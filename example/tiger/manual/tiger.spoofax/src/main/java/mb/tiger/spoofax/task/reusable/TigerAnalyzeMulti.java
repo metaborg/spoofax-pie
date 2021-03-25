@@ -1,5 +1,6 @@
 package mb.tiger.spoofax.task.reusable;
 
+import mb.common.util.MapView;
 import mb.constraint.common.ConstraintAnalyzer.MultiFileResult;
 import mb.constraint.common.ConstraintAnalyzerContext;
 import mb.constraint.pie.ConstraintAnalyzeMultiTaskDef;
@@ -36,7 +37,7 @@ public class TigerAnalyzeMulti extends ConstraintAnalyzeMultiTaskDef {
     }
 
     @Override
-    protected MultiFileResult analyze(ExecContext context, ResourcePath root, HashMap<ResourceKey, IStrategoTerm> asts, ConstraintAnalyzerContext constraintAnalyzerContext) throws Exception {
+    protected MultiFileResult analyze(ExecContext context, ResourcePath root, MapView<ResourceKey, IStrategoTerm> asts, ConstraintAnalyzerContext constraintAnalyzerContext) throws Exception {
         return constraintAnalyzer.analyze(root, asts, constraintAnalyzerContext, strategoRuntimeProvider.get());
     }
 }

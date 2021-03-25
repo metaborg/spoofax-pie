@@ -39,7 +39,7 @@ public class TigerShowPrettyPrintedText implements TaskDef<TigerShowArgs, Comman
         final ResourceKey key = input.key;
         final @Nullable Region region = input.region;
         return context
-            .require(parse.createAstSupplier(key))
+            .require(parse.inputBuilder().withFile(key).buildAstSupplier())
             .map(ast -> {
                 if(region != null) {
                     return TermTracer.getSmallestTermEncompassingRegion(ast, region);

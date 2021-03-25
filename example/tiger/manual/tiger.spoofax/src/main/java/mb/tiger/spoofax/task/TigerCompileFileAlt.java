@@ -78,7 +78,7 @@ public class TigerCompileFileAlt implements TaskDef<TigerCompileFileAlt.Args, Co
 
     @Override public CommandFeedback exec(ExecContext context, Args input) {
         final ResourcePath file = input.file;
-        final Supplier<Result<IStrategoTerm, JSGLR1ParseException>> astSupplier = parse.createAstSupplier(file);
+        final Supplier<Result<IStrategoTerm, JSGLR1ParseException>> astSupplier = parse.inputBuilder().withFile(file).buildAstSupplier();
         Result<String, ?> strResult;
         if(input.listDefNames) {
             strResult = context.require(listDefNames, astSupplier);

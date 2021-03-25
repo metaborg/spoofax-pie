@@ -15,7 +15,7 @@ class ParseTest extends TestBase {
     @Test void testParseTask() throws Exception {
         final FSResource resource = textFile("test.calc", "1 + 2;");
         try(final MixedSession session = newSession()) {
-            final Result<JSGLR1ParseOutput, JSGLR1ParseException> result = session.require(component.getCalcParse().createTask(resourceStringSupplier(resource)));
+            final Result<JSGLR1ParseOutput, JSGLR1ParseException> result = session.require(component.getCalcParse().createTask(component.getCalcParse().inputBuilder().withFile(resource.getKey()).build()));
             assertTrue(result.isOk());
             final JSGLR1ParseOutput output = result.unwrap();
             final IStrategoTerm ast = output.ast;

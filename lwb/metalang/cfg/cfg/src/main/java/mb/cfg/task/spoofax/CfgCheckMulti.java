@@ -1,6 +1,7 @@
 package mb.cfg.task.spoofax;
 
 import mb.cfg.CfgClassLoaderResources;
+import mb.cfg.CfgScope;
 import mb.cfg.task.CfgParse;
 import mb.cfg.task.CfgRootDirectoryToObject;
 import mb.cfg.task.CfgRootDirectoryToObjectException;
@@ -24,7 +25,7 @@ import java.io.Serializable;
 import java.io.UncheckedIOException;
 import java.util.Objects;
 
-@mb.cfg.CfgScope
+@CfgScope
 public class CfgCheckMulti implements TaskDef<CfgCheckMulti.Input, KeyedMessages> {
     public static class Input implements Serializable {
         public final ResourcePath root;
@@ -86,7 +87,7 @@ public class CfgCheckMulti implements TaskDef<CfgCheckMulti.Input, KeyedMessages
         try {
             root.walk(input.walker, input.matcher).forEach(file -> {
                 final ResourcePath filePath = file.getPath();
-                final Messages messages = context.require(parse.createMessagesSupplier(filePath));
+                final Messages messages = context.require(parse.inputBuilder().withFile(filePath).rootDirectoryHint(input.root).buildMessagesSupplier());
                 messagesBuilder.addMessages(filePath, messages);
             });
         } catch(UncheckedIOException e) {

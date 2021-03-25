@@ -5,6 +5,7 @@ import mb.common.message.Message;
 import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.common.util.ListView;
+import mb.common.util.MapView;
 import mb.common.util.MultiMapView;
 import mb.constraint.common.ConstraintAnalyzer;
 import mb.constraint.common.ConstraintAnalyzerContext;
@@ -23,7 +24,6 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-import java.util.HashMap;
 
 @StatixScope
 public class StatixAnalyzeMulti extends ConstraintAnalyzeMultiTaskDef {
@@ -48,7 +48,7 @@ public class StatixAnalyzeMulti extends ConstraintAnalyzeMultiTaskDef {
     }
 
     @Override
-    protected ConstraintAnalyzer.MultiFileResult analyze(ExecContext context, ResourcePath root, HashMap<ResourceKey, IStrategoTerm> asts, ConstraintAnalyzerContext constraintAnalyzerContext) throws ConstraintAnalyzerException {
+    protected ConstraintAnalyzer.MultiFileResult analyze(ExecContext context, ResourcePath root, MapView<ResourceKey, IStrategoTerm> asts, ConstraintAnalyzerContext constraintAnalyzerContext) throws ConstraintAnalyzerException {
         return configFunction.apply(context, root).mapThrowingOrElse(
             o -> o.mapThrowingOrElse(
                 c -> constraintAnalyzer.analyze(root, asts, constraintAnalyzerContext, strategoRuntimeProvider.get().addContextObject(createProjectContext(c))),

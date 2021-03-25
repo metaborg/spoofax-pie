@@ -1,6 +1,7 @@
 package mb.tiger;
 
 import mb.common.message.Severity;
+import mb.common.util.MapView;
 import mb.constraint.common.ConstraintAnalyzer;
 import mb.constraint.common.ConstraintAnalyzer.MultiFileResult;
 import mb.constraint.common.ConstraintAnalyzer.SingleFileResult;
@@ -20,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class TigerConstraintAnalyzerTest extends TigerTestBase {
     @Test void analyzeSingleErrors() throws Exception {
         final ResourceKey resource = new DefaultResourceKey(qualifier, "a.tig");
-        final JSGLR1ParseOutput parsed = parser.parse("1 + nil", "Module", resource);
+        final JSGLR1ParseOutput parsed = parse("1 + nil", resource);
         final SingleFileResult result = analyzer.analyze(resource, parsed.ast, new ConstraintAnalyzerContext(false, null), strategoRuntime);
         assertNotNull(result.ast);
         assertNotNull(result.analysis);
@@ -29,7 +30,7 @@ class TigerConstraintAnalyzerTest extends TigerTestBase {
 
     @Test void analyzeSingleSuccess() throws Exception {
         final ResourceKey resource = new DefaultResourceKey(qualifier, "a.tig");
-        final JSGLR1ParseOutput parsed = parser.parse("1 + 2", "Module", resource);
+        final JSGLR1ParseOutput parsed = parse("1 + 2", resource);
         final SingleFileResult result = analyzer.analyze(resource, parsed.ast, new ConstraintAnalyzerContext(false, null), strategoRuntime);
         assertNotNull(result.ast);
         assertNotNull(result.analysis);
@@ -39,16 +40,16 @@ class TigerConstraintAnalyzerTest extends TigerTestBase {
     @Disabled("Term doesn't have OriginAttachment(TermIndex(\"test##a.tig\",3)).")
     @Test void analyzeMultipleErrors() throws Exception {
         final ResourceKey resource1 = new DefaultResourceKey(qualifier, "a.tig");
-        final JSGLR1ParseOutput parsed1 = parser.parse("1 + 1", "Module", resource1);
+        final JSGLR1ParseOutput parsed1 = parse("1 + 1", resource1);
         final ResourceKey resource2 = new DefaultResourceKey(qualifier, "b.tig");
-        final JSGLR1ParseOutput parsed2 = parser.parse("1 + 2", "Module", resource2);
+        final JSGLR1ParseOutput parsed2 = parse("1 + 2", resource2);
         final ResourceKey resource3 = new DefaultResourceKey(qualifier, "c.tig");
-        final JSGLR1ParseOutput parsed3 = parser.parse("1 + nil", "Module", resource3);
+        final JSGLR1ParseOutput parsed3 = parse("1 + nil", resource3);
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
         asts.put(resource1, parsed1.ast);
         asts.put(resource2, parsed2.ast);
         asts.put(resource3, parsed3.ast);
-        final MultiFileResult result = analyzer.analyze(null, asts, new ConstraintAnalyzerContext(false, null), strategoRuntime);
+        final MultiFileResult result = analyzer.analyze(null, MapView.of(asts), new ConstraintAnalyzerContext(false, null), strategoRuntime);
         final ConstraintAnalyzer.@Nullable Result result1 = result.getResult(resource1);
         assertNotNull(result1);
         assertNotNull(result1.ast);
@@ -72,16 +73,16 @@ class TigerConstraintAnalyzerTest extends TigerTestBase {
 
     @Test void analyzeMultipleSuccess() throws Exception {
         final ResourceKey resource1 = new DefaultResourceKey(qualifier, "a.tig");
-        final JSGLR1ParseOutput parsed1 = parser.parse("1 + 1", "Module", resource1);
+        final JSGLR1ParseOutput parsed1 = parse("1 + 1", resource1);
         final ResourceKey resource2 = new DefaultResourceKey(qualifier, "b.tig");
-        final JSGLR1ParseOutput parsed2 = parser.parse("1 + 2", "Module", resource2);
+        final JSGLR1ParseOutput parsed2 = parse("1 + 2", resource2);
         final ResourceKey resource3 = new DefaultResourceKey(qualifier, "c.tig");
-        final JSGLR1ParseOutput parsed3 = parser.parse("1 + 3", "Module", resource3);
+        final JSGLR1ParseOutput parsed3 = parse("1 + 3", resource3);
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
         asts.put(resource1, parsed1.ast);
         asts.put(resource2, parsed2.ast);
         asts.put(resource3, parsed3.ast);
-        final MultiFileResult result = analyzer.analyze(null, asts, new ConstraintAnalyzerContext(false, null), strategoRuntime);
+        final MultiFileResult result = analyzer.analyze(null, MapView.of(asts), new ConstraintAnalyzerContext(false, null), strategoRuntime);
         final ConstraintAnalyzer.@Nullable Result result1 = result.getResult(resource1);
         assertNotNull(result1);
         assertNotNull(result1.ast);

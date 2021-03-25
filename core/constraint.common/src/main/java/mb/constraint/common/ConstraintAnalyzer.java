@@ -4,6 +4,7 @@ import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Messages;
 import mb.common.message.Severity;
+import mb.common.util.MapView;
 import mb.jsglr.common.ResourceKeyAttachment;
 import mb.nabl2.terms.stratego.StrategoTermIndices;
 import mb.nabl2.terms.stratego.TermIndex;
@@ -231,8 +232,7 @@ public class ConstraintAnalyzer {
         ConstraintAnalyzerContext context,
         StrategoRuntime strategoRuntime
     ) throws ConstraintAnalyzerException {
-        final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>(1);
-        asts.put(resource, ast);
+        final MapView<ResourceKey, IStrategoTerm> asts = MapView.of(resource, ast);
         final MultiFileResult multiFileResult = doAnalyze(root, asts, context, strategoRuntime);
         final @Nullable Result result;
         try {
@@ -245,7 +245,7 @@ public class ConstraintAnalyzer {
 
     public MultiFileResult analyze(
         @Nullable ResourceKey root,
-        HashMap<ResourceKey, IStrategoTerm> asts,
+        MapView<ResourceKey, IStrategoTerm> asts,
         ConstraintAnalyzerContext context,
         StrategoRuntime strategoRuntime
     ) throws ConstraintAnalyzerException {
@@ -255,7 +255,7 @@ public class ConstraintAnalyzer {
 
     private MultiFileResult doAnalyze(
         @Nullable ResourceKey root,
-        HashMap<ResourceKey, IStrategoTerm> asts,
+        MapView<ResourceKey, IStrategoTerm> asts,
         ConstraintAnalyzerContext context,
         StrategoRuntime strategoRuntime
     ) throws ConstraintAnalyzerException {

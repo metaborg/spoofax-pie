@@ -26,7 +26,12 @@ public interface LanguageInstance {
 
     Task<? extends Option<? extends Tokens<?>>> createTokenizeTask(ResourceKey resourceKey);
 
-    Task<Option<Styling>> createStyleTask(ResourceKey resourceKey);
+    Task<Option<Styling>> createStyleTask(ResourceKey file, @Nullable ResourcePath rootDirectoryHint);
+
+    @Deprecated
+    default Task<Option<Styling>> createStyleTask(ResourceKey file) {
+        return createStyleTask(file, null);
+    }
 
     /**
      * Creates a task that produces completions.
@@ -37,7 +42,7 @@ public interface LanguageInstance {
      */
     Task<@Nullable CompletionResult> createCompletionTask(ResourceKey resourceKey, Region primarySelection);
 
-    Task<KeyedMessages> createCheckTask(ResourcePath projectRoot);
+    Task<KeyedMessages> createCheckTask(ResourcePath rootDirectory);
 
     CollectionView<CommandDef<?>> getCommandDefs();
 

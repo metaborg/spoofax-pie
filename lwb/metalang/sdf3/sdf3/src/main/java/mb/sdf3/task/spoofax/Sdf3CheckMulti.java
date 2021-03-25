@@ -118,7 +118,7 @@ public class Sdf3CheckMulti implements TaskDef<Sdf3CheckMulti.Input, KeyedMessag
             try(Stream<? extends HierarchicalResource> stream = root.walk(walker, matcher)) {
                 stream.forEach(file -> {
                     final ResourcePath filePath = file.getPath();
-                    final Messages messages = context.require(parse.createMessagesSupplier(filePath));
+                    final Messages messages = context.require(parse.inputBuilder().withFile(filePath).rootDirectoryHint(config.rootDirectory).buildMessagesSupplier());
                     messagesBuilder.addMessages(filePath, messages);
                 });
             }
@@ -126,7 +126,7 @@ public class Sdf3CheckMulti implements TaskDef<Sdf3CheckMulti.Input, KeyedMessag
             throw e.getCause();
         }
 
-        final Sdf3AnalyzeMulti.Input analyzeInput = new mb.sdf3.task.Sdf3AnalyzeMulti.Input(config.rootDirectory, walker, matcher, parse.createRecoverableAstFunction());
+        final Sdf3AnalyzeMulti.Input analyzeInput = new mb.sdf3.task.Sdf3AnalyzeMulti.Input(config.rootDirectory, parse.createRecoverableMultiAstSupplierFunction(walker, matcher));
         final Result<Sdf3AnalyzeMulti.Output, ?> analysisResult = context.require(analyze, analyzeInput);
         analysisResult
             .ifOk(output -> {

@@ -100,7 +100,7 @@ public class StatixCompile implements TaskDef<StatixCompile.Input, Result<Statix
 
     @Override public Result<Output, ?> exec(ExecContext context, Input input) throws Exception {
         final Supplier<Result<ConstraintAnalyzeMultiTaskDef.SingleFileOutput, ?>> supplier = analyze.createSingleFileOutputSupplier(
-            new ConstraintAnalyzeMultiTaskDef.Input(input.root, StatixUtil.createResourceWalker(), StatixUtil.createResourceMatcher(), parse.createAstFunction()),
+            new ConstraintAnalyzeMultiTaskDef.Input(input.root, parse.createMultiAstSupplierFunction(StatixUtil.createResourceWalker(), StatixUtil.createResourceMatcher())),
             input.resource
         );
         return context.require(supplier).flatMapOrElse((output) -> {

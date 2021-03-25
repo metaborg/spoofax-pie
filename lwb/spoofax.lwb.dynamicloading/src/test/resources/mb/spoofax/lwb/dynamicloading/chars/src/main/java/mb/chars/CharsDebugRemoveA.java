@@ -65,7 +65,7 @@ public class CharsDebugRemoveA implements TaskDef<CharsDebugRemoveA.Args, Comman
         context.require(classloaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
         final ResourceKey file = args.file;
         return context
-            .require(removeA, parse.createAstSupplier(file))
+            .require(removeA, parse.inputBuilder().withFile(file).buildAstSupplier())
             .mapOrElse(
                 ast -> CommandFeedback.of(ShowFeedback.showText(StrategoUtil.toString(ast), "A characters removed from '" + file + "'")),
                 e -> CommandFeedback.ofTryExtractMessagesFrom(e, file)

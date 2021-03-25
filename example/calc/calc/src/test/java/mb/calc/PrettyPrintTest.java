@@ -17,7 +17,7 @@ class PrettyPrintTest extends TestBase {
         final String text = "1 + 2 * 3;";
         final FSResource resource = textFile("test.calc", text);
         try(final MixedSession session = newSession()) {
-            final Result<JSGLR1ParseOutput, JSGLR1ParseException> result = session.require(component.getCalcParse().createTask(resourceStringSupplier(resource)));
+            final Result<JSGLR1ParseOutput, JSGLR1ParseException> result = session.require(component.getCalcParse().createTask(component.getCalcParse().inputBuilder().withFile(resource.getKey()).build()));
             assertTrue(result.isOk());
             final IStrategoTerm ast = result.unwrap().ast;
             final StrategoRuntime strategoRuntime = component.getStrategoRuntimeProvider().get();

@@ -3,17 +3,18 @@ package mb.esv.task;
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Severity;
+import mb.common.option.Option;
 import mb.esv.EsvClassLoaderResources;
 import mb.esv.EsvScope;
+import mb.esv.task.spoofax.EsvParseWrapper;
 import mb.esv.util.EsvVisitor;
 import mb.jsglr.common.TermTracer;
 import mb.jsglr1.common.JSGLR1ParseException;
 import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.pie.api.ExecContext;
-import mb.pie.api.STask;
 import mb.pie.api.TaskDef;
-import mb.pie.api.stamp.output.OutputStampers;
 import mb.pie.api.stamp.resource.ResourceStampers;
+import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -22,9 +23,9 @@ import javax.inject.Inject;
 @EsvScope
 public class EsvCheck implements TaskDef<EsvConfig, KeyedMessages> {
     private final EsvClassLoaderResources classLoaderResources;
-    private final EsvParse parse;
+    private final EsvParseWrapper parse;
 
-    @Inject public EsvCheck(EsvClassLoaderResources classLoaderResources, EsvParse parse) {
+    @Inject public EsvCheck(EsvClassLoaderResources classLoaderResources, EsvParseWrapper parse) {
         this.classLoaderResources = classLoaderResources;
         this.parse = parse;
     }
@@ -35,9 +36,6 @@ public class EsvCheck implements TaskDef<EsvConfig, KeyedMessages> {
 
     @Override public KeyedMessages exec(ExecContext context, EsvConfig config) throws Exception {
         context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
-        for(STask<?> origin : config.sourceFileOrigins) {
-            context.require(origin, OutputStampers.inconsequential());
-        }
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
         final EsvVisitor visitor = new EsvVisitor(parse, config.includeDirectorySuppliers, config.includeAstSuppliers) {
             @Override
@@ -57,8 +55,11 @@ public class EsvCheck implements TaskDef<EsvConfig, KeyedMessages> {
 
             @Override
             protected void acceptParseFail(JSGLR1ParseException parseException) {
-                parseException.getOptionalMessages().ifPresent(messagesBuilder::addMessages);
-                // TODO: handle read string fail
+                final Option<ResourceKey> resource = Option.ofOptional(parseException.getFileHint()).or(Option.ofOptional(parseException.getRootDirectoryHint().map(p -> p)));
+                resource.ifElse(
+                    r -> messagesBuilder.addMessagesRecursivelyWithFallbackKey(parseException, r),
+                    () -> messagesBuilder.addMessagesRecursively(parseException)
+                );
             }
 
             @Override
@@ -70,7 +71,7 @@ public class EsvCheck implements TaskDef<EsvConfig, KeyedMessages> {
                 messagesBuilder.addMessage(text, e, severity, TermTracer.getResourceKey(term), TermTracer.getRegion(term));
             }
         };
-        visitor.visitMainFile(context, config.mainFile);
+        visitor.visitMainFile(context, config.mainFile, config.rootDirectory);
         return messagesBuilder.build();
     }
 }

@@ -47,25 +47,28 @@ spoofax2BasedLanguageProject {
   }
 }
 
+val packageId = "mb.esv"
+val taskPackageId = "$packageId.task"
+val spoofaxTaskPackageId = "$taskPackageId.spoofax"
+
 languageAdapterProject {
   compilerInput {
-    withParser()
+    withParser().run {
+      // Wrap Parse task
+      extendParseTaskDef(spoofaxTaskPackageId, "EsvParseWrapper")
+    }
     withStyler()
     withStrategoRuntime()
     project.configureCompilerInput()
   }
 }
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
-  val packageId = "mb.esv"
-  val taskPackageId = "$packageId.task"
-
   // Extend component
   baseComponent(packageId, "BaseEsvComponent")
   extendComponent(packageId, "EsvComponent")
 
-  // Manual multi-file check implementation
+  // Wrap CheckMulti and rename base tasks
   isMultiFile(true)
-  val spoofaxTaskPackageId = "$taskPackageId.spoofax"
   baseCheckTaskDef(spoofaxTaskPackageId, "BaseEsvCheck")
   baseCheckMultiTaskDef(spoofaxTaskPackageId, "BaseEsvCheckMulti")
   extendCheckMultiTaskDef(spoofaxTaskPackageId, "EsvCheckMultiWrapper")

@@ -25,6 +25,6 @@ public class TigerIdeTokenize implements TaskDef<ResourceKey, Option<JSGLRTokens
 
     @Override
     public Option<JSGLRTokens> exec(ExecContext context, ResourceKey key) throws IOException {
-        return context.require(parse.createTokensSupplier(key)).ok();
+        return context.require(parse.inputBuilder().withFile(key).buildTokensSupplier()).ok();
     }
 }

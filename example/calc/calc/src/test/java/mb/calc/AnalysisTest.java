@@ -12,7 +12,7 @@ class AnalysisTest extends TestBase {
     @Test void testAnalysis() throws Exception {
         final FSResource resource = textFile("test.calc", "1 + 2;");
         try(final MixedSession session = newSession()) {
-            final Result<CalcAnalyze.Output, ?> result = session.require(component.getCalcAnalyze().createTask(new CalcAnalyze.Input(resource.getKey(), component.getCalcParse().createAstSupplier(resource.getKey()))));
+            final Result<CalcAnalyze.Output, ?> result = session.require(component.getCalcAnalyze().createTask(new CalcAnalyze.Input(resource.getKey(), component.getCalcParse().inputBuilder().withFile(resource.getKey()).buildAstSupplier())));
             assertTrue(result.isOk());
             final CalcAnalyze.Output output = result.unwrap();
             assertFalse(output.result.messages.containsError());

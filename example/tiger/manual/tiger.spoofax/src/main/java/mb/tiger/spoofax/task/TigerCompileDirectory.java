@@ -87,7 +87,7 @@ public class TigerCompileDirectory implements TaskDef<TigerCompileDirectory.Args
             if(!first.get()) {
                 sb.append(", ");
             }
-            final Supplier<Result<IStrategoTerm, JSGLR1ParseException>> astSupplier = parse.createAstSupplier(filePath);
+            final Supplier<Result<IStrategoTerm, JSGLR1ParseException>> astSupplier = parse.inputBuilder().withFile(filePath).buildAstSupplier();
             context.require(listDefNames, astSupplier)
                 .ifElse(sb::append, (e) -> {
                     sb.append("[]");

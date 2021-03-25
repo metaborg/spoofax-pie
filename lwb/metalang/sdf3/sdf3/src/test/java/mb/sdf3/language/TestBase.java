@@ -1,5 +1,8 @@
 package mb.sdf3.language;
 
+import mb.jsglr1.common.JSGLR1ParseException;
+import mb.jsglr1.common.JSGLR1ParseInput;
+import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.log.api.LoggerFactory;
 import mb.log.slf4j.SLF4JLoggerFactory;
 import mb.resource.DefaultResourceKey;
@@ -35,6 +38,11 @@ class TestBase {
 
     protected final Sdf3Parser parser = new Sdf3ParserFactory(definitionDirectory).create();
     protected final String startSymbol = "Module";
+
+    protected JSGLR1ParseOutput parse(String text, ResourceKey fileHint) throws JSGLR1ParseException, InterruptedException {
+        return parser.parse(new JSGLR1ParseInput(text, startSymbol, fileHint));
+    }
+
     protected final Sdf3Styler styler = new Sdf3StylerFactory(loggerFactory, definitionDirectory).create();
     protected final StrategoRuntimeBuilder strategoRuntimeBuilder = new Sdf3StrategoRuntimeBuilderFactory(loggerFactory, resourceService, definitionDirectory).create();
     protected final StrategoRuntime strategoRuntime = strategoRuntimeBuilder.build();

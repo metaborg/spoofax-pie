@@ -33,7 +33,7 @@ public class TigerShowAnalyzedAst implements TaskDef<TigerShowArgs, CommandFeedb
     @Override public CommandFeedback exec(ExecContext context, TigerShowArgs input) {
         final ResourceKey key = input.key;
         final @Nullable Region region = input.region;
-        return context.require(analyze, new TigerAnalyze.Input(key, parse.createAstSupplier(key)))
+        return context.require(analyze, new TigerAnalyze.Input(key, parse.inputBuilder().withFile(key).buildAstSupplier()))
             .map(output -> {
                 if(region != null) {
                     return TermTracer.getSmallestTermEncompassingRegion(output.result.ast, region);

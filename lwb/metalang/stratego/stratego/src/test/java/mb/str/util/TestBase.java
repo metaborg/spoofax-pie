@@ -39,7 +39,7 @@ public class TestBase extends SingleLanguageTestBase<StrategoResourcesComponent,
 
 
     public Supplier<? extends Result<IStrategoTerm, ?>> parsedAstSupplier(ResourceKey resourceKey) {
-        return parse.createAstSupplier(resourceKey);
+        return parse.inputBuilder().withFile(resourceKey).buildAstSupplier();
     }
 
     public Supplier<? extends Result<IStrategoTerm, ?>> parsedAstSupplier(Resource resource) {

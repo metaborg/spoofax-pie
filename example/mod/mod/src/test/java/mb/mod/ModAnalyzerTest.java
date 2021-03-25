@@ -1,6 +1,7 @@
 package mb.mod;
 
 import mb.common.message.Severity;
+import mb.common.util.MapView;
 import mb.constraint.common.ConstraintAnalyzer;
 import mb.constraint.common.ConstraintAnalyzer.MultiFileResult;
 import mb.constraint.common.ConstraintAnalyzer.SingleFileResult;
@@ -21,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ModAnalyzerTest extends ModTestBase {
     @Test void analyzeSingleErrors() throws Exception {
         final ResourceKey resource = new DefaultResourceKey(qualifier, "a.mod");
-        final JSGLR1ParseOutput parsed = parser.parse("let a = mod {}; dbg a.b;", startSymbol, resource);
+        final JSGLR1ParseOutput parsed = parse("let a = mod {}; dbg a.b;", resource);
         final SingleFileResult result = analyzer.analyze(rootKey, resource, parsed.ast, new ConstraintAnalyzerContext(true, rootKey), strategoRuntime);
         assertNotNull(result.ast);
         assertNotNull(result.analysis);
@@ -30,7 +31,7 @@ class ModAnalyzerTest extends ModTestBase {
 
     @Test void analyzeSingleSuccess() throws Exception {
         final ResourceKey resource = new DefaultResourceKey(qualifier, "a.mod");
-        final JSGLR1ParseOutput parsed = parser.parse("let a = mod { let b = 1; }; dbg a.b;", startSymbol, resource);
+        final JSGLR1ParseOutput parsed = parse("let a = mod { let b = 1; }; dbg a.b;", resource);
         final SingleFileResult result = analyzer.analyze(rootKey, resource, parsed.ast, new ConstraintAnalyzerContext(true, rootKey), strategoRuntime);
         assertNotNull(result.ast);
         assertNotNull(result.analysis);
@@ -39,16 +40,16 @@ class ModAnalyzerTest extends ModTestBase {
 
     @Test void analyzeMultipleErrors() throws Exception {
         final ResourceKey resource1 = new DefaultResourceKey(qualifier, "a.mod");
-        final JSGLR1ParseOutput parsed1 = parser.parse("let a = 1;", startSymbol, resource1);
+        final JSGLR1ParseOutput parsed1 = parse("let a = 1;", resource1);
         final ResourceKey resource2 = new DefaultResourceKey(qualifier, "b.mod");
-        final JSGLR1ParseOutput parsed2 = parser.parse("let b = 2;", startSymbol, resource2);
+        final JSGLR1ParseOutput parsed2 = parse("let b = 2;", resource2);
         final ResourceKey resource3 = new DefaultResourceKey(qualifier, "c.mod");
-        final JSGLR1ParseOutput parsed3 = parser.parse("let c = d;", startSymbol, resource3);
+        final JSGLR1ParseOutput parsed3 = parse("let c = d;", resource3);
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
         asts.put(resource1, parsed1.ast);
         asts.put(resource2, parsed2.ast);
         asts.put(resource3, parsed3.ast);
-        final MultiFileResult result = analyzer.analyze(rootKey, asts, new ConstraintAnalyzerContext(true, rootKey), strategoRuntime);
+        final MultiFileResult result = analyzer.analyze(rootKey, MapView.of(asts), new ConstraintAnalyzerContext(true, rootKey), strategoRuntime);
         final ConstraintAnalyzer.@Nullable Result result1 = result.getResult(resource1);
         assertNotNull(result1);
         assertNotNull(result1.ast);
@@ -72,16 +73,16 @@ class ModAnalyzerTest extends ModTestBase {
 
     @Test void analyzeMultipleSuccess() throws Exception {
         final ResourceKey resource1 = new DefaultResourceKey(qualifier, "a.tig");
-        final JSGLR1ParseOutput parsed1 = parser.parse("let a = 1;", startSymbol, resource1);
+        final JSGLR1ParseOutput parsed1 = parse("let a = 1;", resource1);
         final ResourceKey resource2 = new DefaultResourceKey(qualifier, "b.tig");
-        final JSGLR1ParseOutput parsed2 = parser.parse("let b = 1;", startSymbol, resource2);
+        final JSGLR1ParseOutput parsed2 = parse("let b = 1;", resource2);
         final ResourceKey resource3 = new DefaultResourceKey(qualifier, "c.tig");
-        final JSGLR1ParseOutput parsed3 = parser.parse("let c = 1;", startSymbol, resource3);
+        final JSGLR1ParseOutput parsed3 = parse("let c = 1;", resource3);
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
         asts.put(resource1, parsed1.ast);
         asts.put(resource2, parsed2.ast);
         asts.put(resource3, parsed3.ast);
-        final MultiFileResult result = analyzer.analyze(rootKey, asts, new ConstraintAnalyzerContext(true, rootKey), strategoRuntime);
+        final MultiFileResult result = analyzer.analyze(rootKey, MapView.of(asts), new ConstraintAnalyzerContext(true, rootKey), strategoRuntime);
         final ConstraintAnalyzer.@Nullable Result result1 = result.getResult(resource1);
         assertNotNull(result1);
         assertNotNull(result1.ast);
@@ -99,7 +100,7 @@ class ModAnalyzerTest extends ModTestBase {
 
     @Test void showScopeGraph() throws Exception, StrategoException {
         final ResourceKey resource = new DefaultResourceKey(qualifier, "a.mod");
-        final JSGLR1ParseOutput parsed = parser.parse("let a = 1;", startSymbol, resource);
+        final JSGLR1ParseOutput parsed = parse("let a = 1;", resource);
         final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext(true, rootKey);
         final SingleFileResult result = analyzer.analyze(rootKey, resource, parsed.ast, constraintAnalyzerContext, strategoRuntime);
         assertNotNull(result.ast);

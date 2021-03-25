@@ -2,6 +2,7 @@ package mb.str.incr;
 
 import mb.common.util.IOUtil;
 import mb.jsglr1.common.JSGLR1ParseException;
+import mb.jsglr1.common.JSGLR1ParseInput;
 import mb.pie.api.ExecException;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceKeyString;
@@ -52,11 +53,7 @@ public class Spoofax3ParseStratego implements ParseStratego {
             resourceKey = null;
         }
 
-        if(resourceKey != null) {
-            return parser.parse(text, "Module", resourceKey).ast;
-        } else {
-            return parser.parse(text, "Module").ast;
-        }
+        return parser.parse(new JSGLR1ParseInput(text, "Module", resourceKey)).ast;
     }
 
     @Override public IStrategoTerm parseRtree(InputStream inputStream) throws Exception {

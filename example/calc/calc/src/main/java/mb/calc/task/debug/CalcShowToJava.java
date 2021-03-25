@@ -61,7 +61,7 @@ public class CalcShowToJava implements TaskDef<CalcShowToJava.Args, CommandFeedb
     @Override public CommandFeedback exec(ExecContext context, Args args) throws Exception {
         final ResourceKey file = args.file;
         return context
-            .require(calcToJava, analyze.createSupplier(new ConstraintAnalyzeTaskDef.Input(file, parse.createAstSupplier(file))))
+            .require(calcToJava, analyze.createSupplier(new ConstraintAnalyzeTaskDef.Input(file, parse.inputBuilder().withFile(file).buildAstSupplier())))
             .mapOrElse(
                 ast -> CommandFeedback.of(ShowFeedback.showText(StrategoUtil.toString(ast), "Java implementation of '" + file + "'")),
                 e -> CommandFeedback.ofTryExtractMessagesFrom(e, file)

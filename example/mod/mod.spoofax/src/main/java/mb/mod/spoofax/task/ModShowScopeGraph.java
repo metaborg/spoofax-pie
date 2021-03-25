@@ -79,7 +79,7 @@ public class ModShowScopeGraph implements TaskDef<ModShowScopeGraph.Args, Comman
         final ResourceMatcher matcher = new PathResourceMatcher(new ExtensionPathMatcher("mod"));
         final ResourcePath project = args.project;
         final ResourceKey file = args.file;
-        return context.require(analyze.createSingleFileOutputSupplier(new ModAnalyzeMulti.Input(project, walker, matcher, parse.createRecoverableAstFunction()), file))
+        return context.require(analyze.createSingleFileOutputSupplier(new ModAnalyzeMulti.Input(project, parse.createRecoverableMultiAstSupplierFunction(walker, matcher)), file))
             .mapCatching(output -> {
                 final StrategoRuntime strategoRuntime = strategoRuntimeProvider.get().addContextObject(output.context);
                 final ITermFactory termFactory = strategoRuntime.getTermFactory();

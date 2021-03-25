@@ -3,7 +3,6 @@ package mb.sdf3.adapter;
 import mb.common.result.Result;
 import mb.log.dagger.DaggerLoggerComponent;
 import mb.log.dagger.LoggerModule;
-import mb.pie.api.SerializableFunction;
 import mb.pie.api.Supplier;
 import mb.pie.api.ValueSupplier;
 import mb.resource.Resource;
@@ -16,6 +15,7 @@ import mb.sdf3.Sdf3ResourcesComponent;
 import mb.sdf3.task.Sdf3AnalyzeMulti;
 import mb.sdf3.task.Sdf3Desugar;
 import mb.sdf3.task.Sdf3Parse;
+import mb.sdf3.task.debug.MultiAstDesugarFunction;
 import mb.sdf3.task.spec.Sdf3CreateSpec;
 import mb.sdf3.task.spec.Sdf3Spec;
 import mb.sdf3.task.spec.Sdf3SpecConfig;
@@ -44,7 +44,7 @@ class TestBase extends SingleLanguageTestBase<Sdf3ResourcesComponent, Sdf3Compon
 
 
     Supplier<? extends Result<IStrategoTerm, ?>> parsedAstSupplier(ResourceKey resourceKey) {
-        return parse.createAstSupplier(resourceKey);
+        return parse.inputBuilder().withFile(resourceKey).buildAstSupplier();
     }
 
     Supplier<? extends Result<IStrategoTerm, ?>> parsedAstSupplier(Resource resource) {
@@ -62,7 +62,7 @@ class TestBase extends SingleLanguageTestBase<Sdf3ResourcesComponent, Sdf3Compon
 
 
     Supplier<? extends Result<Sdf3AnalyzeMulti.SingleFileOutput, ?>> singleFileAnalysisResultSupplier(ResourcePath project, ResourceKey file) {
-        return analyze.createSingleFileOutputSupplier(new Sdf3AnalyzeMulti.Input(project, Sdf3Util.createResourceWalker(), Sdf3Util.createResourceMatcher(), desugar.createFunction().mapInput((SerializableFunction<Supplier<String>, Supplier<? extends Result<IStrategoTerm, ?>>>)parse::createRecoverableAstSupplier)), file);
+        return analyze.createSingleFileOutputSupplier(new Sdf3AnalyzeMulti.Input(project, parse.createRecoverableMultiAstSupplierFunction(Sdf3Util.createResourceWalker(), Sdf3Util.createResourceMatcher()).mapOutput(new MultiAstDesugarFunction(desugar.createFunction()))), file);
     }
 
     Supplier<? extends Result<Sdf3AnalyzeMulti.SingleFileOutput, ?>> singleFileAnalysisResultSupplier(Resource file) {

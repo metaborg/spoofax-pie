@@ -39,7 +39,7 @@ public class TigerShowScopeGraph implements TaskDef<TigerShowArgs, CommandFeedba
 
     @Override public CommandFeedback exec(ExecContext context, TigerShowArgs input) {
         final ResourceKey key = input.key;
-        return context.require(analyze, new TigerAnalyze.Input(key, parse.createAstSupplier(key)))
+        return context.require(analyze, new TigerAnalyze.Input(key, parse.inputBuilder().withFile(key).buildAstSupplier()))
             .mapCatching(output -> {
                 final StrategoRuntime strategoRuntime = strategoRuntimeProvider.get().addContextObject(output.context);
                 final ITermFactory termFactory = strategoRuntime.getTermFactory();

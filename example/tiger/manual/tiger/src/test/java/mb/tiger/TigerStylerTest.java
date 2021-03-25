@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class TigerStylerTest extends TigerTestBase {
     @Test void style() throws Exception {
-        final JSGLR1ParseOutput parsed = parser.parse("1 + 21", "Module");
+        final JSGLR1ParseOutput parsed = parse("1 + 21");
 
         final Styling styling = styler.style(parsed.tokens.tokens);
         final ArrayList<TokenStyle> stylePerToken = styling.getStylePerToken();

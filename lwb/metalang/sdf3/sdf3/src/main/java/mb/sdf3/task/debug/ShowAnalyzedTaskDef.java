@@ -4,7 +4,6 @@ import mb.common.result.Result;
 import mb.constraint.pie.ConstraintAnalyzeMultiTaskDef;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Function;
-import mb.pie.api.SerializableFunction;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
@@ -14,10 +13,8 @@ import mb.sdf3.task.Sdf3GetStrategoRuntimeProvider;
 import mb.sdf3.task.Sdf3Parse;
 import mb.sdf3.task.util.Sdf3Util;
 import mb.spoofax.core.language.command.CommandFeedback;
-import mb.stratego.common.StrategoRuntime;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
-import javax.inject.Provider;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -74,7 +71,8 @@ public abstract class ShowAnalyzedTaskDef extends ProvideOutputShared implements
 
     @Override public CommandFeedback exec(ExecContext context, Args args) {
         return context
-            .require(operation, analyze.createSingleFileOutputSupplier(new Sdf3AnalyzeMulti.Input(args.project, Sdf3Util.createResourceWalker(), Sdf3Util.createResourceMatcher(), desugar.mapInput((SerializableFunction<Supplier<String>, Supplier<? extends Result<IStrategoTerm, ?>>>) parse::createRecoverableAstSupplier)), args.file))
+            .require(operation, analyze.createSingleFileOutputSupplier(new Sdf3AnalyzeMulti.Input(args.project, parse.createRecoverableMultiAstSupplierFunction(Sdf3Util.createResourceWalker(), Sdf3Util.createResourceMatcher()).mapOutput(new MultiAstDesugarFunction(desugar))), args.file))
             .mapOrElse(ast -> provideOutput(context, args.concrete, ast, args.file), e -> CommandFeedback.ofTryExtractMessagesFrom(e, args.file));
     }
+
 }

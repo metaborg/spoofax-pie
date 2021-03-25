@@ -19,7 +19,7 @@ class StyleTest extends TestBase {
     @Test void testParseTask() throws Exception {
         final FSResource resource = textFile("test.calc", "1 + 2;");
         try(final MixedSession session = newSession()) {
-            final Option<Styling> stylingOption = session.require(component.getCalcStyle().createTask(component.getCalcParse().createTokensSupplier(resource.getKey()).map(Result::ok)));
+            final Option<Styling> stylingOption = session.require(component.getCalcStyle().createTask(component.getCalcParse().inputBuilder().withFile(resource.getKey()).buildTokensSupplier().map(Result::ok)));
             assertTrue(stylingOption.isSome());
             final Styling styling = stylingOption.get();
             assertNotNull(styling);

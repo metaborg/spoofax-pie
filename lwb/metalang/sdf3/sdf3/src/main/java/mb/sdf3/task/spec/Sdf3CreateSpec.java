@@ -2,6 +2,7 @@ package mb.sdf3.task.spec;
 
 import mb.common.result.Result;
 import mb.common.util.ListView;
+import mb.jsglr1.pie.JSGLR1ParseTaskInput;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
@@ -40,7 +41,8 @@ public class Sdf3CreateSpec implements TaskDef<Supplier<Result<Sdf3SpecConfig, ?
     @Override
     public Result<Sdf3Spec, ?> exec(ExecContext context, Supplier<Result<Sdf3SpecConfig, ?>> configSupplier) throws IOException {
         return context.require(configSupplier).mapThrowing((config) -> {
-            final Supplier<Result<IStrategoTerm, ?>> mainModuleAstSupplier = desugar.createSupplier(parse.createAstSupplier(config.mainFile));
+            final JSGLR1ParseTaskInput.Builder parseInputBuilder = parse.inputBuilder().rootDirectoryHint(config.rootDirectory);
+            final Supplier<Result<IStrategoTerm, ?>> mainModuleAstSupplier = desugar.createSupplier(parseInputBuilder.withFile(config.mainFile).buildAstSupplier());
             final ResourceWalker walker = Sdf3Util.createResourceWalker();
             final ResourceMatcher matcher = Sdf3Util.createResourceMatcher();
             final HierarchicalResource project = resourceService.getHierarchicalResource(config.rootDirectory);
@@ -49,7 +51,7 @@ public class Sdf3CreateSpec implements TaskDef<Supplier<Result<Sdf3SpecConfig, ?
             final ArrayList<Supplier<? extends Result<IStrategoTerm, ?>>> modulesAstSuppliers = project
                 .walk(Sdf3Util.createResourceWalker(), Sdf3Util.createResourceMatcher())
                 .filter(file -> !file.getPath().equals(config.mainFile)) // Filter out main module, as it is supplied separately.
-                .map(file -> desugar.createSupplier(parse.createAstSupplier(file.getKey())))
+                .map(file -> desugar.createSupplier(parseInputBuilder.withFile(file.getKey()).buildAstSupplier()))
                 .collect(Collectors.toCollection(ArrayList::new));
             return new Sdf3Spec(config.parseTableConfig, mainModuleAstSupplier, ListView.of(modulesAstSuppliers));
         });

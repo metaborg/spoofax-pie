@@ -56,17 +56,17 @@ public class {{baseCheckMultiTaskDef.id}} implements TaskDef<{{baseCheckMultiTas
     }
 
     {{#checkMultiInjections}}
-    {{variable}};
+    private final {{variable}};
     {{/checkMultiInjections}}
 
     @Inject public {{baseCheckMultiTaskDef.id}}(
-    {{#checkMultiInjections}}
+        {{#checkMultiInjections}}
         {{variable}}{{^-last}},{{/-last}}
-    {{/checkMultiInjections}}
+        {{/checkMultiInjections}}
     ) {
-    {{#checkMultiInjections}}
+        {{#checkMultiInjections}}
         {{thisAssign}};
-    {{/checkMultiInjections}}
+        {{/checkMultiInjections}}
     }
 
     @Override public String getId() {
@@ -77,19 +77,19 @@ public class {{baseCheckMultiTaskDef.id}} implements TaskDef<{{baseCheckMultiTas
         context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
         final HierarchicalResource root = context.require(input.root, ResourceStampers.modifiedDirRec(input.walker, input.matcher));
-{{#parser}}
+        {{#parser}}
         try {
             root.walk(input.walker, input.matcher).forEach(file -> {
                 final ResourcePath filePath = file.getPath();
-                final Messages messages = context.require(parse.createMessagesSupplier(filePath));
+                final Messages messages = context.require(parse.inputBuilder().withFile(filePath).rootDirectoryHint(input.root).buildMessagesSupplier());
                 messagesBuilder.addMessages(filePath, messages);
             });
         } catch(UncheckedIOException e) {
             throw e.getCause();
         }
-{{/parser}}
-{{#constraintAnalyzer}}
-        final {{this.analyzeMultiTaskDef.qualifiedId}}.Input analyzeInput = new {{this.analyzeMultiTaskDef.qualifiedId}}.Input(input.root, input.walker, input.matcher, parse.createRecoverableAstFunction());
+        {{/parser}}
+        {{#constraintAnalyzer}}
+        final {{this.analyzeMultiTaskDef.qualifiedId}}.Input analyzeInput = new {{this.analyzeMultiTaskDef.qualifiedId}}.Input(input.root, parse.createRecoverableMultiAstSupplierFunction(input.walker, input.matcher));
         final Result<{{this.analyzeMultiTaskDef.qualifiedId}}.Output, ?> analysisResult = context.require(analyze, analyzeInput);
         analysisResult
             .ifOk(output -> {
@@ -97,7 +97,7 @@ public class {{baseCheckMultiTaskDef.id}} implements TaskDef<{{baseCheckMultiTas
                 messagesBuilder.addMessages(output.messagesFromAstProviders);
             })
             .ifErr(e -> messagesBuilder.addMessage("Project-wide analysis failed", e, Severity.Error, input.root));
-{{/constraintAnalyzer}}
+        {{/constraintAnalyzer}}
         return messagesBuilder.build();
     }
 }

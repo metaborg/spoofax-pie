@@ -5,25 +5,20 @@ import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Messages;
 import mb.common.message.Severity;
 import mb.common.result.Result;
+import mb.common.util.MapView;
 import mb.constraint.common.ConstraintAnalyzer;
 import mb.constraint.common.ConstraintAnalyzerContext;
 import mb.constraint.common.ConstraintAnalyzerException;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Function;
-import mb.pie.api.ResourceStringSupplier;
 import mb.pie.api.SerializableFunction;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
-import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceKey;
-import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
-import mb.resource.hierarchical.match.ResourceMatcher;
-import mb.resource.hierarchical.walk.ResourceWalker;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Objects;
@@ -31,42 +26,34 @@ import java.util.Objects;
 public abstract class ConstraintAnalyzeMultiTaskDef implements TaskDef<ConstraintAnalyzeMultiTaskDef.Input, Result<ConstraintAnalyzeMultiTaskDef.Output, ?>> {
     public static class Input implements Serializable {
         public final ResourcePath root;
-        public final ResourceWalker walker;
-        public final ResourceMatcher matcher;
-        public final Function<Supplier<String>, ? extends Result<IStrategoTerm, ?>> astFunction;
+        public final Function<ResourcePath, ? extends MapView<ResourceKey, ? extends Supplier<? extends Result<IStrategoTerm, ?>>>> astSuppliersFunction;
 
         public Input(
             ResourcePath root,
-            ResourceWalker walker,
-            ResourceMatcher matcher,
-            Function<Supplier<String>, ? extends Result<IStrategoTerm, ?>> astFunction
+            Function<ResourcePath, ? extends MapView<ResourceKey, ? extends Supplier<? extends Result<IStrategoTerm, ?>>>> astSuppliersFunction
         ) {
             this.root = root;
-            this.walker = walker;
-            this.matcher = matcher;
-            this.astFunction = astFunction;
+            this.astSuppliersFunction = astSuppliersFunction;
         }
 
-        @Override public boolean equals(Object o) {
+        @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
-            final Input input = (Input) o;
-            return root.equals(input.root) &&
-                walker.equals(input.walker) &&
-                matcher.equals(input.matcher) &&
-                astFunction.equals(input.astFunction);
+            final Input input = (Input)o;
+            if(!root.equals(input.root)) return false;
+            return astSuppliersFunction.equals(input.astSuppliersFunction);
         }
 
         @Override public int hashCode() {
-            return Objects.hash(root, walker, matcher, astFunction);
+            int result = root.hashCode();
+            result = 31 * result + astSuppliersFunction.hashCode();
+            return result;
         }
 
         @Override public String toString() {
-            return "Input{" +
+            return "ConstraintAnalyzeMultiTaskDef$Input{" +
                 "root=" + root +
-                ", walker=" + walker +
-                ", matcher=" + matcher +
-                ", astTaskDef=" + astFunction +
+                ", astsFunction=" + astSuppliersFunction +
                 '}';
         }
     }
@@ -85,7 +72,7 @@ public abstract class ConstraintAnalyzeMultiTaskDef implements TaskDef<Constrain
         @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
-            final Output output = (Output) o;
+            final Output output = (Output)o;
             return messagesFromAstProviders.equals(output.messagesFromAstProviders) &&
                 context.equals(output.context) &&
                 result.equals(output.result);
@@ -116,7 +103,7 @@ public abstract class ConstraintAnalyzeMultiTaskDef implements TaskDef<Constrain
         @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
-            final SingleFileOutput output = (SingleFileOutput) o;
+            final SingleFileOutput output = (SingleFileOutput)o;
             return context.equals(output.context) && result.equals(output.result);
         }
 
@@ -132,19 +119,27 @@ public abstract class ConstraintAnalyzeMultiTaskDef implements TaskDef<Constrain
         }
     }
 
-    protected abstract ConstraintAnalyzer.MultiFileResult analyze(ExecContext context, ResourcePath root, HashMap<ResourceKey, IStrategoTerm> asts, ConstraintAnalyzerContext constraintAnalyzerContext) throws Exception;
+    protected abstract ConstraintAnalyzer.MultiFileResult analyze(
+        ExecContext context,
+        ResourcePath root,
+        MapView<ResourceKey, IStrategoTerm> asts,
+        ConstraintAnalyzerContext constraintAnalyzerContext
+    ) throws Exception;
 
     @Override public Result<Output, ?> exec(ExecContext context, Input input) throws Exception {
-        final HierarchicalResource root = context.require(input.root, ResourceStampers.modifiedDirRec(input.walker, input.matcher));
-        final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
-        root.walk(input.walker, input.matcher).forEach(file -> context.require(input.astFunction, new ResourceStringSupplier(file.getPath()))
-            .ifOk((ast) -> asts.put(file.getKey(), ast))
-            .ifErr((e) -> messagesBuilder.addMessage("Getting AST for analysis failed", e, Severity.Error, file.getKey()))
-        );
+        final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
+        context.require(input.astSuppliersFunction, input.root).forEach(entry -> {
+            final ResourceKey file = entry.getKey();
+            final Result<IStrategoTerm, ?> result = context.require(entry.getValue());
+            result.ifElse(
+                ast -> asts.put(file, ast),
+                e -> messagesBuilder.addMessage("Getting AST for analysis failed", e, Severity.Error, file)
+            );
+        });
         try {
             final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext(true, input.root);
-            final ConstraintAnalyzer.MultiFileResult result = analyze(context, input.root, asts, constraintAnalyzerContext);
+            final ConstraintAnalyzer.MultiFileResult result = analyze(context, input.root, MapView.of(asts), constraintAnalyzerContext);
             return Result.ofOk(new Output(messagesBuilder.build(), constraintAnalyzerContext, result));
         } catch(ConstraintAnalyzerException e) {
             return Result.ofErr(e);
@@ -181,7 +176,7 @@ class SingleFileMapper implements SerializableFunction<Result<ConstraintAnalyzeM
     @Override public boolean equals(@Nullable Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
-        final SingleFileMapper that = (SingleFileMapper) o;
+        final SingleFileMapper that = (SingleFileMapper)o;
         return resource.equals(that.resource);
     }
 

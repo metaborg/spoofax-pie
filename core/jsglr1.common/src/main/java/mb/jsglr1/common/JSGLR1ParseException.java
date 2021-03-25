@@ -3,33 +3,47 @@ package mb.jsglr1.common;
 import mb.common.message.HasOptionalMessages;
 import mb.common.message.KeyedMessages;
 import mb.common.util.ADT;
+import mb.resource.ResourceKey;
+import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
 import java.util.Optional;
 
-@ADT
+@ADT @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public abstract class JSGLR1ParseException extends Exception implements HasOptionalMessages {
     public interface Cases<R> {
-        R readStringFail(String source, IOException cause);
+        R readStringFail(IOException cause, Optional<String> startSymbol, Optional<ResourceKey> fileHint, Optional<ResourcePath> rootDirectoryHint);
 
-        R parseFail(KeyedMessages messages);
+        R parseFail(KeyedMessages messages, Optional<String> startSymbol, Optional<ResourceKey> fileHint, Optional<ResourcePath> rootDirectoryHint);
 
-        R recoveryDisallowedFail(KeyedMessages messages);
+        R recoveryDisallowedFail(KeyedMessages messages, Optional<String> startSymbol, Optional<ResourceKey> fileHint, Optional<ResourcePath> rootDirectoryHint);
     }
 
-    public static JSGLR1ParseException readStringFail(String source, IOException cause) {
-        final JSGLR1ParseException e = JSGLR1ParseExceptions.readStringFail(source, cause);
+    public static JSGLR1ParseException readStringFail(IOException cause, Optional<String> startSymbol, Optional<ResourceKey> fileHint, Optional<ResourcePath> rootDirectoryHint) {
+        final JSGLR1ParseException e = JSGLR1ParseExceptions.readStringFail(cause, startSymbol, fileHint, rootDirectoryHint);
         e.initCause(cause);
         return e;
     }
 
-    public static JSGLR1ParseException parseFail(KeyedMessages messages) {
-        return JSGLR1ParseExceptions.parseFail(messages);
+    public static JSGLR1ParseException readStringFail(IOException cause, @Nullable String startSymbol, @Nullable ResourceKey fileHint, @Nullable ResourcePath rootDirectoryHint) {
+        return readStringFail(cause, Optional.ofNullable(startSymbol), Optional.ofNullable(fileHint), Optional.ofNullable(rootDirectoryHint));
     }
 
-    public static JSGLR1ParseException recoveryDisallowedFail(KeyedMessages messages) {
-        return JSGLR1ParseExceptions.recoveryDisallowedFail(messages);
+    public static JSGLR1ParseException parseFail(KeyedMessages messages, Optional<String> startSymbol, Optional<ResourceKey> fileHint, Optional<ResourcePath> rootDirectoryHint) {
+        return JSGLR1ParseExceptions.parseFail(messages, startSymbol, fileHint, rootDirectoryHint);
+    }
+
+    public static JSGLR1ParseException parseFail(KeyedMessages messages, @Nullable String startSymbol, @Nullable ResourceKey fileHint, @Nullable ResourcePath rootDirectoryHint) {
+        return parseFail(messages, Optional.ofNullable(startSymbol), Optional.ofNullable(fileHint), Optional.ofNullable(rootDirectoryHint));
+    }
+
+    public static JSGLR1ParseException recoveryDisallowedFail(KeyedMessages messages, Optional<String> startSymbol, Optional<ResourceKey> fileHint, Optional<ResourcePath> rootDirectoryHint) {
+        return JSGLR1ParseExceptions.recoveryDisallowedFail(messages, startSymbol, fileHint, rootDirectoryHint);
+    }
+
+    public static JSGLR1ParseException recoveryDisallowedFail(KeyedMessages messages, @Nullable String startSymbol, @Nullable ResourceKey fileHint, @Nullable ResourcePath rootDirectoryHint) {
+        return recoveryDisallowedFail(messages, Optional.ofNullable(startSymbol), Optional.ofNullable(fileHint), Optional.ofNullable(rootDirectoryHint));
     }
 
 
@@ -43,12 +57,24 @@ public abstract class JSGLR1ParseException extends Exception implements HasOptio
         return JSGLR1ParseExceptions.caseOf(this);
     }
 
+    public Optional<String> getStartSymbol() {
+        return JSGLR1ParseExceptions.getStartSymbol(this);
+    }
+
+    public Optional<ResourceKey> getFileHint() {
+        return JSGLR1ParseExceptions.getFileHint(this);
+    }
+
+    public Optional<ResourcePath> getRootDirectoryHint() {
+        return JSGLR1ParseExceptions.getRootDirectoryHint(this);
+    }
+
 
     @Override public String getMessage() {
         return caseOf()
-            .readStringFail((source, cause) -> "Parsing failed; cannot get text to parse from '" + source + "'")
-            .parseFail((messages) -> "Parsing failed; see error messages")
-            .recoveryDisallowedFail((messages) -> "Parsing recovered from failure, but recovery was disallowed; see error messages");
+            .readStringFail((source, startSymbol, fileHint, rootDirectoryHint) -> "Parsing failed; cannot get text to parse from '" + fileHint + "'")
+            .parseFail((messages, startSymbol, fileHint, rootDirectoryHint) -> "Parsing failed; see error messages")
+            .recoveryDisallowedFail((messages, startSymbol, fileHint, rootDirectoryHint) -> "Parsing recovered from failure, but recovery was disallowed; see error messages");
     }
 
     @Override public Throwable fillInStackTrace() {
@@ -59,7 +85,7 @@ public abstract class JSGLR1ParseException extends Exception implements HasOptio
         return JSGLR1ParseExceptions.getMessages(this);
     }
 
-    
+
     @Override public abstract int hashCode();
 
     @Override public abstract boolean equals(@Nullable Object obj);

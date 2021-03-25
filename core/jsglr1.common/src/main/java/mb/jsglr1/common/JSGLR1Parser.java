@@ -40,13 +40,9 @@ public class JSGLR1Parser {
         disambiguator.setHeuristicFilters(false);
     }
 
-    public JSGLR1ParseOutput parse(String text, String startSymbol) throws JSGLR1ParseException, InterruptedException {
-        return parse(text, startSymbol, null);
-    }
-
-    public JSGLR1ParseOutput parse(String text, String startSymbol, @Nullable ResourceKey resource) throws JSGLR1ParseException, InterruptedException {
+    public JSGLR1ParseOutput parse(JSGLR1ParseInput input) throws JSGLR1ParseException, InterruptedException {
         try {
-            final SGLRParseResult result = parser.parse(text, null, startSymbol);
+            final SGLRParseResult result = parser.parse(input.text, input.fileHint != null ? input.fileHint.toString() : null, input.startSymbol);
             if(result.output == null) {
                 throw new RuntimeException("BUG: parser returned null output even though parsing did not fail");
             }
@@ -54,26 +50,26 @@ public class JSGLR1Parser {
                 throw new RuntimeException("BUG: parser returned an output that is not an instance of IStrategoTerm");
             }
             final IStrategoTerm ast = (IStrategoTerm)result.output;
-            if(resource != null) {
-                ResourceKeyAttachment.setResourceKey(ast, resource);
+            if(input.fileHint != null) {
+                ResourceKeyAttachment.setResourceKey(ast, input.fileHint);
             }
             final JSGLRTokens tokens = TokenUtil.extract(ast);
             final MessagesUtil messagesUtil = new MessagesUtil(true, false, parser.getCollectedErrors());
             messagesUtil.gatherNonFatalErrors(ast);
             final Messages messages = messagesUtil.getMessages();
             final boolean recovered = messages.containsError();
-            return new JSGLR1ParseOutput(ast, tokens, toMessages(messages, resource), recovered);
+            return new JSGLR1ParseOutput(ast, tokens, toMessages(messages, input.fileHint), recovered, input.startSymbol, input.fileHint, input.rootDirectoryHint);
         } catch(SGLRException e) {
             final MessagesUtil messagesUtil = new MessagesUtil(true, true, parser.getCollectedErrors());
-            messagesUtil.processFatalException(new NullTokenizer(text, null), e);
+            messagesUtil.processFatalException(new NullTokenizer(input.text, null), e);
             final Messages messages = messagesUtil.getMessages();
-            throw JSGLR1ParseException.parseFail(toMessages(messages, resource));
+            throw JSGLR1ParseException.parseFail(toMessages(messages, input.fileHint), input.startSymbol, input.fileHint, input.rootDirectoryHint);
         }
     }
 
-    private static KeyedMessages toMessages(Messages messages, @Nullable ResourceKey resource) {
-        if(resource != null) {
-            return messages.toKeyed(resource);
+    private static KeyedMessages toMessages(Messages messages, @Nullable ResourceKey fileHint) {
+        if(fileHint != null) {
+            return messages.toKeyed(fileHint);
         } else {
             return messages.toKeyed();
         }

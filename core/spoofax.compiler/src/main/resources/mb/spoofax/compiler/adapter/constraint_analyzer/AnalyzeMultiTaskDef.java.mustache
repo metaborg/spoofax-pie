@@ -1,5 +1,6 @@
 package {{baseAnalyzeMultiTaskDef.packageId}};
 
+import mb.common.util.MapView;
 import mb.constraint.common.ConstraintAnalyzer.MultiFileResult;
 import mb.constraint.common.ConstraintAnalyzerContext;
 import mb.constraint.pie.ConstraintAnalyzeMultiTaskDef;
@@ -17,10 +18,8 @@ import mb.stratego.common.StrategoRuntime;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.HashMap;
 import java.util.stream.Stream;
 
 @{{adapterProject.scope.qualifiedId}}
@@ -46,7 +45,7 @@ public class {{baseAnalyzeMultiTaskDef.id}} extends ConstraintAnalyzeMultiTaskDe
     }
 
     @Override
-    protected MultiFileResult analyze(ExecContext context, ResourcePath root, HashMap<ResourceKey, IStrategoTerm> asts, ConstraintAnalyzerContext constraintAnalyzerContext) throws Exception {
+    protected MultiFileResult analyze(ExecContext context, ResourcePath root, MapView<ResourceKey, IStrategoTerm> asts, ConstraintAnalyzerContext constraintAnalyzerContext) throws Exception {
         {{#languageProjectInput.enableStatix}}
         try {
             classLoaderResources.performWithDefinitionResourceLocations(

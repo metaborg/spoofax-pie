@@ -82,12 +82,17 @@ public class ConfigureEsv implements TaskDef<ResourcePath, Result<Option<EsvConf
         return context.require(cfgRootDirectoryToObject, rootDirectory)
             .mapErr(EsvConfigureException::getLanguageCompilerConfigurationFail)
             .<Option<EsvConfig>, IOException>flatMapThrowing(cfgOutput -> Result.transpose(Option.ofOptional(cfgOutput.compileLanguageToJavaClassPathInput.compileLanguageInput().esv())
-                .mapThrowing(esvInput -> toEsvConfig(context, cfgOutput.compileLanguageToJavaClassPathInput, esvInput))
+                .mapThrowing(esvInput -> toEsvConfig(context, rootDirectory, cfgOutput.compileLanguageToJavaClassPathInput, esvInput))
             ));
     }
 
 
-    public Result<EsvConfig, EsvConfigureException> toEsvConfig(ExecContext context, CompileLanguageToJavaClassPathInput input, CompileEsvInput esvInput) throws IOException {
+    public Result<EsvConfig, EsvConfigureException> toEsvConfig(
+        ExecContext context,
+        ResourcePath rootDirectory,
+        CompileLanguageToJavaClassPathInput input,
+        CompileEsvInput esvInput
+    ) throws IOException {
         final CompileLanguageInput compileLanguageInput = input.compileLanguageInput();
         final CompileLanguageShared compileLanguageShared = compileLanguageInput.compileLanguageShared();
 
@@ -125,7 +130,8 @@ public class ConfigureEsv implements TaskDef<ResourcePath, Result<Option<EsvConf
             }
         }
 
-        // Gather include directories.
+        // Gather source file origins and include directories.
+        final LinkedHashSet<Supplier<?>> sourceFileOrigins = new LinkedHashSet<>();
         final LinkedHashSet<Supplier<Result<ResourcePath, ?>>> includeDirectorySuppliers = new LinkedHashSet<>();
         // Add main source directory as an include for resolving imports.
         includeDirectorySuppliers.add(new ValueSupplier<>(Result.ofOk(esvInput.mainSourceDirectory())));
@@ -140,7 +146,9 @@ public class ConfigureEsv implements TaskDef<ResourcePath, Result<Option<EsvConf
                 }
             }
             for(Supplier<ResourcePath> unarchiveDirSupplier : libSpoofax2UnarchiveDirSuppliers) {
-                includeDirectorySuppliers.add(unarchiveDirSupplier.map(new AppendPath(export)).map(MakeOk.instance));
+                final Supplier<Result<ResourcePath, ?>> supplier = unarchiveDirSupplier.map(new AppendPath(export)).map(MakeOk.instance);
+                includeDirectorySuppliers.add(supplier);
+                sourceFileOrigins.add(supplier);
             }
         }
 
@@ -153,13 +161,13 @@ public class ConfigureEsv implements TaskDef<ResourcePath, Result<Option<EsvConf
             context.require(sdf3SourceDirectory, ResourceStampers.modifiedDirRec(resourceWalker, resourceMatcher));
             try(final Stream<? extends HierarchicalResource> stream = sdf3SourceDirectory.walk(resourceWalker, resourceMatcher)) {
                 for(HierarchicalResource sdf3File : new StreamIterable<>(stream)) {
-                    final Supplier<Result<IStrategoTerm, ?>> astSupplier = sdf3Desugar.createSupplier(sdf3Parse.createAstSupplier(sdf3File.getPath()));
+                    final Supplier<Result<IStrategoTerm, ?>> astSupplier = sdf3Desugar.createSupplier(sdf3Parse.inputBuilder().withFile(sdf3File.getPath()).rootDirectoryHint(rootDirectory).buildAstSupplier());
                     includeAstSuppliers.add(sdf3ToCompletionColorer.createSupplier(astSupplier));
                 }
             }
         });
 
-        return Result.ofOk(new EsvConfig(esvInput.mainFile(), ListView.of(), ListView.copyOf(includeDirectorySuppliers), ListView.of(includeAstSuppliers)));
+        return Result.ofOk(new EsvConfig(esvInput.mainFile(), rootDirectory, ListView.copyOf(sourceFileOrigins), ListView.copyOf(includeDirectorySuppliers), ListView.of(includeAstSuppliers)));
     }
 
 

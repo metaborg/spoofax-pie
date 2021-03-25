@@ -30,7 +30,7 @@ public class Sdf3IndexAst implements TaskDef<ResourceKey, Result<IStrategoTerm, 
 
     @Override
     public Result<IStrategoTerm, ?> exec(ExecContext context, ResourceKey resourceKey) throws Exception {
-        return context.require(parse.createRecoverableAstSupplier(resourceKey))
+        return context.require(parse.inputBuilder().withFile(resourceKey).buildRecoverableAstSupplier())
             .map(ast -> {
                 ResourceKeyAttachment.setResourceKey(ast, resourceKey);
                 return StrategoTermIndices.index(ast, resourceKey.toString(), termFactory);

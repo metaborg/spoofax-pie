@@ -83,14 +83,14 @@ public class TigerIdeCheckMulti implements TaskDef<TigerIdeCheckMulti.Input, Key
         try {
             root.walk(input.walker, input.matcher).forEach(file -> {
                 final ResourcePath filePath = file.getPath();
-                final Messages messages = context.require(parse.createMessagesSupplier(filePath));
+                final Messages messages = context.require(parse.inputBuilder().withFile(filePath).rootDirectoryHint(input.root).buildMessagesSupplier());
                 messagesBuilder.addMessages(filePath, messages);
             });
         } catch(UncheckedIOException e) {
             throw e.getCause();
         }
 
-        final TigerAnalyzeMulti.Input analyzeInput = new TigerAnalyzeMulti.Input(input.root, input.walker, input.matcher, parse.createRecoverableAstFunction());
+        final TigerAnalyzeMulti.Input analyzeInput = new TigerAnalyzeMulti.Input(input.root, parse.createRecoverableMultiAstSupplierFunction(input.walker, input.matcher));
         final Result<ConstraintAnalyzeMultiTaskDef.Output, ?> analysisResult = context.require(analyze, analyzeInput);
         analysisResult
             .ifOk(output -> {

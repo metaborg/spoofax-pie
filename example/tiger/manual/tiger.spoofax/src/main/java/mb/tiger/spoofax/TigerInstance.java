@@ -41,6 +41,7 @@ import mb.tiger.spoofax.task.reusable.TigerStyle;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
+import java.util.Optional;
 import java.util.Set;
 
 public class TigerInstance implements LanguageInstance {
@@ -114,13 +115,13 @@ public class TigerInstance implements LanguageInstance {
         return tokenize.createTask(resourceKey);
     }
 
-    @Override public Task<Option<Styling>> createStyleTask(ResourceKey resourceKey) {
-        return style.createTask(parse.createRecoverableTokensSupplier(resourceKey).map(Result::ok));
+    @Override public Task<Option<Styling>> createStyleTask(ResourceKey resourceKey, @Nullable ResourcePath rootDirectoryHint) {
+        return style.createTask(parse.inputBuilder().withFile(resourceKey).rootDirectoryHint(Optional.ofNullable(rootDirectoryHint)).buildRecoverableTokensSupplier().map(Result::ok));
     }
 
     @Override
     public Task<@Nullable CompletionResult> createCompletionTask(ResourceKey resourceKey, Region primarySelection) {
-        return complete.createTask(new TigerCompleteTaskDef.Input(parse.createRecoverableAstSupplier(resourceKey).map(Result::get))); // TODO: use Result.
+        return complete.createTask(new TigerCompleteTaskDef.Input(parse.inputBuilder().withFile(resourceKey).buildRecoverableAstSupplier().map(Result::get))); // TODO: use Result.
     }
 
     @Override

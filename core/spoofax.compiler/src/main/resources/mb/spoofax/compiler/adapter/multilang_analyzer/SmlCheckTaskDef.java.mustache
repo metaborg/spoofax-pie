@@ -2,17 +2,16 @@ package {{baseCheckTaskDef.packageId}};
 
 import dagger.Lazy;
 import mb.common.message.Messages;
+import mb.jsglr1.pie.JSGLR1ParseTaskInput;
 import mb.pie.api.Function;
-import mb.pie.api.ResourceStringSupplier;
 import mb.pie.api.SerializableFunction;
-import mb.pie.api.Supplier;
 import mb.resource.ResourceKey;
 import mb.statix.multilang.metadata.LanguageId;
 import mb.statix.multilang.metadata.LanguageMetadataManager;
-import mb.statix.multilang.pie.SmlSolveProject;
 import mb.statix.multilang.pie.SmlCheckTaskDef;
+import mb.statix.multilang.pie.SmlSolveProject;
 import mb.statix.multilang.pie.config.SmlBuildContextConfiguration;
-import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 
@@ -20,13 +19,24 @@ import javax.inject.Inject;
 public class {{baseCheckTaskDef.id}} extends SmlCheckTaskDef {
 
     @Inject public {{baseCheckTaskDef.id}}(
-        Function<Supplier<String>, Messages> messagesSupplier,
+        Function<JSGLR1ParseTaskInput, Messages> messagesSupplier,
         SmlBuildContextConfiguration buildContextConfiguration,
         SmlSolveProject solveProject,
         Lazy<LanguageMetadataManager> languageMetadataManager
     ) {
-        super(messagesSupplier.mapInput((SerializableFunction<ResourceKey, Supplier<String>>)ResourceStringSupplier::new),
-                buildContextConfiguration, solveProject, languageMetadataManager);
+        super(messagesSupplier.mapInput(new SerializableFunction<ResourceKey, JSGLR1ParseTaskInput>() {
+            @Override public JSGLR1ParseTaskInput apply(ResourceKey file) {
+                return JSGLR1ParseTaskInput.builder().withFile(file).build();
+            }
+
+            @Override public boolean equals(@Nullable Object other) {
+                return this == other || other != null && this.getClass() == other.getClass();
+            }
+
+            @Override public int hashCode() { return 0; }
+
+            @Override public String toString() { return getClass().getSimpleName(); }
+        }), buildContextConfiguration, solveProject, languageMetadataManager);
     }
 
     @Override public String getId() {

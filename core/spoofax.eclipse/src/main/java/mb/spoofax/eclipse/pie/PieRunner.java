@@ -126,7 +126,7 @@ public class PieRunner {
 
             final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
 
-            final Task<Option<Styling>> styleTask = languageInstance.createStyleTask(path);
+            final Task<Option<Styling>> styleTask = languageInstance.createStyleTask(path, project != null ? new EclipseResourcePath(project) : null);
             final String text = document.get();
             final Option<Styling> stylingOption = requireWithoutObserving(styleTask, postSession, monitor);
             stylingOption.ifElse(styling -> {

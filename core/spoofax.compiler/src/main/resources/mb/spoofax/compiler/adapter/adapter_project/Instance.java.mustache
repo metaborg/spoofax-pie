@@ -42,8 +42,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.Set;
-
 
 public class {{baseInstance.id}} implements LanguageInstance {
     private final static SetView<String> fileExtensions = SetView.of({{#shared.fileExtensions}}"{{this}}"{{^-last}}, {{/-last}}{{/shared.fileExtensions}});
@@ -83,9 +83,9 @@ public class {{baseInstance.id}} implements LanguageInstance {
         return {{tokenizeInjection.name}}.createTask(resourceKey);
     }
 
-    @Override public Task<Option<Styling>> createStyleTask(ResourceKey resourceKey) {
+    @Override public Task<Option<Styling>> createStyleTask(ResourceKey file, @Nullable ResourcePath rootDirectoryHint) {
 {{#parseInjection}}
-        return {{styleInjection.name}}.createTask({{this.name}}.createRecoverableTokensSupplier(resourceKey).map(TokensResultToOkFunction.instance));
+        return {{styleInjection.name}}.createTask({{this.name}}.inputBuilder().withFile(file).rootDirectoryHint(Optional.ofNullable(rootDirectoryHint)).buildRecoverableTokensSupplier().map(TokensResultToOkFunction.instance));
 {{/parseInjection}}
 {{^parseInjection}}
         return {{styleInjection.name}}.createTask((ctx) -> mb.pie.api.None.instance);
@@ -95,20 +95,20 @@ public class {{baseInstance.id}} implements LanguageInstance {
     @Override
     public Task<@Nullable CompletionResult> createCompletionTask(ResourceKey resourceKey, Region primarySelection) {
 {{#parseInjection}}
-        return {{completeInjection.name}}.createTask(new {{completeInjection.type.qualifiedId}}.Input({{this.name}}.createRecoverableAstSupplier(resourceKey).map(Result::get))); // TODO: use Result
+        return {{completeInjection.name}}.createTask(new {{completeInjection.type.qualifiedId}}.Input({{this.name}}.inputBuilder().withFile(resourceKey).buildRecoverableAstSupplier().map(Result::get))); // TODO: use Result
 {{/parseInjection}}
 {{^parseInjection}}
         return {{completeInjection.name}}.createTask(new {{completeInjection.type.qualifiedId}}.Input((ctx) -> mb.pie.api.None.instance)); // TODO: use Result
 {{/parseInjection}}
     }
 
-    @Override public Task<KeyedMessages> createCheckTask(ResourcePath projectRoot) {
+    @Override public Task<KeyedMessages> createCheckTask(ResourcePath rootDirectory) {
         {{#isMultiLang}}
-        return {{checkInjection.name}}.createTask(projectRoot);
+        return {{checkInjection.name}}.createTask(rootDirectory);
         {{/isMultiLang}}
         {{^isMultiLang}}
         return {{checkInjection.name}}.createTask(new {{checkInjection.type.qualifiedId}}.Input(
-            projectRoot,
+            rootDirectory,
             new PathResourceWalker(new NoHiddenPathMatcher()),
             new PathResourceMatcher(new ExtensionsPathMatcher(getFileExtensions().asUnmodifiable()))));
         {{/isMultiLang}}

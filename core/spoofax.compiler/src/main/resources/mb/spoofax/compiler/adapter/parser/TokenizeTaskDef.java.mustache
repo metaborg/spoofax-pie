@@ -31,6 +31,6 @@ public class {{baseTokenizeTaskDef.id}} implements TaskDef<ResourceKey, Option<J
     @Override
     public @Nullable Option<JSGLRTokens> exec(ExecContext context, ResourceKey key) throws IOException {
         context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
-        return context.require(parse.createTokensSupplier(key)).ok();
+        return context.require(parse.inputBuilder().withFile(key).buildTokensSupplier()).ok();
     }
 }

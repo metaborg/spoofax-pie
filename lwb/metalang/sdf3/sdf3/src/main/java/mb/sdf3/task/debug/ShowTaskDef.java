@@ -62,7 +62,7 @@ public abstract class ShowTaskDef extends ProvideOutputShared implements TaskDef
     }
 
     @Override public CommandFeedback exec(ExecContext context, Args args) {
-        return context.require(operation.createTask(desugar.createSupplier(parse.createAstSupplier(args.file))))
+        return context.require(operation.createTask(desugar.createSupplier(parse.inputBuilder().withFile(args.file).buildRecoverableAstSupplier())))
             .mapOrElse(ast -> provideOutput(context, args.concrete, ast, args.file), e -> CommandFeedback.ofTryExtractMessagesFrom(e, args.file));
     }
 }

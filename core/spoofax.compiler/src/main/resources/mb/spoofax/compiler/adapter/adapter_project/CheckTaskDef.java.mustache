@@ -14,18 +14,18 @@ import java.io.IOException;
 
 @{{scope.qualifiedId}}
 public class {{baseCheckTaskDef.id}} implements TaskDef<ResourceKey, Messages> {
-{{#checkInjections}}
-{{variable}};
-{{/checkInjections}}
+    {{#checkInjections}}
+    private final {{variable}};
+    {{/checkInjections}}
 
     @Inject public {{baseCheckTaskDef.id}}(
-{{#checkInjections}}
-    {{variable}}{{^-last}},{{/-last}}
-{{/checkInjections}}
+        {{#checkInjections}}
+        {{variable}}{{^-last}},{{/-last}}
+        {{/checkInjections}}
     ) {
-{{#checkInjections}}
+        {{#checkInjections}}
         {{thisAssign}};
-{{/checkInjections}}
+        {{/checkInjections}}
     }
 
     @Override public String getId() {
@@ -35,17 +35,16 @@ public class {{baseCheckTaskDef.id}} implements TaskDef<ResourceKey, Messages> {
     @Override public Messages exec(ExecContext context, ResourceKey key) throws IOException {
         context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
         final MessagesBuilder messagesBuilder = new MessagesBuilder();
-        final ResourceStringSupplier stringSupplier = new ResourceStringSupplier(key);
-{{#parser}}
-        final Messages parseMessages = context.require(parse.createMessagesSupplier(stringSupplier));
+        {{#parser}}
+        final Messages parseMessages = context.require(parse.inputBuilder().withFile(key).buildMessagesSupplier());
         messagesBuilder.addMessages(parseMessages);
-{{/parser}}
-{{#constraintAnalyzer}}
-        final Result<{{this.analyzeTaskDef.qualifiedId}}.Output, ?> analysisResult = context.require(analyze, new {{this.analyzeTaskDef.qualifiedId}}.Input(key, parse.createRecoverableAstSupplier(stringSupplier)));
+        {{/parser}}
+        {{#constraintAnalyzer}}
+        final Result<{{this.analyzeTaskDef.qualifiedId}}.Output, ?> analysisResult = context.require(analyze, new {{this.analyzeTaskDef.qualifiedId}}.Input(key, parse.inputBuilder().withFile(key).buildRecoverableAstSupplier()));
         analysisResult
             .ifOk(output -> messagesBuilder.addMessages(output.result.messages))
             .ifErr(e -> messagesBuilder.addMessage("Analysis failed", e, Severity.Error));
-{{/constraintAnalyzer}}
+        {{/constraintAnalyzer}}
         return messagesBuilder.build();
     }
 }

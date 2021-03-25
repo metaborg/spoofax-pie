@@ -65,7 +65,7 @@ public class TigerCompileFile implements TaskDef<TigerCompileFile.Args, CommandF
 
     @Override public CommandFeedback exec(ExecContext context, Args input) {
         final ResourcePath file = input.file;
-        final Supplier<Result<IStrategoTerm, JSGLR1ParseException>> astSupplier = parse.createAstSupplier(file);
+        final Supplier<Result<IStrategoTerm, JSGLR1ParseException>> astSupplier = parse.inputBuilder().withFile(file).buildAstSupplier();
         final Result<String, ?> listedLiteralVals = context.require(listLiteralVals, astSupplier);
         return listedLiteralVals
             .mapCatching((literalVals) -> {

@@ -3,12 +3,11 @@ package mb.esv.util;
 import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.common.util.ListView;
-import mb.esv.task.EsvParse;
+import mb.esv.task.spoofax.EsvParseWrapper;
 import mb.jsglr1.common.JSGLR1ParseException;
 import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ResourceStringSupplier;
-import mb.pie.api.STask;
 import mb.pie.api.Supplier;
 import mb.pie.api.SupplierWithOrigin;
 import mb.pie.api.stamp.resource.ResourceStampers;
@@ -23,16 +22,19 @@ import java.io.UncheckedIOException;
 import java.util.HashSet;
 
 public abstract class EsvVisitor {
-    private final EsvParse parse;
+    private final EsvParseWrapper parse;
+//    private final ListView<? extends Supplier<?>> sourceFileOrigins;
     private final ListView<Supplier<Result<ResourcePath, ?>>> includeDirectorySuppliers;
     private final ListView<Supplier<Result<IStrategoTerm, ?>>> includeAstSuppliers;
 
     protected EsvVisitor(
-        EsvParse parse,
+        EsvParseWrapper parse,
+//        ListView<? extends Supplier<?>> sourceFileOrigins,
         ListView<Supplier<Result<ResourcePath, ?>>> includeDirectorySuppliers,
         ListView<Supplier<Result<IStrategoTerm, ?>>> includeAstSuppliers
     ) {
         this.parse = parse;
+//        this.sourceFileOrigins = sourceFileOrigins;
         this.includeDirectorySuppliers = includeDirectorySuppliers;
         this.includeAstSuppliers = includeAstSuppliers;
     }
@@ -53,22 +55,25 @@ public abstract class EsvVisitor {
 
     public void visitMainFile(
         ExecContext context,
-        ResourcePath mainFile
+        ResourceKey mainFile,
+        ResourcePath rootDirectory
     ) {
-        parse(context, mainFile, null).ifSomeThrowing(ast -> visitAst(context, new HashSet<>(), ast));
+        parse(context, mainFile, rootDirectory, null).ifSomeThrowing(ast -> visitAst(context, new HashSet<>(), rootDirectory, ast));
     }
 
     public void visitAst(
         ExecContext context,
-        IStrategoTerm ast
+        IStrategoTerm ast,
+        ResourcePath rootDirectory
     ) {
         final HashSet<String> seenImports = new HashSet<>();
-        visitAst(context, seenImports, ast);
+        visitAst(context, seenImports, rootDirectory, ast);
     }
 
     private void visitAst(
         ExecContext context,
         HashSet<String> seenModules,
+        ResourcePath rootDirectory,
         IStrategoTerm ast
     ) {
         if(!EsvUtil.isModuleTerm(ast)) throw new RuntimeException("AST '" + ast + "' is not a Module/3 term");
@@ -79,12 +84,12 @@ public abstract class EsvVisitor {
             for(IStrategoTerm importTerm : importsTerm.getSubterm(0)) {
                 final String importName = EsvUtil.getNameFromImportTerm(importTerm);
                 if(seenModules.contains(importName)) continue; // Short-circuit cyclic imports.
-                resolveImport(context, importTerm, importName).ifSome(importedAst -> visitAst(context, seenModules, importedAst));
+                resolveImport(context, rootDirectory, importTerm, importName).ifSome(importedAst -> visitAst(context, seenModules, rootDirectory, importedAst));
             }
         }
     }
 
-    private Option<IStrategoTerm> resolveImport(ExecContext context, IStrategoTerm importTerm, String importName) {
+    private Option<IStrategoTerm> resolveImport(ExecContext context, ResourcePath rootDirectory, IStrategoTerm importTerm, String importName) {
         for(Supplier<Result<ResourcePath, ?>> includeDirectorySupplier : includeDirectorySuppliers) {
             final Result<ResourcePath, ?> result = context.require(includeDirectorySupplier);
             if(result.isErr()) {
@@ -96,7 +101,7 @@ public abstract class EsvVisitor {
             try {
                 final ReadableResource resource = context.require(esvFile, ResourceStampers.<ReadableResource>exists());
                 if(!resource.exists()) continue;
-                return parse(context, esvFile, includeDirectorySupplier);
+                return parse(context, esvFile, rootDirectory, includeDirectorySupplier);
             } catch(IOException e) {
                 throw new UncheckedIOException(e); // Throw exceptions about existence check as unchecked.
             }
@@ -117,12 +122,17 @@ public abstract class EsvVisitor {
         return Option.ofNone();
     }
 
-    private Option<IStrategoTerm> parse(ExecContext context, ResourceKey file, @Nullable Supplier<?> origin) {
+    private Option<IStrategoTerm> parse(ExecContext context, ResourceKey file, ResourcePath rootDirectory, @Nullable Supplier<?> origin) {
         Supplier<String> supplier = new ResourceStringSupplier(file);
         if(origin != null) {
             supplier = new SupplierWithOrigin<>(supplier, origin);
         }
-        final Result<JSGLR1ParseOutput, JSGLR1ParseException> parseResult = context.require(parse, supplier);
+        final Result<JSGLR1ParseOutput, JSGLR1ParseException> parseResult = context.require(parse, parse.inputBuilder()
+            .stringSupplier(supplier)
+            .fileHint(file)
+            .rootDirectoryHint(rootDirectory)
+            .build()
+        );
         if(parseResult.isErr()) {
             acceptParseFail(parseResult.getErr());
             return Option.ofNone();

@@ -1,5 +1,8 @@
 package mb.mod;
 
+import mb.jsglr1.common.JSGLR1ParseException;
+import mb.jsglr1.common.JSGLR1ParseInput;
+import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.log.api.LoggerFactory;
 import mb.log.slf4j.SLF4JLoggerFactory;
 import mb.resource.DefaultResourceKey;
@@ -27,6 +30,11 @@ class ModTestBase {
 
     protected final ModParser parser = new ModParserFactory(definitionDir).create();
     protected final String startSymbol = "Start";
+
+    protected JSGLR1ParseOutput parse(String text, ResourceKey fileHint) throws JSGLR1ParseException, InterruptedException {
+        return parser.parse(new JSGLR1ParseInput(text, startSymbol, fileHint));
+    }
+
     protected final ModStyler styler = new ModStylerFactory(loggerFactory, definitionDir).create();
     protected final StrategoRuntimeBuilder strategoRuntimeBuilder = new ModStrategoRuntimeBuilderFactory(loggerFactory, resourceService, definitionDir).create();
     protected final StrategoRuntime strategoRuntime = strategoRuntimeBuilder.build();

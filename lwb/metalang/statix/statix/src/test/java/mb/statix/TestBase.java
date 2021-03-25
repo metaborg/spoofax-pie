@@ -31,7 +31,7 @@ class TestBase extends SingleLanguageTestBase<StatixResourcesComponent, StatixCo
 
 
     Supplier<? extends Result<IStrategoTerm, ?>> parsedAstSupplier(ResourceKey resourceKey) {
-        return parse.createAstSupplier(resourceKey);
+        return parse.inputBuilder().withFile(resourceKey).buildAstSupplier();
     }
 
     Supplier<? extends Result<IStrategoTerm, ?>> parsedAstSupplier(Resource resource) {

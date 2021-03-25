@@ -141,7 +141,7 @@ public class CompileSdf3 implements TaskDef<CompileSdf3Input, Result<KeyedMessag
         }
 
         // Compile each SDF3 source file to a Stratego signature, pretty-printer, and completion runtime module.
-        final Sdf3AnalyzeMulti.Input analyzeInput = new Sdf3AnalyzeMulti.Input(sourceDirectory.getPath(), resourceWalker, resourceMatcher, parse.createRecoverableAstFunction());
+        final Sdf3AnalyzeMulti.Input analyzeInput = new Sdf3AnalyzeMulti.Input(sourceDirectory.getPath(), parse.createRecoverableMultiAstSupplierFunction(resourceWalker, resourceMatcher));
         try(final Stream<? extends HierarchicalResource> stream = sourceDirectory.walk(resourceWalker, resourceMatcher)) {
             for(HierarchicalResource file : new StreamIterable<>(stream)) {
                 final Supplier<Result<SingleFileOutput, ?>> singleFileAnalysisOutputSupplier = analyze.createSingleFileOutputSupplier(analyzeInput, file.getPath());
@@ -151,7 +151,7 @@ public class CompileSdf3 implements TaskDef<CompileSdf3Input, Result<KeyedMessag
                     return Result.ofErr(Sdf3CompileException.signatureGenerateFail(e));
                 }
 
-                final Supplier<Result<IStrategoTerm, ?>> astSupplier = desugar.createSupplier(parse.createAstSupplier(file.getPath()));
+                final Supplier<Result<IStrategoTerm, ?>> astSupplier = desugar.createSupplier(parse.inputBuilder().withFile(file.getPath()).rootDirectoryHint(rootDirectory).buildAstSupplier());
                 try {
                     toPrettyPrinter(context, input, astSupplier);
                 } catch(Exception e) {

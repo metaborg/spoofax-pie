@@ -54,7 +54,7 @@ public class CharsShowAst implements TaskDef<CharsShowAst.Args, CommandFeedback>
     @Override public CommandFeedback exec(ExecContext context, Args args) throws Exception {
         final ResourceKey file = args.file;
         return context
-            .require(parse.createAstSupplier(file))
+            .require(parse.inputBuilder().withFile(file).buildAstSupplier())
             .mapOrElse(
                 ast -> CommandFeedback.of(ShowFeedback.showText(StrategoUtil.toString(ast), "Parsed AST of '" + file + "'")),
                 e -> CommandFeedback.ofTryExtractMessagesFrom(e, file)

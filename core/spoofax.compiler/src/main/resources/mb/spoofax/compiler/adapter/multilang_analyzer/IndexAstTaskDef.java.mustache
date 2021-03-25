@@ -2,10 +2,13 @@ package {{baseIndexAstTaskDef.packageId}};
 
 import mb.common.result.Result;
 import mb.jsglr1.common.JSGLR1ParseException;
+import mb.jsglr1.pie.JSGLR1ParseTaskInput;
 import mb.pie.api.Function;
+import mb.pie.api.SerializableFunction;
 import mb.pie.api.Supplier;
 import mb.statix.multilang.pie.transform.SmlIndexAstTaskDef;
 import mb.stratego.common.StrategoRuntime;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
@@ -16,9 +19,21 @@ public class {{baseIndexAstTaskDef.id}} extends SmlIndexAstTaskDef<JSGLR1ParseEx
 
     @Inject public {{baseIndexAstTaskDef.id}}(
         Provider<StrategoRuntime> strategoRuntimeProvider,
-        Function<Supplier<String>, Result<IStrategoTerm, JSGLR1ParseException>> astSupplier
+        Function<JSGLR1ParseTaskInput, Result<IStrategoTerm, JSGLR1ParseException>> astSupplier
     ) {
-        super(strategoRuntimeProvider, astSupplier);
+        super(strategoRuntimeProvider, astSupplier.mapInput(new SerializableFunction<Supplier<String>, JSGLR1ParseTaskInput>() {
+            @Override public JSGLR1ParseTaskInput apply(Supplier<String> stringSupplier) {
+                return JSGLR1ParseTaskInput.builder().stringSupplier(stringSupplier).build();
+            }
+
+            @Override public boolean equals(@Nullable Object other) {
+                return this == other || other != null && this.getClass() == other.getClass();
+            }
+
+            @Override public int hashCode() { return 0; }
+
+            @Override public String toString() { return getClass().getSimpleName(); }
+        }));
     }
 
     @Override public String getId() {

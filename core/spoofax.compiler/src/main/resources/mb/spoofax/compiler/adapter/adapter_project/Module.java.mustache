@@ -4,7 +4,10 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ElementsIntoSet;
 import mb.common.result.Result;
+{{#parser}}
 import mb.jsglr1.common.JSGLR1ParseException;
+import mb.jsglr1.pie.JSGLR1ParseTaskInput;
+{{/parser}}
 import mb.log.api.LoggerFactory;
 import mb.common.message.Messages;
 import mb.pie.api.Function;
@@ -229,12 +232,12 @@ public class {{baseModule.id}} {
 
     {{#parser}}
     @Provides @{{scope.id}}
-    static Function<Supplier<String>, Result<IStrategoTerm, JSGLR1ParseException>> provideParseFunction({{parseTaskDef.qualifiedId}} parse) {
+    static Function<JSGLR1ParseTaskInput, Result<IStrategoTerm, JSGLR1ParseException>> provideParseFunction({{parseTaskDef.qualifiedId}} parse) {
         return parse.createAstFunction();
     }
 
     @Provides @{{scope.id}}
-    static Function<Supplier<String>, Messages> provideParseMessagesFunction({{parseTaskDef.qualifiedId}} parse) {
+    static Function<JSGLR1ParseTaskInput, Messages> provideParseMessagesFunction({{parseTaskDef.qualifiedId}} parse) {
         return parse.createMessagesFunction();
     }
     {{/parser}}

@@ -1,9 +1,13 @@
 package mb.tiger;
 
+import mb.jsglr1.common.JSGLR1ParseException;
+import mb.jsglr1.common.JSGLR1ParseInput;
+import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.log.api.LoggerFactory;
 import mb.log.noop.NoopLoggerFactory;
 import mb.resource.DefaultResourceService;
 import mb.resource.DummyResourceRegistry;
+import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
 import mb.resource.classloader.ClassLoaderResourceRegistry;
 import mb.resource.classloader.NoopClassLoaderUrlResolver;
@@ -12,6 +16,7 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.url.URLResourceRegistry;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.terms.TermFactory;
 
@@ -26,6 +31,15 @@ class TigerTestBase {
     protected final ResourceService resourceService = new DefaultResourceService(new DummyResourceRegistry(qualifier), new FSResourceRegistry(), new URLResourceRegistry(), classLoaderResourceRegistry);
 
     protected final TigerParser parser = new TigerParserFactory(definitionDir).create();
+
+    protected JSGLR1ParseOutput parse(String text) throws JSGLR1ParseException, InterruptedException {
+        return parser.parse(new JSGLR1ParseInput(text, "Module"));
+    }
+
+    protected JSGLR1ParseOutput parse(String text, @Nullable ResourceKey fileHint) throws JSGLR1ParseException, InterruptedException {
+        return parser.parse(new JSGLR1ParseInput(text, "Module", fileHint));
+    }
+
     protected final TigerStyler styler = new TigerStylerFactory(loggerFactory, definitionDir).create();
     protected final StrategoRuntimeBuilder strategoRuntimeBuilder = new TigerStrategoRuntimeBuilderFactory(loggerFactory, resourceService, definitionDir).create();
     protected final StrategoRuntime strategoRuntime = strategoRuntimeBuilder.build();

@@ -42,7 +42,7 @@ public class CfgRootDirectoryToObject implements TaskDef<ResourcePath, Result<Cf
     @Override
     public Result<CfgToObject.Output, CfgRootDirectoryToObjectException> exec(ExecContext context, ResourcePath rootDirectory) throws Exception {
         final ResourcePath cfgFile = rootDirectory.appendRelativePath("spoofaxc.cfg");
-        final Supplier<Result<IStrategoTerm, JSGLR1ParseException>> astSupplier = parse.createAstSupplier(cfgFile);
+        final Supplier<Result<IStrategoTerm, JSGLR1ParseException>> astSupplier = parse.inputBuilder().withFile(cfgFile).rootDirectoryHint(rootDirectory).buildAstSupplier();
         final ResourcePath lockFilePath = rootDirectory.appendRelativePath("spoofaxc.lock");
         final WritableResource lockFile = resourceService.getWritableResource(lockFilePath);
         final Supplier<Result<Properties, IOException>> propertiesSupplier = new PropertiesSupplier(lockFile);
