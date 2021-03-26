@@ -13,15 +13,7 @@ import java.util.Properties;
 
 @Value.Immutable
 public interface CompileSdf3Input extends Serializable {
-    class Builder extends ImmutableCompileSdf3Input.Builder implements BuilderBase {
-        static final String propertiesPrefix = "sdf3.";
-        static final String sdf3StrategoStrategyIdAffix = propertiesPrefix + "strategoStrategyIdAffix";
-
-        public Builder withPersistentProperties(Properties properties) {
-            with(properties, sdf3StrategoStrategyIdAffix, this::strategoStrategyIdAffix);
-            return this;
-        }
-    }
+    class Builder extends ImmutableCompileSdf3Input.Builder {}
 
     static Builder builder() { return new Builder(); }
 
@@ -64,11 +56,6 @@ public interface CompileSdf3Input extends Serializable {
     }
 
 
-    @Value.Default default String strategoStrategyIdAffix() {
-        // TODO: convert to Stratego ID instead of Java ID.
-        return Conversion.nameToJavaId(shared().name().toLowerCase());
-    }
-
     @Value.Default default String parseTableRelativePath() {
         return "sdf.tbl";
     }
@@ -83,21 +70,10 @@ public interface CompileSdf3Input extends Serializable {
 
     /// Automatically provided sub-inputs
 
-    @Value.Auxiliary Shared shared();
-
     CompileLanguageShared compileLanguageShared();
-
-
-    default void savePersistentProperties(Properties properties) {
-        properties.setProperty(Builder.sdf3StrategoStrategyIdAffix, strategoStrategyIdAffix());
-    }
 
 
     default void syncTo(ParserLanguageCompiler.Input.Builder builder) {
         builder.parseTableRelativePath(parseTableRelativePath());
-    }
-
-    default void syncTo(CompileStrategoInput.Builder builder) {
-        builder.addStrategoIncludeDirs(compileLanguageShared().generatedStrategoSourcesDirectory());
     }
 }

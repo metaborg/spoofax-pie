@@ -1,11 +1,11 @@
 package mb.cfg;
 
-import mb.common.util.Properties;
-import mb.spoofax.compiler.util.Shared;
 import mb.cfg.metalang.CompileEsvInput;
 import mb.cfg.metalang.CompileSdf3Input;
 import mb.cfg.metalang.CompileStatixInput;
 import mb.cfg.metalang.CompileStrategoInput;
+import mb.common.util.Properties;
+import mb.spoofax.compiler.util.Shared;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -49,7 +49,7 @@ public class CompileLanguageInputBuilder {
 
 
     public CompileLanguageInput build(Properties persistentProperties, Shared shared, CompileLanguageShared compileLanguageShared) {
-        final @Nullable CompileSdf3Input sdf3 = buildSdf3(persistentProperties, shared, compileLanguageShared);
+        final @Nullable CompileSdf3Input sdf3 = buildSdf3(compileLanguageShared);
         if(sdf3 != null) compileLanguage.sdf3(sdf3);
 
         final @Nullable CompileEsvInput esv = buildEsv(compileLanguageShared);
@@ -58,7 +58,7 @@ public class CompileLanguageInputBuilder {
         final @Nullable CompileStatixInput statix = buildStatix(compileLanguageShared);
         if(statix != null) compileLanguage.statix(statix);
 
-        final @Nullable CompileStrategoInput stratego = buildStratego(compileLanguageShared, sdf3);
+        final @Nullable CompileStrategoInput stratego = buildStratego(persistentProperties, shared, compileLanguageShared);
         if(stratego != null) compileLanguage.stratego(stratego);
 
         return compileLanguage
@@ -68,14 +68,10 @@ public class CompileLanguageInputBuilder {
 
 
     private @Nullable CompileSdf3Input buildSdf3(
-        Properties persistentProperties,
-        Shared shared,
         CompileLanguageShared compileLanguageShared
     ) {
         if(!sdf3Enabled) return null;
         return sdf3
-            .withPersistentProperties(persistentProperties)
-            .shared(shared)
             .compileLanguageShared(compileLanguageShared)
             .build();
     }
@@ -99,25 +95,15 @@ public class CompileLanguageInputBuilder {
     }
 
     private @Nullable CompileStrategoInput buildStratego(
-        CompileLanguageShared compileLanguageShared,
-        CompileSdf3Input parserInput
+        Properties persistentProperties,
+        Shared shared,
+        CompileLanguageShared compileLanguageShared
     ) {
         if(!strategoEnabled) return null;
-
-        // Set required parts.
-        stratego
+        return stratego
+            .withPersistentProperties(persistentProperties)
+            .shared(shared)
             .compileLanguageShared(compileLanguageShared)
-        ;
-
-        final CompileStrategoInput.Builder builder;
-        if(parserInput != null) {
-            // Copy the builder before syncing to ensure that multiple builds do not cause a sync multiple times.
-            builder = CompileStrategoInput.builder().from(stratego.build());
-            parserInput.syncTo(builder);
-        } else {
-            builder = stratego;
-        }
-
-        return builder.build();
+            .build();
     }
 }

@@ -18,14 +18,6 @@ public abstract class Sdf3CompileException extends Exception implements HasOptio
         R checkFail(KeyedMessages messages);
 
         R parseTableCompileFail(Exception cause);
-
-        R signatureGenerateFail(Exception cause);
-
-        R prettyPrinterGenerateFail(Exception cause);
-
-        R parenthesizerGenerateFail(Exception cause);
-
-        R completionRuntimeGenerateFail(Exception cause);
     }
 
     public static Sdf3CompileException getLanguageCompilerConfigurationFail(CfgRootDirectoryToObjectException cfgRootDirectoryToObjectException) {
@@ -42,22 +34,6 @@ public abstract class Sdf3CompileException extends Exception implements HasOptio
 
     public static Sdf3CompileException parseTableCompileFail(Exception cause) {
         return withCause(Sdf3CompileExceptions.parseTableCompileFail(cause), cause);
-    }
-
-    public static Sdf3CompileException signatureGenerateFail(Exception cause) {
-        return withCause(Sdf3CompileExceptions.signatureGenerateFail(cause), cause);
-    }
-
-    public static Sdf3CompileException prettyPrinterGenerateFail(Exception cause) {
-        return withCause(Sdf3CompileExceptions.prettyPrinterGenerateFail(cause), cause);
-    }
-
-    public static Sdf3CompileException parenthesizerGenerateFail(Exception cause) {
-        return withCause(Sdf3CompileExceptions.parenthesizerGenerateFail(cause), cause);
-    }
-
-    public static Sdf3CompileException completionRuntimeGenerateFail(Exception cause) {
-        return withCause(Sdf3CompileExceptions.completionRuntimeGenerateFail(cause), cause);
     }
 
     private static Sdf3CompileException withCause(Sdf3CompileException e, Exception cause) {
@@ -83,10 +59,6 @@ public abstract class Sdf3CompileException extends Exception implements HasOptio
             .configureFail((cause) -> "Configuring SDF3 failed")
             .checkFail((messages) -> "Parsing or checking SDF3 source files failed; see error messages")
             .parseTableCompileFail((cause) -> "Compile parse table from SDF3 failed unexpectedly")
-            .signatureGenerateFail((cause) -> "Generate stratego signature from SDF3 failed unexpectedly")
-            .prettyPrinterGenerateFail((cause) -> "Generate pretty-printer from SDF3 failed unexpectedly")
-            .parenthesizerGenerateFail((cause) -> "Generate parenthesizer from SDF3 failed unexpectedly")
-            .completionRuntimeGenerateFail((cause) -> "Generate completion runtime from SDF3 failed unexpectedly")
             ;
     }
 

@@ -52,7 +52,7 @@ public interface CompileLanguageInput extends Serializable {
 
 
     default void savePersistentProperties(Properties properties) {
-        sdf3().ifPresent(i -> i.savePersistentProperties(properties));
+        stratego().ifPresent(i -> i.savePersistentProperties(properties));
     }
 
 

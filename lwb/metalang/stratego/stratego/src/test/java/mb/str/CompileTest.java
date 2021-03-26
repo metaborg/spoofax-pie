@@ -12,10 +12,12 @@ import mb.resource.fs.FSResource;
 import mb.str.config.StrategoCompileConfig;
 import mb.str.task.StrategoCompileToJava;
 import mb.str.util.TestBase;
+import mb.stratego.build.util.StrategoGradualSetting;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Test;
+import org.metaborg.util.cmd.Arguments;
 import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -55,15 +57,15 @@ class CompileTest extends TestBase {
                 strategoMainFile.getPath(),
                 ListView.of(strategoSourceDir.getPath()),
                 ListView.of("stratego-lib"),
+                StrategoGradualSetting.NONE,
+                new Arguments(),
+                ListView.of(),
                 null,
                 strategoJavaPackageOutputDir.getPath(),
                 "mb.test"
             );
-            final Task<Result<None, ?>> strategoCompileTask = compile.createTask(new StrategoCompileToJava.Input(
-                config,
-                list()
-            ));
-            @SuppressWarnings("ConstantConditions") final Result<None, ?> result = session.require(strategoCompileTask);
+            final Task<Result<None, ?>> strategoCompileTask = compile.createTask(config);
+            final Result<None, ?> result = session.require(strategoCompileTask);
             assertTrue(result.isOk());
             assertTrue(strategoJavaPackageOutputDir.exists());
             assertTrue(strategoJavaPackageOutputDir.isDirectory());

@@ -7,22 +7,21 @@ import mb.common.message.KeyedMessagesBuilder;
 import mb.common.result.Result;
 import mb.common.util.ADT;
 import mb.pie.api.ExecContext;
-import mb.pie.api.STask;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.lwb.compiler.esv.CompileEsv;
 import mb.spoofax.lwb.compiler.esv.EsvCompileException;
-import mb.spoofax.lwb.compiler.metalang.CompileStratego;
 import mb.spoofax.lwb.compiler.sdf3.CompileSdf3;
 import mb.spoofax.lwb.compiler.sdf3.Sdf3CompileException;
 import mb.spoofax.lwb.compiler.statix.CompileStatix;
 import mb.spoofax.lwb.compiler.statix.StatixCompileException;
+import mb.spoofax.lwb.compiler.stratego.CompileStratego;
+import mb.spoofax.lwb.compiler.stratego.StrategoCompileException;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
 
 /**
  * Compiles a {@link CompileLanguageShared} by running the meta-language compilers.
@@ -63,11 +62,7 @@ public class CompileLanguage implements TaskDef<CompileLanguageInput, Result<Key
         final ResourcePath rootDirectory = input.compileLanguageShared().languageProject().project().baseDirectory(); // HACK: get root directory from config for now.
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
 
-        final ArrayList<STask<?>> strategoOriginTasks = new ArrayList<>();
-
-        final STask<Result<KeyedMessages, Sdf3CompileException>> compileSdf3Task = compileSdf3.createSupplier(rootDirectory);
-        strategoOriginTasks.add(compileSdf3Task);
-        final Result<KeyedMessages, CompileException> compileSdf3Result = context.require(compileSdf3Task)
+        final Result<KeyedMessages, CompileException> compileSdf3Result = context.require(compileSdf3, rootDirectory)
             .ifOk(messagesBuilder::addMessages)
             .mapErr(CompileLanguage.CompileException::sdf3CompileFail);
         if(compileSdf3Result.isErr()) {
@@ -91,13 +86,11 @@ public class CompileLanguage implements TaskDef<CompileLanguageInput, Result<Key
             messagesBuilder.addMessages(result.get());
         }
 
-        if(input.stratego().isPresent()) {
-            final Result<KeyedMessages, CompileException> result = context.require(compileStratego, new CompileStratego.Args(input.stratego().get(), strategoOriginTasks))
-                .ifOk(messagesBuilder::addMessages)
-                .mapErr(CompileLanguage.CompileException::strategoCompileFail);
-            if(result.isErr()) {
-                return result;
-            }
+        final Result<KeyedMessages, CompileException> compileStrategoResult = context.require(compileStratego, rootDirectory)
+            .ifOk(messagesBuilder::addMessages)
+            .mapErr(CompileLanguage.CompileException::strategoCompileFail);
+        if(compileStrategoResult.isErr()) {
+            return compileStrategoResult;
         }
 
         return Result.ofOk(messagesBuilder.build());
@@ -113,7 +106,7 @@ public class CompileLanguage implements TaskDef<CompileLanguageInput, Result<Key
 
             R statixCompileFail(StatixCompileException statixCompileException);
 
-            R strategoCompileFail(CompileStratego.StrategoCompileException strategoCompileException);
+            R strategoCompileFail(StrategoCompileException strategoCompileException);
         }
 
         public static CompileException sdf3CompileFail(Sdf3CompileException cause) {
@@ -128,7 +121,7 @@ public class CompileLanguage implements TaskDef<CompileLanguageInput, Result<Key
             return withCause(CompileExceptions.statixCompileFail(cause), cause);
         }
 
-        public static CompileException strategoCompileFail(CompileStratego.StrategoCompileException cause) {
+        public static CompileException strategoCompileFail(StrategoCompileException cause) {
             return withCause(CompileExceptions.strategoCompileFail(cause), cause);
         }
 

@@ -208,19 +208,19 @@ open class LanguagePlugin : Plugin<Project> {
       }
       input.stratego().ifPresent {
         // Input: all Stratego files
-        val rootDirectory = resourceService.toLocalFile(it.strategoRootDirectory())
+        val rootDirectory = resourceService.toLocalFile(it.mainSourceDirectory())
         if(rootDirectory != null) {
           inputs.files(project.fileTree(rootDirectory) { include("**/*.str") })
         } else {
-          logger.warn("Cannot set Stratego files as task inputs, because ${it.strategoRootDirectory()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
+          logger.warn("Cannot set Stratego files as task inputs, because ${it.mainSourceDirectory()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
         }
 
         // Output: Stratego output directory
-        val outputDirectory = resourceService.toLocalFile(it.strategoOutputDir())
+        val outputDirectory = resourceService.toLocalFile(it.outputDirectory())
         if(outputDirectory != null) {
           outputs.dir(outputDirectory)
         } else {
-          logger.warn("Cannot set the Stratego output directory as a task output, because ${it.strategoOutputDir()} cannot be converted into a local file. This disables incrementality for this Gradle task")
+          logger.warn("Cannot set the Stratego output directory as a task output, because ${it.outputDirectory()} cannot be converted into a local file. This disables incrementality for this Gradle task")
         }
       }
 

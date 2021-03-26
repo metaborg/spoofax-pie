@@ -1,26 +1,26 @@
-package mb.esv.task.spoofax;
+package mb.str.task.spoofax;
 
 import mb.common.result.Result;
-import mb.esv.EsvClassLoaderResources;
-import mb.esv.EsvParser;
-import mb.esv.task.EsvParse;
 import mb.jsglr1.common.JSGLR1ParseException;
 import mb.jsglr1.common.JSGLR1ParseOutput;
 import mb.jsglr1.pie.JSGLR1ParseTaskInput;
 import mb.pie.api.ExecContext;
 import mb.pie.api.stamp.resource.ResourceStampers;
+import mb.str.StrategoClassLoaderResources;
+import mb.str.StrategoParser;
+import mb.str.task.StrategoParse;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-public class EsvParseWrapper extends EsvParse {
-    private final EsvClassLoaderResources classLoaderResources;
-    private final EsvConfigFunctionWrapper configFunctionWrapper;
+public class StrategoParseWrapper extends StrategoParse {
+    private final StrategoClassLoaderResources classLoaderResources;
+    private final StrategoAnalyzeConfigFunctionWrapper configFunctionWrapper;
 
-    @Inject public EsvParseWrapper(
-        EsvClassLoaderResources classLoaderResources,
-        Provider<EsvParser> parserProvider,
-        EsvConfigFunctionWrapper configFunctionWrapper
+    @Inject public StrategoParseWrapper(
+        StrategoClassLoaderResources classLoaderResources,
+        Provider<StrategoParser> parserProvider,
+        StrategoAnalyzeConfigFunctionWrapper configFunctionWrapper
     ) {
         super(classLoaderResources, parserProvider);
         this.classLoaderResources = classLoaderResources;

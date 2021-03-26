@@ -10,6 +10,7 @@ import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.common.util.StreamIterable;
 import mb.esv.task.EsvConfig;
+import mb.jsglr1.pie.JSGLR1ParseTaskInput;
 import mb.libspoofax2.LibSpoofax2ClassLoaderResources;
 import mb.libspoofax2.LibSpoofax2Exports;
 import mb.pie.api.ExecContext;
@@ -23,15 +24,16 @@ import mb.resource.classloader.ClassLoaderResourceLocations;
 import mb.resource.classloader.JarFileWithPath;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
-import mb.resource.hierarchical.match.AllResourceMatcher;
-import mb.resource.hierarchical.match.FileResourceMatcher;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.match.path.string.PathStringMatcher;
 import mb.resource.hierarchical.walk.ResourceWalker;
 import mb.sdf3.task.Sdf3Desugar;
 import mb.sdf3.task.Sdf3Parse;
 import mb.sdf3.task.Sdf3ToCompletionColorer;
+import mb.sdf3.task.spec.Sdf3SpecConfig;
 import mb.sdf3.task.util.Sdf3Util;
+import mb.spoofax.lwb.compiler.sdf3.ConfigureSdf3;
+import mb.spoofax.lwb.compiler.sdf3.Sdf3ConfigureException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -47,6 +49,7 @@ public class ConfigureEsv implements TaskDef<ResourcePath, Result<Option<EsvConf
     private final UnarchiveFromJar unarchiveFromJar;
     private final LibSpoofax2ClassLoaderResources libSpoofax2ClassLoaderResources;
 
+    private final ConfigureSdf3 configureSdf3;
     private final Sdf3Parse sdf3Parse;
     private final Sdf3Desugar sdf3Desugar;
     private final Sdf3ToCompletionColorer sdf3ToCompletionColorer;
@@ -58,6 +61,7 @@ public class ConfigureEsv implements TaskDef<ResourcePath, Result<Option<EsvConf
         UnarchiveFromJar unarchiveFromJar,
         LibSpoofax2ClassLoaderResources libSpoofax2ClassLoaderResources,
 
+        ConfigureSdf3 configureSdf3,
         Sdf3Parse sdf3Parse,
         Sdf3Desugar sdf3Desugar,
         Sdf3ToCompletionColorer sdf3ToCompletionColorer
@@ -67,6 +71,7 @@ public class ConfigureEsv implements TaskDef<ResourcePath, Result<Option<EsvConf
         this.unarchiveFromJar = unarchiveFromJar;
         this.libSpoofax2ClassLoaderResources = libSpoofax2ClassLoaderResources;
 
+        this.configureSdf3 = configureSdf3;
         this.sdf3Parse = sdf3Parse;
         this.sdf3Desugar = sdf3Desugar;
         this.sdf3ToCompletionColorer = sdf3ToCompletionColorer;
@@ -93,6 +98,7 @@ public class ConfigureEsv implements TaskDef<ResourcePath, Result<Option<EsvConf
         CompileLanguageToJavaClassPathInput input,
         CompileEsvInput esvInput
     ) throws IOException {
+        // TODO: move required properties into esvInput.
         final CompileLanguageInput compileLanguageInput = input.compileLanguageInput();
         final CompileLanguageShared compileLanguageShared = compileLanguageInput.compileLanguageShared();
 
@@ -153,15 +159,22 @@ public class ConfigureEsv implements TaskDef<ResourcePath, Result<Option<EsvConf
         }
 
         // SDF3 to completion colorer (if SDF3 is enabled).
+        final Result<Option<Sdf3SpecConfig>, Sdf3ConfigureException> configureSdf3Result = context.require(configureSdf3, rootDirectory);
+        if(configureSdf3Result.isErr()) {
+            // noinspection ConstantConditions (error is present)
+            return Result.ofErr(EsvConfigureException.sdf3ConfigureFail(configureSdf3Result.getErr()));
+        }
         final ArrayList<Supplier<Result<IStrategoTerm, ?>>> includeAstSuppliers = new ArrayList<>();
-        Option.ofOptional(compileLanguageInput.sdf3()).ifSomeThrowing(sdf3Input -> {
-            final HierarchicalResource sdf3SourceDirectory = context.getHierarchicalResource(sdf3Input.mainSourceDirectory());
+        // noinspection ConstantConditions (value is present)
+        configureSdf3Result.get().ifSomeThrowing(sdf3Config -> {
+            final HierarchicalResource sdf3SourceDirectory = context.getHierarchicalResource(sdf3Config.mainSourceDirectory);
+            final JSGLR1ParseTaskInput.Builder parseInputBuilder = sdf3Parse.inputBuilder().rootDirectoryHint(rootDirectory);
             final ResourceWalker resourceWalker = Sdf3Util.createResourceWalker();
-            final ResourceMatcher resourceMatcher = new AllResourceMatcher(Sdf3Util.createResourceMatcher(), new FileResourceMatcher());
+            final ResourceMatcher resourceMatcher = Sdf3Util.createResourceMatcher();
             context.require(sdf3SourceDirectory, ResourceStampers.modifiedDirRec(resourceWalker, resourceMatcher));
             try(final Stream<? extends HierarchicalResource> stream = sdf3SourceDirectory.walk(resourceWalker, resourceMatcher)) {
                 for(HierarchicalResource sdf3File : new StreamIterable<>(stream)) {
-                    final Supplier<Result<IStrategoTerm, ?>> astSupplier = sdf3Desugar.createSupplier(sdf3Parse.inputBuilder().withFile(sdf3File.getPath()).rootDirectoryHint(rootDirectory).buildAstSupplier());
+                    final Supplier<Result<IStrategoTerm, ?>> astSupplier = sdf3Desugar.createSupplier(parseInputBuilder.withFile(sdf3File.getPath()).buildAstSupplier());
                     includeAstSuppliers.add(sdf3ToCompletionColorer.createSupplier(astSupplier));
                 }
             }

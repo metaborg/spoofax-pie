@@ -101,7 +101,7 @@ class CharsTestBase extends TestBase {
     }
 
     DynamicLoaderReloadSession modifyTransformation(DynamicLoaderMixedSession session, CompileLanguageToJavaClassPathInput input) throws IOException, ExecException, InterruptedException {
-        final ResourcePath path = input.compileLanguageInput().stratego().get().strategoRootDirectory().appendRelativePath("transform/remove-a.str");
+        final ResourcePath path = input.compileLanguageInput().stratego().get().mainSourceDirectory().appendRelativePath("transform/remove-a.str");
         final WritableResource file = resourceService.getWritableResource(path);
         final String text = file.readString().replace("string-replace(|\"a\", \"a\")", "string-replace(|\"a\", \"\")");
         file.writeString(text);

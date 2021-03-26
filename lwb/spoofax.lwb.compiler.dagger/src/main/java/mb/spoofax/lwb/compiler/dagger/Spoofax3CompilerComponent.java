@@ -17,6 +17,7 @@ import mb.spoofax.lwb.compiler.CompileLanguageToJavaClassPath;
 import mb.spoofax.lwb.compiler.CompileLanguageWithCfgToJavaClassPath;
 import mb.spoofax.lwb.compiler.esv.ConfigureEsv;
 import mb.spoofax.lwb.compiler.sdf3.ConfigureSdf3;
+import mb.spoofax.lwb.compiler.stratego.ConfigureStratego;
 import mb.statix.StatixComponent;
 import mb.str.StrategoComponent;
 
@@ -52,6 +53,8 @@ public interface Spoofax3CompilerComponent extends TaskDefsProvider {
     ConfigureEsv getConfigureEsv();
 
     ConfigureSdf3 getConfigureSdf3();
+
+    ConfigureStratego getConfigureStratego();
 
 
     @Override @Spoofax3CompilerQualifier Set<TaskDef<?, ?>> getTaskDefs();

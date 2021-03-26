@@ -1,18 +1,18 @@
-package mb.esv.task.spoofax;
+package mb.str.task.spoofax;
 
 import mb.common.message.KeyedMessages;
 import mb.common.message.Message;
 import mb.common.util.ListView;
-import mb.esv.EsvClassLoaderResources;
-import mb.esv.EsvScope;
-import mb.esv.task.EsvCheck;
-import mb.esv.task.EsvConfig;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.walk.ResourceWalker;
+import mb.str.StrategoClassLoaderResources;
+import mb.str.StrategoScope;
+import mb.str.config.StrategoAnalyzeConfig;
+import mb.str.task.StrategoCheck;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
@@ -20,8 +20,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Objects;
 
-@EsvScope
-public class EsvCheckMultiWrapper implements TaskDef<EsvCheckMultiWrapper.Input, KeyedMessages> {
+@StrategoScope
+public class StrategoCheckMultiWrapper implements TaskDef<StrategoCheckMultiWrapper.Input, KeyedMessages> {
     public static class Input implements Serializable {
         public final ResourcePath root;
         public final ResourceWalker walker;
@@ -57,16 +57,16 @@ public class EsvCheckMultiWrapper implements TaskDef<EsvCheckMultiWrapper.Input,
         }
     }
 
-    private final EsvClassLoaderResources classLoaderResources;
-    private final EsvConfigFunctionWrapper configFunctionWrapper;
-    private final EsvCheck check;
-    private final BaseEsvCheckMulti baseCheckMulti;
+    private final StrategoClassLoaderResources classLoaderResources;
+    private final StrategoAnalyzeConfigFunctionWrapper configFunctionWrapper;
+    private final StrategoCheck check;
+    private final BaseStrategoCheckMulti baseCheckMulti;
 
-    @Inject public EsvCheckMultiWrapper(
-        EsvClassLoaderResources classLoaderResources,
-        EsvConfigFunctionWrapper configFunctionWrapper,
-        EsvCheck check,
-        BaseEsvCheckMulti baseCheckMulti
+    @Inject public StrategoCheckMultiWrapper(
+        StrategoClassLoaderResources classLoaderResources,
+        StrategoAnalyzeConfigFunctionWrapper configFunctionWrapper,
+        StrategoCheck check,
+        BaseStrategoCheckMulti baseCheckMulti
     ) {
         this.classLoaderResources = classLoaderResources;
         this.configFunctionWrapper = configFunctionWrapper;
@@ -85,15 +85,15 @@ public class EsvCheckMultiWrapper implements TaskDef<EsvCheckMultiWrapper.Input,
                 c -> checkWithConfig(context, c),
                 () -> checkDefault(context, input)
             ),
-            e -> KeyedMessages.of(ListView.of(new Message("Cannot check ESV files; reading configuration failed unexpectedly", e)), input.root)
+            e -> KeyedMessages.of(ListView.of(new Message("Cannot check Stratego files; reading configuration failed unexpectedly", e)), input.root)
         );
     }
 
-    private KeyedMessages checkWithConfig(ExecContext context, EsvConfig config) {
+    private KeyedMessages checkWithConfig(ExecContext context, StrategoAnalyzeConfig config) {
         return context.require(check, config);
     }
 
-    private KeyedMessages checkDefault(ExecContext context, EsvCheckMultiWrapper.Input input) {
-        return context.require(baseCheckMulti, new BaseEsvCheckMulti.Input(input.root, input.walker, input.matcher));
+    private KeyedMessages checkDefault(ExecContext context, Input input) {
+        return context.require(baseCheckMulti, new BaseStrategoCheckMulti.Input(input.root, input.walker, input.matcher));
     }
 }

@@ -3,6 +3,7 @@ package mb.esv.util;
 import mb.resource.hierarchical.match.PathResourceMatcher;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.match.path.ExtensionsPathMatcher;
+import mb.resource.hierarchical.match.path.PathMatcher;
 import mb.resource.hierarchical.walk.ResourceWalker;
 import mb.resource.hierarchical.walk.TrueResourceWalker;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -12,11 +13,11 @@ import java.util.List;
 
 public class EsvUtil {
     public static ResourceWalker createResourceWalker() {
-        return new TrueResourceWalker();
+        return ResourceWalker.ofPath(PathMatcher.ofNoHidden());
     }
 
     public static ResourceMatcher createResourceMatcher() {
-        return new PathResourceMatcher(new ExtensionsPathMatcher("esv"));
+        return ResourceMatcher.ofPath(PathMatcher.ofExtension("esv")).and(ResourceMatcher.ofFile());
     }
 
 

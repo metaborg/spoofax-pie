@@ -11,9 +11,10 @@ import mb.resource.ResourceKey;
 import mb.spoofax.test.SingleLanguageTestBase;
 import mb.str.DaggerStrategoResourcesComponent;
 import mb.str.StrategoResourcesComponent;
-import mb.str.task.StrategoAnalyze;
+import mb.str.task.StrategoCheck;
 import mb.str.task.StrategoCompileToJava;
 import mb.str.task.StrategoParse;
+import mb.str.task.spoofax.StrategoParseWrapper;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 public class TestBase extends SingleLanguageTestBase<StrategoResourcesComponent, StrategoTestComponent> {
@@ -31,9 +32,9 @@ public class TestBase extends SingleLanguageTestBase<StrategoResourcesComponent,
     }
 
 
-    public final StrategoParse parse = component.getStrategoParse();
+    public final StrategoParseWrapper parse = component.getStrategoParseWrapper();
     public final StrategoCompileToJava compile = component.getStrategoCompileToJava();
-    public final StrategoAnalyze analyze = component.getStrategoAnalyze();
+    public final StrategoCheck check = component.getStrategoCheck();
     public final CompileJava compileJava = component.getCompileJava();
     public final ArchiveToJar archiveToJar = component.getArchiveToJar();
 

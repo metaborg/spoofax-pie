@@ -7,12 +7,10 @@ import mb.common.util.ListView;
 import mb.pie.api.MixedSession;
 import mb.resource.fs.FSResource;
 import mb.str.config.StrategoAnalyzeConfig;
-import mb.str.task.StrategoAnalyze;
 import mb.str.util.TestBase;
+import mb.stratego.build.util.StrategoGradualSetting;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-
-import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -27,12 +25,11 @@ class AnalyzeTest extends TestBase {
                 projectDir.getPath(),
                 mainFile.getPath(),
                 ListView.of(projectDir.getPath()),
-                ListView.of("stratego-lib")
+                ListView.of("stratego-lib"),
+                StrategoGradualSetting.NONE,
+                ListView.of()
             );
-            @SuppressWarnings("ConstantConditions") final KeyedMessages messages = session.require(analyze.createTask(new StrategoAnalyze.Input(
-                config,
-                new ArrayList<>()
-            )));
+            final KeyedMessages messages = session.require(check.createTask(config));
             assertTrue(messages.containsError());
             final ListView<Message> mainMessages = messages.getMessagesOfKey(mainFile.getKey());
             assertEquals(1, mainMessages.size());

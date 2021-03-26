@@ -125,7 +125,6 @@ public class AstToObject {
             final CompileSdf3Input.Builder builder = languageCompilerInputBuilder.withSdf3();
             subParts.forOneSubtermAsPath("Sdf3MainSourceDirectory", rootDirectory, builder::mainSourceDirectory);
             subParts.forOneSubtermAsPath("Sdf3MainFile", rootDirectory, builder::mainFile);
-            subParts.forOneSubtermAsString("Sdf3StrategoStrategyAffix", builder::strategoStrategyIdAffix);
             // TODO: more SDF3 properties
         });
         parts.getAllSubTermsInListAsParts("EsvSection").ifPresent(subParts -> {
@@ -142,8 +141,9 @@ public class AstToObject {
         });
         parts.getAllSubTermsInListAsParts("StrategoSection").ifPresent(subParts -> {
             final CompileStrategoInput.Builder builder = languageCompilerInputBuilder.withStratego();
-            subParts.forOneSubtermAsPath("StrategoSourceDirectory", rootDirectory, builder::strategoRootDirectory);
-            subParts.forOneSubtermAsPath("StrategoMainFile", rootDirectory, builder::strategoMainFile);
+            subParts.forOneSubtermAsPath("StrategoMainSourceDirectory", rootDirectory, builder::mainSourceDirectory);
+            subParts.forOneSubtermAsPath("StrategoMainFile", rootDirectory, builder::mainFile);
+            subParts.forOneSubtermAsString("StrategoLanguageStrategyAffix", builder::languageStrategyAffix);
             // TODO: more Stratego properties
         });
         final CompileLanguageInput languageCompilerInput = languageCompilerInputBuilder.build(properties, shared, languageShared);

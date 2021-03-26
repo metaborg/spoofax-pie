@@ -63,35 +63,35 @@ spoofax2BasedLanguageProject {
   }
 }
 
+val packageId = "mb.str"
+val taskPackageId = "$packageId.task"
+val spoofaxTaskPackageId = "$taskPackageId.spoofax"
+
 languageAdapterProject {
   compilerInput {
-    withParser()
+    withParser().run {
+      // Wrap Parse task
+      extendParseTaskDef(spoofaxTaskPackageId, "StrategoParseWrapper")
+    }
     withStyler()
     withStrategoRuntime()
     project.configureCompilerInput()
   }
 }
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
-  val packageId = "mb.str"
   val incrPackageId = "$packageId.incr"
-  val configPackageId = "$packageId.config"
-  val taskPackageId = "$packageId.task"
   val commandPackageId = "$packageId.command"
 
-  // Custom component and additional modules
-  baseComponent(packageId, "GeneratedStrategoComponent")
+  // Extend component
+  baseComponent(packageId, "BaseStrategoComponent")
   extendComponent(packageId, "StrategoComponent")
   addAdditionalModules(incrPackageId, "StrategoIncrModule")
-  addAdditionalModules(configPackageId, "StrategoConfigModule")
 
-  // Manual multifile check implementation
+  // Wrap CheckMulti and rename base tasks
   isMultiFile(true)
-  baseCheckMultiTaskDef(taskPackageId, "GeneratedStrategoCheckMulti")
-  extendCheckMultiTaskDef(taskPackageId, "StrategoCheckMulti")
-  addTaskDefs(taskPackageId, "StrategoAnalyze")
-
-  // Utility task definitions
-  addTaskDefs(taskPackageId, "StrategoPrettyPrint")
+  baseCheckTaskDef(spoofaxTaskPackageId, "BaseStrategoCheck")
+  baseCheckMultiTaskDef(spoofaxTaskPackageId, "BaseStrategoCheckMulti")
+  extendCheckMultiTaskDef(spoofaxTaskPackageId, "StrategoCheckMultiWrapper")
 
   // Stratego incremental compiler task definitions
   val strBuildTaskPackageId = "mb.stratego.build.strincr"
@@ -102,11 +102,14 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   addTaskDefs(strBuildTaskPackageId, "LibFrontend")
   addTaskDefs(strBuildTaskPackageId, "Backend")
 
-  // Compilation task definitions
-  val compileToJava = TypeInfo.of(taskPackageId, "StrategoCompileToJava")
+  // Task definitions
+  addTaskDefs(taskPackageId, "StrategoCompileToJava")
+  addTaskDefs(taskPackageId, "StrategoCheck")
   val compileToJavaEditor = TypeInfo.of(taskPackageId, "StrategoEditorCompileToJava")
-  addTaskDefs(compileToJava, compileToJavaEditor)
-  // Compilation commands
+  addTaskDefs(compileToJavaEditor, compileToJavaEditor)
+  addTaskDefs(taskPackageId, "StrategoPrettyPrint")
+
+  // Compilation command
   val resourcePathType = TypeInfo.of("mb.resource.hierarchical", "ResourcePath")
   val compileToJavaCommand = CommandDefRepr.builder()
     .type(commandPackageId, compileToJavaEditor.id() + "Command")
@@ -116,10 +119,13 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
     .description("Compiles Stratego source files to Java source files")
     .addSupportedExecutionTypes(CommandExecutionType.ManualOnce)
     .addAllParams(listOf(
-      ParamRepr.of("projectDir", resourcePathType, true, ArgProviderRepr.enclosingContext(EnclosingCommandContextType.Project)),
+      ParamRepr.of("rootDirectory", resourcePathType, true, ArgProviderRepr.enclosingContext(EnclosingCommandContextType.Project)),
       ParamRepr.of("mainFile", resourcePathType, true, ArgProviderRepr.context(CommandContextType.File)),
       ParamRepr.of("includeDirs", TypeInfo.of("mb.common.util", "ListView"), false, ArgProviderRepr.value("mb.common.util.ListView.of()")),
       ParamRepr.of("builtinLibs", TypeInfo.of("mb.common.util", "ListView"), false, ArgProviderRepr.value("mb.common.util.ListView.of()")),
+      ParamRepr.of("gradualTypingSetting", TypeInfo.of("mb.stratego.build.util", "StrategoGradualSetting"), false, ArgProviderRepr.value("mb.stratego.build.util.StrategoGradualSetting.NONE")),
+      ParamRepr.of("extraCompilerArguments", TypeInfo.of("org.metaborg.util.cmd", "Arguments"), false, ArgProviderRepr.value("new org.metaborg.util.cmd.Arguments()")),
+      ParamRepr.of("sourceFileOrigins", TypeInfo.of("mb.common.util", "ListView"), false, ArgProviderRepr.value("mb.common.util.ListView.of()")),
       ParamRepr.of("cacheDir", resourcePathType, false),
       ParamRepr.of("outputDir", resourcePathType, true),
       ParamRepr.of("outputJavaPackageId", TypeInfo.ofString(), true)

@@ -17,7 +17,6 @@ context-free syntax
 }>
   Sdf3Option.Sdf3MainSourceDirectory   = <main-source-directory = <PathLit>>
   Sdf3Option.Sdf3MainFile              = <main-file = <PathLit>>
-  Sdf3Option.Sdf3StrategoStrategyAffix = <stratego-strategy-affix = <StrStrategyIdLit>>
 
   Part.EsvSection = <esv {
   <{EsvOption "\n"}*>
@@ -35,5 +34,6 @@ context-free syntax
   Part.StrategoSection = <stratego {
   <{StrategoOption "\n"}*>
 }>
-  StrategoOption.StrategoSourceDirectory = <source-directory = <PathLit>>
-  StrategoOption.StrategoMainFile        = <main-file = <PathLit>>
+  StrategoOption.StrategoMainSourceDirectory = <main-source-directory = <PathLit>>
+  StrategoOption.StrategoMainFile            = <main-file = <PathLit>>
+  StrategoOption.StrategoLanguageStrategyAffix = <language-strategy-affix = <StrStrategyIdLit>>

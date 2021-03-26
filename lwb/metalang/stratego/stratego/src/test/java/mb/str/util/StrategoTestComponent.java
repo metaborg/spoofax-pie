@@ -10,7 +10,6 @@ import mb.str.StrategoComponent;
 import mb.str.StrategoModule;
 import mb.str.StrategoResourcesComponent;
 import mb.str.StrategoScope;
-import mb.str.config.StrategoConfigModule;
 import mb.str.incr.StrategoIncrModule;
 
 @StrategoScope
@@ -18,7 +17,6 @@ import mb.str.incr.StrategoIncrModule;
     modules = {
         StrategoModule.class,
         StrategoIncrModule.class,
-        StrategoConfigModule.class,
         TestModule.class
     },
     dependencies = {
