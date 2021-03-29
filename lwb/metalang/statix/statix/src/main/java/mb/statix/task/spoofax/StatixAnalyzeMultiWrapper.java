@@ -2,8 +2,6 @@ package mb.statix.task.spoofax;
 
 import mb.common.message.KeyedMessages;
 import mb.common.message.Message;
-import mb.common.option.Option;
-import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.common.util.MapView;
 import mb.common.util.MultiMapView;
@@ -12,13 +10,12 @@ import mb.constraint.common.ConstraintAnalyzerContext;
 import mb.constraint.common.ConstraintAnalyzerException;
 import mb.constraint.pie.ConstraintAnalyzeMultiTaskDef;
 import mb.pie.api.ExecContext;
-import mb.pie.api.Function;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax2.common.primitive.generic.Spoofax2ProjectContext;
-import mb.statix.StatixConfig;
 import mb.statix.StatixConstraintAnalyzer;
 import mb.statix.StatixScope;
+import mb.statix.task.StatixConfig;
 import mb.stratego.common.StrategoRuntime;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -26,33 +23,33 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 @StatixScope
-public class StatixAnalyzeMulti extends ConstraintAnalyzeMultiTaskDef {
+public class StatixAnalyzeMultiWrapper extends ConstraintAnalyzeMultiTaskDef {
     private final StatixConstraintAnalyzer constraintAnalyzer;
     private final Provider<StrategoRuntime> strategoRuntimeProvider;
-    private final Function<ResourcePath, Result<Option<StatixConfig>, ?>> configFunction;
+    private final StatixConfigFunctionWrapper configFunctionWrapper;
 
     @Inject
-    public StatixAnalyzeMulti(
+    public StatixAnalyzeMultiWrapper(
         StatixConstraintAnalyzer constraintAnalyzer,
         Provider<StrategoRuntime> strategoRuntimeProvider,
-        Function<ResourcePath, Result<Option<StatixConfig>, ?>> configFunction
+        StatixConfigFunctionWrapper configFunctionWrapper
     ) {
         this.constraintAnalyzer = constraintAnalyzer;
         this.strategoRuntimeProvider = strategoRuntimeProvider;
-        this.configFunction = configFunction;
+        this.configFunctionWrapper = configFunctionWrapper;
     }
 
     @Override
     public String getId() {
-        return "mb.statix.task.GeneratedStatixAnalyzeMulti";
+        return getClass().getName();
     }
 
     @Override
     protected ConstraintAnalyzer.MultiFileResult analyze(ExecContext context, ResourcePath root, MapView<ResourceKey, IStrategoTerm> asts, ConstraintAnalyzerContext constraintAnalyzerContext) throws ConstraintAnalyzerException {
-        return configFunction.apply(context, root).mapThrowingOrElse(
+        return configFunctionWrapper.get().apply(context, root).mapThrowingOrElse(
             o -> o.mapThrowingOrElse(
                 c -> constraintAnalyzer.analyze(root, asts, constraintAnalyzerContext, strategoRuntimeProvider.get().addContextObject(createProjectContext(c))),
-                ConstraintAnalyzer.MultiFileResult::new // Statix is not configured, do not need to analyze.
+                ConstraintAnalyzer.MultiFileResult::new // Statix is not configured, do not need to analyze. // TODO: redirect to base analysis?
             ),
             e -> new ConstraintAnalyzer.MultiFileResult(KeyedMessages.of(ListView.of(new Message("Cannot check Statix files; reading configuration failed unexpectedly", e)), root))
         );
@@ -60,6 +57,6 @@ public class StatixAnalyzeMulti extends ConstraintAnalyzeMultiTaskDef {
 
     private Spoofax2ProjectContext createProjectContext(StatixConfig config) {
         final String languageId = "statix";
-        return new Spoofax2ProjectContext(config.projectPath, MultiMapView.of(languageId, config.sourcePaths), MultiMapView.of(languageId, config.includePaths));
+        return new Spoofax2ProjectContext(config.rootDirectory, MultiMapView.of(languageId, config.sourcePaths), MultiMapView.of(languageId, config.includePaths));
     }
 }

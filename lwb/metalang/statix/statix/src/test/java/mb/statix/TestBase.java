@@ -8,7 +8,7 @@ import mb.resource.Resource;
 import mb.resource.ResourceKey;
 import mb.spoofax.test.SingleLanguageTestBase;
 import mb.statix.task.StatixCompile;
-import mb.statix.task.StatixParse;
+import mb.statix.task.spoofax.StatixParseWrapper;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 class TestBase extends SingleLanguageTestBase<StatixResourcesComponent, StatixComponent> {
@@ -26,7 +26,7 @@ class TestBase extends SingleLanguageTestBase<StatixResourcesComponent, StatixCo
     }
 
 
-    final StatixParse parse = component.getStatixParse();
+    final StatixParseWrapper parse = component.getStatixParseWrapper();
     final StatixCompile compile = component.getStatixCompile();
 
 

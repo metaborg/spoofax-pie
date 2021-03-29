@@ -3,11 +3,11 @@ package mb.statix.task;
 import mb.common.result.Result;
 import mb.constraint.pie.ConstraintAnalyzeMultiTaskDef;
 import mb.pie.api.ExecContext;
-import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.statix.StatixScope;
-import mb.statix.task.spoofax.StatixAnalyzeMulti;
+import mb.statix.task.spoofax.StatixAnalyzeMultiWrapper;
+import mb.statix.task.spoofax.StatixParseWrapper;
 import mb.statix.util.StatixUtil;
 import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
@@ -24,29 +24,32 @@ import java.util.Objects;
 @StatixScope
 public class StatixCompile implements TaskDef<StatixCompile.Input, Result<StatixCompile.Output, ?>> {
     public static class Input implements Serializable {
-        public final ResourcePath root;
-        public final ResourcePath resource;
+        public final ResourcePath file;
+        public final StatixConfig config;
 
-        public Input(ResourcePath root, ResourcePath resource) {
-            this.root = root;
-            this.resource = resource;
+        public Input(ResourcePath file, StatixConfig config) {
+            this.file = file;
+            this.config = config;
         }
 
         @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             final Input input = (Input)o;
-            return root.equals(input.root) && resource.equals(input.resource);
+            if(!file.equals(input.file)) return false;
+            return config.equals(input.config);
         }
 
         @Override public int hashCode() {
-            return Objects.hash(root, resource);
+            int result = file.hashCode();
+            result = 31 * result + config.hashCode();
+            return result;
         }
 
         @Override public String toString() {
             return "Input{" +
-                "root=" + root +
-                ", resource=" + resource +
+                "file=" + file +
+                ", config=" + config +
                 '}';
         }
     }
@@ -79,13 +82,13 @@ public class StatixCompile implements TaskDef<StatixCompile.Input, Result<Statix
         }
     }
 
-    private final StatixParse parse;
-    private final StatixAnalyzeMulti analyze;
+    private final StatixParseWrapper parse;
+    private final StatixAnalyzeMultiWrapper analyze;
     private final Provider<StrategoRuntime> strategoRuntimeProvider;
 
     @Inject public StatixCompile(
-        StatixParse parse,
-        StatixAnalyzeMulti analyze,
+        StatixParseWrapper parse,
+        StatixAnalyzeMultiWrapper analyze,
         Provider<StrategoRuntime> strategoRuntimeProvider
     ) {
         this.parse = parse;
@@ -98,23 +101,23 @@ public class StatixCompile implements TaskDef<StatixCompile.Input, Result<Statix
         return getClass().getName();
     }
 
-    @Override public Result<Output, ?> exec(ExecContext context, Input input) throws Exception {
-        final Supplier<Result<ConstraintAnalyzeMultiTaskDef.SingleFileOutput, ?>> supplier = analyze.createSingleFileOutputSupplier(
-            new ConstraintAnalyzeMultiTaskDef.Input(input.root, parse.createMultiAstSupplierFunction(StatixUtil.createResourceWalker(), StatixUtil.createResourceMatcher())),
-            input.resource
-        );
-        return context.require(supplier).flatMapOrElse((output) -> {
-            if(output.result.messages.containsError()) {
+    @Override public Result<Output, ?> exec(ExecContext context, StatixCompile.Input input) throws Exception {
+        // TODO: this does not analyze all source and include directories
+        return context.require(analyze.createSingleFileOutputSupplier(
+            new ConstraintAnalyzeMultiTaskDef.Input(input.config.rootDirectory, parse.createMultiAstSupplierFunction(StatixUtil.createResourceWalker(), StatixUtil.createResourceMatcher())),
+            input.file
+        )).flatMapOrElse(mainFileOutput -> {
+            if(mainFileOutput.result.messages.containsError()) {
                 return Result.ofErr(new Exception("Cannot compile Statix specification; analysis resulted in errors")); // TODO: better error/exception
             }
             try {
-                final StrategoRuntime strategoRuntime = strategoRuntimeProvider.get().addContextObject(output.context);
-                final IStrategoTerm term = StrategoUtil.createLegacyBuilderInputTerm(strategoRuntime.getTermFactory(), output.result.ast, input.resource, input.root);
+                final StrategoRuntime strategoRuntime = strategoRuntimeProvider.get().addContextObject(mainFileOutput.context);
+                final IStrategoTerm term = StrategoUtil.createLegacyBuilderInputTerm(strategoRuntime.getTermFactory(), mainFileOutput.result.ast, input.file, input.config.rootDirectory);
                 final IStrategoTerm outputTerm = strategoRuntime.invoke("generate-aterm", term);
                 return Result.ofOk(new Output(TermUtils.toJavaStringAt(outputTerm, 0), outputTerm.getSubterm(1)));
             } catch(StrategoException e) {
-                return Result.ofErr(e);
+                return Result.ofErr(e); // TODO: better error/exception
             }
-        }, Result::ofErr);
+        }, Result::ofErr); // TODO: better error/exception
     }
 }

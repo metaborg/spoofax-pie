@@ -6,16 +6,6 @@
     <participant group="mb.spoofax.lwb" class="mb.spoofax.lwb.eclipse.SpoofaxLwbLifecycleParticipant$Factory"/>
   </extension>
 
-  <!-- SDF3 component customizer -->
-  <extension point="sdf3.eclipse.component">
-    <customizer class="mb.spoofax.lwb.eclipse.SpoofaxLwbLifecycleParticipant$Factory"/>
-  </extension>
-  <!-- Statix component customizer -->
-  <extension point="statix.eclipse.component">
-    <customizer class="mb.spoofax.lwb.eclipse.SpoofaxLwbLifecycleParticipant$Factory"/>
-  </extension>
-
-
   <!-- Nature and commands -->
   <extension
     id="nature"

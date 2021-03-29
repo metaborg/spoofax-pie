@@ -38,11 +38,9 @@ import mb.spoofax.compiler.dagger.SpoofaxCompilerModule;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.core.platform.DaggerPlatformComponent;
 import mb.spoofax.core.platform.PlatformComponent;
-import mb.spoofax.lwb.compiler.statix.StatixConfigFunction;
 import mb.statix.DaggerStatixComponent;
 import mb.statix.DaggerStatixResourcesComponent;
 import mb.statix.StatixComponent;
-import mb.statix.StatixConfigFunctionModule;
 import mb.statix.StatixResourcesComponent;
 import mb.str.DaggerStrategoComponent;
 import mb.str.DaggerStrategoResourcesComponent;
@@ -127,7 +125,6 @@ public class StandaloneSpoofax3Compiler implements AutoCloseable {
             .build();
         pieModule.addTaskDefsFrom(esvComponent);
         final StatixComponent statixComponent = DaggerStatixComponent.builder()
-            .statixConfigFunctionModule(new StatixConfigFunctionModule(new StatixConfigFunction(cfgFunction)))
             .loggerComponent(loggerComponent)
             .statixResourcesComponent(statixResourcesComponent)
             .resourceServiceComponent(resourceServiceComponent)

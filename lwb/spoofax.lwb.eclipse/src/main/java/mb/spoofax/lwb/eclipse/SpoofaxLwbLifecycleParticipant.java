@@ -17,14 +17,9 @@ import mb.spoofax.eclipse.EclipseLifecycleParticipant;
 import mb.spoofax.eclipse.EclipsePlatformComponent;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 import mb.spoofax.lwb.compiler.dagger.Spoofax3Compiler;
-import mb.spoofax.lwb.compiler.statix.StatixConfigFunction;
 import mb.spoofax.lwb.dynamicloading.DaggerDynamicLoadingComponent;
 import mb.spoofax.lwb.dynamicloading.DynamicLoadingComponent;
 import mb.spoofax.lwb.dynamicloading.DynamicLoadingModule;
-import mb.statix.DaggerStatixResourcesComponent;
-import mb.statix.StatixConfigFunctionModule;
-import mb.statix.eclipse.DaggerStatixEclipseComponent;
-import mb.statix.eclipse.StatixComponentCustomizer;
 import mb.statix.eclipse.StatixLanguage;
 import mb.str.eclipse.StrategoLanguage;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -32,7 +27,7 @@ import org.eclipse.core.runtime.IExecutableExtensionFactory;
 
 import java.util.HashSet;
 
-public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipant, StatixComponentCustomizer {
+public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipant {
     private static @Nullable SpoofaxLwbLifecycleParticipant instance;
 
     private SpoofaxLwbLifecycleParticipant() {}
@@ -142,16 +137,5 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
         dynamicLoadingComponent = null;
         spoofax3Compiler.close();
         spoofax3Compiler = null;
-    }
-
-
-    @Override public void customize(DaggerStatixResourcesComponent.Builder builder) {
-        // Nothing to customize.
-    }
-
-    @Override public void customize(DaggerStatixEclipseComponent.Builder builder) {
-        builder.statixConfigFunctionModule(new StatixConfigFunctionModule(new StatixConfigFunction(
-            CfgLanguage.getInstance().getComponent().getCfgRootDirectoryToObject().createFunction()
-        )));
     }
 }

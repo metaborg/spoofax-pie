@@ -1,7 +1,9 @@
 package mb.spoofax.lwb.compiler.statix;
 
 import mb.cfg.metalang.CompileStatixInput;
+import mb.cfg.task.CfgRootDirectoryToObject;
 import mb.common.message.KeyedMessages;
+import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.common.util.StreamIterable;
 import mb.pie.api.ExecContext;
@@ -9,26 +11,33 @@ import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
-import mb.resource.hierarchical.match.AllResourceMatcher;
-import mb.resource.hierarchical.match.FileResourceMatcher;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.walk.ResourceWalker;
-import mb.statix.task.StatixCheckMulti;
+import mb.statix.task.StatixCheck;
 import mb.statix.task.StatixCompile;
+import mb.statix.task.StatixConfig;
 import mb.statix.util.StatixUtil;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.util.stream.Stream;
 
-public class CompileStatix implements TaskDef<CompileStatixInput, Result<KeyedMessages, StatixCompileException>> {
-    private final StatixCheckMulti check;
+public class CompileStatix implements TaskDef<ResourcePath, Result<KeyedMessages, StatixCompileException>> {
+    private final CfgRootDirectoryToObject cfgRootDirectoryToObject;
+
+    private final ConfigureStatix configure;
+
+    private final StatixCheck check;
     private final StatixCompile compile;
 
     @Inject public CompileStatix(
-        StatixCheckMulti check,
+        CfgRootDirectoryToObject cfgRootDirectoryToObject,
+        ConfigureStatix configure,
+        StatixCheck check,
         StatixCompile compile
     ) {
+        this.cfgRootDirectoryToObject = cfgRootDirectoryToObject;
+        this.configure = configure;
         this.check = check;
         this.compile = compile;
     }
@@ -39,47 +48,42 @@ public class CompileStatix implements TaskDef<CompileStatixInput, Result<KeyedMe
     }
 
     @Override
-    public Result<KeyedMessages, StatixCompileException> exec(ExecContext context, CompileStatixInput input) throws Exception {
-        // Check main file, root directory, and include directories.
-        final HierarchicalResource mainFile = context.require(input.mainFile(), ResourceStampers.<HierarchicalResource>exists());
-        if(!mainFile.exists() || !mainFile.isFile()) {
-            return Result.ofErr(StatixCompileException.mainFileFail(mainFile.getPath()));
-        }
-        final HierarchicalResource sourceDirectory = context.require(input.sourceDirectory(), ResourceStampers.<HierarchicalResource>exists());
-        if(!sourceDirectory.exists() || !sourceDirectory.isDirectory()) {
-            return Result.ofErr(StatixCompileException.sourceDirectoryFail(sourceDirectory.getPath()));
-        }
-        for(ResourcePath includeDirectoryPath : input.includeDirectories()) {
-            final HierarchicalResource includeDirectory = context.require(includeDirectoryPath, ResourceStampers.<HierarchicalResource>exists());
-            if(!includeDirectory.exists() || !includeDirectory.isDirectory()) {
-                return Result.ofErr(StatixCompileException.includeDirectoryFail(includeDirectoryPath));
-            }
-        }
-        final ResourcePath rootDirectory = input.rootDirectory();
+    public Result<KeyedMessages, StatixCompileException> exec(ExecContext context, ResourcePath rootDirectory) throws Exception {
+        return context.require(cfgRootDirectoryToObject, rootDirectory)
+            .mapErr(StatixCompileException::getLanguageCompilerConfigurationFail)
+            .flatMapThrowing(o1 -> Option.ofOptional(o1.compileLanguageToJavaClassPathInput.compileLanguageInput().statix()).mapThrowingOr(
+                i -> context.require(configure, rootDirectory)
+                    .mapErr(StatixCompileException::configureFail)
+                    .flatMapThrowing(o2 -> o2.mapThrowingOr(
+                        c -> checkAndCompile(context, c, i),
+                        Result.ofOk(KeyedMessages.of())
+                    )),
+                Result.ofOk(KeyedMessages.of())
+            ));
+    }
 
-        // Check Statix source files.
-        final ResourceWalker resourceWalker = StatixUtil.createResourceWalker();
-        final ResourceMatcher resourceMatcher = new AllResourceMatcher(StatixUtil.createResourceMatcher(), new FileResourceMatcher());
-        // TODO: this does not check Statix files in include directories.
-        final @Nullable KeyedMessages messages = context.require(check.createTask(
-            new StatixCheckMulti.Input(rootDirectory, resourceWalker, resourceMatcher) // HACK: Run check on root directory so it can pick up the CFG file.
-        ));
+    public Result<KeyedMessages, StatixCompileException> checkAndCompile(ExecContext context, StatixConfig config, CompileStatixInput input) throws IOException {
+        final KeyedMessages messages = context.require(check, config);
         if(messages.containsError()) {
             return Result.ofErr(StatixCompileException.checkFail(messages));
         }
 
+        final ResourceWalker walker = StatixUtil.createResourceWalker();
+        final ResourceMatcher matcher = StatixUtil.createResourceMatcher();
         final HierarchicalResource outputDirectory = context.getHierarchicalResource(input.outputDirectory()).ensureDirectoryExists();
-        try(final Stream<? extends HierarchicalResource> stream = sourceDirectory.walk(resourceWalker, resourceMatcher)) {
-            for(HierarchicalResource inputFile : new StreamIterable<>(stream)) {
-                // HACK: Run compile on root directory so it can pick up the CFG file.
-                final Result<StatixCompile.Output, ?> result = context.require(compile, new StatixCompile.Input(rootDirectory, inputFile.getPath()));
-                if(result.isErr()) {
-                    return Result.ofErr(StatixCompileException.compilerFail(result.unwrapErr()));
+        for(ResourcePath sourceOrIncludeDirectory : config.sourceAndIncludePaths()) {
+            final HierarchicalResource directory = context.require(sourceOrIncludeDirectory, ResourceStampers.modifiedDirRec(walker, matcher));
+            try(final Stream<? extends HierarchicalResource> stream = directory.walk(walker, matcher)) {
+                for(HierarchicalResource inputFile : new StreamIterable<>(stream)) {
+                    final Result<StatixCompile.Output, ?> result = context.require(compile, new StatixCompile.Input(inputFile.getPath(), config));
+                    if(result.isErr()) {
+                        return Result.ofErr(StatixCompileException.compileFail(result.unwrapErr()));
+                    }
+                    final StatixCompile.Output output = result.unwrapUnchecked();
+                    final HierarchicalResource outputFile = outputDirectory.appendAsRelativePath(output.relativeOutputPath).ensureFileExists();
+                    outputFile.writeString(output.spec.toString());
+                    context.provide(outputFile);
                 }
-                final StatixCompile.Output output = result.unwrapUnchecked();
-                final HierarchicalResource outputFile = outputDirectory.appendAsRelativePath(output.relativeOutputPath).ensureFileExists();
-                outputFile.writeString(output.spec.toString());
-                context.provide(outputFile);
             }
         }
 

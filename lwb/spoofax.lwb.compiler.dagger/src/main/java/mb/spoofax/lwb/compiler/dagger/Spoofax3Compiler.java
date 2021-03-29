@@ -9,7 +9,7 @@ import mb.libspoofax2.LibSpoofax2ResourcesComponent;
 import mb.libstatix.LibStatixComponent;
 import mb.libstatix.LibStatixResourcesComponent;
 import mb.log.dagger.LoggerComponent;
-import mb.pie.api.SerializableFunction;
+import mb.pie.api.StatelessSerializableFunction;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.sdf3.Sdf3Component;
 import mb.spoofax.compiler.dagger.DaggerSpoofaxCompilerComponent;
@@ -97,14 +97,13 @@ public class Spoofax3Compiler implements AutoCloseable {
         // Inject config functions.
         this.sdf3Component.getSdf3SpecConfigFunctionWrapper().set(this.component.getConfigureSdf3().createFunction());
         this.esvComponent.getEsvConfigFunctionWrapper().set(this.component.getConfigureEsv().createFunction());
-        this.strategoComponent.getStrategoAnalyzeConfigFunctionWrapper().set(this.component.getConfigureStratego().createFunction().mapOutput(new SerializableFunction<Result<Option<StrategoCompileConfig>, StrategoConfigureException>, Result<Option<StrategoAnalyzeConfig>, StrategoConfigureException>>() {
+        this.strategoComponent.getStrategoAnalyzeConfigFunctionWrapper().set(this.component.getConfigureStratego().createFunction().mapOutput(new StatelessSerializableFunction<Result<Option<StrategoCompileConfig>, StrategoConfigureException>, Result<Option<StrategoAnalyzeConfig>, StrategoConfigureException>>() {
             @Override
             public Result<Option<StrategoAnalyzeConfig>, StrategoConfigureException> apply(Result<Option<StrategoCompileConfig>, StrategoConfigureException> r) {
                 return r.map(o -> o.map(StrategoCompileConfig::toAnalyzeConfig));
             }
-
-            // TODO: equals and hashcode
         }));
+        this.statixComponent.getStatixConfigFunctionWrapper().set(this.component.getConfigureStatix().createFunction());
     }
 
     @Override public void close() throws Exception {

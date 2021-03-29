@@ -76,14 +76,11 @@ public class CompileLanguage implements TaskDef<CompileLanguageInput, Result<Key
             return compileEsvResult;
         }
 
-        if(input.statix().isPresent()) {
-            final Result<KeyedMessages, CompileException> result = context.require(compileStatix, input.statix().get())
-                .ifOk(messagesBuilder::addMessages)
-                .mapErr(CompileLanguage.CompileException::statixCompileFail);
-            if(result.isErr()) {
-                return result;
-            }
-            messagesBuilder.addMessages(result.get());
+        final Result<KeyedMessages, CompileException> compileStatixResult = context.require(compileStatix, rootDirectory)
+            .ifOk(messagesBuilder::addMessages)
+            .mapErr(CompileLanguage.CompileException::statixCompileFail);
+        if(compileStatixResult.isErr()) {
+            return compileStatixResult;
         }
 
         final Result<KeyedMessages, CompileException> compileStrategoResult = context.require(compileStratego, rootDirectory)

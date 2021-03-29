@@ -1,11 +1,5 @@
 import mb.spoofax.compiler.adapter.*
-import mb.spoofax.compiler.adapter.data.*
-import mb.spoofax.compiler.gradle.plugin.*
-import mb.spoofax.compiler.gradle.spoofax2.plugin.*
-import mb.spoofax.compiler.language.*
-import mb.spoofax.compiler.spoofax2.language.*
 import mb.spoofax.compiler.util.*
-import mb.spoofax.core.language.command.*
 
 plugins {
   id("org.metaborg.gradle.config.java-library")
@@ -68,26 +62,34 @@ spoofax2BasedLanguageProject {
 
 val packageId = "mb.statix"
 val taskPackageId = "$packageId.task"
-val spoofaxPackageId = "$taskPackageId.spoofax"
+val spoofaxTaskPackageId = "$taskPackageId.spoofax"
 languageAdapterProject {
   compilerInput {
-    withParser()
+    withParser().run {
+      // Wrap Parse task
+      extendParseTaskDef(spoofaxTaskPackageId, "StatixParseWrapper")
+    }
     withStyler()
     withConstraintAnalyzer().run {
-      // Manual analyze multi implementation to add Spoofax2ProjectContext
-      baseAnalyzeMultiTaskDef(spoofaxPackageId, "GeneratedStatixAnalyzeMulti")
-      extendAnalyzeMultiTaskDef(spoofaxPackageId, "StatixAnalyzeMulti")
+      // Wrap AnalyzeMulti and rename base task
+      baseAnalyzeMultiTaskDef(spoofaxTaskPackageId, "BaseStatixAnalyzeMulti")
+      extendAnalyzeMultiTaskDef(spoofaxTaskPackageId, "StatixAnalyzeMultiWrapper")
     }
     withStrategoRuntime()
     project.configureCompilerInput()
   }
 }
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
-  val packageId = "mb.statix"
+  // Extend component
+  baseComponent(packageId, "BaseStatixComponent")
+  extendComponent(packageId, "StatixComponent")
 
-  // Add config function module
-  addAdditionalModules(TypeInfo.of(packageId, "StatixConfigFunctionModule"))
-
+  // Wrap CheckMulti and rename base tasks
   isMultiFile(true)
+  baseCheckTaskDef(spoofaxTaskPackageId, "BaseStatixCheck")
+  baseCheckMultiTaskDef(spoofaxTaskPackageId, "BaseStatixCheckMulti")
+  extendCheckMultiTaskDef(spoofaxTaskPackageId, "StatixCheckMultiWrapper")
+
+  addTaskDefs(taskPackageId, "StatixCheck")
   addTaskDefs(taskPackageId, "StatixCompile")
 }

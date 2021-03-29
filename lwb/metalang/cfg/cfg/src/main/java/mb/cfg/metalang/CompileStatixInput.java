@@ -19,12 +19,12 @@ public interface CompileStatixInput extends Serializable {
         return compileLanguageShared().languageProject().project().baseDirectory();
     }
 
-    @Value.Default default ResourcePath sourceDirectory() {
+    @Value.Default default ResourcePath mainSourceDirectory() {
         return compileLanguageShared().languageProject().project().srcDirectory();
     }
 
     @Value.Default default ResourcePath mainFile() {
-        return sourceDirectory().appendRelativePath("main.stx");
+        return mainSourceDirectory().appendRelativePath("main.stx");
     }
 
     List<ResourcePath> includeDirectories();

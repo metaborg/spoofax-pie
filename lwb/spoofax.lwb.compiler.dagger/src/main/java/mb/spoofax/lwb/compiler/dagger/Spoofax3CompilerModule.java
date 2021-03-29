@@ -15,6 +15,7 @@ import mb.spoofax.lwb.compiler.esv.ConfigureEsv;
 import mb.spoofax.lwb.compiler.sdf3.CompileSdf3;
 import mb.spoofax.lwb.compiler.sdf3.ConfigureSdf3;
 import mb.spoofax.lwb.compiler.statix.CompileStatix;
+import mb.spoofax.lwb.compiler.statix.ConfigureStatix;
 import mb.spoofax.lwb.compiler.stratego.CompileStratego;
 import mb.spoofax.lwb.compiler.stratego.ConfigureStratego;
 
@@ -57,6 +58,7 @@ public class Spoofax3CompilerModule {
         CompileSdf3 compileSdf3,
         ConfigureEsv configureEsv,
         CompileEsv compileEsv,
+        ConfigureStatix configureStatix,
         CompileStatix compileStatix,
         ConfigureStratego configureStratego,
         CompileStratego compileStratego,
@@ -73,6 +75,7 @@ public class Spoofax3CompilerModule {
         taskDefs.add(compileSdf3);
         taskDefs.add(configureEsv);
         taskDefs.add(compileEsv);
+        taskDefs.add(configureStatix);
         taskDefs.add(compileStatix);
         taskDefs.add(configureStratego);
         taskDefs.add(compileStratego);
