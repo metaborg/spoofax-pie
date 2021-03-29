@@ -9,7 +9,6 @@ import mb.pie.task.java.CompileJava;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.lwb.compiler.CompileLanguage;
 import mb.spoofax.lwb.compiler.CompileLanguageToJavaClassPath;
-import mb.spoofax.lwb.compiler.CompileLanguageWithCfgToJavaClassPath;
 import mb.spoofax.lwb.compiler.esv.CompileEsv;
 import mb.spoofax.lwb.compiler.esv.ConfigureEsv;
 import mb.spoofax.lwb.compiler.sdf3.CompileSdf3;
@@ -51,7 +50,6 @@ public class Spoofax3CompilerModule {
     @Provides @Spoofax3CompilerQualifier @Spoofax3CompilerScope @ElementsIntoSet
     static Set<TaskDef<?, ?>> provideTaskDefsSet(
         CompileLanguageToJavaClassPath compileLanguageToJavaClassPath,
-        CompileLanguageWithCfgToJavaClassPath compileLanguageWithCfgToJavaClassPath,
         CompileLanguage languageProjectCompiler,
 
         ConfigureSdf3 configureSdf3,
@@ -68,7 +66,6 @@ public class Spoofax3CompilerModule {
     ) {
         final HashSet<TaskDef<?, ?>> taskDefs = new HashSet<>();
         taskDefs.add(compileLanguageToJavaClassPath);
-        taskDefs.add(compileLanguageWithCfgToJavaClassPath);
         taskDefs.add(languageProjectCompiler);
 
         taskDefs.add(configureSdf3);

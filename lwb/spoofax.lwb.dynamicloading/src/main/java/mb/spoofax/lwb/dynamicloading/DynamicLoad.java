@@ -70,10 +70,8 @@ public class DynamicLoad implements TaskDef<ResourcePath, OutTransient<DynamicLa
 
     @Override
     public OutTransient<DynamicLanguage> exec(ExecContext context, ResourcePath rootDirectory) throws Exception {
-        final Result<CfgToObject.Output, CfgRootDirectoryToObjectException> cfgResult = context.require(cfgRootDirectoryToObject, rootDirectory);
-        final CompileLanguageToJavaClassPathInput compileInput = cfgResult.unwrap().compileLanguageToJavaClassPathInput; // TODO: properly handle error.
         final Result<CompileLanguageToJavaClassPath.Output, CompileLanguageToJavaClassPathException> result =
-            context.require(compileLanguageToJavaClassPath, new CompileLanguageToJavaClassPath.Args(compileInput)); // TODO: pass in additional class/annotation processor paths?
+            context.require(compileLanguageToJavaClassPath, new CompileLanguageToJavaClassPath.Args(rootDirectory)); // TODO: pass in additional class/annotation processor paths?
         final CompileLanguageToJavaClassPath.Output output = result.unwrap(); // TODO: properly handle error
         final ArrayList<URL> classPath = new ArrayList<>();
         for(ResourcePath path : output.classPath()) {
@@ -86,6 +84,8 @@ public class DynamicLoad implements TaskDef<ResourcePath, OutTransient<DynamicLa
             }
             classPath.add(file.toURI().toURL());
         }
+        final Result<CfgToObject.Output, CfgRootDirectoryToObjectException> cfgResult = context.require(cfgRootDirectoryToObject, rootDirectory);
+        final CompileLanguageToJavaClassPathInput compileInput = cfgResult.unwrap().compileLanguageToJavaClassPathInput; // TODO: properly handle error.
         final DynamicLanguage dynamicLanguage = new DynamicLanguage(
             compileInput,
             classPath.toArray(new URL[0]),

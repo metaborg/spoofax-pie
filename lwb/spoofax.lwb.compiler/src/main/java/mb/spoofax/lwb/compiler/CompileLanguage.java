@@ -24,17 +24,15 @@ import org.immutables.value.Value;
 import javax.inject.Inject;
 
 /**
- * Compiles a {@link CompileLanguageShared} by running the meta-language compilers.
+ * Compiles a language specification by running the meta-language compilers.
  *
- * Takes an {@link CompileLanguageInput} describing the language specification and inputs for the meta-language
- * compilers. Meta-language compiler inputs are optional where absence causes the meta-language compiler to not be
- * executed.
+ * Takes as input a {@link ResourcePath} path to the root directory of the language specification.
  *
  * Produces a {@link Result} that is either an output with all {@link KeyedMessages messages} produced by the
  * meta-language compilers, or a {@link CompileException} when compilation fails.
  */
 @Value.Enclosing
-public class CompileLanguage implements TaskDef<CompileLanguageInput, Result<KeyedMessages, CompileLanguage.CompileException>> {
+public class CompileLanguage implements TaskDef<ResourcePath, Result<KeyedMessages, CompileLanguage.CompileException>> {
     private final CompileSdf3 compileSdf3;
     private final CompileEsv compileEsv;
     private final CompileStatix compileStatix;
@@ -58,38 +56,32 @@ public class CompileLanguage implements TaskDef<CompileLanguageInput, Result<Key
     }
 
     @Override
-    public Result<KeyedMessages, CompileException> exec(ExecContext context, CompileLanguageInput input) {
-        final ResourcePath rootDirectory = input.compileLanguageShared().languageProject().project().baseDirectory(); // HACK: get root directory from config for now.
+    public Result<KeyedMessages, CompileException> exec(ExecContext context, ResourcePath input) {
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
-
-        final Result<KeyedMessages, CompileException> compileSdf3Result = context.require(compileSdf3, rootDirectory)
+        final Result<KeyedMessages, CompileException> compileSdf3Result = context.require(compileSdf3, input)
             .ifOk(messagesBuilder::addMessages)
             .mapErr(CompileLanguage.CompileException::sdf3CompileFail);
         if(compileSdf3Result.isErr()) {
             return compileSdf3Result;
         }
-
-        final Result<KeyedMessages, CompileException> compileEsvResult = context.require(compileEsv, rootDirectory)
+        final Result<KeyedMessages, CompileException> compileEsvResult = context.require(compileEsv, input)
             .ifOk(messagesBuilder::addMessages)
             .mapErr(CompileLanguage.CompileException::esvCompileFail);
         if(compileEsvResult.isErr()) {
             return compileEsvResult;
         }
-
-        final Result<KeyedMessages, CompileException> compileStatixResult = context.require(compileStatix, rootDirectory)
+        final Result<KeyedMessages, CompileException> compileStatixResult = context.require(compileStatix, input)
             .ifOk(messagesBuilder::addMessages)
             .mapErr(CompileLanguage.CompileException::statixCompileFail);
         if(compileStatixResult.isErr()) {
             return compileStatixResult;
         }
-
-        final Result<KeyedMessages, CompileException> compileStrategoResult = context.require(compileStratego, rootDirectory)
+        final Result<KeyedMessages, CompileException> compileStrategoResult = context.require(compileStratego, input)
             .ifOk(messagesBuilder::addMessages)
             .mapErr(CompileLanguage.CompileException::strategoCompileFail);
         if(compileStrategoResult.isErr()) {
             return compileStrategoResult;
         }
-
         return Result.ofOk(messagesBuilder.build());
     }
 

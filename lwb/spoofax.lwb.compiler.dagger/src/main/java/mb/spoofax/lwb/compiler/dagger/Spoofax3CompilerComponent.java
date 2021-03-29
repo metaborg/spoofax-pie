@@ -14,7 +14,6 @@ import mb.resource.dagger.ResourceServiceComponent;
 import mb.sdf3.Sdf3Component;
 import mb.spoofax.lwb.compiler.CompileLanguage;
 import mb.spoofax.lwb.compiler.CompileLanguageToJavaClassPath;
-import mb.spoofax.lwb.compiler.CompileLanguageWithCfgToJavaClassPath;
 import mb.spoofax.lwb.compiler.esv.ConfigureEsv;
 import mb.spoofax.lwb.compiler.sdf3.ConfigureSdf3;
 import mb.spoofax.lwb.compiler.statix.ConfigureStatix;
@@ -45,8 +44,6 @@ import java.util.Set;
 )
 public interface Spoofax3CompilerComponent extends TaskDefsProvider {
     CompileLanguageToJavaClassPath getCompileLanguageToJavaClassPath();
-
-    CompileLanguageWithCfgToJavaClassPath getCompileLanguageWithCfgToJavaClassPath();
 
     CompileLanguage getCompileLanguage();
 

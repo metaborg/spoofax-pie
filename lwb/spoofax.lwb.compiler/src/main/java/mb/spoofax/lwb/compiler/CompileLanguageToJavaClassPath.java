@@ -1,6 +1,9 @@
 package mb.spoofax.lwb.compiler;
 
 import mb.cfg.CompileLanguageToJavaClassPathInput;
+import mb.cfg.task.CfgRootDirectoryToObject;
+import mb.cfg.task.CfgRootDirectoryToObjectException;
+import mb.cfg.task.CfgToObject;
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Severity;
@@ -36,53 +39,51 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * Fully compiles a Spoofax language by running the {@link LanguageProjectCompiler language project compiler}, {@link
+ * Fully compiles a language by running the {@link LanguageProjectCompiler language project compiler}, {@link
  * CompileLanguage language specification compiler}, {@link AdapterProjectCompiler adapter project compiler}, and the
- * {@link CompileJava Java compiler}. This fully compiles a Spoofax language from its sources to Java class files and
+ * {@link CompileJava Java compiler}. This fully compiles a language from its sources to Java class files and
  * corresponding resources.
  *
- * Takes an {@link CompileLanguageToJavaClassPath.Args} as input, which contains the {@link
- * CompileLanguageToJavaClassPathInput compile input} configuring the various compilers, and fields to add additional
- * Java class and annotation processor paths.
+ * Takes an {@link CompileLanguageToJavaClassPath.Args} as input, which contains the root directory that is used to find
+ * the CFG file configuring the various compilers, and fields to add additional Java class and annotation processor
+ * paths.
  *
  * Produces a {@link Result} that is either an {@link Output} or a {@link CompileLanguageToJavaClassPathException} when
  * compilation fails. The {@link Output} contains all {@link KeyedMessages messages} produced during compilation, and
  * the Java class path that can be used to run the language, dynamically load it, or to package it into a JAR file.
- *
- * @see CompileLanguageWithCfgToJavaClassPath for a version of this builder that is configured via the CFG meta-DSL.
  */
 @Value.Enclosing
 public class CompileLanguageToJavaClassPath implements TaskDef<CompileLanguageToJavaClassPath.Args, Result<CompileLanguageToJavaClassPath.Output, CompileLanguageToJavaClassPathException>> {
     public static class Args implements Serializable {
-        public final CompileLanguageToJavaClassPathInput input;
+        public final ResourcePath rootDirectory;
         public final ListView<File> additionalJavaClassPath;
         public final ListView<File> additionalJavaAnnotationProcessorPath;
 
-        public Args(CompileLanguageToJavaClassPathInput input, ListView<File> additionalJavaClassPath, ListView<File> additionalJavaAnnotationProcessorPath) {
-            this.input = input;
+        public Args(ResourcePath rootDirectory, ListView<File> additionalJavaClassPath, ListView<File> additionalJavaAnnotationProcessorPath) {
+            this.rootDirectory = rootDirectory;
             this.additionalJavaClassPath = additionalJavaClassPath;
             this.additionalJavaAnnotationProcessorPath = additionalJavaAnnotationProcessorPath;
         }
 
-        public Args(CompileLanguageToJavaClassPathInput input, ListView<File> additionalJavaClassPath) {
-            this(input, additionalJavaClassPath, ListView.of());
+        public Args(ResourcePath rootDirectory, ListView<File> additionalJavaClassPath) {
+            this(rootDirectory, additionalJavaClassPath, ListView.of());
         }
 
-        public Args(CompileLanguageToJavaClassPathInput input) {
-            this(input, ListView.of());
+        public Args(ResourcePath rootDirectory) {
+            this(rootDirectory, ListView.of());
         }
 
         @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             final Args args = (Args)o;
-            if(!input.equals(args.input)) return false;
+            if(!rootDirectory.equals(args.rootDirectory)) return false;
             if(!additionalJavaClassPath.equals(args.additionalJavaClassPath)) return false;
             return additionalJavaAnnotationProcessorPath.equals(args.additionalJavaAnnotationProcessorPath);
         }
 
         @Override public int hashCode() {
-            int result = input.hashCode();
+            int result = rootDirectory.hashCode();
             result = 31 * result + additionalJavaClassPath.hashCode();
             result = 31 * result + additionalJavaAnnotationProcessorPath.hashCode();
             return result;
@@ -90,7 +91,7 @@ public class CompileLanguageToJavaClassPath implements TaskDef<CompileLanguageTo
 
         @Override public String toString() {
             return "CompileLanguageToJavaClassPath$Args{" +
-                "input=" + input +
+                "rootDirectory=" + rootDirectory +
                 ", additionalJavaClassPath=" + additionalJavaClassPath +
                 ", additionalJavaAnnotationProcessorPath=" + additionalJavaAnnotationProcessorPath +
                 '}';
@@ -98,6 +99,7 @@ public class CompileLanguageToJavaClassPath implements TaskDef<CompileLanguageTo
     }
 
     private final ResourceService resourceService;
+    private final CfgRootDirectoryToObject cfgRootDirectoryToObject;
     private final LanguageProjectCompiler languageProjectCompiler;
     private final CompileLanguage compileLanguage;
     private final AdapterProjectCompiler adapterProjectCompiler;
@@ -106,12 +108,14 @@ public class CompileLanguageToJavaClassPath implements TaskDef<CompileLanguageTo
 
     @Inject public CompileLanguageToJavaClassPath(
         ResourceService resourceService,
+        CfgRootDirectoryToObject cfgRootDirectoryToObject,
         LanguageProjectCompiler languageProjectCompiler,
         CompileLanguage compileLanguage,
         AdapterProjectCompiler adapterProjectCompiler,
         CompileJava compileJava
     ) {
         this.resourceService = resourceService;
+        this.cfgRootDirectoryToObject = cfgRootDirectoryToObject;
         this.languageProjectCompiler = languageProjectCompiler;
         this.compileLanguage = compileLanguage;
         this.adapterProjectCompiler = adapterProjectCompiler;
@@ -125,7 +129,20 @@ public class CompileLanguageToJavaClassPath implements TaskDef<CompileLanguageTo
 
     @Override
     public Result<Output, CompileLanguageToJavaClassPathException> exec(ExecContext context, CompileLanguageToJavaClassPath.Args args) {
-        final CompileLanguageToJavaClassPathInput input = args.input;
+        final ResourcePath rootDirectory = args.rootDirectory;
+        final Result<CfgToObject.Output, CfgRootDirectoryToObjectException> cfgResult = context.require(cfgRootDirectoryToObject, rootDirectory);
+        if(cfgResult.isErr()) {
+            // noinspection ConstantConditions (error is present)
+            return Result.ofErr(CompileLanguageToJavaClassPathException.getConfigurationFail(cfgResult.getErr()));
+        }
+
+        final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
+        @SuppressWarnings("ConstantConditions") final CfgToObject.Output cfgOutput = cfgResult.get();
+        // noinspection ConstantConditions (value is present)
+        messagesBuilder.addMessages(cfgOutput.messages);
+
+        final CompileLanguageToJavaClassPathInput input = cfgOutput.compileLanguageToJavaClassPathInput;
+
         final ArrayList<ResourcePath> javaSourceFiles = new ArrayList<>();
         // Add all Java source files from the user-defined source path.
         for(ResourcePath javaSourcePath : input.javaSourcePath()) {
@@ -142,7 +159,6 @@ public class CompileLanguageToJavaClassPath implements TaskDef<CompileLanguageTo
         }
         final LinkedHashSet<ResourcePath> javaSourcePath = new LinkedHashSet<>(input.javaSourcePath()); // LinkedHashSet to preserve insertion order.
         final ArrayList<Supplier<?>> suppliers = new ArrayList<>();
-        final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
 
         // OPTO: pass in supplier to prevent dependency on large input?
         final Task<None> languageProjectCompilerTask = languageProjectCompiler.createTask(input.languageProjectInput());
@@ -151,15 +167,16 @@ public class CompileLanguageToJavaClassPath implements TaskDef<CompileLanguageTo
         javaSourceFiles.addAll(input.languageProjectInput().javaSourceFiles());
         javaSourcePath.addAll(input.languageProjectInput().javaSourcePaths());
 
-        // OPTO: pass in supplier to prevent dependency on large input?
-        final Task<Result<KeyedMessages, CompileLanguage.CompileException>> languageSpecificationCompilerTask = compileLanguage.createTask(input.compileLanguageInput());
-        @SuppressWarnings("ConstantConditions") final Result<KeyedMessages, CompileLanguage.CompileException> spoofax3CompilerResult = context.require(languageSpecificationCompilerTask);
+        final Task<Result<KeyedMessages, CompileLanguage.CompileException>> languageSpecificationCompilerTask = compileLanguage.createTask(rootDirectory);
+        final Result<KeyedMessages, CompileLanguage.CompileException> spoofax3CompilerResult = context.require(languageSpecificationCompilerTask);
         suppliers.add(languageSpecificationCompilerTask.toSupplier());
         javaSourceFiles.addAll(input.compileLanguageInput().javaSourceFiles());
         javaSourcePath.addAll(input.compileLanguageInput().javaSourcePaths());
         if(spoofax3CompilerResult.isErr()) {
+            // noinspection ConstantConditions (error is present)
             return Result.ofErr(CompileLanguageToJavaClassPathException.compileLanguageFail(spoofax3CompilerResult.getErr()));
         } else {
+            // noinspection ConstantConditions (value is present)
             messagesBuilder.addMessages(spoofax3CompilerResult.get());
         }
 

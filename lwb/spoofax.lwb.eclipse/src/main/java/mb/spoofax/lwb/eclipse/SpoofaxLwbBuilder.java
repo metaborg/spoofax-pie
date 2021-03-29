@@ -12,8 +12,7 @@ import mb.spoofax.compiler.eclipsebundle.SpoofaxCompilerEclipseBundle;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.resource.EclipseResourcePath;
 import mb.spoofax.lwb.compiler.CompileLanguageToJavaClassPath;
-import mb.spoofax.lwb.compiler.CompileLanguageWithCfgToJavaClassPath;
-import mb.spoofax.lwb.compiler.CompileLanguageWithCfgToJavaClassPathException;
+import mb.spoofax.lwb.compiler.CompileLanguageToJavaClassPathException;
 import mb.spoofax.lwb.compiler.dagger.Spoofax3Compiler;
 import mb.tooling.eclipsebundle.ToolingEclipseBundle;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -37,7 +36,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
     }
 
     @Override
-    protected IProject[] build(int kind, Map<String, String> args, IProgressMonitor monitor) throws CoreException {
+    protected @Nullable IProject[] build(int kind, Map<String, String> args, IProgressMonitor monitor) throws CoreException {
         final IProject project = getProject();
         try {
             if(kind == FULL_BUILD) {
@@ -68,14 +67,14 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
             .addClassLoader(SpoofaxCompilerEclipseBundle.class.getClassLoader());
 
         try(final MixedSession session = pieComponent.getPie().newSession()) {
-            final CompileLanguageWithCfgToJavaClassPath.Args args = new CompileLanguageWithCfgToJavaClassPath.Args(
+            final CompileLanguageToJavaClassPath.Args args = new CompileLanguageToJavaClassPath.Args(
                 project,
                 ListView.of(classGraph.getClasspathFiles())
             );
-            final Result<CompileLanguageToJavaClassPath.Output, CompileLanguageWithCfgToJavaClassPathException> result =
-                session.require(spoofax3Compiler.component.getCompileLanguageWithCfgToJavaClassPath().createTask(args));
+            final Result<CompileLanguageToJavaClassPath.Output, CompileLanguageToJavaClassPathException> result =
+                session.require(spoofax3Compiler.component.getCompileLanguageToJavaClassPath().createTask(args));
             result.unwrap();
-        } catch(ExecException | CompileLanguageWithCfgToJavaClassPathException e) {
+        } catch(ExecException | CompileLanguageToJavaClassPathException e) {
             final ExceptionPrinter exceptionPrinter = new ExceptionPrinter();
             exceptionPrinter.addCurrentDirectoryContext(project);
             final String message = exceptionPrinter.printExceptionToString(e);

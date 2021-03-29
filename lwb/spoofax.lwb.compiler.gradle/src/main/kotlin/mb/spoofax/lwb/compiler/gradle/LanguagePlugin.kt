@@ -227,7 +227,7 @@ open class LanguagePlugin : Plugin<Project> {
       doLast {
         synchronized(pie) {
           pie.newSession().use { session ->
-            val result = session.require(compiler.createTask(input))
+            val result = session.require(compiler.createTask(FSPath(project.projectDir)))
             val projectDir = FSPath(project.projectDir)
             result.ifOk {
               project.logMessages(it, projectDir)

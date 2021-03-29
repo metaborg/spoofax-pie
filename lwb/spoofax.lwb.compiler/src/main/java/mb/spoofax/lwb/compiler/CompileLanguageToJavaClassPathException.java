@@ -1,5 +1,6 @@
 package mb.spoofax.lwb.compiler;
 
+import mb.cfg.task.CfgRootDirectoryToObjectException;
 import mb.common.message.HasOptionalMessages;
 import mb.common.message.KeyedMessages;
 import mb.common.util.ADT;
@@ -12,11 +13,17 @@ import java.util.Optional;
 @ADT
 public abstract class CompileLanguageToJavaClassPathException extends Exception implements HasOptionalMessages {
     public interface Cases<R> {
+        R getConfigurationFail(CfgRootDirectoryToObjectException cfgRootDirectoryToObjectException);
+
         R walkJavaSourceFilesFail(IOException ioException);
 
         R compileLanguageFail(CompileLanguage.CompileException compileException);
 
         R javaCompilationFail(KeyedMessages messages);
+    }
+
+    public static CompileLanguageToJavaClassPathException getConfigurationFail(CfgRootDirectoryToObjectException cfgRootDirectoryToObjectException) {
+        return withCause(CompileLanguageToJavaClassPathExceptions.getConfigurationFail(cfgRootDirectoryToObjectException), cfgRootDirectoryToObjectException);
     }
 
     public static CompileLanguageToJavaClassPathException walkJavaSourceFilesFail(IOException ioException) {
@@ -40,17 +47,18 @@ public abstract class CompileLanguageToJavaClassPathException extends Exception 
 
     public abstract <R> R match(Cases<R> cases);
 
-    public static CompileLanguageToJavaClassPathExceptions.CasesMatchers.TotalMatcher_WalkJavaSourceFilesFail cases() {
+    public static CompileLanguageToJavaClassPathExceptions.CasesMatchers.TotalMatcher_GetConfigurationFail cases() {
         return CompileLanguageToJavaClassPathExceptions.cases();
     }
 
-    public CompileLanguageToJavaClassPathExceptions.CaseOfMatchers.TotalMatcher_WalkJavaSourceFilesFail caseOf() {
+    public CompileLanguageToJavaClassPathExceptions.CaseOfMatchers.TotalMatcher_GetConfigurationFail caseOf() {
         return CompileLanguageToJavaClassPathExceptions.caseOf(this);
     }
 
 
     @Override public @NonNull String getMessage() {
         return cases()
+            .getConfigurationFail((e) -> "Failed to get configuration")
             .walkJavaSourceFilesFail((e) -> "Walking Java source files failed")
             .compileLanguageFail((e) -> "Compiling language failed")
             .javaCompilationFail((e) -> "Java compilation failed")
