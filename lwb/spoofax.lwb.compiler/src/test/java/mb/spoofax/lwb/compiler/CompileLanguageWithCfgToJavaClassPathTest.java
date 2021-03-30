@@ -41,15 +41,18 @@ class CompileLanguageWithCfgToJavaClassPathTest {
         new PieModule(PieBuilderImpl::new)
     );
     final Pie pie = compiler.pieComponent.getPie();
-    final CompileLanguageToJavaClassPath compileLanguageWithCfgToJavaClassPath = compiler.compiler.component.getCompileLanguageToJavaClassPath();
+    final CompileLanguage compileLanguageWithCfgToJavaClassPath = compiler.compiler.component.getCompileLanguage();
 
     @Test void testCompileCharsLanguage(@TempDir Path temporaryDirectoryPath) throws Exception {
         // Copy language specification sources to the temporary directory.
         final FSResource temporaryDirectory = new FSResource(temporaryDirectoryPath);
         copyResourcesToTemporaryDirectory("mb/spoofax/lwb/compiler/chars", temporaryDirectory);
         try(final MixedSession session = pie.newSession()) {
-            session.require(compileLanguageWithCfgToJavaClassPath.createTask(new CompileLanguageToJavaClassPath.Args(temporaryDirectory.getPath()))).unwrap();
-        } catch(CompileLanguageToJavaClassPathException e) {
+            final CompileLanguage.Args args = CompileLanguage.Args.builder()
+                .rootDirectory(temporaryDirectory.getPath())
+                .build();
+            session.require(compileLanguageWithCfgToJavaClassPath.createTask(args)).unwrap();
+        } catch(CompileLanguageException e) {
             final ExceptionPrinter exceptionPrinter = new ExceptionPrinter();
             exceptionPrinter.addCurrentDirectoryContext(temporaryDirectory);
             System.err.println(exceptionPrinter.printExceptionToString(e));

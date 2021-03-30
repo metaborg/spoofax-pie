@@ -4,9 +4,9 @@ import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.language.CompleterLanguageCompiler;
 import mb.spoofax.compiler.util.ClassKind;
+import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
@@ -37,6 +37,10 @@ public class CompleterAdapterCompiler implements TaskDef<CompleterAdapterCompile
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         completeTaskDefTemplate.write(context, input.baseCompleteTaskDef().file(generatedJavaSourcesDirectory), input);
         return outputBuilder.build();
+    }
+
+    @Override public Serializable key(Input input) {
+        return input.adapterProject().project().baseDirectory();
     }
 
 

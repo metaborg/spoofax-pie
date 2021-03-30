@@ -21,7 +21,7 @@ import mb.resource.hierarchical.ResourcePath
 import mb.spoofax.compiler.adapter.*
 import mb.spoofax.compiler.language.*
 import mb.spoofax.compiler.util.*
-import mb.spoofax.lwb.compiler.CompileLanguage
+import mb.spoofax.lwb.compiler.CompileLanguageSpecification
 import mb.cfg.CompileLanguageInput
 import mb.cfg.CompileLanguageToJavaClassPathInput
 import mb.spoofax.lwb.compiler.dagger.StandaloneSpoofax3Compiler
@@ -34,7 +34,7 @@ import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.kotlin.dsl.*
 import java.util.*
 
-open class LanguageExtension(project: Project) {
+open class LanguageExtension() {
   companion object {
     internal const val id = "spoofaxLanguage"
   }
@@ -56,7 +56,7 @@ open class LanguagePlugin : Plugin<Project> {
       PieModule { PieBuilderImpl() }
     )
 
-    val extension = LanguageExtension(project)
+    val extension = LanguageExtension()
     project.extensions.add(LanguageExtension.id, extension)
 
     val input = getInput(project, spoofax3Compiler);
@@ -83,7 +83,7 @@ open class LanguagePlugin : Plugin<Project> {
   ) {
     val resourceService = spoofax3Compiler.compiler.resourceServiceComponent.resourceService
     val languageProjectCompiler = spoofax3Compiler.compiler.spoofaxCompilerComponent.languageProjectCompiler
-    val compileLanguage = spoofax3Compiler.compiler.component.compileLanguage
+    val compileLanguage = spoofax3Compiler.compiler.component.compileLanguageSpecification
     val adapterProjectCompiler = spoofax3Compiler.compiler.spoofaxCompilerComponent.adapterProjectCompiler
     val pie = spoofax3Compiler.pieComponent.pie
     configureProject(project, resourceService, languageProjectCompiler, adapterProjectCompiler, input)
@@ -147,7 +147,7 @@ open class LanguagePlugin : Plugin<Project> {
     project: Project,
     resourceService: ResourceService,
     pie: Pie,
-    compiler: CompileLanguage,
+    compiler: CompileLanguageSpecification,
     input: CompileLanguageInput
   ) {
     val compileTask = project.tasks.register("compileLanguage") {

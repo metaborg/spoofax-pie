@@ -264,6 +264,10 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
         return None.instance;
     }
 
+    @Override public Serializable key(Input input) {
+        return input.adapterProject().project().baseDirectory();
+    }
+
 
     public ArrayList<GradleConfiguredDependency> getDependencies(Input input) {
         final Shared shared = input.shared();

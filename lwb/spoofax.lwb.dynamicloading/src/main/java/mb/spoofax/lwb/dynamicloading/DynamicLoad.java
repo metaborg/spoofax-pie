@@ -17,8 +17,8 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.FileResourceMatcher;
 import mb.resource.hierarchical.walk.TrueResourceWalker;
 import mb.spoofax.core.platform.PlatformComponent;
-import mb.spoofax.lwb.compiler.CompileLanguageToJavaClassPath;
-import mb.spoofax.lwb.compiler.CompileLanguageToJavaClassPathException;
+import mb.spoofax.lwb.compiler.CompileLanguage;
+import mb.spoofax.lwb.compiler.CompileLanguageException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
@@ -37,7 +37,7 @@ public class DynamicLoad implements TaskDef<ResourcePath, OutTransient<DynamicLa
     private final ResourceServiceComponent resourceServiceComponent;
     private final PlatformComponent platformComponent;
     private final CfgRootDirectoryToObject cfgRootDirectoryToObject;
-    private final CompileLanguageToJavaClassPath compileLanguageToJavaClassPath;
+    private final CompileLanguage compileLanguage;
     private final Provider<RootPieModule> rootPieModuleProvider;
 
     @Inject public DynamicLoad(
@@ -45,14 +45,14 @@ public class DynamicLoad implements TaskDef<ResourcePath, OutTransient<DynamicLa
         ResourceServiceComponent resourceServiceComponent,
         PlatformComponent platformComponent,
         CfgRootDirectoryToObject cfgRootDirectoryToObject,
-        CompileLanguageToJavaClassPath compileLanguageToJavaClassPath,
+        CompileLanguage compileLanguage,
         Provider<RootPieModule> rootPieModuleProvider
     ) {
         this.loggerComponent = loggerComponent;
         this.resourceServiceComponent = resourceServiceComponent;
         this.platformComponent = platformComponent;
         this.cfgRootDirectoryToObject = cfgRootDirectoryToObject;
-        this.compileLanguageToJavaClassPath = compileLanguageToJavaClassPath;
+        this.compileLanguage = compileLanguage;
         this.rootPieModuleProvider = rootPieModuleProvider;
     }
 
@@ -70,9 +70,11 @@ public class DynamicLoad implements TaskDef<ResourcePath, OutTransient<DynamicLa
 
     @Override
     public OutTransient<DynamicLanguage> exec(ExecContext context, ResourcePath rootDirectory) throws Exception {
-        final Result<CompileLanguageToJavaClassPath.Output, CompileLanguageToJavaClassPathException> result =
-            context.require(compileLanguageToJavaClassPath, new CompileLanguageToJavaClassPath.Args(rootDirectory)); // TODO: pass in additional class/annotation processor paths?
-        final CompileLanguageToJavaClassPath.Output output = result.unwrap(); // TODO: properly handle error
+        final CompileLanguage.Args args = CompileLanguage.Args.builder()
+            .rootDirectory(rootDirectory) // TODO: pass in additional class/annotation processor paths?
+            .build();
+        final Result<CompileLanguage.Output, CompileLanguageException> result = context.require(compileLanguage, args);
+        final CompileLanguage.Output output = result.unwrap(); // TODO: properly handle error
         final ArrayList<URL> classPath = new ArrayList<>();
         for(ResourcePath path : output.classPath()) {
             // TODO: properly handle error

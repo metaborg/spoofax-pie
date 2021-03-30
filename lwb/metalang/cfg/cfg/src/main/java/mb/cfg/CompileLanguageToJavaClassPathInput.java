@@ -9,6 +9,7 @@ import org.immutables.value.Value;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Properties;
 
@@ -34,15 +35,31 @@ public interface CompileLanguageToJavaClassPathInput extends Serializable {
 
     /// Java compilation
 
-    @Value.Default default List<ResourcePath> javaSourcePath() {
-        final ArrayList<ResourcePath> additionalSourcePaths = new ArrayList<>();
-        additionalSourcePaths.add(adapterProjectInput().adapterProject().project().srcMainDirectory().appendSegment("java"));
-        return additionalSourcePaths;
+    default LinkedHashSet<ResourcePath> javaSourceFiles() { // LinkedHashSet to preserve insertion order.
+        final LinkedHashSet<ResourcePath> javaSourceFiles = new LinkedHashSet<>();
+        javaSourceFiles.addAll(languageProjectInput().javaSourceFiles());
+        javaSourceFiles.addAll(compileLanguageInput().javaSourceFiles());
+        javaSourceFiles.addAll(adapterProjectInput().javaSourceFiles());
+        return javaSourceFiles;
     }
 
-    List<File> javaClassPath();
+    @Value.Default default List<ResourcePath> userJavaSourcePaths() {
+        final ArrayList<ResourcePath> sourcePaths = new ArrayList<>();
+        sourcePaths.add(adapterProjectInput().adapterProject().project().srcMainDirectory().appendSegment("java"));
+        return sourcePaths;
+    }
 
-    List<File> javaAnnotationProcessorPath();
+    default LinkedHashSet<ResourcePath> javaSourcePaths() { // LinkedHashSet to preserve insertion order.
+        final LinkedHashSet<ResourcePath> javaSourcePath = new LinkedHashSet<>(userJavaSourcePaths());
+        javaSourcePath.addAll(languageProjectInput().javaSourcePaths());
+        javaSourcePath.addAll(compileLanguageInput().javaSourcePaths());
+        javaSourcePath.addAll(adapterProjectInput().javaSourcePaths());
+        return javaSourcePath;
+    }
+
+    List<File> javaClassPaths();
+
+    List<File> javaAnnotationProcessorPaths();
 
     @Value.Default default String javaRelease() {
         return "8";

@@ -41,7 +41,11 @@ public class MultilangAnalyzerLanguageCompiler implements TaskDef<MultilangAnaly
         return outputBuilder.build();
     }
 
+    @Override public Serializable key(Input input) {
+        return input.languageProject().project().baseDirectory();
+    }
 
+    
     public ListView<GradleConfiguredDependency> getDependencies(Input input) {
         return ListView.of(GradleConfiguredDependency.api(input.shared().multilangDep()));
     }

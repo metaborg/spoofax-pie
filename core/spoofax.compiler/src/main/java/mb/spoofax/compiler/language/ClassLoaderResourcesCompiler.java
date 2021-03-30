@@ -38,6 +38,10 @@ public class ClassLoaderResourcesCompiler implements TaskDef<ClassLoaderResource
         return outputBuilder.build();
     }
 
+    @Override public Serializable key(Input input) {
+        return input.languageProject().project().baseDirectory();
+    }
+
 
     @Value.Immutable public interface Input extends Serializable {
         class Builder extends ClassLoaderResourcesCompilerData.Input.Builder {}

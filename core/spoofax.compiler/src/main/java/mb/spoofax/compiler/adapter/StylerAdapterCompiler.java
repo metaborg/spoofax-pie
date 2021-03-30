@@ -40,6 +40,10 @@ public class StylerAdapterCompiler implements TaskDef<StylerAdapterCompiler.Inpu
         return outputBuilder.build();
     }
 
+    @Override public Serializable key(Input input) {
+        return input.adapterProject().project().baseDirectory();
+    }
+
 
     @Value.Immutable
     public interface Input extends Serializable {

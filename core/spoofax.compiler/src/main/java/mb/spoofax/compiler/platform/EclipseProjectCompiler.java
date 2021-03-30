@@ -126,6 +126,10 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
         return outputBuilder.build();
     }
 
+    @Override public Serializable key(Input input) {
+        return input.project().baseDirectory();
+    }
+
 
     public ArrayList<GradleConfiguredDependency> getDependencies(Input input) {
         final Shared shared = input.shared();

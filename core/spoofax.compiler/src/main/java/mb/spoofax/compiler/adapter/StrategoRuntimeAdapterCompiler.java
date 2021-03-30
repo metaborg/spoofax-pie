@@ -41,6 +41,10 @@ public class StrategoRuntimeAdapterCompiler implements TaskDef<StrategoRuntimeAd
         return outputBuilder.build();
     }
 
+    @Override public Serializable key(Input input) {
+        return input.adapterProject().project().baseDirectory();
+    }
+
 
     public ListView<GradleConfiguredDependency> getDependencies(Input input) {
         return ListView.of(

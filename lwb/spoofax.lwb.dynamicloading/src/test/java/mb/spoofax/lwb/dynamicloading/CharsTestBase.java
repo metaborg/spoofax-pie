@@ -109,7 +109,7 @@ class CharsTestBase extends TestBase {
     }
 
     DynamicLoaderReloadSession modifyCommand(DynamicLoaderMixedSession session, CompileLanguageToJavaClassPathInput input) throws IOException, ExecException, InterruptedException {
-        final ResourcePath path = input.javaSourcePath().get(0).appendRelativePath("mb/chars/CharsDebugRemoveA.java");
+        final ResourcePath path = input.userJavaSourcePaths().get(0).appendRelativePath("mb/chars/CharsDebugRemoveA.java");
         final WritableResource file = resourceService.getWritableResource(path);
         final String text = file.readString().replace("A characters", "'A' characters");
         file.writeString(text);

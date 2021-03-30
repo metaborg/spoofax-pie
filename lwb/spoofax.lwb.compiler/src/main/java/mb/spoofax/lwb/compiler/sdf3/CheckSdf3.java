@@ -1,0 +1,40 @@
+package mb.spoofax.lwb.compiler.sdf3;
+
+import mb.common.message.KeyedMessages;
+import mb.common.message.Message;
+import mb.common.util.ListView;
+import mb.pie.api.ExecContext;
+import mb.pie.api.TaskDef;
+import mb.resource.hierarchical.ResourcePath;
+import mb.sdf3.task.spec.Sdf3CheckSpec;
+
+import javax.inject.Inject;
+
+public class CheckSdf3 implements TaskDef<ResourcePath, KeyedMessages> {
+    private final ConfigureSdf3 configure;
+    private final Sdf3CheckSpec check;
+
+    @Inject public CheckSdf3(
+        ConfigureSdf3 configure,
+        Sdf3CheckSpec check
+    ) {
+        this.configure = configure;
+        this.check = check;
+    }
+
+    @Override public String getId() {
+        return getClass().getName();
+    }
+
+    @Override
+    public KeyedMessages exec(ExecContext context, ResourcePath rootDirectory) {
+        return context.require(configure, rootDirectory).mapOrElse(
+            o -> o.mapOrElse(
+                c -> context.require(check, c),
+                KeyedMessages::of
+            ),
+            e -> KeyedMessages.ofTryExtractMessagesFrom(e, rootDirectory)
+                .orElse(KeyedMessages.of(ListView.of(new Message("Could not check SDF3 because it could not be configured", e)), rootDirectory))
+        );
+    }
+}

@@ -10,7 +10,6 @@ import mb.pie.task.archive.ArchiveToJar;
 import mb.pie.task.java.CompileJava;
 import mb.resource.fs.FSResource;
 import mb.str.config.StrategoCompileConfig;
-import mb.str.task.StrategoCompileToJava;
 import mb.str.util.TestBase;
 import mb.stratego.build.util.StrategoGradualSetting;
 import mb.stratego.common.StrategoRuntime;
@@ -22,7 +21,6 @@ import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import java.io.File;
-import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -30,19 +28,19 @@ class CompileTest extends TestBase {
     @Test void testCompileAndRun() throws Exception {
         final FSResource strategoSourceDir = directory(rootDirectory, "str");
         final FSResource strategoMainFile = textFile(strategoSourceDir, "hello.str", "" +
-                "module hello " +
-                "imports " +
-                "  libstratego-lib " +
-                "  world " +
-                "rules " +
-                "  hello = !$[Hello, [<world>]]; debug"
+            "module hello " +
+            "imports " +
+            "  libstratego-lib " +
+            "  world " +
+            "rules " +
+            "  hello = !$[Hello, [<world>]]; debug"
         );
         final FSResource strategoWorldFile = textFile(strategoSourceDir, "world.str", "" +
-                "module world " +
-                "imports " +
-                "  libstratego-lib " +
-                "rules " +
-                "  world = !\"world!\""
+            "module world " +
+            "imports " +
+            "  libstratego-lib " +
+            "rules " +
+            "  world = !\"world!\""
         );
 
         final FSResource buildDir = directory(rootDirectory, "build");
@@ -91,33 +89,29 @@ class CompileTest extends TestBase {
             assertTrue(testPackageJavaFile.readString().contains("test"));
 
             // Compile Java source files to Java class files.
-            final FSResource sourceFileOutputDir = directory(buildDir, "generated/sources/annotationProcessor/java/main");
-            final FSResource classFileOutputDir = directory(buildDir, "classes/java/main");
-            final FSResource libsDir = directory(buildDir, "libs");
+            final CompileJava.Input.Builder inputBuilder = CompileJava.Input.builder()
+                .addSourceFiles(mainJavaFile.getPath())
+                .addSourcePaths(strategoJavaOutputDir.getPath());
             final @Nullable String classPathProperty = System.getProperty("classPath");
             assertNotNull(classPathProperty);
-            final ArrayList<File> classPath = list();
             for(String classPathPart : classPathProperty.split(File.pathSeparator)) {
-                classPath.add(new File(classPathPart));
+                inputBuilder.addClassPaths(new File(classPathPart));
             }
-            final Task<?> compileJavaTask = compileJava.createTask(new CompileJava.Input(
-                list(mainJavaFile.getPath()),
-                list(strategoJavaOutputDir.getPath()),
-                classPath,
-                list(),
-                null,
-                null,
-                sourceFileOutputDir.getPath(),
-                classFileOutputDir.getPath(),
-                list(strategoCompileTask.toSupplier())
-            ));
+            final FSResource sourceFileOutputDirectory = directory(buildDir, "generated/sources/annotationProcessor/java/main");
+            inputBuilder.sourceFileOutputDirectory(sourceFileOutputDirectory.getPath());
+            final FSResource classFileOutputDirectory = directory(buildDir, "classes/java/main");
+            inputBuilder.classFileOutputDirectory(classFileOutputDirectory.getPath());
+            inputBuilder.addOriginTasks(strategoCompileTask.toSupplier());
+
+            final Task<?> compileJavaTask = compileJava.createTask(inputBuilder.build());
             session.require(compileJavaTask);
 
             // Create a JAR from Java class files.
+            final FSResource libsDir = directory(buildDir, "libs");
             final FSResource jarFile = libsDir.appendRelativePath("stratego.jar").ensureFileExists();
             final Task<?> createJarTask = archiveToJar.createTask(new ArchiveToJar.Input(
                 null,
-                list(ArchiveDirectory.ofClassFilesInDirectory(classFileOutputDir.getPath())),
+                list(ArchiveDirectory.ofClassFilesInDirectory(classFileOutputDirectory.getPath())),
                 jarFile.getPath(),
                 list(compileJavaTask.toSupplier())
             ));

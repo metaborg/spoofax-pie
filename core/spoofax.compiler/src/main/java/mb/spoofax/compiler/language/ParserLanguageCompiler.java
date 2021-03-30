@@ -45,6 +45,10 @@ public class ParserLanguageCompiler implements TaskDef<ParserLanguageCompiler.In
         return None.instance;
     }
 
+    @Override public Serializable key(Input input) {
+        return input.languageProject().project().baseDirectory();
+    }
+
 
     public ListView<GradleConfiguredDependency> getDependencies(Input input) {
         return ListView.of(

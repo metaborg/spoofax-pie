@@ -31,6 +31,10 @@ public class CompleterLanguageCompiler implements TaskDef<CompleterLanguageCompi
         return outputBuilder.build();
     }
 
+    @Override public Serializable key(Input input) {
+        return input.languageProject().project().baseDirectory();
+    }
+
 
     public ListView<GradleConfiguredDependency> getDependencies(Input input) {
         return ListView.of(
