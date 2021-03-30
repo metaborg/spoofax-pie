@@ -4,14 +4,14 @@ DOCKER_IMAGE := squidfunk/mkdocs-material:7.0.6
 ROOT_DIR := $(SELF_DIR)..
 
 # SSH Agent Socket
-ifeq ($(OS),Windows_NT)         # Windows
-    SSH_AGENT_SOCK := {SSH_AUTH_SOCK}
+ifeq ($(OS),Windows_NT)         # WSL2 (Windows)
+    SSH_AGENT_SOCK := ${SSH_AUTH_SOCK}
 else
     UNAME_S := $(shell uname -s)
     ifeq ($(UNAME_S),Darwin)    # macOS
         SSH_AGENT_SOCK := /run/host-services/ssh-auth.sock
     else                        # Linux
-        SSH_AGENT_SOCK := {SSH_AUTH_SOCK}
+        SSH_AGENT_SOCK := ${SSH_AUTH_SOCK}
     endif
 endif
 
