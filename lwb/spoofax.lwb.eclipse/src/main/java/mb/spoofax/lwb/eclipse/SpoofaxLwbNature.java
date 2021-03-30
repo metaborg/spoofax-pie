@@ -3,6 +3,8 @@ package mb.spoofax.lwb.eclipse;
 import mb.spoofax.eclipse.util.AbstractHandlerUtil;
 import mb.spoofax.eclipse.util.BuilderUtil;
 import mb.spoofax.eclipse.util.NatureUtil;
+import mb.spoofax.lwb.eclipse.util.CommonBuilder;
+import mb.spoofax.lwb.eclipse.util.CommonNature;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.commands.AbstractHandler;
@@ -10,6 +12,7 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectNature;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -20,11 +23,16 @@ public class SpoofaxLwbNature implements IProjectNature {
 
 
     @Override public void configure() throws CoreException {
-        BuilderUtil.append(SpoofaxLwbBuilder.id, getProject(), null);
+        // noinspection ConstantConditions (project should be present)
+        addDependencyBuilders(project, null);
+        BuilderUtil.append(SpoofaxLwbBuilder.id, project, null, IncrementalProjectBuilder.FULL_BUILD,
+            IncrementalProjectBuilder.INCREMENTAL_BUILD, IncrementalProjectBuilder.CLEAN_BUILD);
+        sortBuilders(project, null);
     }
 
     @Override public void deconfigure() throws CoreException {
-        BuilderUtil.removeFrom(SpoofaxLwbBuilder.id, getProject(), null);
+        // noinspection ConstantConditions (project should be present)
+        BuilderUtil.removeFrom(SpoofaxLwbBuilder.id, project, null);
     }
 
     @Override public @Nullable IProject getProject() {
@@ -41,6 +49,8 @@ public class SpoofaxLwbNature implements IProjectNature {
     }
 
     public static void addTo(IProject project, @Nullable IProgressMonitor monitor) throws CoreException {
+        // Cannot add dependency natures in configure method, as Eclipse checks dependencies beforehand. Add them here.
+        addDependencyNatures(project, monitor);
         NatureUtil.addTo(id, project, monitor);
     }
 
@@ -79,4 +89,22 @@ public class SpoofaxLwbNature implements IProjectNature {
         }
     }
 
+
+    private static void addDependencyNatures(IProject project, @Nullable IProgressMonitor monitor) throws CoreException {
+        CommonNature.addJavaNature(project, monitor);
+    }
+
+    private static void addDependencyBuilders(IProject project, @Nullable IProgressMonitor monitor) throws CoreException {
+        CommonBuilder.appendJavaBuilder(project, monitor);
+    }
+
+    private static void sortBuilders(IProject project, @Nullable IProgressMonitor monitor) throws CoreException {
+        final String[] buildOrder = new String[]{
+            CommonBuilder.mavenBuilderId,
+            CommonBuilder.gradleBuilderId,
+            SpoofaxLwbBuilder.id,
+            CommonBuilder.javaBuilderId
+        };
+        BuilderUtil.sort(project, monitor, buildOrder);
+    }
 }

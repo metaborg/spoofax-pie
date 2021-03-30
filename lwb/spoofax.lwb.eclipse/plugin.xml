@@ -40,7 +40,7 @@
   >
     <builder
       hasNature="true"
-      isConfigurable="false"
+      isConfigurable="true"
       callOnEmptyDelta="false"
       supportsConfigurations="false"
     >
