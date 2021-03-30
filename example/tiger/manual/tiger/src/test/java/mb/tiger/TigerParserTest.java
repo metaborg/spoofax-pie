@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class TigerParserTest extends TigerTestBase {
+class TigerParserTest extends TestBase {
     @Test void parse() throws Exception {
         final JSGLR1ParseOutput parsed = parse("1");
         assertFalse(parsed.recovered);

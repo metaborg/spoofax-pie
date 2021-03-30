@@ -6,6 +6,7 @@ dependencies {
   api(platform(project(":spoofax.depconstraints")))
 
   api(project(":spoofax.core"))
+  api(project(":spoofax.compiler.interfaces"))
   api("org.metaborg:log.backend.slf4j")
   api("org.slf4j:slf4j-simple:1.7.30")
   api("com.google.jimfs:jimfs:1.1")

@@ -7,7 +7,7 @@ import mb.constraint.common.ConstraintAnalyzer.MultiFileResult;
 import mb.constraint.common.ConstraintAnalyzer.SingleFileResult;
 import mb.constraint.common.ConstraintAnalyzerContext;
 import mb.jsglr1.common.JSGLR1ParseOutput;
-import mb.resource.DefaultResourceKey;
+import mb.resource.ReadableResource;
 import mb.resource.ResourceKey;
 import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoUtil;
@@ -21,45 +21,45 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AnalyzerTest extends TestBase {
     @Test void analyzeSingleErrors() throws Exception {
-        final ResourceKey resource = new DefaultResourceKey(qualifier, "a.sdf3");
-        final JSGLR1ParseOutput parsed = parse("module a syntax A = B", resource);
-        final SingleFileResult result = analyzer.analyze(rootKey, resource, parsed.ast, new ConstraintAnalyzerContext(true, rootKey), strategoRuntime);
+        final ReadableResource file = textFile("a.sdf3", "module a syntax A = B");
+        final JSGLR1ParseOutput parsed = parse(file);
+        final SingleFileResult result = analyze(file, parsed.ast);
         assertNotNull(result.ast);
         assertNotNull(result.analysis);
         assertTrue(result.messages.containsError());
     }
 
     @Test void analyzeSingleSuccess() throws Exception {
-        final ResourceKey resource = new DefaultResourceKey(qualifier, "a.sdf3");
-        final JSGLR1ParseOutput parsed = parse("module a", resource);
+        final ReadableResource file = textFile("a.sdf3", "module a");
+        final JSGLR1ParseOutput parsed = parse(file);
         final SingleFileResult result =
-            analyzer.analyze(rootKey, resource, parsed.ast, new ConstraintAnalyzerContext(true, rootKey), strategoRuntime);
+            analyze(file, parsed.ast);
         assertNotNull(result.ast);
         assertNotNull(result.analysis);
         assertTrue(result.messages.isEmpty());
     }
 
     @Test void analyzeMultipleErrors() throws Exception {
-        final ResourceKey resource1 = new DefaultResourceKey(qualifier, "a.sdf3");
-        final JSGLR1ParseOutput parsed1 = parse("module a", resource1);
-        final ResourceKey resource2 = new DefaultResourceKey(qualifier, "b.sdf3");
-        final JSGLR1ParseOutput parsed2 = parse("module b syntax B = A", resource2);
-        final ResourceKey resource3 = new DefaultResourceKey(qualifier, "c.sdf3");
-        final JSGLR1ParseOutput parsed3 = parse("module c syntax C = A B", resource3);
+        final ReadableResource file1 = textFile("a.sdf3", "module a");
+        final JSGLR1ParseOutput parsed1 = parse(file1);
+        final ReadableResource file2 = textFile("b.sdf3", "module b syntax B = A");
+        final JSGLR1ParseOutput parsed2 = parse(file2);
+        final ReadableResource file3 = textFile("c.sdf3", "module c syntax C = A B");
+        final JSGLR1ParseOutput parsed3 = parse(file3);
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
-        asts.put(resource1, parsed1.ast);
-        asts.put(resource2, parsed2.ast);
-        asts.put(resource3, parsed3.ast);
-        final MultiFileResult result = analyzer.analyze(rootKey, MapView.of(asts), new ConstraintAnalyzerContext(true, rootKey), strategoRuntime);
-        final ConstraintAnalyzer.@Nullable Result result1 = result.getResult(resource1);
+        asts.put(file1.getKey(), parsed1.ast);
+        asts.put(file2.getKey(), parsed2.ast);
+        asts.put(file3.getKey(), parsed3.ast);
+        final MultiFileResult result = analyze(MapView.of(asts));
+        final ConstraintAnalyzer.@Nullable Result result1 = result.getResult(file1.getKey());
         assertNotNull(result1);
         assertNotNull(result1.ast);
         assertNotNull(result1.analysis);
-        final ConstraintAnalyzer.@Nullable Result result2 = result.getResult(resource2);
+        final ConstraintAnalyzer.@Nullable Result result2 = result.getResult(file2.getKey());
         assertNotNull(result2);
         assertNotNull(result2.ast);
         assertNotNull(result2.analysis);
-        final ConstraintAnalyzer.@Nullable Result result3 = result.getResult(resource3);
+        final ConstraintAnalyzer.@Nullable Result result3 = result.getResult(file3.getKey());
         assertNotNull(result3);
         assertNotNull(result3.ast);
         assertNotNull(result3.analysis);
@@ -67,33 +67,33 @@ class AnalyzerTest extends TestBase {
         assertEquals(3, result.messages.size());
         assertTrue(result.messages.containsError());
         boolean foundCorrectMessage = result.messages.getMessagesWithKey().stream()
-            .filter(msg -> resource3.equals(msg.getKey()))
+            .filter(msg -> file3.getKey().equals(msg.getKey()))
             .flatMap(msg -> msg.getValue().stream())
             .anyMatch(msg -> msg.severity.equals(Severity.Error));
         assertTrue(foundCorrectMessage);
     }
 
     @Test void analyzeMultipleSuccess() throws Exception {
-        final ResourceKey resource1 = new DefaultResourceKey(qualifier, "a.sdf3");
-        final JSGLR1ParseOutput parsed1 = parse("module a syntax A = \"\"", resource1);
-        final ResourceKey resource2 = new DefaultResourceKey(qualifier, "b.sdf3");
-        final JSGLR1ParseOutput parsed2 = parse("module b imports a syntax B = A", resource2);
-        final ResourceKey resource3 = new DefaultResourceKey(qualifier, "c.sdf3");
-        final JSGLR1ParseOutput parsed3 = parse("module c imports a b syntax C = A syntax C = B", resource3);
+        final ReadableResource file1 = textFile("a.sdf3", "module a syntax A = \"\"");
+        final JSGLR1ParseOutput parsed1 = parse(file1);
+        final ReadableResource file2 = textFile("b.sdf3", "module b imports a syntax B = A");
+        final JSGLR1ParseOutput parsed2 = parse(file2);
+        final ReadableResource file3 = textFile("c.sdf3", "module c imports a b syntax C = A syntax C = B");
+        final JSGLR1ParseOutput parsed3 = parse(file3);
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
-        asts.put(resource1, parsed1.ast);
-        asts.put(resource2, parsed2.ast);
-        asts.put(resource3, parsed3.ast);
-        final MultiFileResult result = analyzer.analyze(rootKey, MapView.of(asts), new ConstraintAnalyzerContext(true, rootKey), strategoRuntime);
-        final ConstraintAnalyzer.@Nullable Result result1 = result.getResult(resource1);
+        asts.put(file1.getKey(), parsed1.ast);
+        asts.put(file2.getKey(), parsed2.ast);
+        asts.put(file3.getKey(), parsed3.ast);
+        final MultiFileResult result = analyze(MapView.of(asts));
+        final ConstraintAnalyzer.@Nullable Result result1 = result.getResult(file1.getKey());
         assertNotNull(result1);
         assertNotNull(result1.ast);
         assertNotNull(result1.analysis);
-        final ConstraintAnalyzer.@Nullable Result result2 = result.getResult(resource2);
+        final ConstraintAnalyzer.@Nullable Result result2 = result.getResult(file2.getKey());
         assertNotNull(result2);
         assertNotNull(result2.ast);
         assertNotNull(result2.analysis);
-        final ConstraintAnalyzer.@Nullable Result result3 = result.getResult(resource3);
+        final ConstraintAnalyzer.@Nullable Result result3 = result.getResult(file3.getKey());
         assertNotNull(result3);
         assertNotNull(result3.ast);
         assertNotNull(result3.analysis);
@@ -101,15 +101,15 @@ class AnalyzerTest extends TestBase {
         assertFalse(result.messages.containsError());
     }
 
-    @Test void showScopeGraph() throws Exception, StrategoException {
-        final ResourceKey resource = new DefaultResourceKey(qualifier, "a.sdf3");
-        final JSGLR1ParseOutput parsed = parse("module a", resource);
-        final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext(true, rootKey);
-        final SingleFileResult result = analyzer.analyze(rootKey, resource, parsed.ast, constraintAnalyzerContext, strategoRuntime);
+    @Test void showScopeGraph() throws Exception {
+        final ReadableResource file = textFile("a.sdf3", "module a");
+        final JSGLR1ParseOutput parsed = parse(file);
+        final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext(true, rootPath);
+        final SingleFileResult result = analyze(rootPath, file, parsed.ast, constraintAnalyzerContext);
         assertNotNull(result.ast);
         assertNotNull(result.analysis);
         assertTrue(result.messages.isEmpty());
-        final IStrategoTerm input = StrategoUtil.createLegacyBuilderInputTerm(strategoRuntime.getTermFactory(), result.ast, resource.toString(), rootKey.toString());
+        final IStrategoTerm input = StrategoUtil.createLegacyBuilderInputTerm(strategoRuntime.getTermFactory(), result.ast, file.toString(), rootPath.toString());
         final @Nullable IStrategoTerm output = strategoRuntime.addContextObject(constraintAnalyzerContext).invoke("stx--show-scopegraph", input);
         assertNotNull(output);
     }

@@ -30,6 +30,7 @@ dependencies {
 
   compileOnly("org.checkerframework:checker-qual-android")
 
+  testImplementation(compositeBuild("spoofax.test"))
   testCompileOnly("org.checkerframework:checker-qual-android")
 }
 

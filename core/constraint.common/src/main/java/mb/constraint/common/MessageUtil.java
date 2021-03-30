@@ -5,28 +5,27 @@ import mb.common.message.Severity;
 import mb.common.region.Region;
 import mb.jsglr.common.TermTracer;
 import mb.resource.ResourceKey;
+import mb.resource.ResourceKeyString;
+import mb.resource.ResourceService;
+import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spoofax.interpreter.core.StackTracer;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.Term;
 import org.spoofax.terms.TermVisitor;
-import org.strategoxt.HybridInterpreter;
+import org.spoofax.terms.util.TermUtils;
 
 class MessageUtil {
-    static void addAnalysisFailedMessage(KeyedMessagesBuilder messagesBuilder, HybridInterpreter interpreter) {
-        final StackTracer stackTracer = interpreter.getContext().getStackTracer();
-        final String text = "Analysis failed\nStratego stack trace:\n" + stackTracer.getTraceString();
-        messagesBuilder.addMessage(text, Severity.Error);
-    }
-
-    static void addMessagesFromTerm(KeyedMessagesBuilder messagesBuilder, IStrategoTerm messagesTerm, Severity severity) {
-        addMessagesFromTerm(messagesBuilder, messagesTerm, severity, null);
-    }
-
-    static void addMessagesFromTerm(KeyedMessagesBuilder messagesBuilder, IStrategoTerm messagesTerm, Severity severity, @Nullable ResourceKey resourceOverride) {
+    static void addMessagesFromTerm(
+        KeyedMessagesBuilder messagesBuilder,
+        IStrategoTerm messagesTerm,
+        Severity severity,
+        @Nullable ResourceKey resourceOverride,
+        ResourceService resourceService,
+        @Nullable ResourcePath rootDirectory
+    ) {
         for(IStrategoTerm term : messagesTerm) {
             final IStrategoTerm node;
             final String text;
@@ -37,20 +36,28 @@ class MessageUtil {
                 node = term;
                 text = messageTermToString(term) + " (no tree node indicated)";
             }
-            final @Nullable IStrategoTerm originNode = TermTracer.getOrigin(node);
-            if(originNode != null) {
-                final @Nullable Region region = TermTracer.getRegion(originNode);
-                final @Nullable ResourceKey resourceKey =
-                    resourceOverride != null ? resourceOverride : TermTracer.getResourceKey(originNode);
-                messagesBuilder.addMessage(text, severity, resourceKey, region);
-            } else {
-                messagesBuilder.addMessage(text, severity);
-            }
-        }
-    }
 
-    static void addAmbiguityWarnings(KeyedMessagesBuilder messagesBuilder, IStrategoTerm ast) {
-        addAmbiguityWarnings(messagesBuilder, ast, null);
+            final @Nullable IStrategoTerm originNode = TermTracer.getOrigin(node);
+            @Nullable ResourceKey resource;
+            if(resourceOverride != null) { // Use resource override
+                resource = resourceOverride;
+            } else if(originNode != null) { // Use resource attachment from origin node
+                resource = TermTracer.getResourceKey(originNode);
+            } else { // Use resource attachment from node
+                resource = TermTracer.getResourceKey(node);
+            }
+            if(resource == null && TermUtils.isAppl(node, "TermIndex", 2)) { // Use resource from TermIndex string
+                final String resourceString = TermUtils.toJavaStringAt(node, 0);
+                final ResourceKeyString resourceKeyString = ResourceKeyString.parse(resourceString);
+                if(resourceKeyString.hasQualifier()) { // Absolute path with qualifier
+                    resource = resourceService.getResourceKey(resourceKeyString);
+                } else if(rootDirectory != null) { // No qualified -> relative path
+                    resource = rootDirectory.appendAsRelativePath(resourceKeyString.getId());
+                }
+            }
+            final @Nullable Region region = TermTracer.getRegion(node);
+            messagesBuilder.addMessage(text, severity, resource, region);
+        }
     }
 
     static void addAmbiguityWarnings(KeyedMessagesBuilder messagesBuilder, IStrategoTerm ast, @Nullable ResourceKey resourceOverride) {
@@ -89,7 +96,7 @@ class MessageUtil {
 
     static String messageTermToString(IStrategoTerm term) {
         if(term instanceof IStrategoString) {
-            final IStrategoString messageStringTerm = (IStrategoString) term;
+            final IStrategoString messageStringTerm = (IStrategoString)term;
             return messageStringTerm.stringValue();
         } else if(term instanceof IStrategoList) {
             final StringBuilder sb = new StringBuilder();

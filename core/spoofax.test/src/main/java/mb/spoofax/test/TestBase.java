@@ -9,6 +9,7 @@ import mb.pie.api.ResourceStringSupplier;
 import mb.resource.Resource;
 import mb.resource.ResourceKey;
 import mb.resource.fs.FSResource;
+import mb.resource.hierarchical.ResourcePath;
 import mb.resource.text.TextResource;
 import mb.resource.text.TextResourceRegistry;
 import org.junit.jupiter.api.AfterEach;
@@ -26,6 +27,7 @@ public class TestBase {
 
     public final FileSystem fileSystem = Jimfs.newFileSystem(Configuration.unix());
     public final FSResource rootDirectory = new FSResource(fileSystem.getPath("/"));
+    public final ResourcePath rootPath = rootDirectory.getPath();
     public final TextResourceRegistry textResourceRegistry = new TextResourceRegistry();
 
 

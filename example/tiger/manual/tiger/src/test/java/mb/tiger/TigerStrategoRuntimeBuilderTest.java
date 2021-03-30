@@ -8,7 +8,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class TigerStrategoRuntimeBuilderTest extends TigerTestBase {
+class TigerStrategoRuntimeBuilderTest extends TestBase {
     @Test void parseUnparse() throws Exception {
         final String str = "1 + 2";
         final JSGLR1ParseOutput parsed = parse(str);

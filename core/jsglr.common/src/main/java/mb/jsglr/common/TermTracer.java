@@ -27,15 +27,16 @@ public class TermTracer {
 
 
     /**
-     * Gets the source code region given term originated from, or null if it cannot be found.
+     * Gets the source code region given term originated from, automatically getting the originating term if needed.
+     *
+     * @return Region, or {@code null} if no region could be found.
      */
     public static @Nullable Region getRegion(IStrategoTerm term) {
-        term = OriginAttachment.tryGetOrigin(term);
+        term = ImploderAttachment.getImploderOrigin(term);
+        if(term == null) return null;
         final @Nullable IToken left = ImploderAttachment.getLeftToken(term);
         final @Nullable IToken right = ImploderAttachment.getRightToken(term);
-        if(left == null || right == null) {
-            return null;
-        }
+        if(left == null || right == null) return null;
         return RegionUtil.fromTokens(left, right);
     }
 

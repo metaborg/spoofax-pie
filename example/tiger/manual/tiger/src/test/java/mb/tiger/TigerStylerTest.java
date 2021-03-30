@@ -12,11 +12,11 @@ import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class TigerStylerTest extends TigerTestBase {
+class TigerStylerTest extends TestBase {
     @Test void style() throws Exception {
         final JSGLR1ParseOutput parsed = parse("1 + 21");
 
-        final Styling styling = styler.style(parsed.tokens.tokens);
+        final Styling styling = style(parsed.tokens.tokens);
         final ArrayList<TokenStyle> stylePerToken = styling.getStylePerToken();
         assertEquals(5, stylePerToken.size());
 

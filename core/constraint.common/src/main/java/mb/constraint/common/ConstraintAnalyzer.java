@@ -13,6 +13,7 @@ import mb.resource.ResourceKey;
 import mb.resource.ResourceKeyString;
 import mb.resource.ResourceRuntimeException;
 import mb.resource.ResourceService;
+import mb.resource.hierarchical.ResourcePath;
 import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -220,20 +221,22 @@ public class ConstraintAnalyzer {
         ResourceKey resource,
         IStrategoTerm ast,
         ConstraintAnalyzerContext context,
-        StrategoRuntime strategoRuntime
+        StrategoRuntime strategoRuntime,
+        ResourceService resourceService
     ) throws ConstraintAnalyzerException {
-        return analyze(null, resource, ast, context, strategoRuntime);
+        return analyze(null, resource, ast, context, strategoRuntime, resourceService);
     }
 
     public SingleFileResult analyze(
-        @Nullable ResourceKey root,
+        @Nullable ResourcePath root,
         ResourceKey resource,
         IStrategoTerm ast,
         ConstraintAnalyzerContext context,
-        StrategoRuntime strategoRuntime
+        StrategoRuntime strategoRuntime,
+        ResourceService resourceService
     ) throws ConstraintAnalyzerException {
         final MapView<ResourceKey, IStrategoTerm> asts = MapView.of(resource, ast);
-        final MultiFileResult multiFileResult = doAnalyze(root, asts, context, strategoRuntime);
+        final MultiFileResult multiFileResult = doAnalyze(root, asts, context, strategoRuntime, resourceService);
         final @Nullable Result result;
         try {
             result = multiFileResult.results.get(0);
@@ -244,20 +247,22 @@ public class ConstraintAnalyzer {
     }
 
     public MultiFileResult analyze(
-        @Nullable ResourceKey root,
+        @Nullable ResourcePath root,
         MapView<ResourceKey, IStrategoTerm> asts,
         ConstraintAnalyzerContext context,
-        StrategoRuntime strategoRuntime
+        StrategoRuntime strategoRuntime,
+        ResourceService resourceService
     ) throws ConstraintAnalyzerException {
-        return doAnalyze(root, asts, context, strategoRuntime);
+        return doAnalyze(root, asts, context, strategoRuntime, resourceService);
     }
 
 
     private MultiFileResult doAnalyze(
-        @Nullable ResourceKey root,
+        @Nullable ResourcePath root,
         MapView<ResourceKey, IStrategoTerm> asts,
         ConstraintAnalyzerContext context,
-        StrategoRuntime strategoRuntime
+        StrategoRuntime strategoRuntime,
+        ResourceService resourceService
     ) throws ConstraintAnalyzerException {
         final ITermFactory termFactory = strategoRuntime.getTermFactory();
 
@@ -396,7 +401,7 @@ public class ConstraintAnalyzer {
             final ResourceKey resource = entry.getKey();
             final IStrategoTerm resultTerm = entry.getValue();
             if(expects.containsKey(resource)) {
-                expects.get(resource).processResultTerm(resultTerm, context, messagesBuilder);
+                expects.get(resource).processResultTerm(resultTerm, context, messagesBuilder, resourceService, root);
             } else {
                 throw new RuntimeException(
                     "BUG: got result '" + resultTerm + "' for resource '" + resource + "' that was not part of the input");
@@ -449,18 +454,31 @@ public class ConstraintAnalyzer {
             this.resource = resource;
         }
 
-        void addResultMessages(IStrategoTerm errors, IStrategoTerm warnings, IStrategoTerm notes, KeyedMessagesBuilder messagesBuilder) {
+        void addResultMessages(
+            IStrategoTerm errors,
+            IStrategoTerm warnings,
+            IStrategoTerm notes,
+            KeyedMessagesBuilder messagesBuilder,
+            ResourceService resourceService,
+            @Nullable ResourcePath rootDirectory
+        ) {
             final @Nullable ResourceKey resourceOverride = multiFile ? null : resource;
-            MessageUtil.addMessagesFromTerm(messagesBuilder, errors, Severity.Error, resourceOverride);
-            MessageUtil.addMessagesFromTerm(messagesBuilder, warnings, Severity.Warning, resourceOverride);
-            MessageUtil.addMessagesFromTerm(messagesBuilder, notes, Severity.Info, resourceOverride);
+            MessageUtil.addMessagesFromTerm(messagesBuilder, errors, Severity.Error, resourceOverride, resourceService, rootDirectory);
+            MessageUtil.addMessagesFromTerm(messagesBuilder, warnings, Severity.Warning, resourceOverride, resourceService, rootDirectory);
+            MessageUtil.addMessagesFromTerm(messagesBuilder, notes, Severity.Info, resourceOverride, resourceService, rootDirectory);
         }
 
         void addFailMessage(String text, KeyedMessagesBuilder messagesBuilder) {
             messagesBuilder.addMessage(text, Severity.Error, resource);
         }
 
-        abstract void processResultTerm(IStrategoTerm resultTerm, ConstraintAnalyzerContext context, KeyedMessagesBuilder messagesBuilder);
+        abstract void processResultTerm(
+            IStrategoTerm resultTerm,
+            ConstraintAnalyzerContext context,
+            KeyedMessagesBuilder messagesBuilder,
+            ResourceService resourceService,
+            @Nullable ResourcePath rootDirectory
+        );
     }
 
     class Full extends Expect {
@@ -469,12 +487,18 @@ public class ConstraintAnalyzer {
         }
 
         @Override
-        public void processResultTerm(IStrategoTerm resultTerm, ConstraintAnalyzerContext context, KeyedMessagesBuilder messagesBuilder) {
+        public void processResultTerm(
+            IStrategoTerm resultTerm,
+            ConstraintAnalyzerContext context,
+            KeyedMessagesBuilder messagesBuilder,
+            ResourceService resourceService,
+            @Nullable ResourcePath rootDirectory
+        ) {
             final @Nullable List<IStrategoTerm> results;
             if((results = match(resultTerm, "Full", 5)) != null) {
                 final IStrategoTerm ast = results.get(0);
                 final IStrategoTerm analysis = results.get(1);
-                addResultMessages(results.get(2), results.get(3), results.get(4), messagesBuilder);
+                addResultMessages(results.get(2), results.get(3), results.get(4), messagesBuilder, resourceService, rootDirectory);
                 context.updateResult(resource, ast, analysis);
             } else if(match(resultTerm, "Failed", 0) != null) {
                 addFailMessage("Analysis failed", messagesBuilder);
@@ -491,11 +515,17 @@ public class ConstraintAnalyzer {
         }
 
         @Override
-        public void processResultTerm(IStrategoTerm resultTerm, ConstraintAnalyzerContext context, KeyedMessagesBuilder messagesBuilder) {
+        public void processResultTerm(
+            IStrategoTerm resultTerm,
+            ConstraintAnalyzerContext context,
+            KeyedMessagesBuilder messagesBuilder,
+            ResourceService resourceService,
+            @Nullable ResourcePath rootDirectory
+        ) {
             final @Nullable List<IStrategoTerm> results;
             if((results = match(resultTerm, "Update", 4)) != null) {
                 final IStrategoTerm analysis = results.get(0);
-                addResultMessages(results.get(1), results.get(2), results.get(3), messagesBuilder);
+                addResultMessages(results.get(1), results.get(2), results.get(3), messagesBuilder, resourceService, rootDirectory);
                 context.updateResult(resource, analysis);
             } else if(match(resultTerm, "Failed", 0) != null) {
                 addFailMessage("Analysis failed", messagesBuilder);
@@ -512,11 +542,17 @@ public class ConstraintAnalyzer {
         }
 
         @Override
-        public void processResultTerm(IStrategoTerm resultTerm, ConstraintAnalyzerContext context, KeyedMessagesBuilder messagesBuilder) {
+        public void processResultTerm(
+            IStrategoTerm resultTerm,
+            ConstraintAnalyzerContext context,
+            KeyedMessagesBuilder messagesBuilder,
+            ResourceService resourceService,
+            @Nullable ResourcePath rootDirectory
+        ) {
             final @Nullable List<IStrategoTerm> results;
             if((results = match(resultTerm, "Update", 4)) != null) {
                 final IStrategoTerm analysis = results.get(0);
-                addResultMessages(results.get(1), results.get(2), results.get(3), messagesBuilder);
+                addResultMessages(results.get(1), results.get(2), results.get(3), messagesBuilder, resourceService, rootDirectory);
                 context.updateProjectResult(resource, analysis);
             } else if(match(resultTerm, "Failed", 0) != null) {
                 addFailMessage("Analysis failed", messagesBuilder);
@@ -533,11 +569,17 @@ public class ConstraintAnalyzer {
         }
 
         @Override
-        public void processResultTerm(IStrategoTerm resultTerm, ConstraintAnalyzerContext context, KeyedMessagesBuilder messagesBuilder) {
+        public void processResultTerm(
+            IStrategoTerm resultTerm,
+            ConstraintAnalyzerContext context,
+            KeyedMessagesBuilder messagesBuilder,
+            ResourceService resourceService,
+            @Nullable ResourcePath rootDirectory
+        ) {
             final @Nullable List<IStrategoTerm> results;
             if((results = match(resultTerm, "Full", 5)) != null) {
                 final IStrategoTerm analysis = results.get(1);
-                addResultMessages(results.get(2), results.get(3), results.get(4), messagesBuilder);
+                addResultMessages(results.get(2), results.get(3), results.get(4), messagesBuilder, resourceService, rootDirectory);
                 context.updateProjectResult(resource, analysis);
             } else if(match(resultTerm, "Failed", 0) != null) {
                 addFailMessage("Analysis failed", messagesBuilder);

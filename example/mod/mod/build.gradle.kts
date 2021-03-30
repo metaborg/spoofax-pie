@@ -10,9 +10,10 @@ plugins {
   id("org.metaborg.spoofax.compiler.gradle.spoofax2.language")
 }
 
+fun compositeBuild(name: String) = "$group:$name:$version"
+
 dependencies {
-  testImplementation("org.metaborg:log.backend.slf4j")
-  testImplementation("org.slf4j:slf4j-simple:1.7.30")
+  testImplementation(compositeBuild("spoofax.test"))
   testCompileOnly("org.checkerframework:checker-qual-android")
 }
 
