@@ -1,5 +1,6 @@
 package mb.str.task.spoofax;
 
+import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.jsglr1.common.JSGLR1ParseException;
 import mb.jsglr1.common.JSGLR1ParseOutput;
@@ -37,7 +38,18 @@ public class StrategoParseWrapper extends StrategoParse {
     public Result<JSGLR1ParseOutput, JSGLR1ParseException> exec(ExecContext context, JSGLR1ParseTaskInput input) throws Exception {
         context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
         // TODO: instead of requiring all origins for each file to parse, only require the origins that corresponds to a certain file.
-        input.rootDirectoryHint().ifPresent(d -> configFunctionWrapper.get().apply(context, d).ifOk(o -> o.ifSome(c -> c.sourceFileOrigins.forEach(context::require))));
-        return super.exec(context, input);
+        return Option.ofOptional(input.rootDirectoryHint()).mapThrowingOrElseThrowing(
+            d -> configFunctionWrapper.get().apply(context, d).mapThrowingOrElse(
+                o -> o.mapThrowingOrElseThrowing(
+                    c -> {
+                        c.sourceFileOrigins.forEach(context::require);
+                        return super.exec(context, input); // Parse normally after requiring source file origins.
+                    },
+                    () -> super.exec(context, input) // Stratego is not configured -> parse normally.
+                ),
+                e -> Result.ofErr(JSGLR1ParseException.otherFail(e, input.startSymbol(), input.fileHint().toOptional(), input.rootDirectoryHint())) // Stratego configuration failed -> fail.
+            ),
+            () -> super.exec(context, input) // No directory hint is given, cannot get configuration -> parse normally.
+        );
     }
 }
