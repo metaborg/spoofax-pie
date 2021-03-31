@@ -1,6 +1,7 @@
 package mb.spoofax.eclipse.resource;
 
 import mb.resource.ResourceRuntimeException;
+import mb.resource.fs.FSResource;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.HierarchicalResourceAccess;
 import mb.resource.hierarchical.HierarchicalResourceDefaults;
@@ -8,8 +9,10 @@ import mb.resource.hierarchical.HierarchicalResourceType;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.walk.ResourceWalker;
+import mb.spoofax.eclipse.util.ResourceUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileInfo;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -26,6 +29,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension4;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -38,6 +42,7 @@ import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class EclipseResource extends HierarchicalResourceDefaults<EclipseResource> implements HierarchicalResource, WrapsEclipseResource {
@@ -93,6 +98,23 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
     }
 
 
+    public Optional<File> asLocalFile() {
+        return ResourceUtil.asLocalFile(getResource());
+    }
+
+    public File toLocalFile() {
+        return ResourceUtil.toLocalFile(getResource());
+    }
+
+    public Optional<FSResource> asFsResource() {
+        return ResourceUtil.asFsResource(getResource());
+    }
+
+    public FSResource toFsResource() {
+        return ResourceUtil.toFsResource(getResource());
+    }
+
+
     @Override public EclipseResourcePath getKey() {
         return path;
     }
@@ -110,13 +132,13 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
         return getResource().isAccessible();
     }
 
-    @Override public Instant getLastModifiedTime() {
+    @Override public Instant getLastModifiedTime() throws IOException {
         final @Nullable IDocument document = getDocument();
         if(document != null) {
             return getDocumentLastModifiedTime(document);
         } else {
-            final long stamp = getResource().getModificationStamp();
-            if(stamp == IResource.NULL_STAMP) {
+            final long stamp = getFileStore().fetchInfo().getLastModified();
+            if(stamp == EFS.NONE) {
                 return Instant.MIN;
             }
             return Instant.ofEpochMilli(stamp);
@@ -179,7 +201,9 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
     @Override public void setLastModifiedTime(Instant time) throws IOException {
         // TODO: what to do when there is a document override for this resource?
         try {
-            getResource().revertModificationStamp(time.toEpochMilli());
+            final IFileInfo info = EFS.createFileInfo();
+            info.setLastModified(time.toEpochMilli());
+            getFileStore().putInfo(info, EFS.SET_LAST_MODIFIED, null);
         } catch(CoreException e) {
             throw new IOException("Setting last modified time for resource '" + resource + "' failed unexpectedly", e);
         }

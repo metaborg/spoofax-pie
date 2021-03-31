@@ -13,8 +13,10 @@ import mb.pie.dagger.PieComponent;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.eclipsebundle.SpoofaxCompilerEclipseBundle;
+import mb.spoofax.eclipse.EclipseResourceServiceComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.resource.EclipseResourcePath;
+import mb.spoofax.eclipse.util.ResourceUtil;
 import mb.spoofax.lwb.compiler.CompileLanguage;
 import mb.spoofax.lwb.compiler.CompileLanguageException;
 import mb.tooling.eclipsebundle.ToolingEclipseBundle;
@@ -65,42 +67,37 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
     }
 
     private void fullBuild(IProject eclipseProject, @Nullable IProgressMonitor monitor) throws CoreException, InterruptedException {
+        final ResourcePath rootDirectory = getResourcePath(eclipseProject);
+        logger.debug("Running full language build of {}", rootDirectory);
         final PieComponent pieComponent = SpoofaxLwbLifecycleParticipant.getInstance().getPieComponent();
-        final EclipseResourcePath project = new EclipseResourcePath(eclipseProject);
         try(final MixedSession session = pieComponent.getPie().newSession()) {
-            topDownBuild(project, session, monitor);
+            topDownBuild(rootDirectory, session, monitor);
         } catch(ExecException e) {
             cancel(monitor);
-            throw toCoreException(project, e);
+            throw toCoreException(rootDirectory, e);
         }
     }
 
     private void incrBuild(IProject eclipseProject, IResourceDelta delta, @Nullable IProgressMonitor monitor) throws CoreException, InterruptedException {
+        final ResourcePath rootDirectory = getResourcePath(eclipseProject);
+        logger.debug("Running incremental language build of {}", rootDirectory);
         final PieComponent pieComponent = SpoofaxLwbLifecycleParticipant.getInstance().getPieComponent();
-        final EclipseResourcePath project = new EclipseResourcePath(eclipseProject);
-        final LinkedHashSet<ResourceKey> changedResources = new LinkedHashSet<>();
-        delta.accept((d) -> {
-            final IResource resource = d.getResource();
-            final EclipseResourcePath path = new EclipseResourcePath(resource);
-            changedResources.add(path);
-            return true;
-        });
-        final Task<Result<CompileLanguage.Output, CompileLanguageException>> compileTask = createCompileTask(project);
+        final Task<Result<CompileLanguage.Output, CompileLanguageException>> compileTask = createCompileTask(rootDirectory);
         try(final MixedSession session = pieComponent.newSession()) {
             if(!pieComponent.getPie().hasBeenExecuted(compileTask)) {
-                topDownBuild(project, session, monitor);
+                topDownBuild(rootDirectory, session, monitor);
             } else {
-                final TopDownSession topDownSession = session.updateAffectedBy(changedResources);
-                final Result<CompileLanguage.Output, CompileLanguageException> result = topDownSession.getOutput(createCompileTask(project));
-                handleCompileResult(project, result, monitor);
+                bottomUpBuild(rootDirectory, delta, session, monitor);
             }
         } catch(ExecException e) {
             cancel(monitor);
-            throw toCoreException(project, e);
+            throw toCoreException(rootDirectory, e);
         }
     }
 
+
     private void topDownBuild(ResourcePath rootDirectory, MixedSession session, @Nullable IProgressMonitor monitor) throws InterruptedException, CoreException, ExecException {
+        logger.debug("Top-down language build of {}", rootDirectory);
         final KeyedMessages messages = session.requireWithoutObserving(createCheckTask(rootDirectory));
         if(messages.containsError()) {
             logger.debug("Checking language specification revealed errors; skipping compilation");
@@ -108,6 +105,24 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         }
         final Result<CompileLanguage.Output, CompileLanguageException> result = session.require(createCompileTask(rootDirectory));
         handleCompileResult(rootDirectory, result, monitor);
+    }
+
+    private void bottomUpBuild(ResourcePath rootDirectory, IResourceDelta delta, MixedSession session, @Nullable IProgressMonitor monitor) throws InterruptedException, CoreException, ExecException {
+        final LinkedHashSet<ResourceKey> changedResources = new LinkedHashSet<>();
+        delta.accept((d) -> {
+            changedResources.add(getResourcePath(d.getResource()));
+            return true;
+        });
+        logger.debug("Bottom-up language build of {} with changed resources {}", rootDirectory, changedResources);
+        final TopDownSession topDownSession = session.updateAffectedBy(changedResources);
+        final Result<CompileLanguage.Output, CompileLanguageException> result = topDownSession.getOutput(createCompileTask(rootDirectory));
+        handleCompileResult(rootDirectory, result, monitor);
+    }
+
+
+    private ResourcePath getResourcePath(IResource eclipseResource) {
+        return new EclipseResourcePath(eclipseResource);
+        // ResourceUtil.toFsPath(
     }
 
 
@@ -128,6 +143,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         return SpoofaxLwbLifecycleParticipant.getInstance().getSpoofax3Compiler().component.getCompileLanguage().createTask(args);
     }
 
+
     private void handleCompileResult(ResourcePath rootDirectory, Result<CompileLanguage.Output, CompileLanguageException> result, @Nullable IProgressMonitor monitor) throws CoreException {
         try {
             result.unwrap();
@@ -143,15 +159,15 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         }
     }
 
-    private void cancel(@Nullable IProgressMonitor monitor) {
-        rememberLastBuiltState();
-        if(monitor != null) monitor.setCanceled(true);
-    }
-
     private CoreException toCoreException(ResourcePath rootDirectory, Throwable e) {
         final ExceptionPrinter exceptionPrinter = new ExceptionPrinter();
         exceptionPrinter.addCurrentDirectoryContext(rootDirectory);
         final String message = exceptionPrinter.printExceptionToString(e);
         return new CoreException(new Status(IStatus.ERROR, SpoofaxLwbPlugin.id, IStatus.ERROR, message, null));
+    }
+
+    private void cancel(@Nullable IProgressMonitor monitor) {
+        rememberLastBuiltState();
+        if(monitor != null) monitor.setCanceled(true);
     }
 }

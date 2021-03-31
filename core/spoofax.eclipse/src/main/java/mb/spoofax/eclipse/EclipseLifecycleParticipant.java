@@ -1,6 +1,7 @@
 package mb.spoofax.eclipse;
 
 import mb.pie.dagger.PieComponent;
+import mb.pie.dagger.RootPieModule;
 import mb.pie.dagger.TaskDefsProvider;
 import mb.resource.dagger.ResourceRegistriesProvider;
 import mb.resource.dagger.ResourceServiceComponent;
@@ -16,6 +17,10 @@ public interface EclipseLifecycleParticipant extends AutoCloseable {
         ResourceServiceComponent resourceServiceComponent,
         EclipsePlatformComponent platformComponent
     );
+
+    default void customizePieModule(RootPieModule pieModule) {
+
+    }
 
     void start(
         EclipseLoggerComponent loggerComponent,

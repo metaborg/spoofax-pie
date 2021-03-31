@@ -7,6 +7,9 @@ import mb.resource.ResourceRegistry;
 import mb.resource.ResourceRuntimeException;
 import mb.resource.dagger.ResourceServiceScope;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.text.IDocument;
 
 import javax.inject.Inject;
@@ -63,12 +66,34 @@ public class EclipseResourceRegistry implements ResourceRegistry {
     }
 
 
+    public EclipseResource getResource(EclipseResourcePath path, IResource resource) {
+        return new EclipseResource(this, path, resource);
+    }
+
+    public EclipseResource getResource(EclipseResourcePath path) {
+        return new EclipseResource(this, path);
+    }
+
+    public EclipseResource getResource(IResource resource) {
+        return new EclipseResource(this, resource);
+    }
+
+    public EclipseResource getResource(IFile file) {
+        return new EclipseResource(this, file);
+    }
+
+    public EclipseResource getResource(IContainer container) {
+        return new EclipseResource(this, container);
+    }
+
+
     @Override public @Nullable File toLocalFile(ResourceKey key) {
         if(!(key instanceof EclipseResourcePath)) {
             throw new ResourceRuntimeException("Cannot attempt to convert key '" + key + "' to a local file; the key is not of type EclipseResourcePath");
         }
         final EclipseResourcePath path = (EclipseResourcePath)key;
-        return path.path.toFile();
+        final EclipseResource eclipseResource = getResource(path);
+        return eclipseResource.asLocalFile().orElse(null);
     }
 
     @Override public @Nullable File toLocalFile(Resource resource) {
@@ -76,6 +101,6 @@ public class EclipseResourceRegistry implements ResourceRegistry {
             throw new ResourceRuntimeException("Cannot attempt to convert resource '" + resource + "' to a local file; the resource is not of type EclipseResource");
         }
         final EclipseResource eclipseResource = (EclipseResource)resource;
-        return eclipseResource.path.path.toFile();
+        return eclipseResource.asLocalFile().orElse(null);
     }
 }

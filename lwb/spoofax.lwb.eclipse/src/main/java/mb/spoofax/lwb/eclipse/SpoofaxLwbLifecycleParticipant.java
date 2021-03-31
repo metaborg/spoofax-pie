@@ -9,6 +9,7 @@ import mb.pie.dagger.PieComponent;
 import mb.pie.dagger.RootPieModule;
 import mb.pie.dagger.TaskDefsProvider;
 import mb.pie.runtime.PieBuilderImpl;
+import mb.pie.runtime.tracer.LoggingTracer;
 import mb.resource.dagger.EmptyResourceRegistriesProvider;
 import mb.resource.dagger.ResourceRegistriesProvider;
 import mb.resource.dagger.ResourceServiceComponent;
@@ -46,10 +47,18 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
     }
 
 
+    private @Nullable ResourceServiceComponent resourceServiceComponent;
     private @Nullable Spoofax3Compiler spoofax3Compiler;
     private @Nullable DynamicLoadingComponent dynamicLoadingComponent;
     private @Nullable PieComponent pieComponent;
 
+
+    public ResourceServiceComponent getResourceServiceComponent() {
+        if(resourceServiceComponent == null) {
+            throw new RuntimeException("ResourceServiceComponent has not been initialized yet or has been closed");
+        }
+        return resourceServiceComponent;
+    }
 
     public Spoofax3Compiler getSpoofax3Compiler() {
         if(spoofax3Compiler == null) {
@@ -85,6 +94,7 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
         ResourceServiceComponent resourceServiceComponent,
         EclipsePlatformComponent platformComponent
     ) {
+        this.resourceServiceComponent = resourceServiceComponent;
         return () -> {
             // Inside closure so that it is lazily initialized -> meta-language instances should be available.
             if(spoofax3Compiler == null) {
@@ -121,6 +131,10 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
         };
     }
 
+    @Override public void customizePieModule(RootPieModule pieModule) {
+        pieModule.withTracerFactory(LoggingTracer::new);
+    }
+
     @Override
     public void start(
         EclipseLoggerComponent loggerComponent,
@@ -137,5 +151,6 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
         dynamicLoadingComponent = null;
         spoofax3Compiler.close();
         spoofax3Compiler = null;
+        resourceServiceComponent = null;
     }
 }
