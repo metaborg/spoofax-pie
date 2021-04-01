@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 @DynamicLoadingScope
-public class DynamicLoad implements TaskDef<ResourcePath, OutTransient<DynamicLanguage>>, AutoCloseable {
+public class DynamicLoad implements TaskDef<CompileLanguage.Args, OutTransient<DynamicLanguage>>, AutoCloseable {
     private final HashMap<ResourcePath, DynamicLanguage> dynamicLanguages = new HashMap<>();
 
     private final LoggerComponent loggerComponent;
@@ -69,10 +69,10 @@ public class DynamicLoad implements TaskDef<ResourcePath, OutTransient<DynamicLa
     }
 
     @Override
-    public OutTransient<DynamicLanguage> exec(ExecContext context, ResourcePath rootDirectory) throws Exception {
-        final CompileLanguage.Args args = CompileLanguage.Args.builder()
-            .rootDirectory(rootDirectory) // TODO: pass in additional class/annotation processor paths?
-            .build();
+    public OutTransient<DynamicLanguage> exec(ExecContext context, CompileLanguage.Args args) throws Exception {
+//        final CompileLanguage.Args args = CompileLanguage.Args.builder()
+//            .rootDirectory(rootDirectory) // TODO: pass in additional class/annotation processor paths?
+//            .build();
         final Result<CompileLanguage.Output, CompileLanguageException> result = context.require(compileLanguage, args);
         final CompileLanguage.Output output = result.unwrap(); // TODO: properly handle error
         final ArrayList<URL> classPath = new ArrayList<>();
@@ -86,7 +86,7 @@ public class DynamicLoad implements TaskDef<ResourcePath, OutTransient<DynamicLa
             }
             classPath.add(file.toURI().toURL());
         }
-        final Result<CfgToObject.Output, CfgRootDirectoryToObjectException> cfgResult = context.require(cfgRootDirectoryToObject, rootDirectory);
+        final Result<CfgToObject.Output, CfgRootDirectoryToObjectException> cfgResult = context.require(cfgRootDirectoryToObject, args.rootDirectory());
         final CompileLanguageInput compileInput = cfgResult.unwrap().compileLanguageInput; // TODO: properly handle error.
         final DynamicLanguage dynamicLanguage = new DynamicLanguage(
             compileInput,
@@ -96,7 +96,7 @@ public class DynamicLoad implements TaskDef<ResourcePath, OutTransient<DynamicLa
             platformComponent,
             rootPieModuleProvider.get()
         );
-        register(rootDirectory, dynamicLanguage);
+        register(args.rootDirectory(), dynamicLanguage);
         return new OutTransientImpl<>(dynamicLanguage, true);
     }
 

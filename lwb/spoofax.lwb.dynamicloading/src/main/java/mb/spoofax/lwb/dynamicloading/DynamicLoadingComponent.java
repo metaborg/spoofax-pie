@@ -28,6 +28,8 @@ import java.util.Set;
 public interface DynamicLoadingComponent extends TaskDefsProvider, AutoCloseable {
     DynamicLoader getDynamicLoader();
 
+    DynamicLoad getDynamicLoad();
+
 
     @Override @DynamicLoadingQualifier Set<TaskDef<?, ?>> getTaskDefs();
 

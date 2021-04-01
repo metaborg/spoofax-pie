@@ -7,6 +7,7 @@ import mb.common.util.ExceptionPrinter;
 import mb.log.api.Logger;
 import mb.pie.api.ExecException;
 import mb.pie.api.MixedSession;
+import mb.pie.api.OutTransient;
 import mb.pie.api.Pie;
 import mb.pie.api.Task;
 import mb.pie.api.TopDownSession;
@@ -18,6 +19,7 @@ import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.resource.EclipseResourcePath;
 import mb.spoofax.lwb.compiler.CompileLanguage;
 import mb.spoofax.lwb.compiler.CompileLanguageException;
+import mb.spoofax.lwb.dynamicloading.DynamicLanguage;
 import mb.tooling.eclipsebundle.ToolingEclipseBundle;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.commands.AbstractHandler;
@@ -122,6 +124,8 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         }
         final Result<CompileLanguage.Output, CompileLanguageException> result = session.require(createCompileTask(rootDirectory));
         handleCompileResult(rootDirectory, result, monitor);
+        final OutTransient<DynamicLanguage> dynamicLanguage = session.require(createDynamicLoadTask(rootDirectory));
+        logger.debug("Dynamically loaded language '{}'", dynamicLanguage.getValue().getLanguageComponent().getLanguageInstance().getDisplayName());
     }
 
     private void bottomUpBuild(ResourcePath rootDirectory, IResourceDelta delta, MixedSession session, @Nullable IProgressMonitor monitor) throws InterruptedException, CoreException, ExecException {
@@ -134,12 +138,14 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         final TopDownSession topDownSession = session.updateAffectedBy(changedResources);
         final Result<CompileLanguage.Output, CompileLanguageException> result = topDownSession.getOutput(createCompileTask(rootDirectory));
         handleCompileResult(rootDirectory, result, monitor);
+        final OutTransient<DynamicLanguage> dynamicLanguage = topDownSession.getOutput(createDynamicLoadTask(rootDirectory));
+        if(dynamicLanguage.isConsistent()) {
+            logger.debug("Possibly dynamically loaded language '{}'", dynamicLanguage.getValue().getLanguageComponent().getLanguageInstance().getDisplayName());
+        }
     }
-
 
     private ResourcePath getResourcePath(IResource eclipseResource) {
         return new EclipseResourcePath(eclipseResource);
-        // ResourceUtil.toFsPath(
     }
 
 
@@ -147,7 +153,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         return SpoofaxLwbLifecycleParticipant.getInstance().getSpoofax3Compiler().component.getCheckLanguageSpecification().createTask(rootDirectory);
     }
 
-    private Task<Result<CompileLanguage.Output, CompileLanguageException>> createCompileTask(ResourcePath rootDirectory) {
+    private CompileLanguage.Args createCompileArgs(ResourcePath rootDirectory) {
         final ClassGraph classGraph = new ClassGraph()
             .addClassLoader(SpoofaxLwbPlugin.class.getClassLoader())
             .addClassLoader(SpoofaxPlugin.class.getClassLoader())
@@ -161,16 +167,23 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
             .addClassLoader(IDocumentProvider.class.getClassLoader()) // Bundle org.eclipse.ui.workbench.texteditor
             .addClassLoader(TextFileDocumentProvider.class.getClassLoader()) // Bundle: org.eclipse.ui.editors
             .addClassLoader(ContributionItem.class.getClassLoader()) // Bundle: org.eclipse.jface
-//            .addClassLoader(dagger.model.BindingGraphProxies.class.getClassLoader()) // Dagger compiler
             ; // OPTO: only scan for classpath once?
         final List<File> classPath = classGraph.getClasspathFiles();
         logger.trace("Using class path: {}", classPath);
-        final CompileLanguage.Args args = CompileLanguage.Args.builder()
+        return CompileLanguage.Args.builder()
             .rootDirectory(rootDirectory)
             .additionalJavaClassPath(classPath)
             .additionalJavaAnnotationProcessorPath(classPath)
             .build();
-        return SpoofaxLwbLifecycleParticipant.getInstance().getSpoofax3Compiler().component.getCompileLanguage().createTask(args);
+
+    }
+
+    private Task<Result<CompileLanguage.Output, CompileLanguageException>> createCompileTask(ResourcePath rootDirectory) {
+        return SpoofaxLwbLifecycleParticipant.getInstance().getSpoofax3Compiler().component.getCompileLanguage().createTask(createCompileArgs(rootDirectory));
+    }
+
+    private Task<OutTransient<DynamicLanguage>> createDynamicLoadTask(ResourcePath rootDirectory) {
+        return SpoofaxLwbLifecycleParticipant.getInstance().getDynamicLoadingComponent().getDynamicLoad().createTask(createCompileArgs(rootDirectory));
     }
 
 

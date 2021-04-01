@@ -6,6 +6,7 @@ import mb.pie.api.Task;
 import mb.pie.api.TaskKey;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.lwb.compiler.CompileLanguage;
 
 import java.io.IOException;
 import java.util.Set;
@@ -47,10 +48,10 @@ public class DynamicLoaderSession {
 
 
     protected Task<OutTransient<DynamicLanguage>> createTask(ResourcePath rootDirectory) {
-        return dynamicLoad.createTask(rootDirectory);
+        return dynamicLoad.createTask(CompileLanguage.Args.builder().rootDirectory(rootDirectory).build());
     }
 
     protected TaskKey createTaskKey(ResourcePath rootDirectory) {
-        return new TaskKey(dynamicLoad.getId(), dynamicLoad.key(rootDirectory));
+        return new TaskKey(dynamicLoad.getId(), dynamicLoad.key(CompileLanguage.Args.builder().rootDirectory(rootDirectory).build()));
     }
 }
