@@ -1,8 +1,8 @@
 package mb.spoofax.lwb.compiler.esv;
 
+import mb.cfg.CompileLanguageSpecificationInput;
+import mb.cfg.CompileLanguageSpecificationShared;
 import mb.cfg.CompileLanguageInput;
-import mb.cfg.CompileLanguageShared;
-import mb.cfg.CompileLanguageToJavaClassPathInput;
 import mb.cfg.metalang.CompileEsvInput;
 import mb.cfg.task.CfgRootDirectoryToObject;
 import mb.common.option.Option;
@@ -86,8 +86,8 @@ public class ConfigureEsv implements TaskDef<ResourcePath, Result<Option<EsvConf
     public Result<Option<EsvConfig>, EsvConfigureException> exec(ExecContext context, ResourcePath rootDirectory) throws IOException {
         return context.require(cfgRootDirectoryToObject, rootDirectory)
             .mapErr(EsvConfigureException::getLanguageCompilerConfigurationFail)
-            .<Option<EsvConfig>, IOException>flatMapThrowing(cfgOutput -> Result.transpose(Option.ofOptional(cfgOutput.compileLanguageToJavaClassPathInput.compileLanguageInput().esv())
-                .mapThrowing(esvInput -> toEsvConfig(context, rootDirectory, cfgOutput.compileLanguageToJavaClassPathInput, esvInput))
+            .<Option<EsvConfig>, IOException>flatMapThrowing(cfgOutput -> Result.transpose(Option.ofOptional(cfgOutput.compileLanguageInput.compileLanguageSpecificationInput().esv())
+                .mapThrowing(esvInput -> toEsvConfig(context, rootDirectory, cfgOutput.compileLanguageInput, esvInput))
             ));
     }
 
@@ -95,12 +95,12 @@ public class ConfigureEsv implements TaskDef<ResourcePath, Result<Option<EsvConf
     public Result<EsvConfig, EsvConfigureException> toEsvConfig(
         ExecContext context,
         ResourcePath rootDirectory,
-        CompileLanguageToJavaClassPathInput input,
+        CompileLanguageInput input,
         CompileEsvInput esvInput
     ) throws IOException {
         // TODO: move required properties into esvInput.
-        final CompileLanguageInput compileLanguageInput = input.compileLanguageInput();
-        final CompileLanguageShared compileLanguageShared = compileLanguageInput.compileLanguageShared();
+        final CompileLanguageSpecificationInput compileLanguageSpecificationInput = input.compileLanguageSpecificationInput();
+        final CompileLanguageSpecificationShared compileLanguageSpecificationShared = compileLanguageSpecificationInput.compileLanguageShared();
 
         // Check main source directory, main file, and include directories.
         final HierarchicalResource mainSourceDirectory = context.require(esvInput.mainSourceDirectory(), ResourceStampers.<HierarchicalResource>exists());
@@ -121,10 +121,10 @@ public class ConfigureEsv implements TaskDef<ResourcePath, Result<Option<EsvConf
         // Unarchive ESV files from libspoofax2.
         final LinkedHashSet<HierarchicalResource> libSpoofax2DefinitionDirs = new LinkedHashSet<>(); // LinkedHashSet to remove duplicates while keeping insertion order.
         final LinkedHashSet<Supplier<ResourcePath>> libSpoofax2UnarchiveDirSuppliers = new LinkedHashSet<>();
-        if(compileLanguageShared.includeLibSpoofax2Exports()) {
+        if(compileLanguageSpecificationShared.includeLibSpoofax2Exports()) {
             final ClassLoaderResourceLocations locations = libSpoofax2ClassLoaderResources.definitionDirectory.getLocations();
             libSpoofax2DefinitionDirs.addAll(locations.directories);
-            final ResourcePath libSpoofax2UnarchiveDirectory = compileLanguageShared.unarchiveDirectory().appendRelativePath("libspoofax2");
+            final ResourcePath libSpoofax2UnarchiveDirectory = compileLanguageSpecificationShared.unarchiveDirectory().appendRelativePath("libspoofax2");
             for(JarFileWithPath jarFileWithPath : locations.jarFiles) {
                 final ResourcePath jarFilePath = jarFileWithPath.file.getPath();
                 @SuppressWarnings("ConstantConditions") // JAR files always have leaves.

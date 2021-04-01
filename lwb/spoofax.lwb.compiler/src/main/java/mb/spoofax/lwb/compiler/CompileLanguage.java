@@ -1,6 +1,6 @@
 package mb.spoofax.lwb.compiler;
 
-import mb.cfg.CompileLanguageToJavaClassPathInput;
+import mb.cfg.CompileLanguageInput;
 import mb.cfg.task.CfgRootDirectoryToObject;
 import mb.cfg.task.CfgRootDirectoryToObjectException;
 import mb.cfg.task.CfgToObject;
@@ -20,6 +20,7 @@ import mb.resource.hierarchical.match.path.PathMatcher;
 import mb.resource.hierarchical.walk.ResourceWalker;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
 import mb.spoofax.compiler.language.LanguageProjectCompiler;
+import mb.spoofax.compiler.platform.EclipseProjectCompiler;
 import org.immutables.value.Value;
 
 import javax.inject.Inject;
@@ -74,6 +75,7 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
     private final LanguageProjectCompiler languageProjectCompiler;
     private final CompileLanguageSpecification compileLanguage;
     private final AdapterProjectCompiler adapterProjectCompiler;
+    private final EclipseProjectCompiler eclipseProjectCompiler;
     private final CompileJava compileJava;
 
 
@@ -83,6 +85,7 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
         LanguageProjectCompiler languageProjectCompiler,
         CompileLanguageSpecification compileLanguage,
         AdapterProjectCompiler adapterProjectCompiler,
+        EclipseProjectCompiler eclipseProjectCompiler,
         CompileJava compileJava
     ) {
         this.resourceService = resourceService;
@@ -90,6 +93,7 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
         this.languageProjectCompiler = languageProjectCompiler;
         this.compileLanguage = compileLanguage;
         this.adapterProjectCompiler = adapterProjectCompiler;
+        this.eclipseProjectCompiler = eclipseProjectCompiler;
         this.compileJava = compileJava;
     }
 
@@ -112,7 +116,7 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
         // noinspection ConstantConditions (value is present)
         messagesBuilder.addMessages(cfgOutput.messages);
 
-        final CompileLanguageToJavaClassPathInput input = cfgOutput.compileLanguageToJavaClassPathInput;
+        final CompileLanguageInput input = cfgOutput.compileLanguageInput;
         final CompileJava.Input.Builder compileJavaInputBuilder = CompileJava.Input.builder().key(args.rootDirectory());
 
         // OPTO: pass in supplier to prevent dependency on large input?
@@ -135,6 +139,12 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
         final Task<None> adapterProjectCompilerTask = adapterProjectCompiler.createTask(input.adapterProjectInput());
         context.require(adapterProjectCompilerTask);
         compileJavaInputBuilder.addOriginTasks(adapterProjectCompilerTask.toSupplier());
+
+        input.eclipseProjectInput().ifPresent(eclipseProjectInput -> {
+            final Task<EclipseProjectCompiler.Output> task = eclipseProjectCompiler.createTask(eclipseProjectInput);
+            context.require(task);
+            compileJavaInputBuilder.addOriginTasks(task.toSupplier());
+        });
 
         for(ResourcePath javaSourcePath : input.userJavaSourcePaths()) { // Add all Java source files from the user-defined source path.
             final HierarchicalResource directory = resourceService.getHierarchicalResource(javaSourcePath);
@@ -170,7 +180,8 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
         }
 
         return Result.ofOk(Output.builder()
-            .addClassPath(input.javaClassFileOutputDirectory(), input.compileLanguageInput().compileLanguageShared().generatedResourcesDirectory())
+            .addClassPath(input.javaClassFileOutputDirectory())
+            .addAllClassPath(input.resourcePaths())
             .messages(messagesBuilder.build())
             .build()
         );

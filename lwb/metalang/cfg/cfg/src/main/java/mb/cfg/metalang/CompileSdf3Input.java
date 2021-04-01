@@ -1,15 +1,11 @@
 package mb.cfg.metalang;
 
-import mb.cfg.CompileLanguageShared;
+import mb.cfg.CompileLanguageSpecificationShared;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.language.ParserLanguageCompiler;
-import mb.spoofax.compiler.util.BuilderBase;
-import mb.spoofax.compiler.util.Conversion;
-import mb.spoofax.compiler.util.Shared;
 import org.immutables.value.Value;
 
 import java.io.Serializable;
-import java.util.Properties;
 
 @Value.Immutable
 public interface CompileSdf3Input extends Serializable {
@@ -70,7 +66,7 @@ public interface CompileSdf3Input extends Serializable {
 
     /// Automatically provided sub-inputs
 
-    CompileLanguageShared compileLanguageShared();
+    CompileLanguageSpecificationShared compileLanguageShared();
 
 
     default void syncTo(ParserLanguageCompiler.Input.Builder builder) {

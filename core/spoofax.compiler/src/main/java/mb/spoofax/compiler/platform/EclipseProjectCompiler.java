@@ -97,30 +97,34 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
         manifestTemplate.write(context, input.manifestMfFile(), input);
 
         // Class files
-        final ResourcePath classesGenDirectory = input.generatedJavaSourcesDirectory();
-        packageInfoTemplate.write(context, input.basePackageInfo().file(classesGenDirectory), input);
-        componentCustomizerTemplate.write(context, input.baseComponentCustomizer().file(classesGenDirectory), input);
-        languageTemplate.write(context, input.baseLanguage().file(classesGenDirectory), input);
-        languageFactoryTemplate.write(context, input.baseLanguageFactory().file(classesGenDirectory), input);
-        pluginTemplate.write(context, input.basePlugin().file(classesGenDirectory), input);
-        moduleTemplate.write(context, input.baseEclipseModule().file(classesGenDirectory), input);
-        componentTemplate.write(context, input.baseEclipseComponent().file(classesGenDirectory), input);
-        identifiersTemplate.write(context, input.baseEclipseIdentifiers().file(classesGenDirectory), input);
-        documentProviderTemplate.write(context, input.baseDocumentProvider().file(classesGenDirectory), input);
-        editorTemplate.write(context, input.baseEditor().file(classesGenDirectory), input);
-        editorTrackerTemplate.write(context, input.baseEditorTracker().file(classesGenDirectory), input);
-        natureTemplate.write(context, input.baseNature().file(classesGenDirectory), input);
-        addNatureHandlerTemplate.write(context, input.addNatureHandler().file(classesGenDirectory), input);
-        removeNatureHandlerTemplate.write(context, input.removeNatureHandler().file(classesGenDirectory), input);
-        projectBuilderTemplate.write(context, input.baseProjectBuilder().file(classesGenDirectory), input);
-        mainMenuTemplate.write(context, input.baseMainMenu().file(classesGenDirectory), input);
-        editorContextMenuTemplate.write(context, input.baseEditorContextMenu().file(classesGenDirectory), input);
-        resourceContextMenuTemplate.write(context, input.baseResourceContextMenu().file(classesGenDirectory), input);
-        runCommandHandlerTemplate.write(context, input.baseRunCommandHandler().file(classesGenDirectory), input);
-        observeHandlerTemplate.write(context, input.baseObserveHandler().file(classesGenDirectory), input);
-        unobserveHandlerTemplate.write(context, input.baseUnobserveHandler().file(classesGenDirectory), input);
+        final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
+        if(input.adapterProjectDependency().isSome()) {
+            // Only generate package-info.java if the adapter project is a separate project. Otherwise we will have
+            // two package-info.java files in the same package, which is an error.
+            packageInfoTemplate.write(context, input.packageInfo().file(generatedJavaSourcesDirectory), input);
+        }
+        componentCustomizerTemplate.write(context, input.baseComponentCustomizer().file(generatedJavaSourcesDirectory), input);
+        languageTemplate.write(context, input.baseLanguage().file(generatedJavaSourcesDirectory), input);
+        languageFactoryTemplate.write(context, input.baseLanguageFactory().file(generatedJavaSourcesDirectory), input);
+        pluginTemplate.write(context, input.basePlugin().file(generatedJavaSourcesDirectory), input);
+        moduleTemplate.write(context, input.baseEclipseModule().file(generatedJavaSourcesDirectory), input);
+        componentTemplate.write(context, input.baseEclipseComponent().file(generatedJavaSourcesDirectory), input);
+        identifiersTemplate.write(context, input.baseEclipseIdentifiers().file(generatedJavaSourcesDirectory), input);
+        documentProviderTemplate.write(context, input.baseDocumentProvider().file(generatedJavaSourcesDirectory), input);
+        editorTemplate.write(context, input.baseEditor().file(generatedJavaSourcesDirectory), input);
+        editorTrackerTemplate.write(context, input.baseEditorTracker().file(generatedJavaSourcesDirectory), input);
+        natureTemplate.write(context, input.baseNature().file(generatedJavaSourcesDirectory), input);
+        addNatureHandlerTemplate.write(context, input.addNatureHandler().file(generatedJavaSourcesDirectory), input);
+        removeNatureHandlerTemplate.write(context, input.removeNatureHandler().file(generatedJavaSourcesDirectory), input);
+        projectBuilderTemplate.write(context, input.baseProjectBuilder().file(generatedJavaSourcesDirectory), input);
+        mainMenuTemplate.write(context, input.baseMainMenu().file(generatedJavaSourcesDirectory), input);
+        editorContextMenuTemplate.write(context, input.baseEditorContextMenu().file(generatedJavaSourcesDirectory), input);
+        resourceContextMenuTemplate.write(context, input.baseResourceContextMenu().file(generatedJavaSourcesDirectory), input);
+        runCommandHandlerTemplate.write(context, input.baseRunCommandHandler().file(generatedJavaSourcesDirectory), input);
+        observeHandlerTemplate.write(context, input.baseObserveHandler().file(generatedJavaSourcesDirectory), input);
+        unobserveHandlerTemplate.write(context, input.baseUnobserveHandler().file(generatedJavaSourcesDirectory), input);
         if(input.adapterProjectCompilerInput().multilangAnalyzer().isPresent()) {
-            metadataProviderTemplate.write(context, input.baseMetadataProvider().file(classesGenDirectory), input);
+            metadataProviderTemplate.write(context, input.baseMetadataProvider().file(generatedJavaSourcesDirectory), input);
         }
 
         return outputBuilder.build();
@@ -150,8 +154,8 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
         if(input.adapterProjectCompilerInput().multilangAnalyzer().isPresent()) {
             bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.multilangEclipseDep()));
         }
-        input.languageProjectDependency().ifSome((d) -> bundleDependencies.add(GradleConfiguredBundleDependency.bundleEmbedApi(d)));
-        bundleDependencies.add(GradleConfiguredBundleDependency.bundleEmbedApi(input.adapterProjectDependency()));
+        input.languageProjectDependency().ifSome(d -> bundleDependencies.add(GradleConfiguredBundleDependency.bundleEmbedApi(d)));
+        input.adapterProjectDependency().ifSome(d -> bundleDependencies.add(GradleConfiguredBundleDependency.bundleEmbedApi(d)));
         return bundleDependencies;
     }
 
@@ -184,6 +188,7 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
                 return this
                     .project(gradleProject)
                     .packageId(defaultPackageId(shared))
+                    .shared(shared)
                     ;
             }
 
@@ -197,6 +202,37 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
 
             public static String defaultPackageId(Shared shared) {
                 return shared.defaultPackageId() + defaultProjectSuffix();
+            }
+
+
+            public Builder withDefaultsSameProjectFromParentDirectory(ResourcePath parentDirectory, Shared shared) {
+                return withDefaultsSameProject(parentDirectory.appendRelativePath(defaultSameArtifactId(shared)), shared);
+            }
+
+            public Builder withDefaultsSameProject(ResourcePath baseDirectory, Shared shared) {
+                final GradleProject gradleProject = GradleProject.builder()
+                    .coordinate(shared.defaultGroupId(), defaultSameArtifactId(shared), Optional.of(shared.defaultVersion()))
+                    .baseDirectory(baseDirectory)
+                    .build();
+                return this
+                    .project(gradleProject)
+                    .packageId(defaultSamePackageId(shared))
+                    .languageProjectDependency(Option.ofNone())
+                    .adapterProjectDependency(Option.ofNone())
+                    .shared(shared)
+                    ;
+            }
+
+            public static String defaultSameProjectSuffix() {
+                return "";
+            }
+
+            public static String defaultSameArtifactId(Shared shared) {
+                return shared.defaultArtifactId() + defaultSameProjectSuffix();
+            }
+
+            public static String defaultSamePackageId(Shared shared) {
+                return shared.defaultPackageId() + defaultSameProjectSuffix();
             }
         }
 
@@ -217,12 +253,13 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
         /// Gradle configuration
 
         /* None indicates that the language project is the same project as the adapter project */
-        default Option<GradleDependency> languageProjectDependency() {
+        @Value.Default default Option<GradleDependency> languageProjectDependency() {
             return adapterProjectCompilerInput().languageProjectDependency();
         }
 
-        default GradleDependency adapterProjectDependency() {
-            return adapterProjectCompilerInput().adapterProject().project().asProjectDependency();
+        /* None indicates that the Eclipse project is the same project as the adapter project */
+        @Value.Default default Option<GradleDependency> adapterProjectDependency() {
+            return Option.ofSome(adapterProjectCompilerInput().adapterProject().project().asProjectDependency());
         }
 
         List<GradleConfiguredDependency> additionalDependencies();
@@ -580,14 +617,36 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
         }
 
 
-        /// Provided files
+        /// Files information, known up-front for build systems with static dependencies such as Gradle.
 
-        default ArrayList<ResourcePath> providedFiles() {
+        default ArrayList<ResourcePath> resourcePaths() {
+            final ArrayList<ResourcePath> sourcePaths = new ArrayList<>();
+            sourcePaths.add(generatedResourcesDirectory());
+            return sourcePaths;
+        }
+
+        default ArrayList<ResourcePath> resources() {
+            final ArrayList<ResourcePath> providedResources = new ArrayList<>();
+            providedResources.add(pluginXmlFile());
+            providedResources.add(componentExtensionSchemaFile());
+            providedResources.add(manifestMfFile());
+            return providedResources;
+        }
+
+        default ArrayList<ResourcePath> javaSourcePaths() {
+            final ArrayList<ResourcePath> sourcePaths = new ArrayList<>();
+            sourcePaths.add(generatedJavaSourcesDirectory());
+            return sourcePaths;
+        }
+
+        default ArrayList<ResourcePath> javaSourceFiles() {
             final ArrayList<ResourcePath> generatedFiles = new ArrayList<>();
-            generatedFiles.add(pluginXmlFile());
-            generatedFiles.add(manifestMfFile());
             if(classKind().isGenerating()) {
-                generatedFiles.add(basePackageInfo().file(this.generatedJavaSourcesDirectory()));
+                if(adapterProjectDependency().isSome()) {
+                    // Only generate package-info.java if the adapter project is a separate project. Otherwise we will
+                    // have two package-info.java files in the same package, which is an error.
+                    generatedFiles.add(basePackageInfo().file(this.generatedJavaSourcesDirectory()));
+                }
                 generatedFiles.add(baseLanguage().file(this.generatedJavaSourcesDirectory()));
                 generatedFiles.add(baseLanguageFactory().file(this.generatedJavaSourcesDirectory()));
                 generatedFiles.add(basePlugin().file(this.generatedJavaSourcesDirectory()));

@@ -11,6 +11,7 @@ imports
   part/language_base
   part/language
   part/language_adapter
+  part/eclipse
 
 context-free start-symbols
   

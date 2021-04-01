@@ -55,7 +55,7 @@ public class CompileSdf3 implements TaskDef<ResourcePath, Result<KeyedMessages, 
     public Result<KeyedMessages, Sdf3CompileException> exec(ExecContext context, ResourcePath rootDirectory) throws IOException {
         return context.require(cfgRootDirectoryToObject, rootDirectory)
             .mapErr(Sdf3CompileException::getLanguageCompilerConfigurationFail)
-            .flatMapThrowing(o1 -> Option.ofOptional(o1.compileLanguageToJavaClassPathInput.compileLanguageInput().sdf3()).mapThrowingOr(
+            .flatMapThrowing(o1 -> Option.ofOptional(o1.compileLanguageInput.compileLanguageSpecificationInput().sdf3()).mapThrowingOr(
                 i -> context.require(configure, rootDirectory)
                     .mapErr(Sdf3CompileException::configureFail)
                     .flatMapThrowing(o2 -> o2.mapThrowingOr(

@@ -49,7 +49,7 @@ public class CompileStratego implements TaskDef<ResourcePath, Result<KeyedMessag
     public Result<KeyedMessages, StrategoCompileException> exec(ExecContext context, ResourcePath rootDirectory) throws IOException {
         return context.require(cfgRootDirectoryToObject, rootDirectory)
             .mapErr(StrategoCompileException::getLanguageCompilerConfigurationFail)
-            .flatMapThrowing(o1 -> Option.ofOptional(o1.compileLanguageToJavaClassPathInput.compileLanguageInput().stratego()).mapThrowingOr(
+            .flatMapThrowing(o1 -> Option.ofOptional(o1.compileLanguageInput.compileLanguageSpecificationInput().stratego()).mapThrowingOr(
                 i -> context.require(configure, rootDirectory)
                     .mapErr(StrategoCompileException::configureFail)
                     .flatMapThrowing(o2 -> o2.mapThrowingOr(

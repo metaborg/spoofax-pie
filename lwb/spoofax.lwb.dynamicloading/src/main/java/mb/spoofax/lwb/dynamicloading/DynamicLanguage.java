@@ -1,5 +1,6 @@
 package mb.spoofax.lwb.dynamicloading;
 
+import mb.cfg.CompileLanguageInput;
 import mb.log.dagger.LoggerComponent;
 import mb.pie.api.serde.JavaSerde;
 import mb.pie.dagger.DaggerRootPieComponent;
@@ -10,7 +11,6 @@ import mb.resource.dagger.ResourceRegistriesProvider;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.platform.PlatformComponent;
-import mb.cfg.CompileLanguageToJavaClassPathInput;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -18,7 +18,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 
 public class DynamicLanguage {
-    private final CompileLanguageToJavaClassPathInput compileInput;
+    private final CompileLanguageInput compileInput;
     private final URLClassLoader classLoader;
     private final ResourceRegistriesProvider languageResourcesComponent;
     private final ResourceServiceComponent resourceServiceComponent;
@@ -27,7 +27,7 @@ public class DynamicLanguage {
     private boolean closed = false;
 
     public DynamicLanguage(
-        CompileLanguageToJavaClassPathInput compileInput,
+        CompileLanguageInput compileInput,
         URL[] classPath,
         LoggerComponent loggerComponent,
         ResourceServiceComponent parentResourceServiceComponent,
@@ -87,10 +87,10 @@ public class DynamicLanguage {
     }
 
     /**
-     * Gets the {@link CompileLanguageToJavaClassPathInput compiler input} that was used to compile this dynamic
+     * Gets the {@link CompileLanguageInput compiler input} that was used to compile this dynamic
      * language.
      */
-    public CompileLanguageToJavaClassPathInput getCompileInput() {
+    public CompileLanguageInput getCompileInput() {
         return compileInput;
     }
 

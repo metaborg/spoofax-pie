@@ -112,7 +112,7 @@ open class EclipsePlugin : Plugin<Project> {
     val compileTask = project.tasks.register("compileEclipseProject") {
       group = "spoofax compiler"
       inputs.property("input", input)
-      outputs.files(input.providedFiles().map { resourceServiceComponent.resourceService.toLocalFile(it) })
+      outputs.files(input.resources().map { resourceServiceComponent.resourceService.toLocalFile(it) })
 
       doLast {
         project.deleteDirectory(input.generatedJavaSourcesDirectory(), resourceServiceComponent.resourceService)

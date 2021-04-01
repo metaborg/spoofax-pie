@@ -1,6 +1,6 @@
 package mb.cfg.metalang;
 
-import mb.cfg.CompileLanguageShared;
+import mb.cfg.CompileLanguageSpecificationShared;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.language.StylerLanguageCompiler;
 import org.immutables.value.Value;
@@ -44,7 +44,7 @@ public interface CompileEsvInput extends Serializable {
 
     /// Automatically provided sub-inputs
 
-    CompileLanguageShared compileLanguageShared();
+    CompileLanguageSpecificationShared compileLanguageShared();
 
 
     default void syncTo(StylerLanguageCompiler.Input.Builder builder) {

@@ -1,6 +1,6 @@
 package mb.spoofax.lwb.dynamicloading;
 
-import mb.cfg.CompileLanguageToJavaClassPathInput;
+import mb.cfg.CompileLanguageInput;
 import mb.common.message.KeyedMessages;
 import mb.common.option.Option;
 import mb.common.region.Region;
@@ -45,7 +45,7 @@ class DynamicLanguageTest extends CharsTestBase {
     }
 
     @Test void testLanguageSpecificationChanges() throws Exception {
-        CompileLanguageToJavaClassPathInput previousInput;
+        CompileLanguageInput previousInput;
 
         {
             System.out.println("Initial dynamic load");
@@ -316,7 +316,7 @@ class DynamicLanguageTest extends CharsTestBase {
     }
 
     @Disabled @Test void testCloseLanguage() throws Exception {
-        CompileLanguageToJavaClassPathInput previousInput;
+        CompileLanguageInput previousInput;
 
         DynamicLanguage lang1a;
         try(DynamicLoaderMixedSession session = newSession()) {

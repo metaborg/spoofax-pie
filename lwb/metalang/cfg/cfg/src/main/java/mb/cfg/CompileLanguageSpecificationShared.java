@@ -7,8 +7,8 @@ import org.immutables.value.Value;
 import java.io.Serializable;
 
 @Value.Immutable
-public interface CompileLanguageShared extends Serializable {
-    class Builder extends ImmutableCompileLanguageShared.Builder {}
+public interface CompileLanguageSpecificationShared extends Serializable {
+    class Builder extends ImmutableCompileLanguageSpecificationShared.Builder {}
 
     static Builder builder() {
         return new Builder();
@@ -29,11 +29,11 @@ public interface CompileLanguageShared extends Serializable {
     /// Directories
 
     @Value.Default default ResourcePath generatedResourcesDirectory() {
-        return languageProject().project().buildGeneratedResourcesDirectory().appendRelativePath("spoofax3Language");
+        return languageProject().project().buildGeneratedResourcesDirectory().appendRelativePath("languageSpecification");
     }
 
     @Value.Default default ResourcePath generatedSourcesDirectory() {
-        return languageProject().project().buildGeneratedSourcesDirectory().appendRelativePath("spoofax3Language");
+        return languageProject().project().buildGeneratedSourcesDirectory().appendRelativePath("languageSpecification");
     }
 
     @Value.Default default ResourcePath generatedJavaSourcesDirectory() {

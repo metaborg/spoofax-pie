@@ -1,0 +1,17 @@
+module part/eclipse
+
+imports
+
+  lex/path
+  lex/str_id
+  configuration
+
+context-free sorts
+
+  EclipseOption
+
+context-free syntax
+
+  Part.EclipseSection = <eclipse {
+  <{EclipseOption "\n"}*>
+}>

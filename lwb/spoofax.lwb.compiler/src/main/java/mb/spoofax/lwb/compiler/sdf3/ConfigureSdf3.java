@@ -33,7 +33,7 @@ public class ConfigureSdf3 implements TaskDef<ResourcePath, Result<Option<Sdf3Sp
     public Result<Option<Sdf3SpecConfig>, Sdf3ConfigureException> exec(ExecContext context, ResourcePath rootDirectory) throws IOException {
         return context.require(cfgRootDirectoryToObject, rootDirectory)
             .mapErr(Sdf3ConfigureException::getLanguageCompilerConfigurationFail)
-            .<Option<Sdf3SpecConfig>, IOException>flatMapThrowing(cfgOutput -> Result.transpose(Option.ofOptional(cfgOutput.compileLanguageToJavaClassPathInput.compileLanguageInput().sdf3())
+            .<Option<Sdf3SpecConfig>, IOException>flatMapThrowing(cfgOutput -> Result.transpose(Option.ofOptional(cfgOutput.compileLanguageInput.compileLanguageSpecificationInput().sdf3())
                 .mapThrowing(sdf3Input -> toSdf3SpecConfig(context, rootDirectory, sdf3Input))
             ));
     }

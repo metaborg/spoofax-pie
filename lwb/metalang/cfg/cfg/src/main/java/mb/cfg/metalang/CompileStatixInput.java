@@ -1,6 +1,6 @@
 package mb.cfg.metalang;
 
-import mb.cfg.CompileLanguageShared;
+import mb.cfg.CompileLanguageSpecificationShared;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.language.ConstraintAnalyzerLanguageCompiler;
 import org.immutables.value.Value;
@@ -39,7 +39,7 @@ public interface CompileStatixInput extends Serializable {
 
     /// Automatically provided sub-inputs
 
-    CompileLanguageShared compileLanguageShared();
+    CompileLanguageSpecificationShared compileLanguageShared();
 
 
     default void syncTo(ConstraintAnalyzerLanguageCompiler.Input.Builder builder) {

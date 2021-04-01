@@ -1,6 +1,6 @@
 package mb.spoofax.lwb.dynamicloading;
 
-import mb.cfg.CompileLanguageToJavaClassPathInput;
+import mb.cfg.CompileLanguageInput;
 import mb.pie.api.ExecException;
 import mb.pie.api.Task;
 import mb.pie.runtime.tracer.MetricsTracer;
@@ -84,31 +84,31 @@ class CharsTestBase extends TestBase {
     }
 
 
-    DynamicLoaderReloadSession modifyStyler(DynamicLoaderMixedSession session, CompileLanguageToJavaClassPathInput input) throws IOException, ExecException, InterruptedException {
-        final ResourcePath path = input.compileLanguageInput().esv().get().mainFile();
+    DynamicLoaderReloadSession modifyStyler(DynamicLoaderMixedSession session, CompileLanguageInput input) throws IOException, ExecException, InterruptedException {
+        final ResourcePath path = input.compileLanguageSpecificationInput().esv().get().mainFile();
         final WritableResource file = resourceService.getWritableResource(path);
         final String text = file.readString().replace("0 0 150 bold", "255 255 0 italic");
         file.writeString(text);
         return session.updateAffectedBy(path);
     }
 
-    DynamicLoaderReloadSession modifyParser(DynamicLoaderMixedSession session, CompileLanguageToJavaClassPathInput input) throws IOException, ExecException, InterruptedException {
-        final ResourcePath path = input.compileLanguageInput().sdf3().get().mainFile();
+    DynamicLoaderReloadSession modifyParser(DynamicLoaderMixedSession session, CompileLanguageInput input) throws IOException, ExecException, InterruptedException {
+        final ResourcePath path = input.compileLanguageSpecificationInput().sdf3().get().mainFile();
         final WritableResource file = resourceService.getWritableResource(path);
         final String text = file.readString().replace("\\ ", "\\ \\t");
         file.writeString(text);
         return session.updateAffectedBy(path);
     }
 
-    DynamicLoaderReloadSession modifyTransformation(DynamicLoaderMixedSession session, CompileLanguageToJavaClassPathInput input) throws IOException, ExecException, InterruptedException {
-        final ResourcePath path = input.compileLanguageInput().stratego().get().mainSourceDirectory().appendRelativePath("transform/remove-a.str");
+    DynamicLoaderReloadSession modifyTransformation(DynamicLoaderMixedSession session, CompileLanguageInput input) throws IOException, ExecException, InterruptedException {
+        final ResourcePath path = input.compileLanguageSpecificationInput().stratego().get().mainSourceDirectory().appendRelativePath("transform/remove-a.str");
         final WritableResource file = resourceService.getWritableResource(path);
         final String text = file.readString().replace("string-replace(|\"a\", \"a\")", "string-replace(|\"a\", \"\")");
         file.writeString(text);
         return session.updateAffectedBy(path);
     }
 
-    DynamicLoaderReloadSession modifyCommand(DynamicLoaderMixedSession session, CompileLanguageToJavaClassPathInput input) throws IOException, ExecException, InterruptedException {
+    DynamicLoaderReloadSession modifyCommand(DynamicLoaderMixedSession session, CompileLanguageInput input) throws IOException, ExecException, InterruptedException {
         final ResourcePath path = input.userJavaSourcePaths().get(0).appendRelativePath("mb/chars/CharsDebugRemoveA.java");
         final WritableResource file = resourceService.getWritableResource(path);
         final String text = file.readString().replace("A characters", "'A' characters");
@@ -116,8 +116,8 @@ class CharsTestBase extends TestBase {
         return session.updateAffectedBy(path);
     }
 
-    DynamicLoaderReloadSession modifyAnalyzer(DynamicLoaderMixedSession session, CompileLanguageToJavaClassPathInput input) throws IOException, ExecException, InterruptedException {
-        final ResourcePath path = input.compileLanguageInput().statix().get().mainFile();
+    DynamicLoaderReloadSession modifyAnalyzer(DynamicLoaderMixedSession session, CompileLanguageInput input) throws IOException, ExecException, InterruptedException {
+        final ResourcePath path = input.compileLanguageSpecificationInput().statix().get().mainFile();
         final WritableResource file = resourceService.getWritableResource(path);
         final String text = file.readString()
             .replace("Chars(\"\")", "Chars(\"abcdefg\")")

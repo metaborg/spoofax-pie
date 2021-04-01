@@ -93,16 +93,21 @@ val privatePackage = listOf(
   "javax.inject.*",
   // Embed `org.checkerframework:checker-qual-android`
   "org.checkerframework.*",
-  // Embed `com.google.dagger:dagger-compiler`. Allow split packages for `dagger.model`, as `dagger-compiler` and
-  // `dagger-spi` both have this package
+  // Embed `com.google.dagger:dagger-compiler` and dependencies. Allow split packages for `dagger.model`, as
+  // `dagger-compiler` and `dagger-spi` both have this package
   "dagger.model.*;-split-package:=merge-first",
   "dagger.*",
+  "dagger.internal.*",
+  "com.squareup.javapoet.*",
+  "kotlin.*;-split-package:=merge-first",
   // Embed `io.github.classgraph:classgraph`.
   "io.github.classgraph.*",
   "nonapi.io.github.classgraph.*",
   // Embed PIE task modules
   "mb.pie.task.archive.*",
-  "mb.pie.task.java.*"
+  "mb.pie.task.java.*",
+  // Embed services
+  "META-INF.services.*;-split-package:=merge-first"
 )
 tasks {
   "jar"(Jar::class) {

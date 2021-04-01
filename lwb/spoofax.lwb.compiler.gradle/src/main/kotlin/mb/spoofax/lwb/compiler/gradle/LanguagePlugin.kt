@@ -22,8 +22,8 @@ import mb.spoofax.compiler.adapter.*
 import mb.spoofax.compiler.language.*
 import mb.spoofax.compiler.util.*
 import mb.spoofax.lwb.compiler.CompileLanguageSpecification
+import mb.cfg.CompileLanguageSpecificationInput
 import mb.cfg.CompileLanguageInput
-import mb.cfg.CompileLanguageToJavaClassPathInput
 import mb.spoofax.lwb.compiler.dagger.StandaloneSpoofax3Compiler
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -69,17 +69,17 @@ open class LanguagePlugin : Plugin<Project> {
   private fun getInput(
     project: Project,
     spoofax3Compiler: StandaloneSpoofax3Compiler
-  ): CompileLanguageToJavaClassPathInput {
+  ): CompileLanguageInput {
     spoofax3Compiler.pieComponent.pie.newSession().use {
       return it.require(spoofax3Compiler.compiler.cfgComponent.cfgRootDirectoryToObject.createTask(FSPath(project.projectDir)))
-        .unwrap().compileLanguageToJavaClassPathInput // TODO: proper error handling
+        .unwrap().compileLanguageInput // TODO: proper error handling
     }
   }
 
   private fun configure(
     project: Project,
     spoofax3Compiler: StandaloneSpoofax3Compiler,
-    input: CompileLanguageToJavaClassPathInput
+    input: CompileLanguageInput
   ) {
     val resourceService = spoofax3Compiler.compiler.resourceServiceComponent.resourceService
     val languageProjectCompiler = spoofax3Compiler.compiler.spoofaxCompilerComponent.languageProjectCompiler
@@ -88,7 +88,7 @@ open class LanguagePlugin : Plugin<Project> {
     val pie = spoofax3Compiler.pieComponent.pie
     configureProject(project, resourceService, languageProjectCompiler, adapterProjectCompiler, input)
     configureCompileLanguageProjectTask(project, resourceService, pie, languageProjectCompiler, input.languageProjectInput())
-    configureCompileLanguageTask(project, resourceService, pie, compileLanguage, input.compileLanguageInput())
+    configureCompileLanguageTask(project, resourceService, pie, compileLanguage, input.compileLanguageSpecificationInput())
     configureCompileAdapterProjectTask(project, resourceService, pie, adapterProjectCompiler, input.adapterProjectInput())
   }
 
@@ -97,7 +97,7 @@ open class LanguagePlugin : Plugin<Project> {
     resourceService: ResourceService,
     languageProjectCompiler: LanguageProjectCompiler,
     adapterProjectCompiler: AdapterProjectCompiler,
-    input: CompileLanguageToJavaClassPathInput
+    input: CompileLanguageInput
   ) {
     // Language project compiler
     val languageProjectInput = input.languageProjectInput()
@@ -106,7 +106,7 @@ open class LanguagePlugin : Plugin<Project> {
       it.addToDependencies(project)
     }
     // Language compiler
-    val languageSpecificationInput = input.compileLanguageInput()
+    val languageSpecificationInput = input.compileLanguageSpecificationInput()
     project.addMainResourceDirectory(languageSpecificationInput.compileLanguageShared().generatedResourcesDirectory(), resourceService)
     project.addMainJavaSourceDirectory(languageSpecificationInput.compileLanguageShared().generatedJavaSourcesDirectory(), resourceService)
     // Adapter project compiler
@@ -148,7 +148,7 @@ open class LanguagePlugin : Plugin<Project> {
     resourceService: ResourceService,
     pie: Pie,
     compiler: CompileLanguageSpecification,
-    input: CompileLanguageInput
+    input: CompileLanguageSpecificationInput
   ) {
     val compileTask = project.tasks.register("compileLanguage") {
       group = "spoofax compiler"

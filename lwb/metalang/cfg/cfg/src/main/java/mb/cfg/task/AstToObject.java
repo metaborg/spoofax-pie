@@ -1,5 +1,13 @@
 package mb.cfg.task;
 
+import mb.cfg.CompileLanguageInput;
+import mb.cfg.CompileLanguageSpecificationInput;
+import mb.cfg.CompileLanguageSpecificationInputBuilder;
+import mb.cfg.CompileLanguageSpecificationShared;
+import mb.cfg.metalang.CompileEsvInput;
+import mb.cfg.metalang.CompileSdf3Input;
+import mb.cfg.metalang.CompileStatixInput;
+import mb.cfg.metalang.CompileStrategoInput;
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Severity;
@@ -31,19 +39,12 @@ import mb.spoofax.compiler.language.MultilangAnalyzerLanguageCompiler;
 import mb.spoofax.compiler.language.ParserLanguageCompiler;
 import mb.spoofax.compiler.language.StrategoRuntimeLanguageCompiler;
 import mb.spoofax.compiler.language.StylerLanguageCompiler;
+import mb.spoofax.compiler.platform.EclipseProjectCompiler;
 import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.TypeInfo;
 import mb.spoofax.core.language.command.CommandContextType;
 import mb.spoofax.core.language.command.CommandExecutionType;
 import mb.spoofax.core.language.command.EnclosingCommandContextType;
-import mb.cfg.CompileLanguageInput;
-import mb.cfg.CompileLanguageInputBuilder;
-import mb.cfg.CompileLanguageShared;
-import mb.cfg.CompileLanguageToJavaClassPathInput;
-import mb.cfg.metalang.CompileEsvInput;
-import mb.cfg.metalang.CompileSdf3Input;
-import mb.cfg.metalang.CompileStatixInput;
-import mb.cfg.metalang.CompileStrategoInput;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -61,12 +62,12 @@ import java.util.stream.Stream;
 public class AstToObject {
     public static class Output {
         public final KeyedMessages messages;
-        public final CompileLanguageToJavaClassPathInput compileLanguageToJavaClassPathInput;
+        public final CompileLanguageInput compileLanguageInput;
         public final Properties properties;
 
-        public Output(KeyedMessages messages, CompileLanguageToJavaClassPathInput compileLanguageToJavaClassPathInput, Properties properties) {
+        public Output(KeyedMessages messages, CompileLanguageInput compileLanguageInput, Properties properties) {
             this.messages = messages;
-            this.compileLanguageToJavaClassPathInput = compileLanguageToJavaClassPathInput;
+            this.compileLanguageInput = compileLanguageInput;
             this.properties = properties;
         }
     }
@@ -99,6 +100,10 @@ public class AstToObject {
         // TODO: build directory
         final Shared shared = sharedBuilder.build();
 
+        // CompileLanguageInput builder
+        final CompileLanguageInput.Builder compileLanguageInputBuilder = CompileLanguageInput.builder()
+            .shared(shared);
+
         // LanguageBaseShared & LanguageAdapterShared
         final LanguageProject.Builder languageBaseSharedBuilder = LanguageProject.builder()
             .withDefaults(rootDirectory, shared);
@@ -109,18 +114,18 @@ public class AstToObject {
         final AdapterProject languageAdapterShared = languageAdapterSharedBuilder.build();
 
         // LanguageShared
-        final CompileLanguageShared.Builder languageSharedBuilder = CompileLanguageShared.builder()
+        final CompileLanguageSpecificationShared.Builder languageSharedBuilder = CompileLanguageSpecificationShared.builder()
             .languageProject(languageBaseShared);
         // TODO: includeLibSpoofax2Exports
         // TODO: includeLibStatixExports
-        final CompileLanguageShared languageShared = languageSharedBuilder.build();
+        final CompileLanguageSpecificationShared languageShared = languageSharedBuilder.build();
 
         // Builders for LanguageBaseCompilerInput & LanguageCompilerInput
         final LanguageProjectCompilerInputBuilder baseBuilder = new LanguageProjectCompilerInputBuilder();
         final AdapterProjectCompilerInputBuilder adapterBuilder = new AdapterProjectCompilerInputBuilder();
 
         // LanguageCompilerInput
-        final CompileLanguageInputBuilder languageCompilerInputBuilder = new CompileLanguageInputBuilder();
+        final CompileLanguageSpecificationInputBuilder languageCompilerInputBuilder = new CompileLanguageSpecificationInputBuilder();
         parts.getAllSubTermsInListAsParts("Sdf3Section").ifPresent(subParts -> {
             final CompileSdf3Input.Builder builder = languageCompilerInputBuilder.withSdf3();
             subParts.forOneSubtermAsPath("Sdf3MainSourceDirectory", rootDirectory, builder::mainSourceDirectory);
@@ -146,8 +151,9 @@ public class AstToObject {
             subParts.forOneSubtermAsString("StrategoLanguageStrategyAffix", builder::languageStrategyAffix);
             // TODO: more Stratego properties
         });
-        final CompileLanguageInput languageCompilerInput = languageCompilerInputBuilder.build(properties, shared, languageShared);
+        final CompileLanguageSpecificationInput languageCompilerInput = languageCompilerInputBuilder.build(properties, shared, languageShared);
         languageCompilerInput.syncTo(baseBuilder);
+        compileLanguageInputBuilder.compileLanguageSpecificationInput(languageCompilerInput);
 
         // LanguageBaseCompilerInput & LanguageAdapterCompilerInput
         parts.getAllSubTermsInListAsParts("ParserSection").ifPresent(subParts -> {
@@ -227,21 +233,27 @@ public class AstToObject {
             adapterBuilder.project.addCommandDefs(commandDefBuilder.build());
         });
         final LanguageProjectCompiler.Input languageBaseCompilerInput = baseBuilder.build(shared, languageBaseShared);
+        compileLanguageInputBuilder.languageProjectInput(languageBaseCompilerInput);
         final AdapterProjectCompiler.Input languageAdapterCompilerInput = adapterBuilder.build(languageBaseCompilerInput, Option.ofNone(), languageAdapterShared);
+        compileLanguageInputBuilder.adapterProjectInput(languageAdapterCompilerInput);
 
-        // Final input object.
-        final CompileLanguageToJavaClassPathInput.Builder compileLanguageToJavaClassPathInputBuilder = CompileLanguageToJavaClassPathInput.builder()
-            .shared(shared)
-            .languageProjectInput(languageBaseCompilerInput)
-            .compileLanguageInput(languageCompilerInput)
-            .adapterProjectInput(languageAdapterCompilerInput);
-        // TODO: properties
-        final CompileLanguageToJavaClassPathInput compileLanguageToJavaClassPathInput = compileLanguageToJavaClassPathInputBuilder.build();
-        compileLanguageToJavaClassPathInput.savePersistentProperties(properties);
+        // EclipseProjectCompiler.Input
+        parts.getAllSubTermsInListAsParts("EclipseSection").ifPresent(subParts -> {
+            final EclipseProjectCompiler.Input eclipseProjectCompilerInput = EclipseProjectCompiler.Input.builder()
+                .withDefaultsSameProject(rootDirectory, shared)
+                .languageProjectCompilerInput(languageBaseCompilerInput)
+                .adapterProjectCompilerInput(languageAdapterCompilerInput)
+                .build();
+            compileLanguageInputBuilder.eclipseProjectInput(eclipseProjectCompilerInput);
+        });
+
+        // Build compile language input object
+        final CompileLanguageInput compileLanguageInput = compileLanguageInputBuilder.build();
+        compileLanguageInput.savePersistentProperties(properties);
 
         // TODO: remove used parts and check to see that there are no leftover parts in the end? Or at least put warnings/errors on those?
 
-        final Output output = new Output(messagesBuilder.build(), compileLanguageToJavaClassPathInput, properties);
+        final Output output = new Output(messagesBuilder.build(), compileLanguageInput, properties);
         return output;
     }
 

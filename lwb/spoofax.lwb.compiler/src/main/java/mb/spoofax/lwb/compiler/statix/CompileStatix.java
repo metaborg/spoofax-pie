@@ -51,7 +51,7 @@ public class CompileStatix implements TaskDef<ResourcePath, Result<KeyedMessages
     public Result<KeyedMessages, StatixCompileException> exec(ExecContext context, ResourcePath rootDirectory) throws Exception {
         return context.require(cfgRootDirectoryToObject, rootDirectory)
             .mapErr(StatixCompileException::getLanguageCompilerConfigurationFail)
-            .flatMapThrowing(o1 -> Option.ofOptional(o1.compileLanguageToJavaClassPathInput.compileLanguageInput().statix()).mapThrowingOr(
+            .flatMapThrowing(o1 -> Option.ofOptional(o1.compileLanguageInput.compileLanguageSpecificationInput().statix()).mapThrowingOr(
                 i -> context.require(configure, rootDirectory)
                     .mapErr(StatixCompileException::configureFail)
                     .flatMapThrowing(o2 -> o2.mapThrowingOr(

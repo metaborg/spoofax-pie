@@ -33,7 +33,7 @@ public class ConfigureStatix implements TaskDef<ResourcePath, Result<Option<Stat
     public Result<Option<StatixConfig>, StatixConfigureException> exec(ExecContext context, ResourcePath rootDirectory) throws IOException {
         return context.require(cfgRootDirectoryToObject, rootDirectory)
             .mapErr(StatixConfigureException::getLanguageCompilerConfigurationFail)
-            .<Option<StatixConfig>, IOException>flatMapThrowing(cfgOutput -> Result.transpose(Option.ofOptional(cfgOutput.compileLanguageToJavaClassPathInput.compileLanguageInput().statix())
+            .<Option<StatixConfig>, IOException>flatMapThrowing(cfgOutput -> Result.transpose(Option.ofOptional(cfgOutput.compileLanguageInput.compileLanguageSpecificationInput().statix())
                 .mapThrowing(statixInput -> toStatixConfig(context, rootDirectory, statixInput))
             ));
     }

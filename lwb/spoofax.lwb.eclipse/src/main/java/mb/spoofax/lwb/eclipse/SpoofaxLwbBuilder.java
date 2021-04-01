@@ -7,30 +7,39 @@ import mb.common.util.ExceptionPrinter;
 import mb.log.api.Logger;
 import mb.pie.api.ExecException;
 import mb.pie.api.MixedSession;
+import mb.pie.api.Pie;
 import mb.pie.api.Task;
 import mb.pie.api.TopDownSession;
 import mb.pie.dagger.PieComponent;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.eclipsebundle.SpoofaxCompilerEclipseBundle;
-import mb.spoofax.eclipse.EclipseResourceServiceComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.resource.EclipseResourcePath;
-import mb.spoofax.eclipse.util.ResourceUtil;
 import mb.spoofax.lwb.compiler.CompileLanguage;
 import mb.spoofax.lwb.compiler.CompileLanguageException;
 import mb.tooling.eclipsebundle.ToolingEclipseBundle;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.action.ContributionItem;
+import org.eclipse.ui.IWindowListener;
+import org.eclipse.ui.editors.text.TextFileDocumentProvider;
+import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.osgi.framework.BundleActivator;
 
+import java.io.File;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 
 public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
@@ -65,6 +74,14 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         }
         return null;
     }
+
+    @Override protected void clean(IProgressMonitor monitor) throws CoreException {
+        final Pie pie = SpoofaxLwbLifecycleParticipant.getInstance().getPieComponent().getPie();
+        pie.dropCallbacks();
+        pie.dropStore();
+        forgetLastBuiltState();
+    }
+
 
     private void fullBuild(IProject eclipseProject, @Nullable IProgressMonitor monitor) throws CoreException, InterruptedException {
         final ResourcePath rootDirectory = getResourcePath(eclipseProject);
@@ -135,10 +152,23 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
             .addClassLoader(SpoofaxLwbPlugin.class.getClassLoader())
             .addClassLoader(SpoofaxPlugin.class.getClassLoader())
             .addClassLoader(ToolingEclipseBundle.class.getClassLoader())
-            .addClassLoader(SpoofaxCompilerEclipseBundle.class.getClassLoader()); // OPTO: only scan for classpath once?
+            .addClassLoader(SpoofaxCompilerEclipseBundle.class.getClassLoader())
+            .addClassLoader(BundleActivator.class.getClassLoader()) // Bundle: org.eclipse.osgi
+            .addClassLoader(IConfigurationElement.class.getClassLoader()) // Bundle: org.eclipse.equinox.registry
+            .addClassLoader(Platform.class.getClassLoader()) // Bundle: org.eclipse.core.runtime
+            .addClassLoader(AbstractHandler.class.getClassLoader()) // Bundle: org.eclipse.core.commands
+            .addClassLoader(IWindowListener.class.getClassLoader()) // Bundle: org.eclipse.ui.workbench
+            .addClassLoader(IDocumentProvider.class.getClassLoader()) // Bundle org.eclipse.ui.workbench.texteditor
+            .addClassLoader(TextFileDocumentProvider.class.getClassLoader()) // Bundle: org.eclipse.ui.editors
+            .addClassLoader(ContributionItem.class.getClassLoader()) // Bundle: org.eclipse.jface
+//            .addClassLoader(dagger.model.BindingGraphProxies.class.getClassLoader()) // Dagger compiler
+            ; // OPTO: only scan for classpath once?
+        final List<File> classPath = classGraph.getClasspathFiles();
+        logger.trace("Using class path: {}", classPath);
         final CompileLanguage.Args args = CompileLanguage.Args.builder()
             .rootDirectory(rootDirectory)
-            .additionalJavaClassPath(classGraph.getClasspathFiles())
+            .additionalJavaClassPath(classPath)
+            .additionalJavaAnnotationProcessorPath(classPath)
             .build();
         return SpoofaxLwbLifecycleParticipant.getInstance().getSpoofax3Compiler().component.getCompileLanguage().createTask(args);
     }

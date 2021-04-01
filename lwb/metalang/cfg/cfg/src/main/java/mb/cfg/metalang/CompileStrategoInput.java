@@ -1,6 +1,6 @@
 package mb.cfg.metalang;
 
-import mb.cfg.CompileLanguageShared;
+import mb.cfg.CompileLanguageSpecificationShared;
 import mb.common.util.ListView;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.language.StrategoRuntimeLanguageCompiler;
@@ -94,7 +94,7 @@ public interface CompileStrategoInput extends Serializable {
 
     /// Automatically provided sub-inputs
 
-    CompileLanguageShared compileLanguageShared();
+    CompileLanguageSpecificationShared compileLanguageShared();
 
     Shared shared();
 

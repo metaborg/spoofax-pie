@@ -47,7 +47,7 @@ public class CompileEsv implements TaskDef<ResourcePath, Result<KeyedMessages, E
     public Result<KeyedMessages, EsvCompileException> exec(ExecContext context, ResourcePath rootDirectory) {
         return context.require(cfgRootDirectoryToObject, rootDirectory)
             .mapErr(EsvCompileException::getLanguageCompilerConfigurationFail)
-            .flatMap(o1 -> Option.ofOptional(o1.compileLanguageToJavaClassPathInput.compileLanguageInput().esv()).mapOr(
+            .flatMap(o1 -> Option.ofOptional(o1.compileLanguageInput.compileLanguageSpecificationInput().esv()).mapOr(
                 i -> context.require(configure, rootDirectory)
                     .mapErr(EsvCompileException::configureFail)
                     .flatMap(o2 -> o2.mapOr(

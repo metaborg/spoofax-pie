@@ -1,8 +1,8 @@
 package mb.spoofax.lwb.compiler.stratego;
 
 import mb.cfg.CompileLanguageInput;
-import mb.cfg.CompileLanguageShared;
-import mb.cfg.CompileLanguageToJavaClassPathInput;
+import mb.cfg.CompileLanguageSpecificationInput;
+import mb.cfg.CompileLanguageSpecificationShared;
 import mb.cfg.metalang.CompileStrategoInput;
 import mb.cfg.task.CfgRootDirectoryToObject;
 import mb.common.option.Option;
@@ -135,8 +135,8 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
     public Result<Option<StrategoCompileConfig>, StrategoConfigureException> exec(ExecContext context, ResourcePath rootDirectory) throws IOException {
         return context.require(cfgRootDirectoryToObject, rootDirectory)
             .mapErr(StrategoConfigureException::getLanguageCompilerConfigurationFail)
-            .<Option<StrategoCompileConfig>, IOException>flatMapThrowing(cfgOutput -> Result.transpose(Option.ofOptional(cfgOutput.compileLanguageToJavaClassPathInput.compileLanguageInput().stratego())
-                .mapThrowing(strategoInput -> toStrategoConfig(context, rootDirectory, cfgOutput.compileLanguageToJavaClassPathInput, strategoInput))
+            .<Option<StrategoCompileConfig>, IOException>flatMapThrowing(cfgOutput -> Result.transpose(Option.ofOptional(cfgOutput.compileLanguageInput.compileLanguageSpecificationInput().stratego())
+                .mapThrowing(strategoInput -> toStrategoConfig(context, rootDirectory, cfgOutput.compileLanguageInput, strategoInput))
             ));
     }
 
@@ -144,12 +144,12 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
     public Result<StrategoCompileConfig, StrategoConfigureException> toStrategoConfig(
         ExecContext context,
         ResourcePath rootDirectory,
-        CompileLanguageToJavaClassPathInput input,
+        CompileLanguageInput input,
         CompileStrategoInput strategoInput
     ) throws IOException {
         // TODO: move required properties into strategoInput.
-        final CompileLanguageInput compileLanguageInput = input.compileLanguageInput();
-        final CompileLanguageShared compileLanguageShared = compileLanguageInput.compileLanguageShared();
+        final CompileLanguageSpecificationInput compileLanguageSpecificationInput = input.compileLanguageSpecificationInput();
+        final CompileLanguageSpecificationShared compileLanguageSpecificationShared = compileLanguageSpecificationInput.compileLanguageShared();
 
         // Check main source directory, main file, and include directories.
         final HierarchicalResource mainSourceDirectory = context.require(strategoInput.mainSourceDirectory(), ResourceStampers.<HierarchicalResource>exists());
@@ -177,10 +177,10 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
 
         // Determine libspoofax2 definition directories.
         final HashSet<HierarchicalResource> libSpoofax2DefinitionDirs = new LinkedHashSet<>(); // LinkedHashSet to remove duplicates while keeping insertion order.
-        if(compileLanguageShared.includeLibSpoofax2Exports()) {
+        if(compileLanguageSpecificationShared.includeLibSpoofax2Exports()) {
             final ClassLoaderResourceLocations locations = libSpoofax2ClassLoaderResources.definitionDirectory.getLocations();
             libSpoofax2DefinitionDirs.addAll(locations.directories);
-            final ResourcePath unarchiveDirectoryBase = compileLanguageShared.unarchiveDirectory().appendRelativePath("libspoofax2");
+            final ResourcePath unarchiveDirectoryBase = compileLanguageSpecificationShared.unarchiveDirectory().appendRelativePath("libspoofax2");
             for(JarFileWithPath jarFileWithPath : locations.jarFiles) {
                 final ResourcePath jarFilePath = jarFileWithPath.file.getPath();
                 @SuppressWarnings("ConstantConditions") // JAR files always have leaves.
@@ -202,10 +202,10 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
 
         // Determine libstatix definition directories.
         final HashSet<HierarchicalResource> libStatixDefinitionDirs = new LinkedHashSet<>(); // LinkedHashSet to remove duplicates while keeping insertion order.
-        if(compileLanguageShared.includeLibStatixExports()) {
+        if(compileLanguageSpecificationShared.includeLibStatixExports()) {
             final ClassLoaderResourceLocations locations = libStatixClassLoaderResources.definitionDirectory.getLocations();
             libStatixDefinitionDirs.addAll(locations.directories);
-            final ResourcePath unarchiveDirectoryBase = compileLanguageShared.unarchiveDirectory().appendRelativePath("libstatix");
+            final ResourcePath unarchiveDirectoryBase = compileLanguageSpecificationShared.unarchiveDirectory().appendRelativePath("libstatix");
             for(JarFileWithPath jarFileWithPath : locations.jarFiles) {
                 final ResourcePath jarFilePath = jarFileWithPath.file.getPath();
                 @SuppressWarnings("ConstantConditions") // JAR files always have leaves.
@@ -238,7 +238,7 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
             // noinspection ConstantConditions (value is present)
             final Sdf3SpecConfig sdf3Config = configureSdf3Option.get();
 
-            final ResourcePath generatedSourcesDirectory = compileLanguageShared.generatedStrategoSourcesDirectory();
+            final ResourcePath generatedSourcesDirectory = compileLanguageSpecificationShared.generatedStrategoSourcesDirectory();
             final String strategyAffix = strategoInput.languageStrategyAffix();
 
             final ResourceWalker walker = Sdf3Util.createResourceWalker();

@@ -1,6 +1,7 @@
 package mb.cfg.task;
 
 import mb.cfg.CfgScope;
+import mb.cfg.CompileLanguageInput;
 import mb.common.message.KeyedMessages;
 import mb.common.result.Result;
 import mb.common.util.Properties;
@@ -9,7 +10,6 @@ import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
-import mb.cfg.CompileLanguageToJavaClassPathInput;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -66,16 +66,16 @@ public class CfgToObject implements TaskDef<CfgToObject.Input, Result<CfgToObjec
 
     public static class Output implements Serializable {
         public final KeyedMessages messages;
-        public final CompileLanguageToJavaClassPathInput compileLanguageToJavaClassPathInput;
+        public final CompileLanguageInput compileLanguageInput;
         public final Properties properties;
 
         public Output(
             KeyedMessages messages,
-            CompileLanguageToJavaClassPathInput compileLanguageToJavaClassPathInput,
+            CompileLanguageInput compileLanguageInput,
             Properties properties
         ) {
             this.messages = messages;
-            this.compileLanguageToJavaClassPathInput = compileLanguageToJavaClassPathInput;
+            this.compileLanguageInput = compileLanguageInput;
             this.properties = properties;
         }
 
@@ -84,13 +84,13 @@ public class CfgToObject implements TaskDef<CfgToObject.Input, Result<CfgToObjec
             if(o == null || getClass() != o.getClass()) return false;
             final Output output = (Output)o;
             if(!messages.equals(output.messages)) return false;
-            if(!compileLanguageToJavaClassPathInput.equals(output.compileLanguageToJavaClassPathInput)) return false;
+            if(!compileLanguageInput.equals(output.compileLanguageInput)) return false;
             return properties.equals(output.properties);
         }
 
         @Override public int hashCode() {
             int result = messages.hashCode();
-            result = 31 * result + compileLanguageToJavaClassPathInput.hashCode();
+            result = 31 * result + compileLanguageInput.hashCode();
             result = 31 * result + properties.hashCode();
             return result;
         }
@@ -98,7 +98,7 @@ public class CfgToObject implements TaskDef<CfgToObject.Input, Result<CfgToObjec
         @Override public String toString() {
             return "CfgToObject$Output{" +
                 "messages=" + messages +
-                ", compileLanguageToJavaClassPathInput=" + compileLanguageToJavaClassPathInput +
+                ", compileLanguageToJavaClassPathInput=" + compileLanguageInput +
                 ", properties=" + properties +
                 '}';
         }
@@ -140,7 +140,7 @@ public class CfgToObject implements TaskDef<CfgToObject.Input, Result<CfgToObjec
         if(output.messages.containsError()) {
             return Result.ofErr(CfgToObjectException.validationFail(output.messages));
         } else {
-            return Result.ofOk(new Output(output.messages, output.compileLanguageToJavaClassPathInput, output.properties));
+            return Result.ofOk(new Output(output.messages, output.compileLanguageInput, output.properties));
         }
     }
 }
