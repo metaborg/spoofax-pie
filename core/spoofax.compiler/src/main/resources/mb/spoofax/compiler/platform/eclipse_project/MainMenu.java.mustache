@@ -4,6 +4,6 @@ import mb.spoofax.eclipse.menu.MainMenu;
 
 public class {{baseMainMenu.id}} extends MainMenu {
     public {{baseMainMenu.id}}() {
-        super({{language.qualifiedId}}.getInstance().getComponent());
+        super({{languageFactory.qualifiedId}}.getLanguage().getComponent());
     }
 }

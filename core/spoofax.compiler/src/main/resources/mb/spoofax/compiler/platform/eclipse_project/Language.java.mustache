@@ -25,40 +25,28 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class {{baseLanguage.id}} implements EclipseLifecycleParticipant {
-    private static @Nullable {{baseLanguage.id}} instance;
-
     protected {{adapterProjectCompilerInput.resourcesComponent.nullableQualifiedId}} resourcesComponent;
     protected {{eclipseComponent.nullableQualifiedId}} component;
     protected @Nullable PieComponent pieComponent;
 
-    protected {{baseLanguage.id}}() {}
-
-
-    public static {{baseLanguage.id}} getInstance() {
-        if(instance == null) {
-            instance = new {{baseLanguage.id}}();
-        }
-        return instance;
-    }
-
 
     public {{adapterProjectCompilerInput.resourcesComponent.qualifiedId}} getResourcesComponent() {
         if(resourcesComponent == null) {
-            throw new RuntimeException("{{adapterProjectCompilerInput.resourcesComponent.id}} has not been initialized yet");
+            throw new RuntimeException("{{adapterProjectCompilerInput.resourcesComponent.id}} has not been initialized yet or has been deinitialized");
         }
         return resourcesComponent;
     }
 
     public {{eclipseComponent.qualifiedId}} getComponent() {
         if(component == null) {
-            throw new RuntimeException("{{eclipseComponent.id}} has not been initialized yet");
+            throw new RuntimeException("{{eclipseComponent.id}} has not been initialized yet or has been deinitialized");
         }
         return component;
     }
 
     public PieComponent getPieComponent() {
         if(pieComponent == null) {
-            throw new RuntimeException("PieComponent has not been initialized yet");
+            throw new RuntimeException("PieComponent has not been initialized yet or has been deinitialized");
         }
         return pieComponent;
     }
@@ -122,10 +110,7 @@ public class {{baseLanguage.id}} implements EclipseLifecycleParticipant {
     }
 
     @Override public void close() throws Exception {
-        if(pieComponent != null) {
-            pieComponent.close();
-            pieComponent = null;
-        }
+        pieComponent = null;
         if(component != null) {
             component.close();
             component = null;

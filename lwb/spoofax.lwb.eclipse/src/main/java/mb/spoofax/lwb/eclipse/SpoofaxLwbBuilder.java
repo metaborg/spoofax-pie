@@ -26,9 +26,12 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.ICoreRunnable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
@@ -58,22 +61,26 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         if(kind == AUTO_BUILD) {
             return null; // Ignore automatics builds (for now?)
         }
-
         final IProject project = getProject();
-        try {
-            if(kind == FULL_BUILD) {
-                fullBuild(project, monitor);
-            } else {
-                final @Nullable IResourceDelta delta = getDelta(project);
-                if(delta == null) {
-                    fullBuild(project, monitor);
-                } else {
-                    incrBuild(project, delta, monitor);
+        final ICoreRunnable runnable = new ICoreRunnable() {
+            @Override public void run(IProgressMonitor monitor) throws CoreException {
+                try {
+                    if(kind == FULL_BUILD) {
+                        fullBuild(project, monitor);
+                    } else {
+                        final @Nullable IResourceDelta delta = getDelta(project);
+                        if(delta == null) {
+                            fullBuild(project, monitor);
+                        } else {
+                            incrBuild(project, delta, monitor);
+                        }
+                    }
+                } catch(InterruptedException e) {
+                    cancel(monitor);
                 }
             }
-        } catch(InterruptedException e) {
-            cancel(monitor);
-        }
+        };
+        ResourcesPlugin.getWorkspace().run(runnable, project, IWorkspace.AVOID_UPDATE, monitor);
         return null;
     }
 
@@ -131,8 +138,13 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
     private void bottomUpBuild(ResourcePath rootDirectory, IResourceDelta delta, MixedSession session, @Nullable IProgressMonitor monitor) throws InterruptedException, CoreException, ExecException {
         final LinkedHashSet<ResourceKey> changedResources = new LinkedHashSet<>();
         delta.accept((d) -> {
-            changedResources.add(getResourcePath(d.getResource()));
-            return true;
+            final int kind = d.getKind();
+            logger.debug(d.getResource().toString());
+            if(kind == IResourceDelta.ADDED || kind == IResourceDelta.REMOVED || kind == IResourceDelta.CHANGED) {
+                changedResources.add(getResourcePath(d.getResource()));
+                return true;
+            }
+            return false;
         });
         logger.debug("Bottom-up language build of {} with changed resources {}", rootDirectory, changedResources);
         final TopDownSession topDownSession = session.updateAffectedBy(changedResources);
