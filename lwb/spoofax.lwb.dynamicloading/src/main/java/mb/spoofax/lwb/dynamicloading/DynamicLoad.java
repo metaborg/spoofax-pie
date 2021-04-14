@@ -70,9 +70,6 @@ public class DynamicLoad implements TaskDef<CompileLanguage.Args, OutTransient<D
 
     @Override
     public OutTransient<DynamicLanguage> exec(ExecContext context, CompileLanguage.Args args) throws Exception {
-//        final CompileLanguage.Args args = CompileLanguage.Args.builder()
-//            .rootDirectory(rootDirectory) // TODO: pass in additional class/annotation processor paths?
-//            .build();
         final Result<CompileLanguage.Output, CompileLanguageException> result = context.require(compileLanguage, args);
         final CompileLanguage.Output output = result.unwrap(); // TODO: properly handle error
         final ArrayList<URL> classPath = new ArrayList<>();

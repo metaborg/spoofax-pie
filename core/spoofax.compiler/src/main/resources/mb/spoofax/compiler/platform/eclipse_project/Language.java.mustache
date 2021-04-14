@@ -112,6 +112,7 @@ public class {{baseLanguage.id}} implements EclipseLifecycleParticipant {
     @Override public void close() throws Exception {
         pieComponent = null;
         if(component != null) {
+            component.getEditorTracker().unregister();
             component.close();
             component = null;
         }

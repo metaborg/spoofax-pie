@@ -10,6 +10,7 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.walk.ResourceWalker;
 import mb.spoofax.eclipse.util.ResourceUtil;
+import mb.spoofax.eclipse.util.UncheckedCoreException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileInfo;
@@ -258,7 +259,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
         return new EclipseResource(registry, getWorkspaceRoot());
     }
 
-    @Override public HierarchicalResource getNormalized() {
+    @Override public EclipseResource getNormalized() {
         final EclipseResourcePath newPath = path.getNormalized();
         return new EclipseResource(registry, newPath);
     }
@@ -410,7 +411,43 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
     }
 
     public void copyRecursivelyTo(EclipseResource other) throws IOException {
-        copyTo(other);
+        final IWorkspaceRoot root = getWorkspaceRoot();
+        // Normalize target directory to ensure that unpacked files have the target directory as prefix.
+        final EclipseResource targetDirectory = other.getNormalized();
+        final IPath targetDirectoryEclipsePath = targetDirectory.getPath().path;
+        try {
+            try(Stream<EclipseResource> stream = this.walk()) {
+                stream.forEachOrdered(source -> {
+                    try {
+                        final IPath relativePath = source.getPath().path.makeRelativeTo(this.getPath().path);
+                        final IPath target = targetDirectoryEclipsePath.append(relativePath);
+                        if(!targetDirectoryEclipsePath.isPrefixOf(target)) {
+                            throw new IOException("Cannot copy '" + relativePath + "' from '" + this + "', resulting path '" + target + "' is not in the target directory '" + other + "'");
+                        }
+                        if(!root.exists(target)) {
+                            switch(source.getType()) {
+                                case File:
+                                    source.getFile().copy(target, true, null);
+                                    break;
+                                case Directory:
+                                    root.getFolder(target).create(true, true, null);
+                                    break;
+                                case Unknown:
+                                    break;
+                            }
+                        }
+                    } catch(IOException e) {
+                        throw new UncheckedIOException(e);
+                    } catch(CoreException e) {
+                        throw new UncheckedCoreException(e);
+                    }
+                });
+            }
+        } catch(UncheckedIOException e) {
+            throw e.getCause();
+        } catch(UncheckedCoreException e) {
+            throw new IOException(e.getCause());
+        }
     }
 
     @Override public void moveTo(HierarchicalResource other) throws IOException {

@@ -9,6 +9,6 @@ import javax.inject.Inject;
 @TigerScope
 public class TigerEditorTracker extends EditorTracker {
     @Inject public TigerEditorTracker(EclipseIdentifiers eclipseIdentifiers) {
-        super(eclipseIdentifiers);
+        super(eclipseIdentifiers, TigerEditor.class);
     }
 }

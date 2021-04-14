@@ -18,6 +18,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IContributor;
+import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
@@ -31,6 +32,7 @@ import java.util.LinkedHashMap;
 
 public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
     public static final String id = "spoofax.eclipse";
+    public static final String extensionPointId = "spoofax.eclipse.lifecycle";
 
     private static @Nullable SpoofaxPlugin plugin;
     private static @Nullable EclipseLoggerComponent loggerComponent;
@@ -100,15 +102,15 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
             .build();
         SpoofaxPlugin.baseResourceServiceComponent = baseResourceServiceComponent;
 
-        final MultiMap<String, EclipseLifecycleParticipant> lifecycleParticipantsPerGroup = gatherLanguageGroups(logger);
+        final MultiMap<String, EclipseLifecycleParticipant> lifecycleParticipantsPerGroup = gatherLifecycleParticipants(logger);
         SpoofaxPlugin.lifecycleParticipantsPerGroup = lifecycleParticipantsPerGroup;
 
-        // Create resource service components for each language group.
+        // Create resource service components for each participant group.
         final HashMap<String, ResourceServiceComponent> resourceServiceComponentsPerGroup = new LinkedHashMap<>();
         SpoofaxPlugin.resourceServiceComponentsPerGroup = resourceServiceComponentsPerGroup;
-        lifecycleParticipantsPerGroup.forEach((group, languages) -> {
+        lifecycleParticipantsPerGroup.forEach((group, participant) -> {
             final ResourceServiceModule resourceServiceModule = baseResourceServiceComponent.createChildModule();
-            for(EclipseLifecycleParticipant language : languages) {
+            for(EclipseLifecycleParticipant language : participant) {
                 resourceServiceModule.addRegistriesFrom(language.getResourceRegistriesProvider(loggerComponent));
             }
             final ResourceServiceComponent resourceServiceComponent = DaggerResourceServiceComponent.builder()
@@ -125,21 +127,21 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
         SpoofaxPlugin.platformComponent = platformComponent;
         platformComponent.init();
 
-        // Create language components for each language, using the resource service component of their group.
+        // Create task definition providers for each participant, using the resource service component of their group.
         final MultiMap<String, TaskDefsProvider> taskDefsProvidersPerGroup = MultiMap.withLinkedHash();
         SpoofaxPlugin.taskDefsProvidersPerGroup = taskDefsProvidersPerGroup;
-        lifecycleParticipantsPerGroup.forEach((group, languages) -> {
+        lifecycleParticipantsPerGroup.forEach((group, participant) -> {
             final ResourceServiceComponent resourceServiceComponent = resourceServiceComponentsPerGroup.get(group);
             if(resourceServiceComponent == null) {
                 throw new RuntimeException("BUG: Cannot get resource service component for language group '" + group + "' which should have been created before");
             }
-            for(EclipseLifecycleParticipant language : languages) {
+            for(EclipseLifecycleParticipant language : participant) {
                 final TaskDefsProvider languageComponent = language.getTaskDefsProvider(loggerComponent, resourceServiceComponent, platformComponent);
                 taskDefsProvidersPerGroup.put(group, languageComponent);
             }
         });
 
-        // Create PIE components for each language group, using the task definitions from the languages of the group.
+        // Create PIE components for each participant group, using the task definitions from the languages of the group.
         final HashMap<String, RootPieComponent> pieComponentsPerGroup = new LinkedHashMap<>();
         SpoofaxPlugin.pieComponentsPerGroup = pieComponentsPerGroup;
         taskDefsProvidersPerGroup.forEach((group, taskDefsProviders) -> {
@@ -160,8 +162,8 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
             pieComponentsPerGroup.put(group, pieComponent);
         });
 
-        // Start all languages.
-        lifecycleParticipantsPerGroup.forEachValue((group, language) -> {
+        // Start all participant.
+        lifecycleParticipantsPerGroup.forEachValue((group, participant) -> {
             final ResourceServiceComponent resourceServiceComponent = resourceServiceComponentsPerGroup.get(group);
             if(resourceServiceComponent == null) {
                 throw new RuntimeException("BUG: Cannot get resource service component for language group '" + group + "' which should have been created before");
@@ -170,7 +172,7 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
             if(pieComponent == null) {
                 throw new RuntimeException("BUG: Cannot get PIE component for language group '" + group + "' which should have been created before");
             }
-            language.start(loggerComponent, resourceServiceComponentsPerGroup.get(group), platformComponent, pieComponent);
+            participant.start(loggerComponent, resourceServiceComponentsPerGroup.get(group), platformComponent, pieComponent);
         });
     }
 
@@ -216,12 +218,12 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
             resourceServiceComponentsPerGroup = null;
         }
         if(lifecycleParticipantsPerGroup != null) {
-            lifecycleParticipantsPerGroup.forEachValue((group, language) -> {
+            lifecycleParticipantsPerGroup.forEachValue((group, participant) -> {
                 try {
-                    language.close();
+                    participant.close();
                 } catch(Exception e) {
                     if(logger != null) {
-                        logger.error("Closing language '{}' of group '{}' failed unexpectedly", e, language, group);
+                        logger.error("Closing language '{}' of group '{}' failed unexpectedly", e, participant, group);
                     }
                 }
             });
@@ -244,12 +246,23 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
     }
 
 
-    private static MultiMap<String, EclipseLifecycleParticipant> gatherLanguageGroups(Logger logger) {
-        final MultiMap<String, EclipseLifecycleParticipant> eclipseLifecycleParticipants = MultiMap.withLinkedHash();
+    private static MultiMap<String, EclipseLifecycleParticipant> gatherLifecycleParticipants(Logger logger) {
+        final MultiMap<String, EclipseLifecycleParticipant> lifecycleParticipants = MultiMap.withLinkedHash();
         final IExtensionRegistry registry = Platform.getExtensionRegistry();
-        final IExtensionPoint point = registry.getExtensionPoint("spoofax.eclipse.lifecycle");
-        final IContributor contributor = point.getContributor();
-        for(IConfigurationElement config : point.getConfigurationElements()) {
+        final IExtensionPoint point = registry.getExtensionPoint(extensionPointId);
+        for(IExtension extension : point.getExtensions()) {
+            addLifecycleParticipants(logger, extension, lifecycleParticipants);
+        }
+        return lifecycleParticipants;
+    }
+
+    private static void addLifecycleParticipants(
+        Logger logger,
+        IExtension extension,
+        MultiMap<String, EclipseLifecycleParticipant> lifecycleParticipants
+    ) {
+        final IContributor contributor = extension.getContributor();
+        for(IConfigurationElement config : extension.getConfigurationElements()) {
             if(config.getName().equals("participant")) {
                 final String group = config.getAttribute("group");
                 if(group == null) {
@@ -263,7 +276,7 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
                     }
                     if(lifecycleParticipantObject instanceof EclipseLifecycleParticipant) {
                         final EclipseLifecycleParticipant eclipseLifecycleParticipant = (EclipseLifecycleParticipant)lifecycleParticipantObject;
-                        eclipseLifecycleParticipants.put(group, eclipseLifecycleParticipant);
+                        lifecycleParticipants.put(group, eclipseLifecycleParticipant);
                     } else {
                         logger.error("Found participant in '{}', but the object '{}' instantiated from its 'class' property does not implement 'EclipseLifecycleParticipant'; skipping...", contributor, lifecycleParticipantObject);
                     }
@@ -272,6 +285,5 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
                 }
             }
         }
-        return eclipseLifecycleParticipants;
     }
 }

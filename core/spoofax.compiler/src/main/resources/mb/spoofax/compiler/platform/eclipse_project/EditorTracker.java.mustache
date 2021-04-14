@@ -8,6 +8,6 @@ import javax.inject.Inject;
 @{{adapterProjectCompilerInput.scope.qualifiedId}}
 public class {{baseEditorTracker.id}} extends EditorTracker {
     @Inject public {{baseEditorTracker.id}}(EclipseIdentifiers eclipseIdentifiers) {
-        super(eclipseIdentifiers);
+        super(eclipseIdentifiers, {{editor.qualifiedId}}.class);
     }
 }
