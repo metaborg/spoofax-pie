@@ -35,6 +35,7 @@ import mb.spoofax.eclipse.command.CommandUtil;
 import mb.spoofax.eclipse.editor.NamedEditorInput;
 import mb.spoofax.eclipse.editor.PartClosedCallback;
 import mb.spoofax.eclipse.editor.SpoofaxEditor;
+import mb.spoofax.eclipse.editor.SpoofaxEditorBase;
 import mb.spoofax.eclipse.resource.EclipseResource;
 import mb.spoofax.eclipse.resource.EclipseResourcePath;
 import mb.spoofax.eclipse.resource.EclipseResourceRegistry;
@@ -108,7 +109,7 @@ public class PieRunner {
         @Nullable IProject project,
         IFile file,
         IDocument document,
-        SpoofaxEditor editor,
+        SpoofaxEditorBase editor,
         @Nullable IProgressMonitor monitor
     ) throws ExecException, InterruptedException {
         logger.trace("Adding or updating editor for '{}'", file);
@@ -281,7 +282,7 @@ public class PieRunner {
         @Nullable IProgressMonitor monitor
     ) throws IOException, CoreException, ExecException, InterruptedException {
         for(IProject eclipseProject : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
-            if(!eclipseProject.hasNature(languageComponent.getEclipseIdentifiers().getNature())) continue;
+            if(!eclipseProject.isOpen() || !eclipseProject.hasNature(languageComponent.getEclipseIdentifiers().getNature())) continue;
             final ResourceChanges resourceChanges = new ResourceChanges(eclipseProject, languageComponent.getLanguageInstance().getFileExtensions(), resourceRegistry);
             final Pie pie = pieComponent.getPie();
             try(final MixedSession session = pie.newSession()) {

@@ -14,7 +14,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.contexts.IContextActivation;
 import org.eclipse.ui.contexts.IContextService;
 
-public class EditorTracker extends EditorTrackerBase {
+public class EditorTracker extends WindowAndPartListener {
     private final EclipseIdentifiers eclipseIdentifiers;
     private final Class<? extends SpoofaxEditor> editorClass;
 
@@ -43,7 +43,7 @@ public class EditorTracker extends EditorTrackerBase {
                 if(activePage != null) {
                     final @Nullable IEditorPart activeEditorPart = activePage.getActiveEditor();
                     if(activeEditorPart != null) {
-                        if(isSpoofaxEditor(activeEditorPart)) {
+                        if(isRelevantEditor(activeEditorPart)) {
                             activateContext();
                         }
                     }
@@ -56,13 +56,13 @@ public class EditorTracker extends EditorTrackerBase {
     // IWindowListener implementation
 
     @Override public void windowActivated(IWorkbenchWindow window) {
-        if(isSpoofaxEditor(window.getPartService().getActivePart())) {
+        if(isRelevantEditor(window.getPartService().getActivePart())) {
             activateContext();
         }
     }
 
     @Override public void windowDeactivated(IWorkbenchWindow window) {
-        if(isSpoofaxEditor(window.getPartService().getActivePart())) {
+        if(isRelevantEditor(window.getPartService().getActivePart())) {
             deactivateContext();
         }
     }
@@ -71,19 +71,19 @@ public class EditorTracker extends EditorTrackerBase {
     // IPartListener2 implementation
 
     @Override public void partActivated(IWorkbenchPartReference partRef) {
-        if(isSpoofaxEditor(partRef)) {
+        if(isRelevantEditor(partRef)) {
             activateContext();
         }
     }
 
     @Override public void partClosed(IWorkbenchPartReference partRef) {
-        if(isSpoofaxEditor(partRef)) {
+        if(isRelevantEditor(partRef)) {
             deactivateContext();
         }
     }
 
     @Override public void partDeactivated(IWorkbenchPartReference partRef) {
-        if(isSpoofaxEditor(partRef)) {
+        if(isRelevantEditor(partRef)) {
             deactivateContext();
         }
     }
@@ -105,13 +105,13 @@ public class EditorTracker extends EditorTrackerBase {
     }
 
 
-    // Helper methods for casting to SpoofaxEditor instances.
+    // Helper methods for checking if a part is a relevant editor.
 
-    private boolean isSpoofaxEditor(IWorkbenchPartReference part) {
+    private boolean isRelevantEditor(IWorkbenchPartReference part) {
         return eclipseIdentifiers.getEditor().equals(part.getId());
     }
 
-    private boolean isSpoofaxEditor(@Nullable IWorkbenchPart part) {
+    private boolean isRelevantEditor(@Nullable IWorkbenchPart part) {
         if(part == null) return false;
         return editorClass.equals(part.getClass());
     }

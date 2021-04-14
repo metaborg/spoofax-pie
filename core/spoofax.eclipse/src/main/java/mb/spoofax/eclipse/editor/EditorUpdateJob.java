@@ -25,7 +25,7 @@ public class EditorUpdateJob extends Job {
     private final @Nullable IProject project;
     private final IFile file;
     private final IDocument document;
-    private final SpoofaxEditor editor;
+    private final SpoofaxEditorBase editor;
 
     public EditorUpdateJob(
         LoggerFactory loggerFactory,
@@ -35,7 +35,7 @@ public class EditorUpdateJob extends Job {
         @Nullable IProject project,
         IFile file,
         IDocument document,
-        SpoofaxEditor editor
+        SpoofaxEditorBase editor
     ) {
         super(languageComponent.getLanguageInstance().getDisplayName() + " editor update");
         this.logger = loggerFactory.create(getClass());

@@ -27,15 +27,13 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 @DynamicLoadingScope
-public class DynamicLoad implements TaskDef<CompileLanguage.Args, OutTransient<DynamicLanguage>>, AutoCloseable {
-    private final HashMap<ResourcePath, DynamicLanguage> dynamicLanguages = new HashMap<>();
-
+public class DynamicLoad implements TaskDef<CompileLanguage.Args, OutTransient<DynamicLanguage>> {
     private final LoggerComponent loggerComponent;
     private final ResourceServiceComponent resourceServiceComponent;
     private final PlatformComponent platformComponent;
+    private final DynamicLanguageRegistry dynamicLanguageRegistry;
     private final CfgRootDirectoryToObject cfgRootDirectoryToObject;
     private final CompileLanguage compileLanguage;
     private final Provider<RootPieModule> rootPieModuleProvider;
@@ -44,6 +42,7 @@ public class DynamicLoad implements TaskDef<CompileLanguage.Args, OutTransient<D
         LoggerComponent loggerComponent,
         ResourceServiceComponent resourceServiceComponent,
         PlatformComponent platformComponent,
+        DynamicLanguageRegistry dynamicLanguageRegistry,
         CfgRootDirectoryToObject cfgRootDirectoryToObject,
         CompileLanguage compileLanguage,
         Provider<RootPieModule> rootPieModuleProvider
@@ -51,16 +50,10 @@ public class DynamicLoad implements TaskDef<CompileLanguage.Args, OutTransient<D
         this.loggerComponent = loggerComponent;
         this.resourceServiceComponent = resourceServiceComponent;
         this.platformComponent = platformComponent;
+        this.dynamicLanguageRegistry = dynamicLanguageRegistry;
         this.cfgRootDirectoryToObject = cfgRootDirectoryToObject;
         this.compileLanguage = compileLanguage;
         this.rootPieModuleProvider = rootPieModuleProvider;
-    }
-
-    @Override public void close() throws IOException {
-        for(DynamicLanguage dynamicLanguage : dynamicLanguages.values()) {
-            dynamicLanguage.close();
-        }
-        dynamicLanguages.clear();
     }
 
     @Override
@@ -86,6 +79,7 @@ public class DynamicLoad implements TaskDef<CompileLanguage.Args, OutTransient<D
         final Result<CfgToObject.Output, CfgRootDirectoryToObjectException> cfgResult = context.require(cfgRootDirectoryToObject, args.rootDirectory());
         final CompileLanguageInput compileInput = cfgResult.unwrap().compileLanguageInput; // TODO: properly handle error.
         final DynamicLanguage dynamicLanguage = new DynamicLanguage(
+            args.rootDirectory(),
             compileInput,
             classPath.toArray(new URL[0]),
             loggerComponent,
@@ -93,22 +87,7 @@ public class DynamicLoad implements TaskDef<CompileLanguage.Args, OutTransient<D
             platformComponent,
             rootPieModuleProvider.get()
         );
-        register(args.rootDirectory(), dynamicLanguage);
+        dynamicLanguageRegistry.reload(args.rootDirectory(), dynamicLanguage);
         return new OutTransientImpl<>(dynamicLanguage, true);
-    }
-
-
-    void register(ResourcePath rootDirectory, DynamicLanguage dynamicLanguage) throws IOException {
-        final @Nullable DynamicLanguage previousDynamicLanguage = dynamicLanguages.put(rootDirectory, dynamicLanguage);
-        if(previousDynamicLanguage != null) {
-            previousDynamicLanguage.close();
-        }
-    }
-
-    void unregister(ResourcePath rootDirectory) throws IOException {
-        final @Nullable DynamicLanguage dynamicLanguage = dynamicLanguages.remove(rootDirectory);
-        if(dynamicLanguage != null) {
-            dynamicLanguage.close();
-        }
     }
 }

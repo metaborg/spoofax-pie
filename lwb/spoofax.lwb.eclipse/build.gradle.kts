@@ -11,6 +11,7 @@ mavenize {
 
 dependencies {
   api(platform(compositeBuild("spoofax.depconstraints")))
+  annotationProcessor(platform(compositeBuild("spoofax.depconstraints")))
 
 
   bundleTargetPlatformApi(eclipse("javax.inject"))
@@ -78,6 +79,8 @@ dependencies {
   // Embed `org.metaborg:pie.task.archive` and `org.metaborg:pie.task.java`
   bundleEmbedImplementation("org.metaborg:pie.task.archive")
   bundleEmbedImplementation("org.metaborg:pie.task.java")
+
+  annotationProcessor("com.google.dagger:dagger-compiler")
 }
 
 val privatePackage = listOf(

@@ -19,6 +19,8 @@ import mb.spoofax.core.language.menu.MenuItem;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface LanguageInstance {
+    String getId();
+
     String getDisplayName();
 
     SetView<String> getFileExtensions();

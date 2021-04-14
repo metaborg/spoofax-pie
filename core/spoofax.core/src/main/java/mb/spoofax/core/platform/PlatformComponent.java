@@ -15,7 +15,7 @@ import mb.resource.dagger.ResourceServiceComponent;
     }
 )
 public interface PlatformComponent extends AutoCloseable {
-    @Override default void close() throws Exception {
+    @Override default void close() {
         // Override to make Dagger not treat this as a component method.
     }
 }

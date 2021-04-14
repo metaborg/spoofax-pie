@@ -1,9 +1,14 @@
 package mb.spoofax.eclipse.editor;
 
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.*;
+import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.IWindowListener;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 
-public abstract class EditorTrackerBase implements IWindowListener, IPartListener2 {
+public abstract class WindowAndPartListener implements IWindowListener, IPartListener2 {
     public void register() {
         final IWorkbench workbench = PlatformUI.getWorkbench();
         Display.getDefault().asyncExec(() -> {
@@ -18,6 +23,9 @@ public abstract class EditorTrackerBase implements IWindowListener, IPartListene
     public void unregister() {
         final IWorkbench workbench = PlatformUI.getWorkbench();
         workbench.removeWindowListener(this);
+        for(IWorkbenchWindow window : workbench.getWorkbenchWindows()) {
+            window.getPartService().removePartListener(this);
+        }
     }
 
 

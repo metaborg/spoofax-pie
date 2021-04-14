@@ -8,11 +8,10 @@ import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchWindow;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.util.function.Consumer;
 
 @PlatformScope
-public class PartClosedCallback extends EditorTrackerBase {
+public class PartClosedCallback extends WindowAndPartListener {
     private final MultiMap<IWorkbenchPart, Consumer<IWorkbenchPart>> callbacks = MultiMap.withConcurrentHash();
 
     @Inject public PartClosedCallback() {}

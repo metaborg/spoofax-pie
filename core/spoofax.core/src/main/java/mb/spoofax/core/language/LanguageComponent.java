@@ -6,7 +6,7 @@ public interface LanguageComponent extends TaskDefsProvider, AutoCloseable {
     LanguageInstance getLanguageInstance();
 
 
-    @Override default void close() throws Exception {
+    @Override default void close() {
         // Override to make Dagger not treat this as a component method.
     }
 }

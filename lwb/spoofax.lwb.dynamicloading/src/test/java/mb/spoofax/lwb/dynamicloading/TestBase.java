@@ -5,7 +5,13 @@ import mb.log.api.LoggerFactory;
 import mb.log.dagger.DaggerLoggerComponent;
 import mb.log.dagger.LoggerComponent;
 import mb.log.dagger.LoggerModule;
+import mb.pie.api.ExecException;
+import mb.pie.api.MixedSession;
+import mb.pie.api.OutTransient;
 import mb.pie.api.PieBuilder;
+import mb.pie.api.Session;
+import mb.pie.api.Task;
+import mb.pie.api.TopDownSession;
 import mb.pie.api.Tracer;
 import mb.pie.dagger.DaggerPieComponent;
 import mb.pie.dagger.PieComponent;
@@ -29,6 +35,8 @@ import mb.resource.dagger.RootResourceServiceComponent;
 import mb.resource.dagger.RootResourceServiceModule;
 import mb.resource.fs.FSResource;
 import mb.resource.hierarchical.HierarchicalResource;
+import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.lwb.compiler.CompileLanguage;
 import mb.spoofax.lwb.compiler.dagger.StandaloneSpoofax3Compiler;
 
 import java.io.IOException;
@@ -45,7 +53,8 @@ class TestBase {
     StandaloneSpoofax3Compiler standaloneSpoofax3Compiler;
     ResourceService resourceService;
     DynamicLoadingComponent dynamicLoadingComponent;
-    DynamicLoader dynamicLoader;
+    DynamicLoad dynamicLoad;
+    DynamicLanguageRegistry dynamicLanguageRegistry;
     PieComponent pieComponent;
 
     void setup(Path temporaryDirectoryPath) throws IOException {
@@ -80,7 +89,8 @@ class TestBase {
             .cfgComponent(standaloneSpoofax3Compiler.compiler.cfgComponent)
             .spoofax3CompilerComponent(standaloneSpoofax3Compiler.compiler.component)
             .build();
-        dynamicLoader = dynamicLoadingComponent.getDynamicLoader();
+        dynamicLoad = dynamicLoadingComponent.getDynamicLoad();
+        dynamicLanguageRegistry= dynamicLoadingComponent.getDynamicLanguageRegistry();
         pieComponent = DaggerPieComponent.builder()
             .pieModule(standaloneSpoofax3Compiler.pieComponent.createChildModule(dynamicLoadingComponent))
             .loggerComponent(loggerComponent)
@@ -91,7 +101,8 @@ class TestBase {
     void teardown() throws Exception {
         pieComponent.close();
         pieComponent = null;
-        dynamicLoader = null;
+        dynamicLanguageRegistry = null;
+        dynamicLoad = null;
         dynamicLoadingComponent.close();
         dynamicLoadingComponent = null;
         resourceService = null;
@@ -106,8 +117,32 @@ class TestBase {
     }
 
 
-    DynamicLoaderMixedSession newSession() {
-        return dynamicLoader.newSession(pieComponent.getPie());
+    MixedSession newSession() {
+        return pieComponent.newSession();
+    }
+
+    Task<OutTransient<DynamicLanguage>> dynamicLoadTask(CompileLanguage.Args args) {
+        return dynamicLoad.createTask(args);
+    }
+
+    Task<OutTransient<DynamicLanguage>> dynamicLoadTask(ResourcePath rootDirectory) {
+        return dynamicLoad.createTask(CompileLanguage.Args.builder().rootDirectory(rootDirectory).build());
+    }
+
+    DynamicLanguage requireDynamicLoad(Session session, CompileLanguage.Args args) throws ExecException, InterruptedException {
+        return session.require(dynamicLoadTask(args)).getValue();
+    }
+
+    DynamicLanguage requireDynamicLoad(Session session, ResourcePath rootDirectory) throws ExecException, InterruptedException {
+        return session.require(dynamicLoadTask(rootDirectory)).getValue();
+    }
+
+    DynamicLanguage getDynamicLoadOutput(TopDownSession session, CompileLanguage.Args args) {
+        return session.getOutput(dynamicLoadTask(args)).getValue();
+    }
+
+    DynamicLanguage getDynamicLoadOutput(TopDownSession session, ResourcePath rootDirectory) {
+        return session.getOutput(dynamicLoadTask(rootDirectory)).getValue();
     }
 
 

@@ -51,6 +51,7 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
     private @Nullable Spoofax3Compiler spoofax3Compiler;
     private @Nullable DynamicLoadingComponent dynamicLoadingComponent;
     private @Nullable PieComponent pieComponent;
+    private @Nullable SpoofaxLwbComponent spoofaxLwbComponent;
 
 
     public ResourceServiceComponent getResourceServiceComponent() {
@@ -79,6 +80,13 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
             throw new RuntimeException("PieComponent has not been initialized yet or has been closed");
         }
         return pieComponent;
+    }
+
+    public SpoofaxLwbComponent getSpoofaxLwbComponent() {
+        if(spoofaxLwbComponent == null) {
+            throw new RuntimeException("SpoofaxLwbComponent has not been initialized yet or has been closed");
+        }
+        return spoofaxLwbComponent;
     }
 
 
@@ -123,6 +131,13 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
                     .spoofax3CompilerComponent(spoofax3Compiler.component)
                     .build();
             }
+            if(spoofaxLwbComponent == null) {
+                spoofaxLwbComponent = DaggerSpoofaxLwbComponent.builder()
+                    .loggerComponent(loggerComponent)
+                    .resourceServiceComponent(resourceServiceComponent)
+                    .dynamicLoadingComponent(dynamicLoadingComponent)
+                    .build();
+            }
             final HashSet<TaskDef<?, ?>> taskDefs = new HashSet<>();
             taskDefs.addAll(spoofax3Compiler.spoofaxCompilerComponent.getTaskDefs());
             taskDefs.addAll(spoofax3Compiler.component.getTaskDefs());
@@ -143,10 +158,13 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
         PieComponent pieComponent
     ) {
         this.pieComponent = pieComponent;
+        spoofaxLwbComponent.getDynamicChangeProcessor().register();
     }
 
-    @Override public void close() throws Exception {
+    @Override public void close() {
         pieComponent = null;
+        spoofaxLwbComponent.close();
+        spoofaxLwbComponent = null;
         dynamicLoadingComponent.close();
         dynamicLoadingComponent = null;
         spoofax3Compiler.close();

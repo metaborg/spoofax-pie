@@ -42,20 +42,7 @@ import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import java.util.Objects;
 import java.util.Optional;
 
-public abstract class SpoofaxEditor extends TextEditor {
-    private final class DocumentListener implements IDocumentListener {
-        @Override public void documentAboutToBeChanged(@NonNull DocumentEvent event) {
-            // Don't care about this event.
-        }
-
-        @Override public void documentChanged(@NonNull DocumentEvent event) {
-            scheduleJob(false);
-        }
-    }
-
-
-    private final PresentationMerger presentationMerger = new PresentationMerger();
-
+public abstract class SpoofaxEditor extends SpoofaxEditorBase {
     private final EclipseLanguageComponent languageComponent;
     private final PieComponent pieComponent;
 
@@ -65,20 +52,7 @@ public abstract class SpoofaxEditor extends TextEditor {
     */
 
     // Set in initializeEditor, never null after that.
-    private @MonotonicNonNull IJobManager jobManager;
-    private @MonotonicNonNull LoggerFactory loggerFactory;
-    private @MonotonicNonNull Logger logger;
     private @MonotonicNonNull PieRunner pieRunner;
-
-    // Set in createSourceViewer, unset in dispose, may never be null otherwise.
-    private @Nullable IEditorInput input;
-    private @Nullable ISourceViewer sourceViewer;
-
-    // Set in createSourceViewer, if unset in dispose, may never be null if documentProvider returns a null document.
-    private @Nullable IDocument document;
-    private @Nullable DocumentListener documentListener;
-    private @Nullable IProject project;
-    private @Nullable IFile file;
 
 
     protected SpoofaxEditor(EclipseLanguageComponent languageComponent, PieComponent pieComponent) {
@@ -92,137 +66,8 @@ public abstract class SpoofaxEditor extends TextEditor {
         return languageComponent;
     }
 
-    public @Nullable IProject getProject() {
-        return project;
-    }
 
-    public @Nullable IFile getFile() {
-        return file;
-    }
-
-    public Optional<Selection> getSelection() {
-        final @Nullable ISelection selection = doGetSelection();
-        if(selection instanceof ITextSelection) {
-            final ITextSelection s = (ITextSelection)selection;
-            final int length = s.getLength();
-            if(length == 0) {
-                return Optional.of(Selections.offset(s.getOffset()));
-            }
-            return Optional.of(Selections.region(Region.fromOffsetLength(s.getOffset(), length)));
-        }
-        return Optional.empty();
-    }
-
-
-    public void setStyleAsync(TextPresentation textPresentation, @Nullable String text, int textLength, @Nullable IProgressMonitor monitor) {
-        presentationMerger.set(textPresentation);
-        // Update textPresentation on the main thread, required by Eclipse.
-        Display.getDefault().asyncExec(() -> {
-            // Cancel if monitor is cancelled.
-            if(monitor != null && monitor.isCanceled()) {
-                return;
-            }
-            // Cancel if editor has been closed.
-            if(document == null || sourceViewer == null) {
-                return;
-            }
-            // Cancel if editor has no text.
-            final String currentText = document.get();
-            if(currentText == null) {
-                return;
-            }
-            // Cancel if the text the presentation was made for is different than the current text.
-            if(textLength != currentText.length() || (text != null && !text.equals(currentText))) {
-                return;
-            }
-            try {
-                sourceViewer.changeTextPresentation(textPresentation, true);
-            } catch(IllegalArgumentException e) {
-                logger.error("Changing text presentation asynchronously failed unexpectedly", e);
-            }
-        });
-    }
-
-
-    @Override protected void initializeEditor() {
-        super.initializeEditor();
-
-        this.jobManager = Job.getJobManager();
-
-        final EclipseLoggerComponent loggerComponent = SpoofaxPlugin.getLoggerComponent();
-        this.loggerFactory = loggerComponent.getLoggerFactory();
-        this.logger = loggerFactory.create(getClass());
-
-        final EclipsePlatformComponent platformComponent = SpoofaxPlugin.getPlatformComponent();
-        this.pieRunner = platformComponent.getPieRunner();
-
-        setDocumentProvider(new SpoofaxDocumentProvider());
-        setSourceViewerConfiguration(new SpoofaxSourceViewerConfiguration());
-        setEditorContextMenuId("#SpoofaxEditorContext");
-    }
-
-    @Override
-    protected ISourceViewer createSourceViewer(@NonNull Composite parent, @NonNull IVerticalRuler ruler, int styles) {
-        input = getEditorInput();
-        Objects.requireNonNull(input); // Hint to editor that input cannot be null.
-
-        final IDocumentProvider documentProvider = getDocumentProvider();
-        document = documentProvider.getDocument(input);
-        if(document != null) {
-            documentListener = new DocumentListener();
-            document.addDocumentListener(documentListener);
-
-            final @Nullable IFile file = EditorInputUtil.getFile(input);
-            if(file != null) {
-                final @Nullable IProject eclipseProject = file.getProject();
-                if(eclipseProject != null) {
-                    project = eclipseProject;
-                }
-                this.file = file;
-            }
-        } else {
-            logger.error("Editor cannot be initialized, document provider '{}' returned null for editor input '{}'", documentProvider, input);
-            file = null;
-            documentListener = null;
-        }
-
-        sourceViewer = super.createSourceViewer(parent, ruler, styles);
-        Objects.requireNonNull(sourceViewer); // Hint to editor that sourceViewer cannot be null.
-        final SourceViewerDecorationSupport decorationSupport = getSourceViewerDecorationSupport(sourceViewer);
-        configureSourceViewerDecorationSupport(decorationSupport);
-
-        ((ITextViewerExtension4)sourceViewer).addTextPresentationListener(presentationMerger);
-
-        if(document != null) {
-            scheduleJob(true);
-        }
-
-        return sourceViewer;
-    }
-
-    @Override public void dispose() {
-        cancelJobs();
-
-        if(document != null && documentListener != null) {
-            document.removeDocumentListener(documentListener);
-        }
-
-        if(file != null) {
-            pieRunner.removeEditor(file);
-        }
-
-        input = null;
-        sourceViewer = null;
-
-        document = null;
-        documentListener = null;
-        file = null;
-
-        super.dispose();
-    }
-
-
-    private void scheduleJob(boolean initialUpdate) {
+    @Override protected void scheduleJob(boolean initialUpdate) {
         if(document == null || file == null) return; // TODO: support case where file is null but document is not.
         cancelJobs();
         final Job job = new EditorUpdateJob(loggerFactory, pieRunner, languageComponent, pieComponent, project, file, document, this);
@@ -246,13 +91,18 @@ public abstract class SpoofaxEditor extends TextEditor {
         job.schedule(initialUpdate ? 0 : 300);
     }
 
-    private void cancelJobs() {
-        final Job[] existingJobs = jobManager.find(this);
-        if(existingJobs.length > 0) {
-            logger.trace("Cancelling editor update jobs for '{}'", this);
-            for(Job job : existingJobs) {
-                job.cancel();
-            }
+    @Override protected void initializeEditor() {
+        super.initializeEditor();
+
+        final EclipsePlatformComponent platformComponent = SpoofaxPlugin.getPlatformComponent();
+        this.pieRunner = platformComponent.getPieRunner();
+    }
+
+    @Override public void dispose() {
+        super.dispose();
+
+        if(file != null) {
+            pieRunner.removeEditor(file);
         }
     }
 }

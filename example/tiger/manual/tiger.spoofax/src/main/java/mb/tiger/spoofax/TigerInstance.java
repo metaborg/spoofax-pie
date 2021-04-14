@@ -102,6 +102,8 @@ public class TigerInstance implements LanguageInstance {
     }
 
 
+    @Override public String getId() { return "tiger"; }
+
     @Override public String getDisplayName() {
         return "Tiger";
     }

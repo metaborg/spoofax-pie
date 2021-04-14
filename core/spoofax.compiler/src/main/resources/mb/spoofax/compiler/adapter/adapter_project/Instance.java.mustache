@@ -70,6 +70,10 @@ public class {{baseInstance.id}} implements LanguageInstance {
     }
 
 
+    @Override public String getId() {
+        return "{{shared.defaultArtifactId}}";
+    }
+
     @Override public String getDisplayName() {
         return "{{shared.name}}";
     }

@@ -106,7 +106,7 @@ public class Spoofax3Compiler implements AutoCloseable {
         this.statixComponent.getStatixConfigFunctionWrapper().set(this.component.getConfigureStatix().createFunction());
     }
 
-    @Override public void close() throws Exception {
+    @Override public void close() {
         platformComponent.close();
         resourceServiceComponent.close();
     }

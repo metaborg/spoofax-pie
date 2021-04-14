@@ -26,14 +26,14 @@ import java.util.Set;
     }
 )
 public interface DynamicLoadingComponent extends TaskDefsProvider, AutoCloseable {
-    DynamicLoader getDynamicLoader();
+    DynamicLanguageRegistry getDynamicLanguageRegistry();
 
     DynamicLoad getDynamicLoad();
 
 
     @Override @DynamicLoadingQualifier Set<TaskDef<?, ?>> getTaskDefs();
 
-    @Override default void close() throws IOException {
-        getDynamicLoader().close();
+    @Override default void close() {
+        getDynamicLanguageRegistry().close();
     }
 }

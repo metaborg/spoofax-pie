@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+  <!--             -->
+  <!-- Spoofax LWB -->
+  <!--             -->
+
   <!-- Lifecycle participant -->
   <extension point="spoofax.eclipse.lifecycle">
     <participant group="mb.spoofax.lwb" class="mb.spoofax.lwb.eclipse.SpoofaxLwbLifecycleParticipant$Factory"/>
@@ -48,7 +52,6 @@
     </builder>
   </extension>
 
-
   <!-- Menus -->
   <extension point="org.eclipse.ui.menus">
     <!-- Project Explorer context menu -->
@@ -60,4 +63,217 @@
       <dynamic id="spoofax.lwb.eclipse.resource" class="mb.spoofax.lwb.eclipse.ResourceContextMenu"/>
     </menuContribution>
   </extension>
+
+
+
+  <!--                        -->
+  <!-- Dynamic language shims -->
+  <!--                        -->
+
+<!--  &lt;!&ndash; Lifecycle participant &ndash;&gt;-->
+<!--  <extension point="spoofax.eclipse.lifecycle">-->
+<!--    <participant group="mb.spoofax.lwb" class="mb.str.eclipse.StrategoLanguageFactory"/>-->
+<!--  </extension>-->
+
+  <!-- Context -->
+<!--  <extension point="org.eclipse.ui.contexts">-->
+<!--    <context-->
+<!--      id="stratego.eclipse.context"-->
+<!--      parentId="org.eclipse.ui.textEditorScope"-->
+<!--      name="Editing Stratego files"-->
+<!--      description="Editing Stratego files"-->
+<!--    />-->
+<!--  </extension>-->
+
+
+  <!-- Editor -->
+  <extension point="org.eclipse.ui.editors">
+    <editor
+      name="Dynamic Spoofax editor"
+      extensions="str"
+      class="mb.spoofax.lwb.eclipse.dynamicloading.DynamicEditor"
+      id="spoofax.lwb.eclipse.dynamicloading.editor"
+    />
+  </extension>
+
+
+<!--  &lt;!&ndash; Markers &ndash;&gt;-->
+<!--  &lt;!&ndash; Base &ndash;&gt;-->
+<!--  <extension-->
+<!--    point="org.eclipse.core.resources.markers"-->
+<!--    id="stratego.eclipse.marker"-->
+<!--    name="Stratego marker"-->
+<!--  >-->
+<!--    <super type="org.eclipse.core.resources.textmarker"/>-->
+<!--    <super type="org.eclipse.core.resources.problemmarker"/>-->
+<!--    <persistent value="true"/>-->
+<!--  </extension>-->
+<!--  &lt;!&ndash; Info &ndash;&gt;-->
+<!--  <extension-->
+<!--    point="org.eclipse.core.resources.markers"-->
+<!--    id="stratego.eclipse.marker.info"-->
+<!--    name="Stratego info marker"-->
+<!--  >-->
+<!--    <super type="stratego.eclipse.marker"/>-->
+<!--    <persistent value="true"/>-->
+<!--  </extension>-->
+<!--  &lt;!&ndash; Warning &ndash;&gt;-->
+<!--  <extension-->
+<!--    point="org.eclipse.core.resources.markers"-->
+<!--    id="stratego.eclipse.marker.warning"-->
+<!--    name="Stratego warning marker"-->
+<!--  >-->
+<!--    <super type="stratego.eclipse.marker"/>-->
+<!--    <persistent value="true"/>-->
+<!--  </extension>-->
+<!--  &lt;!&ndash; Error &ndash;&gt;-->
+<!--  <extension-->
+<!--    point="org.eclipse.core.resources.markers"-->
+<!--    id="stratego.eclipse.marker.error"-->
+<!--    name="Stratego error marker"-->
+<!--  >-->
+<!--    <super type="stratego.eclipse.marker"/>-->
+<!--    <persistent value="true"/>-->
+<!--  </extension>-->
+
+
+<!--  &lt;!&ndash; Annotations &ndash;&gt;-->
+<!--  <extension point="org.eclipse.ui.editors.annotationTypes">-->
+<!--    &lt;!&ndash; Info &ndash;&gt;-->
+<!--    <type-->
+<!--      markerType="stratego.eclipse.marker.info"-->
+<!--      super="org.eclipse.ui.workbench.texteditor.info"-->
+<!--      markerSeverity="0"-->
+<!--      name="Stratego info annotation"-->
+<!--    />-->
+<!--    &lt;!&ndash; Warning &ndash;&gt;-->
+<!--    <type-->
+<!--      markerType="stratego.eclipse.marker.warning"-->
+<!--      super="org.eclipse.ui.workbench.texteditor.warning"-->
+<!--      markerSeverity="1"-->
+<!--      name="Stratego warning annotation"-->
+<!--    />-->
+<!--    &lt;!&ndash; Error &ndash;&gt;-->
+<!--    <type-->
+<!--      markerType="stratego.eclipse.marker.error"-->
+<!--      super="org.eclipse.ui.workbench.texteditor.error"-->
+<!--      markerSeverity="2"-->
+<!--      name="Stratego error annotation"-->
+<!--    />-->
+<!--  </extension>-->
+
+
+<!--  &lt;!&ndash; Document Provider &ndash;&gt;-->
+<!--  <extension point="org.eclipse.ui.editors.documentProviders">-->
+<!--    <provider-->
+<!--      extensions="str"-->
+<!--      class="mb.str.eclipse.StrategoDocumentProvider"-->
+<!--      id="stratego.eclipse.documentprovider"-->
+<!--    />-->
+<!--  </extension>-->
+
+
+<!--  &lt;!&ndash; Builder &ndash;&gt;-->
+<!--  <extension-->
+<!--    point="org.eclipse.core.resources.builders"-->
+<!--    name="Stratego builder"-->
+<!--    id="builder"-->
+<!--  >-->
+<!--    <builder-->
+<!--      hasNature="true"-->
+<!--      isConfigurable="false"-->
+<!--      callOnEmptyDelta="false"-->
+<!--      supportsConfigurations="false"-->
+<!--    >-->
+<!--      <run class="mb.str.eclipse.StrategoProjectBuilder"/>-->
+<!--    </builder>-->
+<!--  </extension>-->
+
+
+<!--  &lt;!&ndash; Nature &ndash;&gt;-->
+<!--  <extension-->
+<!--    point="org.eclipse.core.resources.natures"-->
+<!--    name="Stratego nature"-->
+<!--    id="nature"-->
+<!--  >-->
+<!--    <runtime>-->
+<!--      <run class="mb.str.eclipse.StrategoNature"/>-->
+<!--    </runtime>-->
+<!--    <builder id="stratego.eclipse.builder"/>-->
+<!--  </extension>-->
+
+
+<!--  &lt;!&ndash; Menus &ndash;&gt;-->
+<!--  <extension point="org.eclipse.ui.menus">-->
+<!--    &lt;!&ndash; Project Explorer context menu &ndash;&gt;-->
+<!--    <menuContribution locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">-->
+<!--      <dynamic id="stratego.eclipse.menu.resource.context" class="mb.str.eclipse.StrategoResourceContextMenu"/>-->
+<!--    </menuContribution>-->
+<!--    &lt;!&ndash; Package Explorer context menu &ndash;&gt;-->
+<!--    <menuContribution locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=additions">-->
+<!--      <dynamic id="stratego.eclipse.menu.resource.context" class="mb.str.eclipse.StrategoResourceContextMenu"/>-->
+<!--    </menuContribution>-->
+<!--    &lt;!&ndash; Editor context menu &ndash;&gt;-->
+<!--    <menuContribution locationURI="popup:#SpoofaxEditorContext?after=additions">-->
+<!--      <dynamic id="stratego.eclipse.menu.editor.context" class="mb.str.eclipse.StrategoEditorContextMenu"/>-->
+<!--    </menuContribution>-->
+<!--    &lt;!&ndash; Main menu &ndash;&gt;-->
+<!--    <menuContribution locationURI="menu:org.eclipse.ui.main.menu">-->
+<!--      <menu id="stratego.eclipse.menu.main" label="Stratego">-->
+<!--        <dynamic id="stratego.eclipse.menu.main.dynamic" class="mb.str.eclipse.StrategoMainMenu"/>-->
+<!--        <visibleWhen>-->
+<!--          <with variable="activeContexts">-->
+<!--            <iterate ifEmpty="false" operator="or">-->
+<!--              <equals value="stratego.eclipse.context"/>-->
+<!--            </iterate>-->
+<!--          </with>-->
+<!--        </visibleWhen>-->
+<!--      </menu>-->
+<!--    </menuContribution>-->
+<!--  </extension>-->
+
+
+<!--  &lt;!&ndash; Commands and Handlers &ndash;&gt;-->
+<!--  &lt;!&ndash; Add/Remove Nature &ndash;&gt;-->
+<!--  <extension point="org.eclipse.ui.commands">-->
+<!--    <command id="stratego.eclipse.nature.add" name="Add Stratego nature"/>-->
+<!--    <command id="stratego.eclipse.nature.remove" name="Remove Stratego nature"/>-->
+<!--  </extension>-->
+<!--  <extension point="org.eclipse.ui.handlers">-->
+<!--    <handler-->
+<!--      commandId="stratego.eclipse.nature.add"-->
+<!--      class="mb.str.eclipse.StrategoAddNatureHandler"-->
+<!--    />-->
+<!--    <handler-->
+<!--      commandId="stratego.eclipse.nature.remove"-->
+<!--      class="mb.str.eclipse.StrategoRemoveNatureHandler"-->
+<!--    />-->
+<!--  </extension>-->
+<!--  &lt;!&ndash; Observe/Unobserve &ndash;&gt;-->
+<!--  <extension point="org.eclipse.ui.commands">-->
+<!--    <command id="stratego.eclipse.observe" name="Observe file(s) for Stratego-related tasks"/>-->
+<!--    <command id="stratego.eclipse.unobserve" name="Unobserve file(s) for Stratego-related tasks"/>-->
+<!--  </extension>-->
+<!--  <extension point="org.eclipse.ui.handlers">-->
+<!--    <handler-->
+<!--      commandId="stratego.eclipse.observe"-->
+<!--      class="mb.str.eclipse.StrategoObserveHandler"-->
+<!--    />-->
+<!--    <handler-->
+<!--      commandId="stratego.eclipse.unobserve"-->
+<!--      class="mb.str.eclipse.StrategoUnobserveHandler"-->
+<!--    />-->
+<!--  </extension>-->
+<!--  &lt;!&ndash; Transform &ndash;&gt;-->
+<!--  <extension point="org.eclipse.ui.commands">-->
+<!--    <command id="stratego.eclipse.runcommand" name="Run Stratego command">-->
+<!--      <commandParameter id="data" name="Data" optional="false"/>-->
+<!--    </command>-->
+<!--  </extension>-->
+<!--  <extension point="org.eclipse.ui.handlers">-->
+<!--    <handler-->
+<!--      commandId="stratego.eclipse.runcommand"-->
+<!--      class="mb.str.eclipse.StrategoRunCommandHandler"-->
+<!--    />-->
+<!--  </extension>-->
 </plugin>

@@ -8,5 +8,4 @@ colorer
   number     : 0 127 0
   operator   : 0 0 128
   layout     : 63 127 95 italic
-  default    : 0 0 0
   unknown    : 0 0 0

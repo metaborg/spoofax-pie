@@ -2,7 +2,9 @@ package mb.spoofax.lwb.dynamicloading;
 
 import mb.cfg.CompileLanguageInput;
 import mb.pie.api.ExecException;
+import mb.pie.api.MixedSession;
 import mb.pie.api.Task;
+import mb.pie.api.TopDownSession;
 import mb.pie.runtime.tracer.MetricsTracer;
 import mb.resource.WritableResource;
 import mb.resource.hierarchical.HierarchicalResource;
@@ -16,6 +18,7 @@ import mb.spoofax.core.language.command.arg.ArgConverters;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.Optional;
 
 class CharsTestBase extends TestBase {
@@ -84,45 +87,45 @@ class CharsTestBase extends TestBase {
     }
 
 
-    DynamicLoaderReloadSession modifyStyler(DynamicLoaderMixedSession session, CompileLanguageInput input) throws IOException, ExecException, InterruptedException {
+    TopDownSession modifyStyler(MixedSession session, CompileLanguageInput input) throws IOException, ExecException, InterruptedException {
         final ResourcePath path = input.compileLanguageSpecificationInput().esv().get().mainFile();
         final WritableResource file = resourceService.getWritableResource(path);
         final String text = file.readString().replace("0 0 150 bold", "255 255 0 italic");
         file.writeString(text);
-        return session.updateAffectedBy(path);
+        return session.updateAffectedBy(Collections.singleton(path));
     }
 
-    DynamicLoaderReloadSession modifyParser(DynamicLoaderMixedSession session, CompileLanguageInput input) throws IOException, ExecException, InterruptedException {
+    TopDownSession modifyParser(MixedSession session, CompileLanguageInput input) throws IOException, ExecException, InterruptedException {
         final ResourcePath path = input.compileLanguageSpecificationInput().sdf3().get().mainFile();
         final WritableResource file = resourceService.getWritableResource(path);
         final String text = file.readString().replace("\\ ", "\\ \\t");
         file.writeString(text);
-        return session.updateAffectedBy(path);
+        return session.updateAffectedBy(Collections.singleton(path));
     }
 
-    DynamicLoaderReloadSession modifyTransformation(DynamicLoaderMixedSession session, CompileLanguageInput input) throws IOException, ExecException, InterruptedException {
+    TopDownSession modifyTransformation(MixedSession session, CompileLanguageInput input) throws IOException, ExecException, InterruptedException {
         final ResourcePath path = input.compileLanguageSpecificationInput().stratego().get().mainSourceDirectory().appendRelativePath("transform/remove-a.str");
         final WritableResource file = resourceService.getWritableResource(path);
         final String text = file.readString().replace("string-replace(|\"a\", \"a\")", "string-replace(|\"a\", \"\")");
         file.writeString(text);
-        return session.updateAffectedBy(path);
+        return session.updateAffectedBy(Collections.singleton(path));
     }
 
-    DynamicLoaderReloadSession modifyCommand(DynamicLoaderMixedSession session, CompileLanguageInput input) throws IOException, ExecException, InterruptedException {
+    TopDownSession modifyCommand(MixedSession session, CompileLanguageInput input) throws IOException, ExecException, InterruptedException {
         final ResourcePath path = input.userJavaSourcePaths().get(0).appendRelativePath("mb/chars/CharsDebugRemoveA.java");
         final WritableResource file = resourceService.getWritableResource(path);
         final String text = file.readString().replace("A characters", "'A' characters");
         file.writeString(text);
-        return session.updateAffectedBy(path);
+        return session.updateAffectedBy(Collections.singleton(path));
     }
 
-    DynamicLoaderReloadSession modifyAnalyzer(DynamicLoaderMixedSession session, CompileLanguageInput input) throws IOException, ExecException, InterruptedException {
+    TopDownSession modifyAnalyzer(MixedSession session, CompileLanguageInput input) throws IOException, ExecException, InterruptedException {
         final ResourcePath path = input.compileLanguageSpecificationInput().statix().get().mainFile();
         final WritableResource file = resourceService.getWritableResource(path);
         final String text = file.readString()
             .replace("Chars(\"\")", "Chars(\"abcdefg\")")
             .replace("combination '' is", "combination 'abcdefg' is");
         file.writeString(text);
-        return session.updateAffectedBy(path);
+        return session.updateAffectedBy(Collections.singleton(path));
     }
 }

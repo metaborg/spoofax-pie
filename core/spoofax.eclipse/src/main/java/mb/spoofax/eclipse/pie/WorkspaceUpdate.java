@@ -10,6 +10,7 @@ import mb.resource.ResourceKey;
 import mb.spoofax.core.platform.PlatformScope;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.editor.SpoofaxEditor;
+import mb.spoofax.eclipse.editor.SpoofaxEditorBase;
 import mb.spoofax.eclipse.util.MarkerUtil;
 import mb.spoofax.eclipse.util.ResourceUtil;
 import mb.spoofax.eclipse.util.StyleUtil;
@@ -121,12 +122,12 @@ public class WorkspaceUpdate {
 
 
     private static class StyleUpdate {
-        public final SpoofaxEditor editor;
+        public final SpoofaxEditorBase editor;
         public final @Nullable String text;
         public final int textLength;
         public final TextPresentation textPresentation;
 
-        public StyleUpdate(SpoofaxEditor editor, @Nullable String text, int textLength, TextPresentation textPresentation) {
+        public StyleUpdate(SpoofaxEditorBase editor, @Nullable String text, int textLength, TextPresentation textPresentation) {
             this.editor = editor;
             this.text = text;
             this.textLength = textLength;
@@ -134,12 +135,12 @@ public class WorkspaceUpdate {
         }
     }
 
-    public void updateStyle(SpoofaxEditor editor, String text, Styling styling) {
+    public void updateStyle(SpoofaxEditorBase editor, String text, Styling styling) {
         final TextPresentation textPresentation = styleUtil.createTextPresentation(styling, text.length());
         styleUpdates.add(new StyleUpdate(editor, text, text.length(), textPresentation));
     }
 
-    public void removeStyle(SpoofaxEditor editor, int textLength) {
+    public void removeStyle(SpoofaxEditorBase editor, int textLength) {
         final TextPresentation textPresentation = styleUtil.createDefaultTextPresentation(textLength);
         styleUpdates.add(new StyleUpdate(editor, null, textLength, textPresentation));
     }
@@ -189,7 +190,7 @@ public class WorkspaceUpdate {
 
         for(StyleUpdate styleUpdate : styleUpdates) {
             if(monitor != null && monitor.isCanceled()) return;
-            final SpoofaxEditor editor = styleUpdate.editor;
+            final SpoofaxEditorBase editor = styleUpdate.editor;
             editor.setStyleAsync(styleUpdate.textPresentation, styleUpdate.text, styleUpdate.textLength, monitor);
         }
     }
