@@ -79,7 +79,7 @@ class TestBase {
         );
         resourceService = standaloneSpoofax3Compiler.compiler.resourceServiceComponent.getResourceService();
         dynamicLoadingComponent = DaggerDynamicLoadingComponent.builder()
-            .dynamicLoadingModule(new DynamicLoadingModule(() -> new RootPieModule(PieBuilderImpl::new)
+            .dynamicLoadingPieModule(new DynamicLoadingPieModule(() -> new RootPieModule(PieBuilderImpl::new)
                 .withStoreFactory(storeFactory)
                 .withTracerFactory(tracerFactory))
             )
@@ -90,7 +90,7 @@ class TestBase {
             .spoofax3CompilerComponent(standaloneSpoofax3Compiler.compiler.component)
             .build();
         dynamicLoad = dynamicLoadingComponent.getDynamicLoad();
-        dynamicLanguageRegistry= dynamicLoadingComponent.getDynamicLanguageRegistry();
+        dynamicLanguageRegistry = dynamicLoadingComponent.getDynamicLanguageRegistry();
         pieComponent = DaggerPieComponent.builder()
             .pieModule(standaloneSpoofax3Compiler.pieComponent.createChildModule(dynamicLoadingComponent))
             .loggerComponent(loggerComponent)

@@ -9,13 +9,13 @@ import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.core.platform.PlatformComponent;
 import mb.spoofax.lwb.compiler.dagger.Spoofax3CompilerComponent;
 
-import java.io.IOException;
 import java.util.Set;
 
 @DynamicLoadingScope
 @Component(
     modules = {
-        DynamicLoadingModule.class
+        DynamicLoadingModule.class,
+        DynamicLoadingPieModule.class
     },
     dependencies = {
         LoggerComponent.class,

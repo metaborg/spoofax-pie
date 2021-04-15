@@ -1,5 +1,7 @@
 package mb.spoofax.lwb.eclipse.dynamicloading;
 
+import mb.spoofax.core.language.LanguageComponent;
+import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.editor.SpoofaxEditorBase;
 import mb.spoofax.lwb.dynamicloading.DynamicLanguage;
 import mb.spoofax.lwb.dynamicloading.DynamicLanguageRegistry;
@@ -31,6 +33,10 @@ public class DynamicEditor extends SpoofaxEditorBase {
         if(fileExtension == null) return;
         final @Nullable DynamicLanguage language = languageRegistry.getLanguageForFileExtension(fileExtension);
         if(language == null) return;
+
+//        if(!(language.getLanguageComponent() instanceof EclipseLanguageComponent)) {
+//            logger.error("Cannot ");
+//        }
 
         cancelJobs();
 

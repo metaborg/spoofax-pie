@@ -17,7 +17,7 @@ val picocliVersion = "4.5.0"
 val javaxInjectVersion = "1"
 val checkerframeworkVersion = "3.10.0"
 
-val daggerVersion = "2.32"
+val daggerVersion = "2.34.1"
 val derive4jVersion = "1.1.1"
 val immutablesVersion = "2.8.2"
 

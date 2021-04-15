@@ -1,5 +1,8 @@
 package mb.spoofax.eclipse.editor;
 
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedFactory;
+import dagger.assisted.AssistedInject;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecException;
@@ -17,6 +20,17 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.text.IDocument;
 
 public class EditorUpdateJob extends Job {
+    @AssistedFactory public interface Factory {
+        EditorUpdateJob create(
+            EclipseLanguageComponent languageComponent,
+            PieComponent pieComponent,
+            @Nullable IProject project,
+            IFile file,
+            IDocument document,
+            SpoofaxEditorBase editor
+        );
+    }
+
     private final Logger logger;
     private final PieRunner pieRunner;
     private final EclipseLanguageComponent languageComponent;
@@ -27,15 +41,15 @@ public class EditorUpdateJob extends Job {
     private final IDocument document;
     private final SpoofaxEditorBase editor;
 
-    public EditorUpdateJob(
+    @AssistedInject public EditorUpdateJob(
         LoggerFactory loggerFactory,
         PieRunner pieRunner,
-        EclipseLanguageComponent languageComponent,
-        PieComponent pieComponent,
-        @Nullable IProject project,
-        IFile file,
-        IDocument document,
-        SpoofaxEditorBase editor
+        @Assisted EclipseLanguageComponent languageComponent,
+        @Assisted PieComponent pieComponent,
+        @Assisted @Nullable IProject project,
+        @Assisted IFile file,
+        @Assisted IDocument document,
+        @Assisted SpoofaxEditorBase editor
     ) {
         super(languageComponent.getLanguageInstance().getDisplayName() + " editor update");
         this.logger = loggerFactory.create(getClass());

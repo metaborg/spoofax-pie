@@ -20,7 +20,7 @@ import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 import mb.spoofax.lwb.compiler.dagger.Spoofax3Compiler;
 import mb.spoofax.lwb.dynamicloading.DaggerDynamicLoadingComponent;
 import mb.spoofax.lwb.dynamicloading.DynamicLoadingComponent;
-import mb.spoofax.lwb.dynamicloading.DynamicLoadingModule;
+import mb.spoofax.lwb.dynamicloading.DynamicLoadingPieModule;
 import mb.statix.eclipse.StatixLanguageFactory;
 import mb.str.eclipse.StrategoLanguageFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -123,7 +123,7 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
             }
             if(dynamicLoadingComponent == null) {
                 dynamicLoadingComponent = DaggerDynamicLoadingComponent.builder()
-                    .dynamicLoadingModule(new DynamicLoadingModule(() -> new RootPieModule(PieBuilderImpl::new)))
+                    .dynamicLoadingPieModule(new DynamicLoadingPieModule(() -> new RootPieModule(PieBuilderImpl::new)))
                     .loggerComponent(loggerComponent)
                     .resourceServiceComponent(resourceServiceComponent)
                     .platformComponent(platformComponent)
