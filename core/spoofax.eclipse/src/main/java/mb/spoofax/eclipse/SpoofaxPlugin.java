@@ -2,15 +2,6 @@ package mb.spoofax.eclipse;
 
 import mb.common.util.MultiMap;
 import mb.log.api.Logger;
-import mb.pie.dagger.DaggerRootPieComponent;
-import mb.pie.dagger.PieComponent;
-import mb.pie.dagger.RootPieComponent;
-import mb.pie.dagger.RootPieModule;
-import mb.pie.dagger.TaskDefsProvider;
-import mb.pie.runtime.PieBuilderImpl;
-import mb.resource.dagger.DaggerResourceServiceComponent;
-import mb.resource.dagger.ResourceServiceComponent;
-import mb.resource.dagger.ResourceServiceModule;
 import mb.spoofax.eclipse.log.DaggerEclipseLoggerComponent;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -27,9 +18,6 @@ import org.eclipse.ui.IStartup;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-
 public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
     public static final String id = "spoofax.eclipse";
     public static final String extensionPointId = "spoofax.eclipse.lifecycle";
@@ -38,11 +26,8 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
     private static @Nullable EclipseLoggerComponent loggerComponent;
     private static @Nullable Logger logger;
     private static @Nullable EclipseResourceServiceComponent baseResourceServiceComponent;
-    private static @Nullable MultiMap<String, EclipseLifecycleParticipant> lifecycleParticipantsPerGroup;
-    private static @Nullable HashMap<String, ResourceServiceComponent> resourceServiceComponentsPerGroup;
     private static @Nullable EclipsePlatformComponent platformComponent;
-    private static @Nullable MultiMap<String, TaskDefsProvider> taskDefsProvidersPerGroup;
-    private static @Nullable HashMap<String, RootPieComponent> pieComponentsPerGroup;
+    private static @Nullable LifecycleParticipantManager lifecycleParticipantManager;
 
 
     public static SpoofaxPlugin getPlugin() {
@@ -66,13 +51,6 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
         return baseResourceServiceComponent;
     }
 
-    public static ResourceServiceComponent getResourceServiceComponentOfGroup(String group) {
-        if(resourceServiceComponentsPerGroup == null) {
-            throw new RuntimeException("Cannot access resource service components of language groups; SpoofaxPlugin has not been started yet, or has been stopped");
-        }
-        return resourceServiceComponentsPerGroup.get(group);
-    }
-
     public static EclipsePlatformComponent getPlatformComponent() {
         if(platformComponent == null) {
             throw new RuntimeException("Cannot access EclipsePlatformComponent; SpoofaxPlugin has not been started yet, or has been stopped");
@@ -80,11 +58,11 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
         return platformComponent;
     }
 
-    public static PieComponent getPieComponentOfGroup(String group) {
-        if(pieComponentsPerGroup == null) {
-            throw new RuntimeException("Cannot access PIE components of language groups; SpoofaxPlugin has not been started yet, or has been stopped");
+    public static LifecycleParticipantManager getLifecycleParticipantManager() {
+        if(lifecycleParticipantManager == null) {
+            throw new RuntimeException("Cannot access LifecycleParticipantManager; SpoofaxPlugin has not been started yet, or has been stopped");
         }
-        return pieComponentsPerGroup.get(group);
+        return lifecycleParticipantManager;
     }
 
 
@@ -92,88 +70,18 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
         super.start(context);
         plugin = this;
 
-        final EclipseLoggerComponent loggerComponent = DaggerEclipseLoggerComponent.create();
-        SpoofaxPlugin.loggerComponent = loggerComponent;
-        final Logger logger = loggerComponent.getLoggerFactory().create(getClass());
-        SpoofaxPlugin.logger = logger;
-
-        final EclipseResourceServiceComponent baseResourceServiceComponent = DaggerEclipseResourceServiceComponent.builder()
+        loggerComponent = DaggerEclipseLoggerComponent.create();
+        logger = loggerComponent.getLoggerFactory().create(getClass());
+        baseResourceServiceComponent = DaggerEclipseResourceServiceComponent.builder()
             .eclipseLoggerComponent(loggerComponent)
             .build();
-        SpoofaxPlugin.baseResourceServiceComponent = baseResourceServiceComponent;
-
-        final MultiMap<String, EclipseLifecycleParticipant> lifecycleParticipantsPerGroup = gatherLifecycleParticipants(logger);
-        SpoofaxPlugin.lifecycleParticipantsPerGroup = lifecycleParticipantsPerGroup;
-
-        // Create resource service components for each participant group.
-        final HashMap<String, ResourceServiceComponent> resourceServiceComponentsPerGroup = new LinkedHashMap<>();
-        SpoofaxPlugin.resourceServiceComponentsPerGroup = resourceServiceComponentsPerGroup;
-        lifecycleParticipantsPerGroup.forEach((group, participant) -> {
-            final ResourceServiceModule resourceServiceModule = baseResourceServiceComponent.createChildModule();
-            for(EclipseLifecycleParticipant language : participant) {
-                resourceServiceModule.addRegistriesFrom(language.getResourceRegistriesProvider(loggerComponent));
-            }
-            final ResourceServiceComponent resourceServiceComponent = DaggerResourceServiceComponent.builder()
-                .loggerComponent(loggerComponent)
-                .resourceServiceModule(resourceServiceModule)
-                .build();
-            resourceServiceComponentsPerGroup.put(group, resourceServiceComponent);
-        });
-
-        final EclipsePlatformComponent platformComponent = DaggerEclipsePlatformComponent.builder()
+        platformComponent = DaggerEclipsePlatformComponent.builder()
             .eclipseLoggerComponent(loggerComponent)
             .eclipseResourceServiceComponent(baseResourceServiceComponent)
             .build();
-        SpoofaxPlugin.platformComponent = platformComponent;
         platformComponent.init();
-
-        // Create task definition providers for each participant, using the resource service component of their group.
-        final MultiMap<String, TaskDefsProvider> taskDefsProvidersPerGroup = MultiMap.withLinkedHash();
-        SpoofaxPlugin.taskDefsProvidersPerGroup = taskDefsProvidersPerGroup;
-        lifecycleParticipantsPerGroup.forEach((group, participant) -> {
-            final ResourceServiceComponent resourceServiceComponent = resourceServiceComponentsPerGroup.get(group);
-            if(resourceServiceComponent == null) {
-                throw new RuntimeException("BUG: Cannot get resource service component for language group '" + group + "' which should have been created before");
-            }
-            for(EclipseLifecycleParticipant language : participant) {
-                final TaskDefsProvider languageComponent = language.getTaskDefsProvider(loggerComponent, resourceServiceComponent, platformComponent);
-                taskDefsProvidersPerGroup.put(group, languageComponent);
-            }
-        });
-
-        // Create PIE components for each participant group, using the task definitions from the languages of the group.
-        final HashMap<String, RootPieComponent> pieComponentsPerGroup = new LinkedHashMap<>();
-        SpoofaxPlugin.pieComponentsPerGroup = pieComponentsPerGroup;
-        taskDefsProvidersPerGroup.forEach((group, taskDefsProviders) -> {
-            final ResourceServiceComponent resourceServiceComponent = resourceServiceComponentsPerGroup.get(group);
-            if(resourceServiceComponent == null) {
-                throw new RuntimeException("BUG: Cannot get resource service component for language group '" + group + "' which should have been created before");
-            }
-            final RootPieModule pieModule = new RootPieModule(PieBuilderImpl::new);
-            for(TaskDefsProvider taskDefsProvider : taskDefsProviders) {
-                pieModule.addTaskDefsFrom(taskDefsProvider);
-            }
-            lifecycleParticipantsPerGroup.get(group).forEach(p -> p.customizePieModule(pieModule));
-            final RootPieComponent pieComponent = DaggerRootPieComponent.builder()
-                .rootPieModule(pieModule)
-                .loggerComponent(loggerComponent)
-                .resourceServiceComponent(resourceServiceComponent)
-                .build();
-            pieComponentsPerGroup.put(group, pieComponent);
-        });
-
-        // Start all participant.
-        lifecycleParticipantsPerGroup.forEachValue((group, participant) -> {
-            final ResourceServiceComponent resourceServiceComponent = resourceServiceComponentsPerGroup.get(group);
-            if(resourceServiceComponent == null) {
-                throw new RuntimeException("BUG: Cannot get resource service component for language group '" + group + "' which should have been created before");
-            }
-            final RootPieComponent pieComponent = pieComponentsPerGroup.get(group);
-            if(pieComponent == null) {
-                throw new RuntimeException("BUG: Cannot get PIE component for language group '" + group + "' which should have been created before");
-            }
-            participant.start(loggerComponent, resourceServiceComponentsPerGroup.get(group), platformComponent, pieComponent);
-        });
+        lifecycleParticipantManager = new LifecycleParticipantManager(loggerComponent, baseResourceServiceComponent, platformComponent);
+        lifecycleParticipantManager.registerStatic(gatherLifecycleParticipants(logger));
     }
 
     @Override public void earlyStartup() {
@@ -182,62 +90,16 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
 
     @Override public void stop(@NonNull BundleContext context) throws Exception {
         super.stop(context);
-        if(pieComponentsPerGroup != null) {
-            pieComponentsPerGroup.forEach((group, pieComponent) -> {
-                try {
-                    pieComponent.close();
-                } catch(RuntimeException e) {
-                    if(logger != null) {
-                        logger.error("Closing PIE component '{}' of group '{}' failed unexpectedly", e, pieComponent, group);
-                    }
-                }
-            });
-            pieComponentsPerGroup.clear();
-            pieComponentsPerGroup = null;
-        }
-        if(taskDefsProvidersPerGroup != null) {
-            // Not closing language components here. Registered languages close it their selves in EclipseLanguage.
-            taskDefsProvidersPerGroup.clear();
-            taskDefsProvidersPerGroup = null;
+        if(lifecycleParticipantManager != null) {
+            lifecycleParticipantManager.close();
+            lifecycleParticipantManager = null;
         }
         if(platformComponent != null) {
             platformComponent.close();
             platformComponent = null;
         }
-        if(resourceServiceComponentsPerGroup != null) {
-            resourceServiceComponentsPerGroup.forEach((group, resourceServiceComponent) -> {
-                try {
-                    resourceServiceComponent.close();
-                } catch(Exception e) {
-                    if(logger != null) {
-                        logger.error("Closing resource service component '{}' of group '{}' failed unexpectedly", e, resourceServiceComponent, group);
-                    }
-                }
-            });
-            resourceServiceComponentsPerGroup.clear();
-            resourceServiceComponentsPerGroup = null;
-        }
-        if(lifecycleParticipantsPerGroup != null) {
-            lifecycleParticipantsPerGroup.forEachValue((group, participant) -> {
-                try {
-                    participant.close();
-                } catch(Exception e) {
-                    if(logger != null) {
-                        logger.error("Closing language '{}' of group '{}' failed unexpectedly", e, participant, group);
-                    }
-                }
-            });
-            lifecycleParticipantsPerGroup.clear();
-            lifecycleParticipantsPerGroup = null;
-        }
         if(baseResourceServiceComponent != null) {
-            try {
-                baseResourceServiceComponent.close();
-            } catch(Exception e) {
-                if(logger != null) {
-                    logger.error("Closing base resource service component '{}' failed unexpectedly", e, baseResourceServiceComponent);
-                }
-            }
+            baseResourceServiceComponent.close();
             baseResourceServiceComponent = null;
         }
         logger = null;

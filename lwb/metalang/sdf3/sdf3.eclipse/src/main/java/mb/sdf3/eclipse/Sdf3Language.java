@@ -24,7 +24,7 @@ public class Sdf3Language extends BaseSdf3Language {
         super.start(loggerComponent, resourceServiceComponent, platformComponent, childPieComponent);
     }
 
-    @Override public void close() throws Exception {
+    @Override public void close() {
         if(pieComponent != null) {
             pieComponent.close();
         }

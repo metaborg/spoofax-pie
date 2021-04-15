@@ -6,7 +6,6 @@ import mb.pie.runtime.store.InMemoryStore;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.eclipse.EclipsePlatformComponent;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
-import mb.str.eclipse.BaseStrategoLanguage;
 
 public class StrategoLanguage extends BaseStrategoLanguage {
     @Override public void start(
@@ -25,7 +24,7 @@ public class StrategoLanguage extends BaseStrategoLanguage {
         super.start(loggerComponent, resourceServiceComponent, platformComponent, childPieComponent);
     }
 
-    @Override public void close() throws Exception {
+    @Override public void close() {
         if(pieComponent != null) {
             pieComponent.close();
         }

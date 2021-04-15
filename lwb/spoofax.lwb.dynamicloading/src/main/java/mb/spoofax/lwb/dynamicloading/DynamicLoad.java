@@ -5,11 +5,13 @@ import mb.cfg.task.CfgRootDirectoryToObject;
 import mb.cfg.task.CfgRootDirectoryToObjectException;
 import mb.cfg.task.CfgToObject;
 import mb.common.result.Result;
+import mb.common.util.StreamIterable;
 import mb.pie.api.ExecContext;
 import mb.pie.api.OutTransient;
 import mb.pie.api.OutTransientImpl;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
+import mb.resource.ReadableResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.walk.ResourceWalker;
@@ -17,6 +19,7 @@ import mb.spoofax.lwb.compiler.CompileLanguage;
 import mb.spoofax.lwb.compiler.CompileLanguageException;
 
 import javax.inject.Inject;
+import java.util.stream.Stream;
 
 @DynamicLoadingScope
 public class DynamicLoad implements TaskDef<CompileLanguage.Args, OutTransient<DynamicLanguage>> {
@@ -46,7 +49,13 @@ public class DynamicLoad implements TaskDef<CompileLanguage.Args, OutTransient<D
         final Result<CompileLanguage.Output, CompileLanguageException> result = context.require(compileLanguage, args);
         final CompileLanguage.Output output = result.unwrap(); // TODO: properly handle error
         for(ResourcePath path : output.classPath()) {
-            context.require(path, ResourceStampers.modifiedDirRec(ResourceWalker.ofTrue(), ResourceMatcher.ofFile()));
+            // HACK: create dependency to each file separately, instead of one for the directory, to ensure this task
+            //       gets re-executed in a bottom-up build when any file changes
+            try(Stream<? extends ReadableResource> files = context.require(path).walk(ResourceWalker.ofTrue(), ResourceMatcher.ofFile())) {
+                for(ReadableResource file : new StreamIterable<>(files)) {
+                    context.require(file, ResourceStampers.modifiedFile());
+                }
+            }
         }
         final Result<CfgToObject.Output, CfgRootDirectoryToObjectException> cfgResult = context.require(cfgRootDirectoryToObject, args.rootDirectory());
         final CompileLanguageInput compileInput = cfgResult.unwrap().compileLanguageInput; // TODO: properly handle error.

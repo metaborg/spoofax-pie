@@ -12,16 +12,12 @@ import mb.resource.dagger.ResourceServiceComponent;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.platform.PlatformComponent;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
 import java.util.List;
 
 @DynamicLoadingScope
@@ -48,15 +44,7 @@ public class DefaultDynamicLanguageLoader implements DynamicLanguageLoader {
         CompileLanguageInput compileInput,
         List<ResourcePath> classPath
     ) throws ReflectiveOperationException, IOException {
-        final ArrayList<URL> classPathUrls = new ArrayList<>();
-        for(ResourcePath path : classPath) {
-            final @Nullable File file = parentResourceServiceComponent.getResourceService().toLocalFile(path);
-            if(file == null) {
-                throw new IOException("Cannot dynamically load language; resource at path '" + path + "' is not on the local filesystem, and can therefore not be loaded into a URLClassLoader");
-            }
-            classPathUrls.add(file.toURI().toURL());
-        }
-        final URLClassLoader classLoader = new URLClassLoader(classPathUrls.toArray(new URL[0]), DynamicLanguage.class.getClassLoader());
+        final URLClassLoader classLoader = new URLClassLoader(DynamicLanguageLoader.classPathToUrl(classPath, parentResourceServiceComponent.getResourceService()), DynamicLanguage.class.getClassLoader());
 
         final ResourceRegistriesProvider resourceRegistriesProvider;
         {

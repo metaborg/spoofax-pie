@@ -3,6 +3,7 @@ package mb.tiger.eclipse;
 import mb.pie.api.ExecException;
 import mb.pie.dagger.PieComponent;
 import mb.resource.dagger.ResourceServiceComponent;
+import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.EclipseLifecycleParticipant;
 import mb.spoofax.eclipse.EclipsePlatformComponent;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
@@ -72,6 +73,14 @@ public class TigerLanguage implements EclipseLifecycleParticipant {
         ResourceServiceComponent resourceServiceComponent,
         EclipsePlatformComponent platformComponent
     ) {
+        return getLanguageComponent(loggerComponent, resourceServiceComponent, platformComponent);
+    }
+
+    @Override public TigerEclipseComponent getLanguageComponent(
+        EclipseLoggerComponent loggerComponent,
+        ResourceServiceComponent resourceServiceComponent,
+        EclipsePlatformComponent platformComponent
+    ) {
         if(component == null) {
             component = DaggerTigerEclipseComponent.builder()
                 .eclipseLoggerComponent(loggerComponent)
@@ -106,7 +115,7 @@ public class TigerLanguage implements EclipseLifecycleParticipant {
         job.schedule();
     }
 
-    @Override public void close() throws Exception {
+    @Override public void close() {
         if(pieComponent != null) {
             // PIE component is closed by SpoofaxPlugin.
             pieComponent = null;

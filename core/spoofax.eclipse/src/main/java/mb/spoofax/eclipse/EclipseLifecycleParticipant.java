@@ -5,7 +5,9 @@ import mb.pie.dagger.RootPieModule;
 import mb.pie.dagger.TaskDefsProvider;
 import mb.resource.dagger.ResourceRegistriesProvider;
 import mb.resource.dagger.ResourceServiceComponent;
+import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface EclipseLifecycleParticipant extends AutoCloseable {
     ResourceRegistriesProvider getResourceRegistriesProvider(
@@ -18,9 +20,13 @@ public interface EclipseLifecycleParticipant extends AutoCloseable {
         EclipsePlatformComponent platformComponent
     );
 
-    default void customizePieModule(RootPieModule pieModule) {
+    @Nullable EclipseLanguageComponent getLanguageComponent(
+        EclipseLoggerComponent loggerComponent,
+        ResourceServiceComponent resourceServiceComponent,
+        EclipsePlatformComponent platformComponent
+    );
 
-    }
+    default void customizePieModule(RootPieModule pieModule) {}
 
     void start(
         EclipseLoggerComponent loggerComponent,
@@ -28,4 +34,6 @@ public interface EclipseLifecycleParticipant extends AutoCloseable {
         EclipsePlatformComponent platformComponent,
         PieComponent pieComponent
     );
+
+    @Override void close();
 }

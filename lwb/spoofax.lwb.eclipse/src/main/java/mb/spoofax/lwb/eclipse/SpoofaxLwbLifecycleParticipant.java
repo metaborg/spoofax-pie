@@ -14,13 +14,15 @@ import mb.resource.dagger.EmptyResourceRegistriesProvider;
 import mb.resource.dagger.ResourceRegistriesProvider;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.sdf3.eclipse.Sdf3LanguageFactory;
+import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.EclipseLifecycleParticipant;
 import mb.spoofax.eclipse.EclipsePlatformComponent;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 import mb.spoofax.lwb.compiler.dagger.Spoofax3Compiler;
-import mb.spoofax.lwb.dynamicloading.DaggerDynamicLoadingComponent;
 import mb.spoofax.lwb.dynamicloading.DynamicLoadingComponent;
 import mb.spoofax.lwb.dynamicloading.DynamicLoadingPieModule;
+import mb.spoofax.lwb.eclipse.dynamicloading.DaggerEclipseDynamicLoadingComponent;
+import mb.spoofax.lwb.eclipse.dynamicloading.EclipseDynamicLoadingComponent;
 import mb.statix.eclipse.StatixLanguageFactory;
 import mb.str.eclipse.StrategoLanguageFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -49,7 +51,7 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
 
     private @Nullable ResourceServiceComponent resourceServiceComponent;
     private @Nullable Spoofax3Compiler spoofax3Compiler;
-    private @Nullable DynamicLoadingComponent dynamicLoadingComponent;
+    private @Nullable EclipseDynamicLoadingComponent dynamicLoadingComponent;
     private @Nullable PieComponent pieComponent;
     private @Nullable SpoofaxLwbComponent spoofaxLwbComponent;
 
@@ -68,9 +70,9 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
         return spoofax3Compiler;
     }
 
-    public DynamicLoadingComponent getDynamicLoadingComponent() {
+    public EclipseDynamicLoadingComponent getDynamicLoadingComponent() {
         if(dynamicLoadingComponent == null) {
-            throw new RuntimeException("DynamicLoadingComponent has not been initialized yet or has been closed");
+            throw new RuntimeException("EclipseDynamicLoadingComponent has not been initialized yet or has been closed");
         }
         return dynamicLoadingComponent;
     }
@@ -122,7 +124,7 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
                 );
             }
             if(dynamicLoadingComponent == null) {
-                dynamicLoadingComponent = DaggerDynamicLoadingComponent.builder()
+                dynamicLoadingComponent = DaggerEclipseDynamicLoadingComponent.builder()
                     .dynamicLoadingPieModule(new DynamicLoadingPieModule(() -> new RootPieModule(PieBuilderImpl::new)))
                     .loggerComponent(loggerComponent)
                     .resourceServiceComponent(resourceServiceComponent)
@@ -144,6 +146,14 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
             taskDefs.addAll(dynamicLoadingComponent.getTaskDefs());
             return taskDefs;
         };
+    }
+
+    @Override public @Nullable EclipseLanguageComponent getLanguageComponent(
+        EclipseLoggerComponent loggerComponent,
+        ResourceServiceComponent resourceServiceComponent,
+        EclipsePlatformComponent platformComponent
+    ) {
+        return null;
     }
 
     @Override public void customizePieModule(RootPieModule pieModule) {

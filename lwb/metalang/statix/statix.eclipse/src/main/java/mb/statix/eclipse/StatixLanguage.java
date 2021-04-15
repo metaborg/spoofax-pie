@@ -24,7 +24,7 @@ public class StatixLanguage extends BaseStatixLanguage {
         super.start(loggerComponent, resourceServiceComponent, platformComponent, childPieComponent);
     }
 
-    @Override public void close() throws Exception {
+    @Override public void close() {
         if(pieComponent != null) {
             pieComponent.close();
         }

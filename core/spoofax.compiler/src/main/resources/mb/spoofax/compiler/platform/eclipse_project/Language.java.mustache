@@ -70,6 +70,14 @@ public class {{baseLanguage.id}} implements EclipseLifecycleParticipant {
         ResourceServiceComponent resourceServiceComponent,
         EclipsePlatformComponent platformComponent
     ) {
+        return getLanguageComponent(loggerComponent, resourceServiceComponent, platformComponent);
+    }
+
+    @Override public {{eclipseComponent.qualifiedId}} getLanguageComponent(
+        EclipseLoggerComponent loggerComponent,
+        ResourceServiceComponent resourceServiceComponent,
+        EclipsePlatformComponent platformComponent
+    ) {
         if(component == null) {
             final {{daggerEclipseComponent.qualifiedId}}.Builder builder = {{daggerEclipseComponent.qualifiedId}}.builder()
                 .eclipseLoggerComponent(loggerComponent)
@@ -109,7 +117,7 @@ public class {{baseLanguage.id}} implements EclipseLifecycleParticipant {
         job.schedule();
     }
 
-    @Override public void close() throws Exception {
+    @Override public void close() {
         pieComponent = null;
         if(component != null) {
             component.getEditorTracker().unregister();
@@ -124,7 +132,8 @@ public class {{baseLanguage.id}} implements EclipseLifecycleParticipant {
         final Logger logger = loggerComponent.getLoggerFactory().create({{baseLanguage.id}}.class);
         final ArrayList<{{componentCustomizer.qualifiedId}}> customizers = new ArrayList<>();
         final IExtensionRegistry registry = Platform.getExtensionRegistry();
-        final IExtensionPoint point = registry.getExtensionPoint("{{componentExtensionPointId}}");
+        final @Nullable IExtensionPoint point = registry.getExtensionPoint("{{componentExtensionPointId}}");
+        if(point == null) return customizers; // Dynamically loaded languages do not have this extension point.
         final IContributor contributor = point.getContributor();
         for(IConfigurationElement config : point.getConfigurationElements()) {
             if(config.getName().equals("customizer")) {
