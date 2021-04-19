@@ -7,6 +7,9 @@ import mb.spoofax.compiler.language.LanguageProjectCompilerInputBuilder;
 import mb.spoofax.compiler.platform.EclipseProjectCompiler;
 import mb.spoofax.compiler.util.Shared;
 
+/**
+ * {@link CompileLanguageInputCustomizer} implementation that does nothing.
+ */
 public class NoopCompileLanguageInputCustomizer implements CompileLanguageInputCustomizer {
     @Override public void customize(Shared.Builder builder) {
 

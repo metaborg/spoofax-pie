@@ -11,13 +11,8 @@ import mb.cfg.metalang.CompileStatixInput;
 import mb.cfg.metalang.CompileStrategoInput;
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
-import mb.common.message.Severity;
 import mb.common.option.Option;
-import mb.common.region.Region;
-import mb.common.util.MultiMap;
 import mb.common.util.Properties;
-import mb.common.util.StreamIterable;
-import mb.jsglr.common.TermTracer;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.adapter.AdapterProject;
@@ -42,24 +37,19 @@ import mb.spoofax.compiler.language.StrategoRuntimeLanguageCompiler;
 import mb.spoofax.compiler.language.StylerLanguageCompiler;
 import mb.spoofax.compiler.platform.EclipseProjectCompiler;
 import mb.spoofax.compiler.util.Shared;
-import mb.spoofax.compiler.util.TypeInfo;
 import mb.spoofax.core.language.command.CommandContextType;
 import mb.spoofax.core.language.command.CommandExecutionType;
 import mb.spoofax.core.language.command.EnclosingCommandContextType;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoAppl;
-import org.spoofax.interpreter.terms.IStrategoConstructor;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.terms.TermFactory;
 import org.spoofax.terms.util.TermUtils;
 
-import java.util.ArrayList;
-import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
-
+/**
+ * Converts a CFG AST into an {@link Output} containing messages, a {@link CompileLanguageInput} output object, and
+ * properties that need to be written to a lockfile.
+ */
 public class AstToObject {
     public static class Output {
         public final KeyedMessages messages;

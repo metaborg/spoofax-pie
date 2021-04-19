@@ -41,6 +41,8 @@ public class DynamicCompileLanguageInputCustomizer implements CompileLanguageInp
     }
 
     @Override public void customize(EclipseProjectCompiler.Input.Builder builder) {
+        // Force dynamically loaded languages to use `spoofax.lwb.eclipse.dynamicloading.*` markers, as their own
+        // markers are not available when dynamically loaded.
         builder.baseMarkerId("spoofax.lwb.eclipse.dynamicloading.marker");
         builder.infoMarkerId("spoofax.lwb.eclipse.dynamicloading.marker.info");
         builder.warningMarkerId("spoofax.lwb.eclipse.dynamicloading.marker.warning");
