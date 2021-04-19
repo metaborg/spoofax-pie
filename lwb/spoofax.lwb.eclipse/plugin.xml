@@ -76,21 +76,20 @@
 <!--  </extension>-->
 
   <!-- Context -->
-<!--  <extension point="org.eclipse.ui.contexts">-->
-<!--    <context-->
-<!--      id="stratego.eclipse.context"-->
-<!--      parentId="org.eclipse.ui.textEditorScope"-->
-<!--      name="Editing Stratego files"-->
-<!--      description="Editing Stratego files"-->
-<!--    />-->
-<!--  </extension>-->
+  <extension point="org.eclipse.ui.contexts">
+    <context
+      id="spoofax.lwb.eclipse.dynamicloading.context"
+      parentId="org.eclipse.ui.textEditorScope"
+      name="Editing Stratego files"
+      description="Editing Stratego files"
+    />
+  </extension>
 
 
   <!-- Editor -->
   <extension point="org.eclipse.ui.editors">
     <editor
       name="Dynamic Spoofax editor"
-      extensions="str"
       class="mb.spoofax.lwb.eclipse.dynamicloading.DynamicEditor"
       id="spoofax.lwb.eclipse.dynamicloading.editor"
     />

@@ -67,6 +67,12 @@ public class DynamicLanguageRegistry implements AutoCloseable {
 
 
     public void reload(ResourcePath rootDirectory, DynamicLanguage language) {
+        final @Nullable DynamicLanguage languageForId = languagePerId.get(language.getId());
+        if(languageForId != null && !languageForId.getRootDirectory().equals(language.getRootDirectory())) {
+            logger.error("Cannot register dynamically loaded language '{}' with ID '{}', a different language '{}' is already registered with that ID. Not loading language", language, language.getId(), languageForId);
+            return;
+        }
+
         final @Nullable DynamicLanguage previousLanguage = languagePerRootDirectory.put(rootDirectory, language);
         final Set<String> previousFileExtensions;
         if(previousLanguage != null) {
@@ -74,12 +80,7 @@ public class DynamicLanguageRegistry implements AutoCloseable {
         } else {
             previousFileExtensions = Collections.emptySet();
         }
-
-        final @Nullable DynamicLanguage languageForId = languagePerId.get(language.getId());
-        if(languageForId != null) {
-            logger.error("Cannot register dynamically loaded language '{}' with ID '{}', language '{}' is already registered with that ID. Not loading language", language, language.getId(), languageForId);
-            return;
-        }
+        languagePerId.put(language.getId(), language);
 
         final Set<String> newFileExtensions = language.getFileExtensions().asCopy();
         final Set<String> removedFileExtensions = new LinkedHashSet<>(previousFileExtensions);
@@ -96,7 +97,11 @@ public class DynamicLanguageRegistry implements AutoCloseable {
             languagePerFileExtension.put(extension, language);
         }
 
-        notifyReload(previousLanguage, language, SetView.of(removedFileExtensions), SetView.of(addedFileExtensions));
+        if(previousLanguage != null && previousLanguage.getId().equals(language.getId())) {
+            notifyReload(previousLanguage, language, SetView.of(removedFileExtensions), SetView.of(addedFileExtensions));
+        } else {
+            notifyLoad(language, SetView.of(addedFileExtensions));
+        }
     }
 
     public void unload(ResourcePath rootDirectory) {
@@ -125,7 +130,11 @@ public class DynamicLanguageRegistry implements AutoCloseable {
     }
 
 
-    private void notifyReload(@Nullable DynamicLanguage previousLanguage, DynamicLanguage language, SetView<String> removedFileExtensions, SetView<String> addedFileExtensions) {
+    private void notifyLoad(DynamicLanguage language, SetView<String> addedFileExtensions) {
+        listeners.forEach(l -> l.load(language, addedFileExtensions));
+    }
+
+    private void notifyReload(DynamicLanguage previousLanguage, DynamicLanguage language, SetView<String> removedFileExtensions, SetView<String> addedFileExtensions) {
         listeners.forEach(l -> l.reload(previousLanguage, language, removedFileExtensions, addedFileExtensions));
     }
 

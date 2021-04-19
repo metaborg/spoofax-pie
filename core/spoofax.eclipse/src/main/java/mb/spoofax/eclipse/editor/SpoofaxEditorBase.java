@@ -5,10 +5,8 @@ import mb.common.region.Selection;
 import mb.common.region.Selections;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
-import mb.spoofax.eclipse.EclipsePlatformComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
-import mb.spoofax.eclipse.pie.PieRunner;
 import mb.spoofax.eclipse.util.EditorInputUtil;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -25,20 +23,22 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewerExtension4;
 import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.ISourceViewerExtension2;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IPropertyListener;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 
-import java.util.Objects;
 import java.util.Optional;
 
 public abstract class SpoofaxEditorBase extends TextEditor {
-    private final class DocumentListener implements IDocumentListener {
+    public final class DocumentListener implements IDocumentListener {
         @Override public void documentAboutToBeChanged(@NonNull DocumentEvent event) {
             // Don't care about this event.
         }
@@ -48,8 +48,17 @@ public abstract class SpoofaxEditorBase extends TextEditor {
         }
     }
 
+    public final class EditorInputChangedListener implements IPropertyListener {
+        @Override public void propertyChanged(Object source, int propId) {
+            if(propId == IEditorPart.PROP_INPUT) {
+                editorInputChanged();
+            }
+        }
+    }
 
-    private final PresentationMerger presentationMerger = new PresentationMerger();
+
+    protected final IPropertyListener editorInputChangedListener = new EditorInputChangedListener();
+    protected final PresentationMerger presentationMerger = new PresentationMerger();
 
     /*
     Do NOT initialize any of the following fields to null, as TextEditor's constructor will call 'initializeEditor' to
@@ -63,7 +72,10 @@ public abstract class SpoofaxEditorBase extends TextEditor {
 
     // Set in createSourceViewer, unset in dispose, may never be null otherwise.
     protected @Nullable IEditorInput input;
+    protected @Nullable String inputName;
     protected @Nullable ISourceViewer sourceViewer;
+    protected @Nullable ISourceViewerExtension2 sourceViewerExt2;
+    protected @Nullable ITextViewerExtension4 textViewerExt4;
 
     // Set in createSourceViewer, if unset in dispose, may never be null if documentProvider returns a null document.
     protected @Nullable IDocument document;
@@ -77,6 +89,14 @@ public abstract class SpoofaxEditorBase extends TextEditor {
     }
 
 
+    public boolean isInitialized() {
+        if(input == null || sourceViewer == null) {
+            logger.error("Attempted to use editor before it was initialized");
+            return false;
+        }
+        return true;
+    }
+
     public @Nullable IProject getProject() {
         return project;
     }
@@ -84,6 +104,12 @@ public abstract class SpoofaxEditorBase extends TextEditor {
     public @Nullable IFile getFile() {
         return file;
     }
+
+    public @Nullable String getFileExtension() {
+        if(file == null) return null;
+        return file.getFileExtension();
+    }
+
 
     public Optional<Selection> getSelection() {
         final @Nullable ISelection selection = doGetSelection();
@@ -127,6 +153,21 @@ public abstract class SpoofaxEditorBase extends TextEditor {
         });
     }
 
+    public void reconfigure() {
+        if(!isInitialized()) return;
+        logger.debug("Reconfiguring editor for {}", inputName);
+        final Display display = Display.getDefault();
+        display.asyncExec(() -> {
+            sourceViewerExt2.unconfigure();
+            setSourceViewerConfiguration(new SpoofaxSourceViewerConfiguration());
+            sourceViewer.configure(getSourceViewerConfiguration());
+            final SourceViewerDecorationSupport decorationSupport = getSourceViewerDecorationSupport(sourceViewer);
+            configureSourceViewerDecorationSupport(decorationSupport);
+            decorationSupport.uninstall();
+            decorationSupport.install(getPreferenceStore());
+        });
+    }
+
 
     protected abstract void scheduleJob(boolean initialUpdate);
 
@@ -146,41 +187,75 @@ public abstract class SpoofaxEditorBase extends TextEditor {
         setEditorContextMenuId("#SpoofaxEditorContext");
     }
 
-    @Override
-    protected ISourceViewer createSourceViewer(@NonNull Composite parent, @NonNull IVerticalRuler ruler, int styles) {
+    protected void setInput() {
         input = getEditorInput();
-
         final IDocumentProvider documentProvider = getDocumentProvider();
         document = documentProvider.getDocument(input);
         if(document != null) {
+            // Register for changes in the text, to schedule editor updates.
             documentListener = new DocumentListener();
             document.addDocumentListener(documentListener);
 
             final @Nullable IFile file = EditorInputUtil.getFile(input);
             if(file != null) {
+                inputName = file.toString();
                 final @Nullable IProject eclipseProject = file.getProject();
                 if(eclipseProject != null) {
                     project = eclipseProject;
                 }
                 this.file = file;
+            } else {
+                inputName = input.getName();
             }
         } else {
             logger.error("Editor cannot be initialized, document provider '{}' returned null for editor input '{}'", documentProvider, input);
+            inputName = input.getName();
             file = null;
             documentListener = null;
         }
+        logger.debug("Editor input was set to '{}'", inputName);
+    }
 
+    @Override
+    protected ISourceViewer createSourceViewer(@NonNull Composite parent, @NonNull IVerticalRuler ruler, int styles) {
+        setInput();
+
+        // Register for changes in the editor input, to handle renaming or moving of resources of open editors.
+        this.addPropertyListener(editorInputChangedListener);
+
+        // Create source viewer after input, document, resources, and language have been set.
         sourceViewer = super.createSourceViewer(parent, ruler, styles);
+        sourceViewerExt2 = (ISourceViewerExtension2)sourceViewer;
+        textViewerExt4 = (ITextViewerExtension4)sourceViewer;
         final SourceViewerDecorationSupport decorationSupport = getSourceViewerDecorationSupport(sourceViewer);
         configureSourceViewerDecorationSupport(decorationSupport);
 
-        ((ITextViewerExtension4)sourceViewer).addTextPresentationListener(presentationMerger);
+        // Register for changes in text presentation, to merge our text presentation with presentations from other
+        // sources, such as marker annotations.
+        textViewerExt4.addTextPresentationListener(presentationMerger);
 
         if(document != null) {
             scheduleJob(true);
         }
 
         return sourceViewer;
+    }
+
+    private void editorInputChanged() {
+        final IEditorInput oldInput = input;
+        final IDocument oldDocument = document;
+        logger.debug("Editor input changed from {} to {}", oldInput, input);
+        // Unregister old document listener and register a new one, because the document will change.
+        if(documentListener != null) {
+            oldDocument.removeDocumentListener(documentListener);
+        }
+        // Set new inputs.
+        setInput();
+        // Reconfigure the editor because the language may have changed.
+        reconfigure();
+        // Cancel and schedule a new job.
+        cancelJobs(oldInput);
+        scheduleJob(true);
     }
 
     @Override
@@ -190,9 +265,15 @@ public abstract class SpoofaxEditorBase extends TextEditor {
         if(document != null && documentListener != null) {
             document.removeDocumentListener(documentListener);
         }
+        this.removePropertyListener(editorInputChangedListener);
+        if(textViewerExt4 != null) {
+            textViewerExt4.removeTextPresentationListener(presentationMerger);
+        }
 
         input = null;
         sourceViewer = null;
+        sourceViewerExt2 = null;
+        textViewerExt4 = null;
 
         document = null;
         documentListener = null;
@@ -201,6 +282,16 @@ public abstract class SpoofaxEditorBase extends TextEditor {
         super.dispose();
     }
 
+
+    protected void cancelJobs(IEditorInput specificInput) {
+        final Job[] existingJobs = jobManager.find(specificInput);
+        if(existingJobs.length > 0) {
+            logger.trace("Cancelling editor update jobs for '{}'", specificInput);
+            for(Job job : existingJobs) {
+                job.cancel();
+            }
+        }
+    }
 
     protected void cancelJobs() {
         final Job[] existingJobs = jobManager.find(this);

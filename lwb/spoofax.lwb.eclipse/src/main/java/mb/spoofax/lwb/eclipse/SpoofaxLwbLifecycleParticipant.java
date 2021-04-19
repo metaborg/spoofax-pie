@@ -169,6 +169,7 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
     ) {
         this.pieComponent = pieComponent;
         spoofaxLwbComponent.getDynamicChangeProcessor().register();
+        spoofaxLwbComponent.getDynamicEditorTracker().register();
     }
 
     @Override public void close() {

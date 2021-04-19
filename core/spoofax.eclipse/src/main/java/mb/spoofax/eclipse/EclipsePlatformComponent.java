@@ -29,7 +29,7 @@ public interface EclipsePlatformComponent extends PlatformComponent {
 
     ColorShare getColorShare();
 
-    StyleUtil getStyleUtils();
+    StyleUtil getStyleUtil();
 
     ScopeManager getScopeManager();
 

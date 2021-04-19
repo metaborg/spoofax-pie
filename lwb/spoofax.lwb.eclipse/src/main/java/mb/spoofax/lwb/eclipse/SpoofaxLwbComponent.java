@@ -5,6 +5,7 @@ import mb.log.dagger.LoggerComponent;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.lwb.dynamicloading.DynamicLoadingComponent;
 import mb.spoofax.lwb.eclipse.dynamicloading.DynamicChangeProcessor;
+import mb.spoofax.lwb.eclipse.dynamicloading.DynamicEditorTracker;
 
 @SpoofaxLwbScope
 @Component(
@@ -20,8 +21,11 @@ import mb.spoofax.lwb.eclipse.dynamicloading.DynamicChangeProcessor;
 public interface SpoofaxLwbComponent extends AutoCloseable {
     DynamicChangeProcessor getDynamicChangeProcessor();
 
+    DynamicEditorTracker getDynamicEditorTracker();
+
 
     @Override default void close() {
         getDynamicChangeProcessor().close();
+        getDynamicEditorTracker().unregister();
     }
 }

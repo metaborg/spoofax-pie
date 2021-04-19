@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.ui.IEditorInput;
 
 public class EditorUpdateJob extends Job {
     @AssistedFactory public interface Factory {
@@ -27,6 +28,7 @@ public class EditorUpdateJob extends Job {
             @Nullable IProject project,
             IFile file,
             IDocument document,
+            IEditorInput input,
             SpoofaxEditorBase editor
         );
     }
@@ -39,6 +41,7 @@ public class EditorUpdateJob extends Job {
     private final @Nullable IProject project;
     private final IFile file;
     private final IDocument document;
+    private final IEditorInput input;
     private final SpoofaxEditorBase editor;
 
     @AssistedInject public EditorUpdateJob(
@@ -49,6 +52,7 @@ public class EditorUpdateJob extends Job {
         @Assisted @Nullable IProject project,
         @Assisted IFile file,
         @Assisted IDocument document,
+        @Assisted IEditorInput input,
         @Assisted SpoofaxEditorBase editor
     ) {
         super(languageComponent.getLanguageInstance().getDisplayName() + " editor update");
@@ -60,6 +64,7 @@ public class EditorUpdateJob extends Job {
         this.project = project;
         this.file = file;
         this.document = document;
+        this.input = input;
         this.editor = editor;
     }
 
@@ -77,7 +82,7 @@ public class EditorUpdateJob extends Job {
     }
 
     @Override public boolean belongsTo(Object family) {
-        return editor.equals(family);
+        return input.equals(family) || editor.equals(family);
     }
 
     private IStatus update(IProgressMonitor monitor) throws ExecException, InterruptedException {

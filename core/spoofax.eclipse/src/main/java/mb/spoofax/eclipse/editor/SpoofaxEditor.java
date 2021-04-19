@@ -9,7 +9,6 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.MultiRule;
 
 public abstract class SpoofaxEditor extends SpoofaxEditorBase {
@@ -40,10 +39,11 @@ public abstract class SpoofaxEditor extends SpoofaxEditorBase {
 
 
     @Override protected void scheduleJob(boolean initialUpdate) {
-        if(document == null || file == null) return; // TODO: support case where file is null but document is not.
+        // TODO: support case where file is null but document is not.
+        if(input == null || document == null || file == null) return;
         cancelJobs();
 
-        final EditorUpdateJob job = editorUpdateJobFactory.create(languageComponent, pieComponent, project, file, document, this);
+        final EditorUpdateJob job = editorUpdateJobFactory.create(languageComponent, pieComponent, project, file, document, input, this);
 
         // HACK: try to pass the build directory as a scheduling rule, because sometimes an editor update may require
         //       unarchiving files into the build directory (usually for meta-languages). This is fine, but the build
