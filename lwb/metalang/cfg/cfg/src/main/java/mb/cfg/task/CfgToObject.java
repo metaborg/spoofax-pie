@@ -2,6 +2,7 @@ package mb.cfg.task;
 
 import mb.cfg.CfgScope;
 import mb.cfg.CompileLanguageInput;
+import mb.cfg.CompileLanguageInputCustomizer;
 import mb.common.message.KeyedMessages;
 import mb.common.result.Result;
 import mb.common.util.Properties;
@@ -105,9 +106,12 @@ public class CfgToObject implements TaskDef<CfgToObject.Input, Result<CfgToObjec
     }
 
 
+    private final CompileLanguageInputCustomizer customizer;
+
+
     @Inject
-    public CfgToObject() {
-        // Default constructor required for injection.
+    public CfgToObject(CompileLanguageInputCustomizer customizer) {
+        this.customizer = customizer;
     }
 
 
@@ -133,7 +137,7 @@ public class CfgToObject implements TaskDef<CfgToObject.Input, Result<CfgToObjec
     ) throws InvalidAstShapeException {
         final AstToObject.Output output;
         try {
-            output = AstToObject.convert(rootDirectory, cfgFile, ast, properties);
+            output = AstToObject.convert(rootDirectory, cfgFile, ast, properties, customizer);
         } catch(IllegalStateException e) {
             return Result.ofErr(CfgToObjectException.buildConfigObjectFail(e));
         }

@@ -62,6 +62,8 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   val packageId = "mb.cfg"
   val taskPackageId = "$packageId.task"
 
+  addAdditionalModules(packageId, "CfgCustomizerModule");
+
   // Config object creation tasks.
   val toObject = TypeInfo.of(taskPackageId, "CfgToObject")
   val rootDirectoryToObject = TypeInfo.of(taskPackageId, "CfgRootDirectoryToObject")
