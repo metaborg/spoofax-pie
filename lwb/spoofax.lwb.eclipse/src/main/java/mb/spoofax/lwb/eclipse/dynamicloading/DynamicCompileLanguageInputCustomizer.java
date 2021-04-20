@@ -47,6 +47,7 @@ public class DynamicCompileLanguageInputCustomizer implements CompileLanguageInp
         builder.infoMarkerId("spoofax.lwb.eclipse.dynamicloading.marker.info");
         builder.warningMarkerId("spoofax.lwb.eclipse.dynamicloading.marker.warning");
         builder.errorMarkerId("spoofax.lwb.eclipse.dynamicloading.marker.error");
+        builder.contextId("spoofax.lwb.eclipse.dynamicloading.context");
     }
 
     @Override public void customize(CompileLanguageInput.Builder builder) {

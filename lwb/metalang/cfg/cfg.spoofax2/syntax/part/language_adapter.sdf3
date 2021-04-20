@@ -15,7 +15,7 @@ context-free sorts
   CommandDef
   CommandDefProperty
 
-context-free syntax
+context-free syntax // Task definition
 
   Part.TaskDefs = <task-defs {
   <{TaskDef "\n"}*>
@@ -23,7 +23,7 @@ context-free syntax
 
   TaskDef.TaskDef = JavaQIdLit
 
-context-free syntax
+context-free syntax // Command definition
 
   Part.CommandDef = <command-def {
   <{CommandDefProperty "\n"}*>
@@ -39,7 +39,7 @@ context-free syntax
   <{Parameter "\n"}*>
 }>
   
-context-free sorts
+context-free sorts // Execution type
 
   ExecutionType
   
@@ -49,7 +49,7 @@ context-free syntax
   ExecutionType.ManualContinuous    = <ManualContinuous>
   ExecutionType.AutomaticContinuous = <AutomaticContinuous>
 
-context-free sorts
+context-free sorts // Parameter
 
   Parameter
   ParameterProperty
@@ -67,7 +67,7 @@ context-free syntax
   <{ArgumentProvider "\n"}*>
 }>
 
-context-free sorts
+context-free sorts // Argument provider
 
   ArgumentProvider
 
@@ -77,7 +77,7 @@ context-free syntax
   ArgumentProvider.ContextArgumentProvider          = <Context(<CommandContext>)>
   ArgumentProvider.EnclosingContextArgumentProvider = <EnclosingContext(<EnclosingCommandContext>)>
 
-context-free sorts
+context-free sorts // (Enclosing) command context
 
   CommandContext
   EnclosingCommandContext
@@ -94,3 +94,69 @@ context-free syntax
   
   EnclosingCommandContext.ProjectEnclosingContext   = <Project>
   EnclosingCommandContext.DirectoryEnclosingContext = <Directory>
+
+context-free sorts // Menu
+
+  MainMenu
+  ResourceContextMenu
+  EditorContextMenu
+  MenuItem
+  CommandActionProperty
+
+context-free syntax
+
+  Part.MainMenu = <main-menu {
+  <{MenuItem "\n"}*>
+}>
+  Part.ResourceContextMenu = <resource-context-menu {
+  <{MenuItem "\n"}*>
+}>
+  Part.EditorContextMenu = <editor-context-menu {
+  <{MenuItem "\n"}*>
+}>
+
+  MenuItem.Separator = <separator>
+  MenuItem.Menu = <menu <StringLit> {
+  <{MenuItem "\n"}*>
+}>
+  MenuItem.CommandAction = <command-action {
+    <{CommandActionProperty "\n"}*>
+  }>
+
+  CommandActionProperty.CommandActionDisplayName   = <display-name = <StringLit>>
+  CommandActionProperty.CommandActionDescription   = <description = <StringLit>>
+  CommandActionProperty.CommandActionDefType       = <command-def-type = <JavaQIdLit>>
+  CommandActionProperty.CommandActionExecutionType = <execution-type = <ExecutionType>>
+  // TODO: initial arguments
+  CommandActionProperty.CommandActionRequiredEditorSelectionTypes      = <required-editor-selection-types = <{EditorSelectionType ","}+>>
+  CommandActionProperty.CommandActionRequiredEditorFileTypes           = <required-editor-file-types = <{EditorFileType ","}+>>
+  CommandActionProperty.CommandActionRequiredHierarchicalResourceTypes = <required-hierarchical-resource-types = <{HierarchicalResourceType ","}+>>
+  CommandActionProperty.CommandActionRequiredEnclosingResourceTypes    = <required-enclosing-command-contexts = <{EnclosingCommandContext ","}+>>
+
+context-free sorts // Editor selection type
+
+  EditorSelectionType
+  
+context-free syntax
+
+  EditorSelectionType.Region = <Region>
+  EditorSelectionType.Offset = <Offset>
+  
+context-free sorts // Editor file type
+
+  EditorFileType
+  
+context-free syntax
+
+  EditorFileType.HierarchicalResource = <HierarchicalResource>
+  EditorFileType.Resource             = <Resource>
+
+context-free sorts // Hierarchical resource type
+
+  HierarchicalResourceType
+  
+context-free syntax
+
+  HierarchicalResourceType.Project   = <Project>
+  HierarchicalResourceType.Directory = <Directory>
+  HierarchicalResourceType.File      = <File>

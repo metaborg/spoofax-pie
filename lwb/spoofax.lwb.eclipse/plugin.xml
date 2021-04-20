@@ -74,11 +74,6 @@
   <!-- Dynamic language shims -->
   <!--                        -->
 
-  <!--  &lt;!&ndash; Lifecycle participant &ndash;&gt;-->
-  <!--  <extension point="spoofax.eclipse.lifecycle">-->
-  <!--    <participant group="mb.spoofax.lwb" class="mb.str.eclipse.StrategoLanguageFactory"/>-->
-  <!--  </extension>-->
-
   <!-- Context -->
   <extension point="org.eclipse.ui.contexts">
     <context
@@ -196,34 +191,34 @@
   <!--  </extension>-->
 
 
-  <!--  &lt;!&ndash; Menus &ndash;&gt;-->
-  <!--  <extension point="org.eclipse.ui.menus">-->
-  <!--    &lt;!&ndash; Project Explorer context menu &ndash;&gt;-->
-  <!--    <menuContribution locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">-->
-  <!--      <dynamic id="stratego.eclipse.menu.resource.context" class="mb.str.eclipse.StrategoResourceContextMenu"/>-->
-  <!--    </menuContribution>-->
-  <!--    &lt;!&ndash; Package Explorer context menu &ndash;&gt;-->
-  <!--    <menuContribution locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=additions">-->
-  <!--      <dynamic id="stratego.eclipse.menu.resource.context" class="mb.str.eclipse.StrategoResourceContextMenu"/>-->
-  <!--    </menuContribution>-->
-  <!--    &lt;!&ndash; Editor context menu &ndash;&gt;-->
-  <!--    <menuContribution locationURI="popup:#SpoofaxEditorContext?after=additions">-->
-  <!--      <dynamic id="stratego.eclipse.menu.editor.context" class="mb.str.eclipse.StrategoEditorContextMenu"/>-->
-  <!--    </menuContribution>-->
-  <!--    &lt;!&ndash; Main menu &ndash;&gt;-->
-  <!--    <menuContribution locationURI="menu:org.eclipse.ui.main.menu">-->
-  <!--      <menu id="stratego.eclipse.menu.main" label="Stratego">-->
-  <!--        <dynamic id="stratego.eclipse.menu.main.dynamic" class="mb.str.eclipse.StrategoMainMenu"/>-->
-  <!--        <visibleWhen>-->
-  <!--          <with variable="activeContexts">-->
-  <!--            <iterate ifEmpty="false" operator="or">-->
-  <!--              <equals value="stratego.eclipse.context"/>-->
-  <!--            </iterate>-->
-  <!--          </with>-->
-  <!--        </visibleWhen>-->
-  <!--      </menu>-->
-  <!--    </menuContribution>-->
-  <!--  </extension>-->
+    <!-- Menus -->
+    <extension point="org.eclipse.ui.menus">
+      <!-- Project Explorer context menu -->
+      <menuContribution locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">
+        <dynamic id="spoofax.lwb.eclipse.dynamicloading.menu.resource.context" class="mb.spoofax.lwb.eclipse.dynamicloading.DynamicResourceContextMenu"/>
+      </menuContribution>
+      <!-- Package Explorer context menu -->
+      <menuContribution locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=additions">
+        <dynamic id="spoofax.lwb.eclipse.dynamicloading.menu.resource.context" class="mb.spoofax.lwb.eclipse.dynamicloading.DynamicResourceContextMenu"/>
+      </menuContribution>
+      <!-- Editor context menu -->
+      <menuContribution locationURI="popup:#SpoofaxEditorContext?after=additions">
+        <dynamic id="spoofax.lwb.eclipse.dynamicloading.menu.editor.context" class="mb.spoofax.lwb.eclipse.dynamicloading.DynamicEditorContextMenu"/>
+      </menuContribution>
+      <!-- Main menu -->
+      <menuContribution locationURI="menu:org.eclipse.ui.main.menu">
+        <menu id="spoofax.lwb.eclipse.dynamicloading.menu.main" label="Spoofax">
+          <dynamic id="spoofax.lwb.eclipse.dynamicloading.menu.main.dynamic" class="mb.spoofax.lwb.eclipse.dynamicloading.DynamicMainMenu"/>
+          <visibleWhen>
+            <with variable="activeContexts">
+              <iterate ifEmpty="false" operator="or">
+                <equals value="spoofax.lwb.eclipse.dynamicloading.context"/>
+              </iterate>
+            </with>
+          </visibleWhen>
+        </menu>
+      </menuContribution>
+    </extension>
 
 
   <!--  &lt;!&ndash; Commands and Handlers &ndash;&gt;-->

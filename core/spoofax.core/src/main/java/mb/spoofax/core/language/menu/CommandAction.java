@@ -125,7 +125,7 @@ public interface CommandAction {
 
     String description();
 
-    CommandRequest commandRequest();
+    CommandRequest<?> commandRequest();
 
     /**
      * Gets whether this command action, in editor context menus, should only be shown when the text selection of the

@@ -18,7 +18,7 @@ public class EditorTracker extends WindowAndPartListener {
     private final EclipseIdentifiers eclipseIdentifiers;
     private final Class<? extends SpoofaxEditor> editorClass;
 
-    @SuppressWarnings("NullableProblems") private @MonotonicNonNull IContextService contextService;
+    private @MonotonicNonNull IContextService contextService;
     private @Nullable IContextActivation contextActivation = null;
 
 

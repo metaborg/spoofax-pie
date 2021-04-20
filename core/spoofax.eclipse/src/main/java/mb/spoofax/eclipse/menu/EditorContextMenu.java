@@ -15,14 +15,16 @@ import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.EclipsePlatformComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.command.EnclosingCommandContextProvider;
-import mb.spoofax.eclipse.editor.SpoofaxEditor;
+import mb.spoofax.eclipse.editor.SpoofaxEditorBase;
 import mb.spoofax.eclipse.resource.EclipseResourcePath;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.contexts.IContextService;
 
 import java.util.Optional;
 
@@ -30,6 +32,8 @@ public class EditorContextMenu extends CommandMenuShared {
     private final EnclosingCommandContextProvider enclosingCommandContextProvider;
 
     private final EclipseLanguageComponent languageComponent;
+
+    private @MonotonicNonNull IContextService contextService;
 
 
     public EditorContextMenu(EclipseLanguageComponent languageComponent) {
@@ -39,19 +43,25 @@ public class EditorContextMenu extends CommandMenuShared {
     }
 
 
-    @Override protected IContributionItem[] getContributionItems() {
+    @Override public IContributionItem[] getContributionItems() {
+        if(contextService == null) {
+            // COMPAT: DO NOT REMOVE CAST, it is required for older versions of Eclipse.
+            @SuppressWarnings("RedundantCast") final IContextService contextService = (IContextService)PlatformUI.getWorkbench().getService(IContextService.class);
+            this.contextService = contextService;
+        }
+
+        if(!contextService.getActiveContextIds().contains(languageComponent.getEclipseIdentifiers().getContext())) {
+            // Not a context menu for this language.
+            return new IContributionItem[0];
+        }
         final @Nullable IWorkbenchPart activePart = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().getActivePart();
-        final SpoofaxEditor editor;
-        if(activePart instanceof SpoofaxEditor) {
-            editor = (SpoofaxEditor)activePart;
-        } else {
-            // Not a context menu for a Spoofax editor.
+        final SpoofaxEditorBase editor;
+        if(activePart instanceof SpoofaxEditorBase) {
+            editor = (SpoofaxEditorBase)activePart;
+        } else { // Not a context menu for a Spoofax editor.
             return new IContributionItem[0];
         }
-        if(languageComponent != editor.getLanguageComponent() /* Reference equality intended */) {
-            // Context menu for a Spoofax editor of a different language.
-            return new IContributionItem[0];
-        }
+
         final @Nullable IFile eclipseFile = editor.getFile();
         final @Nullable ResourcePath filePath;
         final @Nullable ResourceKey documentKey;
@@ -72,7 +82,7 @@ public class EditorContextMenu extends CommandMenuShared {
         final String runCommandCommandId = identifiers.getRunCommand();
         for(MenuItem menuItem : getMenuItems(languageInstance)) {
             EclipseMenuItemVisitor.run(langMenu, menuItem, (menu, commandAction) -> {
-                CommandRequest commandRequest = commandAction.commandRequest();
+                CommandRequest<?> commandRequest = commandAction.commandRequest();
                 if(commandRequest.executionType() == CommandExecutionType.AutomaticContinuous) {
                     return; // Automatic continuous execution is not supported when manually invoking commands.
                 }

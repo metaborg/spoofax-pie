@@ -3,6 +3,7 @@ package mb.spoofax.eclipse.menu;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.ui.actions.CompoundContributionItem;
 import org.eclipse.ui.menus.CommandContributionItem;
 import org.eclipse.ui.menus.CommandContributionItemParameter;
@@ -12,11 +13,15 @@ import org.eclipse.ui.services.IServiceLocator;
 import java.util.Map;
 
 public abstract class MenuShared extends CompoundContributionItem implements IWorkbenchContribution {
-    private @MonotonicNonNull IServiceLocator serviceLocator;
+    protected @MonotonicNonNull IServiceLocator serviceLocator;
 
     @Override public void initialize(@NonNull IServiceLocator serviceLocator) {
         this.serviceLocator = serviceLocator;
     }
+
+    // Make public to make accessible to users of this API, primarily for dynamic loading support.
+    @Override public abstract IContributionItem[] getContributionItems();
+
 
     protected CommandContributionItem createCommand(
         String commandId,

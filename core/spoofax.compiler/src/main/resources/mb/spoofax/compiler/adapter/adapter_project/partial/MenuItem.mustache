@@ -12,9 +12,9 @@ CommandAction.builder().with(
 .buildItem()
 {{/getCommandAction}}
 {{#getMenu}}
-MenuItem.menu("{{displayName}}",
+MenuItem.menu("{{displayName}}"
 {{#items}}
-    {{>adapter_project/partial/MenuItem.mustache}}{{^-last}},{{/-last}}
+    , {{>adapter_project/partial/MenuItem.mustache}}
 {{/items}}
 )
 {{/getMenu}}

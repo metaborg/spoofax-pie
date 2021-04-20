@@ -9,7 +9,6 @@ import mb.spoofax.lwb.dynamicloading.DynamicLanguageRegistry;
 import mb.spoofax.lwb.eclipse.SpoofaxLwbLifecycleParticipant;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.MultiRule;
@@ -101,33 +100,18 @@ public class DynamicEditor extends SpoofaxEditorBase {
     @Override protected void scheduleJob(boolean initialUpdate) {
         // TODO: support case where file is null but document is not.
         if(input == null || document == null || file == null || languageId == null) return;
-        final @Nullable DynamicLanguage language = languageRegistry.getLanguageForId(languageId);
-        if(language == null) return;
-        if(!(language.getLanguageComponent() instanceof EclipseLanguageComponent)) {
-            logger.error("Cannot schedule editor update job for '{}' because its language component is not of type EclipseLanguageComponent", language);
+        final @Nullable EclipseDynamicLanguage language = (EclipseDynamicLanguage)languageRegistry.getLanguageForId(languageId);
+        if(language == null) {
+            logger.error("Cannot schedule editor update job for editor '{}' because no language for id '{}' was found", inputName, languageId);
             return;
         }
-        final EclipseLanguageComponent languageComponent = (EclipseLanguageComponent)language.getLanguageComponent();
-        logger.debug("Scheduling editor update job for {} of dynamically loaded language {}", inputName, language);
+        final EclipseLanguageComponent languageComponent = language.getLanguageComponent();
+        logger.debug("Scheduling update job for editor '{}' of dynamically loaded language '{}'", inputName, language);
 
         cancelJobs();
         final Job job = languageComponent.editorUpdateJobFactory().create(languageComponent, language.getPieComponent(), project, file, document, input, this);
 
-        // TODO: share following code with SpoofaxEditor?
-
-        // HACK: try to pass the build directory as a scheduling rule, because sometimes an editor update may require
-        //       unarchiving files into the build directory (usually for meta-languages). This is fine, but the build
-        //       directory should not be hard coded!
-        final @Nullable IFolder buildDirectory;
-        if(project != null) {
-            buildDirectory = project.getFolder("build");
-        } else {
-            buildDirectory = null;
-        }
-
-        //noinspection ConstantConditions
         job.setRule(MultiRule.combine(new ISchedulingRule[]{
-            buildDirectory, // May be null, but hat is a valid scheduling rule
             file, // May be null, but hat is a valid scheduling rule
             languageComponent.startupReadLockRule()
         }));

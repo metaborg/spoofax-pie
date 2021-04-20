@@ -14,7 +14,7 @@ import org.eclipse.ui.menus.IWorkbenchContribution;
 import java.util.ArrayList;
 
 public class ResourceContextMenu extends MenuShared implements IWorkbenchContribution {
-    @Override protected IContributionItem[] getContributionItems() {
+    @Override public IContributionItem[] getContributionItems() {
         final @Nullable ISelection simpleSelection = SelectionUtil.getActiveSelection();
         if(!(simpleSelection instanceof IStructuredSelection)) {
             return new IContributionItem[0];

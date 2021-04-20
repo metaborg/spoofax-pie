@@ -24,7 +24,10 @@ import mb.spoofax.compiler.adapter.ParserAdapterCompiler;
 import mb.spoofax.compiler.adapter.StrategoRuntimeAdapterCompiler;
 import mb.spoofax.compiler.adapter.StylerAdapterCompiler;
 import mb.spoofax.compiler.adapter.data.ArgProviderRepr;
+import mb.spoofax.compiler.adapter.data.CommandActionRepr;
 import mb.spoofax.compiler.adapter.data.CommandDefRepr;
+import mb.spoofax.compiler.adapter.data.CommandRequestRepr;
+import mb.spoofax.compiler.adapter.data.MenuItemRepr;
 import mb.spoofax.compiler.adapter.data.ParamRepr;
 import mb.spoofax.compiler.language.ConstraintAnalyzerLanguageCompiler;
 import mb.spoofax.compiler.language.ExportsLanguageCompiler;
@@ -39,12 +42,18 @@ import mb.spoofax.compiler.platform.EclipseProjectCompiler;
 import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.core.language.command.CommandContextType;
 import mb.spoofax.core.language.command.CommandExecutionType;
+import mb.spoofax.core.language.command.EditorFileType;
+import mb.spoofax.core.language.command.EditorSelectionType;
 import mb.spoofax.core.language.command.EnclosingCommandContextType;
+import mb.spoofax.core.language.command.HierarchicalResourceType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.util.TermUtils;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Converts a CFG AST into an {@link Output} containing messages, a {@link CompileLanguageInput} output object, and
@@ -229,6 +238,15 @@ public class AstToObject {
             });
             adapterBuilder.project.addCommandDefs(commandDefBuilder.build());
         });
+        parts.forAllSubTermsInList("MainMenu", menuItem -> {
+            adapterBuilder.project.addMainMenuItems(toMenuItemRepr(parts, menuItem));
+        });
+        parts.forAllSubTermsInList("ResourceContextMenu", menuItem -> {
+            adapterBuilder.project.addResourceContextMenuItems(toMenuItemRepr(parts, menuItem));
+        });
+        parts.forAllSubTermsInList("EditorContextMenu", menuItem -> {
+            adapterBuilder.project.addEditorContextMenuItems(toMenuItemRepr(parts, menuItem));
+        });
         customizer.customize(baseBuilder);
         final LanguageProjectCompiler.Input languageBaseCompilerInput = baseBuilder.build(shared, languageBaseShared);
         compileLanguageInputBuilder.languageProjectInput(languageBaseCompilerInput);
@@ -258,7 +276,7 @@ public class AstToObject {
         return output;
     }
 
-    public static CommandExecutionType toCommandExecutionType(IStrategoTerm term) {
+    private static CommandExecutionType toCommandExecutionType(IStrategoTerm term) {
         final IStrategoAppl appl = TermUtils.asAppl(term).orElseThrow(() -> new InvalidAstShapeException("an ExecutionType term application", term));
         switch(appl.getConstructor().getName()) {
             case "ManualOnce":
@@ -272,7 +290,7 @@ public class AstToObject {
         }
     }
 
-    public static CommandContextType toCommandContextType(IStrategoTerm term) {
+    private static CommandContextType toCommandContextType(IStrategoTerm term) {
         final IStrategoAppl appl = TermUtils.asAppl(term).orElseThrow(() -> new InvalidAstShapeException("a term application", term));
         switch(appl.getConstructor().getName()) {
             case "ProjectContext":
@@ -294,7 +312,7 @@ public class AstToObject {
         }
     }
 
-    public static EnclosingCommandContextType toEnclosingCommandContextType(IStrategoTerm term) {
+    private static EnclosingCommandContextType toEnclosingCommandContextType(IStrategoTerm term) {
         final IStrategoAppl appl = TermUtils.asAppl(term).orElseThrow(() -> new InvalidAstShapeException("a term application", term));
         switch(appl.getConstructor().getName()) {
             case "ProjectEnclosingContext":
@@ -306,7 +324,7 @@ public class AstToObject {
         }
     }
 
-    public static ArgProviderRepr toParameterArgumentProvider(IStrategoTerm term) {
+    private static ArgProviderRepr toParameterArgumentProvider(IStrategoTerm term) {
         final IStrategoAppl appl = TermUtils.asAppl(term).orElseThrow(() -> new InvalidAstShapeException("a term application", term));
         switch(appl.getConstructor().getName()) {
             case "ValueArgumentProvider":
@@ -317,6 +335,77 @@ public class AstToObject {
                 return ArgProviderRepr.enclosingContext(toEnclosingCommandContextType(appl.getSubterm(0)));
             default:
                 throw new InvalidAstShapeException("a term of sort ArgumentProvider", appl);
+        }
+    }
+
+    private static MenuItemRepr toMenuItemRepr(Parts mainParts, IStrategoTerm menuItem) {
+        final IStrategoAppl appl = TermUtils.asAppl(menuItem).orElseThrow(() -> new InvalidAstShapeException("a term application", menuItem));
+        switch(appl.getConstructor().getName()) {
+            case "Separator":
+                return MenuItemRepr.separator();
+            case "Menu": {
+                final String displayName = Parts.removeDoubleQuotes(TermUtils.asJavaStringAt(appl, 0).orElseThrow(() -> new InvalidAstShapeException("a string as first subterm", appl)));
+                final IStrategoList subMenuItemsTerm = TermUtils.asListAt(appl, 1).orElseThrow(() -> new InvalidAstShapeException("a list of sub-menu items as second subterm", appl));
+                final List<MenuItemRepr> subMenuItems = subMenuItemsTerm.getSubterms().stream().map(t -> toMenuItemRepr(mainParts, t)).collect(Collectors.toList());
+                return MenuItemRepr.menu(displayName, subMenuItems);
+            }
+            case "CommandAction": {
+                final IStrategoList properties = TermUtils.asListAt(appl, 0).orElseThrow(() -> new InvalidAstShapeException("a list of command action properties as first subterm", appl));
+                final Parts subParts = mainParts.subParts(properties);
+                final CommandActionRepr.Builder commandActionBuilder = CommandActionRepr.builder();
+                subParts.forOneSubtermAsString("CommandActionDisplayName", commandActionBuilder::displayName);
+                subParts.forOneSubtermAsString("CommandActionDescription", commandActionBuilder::description);
+                final CommandRequestRepr.Builder commandRequestBuilder = CommandRequestRepr.builder();
+                subParts.forOneSubtermAsTypeInfo("CommandActionDefType", commandRequestBuilder::commandDefType);
+                subParts.forOneSubterm("CommandActionExecutionType", type -> commandRequestBuilder.executionType(toCommandExecutionType(type)));
+                // TODO: initial arguments
+                commandActionBuilder.commandRequest(commandRequestBuilder.build());
+                subParts.forAllSubTermsInList("CommandActionRequiredEditorSelectionTypes", term -> commandActionBuilder.addRequiredEditorSelectionTypes(toEditorSelectionType(term)));
+                subParts.forAllSubTermsInList("CommandActionRequiredEditorFileTypes", term -> commandActionBuilder.addRequiredEditorFileTypes(toEditorFileType(term)));
+                subParts.forAllSubTermsInList("CommandActionRequiredHierarchicalResourceTypes", term -> commandActionBuilder.addRequiredResourceTypes(toHierarchicalResourceType(term)));
+                subParts.forAllSubTermsInList("CommandActionRequiredEnclosingResourceTypes", term -> commandActionBuilder.addRequiredEnclosingResourceTypes(toEnclosingCommandContextType(term)));
+                return MenuItemRepr.commandAction(commandActionBuilder.build());
+            }
+            default:
+                throw new InvalidAstShapeException("a term of sort MenuItem", appl);
+        }
+    }
+
+    private static EditorSelectionType toEditorSelectionType(IStrategoTerm term) {
+        final IStrategoAppl appl = TermUtils.asAppl(term).orElseThrow(() -> new InvalidAstShapeException("an EditorSelectionType term application", term));
+        switch(appl.getConstructor().getName()) {
+            case "Region":
+                return EditorSelectionType.Region;
+            case "Offset":
+                return EditorSelectionType.Offset;
+            default:
+                throw new InvalidAstShapeException("a term of sort EditorSelectionType", appl);
+        }
+    }
+
+    private static EditorFileType toEditorFileType(IStrategoTerm term) {
+        final IStrategoAppl appl = TermUtils.asAppl(term).orElseThrow(() -> new InvalidAstShapeException("an EditorFileType term application", term));
+        switch(appl.getConstructor().getName()) {
+            case "HierarchicalResource":
+                return EditorFileType.HierarchicalResource;
+            case "Resource":
+                return EditorFileType.Resource;
+            default:
+                throw new InvalidAstShapeException("a term of sort EditorFileType", appl);
+        }
+    }
+
+    private static HierarchicalResourceType toHierarchicalResourceType(IStrategoTerm term) {
+        final IStrategoAppl appl = TermUtils.asAppl(term).orElseThrow(() -> new InvalidAstShapeException("an HierarchicalResourceType term application", term));
+        switch(appl.getConstructor().getName()) {
+            case "Project":
+                return HierarchicalResourceType.Project;
+            case "Directory":
+                return HierarchicalResourceType.Directory;
+            case "File":
+                return HierarchicalResourceType.File;
+            default:
+                throw new InvalidAstShapeException("a term of sort HierarchicalResourceType", appl);
         }
     }
 }

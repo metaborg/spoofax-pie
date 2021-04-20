@@ -13,14 +13,14 @@ import java.io.IOException;
 import java.net.URLClassLoader;
 
 public class DynamicLanguage {
-    private final ResourcePath rootDirectory;
-    private final CompileLanguageInput compileInput;
-    private final URLClassLoader classLoader;
-    private final ResourceRegistriesProvider resourceRegistriesProvider;
-    private final ResourceServiceComponent resourceServiceComponent;
-    private final LanguageComponent languageComponent;
-    private final PieComponent pieComponent;
-    private boolean closed = false;
+    protected final ResourcePath rootDirectory;
+    protected final CompileLanguageInput compileInput;
+    protected final URLClassLoader classLoader;
+    protected final ResourceRegistriesProvider resourceRegistriesProvider;
+    protected final ResourceServiceComponent resourceServiceComponent;
+    protected final LanguageComponent languageComponent;
+    protected final PieComponent pieComponent;
+    protected boolean closed = false;
 
     public DynamicLanguage(
         ResourcePath rootDirectory,

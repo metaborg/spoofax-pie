@@ -32,7 +32,6 @@ import java.util.stream.Collectors;
 
 public abstract class ResourceContextMenu extends CommandMenuShared {
     private final EnclosingCommandContextProvider enclosingCommandContextProvider;
-    private final PieRunner pieRunner;
 
     private final EclipseLanguageComponent languageComponent;
 
@@ -40,12 +39,11 @@ public abstract class ResourceContextMenu extends CommandMenuShared {
     public ResourceContextMenu(EclipseLanguageComponent languageComponent) {
         final EclipsePlatformComponent component = SpoofaxPlugin.getPlatformComponent();
         this.enclosingCommandContextProvider = component.getEnclosingCommandContextProvider();
-        this.pieRunner = component.getPieRunner();
         this.languageComponent = languageComponent;
     }
 
 
-    @Override protected IContributionItem[] getContributionItems() {
+    @Override public IContributionItem[] getContributionItems() {
         final @Nullable ISelection simpleSelection = SelectionUtil.getActiveSelection();
         if(!(simpleSelection instanceof IStructuredSelection)) {
             return new IContributionItem[0];
@@ -110,30 +108,7 @@ public abstract class ResourceContextMenu extends CommandMenuShared {
             }
         }
 
-        // Observe/unobserve check tasks.
-        if(hasFiles) {
-            // TODO: reimplement single/multi-file inspections.
-//            boolean showObserve = false;
-//            boolean showUnobserve = false;
-//            for(EclipseResourcePath file : langFiles) {
-//                if(!pieRunner.isCheckObserved(languageComponent, file)) {
-//                    showObserve = true;
-//                } else {
-//                    showUnobserve = true;
-//                }
-//            }
-//            if(showObserve || showUnobserve) {
-//                langMenu.add(new Separator());
-//                if(showObserve) {
-//                    langMenu.add(createCommand(identifiers.getObserveCommand()));
-//                }
-//                if(showUnobserve) {
-//                    langMenu.add(createCommand(identifiers.getUnobserveCommand()));
-//                }
-//            }
-        }
-
-        // Transformations.
+        // Commands
         final String runCommandCommandId = identifiers.getRunCommand();
         for(MenuItem menuItem : languageInstance.getResourceContextMenuItems()) {
             EclipseMenuItemVisitor.run(langMenu, menuItem, (menu, commandAction) -> {

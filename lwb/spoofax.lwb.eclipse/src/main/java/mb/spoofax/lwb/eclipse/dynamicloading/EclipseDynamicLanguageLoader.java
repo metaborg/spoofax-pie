@@ -3,9 +3,11 @@ package mb.spoofax.lwb.eclipse.dynamicloading;
 import mb.cfg.CompileLanguageInput;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.platform.EclipseProjectCompiler;
+import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.EclipseLifecycleParticipant;
 import mb.spoofax.eclipse.LifecycleParticipantManager;
 import mb.spoofax.eclipse.SpoofaxPlugin;
+import mb.spoofax.eclipse.menu.MenuShared;
 import mb.spoofax.lwb.dynamicloading.DynamicLanguage;
 import mb.spoofax.lwb.dynamicloading.DynamicLanguageLoader;
 import mb.spoofax.lwb.dynamicloading.DynamicLoadingScope;
@@ -42,6 +44,22 @@ public class EclipseDynamicLanguageLoader implements DynamicLanguageLoader {
         final Method getLanguageMethod = factoryClass.getDeclaredMethod("getLanguage");
         final EclipseLifecycleParticipant participant = (EclipseLifecycleParticipant)getLanguageMethod.invoke(null);
         final LifecycleParticipantManager.DynamicGroup group = SpoofaxPlugin.getLifecycleParticipantManager().registerDynamic(rootDirectory, participant);
-        return new DynamicLanguage(rootDirectory, compileInput, classLoader, group.resourceRegistriesProvider, group.resourceServiceComponent, group.languageComponent, group.pieComponent);
+
+        final MenuShared resourceContextMenu = (MenuShared)classLoader.loadClass(eclipseInput.resourceContextMenu().qualifiedId()).getDeclaredConstructor().newInstance();
+        final MenuShared editorContextMenu = (MenuShared)classLoader.loadClass(eclipseInput.editorContextMenu().qualifiedId()).getDeclaredConstructor().newInstance();
+        final MenuShared mainMenu = (MenuShared)classLoader.loadClass(eclipseInput.mainMenu().qualifiedId()).getDeclaredConstructor().newInstance();
+
+        return new EclipseDynamicLanguage(
+            rootDirectory,
+            compileInput,
+            classLoader,
+            group.resourceRegistriesProvider,
+            group.resourceServiceComponent,
+            (EclipseLanguageComponent)group.languageComponent,
+            group.pieComponent,
+            resourceContextMenu,
+            editorContextMenu,
+            mainMenu
+        );
     }
 }

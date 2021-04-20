@@ -207,6 +207,15 @@ class Parts {
     }
 
 
+    Parts subParts(Iterable<IStrategoTerm> terms) {
+        return new Parts(messagesBuilder, cfgFile, terms);
+    }
+
+    Parts subParts(Stream<IStrategoTerm> terms) {
+        return new Parts(messagesBuilder, cfgFile, terms);
+    }
+
+
     private @Nullable ResourceKey getCfgFile(IStrategoTerm term) {
         if(cfgFile != null) return cfgFile;
         return TermTracer.getResourceKey(term);
@@ -235,16 +244,16 @@ class Parts {
     }
 
 
-    private static @Nullable Region getRegion(IStrategoTerm term) {
+    public static @Nullable Region getRegion(IStrategoTerm term) {
         return TermTracer.getRegion(term);
     }
 
 
-    private static String toJavaString(IStrategoTerm term) {
+    public static String toJavaString(IStrategoTerm term) {
         return removeDoubleQuotes(TermUtils.toJavaString(term));
     }
 
-    private static String removeDoubleQuotes(String string) {
+    public static String removeDoubleQuotes(String string) {
         if(string.startsWith("\"")) {
             string = string.substring(1);
         }
