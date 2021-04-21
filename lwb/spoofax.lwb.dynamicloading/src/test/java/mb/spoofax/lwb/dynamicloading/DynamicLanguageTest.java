@@ -114,7 +114,7 @@ class DynamicLanguageTest extends CharsTestBase {
             System.out.println("Change styler and reload");
             final DynamicLanguage dynamicLanguage;
             try(final MixedSession session = newSession()) {
-                dynamicLanguage = requireDynamicLoad(modifyStyler(session, previousInput), rootDirectory);
+                dynamicLanguage = getDynamicLoadOutput(modifyStyler(session, previousInput), rootDirectory);
                 previousInput = dynamicLanguage.getCompileInput();
             } catch(ExecException | RuntimeException e) {
                 printThrowable(e);
@@ -160,7 +160,7 @@ class DynamicLanguageTest extends CharsTestBase {
             final Set<ResourceKey> providedResources;
             try(final MixedSession session = newSession()) {
                 final TopDownSession topDownSession = modifyParser(session, previousInput);
-                dynamicLanguage = requireDynamicLoad(topDownSession, rootDirectory);
+                dynamicLanguage = getDynamicLoadOutput(topDownSession, rootDirectory);
                 previousInput = dynamicLanguage.getCompileInput();
                 providedResources = topDownSession.getProvidedResources();
             } catch(ExecException | RuntimeException e) {
@@ -193,7 +193,7 @@ class DynamicLanguageTest extends CharsTestBase {
             final Set<ResourceKey> providedResources;
             try(final MixedSession session = newSession()) {
                 final TopDownSession topDownSession = modifyTransformation(session, previousInput);
-                dynamicLanguage = requireDynamicLoad(topDownSession, rootDirectory);
+                dynamicLanguage = getDynamicLoadOutput(topDownSession, rootDirectory);
                 previousInput = dynamicLanguage.getCompileInput();
                 providedResources = topDownSession.getProvidedResources();
             } catch(ExecException | RuntimeException e) {
@@ -234,7 +234,7 @@ class DynamicLanguageTest extends CharsTestBase {
             final Set<ResourceKey> providedResources;
             try(final MixedSession session = newSession()) {
                 final TopDownSession topDownSession = modifyCommand(session, previousInput);
-                dynamicLanguage = requireDynamicLoad(topDownSession, rootDirectory);
+                dynamicLanguage = getDynamicLoadOutput(topDownSession, rootDirectory);
                 previousInput = dynamicLanguage.getCompileInput();
                 providedResources = topDownSession.getProvidedResources();
             } catch(ExecException | RuntimeException e) {
@@ -275,7 +275,7 @@ class DynamicLanguageTest extends CharsTestBase {
             final Set<ResourceKey> providedResources;
             try(final MixedSession session = newSession()) {
                 final TopDownSession topDownSession = modifyAnalyzer(session, previousInput);
-                dynamicLanguage = requireDynamicLoad(topDownSession, rootDirectory);
+                dynamicLanguage = getDynamicLoadOutput(topDownSession, rootDirectory);
                 previousInput = dynamicLanguage.getCompileInput();
                 providedResources = topDownSession.getProvidedResources();
             } catch(ExecException | RuntimeException e) {
@@ -296,8 +296,8 @@ class DynamicLanguageTest extends CharsTestBase {
                 assertFalse(hasTokenizeTaskDefExecuted(report, dynamicLanguage));
                 assertFalse(hasParseTaskDefExecuted(report, dynamicLanguage));
                 assertFalse(hasStyleTaskDefExecuted(report, dynamicLanguage));
-                assertFalse(hasRemoveATaskDefExecuted(report));
-                assertFalse(hasDebugRemoveATaskDefExecuted(report));
+                assertTrue(hasRemoveATaskDefExecuted(report)); // Re-executed because Statix change generates new Stratego code which re-executes this task.
+                assertFalse(hasDebugRemoveATaskDefExecuted(report)); // Not re-executed because RemoveA task produced the same output.
                 assertTrue(hasConstraintAnalysisTaskExecuted(report, dynamicLanguage));
                 assertTrue(hasCheckTaskExecuted(report, dynamicLanguage));
                 // TODO: check execution here and in previous steps.

@@ -44,6 +44,10 @@ public class DynamicLanguageRegistry implements AutoCloseable {
     }
 
 
+    public Iterable<DynamicLanguage> getLanguages() {
+        return languagePerId.values();
+    }
+
     public @Nullable DynamicLanguage getLanguageForRootDirectory(ResourcePath rootDirectory) {
         return languagePerRootDirectory.get(rootDirectory);
     }

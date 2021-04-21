@@ -132,10 +132,10 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
     }
 
     @Override
-    public Result<Option<StrategoCompileConfig>, StrategoConfigureException> exec(ExecContext context, ResourcePath rootDirectory) throws IOException {
+    public Result<Option<StrategoCompileConfig>, StrategoConfigureException> exec(ExecContext context, ResourcePath rootDirectory) throws Exception {
         return context.require(cfgRootDirectoryToObject, rootDirectory)
             .mapErr(StrategoConfigureException::getLanguageCompilerConfigurationFail)
-            .<Option<StrategoCompileConfig>, IOException>flatMapThrowing(cfgOutput -> Result.transpose(Option.ofOptional(cfgOutput.compileLanguageInput.compileLanguageSpecificationInput().stratego())
+            .<Option<StrategoCompileConfig>, Exception>flatMapThrowing(cfgOutput -> Result.transpose(Option.ofOptional(cfgOutput.compileLanguageInput.compileLanguageSpecificationInput().stratego())
                 .mapThrowing(strategoInput -> toStrategoConfig(context, rootDirectory, cfgOutput.compileLanguageInput, strategoInput))
             ));
     }
@@ -146,7 +146,7 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
         ResourcePath rootDirectory,
         CompileLanguageInput input,
         CompileStrategoInput strategoInput
-    ) throws IOException {
+    ) throws IOException, InterruptedException {
         // TODO: move required properties into strategoInput.
         final CompileLanguageSpecificationInput compileLanguageSpecificationInput = input.compileLanguageSpecificationInput();
         final CompileLanguageSpecificationShared compileLanguageSpecificationShared = compileLanguageSpecificationInput.compileLanguageShared();
@@ -251,6 +251,8 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
                     final Supplier<Result<ConstraintAnalyzeMultiTaskDef.SingleFileOutput, ?>> singleFileAnalysisOutputSupplier = sdf3Analyze.createSingleFileOutputSupplier(analyzeInput, file.getPath());
                     try {
                         sdf3ToSignature(context, generatedSourcesDirectory, singleFileAnalysisOutputSupplier);
+                    } catch(RuntimeException | InterruptedException e) {
+                        throw e; // Do not wrap runtime and interrupted exceptions, rethrow them.
                     } catch(Exception e) {
                         return Result.ofErr(StrategoConfigureException.sdf3SignatureGenerateFail(e));
                     }
@@ -258,11 +260,15 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
                     final STask<Result<IStrategoTerm, ?>> astSupplier = sdf3Desugar.createSupplier(parseInputBuilder.withFile(file.getPath()).buildAstSupplier());
                     try {
                         sdf3ToPrettyPrinter(context, strategyAffix, generatedSourcesDirectory, astSupplier);
+                    } catch(RuntimeException | InterruptedException e) {
+                        throw e; // Do not wrap runtime and interrupted exceptions, rethrow them.
                     } catch(Exception e) {
                         return Result.ofErr(StrategoConfigureException.sdf3PrettyPrinterGenerateFail(e));
                     }
                     try {
                         sdf3ToCompletionRuntime(context, generatedSourcesDirectory, astSupplier);
+                    } catch(RuntimeException | InterruptedException e) {
+                        throw e; // Do not wrap runtime and interrupted exceptions, rethrow them.
                     } catch(Exception e) {
                         return Result.ofErr(StrategoConfigureException.sdf3CompletionRuntimeGenerateFail(e));
                     }
@@ -273,8 +279,8 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
             try {
                 final STask<Result<ParseTable, ?>> parseTableSupplier = sdf3ToParseTable.createSupplier(new Sdf3SpecToParseTable.Input(sdf3Config, false));
                 sdf3ToParenthesizer(context, strategyAffix, generatedSourcesDirectory, parseTableSupplier);
-            } catch(RuntimeException e) {
-                throw e; // Do not wrap runtime exceptions, rethrow them.
+            } catch(RuntimeException | InterruptedException e) {
+                throw e; // Do not wrap runtime and interrupted exceptions, rethrow them.
             } catch(Exception e) {
                 return Result.ofErr(StrategoConfigureException.sdf3ParenthesizerGenerateFail(e));
             }

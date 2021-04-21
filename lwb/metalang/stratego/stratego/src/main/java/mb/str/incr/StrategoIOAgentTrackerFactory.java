@@ -7,8 +7,10 @@ import mb.str.StrategoScope;
 import mb.stratego.build.util.IOAgentTracker;
 import mb.stratego.build.util.IOAgentTrackerFactory;
 import mb.stratego.common.StrategoIOAgent;
+import org.apache.commons.io.output.TeeOutputStream;
 
 import javax.inject.Inject;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.OutputStream;
 
@@ -23,11 +25,15 @@ public class StrategoIOAgentTrackerFactory implements IOAgentTrackerFactory {
     }
 
     @Override public IOAgentTracker create(File initialDir, String... excludePatterns) {
-        // TODO: handle excludePatterns
-        return new StrategoIOAgentTracker(new StrategoIOAgent(loggerFactory, resourceService, new FSResource(initialDir)));
+        return new StrategoIOAgentTracker(new StrategoIOAgent(loggerFactory, resourceService, new FSResource(initialDir), StrategoIOAgent.defaultStdout(loggerFactory, excludePatterns),
+            StrategoIOAgent.defaultStderr(loggerFactory, excludePatterns)), null, null);
     }
 
     @Override public IOAgentTracker create(File initialDir, OutputStream stdoutStream, OutputStream stderrStream) {
-        return new StrategoIOAgentTracker(new StrategoIOAgent(loggerFactory, resourceService, new FSResource(initialDir), stdoutStream, stderrStream));
+        final ByteArrayOutputStream stdoutLog = new ByteArrayOutputStream();
+        final ByteArrayOutputStream stderrLog = new ByteArrayOutputStream();
+        final TeeOutputStream stdout = new TeeOutputStream(stdoutStream, stdoutLog);
+        final TeeOutputStream stderr = new TeeOutputStream(stderrStream, stderrLog);
+        return new StrategoIOAgentTracker(new StrategoIOAgent(loggerFactory, resourceService, new FSResource(initialDir), stdout, stderr), stdoutLog, stderrLog);
     }
 }

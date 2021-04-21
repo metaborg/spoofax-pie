@@ -260,6 +260,8 @@ public class AstToObject {
                 .withDefaultsSameProject(rootDirectory, shared)
                 .languageProjectCompilerInput(languageBaseCompilerInput)
                 .adapterProjectCompilerInput(languageAdapterCompilerInput);
+            subParts.forOneSubtermAsTypeInfo("EclipseBaseLanguage", builder::baseLanguage);
+            subParts.forOneSubtermAsTypeInfo("EclipseExtendLanguage", builder::extendLanguage);
             customizer.customize(builder);
             final EclipseProjectCompiler.Input input = builder.build();
             compileLanguageInputBuilder.eclipseProjectInput(input);

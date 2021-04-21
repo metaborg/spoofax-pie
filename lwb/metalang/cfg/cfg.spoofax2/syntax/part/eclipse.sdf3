@@ -2,8 +2,7 @@ module part/eclipse
 
 imports
 
-  lex/path
-  lex/str_id
+  lex/java_id
   configuration
 
 context-free sorts
@@ -15,3 +14,6 @@ context-free syntax
   Part.EclipseSection = <eclipse {
   <{EclipseOption "\n"}*>
 }>
+
+  EclipseOption.EclipseBaseLanguage = <base-language = <JavaQIdLit>>
+  EclipseOption.EclipseExtendLanguage = <extend-language = <JavaQIdLit>>
