@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class RunCommandHandler extends AbstractHandler {
+    public final static String languageIdParameterId = "languageId"; // Used for dynamic loading.
     public final static String dataParameterId = "data";
 
     private static final Bundle bundle = FrameworkUtil.getBundle(RunCommandHandler.class);

@@ -11,6 +11,7 @@ import mb.spoofax.eclipse.menu.MenuShared;
 import mb.spoofax.lwb.dynamicloading.DynamicLanguage;
 import mb.spoofax.lwb.dynamicloading.DynamicLanguageLoader;
 import mb.spoofax.lwb.dynamicloading.DynamicLoadingScope;
+import org.eclipse.core.commands.AbstractHandler;
 
 import javax.inject.Inject;
 import java.lang.reflect.Method;
@@ -48,6 +49,7 @@ public class EclipseDynamicLanguageLoader implements DynamicLanguageLoader {
         final MenuShared resourceContextMenu = (MenuShared)classLoader.loadClass(eclipseInput.resourceContextMenu().qualifiedId()).getDeclaredConstructor().newInstance();
         final MenuShared editorContextMenu = (MenuShared)classLoader.loadClass(eclipseInput.editorContextMenu().qualifiedId()).getDeclaredConstructor().newInstance();
         final MenuShared mainMenu = (MenuShared)classLoader.loadClass(eclipseInput.mainMenu().qualifiedId()).getDeclaredConstructor().newInstance();
+        final AbstractHandler runCommandHandler = (AbstractHandler)classLoader.loadClass(eclipseInput.runCommandHandler().qualifiedId()).getDeclaredConstructor().newInstance();
 
         return new EclipseDynamicLanguage(
             rootDirectory,
@@ -59,7 +61,8 @@ public class EclipseDynamicLanguageLoader implements DynamicLanguageLoader {
             group.pieComponent,
             resourceContextMenu,
             editorContextMenu,
-            mainMenu
+            mainMenu,
+            runCommandHandler
         );
     }
 }

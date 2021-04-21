@@ -9,6 +9,7 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.menu.MenuShared;
 import mb.spoofax.lwb.dynamicloading.DynamicLanguage;
+import org.eclipse.core.commands.AbstractHandler;
 
 import java.net.URLClassLoader;
 
@@ -16,6 +17,7 @@ public class EclipseDynamicLanguage extends DynamicLanguage {
     private final MenuShared resourceContextMenu;
     private final MenuShared editorContextMenu;
     private final MenuShared mainMenu;
+    private final AbstractHandler runCommandHandler;
 
     public EclipseDynamicLanguage(
         ResourcePath rootDirectory,
@@ -28,13 +30,15 @@ public class EclipseDynamicLanguage extends DynamicLanguage {
 
         MenuShared resourceContextMenu,
         MenuShared editorContextMenu,
-        MenuShared mainMenu
+        MenuShared mainMenu,
+        AbstractHandler runCommandHandler
     ) {
         super(rootDirectory, compileInput, classLoader, resourceRegistriesProvider, resourceServiceComponent, languageComponent, pieComponent);
 
         this.resourceContextMenu = resourceContextMenu;
         this.editorContextMenu = editorContextMenu;
         this.mainMenu = mainMenu;
+        this.runCommandHandler = runCommandHandler;
     }
 
     @Override public EclipseLanguageComponent getLanguageComponent() {
@@ -58,5 +62,9 @@ public class EclipseDynamicLanguage extends DynamicLanguage {
         if(closed)
             throw new IllegalStateException("Cannot get main menu, dynamically loaded language has been closed");
         return mainMenu;
+    }
+
+    public AbstractHandler getRunCommandHandler() {
+        return runCommandHandler;
     }
 }

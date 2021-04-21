@@ -12,7 +12,6 @@ import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.EclipsePlatformComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.command.EnclosingCommandContextProvider;
-import mb.spoofax.eclipse.pie.PieRunner;
 import mb.spoofax.eclipse.resource.EclipseResourcePath;
 import mb.spoofax.eclipse.util.SelectionUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -127,7 +126,7 @@ public abstract class ResourceContextMenu extends CommandMenuShared {
                 final ArrayList<CommandContext> finalContexts =
                     enclosingCommandContextProvider.filterRequired(contexts.stream(), commandAction.requiredEnclosingResourceTypes())
                         .collect(Collectors.toCollection(ArrayList::new));
-                menu.add(createCommand(runCommandCommandId, commandRequest, ListView.of(finalContexts), commandAction.displayName(), commandAction.description()));
+                menu.add(createCommand(runCommandCommandId, languageComponent.getLanguageInstance().getId(), commandRequest, ListView.of(finalContexts), commandAction.displayName(), commandAction.description()));
             });
         }
 

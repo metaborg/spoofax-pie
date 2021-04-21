@@ -96,7 +96,7 @@ public class EditorContextMenu extends CommandMenuShared {
                 if(finalContext == null) {
                     return; // Command requires a certain type of enclosing context, but context does not have one.
                 }
-                menu.add(createCommand(runCommandCommandId, commandRequest, finalContext, commandAction.displayName(), commandAction.description()));
+                menu.add(createCommand(runCommandCommandId, languageComponent.getLanguageInstance().getId(), commandRequest, finalContext, commandAction.displayName(), commandAction.description()));
             });
         }
 

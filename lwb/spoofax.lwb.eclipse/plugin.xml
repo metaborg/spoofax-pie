@@ -221,47 +221,18 @@
     </extension>
 
 
-  <!--  &lt;!&ndash; Commands and Handlers &ndash;&gt;-->
-  <!--  &lt;!&ndash; Add/Remove Nature &ndash;&gt;-->
-  <!--  <extension point="org.eclipse.ui.commands">-->
-  <!--    <command id="stratego.eclipse.nature.add" name="Add Stratego nature"/>-->
-  <!--    <command id="stratego.eclipse.nature.remove" name="Remove Stratego nature"/>-->
-  <!--  </extension>-->
-  <!--  <extension point="org.eclipse.ui.handlers">-->
-  <!--    <handler-->
-  <!--      commandId="stratego.eclipse.nature.add"-->
-  <!--      class="mb.str.eclipse.StrategoAddNatureHandler"-->
-  <!--    />-->
-  <!--    <handler-->
-  <!--      commandId="stratego.eclipse.nature.remove"-->
-  <!--      class="mb.str.eclipse.StrategoRemoveNatureHandler"-->
-  <!--    />-->
-  <!--  </extension>-->
-  <!--  &lt;!&ndash; Observe/Unobserve &ndash;&gt;-->
-  <!--  <extension point="org.eclipse.ui.commands">-->
-  <!--    <command id="stratego.eclipse.observe" name="Observe file(s) for Stratego-related tasks"/>-->
-  <!--    <command id="stratego.eclipse.unobserve" name="Unobserve file(s) for Stratego-related tasks"/>-->
-  <!--  </extension>-->
-  <!--  <extension point="org.eclipse.ui.handlers">-->
-  <!--    <handler-->
-  <!--      commandId="stratego.eclipse.observe"-->
-  <!--      class="mb.str.eclipse.StrategoObserveHandler"-->
-  <!--    />-->
-  <!--    <handler-->
-  <!--      commandId="stratego.eclipse.unobserve"-->
-  <!--      class="mb.str.eclipse.StrategoUnobserveHandler"-->
-  <!--    />-->
-  <!--  </extension>-->
-  <!--  &lt;!&ndash; Transform &ndash;&gt;-->
-  <!--  <extension point="org.eclipse.ui.commands">-->
-  <!--    <command id="stratego.eclipse.runcommand" name="Run Stratego command">-->
-  <!--      <commandParameter id="data" name="Data" optional="false"/>-->
-  <!--    </command>-->
-  <!--  </extension>-->
-  <!--  <extension point="org.eclipse.ui.handlers">-->
-  <!--    <handler-->
-  <!--      commandId="stratego.eclipse.runcommand"-->
-  <!--      class="mb.str.eclipse.StrategoRunCommandHandler"-->
-  <!--    />-->
-  <!--  </extension>-->
+    <!-- Commands and Handlers -->
+    <!-- Transform -->
+    <extension point="org.eclipse.ui.commands">
+      <command id="spoofax.lwb.eclipse.dynamicloading.runcommand" name="Run Spoofax dynamic command">
+        <commandParameter id="languageId" name="Language ID" optional="false"/>
+        <commandParameter id="data" name="Data" optional="false"/>
+      </command>
+    </extension>
+    <extension point="org.eclipse.ui.handlers">
+      <handler
+        commandId="spoofax.lwb.eclipse.dynamicloading.runcommand"
+        class="mb.spoofax.lwb.eclipse.dynamicloading.DynamicRunCommandHandler"
+      />
+    </extension>
 </plugin>
