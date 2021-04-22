@@ -102,7 +102,7 @@ public class PieRunner {
 
     // Adding/updating/removing editors.
 
-    public <D extends IDocument & IDocumentExtension4> void addOrUpdateEditor(
+    public void addOrUpdateEditor(
         EclipseLanguageComponent languageComponent,
         Pie pie,
         @Nullable IProject project,

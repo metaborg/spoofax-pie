@@ -44,7 +44,11 @@ public interface LanguageInstance {
      */
     Task<@Nullable CompletionResult> createCompletionTask(ResourceKey resourceKey, Region primarySelection);
 
+
+    Task<KeyedMessages> createCheckOneTask(ResourceKey file, @Nullable ResourcePath rootDirectoryHint);
+
     Task<KeyedMessages> createCheckTask(ResourcePath rootDirectory);
+
 
     CollectionView<CommandDef<?>> getCommandDefs();
 

@@ -17,51 +17,15 @@ import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.ResourceMatcher;
+import mb.resource.hierarchical.match.path.PathMatcher;
 import mb.resource.hierarchical.walk.ResourceWalker;
 
 import javax.inject.Inject;
 import java.io.IOException;
-import java.io.Serializable;
 import java.io.UncheckedIOException;
-import java.util.Objects;
 
 @CfgScope
-public class CfgCheckMulti implements TaskDef<CfgCheckMulti.Input, KeyedMessages> {
-    public static class Input implements Serializable {
-        public final ResourcePath root;
-        public final ResourceWalker walker;
-        public final ResourceMatcher matcher;
-
-        public Input(
-            ResourcePath root,
-            ResourceWalker walker,
-            ResourceMatcher matcher
-        ) {
-            this.root = root;
-            this.walker = walker;
-            this.matcher = matcher;
-        }
-
-        @Override public boolean equals(Object o) {
-            if(this == o) return true;
-            if(o == null || getClass() != o.getClass()) return false;
-            final Input input = (Input)o;
-            return root.equals(input.root) && walker.equals(input.walker) && matcher.equals(input.matcher);
-        }
-
-        @Override public int hashCode() {
-            return Objects.hash(root, walker, matcher);
-        }
-
-        @Override public String toString() {
-            return "Input{" +
-                "root=" + root +
-                ", walker=" + walker +
-                ", matcher=" + matcher +
-                '}';
-        }
-    }
-
+public class CfgCheckMulti implements TaskDef<ResourcePath, KeyedMessages> {
     private final CfgClassLoaderResources classLoaderResources;
     private final CfgParse parse;
     private final CfgRootDirectoryToObject rootDirectoryToObject;
@@ -80,20 +44,24 @@ public class CfgCheckMulti implements TaskDef<CfgCheckMulti.Input, KeyedMessages
         return getClass().getName();
     }
 
-    @Override public KeyedMessages exec(ExecContext context, Input input) throws IOException {
+    @Override public KeyedMessages exec(ExecContext context, ResourcePath input) throws IOException {
         context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
-        final HierarchicalResource root = context.require(input.root, ResourceStampers.modifiedDirRec(input.walker, input.matcher));
+        final ResourceWalker walker = ResourceWalker.ofPath(PathMatcher.ofNoHidden());
+        final HierarchicalResource rootDirectory = context.getHierarchicalResource(input);
+        // Require directories recursively, so we re-execute whenever a file is added/removed from a directory.
+        rootDirectory.walkForEach(walker, ResourceMatcher.ofDirectory(), context::require);
+        final ResourceMatcher matcher = ResourceMatcher.ofFile().and(ResourceMatcher.ofPath(PathMatcher.ofExtensions("cfg")));
         try {
-            root.walk(input.walker, input.matcher).forEach(file -> {
+            rootDirectory.walkForEach(walker, matcher, file -> {
                 final ResourcePath filePath = file.getPath();
-                final Messages messages = context.require(parse.inputBuilder().withFile(filePath).rootDirectoryHint(input.root).buildMessagesSupplier());
+                final Messages messages = context.require(parse.inputBuilder().withFile(filePath).rootDirectoryHint(input).buildMessagesSupplier());
                 messagesBuilder.addMessages(filePath, messages);
             });
         } catch(UncheckedIOException e) {
             throw e.getCause();
         }
-        final Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result = context.require(rootDirectoryToObject, input.root);
+        final Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result = context.require(rootDirectoryToObject, input);
         result.ifOk(o -> messagesBuilder.addMessages(o.messages));
         result.ifErr(e -> {
             messagesBuilder.addMessage("Creating configuration object failed", e, Severity.Error, e.getCfgFile());

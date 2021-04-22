@@ -40,6 +40,7 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
     private final TemplateWriter checkTaskDefTemplate;
     private final TemplateWriter checkMultiTaskDefTemplate;
     private final TemplateWriter checkAggregatorTaskDefTemplate;
+    private final TemplateWriter checkDeaggregatorTaskDefTemplate;
     private final TemplateWriter resourcesScopeTemplate;
     private final TemplateWriter resourcesComponentTemplate;
     private final TemplateWriter resourcesModuleTemplate;
@@ -71,6 +72,7 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
         this.checkTaskDefTemplate = templateCompiler.getOrCompileToWriter("adapter_project/CheckTaskDef.java.mustache");
         this.checkMultiTaskDefTemplate = templateCompiler.getOrCompileToWriter("adapter_project/CheckMultiTaskDef.java.mustache");
         this.checkAggregatorTaskDefTemplate = templateCompiler.getOrCompileToWriter("adapter_project/CheckAggregatorTaskDef.java.mustache");
+        this.checkDeaggregatorTaskDefTemplate = templateCompiler.getOrCompileToWriter("adapter_project/CheckDeaggregatorTaskDef.java.mustache");
         this.resourcesScopeTemplate = templateCompiler.getOrCompileToWriter("adapter_project/ResourcesScope.java.mustache");
         this.resourcesComponentTemplate = templateCompiler.getOrCompileToWriter("adapter_project/ResourcesComponent.java.mustache");
         this.resourcesModuleTemplate = templateCompiler.getOrCompileToWriter("adapter_project/ResourcesModule.java.mustache");
@@ -143,6 +145,7 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
         allTaskDefs.add(input.checkTaskDef());
         allTaskDefs.add(input.checkMultiTaskDef());
         allTaskDefs.add(input.checkAggregatorTaskDef());
+        allTaskDefs.add(input.checkDeaggregatorTaskDef());
 
         // Class files
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
@@ -154,6 +157,7 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
         checkTaskDefTemplate.write(context, input.baseCheckTaskDef().file(generatedJavaSourcesDirectory), input);
         checkMultiTaskDefTemplate.write(context, input.baseCheckMultiTaskDef().file(generatedJavaSourcesDirectory), input);
         checkAggregatorTaskDefTemplate.write(context, input.baseCheckAggregatorTaskDef().file(generatedJavaSourcesDirectory), input);
+        checkDeaggregatorTaskDefTemplate.write(context, input.baseCheckDeaggregatorTaskDef().file(generatedJavaSourcesDirectory), input);
 
         resourcesScopeTemplate.write(context, input.baseResourcesScope().file(generatedJavaSourcesDirectory), input);
         resourcesComponentTemplate.write(context, input.baseResourcesComponent().file(generatedJavaSourcesDirectory), input);
@@ -216,19 +220,25 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
                 injected.add(tokenizeInjection);
             }
             final NamedTypeInfo checkInjection;
+            final NamedTypeInfo checkOneInjection;
             if(input.multilangAnalyzer().isPresent()) { // isMultiLang will be true
                 map.put("languageId", input.multilangAnalyzer().get().languageId());
                 map.put("contextId", input.multilangAnalyzer().get().contextId());
             }
             if(input.multilangAnalyzer().isPresent()) {
                 checkInjection = uniqueNamer.makeUnique(input.multilangAnalyzer().get().checkTaskDef());
+                checkOneInjection = uniqueNamer.makeUnique(input.checkDeaggregatorTaskDef());
             } else if(input.isMultiFile()) {
                 checkInjection = uniqueNamer.makeUnique(input.checkMultiTaskDef());
+                checkOneInjection = uniqueNamer.makeUnique(input.checkDeaggregatorTaskDef());
             } else {
                 checkInjection = uniqueNamer.makeUnique(input.checkAggregatorTaskDef());
+                checkOneInjection = uniqueNamer.makeUnique(input.checkTaskDef());
             }
             injected.add(checkInjection);
+            injected.add(checkOneInjection);
             map.put("checkInjection", checkInjection);
+            map.put("checkOneInjection", checkOneInjection);
             final NamedTypeInfo styleInjection;
             if(input.styler().isPresent()) {
                 styleInjection = uniqueNamer.makeUnique(input.styler().get().styleTaskDef());
@@ -535,6 +545,18 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
             return extendCheckAggregatorTaskDef().orElseGet(this::baseCheckAggregatorTaskDef);
         }
 
+        // Multi file check results deaggregator task definition
+
+        @Value.Default default TypeInfo baseCheckDeaggregatorTaskDef() {
+            return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "CheckDeaggregator");
+        }
+
+        Optional<TypeInfo> extendCheckDeaggregatorTaskDef();
+
+        default TypeInfo checkDeaggregatorTaskDef() {
+            return extendCheckDeaggregatorTaskDef().orElseGet(this::baseCheckDeaggregatorTaskDef);
+        }
+
 
         /// Files information, known up-front for build systems with static dependencies such as Gradle.
 
@@ -564,6 +586,7 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
                 javaSourceFiles.add(baseCheckTaskDef().file(generatedJavaSourcesDirectory));
                 javaSourceFiles.add(baseCheckMultiTaskDef().file(generatedJavaSourcesDirectory));
                 javaSourceFiles.add(baseCheckAggregatorTaskDef().file(generatedJavaSourcesDirectory));
+                javaSourceFiles.add(baseCheckDeaggregatorTaskDef().file(generatedJavaSourcesDirectory));
                 for(CommandDefRepr commandDef : commandDefs()) {
                     javaSourceFiles.add(commandDef.type().file(generatedJavaSourcesDirectory));
                 }

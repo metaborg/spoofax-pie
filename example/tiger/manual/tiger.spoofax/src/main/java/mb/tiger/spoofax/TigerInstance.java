@@ -14,10 +14,6 @@ import mb.jsglr.common.JSGLRTokens;
 import mb.pie.api.Task;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
-import mb.resource.hierarchical.match.PathResourceMatcher;
-import mb.resource.hierarchical.match.path.ExtensionsPathMatcher;
-import mb.resource.hierarchical.match.path.NoHiddenPathMatcher;
-import mb.resource.hierarchical.walk.PathResourceWalker;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.cli.CliCommand;
 import mb.spoofax.core.language.cli.CliParam;
@@ -33,7 +29,8 @@ import mb.tiger.spoofax.command.TigerShowAnalyzedAstCommand;
 import mb.tiger.spoofax.command.TigerShowDesugaredAstCommand;
 import mb.tiger.spoofax.command.TigerShowParsedAstCommand;
 import mb.tiger.spoofax.command.TigerShowPrettyPrintedTextCommand;
-import mb.tiger.spoofax.task.TigerIdeCheckAggregate;
+import mb.tiger.spoofax.task.TigerCheck;
+import mb.tiger.spoofax.task.TigerCheckAggregator;
 import mb.tiger.spoofax.task.TigerIdeTokenize;
 import mb.tiger.spoofax.task.reusable.TigerCompleteTaskDef;
 import mb.tiger.spoofax.task.reusable.TigerParse;
@@ -48,7 +45,8 @@ public class TigerInstance implements LanguageInstance {
     private final static SetView<String> extensions = SetView.of("tig");
 
     private final TigerParse parse;
-    private final TigerIdeCheckAggregate tigerIdeCheckAggregate;
+    private final TigerCheck check;
+    private final TigerCheckAggregator checkAggregate;
     private final TigerStyle style;
     private final TigerIdeTokenize tokenize;
     private final TigerCompleteTaskDef complete;
@@ -67,7 +65,8 @@ public class TigerInstance implements LanguageInstance {
 
     @Inject public TigerInstance(
         TigerParse parse,
-        TigerIdeCheckAggregate tigerIdeCheckAggregate,
+        TigerCheck check,
+        TigerCheckAggregator checkAggregate,
         TigerStyle style,
         TigerIdeTokenize tokenize,
         TigerCompleteTaskDef complete,
@@ -84,7 +83,8 @@ public class TigerInstance implements LanguageInstance {
         Set<AutoCommandRequest<?>> autoCommandDefs
     ) {
         this.parse = parse;
-        this.tigerIdeCheckAggregate = tigerIdeCheckAggregate;
+        this.check = check;
+        this.checkAggregate = checkAggregate;
         this.style = style;
         this.tokenize = tokenize;
         this.complete = complete;
@@ -127,12 +127,13 @@ public class TigerInstance implements LanguageInstance {
     }
 
     @Override
+    public Task<KeyedMessages> createCheckOneTask(ResourceKey file, @Nullable ResourcePath rootDirectoryHint) {
+        return check.createTask(new TigerCheck.Input(file, rootDirectoryHint));
+    }
+
+    @Override
     public Task<KeyedMessages> createCheckTask(ResourcePath projectRoot) {
-        return tigerIdeCheckAggregate.createTask(new TigerIdeCheckAggregate.Input(
-            projectRoot,
-            new PathResourceWalker(new NoHiddenPathMatcher()),
-            new PathResourceMatcher(new ExtensionsPathMatcher(this.getFileExtensions().asUnmodifiable()))
-        ));
+        return checkAggregate.createTask(projectRoot);
     }
 
     @Override public CollectionView<CommandDef<?>> getCommandDefs() {

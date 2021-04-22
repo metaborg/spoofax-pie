@@ -1,15 +1,17 @@
-package {{baseCheckTaskDef.packageId}};
+package mb.tiger.spoofax.task;
 
 import mb.common.message.KeyedMessages;
-import mb.common.message.Messages;
 import mb.common.message.KeyedMessagesBuilder;
+import mb.common.message.Messages;
 import mb.common.message.Severity;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
-import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
+import mb.tiger.spoofax.TigerScope;
+import mb.tiger.spoofax.task.reusable.TigerAnalyze;
+import mb.tiger.spoofax.task.reusable.TigerParse;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
@@ -17,8 +19,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Optional;
 
-@{{scope.qualifiedId}}
-public class {{baseCheckTaskDef.id}} implements TaskDef<{{baseCheckTaskDef.id}}.Input, KeyedMessages> {
+@TigerScope
+public class TigerCheck implements TaskDef<TigerCheck.Input, KeyedMessages> {
     public static class Input implements Serializable {
         public final ResourceKey file;
         public final @Nullable ResourcePath rootDirectoryHint;
@@ -43,45 +45,35 @@ public class {{baseCheckTaskDef.id}} implements TaskDef<{{baseCheckTaskDef.id}}.
         }
 
         @Override public String toString() {
-            return "{{baseCheckTaskDef.id}}$Input{" +
+            return "TigerCheck$Input{" +
                 "file=" + file +
                 ", rootDirectoryHint=" + rootDirectoryHint +
                 '}';
         }
     }
 
-    {{#checkInjections}}
-    private final {{variable}};
-    {{/checkInjections}}
+    private final TigerParse parse;
+    private final TigerAnalyze analyze;
 
-    @Inject public {{baseCheckTaskDef.id}}(
-        {{#checkInjections}}
-        {{variable}}{{^-last}},{{/-last}}
-        {{/checkInjections}}
-    ) {
-        {{#checkInjections}}
-        {{thisAssign}};
-        {{/checkInjections}}
+    @Inject public TigerCheck(TigerParse parse, TigerAnalyze analyze) {
+        this.parse = parse;
+        this.analyze = analyze;
     }
 
     @Override public String getId() {
-        return "{{baseCheckTaskDef.qualifiedId}}";
+        return getClass().getName();
     }
 
-    @Override public KeyedMessages exec(ExecContext context, Input input) throws IOException {
-        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+    @Override
+    public KeyedMessages exec(ExecContext context, TigerCheck.Input input) throws IOException {
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
-        {{#parser}}
         final mb.jsglr1.pie.JSGLR1ParseTaskInput.Builder parseInputBuilder = parse.inputBuilder().withFile(input.file).rootDirectoryHint(Optional.ofNullable(input.rootDirectoryHint));
         final Messages parseMessages = context.require(parseInputBuilder.buildMessagesSupplier());
         messagesBuilder.addMessages(input.file, parseMessages);
-        {{/parser}}
-        {{#constraintAnalyzer}}
-        final Result<{{this.analyzeTaskDef.qualifiedId}}.Output, ?> analysisResult = context.require(analyze, new {{this.analyzeTaskDef.qualifiedId}}.Input(input.file, parseInputBuilder.buildRecoverableAstSupplier()));
+        final Result<TigerAnalyze.Output, ?> analysisResult = context.require(analyze, new TigerAnalyze.Input(input.file, parseInputBuilder.buildRecoverableAstSupplier()));
         analysisResult
             .ifOk(output -> messagesBuilder.addMessages(output.result.resource, output.result.messages))
             .ifErr(e -> messagesBuilder.addMessage("Analysis failed", e, Severity.Error));
-        {{/constraintAnalyzer}}
         return messagesBuilder.build();
     }
 }

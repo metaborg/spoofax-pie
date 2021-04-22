@@ -7,56 +7,16 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.hierarchical.ResourcePath;
-import mb.resource.hierarchical.match.ResourceMatcher;
-import mb.resource.hierarchical.walk.ResourceWalker;
 import mb.str.StrategoClassLoaderResources;
 import mb.str.StrategoScope;
 import mb.str.config.StrategoAnalyzeConfig;
 import mb.str.task.StrategoCheck;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 import java.io.IOException;
-import java.io.Serializable;
-import java.util.Objects;
 
 @StrategoScope
-public class StrategoCheckMultiWrapper implements TaskDef<StrategoCheckMultiWrapper.Input, KeyedMessages> {
-    public static class Input implements Serializable {
-        public final ResourcePath root;
-        public final ResourceWalker walker;
-        public final ResourceMatcher matcher;
-
-        public Input(
-            ResourcePath root,
-            ResourceWalker walker,
-            ResourceMatcher matcher
-        ) {
-            this.root = root;
-            this.walker = walker;
-            this.matcher = matcher;
-        }
-
-        @Override public boolean equals(@Nullable Object o) {
-            if(this == o) return true;
-            if(o == null || getClass() != o.getClass()) return false;
-            final Input input = (Input)o;
-            return root.equals(input.root) && walker.equals(input.walker) && matcher.equals(input.matcher);
-        }
-
-        @Override public int hashCode() {
-            return Objects.hash(root, walker, matcher);
-        }
-
-        @Override public String toString() {
-            return "Input{" +
-                "root=" + root +
-                ", walker=" + walker +
-                ", matcher=" + matcher +
-                '}';
-        }
-    }
-
+public class StrategoCheckMultiWrapper implements TaskDef<ResourcePath, KeyedMessages> {
     private final StrategoClassLoaderResources classLoaderResources;
     private final StrategoAnalyzeConfigFunctionWrapper configFunctionWrapper;
     private final StrategoCheck check;
@@ -78,14 +38,14 @@ public class StrategoCheckMultiWrapper implements TaskDef<StrategoCheckMultiWrap
         return getClass().getName();
     }
 
-    @Override public KeyedMessages exec(ExecContext context, Input input) throws IOException {
+    @Override public KeyedMessages exec(ExecContext context, ResourcePath rootDirectory) throws IOException {
         context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
-        return configFunctionWrapper.get().apply(context, input.root).mapOrElse(
+        return configFunctionWrapper.get().apply(context, rootDirectory).mapOrElse(
             o -> o.mapOrElse(
                 c -> checkWithConfig(context, c),
-                () -> checkDefault(context, input)
+                () -> checkDefault(context, rootDirectory)
             ),
-            e -> KeyedMessages.of(ListView.of(new Message("Cannot check Stratego files; reading configuration failed unexpectedly", e)), input.root)
+            e -> KeyedMessages.of(ListView.of(new Message("Cannot check Stratego files; reading configuration failed unexpectedly", e)), rootDirectory)
         );
     }
 
@@ -93,7 +53,7 @@ public class StrategoCheckMultiWrapper implements TaskDef<StrategoCheckMultiWrap
         return context.require(check, config);
     }
 
-    private KeyedMessages checkDefault(ExecContext context, Input input) {
-        return context.require(baseCheckMulti, new BaseStrategoCheckMulti.Input(input.root, input.walker, input.matcher));
+    private KeyedMessages checkDefault(ExecContext context, ResourcePath rootDirectory) {
+        return context.require(baseCheckMulti, rootDirectory);
     }
 }

@@ -106,16 +106,13 @@ public class {{baseInstance.id}} implements LanguageInstance {
 {{/parseInjection}}
     }
 
+
+    @Override public Task<KeyedMessages> createCheckOneTask(ResourceKey file, @Nullable ResourcePath rootDirectoryHint) {
+        return {{checkOneInjection.name}}.createTask(new {{checkOneInjection.type.qualifiedId}}.Input(file, rootDirectoryHint));
+    }
+
     @Override public Task<KeyedMessages> createCheckTask(ResourcePath rootDirectory) {
-        {{#isMultiLang}}
         return {{checkInjection.name}}.createTask(rootDirectory);
-        {{/isMultiLang}}
-        {{^isMultiLang}}
-        return {{checkInjection.name}}.createTask(new {{checkInjection.type.qualifiedId}}.Input(
-            rootDirectory,
-            new PathResourceWalker(new NoHiddenPathMatcher()),
-            new PathResourceMatcher(new ExtensionsPathMatcher(getFileExtensions().asUnmodifiable()))));
-        {{/isMultiLang}}
     }
 
     @Override public CollectionView<CommandDef<?>> getCommandDefs() {

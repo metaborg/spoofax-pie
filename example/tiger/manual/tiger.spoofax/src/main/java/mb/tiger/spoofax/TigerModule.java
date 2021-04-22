@@ -28,11 +28,11 @@ import mb.tiger.spoofax.command.TigerShowDesugaredAstCommand;
 import mb.tiger.spoofax.command.TigerShowParsedAstCommand;
 import mb.tiger.spoofax.command.TigerShowPrettyPrintedTextCommand;
 import mb.tiger.spoofax.command.TigerShowScopeGraphCommand;
+import mb.tiger.spoofax.task.TigerCheckAggregator;
 import mb.tiger.spoofax.task.TigerCompileDirectory;
 import mb.tiger.spoofax.task.TigerCompileFile;
 import mb.tiger.spoofax.task.TigerCompileFileAlt;
-import mb.tiger.spoofax.task.TigerIdeCheck;
-import mb.tiger.spoofax.task.TigerIdeCheckAggregate;
+import mb.tiger.spoofax.task.TigerCheck;
 import mb.tiger.spoofax.task.TigerIdeTokenize;
 import mb.tiger.spoofax.task.TigerShowAnalyzedAst;
 import mb.tiger.spoofax.task.TigerShowDesugaredAst;
@@ -116,8 +116,8 @@ public class TigerModule {
         TigerListDefNames listDefNames,
 
         TigerIdeTokenize tokenize,
-        TigerIdeCheck check,
-        TigerIdeCheckAggregate checkAggregate,
+        TigerCheck check,
+        TigerCheckAggregator checkAggregate,
 
         TigerShowParsedAst showParsedAst,
         TigerShowPrettyPrintedText showPrettyPrintedText,

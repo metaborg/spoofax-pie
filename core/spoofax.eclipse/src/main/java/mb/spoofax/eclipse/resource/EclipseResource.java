@@ -3,7 +3,6 @@ package mb.spoofax.eclipse.resource;
 import mb.resource.ResourceRuntimeException;
 import mb.resource.fs.FSResource;
 import mb.resource.hierarchical.HierarchicalResource;
-import mb.resource.hierarchical.HierarchicalResourceAccess;
 import mb.resource.hierarchical.HierarchicalResourceDefaults;
 import mb.resource.hierarchical.HierarchicalResourceType;
 import mb.resource.hierarchical.ResourcePath;
@@ -348,18 +347,17 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
     @Override public Stream<EclipseResource> walk() throws IOException {
         final Stream.Builder<EclipseResource> builder = Stream.builder();
         try {
-            recursiveMembers(getContainer(), builder, null, null, null);
+            recursiveMembers(getContainer(), builder, null, null);
         } catch(CoreException e) {
             throw new IOException("Walking resources in '" + path + "' failed unexpectedly", e);
         }
         return builder.build();
     }
 
-    @Override
-    public Stream<EclipseResource> walk(ResourceWalker walker, ResourceMatcher matcher, @Nullable HierarchicalResourceAccess access) throws IOException {
+    @Override public Stream<EclipseResource> walk(ResourceWalker walker, ResourceMatcher matcher) throws IOException {
         final Stream.Builder<EclipseResource> builder = Stream.builder();
         try {
-            recursiveMembers(getContainer(), builder, walker, matcher, access);
+            recursiveMembers(getContainer(), builder, walker, matcher);
         } catch(CoreException e) {
             throw new IOException(
                 "Walking resources in '" + path + "' with walker '" + walker + "' and matcher '" + matcher + "' failed unexpectedly",
@@ -368,20 +366,17 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
         return builder.build();
     }
 
-    private void recursiveMembers(IContainer container, Stream.Builder<EclipseResource> builder, @Nullable ResourceWalker walker, @Nullable ResourceMatcher matcher, @Nullable HierarchicalResourceAccess access) throws CoreException, IOException {
+    private void recursiveMembers(IContainer container, Stream.Builder<EclipseResource> builder, @Nullable ResourceWalker walker, @Nullable ResourceMatcher matcher) throws CoreException, IOException {
         final IResource[] members = container.members();
         for(IResource member : members) {
             final EclipseResource resource = new EclipseResource(registry, member);
-            if(access != null) {
-                access.read(resource);
-            }
             if(matcher == null || matcher.matches(resource, this)) {
                 builder.accept(resource);
             }
             if(member instanceof IContainer) {
                 if(walker == null || walker.traverse(resource, this)) {
                     // OPTO: non-recursive implementation.
-                    recursiveMembers((IContainer)member, builder, walker, matcher, access);
+                    recursiveMembers((IContainer)member, builder, walker, matcher);
                 }
             }
         }
