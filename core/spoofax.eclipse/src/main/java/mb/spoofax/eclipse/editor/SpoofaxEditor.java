@@ -72,10 +72,9 @@ public abstract class SpoofaxEditor extends SpoofaxEditorBase {
     }
 
     @Override public void dispose() {
-        super.dispose();
-
         if(file != null) {
-            pieRunner.removeEditor(file);
+            pieRunner.removeEditor(languageComponent, pieComponent, project, file);
         }
+        super.dispose();
     }
 }

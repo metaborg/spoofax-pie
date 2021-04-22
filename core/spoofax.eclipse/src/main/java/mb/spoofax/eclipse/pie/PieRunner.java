@@ -48,7 +48,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentExtension4;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -105,84 +104,74 @@ public class PieRunner {
     public void addOrUpdateEditor(
         EclipseLanguageComponent languageComponent,
         Pie pie,
-        @Nullable IProject project,
-        IFile file,
+        @Nullable IProject eclipseProject,
+        IFile eclipseFile,
         IDocument document,
         SpoofaxEditorBase editor,
         @Nullable IProgressMonitor monitor
     ) throws ExecException, InterruptedException {
-        logger.trace("Adding or updating editor for '{}'", file);
+        logger.trace("Adding or updating editor for '{}'", eclipseFile);
 
-        final EclipseResourcePath path = new EclipseResourcePath(file);
-        resourceRegistry.putDocumentOverride(path, document);
+        final @Nullable ResourcePath rootDirectoryHint = eclipseProject != null ? new EclipseResourcePath(eclipseProject) : null;
+        final EclipseResourcePath file = new EclipseResourcePath(eclipseFile);
+        resourceRegistry.putDocumentOverride(file, document);
 
         final WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
         try(final MixedSession session = pie.newSession()) {
             // First run a bottom-up build, to ensure that tasks affected by changed file are brought up-to-date.
             final HashSet<ResourceKey> changedResources = new HashSet<>();
-            changedResources.add(path);
+            changedResources.add(file);
             final TopDownSession topDownSession = updateAffectedBy(changedResources, session, monitor);
 
             final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
 
-            final Task<Option<Styling>> styleTask = languageInstance.createStyleTask(path, project != null ? new EclipseResourcePath(project) : null);
+            final Task<Option<Styling>> styleTask = createStyleTask(languageInstance, file, rootDirectoryHint);
             final String text = document.get();
             final Option<Styling> stylingOption = getOrRequire(styleTask, topDownSession, monitor);
-            stylingOption.ifElse(styling -> {
-                workspaceUpdate.updateStyle(editor, text, styling);
-            }, () -> {
-                workspaceUpdate.removeStyle(editor, text.length());
-            });
+            stylingOption.ifElse(
+                styling -> workspaceUpdate.updateStyle(editor, text, styling),
+                () -> workspaceUpdate.removeStyle(editor, text.length())
+            );
 
-            try {
-                if(project == null) {
-                    logger.warn("Cannot run inspections for resource '" + file + "' of language '" + languageInstance.getDisplayName() + "', because it requires multi-file analysis but no project was given");
-                } else {
-                    requireCheck(project, monitor, workspaceUpdate, topDownSession, languageInstance);
-                }
-            } catch(UncheckedException e) {
-                final Exception cause = e.getCause();
-                if(cause instanceof ExecException) {
-                    throw (ExecException)cause;
-                }
-                if(cause instanceof InterruptedException) {
-                    throw (InterruptedException)cause;
-                }
-                throw e;
-            }
+            final Task<KeyedMessages> checkTask = createCheckOneTask(languageInstance, file, rootDirectoryHint);
+            final KeyedMessages messages = getOrRequire(checkTask, topDownSession, monitor);
+            workspaceUpdate.replaceMessages(messages, file);
         }
 
-        workspaceUpdate.update(file, file, monitor);
+        workspaceUpdate.update(eclipseFile, eclipseFile, monitor);
     }
 
-    public WorkspaceUpdate requireCheck(
-        IProject project,
-        @Nullable IProgressMonitor monitor,
-        TopDownSession session,
-        EclipseLanguageComponent languageComponent
-    ) throws ExecException, InterruptedException {
-        WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
-        LanguageInstance languageInstance = languageComponent.getLanguageInstance();
-        requireCheck(project, monitor, workspaceUpdate, session, languageInstance);
-        return workspaceUpdate;
+    public void removeEditor(
+        EclipseLanguageComponent languageComponent,
+        PieComponent pieComponent,
+        @Nullable IProject project,
+        IFile file
+    ) {
+        removeEditor(languageComponent.getLanguageInstance(), pieComponent.getPie(), project, file);
     }
 
-    private void requireCheck(
-        IProject project,
-        @Nullable IProgressMonitor monitor,
-        WorkspaceUpdate workspaceUpdate,
-        TopDownSession session,
-        LanguageInstance languageInstance
-    ) throws ExecException, InterruptedException {
-        final EclipseResourcePath resourcePath = new EclipseResourcePath(project);
-        final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(resourcePath);
-        final KeyedMessages messages = getOrRequire(checkTask, session, monitor);
-        workspaceUpdate.replaceMessages(messages, resourcePath);
+    public void removeEditor(
+        LanguageInstance languageInstance,
+        Pie pie,
+        @Nullable IProject eclipseProject,
+        IFile eclipseFile
+    ) {
+        logger.trace("Removing editor for '{}'", eclipseFile);
+        try(final MixedSession session = pie.newSession()) {
+            final ResourceKey file = new EclipseResourcePath(eclipseFile);
+            final @Nullable ResourcePath rootDirectoryHint = eclipseProject != null ? new EclipseResourcePath(eclipseProject) : null;
+            unobserve(createStyleTask(languageInstance, file, rootDirectoryHint), session, null);
+            unobserve(createCheckOneTask(languageInstance, file, rootDirectoryHint), session, null);
+        }
+        resourceRegistry.removeDocumentOverride(new EclipseResourcePath(eclipseFile));
     }
 
-    public void removeEditor(IFile file) {
-        logger.trace("Removing editor for '{}'", file);
-        resourceRegistry.removeDocumentOverride(new EclipseResourcePath(file));
+    private static Task<Option<Styling>> createStyleTask(LanguageInstance instance, ResourceKey file, @Nullable ResourcePath rootDirectoryHint) {
+        return instance.createStyleTask(file, rootDirectoryHint);
+    }
+
+    private static Task<KeyedMessages> createCheckOneTask(LanguageInstance instance, ResourceKey file, @Nullable ResourcePath rootDirectoryHint) {
+        return instance.createCheckOneTask(file, rootDirectoryHint);
     }
 
 
@@ -245,25 +234,25 @@ public class PieRunner {
             // Unobserve auto transforms.
             for(AutoCommandRequest<?> request : autoCommandRequests.project) {
                 final Task<CommandFeedback> task = request.createTask(CommandContext.ofProject(project), argConverters);
-                unobserve(task, pie, session, monitor);
+                unobserve(task, session, monitor);
             }
             for(ResourcePath directory : resourceChanges.newDirectories) {
                 for(AutoCommandRequest<?> request : autoCommandRequests.directory) {
                     final Task<CommandFeedback> task = request.createTask(CommandContext.ofDirectory(directory), argConverters);
-                    unobserve(task, pie, session, monitor);
+                    unobserve(task, session, monitor);
                 }
             }
             for(ResourcePath file : resourceChanges.newFiles) {
                 for(AutoCommandRequest<?> request : autoCommandRequests.file) {
                     final Task<CommandFeedback> task = request.createTask(CommandContext.ofFile(file), argConverters);
-                    unobserve(task, pie, session, monitor);
+                    unobserve(task, session, monitor);
                 }
             }
             // Unobserve inspection tasks and clear messages.
             final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
             final WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
             final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(projectResource.getPath());
-            unobserve(checkTask, pie, session, monitor);
+            unobserve(checkTask, session, monitor);
             workspaceUpdate.clearMessages(project, true);
             workspaceUpdate.update(eclipseProject, null, monitor);
             // Delete unobserved tasks and their provided files.
@@ -320,14 +309,14 @@ public class PieRunner {
                         // POTI: this opens a new PIE session, which may be used concurrently with other sessions, which
                         // may not be (thread-)safe.
                         try(final MixedSession newSession = pie.newSession()) {
-                            unobserve(task, pie, newSession, monitor);
+                            unobserve(task, newSession, monitor);
                         }
                         pie.removeCallback(task);
                     });
                     if(feedback.hasErrorMessagesOrException()) {
                         // Command feedback indicates failure, unobserve to cancel continuous execution.
                         try(final MixedSession newSession = pie.newSession()) {
-                            unobserve(task, pie, newSession, monitor);
+                            unobserve(task, newSession, monitor);
                         }
                     } else {
                         // Command feedback indicates success, set a callback to process feedback when task is required.
@@ -431,7 +420,7 @@ public class PieRunner {
     }
 
     public <T extends Serializable> T getOrRequire(Task<T> task, TopDownSession session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
-        if(session.hasBeenExecuted(task)) {
+        if(session.hasBeenExecuted(task) && session.isObserved(task)) {
             logger.trace("Get '{}'", task);
             return session.getOutput(task);
         } else {
@@ -444,11 +433,10 @@ public class PieRunner {
         return session.updateAffectedBy(changedResources, monitorCancelled(monitor));
     }
 
-    public void unobserve(Task<?> task, Pie pie, Session session, @Nullable IProgressMonitor _monitor) {
-        final TaskKey key = task.key();
-        if(!pie.isObserved(key)) return;
-        logger.trace("Unobserving '{}'", key);
-        session.unobserve(key);
+    public void unobserve(Task<?> task, Session session, @Nullable IProgressMonitor _monitor) {
+        if(!session.isObserved(task)) return;
+        logger.trace("Unobserving '{}'", task);
+        session.unobserve(task);
     }
 
     public void deleteUnobservedTasks(Session session, @Nullable IProgressMonitor _monitor) throws IOException {
@@ -615,7 +603,7 @@ public class PieRunner {
             }
             for(ResourcePath removedProject : resourceChanges.removedProjects) {
                 final Task<CommandFeedback> task = request.createTask(CommandContext.ofProject(removedProject), argConverters);
-                unobserve(task, pie, session, monitor);
+                unobserve(task, session, monitor);
             }
         }
         for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.directory) {
@@ -625,7 +613,7 @@ public class PieRunner {
             }
             for(ResourcePath removedDirectory : resourceChanges.removedDirectories) {
                 final Task<CommandFeedback> task = request.createTask(CommandContext.ofDirectory(removedDirectory), argConverters);
-                unobserve(task, pie, session, monitor);
+                unobserve(task, session, monitor);
             }
         }
         for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.file) {
@@ -635,7 +623,7 @@ public class PieRunner {
             }
             for(ResourcePath removedFile : resourceChanges.removedFiles) {
                 final Task<CommandFeedback> task = request.createTask(CommandContext.ofFile(removedFile), argConverters);
-                unobserve(task, pie, session, monitor);
+                unobserve(task, session, monitor);
             }
         }
         if(resourceChanges.hasRemovedResources()) {
@@ -676,7 +664,7 @@ public class PieRunner {
             });
             resourceChanges.removedProjects.forEach(removedProject -> {
                 final Task<KeyedMessages> task = languageInstance.createCheckTask(removedProject);
-                unobserve(task, pie, session, monitor);
+                unobserve(task, session, monitor);
                 workspaceUpdate.clearMessages(removedProject, true);
             });
         } catch(UncheckedException e) {
