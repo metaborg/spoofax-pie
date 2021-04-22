@@ -34,7 +34,6 @@ import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.command.CommandUtil;
 import mb.spoofax.eclipse.editor.NamedEditorInput;
 import mb.spoofax.eclipse.editor.PartClosedCallback;
-import mb.spoofax.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.eclipse.editor.SpoofaxEditorBase;
 import mb.spoofax.eclipse.resource.EclipseResource;
 import mb.spoofax.eclipse.resource.EclipseResourcePath;
@@ -118,18 +117,17 @@ public class PieRunner {
         resourceRegistry.putDocumentOverride(path, document);
 
         final WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
-
         try(final MixedSession session = pie.newSession()) {
             // First run a bottom-up build, to ensure that tasks affected by changed file are brought up-to-date.
             final HashSet<ResourceKey> changedResources = new HashSet<>();
             changedResources.add(path);
-            final TopDownSession postSession = updateAffectedBy(changedResources, session, monitor);
+            final TopDownSession topDownSession = updateAffectedBy(changedResources, session, monitor);
 
             final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
 
             final Task<Option<Styling>> styleTask = languageInstance.createStyleTask(path, project != null ? new EclipseResourcePath(project) : null);
             final String text = document.get();
-            final Option<Styling> stylingOption = requireWithoutObserving(styleTask, postSession, monitor);
+            final Option<Styling> stylingOption = getOrRequire(styleTask, topDownSession, monitor);
             stylingOption.ifElse(styling -> {
                 workspaceUpdate.updateStyle(editor, text, styling);
             }, () -> {
@@ -140,7 +138,7 @@ public class PieRunner {
                 if(project == null) {
                     logger.warn("Cannot run inspections for resource '" + file + "' of language '" + languageInstance.getDisplayName() + "', because it requires multi-file analysis but no project was given");
                 } else {
-                    requireCheck(project, monitor, workspaceUpdate, postSession, languageInstance);
+                    requireCheck(project, monitor, workspaceUpdate, topDownSession, languageInstance);
                 }
             } catch(UncheckedException e) {
                 final Exception cause = e.getCause();
@@ -178,7 +176,7 @@ public class PieRunner {
     ) throws ExecException, InterruptedException {
         final EclipseResourcePath resourcePath = new EclipseResourcePath(project);
         final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(resourcePath);
-        final KeyedMessages messages = requireWithoutObserving(checkTask, session, monitor);
+        final KeyedMessages messages = getOrRequire(checkTask, session, monitor);
         workspaceUpdate.replaceMessages(messages, resourcePath);
     }
 
@@ -282,7 +280,8 @@ public class PieRunner {
         @Nullable IProgressMonitor monitor
     ) throws IOException, CoreException, ExecException, InterruptedException {
         for(IProject eclipseProject : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
-            if(!eclipseProject.isOpen() || !eclipseProject.hasNature(languageComponent.getEclipseIdentifiers().getNature())) continue;
+            if(!eclipseProject.isOpen() || !eclipseProject.hasNature(languageComponent.getEclipseIdentifiers().getNature()))
+                continue;
             final ResourceChanges resourceChanges = new ResourceChanges(eclipseProject, languageComponent.getLanguageInstance().getFileExtensions(), resourceRegistry);
             final Pie pie = pieComponent.getPie();
             try(final MixedSession session = pie.newSession()) {
@@ -421,22 +420,28 @@ public class PieRunner {
 
     // Standard PIE operations with trace logging.
 
-    public <T extends @Nullable Serializable> T requireWithoutObserving(Task<T> task, Session session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
+    public <T extends Serializable> T requireWithoutObserving(Task<T> task, Session session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
         logger.trace("Require (without observing) '{}'", task);
-        final T result = session.requireWithoutObserving(task, monitorCancelled(monitor));
-        return result;
+        return session.requireWithoutObserving(task, monitorCancelled(monitor));
     }
 
-    public <T extends @Nullable Serializable> T require(Task<T> task, Session session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
+    public <T extends Serializable> T require(Task<T> task, Session session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
         logger.trace("Require '{}'", task);
-        final T result = session.require(task, monitorCancelled(monitor));
-        return result;
+        return session.require(task, monitorCancelled(monitor));
+    }
+
+    public <T extends Serializable> T getOrRequire(Task<T> task, TopDownSession session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
+        if(session.hasBeenExecuted(task)) {
+            logger.trace("Get '{}'", task);
+            return session.getOutput(task);
+        } else {
+            return require(task, session, monitor);
+        }
     }
 
     public TopDownSession updateAffectedBy(Set<? extends ResourceKey> changedResources, MixedSession session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
         logger.trace("Update affected by '{}'", changedResources);
-        final TopDownSession newSession = session.updateAffectedBy(changedResources, monitorCancelled(monitor));
-        return newSession;
+        return session.updateAffectedBy(changedResources, monitorCancelled(monitor));
     }
 
     public void unobserve(Task<?> task, Pie pie, Session session, @Nullable IProgressMonitor _monitor) {

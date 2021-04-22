@@ -285,7 +285,7 @@ fun Project.logMessages(messages: KeyedMessages, backupResource: ResourceKey?) {
 }
 
 fun Project.logMessages(allMessages: KeyedMessages) {
-  allMessages.messagesWithKey.forEach { resource, messages ->
+  allMessages.messagesWithKey.forEachEntry { resource, messages ->
     messages.forEach {  message -> logMessage(message, resource) }
   }
   allMessages.messagesWithoutKey.forEach { message -> logMessage(message, allMessages.resourceForMessagesWithoutKeys) }
