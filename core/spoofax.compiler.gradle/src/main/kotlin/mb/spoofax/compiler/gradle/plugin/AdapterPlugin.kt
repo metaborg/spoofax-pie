@@ -3,11 +3,13 @@
 package mb.spoofax.compiler.gradle.plugin
 
 import mb.common.option.Option
+import mb.common.result.Result
+import mb.pie.api.ValueSupplier
 import mb.pie.dagger.PieComponent
+import mb.resource.dagger.ResourceServiceComponent
 import mb.spoofax.compiler.adapter.*
 import mb.spoofax.compiler.dagger.*
 import mb.spoofax.compiler.gradle.*
-import mb.resource.dagger.ResourceServiceComponent
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaLibraryPlugin
@@ -134,7 +136,7 @@ open class AdapterPlugin : Plugin<Project> {
         project.deleteDirectory(input.adapterProject().generatedJavaSourcesDirectory(), resourceServiceComponent.resourceService)
         synchronized(pieComponent.pie) {
           pieComponent.pie.newSession().use { session ->
-            session.require(component.adapterProjectCompiler.createTask(input))
+            session.require(component.adapterProjectCompiler.createTask(ValueSupplier(Result.ofOk<AdapterProjectCompiler.Input, Exception>(input))))
           }
         }
       }

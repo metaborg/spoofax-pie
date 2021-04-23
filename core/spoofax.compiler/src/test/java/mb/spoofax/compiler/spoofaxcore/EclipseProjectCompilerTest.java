@@ -1,6 +1,9 @@
 package mb.spoofax.compiler.spoofaxcore;
 
+import mb.common.option.Option;
+import mb.common.result.Result;
 import mb.pie.api.MixedSession;
+import mb.pie.api.ValueSupplier;
 import mb.spoofax.compiler.platform.EclipseProjectCompiler;
 import mb.spoofax.compiler.spoofaxcore.tiger.TigerInputs;
 import org.junit.jupiter.api.Test;
@@ -12,7 +15,7 @@ class EclipseProjectCompilerTest extends TestBase {
         try(MixedSession session = pie.newSession()) {
             compileLanguageAndAdapterProject(session, inputs);
             final EclipseProjectCompiler.Input input = inputs.eclipseProjectInput().build();
-            session.require(component.getEclipseProjectCompiler().createTask(input));
+            session.require(component.getEclipseProjectCompiler().createTask(new ValueSupplier<>(Result.ofOk(Option.ofSome(input)))));
             fileAssertions.asserts(input.pluginXmlFile(), (s) -> s.assertAll("plugin.xml", "<plugin>"));
             fileAssertions.asserts(input.manifestMfFile(), (s) -> s.assertAll("MANIFEST.MF", "Bundle-ManifestVersion"));
             fileAssertions.scopedExists(input.generatedJavaSourcesDirectory(), (s) -> {

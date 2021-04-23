@@ -1,7 +1,9 @@
 package mb.spoofax.compiler.language;
 
+import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.None;
+import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
@@ -13,13 +15,14 @@ import mb.spoofax.compiler.util.TypeInfo;
 import org.immutables.value.Value;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Value.Enclosing
-public class LanguageProjectCompiler implements TaskDef<LanguageProjectCompiler.Input, None> {
+public class LanguageProjectCompiler implements TaskDef<Supplier<Result<LanguageProjectCompiler.Input, ?>>, Result<None, ?>> {
     private final TemplateWriter packageInfoTemplate;
     private final ClassLoaderResourcesCompiler classLoaderResourcesCompiler;
     private final ParserLanguageCompiler parserCompiler;
@@ -59,9 +62,12 @@ public class LanguageProjectCompiler implements TaskDef<LanguageProjectCompiler.
         return getClass().getName();
     }
 
-    @Override public None exec(ExecContext context, Input input) throws Exception {
-        final Shared shared = input.shared();
+    @Override
+    public Result<None, ?> exec(ExecContext context, Supplier<Result<Input, ?>> input) throws IOException {
+        return context.require(input).mapThrowing(i -> compile(context, i));
+    }
 
+    private None compile(ExecContext context, Input input) throws IOException {
         // Class files.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         packageInfoTemplate.write(context, input.basePackageInfo().file(generatedJavaSourcesDirectory), input);
@@ -77,10 +83,6 @@ public class LanguageProjectCompiler implements TaskDef<LanguageProjectCompiler.
         input.exports().ifPresent((i) -> context.require(exportsCompiler, i));
 
         return None.instance;
-    }
-
-    @Override public Serializable key(Input input) {
-        return input.languageProject().project().baseDirectory();
     }
 
 

@@ -2,6 +2,7 @@ package mb.spoofax.compiler.adapter;
 
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
+import mb.pie.api.None;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.language.ClassLoaderResourcesCompiler;
@@ -19,7 +20,7 @@ import java.io.Serializable;
 import java.util.Optional;
 
 @Value.Enclosing
-public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnalyzerAdapterCompiler.Input, ConstraintAnalyzerAdapterCompiler.Output> {
+public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnalyzerAdapterCompiler.Input, None> {
     private final TemplateWriter analyzeTaskDefTemplate;
     private final TemplateWriter analyzeMultiTaskDefTemplate;
 
@@ -34,13 +35,12 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
         return getClass().getName();
     }
 
-    @Override public Output exec(ExecContext context, Input input) throws Exception {
-        final Output.Builder outputBuilder = Output.builder();
-        if(input.classKind().isManual()) return outputBuilder.build(); // Nothing to generate: return.
+    @Override public None exec(ExecContext context, Input input) throws Exception {
+        if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         analyzeTaskDefTemplate.write(context, input.baseAnalyzeTaskDef().file(generatedJavaSourcesDirectory), input);
         analyzeMultiTaskDefTemplate.write(context, input.baseAnalyzeMultiTaskDef().file(generatedJavaSourcesDirectory), input);
-        return outputBuilder.build();
+        return None.instance;
     }
 
     @Override public Serializable key(Input input) {
@@ -111,7 +111,7 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
 
         /// Automatically provided sub-inputs
 
-        Shared shared();
+        @Value.Auxiliary Shared shared();
 
         AdapterProject adapterProject();
 
@@ -120,16 +120,5 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
         ClassLoaderResourcesCompiler.Input classLoaderResourcesInput();
 
         StrategoRuntimeAdapterCompiler.Input strategoRuntimeInput();
-
-
-        @Value.Check default void check() {
-
-        }
-    }
-
-    @Value.Immutable public interface Output extends Serializable {
-        class Builder extends ConstraintAnalyzerAdapterCompilerData.Output.Builder {}
-
-        static Builder builder() { return new Builder(); }
     }
 }

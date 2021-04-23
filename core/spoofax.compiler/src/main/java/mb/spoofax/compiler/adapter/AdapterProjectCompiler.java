@@ -2,8 +2,10 @@ package mb.spoofax.compiler.adapter;
 
 import com.samskivert.mustache.Mustache;
 import mb.common.option.Option;
+import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.None;
+import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.adapter.data.AutoCommandRequestRepr;
@@ -27,6 +29,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,7 +38,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Value.Enclosing
-public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.Input, None> {
+public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterProjectCompiler.Input, ?>>, Result<None, ?>> {
     private final TemplateWriter packageInfoTemplate;
     private final TemplateWriter checkTaskDefTemplate;
     private final TemplateWriter checkMultiTaskDefTemplate;
@@ -96,9 +99,12 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
         return getClass().getName();
     }
 
-    @Override public None exec(ExecContext context, Input input) throws Exception {
-        final Shared shared = input.shared();
+    @Override
+    public Result<None, ?> exec(ExecContext context, Supplier<Result<Input, ?>> input) throws IOException {
+        return context.require(input).mapThrowing(i -> compile(context, i));
+    }
 
+    public None compile(ExecContext context, Input input) throws IOException {
         // Files from other compilers.
         input.parser().ifPresent((i) -> context.require(parserCompiler, i));
         input.styler().ifPresent((i) -> context.require(stylerCompiler, i));
@@ -272,10 +278,6 @@ public class AdapterProjectCompiler implements TaskDef<AdapterProjectCompiler.In
         }
 
         return None.instance;
-    }
-
-    @Override public Serializable key(Input input) {
-        return input.adapterProject().project().baseDirectory();
     }
 
 

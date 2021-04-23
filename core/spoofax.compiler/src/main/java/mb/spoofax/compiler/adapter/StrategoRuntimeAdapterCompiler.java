@@ -2,6 +2,7 @@ package mb.spoofax.compiler.adapter;
 
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
+import mb.pie.api.None;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.language.ClassLoaderResourcesCompiler;
@@ -20,7 +21,7 @@ import java.io.Serializable;
 import java.util.Optional;
 
 @Value.Enclosing
-public class StrategoRuntimeAdapterCompiler implements TaskDef<StrategoRuntimeAdapterCompiler.Input, StrategoRuntimeAdapterCompiler.Output> {
+public class StrategoRuntimeAdapterCompiler implements TaskDef<StrategoRuntimeAdapterCompiler.Input, None> {
     private final TemplateWriter getStrategoRuntimeTaskDefTemplate;
 
     @Inject public StrategoRuntimeAdapterCompiler(TemplateCompiler templateCompiler) {
@@ -33,12 +34,11 @@ public class StrategoRuntimeAdapterCompiler implements TaskDef<StrategoRuntimeAd
         return getClass().getName();
     }
 
-    @Override public Output exec(ExecContext context, Input input) throws IOException {
-        final Output.Builder outputBuilder = Output.builder();
-        if(input.classKind().isManual()) return outputBuilder.build(); // Nothing to generate: return.
+    @Override public None exec(ExecContext context, Input input) throws IOException {
+        if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         getStrategoRuntimeTaskDefTemplate.write(context, input.baseGetStrategoRuntimeProviderTaskDef().file(generatedJavaSourcesDirectory), input);
-        return outputBuilder.build();
+        return None.instance;
     }
 
     @Override public Serializable key(Input input) {
@@ -98,18 +98,12 @@ public class StrategoRuntimeAdapterCompiler implements TaskDef<StrategoRuntimeAd
 
         /// Automatically provided sub-inputs
 
-        Shared shared();
+        @Value.Auxiliary Shared shared();
 
         AdapterProject adapterProject();
 
         StrategoRuntimeLanguageCompiler.Input languageProjectInput();
 
         ClassLoaderResourcesCompiler.Input classLoaderResourcesInput();
-    }
-
-    @Value.Immutable public interface Output extends Serializable {
-        class Builder extends StrategoRuntimeAdapterCompilerData.Output.Builder {}
-
-        static Builder builder() { return new Builder(); }
     }
 }

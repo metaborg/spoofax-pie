@@ -6,9 +6,12 @@ import mb.cfg.task.CfgRootDirectoryToObjectException;
 import mb.cfg.task.CfgToObject;
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
+import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.None;
+import mb.pie.api.STask;
+import mb.pie.api.Stateful1Supplier;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.pie.task.java.CompileJava;
@@ -105,7 +108,9 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
     @Override
     public Result<Output, CompileLanguageException> exec(ExecContext context, Args args) {
         final ResourcePath rootDirectory = args.rootDirectory();
-        final Result<CfgToObject.Output, CfgRootDirectoryToObjectException> cfgResult = context.require(cfgRootDirectoryToObject, rootDirectory);
+        final Task<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>> cfgTask = cfgRootDirectoryToObject.createTask(rootDirectory);
+        final STask<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>> cfgSupplier = cfgTask.toSupplier();
+        final Result<CfgToObject.Output, CfgRootDirectoryToObjectException> cfgResult = context.require(cfgTask);
         if(cfgResult.isErr()) {
             // noinspection ConstantConditions (error is present)
             return Result.ofErr(CompileLanguageException.getConfigurationFail(cfgResult.getErr()));
@@ -119,8 +124,9 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
         final CompileLanguageInput input = cfgOutput.compileLanguageInput;
         final CompileJava.Input.Builder compileJavaInputBuilder = CompileJava.Input.builder().key(args.rootDirectory());
 
-        // OPTO: pass in supplier to prevent dependency on large input?
-        final Task<None> languageProjectCompilerTask = languageProjectCompiler.createTask(input.languageProjectInput());
+
+        final Task<Result<None, ?>> languageProjectCompilerTask = languageProjectCompiler.createTask(new LanguageProjectInputSupplier(cfgSupplier));
+        // TODO: check result? It can only fail due to a CFG failure atm.
         context.require(languageProjectCompilerTask);
         compileJavaInputBuilder.addOriginTasks(languageProjectCompilerTask.toSupplier());
 
@@ -135,16 +141,15 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
             messagesBuilder.addMessages(spoofax3CompilerResult.get());
         }
 
-        // OPTO: pass in supplier to prevent dependency on large input?
-        final Task<None> adapterProjectCompilerTask = adapterProjectCompiler.createTask(input.adapterProjectInput());
+        final Task<Result<None, ?>> adapterProjectCompilerTask = adapterProjectCompiler.createTask(new AdapterProjectInputSupplier(cfgSupplier));
+        // TODO: check result? It can only fail due to a CFG failure atm.
         context.require(adapterProjectCompilerTask);
         compileJavaInputBuilder.addOriginTasks(adapterProjectCompilerTask.toSupplier());
 
-        input.eclipseProjectInput().ifPresent(eclipseProjectInput -> {
-            final Task<EclipseProjectCompiler.Output> task = eclipseProjectCompiler.createTask(eclipseProjectInput);
-            context.require(task);
-            compileJavaInputBuilder.addOriginTasks(task.toSupplier());
-        });
+        final Task<Result<None, ?>> eclipseProjectCompilerTask = eclipseProjectCompiler.createTask(new EclipseProjectInputSupplier(cfgSupplier));
+        // TODO: check result? It can only fail due to a CFG failure atm.
+        context.require(eclipseProjectCompilerTask);
+        compileJavaInputBuilder.addOriginTasks(eclipseProjectCompilerTask.toSupplier());
 
         for(ResourcePath javaSourcePath : input.userJavaSourcePaths()) { // Add all Java source files from the user-defined source path.
             final HierarchicalResource directory = resourceService.getHierarchicalResource(javaSourcePath);
@@ -190,4 +195,39 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
     @Override public Serializable key(Args input) {
         return input.rootDirectory();
     }
+
+
+    private static class LanguageProjectInputSupplier extends Stateful1Supplier<STask<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>>, Result<LanguageProjectCompiler.Input, ?>> {
+        public LanguageProjectInputSupplier(STask<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>> state) {
+            super(state);
+        }
+
+        @Override public Result<LanguageProjectCompiler.Input, ?> get(ExecContext context) {
+            // OPTO: set output stamper
+            return context.require(state).map(o -> o.compileLanguageInput.languageProjectInput());
+        }
+    }
+
+    private static class AdapterProjectInputSupplier extends Stateful1Supplier<STask<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>>, Result<AdapterProjectCompiler.Input, ?>> {
+        public AdapterProjectInputSupplier(STask<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>> state) {
+            super(state);
+        }
+
+        @Override public Result<AdapterProjectCompiler.Input, ?> get(ExecContext context) {
+            // OPTO: set output stamper
+            return context.require(state).map(o -> o.compileLanguageInput.adapterProjectInput());
+        }
+    }
+
+    private static class EclipseProjectInputSupplier extends Stateful1Supplier<STask<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>>, Result<Option<EclipseProjectCompiler.Input>, ?>> {
+        public EclipseProjectInputSupplier(STask<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>> state) {
+            super(state);
+        }
+
+        @Override public Result<Option<EclipseProjectCompiler.Input>, ?> get(ExecContext context) {
+            // OPTO: set output stamper
+            return context.require(state).map(o -> Option.ofOptional(o.compileLanguageInput.eclipseProjectInput()));
+        }
+    }
 }
+

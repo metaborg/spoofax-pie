@@ -2,8 +2,10 @@
 
 package mb.spoofax.compiler.gradle.plugin
 
+import mb.common.result.Result
 import mb.log.dagger.DaggerLoggerComponent
 import mb.log.dagger.LoggerModule
+import mb.pie.api.ValueSupplier
 import mb.pie.dagger.DaggerRootPieComponent
 import mb.pie.dagger.PieComponent
 import mb.pie.dagger.RootPieModule
@@ -206,7 +208,7 @@ open class LanguagePlugin : Plugin<Project> {
         project.deleteDirectory(input.languageProject().generatedJavaSourcesDirectory(), resourceServiceComponent.resourceService)
         synchronized(pieComponent.pie) {
           pieComponent.pie.newSession().use { session ->
-            session.require(component.languageProjectCompiler.createTask(input))
+            session.require(component.languageProjectCompiler.createTask(ValueSupplier(Result.ofOk<LanguageProjectCompiler.Input, Exception>(input))))
           }
         }
       }

@@ -2,9 +2,13 @@
 
 package mb.spoofax.compiler.gradle.plugin
 
+import mb.common.option.Option
+import mb.common.result.Result
 import mb.coronium.plugin.BundleExtension
+import mb.pie.api.ValueSupplier
 import mb.pie.dagger.PieComponent
 import mb.resource.dagger.ResourceServiceComponent
+import mb.spoofax.compiler.adapter.*
 import mb.spoofax.compiler.dagger.*
 import mb.spoofax.compiler.gradle.*
 import mb.spoofax.compiler.platform.*
@@ -119,7 +123,7 @@ open class EclipsePlugin : Plugin<Project> {
         project.deleteDirectory(input.generatedResourcesDirectory(), resourceServiceComponent.resourceService)
         synchronized(pieComponent.pie) {
           pieComponent.pie.newSession().use { session ->
-            session.require(component.eclipseProjectCompiler.createTask(input))
+            session.require(component.eclipseProjectCompiler.createTask(ValueSupplier(Result.ofOk<Option<EclipseProjectCompiler.Input>, Exception>(Option.ofSome(input)))))
           }
         }
       }

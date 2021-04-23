@@ -2,12 +2,14 @@ package mb.spoofax.compiler.spoofaxcore;
 
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
+import mb.common.result.Result;
 import mb.log.dagger.DaggerLoggerComponent;
 import mb.log.dagger.LoggerComponent;
 import mb.log.dagger.LoggerModule;
 import mb.pie.api.ExecException;
 import mb.pie.api.MixedSession;
 import mb.pie.api.Pie;
+import mb.pie.api.ValueSupplier;
 import mb.pie.dagger.DaggerRootPieComponent;
 import mb.pie.dagger.RootPieComponent;
 import mb.pie.dagger.RootPieModule;
@@ -76,13 +78,13 @@ class TestBase {
 
     LanguageProjectCompiler.Input compileLanguageProject(MixedSession session, TigerInputs inputs) throws ExecException, InterruptedException {
         final LanguageProjectCompiler.Input input = inputs.languageProjectCompilerInput();
-        session.require(component.getLanguageProjectCompiler().createTask(input));
+        session.require(component.getLanguageProjectCompiler().createTask(new ValueSupplier<>(Result.ofOk(input))));
         return input;
     }
 
     AdapterProjectCompiler.Input compileAdapterProject(MixedSession session, TigerInputs inputs) throws ExecException, InterruptedException {
         final AdapterProjectCompiler.Input input = inputs.adapterProjectCompilerInput();
-        session.require(component.getAdapterProjectCompiler().createTask(input));
+        session.require(component.getAdapterProjectCompiler().createTask(new ValueSupplier<>(Result.ofOk(input))));
         return input;
     }
 

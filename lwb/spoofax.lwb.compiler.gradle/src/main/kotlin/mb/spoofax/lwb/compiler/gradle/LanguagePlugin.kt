@@ -2,14 +2,18 @@
 
 package mb.spoofax.lwb.compiler.gradle
 
+import mb.cfg.CompileLanguageInput
+import mb.cfg.CompileLanguageSpecificationInput
 import mb.common.message.KeyedMessages
 import mb.common.message.Message
 import mb.common.message.Messages
 import mb.common.message.Severity
+import mb.common.result.Result
 import mb.common.util.ExceptionPrinter
 import mb.log.dagger.DaggerLoggerComponent
 import mb.log.dagger.LoggerModule
 import mb.pie.api.Pie
+import mb.pie.api.ValueSupplier
 import mb.pie.dagger.PieModule
 import mb.pie.runtime.PieBuilderImpl
 import mb.resource.ResourceKey
@@ -22,8 +26,6 @@ import mb.spoofax.compiler.adapter.*
 import mb.spoofax.compiler.language.*
 import mb.spoofax.compiler.util.*
 import mb.spoofax.lwb.compiler.CompileLanguageSpecification
-import mb.cfg.CompileLanguageSpecificationInput
-import mb.cfg.CompileLanguageInput
 import mb.spoofax.lwb.compiler.dagger.StandaloneSpoofax3Compiler
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -133,7 +135,7 @@ open class LanguagePlugin : Plugin<Project> {
         project.deleteDirectory(input.languageProject().generatedJavaSourcesDirectory(), resourceService)
         synchronized(pie) {
           pie.newSession().use { session ->
-            session.require(compiler.createTask(input))
+            session.require(compiler.createTask(ValueSupplier(Result.ofOk<LanguageProjectCompiler.Input, Exception>(input))))
           }
         }
       }
@@ -261,7 +263,7 @@ open class LanguagePlugin : Plugin<Project> {
         project.deleteDirectory(input.adapterProject().generatedJavaSourcesDirectory(), resourceService)
         synchronized(pie) {
           pie.newSession().use { session ->
-            session.require(compiler.createTask(input))
+            session.require(compiler.createTask(ValueSupplier(Result.ofOk<AdapterProjectCompiler.Input, Exception>(input))))
           }
         }
       }
@@ -286,7 +288,7 @@ fun Project.logMessages(messages: KeyedMessages, backupResource: ResourceKey?) {
 
 fun Project.logMessages(allMessages: KeyedMessages) {
   allMessages.messagesWithKey.forEachEntry { resource, messages ->
-    messages.forEach {  message -> logMessage(message, resource) }
+    messages.forEach { message -> logMessage(message, resource) }
   }
   allMessages.messagesWithoutKey.forEach { message -> logMessage(message, allMessages.resourceForMessagesWithoutKeys) }
 }

@@ -1,7 +1,10 @@
 package mb.spoofax.compiler.platform;
 
 import mb.common.option.Option;
+import mb.common.result.Result;
 import mb.pie.api.ExecContext;
+import mb.pie.api.None;
+import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
@@ -26,7 +29,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Value.Enclosing
-public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.Input, EclipseProjectCompiler.Output> {
+public class EclipseProjectCompiler implements TaskDef<Supplier<Result<Option<EclipseProjectCompiler.Input>, ?>>, Result<None, ?>> {
     private final TemplateWriter pluginXmlTemplate;
     private final TemplateWriter manifestTemplate;
     private final TemplateWriter packageInfoTemplate;
@@ -85,11 +88,13 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
 
     @Override public String getId() { return getClass().getName(); }
 
-    @Override public Output exec(ExecContext context, Input input) throws IOException {
-        final Shared shared = input.shared();
+    @Override
+    public Result<None, ?> exec(ExecContext context, Supplier<Result<Option<EclipseProjectCompiler.Input>, ?>> input) throws IOException {
+        return context.require(input).mapThrowing(o -> o.mapThrowingOrElse(i -> compile(context, i), () -> None.instance));
+    }
 
-        final Output.Builder outputBuilder = Output.builder();
-        if(input.classKind().isManual()) return outputBuilder.build(); // Nothing to generate: return.
+    public None compile(ExecContext context, Input input) throws IOException {
+        if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
 
         // Eclipse files
         pluginXmlTemplate.write(context, input.pluginXmlFile(), input);
@@ -127,11 +132,7 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
             metadataProviderTemplate.write(context, input.baseMetadataProvider().file(generatedJavaSourcesDirectory), input);
         }
 
-        return outputBuilder.build();
-    }
-
-    @Override public Serializable key(Input input) {
-        return input.project().baseDirectory();
+        return None.instance;
     }
 
 
@@ -676,19 +677,10 @@ public class EclipseProjectCompiler implements TaskDef<EclipseProjectCompiler.In
 
         /// Automatically provided sub-inputs
 
-        Shared shared();
+        @Value.Auxiliary Shared shared();
 
         AdapterProjectCompiler.Input adapterProjectCompilerInput();
 
         LanguageProjectCompiler.Input languageProjectCompilerInput();
-
-
-        // TODO: implement check
-    }
-
-    @Value.Immutable public interface Output extends Serializable {
-        class Builder extends EclipseProjectCompilerData.Output.Builder {}
-
-        static Builder builder() { return new Builder(); }
     }
 }

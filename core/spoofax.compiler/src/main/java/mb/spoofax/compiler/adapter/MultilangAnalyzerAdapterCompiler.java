@@ -2,6 +2,7 @@ package mb.spoofax.compiler.adapter;
 
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
+import mb.pie.api.None;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.language.MultilangAnalyzerLanguageCompiler;
@@ -20,7 +21,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 @Value.Enclosing
-public class MultilangAnalyzerAdapterCompiler implements TaskDef<MultilangAnalyzerAdapterCompiler.Input, MultilangAnalyzerAdapterCompiler.Output> {
+public class MultilangAnalyzerAdapterCompiler implements TaskDef<MultilangAnalyzerAdapterCompiler.Input, None> {
     private final TemplateWriter analyzeProjectTemplate;
     private final TemplateWriter indexAstTaskDefTemplate;
     private final TemplateWriter preStatixTaskDefTemplate;
@@ -41,16 +42,15 @@ public class MultilangAnalyzerAdapterCompiler implements TaskDef<MultilangAnalyz
         return getClass().getName();
     }
 
-    @Override public Output exec(ExecContext context, Input input) throws IOException {
-        final Output.Builder outputBuilder = Output.builder();
-        if(input.classKind().isManual()) return outputBuilder.build(); // Nothing to generate: return.
+    @Override public None exec(ExecContext context, Input input) throws IOException {
+        if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         analyzeProjectTemplate.write(context, input.baseAnalyzeTaskDef().file(generatedJavaSourcesDirectory), input);
         indexAstTaskDefTemplate.write(context, input.baseIndexAstTaskDef().file(generatedJavaSourcesDirectory), input);
         preStatixTaskDefTemplate.write(context, input.basePreStatixTaskDef().file(generatedJavaSourcesDirectory), input);
         postStatixTaskDefTemplate.write(context, input.basePostStatixTaskDef().file(generatedJavaSourcesDirectory), input);
         checkTaskDefTemplate.write(context, input.baseCheckTaskDef().file(generatedJavaSourcesDirectory), input);
-        return outputBuilder.build();
+        return None.instance;
     }
 
     @Override public Serializable key(Input input) {
@@ -183,19 +183,13 @@ public class MultilangAnalyzerAdapterCompiler implements TaskDef<MultilangAnalyz
 
         /// Automatically provided sub-inputs
 
-        Shared shared();
+        @Value.Auxiliary Shared shared();
 
         AdapterProject adapterProject();
 
         MultilangAnalyzerLanguageCompiler.Input languageProjectInput();
 
         StrategoRuntimeAdapterCompiler.Input strategoRuntimeInput();
-    }
-
-    @Value.Immutable public interface Output extends Serializable {
-        class Builder extends MultilangAnalyzerAdapterCompilerData.Output.Builder {}
-
-        static Builder builder() { return new Builder(); }
     }
 }
 

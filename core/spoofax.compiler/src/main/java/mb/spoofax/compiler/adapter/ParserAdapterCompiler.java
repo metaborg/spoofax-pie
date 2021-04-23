@@ -2,6 +2,7 @@ package mb.spoofax.compiler.adapter;
 
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
+import mb.pie.api.None;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.language.ClassLoaderResourcesCompiler;
@@ -20,7 +21,7 @@ import java.io.Serializable;
 import java.util.Optional;
 
 @Value.Enclosing
-public class ParserAdapterCompiler implements TaskDef<ParserAdapterCompiler.Input, ParserAdapterCompiler.Output> {
+public class ParserAdapterCompiler implements TaskDef<ParserAdapterCompiler.Input, None> {
     private final TemplateWriter parseTaskDefTemplate;
     private final TemplateWriter tokenizeTaskDefTemplate;
 
@@ -35,13 +36,12 @@ public class ParserAdapterCompiler implements TaskDef<ParserAdapterCompiler.Inpu
         return getClass().getName();
     }
 
-    @Override public Output exec(ExecContext context, Input input) throws IOException {
-        final Output.Builder outputBuilder = Output.builder();
-        if(input.classKind().isManual()) return outputBuilder.build(); // Nothing to generate: return.
+    @Override public None exec(ExecContext context, Input input) throws IOException {
+        if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         parseTaskDefTemplate.write(context, input.baseParseTaskDef().file(generatedJavaSourcesDirectory), input);
         tokenizeTaskDefTemplate.write(context, input.baseTokenizeTaskDef().file(generatedJavaSourcesDirectory), input);
-        return outputBuilder.build();
+        return None.instance;
     }
 
     @Override public Serializable key(Input input) {
@@ -116,23 +116,12 @@ public class ParserAdapterCompiler implements TaskDef<ParserAdapterCompiler.Inpu
 
         /// Automatically provided sub-inputs.
 
-        Shared shared();
+        @Value.Auxiliary Shared shared();
 
         AdapterProject adapterProject();
 
         ParserLanguageCompiler.Input languageProjectInput();
 
         ClassLoaderResourcesCompiler.Input classLoaderResourcesInput();
-
-
-        @Value.Check default void check() {
-
-        }
-    }
-
-    @Value.Immutable public interface Output extends Serializable {
-        class Builder extends ParserAdapterCompilerData.Output.Builder {}
-
-        static Builder builder() { return new Builder(); }
     }
 }
