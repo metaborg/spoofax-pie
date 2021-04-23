@@ -50,7 +50,12 @@ public abstract class SpoofaxEditor extends SpoofaxEditorBase {
         //       directory should not be hard coded!
         final @Nullable IFolder buildDirectory;
         if(project != null) {
-            buildDirectory = project.getFolder("build");
+            final IFolder folder = project.getFolder("build");
+            if(folder.exists()) {
+                buildDirectory = folder;
+            } else {
+                buildDirectory = null;
+            }
         } else {
             buildDirectory = null;
         }

@@ -86,6 +86,7 @@ public class AstToObject {
         // Shared
         final Shared.Builder sharedBuilder = Shared.builder().withPersistentProperties(properties);
         parts.forOneSubtermAsString("Group", sharedBuilder::defaultGroupId);
+        parts.forOneSubtermAsString("Id", sharedBuilder::defaultArtifactId);
         parts.forOneSubtermAsString("Name", sharedBuilder::name);
         parts.forOneSubtermAsString("Version", sharedBuilder::defaultVersion);
         parts.forAllSubtermsAsStrings("FileExtension", sharedBuilder::addFileExtensions);

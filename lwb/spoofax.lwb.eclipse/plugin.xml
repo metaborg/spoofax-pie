@@ -69,6 +69,25 @@
     </menuContribution>
   </extension>
 
+  <!-- New project wizard -->
+  <extension point="org.eclipse.ui.newWizards">
+    <category
+      id="spoofax.lwb.eclipse.newwizard.category"
+      name="Spoofax LWB"
+    >
+    </category>
+    <wizard
+      id="spoofax.lwb.eclipse.newwizard.generateLanguageProject"
+      name="Spoofax language project"
+      category="spoofax.lwb.eclipse.newwizard.category"
+      project="true"
+      hasPages="true"
+      class="mb.spoofax.lwb.eclipse.generator.LanguageProjectWizard"
+    >
+    </wizard>
+  </extension>
+
+
 
   <!--                        -->
   <!-- Dynamic language shims -->

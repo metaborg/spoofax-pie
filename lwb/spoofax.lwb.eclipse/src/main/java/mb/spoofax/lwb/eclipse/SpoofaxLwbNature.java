@@ -95,7 +95,8 @@ public class SpoofaxLwbNature implements IProjectNature {
     }
 
     private static void addDependencyBuilders(IProject project, @Nullable IProgressMonitor monitor) throws CoreException {
-        CommonBuilder.appendJavaBuilder(project, monitor);
+        CommonBuilder.appendJavaBuilder(project, monitor, IncrementalProjectBuilder.FULL_BUILD,
+            IncrementalProjectBuilder.INCREMENTAL_BUILD, IncrementalProjectBuilder.CLEAN_BUILD);
     }
 
     private static void sortBuilders(IProject project, @Nullable IProgressMonitor monitor) throws CoreException {

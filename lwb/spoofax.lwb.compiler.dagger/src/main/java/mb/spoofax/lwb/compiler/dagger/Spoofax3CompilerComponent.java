@@ -16,6 +16,7 @@ import mb.spoofax.lwb.compiler.CheckLanguageSpecification;
 import mb.spoofax.lwb.compiler.CompileLanguage;
 import mb.spoofax.lwb.compiler.CompileLanguageSpecification;
 import mb.spoofax.lwb.compiler.esv.ConfigureEsv;
+import mb.spoofax.lwb.compiler.generator.LanguageProjectGenerator;
 import mb.spoofax.lwb.compiler.sdf3.ConfigureSdf3;
 import mb.spoofax.lwb.compiler.statix.ConfigureStatix;
 import mb.spoofax.lwb.compiler.stratego.ConfigureStratego;
@@ -58,6 +59,9 @@ public interface Spoofax3CompilerComponent extends TaskDefsProvider {
     ConfigureStatix getConfigureStatix();
 
     ConfigureStratego getConfigureStratego();
+
+
+    LanguageProjectGenerator getLanguageProjectGenerator();
 
 
     @Override @Spoofax3CompilerQualifier Set<TaskDef<?, ?>> getTaskDefs();

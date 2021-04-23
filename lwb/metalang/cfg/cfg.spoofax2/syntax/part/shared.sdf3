@@ -9,7 +9,8 @@ imports
 
 context-free syntax
 
-  Part.Group   = <group = <StringLit>>
+  Part.Group   = <group = <JavaQIdLit>>
+  Part.Id      = <id = <JavaIdLit>>
   Part.Name    = <name = <StringLit>>
   Part.Version = <version = <StringLit>>
   

@@ -1,0 +1,20 @@
+module main
+
+signature
+
+  sorts Start constructors
+    Empty : Start
+
+rules
+
+{{#multiFileAnalysis}}
+  projectOk : scope
+  projectOk(s).
+
+  fileOk : scope * Start
+  fileOk(s, Empty()).
+{{/multiFileAnalysis}}
+{{^multiFileAnalysis}}
+  programOk : Start
+  programOk(Empty()).
+{{/multiFileAnalysis}}

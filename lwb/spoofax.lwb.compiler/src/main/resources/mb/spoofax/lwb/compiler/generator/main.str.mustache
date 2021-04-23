@@ -1,0 +1,20 @@
+module main
+
+imports
+
+  statixruntime
+  statix/api
+
+  signatures/-
+
+rules // Analysis
+
+  pre-analyze  = id
+  post-analyze = id
+
+{{#multiFileAnalysis}}
+  editor-analyze = stx-editor-analyze(pre-analyze, post-analyze|"main", "programOk")
+{{/multiFileAnalysis}}
+{{^multiFileAnalysis}}
+  editor-analyze = stx-editor-analyze(pre-analyze, post-analyze|"main", "projectOk", "fileOk")
+{{/multiFileAnalysis}}
