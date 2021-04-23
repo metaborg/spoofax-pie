@@ -132,25 +132,25 @@ public class AstToObject {
 
         // LanguageCompilerInput
         final CompileLanguageSpecificationInputBuilder languageCompilerInputBuilder = new CompileLanguageSpecificationInputBuilder();
-        parts.getAllSubTermsInListAsParts("Sdf3Section").ifPresent(subParts -> {
+        parts.getAllSubTermsInListAsParts("Sdf3Section").ifSome(subParts -> {
             final CompileSdf3Input.Builder builder = languageCompilerInputBuilder.withSdf3();
             subParts.forOneSubtermAsPath("Sdf3MainSourceDirectory", rootDirectory, builder::mainSourceDirectory);
             subParts.forOneSubtermAsPath("Sdf3MainFile", rootDirectory, builder::mainFile);
             // TODO: more SDF3 properties
         });
-        parts.getAllSubTermsInListAsParts("EsvSection").ifPresent(subParts -> {
+        parts.getAllSubTermsInListAsParts("EsvSection").ifSome(subParts -> {
             final CompileEsvInput.Builder builder = languageCompilerInputBuilder.withEsv();
             subParts.forOneSubtermAsPath("EsvMainSourceDirectory", rootDirectory, builder::mainSourceDirectory);
             subParts.forOneSubtermAsPath("EsvMainFile", rootDirectory, builder::mainFile);
             subParts.forAllSubtermsAsPaths("EsvIncludeDirectory", rootDirectory, builder::addIncludeDirectories);
         });
-        parts.getAllSubTermsInListAsParts("StatixSection").ifPresent(subParts -> {
+        parts.getAllSubTermsInListAsParts("StatixSection").ifSome(subParts -> {
             final CompileStatixInput.Builder builder = languageCompilerInputBuilder.withStatix();
             subParts.forOneSubtermAsPath("StatixMainSourceDirectory", rootDirectory, builder::mainSourceDirectory);
             subParts.forOneSubtermAsPath("StatixMainFile", rootDirectory, builder::mainFile);
             // TODO: more Statix properties
         });
-        parts.getAllSubTermsInListAsParts("StrategoSection").ifPresent(subParts -> {
+        parts.getAllSubTermsInListAsParts("StrategoSection").ifSome(subParts -> {
             final CompileStrategoInput.Builder builder = languageCompilerInputBuilder.withStratego();
             subParts.forOneSubtermAsPath("StrategoMainSourceDirectory", rootDirectory, builder::mainSourceDirectory);
             subParts.forOneSubtermAsPath("StrategoMainFile", rootDirectory, builder::mainFile);
@@ -163,20 +163,20 @@ public class AstToObject {
         compileLanguageInputBuilder.compileLanguageSpecificationInput(languageCompilerInput);
 
         // LanguageBaseCompilerInput & LanguageAdapterCompilerInput
-        parts.getAllSubTermsInListAsParts("ParserSection").ifPresent(subParts -> {
+        parts.getAllSubTermsInListAsParts("ParserSection").ifSome(subParts -> {
             final ParserLanguageCompiler.Input.Builder base = baseBuilder.withParser();
             subParts.forOneSubtermAsString("DefaultStartSymbol", base::startSymbol);
             // TODO: parser language properties
             final ParserAdapterCompiler.Input.Builder adapter = adapterBuilder.withParser();
             // TODO: parser adapter properties
         });
-        parts.getAllSubTermsInListAsParts("StylerSection").ifPresent(subParts -> {
+        parts.getAllSubTermsInListAsParts("StylerSection").ifSome(subParts -> {
             final StylerLanguageCompiler.Input.Builder base = baseBuilder.withStyler();
             // TODO: styler language properties
             final StylerAdapterCompiler.Input.Builder adapter = adapterBuilder.withStyler();
             // TODO: styler adapter properties
         });
-        parts.getAllSubTermsInListAsParts("ConstraintAnalyzerSection").ifPresent(subParts -> {
+        parts.getAllSubTermsInListAsParts("ConstraintAnalyzerSection").ifSome(subParts -> {
             final ConstraintAnalyzerLanguageCompiler.Input.Builder base = baseBuilder.withConstraintAnalyzer();
             subParts.forOneSubtermAsBool("ConstraintAnalyzerEnableNaBL2", base::enableNaBL2);
             subParts.forOneSubtermAsBool("ConstraintAnalyzerEnableStatix", base::enableStatix);
@@ -186,13 +186,13 @@ public class AstToObject {
             final ConstraintAnalyzerAdapterCompiler.Input.Builder adapter = adapterBuilder.withConstraintAnalyzer();
             // TODO: constraintAnalyzer adapter properties
         });
-        parts.getAllSubTermsInListAsParts("MultilangAnalyzerSection").ifPresent(subParts -> {
+        parts.getAllSubTermsInListAsParts("MultilangAnalyzerSection").ifSome(subParts -> {
             final MultilangAnalyzerLanguageCompiler.Input.Builder base = baseBuilder.withMultilangAnalyzer();
             // TODO: multilangAnalyzer language properties
             final MultilangAnalyzerAdapterCompiler.Input.Builder adapter = adapterBuilder.withMultilangAnalyzer();
             // TODO: multilangAnalyzer adapter properties
         });
-        parts.getAllSubTermsInListAsParts("StrategoRuntimeSection").ifPresent(subParts -> {
+        parts.getAllSubTermsInListAsParts("StrategoRuntimeSection").ifSome(subParts -> {
             final StrategoRuntimeLanguageCompiler.Input.Builder base = baseBuilder.withStrategoRuntime();
             subParts.forAllSubtermsAsStrings("StrategoRuntimeStrategyPackageId", base::addStrategyPackageIds);
             subParts.forAllSubtermsAsStrings("StrategoRuntimeInteropRegistererByReflection", base::addInteropRegisterersByReflection);
@@ -204,14 +204,14 @@ public class AstToObject {
             // TODO: strategoRuntime adapter properties
         });
         // TODO: completion
-        parts.getAllSubTermsInListAsParts("ExportsSection").ifPresent(subParts -> {
+        parts.getAllSubTermsInListAsParts("ExportsSection").ifSome(subParts -> {
             final ExportsLanguageCompiler.Input.Builder builder = baseBuilder.withExports();
             // TODO: exports language properties
         });
-        parts.getAllSubTermsInListAsParts("TaskDefs").ifPresent(subParts ->
+        parts.getAllSubTermsInListAsParts("TaskDefs").ifSome(subParts ->
             subParts.forAllSubtermsAsTypeInfo("TaskDef", adapterBuilder.project::addTaskDefs)
         );
-        parts.getAllSubTermsInListAsParts("CommandDef").ifPresent(commandDefParts -> {
+        parts.getAllSubTermsInListAsParts("CommandDef").ifSome(commandDefParts -> {
             final CommandDefRepr.Builder commandDefBuilder = CommandDefRepr.builder();
             commandDefParts.forOneSubtermAsTypeInfo("CommandDefType", commandDefBuilder::type);
             commandDefParts.forOneSubtermAsTypeInfo("CommandDefTaskDefType", commandDefBuilder::taskDefType);
@@ -221,7 +221,7 @@ public class AstToObject {
             commandDefParts.forOneSubterm("CommandDefSupportedExecutionTypes", types -> types.forEach(term -> {
                 commandDefBuilder.addSupportedExecutionTypes(toCommandExecutionType(term));
             }));
-            commandDefParts.getAllSubTermsInListAsParts("CommandDefParameters").ifPresent(parametersParts -> {
+            commandDefParts.getAllSubTermsInListAsParts("CommandDefParameters").ifSome(parametersParts -> {
                 parametersParts.forAll("Parameter", 2, parameterTerm -> {
                     final ParamRepr.Builder parameterBuilder = ParamRepr.builder();
                     final String id = TermUtils.asJavaStringAt(parameterTerm, 0).orElseThrow(() -> new InvalidAstShapeException("id as first subterm", parameterTerm));
@@ -256,16 +256,27 @@ public class AstToObject {
         compileLanguageInputBuilder.adapterProjectInput(languageAdapterCompilerInput);
 
         // EclipseProjectCompiler.Input
-        parts.getAllSubTermsInListAsParts("EclipseSection").ifPresent(subParts -> {
+        parts.getAllSubTermsInListAsParts("EclipseSection").ifElse(subParts -> {
             final EclipseProjectCompiler.Input.Builder builder = EclipseProjectCompiler.Input.builder()
                 .withDefaultsSameProject(rootDirectory, shared)
                 .languageProjectCompilerInput(languageBaseCompilerInput)
                 .adapterProjectCompilerInput(languageAdapterCompilerInput);
             subParts.forOneSubtermAsTypeInfo("EclipseBaseLanguage", builder::baseLanguage);
             subParts.forOneSubtermAsTypeInfo("EclipseExtendLanguage", builder::extendLanguage);
-            customizer.customize(builder);
-            final EclipseProjectCompiler.Input input = builder.build();
-            compileLanguageInputBuilder.eclipseProjectInput(input);
+            if(customizer.customize(builder)) {
+                final EclipseProjectCompiler.Input input = builder.build();
+                compileLanguageInputBuilder.eclipseProjectInput(input);
+            }
+        }, () -> {
+            customizer.getDefaultEclipseProjectInput().ifPresent(builder -> {
+                builder.withDefaultsSameProject(rootDirectory, shared)
+                    .languageProjectCompilerInput(languageBaseCompilerInput)
+                    .adapterProjectCompilerInput(languageAdapterCompilerInput);
+                if(customizer.customize(builder)) {
+                    final EclipseProjectCompiler.Input input = builder.build();
+                    compileLanguageInputBuilder.eclipseProjectInput(input);
+                }
+            });
         });
 
         // Build compile language input object

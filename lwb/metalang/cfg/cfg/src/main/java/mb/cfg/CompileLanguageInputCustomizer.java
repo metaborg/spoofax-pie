@@ -9,6 +9,8 @@ import mb.spoofax.compiler.language.LanguageProjectCompilerInputBuilder;
 import mb.spoofax.compiler.platform.EclipseProjectCompiler;
 import mb.spoofax.compiler.util.Shared;
 
+import java.util.Optional;
+
 /**
  * Interface for customizing {@link CompileLanguageInput} objects, used in {@link AstToObject} as part of {@link
  * CfgToObject}. An implementation is provided by {@link CfgCustomizerModule} which is then injected into the relevant
@@ -34,7 +36,9 @@ public interface CompileLanguageInputCustomizer {
     void customize(AdapterProjectCompilerInputBuilder adapterBuilder);
 
 
-    void customize(EclipseProjectCompiler.Input.Builder builder);
+    boolean customize(EclipseProjectCompiler.Input.Builder builder);
+
+    Optional<EclipseProjectCompiler.Input.Builder> getDefaultEclipseProjectInput();
 
 
     void customize(CompileLanguageInput.Builder builder);

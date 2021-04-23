@@ -15,6 +15,7 @@ dependencies {
 
 
   bundleTargetPlatformApi(eclipse("javax.inject"))
+  bundleTargetPlatformApi(eclipse("org.eclipse.jdt.core"))
 
 
   bundleApi(compositeBuild("spoofax.eclipse"))

@@ -1,6 +1,5 @@
 package mb.spoofax.lwb.eclipse;
 
-import io.github.classgraph.ClassGraph;
 import mb.common.message.KeyedMessages;
 import mb.common.result.Result;
 import mb.common.util.ExceptionPrinter;
@@ -14,15 +13,13 @@ import mb.pie.api.TopDownSession;
 import mb.pie.dagger.PieComponent;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.eclipsebundle.SpoofaxCompilerEclipseBundle;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.resource.EclipseResourcePath;
 import mb.spoofax.lwb.compiler.CompileLanguage;
 import mb.spoofax.lwb.compiler.CompileLanguageException;
 import mb.spoofax.lwb.dynamicloading.DynamicLanguage;
-import mb.tooling.eclipsebundle.ToolingEclipseBundle;
+import mb.spoofax.lwb.eclipse.util.ClassPathUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
@@ -30,17 +27,10 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.ICoreRunnable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.action.ContributionItem;
-import org.eclipse.ui.IWindowListener;
-import org.eclipse.ui.editors.text.TextFileDocumentProvider;
-import org.eclipse.ui.texteditor.IDocumentProvider;
-import org.osgi.framework.BundleActivator;
 
 import java.io.File;
 import java.util.LinkedHashSet;
@@ -75,6 +65,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
                             incrBuild(project, delta, monitor);
                         }
                     }
+                    project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
                 } catch(InterruptedException e) {
                     cancel(monitor);
                 }
@@ -150,7 +141,13 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         final TopDownSession topDownSession = session.updateAffectedBy(changedResources);
         final Result<CompileLanguage.Output, CompileLanguageException> result = topDownSession.getOutput(createCompileTask(rootDirectory));
         handleCompileResult(rootDirectory, result, monitor);
-        final OutTransient<DynamicLanguage> dynamicLanguage = topDownSession.getOutput(createDynamicLoadTask(rootDirectory));
+        final Task<OutTransient<DynamicLanguage>> dynamicLoadTask = createDynamicLoadTask(rootDirectory);
+        final OutTransient<DynamicLanguage> dynamicLanguage;
+        if(!topDownSession.hasBeenExecuted(dynamicLoadTask)) {
+            dynamicLanguage = topDownSession.require(dynamicLoadTask);
+        } else {
+            dynamicLanguage = topDownSession.getOutput(dynamicLoadTask);
+        }
         if(dynamicLanguage.isConsistent()) {
             logger.debug("Possibly dynamically loaded language '{}'", dynamicLanguage.getValue().getLanguageComponent().getLanguageInstance().getDisplayName());
         }
@@ -166,21 +163,8 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
     }
 
     private CompileLanguage.Args createCompileArgs(ResourcePath rootDirectory) {
-        final ClassGraph classGraph = new ClassGraph()
-            .addClassLoader(SpoofaxLwbPlugin.class.getClassLoader())
-            .addClassLoader(SpoofaxPlugin.class.getClassLoader())
-            .addClassLoader(ToolingEclipseBundle.class.getClassLoader())
-            .addClassLoader(SpoofaxCompilerEclipseBundle.class.getClassLoader())
-            .addClassLoader(BundleActivator.class.getClassLoader()) // Bundle: org.eclipse.osgi
-            .addClassLoader(IConfigurationElement.class.getClassLoader()) // Bundle: org.eclipse.equinox.registry
-            .addClassLoader(Platform.class.getClassLoader()) // Bundle: org.eclipse.core.runtime
-            .addClassLoader(AbstractHandler.class.getClassLoader()) // Bundle: org.eclipse.core.commands
-            .addClassLoader(IWindowListener.class.getClassLoader()) // Bundle: org.eclipse.ui.workbench
-            .addClassLoader(IDocumentProvider.class.getClassLoader()) // Bundle org.eclipse.ui.workbench.texteditor
-            .addClassLoader(TextFileDocumentProvider.class.getClassLoader()) // Bundle: org.eclipse.ui.editors
-            .addClassLoader(ContributionItem.class.getClassLoader()) // Bundle: org.eclipse.jface
-            ; // OPTO: only scan for classpath once?
-        final List<File> classPath = classGraph.getClasspathFiles();
+        // OPTO: only scan for classpath once?
+        final List<File> classPath = ClassPathUtil.getClassPath();
         logger.trace("Using class path: {}", classPath);
         return CompileLanguage.Args.builder()
             .rootDirectory(rootDirectory)

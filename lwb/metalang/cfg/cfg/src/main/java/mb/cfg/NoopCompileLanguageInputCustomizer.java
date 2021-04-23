@@ -7,6 +7,8 @@ import mb.spoofax.compiler.language.LanguageProjectCompilerInputBuilder;
 import mb.spoofax.compiler.platform.EclipseProjectCompiler;
 import mb.spoofax.compiler.util.Shared;
 
+import java.util.Optional;
+
 /**
  * {@link CompileLanguageInputCustomizer} implementation that does nothing.
  */
@@ -39,8 +41,12 @@ public class NoopCompileLanguageInputCustomizer implements CompileLanguageInputC
 
     }
 
-    @Override public void customize(EclipseProjectCompiler.Input.Builder builder) {
+    @Override public boolean customize(EclipseProjectCompiler.Input.Builder builder) {
+        return true;
+    }
 
+    @Override public Optional<EclipseProjectCompiler.Input.Builder> getDefaultEclipseProjectInput() {
+        return Optional.empty();
     }
 
     @Override public void customize(CompileLanguageInput.Builder builder) {

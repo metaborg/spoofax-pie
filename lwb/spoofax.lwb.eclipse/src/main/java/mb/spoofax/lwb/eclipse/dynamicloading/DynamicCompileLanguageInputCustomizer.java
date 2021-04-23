@@ -11,6 +11,8 @@ import mb.spoofax.compiler.language.LanguageProjectCompilerInputBuilder;
 import mb.spoofax.compiler.platform.EclipseProjectCompiler;
 import mb.spoofax.compiler.util.Shared;
 
+import java.util.Optional;
+
 public class DynamicCompileLanguageInputCustomizer implements CompileLanguageInputCustomizer {
     @Override public void customize(Shared.Builder builder) {
 
@@ -40,7 +42,7 @@ public class DynamicCompileLanguageInputCustomizer implements CompileLanguageInp
 
     }
 
-    @Override public void customize(EclipseProjectCompiler.Input.Builder builder) {
+    @Override public boolean customize(EclipseProjectCompiler.Input.Builder builder) {
         // Override several identifiers to `spoofax.lwb.eclipse.dynamicloading.*` versions, as their own implementations
         // are not available when dynamically loaded.
         builder.baseMarkerId("spoofax.lwb.eclipse.dynamicloading.marker");
@@ -55,6 +57,11 @@ public class DynamicCompileLanguageInputCustomizer implements CompileLanguageInp
         builder.removeNatureCommandId("spoofax.lwb.eclipse.dynamicloading.nature.remove");
         builder.projectBuilderRelativeId(DynamicProjectBuilder.relativeId);
         builder.projectBuilderId(DynamicProjectBuilder.id);
+        return true;
+    }
+
+    @Override public Optional<EclipseProjectCompiler.Input.Builder> getDefaultEclipseProjectInput() {
+        return Optional.of(EclipseProjectCompiler.Input.builder());
     }
 
     @Override public void customize(CompileLanguageInput.Builder builder) {

@@ -2,6 +2,7 @@ package mb.cfg.task;
 
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Severity;
+import mb.common.option.Option;
 import mb.common.region.Region;
 import mb.common.util.MultiMap;
 import mb.common.util.StreamIterable;
@@ -18,7 +19,6 @@ import org.spoofax.terms.TermFactory;
 import org.spoofax.terms.util.TermUtils;
 
 import java.util.ArrayList;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -65,12 +65,12 @@ class Parts {
     }
 
 
-    Optional<IStrategoAppl> getOne(IStrategoConstructor constructor) {
+    Option<IStrategoAppl> getOne(IStrategoConstructor constructor) {
         final ArrayList<IStrategoAppl> values = parts.get(constructor);
         if(values.isEmpty()) {
-            return Optional.empty();
+            return Option.ofNone();
         } else if(values.size() == 1) {
-            return Optional.of(values.get(0));
+            return Option.ofSome(values.get(0));
         } else {
             @MonotonicNonNull IStrategoAppl first = null;
             for(IStrategoAppl part : values) {
@@ -80,61 +80,61 @@ class Parts {
                     createCfgWarning("Option ignored because it was defined before", part);
                 }
             }
-            return Optional.of(first);
+            return Option.ofSome(first);
         }
     }
 
     void forOne(IStrategoConstructor constructor, Consumer<IStrategoAppl> consumer) {
-        getOne(constructor).ifPresent(consumer);
+        getOne(constructor).ifSome(consumer);
     }
 
-    Optional<IStrategoAppl> getOne(String name, int arity) {
+    Option<IStrategoAppl> getOne(String name, int arity) {
         return getOne(termFactory.makeConstructor(name, arity));
     }
 
     void forOne(String name, int arity, Consumer<IStrategoAppl> consumer) {
-        getOne(name, arity).ifPresent(consumer);
+        getOne(name, arity).ifSome(consumer);
     }
 
 
-    Optional<IStrategoTerm> getOneSubterm(String name) {
+    Option<IStrategoTerm> getOneSubterm(String name) {
         return getOne(name, 1).map(t -> t.getSubterm(0));
     }
 
     void forOneSubterm(String name, Consumer<IStrategoTerm> consumer) {
-        getOneSubterm(name).ifPresent(consumer);
+        getOneSubterm(name).ifSome(consumer);
     }
 
-    Optional<String> getOneSubtermAsString(String name) {
+    Option<String> getOneSubtermAsString(String name) {
         return getOneSubterm(name).map(Parts::toJavaString);
     }
 
     void forOneSubtermAsString(String name, Consumer<String> consumer) {
-        getOneSubtermAsString(name).ifPresent(consumer);
+        getOneSubtermAsString(name).ifSome(consumer);
     }
 
-    Optional<ResourcePath> getOneSubtermAsPath(String name, ResourcePath base) {
+    Option<ResourcePath> getOneSubtermAsPath(String name, ResourcePath base) {
         return getOneSubtermAsString(name).map(base::appendRelativePath).map(ResourcePath::getNormalized);
     }
 
     void forOneSubtermAsPath(String name, ResourcePath base, Consumer<ResourcePath> consumer) {
-        getOneSubtermAsPath(name, base).ifPresent(consumer);
+        getOneSubtermAsPath(name, base).ifSome(consumer);
     }
 
-    Optional<TypeInfo> getOneSubtermAsTypeInfo(String name) {
+    Option<TypeInfo> getOneSubtermAsTypeInfo(String name) {
         return getOneSubtermAsString(name).map(TypeInfo::of);
     }
 
     void forOneSubtermAsTypeInfo(String name, Consumer<TypeInfo> consumer) {
-        getOneSubtermAsTypeInfo(name).ifPresent(consumer);
+        getOneSubtermAsTypeInfo(name).ifSome(consumer);
     }
 
-    Optional<Boolean> getOneSubtermAsBool(String name) {
-        return getOneSubterm(name).flatMap(TermUtils::asAppl).map(a -> a.getConstructor().getName().equals("True"));
+    Option<Boolean> getOneSubtermAsBool(String name) {
+        return getOneSubterm(name).flatMap(t -> Option.ofOptional(TermUtils.asAppl(t))).map(a -> a.getConstructor().getName().equals("True"));
     }
 
     void forOneSubtermAsBool(String name, Consumer<Boolean> consumer) {
-        getOneSubtermAsBool(name).ifPresent(consumer);
+        getOneSubtermAsBool(name).ifSome(consumer);
     }
 
 
@@ -187,9 +187,9 @@ class Parts {
         getAllSubtermsAsTypeInfo(name).forEach(consumer);
     }
 
-    Optional<Parts> getAllSubTermsAsParts(String name) {
-        if(!contains(name)) return Optional.empty();
-        return Optional.of(new Parts(messagesBuilder, cfgFile, getAllSubTerms(name)));
+    Option<Parts> getAllSubTermsAsParts(String name) {
+        if(!contains(name)) return Option.ofNone();
+        return Option.ofSome(new Parts(messagesBuilder, cfgFile, getAllSubTerms(name)));
     }
 
 
@@ -201,9 +201,9 @@ class Parts {
         getAllSubTermsInList(name).forEach(consumer);
     }
 
-    Optional<Parts> getAllSubTermsInListAsParts(String name) {
-        if(!contains(name)) return Optional.empty();
-        return Optional.of(new Parts(messagesBuilder, cfgFile, getAllSubTermsInList(name)));
+    Option<Parts> getAllSubTermsInListAsParts(String name) {
+        if(!contains(name)) return Option.ofNone();
+        return Option.ofSome(new Parts(messagesBuilder, cfgFile, getAllSubTermsInList(name)));
     }
 
 
