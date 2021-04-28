@@ -9,6 +9,7 @@ import mb.spoofax.lwb.dynamicloading.DynamicLanguageRegistry;
 import mb.spoofax.lwb.eclipse.SpoofaxLwbLifecycleParticipant;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.MultiRule;
@@ -111,8 +112,18 @@ public class DynamicEditor extends SpoofaxEditorBase {
         cancelJobs();
         final Job job = languageComponent.editorUpdateJobFactory().create(languageComponent, language.getPieComponent(), project, file, document, input, this);
 
+        //A dd refresh scheduling rule because listing/walking a resource may require refreshes.
+        final @Nullable ISchedulingRule refreshSchedulingRule;
+        if(project != null) {
+            refreshSchedulingRule = ResourcesPlugin.getWorkspace().getRuleFactory().refreshRule(project);
+        } else {
+            refreshSchedulingRule = null;
+        }
+
+        // noinspection ConstantConditions (scheduling rules may be null)
         job.setRule(MultiRule.combine(new ISchedulingRule[]{
-            file, // May be null, but hat is a valid scheduling rule
+            refreshSchedulingRule,
+            file,
             languageComponent.startupReadLockRule()
         }));
         job.schedule(initialUpdate ? 0 : 300);

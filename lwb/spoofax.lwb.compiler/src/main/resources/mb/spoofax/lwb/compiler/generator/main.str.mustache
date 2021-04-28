@@ -13,8 +13,8 @@ rules // Analysis
   post-analyze = id
 
 {{#multiFileAnalysis}}
-  editor-analyze = stx-editor-analyze(pre-analyze, post-analyze|"main", "programOk")
+  editor-analyze = stx-editor-analyze(pre-analyze, post-analyze|"main", "projectOk", "fileOk")
 {{/multiFileAnalysis}}
 {{^multiFileAnalysis}}
-  editor-analyze = stx-editor-analyze(pre-analyze, post-analyze|"main", "projectOk", "fileOk")
+  editor-analyze = stx-editor-analyze(pre-analyze, post-analyze|"main", "programOk")
 {{/multiFileAnalysis}}

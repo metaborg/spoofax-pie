@@ -1,7 +1,7 @@
 package mb.spoofax.lwb.eclipse.generator;
 
+import mb.common.util.StringUtil;
 import mb.spoofax.compiler.util.Conversion;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
@@ -12,7 +12,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class LanguageIdentifierControls {
     protected final Group container;
@@ -72,7 +71,7 @@ public class LanguageIdentifierControls {
             name.setText(Conversion.nameToJavaId(projectName));
         }
         if(!javaClassIdPrefixModified) {
-            javaClassIdPrefix.setText(Conversion.nameToJavaId(projectName));
+            javaClassIdPrefix.setText(StringUtil.capitalize(Conversion.nameToJavaId(projectName)));
         }
         ignoreEvents = false;
     }

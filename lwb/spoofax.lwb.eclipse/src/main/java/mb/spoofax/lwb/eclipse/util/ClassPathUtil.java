@@ -32,7 +32,9 @@ public class ClassPathUtil {
             .addClassLoader(SpoofaxPlugin.class.getClassLoader())
             .addClassLoader(ToolingEclipseBundle.class.getClassLoader())
             .addClassLoader(SpoofaxCompilerEclipseBundle.class.getClassLoader())
+
             .addClassLoader(Generated.class.getClassLoader()) // Artifact: javax.annotation:jsr250-api:1.0
+
             .addClassLoader(BundleActivator.class.getClassLoader()) // Bundle: org.eclipse.osgi
             .addClassLoader(IConfigurationElement.class.getClassLoader()) // Bundle: org.eclipse.equinox.registry
             .addClassLoader(CoreException.class.getClassLoader()) // Bundle: org.eclipse.equinox.common

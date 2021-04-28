@@ -13,5 +13,12 @@ parser {
   default-start-symbol = Start
 }
 styler {}
+{{#multiFileAnalysis}}
+constraint-analyzer {
+  multi-file = true
+}
+{{/multiFileAnalysis}}
+{{^multiFileAnalysis}}
 constraint-analyzer {}
+{{/multiFileAnalysis}}
 stratego-runtime {}

@@ -50,25 +50,25 @@ public abstract class SpoofaxEditor extends SpoofaxEditorBase {
         //       unarchiving files into the build directory (usually for meta-languages). This is fine, but the build
         //       directory should not be hard coded! Also add refresh scheduling rule because listing/walking a resource
         //       may require refreshes.
-        final @Nullable ISchedulingRule buildDirectorySchedulingRule;
         final @Nullable ISchedulingRule refreshSchedulingRule;
+        final @Nullable ISchedulingRule buildDirectorySchedulingRule;
         if(project != null) {
+            refreshSchedulingRule = ResourcesPlugin.getWorkspace().getRuleFactory().refreshRule(project);
             final IFolder folder = project.getFolder("build");
             if(folder.exists()) {
                 buildDirectorySchedulingRule = folder;
             } else {
                 buildDirectorySchedulingRule = null;
             }
-            refreshSchedulingRule = ResourcesPlugin.getWorkspace().getRuleFactory().refreshRule(project);
         } else {
             buildDirectorySchedulingRule = null;
             refreshSchedulingRule = null;
         }
 
-        //noinspection ConstantConditions (scheduling rules may be null)
+        // noinspection ConstantConditions (scheduling rules may be null)
         job.setRule(MultiRule.combine(new ISchedulingRule[]{
-            buildDirectorySchedulingRule,
             refreshSchedulingRule,
+            buildDirectorySchedulingRule,
             file,
             languageComponent.startupReadLockRule()
         }));
