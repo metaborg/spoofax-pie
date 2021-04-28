@@ -8,6 +8,7 @@ import mb.spoofax.eclipse.pie.PieRunner;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.MultiRule;
 
@@ -47,23 +48,28 @@ public abstract class SpoofaxEditor extends SpoofaxEditorBase {
 
         // HACK: try to pass the build directory as a scheduling rule, because sometimes an editor update may require
         //       unarchiving files into the build directory (usually for meta-languages). This is fine, but the build
-        //       directory should not be hard coded!
-        final @Nullable IFolder buildDirectory;
+        //       directory should not be hard coded! Also add refresh scheduling rule because listing/walking a resource
+        //       may require refreshes.
+        final @Nullable ISchedulingRule buildDirectorySchedulingRule;
+        final @Nullable ISchedulingRule refreshSchedulingRule;
         if(project != null) {
             final IFolder folder = project.getFolder("build");
             if(folder.exists()) {
-                buildDirectory = folder;
+                buildDirectorySchedulingRule = folder;
             } else {
-                buildDirectory = null;
+                buildDirectorySchedulingRule = null;
             }
+            refreshSchedulingRule = ResourcesPlugin.getWorkspace().getRuleFactory().refreshRule(project);
         } else {
-            buildDirectory = null;
+            buildDirectorySchedulingRule = null;
+            refreshSchedulingRule = null;
         }
 
-        //noinspection ConstantConditions
+        //noinspection ConstantConditions (scheduling rules may be null)
         job.setRule(MultiRule.combine(new ISchedulingRule[]{
-            buildDirectory, // May be null, but hat is a valid scheduling rule
-            file, // May be null, but hat is a valid scheduling rule
+            buildDirectorySchedulingRule,
+            refreshSchedulingRule,
+            file,
             languageComponent.startupReadLockRule()
         }));
         job.schedule(initialUpdate ? 0 : 300);

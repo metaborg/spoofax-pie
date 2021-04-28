@@ -21,7 +21,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceStatus;
 import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourceAttributes;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -51,6 +50,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
     private transient @Nullable IResource resource;
     private transient @Nullable IFile file;
     private transient @Nullable IContainer container;
+    private transient @Nullable IFileStore store;
 
 
     EclipseResource(EclipseResourceRegistry registry, EclipseResourcePath path, IResource resource) {
@@ -59,6 +59,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
         this.resource = resource;
         this.file = null;
         this.container = null;
+        this.store = null;
     }
 
     public EclipseResource(EclipseResourceRegistry registry, EclipseResourcePath path) {
@@ -67,6 +68,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
         this.resource = null;
         this.file = null;
         this.container = null;
+        this.store = null;
     }
 
     public EclipseResource(EclipseResourceRegistry registry, IResource resource) {
@@ -75,6 +77,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
         this.resource = resource;
         this.file = null;
         this.container = null;
+        this.store = null;
     }
 
     public EclipseResource(EclipseResourceRegistry registry, IFile file) {
@@ -83,6 +86,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
         this.resource = file;
         this.file = file;
         this.container = null;
+        this.store = null;
     }
 
     public EclipseResource(EclipseResourceRegistry registry, IContainer container) {
@@ -91,6 +95,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
         this.resource = container;
         this.file = null;
         this.container = container;
+        this.store = null;
     }
 
     @Override public void close() {
@@ -125,11 +130,15 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
 
 
     @Override public boolean exists() {
-        return getResource().exists();
+        try {
+            return getInfo().exists();
+        } catch(IOException e) {
+            return false;
+        }
     }
 
     @Override public boolean isReadable() {
-        return getResource().isAccessible();
+        return exists();
     }
 
     @Override public Instant getLastModifiedTime() throws IOException {
@@ -137,7 +146,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
         if(document != null) {
             return getDocumentLastModifiedTime(document);
         } else {
-            final long stamp = getFileStore().fetchInfo().getLastModified();
+            final long stamp = getInfo().getLastModified();
             if(stamp == EFS.NONE) {
                 return Instant.MIN;
             }
@@ -163,7 +172,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
         if(document != null) {
             return document.getLength() * 2L; // Java Strings are UTF-16: 2 bytes per character.
         } else {
-            return getFileStore().fetchInfo().getLength();
+            return getInfo().getLength();
         }
     }
 
@@ -173,7 +182,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
             return new ByteArrayInputStream(document.get().getBytes(StandardCharsets.UTF_8));
         } else {
             try {
-                return getFileStore().openInputStream(EFS.NONE, null);
+                return getStore().openInputStream(EFS.NONE, null);
             } catch(CoreException e) {
                 throw new IOException("Creating a new input stream for resource '" + resource + "' failed unexpectedly", e);
             }
@@ -190,12 +199,12 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
     }
 
     @Override public boolean isWritable() {
-        // TODO: what to do when there is a document override for this resource?
-        final @Nullable ResourceAttributes resourceAttributes = getResource().getResourceAttributes();
-        if(resourceAttributes == null) {
+        try {
+            final IFileInfo fileInfo = getInfo();
+            return !fileInfo.getAttribute(EFS.ATTRIBUTE_READ_ONLY) && !fileInfo.getAttribute(EFS.ATTRIBUTE_IMMUTABLE);
+        } catch(IOException e) {
             return false;
         }
-        return !resourceAttributes.isReadOnly();
     }
 
     @Override public void setLastModifiedTime(Instant time) throws IOException {
@@ -203,7 +212,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
         try {
             final IFileInfo info = EFS.createFileInfo();
             info.setLastModified(time.toEpochMilli());
-            getFileStore().putInfo(info, EFS.SET_LAST_MODIFIED, null);
+            getStore().putInfo(info, EFS.SET_LAST_MODIFIED, null);
         } catch(CoreException e) {
             throw new IOException("Setting last modified time for resource '" + resource + "' failed unexpectedly", e);
         }
@@ -212,7 +221,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
     @Override public OutputStream openWrite() throws IOException {
         // TODO: what to do when there is a document override for this resource?
         try {
-            return getFileStore().openOutputStream(EFS.OVERWRITE, null);
+            return getStore().openOutputStream(EFS.OVERWRITE, null);
         } catch(CoreException e) {
             throw new IOException("Creating a new output stream for resource '" + resource + "' failed unexpectedly", e);
         }
@@ -221,7 +230,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
     @Override public OutputStream openWriteAppend() throws IOException {
         // TODO: what to do when there is a document override for this resource?
         try {
-            return getFileStore().openOutputStream(EFS.APPEND, null);
+            return getStore().openOutputStream(EFS.APPEND, null);
         } catch(CoreException e) {
             throw new IOException("Creating a new output stream for resource '" + resource + "' failed unexpectedly", e);
         }
@@ -230,7 +239,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
     @Override public OutputStream openWriteExisting() throws IOException {
         // TODO: what to do when there is a document override for this resource?
         try {
-            return getFileStore().openOutputStream(EFS.OVERWRITE, null);
+            return getStore().openOutputStream(EFS.OVERWRITE, null);
         } catch(CoreException e) {
             throw new IOException("Creating a new output stream for resource '" + resource + "' failed unexpectedly", e);
         }
@@ -239,7 +248,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
     @Override public OutputStream openWriteNew() throws IOException {
         // TODO: what to do when there is a document override for this resource?
         try {
-            return getFileStore().openOutputStream(EFS.NONE, null);
+            return getStore().openOutputStream(EFS.NONE, null);
         } catch(CoreException e) {
             throw new IOException("Creating a new output stream for resource '" + resource + "' failed unexpectedly", e);
         }
@@ -319,8 +328,11 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
 
     @Override public Stream<EclipseResource> list() throws IOException {
         try {
-            final IResource[] members = getContainer().members();
-            return Arrays.stream(members).map(resource1 -> new EclipseResource(registry, resource1));
+            final IContainer container = getContainer();
+            // HACK: refresh before listing to ensure that Eclipse sees new resources.
+            container.refreshLocal(IResource.DEPTH_ONE, null);
+            final IResource[] members = container.members();
+            return Arrays.stream(members).map(m -> new EclipseResource(registry, m));
         } catch(CoreException e) {
             throw new IOException("Listing resources in '" + path + "' failed unexpectedly", e);
         }
@@ -328,8 +340,11 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
 
     @Override public Stream<EclipseResource> list(ResourceMatcher matcher) throws IOException {
         try {
-            final IResource[] members = getContainer().members();
-            return Arrays.stream(members).map(resource1 -> new EclipseResource(registry, resource1)).filter((r) -> {
+            final IContainer container = getContainer();
+            // HACK: refresh before listing to ensure that Eclipse sees new resources.
+            container.refreshLocal(IResource.DEPTH_ONE, null);
+            final IResource[] members = container.members();
+            return Arrays.stream(members).map(m -> new EclipseResource(registry, m)).filter((r) -> {
                 try {
                     return matcher.matches(r, this);
                 } catch(IOException e) {
@@ -347,7 +362,10 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
     @Override public Stream<EclipseResource> walk() throws IOException {
         final Stream.Builder<EclipseResource> builder = Stream.builder();
         try {
-            recursiveMembers(getContainer(), builder, null, null);
+            final IContainer container = getContainer();
+            // HACK: refresh before walking to ensure that Eclipse sees new resources.
+            container.refreshLocal(IResource.DEPTH_INFINITE, null);
+            recursiveMembers(container, builder, null, null);
         } catch(CoreException e) {
             throw new IOException("Walking resources in '" + path + "' failed unexpectedly", e);
         }
@@ -357,11 +375,12 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
     @Override public Stream<EclipseResource> walk(ResourceWalker walker, ResourceMatcher matcher) throws IOException {
         final Stream.Builder<EclipseResource> builder = Stream.builder();
         try {
-            recursiveMembers(getContainer(), builder, walker, matcher);
+            final IContainer container = getContainer();
+            // HACK: refresh before walking to ensure that Eclipse sees new resources.
+            container.refreshLocal(IResource.DEPTH_INFINITE, null);
+            recursiveMembers(container, builder, walker, matcher);
         } catch(CoreException e) {
-            throw new IOException(
-                "Walking resources in '" + path + "' with walker '" + walker + "' and matcher '" + matcher + "' failed unexpectedly",
-                e);
+            throw new IOException("Walking resources in '" + path + "' with walker '" + walker + "' and matcher '" + matcher + "' failed unexpectedly", e);
         }
         return builder.build();
     }
@@ -588,12 +607,20 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
         return container;
     }
 
-    private IFileStore getFileStore() throws IOException {
+    private IFileStore getStore() throws IOException {
+        if(store != null) {
+            return store;
+        }
         try {
-            return EFS.getStore(getFile().getLocationURI());
+            store = EFS.getStore(getResource().getLocationURI());
+            return store;
         } catch(CoreException e) {
             throw new IOException("Getting file store for resource '" + resource + "' failed unexpectedly", e);
         }
+    }
+
+    private IFileInfo getInfo() throws IOException {
+        return getStore().fetchInfo();
     }
 
     private @Nullable IDocument getDocument() {

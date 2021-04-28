@@ -15,11 +15,13 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.ContributionItem;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWindowListener;
 import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.osgi.framework.BundleActivator;
 
+import javax.annotation.Generated;
 import java.io.File;
 import java.util.List;
 
@@ -30,6 +32,7 @@ public class ClassPathUtil {
             .addClassLoader(SpoofaxPlugin.class.getClassLoader())
             .addClassLoader(ToolingEclipseBundle.class.getClassLoader())
             .addClassLoader(SpoofaxCompilerEclipseBundle.class.getClassLoader())
+            .addClassLoader(Generated.class.getClassLoader()) // Artifact: javax.annotation:jsr250-api:1.0
             .addClassLoader(BundleActivator.class.getClassLoader()) // Bundle: org.eclipse.osgi
             .addClassLoader(IConfigurationElement.class.getClassLoader()) // Bundle: org.eclipse.equinox.registry
             .addClassLoader(CoreException.class.getClassLoader()) // Bundle: org.eclipse.equinox.common
@@ -44,6 +47,7 @@ public class ClassPathUtil {
             .addClassLoader(ContributionItem.class.getClassLoader()) // Bundle: org.eclipse.jface
             .addClassLoader(ISourceViewer.class.getClassLoader()) // Bundle: org.eclipse.jface.text
             .addClassLoader(IAnnotationModel.class.getClassLoader()) // Bundle: org.eclipse.text
+            .addClassLoader(Composite.class.getClassLoader()) // Bundle: org.eclipse.swt.*
             ;
         return classGraph.getClasspathFiles();
     }

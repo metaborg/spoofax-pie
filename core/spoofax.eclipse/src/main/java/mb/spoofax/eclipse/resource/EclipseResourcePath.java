@@ -1,7 +1,6 @@
 package mb.spoofax.eclipse.resource;
 
 import mb.resource.ResourceRuntimeException;
-import mb.resource.fs.FSPath;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.ResourcePathDefaults;
 import org.checkerframework.checker.nullness.qual.Nullable;

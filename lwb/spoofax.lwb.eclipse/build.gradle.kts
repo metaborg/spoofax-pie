@@ -104,13 +104,14 @@ val privatePackage = listOf(
   "dagger.internal.*",
   "com.squareup.javapoet.*",
   "kotlin.*;-split-package:=merge-first",
+  "javax.annotation.*;-split-package:=merge-first",
   // Embed `io.github.classgraph:classgraph`.
   "io.github.classgraph.*",
   "nonapi.io.github.classgraph.*",
   // Embed PIE task modules
   "mb.pie.task.archive.*",
   "mb.pie.task.java.*",
-  // Embed services
+  // Embed services, to make the embedded Dagger annotation processor work.
   "META-INF.services.*;-split-package:=merge-first"
 )
 tasks {
