@@ -63,6 +63,12 @@ public interface CompileLanguageInput extends Serializable {
         return javaSourcePath;
     }
 
+    default LinkedHashSet<ResourcePath> javaSourceDirectoryPaths() { // LinkedHashSet to preserve insertion order.
+        final LinkedHashSet<ResourcePath> javaSourceDirectoryPath = new LinkedHashSet<>();
+        javaSourceDirectoryPath.addAll(compileLanguageSpecificationInput().javaSourceDirectoryPaths());
+        return javaSourceDirectoryPath;
+    }
+
     List<File> javaClassPaths();
 
     List<File> javaAnnotationProcessorPaths();

@@ -5,10 +5,8 @@ import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Messages;
 import mb.common.message.Severity;
 import mb.common.result.Result;
-import mb.constraint.pie.ConstraintAnalyzeMultiTaskDef;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
-import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.ResourceMatcher;
@@ -20,9 +18,6 @@ import mb.tiger.spoofax.task.reusable.TigerParse;
 
 import javax.inject.Inject;
 import java.io.IOException;
-import java.io.Serializable;
-import java.io.UncheckedIOException;
-import java.util.Objects;
 
 /**
  * @implNote Although Tiger is a single-file language, we implement the multi-file check variant here as well for

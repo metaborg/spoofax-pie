@@ -9,7 +9,6 @@ import mb.log.api.LoggerFactory;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.platform.PlatformScope;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
-import mb.spoofax.eclipse.editor.SpoofaxEditor;
 import mb.spoofax.eclipse.editor.SpoofaxEditorBase;
 import mb.spoofax.eclipse.util.MarkerUtil;
 import mb.spoofax.eclipse.util.ResourceUtil;

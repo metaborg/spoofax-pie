@@ -2,7 +2,6 @@ package mb.tiger.spoofax.task;
 
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
-import mb.common.util.UncheckedException;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;

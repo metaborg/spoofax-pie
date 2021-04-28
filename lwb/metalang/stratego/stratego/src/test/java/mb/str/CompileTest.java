@@ -62,8 +62,8 @@ class CompileTest extends TestBase {
                 strategoJavaPackageOutputDir.getPath(),
                 "mb.test"
             );
-            final Task<Result<None, ?>> strategoCompileTask = compile.createTask(config);
-            final Result<None, ?> result = session.require(strategoCompileTask);
+            final Task<? extends Result<?, ?>> strategoCompileTask = compile.createTask(config);
+            final Result<?, ?> result = session.require(strategoCompileTask);
             assertTrue(result.isOk());
             assertTrue(strategoJavaPackageOutputDir.exists());
             assertTrue(strategoJavaPackageOutputDir.isDirectory());

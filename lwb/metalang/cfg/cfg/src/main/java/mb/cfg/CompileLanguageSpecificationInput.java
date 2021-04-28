@@ -40,8 +40,16 @@ public interface CompileLanguageSpecificationInput extends Serializable {
 
     default ArrayList<ResourcePath> javaSourcePaths() {
         final ArrayList<ResourcePath> sourcePaths = new ArrayList<>();
-        sourcePaths.add(compileLanguageShared().generatedJavaSourcesDirectory());
         return sourcePaths;
+    }
+
+    default ArrayList<ResourcePath> javaSourceDirectoryPaths() {
+        final ArrayList<ResourcePath> sourceDirectoryPaths = new ArrayList<>();
+        // Add only as source directory path, as Java source files are directly passed from the Stratego compiler into
+        // the Java compiler, to prevent hidden dependencies when Java source files are no longer provided. We still
+        // need to add it as a source directory path so that the Java compiler can resolve packages (directories).
+        sourceDirectoryPaths.add(compileLanguageShared().generatedJavaSourcesDirectory());
+        return sourceDirectoryPaths;
     }
 
     default ArrayList<ResourcePath> javaSourceFiles() {

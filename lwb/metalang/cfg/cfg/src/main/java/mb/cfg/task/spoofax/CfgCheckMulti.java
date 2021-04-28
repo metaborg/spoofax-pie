@@ -65,7 +65,7 @@ public class CfgCheckMulti implements TaskDef<ResourcePath, KeyedMessages> {
         result.ifOk(o -> messagesBuilder.addMessages(o.messages));
         result.ifErr(e -> {
             messagesBuilder.addMessage("Creating configuration object failed", e, Severity.Error, e.getCfgFile());
-            messagesBuilder.addMessagesRecursivelyWithFallbackKey(e, e.getCfgFile());
+            messagesBuilder.extractMessagesRecursivelyWithFallbackKey(e, e.getCfgFile());
         });
         return messagesBuilder.build();
     }

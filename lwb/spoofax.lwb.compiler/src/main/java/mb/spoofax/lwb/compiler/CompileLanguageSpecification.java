@@ -13,6 +13,9 @@ import mb.spoofax.lwb.compiler.stratego.CompileStratego;
 import org.immutables.value.Value;
 
 import javax.inject.Inject;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Compiles a language specification by running the meta-language compilers.
@@ -23,7 +26,19 @@ import javax.inject.Inject;
  * meta-language compilers, or a {@link CompileLanguageSpecificationException} when compilation fails.
  */
 @Value.Enclosing
-public class CompileLanguageSpecification implements TaskDef<ResourcePath, Result<KeyedMessages, CompileLanguageSpecificationException>> {
+public class CompileLanguageSpecification implements TaskDef<ResourcePath, Result<CompileLanguageSpecification.Output, CompileLanguageSpecificationException>> {
+    @Value.Immutable
+    public interface Output extends Serializable {
+        class Builder extends CompileLanguageSpecificationData.Output.Builder {}
+
+        static Builder builder() { return new Builder(); }
+
+        List<ResourcePath> providedJavaFiles();
+
+        @Value.Default default KeyedMessages messages() { return KeyedMessages.of(); }
+    }
+
+
     private final CompileSdf3 compileSdf3;
     private final CompileEsv compileEsv;
     private final CompileStatix compileStatix;
@@ -47,9 +62,10 @@ public class CompileLanguageSpecification implements TaskDef<ResourcePath, Resul
     }
 
     @Override
-    public Result<KeyedMessages, CompileLanguageSpecificationException> exec(ExecContext context, ResourcePath rootDirectory) {
+    public Result<Output, CompileLanguageSpecificationException> exec(ExecContext context, ResourcePath rootDirectory) {
+        final ArrayList<ResourcePath> providedJavaFiles = new ArrayList<>();
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
-        final Result<KeyedMessages, CompileLanguageSpecificationException> result = context.require(compileSdf3, rootDirectory)
+        final Result<?, CompileLanguageSpecificationException> result = context.require(compileSdf3, rootDirectory)
             .ifOk(messagesBuilder::addMessages)
             .mapErr(CompileLanguageSpecificationException::sdf3CompileFail)
             .and(
@@ -62,10 +78,13 @@ public class CompileLanguageSpecification implements TaskDef<ResourcePath, Resul
                     .mapErr(CompileLanguageSpecificationException::statixCompileFail)
             ).and(
                 context.require(compileStratego, rootDirectory)
-                    .ifOk(messagesBuilder::addMessages)
+                    .ifOk(o -> {
+                        messagesBuilder.addMessages(o.messages());
+                        providedJavaFiles.addAll(o.providedJavaFiles());
+                    })
                     .mapErr(CompileLanguageSpecificationException::strategoCompileFail)
             );
-        if(result.isErr()) return result;
-        return Result.ofOk(messagesBuilder.build());
+        if(result.isErr()) return result.ignoreValueIfErr();
+        return Result.ofOk(Output.builder().providedJavaFiles(providedJavaFiles).messages(messagesBuilder.build()).build());
     }
 }

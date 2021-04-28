@@ -57,8 +57,8 @@ public class EsvCheck implements TaskDef<EsvConfig, KeyedMessages> {
             protected void acceptParseFail(JSGLR1ParseException parseException) {
                 final Option<ResourceKey> resource = Option.ofOptional(parseException.getFileHint()).or(Option.ofOptional(parseException.getRootDirectoryHint().map(p -> p)));
                 resource.ifElse(
-                    r -> messagesBuilder.addMessagesRecursivelyWithFallbackKey(parseException, r),
-                    () -> messagesBuilder.addMessagesRecursively(parseException)
+                    r -> messagesBuilder.extractMessagesRecursivelyWithFallbackKey(parseException, r),
+                    () -> messagesBuilder.extractMessagesRecursively(parseException)
                 );
             }
 

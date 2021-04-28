@@ -232,7 +232,7 @@ open class LanguagePlugin : Plugin<Project> {
             val result = session.require(compiler.createTask(FSPath(project.projectDir)))
             val projectDir = FSPath(project.projectDir)
             result.ifOk {
-              project.logMessages(it, projectDir)
+              project.logMessages(it.messages(), projectDir)
             }.ifErr {
               val exceptionPrinter = ExceptionPrinter()
               exceptionPrinter.addCurrentDirectoryContext(projectDir)

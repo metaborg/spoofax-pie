@@ -130,15 +130,18 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
         context.require(languageProjectCompilerTask);
         compileJavaInputBuilder.addOriginTasks(languageProjectCompilerTask.toSupplier());
 
-        final Task<Result<KeyedMessages, CompileLanguageSpecificationException>> languageSpecificationCompilerTask = compileLanguage.createTask(rootDirectory);
-        final Result<KeyedMessages, CompileLanguageSpecificationException> spoofax3CompilerResult = context.require(languageSpecificationCompilerTask);
+        final Task<Result<CompileLanguageSpecification.Output, CompileLanguageSpecificationException>> languageSpecificationCompilerTask = compileLanguage.createTask(rootDirectory);
+        final Result<CompileLanguageSpecification.Output, CompileLanguageSpecificationException> spoofax3CompilerResult = context.require(languageSpecificationCompilerTask);
         compileJavaInputBuilder.addOriginTasks(languageSpecificationCompilerTask.toSupplier());
         if(spoofax3CompilerResult.isErr()) {
             // noinspection ConstantConditions (error is present)
             return Result.ofErr(CompileLanguageException.compileLanguageFail(spoofax3CompilerResult.getErr()));
         } else {
             // noinspection ConstantConditions (value is present)
-            messagesBuilder.addMessages(spoofax3CompilerResult.get());
+            final CompileLanguageSpecification.Output output = spoofax3CompilerResult.get();
+            // noinspection ConstantConditions (value is present)
+            compileJavaInputBuilder.addAllSourceFiles(output.providedJavaFiles());
+            messagesBuilder.addMessages(output.messages());
         }
 
         final Task<Result<None, ?>> adapterProjectCompilerTask = adapterProjectCompiler.createTask(new AdapterProjectInputSupplier(cfgSupplier));
@@ -170,6 +173,7 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
         compileJavaInputBuilder
             .addAllSourceFiles(input.javaSourceFiles())
             .sourcePaths(input.javaSourcePaths())
+            .sourceDirectoryPaths(input.javaSourceDirectoryPaths())
             .addAllClassPaths(input.javaClassPaths())
             .addAllClassPaths(args.additionalJavaClassPath())
             .addAllAnnotationProcessorPaths(input.javaAnnotationProcessorPaths())
