@@ -8,7 +8,9 @@ plugins {
 
   id("org.metaborg.devenv.spoofax.gradle.langspec") version "0.1.0" apply false
   id("de.set.ecj") version "1.4.1" apply false
-  id("org.metaborg.coronium.bundle") version "0.3.6" apply false
+  id("org.metaborg.coronium.bundle") version "0.3.7" apply false
+  id("org.metaborg.coronium.feature") version "0.3.7" apply false
+  id("org.metaborg.coronium.repository") version "0.3.7" apply false
   id("biz.aQute.bnd.builder") version "5.3.0" apply false
   id("org.jetbrains.intellij") version "0.6.5" apply false
 
