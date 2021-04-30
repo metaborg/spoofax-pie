@@ -1,8 +1,14 @@
 package mb.spoofax.lwb.eclipse;
 
+import mb.cfg.CfgComponent;
 import mb.cfg.eclipse.CfgLanguageFactory;
+import mb.esv.eclipse.EsvEclipseComponent;
 import mb.esv.eclipse.EsvLanguageFactory;
+import mb.libspoofax2.LibSpoofax2ResourcesComponent;
+import mb.libspoofax2.eclipse.LibSpoofax2EclipseComponent;
 import mb.libspoofax2.eclipse.LibSpoofax2LanguageFactory;
+import mb.libstatix.LibStatixResourcesComponent;
+import mb.libstatix.eclipse.LibStatixEclipseComponent;
 import mb.libstatix.eclipse.LibStatixLanguageFactory;
 import mb.pie.api.TaskDef;
 import mb.pie.dagger.PieComponent;
@@ -13,21 +19,31 @@ import mb.pie.runtime.tracer.LoggingTracer;
 import mb.resource.dagger.EmptyResourceRegistriesProvider;
 import mb.resource.dagger.ResourceRegistriesProvider;
 import mb.resource.dagger.ResourceServiceComponent;
+import mb.sdf3.Sdf3Component;
 import mb.sdf3.eclipse.Sdf3LanguageFactory;
+import mb.spoofax.compiler.dagger.DaggerSpoofaxCompilerComponent;
+import mb.spoofax.compiler.dagger.SpoofaxCompilerComponent;
+import mb.spoofax.compiler.dagger.SpoofaxCompilerModule;
+import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.EclipseLifecycleParticipant;
 import mb.spoofax.eclipse.EclipsePlatformComponent;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 import mb.spoofax.lwb.compiler.dagger.Spoofax3Compiler;
-import mb.spoofax.lwb.dynamicloading.DynamicLoadingComponent;
+import mb.spoofax.lwb.compiler.dagger.Spoofax3CompilerModule;
 import mb.spoofax.lwb.dynamicloading.DynamicLoadingPieModule;
+import mb.spoofax.lwb.eclipse.compiler.DaggerEclipseSpoofax3CompilerComponent;
+import mb.spoofax.lwb.eclipse.compiler.EclipseSpoofax3CompilerComponent;
 import mb.spoofax.lwb.eclipse.dynamicloading.DaggerEclipseDynamicLoadingComponent;
 import mb.spoofax.lwb.eclipse.dynamicloading.EclipseDynamicLoadingComponent;
+import mb.statix.eclipse.StatixEclipseComponent;
 import mb.statix.eclipse.StatixLanguageFactory;
+import mb.str.eclipse.StrategoEclipseComponent;
 import mb.str.eclipse.StrategoLanguageFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.runtime.IExecutableExtensionFactory;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 
 public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipant {
@@ -108,19 +124,56 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
         return () -> {
             // Inside closure so that it is lazily initialized -> meta-language instances should be available.
             if(spoofax3Compiler == null) {
+                final TemplateCompiler templateCompiler = new TemplateCompiler(StandardCharsets.UTF_8);
+                final SpoofaxCompilerComponent spoofaxCompilerComponent = DaggerSpoofaxCompilerComponent.builder()
+                    .spoofaxCompilerModule(new SpoofaxCompilerModule(templateCompiler))
+                    .loggerComponent(loggerComponent)
+                    .resourceServiceComponent(resourceServiceComponent)
+                    .build();
+
+                final CfgComponent cfgComponent = CfgLanguageFactory.getLanguage().getComponent();
+                final Sdf3Component sdf3Component = Sdf3LanguageFactory.getLanguage().getComponent();
+                final StrategoEclipseComponent strategoComponent = StrategoLanguageFactory.getLanguage().getComponent();
+                final EsvEclipseComponent esvComponent = EsvLanguageFactory.getLanguage().getComponent();
+                final StatixEclipseComponent statixComponent = StatixLanguageFactory.getLanguage().getComponent();
+                final LibSpoofax2EclipseComponent libSpoofax2Component = LibSpoofax2LanguageFactory.getLanguage().getComponent();
+                final LibSpoofax2ResourcesComponent libSpoofax2ResourcesComponent = LibSpoofax2LanguageFactory.getLanguage().getResourcesComponent();
+                final LibStatixEclipseComponent libStatixComponent = LibStatixLanguageFactory.getLanguage().getComponent();
+                final LibStatixResourcesComponent libStatixResourcesComponent = LibStatixLanguageFactory.getLanguage().getResourcesComponent();
+
+                final EclipseSpoofax3CompilerComponent component = DaggerEclipseSpoofax3CompilerComponent.builder()
+                    .spoofax3CompilerModule(new Spoofax3CompilerModule(templateCompiler))
+                    .loggerComponent(loggerComponent)
+                    .resourceServiceComponent(resourceServiceComponent)
+                    .cfgComponent(cfgComponent)
+                    .sdf3Component(sdf3Component)
+                    .strategoComponent(strategoComponent)
+                    .esvComponent(esvComponent)
+                    .statixComponent(statixComponent)
+                    .libSpoofax2Component(libSpoofax2Component)
+                    .libSpoofax2ResourcesComponent(libSpoofax2ResourcesComponent)
+                    .libStatixComponent(libStatixComponent)
+                    .libStatixResourcesComponent(libStatixResourcesComponent)
+                    .build();
+
                 spoofax3Compiler = new Spoofax3Compiler(
                     loggerComponent,
                     resourceServiceComponent,
                     platformComponent,
-                    CfgLanguageFactory.getLanguage().getComponent(),
-                    Sdf3LanguageFactory.getLanguage().getComponent(),
-                    StrategoLanguageFactory.getLanguage().getComponent(),
-                    EsvLanguageFactory.getLanguage().getComponent(),
-                    StatixLanguageFactory.getLanguage().getComponent(),
-                    LibSpoofax2LanguageFactory.getLanguage().getComponent(),
-                    LibSpoofax2LanguageFactory.getLanguage().getResourcesComponent(),
-                    LibStatixLanguageFactory.getLanguage().getComponent(),
-                    LibStatixLanguageFactory.getLanguage().getResourcesComponent()
+
+                    cfgComponent,
+                    sdf3Component,
+                    strategoComponent,
+                    esvComponent,
+                    statixComponent,
+                    libSpoofax2Component,
+                    libSpoofax2ResourcesComponent,
+                    libStatixComponent,
+                    libStatixResourcesComponent,
+
+                    templateCompiler,
+                    spoofaxCompilerComponent,
+                    component
                 );
             }
             if(dynamicLoadingComponent == null) {

@@ -17,7 +17,7 @@ import org.immutables.value.Value;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 @Value.Enclosing
@@ -82,13 +82,13 @@ public class CompileStratego implements TaskDef<ResourcePath, Result<CompileStra
             return Result.ofErr(StrategoCompileException.checkFail(messages, analyzeConfig));
         }
 
-        final Result<ArrayList<ResourcePath>, ?> compileResult = context.require(compileToJava, config);
+        final Result<LinkedHashSet<ResourcePath>, ?> compileResult = context.require(compileToJava, config);
         if(compileResult.isErr()) {
             // noinspection ConstantConditions (error is present)
             return Result.ofErr(StrategoCompileException.compileFail(compileResult.getErr(), config));
         }
         // noinspection ConstantConditions (value is present)
-        final ArrayList<ResourcePath> providedJavaFiles = compileResult.get();
+        final LinkedHashSet<ResourcePath> providedJavaFiles = compileResult.get();
 
         return Result.ofOk(Output.builder().providedJavaFiles(providedJavaFiles).messages(messages).build());
     }

@@ -46,11 +46,6 @@ public class Spoofax3CompilerModule {
         return new UnarchiveFromJar();
     }
 
-    @Provides @Spoofax3CompilerScope
-    static CompileJava provideCompileJava() {
-        return new CompileJava();
-    }
-
 
     @Provides @Spoofax3CompilerQualifier @Spoofax3CompilerScope @ElementsIntoSet
     static Set<TaskDef<?, ?>> provideTaskDefsSet(

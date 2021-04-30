@@ -169,7 +169,7 @@ public class StandaloneSpoofax3Compiler implements AutoCloseable {
             .build();
         pieModule.addTaskDefsFrom(component);
 
-        this.compiler = new Spoofax3Compiler(
+        this.compiler = Spoofax3Compiler.createDefault(
             loggerComponent,
             resourceServiceComponent,
             platformComponent,

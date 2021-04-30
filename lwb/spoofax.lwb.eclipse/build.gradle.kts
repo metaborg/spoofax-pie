@@ -33,6 +33,13 @@ dependencies {
   bundleImplementation(project(":libstatix.eclipse"))
 
 
+  // Dependencies for using the ECJ compiler, but those are already included with Eclipse, so they are not needed?.
+  // We're also not using ECJ as the Java compiler at the moment.
+  //api("org.eclipse.jdt:org.eclipse.jdt.compiler.tool:1.2.1100")
+  //api("org.eclipse.jdt:org.eclipse.jdt.compiler.apt:1.3.1200")
+  //api("org.eclipse.jdt:org.eclipse.jdt.core:3.25.0")
+
+
   // Convenient library to get the current classpath, which works under OSGi (Eclipse) as well. Used to pass the current
   // classpath to the Java compiler.
   // TODO: only using this to extract a classpath, can we just copy that functionality without a dependency?

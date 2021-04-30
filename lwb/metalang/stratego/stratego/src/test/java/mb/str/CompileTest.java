@@ -3,12 +3,12 @@ package mb.str;
 import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.pie.api.MixedSession;
-import mb.pie.api.None;
 import mb.pie.api.Task;
 import mb.pie.task.archive.ArchiveDirectory;
 import mb.pie.task.archive.ArchiveToJar;
 import mb.pie.task.java.CompileJava;
 import mb.resource.fs.FSResource;
+import mb.resource.hierarchical.ResourcePath;
 import mb.str.config.StrategoCompileConfig;
 import mb.str.util.TestBase;
 import mb.stratego.build.util.StrategoGradualSetting;
@@ -16,11 +16,14 @@ import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.metaborg.util.cmd.Arguments;
 import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.util.LinkedHashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -62,8 +65,8 @@ class CompileTest extends TestBase {
                 strategoJavaPackageOutputDir.getPath(),
                 "mb.test"
             );
-            final Task<? extends Result<?, ?>> strategoCompileTask = compile.createTask(config);
-            final Result<?, ?> result = session.require(strategoCompileTask);
+            final Task<Result<LinkedHashSet<ResourcePath>, ?>> strategoCompileTask = compile.createTask(config);
+            final Result<LinkedHashSet<ResourcePath>, ?> result = session.require(strategoCompileTask);
             assertTrue(result.isOk());
             assertTrue(strategoJavaPackageOutputDir.exists());
             assertTrue(strategoJavaPackageOutputDir.isDirectory());
@@ -90,8 +93,9 @@ class CompileTest extends TestBase {
 
             // Compile Java source files to Java class files.
             final CompileJava.Input.Builder inputBuilder = CompileJava.Input.builder()
-                .addSourceFiles(mainJavaFile.getPath())
-                .addSourcePaths(strategoJavaOutputDir.getPath());
+                .addAllSourceFiles(result.get())
+                .addSourcePaths(strategoJavaOutputDir.getPath())
+                .release("8");
             final @Nullable String classPathProperty = System.getProperty("classPath");
             assertNotNull(classPathProperty);
             for(String classPathPart : classPathProperty.split(File.pathSeparator)) {

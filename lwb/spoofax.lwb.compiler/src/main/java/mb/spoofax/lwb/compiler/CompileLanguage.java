@@ -181,6 +181,7 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
             .release(input.javaRelease())
             .sourceFileOutputDirectory(input.javaSourceFileOutputDirectory())
             .classFileOutputDirectory(input.javaClassFileOutputDirectory())
+            .reportWarnings(false)
         ;
         final KeyedMessages javaCompilationMessages = context.require(compileJava, compileJavaInputBuilder.build());
         messagesBuilder.addMessages(javaCompilationMessages);

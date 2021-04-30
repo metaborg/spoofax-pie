@@ -28,7 +28,8 @@ import java.util.Set;
 @Spoofax3CompilerScope
 @Component(
     modules = {
-        Spoofax3CompilerModule.class
+        Spoofax3CompilerModule.class,
+        Spoofax3CompilerJavaModule.class
     },
     dependencies = {
         LoggerComponent.class,

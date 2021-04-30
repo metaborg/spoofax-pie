@@ -10,9 +10,10 @@ import mb.stratego.build.strincr.StrIncr;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 
 @StrategoScope
-public class StrategoCompileToJava implements TaskDef<StrategoCompileConfig, Result<ArrayList<ResourcePath>, ?>> {
+public class StrategoCompileToJava implements TaskDef<StrategoCompileConfig, Result<LinkedHashSet<ResourcePath>, ?>> {
     private final StrIncr strIncr;
 
     @Inject public StrategoCompileToJava(StrIncr strIncr) {
@@ -23,7 +24,7 @@ public class StrategoCompileToJava implements TaskDef<StrategoCompileConfig, Res
         return getClass().getName();
     }
 
-    @Override public Result<ArrayList<ResourcePath>, ?> exec(ExecContext context, StrategoCompileConfig config) {
+    @Override public Result<LinkedHashSet<ResourcePath>, ?> exec(ExecContext context, StrategoCompileConfig config) {
         return Result.ofOkOrCatching(() -> context.require(strIncr, new StrIncr.Input(
             config.mainFile,
             config.outputJavaPackageId,

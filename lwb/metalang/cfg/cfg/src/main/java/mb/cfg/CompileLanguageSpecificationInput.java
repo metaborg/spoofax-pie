@@ -1,11 +1,11 @@
 package mb.cfg;
 
-import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.language.LanguageProjectCompilerInputBuilder;
 import mb.cfg.metalang.CompileEsvInput;
 import mb.cfg.metalang.CompileSdf3Input;
 import mb.cfg.metalang.CompileStatixInput;
 import mb.cfg.metalang.CompileStrategoInput;
+import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.compiler.language.LanguageProjectCompilerInputBuilder;
 import org.immutables.value.Value;
 
 import java.io.Serializable;
@@ -54,7 +54,8 @@ public interface CompileLanguageSpecificationInput extends Serializable {
 
     default ArrayList<ResourcePath> javaSourceFiles() {
         final ArrayList<ResourcePath> javaSourceFiles = new ArrayList<>();
-        stratego().ifPresent(i -> i.javaSourceFiles().addAllTo(javaSourceFiles));
+        // No static dependencies at the moment. All Java source files are passed from the Stratego compiler into the
+        // Java compiler.
         return javaSourceFiles;
     }
 

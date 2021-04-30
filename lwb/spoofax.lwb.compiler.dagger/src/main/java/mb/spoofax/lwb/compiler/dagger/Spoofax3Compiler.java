@@ -57,7 +57,11 @@ public class Spoofax3Compiler implements AutoCloseable {
         LibSpoofax2Component libSpoofax2Component,
         LibSpoofax2ResourcesComponent libSpoofax2ResourcesComponent,
         LibStatixComponent libStatixComponent,
-        LibStatixResourcesComponent libStatixResourcesComponent
+        LibStatixResourcesComponent libStatixResourcesComponent,
+
+        TemplateCompiler templateCompiler,
+        SpoofaxCompilerComponent spoofaxCompilerComponent,
+        Spoofax3CompilerComponent component
     ) {
         this.loggerComponent = loggerComponent;
         this.resourceServiceComponent = resourceServiceComponent;
@@ -73,13 +77,43 @@ public class Spoofax3Compiler implements AutoCloseable {
         this.libStatixComponent = libStatixComponent;
         this.libStatixResourcesComponent = libStatixResourcesComponent;
 
-        this.templateCompiler = new TemplateCompiler(StandardCharsets.UTF_8);
-        this.spoofaxCompilerComponent = DaggerSpoofaxCompilerComponent.builder()
+        this.templateCompiler = templateCompiler;
+        this.spoofaxCompilerComponent = spoofaxCompilerComponent;
+        this.component = component;
+
+        this.sdf3Component.getSdf3SpecConfigFunctionWrapper().set(this.component.getConfigureSdf3().createFunction());
+        this.esvComponent.getEsvConfigFunctionWrapper().set(this.component.getConfigureEsv().createFunction());
+        this.strategoComponent.getStrategoAnalyzeConfigFunctionWrapper().set(this.component.getConfigureStratego().createFunction().mapOutput(new StatelessSerializableFunction<Result<Option<StrategoCompileConfig>, StrategoConfigureException>, Result<Option<StrategoAnalyzeConfig>, StrategoConfigureException>>() {
+            @Override
+            public Result<Option<StrategoAnalyzeConfig>, StrategoConfigureException> apply(Result<Option<StrategoCompileConfig>, StrategoConfigureException> r) {
+                return r.map(o -> o.map(StrategoCompileConfig::toAnalyzeConfig));
+            }
+        }));
+        this.statixComponent.getStatixConfigFunctionWrapper().set(this.component.getConfigureStatix().createFunction());
+    }
+
+    public static Spoofax3Compiler createDefault(
+        LoggerComponent loggerComponent,
+        ResourceServiceComponent resourceServiceComponent,
+        PlatformComponent platformComponent,
+
+        CfgComponent cfgComponent,
+        Sdf3Component sdf3Component,
+        StrategoComponent strategoComponent,
+        EsvComponent esvComponent,
+        StatixComponent statixComponent,
+        LibSpoofax2Component libSpoofax2Component,
+        LibSpoofax2ResourcesComponent libSpoofax2ResourcesComponent,
+        LibStatixComponent libStatixComponent,
+        LibStatixResourcesComponent libStatixResourcesComponent
+    ) {
+        final TemplateCompiler templateCompiler = new TemplateCompiler(StandardCharsets.UTF_8);
+        final SpoofaxCompilerComponent spoofaxCompilerComponent = DaggerSpoofaxCompilerComponent.builder()
             .spoofaxCompilerModule(new SpoofaxCompilerModule(templateCompiler))
             .loggerComponent(loggerComponent)
             .resourceServiceComponent(resourceServiceComponent)
             .build();
-        this.component = DaggerSpoofax3CompilerComponent.builder()
+        final Spoofax3CompilerComponent component = DaggerSpoofax3CompilerComponent.builder()
             .spoofax3CompilerModule(new Spoofax3CompilerModule(templateCompiler))
             .loggerComponent(loggerComponent)
             .resourceServiceComponent(resourceServiceComponent)
@@ -93,17 +127,25 @@ public class Spoofax3Compiler implements AutoCloseable {
             .libStatixComponent(libStatixComponent)
             .libStatixResourcesComponent(libStatixResourcesComponent)
             .build();
+        return new Spoofax3Compiler(
+            loggerComponent,
+            resourceServiceComponent,
+            platformComponent,
 
-        // Inject config functions.
-        this.sdf3Component.getSdf3SpecConfigFunctionWrapper().set(this.component.getConfigureSdf3().createFunction());
-        this.esvComponent.getEsvConfigFunctionWrapper().set(this.component.getConfigureEsv().createFunction());
-        this.strategoComponent.getStrategoAnalyzeConfigFunctionWrapper().set(this.component.getConfigureStratego().createFunction().mapOutput(new StatelessSerializableFunction<Result<Option<StrategoCompileConfig>, StrategoConfigureException>, Result<Option<StrategoAnalyzeConfig>, StrategoConfigureException>>() {
-            @Override
-            public Result<Option<StrategoAnalyzeConfig>, StrategoConfigureException> apply(Result<Option<StrategoCompileConfig>, StrategoConfigureException> r) {
-                return r.map(o -> o.map(StrategoCompileConfig::toAnalyzeConfig));
-            }
-        }));
-        this.statixComponent.getStatixConfigFunctionWrapper().set(this.component.getConfigureStatix().createFunction());
+            cfgComponent,
+            sdf3Component,
+            strategoComponent,
+            esvComponent,
+            statixComponent,
+            libSpoofax2Component,
+            libSpoofax2ResourcesComponent,
+            libStatixComponent,
+            libStatixResourcesComponent,
+            
+            templateCompiler,
+            spoofaxCompilerComponent,
+            component
+        );
     }
 
     @Override public void close() {

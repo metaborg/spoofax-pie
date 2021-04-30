@@ -84,14 +84,6 @@ public interface CompileStrategoInput extends Serializable {
     }
 
 
-    default ListView<ResourcePath> javaSourceFiles() {
-        return ListView.of(
-            outputJavaInteropRegistererFile(),
-            outputJavaMainFile()
-        );
-    }
-
-
     /// Automatically provided sub-inputs
 
     CompileLanguageSpecificationShared compileLanguageShared();
