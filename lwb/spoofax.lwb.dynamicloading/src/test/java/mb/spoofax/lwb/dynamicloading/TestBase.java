@@ -66,7 +66,7 @@ class TestBase {
         final Function<LoggerFactory, Tracer> tracerFactory = loggerFactory -> new CompositeTracer(new LoggingTracer(loggerFactory), metricsTracer);
 
         loggerComponent = DaggerLoggerComponent.builder()
-            .loggerModule(LoggerModule.stdOutErrorsAndWarnings())
+            .loggerModule(LoggerModule.stdOutVeryVerbose())
             .build();
         rootResourceServiceComponent = DaggerRootResourceServiceComponent.builder()
             .rootResourceServiceModule(new RootResourceServiceModule(classLoaderResourceRegistry))

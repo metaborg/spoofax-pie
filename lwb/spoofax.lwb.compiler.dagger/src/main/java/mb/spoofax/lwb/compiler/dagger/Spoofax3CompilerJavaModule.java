@@ -2,34 +2,33 @@ package mb.spoofax.lwb.compiler.dagger;
 
 import dagger.Module;
 import dagger.Provides;
-import dagger.multibindings.ElementsIntoSet;
-import mb.pie.api.TaskDef;
-import mb.pie.task.archive.UnarchiveFromJar;
 import mb.pie.task.java.CompileJava;
-import mb.spoofax.compiler.util.TemplateCompiler;
-import mb.spoofax.lwb.compiler.CheckLanguageSpecification;
-import mb.spoofax.lwb.compiler.CompileLanguage;
-import mb.spoofax.lwb.compiler.CompileLanguageSpecification;
-import mb.spoofax.lwb.compiler.esv.CheckEsv;
-import mb.spoofax.lwb.compiler.esv.CompileEsv;
-import mb.spoofax.lwb.compiler.esv.ConfigureEsv;
-import mb.spoofax.lwb.compiler.sdf3.CheckSdf3;
-import mb.spoofax.lwb.compiler.sdf3.CompileSdf3;
-import mb.spoofax.lwb.compiler.sdf3.ConfigureSdf3;
-import mb.spoofax.lwb.compiler.statix.CheckStatix;
-import mb.spoofax.lwb.compiler.statix.CompileStatix;
-import mb.spoofax.lwb.compiler.statix.ConfigureStatix;
-import mb.spoofax.lwb.compiler.stratego.CheckStratego;
-import mb.spoofax.lwb.compiler.stratego.CompileStratego;
-import mb.spoofax.lwb.compiler.stratego.ConfigureStratego;
+import mb.pie.task.java.FileManagerFactory;
+import mb.pie.task.java.JavaFileObjectFactory;
+import mb.pie.task.java.JavaResource;
+import mb.pie.task.java.JavaResourceManager;
 
-import java.util.HashSet;
-import java.util.Set;
+import javax.tools.JavaCompiler;
+import javax.tools.ToolProvider;
 
 @Module
-public abstract class Spoofax3CompilerJavaModule {
+public class Spoofax3CompilerJavaModule {
+    private final JavaCompiler compiler;
+    private final FileManagerFactory fileManagerFactory;
+    private final JavaFileObjectFactory javaFileObjectFactory;
+
+    public Spoofax3CompilerJavaModule(JavaCompiler compiler, FileManagerFactory fileManagerFactory, JavaFileObjectFactory javaFileObjectFactory) {
+        this.compiler = compiler;
+        this.fileManagerFactory = fileManagerFactory;
+        this.javaFileObjectFactory = javaFileObjectFactory;
+    }
+
+    public Spoofax3CompilerJavaModule() {
+        this(ToolProvider.getSystemJavaCompiler(), JavaResourceManager::new, new JavaResource.Factory());
+    }
+
     @Provides @Spoofax3CompilerScope
-    static CompileJava provideCompileJava() {
-        return new CompileJava();
+    CompileJava provideCompileJava() {
+        return new CompileJava(compiler, fileManagerFactory, javaFileObjectFactory);
     }
 }

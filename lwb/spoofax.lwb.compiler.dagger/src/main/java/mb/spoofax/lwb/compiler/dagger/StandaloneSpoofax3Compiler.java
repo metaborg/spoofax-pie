@@ -68,7 +68,8 @@ public class StandaloneSpoofax3Compiler implements AutoCloseable {
     public StandaloneSpoofax3Compiler(
         LoggerComponent loggerComponent,
         ResourceServiceModule resourceServiceModule,
-        PieModule pieModule
+        PieModule pieModule,
+        Spoofax3CompilerJavaModule spoofax3CompilerJavaModule
     ) {
         final CfgResourcesComponent cfgResourcesComponent = DaggerCfgResourcesComponent.create();
         resourceServiceModule.addRegistriesFrom(cfgResourcesComponent);
@@ -155,6 +156,7 @@ public class StandaloneSpoofax3Compiler implements AutoCloseable {
         pieModule.addTaskDefsFrom(spoofaxCompilerComponent);
         final Spoofax3CompilerComponent component = DaggerSpoofax3CompilerComponent.builder()
             .spoofax3CompilerModule(new Spoofax3CompilerModule(templateCompiler))
+            .spoofax3CompilerJavaModule(spoofax3CompilerJavaModule)
             .loggerComponent(loggerComponent)
             .resourceServiceComponent(resourceServiceComponent)
             .cfgComponent(cfgComponent)
@@ -188,6 +190,14 @@ public class StandaloneSpoofax3Compiler implements AutoCloseable {
             .loggerComponent(loggerComponent)
             .resourceServiceComponent(resourceServiceComponent)
             .build();
+    }
+
+    public StandaloneSpoofax3Compiler(
+        LoggerComponent loggerComponent,
+        ResourceServiceModule resourceServiceModule,
+        PieModule pieModule
+    ) {
+        this(loggerComponent, resourceServiceModule, pieModule, new Spoofax3CompilerJavaModule());
     }
 
     @Override public void close() {
