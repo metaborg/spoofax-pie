@@ -5,6 +5,7 @@ import mb.log.api.LoggerFactory;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.resource.EclipseResourcePath;
+import mb.spoofax.eclipse.util.StatusUtil;
 import mb.spoofax.lwb.compiler.generator.LanguageProjectGenerator;
 import mb.spoofax.lwb.eclipse.SpoofaxLwbLifecycleParticipant;
 import mb.spoofax.lwb.eclipse.SpoofaxLwbNature;
@@ -15,8 +16,10 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ICoreRunnable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
@@ -61,6 +64,8 @@ public class LanguageProjectWizard extends Wizard implements INewWizard {
             basePath = page.getLocationPath();
         }
 
+        // Access page properties here, before the IRunnableWithProgress because it runs in a different thread which may
+        // not access the page properties (they may only be accessed on the UI thread)
         final String id = page.id();
         final LanguageProjectGenerator.Input.Builder inputBuilder = LanguageProjectGenerator.Input.builder()
             .id(page.id())
@@ -69,9 +74,27 @@ public class LanguageProjectWizard extends Wizard implements INewWizard {
             .fileExtensions(page.fileExtensions())
             .multiFileAnalysis(page.multiFileAnalysis());
 
+        // Run in IRunnableWithProgress for progress reporting in wizard dialog.
         final IRunnableWithProgress runnable = monitor -> {
             try {
-                generate(basePath, id, inputBuilder, monitor);
+                // Create project.
+                final IProject project = getProject(id);
+                if(project.exists()) {
+                    throw new IOException("Cannot create language project because project with name '" + project + "' already exists");
+                }
+                createProject(project, basePath);
+                // Generate with ICoreRunnable to avoid resource updates during project generation.
+                final ICoreRunnable coreRunnable = new ICoreRunnable() {
+                    @Override public void run(IProgressMonitor monitor) throws CoreException {
+                        try {
+                            generate(project, inputBuilder, monitor);
+                        } catch(IOException e) {
+                            throw new CoreException(StatusUtil.error("Generating language project failed", e));
+                        }
+                    }
+                };
+                // Use workspace root as scheduling rule, because adding a nature requires it.
+                ResourcesPlugin.getWorkspace().run(coreRunnable, ResourcesPlugin.getWorkspace().getRoot(), IWorkspace.AVOID_UPDATE, monitor);
             } catch(Throwable e) {
                 throw new InvocationTargetException(e);
             } finally {
@@ -92,17 +115,13 @@ public class LanguageProjectWizard extends Wizard implements INewWizard {
         return true;
     }
 
-    private void generate(IPath basePath, String id, LanguageProjectGenerator.Input.Builder inputBuilder, IProgressMonitor monitor) throws IOException, CoreException {
-        // Create project
-        final IProject project = getProject(id);
-        if(project.exists()) {
-            throw new IOException("Cannot create language project because project with name '" + project + "' already exists");
-        }
-        createProject(project, basePath);
+    private void generate(IProject project, LanguageProjectGenerator.Input.Builder inputBuilder, IProgressMonitor monitor) throws IOException, CoreException {
         final ResourcePath rootDirectory = new EclipseResourcePath(project);
 
-        // Generate language project.
+        // Add Spoofax LWB nature, which also adds the Java nature.
         SpoofaxLwbNature.addTo(project, null);
+
+        // Generate language project.
         languageProjectGenerator.generate(inputBuilder.rootDirectory(rootDirectory).build());
 
         // Configure JDT.
