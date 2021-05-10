@@ -1,5 +1,6 @@
 plugins {
   id("org.metaborg.coronium.repository")
+  `maven-publish`
 }
 
 fun compositeBuild(name: String) = "$group:$name:$version"
