@@ -17,7 +17,7 @@ If you are looking for a more mature alternative, see [Spoofax 2](http://spoofax
 
 ## Copyright and License
 
-Copyright © 2018-2020 Delft University of Technology
+Copyright © 2018-2021 Delft University of Technology
 
 The code and files in this project are licensed under the [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
 You may use the files in this project in compliance with the license.
