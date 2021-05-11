@@ -30,7 +30,7 @@ jobs:
         run: python3 -m pip install -r mkdocs_requirements.txt
 
       - name: Inject slug/short variables
-        uses: rlespinasse/github-slug-action@v3
+        uses: rlespinasse/github-slug-action@v3.x
 
       - name: Build documentation
         run: mkdocs build
