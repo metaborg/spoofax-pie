@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
+      - uses: rlespinasse/github-slug-action@v3.x
 
       - name: Setup Python
         uses: actions/setup-python@v2
@@ -29,9 +30,6 @@ jobs:
       - name: Install Python packages
         run: python3 -m pip install -r mkdocs_requirements.txt
 
-      - name: Inject slug/short variables
-        uses: rlespinasse/github-slug-action@v3.x
-
       - name: Build documentation
         run: mkdocs build
       - name: Publish documentation
@@ -39,4 +37,4 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./site
-          destination_dir: ${{ env.GITHUB_HEAD_REF_SLUG }}
+          destination_dir: ${{ env.GITHUB_REF_SLUG }}
