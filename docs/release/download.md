@@ -2,7 +2,7 @@
 
 This page contains download links to for the latest development version of Spoofax 3.
 
-## Eclipse Language Workbench
+## Eclipse Language Workbench Environment
 
 With embedded JVM:
 
