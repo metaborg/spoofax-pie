@@ -15,4 +15,3 @@ Without embedded JVM:
 * {{download.dev.lwb.eclipse.windows}}
 * {{download.dev.lwb.eclipse.macos}}
 * {{download.dev.lwb.eclipse.linux}}
-

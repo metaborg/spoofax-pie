@@ -1,5 +1,7 @@
 # Spoofax 3
 
+--8<-- "docs/_include/_all.md"
+
 Spoofax 3 is a _modular_ and _incremental_ textual language workbench running on the JVM: a collection of tools and Java libraries that enable the development of textual languages, embeddable into batch compilers, code editors and IDEs, or custom applications.
 It is a reimplementation of [Spoofax 2](http://spoofax.org), with the goal of being more modular, flexible, and correctly incremental.
 
@@ -13,7 +15,7 @@ If you are looking for a more mature alternative, see [Spoofax 2](http://spoofax
 
 The documentation for Spoofax 3 is split into five parts:
 
-* **[Tutorials](tutorial/installing_lwb.md)**: hands-on tutorials to getting you started with Spoofax 3.
+* **[Tutorials](tutorial/install.md)**: hands-on tutorials to getting you started with Spoofax 3.
 * **How-to guides**: step-by-step guides showing how to implement certain features or how to solve common problems. (Under construction)
 * **[Reference](reference/anatomy_language_implementation.md)**: technical reference describing the various facets of Spoofax 3.
 * **[Background](background/documentation.md)**: background information and discussion on various key topics.

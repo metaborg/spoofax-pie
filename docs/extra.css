@@ -1,3 +1,31 @@
 html {
     overflow-y: scroll;
 }
+
+.guilabel {
+    border: 1px solid #7fbbe3;
+    background: #e7f2fa;
+    font-size: 80%;
+    font-weight: 700;
+    border-radius: 4px;
+    padding: 1px 3px;
+    margin: auto 1px;
+}
+
+.md-typeset .admonition.todo,
+.md-typeset details.todo {
+    border-color: #ff9100;
+}
+
+.md-typeset .todo > .admonition-title,
+.md-typeset .todo > summary {
+    background-color: rgba(255, 145, 0, .1);
+    border-color: #ff9100;
+}
+
+.md-typeset .todo > .admonition-title::before,
+.md-typeset .todo > summary::before {
+    background-color: #ff9100;
+    -webkit-mask-image: var(--md-admonition-icon--warning);
+    mask-image: var(--md-admonition-icon--warning);
+}

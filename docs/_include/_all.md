@@ -1,0 +1,1 @@
+--8<-- "docs/_include/abbreviation.md"

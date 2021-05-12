@@ -4,7 +4,8 @@ site_description: Spoofax 3 documentation website
 nav:
   - Home: index.md
   - Tutorials:
-      - tutorial/installing_lwb.md
+      - tutorial/install.md
+      - tutorial/create_language_project.md
 #  - Guides:
 #      - guide/adding_commands_and_menus.md
   - Reference:
@@ -58,6 +59,7 @@ markdown_extensions:
   - pymdownx.mark
   - pymdownx.saneheaders
   - pymdownx.smartsymbols
+  - pymdownx.snippets
   - pymdownx.superfences
   - pymdownx.tabbed
   - pymdownx.tasklist:
