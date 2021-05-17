@@ -1,0 +1,20 @@
+module statsem/part/eclipse
+
+imports
+
+  statsem/part
+  statsem/expr
+  
+  signatures/part/eclipse-sig
+
+rules
+
+  partOk(s, EclipseSection(options)) :- eclipseOptionsOk(s, options).
+  
+  eclipseOptionOk : scope * EclipseOption
+  eclipseOptionsOk maps eclipseOptionOk(*, list(*))
+  
+  eclipseOptionOk(s, EclipseBaseLanguage(e)) :-
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]. 
+  eclipseOptionOk(s, EclipseExtendLanguage(e)) :-
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]. 

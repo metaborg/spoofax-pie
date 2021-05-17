@@ -1,0 +1,54 @@
+module statsem/expr/command
+
+imports
+
+  statsem/expr
+  statsem/part
+
+  signatures/expr/command-sig
+
+rules // Task definiton
+
+  typeOfExpr(_, TaskDefExpr(_)) = TASK_DEF().
+  partOk(_, TaskDefPart(_)).
+  
+rules // Command definition and properties
+
+  typeOfExpr(s, CommandDef(properties)) = COMMAND_DEF() :-
+    commandDefPropertiesOk(s, properties).
+
+  commandDefPropertyOk : scope * CommandDefProperty
+  commandDefPropertiesOk maps commandDefPropertyOk(*, list(*))
+  
+  commandDefPropertyOk(s, CommandDefType(e)) :- 
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier].
+  commandDefPropertyOk(s, CommandDefTaskDef(e)) :- 
+    typeOfExpr(s, e) == TASK_DEF() | error $[Expected task definition]. // TODO: also allow a Java type identifier
+  commandDefPropertyOk(s, CommandDefArgsType(e)) :- 
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier].
+  commandDefPropertyOk(s, CommandDefDisplayName(e)) :- 
+    typeOfExpr(s, e) == STRING() | error $[Expected string].
+  commandDefPropertyOk(s, CommandDefDescription(e)) :- 
+    typeOfExpr(s, e) == STRING() | error $[Expected string].
+  commandDefPropertyOk(_, CommandDefSupportedExecutionTypes(_)).
+  commandDefPropertyOk(s, CommandDefParameters(parameters)) :-
+    parametersOk(s, parameters).
+
+rules // Parameter and properties
+
+  parameterOk : scope * Parameter
+  parametersOk maps parameterOk(*, list(*))
+
+  parameterOk(s, Parameter(id, properties)) :-
+    parameterPropertiesOk(s, properties). // TODO: check for duplicate parameter names
+
+  parameterPropertyOk : scope * ParameterProperty
+  parameterPropertiesOk maps parameterPropertyOk(*, list(*))
+
+  parameterPropertyOk(s, ParameterType(e)) :- 
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier].
+  parameterPropertyOk(s, ParameterRequired(e)) :- 
+    typeOfExpr(s, e) == BOOL() | error $[Expected boolean].
+  parameterPropertyOk(s, ParameterConverter(e)) :- 
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier].
+  parameterPropertyOk(_, ParameterArgumentProviders(_)).

@@ -1,4 +1,4 @@
-module lex/str_id
+module lex/stratego_id
 
 lexical sorts
 

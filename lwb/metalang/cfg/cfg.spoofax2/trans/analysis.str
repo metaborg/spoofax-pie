@@ -11,7 +11,7 @@ rules
   pre-analyze  = explicate-injections-cfg-Configuration
   post-analyze = implicate-injections-cfg-Configuration
 
-  editor-analyze = stx-editor-analyze(pre-analyze, post-analyze|"statics", "projectOk", "fileOk")
+  editor-analyze = stx-editor-analyze(pre-analyze, post-analyze|"main", "configurationOk")
   editor-resolve = stx-editor-resolve
   editor-hover   = stx-editor-hover
 

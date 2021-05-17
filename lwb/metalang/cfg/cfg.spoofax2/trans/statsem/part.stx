@@ -1,0 +1,10 @@
+module statsem/part
+
+imports
+
+  signatures/part-sig
+
+rules
+
+  partOk : scope * Part
+  partsOk maps partOk(*, list(*))

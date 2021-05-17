@@ -2,25 +2,70 @@ module part/language_base
 
 imports
 
-  lex/sdf3_id
-  lex/str_id
-  lex/java_id
-  lex/path
-  configuration
-  section
-  boolean
+  part
+  expr
+
+context-free sorts
+
+  ParserOption 
+  StylerOption 
+  ConstraintAnalyzerOption
+  MultilangAnalyzerOption
+  StrategoRuntimeOption
+  CompleterOption
+  ExportsOption
 
 context-free syntax
 
-  ParserOption.DefaultStartSymbol = <default-start-symbol = <Sdf3SortIdLit>>
+  Part.ParserSection = <parser {
+  <{ParserOption "\n"}*>
+}>
 
-  ConstraintAnalyzerOption.ConstraintAnalyzerEnableNaBL2      = <enable-nabl2 = <BooleanLit>>
-  ConstraintAnalyzerOption.ConstraintAnalyzerEnableStatix     = <enable-statix = <BooleanLit>>
-  ConstraintAnalyzerOption.ConstraintAnalyzerMultiFile        = <multi-file = <BooleanLit>>
-  ConstraintAnalyzerOption.ConstraintAnalyzerStrategoStrategy = <stratego-strategy = <StrStrategyIdLit>>
+  ParserOption.DefaultStartSymbol = <default-start-symbol = <Expr>>
 
-  StrategoRuntimeOption.StrategoRuntimeStrategyPackageId             = <strategy-package-id = <JavaQIdLit>>
-  StrategoRuntimeOption.StrategoRuntimeInteropRegistererByReflection = <interop-registerer-by-reflection = <JavaQIdLit>>
-  StrategoRuntimeOption.StrategoRuntimeAddSpoofax2Primitives         = <add-spoofax2-primitives = <BooleanLit>>
-  StrategoRuntimeOption.StrategoRuntimeAddNaBL2Primitives            = <add-nabl2-primitives = <BooleanLit>>
-  StrategoRuntimeOption.StrategoRuntimeAddStatixPrimitives           = <add-statix-primitives = <BooleanLit>>
+context-free syntax
+
+  Part.StylerSection = <styler {
+  <{StylerOption "\n"}*>
+}>
+
+context-free syntax
+
+  Part.ConstraintAnalyzerSection = <constraint-analyzer {
+  <{ConstraintAnalyzerOption "\n"}*>
+}>
+
+  ConstraintAnalyzerOption.ConstraintAnalyzerEnableNaBL2      = <enable-nabl2 = <Expr>>
+  ConstraintAnalyzerOption.ConstraintAnalyzerEnableStatix     = <enable-statix = <Expr>>
+  ConstraintAnalyzerOption.ConstraintAnalyzerMultiFile        = <multi-file = <Expr>>
+  ConstraintAnalyzerOption.ConstraintAnalyzerStrategoStrategy = <stratego-strategy = <Expr>>
+
+context-free syntax
+
+  Part.MultilangAnalyzerSection = <multilang-analyzer {
+  <{MultilangAnalyzerOption "\n"}*>
+}>
+
+context-free syntax
+
+  Part.StrategoRuntimeSection = <stratego-runtime {
+  <{StrategoRuntimeOption "\n"}*>
+}>
+
+  StrategoRuntimeOption.StrategoRuntimeStrategyPackageId             = <strategy-package-id = <Expr>>
+  StrategoRuntimeOption.StrategoRuntimeInteropRegistererByReflection = <interop-registerer-by-reflection = <Expr>>
+  StrategoRuntimeOption.StrategoRuntimeAddSpoofax2Primitives         = <add-spoofax2-primitives = <Expr>>
+  StrategoRuntimeOption.StrategoRuntimeAddNaBL2Primitives            = <add-nabl2-primitives = <Expr>>
+  StrategoRuntimeOption.StrategoRuntimeAddStatixPrimitives           = <add-statix-primitives = <Expr>>
+
+context-free syntax
+
+  Part.CompleterSection = <completer {
+  <{CompleterOption "\n"}*>
+}>
+
+context-free syntax
+
+  Part.ExportsSection = <exports {
+  <{ExportsOption "\n"}*>
+}>

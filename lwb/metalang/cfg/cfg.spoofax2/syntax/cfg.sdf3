@@ -5,14 +5,27 @@ imports
   lex/comment
   lex/layout
 
-  configuration
-
+  part
   part/shared
   part/language_base
   part/language
   part/language_adapter
   part/eclipse
+  
+  expr/literal
+  expr/menu_item
+  expr/command
+  
+  variable
+
+context-free sorts
+
+  Configuration
 
 context-free start-symbols
   
   Configuration
+
+context-free syntax
+  
+  Configuration.Configuration = <<{Part "\n"}*>>

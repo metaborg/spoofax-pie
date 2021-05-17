@@ -59,7 +59,7 @@ import java.util.stream.Collectors;
  * Converts a CFG AST into an {@link Output} containing messages, a {@link CompileLanguageInput} output object, and
  * properties that need to be written to a lockfile.
  */
-public class AstToObject {
+public class CfgAstToObject {
     public static class Output {
         public final KeyedMessages messages;
         public final CompileLanguageInput compileLanguageInput;
@@ -208,7 +208,7 @@ public class AstToObject {
             final ExportsLanguageCompiler.Input.Builder builder = baseBuilder.withExports();
             // TODO: exports language properties
         });
-        parts.getAllSubTermsInListAsParts("TaskDefs").ifSome(subParts ->
+        parts.getAllSubTermsInListAsParts("TaskDefs").ifSome(subParts -> // TODO: refactored to expression
             subParts.forAllSubtermsAsTypeInfo("TaskDef", adapterBuilder.project::addTaskDefs)
         );
         parts.getAllSubTermsInListAsParts("CommandDef").ifSome(commandDefParts -> {

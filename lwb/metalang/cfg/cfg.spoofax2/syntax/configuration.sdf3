@@ -1,9 +1,0 @@
-module configuration
-
-context-free sorts
-
-  Configuration Part
-
-context-free syntax
-  
-  Configuration.Configuration = <<{Part "\n"}*>>

@@ -136,7 +136,7 @@ public class HelloWorldShowParsedAst implements TaskDef<HelloWorldShowParsedAst.
     context.require(classloaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
     final ResourceKey file = args.file;
     return context.require(parse.inputBuilder().withFile(file).buildAstSupplier()).mapOrElse(
-        ast -> CommandFeedback.of(ShowFeedback.showText(StrategoUtil.toString(ast), "Parsed AST for '" + file + "'")),
+      ast -> CommandFeedback.of(ShowFeedback.showText(StrategoUtil.toString(ast), "Parsed AST for '" + file + "'")),
       e -> CommandFeedback.ofTryExtractMessagesFrom(e, file)
     );
   }

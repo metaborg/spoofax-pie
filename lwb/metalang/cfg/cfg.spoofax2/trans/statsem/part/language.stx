@@ -1,0 +1,60 @@
+module statsem/part/language
+
+imports
+
+  statsem/part
+  statsem/expr
+  
+  signatures/part/language-sig
+
+rules // Sdf3 section and options
+
+  partOk(s, Sdf3Section(options)) :- sdf3OptionsOk(s, options).
+  
+  sdf3OptionOk : scope * Sdf3Option
+  sdf3OptionsOk maps sdf3OptionOk(*, list(*))
+  
+  sdf3OptionOk(s, Sdf3MainSourceDirectory(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path]. 
+  sdf3OptionOk(s, Sdf3MainFile(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path]. 
+    
+rules // Esv section and options
+
+  partOk(s, EsvSection(options)) :- esvOptionsOk(s, options).
+  
+  esvOptionOk : scope * EsvOption
+  esvOptionsOk maps esvOptionOk(*, list(*))
+  
+  esvOptionOk(s, EsvMainSourceDirectory(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path]. 
+  esvOptionOk(s, EsvMainFile(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path]. 
+  esvOptionOk(s, EsvIncludeDirectory(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path]. 
+      
+rules // Statix section and options
+
+  partOk(s, StatixSection(options)) :- statixOptionsOk(s, options).
+  
+  statixOptionOk : scope * StatixOption
+  statixOptionsOk maps statixOptionOk(*, list(*))
+  
+  statixOptionOk(s, StatixMainSourceDirectory(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path]. 
+  statixOptionOk(s, StatixMainFile(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path]. 
+  
+rules // Stratego section and options
+
+  partOk(s, StrategoSection(options)) :- strategoOptionsOk(s, options).
+  
+  strategoOptionOk : scope * StrategoOption
+  strategoOptionsOk maps strategoOptionOk(*, list(*))
+
+  strategoOptionOk(s, StrategoMainSourceDirectory(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path]. 
+  strategoOptionOk(s, StrategoMainFile(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path]. 
+  strategoOptionOk(s, StrategoLanguageStrategyAffix(e)) :-
+    typeOfExpr(s, e) == STRATEGY() | error $[Expected Stratego strategy identifier]. 

@@ -6,8 +6,7 @@ lexical sorts
 
 lexical syntax
 
-  PathLit        = PathStart PathChars
-  PathSegmentLit = PathChar PathChars
+  PathLit = PathStart PathChars
   
   PathStart = "/"
   PathStart = "./"

@@ -1,0 +1,11 @@
+module variable
+
+imports
+
+  lex/id
+  expr
+
+context-free syntax
+
+  Part.Let = <let <Id> = <Expr>>
+  Expr.Ref = <<Id>>

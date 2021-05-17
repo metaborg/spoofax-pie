@@ -2,22 +2,20 @@ module part/shared
 
 imports
 
-  lex/string
-  lex/path
-  lex/java_id
-  configuration
+  part
+  expr
 
 context-free syntax
 
-  Part.Group   = <group = <JavaQIdLit>>
-  Part.Id      = <id = <JavaIdLit>>
-  Part.Name    = <name = <StringLit>>
-  Part.Version = <version = <StringLit>>
+  Part.Group   = <group = <Expr>>
+  Part.Id      = <id = <Expr>>
+  Part.Name    = <name = <Expr>>
+  Part.Version = <version = <Expr>>
   
-  Part.FileExtension = <file-extension = <PathSegmentLit>>
+  Part.FileExtension = <file-extension = <Expr>>
   
-  Part.JavaPackageIdPrefix = <java-package-id-prefix = <JavaQIdLit>>
-  Part.JavaClassIdPrefix   = <java-class-id-prefix = <JavaIdLit>>
+  Part.JavaPackageIdPrefix = <java-package-id-prefix = <Expr>>
+  Part.JavaClassIdPrefix   = <java-class-id-prefix = <Expr>>
 
-  Part.SourceDirectory = <source-directory = <PathLit>>
-  Part.BuildDirectory = <build-directory = <PathLit>>
+  Part.SourceDirectory = <source-directory = <Expr>>
+  Part.BuildDirectory = <build-directory = <Expr>>

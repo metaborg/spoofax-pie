@@ -1,0 +1,28 @@
+module command
+
+context-free sorts // Execution type
+
+  ExecutionType
+  
+context-free syntax
+
+  ExecutionType.Once          = <Once>
+  ExecutionType.Continuous    = <Continuous>
+
+context-free sorts // (Enclosing) command context
+
+  CommandContext
+  EnclosingCommandContext
+  
+context-free syntax
+
+  CommandContext.ProjectContext      = <Project>
+  CommandContext.DirectoryContext    = <Directory>
+  CommandContext.FileContext         = <File>
+  CommandContext.ResourcePathContext = <ResourcePath>
+  CommandContext.ResourceKeyContext  = <ResourceKey>
+  CommandContext.RegionContext       = <Region>
+  CommandContext.OffsetContext       = <Offset>  
+  
+  EnclosingCommandContext.ProjectEnclosingContext   = <Project>
+  EnclosingCommandContext.DirectoryEnclosingContext = <Directory>

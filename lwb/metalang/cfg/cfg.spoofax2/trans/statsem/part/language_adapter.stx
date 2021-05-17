@@ -1,0 +1,17 @@
+module statsem/part/language_adapter
+
+imports
+
+  statsem/part
+  statsem/expr
+  
+  signatures/part/language_adapter-sig
+
+rules
+
+  partOk(s, MainMenu(e_menu_items)) :- {t_menu_items}
+    typesOfExpr(s, e_menu_items) == t_menu_items. // TODO: check menu item types
+  partOk(s, ResourceContextMenu(e_menu_items)) :- {t_menu_items}
+    typesOfExpr(s, e_menu_items) == t_menu_items. // TODO: check menu item types
+  partOk(s, EditorContextMenu(e_menu_items)) :- {t_menu_items}
+    typesOfExpr(s, e_menu_items) == t_menu_items. // TODO: check menu item types

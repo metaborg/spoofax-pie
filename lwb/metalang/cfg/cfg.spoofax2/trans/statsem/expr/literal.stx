@@ -1,0 +1,18 @@
+module statsem/expr/literal
+
+imports
+
+  statsem/expr
+  
+  signatures/expr-sig
+  signatures/expr/literal-sig
+
+rules
+
+  typeOfExpr(_, True())        = BOOL().
+  typeOfExpr(_, False())       = BOOL().
+  typeOfExpr(_, String(_))     = STRING().
+  typeOfExpr(_, Path(_))       = PATH().
+  typeOfExpr(_, JavaId(_))     = JAVA_ID().
+  typeOfExpr(_, SortId(_))     = SORT().
+  typeOfExpr(_, StrategyId(_)) = STRATEGY().

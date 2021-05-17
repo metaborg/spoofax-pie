@@ -1,0 +1,23 @@
+module statsem/part/shared
+
+imports
+
+  statsem/part
+  statsem/expr
+  
+  signatures/part/shared-sig
+  
+rules
+
+  partOk(s, Group(e))   :- typeOfExpr(s, e) == STRING() | error $[Expected string].
+  partOk(s, Id(e))      :- typeOfExpr(s, e) == STRING() | error $[Expected string].
+  partOk(s, Name(e))    :- typeOfExpr(s, e) == STRING() | error $[Expected string].
+  partOk(s, Version(e)) :- typeOfExpr(s, e) == STRING() | error $[Expected string].
+  
+  partOk(s, FileExtension(e)) :- typeOfExpr(s, e) == STRING() | error $[Expected string].
+  
+  partOk(s, JavaPackageIdPrefix(e)) :- typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java identifier].
+  partOk(s, JavaClassIdPrefix(e))   :- typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java identifier].
+  
+  partOk(s, SourceDirectory(e)) :- typeOfExpr(s, e) == PATH() | error $[Expected path].
+  partOk(s, BuildDirectory(e))  :- typeOfExpr(s, e) == PATH() | error $[Expected path].

@@ -1,0 +1,32 @@
+module expr/literal
+
+imports
+
+  lex/string
+  lex/path
+  lex/java_id
+  lex/sdf3_id
+  lex/stratego_id
+
+context-free syntax
+
+  Expr.True  = "true"
+  Expr.False = "false"
+
+  Expr.String = <<StringLit>>
+  
+  Expr.Path = <<PathLit>>
+  
+  Expr.JavaId = <java <JavaQIdLit>>
+  
+  Expr.SortId = <sort <Sdf3SortIdLit>>
+  
+  Expr.StrategyId = <strategy <StrStrategyIdLit>>
+  
+lexical syntax // Keywords
+
+  Keyword = "true"
+  Keyword = "false"
+  Keyword = "java"
+  Keyword = "sdf3"
+  Keyword = "stratego"

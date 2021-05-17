@@ -1,0 +1,21 @@
+module lex/id
+
+imports
+
+  lex/keyword
+
+lexical sorts
+
+  Id IdChars
+
+lexical syntax
+
+  Id  = IdChars
+  
+  IdChars = [a-zA-Z\_\$] [a-zA-Z0-9\_\$]*
+
+  IdChars = Keyword {reject}
+  
+lexical restrictions
+
+  IdChars -/- [a-zA-Z0-9\_\$]

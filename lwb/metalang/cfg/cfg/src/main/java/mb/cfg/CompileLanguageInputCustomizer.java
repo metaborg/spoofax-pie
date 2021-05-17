@@ -1,6 +1,6 @@
 package mb.cfg;
 
-import mb.cfg.task.AstToObject;
+import mb.cfg.task.CfgAstToObject;
 import mb.cfg.task.CfgToObject;
 import mb.spoofax.compiler.adapter.AdapterProject;
 import mb.spoofax.compiler.adapter.AdapterProjectCompilerInputBuilder;
@@ -12,7 +12,7 @@ import mb.spoofax.compiler.util.Shared;
 import java.util.Optional;
 
 /**
- * Interface for customizing {@link CompileLanguageInput} objects, used in {@link AstToObject} as part of {@link
+ * Interface for customizing {@link CompileLanguageInput} objects, used in {@link CfgAstToObject} as part of {@link
  * CfgToObject}. An implementation is provided by {@link CfgCustomizerModule} which is then injected into the relevant
  * objects. Pass a {@link CfgCustomizerModule} object when building the {@link CfgComponent} via {@link
  * DaggerCfgComponent.Builder#cfgCustomizerModule(CfgCustomizerModule)}.

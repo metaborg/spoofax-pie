@@ -1,0 +1,58 @@
+module expr/menu_item
+
+imports
+
+  expr
+  command
+
+context-free sorts
+
+  CommandActionProperty
+  
+context-free syntax
+
+  Expr.Separator = <separator>
+  Expr.Menu = <menu <Expr> [
+  <{Expr "\n"}*>
+]>
+  Expr.CommandAction = <command-action {
+    <{CommandActionProperty "\n"}*>
+  }>
+
+  CommandActionProperty.CommandActionDisplayName   = <display-name = <Expr>>
+  CommandActionProperty.CommandActionDescription   = <description = <Expr>>
+  CommandActionProperty.CommandActionDefType       = <command-def = <Expr>>
+  CommandActionProperty.CommandActionExecutionType = <execution-type = <ExecutionType>>
+  // TODO: initial arguments
+  CommandActionProperty.CommandActionRequiredEditorSelectionTypes      = <required-editor-selection-types = [<{EditorSelectionType ", "}+>]>
+  CommandActionProperty.CommandActionRequiredEditorFileTypes           = <required-editor-file-types = [<{EditorFileType ","}+>]>
+  CommandActionProperty.CommandActionRequiredHierarchicalResourceTypes = <required-resource-types = [<{HierarchicalResourceType ", "}+>]>
+  CommandActionProperty.CommandActionRequiredEnclosingResourceTypes    = <required-enclosing-command-contexts = [<{EnclosingCommandContext ", "}+>]>
+
+context-free sorts // Editor selection type
+
+  EditorSelectionType
+  
+context-free syntax
+
+  EditorSelectionType.Region = <Region>
+  EditorSelectionType.Offset = <Offset>
+  
+context-free sorts // Editor file type
+
+  EditorFileType
+  
+context-free syntax
+
+  EditorFileType.HierarchicalResource = <HierarchicalResource>
+  EditorFileType.Resource             = <Resource>
+
+context-free sorts // Hierarchical resource type
+
+  HierarchicalResourceType
+  
+context-free syntax
+
+  //HierarchicalResourceType.Project   = <Project>
+  HierarchicalResourceType.Directory = <Directory>
+  HierarchicalResourceType.File      = <File>

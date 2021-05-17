@@ -1,0 +1,40 @@
+module statsem/variable
+
+imports
+
+  statsem/expr
+  statsem/part
+  
+  signatures/lex/id-sig
+  signatures/variable-sig
+
+signature
+
+  relations
+    variable : Id -> TYPE
+
+rules
+
+  partOk(s, Let(id, e)) :- {T}
+    typeOfExpr(s, e) == T,
+    declareVariable(s, id, T).
+
+  typeOfExpr(s, Ref(id)) = T :- {id'}
+    resolveVariable(s, id) == [(_, (id', T))|_] | error $[Variable [id] is not defined],
+    @id.ref := id'.
+    
+rules
+
+  declareVariable : scope * Id * TYPE
+  declareVariable(s, id, T) :- 
+    !variable[id, T] in s,
+    resolveVariable(s, id) == [(_, (_, _))] | error $[Duplicate definition of variable [id]],
+    @id.type := T.
+    
+  resolveVariable : scope * Id -> list((path * (Id * TYPE)))
+  resolveVariable(s, id) = ps :-
+    query variable
+      filter e and { id' :- id' == id }
+      min and true
+        in s |-> ps.
+        

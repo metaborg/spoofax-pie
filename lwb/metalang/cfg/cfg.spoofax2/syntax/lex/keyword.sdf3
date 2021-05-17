@@ -1,0 +1,5 @@
+module lex/keyword
+
+lexical sorts
+
+  Keyword

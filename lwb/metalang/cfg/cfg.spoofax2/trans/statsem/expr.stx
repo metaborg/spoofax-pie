@@ -1,0 +1,23 @@
+module statsem/expr
+
+imports
+
+  signatures/expr-sig
+
+signature
+
+  sorts TYPE constructors
+    BOOL        : TYPE
+    STRING      : TYPE
+    PATH        : TYPE
+    JAVA_ID     : TYPE
+    SORT        : TYPE
+    STRATEGY    : TYPE
+    TASK_DEF    : TYPE
+    COMMAND_DEF : TYPE
+    MENU_ITEM   : TYPE
+
+rules
+
+  typeOfExpr : scope * Expr -> TYPE
+  typesOfExpr maps typeOfExpr(*, list(*)) = list(*)

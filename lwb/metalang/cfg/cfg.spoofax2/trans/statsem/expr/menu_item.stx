@@ -1,0 +1,33 @@
+module statsem/expr/menu_item
+
+imports
+
+  statsem/expr
+
+  signatures/expr/menu_item-sig
+
+rules
+
+  typeOfExpr(_, Separator()) = MENU_ITEM().
+  typeOfExpr(s, Menu(e_name, e_menu_items)) = MENU_ITEM() :- {t_menu_items}
+    typeOfExpr(s, e_name) == STRING() | error $[Expected string],
+    typesOfExpr(s, e_menu_items) == t_menu_items. // TODO: check menu item types
+  typeOfExpr(s, CommandAction(properties)) = MENU_ITEM() :-
+    commandActionPropertiesOk(s, properties).
+   
+rules // Command action property
+
+  commandActionPropertyOk : scope * CommandActionProperty
+  commandActionPropertiesOk maps commandActionPropertyOk(*, list(*))
+  
+  commandActionPropertyOk(s, CommandActionDisplayName(e)) :-
+    typeOfExpr(s, e) == STRING() | error $[Expected string].
+  commandActionPropertyOk(s, CommandActionDescription(e)) :-
+    typeOfExpr(s, e) == STRING() | error $[Expected string].
+  commandActionPropertyOk(s, CommandActionDefType(e)) :-
+    typeOfExpr(s, e) == COMMAND_DEF() | error $[Expected command definition]. // TODO: also allow a Java type identifier
+  commandActionPropertyOk(_, CommandActionExecutionType(_)).
+  commandActionPropertyOk(_, CommandActionRequiredEditorSelectionTypes(_)).
+  commandActionPropertyOk(_, CommandActionRequiredEditorFileTypes(_)).
+  commandActionPropertyOk(_, CommandActionRequiredHierarchicalResourceTypes(_)).
+  commandActionPropertyOk(_, CommandActionRequiredEnclosingResourceTypes(_)).
