@@ -2,16 +2,22 @@ module expr/literal
 
 imports
 
+  expr
   lex/string
   lex/path
   lex/java_id
   lex/sdf3_id
   lex/stratego_id
 
+context-free sorts
+
+  BoolLit
+
 context-free syntax
 
-  Expr.True  = "true"
-  Expr.False = "false"
+  BoolLit.True  = "true"
+  BoolLit.False = "false"
+  Expr.Bool = <<BoolLit>>
 
   Expr.String = <<StringLit>>
   

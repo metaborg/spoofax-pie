@@ -1,0 +1,29 @@
+module value
+
+imports
+
+  statixruntime
+  statix/api
+  
+  signatures/value-sig
+  libspoofax/stratego/debug
+
+rules
+
+  debug-show-resolved:
+    (selected, _, _, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"resolved.aterm")> path
+    ; result   := <resolve-values> selected
+
+strategies
+
+  resolve-values = innermost(resolve-value)
+  
+rules
+
+  resolve-value: t@Ref(i) -> v
+  with
+    a   := <debuga; stx-get-ast-analysis; debugb> t
+  ; ref := <debugc; stx--get-ast-property(|a, Ref()); debugd> i
+  ; v   := <debuge; stx-get-ast-property(|a, "val"); debugf> ref

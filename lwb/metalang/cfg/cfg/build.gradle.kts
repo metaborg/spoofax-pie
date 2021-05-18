@@ -35,6 +35,10 @@ languageProject {
       startSymbol("Configuration")
     }
     withStyler()
+    withConstraintAnalyzer().run {
+      enableNaBL2(false)
+      enableStatix(true)
+    }
     withStrategoRuntime()
   }
 }
@@ -42,6 +46,7 @@ spoofax2BasedLanguageProject {
   compilerInput {
     withParser()
     withStyler()
+    withConstraintAnalyzer()
     withStrategoRuntime().run {
       copyCtree(true)
       copyClasses(false)
@@ -54,6 +59,7 @@ languageAdapterProject {
   compilerInput {
     withParser()
     withStyler()
+    withConstraintAnalyzer()
     withStrategoRuntime()
     project.configureCompilerInput()
   }
@@ -70,8 +76,8 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   addTaskDefs(toObject, rootDirectoryToObject)
 
   // Manual multi-file check implementation.
-  isMultiFile(true)
+  isMultiFile(false)
   val spoofaxTaskPackageId = "$taskPackageId.spoofax"
-  baseCheckMultiTaskDef(spoofaxTaskPackageId, "GeneratedCfgCheckMulti")
-  extendCheckMultiTaskDef(spoofaxTaskPackageId, "CfgCheckMulti")
+  baseCheckTaskDef(spoofaxTaskPackageId, "BaseCfgCheck")
+  extendCheckTaskDef(spoofaxTaskPackageId, "CfgCheck")
 }

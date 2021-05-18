@@ -5,19 +5,13 @@ imports
   lex/java_id
   lex/keyword
   expr
+  part
   command
 
 context-free sorts
 
-  TaskDef
   CommandDef
   CommandDefProperty
-
-context-free syntax // Task definition
-
-  TaskDef.TaskDef = <task-def <JavaQIdLit>> 
-  Expr.TaskDefExpr = <<TaskDef>>
-  Part.TaskDefPart = <<TaskDef>>
 
 context-free syntax // Command definition
 

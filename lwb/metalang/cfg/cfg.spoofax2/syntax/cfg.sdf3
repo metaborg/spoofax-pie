@@ -11,12 +11,14 @@ imports
   part/language
   part/language_adapter
   part/eclipse
+  part/task_def
   
   expr/literal
-  expr/menu_item
+  expr/task_def
   expr/command
+  expr/menu_item
   
-  variable
+  value
 
 context-free sorts
 

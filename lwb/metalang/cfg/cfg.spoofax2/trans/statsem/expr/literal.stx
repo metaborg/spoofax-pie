@@ -9,8 +9,7 @@ imports
 
 rules
 
-  typeOfExpr(_, True())        = BOOL().
-  typeOfExpr(_, False())       = BOOL().
+  typeOfExpr(_, Bool(_))       = BOOL().
   typeOfExpr(_, String(_))     = STRING().
   typeOfExpr(_, Path(_))       = PATH().
   typeOfExpr(_, JavaId(_))     = JAVA_ID().

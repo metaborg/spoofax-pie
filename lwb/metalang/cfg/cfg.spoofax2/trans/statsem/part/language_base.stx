@@ -4,19 +4,26 @@ imports
 
   statsem/part
   statsem/expr
+  statsem/util
   
   signatures/part/language_base-sig
 
 rules // Parser section and options
 
-  partOk(s, ParserSection(options)) :-
-    parserOptionsOk(s, options).
+  partOk(s, t@ParserSection(options)) :-
+    parserOptionsOk(s, options),
+    hasDefaultStartSymbol(options) == TRUE() | error $['default-start-symbol' option has not been set]@t.
     
   parserOptionOk : scope * ParserOption
   parserOptionsOk maps parserOptionOk(*, list(*))
   
   parserOptionOk(s, DefaultStartSymbol(e)) :-
-    typeOfExpr(s, e) == SORT() | error $[Expected SDF3 sort].
+    typeOfExpr(s, e) == SORT() | error $[Expected sort].
+    
+  hasDefaultStartSymbol: list(ParserOption) -> BOOL
+  hasDefaultStartSymbol([DefaultStartSymbol(_)|_]) = TRUE().
+  hasDefaultStartSymbol([_|s]) = hasDefaultStartSymbol(s).
+  hasDefaultStartSymbol([]) = FALSE().
     
 rules // Styler section and options
 

@@ -4,6 +4,7 @@ imports
 
   statsem/expr
   statsem/expr/literal
+  statsem/expr/task_def
   statsem/expr/command
   statsem/expr/menu_item
   
@@ -13,8 +14,9 @@ imports
   statsem/part/language_adapter
   statsem/part/language
   statsem/part/eclipse
+  statsem/part/task_def
   
-  statsem/variable
+  statsem/value
   
   signatures/cfg-sig
 

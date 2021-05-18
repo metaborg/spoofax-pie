@@ -1,8 +1,9 @@
-module variable
+module value
 
 imports
 
   lex/id
+  part
   expr
 
 context-free syntax

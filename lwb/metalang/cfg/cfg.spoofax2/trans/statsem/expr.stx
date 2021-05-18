@@ -2,7 +2,12 @@ module statsem/expr
 
 imports
 
+  statsem/util
+
   signatures/expr-sig
+  signatures/expr/literal-sig
+  signatures/expr/command-sig
+  signatures/expr/menu_item-sig
 
 signature
 
@@ -16,8 +21,16 @@ signature
     TASK_DEF    : TYPE
     COMMAND_DEF : TYPE
     MENU_ITEM   : TYPE
-
+    
 rules
 
   typeOfExpr : scope * Expr -> TYPE
-  typesOfExpr maps typeOfExpr(*, list(*)) = list(*)
+  typesOfExprs maps typeOfExpr(*, list(*)) = list(*)
+
+rules
+
+  typeEq : TYPE * TYPE -> BOOL
+  typeEq(t, t) = TRUE().
+  typeEq(t, _) = FALSE().
+  
+  typesEq maps typeEq(*, list(*)) = list(*)

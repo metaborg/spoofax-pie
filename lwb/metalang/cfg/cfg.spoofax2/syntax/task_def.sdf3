@@ -1,0 +1,13 @@
+module task_def
+
+imports
+
+  lex/java_id
+
+context-free sorts
+
+  TaskDef
+
+context-free syntax
+
+  TaskDef.TaskDef = <task-def <JavaQIdLit>>

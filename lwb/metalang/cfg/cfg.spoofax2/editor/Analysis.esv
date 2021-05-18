@@ -20,3 +20,4 @@ menus
 
     action: "Show pre-analyzed AST" = debug-show-pre-analyzed (source)
     action: "Show analyzed AST"     = debug-show-analyzed
+    action: "Show resolved AST"     = debug-show-resolved

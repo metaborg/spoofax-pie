@@ -3,6 +3,7 @@ package mb.cfg.task;
 import mb.cfg.CfgScope;
 import mb.common.result.Result;
 import mb.common.util.Properties;
+import mb.constraint.pie.ConstraintAnalyzeTaskDef;
 import mb.jsglr1.common.JSGLR1ParseException;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
@@ -26,12 +27,14 @@ import java.io.Serializable;
 public class CfgRootDirectoryToObject implements TaskDef<ResourcePath, Result<CfgToObject.Output, CfgRootDirectoryToObjectException>> {
     private final ResourceService resourceService;
     private final CfgParse parse;
+    private final CfgAnalyze analyze;
     private final CfgToObject toObject;
 
     @Inject
-    public CfgRootDirectoryToObject(ResourceService resourceService, CfgParse parse, CfgToObject toObject) {
+    public CfgRootDirectoryToObject(ResourceService resourceService, CfgParse parse, CfgAnalyze analyze, CfgToObject toObject) {
         this.resourceService = resourceService;
         this.parse = parse;
+        this.analyze = analyze;
         this.toObject = toObject;
     }
 
@@ -42,11 +45,11 @@ public class CfgRootDirectoryToObject implements TaskDef<ResourcePath, Result<Cf
     @Override
     public Result<CfgToObject.Output, CfgRootDirectoryToObjectException> exec(ExecContext context, ResourcePath rootDirectory) throws Exception {
         final ResourcePath cfgFile = rootDirectory.appendRelativePath("spoofaxc.cfg");
-        final Supplier<Result<IStrategoTerm, JSGLR1ParseException>> astSupplier = parse.inputBuilder().withFile(cfgFile).rootDirectoryHint(rootDirectory).buildAstSupplier();
+        final Supplier<Result<ConstraintAnalyzeTaskDef.Output, ?>> analysisOutputSupplier = analyze.createSupplier(new CfgAnalyze.Input(cfgFile, parse.inputBuilder().withFile(cfgFile).rootDirectoryHint(rootDirectory).buildAstSupplier()));
         final ResourcePath lockFilePath = rootDirectory.appendRelativePath("spoofaxc.lock");
         final WritableResource lockFile = resourceService.getWritableResource(lockFilePath);
         final Supplier<Result<Properties, IOException>> propertiesSupplier = new PropertiesSupplier(lockFile);
-        return context.require(toObject, new CfgToObject.Input(rootDirectory, cfgFile, astSupplier, propertiesSupplier))
+        return context.require(toObject, new CfgToObject.Input(rootDirectory, cfgFile, analysisOutputSupplier, propertiesSupplier))
             .mapErr(e -> CfgRootDirectoryToObjectException.convertFail(e, cfgFile, lockFilePath))
             .flatMap(output -> {
                 try {

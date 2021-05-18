@@ -6,6 +6,7 @@ import mb.cfg.CompileLanguageInputCustomizer;
 import mb.common.message.KeyedMessages;
 import mb.common.result.Result;
 import mb.common.util.Properties;
+import mb.constraint.pie.ConstraintAnalyzeTaskDef;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
@@ -22,18 +23,18 @@ public class CfgToObject implements TaskDef<CfgToObject.Input, Result<CfgToObjec
     public static class Input implements Serializable {
         public final ResourcePath rootDirectory;
         public final @Nullable ResourceKey cfgResource;
-        public final Supplier<? extends Result<IStrategoTerm, ?>> astSupplier;
+        public final Supplier<Result<ConstraintAnalyzeTaskDef.Output, ?>> analysisOutputSupplier;
         public final Supplier<? extends Result<Properties, ?>> propertiesSupplier;
 
         public Input(
             ResourcePath rootDirectory,
             @Nullable ResourceKey cfgResource,
-            Supplier<? extends Result<IStrategoTerm, ?>> astSupplier,
+            Supplier<Result<ConstraintAnalyzeTaskDef.Output, ?>> analysisOutputSupplier,
             Supplier<? extends Result<Properties, ?>> propertiesSupplier
         ) {
             this.rootDirectory = rootDirectory;
             this.cfgResource = cfgResource;
-            this.astSupplier = astSupplier;
+            this.analysisOutputSupplier = analysisOutputSupplier;
             this.propertiesSupplier = propertiesSupplier;
         }
 
@@ -43,14 +44,14 @@ public class CfgToObject implements TaskDef<CfgToObject.Input, Result<CfgToObjec
             final Input input = (Input)o;
             if(!rootDirectory.equals(input.rootDirectory)) return false;
             if(cfgResource != null ? !cfgResource.equals(input.cfgResource) : input.cfgResource != null) return false;
-            if(!astSupplier.equals(input.astSupplier)) return false;
+            if(!analysisOutputSupplier.equals(input.analysisOutputSupplier)) return false;
             return propertiesSupplier.equals(input.propertiesSupplier);
         }
 
         @Override public int hashCode() {
             int result = rootDirectory.hashCode();
             result = 31 * result + (cfgResource != null ? cfgResource.hashCode() : 0);
-            result = 31 * result + astSupplier.hashCode();
+            result = 31 * result + analysisOutputSupplier.hashCode();
             result = 31 * result + propertiesSupplier.hashCode();
             return result;
         }
@@ -59,7 +60,7 @@ public class CfgToObject implements TaskDef<CfgToObject.Input, Result<CfgToObjec
             return "CfgToObject$Input{" +
                 "rootDirectory=" + rootDirectory +
                 ", cfgResource=" + cfgResource +
-                ", astSupplier=" + astSupplier +
+                ", astSupplier=" + analysisOutputSupplier +
                 ", propertiesSupplier=" + propertiesSupplier +
                 '}';
         }
@@ -121,23 +122,23 @@ public class CfgToObject implements TaskDef<CfgToObject.Input, Result<CfgToObjec
 
     @Override
     public Result<Output, CfgToObjectException> exec(ExecContext context, CfgToObject.Input input) {
-        return context.require(input.astSupplier)
+        return context.require(input.analysisOutputSupplier)
             .mapErr(CfgToObjectException::astSupplyFail)
-            .flatMap(ast -> context.require(input.propertiesSupplier)
+            .flatMap(analysisOutput -> context.require(input.propertiesSupplier)
                 .mapErr(CfgToObjectException::propertiesSupplyFail)
-                .flatMap(properties -> toOutput(input.rootDirectory, input.cfgResource, ast, properties))
+                .flatMap(properties -> toOutput(input.rootDirectory, input.cfgResource, analysisOutput, properties))
             );
     }
 
     private Result<Output, CfgToObjectException> toOutput(
         ResourcePath rootDirectory,
         @Nullable ResourceKey cfgFile,
-        IStrategoTerm ast,
+        ConstraintAnalyzeTaskDef.Output analysisOutput,
         Properties properties
     ) throws InvalidAstShapeException {
         final CfgAstToObject.Output output;
         try {
-            output = CfgAstToObject.convert(rootDirectory, cfgFile, ast, properties, customizer);
+            output = CfgAstToObject.convert(rootDirectory, cfgFile, analysisOutput, properties, customizer);
         } catch(IllegalStateException e) {
             return Result.ofErr(CfgToObjectException.buildConfigObjectFail(e));
         }

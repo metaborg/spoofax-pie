@@ -1,0 +1,10 @@
+module part/task_def
+
+imports
+
+  part
+  task_def
+  
+context-free syntax
+
+  Part.TaskDefPart = TaskDef

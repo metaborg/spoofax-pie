@@ -1,0 +1,11 @@
+module statsem/part/task_def
+
+imports
+
+  statsem/part
+
+  signatures/part/task_def-sig
+
+rules
+
+  partOk(_, TaskDefPart(_)).

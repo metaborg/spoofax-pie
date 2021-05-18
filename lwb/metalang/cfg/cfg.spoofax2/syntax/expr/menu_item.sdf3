@@ -7,21 +7,23 @@ imports
 
 context-free sorts
 
+  MenuItem
   CommandActionProperty
   
 context-free syntax
 
-  Expr.Separator = <separator>
-  Expr.Menu = <menu <Expr> [
+  MenuItem.Separator = <separator>
+  MenuItem.Menu = <menu <Expr> [
   <{Expr "\n"}*>
 ]>
-  Expr.CommandAction = <command-action {
+  MenuItem.CommandAction = <command-action {
     <{CommandActionProperty "\n"}*>
   }>
+  Expr.MenuItem = <<MenuItem>>
 
   CommandActionProperty.CommandActionDisplayName   = <display-name = <Expr>>
   CommandActionProperty.CommandActionDescription   = <description = <Expr>>
-  CommandActionProperty.CommandActionDefType       = <command-def = <Expr>>
+  CommandActionProperty.CommandActionDef           = <command-def = <Expr>>
   CommandActionProperty.CommandActionExecutionType = <execution-type = <ExecutionType>>
   // TODO: initial arguments
   CommandActionProperty.CommandActionRequiredEditorSelectionTypes      = <required-editor-selection-types = [<{EditorSelectionType ", "}+>]>
@@ -56,3 +58,8 @@ context-free syntax
   //HierarchicalResourceType.Project   = <Project>
   HierarchicalResourceType.Directory = <Directory>
   HierarchicalResourceType.File      = <File>
+
+lexical syntax // Keywords
+
+  Keyword = "separator"
+  Keyword = "menu"

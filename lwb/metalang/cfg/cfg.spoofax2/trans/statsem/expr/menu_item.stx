@@ -3,31 +3,51 @@ module statsem/expr/menu_item
 imports
 
   statsem/expr
+  statsem/util
 
   signatures/expr/menu_item-sig
 
 rules
 
-  typeOfExpr(_, Separator()) = MENU_ITEM().
-  typeOfExpr(s, Menu(e_name, e_menu_items)) = MENU_ITEM() :- {t_menu_items}
-    typeOfExpr(s, e_name) == STRING() | error $[Expected string],
-    typesOfExpr(s, e_menu_items) == t_menu_items. // TODO: check menu item types
-  typeOfExpr(s, CommandAction(properties)) = MENU_ITEM() :-
-    commandActionPropertiesOk(s, properties).
-   
+  typeOfExpr(_, MenuItem(Separator())) = MENU_ITEM().
+  typeOfExpr(s, MenuItem(Menu(e_name, e_menu_items))) = MENU_ITEM() :-
+    typeOfExpr(s, e_name) == STRING() | error $[Expected string]@e_name,
+    //typesOfExprs(s, e_menu_items) == _.
+    exprsAreMenuItems(s, e_menu_items).
+  typeOfExpr(s, MenuItem(t@CommandAction(properties))) = MENU_ITEM() :-
+    commandActionPropertiesOk(s, properties),
+    hasCommandActionCommandDef(properties) == TRUE() | error $['command-def' property has not been set]@t,
+    hasCommandActionExecutionType(properties) == TRUE() | error $['execution-type' property has not been set]@t.
+  
+  exprIsMenuItem : scope * Expr
+  exprsAreMenuItems maps exprIsMenuItem(*, list(*))
+  exprIsMenuItem(s, e) :-
+    typeOfExpr(s, e) == MENU_ITEM() | error $[Expected menu item]@e.
+  
 rules // Command action property
 
   commandActionPropertyOk : scope * CommandActionProperty
   commandActionPropertiesOk maps commandActionPropertyOk(*, list(*))
   
   commandActionPropertyOk(s, CommandActionDisplayName(e)) :-
-    typeOfExpr(s, e) == STRING() | error $[Expected string].
+    typeOfExpr(s, e) == STRING() | error $[Expected string]@e.
   commandActionPropertyOk(s, CommandActionDescription(e)) :-
-    typeOfExpr(s, e) == STRING() | error $[Expected string].
-  commandActionPropertyOk(s, CommandActionDefType(e)) :-
-    typeOfExpr(s, e) == COMMAND_DEF() | error $[Expected command definition]. // TODO: also allow a Java type identifier
+    typeOfExpr(s, e) == STRING() | error $[Expected string]@e.
+  commandActionPropertyOk(s, CommandActionDef(e)) :- {T}
+    typeOfExpr(s, e) == T,
+    bOr(typeEq(T, COMMAND_DEF()), typeEq(T, JAVA_ID())) == TRUE() | error $[Expected command definition or Java type identifier]@e.
   commandActionPropertyOk(_, CommandActionExecutionType(_)).
   commandActionPropertyOk(_, CommandActionRequiredEditorSelectionTypes(_)).
   commandActionPropertyOk(_, CommandActionRequiredEditorFileTypes(_)).
   commandActionPropertyOk(_, CommandActionRequiredHierarchicalResourceTypes(_)).
   commandActionPropertyOk(_, CommandActionRequiredEnclosingResourceTypes(_)).
+
+  hasCommandActionCommandDef: list(CommandActionProperty) -> BOOL
+  hasCommandActionCommandDef([CommandActionDef(_)|_]) = TRUE().
+  hasCommandActionCommandDef([_|s]) = hasCommandActionCommandDef(s).
+  hasCommandActionCommandDef([]) = FALSE().
+  
+  hasCommandActionExecutionType: list(CommandActionProperty) -> BOOL
+  hasCommandActionExecutionType([CommandActionExecutionType(_)|_]) = TRUE().
+  hasCommandActionExecutionType([_|s]) = hasCommandActionExecutionType(s).
+  hasCommandActionExecutionType([]) = FALSE().

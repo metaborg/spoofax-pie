@@ -1,0 +1,17 @@
+module statsem/util
+
+signature
+
+  sorts BOOL constructors
+    TRUE  : BOOL
+    FALSE : BOOL
+
+rules
+
+  bAnd: BOOL * BOOL    -> BOOL
+  bAnd(TRUE(), TRUE() ) = TRUE().
+  bAnd(_     , _      ) = FALSE().
+
+  bOr: BOOL  * BOOL    -> BOOL
+  bOr(FALSE(), FALSE()) = FALSE().
+  bOr(_      , _      ) = TRUE().

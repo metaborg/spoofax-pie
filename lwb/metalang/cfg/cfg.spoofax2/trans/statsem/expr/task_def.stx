@@ -1,0 +1,11 @@
+module statsem/expr/task_def
+
+imports
+
+  statsem/expr
+
+  signatures/expr/task_def-sig
+
+rules
+
+  typeOfExpr(_, TaskDefExpr(_)) = TASK_DEF().

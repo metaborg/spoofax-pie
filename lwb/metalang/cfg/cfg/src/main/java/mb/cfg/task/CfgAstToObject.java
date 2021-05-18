@@ -13,6 +13,7 @@ import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.option.Option;
 import mb.common.util.Properties;
+import mb.constraint.pie.ConstraintAnalyzeTaskDef;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.adapter.AdapterProject;
@@ -75,7 +76,7 @@ public class CfgAstToObject {
     public static Output convert(
         ResourcePath rootDirectory,
         @Nullable ResourceKey cfgFile,
-        IStrategoTerm ast,
+        ConstraintAnalyzeTaskDef.Output analysisOutput,
         Properties properties,
         CompileLanguageInputCustomizer customizer
     ) throws InvalidAstShapeException, IllegalStateException {
@@ -421,6 +422,10 @@ public class CfgAstToObject {
             default:
                 throw new InvalidAstShapeException("a term of sort HierarchicalResourceType", appl);
         }
+    }
+
+    private static IStrategoTerm replaceRefs(ConstraintAnalyzeTaskDef.Output analysisOutput) {
+
     }
 }
 
