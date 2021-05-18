@@ -40,6 +40,7 @@ import mb.spoofax.compiler.language.StrategoRuntimeLanguageCompiler;
 import mb.spoofax.compiler.language.StylerLanguageCompiler;
 import mb.spoofax.compiler.platform.EclipseProjectCompiler;
 import mb.spoofax.compiler.util.Shared;
+import mb.spoofax.compiler.util.TypeInfo;
 import mb.spoofax.core.language.command.CommandContextType;
 import mb.spoofax.core.language.command.CommandExecutionType;
 import mb.spoofax.core.language.command.EditorFileType;
@@ -210,9 +211,15 @@ public class CfgAstToObject {
             final ExportsLanguageCompiler.Input.Builder builder = baseBuilder.withExports();
             // TODO: exports language properties
         });
-        parts.getAllSubTermsInListAsParts("TaskDefs").ifSome(subParts -> // TODO: refactored to expression
-            subParts.forAllSubtermsAsTypeInfo("TaskDef", adapterBuilder.project::addTaskDefs)
-        );
+
+        // LanguageAdapterCompilerInput > Task definitions
+        for(IStrategoTerm taskDefTerm : taskDefList) {
+            final String type = TermUtils.asJavaStringAt(taskDefTerm, 0).orElseThrow(() -> new InvalidAstShapeException("Java type id as first subterm", taskDefTerm));
+            final TypeInfo typeInfo = TypeInfo.of(type);
+            adapterBuilder.project.addTaskDefs(typeInfo);
+        }
+
+        // LanguageAdapterCompilerInput > Command definitions
         parts.getAllSubTermsInListAsParts("CommandDef").ifSome(commandDefParts -> {
             final CommandDefRepr.Builder commandDefBuilder = CommandDefRepr.builder();
             commandDefParts.forOneSubtermAsTypeInfo("CommandDefType", commandDefBuilder::type);
@@ -241,6 +248,8 @@ public class CfgAstToObject {
             });
             adapterBuilder.project.addCommandDefs(commandDefBuilder.build());
         });
+
+        // LanguageAdapterCompilerInput > Menus
         parts.forAllSubTermsInList("MainMenu", menuItem -> {
             adapterBuilder.project.addMainMenuItems(toMenuItemRepr(parts, menuItem));
         });
