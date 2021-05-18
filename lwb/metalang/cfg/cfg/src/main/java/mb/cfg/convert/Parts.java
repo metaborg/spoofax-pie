@@ -1,4 +1,4 @@
-package mb.cfg.task;
+package mb.cfg.convert;
 
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Severity;
@@ -250,10 +250,18 @@ class Parts {
 
 
     public static String toJavaString(IStrategoTerm term) {
-        return removeDoubleQuotes(TermUtils.toJavaString(term));
+        if(TermUtils.isAppl(term, "String", 1)) {
+            return tryRemoveDoubleQuotes(TermUtils.toJavaStringAt(term, 0));
+        } else if(TermUtils.isAppl(term, "Path", 1) || TermUtils.isAppl(term, "JavaId", 1) || TermUtils.isAppl(term, "SortId", 1) || TermUtils.isAppl(term, "StrategyId", 1)) {
+            return TermUtils.toJavaStringAt(term, 0);
+        } else if(TermUtils.isString(term)) {
+            return tryRemoveDoubleQuotes(TermUtils.toJavaString(term));
+        } else {
+            throw new InvalidAstShapeException("string or String/Path/JavaId/SortId/StrategyId application", term);
+        }
     }
 
-    public static String removeDoubleQuotes(String string) {
+    public static String tryRemoveDoubleQuotes(String string) {
         if(string.startsWith("\"")) {
             string = string.substring(1);
         }

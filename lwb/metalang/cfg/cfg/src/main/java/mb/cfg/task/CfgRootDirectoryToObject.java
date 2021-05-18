@@ -3,7 +3,6 @@ package mb.cfg.task;
 import mb.cfg.CfgScope;
 import mb.common.result.Result;
 import mb.common.util.Properties;
-import mb.constraint.pie.ConstraintAnalyzeTaskDef;
 import mb.jsglr1.common.JSGLR1ParseException;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
@@ -28,13 +27,21 @@ public class CfgRootDirectoryToObject implements TaskDef<ResourcePath, Result<Cf
     private final ResourceService resourceService;
     private final CfgParse parse;
     private final CfgAnalyze analyze;
+    private final CfgNormalize normalize;
     private final CfgToObject toObject;
 
     @Inject
-    public CfgRootDirectoryToObject(ResourceService resourceService, CfgParse parse, CfgAnalyze analyze, CfgToObject toObject) {
+    public CfgRootDirectoryToObject(
+        ResourceService resourceService,
+        CfgParse parse,
+        CfgAnalyze analyze,
+        CfgNormalize normalize,
+        CfgToObject toObject
+    ) {
         this.resourceService = resourceService;
         this.parse = parse;
         this.analyze = analyze;
+        this.normalize = normalize;
         this.toObject = toObject;
     }
 
@@ -45,11 +52,25 @@ public class CfgRootDirectoryToObject implements TaskDef<ResourcePath, Result<Cf
     @Override
     public Result<CfgToObject.Output, CfgRootDirectoryToObjectException> exec(ExecContext context, ResourcePath rootDirectory) throws Exception {
         final ResourcePath cfgFile = rootDirectory.appendRelativePath("spoofaxc.cfg");
-        final Supplier<Result<ConstraintAnalyzeTaskDef.Output, ?>> analysisOutputSupplier = analyze.createSupplier(new CfgAnalyze.Input(cfgFile, parse.inputBuilder().withFile(cfgFile).rootDirectoryHint(rootDirectory).buildAstSupplier()));
+        final Supplier<Result<IStrategoTerm, JSGLR1ParseException>> astSupplier = parse.inputBuilder().withFile(cfgFile).rootDirectoryHint(rootDirectory).buildAstSupplier();
+        final Supplier<Result<CfgAnalyze.Output, ?>> analyzeOutputSupplier = analyze.createSupplier(new CfgAnalyze.Input(cfgFile, astSupplier));
+        final Result<CfgAnalyze.Output, ?> analyzeOutput = context.require(analyzeOutputSupplier);
+        if(analyzeOutput.isErr()) {
+            //noinspection ConstantConditions
+            return Result.ofErr(CfgRootDirectoryToObjectException.analyzeExceptionalFail(analyzeOutput.getErr(), cfgFile));
+        } else {
+            //noinspection ConstantConditions
+            final CfgAnalyze.Output output = analyzeOutput.get();
+            //noinspection ConstantConditions
+            if(output.result.messages.containsError()) {
+                return Result.ofErr(CfgRootDirectoryToObjectException.analyzeFail(output.result.messages.toKeyed(cfgFile), cfgFile));
+            }
+        }
+        final Supplier<Result<IStrategoTerm, ?>> normalizedAstSupplier = normalize.createSupplier(analyzeOutputSupplier);
         final ResourcePath lockFilePath = rootDirectory.appendRelativePath("spoofaxc.lock");
         final WritableResource lockFile = resourceService.getWritableResource(lockFilePath);
         final Supplier<Result<Properties, IOException>> propertiesSupplier = new PropertiesSupplier(lockFile);
-        return context.require(toObject, new CfgToObject.Input(rootDirectory, cfgFile, analysisOutputSupplier, propertiesSupplier))
+        return context.require(toObject, new CfgToObject.Input(rootDirectory, cfgFile, normalizedAstSupplier, propertiesSupplier))
             .mapErr(e -> CfgRootDirectoryToObjectException.convertFail(e, cfgFile, lockFilePath))
             .flatMap(output -> {
                 try {

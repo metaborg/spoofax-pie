@@ -1,17 +1,32 @@
 package mb.cfg.task;
 
+import mb.common.message.HasOptionalMessages;
+import mb.common.message.KeyedMessages;
 import mb.common.util.ADT;
 import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @ADT
-public abstract class CfgRootDirectoryToObjectException extends Exception {
+public abstract class CfgRootDirectoryToObjectException extends Exception implements HasOptionalMessages {
     public interface Cases<R> {
+        R analyzeExceptionalFail(Exception exception, ResourceKey cfgFile);
+
+        R analyzeFail(KeyedMessages messages, ResourceKey cfgFile);
+
         R convertFail(CfgToObjectException cfgToObjectException, ResourceKey cfgFile, ResourceKey lockFile);
 
         R lockFileWriteFail(IOException ioException, ResourceKey cfgFile, ResourceKey lockfile);
+    }
+
+    public static CfgRootDirectoryToObjectException analyzeExceptionalFail(Exception exception, ResourceKey cfgFile) {
+        return withCause(CfgRootDirectoryToObjectExceptions.analyzeExceptionalFail(exception, cfgFile), exception);
+    }
+
+    public static CfgRootDirectoryToObjectException analyzeFail(KeyedMessages messages, ResourceKey cfgFile) {
+        return CfgRootDirectoryToObjectExceptions.analyzeFail(messages, cfgFile);
     }
 
     public static CfgRootDirectoryToObjectException convertFail(
@@ -39,11 +54,11 @@ public abstract class CfgRootDirectoryToObjectException extends Exception {
 
     public abstract <R> R match(Cases<R> cases);
 
-    public static CfgRootDirectoryToObjectExceptions.CasesMatchers.TotalMatcher_ConvertFail cases() {
+    public static CfgRootDirectoryToObjectExceptions.CasesMatchers.TotalMatcher_AnalyzeExceptionalFail cases() {
         return CfgRootDirectoryToObjectExceptions.cases();
     }
 
-    public CfgRootDirectoryToObjectExceptions.CaseOfMatchers.TotalMatcher_ConvertFail caseOf() {
+    public CfgRootDirectoryToObjectExceptions.CaseOfMatchers.TotalMatcher_AnalyzeExceptionalFail caseOf() {
         return CfgRootDirectoryToObjectExceptions.caseOf(this);
     }
 
@@ -54,6 +69,8 @@ public abstract class CfgRootDirectoryToObjectException extends Exception {
 
     @Override public String getMessage() {
         return caseOf()
+            .analyzeExceptionalFail((e, cfgFile) -> "Failed to analyze CFG file '" + cfgFile + "'")
+            .analyzeFail((messages, cfgFile) -> "Analyzing CFG file '" + cfgFile + "' produced errors")
             .convertFail((e, cfgFile, lockFile) -> "Failed to convert CFG file '" + cfgFile + "' with lock file '" + lockFile + "' to a language compiler input object")
             .lockFileWriteFail((e, cfgFile, lockFile) -> "Failed to write to lock file '" + lockFile + "'")
             ;
@@ -61,6 +78,10 @@ public abstract class CfgRootDirectoryToObjectException extends Exception {
 
     @Override public Throwable fillInStackTrace() {
         return this; // Do nothing so that no stack trace is created, saving memory and CPU time.
+    }
+
+    @Override public Optional<KeyedMessages> getOptionalMessages() {
+        return CfgRootDirectoryToObjectExceptions.getMessages(this);
     }
 
 

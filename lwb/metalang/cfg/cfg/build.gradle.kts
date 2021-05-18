@@ -38,6 +38,7 @@ languageProject {
     withConstraintAnalyzer().run {
       enableNaBL2(false)
       enableStatix(true)
+      multiFile(false)
     }
     withStrategoRuntime()
   }
@@ -46,7 +47,9 @@ spoofax2BasedLanguageProject {
   compilerInput {
     withParser()
     withStyler()
-    withConstraintAnalyzer()
+    withConstraintAnalyzer().run {
+      copyStatix(true)
+    }
     withStrategoRuntime().run {
       copyCtree(true)
       copyClasses(false)
@@ -71,9 +74,10 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   addAdditionalModules(packageId, "CfgCustomizerModule");
 
   // Config object creation tasks.
+  val normalize = TypeInfo.of(taskPackageId, "CfgNormalize")
   val toObject = TypeInfo.of(taskPackageId, "CfgToObject")
   val rootDirectoryToObject = TypeInfo.of(taskPackageId, "CfgRootDirectoryToObject")
-  addTaskDefs(toObject, rootDirectoryToObject)
+  addTaskDefs(normalize, toObject, rootDirectoryToObject)
 
   // Manual multi-file check implementation.
   isMultiFile(false)

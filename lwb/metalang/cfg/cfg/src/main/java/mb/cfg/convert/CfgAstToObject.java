@@ -1,4 +1,4 @@
-package mb.cfg.task;
+package mb.cfg.convert;
 
 import mb.cfg.CompileLanguageInput;
 import mb.cfg.CompileLanguageInputCustomizer;
@@ -13,7 +13,6 @@ import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.option.Option;
 import mb.common.util.Properties;
-import mb.constraint.pie.ConstraintAnalyzeTaskDef;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.adapter.AdapterProject;
@@ -76,12 +75,14 @@ public class CfgAstToObject {
     public static Output convert(
         ResourcePath rootDirectory,
         @Nullable ResourceKey cfgFile,
-        ConstraintAnalyzeTaskDef.Output analysisOutput,
+        IStrategoTerm normalizedAst,
         Properties properties,
         CompileLanguageInputCustomizer customizer
     ) throws InvalidAstShapeException, IllegalStateException {
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
-        final IStrategoList partsList = TermUtils.asListAt(ast, 0).orElseThrow(() -> new InvalidAstShapeException("part list as first subterm", ast));
+        final IStrategoList taskDefList = TermUtils.asListAt(normalizedAst, 0).orElseThrow(() -> new InvalidAstShapeException("task definition list as first subterm", normalizedAst));
+        final IStrategoList commandDefList = TermUtils.asListAt(normalizedAst, 1).orElseThrow(() -> new InvalidAstShapeException("command definition list as second subterm", normalizedAst));
+        final IStrategoList partsList = TermUtils.asListAt(normalizedAst, 2).orElseThrow(() -> new InvalidAstShapeException("parts list as third subterm", normalizedAst));
         final Parts parts = new Parts(messagesBuilder, cfgFile, partsList);
 
         // Shared
@@ -359,7 +360,7 @@ public class CfgAstToObject {
             case "Separator":
                 return MenuItemRepr.separator();
             case "Menu": {
-                final String displayName = Parts.removeDoubleQuotes(TermUtils.asJavaStringAt(appl, 0).orElseThrow(() -> new InvalidAstShapeException("a string as first subterm", appl)));
+                final String displayName = Parts.tryRemoveDoubleQuotes(TermUtils.asJavaStringAt(appl, 0).orElseThrow(() -> new InvalidAstShapeException("a string as first subterm", appl)));
                 final IStrategoList subMenuItemsTerm = TermUtils.asListAt(appl, 1).orElseThrow(() -> new InvalidAstShapeException("a list of sub-menu items as second subterm", appl));
                 final List<MenuItemRepr> subMenuItems = subMenuItemsTerm.getSubterms().stream().map(t -> toMenuItemRepr(mainParts, t)).collect(Collectors.toList());
                 return MenuItemRepr.menu(displayName, subMenuItems);
@@ -422,10 +423,6 @@ public class CfgAstToObject {
             default:
                 throw new InvalidAstShapeException("a term of sort HierarchicalResourceType", appl);
         }
-    }
-
-    private static IStrategoTerm replaceRefs(ConstraintAnalyzeTaskDef.Output analysisOutput) {
-
     }
 }
 

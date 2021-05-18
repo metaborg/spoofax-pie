@@ -1,4 +1,4 @@
-package mb.cfg.task;
+package mb.cfg.convert;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 

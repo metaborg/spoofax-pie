@@ -1,6 +1,6 @@
 package mb.cfg;
 
-import mb.cfg.task.CfgAstToObject;
+import mb.cfg.convert.CfgAstToObject;
 import mb.cfg.task.CfgToObject;
 import mb.spoofax.compiler.adapter.AdapterProject;
 import mb.spoofax.compiler.adapter.AdapterProjectCompilerInputBuilder;
