@@ -32,7 +32,7 @@ languageProject {
   }
   compilerInput {
     withParser().run {
-      startSymbol("Configuration")
+      startSymbol("Start")
     }
     withStyler()
     withConstraintAnalyzer().run {

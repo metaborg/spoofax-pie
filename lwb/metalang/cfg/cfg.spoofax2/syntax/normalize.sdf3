@@ -1,0 +1,21 @@
+module normalize
+
+imports
+
+  cfg
+  task_def
+  command
+  part
+  
+context-free syntax
+
+  Start.NormalizedConfiguration = <all-task-definitions [
+  <{TaskDef "\n"}*>
+]
+all-command-defs [
+  <{CommandDef "\n"}*>
+]
+relevant-parts [
+  <{Part "\n"}*>
+]
+>

@@ -1,0 +1,50 @@
+module normalize
+
+imports
+
+  libspoofax/stratego/debug
+
+  statixruntime
+  statix/api
+  signatures/statix/-
+  injections/statix/-
+  statix/runtime/-
+  
+  signatures/-
+  signatures/part/-
+  
+  pp
+
+rules
+
+  debug-show-normalized:
+    (ast, _, _, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"resolved.aterm")> path
+    ; result   := <normalize> ast
+
+  debug-show-normalized-pp:
+    (ast, _, _, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"resolved.cfg")> path
+    ; result   := <normalize; pp-cfg-string> ast
+
+rules
+
+  normalize: Configuration(parts) -> NormalizedConfiguration(task-defs, command-defs, parts')
+  with
+    task-defs    := <collect-all(?TaskDef(_)); resolve-values> parts
+  ; command-defs := <collect-all(?CommandDef(_)); resolve-values> parts
+  ; parts'       := <remove-all(?Let(_, _) <+ ?TaskDefPart(_)); resolve-values> parts
+
+strategies
+
+  resolve-values = innermost(resolve-value)
+  
+rules
+
+  resolve-value: t@Ref(i) -> v
+  with
+    a   := <stx-get-ast-analysis> t
+  ; ref := <stx--get-ast-property(|a, Ref())> i
+  ; v   := <stx-get-ast-property(|a, "val")> ref

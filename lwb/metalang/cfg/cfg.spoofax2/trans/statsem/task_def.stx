@@ -1,0 +1,13 @@
+module statsem/task_def
+
+imports
+
+  statsem/expr
+
+  signatures/task_def-sig
+
+rules
+
+  taskDefOk : scope * TaskDef
+  taskDefsOk maps taskDefOk(*, list(*))
+  taskDefOk(_, TaskDef(_)).

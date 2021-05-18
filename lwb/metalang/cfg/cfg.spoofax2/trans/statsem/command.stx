@@ -1,0 +1,71 @@
+module statsem/command
+
+imports
+
+  statsem/expr
+  statsem/util
+
+  signatures/command-sig
+
+rules // Command definition and properties
+
+  commandDefOk : scope * CommandDef
+  commandDefsOk maps commandDefOk(*, list(*))
+  commandDefOk(s, t@CommandDef(properties)) :-
+    commandDefPropertiesOk(s, properties),
+    hasCommandDefTaskDef(properties) == TRUE() | error $['task-def' property has not been set]@t,
+    hasCommandDefDisplayName(properties) == TRUE() | error $['display-name' property has not been set]@t.
+
+  commandDefPropertyOk : scope * CommandDefProperty
+  commandDefPropertiesOk maps commandDefPropertyOk(*, list(*))
+  
+  commandDefPropertyOk(s, CommandDefType(e)) :- 
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e.
+  commandDefPropertyOk(s, CommandDefTaskDef(e)) :- {T}
+    typeOfExpr(s, e) == T,
+    bOr(typeEq(T, TASK_DEF()), typeEq(T, JAVA_ID())) == TRUE() | error $[Expected task definition or Java type identifier]@e.
+  commandDefPropertyOk(s, CommandDefArgsType(e)) :- 
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e.
+  commandDefPropertyOk(s, CommandDefDisplayName(e)) :- 
+    typeOfExpr(s, e) == STRING() | error $[Expected string]@e.
+  commandDefPropertyOk(s, CommandDefDescription(e)) :- 
+    typeOfExpr(s, e) == STRING() | error $[Expected string]@e.
+  commandDefPropertyOk(_, CommandDefSupportedExecutionTypes(_)).
+  commandDefPropertyOk(s, CommandDefParameters(parameters)) :-
+    parametersOk(s, parameters).
+
+  hasCommandDefTaskDef: list(CommandDefProperty) -> BOOL
+  hasCommandDefTaskDef([CommandDefTaskDef(_)|_]) = TRUE().
+  hasCommandDefTaskDef([_|s]) = hasCommandDefTaskDef(s).
+  hasCommandDefTaskDef([]) = FALSE().
+
+  hasCommandDefDisplayName: list(CommandDefProperty) -> BOOL
+  hasCommandDefDisplayName([CommandDefDisplayName(_)|_]) = TRUE().
+  hasCommandDefDisplayName([_|s]) = hasCommandDefDisplayName(s).
+  hasCommandDefDisplayName([]) = FALSE().
+
+rules // Parameter and properties
+
+  parameterOk : scope * Parameter
+  parametersOk maps parameterOk(*, list(*))
+
+  parameterOk(s, t@Parameter(id, properties)) :-
+    parameterPropertiesOk(s, properties),
+    hasParameterType(properties) == TRUE() | error $['type' property has not been set]@t. 
+    // TODO: check for duplicate parameter names
+
+  parameterPropertyOk : scope * ParameterProperty
+  parameterPropertiesOk maps parameterPropertyOk(*, list(*))
+
+  parameterPropertyOk(s, ParameterType(e)) :- 
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e.
+  parameterPropertyOk(s, ParameterRequired(e)) :- 
+    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
+  parameterPropertyOk(s, ParameterConverter(e)) :- 
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e.
+  parameterPropertyOk(_, ParameterArgumentProviders(_)).
+  
+  hasParameterType: list(ParameterProperty) -> BOOL
+  hasParameterType([ParameterType(_)|_]) = TRUE().
+  hasParameterType([_|s]) = hasParameterType(s).
+  hasParameterType([]) = FALSE().

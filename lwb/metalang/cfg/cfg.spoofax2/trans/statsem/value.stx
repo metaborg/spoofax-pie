@@ -15,9 +15,16 @@ signature
 
 rules
 
-  partOk(s, Let(id, e)) :- {T}
+  partOk(s, Let(id, e)) :- {T e'}
     typeOfExpr(s, e) == T,
-    declareVal(s, id, T, e).
+    valOfExpr(s, e) == e',
+    declareVal(s, id, T, e').
+
+  valOfExpr : scope * Expr -> Expr
+  valOfExpr(s, Ref(id)) = e' :- {id' e}
+    resolveVal(s, id) == [(_, (id', (_, e)))|_],
+    valOfExpr(s, e) == e'.
+  valOfExpr(s, e) = e.
 
   typeOfExpr(s, Ref(id)) = T :- {id' e}
     resolveVal(s, id) == [(_, (id', (T, e)))|_] | error $[Value [id] is not defined],

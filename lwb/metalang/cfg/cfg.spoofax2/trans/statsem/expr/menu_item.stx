@@ -12,7 +12,6 @@ rules
   typeOfExpr(_, MenuItem(Separator())) = MENU_ITEM().
   typeOfExpr(s, MenuItem(Menu(e_name, e_menu_items))) = MENU_ITEM() :-
     typeOfExpr(s, e_name) == STRING() | error $[Expected string]@e_name,
-    //typesOfExprs(s, e_menu_items) == _.
     exprsAreMenuItems(s, e_menu_items).
   typeOfExpr(s, MenuItem(t@CommandAction(properties))) = MENU_ITEM() :-
     commandActionPropertiesOk(s, properties),

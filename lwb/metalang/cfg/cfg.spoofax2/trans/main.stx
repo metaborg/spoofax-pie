@@ -17,12 +17,22 @@ imports
   statsem/part/task_def
   
   statsem/value
+  statsem/task_def
+  statsem/command
   
   signatures/cfg-sig
+  signatures/normalize-sig
 
 rules
 
-  configurationOk : Configuration
-  configurationOk(Configuration(parts)) :- {s_root}
+  startOk : Start
+  startOk(Configuration(parts)) :- {s_root}
     new s_root,
     partsOk(s_root, parts).
+  startOk(NormalizedConfiguration(taskDefs, commandDefs, parts)) :- {s_task_defs s_command_defs s_parts}
+    new s_task_defs,
+    taskDefsOk(s_task_defs, taskDefs),
+    new s_command_defs,
+    commandDefsOk(s_command_defs, commandDefs),
+    new s_parts,
+    partsOk(s_parts, parts).

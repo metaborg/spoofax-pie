@@ -19,15 +19,16 @@ imports
   expr/menu_item
   
   value
+  normalize
 
 context-free sorts
 
-  Configuration
+  Start
 
 context-free start-symbols
   
-  Configuration
+  Start
 
 context-free syntax
   
-  Configuration.Configuration = <<{Part "\n"}*>>
+  Start.Configuration = <<{Part "\n"}*>>

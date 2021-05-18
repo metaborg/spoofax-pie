@@ -8,57 +8,11 @@ imports
   part
   command
 
-context-free sorts
+imports
 
-  CommandDef
-  CommandDefProperty
-
-context-free syntax // Command definition
-
-  Expr.CommandDef = <command-def {
-  <{CommandDefProperty "\n"}*>
-}>
-
-  CommandDefProperty.CommandDefType                    = <type = <Expr>>
-  CommandDefProperty.CommandDefTaskDef                 = <task-def = <Expr>>
-  CommandDefProperty.CommandDefArgsType                = <args-type = <Expr>>
-  CommandDefProperty.CommandDefDisplayName             = <display-name = <Expr>>
-  CommandDefProperty.CommandDefDescription             = <description = <Expr>>
-  CommandDefProperty.CommandDefSupportedExecutionTypes = <supported-execution-types = [<{ExecutionType ","}+>]>
-  CommandDefProperty.CommandDefParameters              = <parameters = [
-  <{Parameter "\n"}*>
-]>
-
-context-free sorts // Parameter
-
-  Parameter
-  ParameterProperty
+  expr
+  task_def
   
 context-free syntax
 
-  Parameter.Parameter = <<JavaIdLit> = parameter {
-  <{ParameterProperty "\n"}*>
-}>
-
-  ParameterProperty.ParameterType      = <type = <Expr>>
-  ParameterProperty.ParameterRequired  = <required = <Expr>>
-  ParameterProperty.ParameterConverter = <converter-type = <Expr>>
-  ParameterProperty.ParameterArgumentProviders = <argument-providers = [
-  <{ArgumentProvider "\n"}*>
-]>
-
-context-free sorts // Argument provider
-
-  ArgumentProvider
-
-context-free syntax
-
-  ArgumentProvider.ValueArgumentProvider            = <Value(<Expr>)>
-  ArgumentProvider.ContextArgumentProvider          = <Context(<CommandContext>)>
-  ArgumentProvider.EnclosingContextArgumentProvider = <EnclosingContext(<EnclosingCommandContext>)>
-
-  
-lexical syntax // Keywords
-
-  Keyword = "task-def"
-  Keyword = "command-def"
+  Expr.CommandDefExpr = CommandDef

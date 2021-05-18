@@ -1,5 +1,66 @@
 module command
 
+imports
+
+  lex/java_id
+  lex/keyword
+  expr
+  part
+  command
+
+
+context-free sorts // Command definition
+
+  CommandDef
+  CommandDefProperty
+
+context-free syntax
+
+  CommandDef.CommandDef = <command-def {
+  <{CommandDefProperty "\n"}*>
+}>
+
+  CommandDefProperty.CommandDefType                    = <type = <Expr>>
+  CommandDefProperty.CommandDefTaskDef                 = <task-def = <Expr>>
+  CommandDefProperty.CommandDefArgsType                = <args-type = <Expr>>
+  CommandDefProperty.CommandDefDisplayName             = <display-name = <Expr>>
+  CommandDefProperty.CommandDefDescription             = <description = <Expr>>
+  CommandDefProperty.CommandDefSupportedExecutionTypes = <supported-execution-types = [<{ExecutionType ","}+>]>
+  CommandDefProperty.CommandDefParameters              = <parameters = [
+  <{Parameter "\n"}*>
+]>
+
+
+context-free sorts // Parameter
+
+  Parameter
+  ParameterProperty
+  
+context-free syntax
+
+  Parameter.Parameter = <<JavaIdLit> = parameter {
+  <{ParameterProperty "\n"}*>
+}>
+
+  ParameterProperty.ParameterType      = <type = <Expr>>
+  ParameterProperty.ParameterRequired  = <required = <Expr>>
+  ParameterProperty.ParameterConverter = <converter-type = <Expr>>
+  ParameterProperty.ParameterArgumentProviders = <argument-providers = [
+  <{ArgumentProvider "\n"}*>
+]>
+
+
+context-free sorts // Argument provider
+
+  ArgumentProvider
+
+context-free syntax
+
+  ArgumentProvider.ValueArgumentProvider            = <Value(<Expr>)>
+  ArgumentProvider.ContextArgumentProvider          = <Context(<CommandContext>)>
+  ArgumentProvider.EnclosingContextArgumentProvider = <EnclosingContext(<EnclosingCommandContext>)>
+
+  
 context-free sorts // Execution type
 
   ExecutionType
@@ -8,6 +69,7 @@ context-free syntax
 
   ExecutionType.Once          = <Once>
   ExecutionType.Continuous    = <Continuous>
+
 
 context-free sorts // (Enclosing) command context
 
@@ -26,3 +88,8 @@ context-free syntax
   
   EnclosingCommandContext.ProjectEnclosingContext   = <Project>
   EnclosingCommandContext.DirectoryEnclosingContext = <Directory>
+
+lexical syntax // Keywords
+
+  Keyword = "task-def"
+  Keyword = "command-def"
