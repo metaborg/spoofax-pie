@@ -415,12 +415,14 @@ public class CfgAstToObject {
                 return MenuItemRepr.separator();
             case "Menu": {
                 final String displayName = Parts.toJavaString(appl.getSubterm(0));
-                final IStrategoList subMenuItemsTerm = TermUtils.asListAt(appl, 1).orElseThrow(() -> new InvalidAstShapeException("a list of sub-menu items as second subterm", appl));
+                final IStrategoList subMenuItemsTerm = TermUtils.asListAt(appl, 1)
+                    .orElseThrow(() -> new InvalidAstShapeException("a list of sub-menu items as second subterm", appl));
                 final List<MenuItemRepr> subMenuItems = subMenuItemsTerm.getSubterms().stream().map(t -> toMenuItemRepr(mainParts, t, languageAdapterShared)).collect(Collectors.toList());
                 return MenuItemRepr.menu(displayName, subMenuItems);
             }
             case "CommandAction": {
-                final IStrategoList properties = TermUtils.asListAt(appl, 0).orElseThrow(() -> new InvalidAstShapeException("a list of command action properties as first subterm", appl));
+                final IStrategoList properties = TermUtils.asListAt(appl, 0)
+                    .orElseThrow(() -> new InvalidAstShapeException("a list of command action properties as first subterm", appl));
                 final Parts commandActionParts = mainParts.subParts(properties);
                 final CommandActionRepr.Builder commandActionBuilder = CommandActionRepr.builder();
 
@@ -433,11 +435,16 @@ public class CfgAstToObject {
 
                 final CommandRequestRepr.Builder commandRequestBuilder = CommandRequestRepr.builder();
                 commandRequestBuilder.commandDefType(commandDefType);
-                commandActionParts.forOneSubterm("CommandActionExecutionType", type -> commandRequestBuilder.executionType(toCommandExecutionType(type)));
+                // CommandActionExecutionType must be set, ensured by static semantics.
+                final CommandExecutionType commandExecutionType = commandActionParts.getOneSubterm("CommandActionExecutionType")
+                    .map(CfgAstToObject::toCommandExecutionType)
+                    .unwrapOrElseThrow(() -> new InvalidAstShapeException("command action with one CommandActionExecutionType option", actualMenuItem));
+                commandRequestBuilder.executionType(commandExecutionType);
                 // TODO: initial arguments
                 commandActionBuilder.commandRequest(commandRequestBuilder.build());
 
-                final String displayName = commandActionParts.getOneSubtermAsString("CommandActionDisplayName").unwrapOrElse(() -> getCommandDefDisplayName(commandDefParts, commandDefTerm));
+                final String displayName = commandActionParts.getOneSubtermAsString("CommandActionDisplayName")
+                    .unwrapOrElse(() -> getCommandDefDisplayName(commandDefParts, commandDefTerm) + (commandExecutionType == CommandExecutionType.ManualContinuous ? " (continuous)" : ""));
                 commandActionBuilder.displayName(displayName);
                 commandActionParts.getOneSubtermAsString("CommandActionDescription").orElse(() -> getCommandDefDescription(commandDefParts)).ifSome(commandActionBuilder::description);
                 commandActionParts.forAllSubTermsInList("CommandActionRequiredEditorSelectionTypes", term -> commandActionBuilder.addRequiredEditorSelectionTypes(toEditorSelectionType(term)));

@@ -159,73 +159,80 @@ The CFG meta-language is a configuration language where we configure and glue to
 Add the following configuration to the end of the file:
 
 ```cfg
-task-defs {
-  mb.helloworld.task.HelloWorldShowParsedAst
-}
-
+let showParsedAst = task-def mb.helloworld.task.HelloWorldShowParsedAst
 ```
 
-This registers the task definition class that we just created.
+This registers the task definition class that we just created, and makes it available under the `showParsedAst` name in the configuration.
 
 ### Creating the command
 
 To create the command, add the following configuration to the end of the `spoofax.cfg` file:
 
 ```cfg
-command-def {
-  type = mb.helloworld.HelloWorldShowParsedAstCommand
-  task-def-type = mb.helloworld.task.HelloWorldShowParsedAst
-  args-type = mb.helloworld.task.HelloWorldShowParsedAst.Args
+let showParsedAstCommand = command-def {
+  type = java mb.helloworld.command.HelloWorldShowParsedAstCommand
+  task-def = showParsedAst
+  args-type = java mb.helloworld.task.HelloWorldShowParsedAst.Args
   display-name = "Show parsed AST"
   description = "Shows the parsed AST"
-  supported-execution-types = ManualOnce, ManualContinuous
-  parameters = {
-    file = {
-      type = mb.resource.ResourceKey
+  supported-execution-types = [Once, Continuous]
+  parameters = [
+    file = parameter {
+      type = java mb.resource.ResourceKey
       required = true
-      argument-providers = {
-        Context(File)
-      }
+      argument-providers = [Context(File)]
     }
-  }
+  ]
 }
 ```
 
 !!! todo
     Explain this configuration.
 
+Some properties set above are set to their conventional (default) value, or are optional, so we can leave them out. Replace the command definition with the following code:
+
+```cfg
+let showParsedAstCommand = command-def {
+  task-def = showParsedAst
+  display-name = "Show parsed AST"
+  parameters = [
+    file = parameter {
+      type = java mb.resource.ResourceKey
+      argument-providers = [Context(File)]
+    }
+  ]
+}
+```
+
+!!! todo
+    Explain conventions and optionals.
+
 ### Adding the menu item
 
 To add the menu item, add the following configuration to the end of the `spoofax.cfg` file:
 
 ```cfg
-editor-context-menu {
-  menu "Debug" {
+editor-context-menu [
+  menu "Debug" [
     command-action {
-      display-name = "Show parsed AST"
-      description = "Shows the parsed AST"
-      command-def-type = mb.helloworld.HelloWorldShowParsedAstCommand
-      execution-type = ManualOnce
+      command-def = showParsedAstCommand
+      execution-type = Once
     }
     command-action {
-      display-name = "Show parsed AST (continuous)"
-      description = "Shows the parsed AST continuously"
-      command-def-type = mb.helloworld.HelloWorldShowParsedAstCommand
-      execution-type = ManualContinuous
+      command-def = showParsedAstCommand
+      execution-type = Continuous
     }
-  }
-}
-resource-context-menu {
-  menu "Debug" {
+  ]
+]
+resource-context-menu [
+  menu "Debug" [
     command-action {
-      display-name = "Show parsed AST"
-      description = "Shows the parsed AST"
-      command-def-type = mb.helloworld.HelloWorldShowParsedAstCommand
-      execution-type = ManualOnce
-      required-hierarchical-resource-types = File
+      command-def = showParsedAstCommand
+      execution-type = Once
+      required-resource-types = [File]
     }
-  }
-}
+  ]
+]
 ```
 
 !!! todo
@@ -319,11 +326,11 @@ rules
 
   replace-world: Hello() -> Hello()
   replace-world: World() -> Hello()
-  replace-worlds = topdown(replace-world)
+  replace-worlds = topdown(try(replace-world))
 ```
 
 The `#!stratego replace-world` rule passes `#!stratego Hello()` terms but rewrites `#!stratego World()` terms to `#!stratego Hello()`.
-The `#!stratego replace-worlds` strategy applies `#!stratego replace-world` in a top-down manner over the entire AST.
+The `#!stratego replace-worlds` strategy tries to apply `#!stratego replace-world` in a top-down manner over the entire AST.
 
 Now we add a task and command-task for this transformation.
 We define two separate tasks to keep separate
@@ -338,6 +345,7 @@ Right-click the `mb.helloworld.task` package and create the `HelloWorldReplaceWo
 package mb.helloworld.task;
 
 import mb.helloworld.HelloWorldClassLoaderResources;
+import mb.helloworld.HelloWorldScope;
 import mb.pie.api.ExecContext;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.stratego.pie.AstStrategoTransformTaskDef;
@@ -459,67 +467,50 @@ This class very similar to `HelloWorldShowParsedAst`, but runs the `HelloWorldRe
 Now open `helloworld/spoofax.cfg` again and register the tasks by adding:
 
 ```cfg
-task-defs {
-  mb.helloworld.task.HelloWorldReplaceWorlds
-  mb.helloworld.task.HelloWorldShowReplaceWorlds
-}
+task-def mb.helloworld.task.HelloWorldReplaceWorlds
+let showReplaceWorlds = task-def mb.helloworld.task.HelloWorldShowReplaceWorlds
 ```
 
 Then add a command for it by adding:
 
 ```cfg
-command-def {
-  type = mb.helloworld.HelloWorldShowReplaceWorldsCommand
-  task-def-type = mb.helloworld.task.HelloWorldShowReplaceWorlds
-  args-type = mb.helloworld.task.HelloWorldShowReplaceWorlds.Args
-  display-name = "Show parsed AST"
-  description = "Shows the parsed AST"
-  supported-execution-types = ManualOnce, ManualContinuous
-  parameters = {
-    file = {
-      type = mb.resource.ResourceKey
-      required = true
-      argument-providers = {
-        Context(File)
-      }
+let showReplaceWorldsCommand = command-def {
+  task-def = showReplaceWorlds
+  display-name = "Show result of replace worlds transformation"
+  description = "Shows the resulting AST of the replace world transformation"
+  parameters = [
+    file = parameter {
+      type = java mb.resource.ResourceKey
+      argument-providers = [Context(File)]
     }
-  }
+  ]
 }
 ```
-
-!!! bug
-    The command definition will have several warnings noting "Option ignored because it was defined before", because the command is merged with the previous command, breaking the entire command. This can be worked around by commenting out the command and menu added earlier and cleaning with <span class="guilabel">Project ‣ Clean</span>. This will be fixed in a future version.
 
 Finally, add menu items for the command by adding:
 
 ```cfg
-editor-context-menu {
-  menu "Debug" {
+editor-context-menu [
+  menu "Debug" [
     command-action {
-      display-name = "Show result of replace worlds transformation"
-      description = "Shows the resulting AST of the replace world transformation"
-      command-def-type = mb.helloworld.HelloWorldShowReplaceWorldsCommand
-      execution-type = ManualOnce
+      command-def = showReplaceWorldsCommand
+      execution-type = Once
     }
     command-action {
-      display-name = "Show result of replace worlds transformation (continuous)"
-      description = "Shows the resulting AST of the replace world transformation continuously"
-      command-def-type = mb.helloworld.HelloWorldShowReplaceWorldsCommand
-      execution-type = ManualContinuous
+      command-def = showReplaceWorldsCommand
+      execution-type = Continuous
     }
-  }
-}
-resource-context-menu {
-  menu "Debug" {
+  ]
+]
+resource-context-menu [
+  menu "Debug" [
     command-action {
-      display-name = "Show result of replace worlds transformation"
-      description = "Shows the resulting AST of the replace world transformation"
-      command-def-type = mb.helloworld.HelloWorldShowReplaceWorldsCommand
-      execution-type = ManualOnce
-      required-hierarchical-resource-types = File
+      command-def = showReplaceWorldsCommand
+      execution-type = Once
+      required-resource-types = [File]
     }
-  }
-}
+  ]
+]
 ```
 
 Build the project so that we can test our changes.
