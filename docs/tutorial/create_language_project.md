@@ -57,11 +57,16 @@ Remember to rebuild the project after making a change to the language definition
 ## Adding a debugging command
 
 It can be quite handy to look at the AST of a program that the parser of the language produces as a debugging tool.
-To do that, we will write a *task definition* that produces the AST of a program by parsing it, we will add a *command* for that task, and finally we will bind the command to a *menu item* so that we can execute the command.
+To do that, we will write a *task definition* that produces the AST of a program by parsing it, we will add a *command definition* for that task, and finally we will bind the command to a *menu item* so that we can execute the command.
 
 ### Creating the task definition
 
-A task definition is a piece of code that take some input, may read from or write to files, and produce some output.
+A task definition is a piece of code that take some input, may read from or write to files, run and get the result of other tasks, and produce some output.
+Task definitions come from [PIE](https://github.com/metaborg/pie), a framework for developing composable, incremental, and correct pipelines and build scripts.
+PIE incrementally executes task definitions, ensures that the result is correct, and enables composition of tasks.
+
+All user interaction, pipelines, and builds in Spoofax 3 are composed of task definitions.
+So whenever you want to perform a command, present feedback to the user, or compile your language, you will need to write a task definition for it.
 A task definition is written as a class in Java, and needs to adhere to a certain interface.
 For brevity, we usually just refer to a "task definition" by "task".
 
