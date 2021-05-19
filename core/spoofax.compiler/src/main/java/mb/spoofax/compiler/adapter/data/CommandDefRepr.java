@@ -5,6 +5,7 @@ import mb.spoofax.core.language.command.CommandExecutionType;
 import org.immutables.value.Value;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,13 +23,21 @@ public interface CommandDefRepr extends Serializable {
 
     TypeInfo taskDefType();
 
-    TypeInfo argType();
+    @Value.Default default TypeInfo argType() {
+        return taskDefType().appendToId(".Args");
+    }
 
     String displayName();
 
-    String description();
+    @Value.Default default String description() { return ""; }
 
-    Set<CommandExecutionType> supportedExecutionTypes();
+    @Value.Default default Set<CommandExecutionType> supportedExecutionTypes() {
+        final Set<CommandExecutionType> types = new HashSet<>();
+        types.add(CommandExecutionType.ManualOnce);
+        types.add(CommandExecutionType.ManualContinuous);
+        types.add(CommandExecutionType.AutomaticContinuous);
+        return types;
+    }
 
     List<ParamRepr> params();
 

@@ -124,7 +124,7 @@ public interface CommandActionRepr extends Serializable {
 
     String displayName();
 
-    String description();
+    @Value.Default default String description() { return ""; }
 
     CommandRequestRepr commandRequest();
 
