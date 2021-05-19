@@ -787,9 +787,13 @@ You can play around with the coloring a bit and choose a style to your liking.
 Remember to rebuild the project after making a change to the language definition.</p>
 <h2 id="adding-a-debugging-command">Adding a debugging command<a class="headerlink" href="#adding-a-debugging-command" title="Permanent link">&para;</a></h2>
 <p>It can be quite handy to look at the <abbr title="Abstract Syntax Tree">AST</abbr> of a program that the parser of the language produces as a debugging tool.
-To do that, we will write a <em>task definition</em> that produces the <abbr title="Abstract Syntax Tree">AST</abbr> of a program by parsing it, we will add a <em>command</em> for that task, and finally we will bind the command to a <em>menu item</em> so that we can execute the command.</p>
+To do that, we will write a <em>task definition</em> that produces the <abbr title="Abstract Syntax Tree">AST</abbr> of a program by parsing it, we will add a <em>command definition</em> for that task, and finally we will bind the command to a <em>menu item</em> so that we can execute the command.</p>
 <h3 id="creating-the-task-definition">Creating the task definition<a class="headerlink" href="#creating-the-task-definition" title="Permanent link">&para;</a></h3>
-<p>A task definition is a piece of code that take some input, may read from or write to files, and produce some output.
+<p>A task definition is a piece of code that take some input, may read from or write to files, run and get the result of other tasks, and produce some output.
+Task definitions come from <a href="https://github.com/metaborg/pie">PIE</a>, a framework for developing composable, incremental, and correct pipelines and build scripts.
+PIE incrementally executes task definitions, ensures that the result is correct, and enables composition of tasks.</p>
+<p>All user interaction, pipelines, and builds in Spoofax 3 are composed of task definitions.
+So whenever you want to perform a command, present feedback to the user, or compile your language, you will need to write a task definition for it.
 A task definition is written as a class in Java, and needs to adhere to a certain interface.
 For brevity, we usually just refer to a "task definition" by "task".</p>
 <p>Let's start by creating the class for this task.
