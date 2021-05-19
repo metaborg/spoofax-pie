@@ -861,7 +861,7 @@ Replace the entire Java file with the following code:</p>
     <span class="n">context</span><span class="p">.</span><span class="na">require</span><span class="p">(</span><span class="n">classloaderResources</span><span class="p">.</span><span class="na">tryGetAsLocalResource</span><span class="p">(</span><span class="n">getClass</span><span class="p">()),</span> <span class="n">ResourceStampers</span><span class="p">.</span><span class="na">hashFile</span><span class="p">());</span>
     <span class="kd">final</span> <span class="n">ResourceKey</span> <span class="n">file</span> <span class="o">=</span> <span class="n">args</span><span class="p">.</span><span class="na">file</span><span class="p">;</span>
     <span class="k">return</span> <span class="n">context</span><span class="p">.</span><span class="na">require</span><span class="p">(</span><span class="n">parse</span><span class="p">.</span><span class="na">inputBuilder</span><span class="p">().</span><span class="na">withFile</span><span class="p">(</span><span class="n">file</span><span class="p">).</span><span class="na">buildAstSupplier</span><span class="p">()).</span><span class="na">mapOrElse</span><span class="p">(</span>
-        <span class="n">ast</span> <span class="o">-&gt;</span> <span class="n">CommandFeedback</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">ShowFeedback</span><span class="p">.</span><span class="na">showText</span><span class="p">(</span><span class="n">StrategoUtil</span><span class="p">.</span><span class="na">toString</span><span class="p">(</span><span class="n">ast</span><span class="p">),</span> <span class="s">&quot;Parsed AST for &#39;&quot;</span> <span class="o">+</span> <span class="n">file</span> <span class="o">+</span> <span class="s">&quot;&#39;&quot;</span><span class="p">)),</span>
+      <span class="n">ast</span> <span class="o">-&gt;</span> <span class="n">CommandFeedback</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">ShowFeedback</span><span class="p">.</span><span class="na">showText</span><span class="p">(</span><span class="n">StrategoUtil</span><span class="p">.</span><span class="na">toString</span><span class="p">(</span><span class="n">ast</span><span class="p">),</span> <span class="s">&quot;Parsed AST for &#39;&quot;</span> <span class="o">+</span> <span class="n">file</span> <span class="o">+</span> <span class="s">&quot;&#39;&quot;</span><span class="p">)),</span>
       <span class="n">e</span> <span class="o">-&gt;</span> <span class="n">CommandFeedback</span><span class="p">.</span><span class="na">ofTryExtractMessagesFrom</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
     <span class="p">);</span>
   <span class="p">}</span>
@@ -881,64 +881,70 @@ Replace the entire Java file with the following code:</p>
 Open the CFG <code>helloworld/spoofax.cfg</code> file.
 The CFG meta-language is a configuration language where we configure and glue together the various aspects of your language.
 Add the following configuration to the end of the file:</p>
-<div class="highlight"><pre><span></span><code><span class="na">task-defs {</span>
-  <span class="na">mb.helloworld.task.HelloWorldShowParsedAst</span>
-<span class="na">}</span>
+<div class="highlight"><pre><span></span><code><span class="na">let showParsedAst</span> <span class="o">=</span> <span class="s">task-def mb.helloworld.task.HelloWorldShowParsedAst</span>
 </code></pre></div>
-<p>This registers the task definition class that we just created.</p>
+<p>This registers the task definition class that we just created, and makes it available under the <code>showParsedAst</code> name in the configuration.</p>
 <h3 id="creating-the-command">Creating the command<a class="headerlink" href="#creating-the-command" title="Permanent link">&para;</a></h3>
 <p>To create the command, add the following configuration to the end of the <code>spoofax.cfg</code> file:</p>
-<div class="highlight"><pre><span></span><code><span class="na">command-def {</span>
-  <span class="na">type</span> <span class="o">=</span> <span class="s">mb.helloworld.HelloWorldShowParsedAstCommand</span>
-  <span class="na">task-def-type</span> <span class="o">=</span> <span class="s">mb.helloworld.task.HelloWorldShowParsedAst</span>
-  <span class="na">args-type</span> <span class="o">=</span> <span class="s">mb.helloworld.task.HelloWorldShowParsedAst.Args</span>
+<div class="highlight"><pre><span></span><code><span class="na">let showParsedAstCommand</span> <span class="o">=</span> <span class="s">command-def {</span>
+  <span class="na">type</span> <span class="o">=</span> <span class="s">java mb.helloworld.command.HelloWorldShowParsedAstCommand</span>
+  <span class="na">task-def</span> <span class="o">=</span> <span class="s">showParsedAst</span>
+  <span class="na">args-type</span> <span class="o">=</span> <span class="s">java mb.helloworld.task.HelloWorldShowParsedAst.Args</span>
   <span class="na">display-name</span> <span class="o">=</span> <span class="s">&quot;Show parsed AST&quot;</span>
   <span class="na">description</span> <span class="o">=</span> <span class="s">&quot;Shows the parsed AST&quot;</span>
-  <span class="na">supported-execution-types</span> <span class="o">=</span> <span class="s">ManualOnce, ManualContinuous</span>
-  <span class="na">parameters</span> <span class="o">=</span> <span class="s">{</span>
-    <span class="na">file</span> <span class="o">=</span> <span class="s">{</span>
-      <span class="na">type</span> <span class="o">=</span> <span class="s">mb.resource.ResourceKey</span>
+  <span class="na">supported-execution-types</span> <span class="o">=</span> <span class="s">[Once, Continuous]</span>
+  <span class="na">parameters</span> <span class="o">=</span> <span class="s">[</span>
+    <span class="na">file</span> <span class="o">=</span> <span class="s">parameter {</span>
+      <span class="na">type</span> <span class="o">=</span> <span class="s">java mb.resource.ResourceKey</span>
       <span class="na">required</span> <span class="o">=</span> <span class="s">true</span>
-      <span class="na">argument-providers</span> <span class="o">=</span> <span class="s">{</span>
-        <span class="na">Context(File)</span>
-      <span class="na">}</span>
+      <span class="na">argument-providers</span> <span class="o">=</span> <span class="s">[Context(File)]</span>
     <span class="na">}</span>
-  <span class="na">}</span>
+  <span class="na">]</span>
 <span class="na">}</span>
 </code></pre></div>
 <div class="admonition todo">
 <p class="admonition-title">Todo</p>
 <p>Explain this configuration.</p>
 </div>
+<p>Some properties set above are set to their conventional (default) value, or are optional, so we can leave them out. Replace the command definition with the following code:</p>
+<div class="highlight"><pre><span></span><code><span class="na">let showParsedAstCommand</span> <span class="o">=</span> <span class="s">command-def {</span>
+  <span class="na">task-def</span> <span class="o">=</span> <span class="s">showParsedAst</span>
+  <span class="na">display-name</span> <span class="o">=</span> <span class="s">&quot;Show parsed AST&quot;</span>
+  <span class="na">parameters</span> <span class="o">=</span> <span class="s">[</span>
+    <span class="na">file</span> <span class="o">=</span> <span class="s">parameter {</span>
+      <span class="na">type</span> <span class="o">=</span> <span class="s">java mb.resource.ResourceKey</span>
+      <span class="na">argument-providers</span> <span class="o">=</span> <span class="s">[Context(File)]</span>
+    <span class="na">}</span>
+  <span class="na">]</span>
+<span class="na">}</span>
+</code></pre></div>
+<div class="admonition todo">
+<p class="admonition-title">Todo</p>
+<p>Explain conventions and optionals.</p>
+</div>
 <h3 id="adding-the-menu-item">Adding the menu item<a class="headerlink" href="#adding-the-menu-item" title="Permanent link">&para;</a></h3>
 <p>To add the menu item, add the following configuration to the end of the <code>spoofax.cfg</code> file:</p>
-<div class="highlight"><pre><span></span><code><span class="na">editor-context-menu {</span>
-  <span class="na">menu &quot;Debug&quot; {</span>
+<div class="highlight"><pre><span></span><code><span class="na">editor-context-menu [</span>
+  <span class="na">menu &quot;Debug&quot; [</span>
     <span class="na">command-action {</span>
-      <span class="na">display-name</span> <span class="o">=</span> <span class="s">&quot;Show parsed AST&quot;</span>
-      <span class="na">description</span> <span class="o">=</span> <span class="s">&quot;Shows the parsed AST&quot;</span>
-      <span class="na">command-def-type</span> <span class="o">=</span> <span class="s">mb.helloworld.HelloWorldShowParsedAstCommand</span>
-      <span class="na">execution-type</span> <span class="o">=</span> <span class="s">ManualOnce</span>
+      <span class="na">command-def</span> <span class="o">=</span> <span class="s">showParsedAstCommand</span>
+      <span class="na">execution-type</span> <span class="o">=</span> <span class="s">Once</span>
     <span class="na">}</span>
     <span class="na">command-action {</span>
-      <span class="na">display-name</span> <span class="o">=</span> <span class="s">&quot;Show parsed AST (continuous)&quot;</span>
-      <span class="na">description</span> <span class="o">=</span> <span class="s">&quot;Shows the parsed AST continuously&quot;</span>
-      <span class="na">command-def-type</span> <span class="o">=</span> <span class="s">mb.helloworld.HelloWorldShowParsedAstCommand</span>
-      <span class="na">execution-type</span> <span class="o">=</span> <span class="s">ManualContinuous</span>
+      <span class="na">command-def</span> <span class="o">=</span> <span class="s">showParsedAstCommand</span>
+      <span class="na">execution-type</span> <span class="o">=</span> <span class="s">Continuous</span>
     <span class="na">}</span>
-  <span class="na">}</span>
-<span class="na">}</span>
-<span class="na">resource-context-menu {</span>
-  <span class="na">menu &quot;Debug&quot; {</span>
+  <span class="na">]</span>
+<span class="na">]</span>
+<span class="na">resource-context-menu [</span>
+  <span class="na">menu &quot;Debug&quot; [</span>
     <span class="na">command-action {</span>
-      <span class="na">display-name</span> <span class="o">=</span> <span class="s">&quot;Show parsed AST&quot;</span>
-      <span class="na">description</span> <span class="o">=</span> <span class="s">&quot;Shows the parsed AST&quot;</span>
-      <span class="na">command-def-type</span> <span class="o">=</span> <span class="s">mb.helloworld.HelloWorldShowParsedAstCommand</span>
-      <span class="na">execution-type</span> <span class="o">=</span> <span class="s">ManualOnce</span>
-      <span class="na">required-hierarchical-resource-types</span> <span class="o">=</span> <span class="s">File</span>
+      <span class="na">command-def</span> <span class="o">=</span> <span class="s">showParsedAstCommand</span>
+      <span class="na">execution-type</span> <span class="o">=</span> <span class="s">Once</span>
+      <span class="na">required-resource-types</span> <span class="o">=</span> <span class="s">[File]</span>
     <span class="na">}</span>
-  <span class="na">}</span>
-<span class="na">}</span>
+  <span class="na">]</span>
+<span class="na">]</span>
 </code></pre></div>
 <div class="admonition todo">
 <p class="admonition-title">Todo</p>
@@ -1012,10 +1018,10 @@ We will add a silly transformation that replaces all instances of <code class="h
 
   replace-world: Hello() -&gt; Hello()
   replace-world: World() -&gt; Hello()
-  replace-worlds = topdown(replace-world)
+  replace-worlds = topdown(try(replace-world))
 </code></pre></div>
 <p>The <code class="highlight">replace-world</code> rule passes <code class="highlight">Hello()</code> terms but rewrites <code class="highlight">World()</code> terms to <code class="highlight">Hello()</code>.
-The <code class="highlight">replace-worlds</code> strategy applies <code class="highlight">replace-world</code> in a top-down manner over the entire <abbr title="Abstract Syntax Tree">AST</abbr>.</p>
+The <code class="highlight">replace-worlds</code> strategy tries to apply <code class="highlight">replace-world</code> in a top-down manner over the entire <abbr title="Abstract Syntax Tree">AST</abbr>.</p>
 <p>Now we add a task and command-task for this transformation.
 We define two separate tasks to keep separate</p>
 <ol>
@@ -1027,6 +1033,7 @@ Right-click the <code>mb.helloworld.task</code> package and create the <code>Hel
 <div class="highlight"><pre><span></span><code><span class="kn">package</span> <span class="nn">mb.helloworld.task</span><span class="p">;</span>
 
 <span class="kn">import</span> <span class="nn">mb.helloworld.HelloWorldClassLoaderResources</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">mb.helloworld.HelloWorldScope</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">mb.pie.api.ExecContext</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">mb.pie.api.stamp.resource.ResourceStampers</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">mb.stratego.pie.AstStrategoTransformTaskDef</span><span class="p">;</span>
@@ -1141,62 +1148,44 @@ Right-click the <code>mb.helloworld.task</code> package and create the <code>Hel
 </code></pre></div>
 <p>This class very similar to <code>HelloWorldShowParsedAst</code>, but runs the <code>HelloWorldReplaceWorlds</code> task on the parsed <abbr title="Abstract Syntax Tree">AST</abbr>, transforming the <abbr title="Abstract Syntax Tree">AST</abbr>.</p>
 <p>Now open <code>helloworld/spoofax.cfg</code> again and register the tasks by adding:</p>
-<div class="highlight"><pre><span></span><code><span class="na">task-defs {</span>
-  <span class="na">mb.helloworld.task.HelloWorldReplaceWorlds</span>
-  <span class="na">mb.helloworld.task.HelloWorldShowReplaceWorlds</span>
-<span class="na">}</span>
+<div class="highlight"><pre><span></span><code><span class="na">task-def mb.helloworld.task.HelloWorldReplaceWorlds</span>
+<span class="na">let showReplaceWorlds</span> <span class="o">=</span> <span class="s">task-def mb.helloworld.task.HelloWorldShowReplaceWorlds</span>
 </code></pre></div>
 <p>Then add a command for it by adding:</p>
-<div class="highlight"><pre><span></span><code><span class="na">command-def {</span>
-  <span class="na">type</span> <span class="o">=</span> <span class="s">mb.helloworld.HelloWorldShowReplaceWorldsCommand</span>
-  <span class="na">task-def-type</span> <span class="o">=</span> <span class="s">mb.helloworld.task.HelloWorldShowReplaceWorlds</span>
-  <span class="na">args-type</span> <span class="o">=</span> <span class="s">mb.helloworld.task.HelloWorldShowReplaceWorlds.Args</span>
-  <span class="na">display-name</span> <span class="o">=</span> <span class="s">&quot;Show parsed AST&quot;</span>
-  <span class="na">description</span> <span class="o">=</span> <span class="s">&quot;Shows the parsed AST&quot;</span>
-  <span class="na">supported-execution-types</span> <span class="o">=</span> <span class="s">ManualOnce, ManualContinuous</span>
-  <span class="na">parameters</span> <span class="o">=</span> <span class="s">{</span>
-    <span class="na">file</span> <span class="o">=</span> <span class="s">{</span>
-      <span class="na">type</span> <span class="o">=</span> <span class="s">mb.resource.ResourceKey</span>
-      <span class="na">required</span> <span class="o">=</span> <span class="s">true</span>
-      <span class="na">argument-providers</span> <span class="o">=</span> <span class="s">{</span>
-        <span class="na">Context(File)</span>
-      <span class="na">}</span>
+<div class="highlight"><pre><span></span><code><span class="na">let showReplaceWorldsCommand</span> <span class="o">=</span> <span class="s">command-def {</span>
+  <span class="na">task-def</span> <span class="o">=</span> <span class="s">showReplaceWorlds</span>
+  <span class="na">display-name</span> <span class="o">=</span> <span class="s">&quot;Show result of replace worlds transformation&quot;</span>
+  <span class="na">description</span> <span class="o">=</span> <span class="s">&quot;Shows the resulting AST of the replace world transformation&quot;</span>
+  <span class="na">parameters</span> <span class="o">=</span> <span class="s">[</span>
+    <span class="na">file</span> <span class="o">=</span> <span class="s">parameter {</span>
+      <span class="na">type</span> <span class="o">=</span> <span class="s">java mb.resource.ResourceKey</span>
+      <span class="na">argument-providers</span> <span class="o">=</span> <span class="s">[Context(File)]</span>
     <span class="na">}</span>
-  <span class="na">}</span>
+  <span class="na">]</span>
 <span class="na">}</span>
 </code></pre></div>
-<div class="admonition bug">
-<p class="admonition-title">Bug</p>
-<p>The command definition will have several warnings noting "Option ignored because it was defined before", because the command is merged with the previous command, breaking the entire command. This can be worked around by commenting out the command and menu added earlier and cleaning with <span class="guilabel">Project ‣ Clean</span>. This will be fixed in a future version.</p>
-</div>
 <p>Finally, add menu items for the command by adding:</p>
-<div class="highlight"><pre><span></span><code><span class="na">editor-context-menu {</span>
-  <span class="na">menu &quot;Debug&quot; {</span>
+<div class="highlight"><pre><span></span><code><span class="na">editor-context-menu [</span>
+  <span class="na">menu &quot;Debug&quot; [</span>
     <span class="na">command-action {</span>
-      <span class="na">display-name</span> <span class="o">=</span> <span class="s">&quot;Show result of replace worlds transformation&quot;</span>
-      <span class="na">description</span> <span class="o">=</span> <span class="s">&quot;Shows the resulting AST of the replace world transformation&quot;</span>
-      <span class="na">command-def-type</span> <span class="o">=</span> <span class="s">mb.helloworld.HelloWorldShowReplaceWorldsCommand</span>
-      <span class="na">execution-type</span> <span class="o">=</span> <span class="s">ManualOnce</span>
+      <span class="na">command-def</span> <span class="o">=</span> <span class="s">showReplaceWorldsCommand</span>
+      <span class="na">execution-type</span> <span class="o">=</span> <span class="s">Once</span>
     <span class="na">}</span>
     <span class="na">command-action {</span>
-      <span class="na">display-name</span> <span class="o">=</span> <span class="s">&quot;Show result of replace worlds transformation (continuous)&quot;</span>
-      <span class="na">description</span> <span class="o">=</span> <span class="s">&quot;Shows the resulting AST of the replace world transformation continuously&quot;</span>
-      <span class="na">command-def-type</span> <span class="o">=</span> <span class="s">mb.helloworld.HelloWorldShowReplaceWorldsCommand</span>
-      <span class="na">execution-type</span> <span class="o">=</span> <span class="s">ManualContinuous</span>
+      <span class="na">command-def</span> <span class="o">=</span> <span class="s">showReplaceWorldsCommand</span>
+      <span class="na">execution-type</span> <span class="o">=</span> <span class="s">Continuous</span>
     <span class="na">}</span>
-  <span class="na">}</span>
-<span class="na">}</span>
-<span class="na">resource-context-menu {</span>
-  <span class="na">menu &quot;Debug&quot; {</span>
+  <span class="na">]</span>
+<span class="na">]</span>
+<span class="na">resource-context-menu [</span>
+  <span class="na">menu &quot;Debug&quot; [</span>
     <span class="na">command-action {</span>
-      <span class="na">display-name</span> <span class="o">=</span> <span class="s">&quot;Show result of replace worlds transformation&quot;</span>
-      <span class="na">description</span> <span class="o">=</span> <span class="s">&quot;Shows the resulting AST of the replace world transformation&quot;</span>
-      <span class="na">command-def-type</span> <span class="o">=</span> <span class="s">mb.helloworld.HelloWorldShowReplaceWorldsCommand</span>
-      <span class="na">execution-type</span> <span class="o">=</span> <span class="s">ManualOnce</span>
-      <span class="na">required-hierarchical-resource-types</span> <span class="o">=</span> <span class="s">File</span>
+      <span class="na">command-def</span> <span class="o">=</span> <span class="s">showReplaceWorldsCommand</span>
+      <span class="na">execution-type</span> <span class="o">=</span> <span class="s">Once</span>
+      <span class="na">required-resource-types</span> <span class="o">=</span> <span class="s">[File]</span>
     <span class="na">}</span>
-  <span class="na">}</span>
-<span class="na">}</span>
+  <span class="na">]</span>
+<span class="na">]</span>
 </code></pre></div>
 <p>Build the project so that we can test our changes.</p>
 <div class="admonition bug">
