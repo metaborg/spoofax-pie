@@ -16,11 +16,7 @@ import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.pie.task.java.CompileJava;
 import mb.resource.ResourceService;
-import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
-import mb.resource.hierarchical.match.ResourceMatcher;
-import mb.resource.hierarchical.match.path.PathMatcher;
-import mb.resource.hierarchical.walk.ResourceWalker;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
 import mb.spoofax.compiler.language.LanguageProjectCompiler;
 import mb.spoofax.compiler.platform.EclipseProjectCompiler;
@@ -28,10 +24,8 @@ import org.immutables.value.Value;
 
 import javax.inject.Inject;
 import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * Fully compiles a language by running the {@link LanguageProjectCompiler language project compiler}, {@link
@@ -132,15 +126,14 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
 
         final Task<Result<CompileLanguageSpecification.Output, CompileLanguageSpecificationException>> languageSpecificationCompilerTask = compileLanguage.createTask(rootDirectory);
         final Result<CompileLanguageSpecification.Output, CompileLanguageSpecificationException> spoofax3CompilerResult = context.require(languageSpecificationCompilerTask);
-        compileJavaInputBuilder.addOriginTasks(languageSpecificationCompilerTask.toSupplier());
+        compileJavaInputBuilder.addSourceTasks(new LanguageSpecificationJavaSourcesSupplier(languageSpecificationCompilerTask.toSupplier()));
         if(spoofax3CompilerResult.isErr()) {
             // noinspection ConstantConditions (error is present)
             return Result.ofErr(CompileLanguageException.compileLanguageFail(spoofax3CompilerResult.getErr()));
         } else {
             // noinspection ConstantConditions (value is present)
             final CompileLanguageSpecification.Output output = spoofax3CompilerResult.get();
-            // noinspection ConstantConditions (value is present)
-            compileJavaInputBuilder.addAllSourceFiles(output.providedJavaFiles());
+            //noinspection ConstantConditions (value is present)
             messagesBuilder.addMessages(output.messages());
         }
 
@@ -154,26 +147,8 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
         context.require(eclipseProjectCompilerTask);
         compileJavaInputBuilder.addOriginTasks(eclipseProjectCompilerTask.toSupplier());
 
-        for(ResourcePath javaSourcePath : input.userJavaSourcePaths()) { // Add all Java source files from the user-defined source path.
-            final HierarchicalResource directory = resourceService.getHierarchicalResource(javaSourcePath);
-            try {
-                if(directory.exists() && directory.isDirectory()) {
-                    try(final Stream<? extends HierarchicalResource> stream = directory.walk(
-                        ResourceWalker.ofPath(PathMatcher.ofNoHidden()),
-                        ResourceMatcher.ofPath(PathMatcher.ofExtension("java")).and(ResourceMatcher.ofFile())
-                    )) {
-                        stream.forEach((r) -> compileJavaInputBuilder.addSourceFiles(r.getPath()));
-                    }
-                }
-            } catch(IOException e) {
-                return Result.ofErr(CompileLanguageException.walkJavaSourceFilesFail(e));
-            }
-        }
-
         compileJavaInputBuilder
-            .addAllSourceFiles(input.javaSourceFiles())
-            .sourcePaths(input.javaSourcePaths())
-            .sourceDirectoryPaths(input.javaSourceDirectoryPaths())
+            .addSourceTasks(new JavaSourcesSupplier(cfgSupplier))
             .addAllClassPaths(input.javaClassPaths())
             .addAllClassPaths(args.additionalJavaClassPath())
             .addAllAnnotationProcessorPaths(input.javaAnnotationProcessorPaths())
@@ -232,6 +207,34 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
         @Override public Result<Option<EclipseProjectCompiler.Input>, ?> get(ExecContext context) {
             // OPTO: set output stamper
             return context.require(state).map(o -> Option.ofOptional(o.compileLanguageInput.eclipseProjectInput()));
+        }
+    }
+
+    private static class LanguageSpecificationJavaSourcesSupplier extends Stateful1Supplier<STask<Result<CompileLanguageSpecification.Output, CompileLanguageSpecificationException>>, Result<CompileJava.Sources, ?>> {
+        public LanguageSpecificationJavaSourcesSupplier(STask<Result<CompileLanguageSpecification.Output, CompileLanguageSpecificationException>> state) {
+            super(state);
+        }
+
+        @Override public Result<CompileJava.Sources, ?> get(ExecContext context) {
+            // OPTO: set output stamper
+            return context.require(state).map(o -> CompileJava.Sources.builder().addAllSourceFiles(o.providedJavaFiles()).build());
+        }
+    }
+
+    private static class JavaSourcesSupplier extends Stateful1Supplier<STask<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>>, Result<CompileJava.Sources, ?>> {
+        public JavaSourcesSupplier(STask<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>> state) {
+            super(state);
+        }
+
+        @Override public Result<CompileJava.Sources, ?> get(ExecContext context) {
+            // OPTO: set output stamper
+            return context.require(state).map(o -> CompileJava.Sources.builder()
+                .addAllSourceFiles(o.compileLanguageInput.javaSourceFiles())
+                .sourceFilesFromPaths(o.compileLanguageInput.userJavaSourcePaths())
+                .sourcePaths(o.compileLanguageInput.javaSourcePaths())
+                .packagePaths(o.compileLanguageInput.javaSourceDirectoryPaths())
+                .build()
+            );
         }
     }
 }

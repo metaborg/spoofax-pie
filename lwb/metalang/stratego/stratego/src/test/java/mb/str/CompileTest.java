@@ -16,13 +16,11 @@ import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.metaborg.util.cmd.Arguments;
 import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.LinkedHashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -93,8 +91,11 @@ class CompileTest extends TestBase {
 
             // Compile Java source files to Java class files.
             final CompileJava.Input.Builder inputBuilder = CompileJava.Input.builder()
-                .addAllSourceFiles(result.get())
-                .addSourcePaths(strategoJavaOutputDir.getPath())
+                .sources(CompileJava.Sources.builder()
+                    .addAllSourceFiles(result.get())
+                    .addSourcePaths(strategoJavaOutputDir.getPath())
+                    .build()
+                )
                 .release("8");
             final @Nullable String classPathProperty = System.getProperty("classPath");
             assertNotNull(classPathProperty);
