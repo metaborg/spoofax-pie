@@ -1,7 +1,8 @@
 SELF_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
-DOCKER_IMAGE := squidfunk/mkdocs-material:7.0.6
+MKDOCS_VERSION := 7.0.6
 ROOT_DIR := $(SELF_DIR)..
+CUSTOM_DOCKER_IMAGE := metaborg/mkdocs-material
 
 # SSH Agent Socket
 ifeq ($(OS),Windows_NT)         # WSL2 (Windows)
@@ -23,22 +24,25 @@ BASE_COMMAND := docker run --rm -it -p 8000:8000 \
   -v ${ROOT_DIR}:/docs \
   -v ~/.ssh/known_hosts:/root/.ssh/known_hosts \
   -v ${SSH_AGENT_SOCK}:/ssh-agent --env SSH_AUTH_SOCK=/ssh-agent \
-  ${DOCKER_IMAGE}
+  ${CUSTOM_DOCKER_IMAGE}
 
-serve:
+serve: build-image
 	$(BASE_COMMAND) serve --dev-addr=0.0.0.0:8000
 
-new:
+new: build-image
 	$(BASE_COMMAND) new $(ROOT_DIR)
 
-build:
+build: build-image
 	$(BASE_COMMAND) build
 
-deploy:
+deploy: build-image
 	$(BASE_COMMAND) gh-deploy --force
 
-help:
+help: build-image
 	$(BASE_COMMAND) -h
 
-.PHONY: serve new build deploy help
+build-image: Dockerfile
+	docker build --build-arg "VERSION=${MKDOCS_VERSION}" -t ${CUSTOM_DOCKER_IMAGE} -f ${ROOT_DIR}/docs/Dockerfile ${ROOT_DIR}
+
+.PHONY: serve new build deploy help build-image
 SILENT:
