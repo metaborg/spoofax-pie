@@ -11,7 +11,7 @@ In the new project dialog, select <span class="guilabel">Spoofax LWB ‣ Spoofax
 In this wizard, you can customize the various names your language will use.
 However, for the purpose of this tutorial, fill in `HelloWorld` as the name of the project, which will automatically fill in the other elements with defaults.
 Then press <span class="guilabel">Finish</span> to create the project.
-There should now be a project named `helloworld` in the <span class="guilabel">Package Explorer</span.
+There should now be a project named `helloworld` in the <span class="guilabel">Package Explorer</span>.
 
 ## Adding syntax
 
@@ -244,11 +244,6 @@ resource-context-menu [
     Explain this configuration.
 
 Build the project so that we can test our changes.
-
-!!! bug
-    Building the project at this point will result in an error. This can be worked around by first cleaning the project by choosing <span class="guilabel">Project ‣ Clean</span> from the main menu. This bug will be fixed in a future version.
-
-Let's test the command.
 Open the `test.hel` file and right-click inside the editor area to open the context menu.
 From the editor context menu, select <span class="guilabel">HelloWorld ‣ Debug ‣ Show parsed AST</span>.
 A new editor will pop up with the result of the command, showing the AST of your example file.
@@ -482,7 +477,6 @@ Then add a command for it by adding:
 let showReplaceWorldsCommand = command-def {
   task-def = showReplaceWorlds
   display-name = "Show result of replace worlds transformation"
-  description = "Shows the resulting AST of the replace world transformation"
   parameters = [
     file = parameter {
       type = java mb.resource.ResourceKey
@@ -519,8 +513,4 @@ resource-context-menu [
 ```
 
 Build the project so that we can test our changes.
-
-!!! bug
-    Building the project at this point will result in an error. This can be worked around by first cleaning the project by choosing <span class="guilabel">Project ‣ Clean</span> from the main menu. This bug will be fixed in a future version.
-
 Test the command similarly to testing the "Show parsed AST" command.
