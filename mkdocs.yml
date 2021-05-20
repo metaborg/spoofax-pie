@@ -21,6 +21,8 @@ nav:
 theme:
   name: material
   language: en
+  logo: assets/spoofax.svg
+  favicon: assets/spoofax.png
   palette:
     primary: indigo
     accent: indigo
