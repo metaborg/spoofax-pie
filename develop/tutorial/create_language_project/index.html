@@ -752,7 +752,7 @@ In the new project dialog, select <span class="guilabel">Spoofax <abbr title="La
 In this wizard, you can customize the various names your language will use.
 However, for the purpose of this tutorial, fill in <code>HelloWorld</code> as the name of the project, which will automatically fill in the other elements with defaults.
 Then press <span class="guilabel">Finish</span> to create the project.
-There should now be a project named <code>helloworld</code> in the <span class="guilabel">Package Explorer&lt;/span.</p>
+There should now be a project named <code>helloworld</code> in the <span class="guilabel">Package Explorer</span>.</p>
 <h2 id="adding-syntax">Adding syntax<a class="headerlink" href="#adding-syntax" title="Permanent link">&para;</a></h2>
 <p>First we will add some syntax to the language.
 Open the main SDF3 file <code>helloworld/src/start.sdf3</code> file by expanding the folders and double-clicking the file.
@@ -954,12 +954,7 @@ Add the following configuration to the end of the file:</p>
 <p class="admonition-title">Todo</p>
 <p>Explain this configuration.</p>
 </div>
-<p>Build the project so that we can test our changes.</p>
-<div class="admonition bug">
-<p class="admonition-title">Bug</p>
-<p>Building the project at this point will result in an error. This can be worked around by first cleaning the project by choosing <span class="guilabel">Project ‣ Clean</span> from the main menu. This bug will be fixed in a future version.</p>
-</div>
-<p>Let's test the command.
+<p>Build the project so that we can test our changes.
 Open the <code>test.hel</code> file and right-click inside the editor area to open the context menu.
 From the editor context menu, select <span class="guilabel">HelloWorld ‣ Debug ‣ Show parsed <abbr title="Abstract Syntax Tree">AST</abbr></span>.
 A new editor will pop up with the result of the command, showing the <abbr title="Abstract Syntax Tree">AST</abbr> of your example file.
@@ -1159,7 +1154,6 @@ Right-click the <code>mb.helloworld.task</code> package and create the <code>Hel
 <div class="highlight"><pre><span></span><code><span class="na">let showReplaceWorldsCommand</span> <span class="o">=</span> <span class="s">command-def {</span>
   <span class="na">task-def</span> <span class="o">=</span> <span class="s">showReplaceWorlds</span>
   <span class="na">display-name</span> <span class="o">=</span> <span class="s">&quot;Show result of replace worlds transformation&quot;</span>
-  <span class="na">description</span> <span class="o">=</span> <span class="s">&quot;Shows the resulting AST of the replace world transformation&quot;</span>
   <span class="na">parameters</span> <span class="o">=</span> <span class="s">[</span>
     <span class="na">file</span> <span class="o">=</span> <span class="s">parameter {</span>
       <span class="na">type</span> <span class="o">=</span> <span class="s">java mb.resource.ResourceKey</span>
@@ -1191,12 +1185,8 @@ Right-click the <code>mb.helloworld.task</code> package and create the <code>Hel
   <span class="na">]</span>
 <span class="na">]</span>
 </code></pre></div>
-<p>Build the project so that we can test our changes.</p>
-<div class="admonition bug">
-<p class="admonition-title">Bug</p>
-<p>Building the project at this point will result in an error. This can be worked around by first cleaning the project by choosing <span class="guilabel">Project ‣ Clean</span> from the main menu. This bug will be fixed in a future version.</p>
-</div>
-<p>Test the command similarly to testing the "Show parsed <abbr title="Abstract Syntax Tree">AST</abbr>" command.</p>
+<p>Build the project so that we can test our changes.
+Test the command similarly to testing the "Show parsed <abbr title="Abstract Syntax Tree">AST</abbr>" command.</p>
                 
               
               
