@@ -1,6 +1,6 @@
 SELF_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
-MKDOCS_VERSION := 7.0.6
+MKDOCS_VERSION := 7.1.4
 ROOT_DIR := $(SELF_DIR)..
 CUSTOM_DOCKER_IMAGE := metaborg/mkdocs-material
 
