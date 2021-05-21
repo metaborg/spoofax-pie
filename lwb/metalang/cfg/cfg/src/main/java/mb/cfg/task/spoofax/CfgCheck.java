@@ -24,6 +24,7 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @CfgScope
 public class CfgCheck implements TaskDef<CfgCheck.Input, KeyedMessages> {
@@ -87,12 +88,16 @@ public class CfgCheck implements TaskDef<CfgCheck.Input, KeyedMessages> {
         final Messages parseMessages = context.require(parseInputBuilder.buildMessagesSupplier());
         messagesBuilder.addMessages(input.file, parseMessages);
 
+        final AtomicBoolean analysisErrors = new AtomicBoolean(false);
         final Result<CfgAnalyze.Output, ?> analysisResult = context.require(analyze, new CfgAnalyze.Input(input.file, parseInputBuilder.buildRecoverableAstSupplier()));
         analysisResult
-            .ifOk(output -> messagesBuilder.addMessages(output.result.resource, output.result.messages))
+            .ifOk(output -> {
+                analysisErrors.set(output.result.messages.containsError());
+                messagesBuilder.addMessages(output.result.resource, output.result.messages);
+            })
             .ifErr(e -> messagesBuilder.addMessage("Analysis failed", e, Severity.Error));
 
-        if(input.rootDirectoryHint != null) {
+        if(!analysisErrors.get() && input.rootDirectoryHint != null) {
             final Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result = context.require(rootDirectoryToObject, input.rootDirectoryHint);
             result.ifOk(o -> messagesBuilder.addMessages(o.messages));
             result.ifErr(e -> {

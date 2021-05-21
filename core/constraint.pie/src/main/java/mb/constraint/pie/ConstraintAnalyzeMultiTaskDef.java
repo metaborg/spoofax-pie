@@ -4,6 +4,7 @@ import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Messages;
 import mb.common.message.Severity;
+import mb.common.result.MessagesException;
 import mb.common.result.Result;
 import mb.common.util.MapView;
 import mb.constraint.common.ConstraintAnalyzer;
@@ -162,15 +163,15 @@ class SingleFileMapper implements SerializableFunction<Result<ConstraintAnalyzeM
 
     @Override
     public Result<ConstraintAnalyzeMultiTaskDef.SingleFileOutput, ?> apply(Result<ConstraintAnalyzeMultiTaskDef.Output, ?> outputResult) {
-        return outputResult.map(output -> {
+        return outputResult.flatMapOrElse(output -> {
             final ConstraintAnalyzer.@Nullable Result result = output.result.getResult(resource);
             if(result != null) {
                 final Messages messages = new Messages(output.result.messages.getMessagesOfKey(resource));
-                return new ConstraintAnalyzeMultiTaskDef.SingleFileOutput(output.context, new ConstraintAnalyzer.SingleFileResult(output.result.projectResult, result.resource, result.ast, result.analysis, messages));
+                return Result.ofOk(new ConstraintAnalyzeMultiTaskDef.SingleFileOutput(output.context, new ConstraintAnalyzer.SingleFileResult(output.result.projectResult, result.resource, result.ast, result.analysis, messages)));
             } else {
-                throw new RuntimeException("BUG: multi file result is missing a result for resource '" + resource + "' that was part of the input");
+                return Result.ofErr(new MessagesException(output.result.messages, "Multi file constraint analyzer result is missing a result for resource '" + resource + "' that was part of the input"));
             }
-        });
+        }, Result::ofErr);
     }
 
     @Override public boolean equals(@Nullable Object o) {

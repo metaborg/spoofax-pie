@@ -1,5 +1,6 @@
 package mb.spoofax.lwb.compiler;
 
+import mb.cfg.task.spoofax.CfgCheck;
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.pie.api.ExecContext;
@@ -22,17 +23,20 @@ import javax.inject.Inject;
  */
 @Value.Enclosing
 public class CheckLanguageSpecification implements TaskDef<ResourcePath, KeyedMessages> {
+    private final CfgCheck checkCfg;
     private final CheckSdf3 checkSdf3;
     private final CheckEsv checkEsv;
     private final CheckStatix checkStatix;
     private final CheckStratego checkStratego;
 
     @Inject public CheckLanguageSpecification(
+        CfgCheck checkCfg,
         CheckSdf3 checkSdf3,
         CheckEsv checkEsv,
         CheckStatix checkStatix,
         CheckStratego checkStratego
     ) {
+        this.checkCfg = checkCfg;
         this.checkSdf3 = checkSdf3;
         this.checkEsv = checkEsv;
         this.checkStatix = checkStatix;
@@ -46,6 +50,8 @@ public class CheckLanguageSpecification implements TaskDef<ResourcePath, KeyedMe
     @Override
     public KeyedMessages exec(ExecContext context, ResourcePath rootDirectory) {
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
+        // HACK: manually resolve spoofaxc.cfg file for CfgCheck task.
+        messagesBuilder.addMessages(context.require(checkCfg, new CfgCheck.Input(rootDirectory.appendRelativePath("spoofaxc.cfg"), rootDirectory)));
         messagesBuilder.addMessages(context.require(checkSdf3, rootDirectory));
         messagesBuilder.addMessages(context.require(checkEsv, rootDirectory));
         messagesBuilder.addMessages(context.require(checkStatix, rootDirectory));

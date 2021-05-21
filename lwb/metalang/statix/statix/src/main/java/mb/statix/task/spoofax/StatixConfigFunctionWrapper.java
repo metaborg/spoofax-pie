@@ -21,7 +21,7 @@ public class StatixConfigFunctionWrapper {
 
     public Function<ResourcePath, ? extends Result<Option<StatixConfig>, ?>> get() {
         if(function == null) {
-            function = StrategoDefaultAnalyzeConfigFunction.instance;
+            function = StatixDefaultAnalyzeConfigFunction.instance;
         }
         return function;
     }
@@ -34,10 +34,10 @@ public class StatixConfigFunctionWrapper {
     }
 
 
-    private static class StrategoDefaultAnalyzeConfigFunction implements Function<ResourcePath, Result<Option<StatixConfig>, ?>> {
-        private static final StrategoDefaultAnalyzeConfigFunction instance = new StrategoDefaultAnalyzeConfigFunction();
+    private static class StatixDefaultAnalyzeConfigFunction implements Function<ResourcePath, Result<Option<StatixConfig>, ?>> {
+        private static final StatixDefaultAnalyzeConfigFunction instance = new StatixDefaultAnalyzeConfigFunction();
 
-        private StrategoDefaultAnalyzeConfigFunction() {}
+        private StatixDefaultAnalyzeConfigFunction() {}
 
         @Override
         public Result<Option<StatixConfig>, ?> apply(ExecContext context, ResourcePath rootDirectory) {
@@ -50,7 +50,7 @@ public class StatixConfigFunctionWrapper {
 
         @Override public int hashCode() { return 0; }
 
-        @Override public String toString() { return "StrategoDefaultAnalyzeConfigFunction()"; }
+        @Override public String toString() { return "StatixDefaultAnalyzeConfigFunction()"; }
 
         private Object readResolve() { return instance; }
     }

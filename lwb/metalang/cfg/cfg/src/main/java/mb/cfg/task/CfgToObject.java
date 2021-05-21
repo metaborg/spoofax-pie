@@ -9,14 +9,18 @@ import mb.common.message.KeyedMessages;
 import mb.common.result.Result;
 import mb.common.util.Properties;
 import mb.pie.api.ExecContext;
+import mb.pie.api.None;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
+import mb.stratego.common.StrategoException;
+import mb.stratego.common.StrategoRuntime;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import java.io.Serializable;
 
 @CfgScope
@@ -24,18 +28,18 @@ public class CfgToObject implements TaskDef<CfgToObject.Input, Result<CfgToObjec
     public static class Input implements Serializable {
         public final ResourcePath rootDirectory;
         public final @Nullable ResourceKey cfgResource;
-        public final Supplier<? extends Result<IStrategoTerm, ?>> astSupplier;
+        public final Supplier<? extends Result<CfgAnalyze.Output, ?>> analysisOutputSupplier;
         public final Supplier<? extends Result<Properties, ?>> propertiesSupplier;
 
         public Input(
             ResourcePath rootDirectory,
             @Nullable ResourceKey cfgResource,
-            Supplier<? extends Result<IStrategoTerm, ?>> astSupplier,
+            Supplier<? extends Result<CfgAnalyze.Output, ?>> analysisOutputSupplier,
             Supplier<? extends Result<Properties, ?>> propertiesSupplier
         ) {
             this.rootDirectory = rootDirectory;
             this.cfgResource = cfgResource;
-            this.astSupplier = astSupplier;
+            this.analysisOutputSupplier = analysisOutputSupplier;
             this.propertiesSupplier = propertiesSupplier;
         }
 
@@ -45,14 +49,14 @@ public class CfgToObject implements TaskDef<CfgToObject.Input, Result<CfgToObjec
             final Input input = (Input)o;
             if(!rootDirectory.equals(input.rootDirectory)) return false;
             if(cfgResource != null ? !cfgResource.equals(input.cfgResource) : input.cfgResource != null) return false;
-            if(!astSupplier.equals(input.astSupplier)) return false;
+            if(!analysisOutputSupplier.equals(input.analysisOutputSupplier)) return false;
             return propertiesSupplier.equals(input.propertiesSupplier);
         }
 
         @Override public int hashCode() {
             int result = rootDirectory.hashCode();
             result = 31 * result + (cfgResource != null ? cfgResource.hashCode() : 0);
-            result = 31 * result + astSupplier.hashCode();
+            result = 31 * result + analysisOutputSupplier.hashCode();
             result = 31 * result + propertiesSupplier.hashCode();
             return result;
         }
@@ -61,7 +65,7 @@ public class CfgToObject implements TaskDef<CfgToObject.Input, Result<CfgToObjec
             return "CfgToObject$Input{" +
                 "rootDirectory=" + rootDirectory +
                 ", cfgResource=" + cfgResource +
-                ", astSupplier=" + astSupplier +
+                ", astSupplier=" + analysisOutputSupplier +
                 ", propertiesSupplier=" + propertiesSupplier +
                 '}';
         }
@@ -108,11 +112,13 @@ public class CfgToObject implements TaskDef<CfgToObject.Input, Result<CfgToObjec
     }
 
 
+    private final CfgGetStrategoRuntimeProvider getStrategoRuntimeProvider;
     private final CompileLanguageInputCustomizer customizer;
 
 
     @Inject
-    public CfgToObject(CompileLanguageInputCustomizer customizer) {
+    public CfgToObject(CfgGetStrategoRuntimeProvider getStrategoRuntimeProvider, CompileLanguageInputCustomizer customizer) {
+        this.getStrategoRuntimeProvider = getStrategoRuntimeProvider;
         this.customizer = customizer;
     }
 
@@ -123,20 +129,39 @@ public class CfgToObject implements TaskDef<CfgToObject.Input, Result<CfgToObjec
 
     @Override
     public Result<Output, CfgToObjectException> exec(ExecContext context, CfgToObject.Input input) {
-        return context.require(input.astSupplier)
-            .mapErr(CfgToObjectException::astSupplyFail)
-            .flatMap(ast -> context.require(input.propertiesSupplier)
-                .mapErr(CfgToObjectException::propertiesSupplyFail)
-                .flatMap(properties -> toOutput(input.rootDirectory, input.cfgResource, ast, properties))
+        return context.require(input.analysisOutputSupplier)
+            .mapErr(CfgToObjectException::analyzeExceptionalFail)
+            .flatMap(analysisOutput -> context.require(input.propertiesSupplier)
+                .mapErr(CfgToObjectException::analyzeExceptionalFail)
+                .flatMap(properties -> toOutput(context, input.rootDirectory, input.cfgResource, analysisOutput, properties))
             );
     }
 
     private Result<Output, CfgToObjectException> toOutput(
+        ExecContext context,
         ResourcePath rootDirectory,
         @Nullable ResourceKey cfgFile,
-        IStrategoTerm ast,
+        CfgAnalyze.Output analysisOutput,
         Properties properties
     ) throws InvalidAstShapeException {
+        if(analysisOutput.result.messages.containsError()) {
+            final KeyedMessages messages;
+            if(cfgFile != null) {
+                messages = analysisOutput.result.messages.toKeyed(cfgFile);
+            } else {
+                messages = analysisOutput.result.messages.toKeyed();
+            }
+            return Result.ofErr(CfgToObjectException.analyzeFail(messages));
+        }
+
+        final Provider<StrategoRuntime> strategoRuntimeProvider = context.require(getStrategoRuntimeProvider, None.instance).getValue();
+        final IStrategoTerm ast;
+        try {
+            ast = strategoRuntimeProvider.get().addContextObject(analysisOutput.context).invoke("normalize", analysisOutput.result.ast);
+        } catch(StrategoException e) {
+            return Result.ofErr(CfgToObjectException.normalizationFail(e));
+        }
+
         final CfgAstToObject.Output output;
         try {
             output = CfgAstToObject.convert(rootDirectory, cfgFile, ast, properties, customizer);

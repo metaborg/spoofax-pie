@@ -1,11 +1,11 @@
 package mb.spoofax.lwb.dynamicloading;
 
+import mb.common.result.Result;
 import mb.common.util.ExceptionPrinter;
 import mb.log.api.LoggerFactory;
 import mb.log.dagger.DaggerLoggerComponent;
 import mb.log.dagger.LoggerComponent;
 import mb.log.dagger.LoggerModule;
-import mb.pie.api.ExecException;
 import mb.pie.api.MixedSession;
 import mb.pie.api.OutTransient;
 import mb.pie.api.PieBuilder;
@@ -121,28 +121,28 @@ class TestBase {
         return pieComponent.newSession();
     }
 
-    Task<OutTransient<DynamicLanguage>> dynamicLoadTask(CompileLanguage.Args args) {
+    Task<OutTransient<Result<DynamicLanguage, ?>>> dynamicLoadTask(CompileLanguage.Args args) {
         return dynamicLoad.createTask(args);
     }
 
-    Task<OutTransient<DynamicLanguage>> dynamicLoadTask(ResourcePath rootDirectory) {
+    Task<OutTransient<Result<DynamicLanguage, ?>>> dynamicLoadTask(ResourcePath rootDirectory) {
         return dynamicLoad.createTask(CompileLanguage.Args.builder().rootDirectory(rootDirectory).build());
     }
 
-    DynamicLanguage requireDynamicLoad(Session session, CompileLanguage.Args args) throws ExecException, InterruptedException {
-        return session.require(dynamicLoadTask(args)).getValue();
+    DynamicLanguage requireDynamicLoad(Session session, CompileLanguage.Args args) throws Exception {
+        return session.require(dynamicLoadTask(args)).getValue().unwrap();
     }
 
-    DynamicLanguage requireDynamicLoad(Session session, ResourcePath rootDirectory) throws ExecException, InterruptedException {
-        return session.require(dynamicLoadTask(rootDirectory)).getValue();
+    DynamicLanguage requireDynamicLoad(Session session, ResourcePath rootDirectory) throws Exception {
+        return session.require(dynamicLoadTask(rootDirectory)).getValue().unwrap();
     }
 
-    DynamicLanguage getDynamicLoadOutput(TopDownSession session, CompileLanguage.Args args) {
-        return session.getOutput(dynamicLoadTask(args)).getValue();
+    DynamicLanguage getDynamicLoadOutput(TopDownSession session, CompileLanguage.Args args) throws Exception {
+        return session.getOutput(dynamicLoadTask(args)).getValue().unwrap();
     }
 
-    DynamicLanguage getDynamicLoadOutput(TopDownSession session, ResourcePath rootDirectory) {
-        return session.getOutput(dynamicLoadTask(rootDirectory)).getValue();
+    DynamicLanguage getDynamicLoadOutput(TopDownSession session, ResourcePath rootDirectory) throws Exception {
+        return session.getOutput(dynamicLoadTask(rootDirectory)).getValue().unwrap();
     }
 
 

@@ -120,10 +120,12 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
             logger.debug("Checking language specification revealed errors; skipping compilation");
             return;
         }
+
         final Result<CompileLanguage.Output, CompileLanguageException> result = session.require(createCompileTask(rootDirectory));
         handleCompileResult(rootDirectory, result, monitor);
-        final OutTransient<DynamicLanguage> dynamicLanguage = session.require(createDynamicLoadTask(rootDirectory));
-        logger.debug("Dynamically loaded language '{}'", dynamicLanguage.getValue().getLanguageComponent().getLanguageInstance().getDisplayName());
+
+        final OutTransient<Result<DynamicLanguage, ?>> dynamicLanguage = session.require(createDynamicLoadTask(rootDirectory));
+        handleDynamicLoadResult(dynamicLanguage);
     }
 
     private void bottomUpBuild(ResourcePath rootDirectory, IResourceDelta delta, MixedSession session, @Nullable IProgressMonitor monitor) throws InterruptedException, CoreException, ExecException {
@@ -137,20 +139,33 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
             }
             return false;
         });
+
         logger.debug("Bottom-up language build of {} with changed resources {}", rootDirectory, changedResources);
         final TopDownSession topDownSession = session.updateAffectedBy(changedResources);
+
+        final KeyedMessages messages;
+        final Task<KeyedMessages> checkTask = createCheckTask(rootDirectory);
+        if(!topDownSession.hasBeenExecuted(checkTask)) {
+            messages = topDownSession.require(checkTask);
+        } else {
+            messages = topDownSession.getOutput(checkTask);
+        }
+        if(messages.containsError()) {
+            logger.debug("Checking language specification revealed errors; skipping handling of compile result");
+            return;
+        }
+
         final Result<CompileLanguage.Output, CompileLanguageException> result = topDownSession.getOutput(createCompileTask(rootDirectory));
         handleCompileResult(rootDirectory, result, monitor);
-        final Task<OutTransient<DynamicLanguage>> dynamicLoadTask = createDynamicLoadTask(rootDirectory);
-        final OutTransient<DynamicLanguage> dynamicLanguage;
+
+        final Task<OutTransient<Result<DynamicLanguage, ?>>> dynamicLoadTask = createDynamicLoadTask(rootDirectory);
+        final OutTransient<Result<DynamicLanguage, ?>> dynamicLanguage;
         if(!topDownSession.hasBeenExecuted(dynamicLoadTask)) {
             dynamicLanguage = topDownSession.require(dynamicLoadTask);
         } else {
             dynamicLanguage = topDownSession.getOutput(dynamicLoadTask);
         }
-        if(dynamicLanguage.isConsistent()) {
-            logger.debug("Possibly dynamically loaded language '{}'", dynamicLanguage.getValue().getLanguageComponent().getLanguageInstance().getDisplayName());
-        }
+        handleDynamicLoadResult(dynamicLanguage);
     }
 
     private ResourcePath getResourcePath(IResource eclipseResource) {
@@ -178,7 +193,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         return SpoofaxLwbLifecycleParticipant.getInstance().getSpoofax3Compiler().component.getCompileLanguage().createTask(createCompileArgs(rootDirectory));
     }
 
-    private Task<OutTransient<DynamicLanguage>> createDynamicLoadTask(ResourcePath rootDirectory) {
+    private Task<OutTransient<Result<DynamicLanguage, ?>>> createDynamicLoadTask(ResourcePath rootDirectory) {
         return SpoofaxLwbLifecycleParticipant.getInstance().getDynamicLoadingComponent().getDynamicLoad().createTask(createCompileArgs(rootDirectory));
     }
 
@@ -195,6 +210,17 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
                 cancel(monitor);
                 throw toCoreException(rootDirectory, e);
             }
+        }
+    }
+
+    private void handleDynamicLoadResult(OutTransient<Result<DynamicLanguage, ?>> dynamicLanguage) {
+        if(dynamicLanguage.isConsistent()) {
+            dynamicLanguage.getValue().ifElse(
+                l -> logger.debug("Possibly dynamically loaded language '{}'", l.getLanguageComponent().getLanguageInstance().getDisplayName()),
+                e -> logger.debug("Dynamic load task failed", e)
+            );
+        } else {
+            logger.debug("Dynamic language returned from dynamic load task is not consistent");
         }
     }
 

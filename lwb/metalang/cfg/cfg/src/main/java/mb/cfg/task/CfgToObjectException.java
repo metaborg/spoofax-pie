@@ -3,6 +3,7 @@ package mb.cfg.task;
 import mb.common.message.HasOptionalMessages;
 import mb.common.message.KeyedMessages;
 import mb.common.util.ADT;
+import mb.stratego.common.StrategoException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
@@ -10,7 +11,11 @@ import java.util.Optional;
 @ADT
 public abstract class CfgToObjectException extends Exception implements HasOptionalMessages {
     public interface Cases<R> {
-        R astSupplyFail(Exception astSupplyException);
+        R analyzeExceptionalFail(Exception astSupplyException);
+
+        R analyzeFail(KeyedMessages messages);
+
+        R normalizationFail(StrategoException normalizationException);
 
         R propertiesSupplyFail(Exception propertiesSupplyException);
 
@@ -19,12 +24,16 @@ public abstract class CfgToObjectException extends Exception implements HasOptio
         R validationFail(KeyedMessages messages);
     }
 
-    public static CfgToObjectException astSupplyFail(Exception astSupplyException) {
-        return withCause(CfgToObjectExceptions.astSupplyFail(astSupplyException), astSupplyException);
+    public static CfgToObjectException analyzeExceptionalFail(Exception analysisOutputSupplyException) {
+        return withCause(CfgToObjectExceptions.analyzeExceptionalFail(analysisOutputSupplyException), analysisOutputSupplyException);
     }
 
-    public static CfgToObjectException propertiesSupplyFail(Exception propertiesSupplyException) {
-        return withCause(CfgToObjectExceptions.propertiesSupplyFail(propertiesSupplyException), propertiesSupplyException);
+    public static CfgToObjectException analyzeFail(KeyedMessages messages) {
+        return CfgToObjectExceptions.analyzeFail(messages);
+    }
+
+    public static CfgToObjectException normalizationFail(StrategoException normalizationException) {
+        return CfgToObjectExceptions.normalizationFail(normalizationException);
     }
 
     public static CfgToObjectException buildConfigObjectFail(IllegalStateException illegalStateException) {
@@ -43,18 +52,20 @@ public abstract class CfgToObjectException extends Exception implements HasOptio
 
     public abstract <R> R match(Cases<R> cases);
 
-    public static CfgToObjectExceptions.CasesMatchers.TotalMatcher_AstSupplyFail cases() {
+    public static CfgToObjectExceptions.CasesMatchers.TotalMatcher_AnalyzeExceptionalFail cases() {
         return CfgToObjectExceptions.cases();
     }
 
-    public CfgToObjectExceptions.CaseOfMatchers.TotalMatcher_AstSupplyFail caseOf() {
+    public CfgToObjectExceptions.CaseOfMatchers.TotalMatcher_AnalyzeExceptionalFail caseOf() {
         return CfgToObjectExceptions.caseOf(this);
     }
 
 
     @Override public String getMessage() {
         return caseOf()
-            .astSupplyFail((e) -> "Failed to supply AST of CFG language")
+            .analyzeExceptionalFail((e) -> "Analysis failed unexpectedly")
+            .analyzeFail((m) -> "Analysis produced errors")
+            .normalizationFail((e) -> "Normalization failed unexpectedly")
             .propertiesSupplyFail((e) -> "Failed to supply configuration properties")
             .buildConfigObjectFail((e) -> "Failed to build configuration object")
             .validationFail((m) -> "Failed to build configuration objects; validation produced errors")

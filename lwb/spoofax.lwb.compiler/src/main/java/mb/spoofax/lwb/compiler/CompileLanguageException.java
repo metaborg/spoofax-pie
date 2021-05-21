@@ -15,8 +15,6 @@ public abstract class CompileLanguageException extends Exception implements HasO
     public interface Cases<R> {
         R getConfigurationFail(CfgRootDirectoryToObjectException cfgRootDirectoryToObjectException);
 
-        R walkJavaSourceFilesFail(IOException ioException);
-
         R compileLanguageFail(CompileLanguageSpecificationException compileLanguageSpecificationException);
 
         R javaCompilationFail(KeyedMessages messages);
@@ -24,10 +22,6 @@ public abstract class CompileLanguageException extends Exception implements HasO
 
     public static CompileLanguageException getConfigurationFail(CfgRootDirectoryToObjectException cfgRootDirectoryToObjectException) {
         return withCause(CompileLanguageExceptions.getConfigurationFail(cfgRootDirectoryToObjectException), cfgRootDirectoryToObjectException);
-    }
-
-    public static CompileLanguageException walkJavaSourceFilesFail(IOException ioException) {
-        return withCause(CompileLanguageExceptions.walkJavaSourceFilesFail(ioException), ioException);
     }
 
     public static CompileLanguageException compileLanguageFail(CompileLanguageSpecificationException compileLanguageSpecificationException) {
@@ -59,7 +53,6 @@ public abstract class CompileLanguageException extends Exception implements HasO
     @Override public @NonNull String getMessage() {
         return cases()
             .getConfigurationFail((e) -> "Failed to get configuration")
-            .walkJavaSourceFilesFail((e) -> "Walking Java source files failed")
             .compileLanguageFail((e) -> "Compiling language failed")
             .javaCompilationFail((e) -> "Java compilation failed")
             .apply(this);
