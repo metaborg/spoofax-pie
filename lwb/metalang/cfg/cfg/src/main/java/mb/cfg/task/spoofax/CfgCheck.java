@@ -95,7 +95,10 @@ public class CfgCheck implements TaskDef<CfgCheck.Input, KeyedMessages> {
                 analysisErrors.set(output.result.messages.containsError());
                 messagesBuilder.addMessages(output.result.resource, output.result.messages);
             })
-            .ifErr(e -> messagesBuilder.addMessage("Analysis failed", e, Severity.Error));
+            .ifErr(e -> {
+                analysisErrors.set(true);
+                messagesBuilder.addMessage("Analysis failed", e, Severity.Error);
+            });
 
         if(!analysisErrors.get() && input.rootDirectoryHint != null) {
             final Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result = context.require(rootDirectoryToObject, input.rootDirectoryHint);

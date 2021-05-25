@@ -115,7 +115,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
 
     private void topDownBuild(ResourcePath rootDirectory, MixedSession session, @Nullable IProgressMonitor monitor) throws InterruptedException, CoreException, ExecException {
         logger.debug("Top-down language build of {}", rootDirectory);
-        final KeyedMessages messages = session.requireWithoutObserving(createCheckTask(rootDirectory));
+        final KeyedMessages messages = session.require(createCheckTask(rootDirectory));
         if(messages.containsError()) {
             logger.debug("Checking language specification revealed errors; skipping compilation");
             return;
