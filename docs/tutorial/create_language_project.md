@@ -168,7 +168,7 @@ We explain this class with numbered annotations in the above Java source file:
 
     In this concrete case, the input type is `#!java HelloWorldShowParsedAst.Args` which is a nested data class defined at (2). The output is `#!java CommandFeedback` which is a type defined by Spoofax for providing feedback back to the user when executing a command. All tasks that are executed through commands must return a `#!java CommandFeedback` object.
 
- 2. A nested data class encapsulating the input to this task. In this case, we want this task to take the `file` we are going to show the AST of as input. Even though we only take one argument as input, we must encapsulate it in a class, because Spoofax must be able to make an instance of this class, filling in the arguments through the constructor, in order to execute the command.
+ 2. A nested data class encapsulating the input to this task. In this case, we want this task to take the `file` we are going to show the AST of as input. Even though we only take one argument as input, we must encapsulate it in a class due to the way commands in Spoofax work.
 
     This data class must implement `#!java Serializable` because it is used as an input to a task. In order for PIE to incrementalize tasks across JVM restarts, it must be able to serialize the input (and output) objects to disk. Furthermore, this class must be immutable, because PIE caches input (and output) objects, and this caching would be inconsistent if the class is mutable. This class is immutable by storing the file in a `#!java final` field which is set in the constructor (and the `#!java ResourceKey` class is immutable as well).
 
@@ -178,17 +178,21 @@ We explain this class with numbered annotations in the above Java source file:
 
  3. The `exec` method which is called when the task is executed. It takes an `#!java ExecContext` as input, which is used to tell PIE about dependencies to files, and can be used to execute and get the result of another task (implicitly creating a dependency to that task). It also takes the input type `Args` as input, and must return a `CommandFeedback`.
 
- 4. For sound incrementality, we want to re-execute this task when we make changes to this class. Therefore, we want to make a *self-dependency*. That is, we want to make a file dependency to the Java class file that is compiled from this Java source file. The `#!java classloaderResources` object (defined below at (8)) is used to get the class or JAR file of the current class. This resource is passed to `#!java context.require` to tell PIE that this task depends on that file. We pass in `#!java ResourceStampers.hashFile()` as the second argument, which indicates that we want to use the hash of the class file to detect changes, instead of the last modified date which is used by default. It is recommended to use `#!java ResourceStampers.hashFile()` for dependencies to generated/compiled files, as compiled files are sometimes recompiled without changes, which changes the modified date but not the hash, leading to better incrementality.
+ 4. For sound incrementality, we want to re-execute this task when we make changes to this class. Therefore, we want to make a *self-dependency*. That is, we want to make a file dependency to the Java class file that is compiled from this Java source file. The `#!java classloaderResources` object (defined below at (8)) is used to get the class or JAR file of the current class. This resource is passed to `#!java context.require` to tell PIE that this task depends on that file.
+
+    We pass in `#!java ResourceStampers.hashFile()` as the second argument, which indicates that we want to use the hash of the class file to detect changes, instead of the last modified date which is used by default. It is recommended to use hashes for dependencies to generated/compiled files, as compiled files are sometimes recompiled without changes, which changes the modified date but not the hash, leading to better incrementality.
 
  5. To show the AST we must parse the input file, and in order to do that we must call a task which performs the parsing. Whereas (4) uses `context.require` to create a dependency to a *file*, we use `context.require` here to create a dependency to the *task* that does the parsing, and get the output of that task. As input to `context.require` we pass `parse.inputBuilder().withFile(file).buildAstSupplier()`, which uses the builder pattern to create an input for the `parse` task and then extracts the AST from the output.
 
-    The output of this task is `Result<IStrategoTerm, JSGLR1ParseException>` which is a [*result type*](https://en.wikipedia.org/wiki/Result_type) which is either a `IStrategoTerm` representing the AST of the file if parsing succeeds, or a `JSGLR1ParseException` when parsing fails.
+    Internally, the `parse` task creates a dependency to the `file` we pass into it. We depend on the `parse` task. Therefore, when the `file` changes, PIE re-executes the `parse` task, and then re-executes this task if the output of the `parse` task is different. Thereby, PIE incrementally executes your task without having to incrementalize it yourself.
+
+    The output of the `parse` task is `Result<IStrategoTerm, JSGLR1ParseException>` which is a [*result type*](https://en.wikipedia.org/wiki/Result_type) which is either a `IStrategoTerm` representing the AST of the file if parsing succeeds, or a `JSGLR1ParseException` when parsing fails.
 
     Instead of throwing exceptions, we use result types (akin to `Either` in Haskell or `Result` in Rust) to model the possibility of failure with values. We do this to make it possible to work with failures in PIE tasks. In PIE, throwing an exception signifies an unrecoverable error and cancels the entire pipeline. However, using failures as values works normally.
 
  6. Now that we have the result of parsing, we can turn it into a `CommandFeedback` object. We use `mapOrElse` of `Result` to map the result to a `CommandFeedback` differently depending on whether parsing succeeded or failed.
 
-    If parsing succeeded, we show the AST as text to the user with `CommandFeedback.of(ShowFeedback.showText(...)) with the first argument providing the text, and the second argument providing the title. The IDE then shows this as an editor.
+    If parsing succeeded, we show the AST as text to the user with `CommandFeedback.of(ShowFeedback.showText(...))` with the first argument providing the text, and the second argument providing the title. The IDE then shows this as a textual editor.
 
     If parsing failed, we present the parse error messages as feedback to the user with `CommandFeedback.ofTryExtractMessagesFrom`.
 
@@ -216,7 +220,7 @@ let showParsedAst = task-def mb.helloworld.task.HelloWorldShowParsedAst
 This registers the task definition class that we just created, and makes it available under the `showParsedAst` name in the configuration.
 
 !!! warning
-    Spoofax assumes that this class implements `TaskDef`. This is not checked at compile time. Faults will lead to Java compile errors.
+    Spoofax assumes that this class implements `TaskDef`. This is not checked as part of this configuration. Faults will lead to Java compile errors.
 
 ### Creating the command
 
@@ -259,7 +263,7 @@ We explain this configuration with numbered annotations in the above CFG source 
         Currently, Spoofax does not support running commands in the IDE without an argument provider, so a working argument provider is currently required.
 
 !!! warning
-    Spoofax assumes that: a) the task definition's input type is the one defined at (3), b) the output type is `CommandFeedback`, and c) that the argument type has a constructor covering exactly the parameters from (7). This is not checked at compile time. Faults will lead to Java compile errors or errors when running the command.
+    Spoofax assumes that: a) the task definition's input type is the one defined at (3), b) the output type is `CommandFeedback`, and c) that the argument type has a constructor covering exactly the parameters from (7). This is not checked as part of this configuration. Faults will lead to Java compile errors.
 
 Some properties set above are set to their conventional (default) value, or are optional, so we can leave them out. Replace the command definition with the following code:
 
