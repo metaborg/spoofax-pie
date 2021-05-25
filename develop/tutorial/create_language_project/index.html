@@ -755,15 +755,15 @@ There should now be a project named <code>helloworld</code> in the <span class="
 <p>First we will add some syntax to the language.
 Open the main SDF3 file <code>helloworld/src/start.sdf3</code> file by expanding the folders and double-clicking the file.
 SDF3 is a meta-language (i.e., a language to describe languages) for describing the syntax of a language, from which Spoofax will derive the parser of your language.
-Under the <code class="highlight">context-free syntax</code> section, replace the <code class="highlight">Start.Empty = &lt;&gt;</code> line with <code class="highlight">Start.Program = &lt;&lt;{Part &quot; &quot;}*&gt;&gt;</code>, indicating that the language accepts programs which consists of one or more parts.
-Then add <code class="highlight">Part.Hello = &lt;hello&gt;</code> on a new line, indicating that one sort of part is the word <code>hello.</code>
-Finally, add <code class="highlight">Part.World = &lt;world&gt;</code> on a new line, indicating that one sort of part is the word <code>world</code>.
+Under the <code class="highlight"><span class="k">context-free</span><span class="w"> </span><span class="k">syntax</span><span class="w"></span></code> section, replace the <code class="highlight"><span class="nv">Start</span><span class=" -Punctuation">.</span><span class="nv">Empty</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;&gt;</span><span class="w"></span></code> line with <code class="highlight"><span class="nv">Start</span><span class=" -Punctuation">.</span><span class="nv">Program</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;&lt;{</span><span class="nv">Part</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class=" -Punctuation">}</span><span class="o">*</span><span class=" -Punctuation">&gt;&gt;</span><span class="w"></span></code>, indicating that the language accepts programs which consists of one or more parts.
+Then add <code class="highlight"><span class="nv">Part</span><span class=" -Punctuation">.</span><span class="nv">Hello</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;</span><span class="nv">hello</span><span class=" -Punctuation">&gt;</span><span class="w"></span></code> on a new line, indicating that one sort of part is the word <code>hello.</code>
+Finally, add <code class="highlight"><span class="nv">Part</span><span class=" -Punctuation">.</span><span class="nv">World</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;</span><span class="nv">world</span><span class=" -Punctuation">&gt;</span><span class="w"></span></code> on a new line, indicating that one sort of part is the word <code>world</code>.
 The context-free syntax section should now look as follows:</p>
-<div class="highlight"><pre><span></span><code>context-free syntax
+<div class="highlight"><pre><span></span><code><span class="k">context-free</span><span class="w"> </span><span class="k">syntax</span><span class="w"></span>
 
-  Start.Program = &lt;&lt;{Part &quot; &quot;}*&gt;&gt;
-  Part.Hello = &lt;hello&gt;
-  Part.World = &lt;world&gt;
+<span class="w">  </span><span class="nv">Start</span><span class=" -Punctuation">.</span><span class="nv">Program</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;&lt;{</span><span class="nv">Part</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class=" -Punctuation">}</span><span class="o">*</span><span class=" -Punctuation">&gt;&gt;</span><span class="w"></span>
+<span class="w">  </span><span class="nv">Part</span><span class=" -Punctuation">.</span><span class="nv">Hello</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;</span><span class="nv">hello</span><span class=" -Punctuation">&gt;</span><span class="w"></span>
+<span class="w">  </span><span class="nv">Part</span><span class=" -Punctuation">.</span><span class="nv">World</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;</span><span class="nv">world</span><span class=" -Punctuation">&gt;</span><span class="w"></span>
 </code></pre></div>
 <p>To test our change, build the project by clicking on the project in the <span class="guilabel">Package Explorer</span> and choosing <span class="guilabel">Project ‣ Build Project</span> from the main menu, or by pressing <span class="keys"><kbd class="key-command">Cmd</kbd><span>+</span><kbd class="key-b">B</kbd></span> on macOS or <span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-b">B</kbd></span> on others.
 To see when the build is done, open the progress window by choosing <span class="guilabel">Window ‣ Show View ‣ Progress</span>.
@@ -778,7 +778,7 @@ That is ok for now, we will fix this later.</p>
 <p>Now we will change the syntax highlighter of the language.
 Open the main ESV file <code>helloworld/src/main.esv</code>.
 ESV is a meta-language for describing the syntax highlighter.
-Change the <code class="highlight">keyword : 127 0 85 bold</code> line to <code class="highlight">keyword: 0 0 150 bold</code> and build the project.
+Change the <code class="highlight">keyword<span class="w"> </span><span class=" -Punctuation">:</span><span class="w"> </span>127<span class="w"> </span>0<span class="w"> </span>85<span class="w"> </span>bold<span class="w"></span></code> line to <code class="highlight">keyword<span class=" -Punctuation">:</span><span class="w"> </span>0<span class="w"> </span>0<span class="w"> </span>150<span class="w"> </span>bold<span class="w"></span></code> and build the project.
 Then check your <code>test.hel</code> example file, it should now be highlighted blue.</p>
 <p>To make iteration easier, you can drag the <code>test.hel</code> tab to the side of the screen to open the language definition and example file side-by-side.
 You can play around with the coloring a bit and choose a style to your liking.
@@ -965,60 +965,60 @@ Finally, we can run the command by right-clicking the <code>test.hel</code> file
 Open the main Statix file <code>helloworld/src/main.stx</code>
 Statix is a meta-language for defining the static semantics of your language, which includes type checking.</p>
 <p>First we will update the Statix specification to handle the new language constructs.
-Replace the <code class="highlight">signature</code> section with the following:</p>
-<div class="highlight"><pre><span></span><code>signature
+Replace the <code class="highlight"><span class="k">signature</span><span class="w"></span></code> section with the following:</p>
+<div class="highlight"><pre><span></span><code><span class="k">signature</span><span class="w"></span>
 
-  sorts Start constructors
-    Program : list(Part) -&gt; Start
-  sorts Part constructors
-    Hello : Part
-    World : Part
+<span class="w">  </span><span class="k">sorts</span><span class="w"> </span><span class="nv">Start</span><span class="w"> </span><span class="k">constructors</span><span class="w"></span>
+<span class="w">    </span><span class="nv">Program</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="k">list</span><span class="p">(</span><span class="nv">Part</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nv">Start</span><span class="w"></span>
+<span class="w">  </span><span class="k">sorts</span><span class="w"> </span><span class="nv">Part</span><span class="w"> </span><span class="k">constructors</span><span class="w"></span>
+<span class="w">    </span><span class="nv">Hello</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="nv">Part</span><span class="w"></span>
+<span class="w">    </span><span class="nv">World</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="nv">Part</span><span class="w"></span>
 </code></pre></div>
 <p>This defines the <abbr title="Abstract Syntax Tree">AST</abbr> signature of the language.
 In a future version of Spoofax 3, this will be automatically derived from the SDF3 specification.</p>
-<p>Now, replace the <code class="highlight">programOk(Empty()).</code> line with <code class="highlight">programOk(Program(parts)).</code>, meaning that we accept all programs consisting of parts, which is always true due to the syntax of the language.
+<p>Now, replace the <code class="highlight"><span class="nv">programOk</span><span class="p">(</span><span class="nv">Empty</span><span class="p">()).</span><span class="w"></span></code> line with <code class="highlight"><span class="nv">programOk</span><span class="p">(</span><span class="nv">Program</span><span class="p">(</span><span class="nv">parts</span><span class="p">)).</span><span class="w"></span></code>, meaning that we accept all programs consisting of parts, which is always true due to the syntax of the language.
 The file should now look like this:</p>
-<div class="highlight"><pre><span></span><code>module main
+<div class="highlight"><pre><span></span><code><span class="k">module</span><span class="w"> </span><span class="nv">main</span><span class="w"></span>
 
-signature
+<span class="k">signature</span><span class="w"></span>
 
-  sorts Start constructors
-    Program : list(Part) -&gt; Start
-  sorts Part constructors
-    Hello : Part
-    World : Part
+<span class="w">  </span><span class="k">sorts</span><span class="w"> </span><span class="nv">Start</span><span class="w"> </span><span class="k">constructors</span><span class="w"></span>
+<span class="w">    </span><span class="nv">Program</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="k">list</span><span class="p">(</span><span class="nv">Part</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nv">Start</span><span class="w"></span>
+<span class="w">  </span><span class="k">sorts</span><span class="w"> </span><span class="nv">Part</span><span class="w"> </span><span class="k">constructors</span><span class="w"></span>
+<span class="w">    </span><span class="nv">Hello</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="nv">Part</span><span class="w"></span>
+<span class="w">    </span><span class="nv">World</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="nv">Part</span><span class="w"></span>
 
-rules
+<span class="k">rules</span><span class="w"></span>
 
-  programOk : Start
-  programOk(Program(parts)).
+<span class="w">  </span><span class="nv">programOk</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="nv">Start</span><span class="w"></span>
+<span class="w">  </span><span class="nv">programOk</span><span class="p">(</span><span class="nv">Program</span><span class="p">(</span><span class="nv">parts</span><span class="p">)).</span><span class="w"></span>
 </code></pre></div>
 <p>Build the project, and the error marker should disappear from your example program.</p>
 <p>As a silly rule, we will add a warning to all instances of <code>world</code> in the program.
 Add the following code to the end of the Statix definition:</p>
-<div class="highlight"><pre><span></span><code>  partOk : Part
-  partOk(Hello()).
-  partOk(World()) :- try { false } | warning $[World!].
-  partsOk maps partOk(list(*))
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nv">partOk</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="nv">Part</span><span class="w"></span>
+<span class="w">  </span><span class="nv">partOk</span><span class="p">(</span><span class="nv">Hello</span><span class="p">()).</span><span class="w"></span>
+<span class="w">  </span><span class="nv">partOk</span><span class="p">(</span><span class="nv">World</span><span class="p">())</span><span class="w"> </span><span class="p">:</span><span class="nv">-</span><span class="w"> </span><span class="nv">try</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">false</span><span class="w"> </span><span class="p">}</span><span class="w"> </span>|<span class="w"> </span><span class="nv">warning</span><span class="w"> </span>$[<span class="nv">World</span>!]<span class="p">.</span><span class="w"></span>
+<span class="w">  </span><span class="nv">partsOk</span><span class="w"> </span><span class="k">maps</span><span class="w"> </span><span class="nv">partOk</span><span class="p">(</span><span class="k">list</span><span class="p">(</span>*<span class="p">))</span><span class="w"></span>
 </code></pre></div>
-<p>This adds a <code class="highlight">partOk</code> rule that lets all <code class="highlight">Hello()</code> parts pass, but will add a warning to all <code class="highlight">World()</code> parts.
-<code class="highlight">partsOk</code> goes over a list of parts and applies <code class="highlight">partOk</code>.
-Replace the <code class="highlight">programOk(Program(parts)).</code> line with <code class="highlight">programOk(Program(parts)) :- partsOk(parts).</code> to apply the <code class="highlight">partsOk</code> rule.
+<p>This adds a <code class="highlight"><span class="nv">partOk</span><span class="w"></span></code> rule that lets all <code class="highlight"><span class="nv">Hello</span><span class="p">()</span><span class="w"></span></code> parts pass, but will add a warning to all <code class="highlight"><span class="nv">World</span><span class="p">()</span><span class="w"></span></code> parts.
+<code class="highlight"><span class="nv">partsOk</span><span class="w"></span></code> goes over a list of parts and applies <code class="highlight"><span class="nv">partOk</span><span class="w"></span></code>.
+Replace the <code class="highlight"><span class="nv">programOk</span><span class="p">(</span><span class="nv">Program</span><span class="p">(</span><span class="nv">parts</span><span class="p">)).</span><span class="w"></span></code> line with <code class="highlight"><span class="nv">programOk</span><span class="p">(</span><span class="nv">Program</span><span class="p">(</span><span class="nv">parts</span><span class="p">))</span><span class="w"> </span><span class="p">:</span><span class="nv">-</span><span class="w"> </span><span class="nv">partsOk</span><span class="p">(</span><span class="nv">parts</span><span class="p">).</span><span class="w"></span></code> to apply the <code class="highlight"><span class="nv">partsOk</span><span class="w"></span></code> rule.
 Build the project, and a warning marker should appear under all instances of <code>world</code> in the program.</p>
 <h2 id="adding-a-transformation">Adding a transformation<a class="headerlink" href="#adding-a-transformation" title="Permanent link">&para;</a></h2>
 <p>Finally, we will define a transformation for our language and add a task, command-tasks, command, and menu item for it.
 Open the main Stratego file <code>helloworld/src/main.str</code>.
 Stratego is a meta-language for defining term (<abbr title="Abstract Syntax Tree">AST</abbr>) transformations through rewrite rules.
-We will add a silly transformation that replaces all instances of <code class="highlight">World()</code> with <code class="highlight">Hello()</code>.</p>
+We will add a silly transformation that replaces all instances of <code class="highlight"><span class="nv">World</span><span class=" -Punctuation">()</span><span class="w"></span></code> with <code class="highlight"><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"></span></code>.</p>
 <p>Add the following code to the end of the Stratego file:</p>
-<div class="highlight"><pre><span></span><code>rules
+<div class="highlight"><pre><span></span><code><span class="k">rules</span><span class="w"></span>
 
-  replace-world: Hello() -&gt; Hello()
-  replace-world: World() -&gt; Hello()
-  replace-worlds = topdown(try(replace-world))
+<span class="w">  </span><span class="nv">replace-world</span><span class=" -Punctuation">:</span><span class="w"> </span><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"> </span><span class="nv">-</span><span class=" -Punctuation">&gt;</span><span class="w"> </span><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"></span>
+<span class="w">  </span><span class="nv">replace-world</span><span class=" -Punctuation">:</span><span class="w"> </span><span class="nv">World</span><span class=" -Punctuation">()</span><span class="w"> </span><span class="nv">-</span><span class=" -Punctuation">&gt;</span><span class="w"> </span><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"></span>
+<span class="w">  </span><span class="nv">replace-worlds</span><span class="w"> </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">topdown</span><span class=" -Punctuation">(</span><span class="nv">try</span><span class=" -Punctuation">(</span><span class="nv">replace-world</span><span class=" -Punctuation">))</span><span class="w"></span>
 </code></pre></div>
-<p>The <code class="highlight">replace-world</code> rule passes <code class="highlight">Hello()</code> terms but rewrites <code class="highlight">World()</code> terms to <code class="highlight">Hello()</code>.
-The <code class="highlight">replace-worlds</code> strategy tries to apply <code class="highlight">replace-world</code> in a top-down manner over the entire <abbr title="Abstract Syntax Tree">AST</abbr>.</p>
+<p>The <code class="highlight"><span class="nv">replace-world</span><span class="w"></span></code> rule passes <code class="highlight"><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"></span></code> terms but rewrites <code class="highlight"><span class="nv">World</span><span class=" -Punctuation">()</span><span class="w"></span></code> terms to <code class="highlight"><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"></span></code>.
+The <code class="highlight"><span class="nv">replace-worlds</span><span class="w"></span></code> strategy tries to apply <code class="highlight"><span class="nv">replace-world</span><span class="w"></span></code> in a top-down manner over the entire <abbr title="Abstract Syntax Tree">AST</abbr>.</p>
 <p>Now we add a task and command-task for this transformation.
 We define two separate tasks to keep separate</p>
 <ol>
