@@ -966,12 +966,12 @@ Replace the entire Java file with the following code:</p>
 <ol>
 <li>
 <p>This class implements <code class="highlight"><span class="n">TaskDef</span></code>, which is an interface from PIE which a class must implement to be a task definition. Task definitions have an input and output type defined by the first and second generic argument. To execute this task, an object of the input type is required, and once it is done executing, it must return an object of the output type.</p>
-<p>In this concrete case, the input type is <code class="highlight"><span class="n">HelloWorldShowParsedAst</span><span class="p">.</span><span class="na">Args</span></code> which is a nested data class defined at (2). The output is <code class="highlight"><span class="n">CommandFeedback</span></code> which is a type defined by Spoofax 3 for providing feedback back to the user when executing a command. All tasks that are executed through commands must return a <code class="highlight"><span class="n">CommandFeedback</span></code> object.</p>
+<p>In this concrete case, the input type is <code class="highlight"><span class="n">HelloWorldShowParsedAst</span><span class="p">.</span><span class="na">Args</span></code> which is a nested data class defined at (2). The output is <code class="highlight"><span class="n">CommandFeedback</span></code> which is a type defined by Spoofax for providing feedback back to the user when executing a command. All tasks that are executed through commands must return a <code class="highlight"><span class="n">CommandFeedback</span></code> object.</p>
 </li>
 <li>
-<p>A nested data class encapsulating the input to this task. In this case, we want this task to take the <code>file</code> we are going to show the <abbr title="Abstract Syntax Tree">AST</abbr> of as input. Even though we only take one argument as input, we must encapsulate it in a class, because Spoofax 3 must be able to make an instance of this class, filling in the arguments through the constructor, in order to execute the command.</p>
+<p>A nested data class encapsulating the input to this task. In this case, we want this task to take the <code>file</code> we are going to show the <abbr title="Abstract Syntax Tree">AST</abbr> of as input. Even though we only take one argument as input, we must encapsulate it in a class, because Spoofax must be able to make an instance of this class, filling in the arguments through the constructor, in order to execute the command.</p>
 <p>This data class must implement <code class="highlight"><span class="n">Serializable</span></code> because it is used as an input to a task. In order for PIE to incrementalize tasks across <abbr title="Java Virtual Machine">JVM</abbr> restarts, it must be able to serialize the input (and output) objects to disk. Furthermore, this class must be immutable, because PIE caches input (and output) objects, and this caching would be inconsistent if the class is mutable. This class is immutable by storing the file in a <code class="highlight"><span class="kd">final</span></code> field which is set in the constructor (and the <code class="highlight"><span class="n">ResourceKey</span></code> class is immutable as well).</p>
-<p>Spoofax 3 and PIE abstract over files with <em>resources</em>. A resource is some externally managed mutable state, with a (immutable and serializable) <em>key</em> which can be used to identify, read, and write to that resource. Such a key is represented by a <code class="highlight"><span class="n">ResourceKey</span></code>.</p>
+<p>Spoofax and PIE abstract over files with <em>resources</em>. A resource is some externally managed mutable state, with a (immutable and serializable) <em>key</em> which can be used to identify, read, and write to that resource. Such a key is represented by a <code class="highlight"><span class="n">ResourceKey</span></code>.</p>
 <p>Finally, this data class must implement <code class="highlight"><span class="n">equals</span></code> and <code class="highlight"><span class="n">hashCode</span></code> according to the data in the class because PIE uses these methods to identify tasks according to their input, which in turn is used for caching. A <code class="highlight"><span class="n">toString</span></code> implementation is also recommended for debugging.</p>
 </li>
 <li>
@@ -994,13 +994,14 @@ Replace the entire Java file with the following code:</p>
 <p>Finally, PIE needs to be able to identify this task definition. That is done by this <code>getId</code> method that returns a unique identifier. This can almost always be implemented using <code>getClass().getName()</code> which returns the fully qualified name of this class.</p>
 </li>
 <li>
-<p>Spoofax 3 uses <a href="https://en.wikipedia.org/wiki/Dependency_injection">dependency injection</a> to inject required services, tasks, and other objects into the objects of your classes. The <code>classloaderResources</code> object used in (4) is of type <code>HelloWorldClassLoaderResources</code> which is class that Spoofax 3 generates for your language. Similarly, the <code>parse</code> object used in (5) is of type <code>HelloWorldParse</code> which is a task definition that Spoofax 3 generates for you. We store these as fields of this class.</p>
+<p>Spoofax uses <a href="https://en.wikipedia.org/wiki/Dependency_injection">dependency injection</a> to inject required services, tasks, and other objects into the objects of your classes. The <code>classloaderResources</code> object used in (4) is of type <code>HelloWorldClassLoaderResources</code> which is class that Spoofax generates for your language. Similarly, the <code>parse</code> object used in (5) is of type <code>HelloWorldParse</code> which is a task definition that Spoofax generates for you. We store these as fields of this class.</p>
+<p>Note that dependency injection, and file/task dependencies in PIE, are two completely separate things.</p>
 </li>
 <li>
-<p>These fields are set using <a href="https://en.wikipedia.org/wiki/Dependency_injection#Constructor_injection">constructor injection</a> in the single constructor of this class marked with <code>@Inject</code>. The dependency injection framework that Spoofax 3 uses (the <a href="https://dagger.dev/dev-guide/">Dagger</a> framework) will then instantiate your class with instances of the dependencies.</p>
+<p>These fields are set using <a href="https://en.wikipedia.org/wiki/Dependency_injection#Constructor_injection">constructor injection</a> in the single constructor of this class marked with <code>@Inject</code>. The dependency injection framework that Spoofax uses (the <a href="https://dagger.dev/dev-guide/">Dagger</a> framework) will then instantiate your class with instances of the dependencies.</p>
 </li>
 <li>
-<p>Finally, we must tell the dependency injection framework to which scope instances of this class belongs. We annotate the class with <code>@HelloWorldScope</code> which is a scope annotation that Spoofax 3 generates for you. This is mainly used to differentiate between different languages when multiple languages are composed, which we do not do in this tutorial, but is required nonetheless.</p>
+<p>Finally, we must tell the dependency injection framework to which scope instances of this class belongs. We annotate the class with <code>@HelloWorldScope</code> which is a scope annotation that Spoofax generates for you. This is mainly used to differentiate between different languages when multiple languages are composed, which we do not do in this tutorial, but is required nonetheless.</p>
 </li>
 </ol>
 <h3 id="registering-the-task-definition">Registering the task definition<a class="headerlink" href="#registering-the-task-definition" title="Permanent link">&para;</a></h3>
@@ -1011,27 +1012,51 @@ Add the following configuration to the end of the file:</p>
 <div class="highlight"><pre><span></span><code><span class="na">let showParsedAst</span> <span class="o">=</span> <span class="s">task-def mb.helloworld.task.HelloWorldShowParsedAst</span>
 </code></pre></div>
 <p>This registers the task definition class that we just created, and makes it available under the <code>showParsedAst</code> name in the configuration.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Spoofax assumes that this class implements <code>TaskDef</code>. This is not checked at compile time. Faults will lead to Java compile errors.</p>
+</div>
 <h3 id="creating-the-command">Creating the command<a class="headerlink" href="#creating-the-command" title="Permanent link">&para;</a></h3>
 <p>To create the command, add the following configuration to the end of the <code>spoofax.cfg</code> file:</p>
-<div class="highlight"><pre><span></span><code><span class="na">let showParsedAstCommand</span> <span class="o">=</span> <span class="s">command-def {</span>
-  <span class="na">type</span> <span class="o">=</span> <span class="s">java mb.helloworld.command.HelloWorldShowParsedAstCommand</span>
-  <span class="na">task-def</span> <span class="o">=</span> <span class="s">showParsedAst</span>
-  <span class="na">args-type</span> <span class="o">=</span> <span class="s">java mb.helloworld.task.HelloWorldShowParsedAst.Args</span>
-  <span class="na">display-name</span> <span class="o">=</span> <span class="s">&quot;Show parsed AST&quot;</span>
-  <span class="na">description</span> <span class="o">=</span> <span class="s">&quot;Shows the parsed AST&quot;</span>
-  <span class="na">supported-execution-types</span> <span class="o">=</span> <span class="s">[Once, Continuous]</span>
-  <span class="na">parameters</span> <span class="o">=</span> <span class="s">[</span>
-    <span class="na">file</span> <span class="o">=</span> <span class="s">parameter {</span>
-      <span class="na">type</span> <span class="o">=</span> <span class="s">java mb.resource.ResourceKey</span>
-      <span class="na">required</span> <span class="o">=</span> <span class="s">true</span>
-      <span class="na">argument-providers</span> <span class="o">=</span> <span class="s">[Context(File)]</span>
+<div class="annotate highlight"><pre><span></span><code><span class="na">let showParsedAstCommand</span> <span class="o">=</span> <span class="s">command-def {</span>
+  <span class="na">type</span> <span class="o">=</span> <span class="s">java mb.helloworld.command.HelloWorldShowParsedAstCommand // (1)</span>
+  <span class="na">task-def</span> <span class="o">=</span> <span class="s">showParsedAst // (2)</span>
+  <span class="na">args-type</span> <span class="o">=</span> <span class="s">java mb.helloworld.task.HelloWorldShowParsedAst.Args // (3)</span>
+  <span class="na">display-name</span> <span class="o">=</span> <span class="s">&quot;Show parsed AST&quot; // (4)</span>
+  <span class="na">description</span> <span class="o">=</span> <span class="s">&quot;Shows the parsed AST&quot; // (5)</span>
+  <span class="na">supported-execution-types</span> <span class="o">=</span> <span class="s">[Once, Continuous] // (6)</span>
+  <span class="na">parameters</span> <span class="o">=</span> <span class="s">[ // (7)</span>
+    <span class="na">file</span> <span class="o">=</span> <span class="s">parameter { (7a)</span>
+      <span class="na">type</span> <span class="o">=</span> <span class="s">java mb.resource.ResourceKey (7b)</span>
+      <span class="na">required</span> <span class="o">=</span> <span class="s">true (7c)</span>
+      <span class="na">argument-providers</span> <span class="o">=</span> <span class="s">[Context(File)] (7d)</span>
     <span class="na">}</span>
   <span class="na">]</span>
 <span class="na">}</span>
 </code></pre></div>
-<div class="admonition todo">
-<p class="admonition-title">Todo</p>
-<p>Explain this configuration.</p>
+<p>We explain this configuration with numbered annotations in the above CFG source file:</p>
+<ol>
+<li>Spoofax generates a Java class implementing the command boilerplate for you. This is the fully qualified Java type we want this command to have. Can be omitted to generate a type based on the name of the task definition.</li>
+<li>The task definition that the command will execute, which is the <code>showParsedAst</code> we defined earlier.</li>
+<li>The fully qualified Java type of the argument class.</li>
+<li>The display name of the command.</li>
+<li>The optional description of the command.</li>
+<li>The optional supported execution types of the command. <code>Once</code> indicates a one-shot command, while <code>Continuous</code> indicates a command that is executed every time the input file changes. Defaults to <code>[Once, Continuous]</code>.</li>
+<li>The description of the parameters of the command:<ol>
+<li>The name of the parameter.</li>
+<li>The fully qualified Java of the type of the parameter. This must match the type we used in the <code>HelloWorldShowParsedAst.Args</code> class before.</li>
+<li>Whether the parameter is required. Defaults to <code>true</code>.</li>
+<li>
+<p>Argument providers for this parameter that attempt to automatically provide a fitting argument. When providing an argument fails, the next argument provider in the list will be attempted.</p>
+<p>Because this argument is a file, we want to try to infer the file from context, so we use <code>Context(File)</code>. When we execute this command on a "Hello world" file in the IDE, Spoofax will automatically infer that file as the argument for the parameter.</p>
+<p>Currently, Spoofax does not support running commands in the IDE without an argument provider, so a working argument provider is currently required.</p>
+</li>
+</ol>
+</li>
+</ol>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Spoofax assumes that: a) the task definition's input type is the one defined at (3), b) the output type is <code>CommandFeedback</code>, and c) that the argument type has a constructor covering exactly the parameters from (7). This is not checked at compile time. Faults will lead to Java compile errors or errors when running the command.</p>
 </div>
 <p>Some properties set above are set to their conventional (default) value, or are optional, so we can leave them out. Replace the command definition with the following code:</p>
 <div class="highlight"><pre><span></span><code><span class="na">let showParsedAstCommand</span> <span class="o">=</span> <span class="s">command-def {</span>
@@ -1045,10 +1070,6 @@ Add the following configuration to the end of the file:</p>
   <span class="na">]</span>
 <span class="na">}</span>
 </code></pre></div>
-<div class="admonition todo">
-<p class="admonition-title">Todo</p>
-<p>Explain conventions and optionals.</p>
-</div>
 <h3 id="adding-the-menu-item">Adding the menu item<a class="headerlink" href="#adding-the-menu-item" title="Permanent link">&para;</a></h3>
 <p>To add the menu item, add the following configuration to the end of the <code>spoofax.cfg</code> file:</p>
 <div class="highlight"><pre><span></span><code><span class="na">editor-context-menu [</span>
