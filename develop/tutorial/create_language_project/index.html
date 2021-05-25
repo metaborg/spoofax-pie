@@ -788,17 +788,99 @@ Remember to rebuild the project after making a change to the language definition
 To do that, we will write a <em>task definition</em> that produces the <abbr title="Abstract Syntax Tree">AST</abbr> of a program by parsing it, we will add a <em>command definition</em> for that task, and finally we will bind the command to a <em>menu item</em> so that we can execute the command.</p>
 <h3 id="creating-the-task-definition">Creating the task definition<a class="headerlink" href="#creating-the-task-definition" title="Permanent link">&para;</a></h3>
 <p>A task definition is a piece of code that take some input, may read from or write to files, run and get the result of other tasks, and produce some output.
-Task definitions come from <a href="https://github.com/metaborg/pie">PIE</a>, a framework for developing composable, incremental, and correct pipelines and build scripts.
-PIE incrementally executes task definitions, ensures that the result is correct, and enables composition of tasks.</p>
+Task definitions come from <a href="https://github.com/metaborg/pie">PIE</a>, a framework for developing composable, incremental, correct, and expressive pipelines and build scripts.</p>
 <p>All user interaction, pipelines, and builds in Spoofax 3 are composed of task definitions.
 So whenever you want to perform a command, present feedback to the user, or compile your language, you will need to write a task definition for it.
-A task definition is written as a class in Java, and needs to adhere to a certain interface.
 For brevity, we usually just refer to a "task definition" by "task".</p>
-<p>Let's start by creating the class for this task.
+<p>For PIE to be able to incrementally execute your task, you must make your dependencies explicit.
+That is, dependencies to files and other tasks must be made explicit.
+However, because PIE supports <em>dynamic dependencies</em>, those dependencies are made <em>while the build script is executing</em>.
+A full tutorial on PIE is outside the scope of this tutorial, but we will implement several tasks in this tutorial, explain the PIE concepts, and how Spoofax 3 uses these concepts.</p>
+<p>A task definition is written as a class in Java, and needs to adhere to a certain interface.
+Let's start by creating the class for this task.
 First, right-click the <code>helloworld/src/main/java</code> directory and choose <span class="guilabel">New ‣ Package</span>, replace the name with <code>mb.helloworld.task</code>, and press <span class="guilabel">Finish</span>.
 Then, right-click the <code>mb.helloworld.task</code> package we just created and choose <span class="guilabel">New ‣ Class</span> and fill in <code>HelloWorldShowParsedAst</code> as name, then press <span class="guilabel">Finish</span>.
 Replace the entire Java file with the following code:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">package</span> <span class="nn">mb.helloworld.task</span><span class="p">;</span>
+<table class="annotate highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span></pre></div></td><td class="code"><div class="annotate highlight"><pre><span></span><code><span class="kn">package</span> <span class="nn">mb.helloworld.task</span><span class="p">;</span>
 
 <span class="kn">import</span> <span class="nn">java.io.Serializable</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">java.util.Objects</span><span class="p">;</span>
@@ -806,9 +888,12 @@ Replace the entire Java file with the following code:</p>
 <span class="kn">import</span> <span class="nn">javax.inject.Inject</span><span class="p">;</span>
 
 <span class="kn">import</span> <span class="nn">org.checkerframework.checker.nullness.qual.Nullable</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.spoofax.interpreter.terms.IStrategoTerm</span><span class="p">;</span>
 
+<span class="kn">import</span> <span class="nn">mb.common.result.Result</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">mb.helloworld.HelloWorldClassLoaderResources</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">mb.helloworld.HelloWorldScope</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">mb.jsglr1.common.JSGLR1ParseException</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">mb.pie.api.ExecContext</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">mb.pie.api.TaskDef</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">mb.pie.api.stamp.resource.ResourceStampers</span><span class="p">;</span>
@@ -817,67 +902,107 @@ Replace the entire Java file with the following code:</p>
 <span class="kn">import</span> <span class="nn">mb.spoofax.core.language.command.ShowFeedback</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">mb.stratego.common.StrategoUtil</span><span class="p">;</span>
 
-<span class="nd">@HelloWorldScope</span>
-<span class="kd">public</span> <span class="kd">class</span> <span class="nc">HelloWorldShowParsedAst</span> <span class="kd">implements</span> <span class="n">TaskDef</span><span class="o">&lt;</span><span class="n">HelloWorldShowParsedAst</span><span class="p">.</span><span class="na">Args</span><span class="p">,</span> <span class="n">CommandFeedback</span><span class="o">&gt;</span> <span class="p">{</span>
-  <span class="kd">public</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">Args</span> <span class="kd">implements</span> <span class="n">Serializable</span> <span class="p">{</span>
-    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">long</span> <span class="n">serialVersionUID</span> <span class="o">=</span> <span class="mi">1L</span><span class="p">;</span>
+<span class="nd">@HelloWorldScope</span> <span class="c1">// (10)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">HelloWorldShowParsedAst</span> <span class="kd">implements</span> <span class="n">TaskDef</span><span class="o">&lt;</span><span class="n">HelloWorldShowParsedAst</span><span class="p">.</span><span class="na">Args</span><span class="p">,</span> <span class="n">CommandFeedback</span><span class="o">&gt;</span> <span class="p">{</span> <span class="c1">// (1)</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">Args</span> <span class="kd">implements</span> <span class="n">Serializable</span> <span class="p">{</span> <span class="c1">// (2)</span>
+        <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">long</span> <span class="n">serialVersionUID</span> <span class="o">=</span> <span class="mi">1L</span><span class="p">;</span>
 
-    <span class="kd">public</span> <span class="kd">final</span> <span class="n">ResourceKey</span> <span class="n">file</span><span class="p">;</span>
+        <span class="kd">public</span> <span class="kd">final</span> <span class="n">ResourceKey</span> <span class="n">file</span><span class="p">;</span>
 
-    <span class="kd">public</span> <span class="nf">Args</span><span class="p">(</span><span class="n">ResourceKey</span> <span class="n">file</span><span class="p">)</span> <span class="p">{</span>
-      <span class="k">this</span><span class="p">.</span><span class="na">file</span> <span class="o">=</span> <span class="n">file</span><span class="p">;</span>
+        <span class="kd">public</span> <span class="nf">Args</span><span class="p">(</span><span class="n">ResourceKey</span> <span class="n">file</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="na">file</span> <span class="o">=</span> <span class="n">file</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">equals</span><span class="p">(</span><span class="nd">@Nullable</span> <span class="n">Object</span> <span class="n">o</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span><span class="p">(</span><span class="k">this</span> <span class="o">==</span> <span class="n">o</span><span class="p">)</span> <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">o</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">||</span> <span class="n">getClass</span><span class="p">()</span> <span class="o">!=</span> <span class="n">o</span><span class="p">.</span><span class="na">getClass</span><span class="p">())</span> <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+            <span class="kd">final</span> <span class="n">Args</span> <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">Args</span><span class="p">)</span><span class="n">o</span><span class="p">;</span>
+            <span class="k">return</span> <span class="n">file</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="na">file</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="kt">int</span> <span class="nf">hashCode</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">Objects</span><span class="p">.</span><span class="na">hash</span><span class="p">(</span><span class="n">file</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="n">String</span> <span class="nf">toString</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">&quot;Args{&quot;</span> <span class="o">+</span> <span class="s">&quot;file=&quot;</span> <span class="o">+</span> <span class="n">file</span> <span class="o">+</span> <span class="sc">&#39;}&#39;</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">CommandFeedback</span> <span class="nf">exec</span><span class="p">(</span><span class="n">ExecContext</span> <span class="n">context</span><span class="p">,</span> <span class="n">Args</span> <span class="n">args</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="p">{</span> <span class="c1">// (3)</span>
+        <span class="n">context</span><span class="p">.</span><span class="na">require</span><span class="p">(</span><span class="n">classloaderResources</span><span class="p">.</span><span class="na">tryGetAsLocalResource</span><span class="p">(</span><span class="n">getClass</span><span class="p">()),</span> <span class="n">ResourceStampers</span><span class="p">.</span><span class="na">hashFile</span><span class="p">());</span> <span class="c1">// (4)</span>
+        <span class="kd">final</span> <span class="n">ResourceKey</span> <span class="n">file</span> <span class="o">=</span> <span class="n">args</span><span class="p">.</span><span class="na">file</span><span class="p">;</span>
+        <span class="kd">final</span> <span class="n">Result</span><span class="o">&lt;</span><span class="n">IStrategoTerm</span><span class="p">,</span> <span class="n">JSGLR1ParseException</span><span class="o">&gt;</span> <span class="n">astResult</span> <span class="o">=</span> <span class="n">context</span><span class="p">.</span><span class="na">require</span><span class="p">(</span><span class="n">parse</span><span class="p">.</span><span class="na">inputBuilder</span><span class="p">().</span><span class="na">withFile</span><span class="p">(</span><span class="n">file</span><span class="p">).</span><span class="na">buildAstSupplier</span><span class="p">());</span> <span class="c1">// (5)</span>
+        <span class="k">return</span> <span class="n">astResult</span><span class="p">.</span><span class="na">mapOrElse</span><span class="p">(</span> <span class="c1">// (6)</span>
+            <span class="n">ast</span> <span class="o">-&gt;</span> <span class="n">CommandFeedback</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">ShowFeedback</span><span class="p">.</span><span class="na">showText</span><span class="p">(</span><span class="n">StrategoUtil</span><span class="p">.</span><span class="na">toString</span><span class="p">(</span><span class="n">ast</span><span class="p">),</span> <span class="s">&quot;Parsed AST for &#39;&quot;</span> <span class="o">+</span> <span class="n">file</span> <span class="o">+</span> <span class="s">&quot;&#39;&quot;</span><span class="p">)),</span>
+            <span class="n">e</span> <span class="o">-&gt;</span> <span class="n">CommandFeedback</span><span class="p">.</span><span class="na">ofTryExtractMessagesFrom</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+        <span class="p">);</span>
     <span class="p">}</span>
 
     <span class="nd">@Override</span>
-    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">equals</span><span class="p">(</span><span class="nd">@Nullable</span> <span class="n">Object</span> <span class="n">o</span><span class="p">)</span> <span class="p">{</span>
-      <span class="k">if</span><span class="p">(</span><span class="k">this</span> <span class="o">==</span> <span class="n">o</span><span class="p">)</span> <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
-      <span class="k">if</span><span class="p">(</span><span class="n">o</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">||</span> <span class="n">getClass</span><span class="p">()</span> <span class="o">!=</span> <span class="n">o</span><span class="p">.</span><span class="na">getClass</span><span class="p">())</span> <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
-      <span class="kd">final</span> <span class="n">Args</span> <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">Args</span><span class="p">)</span><span class="n">o</span><span class="p">;</span>
-      <span class="k">return</span> <span class="n">file</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="na">file</span><span class="p">);</span>
+    <span class="kd">public</span> <span class="n">String</span> <span class="nf">getId</span><span class="p">()</span> <span class="p">{</span> <span class="c1">// (7)</span>
+        <span class="k">return</span> <span class="n">getClass</span><span class="p">().</span><span class="na">getName</span><span class="p">();</span>
     <span class="p">}</span>
 
-    <span class="nd">@Override</span>
-    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">hashCode</span><span class="p">()</span> <span class="p">{</span>
-      <span class="k">return</span> <span class="n">Objects</span><span class="p">.</span><span class="na">hash</span><span class="p">(</span><span class="n">file</span><span class="p">);</span>
+
+    <span class="c1">// (8)</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">HelloWorldClassLoaderResources</span> <span class="n">classloaderResources</span><span class="p">;</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">HelloWorldParse</span> <span class="n">parse</span><span class="p">;</span>
+
+    <span class="nd">@Inject</span> <span class="c1">// (9)</span>
+    <span class="kd">public</span> <span class="nf">HelloWorldShowParsedAst</span><span class="p">(</span><span class="n">HelloWorldClassLoaderResources</span> <span class="n">classloaderResources</span><span class="p">,</span> <span class="n">HelloWorldParse</span> <span class="n">parse</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">classloaderResources</span> <span class="o">=</span> <span class="n">classloaderResources</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">parse</span> <span class="o">=</span> <span class="n">parse</span><span class="p">;</span>
     <span class="p">}</span>
-
-    <span class="nd">@Override</span>
-    <span class="kd">public</span> <span class="n">String</span> <span class="nf">toString</span><span class="p">()</span> <span class="p">{</span>
-      <span class="k">return</span> <span class="s">&quot;Args{&quot;</span> <span class="o">+</span> <span class="s">&quot;file=&quot;</span> <span class="o">+</span> <span class="n">file</span> <span class="o">+</span> <span class="sc">&#39;}&#39;</span><span class="p">;</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
-
-
-  <span class="kd">private</span> <span class="kd">final</span> <span class="n">HelloWorldClassLoaderResources</span> <span class="n">classloaderResources</span><span class="p">;</span>
-  <span class="kd">private</span> <span class="kd">final</span> <span class="n">HelloWorldParse</span> <span class="n">parse</span><span class="p">;</span>
-
-  <span class="nd">@Inject</span>
-  <span class="kd">public</span> <span class="nf">HelloWorldShowParsedAst</span><span class="p">(</span><span class="n">HelloWorldClassLoaderResources</span> <span class="n">classloaderResources</span><span class="p">,</span> <span class="n">HelloWorldParse</span> <span class="n">parse</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">this</span><span class="p">.</span><span class="na">classloaderResources</span> <span class="o">=</span> <span class="n">classloaderResources</span><span class="p">;</span>
-    <span class="k">this</span><span class="p">.</span><span class="na">parse</span> <span class="o">=</span> <span class="n">parse</span><span class="p">;</span>
-  <span class="p">}</span>
-
-
-  <span class="nd">@Override</span>
-  <span class="kd">public</span> <span class="n">CommandFeedback</span> <span class="nf">exec</span><span class="p">(</span><span class="n">ExecContext</span> <span class="n">context</span><span class="p">,</span> <span class="n">Args</span> <span class="n">args</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="p">{</span>
-    <span class="n">context</span><span class="p">.</span><span class="na">require</span><span class="p">(</span><span class="n">classloaderResources</span><span class="p">.</span><span class="na">tryGetAsLocalResource</span><span class="p">(</span><span class="n">getClass</span><span class="p">()),</span> <span class="n">ResourceStampers</span><span class="p">.</span><span class="na">hashFile</span><span class="p">());</span>
-    <span class="kd">final</span> <span class="n">ResourceKey</span> <span class="n">file</span> <span class="o">=</span> <span class="n">args</span><span class="p">.</span><span class="na">file</span><span class="p">;</span>
-    <span class="k">return</span> <span class="n">context</span><span class="p">.</span><span class="na">require</span><span class="p">(</span><span class="n">parse</span><span class="p">.</span><span class="na">inputBuilder</span><span class="p">().</span><span class="na">withFile</span><span class="p">(</span><span class="n">file</span><span class="p">).</span><span class="na">buildAstSupplier</span><span class="p">()).</span><span class="na">mapOrElse</span><span class="p">(</span>
-      <span class="n">ast</span> <span class="o">-&gt;</span> <span class="n">CommandFeedback</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">ShowFeedback</span><span class="p">.</span><span class="na">showText</span><span class="p">(</span><span class="n">StrategoUtil</span><span class="p">.</span><span class="na">toString</span><span class="p">(</span><span class="n">ast</span><span class="p">),</span> <span class="s">&quot;Parsed AST for &#39;&quot;</span> <span class="o">+</span> <span class="n">file</span> <span class="o">+</span> <span class="s">&quot;&#39;&quot;</span><span class="p">)),</span>
-      <span class="n">e</span> <span class="o">-&gt;</span> <span class="n">CommandFeedback</span><span class="p">.</span><span class="na">ofTryExtractMessagesFrom</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
-    <span class="p">);</span>
-  <span class="p">}</span>
-
-  <span class="nd">@Override</span>
-  <span class="kd">public</span> <span class="n">String</span> <span class="nf">getId</span><span class="p">()</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="n">getClass</span><span class="p">().</span><span class="na">getName</span><span class="p">();</span>
-  <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
-<div class="admonition todo">
-<p class="admonition-title">Todo</p>
-<p>Explain this class.</p>
-</div>
+</td></tr></table>
+<p>We explain this class with numbered annotations in the above Java source file:</p>
+<ol>
+<li>
+<p>This class implements <code class="highlight"><span class="n">TaskDef</span></code>, which is an interface from PIE which a class must implement to be a task definition. Task definitions have an input and output type defined by the first and second generic argument. To execute this task, an object of the input type is required, and once it is done executing, it must return an object of the output type.</p>
+<p>In this concrete case, the input type is <code class="highlight"><span class="n">HelloWorldShowParsedAst</span><span class="p">.</span><span class="na">Args</span></code> which is a nested data class defined at (2). The output is <code class="highlight"><span class="n">CommandFeedback</span></code> which is a type defined by Spoofax 3 for providing feedback back to the user when executing a command. All tasks that are executed through commands must return a <code class="highlight"><span class="n">CommandFeedback</span></code> object.</p>
+</li>
+<li>
+<p>A nested data class encapsulating the input to this task. In this case, we want this task to take the <code>file</code> we are going to show the <abbr title="Abstract Syntax Tree">AST</abbr> of as input. Even though we only take one argument as input, we must encapsulate it in a class, because Spoofax 3 must be able to make an instance of this class, filling in the arguments through the constructor, in order to execute the command.</p>
+<p>This data class must implement <code class="highlight"><span class="n">Serializable</span></code> because it is used as an input to a task. In order for PIE to incrementalize tasks across <abbr title="Java Virtual Machine">JVM</abbr> restarts, it must be able to serialize the input (and output) objects to disk. Furthermore, this class must be immutable, because PIE caches input (and output) objects, and this caching would be inconsistent if the class is mutable. This class is immutable by storing the file in a <code class="highlight"><span class="kd">final</span></code> field which is set in the constructor (and the <code class="highlight"><span class="n">ResourceKey</span></code> class is immutable as well).</p>
+<p>Spoofax 3 and PIE abstract over files with <em>resources</em>. A resource is some externally managed mutable state, with a (immutable and serializable) <em>key</em> which can be used to identify, read, and write to that resource. Such a key is represented by a <code class="highlight"><span class="n">ResourceKey</span></code>.</p>
+<p>Finally, this data class must implement <code class="highlight"><span class="n">equals</span></code> and <code class="highlight"><span class="n">hashCode</span></code> according to the data in the class because PIE uses these methods to identify tasks according to their input, which in turn is used for caching. A <code class="highlight"><span class="n">toString</span></code> implementation is also recommended for debugging.</p>
+</li>
+<li>
+<p>The <code>exec</code> method which is called when the task is executed. It takes an <code class="highlight"><span class="n">ExecContext</span></code> as input, which is used to tell PIE about dependencies to files, and can be used to execute and get the result of another task (implicitly creating a dependency to that task). It also takes the input type <code>Args</code> as input, and must return a <code>CommandFeedback</code>.</p>
+</li>
+<li>
+<p>For sound incrementality, we want to re-execute this task when we make changes to this class. Therefore, we want to make a <em>self-dependency</em>. That is, we want to make a file dependency to the Java class file that is compiled from this Java source file. The <code class="highlight"><span class="n">classloaderResources</span></code> object (defined below at (8)) is used to get the class or JAR file of the current class. This resource is passed to <code class="highlight"><span class="n">context</span><span class="p">.</span><span class="na">require</span></code> to tell PIE that this task depends on that file. We pass in <code class="highlight"><span class="n">ResourceStampers</span><span class="p">.</span><span class="na">hashFile</span><span class="p">()</span></code> as the second argument, which indicates that we want to use the hash of the class file to detect changes, instead of the last modified date which is used by default. It is recommended to use <code class="highlight"><span class="n">ResourceStampers</span><span class="p">.</span><span class="na">hashFile</span><span class="p">()</span></code> for dependencies to generated/compiled files, as compiled files are sometimes recompiled without changes, which changes the modified date but not the hash, leading to better incrementality.</p>
+</li>
+<li>
+<p>To show the <abbr title="Abstract Syntax Tree">AST</abbr> we must parse the input file, and in order to do that we must call a task which performs the parsing. Whereas (4) uses <code>context.require</code> to create a dependency to a <em>file</em>, we use <code>context.require</code> here to create a dependency to the <em>task</em> that does the parsing, and get the output of that task. As input to <code>context.require</code> we pass <code>parse.inputBuilder().withFile(file).buildAstSupplier()</code>, which uses the builder pattern to create an input for the <code>parse</code> task and then extracts the <abbr title="Abstract Syntax Tree">AST</abbr> from the output.</p>
+<p>The output of this task is <code>Result&lt;IStrategoTerm, JSGLR1ParseException&gt;</code> which is a <a href="https://en.wikipedia.org/wiki/Result_type"><em>result type</em></a> which is either a <code>IStrategoTerm</code> representing the <abbr title="Abstract Syntax Tree">AST</abbr> of the file if parsing succeeds, or a <code>JSGLR1ParseException</code> when parsing fails.</p>
+<p>Instead of throwing exceptions, we use result types (akin to <code>Either</code> in Haskell or <code>Result</code> in Rust) to model the possibility of failure with values. We do this to make it possible to work with failures in PIE tasks. In PIE, throwing an exception signifies an unrecoverable error and cancels the entire pipeline. However, using failures as values works normally.</p>
+</li>
+<li>
+<p>Now that we have the result of parsing, we can turn it into a <code>CommandFeedback</code> object. We use <code>mapOrElse</code> of <code>Result</code> to map the result to a <code>CommandFeedback</code> differently depending on whether parsing succeeded or failed.</p>
+<p>If parsing succeeded, we show the <abbr title="Abstract Syntax Tree">AST</abbr> as text to the user with `CommandFeedback.of(ShowFeedback.showText(...)) with the first argument providing the text, and the second argument providing the title. The IDE then shows this as an editor.</p>
+<p>If parsing failed, we present the parse error messages as feedback to the user with <code>CommandFeedback.ofTryExtractMessagesFrom</code>.</p>
+</li>
+<li>
+<p>Finally, PIE needs to be able to identify this task definition. That is done by this <code>getId</code> method that returns a unique identifier. This can almost always be implemented using <code>getClass().getName()</code> which returns the fully qualified name of this class.</p>
+</li>
+<li>
+<p>Spoofax 3 uses <a href="https://en.wikipedia.org/wiki/Dependency_injection">dependency injection</a> to inject required services, tasks, and other objects into the objects of your classes. The <code>classloaderResources</code> object used in (4) is of type <code>HelloWorldClassLoaderResources</code> which is class that Spoofax 3 generates for your language. Similarly, the <code>parse</code> object used in (5) is of type <code>HelloWorldParse</code> which is a task definition that Spoofax 3 generates for you. We store these as fields of this class.</p>
+</li>
+<li>
+<p>These fields are set using <a href="https://en.wikipedia.org/wiki/Dependency_injection#Constructor_injection">constructor injection</a> in the single constructor of this class marked with <code>@Inject</code>. The dependency injection framework that Spoofax 3 uses (the <a href="https://dagger.dev/dev-guide/">Dagger</a> framework) will then instantiate your class with instances of the dependencies.</p>
+</li>
+<li>
+<p>Finally, we must tell the dependency injection framework to which scope instances of this class belongs. We annotate the class with <code>@HelloWorldScope</code> which is a scope annotation that Spoofax 3 generates for you. This is mainly used to differentiate between different languages when multiple languages are composed, which we do not do in this tutorial, but is required nonetheless.</p>
+</li>
+</ol>
 <h3 id="registering-the-task-definition">Registering the task definition<a class="headerlink" href="#registering-the-task-definition" title="Permanent link">&para;</a></h3>
 <p>We must register this task in order for Spoofax to know about it.
 Open the CFG <code>helloworld/spoofax.cfg</code> file.
