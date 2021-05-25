@@ -62,20 +62,24 @@ To do that, we will write a *task definition* that produces the AST of a program
 ### Creating the task definition
 
 A task definition is a piece of code that take some input, may read from or write to files, run and get the result of other tasks, and produce some output.
-Task definitions come from [PIE](https://github.com/metaborg/pie), a framework for developing composable, incremental, and correct pipelines and build scripts.
-PIE incrementally executes task definitions, ensures that the result is correct, and enables composition of tasks.
+Task definitions come from [PIE](https://github.com/metaborg/pie), a framework for developing composable, incremental, correct, and expressive pipelines and build scripts.
 
 All user interaction, pipelines, and builds in Spoofax 3 are composed of task definitions.
 So whenever you want to perform a command, present feedback to the user, or compile your language, you will need to write a task definition for it.
-A task definition is written as a class in Java, and needs to adhere to a certain interface.
 For brevity, we usually just refer to a "task definition" by "task".
 
+For PIE to be able to incrementally execute your task, you must make your dependencies explicit.
+That is, dependencies to files and other tasks must be made explicit.
+However, because PIE supports *dynamic dependencies*, those dependencies are made *while the build script is executing*.
+A full tutorial on PIE is outside the scope of this tutorial, but we will implement several tasks in this tutorial, explain the PIE concepts, and how Spoofax 3 uses these concepts.
+
+A task definition is written as a class in Java, and needs to adhere to a certain interface.
 Let's start by creating the class for this task.
 First, right-click the `helloworld/src/main/java` directory and choose <span class="guilabel">New ‣ Package</span>, replace the name with `mb.helloworld.task`, and press <span class="guilabel">Finish</span>.
 Then, right-click the `mb.helloworld.task` package we just created and choose <span class="guilabel">New ‣ Class</span> and fill in `HelloWorldShowParsedAst` as name, then press <span class="guilabel">Finish</span>.
 Replace the entire Java file with the following code:
 
-```java
+``` { .java .annotate linenums="1" }
 package mb.helloworld.task;
 
 import java.io.Serializable;
@@ -84,9 +88,12 @@ import java.util.Objects;
 import javax.inject.Inject;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spoofax.interpreter.terms.IStrategoTerm;
 
+import mb.common.result.Result;
 import mb.helloworld.HelloWorldClassLoaderResources;
 import mb.helloworld.HelloWorldScope;
+import mb.jsglr1.common.JSGLR1ParseException;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
@@ -95,66 +102,103 @@ import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
 import mb.stratego.common.StrategoUtil;
 
-@HelloWorldScope
-public class HelloWorldShowParsedAst implements TaskDef<HelloWorldShowParsedAst.Args, CommandFeedback> {
-  public static class Args implements Serializable {
-    private static final long serialVersionUID = 1L;
+@HelloWorldScope // (10)
+public class HelloWorldShowParsedAst implements TaskDef<HelloWorldShowParsedAst.Args, CommandFeedback> { // (1)
+    public static class Args implements Serializable { // (2)
+        private static final long serialVersionUID = 1L;
 
-    public final ResourceKey file;
+        public final ResourceKey file;
 
-    public Args(ResourceKey file) {
-      this.file = file;
+        public Args(ResourceKey file) {
+            this.file = file;
+        }
+
+        @Override
+        public boolean equals(@Nullable Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            final Args args = (Args)o;
+            return file.equals(args.file);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(file);
+        }
+
+        @Override
+        public String toString() {
+            return "Args{" + "file=" + file + '}';
+        }
+    }
+
+
+    @Override
+    public CommandFeedback exec(ExecContext context, Args args) throws Exception { // (3)
+        context.require(classloaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile()); // (4)
+        final ResourceKey file = args.file;
+        final Result<IStrategoTerm, JSGLR1ParseException> astResult = context.require(parse.inputBuilder().withFile(file).buildAstSupplier()); // (5)
+        return astResult.mapOrElse( // (6)
+            ast -> CommandFeedback.of(ShowFeedback.showText(StrategoUtil.toString(ast), "Parsed AST for '" + file + "'")),
+            e -> CommandFeedback.ofTryExtractMessagesFrom(e, file)
+        );
     }
 
     @Override
-    public boolean equals(@Nullable Object o) {
-      if(this == o) return true;
-      if(o == null || getClass() != o.getClass()) return false;
-      final Args args = (Args)o;
-      return file.equals(args.file);
+    public String getId() { // (7)
+        return getClass().getName();
     }
 
-    @Override
-    public int hashCode() {
-      return Objects.hash(file);
+
+    // (8)
+    private final HelloWorldClassLoaderResources classloaderResources;
+    private final HelloWorldParse parse;
+
+    @Inject // (9)
+    public HelloWorldShowParsedAst(HelloWorldClassLoaderResources classloaderResources, HelloWorldParse parse) {
+        this.classloaderResources = classloaderResources;
+        this.parse = parse;
     }
-
-    @Override
-    public String toString() {
-      return "Args{" + "file=" + file + '}';
-    }
-  }
-
-
-  private final HelloWorldClassLoaderResources classloaderResources;
-  private final HelloWorldParse parse;
-
-  @Inject
-  public HelloWorldShowParsedAst(HelloWorldClassLoaderResources classloaderResources, HelloWorldParse parse) {
-    this.classloaderResources = classloaderResources;
-    this.parse = parse;
-  }
-
-
-  @Override
-  public CommandFeedback exec(ExecContext context, Args args) throws Exception {
-    context.require(classloaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
-    final ResourceKey file = args.file;
-    return context.require(parse.inputBuilder().withFile(file).buildAstSupplier()).mapOrElse(
-      ast -> CommandFeedback.of(ShowFeedback.showText(StrategoUtil.toString(ast), "Parsed AST for '" + file + "'")),
-      e -> CommandFeedback.ofTryExtractMessagesFrom(e, file)
-    );
-  }
-
-  @Override
-  public String getId() {
-    return getClass().getName();
-  }
 }
 ```
 
-!!! todo
-    Explain this class.
+We explain this class with numbered annotations in the above Java source file:
+
+ 1. This class implements `#!java TaskDef`, which is an interface from PIE which a class must implement to be a task definition. Task definitions have an input and output type defined by the first and second generic argument. To execute this task, an object of the input type is required, and once it is done executing, it must return an object of the output type.
+
+    In this concrete case, the input type is `#!java HelloWorldShowParsedAst.Args` which is a nested data class defined at (2). The output is `#!java CommandFeedback` which is a type defined by Spoofax 3 for providing feedback back to the user when executing a command. All tasks that are executed through commands must return a `#!java CommandFeedback` object.
+
+ 2. A nested data class encapsulating the input to this task. In this case, we want this task to take the `file` we are going to show the AST of as input. Even though we only take one argument as input, we must encapsulate it in a class, because Spoofax 3 must be able to make an instance of this class, filling in the arguments through the constructor, in order to execute the command.
+
+    This data class must implement `#!java Serializable` because it is used as an input to a task. In order for PIE to incrementalize tasks across JVM restarts, it must be able to serialize the input (and output) objects to disk. Furthermore, this class must be immutable, because PIE caches input (and output) objects, and this caching would be inconsistent if the class is mutable. This class is immutable by storing the file in a `#!java final` field which is set in the constructor (and the `#!java ResourceKey` class is immutable as well).
+
+    Spoofax 3 and PIE abstract over files with *resources*. A resource is some externally managed mutable state, with a (immutable and serializable) *key* which can be used to identify, read, and write to that resource. Such a key is represented by a `#!java ResourceKey`.
+
+    Finally, this data class must implement `#!java equals` and `#!java hashCode` according to the data in the class because PIE uses these methods to identify tasks according to their input, which in turn is used for caching. A `#!java toString` implementation is also recommended for debugging.
+
+ 3. The `exec` method which is called when the task is executed. It takes an `#!java ExecContext` as input, which is used to tell PIE about dependencies to files, and can be used to execute and get the result of another task (implicitly creating a dependency to that task). It also takes the input type `Args` as input, and must return a `CommandFeedback`.
+
+ 4. For sound incrementality, we want to re-execute this task when we make changes to this class. Therefore, we want to make a *self-dependency*. That is, we want to make a file dependency to the Java class file that is compiled from this Java source file. The `#!java classloaderResources` object (defined below at (8)) is used to get the class or JAR file of the current class. This resource is passed to `#!java context.require` to tell PIE that this task depends on that file. We pass in `#!java ResourceStampers.hashFile()` as the second argument, which indicates that we want to use the hash of the class file to detect changes, instead of the last modified date which is used by default. It is recommended to use `#!java ResourceStampers.hashFile()` for dependencies to generated/compiled files, as compiled files are sometimes recompiled without changes, which changes the modified date but not the hash, leading to better incrementality.
+
+ 5. To show the AST we must parse the input file, and in order to do that we must call a task which performs the parsing. Whereas (4) uses `context.require` to create a dependency to a *file*, we use `context.require` here to create a dependency to the *task* that does the parsing, and get the output of that task. As input to `context.require` we pass `parse.inputBuilder().withFile(file).buildAstSupplier()`, which uses the builder pattern to create an input for the `parse` task and then extracts the AST from the output.
+
+    The output of this task is `Result<IStrategoTerm, JSGLR1ParseException>` which is a [*result type*](https://en.wikipedia.org/wiki/Result_type) which is either a `IStrategoTerm` representing the AST of the file if parsing succeeds, or a `JSGLR1ParseException` when parsing fails.
+
+    Instead of throwing exceptions, we use result types (akin to `Either` in Haskell or `Result` in Rust) to model the possibility of failure with values. We do this to make it possible to work with failures in PIE tasks. In PIE, throwing an exception signifies an unrecoverable error and cancels the entire pipeline. However, using failures as values works normally.
+
+ 6. Now that we have the result of parsing, we can turn it into a `CommandFeedback` object. We use `mapOrElse` of `Result` to map the result to a `CommandFeedback` differently depending on whether parsing succeeded or failed.
+
+    If parsing succeeded, we show the AST as text to the user with `CommandFeedback.of(ShowFeedback.showText(...)) with the first argument providing the text, and the second argument providing the title. The IDE then shows this as an editor.
+
+    If parsing failed, we present the parse error messages as feedback to the user with `CommandFeedback.ofTryExtractMessagesFrom`.
+
+ 7. Finally, PIE needs to be able to identify this task definition. That is done by this `getId` method that returns a unique identifier. This can almost always be implemented using `getClass().getName()` which returns the fully qualified name of this class.
+
+ 8. Spoofax 3 uses [dependency injection](https://en.wikipedia.org/wiki/Dependency_injection) to inject required services, tasks, and other objects into the objects of your classes. The `classloaderResources` object used in (4) is of type `HelloWorldClassLoaderResources` which is class that Spoofax 3 generates for your language. Similarly, the `parse` object used in (5) is of type `HelloWorldParse` which is a task definition that Spoofax 3 generates for you. We store these as fields of this class.
+
+ 9. These fields are set using [constructor injection](https://en.wikipedia.org/wiki/Dependency_injection#Constructor_injection) in the single constructor of this class marked with `@Inject`. The dependency injection framework that Spoofax 3 uses (the [Dagger](https://dagger.dev/dev-guide/) framework) will then instantiate your class with instances of the dependencies.
+
+10. Finally, we must tell the dependency injection framework to which scope instances of this class belongs. We annotate the class with `@HelloWorldScope` which is a scope annotation that Spoofax 3 generates for you. This is mainly used to differentiate between different languages when multiple languages are composed, which we do not do in this tutorial, but is required nonetheless.
 
 ### Registering the task definition
 
