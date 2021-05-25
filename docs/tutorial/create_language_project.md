@@ -166,13 +166,13 @@ We explain this class with numbered annotations in the above Java source file:
 
  1. This class implements `#!java TaskDef`, which is an interface from PIE which a class must implement to be a task definition. Task definitions have an input and output type defined by the first and second generic argument. To execute this task, an object of the input type is required, and once it is done executing, it must return an object of the output type.
 
-    In this concrete case, the input type is `#!java HelloWorldShowParsedAst.Args` which is a nested data class defined at (2). The output is `#!java CommandFeedback` which is a type defined by Spoofax 3 for providing feedback back to the user when executing a command. All tasks that are executed through commands must return a `#!java CommandFeedback` object.
+    In this concrete case, the input type is `#!java HelloWorldShowParsedAst.Args` which is a nested data class defined at (2). The output is `#!java CommandFeedback` which is a type defined by Spoofax for providing feedback back to the user when executing a command. All tasks that are executed through commands must return a `#!java CommandFeedback` object.
 
- 2. A nested data class encapsulating the input to this task. In this case, we want this task to take the `file` we are going to show the AST of as input. Even though we only take one argument as input, we must encapsulate it in a class, because Spoofax 3 must be able to make an instance of this class, filling in the arguments through the constructor, in order to execute the command.
+ 2. A nested data class encapsulating the input to this task. In this case, we want this task to take the `file` we are going to show the AST of as input. Even though we only take one argument as input, we must encapsulate it in a class, because Spoofax must be able to make an instance of this class, filling in the arguments through the constructor, in order to execute the command.
 
     This data class must implement `#!java Serializable` because it is used as an input to a task. In order for PIE to incrementalize tasks across JVM restarts, it must be able to serialize the input (and output) objects to disk. Furthermore, this class must be immutable, because PIE caches input (and output) objects, and this caching would be inconsistent if the class is mutable. This class is immutable by storing the file in a `#!java final` field which is set in the constructor (and the `#!java ResourceKey` class is immutable as well).
 
-    Spoofax 3 and PIE abstract over files with *resources*. A resource is some externally managed mutable state, with a (immutable and serializable) *key* which can be used to identify, read, and write to that resource. Such a key is represented by a `#!java ResourceKey`.
+    Spoofax and PIE abstract over files with *resources*. A resource is some externally managed mutable state, with a (immutable and serializable) *key* which can be used to identify, read, and write to that resource. Such a key is represented by a `#!java ResourceKey`.
 
     Finally, this data class must implement `#!java equals` and `#!java hashCode` according to the data in the class because PIE uses these methods to identify tasks according to their input, which in turn is used for caching. A `#!java toString` implementation is also recommended for debugging.
 
@@ -194,11 +194,13 @@ We explain this class with numbered annotations in the above Java source file:
 
  7. Finally, PIE needs to be able to identify this task definition. That is done by this `getId` method that returns a unique identifier. This can almost always be implemented using `getClass().getName()` which returns the fully qualified name of this class.
 
- 8. Spoofax 3 uses [dependency injection](https://en.wikipedia.org/wiki/Dependency_injection) to inject required services, tasks, and other objects into the objects of your classes. The `classloaderResources` object used in (4) is of type `HelloWorldClassLoaderResources` which is class that Spoofax 3 generates for your language. Similarly, the `parse` object used in (5) is of type `HelloWorldParse` which is a task definition that Spoofax 3 generates for you. We store these as fields of this class.
+ 8. Spoofax uses [dependency injection](https://en.wikipedia.org/wiki/Dependency_injection) to inject required services, tasks, and other objects into the objects of your classes. The `classloaderResources` object used in (4) is of type `HelloWorldClassLoaderResources` which is class that Spoofax generates for your language. Similarly, the `parse` object used in (5) is of type `HelloWorldParse` which is a task definition that Spoofax generates for you. We store these as fields of this class.
 
- 9. These fields are set using [constructor injection](https://en.wikipedia.org/wiki/Dependency_injection#Constructor_injection) in the single constructor of this class marked with `@Inject`. The dependency injection framework that Spoofax 3 uses (the [Dagger](https://dagger.dev/dev-guide/) framework) will then instantiate your class with instances of the dependencies.
+    Note that dependency injection, and file/task dependencies in PIE, are two completely separate things.
 
-10. Finally, we must tell the dependency injection framework to which scope instances of this class belongs. We annotate the class with `@HelloWorldScope` which is a scope annotation that Spoofax 3 generates for you. This is mainly used to differentiate between different languages when multiple languages are composed, which we do not do in this tutorial, but is required nonetheless.
+ 9. These fields are set using [constructor injection](https://en.wikipedia.org/wiki/Dependency_injection#Constructor_injection) in the single constructor of this class marked with `@Inject`. The dependency injection framework that Spoofax uses (the [Dagger](https://dagger.dev/dev-guide/) framework) will then instantiate your class with instances of the dependencies.
+
+10. Finally, we must tell the dependency injection framework to which scope instances of this class belongs. We annotate the class with `@HelloWorldScope` which is a scope annotation that Spoofax generates for you. This is mainly used to differentiate between different languages when multiple languages are composed, which we do not do in this tutorial, but is required nonetheless.
 
 ### Registering the task definition
 
@@ -213,30 +215,51 @@ let showParsedAst = task-def mb.helloworld.task.HelloWorldShowParsedAst
 
 This registers the task definition class that we just created, and makes it available under the `showParsedAst` name in the configuration.
 
+!!! warning
+    Spoofax assumes that this class implements `TaskDef`. This is not checked at compile time. Faults will lead to Java compile errors.
+
 ### Creating the command
 
 To create the command, add the following configuration to the end of the `spoofax.cfg` file:
 
-```cfg
+```{ .cfg .annotate }
 let showParsedAstCommand = command-def {
-  type = java mb.helloworld.command.HelloWorldShowParsedAstCommand
-  task-def = showParsedAst
-  args-type = java mb.helloworld.task.HelloWorldShowParsedAst.Args
-  display-name = "Show parsed AST"
-  description = "Shows the parsed AST"
-  supported-execution-types = [Once, Continuous]
-  parameters = [
-    file = parameter {
-      type = java mb.resource.ResourceKey
-      required = true
-      argument-providers = [Context(File)]
+  type = java mb.helloworld.command.HelloWorldShowParsedAstCommand // (1)
+  task-def = showParsedAst // (2)
+  args-type = java mb.helloworld.task.HelloWorldShowParsedAst.Args // (3)
+  display-name = "Show parsed AST" // (4)
+  description = "Shows the parsed AST" // (5)
+  supported-execution-types = [Once, Continuous] // (6)
+  parameters = [ // (7)
+    file = parameter { (7a)
+      type = java mb.resource.ResourceKey (7b)
+      required = true (7c)
+      argument-providers = [Context(File)] (7d)
     }
   ]
 }
 ```
 
-!!! todo
-    Explain this configuration.
+We explain this configuration with numbered annotations in the above CFG source file:
+
+1. Spoofax generates a Java class implementing the command boilerplate for you. This is the fully qualified Java type we want this command to have. Can be omitted to generate a type based on the name of the task definition.
+2. The task definition that the command will execute, which is the `showParsedAst` we defined earlier.
+3. The fully qualified Java type of the argument class.
+4. The display name of the command.
+5. The optional description of the command.
+6. The optional supported execution types of the command. `Once` indicates a one-shot command, while `Continuous` indicates a command that is executed every time the input file changes. Defaults to `[Once, Continuous]`.
+7. The description of the parameters of the command:
+    1. The name of the parameter.
+    2. The fully qualified Java of the type of the parameter. This must match the type we used in the `HelloWorldShowParsedAst.Args` class before.
+    3. Whether the parameter is required. Defaults to `true`.
+    4. Argument providers for this parameter that attempt to automatically provide a fitting argument. When providing an argument fails, the next argument provider in the list will be attempted.
+
+        Because this argument is a file, we want to try to infer the file from context, so we use `Context(File)`. When we execute this command on a "Hello world" file in the IDE, Spoofax will automatically infer that file as the argument for the parameter.
+
+        Currently, Spoofax does not support running commands in the IDE without an argument provider, so a working argument provider is currently required.
+
+!!! warning
+    Spoofax assumes that: a) the task definition's input type is the one defined at (3), b) the output type is `CommandFeedback`, and c) that the argument type has a constructor covering exactly the parameters from (7). This is not checked at compile time. Faults will lead to Java compile errors or errors when running the command.
 
 Some properties set above are set to their conventional (default) value, or are optional, so we can leave them out. Replace the command definition with the following code:
 
@@ -252,9 +275,6 @@ let showParsedAstCommand = command-def {
   ]
 }
 ```
-
-!!! todo
-    Explain conventions and optionals.
 
 ### Adding the menu item
 
