@@ -982,28 +982,28 @@ Replace the entire Java file with the following code:</p>
 <p>We pass in <code class="highlight"><span class="n">ResourceStampers</span><span class="p">.</span><span class="na">hashFile</span><span class="p">()</span></code> as the second argument, which indicates that we want to use the hash of the class file to detect changes, instead of the last modified date which is used by default. It is recommended to use hashes for dependencies to generated/compiled files, as compiled files are sometimes recompiled without changes, which changes the modified date but not the hash, leading to better incrementality.</p>
 </li>
 <li>
-<p>To show the <abbr title="Abstract Syntax Tree">AST</abbr> we must parse the input file, and in order to do that we must call a task which performs the parsing. Whereas (4) uses <code>context.require</code> to create a dependency to a <em>file</em>, we use <code>context.require</code> here to create a dependency to the <em>task</em> that does the parsing, and get the output of that task. As input to <code>context.require</code> we pass <code>parse.inputBuilder().withFile(file).buildAstSupplier()</code>, which uses the builder pattern to create an input for the <code>parse</code> task and then extracts the <abbr title="Abstract Syntax Tree">AST</abbr> from the output.</p>
-<p>Internally, the <code>parse</code> task creates a dependency to the <code>file</code> we pass into it. We depend on the <code>parse</code> task. Therefore, when the <code>file</code> changes, PIE re-executes the <code>parse</code> task, and then re-executes this task if the output of the <code>parse</code> task is different. Thereby, PIE incrementally executes your task without having to incrementalize it yourself.</p>
-<p>The output of the <code>parse</code> task is <code>Result&lt;IStrategoTerm, JSGLR1ParseException&gt;</code> which is a <a href="https://en.wikipedia.org/wiki/Result_type"><em>result type</em></a> which is either a <code>IStrategoTerm</code> representing the <abbr title="Abstract Syntax Tree">AST</abbr> of the file if parsing succeeds, or a <code>JSGLR1ParseException</code> when parsing fails.</p>
+<p>To show the <abbr title="Abstract Syntax Tree">AST</abbr> we must parse the input file, and in order to do that we must call a task which performs the parsing. Whereas (4) uses <code class="highlight"><span class="n">context</span><span class="p">.</span><span class="na">require</span></code> to create a dependency to a <em>file</em>, we use <code class="highlight"><span class="n">context</span><span class="p">.</span><span class="na">require</span></code> here to create a dependency to the <em>task</em> that does the parsing, and get the output of that task. As input to <code class="highlight"><span class="n">context</span><span class="p">.</span><span class="na">require</span></code> we pass <code class="highlight"><span class="n">parse</span><span class="p">.</span><span class="na">inputBuilder</span><span class="p">().</span><span class="na">withFile</span><span class="p">(</span><span class="n">file</span><span class="p">).</span><span class="na">buildAstSupplier</span><span class="p">()</span></code>, which uses the builder pattern to create an input for the <code>parse</code> task and then extracts the <abbr title="Abstract Syntax Tree">AST</abbr> from the output.</p>
+<p>Internally, the <code class="highlight"><span class="n">parse</span></code> task creates a dependency to the <code class="highlight"><span class="n">file</span></code> we pass into it. We depend on the <code class="highlight"><span class="n">parse</span></code> task. Therefore, when the <code class="highlight"><span class="n">file</span></code> changes, PIE re-executes the <code class="highlight"><span class="n">parse</span></code> task, and then re-executes this task if the output of the <code class="highlight"><span class="n">parse</span></code> task is different. Thereby, PIE incrementally executes your task without having to incrementalize it yourself.</p>
+<p>The output of the <code class="highlight"><span class="n">parse</span></code> task is <code class="highlight"><span class="n">Result</span><span class="o">&lt;</span><span class="n">IStrategoTerm</span><span class="p">,</span> <span class="n">JSGLR1ParseException</span><span class="o">&gt;</span></code> which is a <a href="https://en.wikipedia.org/wiki/Result_type"><em>result type</em></a> which is either a <code class="highlight"><span class="n">IStrategoTerm</span></code> representing the <abbr title="Abstract Syntax Tree">AST</abbr> of the file if parsing succeeds, or a <code class="highlight"><span class="n">JSGLR1ParseException</span></code> when parsing fails.</p>
 <p>Instead of throwing exceptions, we use result types (akin to <code>Either</code> in Haskell or <code>Result</code> in Rust) to model the possibility of failure with values. We do this to make it possible to work with failures in PIE tasks. In PIE, throwing an exception signifies an unrecoverable error and cancels the entire pipeline. However, using failures as values works normally.</p>
 </li>
 <li>
-<p>Now that we have the result of parsing, we can turn it into a <code>CommandFeedback</code> object. We use <code>mapOrElse</code> of <code>Result</code> to map the result to a <code>CommandFeedback</code> differently depending on whether parsing succeeded or failed.</p>
-<p>If parsing succeeded, we show the <abbr title="Abstract Syntax Tree">AST</abbr> as text to the user with <code>CommandFeedback.of(ShowFeedback.showText(...))</code> with the first argument providing the text, and the second argument providing the title. The IDE then shows this as a textual editor.</p>
-<p>If parsing failed, we present the parse error messages as feedback to the user with <code>CommandFeedback.ofTryExtractMessagesFrom</code>.</p>
+<p>Now that we have the result of parsing, we can turn it into a <code class="highlight"><span class="n">CommandFeedback</span></code> object. We use <code class="highlight"><span class="n">mapOrElse</span></code> of <code class="highlight"><span class="n">Result</span></code> to map the result to a <code class="highlight"><span class="n">CommandFeedback</span></code> differently depending on whether parsing succeeded or failed.</p>
+<p>If parsing succeeded, we show the <abbr title="Abstract Syntax Tree">AST</abbr> as text to the user with <code class="highlight"><span class="n">CommandFeedback</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">ShowFeedback</span><span class="p">.</span><span class="na">showText</span><span class="p">(...))</span></code> with the first argument providing the text, and the second argument providing the title. The IDE then shows this as a textual editor.</p>
+<p>If parsing failed, we present the parse error messages as feedback to the user with <code class="highlight"><span class="n">CommandFeedback</span><span class="p">.</span><span class="na">ofTryExtractMessagesFrom</span></code>.</p>
 </li>
 <li>
-<p>Finally, PIE needs to be able to identify this task definition. That is done by this <code>getId</code> method that returns a unique identifier. This can almost always be implemented using <code>getClass().getName()</code> which returns the fully qualified name of this class.</p>
+<p>Finally, PIE needs to be able to identify this task definition. That is done by this <code>getId</code> method that returns a unique identifier. This can almost always be implemented using <code class="highlight"><span class="n">getClass</span><span class="p">().</span><span class="na">getName</span><span class="p">()</span></code> which returns the fully qualified name of this class.</p>
 </li>
 <li>
-<p>Spoofax uses <a href="https://en.wikipedia.org/wiki/Dependency_injection">dependency injection</a> to inject required services, tasks, and other objects into the objects of your classes. The <code>classloaderResources</code> object used in (4) is of type <code>HelloWorldClassLoaderResources</code> which is class that Spoofax generates for your language. Similarly, the <code>parse</code> object used in (5) is of type <code>HelloWorldParse</code> which is a task definition that Spoofax generates for you. We store these as fields of this class.</p>
+<p>Spoofax uses <a href="https://en.wikipedia.org/wiki/Dependency_injection">dependency injection</a> to inject required services, tasks, and other objects into the objects of your classes. The <code class="highlight"><span class="n">classloaderResources</span></code> object used in (4) is of type <code class="highlight"><span class="n">HelloWorldClassLoaderResources</span></code> which is class that Spoofax generates for your language. Similarly, the <code class="highlight"><span class="n">parse</span></code> object used in (5) is of type <code class="highlight"><span class="n">HelloWorldParse</span></code> which is a task definition that Spoofax generates for you. We store these as fields of this class.</p>
 <p>Note that dependency injection, and file/task dependencies in PIE, are two completely separate things.</p>
 </li>
 <li>
-<p>These fields are set using <a href="https://en.wikipedia.org/wiki/Dependency_injection#Constructor_injection">constructor injection</a> in the single constructor of this class marked with <code>@Inject</code>. The dependency injection framework that Spoofax uses (the <a href="https://dagger.dev/dev-guide/">Dagger</a> framework) will then instantiate your class with instances of the dependencies.</p>
+<p>These fields are set using <a href="https://en.wikipedia.org/wiki/Dependency_injection#Constructor_injection">constructor injection</a> in the single constructor of this class marked with <code class="highlight"><span class="nd">@Inject</span></code>. The dependency injection framework that Spoofax uses (the <a href="https://dagger.dev/dev-guide/">Dagger</a> framework) will then instantiate your class with instances of the dependencies.</p>
 </li>
 <li>
-<p>Finally, we must tell the dependency injection framework to which scope instances of this class belongs. We annotate the class with <code>@HelloWorldScope</code> which is a scope annotation that Spoofax generates for you. This is mainly used to differentiate between different languages when multiple languages are composed, which we do not do in this tutorial, but is required nonetheless.</p>
+<p>Finally, we must tell the dependency injection framework to which scope instances of this class belongs. We annotate the class with <code class="highlight"><span class="nd">@HelloWorldScope</span></code> which is a scope annotation that Spoofax generates for you. This is mainly used to differentiate between different languages when multiple languages are composed, which we do not do in this tutorial, but is required nonetheless.</p>
 </li>
 </ol>
 <h3 id="registering-the-task-definition">Registering the task definition<a class="headerlink" href="#registering-the-task-definition" title="Permanent link">&para;</a></h3>
@@ -1036,21 +1036,20 @@ Add the following configuration to the end of the file:</p>
   <span class="na">]</span>
 <span class="na">}</span>
 </code></pre></div>
-<p>We explain this configuration with numbered annotations in the above CFG source file:</p>
 <ol>
 <li>Spoofax generates a Java class implementing the command boilerplate for you. This is the fully qualified Java type we want this command to have. Can be omitted to generate a type based on the name of the task definition.</li>
-<li>The task definition that the command will execute, which is the <code>showParsedAst</code> we defined earlier.</li>
-<li>The fully qualified Java type of the argument class.</li>
+<li>The task definition that the command will execute, which is the <code class="highlight"><span class="na">showParsedAst</span></code> we defined earlier.</li>
+<li>The fully qualified Java type of the argument class. Can be omitted if the argument class is a nested class named <code>Args</code> of the task definition.</li>
 <li>The display name of the command.</li>
 <li>The optional description of the command.</li>
-<li>The optional supported execution types of the command. <code>Once</code> indicates a one-shot command, while <code>Continuous</code> indicates a command that is executed every time the input file changes. Defaults to <code>[Once, Continuous]</code>.</li>
+<li>The optional supported execution types of the command. <code class="highlight"><span class="na">Once</span></code> indicates a one-shot command, while <code class="highlight"><span class="na">Continuous</span></code> indicates a command that is executed every time the source file changes. Defaults to <code class="highlight"><span class="k">[Once, Continuous]</span></code>.</li>
 <li>The description of the parameters of the command:<ol>
 <li>The name of the parameter.</li>
-<li>The fully qualified Java of the type of the parameter. This must match the type we used in the <code>HelloWorldShowParsedAst.Args</code> class before.</li>
-<li>Whether the parameter is required. Defaults to <code>true</code>.</li>
+<li>The fully qualified Java of the type of the parameter. This must match the type we used in the <code class="highlight"><span class="n">HelloWorldShowParsedAst</span><span class="p">.</span><span class="na">Args</span></code> class before.</li>
+<li>Whether the parameter is required. Defaults to <code class="highlight"><span class="na">true</span></code>.</li>
 <li>
 <p>Argument providers for this parameter that attempt to automatically provide a fitting argument. When providing an argument fails, the next argument provider in the list will be attempted.</p>
-<p>Because this argument is a file, we want to try to infer the file from context, so we use <code>Context(File)</code>. When we execute this command on a "Hello world" file in the IDE, Spoofax will automatically infer that file as the argument for the parameter.</p>
+<p>Because this argument is a file, we want to try to infer the file from context, so we use <code class="highlight"><span class="na">Context(File)</span></code>. When we execute this command on a "Hello world" file in the IDE, Spoofax will automatically infer that file as the argument for the parameter.</p>
 <p>Currently, Spoofax does not support running commands in the IDE without an argument provider, so a working argument provider is currently required.</p>
 </li>
 </ol>
@@ -1074,11 +1073,11 @@ Add the following configuration to the end of the file:</p>
 </code></pre></div>
 <h3 id="adding-the-menu-item">Adding the menu item<a class="headerlink" href="#adding-the-menu-item" title="Permanent link">&para;</a></h3>
 <p>To add the menu item, add the following configuration to the end of the <code>spoofax.cfg</code> file:</p>
-<div class="highlight"><pre><span></span><code><span class="na">editor-context-menu [</span>
-  <span class="na">menu &quot;Debug&quot; [</span>
-    <span class="na">command-action {</span>
-      <span class="na">command-def</span> <span class="o">=</span> <span class="s">showParsedAstCommand</span>
-      <span class="na">execution-type</span> <span class="o">=</span> <span class="s">Once</span>
+<div class="annotate highlight"><pre><span></span><code><span class="na">editor-context-menu [ // (1)</span>
+  <span class="na">menu &quot;Debug&quot; [ // (2)</span>
+    <span class="na">command-action { // (3)</span>
+      <span class="na">command-def</span> <span class="o">=</span> <span class="s">showParsedAstCommand // (3a)</span>
+      <span class="na">execution-type</span> <span class="o">=</span> <span class="s">Once // (3b)</span>
     <span class="na">}</span>
     <span class="na">command-action {</span>
       <span class="na">command-def</span> <span class="o">=</span> <span class="s">showParsedAstCommand</span>
@@ -1086,20 +1085,27 @@ Add the following configuration to the end of the file:</p>
     <span class="na">}</span>
   <span class="na">]</span>
 <span class="na">]</span>
-<span class="na">resource-context-menu [</span>
+<span class="na">resource-context-menu [ // (4)</span>
   <span class="na">menu &quot;Debug&quot; [</span>
     <span class="na">command-action {</span>
       <span class="na">command-def</span> <span class="o">=</span> <span class="s">showParsedAstCommand</span>
       <span class="na">execution-type</span> <span class="o">=</span> <span class="s">Once</span>
-      <span class="na">required-resource-types</span> <span class="o">=</span> <span class="s">[File]</span>
+      <span class="na">required-resource-types</span> <span class="o">=</span> <span class="s">[File] // (5)</span>
     <span class="na">}</span>
   <span class="na">]</span>
 <span class="na">]</span>
 </code></pre></div>
-<div class="admonition todo">
-<p class="admonition-title">Todo</p>
-<p>Explain this configuration.</p>
-</div>
+<ol>
+<li>An <code class="highlight"><span class="na">editor-context-menu</span></code> section adds menu items to the editor context menu. That is, the menu that pops up when you right-click inside an editor for your language. There is also a <code class="highlight"><span class="na">main-menu</span></code> section for adding menu items to the main menu when an editor for your language has focus. If no <code class="highlight"><span class="na">main-menu</span></code> section is defined, the main menu will take all menu items from <code class="highlight"><span class="na">editor-context-menu</span></code>.</li>
+<li>A nested menu with name <code class="highlight"><span class="na">&quot;Debug&quot;</span></code>.</li>
+<li>An action menu item that executes a command.<ol>
+<li>The command to execute.</li>
+<li>How the command should be executed. <code class="highlight"><span class="na">Once</span></code> to execute it once, <code class="highlight"><span class="na">Continuous</span></code> to continuously execute the command when the source file changes.</li>
+</ol>
+</li>
+<li>A <code class="highlight"><span class="na">resource-context-menu</span></code> section adds menu items to the context menu of the resource browser. That is, the menu that pops up when you right-click a file of your language.</li>
+<li>For menu items inside a <code class="highlight"><span class="na">resource-context-menu</span></code> to show up, they must specify on what kind of resource types they are shown. In this case, we want the command to show up for files of our language, so we choose <code>[File]</code>.</li>
+</ol>
 <p>Build the project so that we can test our changes.
 Open the <code>test.hel</code> file and right-click inside the editor area to open the context menu.
 From the editor context menu, select <span class="guilabel">HelloWorld ‣ Debug ‣ Show parsed <abbr title="Abstract Syntax Tree">AST</abbr></span>.
@@ -1175,7 +1181,38 @@ We define two separate tasks to keep separate</p>
 </ol>
 <p>This practice later allows us to reuse the first task in a different task if we need to.
 Right-click the <code>mb.helloworld.task</code> package and create the <code>HelloWorldReplaceWorlds</code> class and replace the entire Java file with:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">package</span> <span class="nn">mb.helloworld.task</span><span class="p">;</span>
+<table class="annotate highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span></pre></div></td><td class="code"><div class="annotate highlight"><pre><span></span><code><span class="kn">package</span> <span class="nn">mb.helloworld.task</span><span class="p">;</span>
 
 <span class="kn">import</span> <span class="nn">mb.helloworld.HelloWorldClassLoaderResources</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">mb.helloworld.HelloWorldScope</span><span class="p">;</span>
@@ -1191,29 +1228,109 @@ Right-click the <code>mb.helloworld.task</code> package and create the <code>Hel
   <span class="kd">private</span> <span class="kd">final</span> <span class="n">HelloWorldClassLoaderResources</span> <span class="n">classloaderResources</span><span class="p">;</span>
 
   <span class="nd">@Inject</span>
-  <span class="kd">public</span> <span class="nf">HelloWorldReplaceWorlds</span><span class="p">(</span>
+  <span class="kd">public</span> <span class="nf">HelloWorldReplaceWorlds</span><span class="p">(</span> <span class="c1">// 1</span>
     <span class="n">HelloWorldClassLoaderResources</span> <span class="n">classloaderResources</span><span class="p">,</span>
     <span class="n">HelloWorldGetStrategoRuntimeProvider</span> <span class="n">getStrategoRuntimeProvider</span>
   <span class="p">)</span> <span class="p">{</span>
-    <span class="kd">super</span><span class="p">(</span><span class="n">getStrategoRuntimeProvider</span><span class="p">,</span> <span class="s">&quot;replace-worlds&quot;</span><span class="p">);</span>
+    <span class="kd">super</span><span class="p">(</span><span class="n">getStrategoRuntimeProvider</span><span class="p">,</span> <span class="s">&quot;replace-worlds&quot;</span><span class="p">);</span> <span class="c1">// 2</span>
     <span class="k">this</span><span class="p">.</span><span class="na">classloaderResources</span> <span class="o">=</span> <span class="n">classloaderResources</span><span class="p">;</span>
   <span class="p">}</span>
 
-  <span class="nd">@Override</span> <span class="kd">public</span> <span class="n">String</span> <span class="nf">getId</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nd">@Override</span> <span class="kd">public</span> <span class="n">String</span> <span class="nf">getId</span><span class="p">()</span> <span class="p">{</span> <span class="c1">// 3</span>
     <span class="k">return</span> <span class="n">getClass</span><span class="p">().</span><span class="na">getName</span><span class="p">();</span>
   <span class="p">}</span>
 
-  <span class="nd">@Override</span> <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">createDependencies</span><span class="p">(</span><span class="n">ExecContext</span> <span class="n">context</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">IOException</span> <span class="p">{</span>
+  <span class="nd">@Override</span> <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">createDependencies</span><span class="p">(</span><span class="n">ExecContext</span> <span class="n">context</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">IOException</span> <span class="p">{</span> <span class="c1">// 4</span>
     <span class="n">context</span><span class="p">.</span><span class="na">require</span><span class="p">(</span><span class="n">classloaderResources</span><span class="p">.</span><span class="na">tryGetAsLocalResource</span><span class="p">(</span><span class="n">getClass</span><span class="p">()),</span> <span class="n">ResourceStampers</span><span class="p">.</span><span class="na">hashFile</span><span class="p">());</span>
   <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
-<div class="admonition todo">
-<p class="admonition-title">Todo</p>
-<p>Explain this class.</p>
-</div>
+</td></tr></table>
+<p>This task extends <code class="highlight"><span class="n">AstStrategoTransformTaskDef</span></code> which is a convenient abstract class for creating tasks that run Stratego transformations by implementing a constructor and a couple of methods:</p>
+<ol>
+<li>The constructor should inject <code class="highlight"><span class="n">HelloWorldClassLoaderResources</span></code> which we again will use to create a self-dependency, and <code class="highlight"><span class="n">HelloWorldGetStrategoRuntimeProvider</span></code> which is a task that Spoofax generates for your language, which provides a Stratego runtime to execute strategies with.</li>
+<li>The <code class="highlight"><span class="n">HelloWorldGetStrategoRuntimeProvider</span></code> instance is provided to the superclass constructor, along with the strategy that we want this task to execute, which is <code class="highlight"><span class="s">&quot;replace-worlds&quot;</span></code>.</li>
+<li>We override <code class="highlight"><span class="n">getId</span></code> of <code class="highlight"><span class="n">TaskDef</span></code> again to give this task a unique identifier.</li>
+<li>We override <code class="highlight"><span class="n">createDependencies</span></code> of <code class="highlight"><span class="n">AstStrategoTransformTaskDef</span></code> to create a self-dependency.</li>
+</ol>
 <p>Then create the <code>HelloWorldShowReplaceWorlds</code> class and replace the entire Java file with:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">package</span> <span class="nn">mb.helloworld.task</span><span class="p">;</span>
+<table class="annotate highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span></pre></div></td><td class="code"><div class="annotate highlight"><pre><span></span><code><span class="kn">package</span> <span class="nn">mb.helloworld.task</span><span class="p">;</span>
 
 <span class="kn">import</span> <span class="nn">java.io.Serializable</span><span class="p">;</span>
 <span class="kn">import</span> <span class="nn">java.util.Objects</span><span class="p">;</span>
@@ -1291,6 +1408,7 @@ Right-click the <code>mb.helloworld.task</code> package and create the <code>Hel
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
+</td></tr></table>
 <p>This class very similar to <code>HelloWorldShowParsedAst</code>, but runs the <code>HelloWorldReplaceWorlds</code> task on the parsed <abbr title="Abstract Syntax Tree">AST</abbr>, transforming the <abbr title="Abstract Syntax Tree">AST</abbr>.</p>
 <p>Now open <code>helloworld/spoofax.cfg</code> again and register the tasks by adding:</p>
 <div class="highlight"><pre><span></span><code><span class="na">task-def mb.helloworld.task.HelloWorldReplaceWorlds</span>
@@ -1299,7 +1417,7 @@ Right-click the <code>mb.helloworld.task</code> package and create the <code>Hel
 <p>Then add a command for it by adding:</p>
 <div class="highlight"><pre><span></span><code><span class="na">let showReplaceWorldsCommand</span> <span class="o">=</span> <span class="s">command-def {</span>
   <span class="na">task-def</span> <span class="o">=</span> <span class="s">showReplaceWorlds</span>
-  <span class="na">display-name</span> <span class="o">=</span> <span class="s">&quot;Show result of replace worlds transformation&quot;</span>
+  <span class="na">display-name</span> <span class="o">=</span> <span class="s">&quot;Replace world with hello&quot;</span>
   <span class="na">parameters</span> <span class="o">=</span> <span class="s">[</span>
     <span class="na">file</span> <span class="o">=</span> <span class="s">parameter {</span>
       <span class="na">type</span> <span class="o">=</span> <span class="s">java mb.resource.ResourceKey</span>
@@ -1310,7 +1428,7 @@ Right-click the <code>mb.helloworld.task</code> package and create the <code>Hel
 </code></pre></div>
 <p>Finally, add menu items for the command by adding:</p>
 <div class="highlight"><pre><span></span><code><span class="na">editor-context-menu [</span>
-  <span class="na">menu &quot;Debug&quot; [</span>
+  <span class="na">menu &quot;Transform&quot; [</span>
     <span class="na">command-action {</span>
       <span class="na">command-def</span> <span class="o">=</span> <span class="s">showReplaceWorldsCommand</span>
       <span class="na">execution-type</span> <span class="o">=</span> <span class="s">Once</span>
@@ -1322,7 +1440,7 @@ Right-click the <code>mb.helloworld.task</code> package and create the <code>Hel
   <span class="na">]</span>
 <span class="na">]</span>
 <span class="na">resource-context-menu [</span>
-  <span class="na">menu &quot;Debug&quot; [</span>
+  <span class="na">menu &quot;Transform&quot; [</span>
     <span class="na">command-action {</span>
       <span class="na">command-def</span> <span class="o">=</span> <span class="s">showReplaceWorldsCommand</span>
       <span class="na">execution-type</span> <span class="o">=</span> <span class="s">Once</span>
