@@ -79,7 +79,7 @@ First, right-click the `helloworld/src/main/java` directory and choose <span cla
 Then, right-click the `mb.helloworld.task` package we just created and choose <span class="guilabel">New ‣ Class</span> and fill in `HelloWorldShowParsedAst` as name, then press <span class="guilabel">Finish</span>.
 Replace the entire Java file with the following code:
 
-``` { .java .annotate linenums="1" }
+```{ .java .annotate linenums="1" }
 package mb.helloworld.task;
 
 import java.io.Serializable;
@@ -182,29 +182,29 @@ We explain this class with numbered annotations in the above Java source file:
 
     We pass in `#!java ResourceStampers.hashFile()` as the second argument, which indicates that we want to use the hash of the class file to detect changes, instead of the last modified date which is used by default. It is recommended to use hashes for dependencies to generated/compiled files, as compiled files are sometimes recompiled without changes, which changes the modified date but not the hash, leading to better incrementality.
 
- 5. To show the AST we must parse the input file, and in order to do that we must call a task which performs the parsing. Whereas (4) uses `context.require` to create a dependency to a *file*, we use `context.require` here to create a dependency to the *task* that does the parsing, and get the output of that task. As input to `context.require` we pass `parse.inputBuilder().withFile(file).buildAstSupplier()`, which uses the builder pattern to create an input for the `parse` task and then extracts the AST from the output.
+ 5. To show the AST we must parse the input file, and in order to do that we must call a task which performs the parsing. Whereas (4) uses `#!java context.require` to create a dependency to a *file*, we use `#!java context.require` here to create a dependency to the *task* that does the parsing, and get the output of that task. As input to `#!java context.require` we pass `#!java parse.inputBuilder().withFile(file).buildAstSupplier()`, which uses the builder pattern to create an input for the `parse` task and then extracts the AST from the output.
 
-    Internally, the `parse` task creates a dependency to the `file` we pass into it. We depend on the `parse` task. Therefore, when the `file` changes, PIE re-executes the `parse` task, and then re-executes this task if the output of the `parse` task is different. Thereby, PIE incrementally executes your task without having to incrementalize it yourself.
+    Internally, the `#!java parse` task creates a dependency to the `#!java file` we pass into it. We depend on the `#!java parse` task. Therefore, when the `#!java file` changes, PIE re-executes the `#!java parse` task, and then re-executes this task if the output of the `#!java parse` task is different. Thereby, PIE incrementally executes your task without having to incrementalize it yourself.
 
-    The output of the `parse` task is `Result<IStrategoTerm, JSGLR1ParseException>` which is a [*result type*](https://en.wikipedia.org/wiki/Result_type) which is either a `IStrategoTerm` representing the AST of the file if parsing succeeds, or a `JSGLR1ParseException` when parsing fails.
+    The output of the `#!java parse` task is `#!java Result<IStrategoTerm, JSGLR1ParseException>` which is a [*result type*](https://en.wikipedia.org/wiki/Result_type) which is either a `#!java IStrategoTerm` representing the AST of the file if parsing succeeds, or a `#!java JSGLR1ParseException` when parsing fails.
 
     Instead of throwing exceptions, we use result types (akin to `Either` in Haskell or `Result` in Rust) to model the possibility of failure with values. We do this to make it possible to work with failures in PIE tasks. In PIE, throwing an exception signifies an unrecoverable error and cancels the entire pipeline. However, using failures as values works normally.
 
- 6. Now that we have the result of parsing, we can turn it into a `CommandFeedback` object. We use `mapOrElse` of `Result` to map the result to a `CommandFeedback` differently depending on whether parsing succeeded or failed.
+ 6. Now that we have the result of parsing, we can turn it into a `#!java CommandFeedback` object. We use `#!java mapOrElse` of `#!java Result` to map the result to a `#!java CommandFeedback` differently depending on whether parsing succeeded or failed.
 
-    If parsing succeeded, we show the AST as text to the user with `CommandFeedback.of(ShowFeedback.showText(...))` with the first argument providing the text, and the second argument providing the title. The IDE then shows this as a textual editor.
+    If parsing succeeded, we show the AST as text to the user with `#!java CommandFeedback.of(ShowFeedback.showText(...))` with the first argument providing the text, and the second argument providing the title. The IDE then shows this as a textual editor.
 
-    If parsing failed, we present the parse error messages as feedback to the user with `CommandFeedback.ofTryExtractMessagesFrom`.
+    If parsing failed, we present the parse error messages as feedback to the user with `#!java CommandFeedback.ofTryExtractMessagesFrom`.
 
- 7. Finally, PIE needs to be able to identify this task definition. That is done by this `getId` method that returns a unique identifier. This can almost always be implemented using `getClass().getName()` which returns the fully qualified name of this class.
+ 7. Finally, PIE needs to be able to identify this task definition. That is done by this `getId` method that returns a unique identifier. This can almost always be implemented using `#!java getClass().getName()` which returns the fully qualified name of this class.
 
- 8. Spoofax uses [dependency injection](https://en.wikipedia.org/wiki/Dependency_injection) to inject required services, tasks, and other objects into the objects of your classes. The `classloaderResources` object used in (4) is of type `HelloWorldClassLoaderResources` which is class that Spoofax generates for your language. Similarly, the `parse` object used in (5) is of type `HelloWorldParse` which is a task definition that Spoofax generates for you. We store these as fields of this class.
+ 8. Spoofax uses [dependency injection](https://en.wikipedia.org/wiki/Dependency_injection) to inject required services, tasks, and other objects into the objects of your classes. The `#!java classloaderResources` object used in (4) is of type `#!java HelloWorldClassLoaderResources` which is class that Spoofax generates for your language. Similarly, the `#!java parse` object used in (5) is of type `#!java HelloWorldParse` which is a task definition that Spoofax generates for you. We store these as fields of this class.
 
     Note that dependency injection, and file/task dependencies in PIE, are two completely separate things.
 
- 9. These fields are set using [constructor injection](https://en.wikipedia.org/wiki/Dependency_injection#Constructor_injection) in the single constructor of this class marked with `@Inject`. The dependency injection framework that Spoofax uses (the [Dagger](https://dagger.dev/dev-guide/) framework) will then instantiate your class with instances of the dependencies.
+ 9. These fields are set using [constructor injection](https://en.wikipedia.org/wiki/Dependency_injection#Constructor_injection) in the single constructor of this class marked with `#!java @Inject`. The dependency injection framework that Spoofax uses (the [Dagger](https://dagger.dev/dev-guide/) framework) will then instantiate your class with instances of the dependencies.
 
-10. Finally, we must tell the dependency injection framework to which scope instances of this class belongs. We annotate the class with `@HelloWorldScope` which is a scope annotation that Spoofax generates for you. This is mainly used to differentiate between different languages when multiple languages are composed, which we do not do in this tutorial, but is required nonetheless.
+10. Finally, we must tell the dependency injection framework to which scope instances of this class belongs. We annotate the class with `#!java @HelloWorldScope` which is a scope annotation that Spoofax generates for you. This is mainly used to differentiate between different languages when multiple languages are composed, which we do not do in this tutorial, but is required nonetheless.
 
 ### Registering the task definition
 
@@ -244,21 +244,19 @@ let showParsedAstCommand = command-def {
 }
 ```
 
-We explain this configuration with numbered annotations in the above CFG source file:
-
 1. Spoofax generates a Java class implementing the command boilerplate for you. This is the fully qualified Java type we want this command to have. Can be omitted to generate a type based on the name of the task definition.
-2. The task definition that the command will execute, which is the `showParsedAst` we defined earlier.
-3. The fully qualified Java type of the argument class.
+2. The task definition that the command will execute, which is the `#!cfg showParsedAst` we defined earlier.
+3. The fully qualified Java type of the argument class. Can be omitted if the argument class is a nested class named `Args` of the task definition.
 4. The display name of the command.
 5. The optional description of the command.
-6. The optional supported execution types of the command. `Once` indicates a one-shot command, while `Continuous` indicates a command that is executed every time the input file changes. Defaults to `[Once, Continuous]`.
+6. The optional supported execution types of the command. `#!cfg Once` indicates a one-shot command, while `#!cfg Continuous` indicates a command that is executed every time the source file changes. Defaults to `#!cfg [Once, Continuous]`.
 7. The description of the parameters of the command:
     1. The name of the parameter.
-    2. The fully qualified Java of the type of the parameter. This must match the type we used in the `HelloWorldShowParsedAst.Args` class before.
-    3. Whether the parameter is required. Defaults to `true`.
+    2. The fully qualified Java of the type of the parameter. This must match the type we used in the `#!java HelloWorldShowParsedAst.Args` class before.
+    3. Whether the parameter is required. Defaults to `#!cfg true`.
     4. Argument providers for this parameter that attempt to automatically provide a fitting argument. When providing an argument fails, the next argument provider in the list will be attempted.
 
-        Because this argument is a file, we want to try to infer the file from context, so we use `Context(File)`. When we execute this command on a "Hello world" file in the IDE, Spoofax will automatically infer that file as the argument for the parameter.
+        Because this argument is a file, we want to try to infer the file from context, so we use `#!cfg Context(File)`. When we execute this command on a "Hello world" file in the IDE, Spoofax will automatically infer that file as the argument for the parameter.
 
         Currently, Spoofax does not support running commands in the IDE without an argument provider, so a working argument provider is currently required.
 
@@ -284,12 +282,12 @@ let showParsedAstCommand = command-def {
 
 To add the menu item, add the following configuration to the end of the `spoofax.cfg` file:
 
-```cfg
-editor-context-menu [
-  menu "Debug" [
-    command-action {
-      command-def = showParsedAstCommand
-      execution-type = Once
+```{ .cfg .annotate }
+editor-context-menu [ // (1)
+  menu "Debug" [ // (2)
+    command-action { // (3)
+      command-def = showParsedAstCommand // (3a)
+      execution-type = Once // (3b)
     }
     command-action {
       command-def = showParsedAstCommand
@@ -297,19 +295,24 @@ editor-context-menu [
     }
   ]
 ]
-resource-context-menu [
+resource-context-menu [ // (4)
   menu "Debug" [
     command-action {
       command-def = showParsedAstCommand
       execution-type = Once
-      required-resource-types = [File]
+      required-resource-types = [File] // (5)
     }
   ]
 ]
 ```
 
-!!! todo
-    Explain this configuration.
+ 1. An `#!cfg editor-context-menu` section adds menu items to the editor context menu. That is, the menu that pops up when you right-click inside an editor for your language. There is also a `#!cfg main-menu` section for adding menu items to the main menu when an editor for your language has focus. If no `#!cfg main-menu` section is defined, the main menu will take all menu items from `#!cfg editor-context-menu`.
+ 2. A nested menu with name `#!cfg "Debug"`.
+ 3. An action menu item that executes a command.
+    1. The command to execute.
+    2. How the command should be executed. `#!cfg Once` to execute it once, `#!cfg Continuous` to continuously execute the command when the source file changes.
+ 4. A `#!cfg resource-context-menu` section adds menu items to the context menu of the resource browser. That is, the menu that pops up when you right-click a file of your language.
+ 5. For menu items inside a `#!cfg resource-context-menu` to show up, they must specify on what kind of resource types they are shown. In this case, we want the command to show up for files of our language, so we choose `[File]`.
 
 Build the project so that we can test our changes.
 Open the `test.hel` file and right-click inside the editor area to open the context menu.
@@ -409,7 +412,7 @@ We define two separate tasks to keep separate
 This practice later allows us to reuse the first task in a different task if we need to.
 Right-click the `mb.helloworld.task` package and create the `HelloWorldReplaceWorlds` class and replace the entire Java file with:
 
-```java
+```{ .java .annotate linenums="1" }
 package mb.helloworld.task;
 
 import mb.helloworld.HelloWorldClassLoaderResources;
@@ -426,31 +429,35 @@ public class HelloWorldReplaceWorlds extends AstStrategoTransformTaskDef {
   private final HelloWorldClassLoaderResources classloaderResources;
 
   @Inject
-  public HelloWorldReplaceWorlds(
+  public HelloWorldReplaceWorlds( // 1
     HelloWorldClassLoaderResources classloaderResources,
     HelloWorldGetStrategoRuntimeProvider getStrategoRuntimeProvider
   ) {
-    super(getStrategoRuntimeProvider, "replace-worlds");
+    super(getStrategoRuntimeProvider, "replace-worlds"); // 2
     this.classloaderResources = classloaderResources;
   }
 
-  @Override public String getId() {
+  @Override public String getId() { // 3
     return getClass().getName();
   }
 
-  @Override protected void createDependencies(ExecContext context) throws IOException {
+  @Override protected void createDependencies(ExecContext context) throws IOException { // 4
     context.require(classloaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
   }
 }
 
 ```
 
-!!! todo
-    Explain this class.
+This task extends `#!java AstStrategoTransformTaskDef` which is a convenient abstract class for creating tasks that run Stratego transformations by implementing a constructor and a couple of methods:
+
+ 1. The constructor should inject `#!java HelloWorldClassLoaderResources` which we again will use to create a self-dependency, and `#!java HelloWorldGetStrategoRuntimeProvider` which is a task that Spoofax generates for your language, which provides a Stratego runtime to execute strategies with.
+ 2. The `#!java HelloWorldGetStrategoRuntimeProvider` instance is provided to the superclass constructor, along with the strategy that we want this task to execute, which is `#!java "replace-worlds"`.
+ 3. We override `#!java getId` of `#!java TaskDef` again to give this task a unique identifier.
+ 4. We override `#!java createDependencies` of `#!java AstStrategoTransformTaskDef` to create a self-dependency.
 
 Then create the `HelloWorldShowReplaceWorlds` class and replace the entire Java file with:
 
-```java
+```{ .java .annotate linenums="1" }
 package mb.helloworld.task;
 
 import java.io.Serializable;
@@ -544,7 +551,7 @@ Then add a command for it by adding:
 ```cfg
 let showReplaceWorldsCommand = command-def {
   task-def = showReplaceWorlds
-  display-name = "Show result of replace worlds transformation"
+  display-name = "Replace world with hello"
   parameters = [
     file = parameter {
       type = java mb.resource.ResourceKey
@@ -558,7 +565,7 @@ Finally, add menu items for the command by adding:
 
 ```cfg
 editor-context-menu [
-  menu "Debug" [
+  menu "Transform" [
     command-action {
       command-def = showReplaceWorldsCommand
       execution-type = Once
@@ -570,7 +577,7 @@ editor-context-menu [
   ]
 ]
 resource-context-menu [
-  menu "Debug" [
+  menu "Transform" [
     command-action {
       command-def = showReplaceWorldsCommand
       execution-type = Once
