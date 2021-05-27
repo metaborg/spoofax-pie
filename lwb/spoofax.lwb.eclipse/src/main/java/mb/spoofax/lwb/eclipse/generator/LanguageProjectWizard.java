@@ -9,10 +9,8 @@ import mb.spoofax.eclipse.util.StatusUtil;
 import mb.spoofax.lwb.compiler.generator.LanguageProjectGenerator;
 import mb.spoofax.lwb.eclipse.SpoofaxLwbLifecycleParticipant;
 import mb.spoofax.lwb.eclipse.SpoofaxLwbNature;
-import mb.spoofax.lwb.eclipse.util.ClassPathUtil;
+import mb.spoofax.lwb.eclipse.util.JavaProjectUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
@@ -22,11 +20,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ICoreRunnable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.jdt.core.IClasspathAttribute;
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -34,11 +27,8 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class LanguageProjectWizard extends Wizard implements INewWizard {
     private final Logger logger;
@@ -117,56 +107,9 @@ public class LanguageProjectWizard extends Wizard implements INewWizard {
 
     private void generate(IProject project, LanguageProjectGenerator.Input.Builder inputBuilder, IProgressMonitor monitor) throws IOException, CoreException {
         final ResourcePath rootDirectory = new EclipseResourcePath(project);
-
-        // Add Spoofax LWB nature, which also adds the Java nature.
         SpoofaxLwbNature.addTo(project, null);
-
-        // Generate language project.
         languageProjectGenerator.generate(inputBuilder.rootDirectory(rootDirectory).build());
-
-        // Configure JDT.
-        // TODO: sync these hardcoded paths with the compiler
-        final IFolder src = getFolder(project, "src", monitor);
-        final IFolder srcMain = getFolder(src, "main", monitor);
-        final IFolder srcMainJava = getFolder(srcMain, "java", monitor);
-        final IFolder build = getDerivedFolder(project, "build", monitor);
-        final IFolder buildEclipseClasses = getDerivedFolder(build, "eclipseclasses", monitor);
-        final IFolder buildGenerated = getDerivedFolder(build, "generated", monitor);
-        final IFolder buildGeneratedSources = getDerivedFolder(buildGenerated, "sources", monitor);
-        final IFolder buildGeneratedSourcesLanguage = getDerivedFolder(buildGeneratedSources, "language", monitor);
-        final IFolder buildGeneratedSourcesAdapter = getDerivedFolder(buildGeneratedSources, "adapter", monitor);
-        final IFolder buildGeneratedSourcesEclipse = getDerivedFolder(buildGeneratedSources, "eclipse", monitor);
-        final IFolder buildGeneratedSourcesLanguageSpecification = getDerivedFolder(buildGeneratedSources, "languageSpecification", monitor);
-        final IFolder buildGeneratedSourcesLanguageSpecificationJava = getDerivedFolder(buildGeneratedSourcesLanguageSpecification, "java", monitor);
-        final IFolder buildGeneratedSourcesAnnotationProcessor = getDerivedFolder(buildGeneratedSources, "annotationProcessor", monitor);
-        final IFolder buildGeneratedSourcesAnnotationProcessorJava = getDerivedFolder(buildGeneratedSourcesAnnotationProcessor, "java", monitor);
-        final IFolder buildGeneratedSourcesAnnotationProcessorJavaMain = getDerivedFolder(buildGeneratedSourcesAnnotationProcessorJava, "main", monitor);
-
-        final IPath[] emptyPaths = new IPath[]{};
-        final IClasspathAttribute optionalAttribute = JavaCore.newClasspathAttribute(IClasspathAttribute.OPTIONAL, "true");
-        final IClasspathAttribute[] sourceAttributes = new IClasspathAttribute[]{optionalAttribute};
-        final IClasspathAttribute ignoreOptionalProblemsAttribute = JavaCore.newClasspathAttribute(IClasspathAttribute.IGNORE_OPTIONAL_PROBLEMS, "true");
-        final IClasspathAttribute[] derivedSourceAttributes = new IClasspathAttribute[]{optionalAttribute, ignoreOptionalProblemsAttribute};
-
-        final ArrayList<IClasspathEntry> classpathEntries = new ArrayList<>();
-        classpathEntries.add(JavaCore.newSourceEntry(srcMainJava.getFullPath(), emptyPaths, emptyPaths, null, sourceAttributes));
-        classpathEntries.add(JavaCore.newSourceEntry(buildGeneratedSourcesLanguage.getFullPath(), emptyPaths, emptyPaths, null, derivedSourceAttributes));
-        classpathEntries.add(JavaCore.newSourceEntry(buildGeneratedSourcesAdapter.getFullPath(), emptyPaths, emptyPaths, null, derivedSourceAttributes));
-        classpathEntries.add(JavaCore.newSourceEntry(buildGeneratedSourcesEclipse.getFullPath(), emptyPaths, emptyPaths, null, derivedSourceAttributes));
-        classpathEntries.add(JavaCore.newSourceEntry(buildGeneratedSourcesLanguageSpecificationJava.getFullPath(), emptyPaths, emptyPaths, null, derivedSourceAttributes));
-        classpathEntries.add(JavaCore.newSourceEntry(buildGeneratedSourcesAnnotationProcessorJavaMain.getFullPath(), emptyPaths, emptyPaths, null, derivedSourceAttributes));
-
-        final List<File> classPath = ClassPathUtil.getClassPath();
-        for(File classPathEntry : classPath) {
-            classpathEntries.add(JavaCore.newLibraryEntry(Path.fromOSString(classPathEntry.getAbsolutePath()), null, null));
-        }
-
-        classpathEntries.add(JavaCore.newContainerEntry(Path.fromOSString("org.eclipse.jdt.launching.JRE_CONTAINER")));
-
-        final IJavaProject javaProject = JavaCore.create(project);
-        javaProject.setOutputLocation(buildEclipseClasses.getFullPath(), monitor);
-        javaProject.setRawClasspath(classpathEntries.toArray(new IClasspathEntry[0]), monitor);
-
+        JavaProjectUtil.configureProject(project, monitor);
         project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
     }
 
@@ -187,19 +130,5 @@ public class LanguageProjectWizard extends Wizard implements INewWizard {
         }
         project.open(null);
         project.refreshLocal(IResource.DEPTH_INFINITE, null);
-    }
-
-    private IFolder getFolder(IContainer parent, String path, @Nullable IProgressMonitor monitor) throws CoreException {
-        final IFolder folder = parent.getFolder(Path.fromOSString(path));
-        if(!folder.exists()) {
-            folder.create(true, true, monitor);
-        }
-        return folder;
-    }
-
-    private IFolder getDerivedFolder(IContainer parent, String path, @Nullable IProgressMonitor monitor) throws CoreException {
-        final IFolder folder = getFolder(parent, path, monitor);
-        folder.setDerived(true, monitor);
-        return folder;
     }
 }

@@ -19,6 +19,7 @@ import mb.spoofax.lwb.compiler.CompileLanguage;
 import mb.spoofax.lwb.compiler.CompileLanguageException;
 import mb.spoofax.lwb.dynamicloading.DynamicLanguage;
 import mb.spoofax.lwb.eclipse.util.ClassPathUtil;
+import mb.spoofax.lwb.eclipse.util.JavaProjectUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -84,6 +85,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
 
 
     private void fullBuild(IProject eclipseProject, @Nullable IProgressMonitor monitor) throws CoreException, InterruptedException {
+        JavaProjectUtil.configureProject(eclipseProject, monitor);
         final ResourcePath rootDirectory = getResourcePath(eclipseProject);
         logger.debug("Running full language build of {}", rootDirectory);
         final PieComponent pieComponent = SpoofaxLwbLifecycleParticipant.getInstance().getPieComponent();
@@ -96,6 +98,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
     }
 
     private void incrBuild(IProject eclipseProject, IResourceDelta delta, @Nullable IProgressMonitor monitor) throws CoreException, InterruptedException {
+        JavaProjectUtil.configureProject(eclipseProject, monitor);
         final ResourcePath rootDirectory = getResourcePath(eclipseProject);
         logger.debug("Running incremental language build of {}", rootDirectory);
         final PieComponent pieComponent = SpoofaxLwbLifecycleParticipant.getInstance().getPieComponent();

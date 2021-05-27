@@ -22,11 +22,17 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.osgi.framework.BundleActivator;
 
 import javax.annotation.Generated;
+import javax.annotation.Nullable;
 import java.io.File;
 import java.util.List;
 
 public class ClassPathUtil {
+    private static @Nullable List<File> classPath;
+
     public static List<File> getClassPath() {
+        if(classPath != null) {
+            return classPath;
+        }
         final ClassGraph classGraph = new ClassGraph()
             .addClassLoader(SpoofaxLwbPlugin.class.getClassLoader())
             .addClassLoader(SpoofaxPlugin.class.getClassLoader())
@@ -51,6 +57,7 @@ public class ClassPathUtil {
             .addClassLoader(IAnnotationModel.class.getClassLoader()) // Bundle: org.eclipse.text
             .addClassLoader(Composite.class.getClassLoader()) // Bundle: org.eclipse.swt.*
             ;
-        return classGraph.getClasspathFiles();
+        classPath = classGraph.getClasspathFiles();
+        return classPath;
     }
 }
