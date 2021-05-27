@@ -30,7 +30,10 @@ These are bundled with an embedded JVM so that you do not need to have a JVM ins
 
 ## Unpack
 
-Unpack the downloaded archive to a location with write access. Write access is required because Eclipse needs to write to several configuration files inside its installation.
+Unpack the downloaded archive to a directory with write access. Write access is required because Eclipse needs to write to several configuration files inside its installation.
+
+!!! warning
+    The unpacked directory or application may be renamed, but do not include spaces or other characters that would not be allowed in a URI (i.e., `: ? # [ ] @`). The same is true for the directory the archive is extracted to. Failing to do so breaks a built-in classpath detection mechanism which will cause Java compilation errors.
 
 !!! warning
     On {{ os.windows }} do not unpack the Eclipse installation into `Program Files`, because no write access is granted there, breaking both Eclipse and Spoofax.
