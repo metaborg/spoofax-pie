@@ -1,0 +1,1533 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Spoofax 3 documentation website">
+      
+      
+      
+      
+      <link rel="icon" href="../../assets/spoofax.png">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.1.4">
+    
+    
+      
+        <title>Creating a language project - Spoofax 3</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.bde7dde4.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ef6f36e2.min.css">
+        
+          
+          
+          <meta name="theme-color" content="#4051b5">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=:300,400,400i,700%7CJetBrains+Mono&display=fallback">
+        <style>:root{--md-text-font-family:"";--md-code-font-family:"JetBrains Mono"}</style>
+      
+    
+    
+    
+      <link rel="stylesheet" href="../../extra.css">
+    
+    
+      
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <script>function __prefix(e){return new URL("../..",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#creating-a-language-project" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Spoofax 3" class="md-header__button md-logo" aria-label="Spoofax 3" data-md-component="logo">
+      
+  <img src="../../assets/spoofax.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Spoofax 3
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Creating a language project
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        
+<a href="https://github.com/metaborg/spoofax-pie/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    metaborg/spoofax-pie
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../.." class="md-tabs__link">
+      Home
+    </a>
+  </li>
+
+      
+        
+  
+  
+    
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../install/" class="md-tabs__link md-tabs__link--active">
+        Tutorials
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../reference/anatomy_language_implementation/" class="md-tabs__link">
+        Reference
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../background/documentation/" class="md-tabs__link">
+        Background
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../release/download/" class="md-tabs__link">
+        Releases
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Spoofax 3" class="md-nav__button md-logo" aria-label="Spoofax 3" data-md-component="logo">
+      
+  <img src="../../assets/spoofax.svg" alt="logo">
+
+    </a>
+    Spoofax 3
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/metaborg/spoofax-pie/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    metaborg/spoofax-pie
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" checked>
+      
+      <label class="md-nav__link" for="__nav_2">
+        Tutorials
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Tutorials" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Tutorials
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../install/" class="md-nav__link">
+        Installing the Spoofax 3 language workbench
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Creating a language project
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Creating a language project
+      </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#creating-a-new-project" class="md-nav__link">
+    Creating a new project
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-syntax" class="md-nav__link">
+    Adding syntax
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changing-syntax-highlighting" class="md-nav__link">
+    Changing syntax highlighting
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-a-debugging-command" class="md-nav__link">
+    Adding a debugging command
+  </a>
+  
+    <nav class="md-nav" aria-label="Adding a debugging command">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#creating-the-task-definition" class="md-nav__link">
+    Creating the task definition
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#registering-the-task-definition" class="md-nav__link">
+    Registering the task definition
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#creating-the-command" class="md-nav__link">
+    Creating the command
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adding-the-menu-item" class="md-nav__link">
+    Adding the menu item
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changing-the-static-semantics" class="md-nav__link">
+    Changing the static semantics
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-a-transformation" class="md-nav__link">
+    Adding a transformation
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
+      
+      <label class="md-nav__link" for="__nav_3">
+        Reference
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Reference" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Reference
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/anatomy_language_implementation/" class="md-nav__link">
+        Anatomy of a language implementation
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
+      
+      <label class="md-nav__link" for="__nav_4">
+        Background
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Background" data-md-level="1">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Background
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../background/documentation/" class="md-nav__link">
+        Documentation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../background/motivation/" class="md-nav__link">
+        Motivation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../background/key_ideas/" class="md-nav__link">
+        Key ideas
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../background/status/" class="md-nav__link">
+        Current Status
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+      
+      <label class="md-nav__link" for="__nav_5">
+        Releases
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Releases" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Releases
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../release/download/" class="md-nav__link">
+        Downloads
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#creating-a-new-project" class="md-nav__link">
+    Creating a new project
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-syntax" class="md-nav__link">
+    Adding syntax
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changing-syntax-highlighting" class="md-nav__link">
+    Changing syntax highlighting
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-a-debugging-command" class="md-nav__link">
+    Adding a debugging command
+  </a>
+  
+    <nav class="md-nav" aria-label="Adding a debugging command">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#creating-the-task-definition" class="md-nav__link">
+    Creating the task definition
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#registering-the-task-definition" class="md-nav__link">
+    Registering the task definition
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#creating-the-command" class="md-nav__link">
+    Creating the command
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adding-the-menu-item" class="md-nav__link">
+    Adding the menu item
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changing-the-static-semantics" class="md-nav__link">
+    Changing the static semantics
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-a-transformation" class="md-nav__link">
+    Adding a transformation
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/metaborg/spoofax-pie/edit/master/docs/tutorial/create_language_project.md" title="Edit this page" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                <h1 id="creating-a-language-project">Creating a language project<a class="headerlink" href="#creating-a-language-project" title="Permanent link">&para;</a></h1>
+<p>This tutorial gets you started with language development by creating a language project and changing various aspects of the language. First follow the <a href="../install/">installation tutorial</a> if you haven't done so yet.</p>
+<h2 id="creating-a-new-project">Creating a new project<a class="headerlink" href="#creating-a-new-project" title="Permanent link">&para;</a></h2>
+<p>In Eclipse, open the new project dialog by choosing <span class="guilabel">File ‣ New ‣ Project</span> from the main menu.
+In the new project dialog, select <span class="guilabel">Spoofax <abbr title="Language Workbench">LWB</abbr> ‣ Spoofax language project</span> and press <span class="guilabel">Next</span>.
+In this wizard, you can customize the various names your language will use.
+However, for the purpose of this tutorial, fill in <code>HelloWorld</code> as the name of the project, which will automatically fill in the other elements with defaults.
+Then press <span class="guilabel">Finish</span> to create the project.
+There should now be a project named <code>helloworld</code> in the <span class="guilabel">Package Explorer</span>.</p>
+<h2 id="adding-syntax">Adding syntax<a class="headerlink" href="#adding-syntax" title="Permanent link">&para;</a></h2>
+<p>First we will add some syntax to the language.
+Open the main SDF3 file <code>helloworld/src/start.sdf3</code> file by expanding the folders and double-clicking the file.
+SDF3 is a meta-language (i.e., a language to describe languages) for describing the syntax of a language, from which Spoofax will derive the parser of your language.
+Under the <code class="highlight"><span class="k">context-free</span><span class="w"> </span><span class="k">syntax</span><span class="w"></span></code> section, replace the <code class="highlight"><span class="nv">Start</span><span class=" -Punctuation">.</span><span class="nv">Empty</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;&gt;</span><span class="w"></span></code> line with <code class="highlight"><span class="nv">Start</span><span class=" -Punctuation">.</span><span class="nv">Program</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;&lt;{</span><span class="nv">Part</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class=" -Punctuation">}</span><span class="o">*</span><span class=" -Punctuation">&gt;&gt;</span><span class="w"></span></code>, indicating that the language accepts programs which consists of one or more parts.
+Then add <code class="highlight"><span class="nv">Part</span><span class=" -Punctuation">.</span><span class="nv">Hello</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;</span><span class="nv">hello</span><span class=" -Punctuation">&gt;</span><span class="w"></span></code> on a new line, indicating that one sort of part is the word <code>hello.</code>
+Finally, add <code class="highlight"><span class="nv">Part</span><span class=" -Punctuation">.</span><span class="nv">World</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;</span><span class="nv">world</span><span class=" -Punctuation">&gt;</span><span class="w"></span></code> on a new line, indicating that one sort of part is the word <code>world</code>.
+The context-free syntax section should now look as follows:</p>
+<div class="highlight"><pre><span></span><code><span class="k">context-free</span><span class="w"> </span><span class="k">syntax</span><span class="w"></span>
+
+<span class="w">  </span><span class="nv">Start</span><span class=" -Punctuation">.</span><span class="nv">Program</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;&lt;{</span><span class="nv">Part</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class=" -Punctuation">}</span><span class="o">*</span><span class=" -Punctuation">&gt;&gt;</span><span class="w"></span>
+<span class="w">  </span><span class="nv">Part</span><span class=" -Punctuation">.</span><span class="nv">Hello</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;</span><span class="nv">hello</span><span class=" -Punctuation">&gt;</span><span class="w"></span>
+<span class="w">  </span><span class="nv">Part</span><span class=" -Punctuation">.</span><span class="nv">World</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;</span><span class="nv">world</span><span class=" -Punctuation">&gt;</span><span class="w"></span>
+</code></pre></div>
+<p>To test our change, build the project by clicking on the project in the <span class="guilabel">Package Explorer</span> and choosing <span class="guilabel">Project ‣ Build Project</span> from the main menu, or by pressing <span class="keys"><kbd class="key-command">Cmd</kbd><span>+</span><kbd class="key-b">B</kbd></span> on macOS or <span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-b">B</kbd></span> on others.
+To see when the build is done, open the progress window by choosing <span class="guilabel">Window ‣ Show View ‣ Progress</span>.
+If the progress view is empty, the build is done.
+The initial build can be a bit slow because there is a lot of code to compile in the background.
+Subsequent builds will be faster due to incrementalization.</p>
+<p>Create a test file for your language by right-clicking the project and choosing <span class="guilabel">New ‣ File</span>, filling in <code>test.hel</code> as file name, and pressing <span class="guilabel">Finish</span>.
+Type a valid sentence such as <code>hello world hello hello world</code> in this file, and it will highlight purple indicating that <code>hello</code> and <code>world</code> are keywords.
+There will also be an error marker on the file because we have not yet updated the static semantics (i.e., type checker) of the language to handle the language constructs we just added.
+That is ok for now, we will fix this later.</p>
+<h2 id="changing-syntax-highlighting">Changing syntax highlighting<a class="headerlink" href="#changing-syntax-highlighting" title="Permanent link">&para;</a></h2>
+<p>Now we will change the syntax highlighter of the language.
+Open the main ESV file <code>helloworld/src/main.esv</code>.
+ESV is a meta-language for describing the syntax highlighter.
+Change the <code class="highlight">keyword<span class="w"> </span><span class=" -Punctuation">:</span><span class="w"> </span>127<span class="w"> </span>0<span class="w"> </span>85<span class="w"> </span>bold<span class="w"></span></code> line to <code class="highlight">keyword<span class=" -Punctuation">:</span><span class="w"> </span>0<span class="w"> </span>0<span class="w"> </span>150<span class="w"> </span>bold<span class="w"></span></code> and build the project.
+Then check your <code>test.hel</code> example file, it should now be highlighted blue.</p>
+<p>To make iteration easier, you can drag the <code>test.hel</code> tab to the side of the screen to open the language definition and example file side-by-side.
+You can play around with the coloring a bit and choose a style to your liking.
+Remember to rebuild the project after making a change to the language definition.</p>
+<h2 id="adding-a-debugging-command">Adding a debugging command<a class="headerlink" href="#adding-a-debugging-command" title="Permanent link">&para;</a></h2>
+<p>It can be quite handy to look at the <abbr title="Abstract Syntax Tree">AST</abbr> of a program that the parser of the language produces as a debugging tool.
+To do that, we will write a <em>task definition</em> that produces the <abbr title="Abstract Syntax Tree">AST</abbr> of a program by parsing it, we will add a <em>command definition</em> for that task, and finally we will bind the command to a <em>menu item</em> so that we can execute the command.</p>
+<h3 id="creating-the-task-definition">Creating the task definition<a class="headerlink" href="#creating-the-task-definition" title="Permanent link">&para;</a></h3>
+<p>A task definition is a piece of code that take some input, may read from or write to files, run and get the result of other tasks, and produce some output.
+Task definitions come from <a href="https://github.com/metaborg/pie">PIE</a>, a framework for developing composable, incremental, correct, and expressive pipelines and build scripts.</p>
+<p>All user interaction, pipelines, and builds in Spoofax 3 are composed of task definitions.
+So whenever you want to perform a command, present feedback to the user, or compile your language, you will need to write a task definition for it.
+For brevity, we usually just refer to a "task definition" by "task".</p>
+<p>For PIE to be able to incrementally execute your task, you must make your dependencies explicit.
+That is, dependencies to files and other tasks must be made explicit.
+However, because PIE supports <em>dynamic dependencies</em>, those dependencies are made <em>while the build script is executing</em>.
+A full tutorial on PIE is outside the scope of this tutorial, but we will implement several tasks in this tutorial, explain the PIE concepts, and how Spoofax 3 uses these concepts.</p>
+<p>A task definition is written as a class in Java, and needs to adhere to a certain interface.
+Let's start by creating the class for this task.
+First, right-click the <code>helloworld/src/main/java</code> directory and choose <span class="guilabel">New ‣ Package</span>, replace the name with <code>mb.helloworld.task</code>, and press <span class="guilabel">Finish</span>.
+Then, right-click the <code>mb.helloworld.task</code> package we just created and choose <span class="guilabel">New ‣ Class</span> and fill in <code>HelloWorldShowParsedAst</code> as name, then press <span class="guilabel">Finish</span>.
+Replace the entire Java file with the following code:</p>
+<table class="annotate highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span></pre></div></td><td class="code"><div class="annotate highlight"><pre><span></span><code><span class="kn">package</span> <span class="nn">mb.helloworld.task</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.Serializable</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Objects</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">javax.inject.Inject</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">org.checkerframework.checker.nullness.qual.Nullable</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">org.spoofax.interpreter.terms.IStrategoTerm</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">mb.common.result.Result</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">mb.helloworld.HelloWorldClassLoaderResources</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">mb.helloworld.HelloWorldScope</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">mb.jsglr1.common.JSGLR1ParseException</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">mb.pie.api.ExecContext</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">mb.pie.api.TaskDef</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">mb.pie.api.stamp.resource.ResourceStampers</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">mb.resource.ResourceKey</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">mb.spoofax.core.language.command.CommandFeedback</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">mb.spoofax.core.language.command.ShowFeedback</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">mb.stratego.common.StrategoUtil</span><span class="p">;</span>
+
+<span class="nd">@HelloWorldScope</span> <span class="c1">// (10)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">HelloWorldShowParsedAst</span> <span class="kd">implements</span> <span class="n">TaskDef</span><span class="o">&lt;</span><span class="n">HelloWorldShowParsedAst</span><span class="p">.</span><span class="na">Args</span><span class="p">,</span> <span class="n">CommandFeedback</span><span class="o">&gt;</span> <span class="p">{</span> <span class="c1">// (1)</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">Args</span> <span class="kd">implements</span> <span class="n">Serializable</span> <span class="p">{</span> <span class="c1">// (2)</span>
+        <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">long</span> <span class="n">serialVersionUID</span> <span class="o">=</span> <span class="mi">1L</span><span class="p">;</span>
+
+        <span class="kd">public</span> <span class="kd">final</span> <span class="n">ResourceKey</span> <span class="n">file</span><span class="p">;</span>
+
+        <span class="kd">public</span> <span class="nf">Args</span><span class="p">(</span><span class="n">ResourceKey</span> <span class="n">file</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="na">file</span> <span class="o">=</span> <span class="n">file</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">equals</span><span class="p">(</span><span class="nd">@Nullable</span> <span class="n">Object</span> <span class="n">o</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span><span class="p">(</span><span class="k">this</span> <span class="o">==</span> <span class="n">o</span><span class="p">)</span> <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">o</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">||</span> <span class="n">getClass</span><span class="p">()</span> <span class="o">!=</span> <span class="n">o</span><span class="p">.</span><span class="na">getClass</span><span class="p">())</span> <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+            <span class="kd">final</span> <span class="n">Args</span> <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">Args</span><span class="p">)</span><span class="n">o</span><span class="p">;</span>
+            <span class="k">return</span> <span class="n">file</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="na">file</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="kt">int</span> <span class="nf">hashCode</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">Objects</span><span class="p">.</span><span class="na">hash</span><span class="p">(</span><span class="n">file</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="n">String</span> <span class="nf">toString</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">&quot;Args{&quot;</span> <span class="o">+</span> <span class="s">&quot;file=&quot;</span> <span class="o">+</span> <span class="n">file</span> <span class="o">+</span> <span class="sc">&#39;}&#39;</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">CommandFeedback</span> <span class="nf">exec</span><span class="p">(</span><span class="n">ExecContext</span> <span class="n">context</span><span class="p">,</span> <span class="n">Args</span> <span class="n">args</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="p">{</span> <span class="c1">// (3)</span>
+        <span class="n">context</span><span class="p">.</span><span class="na">require</span><span class="p">(</span><span class="n">classloaderResources</span><span class="p">.</span><span class="na">tryGetAsLocalResource</span><span class="p">(</span><span class="n">getClass</span><span class="p">()),</span> <span class="n">ResourceStampers</span><span class="p">.</span><span class="na">hashFile</span><span class="p">());</span> <span class="c1">// (4)</span>
+        <span class="kd">final</span> <span class="n">ResourceKey</span> <span class="n">file</span> <span class="o">=</span> <span class="n">args</span><span class="p">.</span><span class="na">file</span><span class="p">;</span>
+        <span class="kd">final</span> <span class="n">Result</span><span class="o">&lt;</span><span class="n">IStrategoTerm</span><span class="p">,</span> <span class="n">JSGLR1ParseException</span><span class="o">&gt;</span> <span class="n">astResult</span> <span class="o">=</span> <span class="n">context</span><span class="p">.</span><span class="na">require</span><span class="p">(</span><span class="n">parse</span><span class="p">.</span><span class="na">inputBuilder</span><span class="p">().</span><span class="na">withFile</span><span class="p">(</span><span class="n">file</span><span class="p">).</span><span class="na">buildAstSupplier</span><span class="p">());</span> <span class="c1">// (5)</span>
+        <span class="k">return</span> <span class="n">astResult</span><span class="p">.</span><span class="na">mapOrElse</span><span class="p">(</span> <span class="c1">// (6)</span>
+            <span class="n">ast</span> <span class="o">-&gt;</span> <span class="n">CommandFeedback</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">ShowFeedback</span><span class="p">.</span><span class="na">showText</span><span class="p">(</span><span class="n">StrategoUtil</span><span class="p">.</span><span class="na">toString</span><span class="p">(</span><span class="n">ast</span><span class="p">),</span> <span class="s">&quot;Parsed AST for &#39;&quot;</span> <span class="o">+</span> <span class="n">file</span> <span class="o">+</span> <span class="s">&quot;&#39;&quot;</span><span class="p">)),</span>
+            <span class="n">e</span> <span class="o">-&gt;</span> <span class="n">CommandFeedback</span><span class="p">.</span><span class="na">ofTryExtractMessagesFrom</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+        <span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">String</span> <span class="nf">getId</span><span class="p">()</span> <span class="p">{</span> <span class="c1">// (7)</span>
+        <span class="k">return</span> <span class="n">getClass</span><span class="p">().</span><span class="na">getName</span><span class="p">();</span>
+    <span class="p">}</span>
+
+
+    <span class="c1">// (8)</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">HelloWorldClassLoaderResources</span> <span class="n">classloaderResources</span><span class="p">;</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">HelloWorldParse</span> <span class="n">parse</span><span class="p">;</span>
+
+    <span class="nd">@Inject</span> <span class="c1">// (9)</span>
+    <span class="kd">public</span> <span class="nf">HelloWorldShowParsedAst</span><span class="p">(</span><span class="n">HelloWorldClassLoaderResources</span> <span class="n">classloaderResources</span><span class="p">,</span> <span class="n">HelloWorldParse</span> <span class="n">parse</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">classloaderResources</span> <span class="o">=</span> <span class="n">classloaderResources</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">parse</span> <span class="o">=</span> <span class="n">parse</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+</td></tr></table>
+<p>We explain this class with numbered annotations in the above Java source file:</p>
+<ol>
+<li>
+<p>This class implements <code class="highlight"><span class="n">TaskDef</span></code>, which is an interface from PIE which a class must implement to be a task definition. Task definitions have an input and output type defined by the first and second generic argument. To execute this task, an object of the input type is required, and once it is done executing, it must return an object of the output type.</p>
+<p>In this concrete case, the input type is <code class="highlight"><span class="n">HelloWorldShowParsedAst</span><span class="p">.</span><span class="na">Args</span></code> which is a nested data class defined at (2). The output is <code class="highlight"><span class="n">CommandFeedback</span></code> which is a type defined by Spoofax for providing feedback back to the user when executing a command. All tasks that are executed through commands must return a <code class="highlight"><span class="n">CommandFeedback</span></code> object.</p>
+</li>
+<li>
+<p>A nested data class encapsulating the input to this task. In this case, we want this task to take the <code>file</code> we are going to show the <abbr title="Abstract Syntax Tree">AST</abbr> of as input. Even though we only take one argument as input, we must encapsulate it in a class due to the way commands in Spoofax work.</p>
+<p>This data class must implement <code class="highlight"><span class="n">Serializable</span></code> because it is used as an input to a task. In order for PIE to incrementalize tasks across <abbr title="Java Virtual Machine">JVM</abbr> restarts, it must be able to serialize the input (and output) objects to disk. Furthermore, this class must be immutable, because PIE caches input (and output) objects, and this caching would be inconsistent if the class is mutable. This class is immutable by storing the file in a <code class="highlight"><span class="kd">final</span></code> field which is set in the constructor (and the <code class="highlight"><span class="n">ResourceKey</span></code> class is immutable as well).</p>
+<p>Spoofax and PIE abstract over files with <em>resources</em>. A resource is some externally managed mutable state, with a (immutable and serializable) <em>key</em> which can be used to identify, read, and write to that resource. Such a key is represented by a <code class="highlight"><span class="n">ResourceKey</span></code>.</p>
+<p>Finally, this data class must implement <code class="highlight"><span class="n">equals</span></code> and <code class="highlight"><span class="n">hashCode</span></code> according to the data in the class because PIE uses these methods to identify tasks according to their input, which in turn is used for caching. A <code class="highlight"><span class="n">toString</span></code> implementation is also recommended for debugging.</p>
+</li>
+<li>
+<p>The <code>exec</code> method which is called when the task is executed. It takes an <code class="highlight"><span class="n">ExecContext</span></code> as input, which is used to tell PIE about dependencies to files, and can be used to execute and get the result of another task (implicitly creating a dependency to that task). It also takes the input type <code>Args</code> as input, and must return a <code>CommandFeedback</code>.</p>
+</li>
+<li>
+<p>For sound incrementality, we want to re-execute this task when we make changes to this class. Therefore, we want to make a <em>self-dependency</em>. That is, we want to make a file dependency to the Java class file that is compiled from this Java source file. The <code class="highlight"><span class="n">classloaderResources</span></code> object (defined below at (8)) is used to get the class or JAR file of the current class. This resource is passed to <code class="highlight"><span class="n">context</span><span class="p">.</span><span class="na">require</span></code> to tell PIE that this task depends on that file.</p>
+<p>We pass in <code class="highlight"><span class="n">ResourceStampers</span><span class="p">.</span><span class="na">hashFile</span><span class="p">()</span></code> as the second argument, which indicates that we want to use the hash of the class file to detect changes, instead of the last modified date which is used by default. It is recommended to use hashes for dependencies to generated/compiled files, as compiled files are sometimes recompiled without changes, which changes the modified date but not the hash, leading to better incrementality.</p>
+</li>
+<li>
+<p>To show the <abbr title="Abstract Syntax Tree">AST</abbr> we must parse the input file, and in order to do that we must call a task which performs the parsing. Whereas (4) uses <code class="highlight"><span class="n">context</span><span class="p">.</span><span class="na">require</span></code> to create a dependency to a <em>file</em>, we use <code class="highlight"><span class="n">context</span><span class="p">.</span><span class="na">require</span></code> here to create a dependency to the <em>task</em> that does the parsing, and get the output of that task. As input to <code class="highlight"><span class="n">context</span><span class="p">.</span><span class="na">require</span></code> we pass <code class="highlight"><span class="n">parse</span><span class="p">.</span><span class="na">inputBuilder</span><span class="p">().</span><span class="na">withFile</span><span class="p">(</span><span class="n">file</span><span class="p">).</span><span class="na">buildAstSupplier</span><span class="p">()</span></code>, which uses the builder pattern to create an input for the <code>parse</code> task and then extracts the <abbr title="Abstract Syntax Tree">AST</abbr> from the output.</p>
+<p>Internally, the <code class="highlight"><span class="n">parse</span></code> task creates a dependency to the <code class="highlight"><span class="n">file</span></code> we pass into it. We depend on the <code class="highlight"><span class="n">parse</span></code> task. Therefore, when the <code class="highlight"><span class="n">file</span></code> changes, PIE re-executes the <code class="highlight"><span class="n">parse</span></code> task, and then re-executes this task if the output of the <code class="highlight"><span class="n">parse</span></code> task is different. Thereby, PIE incrementally executes your task without having to incrementalize it yourself.</p>
+<p>The output of the <code class="highlight"><span class="n">parse</span></code> task is <code class="highlight"><span class="n">Result</span><span class="o">&lt;</span><span class="n">IStrategoTerm</span><span class="p">,</span> <span class="n">JSGLR1ParseException</span><span class="o">&gt;</span></code> which is a <a href="https://en.wikipedia.org/wiki/Result_type"><em>result type</em></a> which is either a <code class="highlight"><span class="n">IStrategoTerm</span></code> representing the <abbr title="Abstract Syntax Tree">AST</abbr> of the file if parsing succeeds, or a <code class="highlight"><span class="n">JSGLR1ParseException</span></code> when parsing fails.</p>
+<p>Instead of throwing exceptions, we use result types (akin to <code>Either</code> in Haskell or <code>Result</code> in Rust) to model the possibility of failure with values. We do this to make it possible to work with failures in PIE tasks. In PIE, throwing an exception signifies an unrecoverable error and cancels the entire pipeline. However, using failures as values works normally.</p>
+</li>
+<li>
+<p>Now that we have the result of parsing, we can turn it into a <code class="highlight"><span class="n">CommandFeedback</span></code> object. We use <code class="highlight"><span class="n">mapOrElse</span></code> of <code class="highlight"><span class="n">Result</span></code> to map the result to a <code class="highlight"><span class="n">CommandFeedback</span></code> differently depending on whether parsing succeeded or failed.</p>
+<p>If parsing succeeded, we show the <abbr title="Abstract Syntax Tree">AST</abbr> as text to the user with <code class="highlight"><span class="n">CommandFeedback</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">ShowFeedback</span><span class="p">.</span><span class="na">showText</span><span class="p">(...))</span></code> with the first argument providing the text, and the second argument providing the title. The IDE then shows this as a textual editor.</p>
+<p>If parsing failed, we present the parse error messages as feedback to the user with <code class="highlight"><span class="n">CommandFeedback</span><span class="p">.</span><span class="na">ofTryExtractMessagesFrom</span></code>.</p>
+</li>
+<li>
+<p>Finally, PIE needs to be able to identify this task definition. That is done by this <code>getId</code> method that returns a unique identifier. This can almost always be implemented using <code class="highlight"><span class="n">getClass</span><span class="p">().</span><span class="na">getName</span><span class="p">()</span></code> which returns the fully qualified name of this class.</p>
+</li>
+<li>
+<p>Spoofax uses <a href="https://en.wikipedia.org/wiki/Dependency_injection">dependency injection</a> to inject required services, tasks, and other objects into the objects of your classes. The <code class="highlight"><span class="n">classloaderResources</span></code> object used in (4) is of type <code class="highlight"><span class="n">HelloWorldClassLoaderResources</span></code> which is class that Spoofax generates for your language. Similarly, the <code class="highlight"><span class="n">parse</span></code> object used in (5) is of type <code class="highlight"><span class="n">HelloWorldParse</span></code> which is a task definition that Spoofax generates for you. We store these as fields of this class.</p>
+<p>Note that dependency injection, and file/task dependencies in PIE, are two completely separate things.</p>
+</li>
+<li>
+<p>These fields are set using <a href="https://en.wikipedia.org/wiki/Dependency_injection#Constructor_injection">constructor injection</a> in the single constructor of this class marked with <code class="highlight"><span class="nd">@Inject</span></code>. The dependency injection framework that Spoofax uses (the <a href="https://dagger.dev/dev-guide/">Dagger</a> framework) will then instantiate your class with instances of the dependencies.</p>
+</li>
+<li>
+<p>Finally, we must tell the dependency injection framework to which scope instances of this class belongs. We annotate the class with <code class="highlight"><span class="nd">@HelloWorldScope</span></code> which is a scope annotation that Spoofax generates for you. This is mainly used to differentiate between different languages when multiple languages are composed, which we do not do in this tutorial, but is required nonetheless.</p>
+</li>
+</ol>
+<h3 id="registering-the-task-definition">Registering the task definition<a class="headerlink" href="#registering-the-task-definition" title="Permanent link">&para;</a></h3>
+<p>We must register this task in order for Spoofax to know about it.
+Open the CFG <code>helloworld/spoofax.cfg</code> file.
+The CFG meta-language is a configuration language where we configure and glue together the various aspects of your language.
+Add the following configuration to the end of the file:</p>
+<div class="highlight"><pre><span></span><code><span class="na">let showParsedAst</span> <span class="o">=</span> <span class="s">task-def mb.helloworld.task.HelloWorldShowParsedAst</span>
+</code></pre></div>
+<p>This registers the task definition class that we just created, and makes it available under the <code>showParsedAst</code> name in the configuration.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Spoofax assumes that this class implements <code>TaskDef</code>. This is not checked as part of this configuration. Faults will lead to Java compile errors.</p>
+</div>
+<h3 id="creating-the-command">Creating the command<a class="headerlink" href="#creating-the-command" title="Permanent link">&para;</a></h3>
+<p>To create the command, add the following configuration to the end of the <code>spoofax.cfg</code> file:</p>
+<div class="annotate highlight"><pre><span></span><code><span class="na">let showParsedAstCommand</span> <span class="o">=</span> <span class="s">command-def {</span>
+  <span class="na">type</span> <span class="o">=</span> <span class="s">java mb.helloworld.command.HelloWorldShowParsedAstCommand // (1)</span>
+  <span class="na">task-def</span> <span class="o">=</span> <span class="s">showParsedAst // (2)</span>
+  <span class="na">args-type</span> <span class="o">=</span> <span class="s">java mb.helloworld.task.HelloWorldShowParsedAst.Args // (3)</span>
+  <span class="na">display-name</span> <span class="o">=</span> <span class="s">&quot;Show parsed AST&quot; // (4)</span>
+  <span class="na">description</span> <span class="o">=</span> <span class="s">&quot;Shows the parsed AST&quot; // (5)</span>
+  <span class="na">supported-execution-types</span> <span class="o">=</span> <span class="s">[Once, Continuous] // (6)</span>
+  <span class="na">parameters</span> <span class="o">=</span> <span class="s">[ // (7)</span>
+    <span class="na">file</span> <span class="o">=</span> <span class="s">parameter { // (7a)</span>
+      <span class="na">type</span> <span class="o">=</span> <span class="s">java mb.resource.ResourceKey // (7b)</span>
+      <span class="na">required</span> <span class="o">=</span> <span class="s">true // (7c)</span>
+      <span class="na">argument-providers</span> <span class="o">=</span> <span class="s">[Context(File)] // (7d)</span>
+    <span class="na">}</span>
+  <span class="na">]</span>
+<span class="na">}</span>
+</code></pre></div>
+<ol>
+<li>Spoofax generates a Java class implementing the command boilerplate for you. This is the fully qualified Java type we want this command to have. Can be omitted to generate a type based on the name of the task definition.</li>
+<li>The task definition that the command will execute, which is the <code class="highlight"><span class="na">showParsedAst</span></code> we defined earlier.</li>
+<li>The fully qualified Java type of the argument class. Can be omitted if the argument class is a nested class named <code>Args</code> of the task definition.</li>
+<li>The display name of the command.</li>
+<li>The optional description of the command.</li>
+<li>The optional supported execution types of the command. <code class="highlight"><span class="na">Once</span></code> indicates a one-shot command, while <code class="highlight"><span class="na">Continuous</span></code> indicates a command that is executed every time the source file changes. Defaults to <code class="highlight"><span class="k">[Once, Continuous]</span></code>.</li>
+<li>The description of the parameters of the command:<ol>
+<li>The name of the parameter.</li>
+<li>The fully qualified Java of the type of the parameter. This must match the type we used in the <code class="highlight"><span class="n">HelloWorldShowParsedAst</span><span class="p">.</span><span class="na">Args</span></code> class before.</li>
+<li>Whether the parameter is required. Defaults to <code class="highlight"><span class="na">true</span></code>.</li>
+<li>
+<p>Argument providers for this parameter that attempt to automatically provide a fitting argument. When providing an argument fails, the next argument provider in the list will be attempted.</p>
+<p>Because this argument is a file, we want to try to infer the file from context, so we use <code class="highlight"><span class="na">Context(File)</span></code>. When we execute this command on a "Hello world" file in the IDE, Spoofax will automatically infer that file as the argument for the parameter.</p>
+<p>Currently, Spoofax does not support running commands in the IDE without an argument provider, so a working argument provider is currently required.</p>
+</li>
+</ol>
+</li>
+</ol>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Spoofax assumes that: a) the task definition's input type is the one defined at (3), b) the output type is <code>CommandFeedback</code>, and c) that the argument type has a constructor covering exactly the parameters from (7). This is not checked as part of this configuration. Faults will lead to Java compile errors.</p>
+</div>
+<p>Some properties set above are set to their conventional (default) value, or are optional, so we can leave them out. Replace the command definition with the following code:</p>
+<div class="highlight"><pre><span></span><code><span class="na">let showParsedAstCommand</span> <span class="o">=</span> <span class="s">command-def {</span>
+  <span class="na">task-def</span> <span class="o">=</span> <span class="s">showParsedAst</span>
+  <span class="na">display-name</span> <span class="o">=</span> <span class="s">&quot;Show parsed AST&quot;</span>
+  <span class="na">parameters</span> <span class="o">=</span> <span class="s">[</span>
+    <span class="na">file</span> <span class="o">=</span> <span class="s">parameter {</span>
+      <span class="na">type</span> <span class="o">=</span> <span class="s">java mb.resource.ResourceKey</span>
+      <span class="na">argument-providers</span> <span class="o">=</span> <span class="s">[Context(File)]</span>
+    <span class="na">}</span>
+  <span class="na">]</span>
+<span class="na">}</span>
+</code></pre></div>
+<h3 id="adding-the-menu-item">Adding the menu item<a class="headerlink" href="#adding-the-menu-item" title="Permanent link">&para;</a></h3>
+<p>To add the menu item, add the following configuration to the end of the <code>spoofax.cfg</code> file:</p>
+<div class="annotate highlight"><pre><span></span><code><span class="na">editor-context-menu [ // (1)</span>
+  <span class="na">menu &quot;Debug&quot; [ // (2)</span>
+    <span class="na">command-action { // (3)</span>
+      <span class="na">command-def</span> <span class="o">=</span> <span class="s">showParsedAstCommand // (3a)</span>
+      <span class="na">execution-type</span> <span class="o">=</span> <span class="s">Once // (3b)</span>
+    <span class="na">}</span>
+    <span class="na">command-action {</span>
+      <span class="na">command-def</span> <span class="o">=</span> <span class="s">showParsedAstCommand</span>
+      <span class="na">execution-type</span> <span class="o">=</span> <span class="s">Continuous</span>
+    <span class="na">}</span>
+  <span class="na">]</span>
+<span class="na">]</span>
+<span class="na">resource-context-menu [ // (4)</span>
+  <span class="na">menu &quot;Debug&quot; [</span>
+    <span class="na">command-action {</span>
+      <span class="na">command-def</span> <span class="o">=</span> <span class="s">showParsedAstCommand</span>
+      <span class="na">execution-type</span> <span class="o">=</span> <span class="s">Once</span>
+      <span class="na">required-resource-types</span> <span class="o">=</span> <span class="s">[File] // (5)</span>
+    <span class="na">}</span>
+  <span class="na">]</span>
+<span class="na">]</span>
+</code></pre></div>
+<ol>
+<li>An <code class="highlight"><span class="na">editor-context-menu</span></code> section adds menu items to the editor context menu. That is, the menu that pops up when you right-click inside an editor for your language. There is also a <code class="highlight"><span class="na">main-menu</span></code> section for adding menu items to the main menu when an editor for your language has focus. If no <code class="highlight"><span class="na">main-menu</span></code> section is defined, the main menu will take all menu items from <code class="highlight"><span class="na">editor-context-menu</span></code>.</li>
+<li>A nested menu with name <code class="highlight"><span class="na">&quot;Debug&quot;</span></code>.</li>
+<li>An action menu item that executes a command.<ol>
+<li>The command to execute.</li>
+<li>How the command should be executed. <code class="highlight"><span class="na">Once</span></code> to execute it once, <code class="highlight"><span class="na">Continuous</span></code> to continuously execute the command when the source file changes.</li>
+</ol>
+</li>
+<li>A <code class="highlight"><span class="na">resource-context-menu</span></code> section adds menu items to the context menu of the resource browser. That is, the menu that pops up when you right-click a file of your language.</li>
+<li>For menu items inside a <code class="highlight"><span class="na">resource-context-menu</span></code> to show up, they must specify on what kind of resource types they are shown. In this case, we want the command to show up for files of our language, so we choose <code>[File]</code>.</li>
+</ol>
+<p>Build the project so that we can test our changes.
+Open the <code>test.hel</code> file and right-click inside the editor area to open the context menu.
+From the editor context menu, select <span class="guilabel">HelloWorld ‣ Debug ‣ Show parsed <abbr title="Abstract Syntax Tree">AST</abbr></span>.
+A new editor will pop up with the result of the command, showing the <abbr title="Abstract Syntax Tree">AST</abbr> of your example file.
+Close the result and now run <span class="guilabel">HelloWorld ‣ Debug ‣ Show parsed <abbr title="Abstract Syntax Tree">AST</abbr> (continuous)</span>.
+Drag the resulting editor to the side and edit the example project, the resulting editor will update whenever the example file changes.</p>
+<p>We can also run the command by activating the <code>test.hel</code> editor by choosing <span class="guilabel">Spoofax ‣ Debug ‣ Show parsed <abbr title="Abstract Syntax Tree">AST</abbr></span> from the main menu.
+Finally, we can run the command by right-clicking the <code>test.hel</code> file in the <span class="guilabel">Package Explorer</span> by choosing <span class="guilabel">Spoofax ‣ Debug ‣ Show parsed <abbr title="Abstract Syntax Tree">AST</abbr></span> from the context menu.</p>
+<h2 id="changing-the-static-semantics">Changing the static semantics<a class="headerlink" href="#changing-the-static-semantics" title="Permanent link">&para;</a></h2>
+<p>Now we will fix the static semantics of the language.
+Open the main Statix file <code>helloworld/src/main.stx</code>
+Statix is a meta-language for defining the static semantics of your language, which includes type checking.</p>
+<p>First we will update the Statix specification to handle the new language constructs.
+Replace the <code class="highlight"><span class="k">signature</span><span class="w"></span></code> section with the following:</p>
+<div class="highlight"><pre><span></span><code><span class="k">signature</span><span class="w"></span>
+
+<span class="w">  </span><span class="k">sorts</span><span class="w"> </span><span class="nv">Start</span><span class="w"> </span><span class="k">constructors</span><span class="w"></span>
+<span class="w">    </span><span class="nv">Program</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="k">list</span><span class="p">(</span><span class="nv">Part</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nv">Start</span><span class="w"></span>
+<span class="w">  </span><span class="k">sorts</span><span class="w"> </span><span class="nv">Part</span><span class="w"> </span><span class="k">constructors</span><span class="w"></span>
+<span class="w">    </span><span class="nv">Hello</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="nv">Part</span><span class="w"></span>
+<span class="w">    </span><span class="nv">World</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="nv">Part</span><span class="w"></span>
+</code></pre></div>
+<p>This defines the <abbr title="Abstract Syntax Tree">AST</abbr> signature of the language.
+In a future version of Spoofax 3, this will be automatically derived from the SDF3 specification.</p>
+<p>Now, replace the <code class="highlight"><span class="nv">programOk</span><span class="p">(</span><span class="nv">Empty</span><span class="p">()).</span><span class="w"></span></code> line with <code class="highlight"><span class="nv">programOk</span><span class="p">(</span><span class="nv">Program</span><span class="p">(</span><span class="nv">parts</span><span class="p">)).</span><span class="w"></span></code>, meaning that we accept all programs consisting of parts, which is always true due to the syntax of the language.
+The file should now look like this:</p>
+<div class="highlight"><pre><span></span><code><span class="k">module</span><span class="w"> </span><span class="nv">main</span><span class="w"></span>
+
+<span class="k">signature</span><span class="w"></span>
+
+<span class="w">  </span><span class="k">sorts</span><span class="w"> </span><span class="nv">Start</span><span class="w"> </span><span class="k">constructors</span><span class="w"></span>
+<span class="w">    </span><span class="nv">Program</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="k">list</span><span class="p">(</span><span class="nv">Part</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nv">Start</span><span class="w"></span>
+<span class="w">  </span><span class="k">sorts</span><span class="w"> </span><span class="nv">Part</span><span class="w"> </span><span class="k">constructors</span><span class="w"></span>
+<span class="w">    </span><span class="nv">Hello</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="nv">Part</span><span class="w"></span>
+<span class="w">    </span><span class="nv">World</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="nv">Part</span><span class="w"></span>
+
+<span class="k">rules</span><span class="w"></span>
+
+<span class="w">  </span><span class="nv">programOk</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="nv">Start</span><span class="w"></span>
+<span class="w">  </span><span class="nv">programOk</span><span class="p">(</span><span class="nv">Program</span><span class="p">(</span><span class="nv">parts</span><span class="p">)).</span><span class="w"></span>
+</code></pre></div>
+<p>Build the project, and the error marker should disappear from your example program.</p>
+<p>As a silly rule, we will add a warning to all instances of <code>world</code> in the program.
+Add the following code to the end of the Statix definition:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nv">partOk</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="nv">Part</span><span class="w"></span>
+<span class="w">  </span><span class="nv">partOk</span><span class="p">(</span><span class="nv">Hello</span><span class="p">()).</span><span class="w"></span>
+<span class="w">  </span><span class="nv">partOk</span><span class="p">(</span><span class="nv">World</span><span class="p">())</span><span class="w"> </span><span class="p">:</span><span class="nv">-</span><span class="w"> </span><span class="nv">try</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">false</span><span class="w"> </span><span class="p">}</span><span class="w"> </span>|<span class="w"> </span><span class="nv">warning</span><span class="w"> </span>$[<span class="nv">World</span>!]<span class="p">.</span><span class="w"></span>
+<span class="w">  </span><span class="nv">partsOk</span><span class="w"> </span><span class="k">maps</span><span class="w"> </span><span class="nv">partOk</span><span class="p">(</span><span class="k">list</span><span class="p">(</span>*<span class="p">))</span><span class="w"></span>
+</code></pre></div>
+<p>This adds a <code class="highlight"><span class="nv">partOk</span><span class="w"></span></code> rule that lets all <code class="highlight"><span class="nv">Hello</span><span class="p">()</span><span class="w"></span></code> parts pass, but will add a warning to all <code class="highlight"><span class="nv">World</span><span class="p">()</span><span class="w"></span></code> parts.
+<code class="highlight"><span class="nv">partsOk</span><span class="w"></span></code> goes over a list of parts and applies <code class="highlight"><span class="nv">partOk</span><span class="w"></span></code>.
+Replace the <code class="highlight"><span class="nv">programOk</span><span class="p">(</span><span class="nv">Program</span><span class="p">(</span><span class="nv">parts</span><span class="p">)).</span><span class="w"></span></code> line with <code class="highlight"><span class="nv">programOk</span><span class="p">(</span><span class="nv">Program</span><span class="p">(</span><span class="nv">parts</span><span class="p">))</span><span class="w"> </span><span class="p">:</span><span class="nv">-</span><span class="w"> </span><span class="nv">partsOk</span><span class="p">(</span><span class="nv">parts</span><span class="p">).</span><span class="w"></span></code> to apply the <code class="highlight"><span class="nv">partsOk</span><span class="w"></span></code> rule.
+Build the project, and a warning marker should appear under all instances of <code>world</code> in the program.</p>
+<h2 id="adding-a-transformation">Adding a transformation<a class="headerlink" href="#adding-a-transformation" title="Permanent link">&para;</a></h2>
+<p>Finally, we will define a transformation for our language and add a task, command-tasks, command, and menu item for it.
+Open the main Stratego file <code>helloworld/src/main.str</code>.
+Stratego is a meta-language for defining term (<abbr title="Abstract Syntax Tree">AST</abbr>) transformations through rewrite rules.
+We will add a silly transformation that replaces all instances of <code class="highlight"><span class="nv">World</span><span class=" -Punctuation">()</span><span class="w"></span></code> with <code class="highlight"><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"></span></code>.</p>
+<p>Add the following code to the end of the Stratego file:</p>
+<div class="highlight"><pre><span></span><code><span class="k">rules</span><span class="w"></span>
+
+<span class="w">  </span><span class="nv">replace-world</span><span class=" -Punctuation">:</span><span class="w"> </span><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"> </span><span class="nv">-</span><span class=" -Punctuation">&gt;</span><span class="w"> </span><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"></span>
+<span class="w">  </span><span class="nv">replace-world</span><span class=" -Punctuation">:</span><span class="w"> </span><span class="nv">World</span><span class=" -Punctuation">()</span><span class="w"> </span><span class="nv">-</span><span class=" -Punctuation">&gt;</span><span class="w"> </span><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"></span>
+<span class="w">  </span><span class="nv">replace-worlds</span><span class="w"> </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">topdown</span><span class=" -Punctuation">(</span><span class="nv">try</span><span class=" -Punctuation">(</span><span class="nv">replace-world</span><span class=" -Punctuation">))</span><span class="w"></span>
+</code></pre></div>
+<p>The <code class="highlight"><span class="nv">replace-world</span><span class="w"></span></code> rule passes <code class="highlight"><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"></span></code> terms but rewrites <code class="highlight"><span class="nv">World</span><span class=" -Punctuation">()</span><span class="w"></span></code> terms to <code class="highlight"><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"></span></code>.
+The <code class="highlight"><span class="nv">replace-worlds</span><span class="w"></span></code> strategy tries to apply <code class="highlight"><span class="nv">replace-world</span><span class="w"></span></code> in a top-down manner over the entire <abbr title="Abstract Syntax Tree">AST</abbr>.</p>
+<p>Now we add a task and command-task for this transformation.
+We define two separate tasks to keep separate</p>
+<ol>
+<li>the act of transforming the program, and</li>
+<li>feeding back the result of that transformation to the user that executes a command.</li>
+</ol>
+<p>This practice later allows us to reuse the first task in a different task if we need to.
+Right-click the <code>mb.helloworld.task</code> package and create the <code>HelloWorldReplaceWorlds</code> class and replace the entire Java file with:</p>
+<table class="annotate highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span></pre></div></td><td class="code"><div class="annotate highlight"><pre><span></span><code><span class="kn">package</span> <span class="nn">mb.helloworld.task</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">mb.helloworld.HelloWorldClassLoaderResources</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">mb.helloworld.HelloWorldScope</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">mb.pie.api.ExecContext</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">mb.pie.api.stamp.resource.ResourceStampers</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">mb.stratego.pie.AstStrategoTransformTaskDef</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">javax.inject.Inject</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="p">;</span>
+
+<span class="nd">@HelloWorldScope</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">HelloWorldReplaceWorlds</span> <span class="kd">extends</span> <span class="n">AstStrategoTransformTaskDef</span> <span class="p">{</span>
+  <span class="kd">private</span> <span class="kd">final</span> <span class="n">HelloWorldClassLoaderResources</span> <span class="n">classloaderResources</span><span class="p">;</span>
+
+  <span class="nd">@Inject</span>
+  <span class="kd">public</span> <span class="nf">HelloWorldReplaceWorlds</span><span class="p">(</span> <span class="c1">// 1</span>
+    <span class="n">HelloWorldClassLoaderResources</span> <span class="n">classloaderResources</span><span class="p">,</span>
+    <span class="n">HelloWorldGetStrategoRuntimeProvider</span> <span class="n">getStrategoRuntimeProvider</span>
+  <span class="p">)</span> <span class="p">{</span>
+    <span class="kd">super</span><span class="p">(</span><span class="n">getStrategoRuntimeProvider</span><span class="p">,</span> <span class="s">&quot;replace-worlds&quot;</span><span class="p">);</span> <span class="c1">// 2</span>
+    <span class="k">this</span><span class="p">.</span><span class="na">classloaderResources</span> <span class="o">=</span> <span class="n">classloaderResources</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="nd">@Override</span> <span class="kd">public</span> <span class="n">String</span> <span class="nf">getId</span><span class="p">()</span> <span class="p">{</span> <span class="c1">// 3</span>
+    <span class="k">return</span> <span class="n">getClass</span><span class="p">().</span><span class="na">getName</span><span class="p">();</span>
+  <span class="p">}</span>
+
+  <span class="nd">@Override</span> <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">createDependencies</span><span class="p">(</span><span class="n">ExecContext</span> <span class="n">context</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">IOException</span> <span class="p">{</span> <span class="c1">// 4</span>
+    <span class="n">context</span><span class="p">.</span><span class="na">require</span><span class="p">(</span><span class="n">classloaderResources</span><span class="p">.</span><span class="na">tryGetAsLocalResource</span><span class="p">(</span><span class="n">getClass</span><span class="p">()),</span> <span class="n">ResourceStampers</span><span class="p">.</span><span class="na">hashFile</span><span class="p">());</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+</td></tr></table>
+<p>This task extends <code class="highlight"><span class="n">AstStrategoTransformTaskDef</span></code> which is a convenient abstract class for creating tasks that run Stratego transformations by implementing a constructor and a couple of methods:</p>
+<ol>
+<li>The constructor should inject <code class="highlight"><span class="n">HelloWorldClassLoaderResources</span></code> which we again will use to create a self-dependency, and <code class="highlight"><span class="n">HelloWorldGetStrategoRuntimeProvider</span></code> which is a task that Spoofax generates for your language, which provides a Stratego runtime to execute strategies with.</li>
+<li>The <code class="highlight"><span class="n">HelloWorldGetStrategoRuntimeProvider</span></code> instance is provided to the superclass constructor, along with the strategy that we want this task to execute, which is <code class="highlight"><span class="s">&quot;replace-worlds&quot;</span></code>.</li>
+<li>We override <code class="highlight"><span class="n">getId</span></code> of <code class="highlight"><span class="n">TaskDef</span></code> again to give this task a unique identifier.</li>
+<li>We override <code class="highlight"><span class="n">createDependencies</span></code> of <code class="highlight"><span class="n">AstStrategoTransformTaskDef</span></code> to create a self-dependency.</li>
+</ol>
+<p>Then create the <code>HelloWorldShowReplaceWorlds</code> class and replace the entire Java file with:</p>
+<table class="annotate highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span></pre></div></td><td class="code"><div class="annotate highlight"><pre><span></span><code><span class="kn">package</span> <span class="nn">mb.helloworld.task</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.Serializable</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Objects</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">javax.inject.Inject</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">org.checkerframework.checker.nullness.qual.Nullable</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">mb.helloworld.HelloWorldClassLoaderResources</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">mb.helloworld.HelloWorldScope</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">mb.pie.api.ExecContext</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">mb.pie.api.TaskDef</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">mb.pie.api.stamp.resource.ResourceStampers</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">mb.resource.ResourceKey</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">mb.spoofax.core.language.command.CommandFeedback</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">mb.spoofax.core.language.command.ShowFeedback</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">mb.stratego.common.StrategoUtil</span><span class="p">;</span>
+
+<span class="nd">@HelloWorldScope</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">HelloWorldShowReplaceWorlds</span> <span class="kd">implements</span> <span class="n">TaskDef</span><span class="o">&lt;</span><span class="n">HelloWorldShowReplaceWorlds</span><span class="p">.</span><span class="na">Args</span><span class="p">,</span> <span class="n">CommandFeedback</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">Args</span> <span class="kd">implements</span> <span class="n">Serializable</span> <span class="p">{</span>
+        <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">long</span> <span class="n">serialVersionUID</span> <span class="o">=</span> <span class="mi">1L</span><span class="p">;</span>
+
+        <span class="kd">public</span> <span class="kd">final</span> <span class="n">ResourceKey</span> <span class="n">file</span><span class="p">;</span>
+
+        <span class="kd">public</span> <span class="nf">Args</span><span class="p">(</span><span class="n">ResourceKey</span> <span class="n">file</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="na">file</span> <span class="o">=</span> <span class="n">file</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">equals</span><span class="p">(</span><span class="nd">@Nullable</span> <span class="n">Object</span> <span class="n">o</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="k">this</span> <span class="o">==</span> <span class="n">o</span><span class="p">)</span> <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">o</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">||</span> <span class="n">getClass</span><span class="p">()</span> <span class="o">!=</span> <span class="n">o</span><span class="p">.</span><span class="na">getClass</span><span class="p">())</span> <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+            <span class="kd">final</span> <span class="n">Args</span> <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">Args</span><span class="p">)</span> <span class="n">o</span><span class="p">;</span>
+            <span class="k">return</span> <span class="n">file</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="na">file</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="kt">int</span> <span class="nf">hashCode</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">Objects</span><span class="p">.</span><span class="na">hash</span><span class="p">(</span><span class="n">file</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="n">String</span> <span class="nf">toString</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">&quot;Args{&quot;</span> <span class="o">+</span> <span class="s">&quot;file=&quot;</span> <span class="o">+</span> <span class="n">file</span> <span class="o">+</span> <span class="sc">&#39;}&#39;</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">HelloWorldClassLoaderResources</span> <span class="n">classloaderResources</span><span class="p">;</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">HelloWorldParse</span> <span class="n">parse</span><span class="p">;</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">HelloWorldReplaceWorlds</span> <span class="n">replaceWorlds</span><span class="p">;</span>
+
+    <span class="nd">@Inject</span>
+    <span class="kd">public</span> <span class="nf">HelloWorldShowReplaceWorlds</span><span class="p">(</span><span class="n">HelloWorldClassLoaderResources</span> <span class="n">classloaderResources</span><span class="p">,</span> <span class="n">HelloWorldParse</span> <span class="n">parse</span><span class="p">,</span> <span class="n">HelloWorldReplaceWorlds</span> <span class="n">replaceWorlds</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">classloaderResources</span> <span class="o">=</span> <span class="n">classloaderResources</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">parse</span> <span class="o">=</span> <span class="n">parse</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">replaceWorlds</span> <span class="o">=</span> <span class="n">replaceWorlds</span><span class="p">;</span>
+    <span class="p">}</span>
+
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">CommandFeedback</span> <span class="nf">exec</span><span class="p">(</span><span class="n">ExecContext</span> <span class="n">context</span><span class="p">,</span> <span class="n">Args</span> <span class="n">args</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="p">{</span>
+        <span class="n">context</span><span class="p">.</span><span class="na">require</span><span class="p">(</span><span class="n">classloaderResources</span><span class="p">.</span><span class="na">tryGetAsLocalResource</span><span class="p">(</span><span class="n">getClass</span><span class="p">()),</span> <span class="n">ResourceStampers</span><span class="p">.</span><span class="na">hashFile</span><span class="p">());</span>
+        <span class="kd">final</span> <span class="n">ResourceKey</span> <span class="n">file</span> <span class="o">=</span> <span class="n">args</span><span class="p">.</span><span class="na">file</span><span class="p">;</span>
+        <span class="k">return</span> <span class="n">context</span><span class="p">.</span><span class="na">require</span><span class="p">(</span><span class="n">replaceWorlds</span><span class="p">,</span> <span class="n">parse</span><span class="p">.</span><span class="na">inputBuilder</span><span class="p">().</span><span class="na">withFile</span><span class="p">(</span><span class="n">file</span><span class="p">).</span><span class="na">buildAstSupplier</span><span class="p">()).</span><span class="na">mapOrElse</span><span class="p">(</span>
+            <span class="n">ast</span> <span class="o">-&gt;</span> <span class="n">CommandFeedback</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">ShowFeedback</span><span class="p">.</span><span class="na">showText</span><span class="p">(</span><span class="n">StrategoUtil</span><span class="p">.</span><span class="na">toString</span><span class="p">(</span><span class="n">ast</span><span class="p">),</span> <span class="s">&quot;Replaced World()s with Hello()s for &#39;&quot;</span> <span class="o">+</span> <span class="n">file</span> <span class="o">+</span> <span class="s">&quot;&#39;&quot;</span><span class="p">)),</span>
+            <span class="n">e</span> <span class="o">-&gt;</span> <span class="n">CommandFeedback</span><span class="p">.</span><span class="na">ofTryExtractMessagesFrom</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+        <span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">String</span> <span class="nf">getId</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">getClass</span><span class="p">().</span><span class="na">getName</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+</td></tr></table>
+<p>This class very similar to <code>HelloWorldShowParsedAst</code>, but runs the <code>HelloWorldReplaceWorlds</code> task on the parsed <abbr title="Abstract Syntax Tree">AST</abbr>, transforming the <abbr title="Abstract Syntax Tree">AST</abbr>.</p>
+<p>Now open <code>helloworld/spoofax.cfg</code> again and register the tasks by adding:</p>
+<div class="highlight"><pre><span></span><code><span class="na">task-def mb.helloworld.task.HelloWorldReplaceWorlds</span>
+<span class="na">let showReplaceWorlds</span> <span class="o">=</span> <span class="s">task-def mb.helloworld.task.HelloWorldShowReplaceWorlds</span>
+</code></pre></div>
+<p>Then add a command for it by adding:</p>
+<div class="highlight"><pre><span></span><code><span class="na">let showReplaceWorldsCommand</span> <span class="o">=</span> <span class="s">command-def {</span>
+  <span class="na">task-def</span> <span class="o">=</span> <span class="s">showReplaceWorlds</span>
+  <span class="na">display-name</span> <span class="o">=</span> <span class="s">&quot;Replace world with hello&quot;</span>
+  <span class="na">parameters</span> <span class="o">=</span> <span class="s">[</span>
+    <span class="na">file</span> <span class="o">=</span> <span class="s">parameter {</span>
+      <span class="na">type</span> <span class="o">=</span> <span class="s">java mb.resource.ResourceKey</span>
+      <span class="na">argument-providers</span> <span class="o">=</span> <span class="s">[Context(File)]</span>
+    <span class="na">}</span>
+  <span class="na">]</span>
+<span class="na">}</span>
+</code></pre></div>
+<p>Finally, add menu items for the command by adding:</p>
+<div class="highlight"><pre><span></span><code><span class="na">editor-context-menu [</span>
+  <span class="na">menu &quot;Transform&quot; [</span>
+    <span class="na">command-action {</span>
+      <span class="na">command-def</span> <span class="o">=</span> <span class="s">showReplaceWorldsCommand</span>
+      <span class="na">execution-type</span> <span class="o">=</span> <span class="s">Once</span>
+    <span class="na">}</span>
+    <span class="na">command-action {</span>
+      <span class="na">command-def</span> <span class="o">=</span> <span class="s">showReplaceWorldsCommand</span>
+      <span class="na">execution-type</span> <span class="o">=</span> <span class="s">Continuous</span>
+    <span class="na">}</span>
+  <span class="na">]</span>
+<span class="na">]</span>
+<span class="na">resource-context-menu [</span>
+  <span class="na">menu &quot;Transform&quot; [</span>
+    <span class="na">command-action {</span>
+      <span class="na">command-def</span> <span class="o">=</span> <span class="s">showReplaceWorldsCommand</span>
+      <span class="na">execution-type</span> <span class="o">=</span> <span class="s">Once</span>
+      <span class="na">required-resource-types</span> <span class="o">=</span> <span class="s">[File]</span>
+    <span class="na">}</span>
+  <span class="na">]</span>
+<span class="na">]</span>
+</code></pre></div>
+<p>Build the project so that we can test our changes.
+Test the command similarly to testing the "Show parsed <abbr title="Abstract Syntax Tree">AST</abbr>" command.</p>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+        
+          <a href="#" class="md-top md-icon" title="Back to top" data-md-component="top" data-md-state="hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"/></svg>
+          </a>
+        
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        <a href="../install/" class="md-footer__link md-footer__link--prev" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Installing the Spoofax 3 language workbench
+            </div>
+          </div>
+        </a>
+      
+      
+        <a href="../../reference/anatomy_language_implementation/" class="md-footer__link md-footer__link--next" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Anatomy of a language implementation
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+        
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.tabs", "navigation.top"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../../assets/javascripts/workers/search.4fa0e4ee.min.js", "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.1d3bfcf1.min.js"></script>
+      
+    
+  </body>
+</html>
