@@ -235,10 +235,10 @@ let showParsedAstCommand = command-def {
   description = "Shows the parsed AST" // (5)
   supported-execution-types = [Once, Continuous] // (6)
   parameters = [ // (7)
-    file = parameter { (7a)
-      type = java mb.resource.ResourceKey (7b)
-      required = true (7c)
-      argument-providers = [Context(File)] (7d)
+    file = parameter { // (7a)
+      type = java mb.resource.ResourceKey // (7b)
+      required = true // (7c)
+      argument-providers = [Context(File)] // (7d)
     }
   ]
 }
