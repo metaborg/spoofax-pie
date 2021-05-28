@@ -1028,10 +1028,10 @@ Add the following configuration to the end of the file:</p>
   <span class="na">description</span> <span class="o">=</span> <span class="s">&quot;Shows the parsed AST&quot; // (5)</span>
   <span class="na">supported-execution-types</span> <span class="o">=</span> <span class="s">[Once, Continuous] // (6)</span>
   <span class="na">parameters</span> <span class="o">=</span> <span class="s">[ // (7)</span>
-    <span class="na">file</span> <span class="o">=</span> <span class="s">parameter { (7a)</span>
-      <span class="na">type</span> <span class="o">=</span> <span class="s">java mb.resource.ResourceKey (7b)</span>
-      <span class="na">required</span> <span class="o">=</span> <span class="s">true (7c)</span>
-      <span class="na">argument-providers</span> <span class="o">=</span> <span class="s">[Context(File)] (7d)</span>
+    <span class="na">file</span> <span class="o">=</span> <span class="s">parameter { // (7a)</span>
+      <span class="na">type</span> <span class="o">=</span> <span class="s">java mb.resource.ResourceKey // (7b)</span>
+      <span class="na">required</span> <span class="o">=</span> <span class="s">true // (7c)</span>
+      <span class="na">argument-providers</span> <span class="o">=</span> <span class="s">[Context(File)] // (7d)</span>
     <span class="na">}</span>
   <span class="na">]</span>
 <span class="na">}</span>
