@@ -6,6 +6,9 @@
 *.jar
 hs_err_pid*
 
+# Python
+__pycache__/
+
 # Gradle
 **/.gradle
 **/build/
