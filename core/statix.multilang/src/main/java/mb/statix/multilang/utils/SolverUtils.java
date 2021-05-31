@@ -20,7 +20,7 @@ public class SolverUtils {
     public static SolverResult partialSolve(Spec spec, IState.Immutable state, IConstraint constraint, IDebugContext debug,
                                             ICancel cancel, IProgress progress) throws InterruptedException {
         final IsComplete isComplete = (s, l, st) -> !state.scopes().contains(s);
-        return Solver.solve(spec, state, constraint, isComplete, debug, cancel, progress);
+        return Solver.solve(spec, state, constraint, isComplete, debug, cancel, progress, 0);
     }
 
     public static IDebugContext createDebugContext(@Nullable Level logLevel) {

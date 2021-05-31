@@ -30,6 +30,8 @@ public class StatixPrimitiveLibrary extends AbstractStrategoOperatorRegistry {
         add(new STX_solve_multi_file());
         add(new STX_solve_multi_project());
 
+        add(new StatixProjectConfigPrimitive());
+
         add(new FailingPrimitive("STX_is_concurrent_enabled"));
     }
 

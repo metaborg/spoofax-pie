@@ -5,6 +5,7 @@ import mb.pie.api.Supplier;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.Serializable;
 
 public class NullCompleteTaskDef extends NullTaskDef<NullCompleteTaskDef.Input, @Nullable CompletionResult> {
@@ -16,5 +17,5 @@ public class NullCompleteTaskDef extends NullTaskDef<NullCompleteTaskDef.Input, 
         }
     }
 
-    @Inject public NullCompleteTaskDef() {}
+    @Inject public NullCompleteTaskDef(@Named("packageId") String packageId) { super(packageId); }
 }

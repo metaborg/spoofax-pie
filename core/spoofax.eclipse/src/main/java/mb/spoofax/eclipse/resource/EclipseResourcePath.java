@@ -97,7 +97,7 @@ public class EclipseResourcePath extends ResourcePathDefaults<EclipseResourcePat
         return path.lastSegment();
     }
 
-    @Override public @Nullable String getLeafExtension() {
+    @Override public @Nullable String getLeafFileExtension() {
         return path.getFileExtension();
     }
 

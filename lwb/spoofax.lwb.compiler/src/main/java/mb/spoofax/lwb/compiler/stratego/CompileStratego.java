@@ -4,6 +4,7 @@ import mb.cfg.metalang.CompileStrategoInput;
 import mb.cfg.task.CfgRootDirectoryToObject;
 import mb.common.message.KeyedMessages;
 import mb.common.option.Option;
+import mb.common.result.MessagesException;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
@@ -12,6 +13,7 @@ import mb.str.config.StrategoAnalyzeConfig;
 import mb.str.config.StrategoCompileConfig;
 import mb.str.task.StrategoCheck;
 import mb.str.task.StrategoCompileToJava;
+import mb.stratego.build.strincr.task.output.CompileOutput;
 import org.immutables.value.Value;
 
 import javax.inject.Inject;
@@ -82,13 +84,13 @@ public class CompileStratego implements TaskDef<ResourcePath, Result<CompileStra
             return Result.ofErr(StrategoCompileException.checkFail(messages, analyzeConfig));
         }
 
-        final Result<LinkedHashSet<ResourcePath>, ?> compileResult = context.require(compileToJava, config);
+        final Result<CompileOutput.Success, MessagesException> compileResult = context.require(compileToJava, config);
         if(compileResult.isErr()) {
             // noinspection ConstantConditions (error is present)
             return Result.ofErr(StrategoCompileException.compileFail(compileResult.getErr(), config));
         }
         // noinspection ConstantConditions (value is present)
-        final LinkedHashSet<ResourcePath> providedJavaFiles = compileResult.get();
+        final LinkedHashSet<ResourcePath> providedJavaFiles = compileResult.get().resultFiles;
 
         return Result.ofOk(Output.builder().providedJavaFiles(providedJavaFiles).messages(messages).build());
     }

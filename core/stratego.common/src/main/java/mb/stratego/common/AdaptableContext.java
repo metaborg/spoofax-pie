@@ -33,13 +33,13 @@ public class AdaptableContext {
      * @param targetType Reified type to adapt to.
      * @param <T>        Type to adapt to.
      * @return Object of given type.
-     * @throws RuntimeException when {@code obj} is {@code null}.
-     * @throws RuntimeException when {@code obj} is not of {@code type} nor a {@link AdaptableContext}.
-     * @throws RuntimeException when {@code obj} is a {@link AdaptableContext} which does not contain {@code type}.
+     * @throws AdaptException when {@code obj} is {@code null}.
+     * @throws AdaptException when {@code obj} is not of {@code type} nor a {@link AdaptableContext}.
+     * @throws AdaptException when {@code obj} is a {@link AdaptableContext} which does not contain {@code type}.
      */
     public static <T> T adaptContextObject(@Nullable Object obj, Class<T> targetType) {
         if(obj == null) {
-            throw new RuntimeException("Cannot adapt to type '" + targetType + "', context object is null");
+            throw new AdaptException("Cannot adapt to type '" + targetType + "', context object is null");
         }
         final Class<?> type = obj.getClass();
         if(type.equals(targetType)) {
@@ -50,10 +50,10 @@ public class AdaptableContext {
             final AdaptableContext adaptableContext = (AdaptableContext)obj;
             final @Nullable T value = adaptableContext.get(targetType);
             if(value == null) {
-                throw new RuntimeException("Cannot adapt to type '" + targetType + "', context object is an AdaptableContext, but does not contain that type");
+                throw new AdaptException("Cannot adapt to type '" + targetType + "', context object is an AdaptableContext, but does not contain that type");
             }
             return value;
         }
-        throw new RuntimeException("Cannot adapt to type '" + targetType + "', context object is of unrelated type '" + obj.getClass() + "'");
+        throw new AdaptException("Cannot adapt to type '" + targetType + "', context object is of unrelated type '" + obj.getClass() + "'");
     }
 }

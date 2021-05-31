@@ -1,42 +1,52 @@
 package mb.str.task;
 
+import mb.common.result.MessagesException;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
-import mb.resource.hierarchical.ResourcePath;
 import mb.str.StrategoScope;
 import mb.str.config.StrategoCompileConfig;
-import mb.stratego.build.strincr.StrIncr;
+import mb.str.incr.MessageConverter;
+import mb.stratego.build.strincr.task.Compile;
+import mb.stratego.build.strincr.task.input.CompileInput;
+import mb.stratego.build.strincr.task.output.CompileOutput;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 
 @StrategoScope
-public class StrategoCompileToJava implements TaskDef<StrategoCompileConfig, Result<LinkedHashSet<ResourcePath>, ?>> {
-    private final StrIncr strIncr;
+public class StrategoCompileToJava implements TaskDef<StrategoCompileConfig, Result<CompileOutput.Success, MessagesException>> {
+    private final Compile compile;
 
-    @Inject public StrategoCompileToJava(StrIncr strIncr) {
-        this.strIncr = strIncr;
+    @Inject public StrategoCompileToJava(Compile compile) {
+        this.compile = compile;
     }
 
     @Override public String getId() {
         return getClass().getName();
     }
 
-    @Override public Result<LinkedHashSet<ResourcePath>, ?> exec(ExecContext context, StrategoCompileConfig config) {
-        return Result.ofOkOrCatching(() -> context.require(strIncr, new StrIncr.Input(
-            config.mainFile,
+    @Override public Result<CompileOutput.Success, MessagesException> exec(ExecContext context, StrategoCompileConfig config) {
+        final CompileOutput output = context.require(compile, new CompileInput(
+            config.mainModule,
+            config.rootDirectory,
+            config.outputDir,
             config.outputJavaPackageId,
-            config.includeDirs.asUnmodifiable(),
-            config.builtinLibs.asUnmodifiable(),
             config.cacheDir,
             new ArrayList<>(),
+            config.includeDirs.asCopy(),
+            config.builtinLibs.asCopy(),
             config.extraCompilerArguments,
-            config.outputDir,
-            config.sourceFileOrigins.asUnmodifiable(),
-            config.rootDirectory,
-            config.gradualTypingSetting
-        )));
+            config.sourceFileOrigins.asCopy(),
+            config.gradualTypingSetting,
+            true,
+            true
+        ));
+        if(output instanceof CompileOutput.Failure) {
+            final CompileOutput.Failure failure = (CompileOutput.Failure)output;
+            return Result.ofErr(new MessagesException(MessageConverter.convertMessages(config.rootDirectory, failure.messages), "Stratego compilation failed"));
+        }
+        final CompileOutput.Success success = (CompileOutput.Success)output;
+        return Result.ofOk(success);
     }
 }

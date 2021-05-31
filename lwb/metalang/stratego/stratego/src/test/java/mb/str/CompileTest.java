@@ -1,5 +1,6 @@
 package mb.str;
 
+import mb.common.result.MessagesException;
 import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.pie.api.MixedSession;
@@ -11,6 +12,8 @@ import mb.resource.fs.FSResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.str.config.StrategoCompileConfig;
 import mb.str.util.TestBase;
+import mb.stratego.build.strincr.BuiltinLibraryIdentifier;
+import mb.stratego.build.strincr.task.output.CompileOutput;
 import mb.stratego.build.util.StrategoGradualSetting;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
@@ -55,7 +58,7 @@ class CompileTest extends TestBase {
                 strategoSourceDir.getPath(),
                 strategoMainFile.getPath(),
                 ListView.of(strategoSourceDir.getPath()),
-                ListView.of("stratego-lib"),
+                ListView.of(BuiltinLibraryIdentifier.StrategoLib),
                 StrategoGradualSetting.NONE,
                 new Arguments(),
                 ListView.of(),
@@ -63,8 +66,8 @@ class CompileTest extends TestBase {
                 strategoJavaPackageOutputDir.getPath(),
                 "mb.test"
             );
-            final Task<Result<LinkedHashSet<ResourcePath>, ?>> strategoCompileTask = compile.createTask(config);
-            final Result<LinkedHashSet<ResourcePath>, ?> result = session.require(strategoCompileTask);
+            final Task<Result<CompileOutput.Success, MessagesException>> strategoCompileTask = compile.createTask(config);
+            final Result<CompileOutput.Success, ?> result = session.require(strategoCompileTask);
             assertTrue(result.isOk());
             assertTrue(strategoJavaPackageOutputDir.exists());
             assertTrue(strategoJavaPackageOutputDir.isDirectory());
@@ -92,7 +95,7 @@ class CompileTest extends TestBase {
             // Compile Java source files to Java class files.
             final CompileJava.Input.Builder inputBuilder = CompileJava.Input.builder()
                 .sources(CompileJava.Sources.builder()
-                    .addAllSourceFiles(result.get())
+                    .addAllSourceFiles(result.get().resultFiles)
                     .addSourcePaths(strategoJavaOutputDir.getPath())
                     .build()
                 )

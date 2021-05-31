@@ -13,10 +13,14 @@ import java.io.Serializable;
  * @param <O> the type of output of the task
  */
 public abstract class NullTaskDef<I extends Serializable, O extends @Nullable Serializable> implements TaskDef<I, @Nullable O> {
-    protected NullTaskDef() {}
+    private final String idPrefix;
+
+    protected NullTaskDef(String idPrefix) {
+        this.idPrefix = idPrefix;
+    }
 
     @Override public String getId() {
-        return getClass().getName();
+        return idPrefix + "-" + getClass().getName();
     }
 
     @Override public @Nullable O exec(ExecContext context, I input) throws Exception {

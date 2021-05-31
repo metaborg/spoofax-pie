@@ -44,10 +44,10 @@ languageProject {
     }
     withStyler()
     withStrategoRuntime().run {
-      addStrategyPackageIds("org.metaborg.meta.lang.stratego.trans")
-      addInteropRegisterersByReflection("org.metaborg.meta.lang.stratego.trans.InteropRegisterer")
-      addStrategyPackageIds("org.metaborg.meta.lang.stratego.strategies")
-      addInteropRegisterersByReflection("org.metaborg.meta.lang.stratego.strategies.InteropRegisterer")
+      addStrategyPackageIds("stratego.lang.trans")
+      addInteropRegisterersByReflection("stratego.lang.trans.InteropRegisterer")
+      addStrategyPackageIds("stratego.lang.strategies")
+      addInteropRegisterersByReflection("stratego.lang.strategies.InteropRegisterer")
     }
   }
 }
@@ -59,7 +59,7 @@ spoofax2BasedLanguageProject {
       copyCtree(false)
       copyClasses(true)
     }
-    project.languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:org.metaborg.meta.lang.stratego:${ext["spoofax2DevenvVersion"]}"))
+    project.languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:stratego.lang:${ext["spoofax2DevenvVersion"]}"))
   }
 }
 
@@ -94,13 +94,15 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   extendCheckMultiTaskDef(spoofaxTaskPackageId, "StrategoCheckMultiWrapper")
 
   // Stratego incremental compiler task definitions
-  val strBuildTaskPackageId = "mb.stratego.build.strincr"
-  addTaskDefs(strBuildTaskPackageId, "StrIncr")
-  addTaskDefs(strBuildTaskPackageId, "StrIncrAnalysis")
-  addTaskDefs(strBuildTaskPackageId, "Frontend")
-  addTaskDefs(strBuildTaskPackageId, "SubFrontend")
-  addTaskDefs(strBuildTaskPackageId, "LibFrontend")
-  addTaskDefs(strBuildTaskPackageId, "Backend")
+  val strBuildTaskPackageId = "mb.stratego.build.strincr.task"
+  addTaskDefs(strBuildTaskPackageId, "Back")
+  addTaskDefs(strBuildTaskPackageId, "Check")
+  addTaskDefs(strBuildTaskPackageId, "CheckModule")
+  addTaskDefs(strBuildTaskPackageId, "CheckOpenModule")
+  addTaskDefs(strBuildTaskPackageId, "Compile")
+  addTaskDefs(strBuildTaskPackageId, "Front")
+  addTaskDefs(strBuildTaskPackageId, "FrontSplit")
+  addTaskDefs(strBuildTaskPackageId, "Resolve")
 
   // Task definitions
   addTaskDefs(taskPackageId, "StrategoCompileToJava")

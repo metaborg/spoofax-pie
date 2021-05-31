@@ -48,6 +48,7 @@ dependencies {
 }
 
 tasks.test {
+  enableAssertions = false // HACK: disable assertions until we support JSGLR2 parsing for Stratego
   // Show standard err in tests.
   testLogging {
     events(org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR)

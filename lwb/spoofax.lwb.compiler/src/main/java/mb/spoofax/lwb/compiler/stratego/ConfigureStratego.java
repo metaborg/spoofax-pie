@@ -45,7 +45,10 @@ import mb.spoofax.lwb.compiler.sdf3.ConfigureSdf3;
 import mb.spoofax.lwb.compiler.sdf3.Sdf3ConfigureException;
 import mb.str.config.StrategoCompileConfig;
 import mb.str.task.StrategoPrettyPrint;
+import mb.stratego.build.strincr.BuiltinLibraryIdentifier;
+import mb.stratego.build.strincr.ModuleIdentifier;
 import mb.stratego.build.util.StrategoGradualSetting;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.sdf2table.parsetable.ParseTable;
 import org.metaborg.util.cmd.Arguments;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -57,6 +60,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<StrategoCompileConfig>, StrategoConfigureException>> {
@@ -299,11 +303,20 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
             sourceFileOrigins.add(this.createSupplier(rootDirectory));
         }
 
+        final ArrayList<BuiltinLibraryIdentifier> builtinLibraryIdentifiers = new ArrayList<>(strategoInput.includeBuiltinLibraries().size());
+        for(String builtinLibraryName : strategoInput.includeBuiltinLibraries()) {
+            final @Nullable BuiltinLibraryIdentifier identifier = BuiltinLibraryIdentifier.fromString(builtinLibraryName);
+            if(identifier == null) {
+                return Result.ofErr(StrategoConfigureException.builtinLibraryFail(builtinLibraryName));
+            }
+            builtinLibraryIdentifiers.add(identifier);
+        }
+
         return Result.ofOk(new StrategoCompileConfig(
             rootDirectory,
-            mainFile.getPath(),
+            new ModuleIdentifier(false, strategoInput.mainModule(), mainFile.getPath()),
             ListView.copyOf(includeDirectories),
-            ListView.of(strategoInput.includeBuiltinLibraries()),
+            ListView.of(builtinLibraryIdentifiers),
             StrategoGradualSetting.NONE, // TODO: add to input and configure
             new Arguments(), // TODO: add to input and configure
             ListView.of(sourceFileOrigins),

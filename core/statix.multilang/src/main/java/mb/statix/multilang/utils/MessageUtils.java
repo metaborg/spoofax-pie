@@ -68,7 +68,7 @@ public class MessageUtils {
 
         // add constraint message
         // When there is no message, and trace is empty, add failing constraint as message
-        String messageString = message.toString(formatter);
+        String messageString = message.toString(formatter, () -> "");
         if (!messageString.matches("^\\s*$")) {
             trace.addFirst(messageString);
         } else if(trace.isEmpty()) {

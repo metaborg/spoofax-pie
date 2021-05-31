@@ -14,7 +14,6 @@ import mb.pie.api.MixedSession;
 import mb.pie.api.Pie;
 import mb.pie.api.Session;
 import mb.pie.api.Task;
-import mb.pie.api.TaskKey;
 import mb.pie.api.TopDownSession;
 import mb.pie.api.exec.CancelToken;
 import mb.pie.api.exec.NullCancelableToken;
@@ -485,7 +484,7 @@ public class PieRunner {
 
         ResourceChanges(IResourceDelta delta, SetView<String> extensions) throws CoreException {
             walkDelta(delta, path -> {
-                final @Nullable String extension = path.getLeafExtension();
+                final @Nullable String extension = path.getLeafFileExtension();
                 return extension != null && extensions.contains(extension);
             });
         }

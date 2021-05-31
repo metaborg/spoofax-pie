@@ -166,7 +166,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
                 try {
                     long t0 = System.currentTimeMillis();
                     IDebugContext debug = SolverUtils.createDebugContext(input.logLevel);
-                    SolverResult result = Solver.solve(combinedSpec, combinedState, combinedConstraint, (s, l, st) -> true, debug, new NullCancel(), new NullProgress());
+                    SolverResult result = Solver.solve(combinedSpec, combinedState, combinedConstraint, (s, l, st) -> true, debug, new NullCancel(), new NullProgress(), 0);
                     long dt = System.currentTimeMillis() - t0;
                     logger.info("Project analyzed in {} ms", dt);
 

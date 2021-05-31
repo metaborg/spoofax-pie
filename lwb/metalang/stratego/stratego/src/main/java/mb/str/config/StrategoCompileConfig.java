@@ -3,6 +3,8 @@ package mb.str.config;
 import mb.common.util.ListView;
 import mb.pie.api.STask;
 import mb.resource.hierarchical.ResourcePath;
+import mb.stratego.build.strincr.BuiltinLibraryIdentifier;
+import mb.stratego.build.strincr.ModuleIdentifier;
 import mb.stratego.build.util.StrategoGradualSetting;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.cmd.Arguments;
@@ -11,47 +13,70 @@ import java.io.Serializable;
 
 public class StrategoCompileConfig implements Serializable {
     public final ResourcePath rootDirectory;
-    public final ResourcePath mainFile;
+    public final ModuleIdentifier mainModule;
     public final ListView<ResourcePath> includeDirs;
-    public final ListView<String> builtinLibs;
+    public final ListView<BuiltinLibraryIdentifier> builtinLibs;
     public final StrategoGradualSetting gradualTypingSetting;
     public final Arguments extraCompilerArguments;
     public final ListView<STask<?>> sourceFileOrigins;
-
     public final @Nullable ResourcePath cacheDir;
     public final ResourcePath outputDir;
     public final String outputJavaPackageId;
 
     public StrategoCompileConfig(
         ResourcePath rootDirectory,
-        ResourcePath mainFile,
+        ModuleIdentifier mainModule,
         ListView<ResourcePath> includeDirs,
-        ListView<String> builtinLibs,
+        ListView<BuiltinLibraryIdentifier> builtinLibs,
         StrategoGradualSetting gradualTypingSetting,
         Arguments extraCompilerArguments,
         ListView<STask<?>> sourceFileOrigins,
-
         @Nullable ResourcePath cacheDir,
         ResourcePath outputDir,
         String outputJavaPackageId
     ) {
         this.rootDirectory = rootDirectory;
-        this.mainFile = mainFile;
+        this.mainModule = mainModule;
         this.includeDirs = includeDirs;
         this.builtinLibs = builtinLibs;
         this.gradualTypingSetting = gradualTypingSetting;
         this.extraCompilerArguments = extraCompilerArguments;
         this.sourceFileOrigins = sourceFileOrigins;
-
         this.cacheDir = cacheDir;
         this.outputDir = outputDir;
         this.outputJavaPackageId = outputJavaPackageId;
     }
 
+    public StrategoCompileConfig(
+        ResourcePath rootDirectory,
+        ResourcePath mainFile,
+        ListView<ResourcePath> includeDirs,
+        ListView<BuiltinLibraryIdentifier> builtinLibs,
+        StrategoGradualSetting gradualTypingSetting,
+        Arguments extraCompilerArguments,
+        ListView<STask<?>> sourceFileOrigins,
+        @Nullable ResourcePath cacheDir,
+        ResourcePath outputDir,
+        String outputJavaPackageId
+    ) {
+        this(
+            rootDirectory,
+            StrategoConfig.fromRootDirectoryAndMainFile(rootDirectory, mainFile),
+            includeDirs,
+            builtinLibs,
+            gradualTypingSetting,
+            extraCompilerArguments,
+            sourceFileOrigins,
+            cacheDir,
+            outputDir,
+            outputJavaPackageId
+        );
+    }
+
     public static StrategoCompileConfig createDefault(ResourcePath rootDirectory, ResourcePath outputDir, String outputJavaPackageId) {
         return new StrategoCompileConfig(
             rootDirectory,
-            StrategoConfig.defaultMainFile(rootDirectory),
+            StrategoConfig.defaultMainModule(rootDirectory),
             ListView.of(),
             StrategoConfig.defaultBuiltinLibs(),
             StrategoConfig.defaultGradualTypingSetting(),
@@ -64,7 +89,7 @@ public class StrategoCompileConfig implements Serializable {
     }
 
     public StrategoAnalyzeConfig toAnalyzeConfig() {
-        return new StrategoAnalyzeConfig(rootDirectory, mainFile, includeDirs, builtinLibs, gradualTypingSetting, sourceFileOrigins);
+        return new StrategoAnalyzeConfig(rootDirectory, mainModule, includeDirs, builtinLibs, gradualTypingSetting, sourceFileOrigins);
     }
 
     @Override public boolean equals(@Nullable Object o) {
@@ -72,7 +97,7 @@ public class StrategoCompileConfig implements Serializable {
         if(o == null || getClass() != o.getClass()) return false;
         final StrategoCompileConfig that = (StrategoCompileConfig)o;
         if(!rootDirectory.equals(that.rootDirectory)) return false;
-        if(!mainFile.equals(that.mainFile)) return false;
+        if(!mainModule.equals(that.mainModule)) return false;
         if(!includeDirs.equals(that.includeDirs)) return false;
         if(!builtinLibs.equals(that.builtinLibs)) return false;
         if(gradualTypingSetting != that.gradualTypingSetting) return false;
@@ -85,7 +110,7 @@ public class StrategoCompileConfig implements Serializable {
 
     @Override public int hashCode() {
         int result = rootDirectory.hashCode();
-        result = 31 * result + mainFile.hashCode();
+        result = 31 * result + mainModule.hashCode();
         result = 31 * result + includeDirs.hashCode();
         result = 31 * result + builtinLibs.hashCode();
         result = 31 * result + gradualTypingSetting.hashCode();
@@ -100,7 +125,7 @@ public class StrategoCompileConfig implements Serializable {
     @Override public String toString() {
         return "StrategoCompileConfig{" +
             "rootDirectory=" + rootDirectory +
-            ", mainFile=" + mainFile +
+            ", mainModule=" + mainModule +
             ", includeDirs=" + includeDirs +
             ", builtinLibs=" + builtinLibs +
             ", gradualTypingSetting=" + gradualTypingSetting +

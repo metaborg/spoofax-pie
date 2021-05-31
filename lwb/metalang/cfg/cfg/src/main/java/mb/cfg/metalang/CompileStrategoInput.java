@@ -41,12 +41,17 @@ public interface CompileStrategoInput extends Serializable {
         return mainSourceDirectory().appendRelativePath("main.str");
     }
 
+    @Value.Default default String mainModule() {
+        return "main";
+    }
+
     List<ResourcePath> includeDirectories();
 
     @Value.Default default List<String> includeBuiltinLibraries() {
         final ArrayList<String> strategoBuiltinLibs = new ArrayList<>();
         strategoBuiltinLibs.add("stratego-lib");
         strategoBuiltinLibs.add("stratego-gpp");
+        strategoBuiltinLibs.add("libstratego-sglr");
         return strategoBuiltinLibs;
     }
 

@@ -53,7 +53,26 @@ import java.util.Map;
 
 @Module
 public class {{baseModule.id}} {
+    @Provides @Named("groupId") String provideGroupId() {
+        return "{{adapterProject.project.coordinate.groupId}}";
+    }
+
+    @Provides @Named("artifactId") String provideArtifactId() {
+        return "{{adapterProject.project.coordinate.artifactId}}";
+    }
+{{#adapterProject.project.coordinate.version}}
+
+    @Provides @Named("version") String provideVersion() {
+        return "{{adapterProject.project.coordinate.version}}";
+    }
+{{/adapterProject.project.coordinate.version}}
+
+    @Provides @Named("packageId") String providePackageId() {
+        return "{{adapterProject.packageId}}";
+    }
 {{#parser}}
+
+
     @Provides @{{scope.id}}
     static {{this.languageProjectInput.parserFactory.qualifiedId}} provideParserFactory(@{{qualifier.id}}("definition-directory") HierarchicalResource definitionDir) {
         return new {{this.languageProjectInput.parserFactory.qualifiedId}}(definitionDir);

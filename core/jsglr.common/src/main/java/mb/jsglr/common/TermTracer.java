@@ -41,10 +41,14 @@ public class TermTracer {
     }
 
     /**
-     * Gets the key of the resource given term originated from, or null if it cannot be found.
+     * Gets the key of the resource given term originated from, automatically getting the originating term if needed.
+     *
+     * @return Resource key, or {@code null} if no resource key could be found.
      */
-    public static @Nullable ResourceKey getResourceKey(IStrategoTerm originatingTerm) {
-        return ResourceKeyAttachment.getResourceKey(originatingTerm);
+    public static @Nullable ResourceKey getResourceKey(IStrategoTerm term) {
+        term = ImploderAttachment.getImploderOrigin(term);
+        if(term == null) return null;
+        return ResourceKeyAttachment.getResourceKey(term);
     }
 
 

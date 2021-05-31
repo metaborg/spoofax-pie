@@ -18,6 +18,8 @@ public abstract class StrategoConfigureException extends Exception {
 
         R includeDirectoryFail(ResourcePath includeDirectory);
 
+        R builtinLibraryFail(String builtinLibraryName);
+
         R sdf3ConfigureFail(Sdf3ConfigureException sdf3ConfigureException);
 
         R sdf3SignatureGenerateFail(Exception cause);
@@ -43,6 +45,10 @@ public abstract class StrategoConfigureException extends Exception {
 
     public static StrategoConfigureException includeDirectoryFail(ResourcePath includeDirectory) {
         return StrategoConfigureExceptions.includeDirectoryFail(includeDirectory);
+    }
+
+    public static StrategoConfigureException builtinLibraryFail(String builtinLibraryName) {
+        return StrategoConfigureExceptions.builtinLibraryFail(builtinLibraryName);
     }
 
     public static StrategoConfigureException sdf3ConfigureFail(Sdf3ConfigureException sdf3ConfigureException) {
@@ -84,15 +90,16 @@ public abstract class StrategoConfigureException extends Exception {
 
     @Override public String getMessage() {
         return caseOf()
-            .getLanguageCompilerConfigurationFail((cause) -> "Getting language compiler configuration failed")
-            .mainSourceDirectoryFail((mainSourceDirectory) -> "ESV main source directory '" + mainSourceDirectory + "' does not exist or is not a directory")
-            .mainFileFail((mainFile) -> "ESV main file '" + mainFile + "' does not exist or is not a file")
-            .includeDirectoryFail((includeDirectory) -> "ESV include directory '" + includeDirectory + "' does not exist or is not a directory")
-            .sdf3ConfigureFail((cause) -> "Configuring SDF3 failed")
-            .sdf3SignatureGenerateFail((cause) -> "SDF3 to signature generator failed")
-            .sdf3PrettyPrinterGenerateFail((cause) -> "SDF3 to pretty-printer generator failed")
-            .sdf3ParenthesizerGenerateFail((cause) -> "SDF3 to parenthesizer generator failed")
-            .sdf3CompletionRuntimeGenerateFail((cause) -> "SDF3 to completion runtime generator failed")
+            .getLanguageCompilerConfigurationFail(cause -> "Getting language compiler configuration failed")
+            .mainSourceDirectoryFail(mainSourceDirectory -> "Stratego main source directory '" + mainSourceDirectory + "' does not exist or is not a directory")
+            .mainFileFail(mainFile -> "Stratego main file '" + mainFile + "' does not exist or is not a file")
+            .includeDirectoryFail(includeDirectory -> "Stratego include directory '" + includeDirectory + "' does not exist or is not a directory")
+            .builtinLibraryFail(builtinLibraryName -> "Stratego built-in library '" + builtinLibraryName + "' does not exist")
+            .sdf3ConfigureFail(cause -> "Configuring SDF3 failed")
+            .sdf3SignatureGenerateFail(cause -> "SDF3 to signature generator failed")
+            .sdf3PrettyPrinterGenerateFail(cause -> "SDF3 to pretty-printer generator failed")
+            .sdf3ParenthesizerGenerateFail(cause -> "SDF3 to parenthesizer generator failed")
+            .sdf3CompletionRuntimeGenerateFail(cause -> "SDF3 to completion runtime generator failed")
             ;
     }
 

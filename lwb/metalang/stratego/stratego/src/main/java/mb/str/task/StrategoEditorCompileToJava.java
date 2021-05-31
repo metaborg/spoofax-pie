@@ -24,6 +24,6 @@ public class StrategoEditorCompileToJava implements TaskDef<StrategoCompileConfi
     @Override
     public CommandFeedback exec(ExecContext context, StrategoCompileConfig input) throws Exception {
         return context.require(compileToJava, input)
-            .mapErrOrElse(e -> CommandFeedback.ofTryExtractMessagesFrom(e, input.mainFile), () -> CommandFeedback.of());
+            .mapErrOrElse(e -> CommandFeedback.ofTryExtractMessagesFrom(e, input.mainModule.path), () -> CommandFeedback.of());
     }
 }

@@ -14,10 +14,14 @@ import java.io.Serializable;
  * @param <O> the type of option output of the task
  */
 public abstract class NoneTaskDef<I extends Serializable, O extends Serializable> implements TaskDef<I, Option<O>> {
-    protected NoneTaskDef() {}
+    private final String idPrefix;
+
+    protected NoneTaskDef(String idPrefix) {
+        this.idPrefix = idPrefix;
+    }
 
     @Override public String getId() {
-        return getClass().getName();
+        return idPrefix + "-" + getClass().getName();
     }
 
     @Override public @Nullable Option<O> exec(ExecContext context, I input) throws Exception {

@@ -8,6 +8,7 @@ import mb.pie.api.MixedSession;
 import mb.resource.fs.FSResource;
 import mb.str.config.StrategoAnalyzeConfig;
 import mb.str.util.TestBase;
+import mb.stratego.build.strincr.BuiltinLibraryIdentifier;
 import mb.stratego.build.util.StrategoGradualSetting;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,7 @@ class AnalyzeTest extends TestBase {
                 projectDir.getPath(),
                 mainFile.getPath(),
                 ListView.of(projectDir.getPath()),
-                ListView.of("stratego-lib"),
+                ListView.of(BuiltinLibraryIdentifier.StrategoLib),
                 StrategoGradualSetting.NONE,
                 ListView.of()
             );
