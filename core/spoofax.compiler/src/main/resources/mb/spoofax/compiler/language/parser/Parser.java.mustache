@@ -1,22 +1,21 @@
 package {{baseParser.packageId}};
 
-import mb.jsglr1.common.JSGLR1ParseException;
-import mb.jsglr1.common.JSGLR1ParseInput;
-import mb.jsglr1.common.JSGLR1ParseOutput;
-import mb.jsglr1.common.JSGLR1Parser;
+import mb.jsglr.common.JsglrParseException;
+import mb.jsglr.common.JsglrParseInput;
+import mb.jsglr.common.JsglrParseOutput;
 import mb.spoofax.compiler.interfaces.spoofaxcore.Parser;
 
 import {{parseTable.qualifiedId}};
 
 public class {{baseParser.id}} implements Parser {
-    private final JSGLR1Parser parser;
+    private final {{parserType.qualifiedId}} parser;
 
     public {{baseParser.id}}({{parseTable.id}} parseTable) {
-        this.parser = new JSGLR1Parser(parseTable.parseTable);
+        this.parser = new {{parserType.qualifiedId}}(parseTable.parseTable);
     }
 
     @Override
-    public JSGLR1ParseOutput parse(JSGLR1ParseInput input) throws JSGLR1ParseException, InterruptedException {
+    public JsglrParseOutput parse(JsglrParseInput input) throws JsglrParseException, InterruptedException {
         return parser.parse(input);
     }
 }

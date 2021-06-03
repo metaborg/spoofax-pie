@@ -1,10 +1,10 @@
 package {{baseParseTaskDef.packageId}};
 
 import mb.common.result.Result;
-import mb.jsglr1.common.JSGLR1ParseException;
-import mb.jsglr1.common.JSGLR1ParseInput;
-import mb.jsglr1.common.JSGLR1ParseOutput;
-import mb.jsglr1.pie.JSGLR1ParseTaskDef;
+import mb.jsglr.common.JsglrParseException;
+import mb.jsglr.common.JsglrParseInput;
+import mb.jsglr.common.JsglrParseOutput;
+import mb.jsglr.pie.JsglrParseTaskDef;
 import mb.pie.api.ExecContext;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceKey;
@@ -15,7 +15,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 @{{adapterProject.scope.qualifiedId}}
-public class {{baseParseTaskDef.id}} extends JSGLR1ParseTaskDef {
+public class {{baseParseTaskDef.id}} extends JsglrParseTaskDef {
     private final {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources;
     private final Provider<{{languageProjectInput.parser.qualifiedId}}> parserProvider;
 
@@ -31,7 +31,7 @@ public class {{baseParseTaskDef.id}} extends JSGLR1ParseTaskDef {
         return "{{baseParseTaskDef.qualifiedId}}";
     }
 
-    @Override protected Result<JSGLR1ParseOutput, JSGLR1ParseException> parse(
+    @Override protected Result<JsglrParseOutput, JsglrParseException> parse(
         ExecContext context,
         String text,
         @Nullable String startSymbol,
@@ -45,8 +45,8 @@ public class {{baseParseTaskDef.id}} extends JSGLR1ParseTaskDef {
         context.require(classLoaderResources.tryGetAsLocalResource({{languageProjectInput.parseTable.qualifiedId}}.class), ResourceStampers.hashFile());
         final {{languageProjectInput.parser.qualifiedId}} parser = parserProvider.get();
         try {
-            return Result.ofOk(parser.parse(new JSGLR1ParseInput(text, startSymbol != null ? startSymbol : "{{languageProjectInput.startSymbol}}", fileHint, rootDirectoryHint)));
-        } catch(JSGLR1ParseException e) {
+            return Result.ofOk(parser.parse(new JsglrParseInput(text, startSymbol != null ? startSymbol : "{{languageProjectInput.startSymbol}}", fileHint, rootDirectoryHint)));
+        } catch(JsglrParseException e) {
             return Result.ofErr(e);
         }
     }

@@ -1,8 +1,8 @@
-package mb.jsglr1.pie;
+package mb.jsglr.pie;
 
 import mb.common.result.Result;
 import mb.common.util.MapView;
-import mb.jsglr1.common.JSGLR1ParseException;
+import mb.jsglr.common.JsglrParseException;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Function;
 import mb.pie.api.Supplier;
@@ -19,22 +19,22 @@ import java.io.UncheckedIOException;
 import java.util.HashMap;
 import java.util.stream.Stream;
 
-public class MultiAstSupplierFunction implements Function<ResourcePath, MapView<ResourceKey, Supplier<Result<IStrategoTerm, JSGLR1ParseException>>>> {
-    private final Function<JSGLR1ParseTaskInput, Result<IStrategoTerm, JSGLR1ParseException>> parseToAstFunction;
+public class MultiAstSupplierFunction implements Function<ResourcePath, MapView<ResourceKey, Supplier<Result<IStrategoTerm, JsglrParseException>>>> {
+    private final Function<JsglrParseTaskInput, Result<IStrategoTerm, JsglrParseException>> parseToAstFunction;
     private final ResourceWalker walker;
     private final ResourceMatcher matcher;
 
-    public MultiAstSupplierFunction(Function<JSGLR1ParseTaskInput, Result<IStrategoTerm, JSGLR1ParseException>> parseToAstFunction, ResourceWalker walker, ResourceMatcher matcher) {
+    public MultiAstSupplierFunction(Function<JsglrParseTaskInput, Result<IStrategoTerm, JsglrParseException>> parseToAstFunction, ResourceWalker walker, ResourceMatcher matcher) {
         this.parseToAstFunction = parseToAstFunction;
         this.walker = walker;
         this.matcher = matcher;
     }
 
     @Override
-    public MapView<ResourceKey, Supplier<Result<IStrategoTerm, JSGLR1ParseException>>> apply(ExecContext context, ResourcePath rootDirectory) {
-        final HashMap<ResourceKey, Supplier<Result<IStrategoTerm, JSGLR1ParseException>>> astsAndErrors = new HashMap<>();
+    public MapView<ResourceKey, Supplier<Result<IStrategoTerm, JsglrParseException>>> apply(ExecContext context, ResourcePath rootDirectory) {
+        final HashMap<ResourceKey, Supplier<Result<IStrategoTerm, JsglrParseException>>> astsAndErrors = new HashMap<>();
         try(final Stream<? extends HierarchicalResource> stream = context.require(rootDirectory, ResourceStampers.modifiedDirRec(walker, matcher)).walk(walker, matcher)) {
-            stream.forEach(file -> astsAndErrors.put(file.getKey(), parseToAstFunction.createSupplier(JSGLR1ParseTaskInput.builder().withFile(file.getKey()).rootDirectoryHint(rootDirectory).build())));
+            stream.forEach(file -> astsAndErrors.put(file.getKey(), parseToAstFunction.createSupplier(JsglrParseTaskInput.builder().withFile(file.getKey()).rootDirectoryHint(rootDirectory).build())));
         } catch(IOException e) {
             throw new UncheckedIOException(e);
         }

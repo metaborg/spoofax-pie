@@ -1,8 +1,8 @@
 package mb.str;
 
 import mb.common.result.Result;
-import mb.jsglr1.common.JSGLR1ParseException;
-import mb.jsglr1.common.JSGLR1ParseOutput;
+import mb.jsglr.common.JsglrParseException;
+import mb.jsglr.common.JsglrParseOutput;
 import mb.pie.api.MixedSession;
 import mb.resource.fs.FSResource;
 import mb.str.util.TestBase;
@@ -16,9 +16,9 @@ class ParseTest extends TestBase {
     @Test void testParseTask() throws Exception {
         final FSResource resource = textFile("a.str", "module a");
         try(final MixedSession session = newSession()) {
-            final Result<JSGLR1ParseOutput, JSGLR1ParseException> result = session.require(parse.createTask(parse.inputBuilder().withFile(resource.getKey()).build()));
+            final Result<JsglrParseOutput, JsglrParseException> result = session.require(parse.createTask(parse.inputBuilder().withFile(resource.getKey()).build()));
             assertTrue(result.isOk());
-            final JSGLR1ParseOutput output = result.unwrap();
+            final JsglrParseOutput output = result.unwrap();
             log.info("{}", output);
             final IStrategoTerm ast = output.ast;
             assertNotNull(ast);

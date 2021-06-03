@@ -2,7 +2,7 @@ package mb.sdf3.task.spec;
 
 import mb.common.result.ExpectException;
 import mb.common.result.Result;
-import mb.jsglr1.pie.JSGLR1ParseTaskInput;
+import mb.jsglr.pie.JsglrParseTaskInput;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.Task;
@@ -89,7 +89,7 @@ public class Sdf3SpecToParseTable implements TaskDef<Sdf3SpecToParseTable.Input,
     }
 
     @Override public Result<ParseTable, ?> exec(ExecContext context, Input input) throws IOException {
-        final JSGLR1ParseTaskInput.Builder parseInputBuilder = parse.inputBuilder().rootDirectoryHint(input.config.rootDirectory);
+        final JsglrParseTaskInput.Builder parseInputBuilder = parse.inputBuilder().rootDirectoryHint(input.config.rootDirectory);
         final Supplier<Result<IStrategoTerm, ?>> mainModuleAstSupplier = desugar.createSupplier(parseInputBuilder.withFile(input.config.mainFile).buildAstSupplier());
 
         final ResourceWalker walker = Sdf3Util.createResourceWalker();

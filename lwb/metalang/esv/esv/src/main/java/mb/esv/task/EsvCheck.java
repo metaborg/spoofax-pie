@@ -9,8 +9,8 @@ import mb.esv.EsvScope;
 import mb.esv.task.spoofax.EsvParseWrapper;
 import mb.esv.util.EsvVisitor;
 import mb.jsglr.common.TermTracer;
-import mb.jsglr1.common.JSGLR1ParseException;
-import mb.jsglr1.common.JSGLR1ParseOutput;
+import mb.jsglr.common.JsglrParseException;
+import mb.jsglr.common.JsglrParseOutput;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
@@ -54,7 +54,7 @@ public class EsvCheck implements TaskDef<EsvConfig, KeyedMessages> {
             }
 
             @Override
-            protected void acceptParseFail(JSGLR1ParseException parseException) {
+            protected void acceptParseFail(JsglrParseException parseException) {
                 final Option<ResourceKey> resource = Option.ofOptional(parseException.getFileHint()).or(Option.ofOptional(parseException.getRootDirectoryHint().map(p -> p)));
                 resource.ifElse(
                     r -> messagesBuilder.extractMessagesRecursivelyWithFallbackKey(parseException, r),
@@ -63,7 +63,7 @@ public class EsvCheck implements TaskDef<EsvConfig, KeyedMessages> {
             }
 
             @Override
-            protected void acceptParse(JSGLR1ParseOutput parseOutput) {
+            protected void acceptParse(JsglrParseOutput parseOutput) {
                 messagesBuilder.addMessages(parseOutput.messages);
             }
 

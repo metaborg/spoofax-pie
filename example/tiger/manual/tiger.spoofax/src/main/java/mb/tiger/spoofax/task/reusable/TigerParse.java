@@ -1,10 +1,10 @@
 package mb.tiger.spoofax.task.reusable;
 
 import mb.common.result.Result;
-import mb.jsglr1.common.JSGLR1ParseException;
-import mb.jsglr1.common.JSGLR1ParseInput;
-import mb.jsglr1.common.JSGLR1ParseOutput;
-import mb.jsglr1.pie.JSGLR1ParseTaskDef;
+import mb.jsglr.common.JsglrParseException;
+import mb.jsglr.common.JsglrParseInput;
+import mb.jsglr.common.JsglrParseOutput;
+import mb.jsglr.pie.JsglrParseTaskDef;
 import mb.pie.api.ExecContext;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
@@ -16,7 +16,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 @TigerScope
-public class TigerParse extends JSGLR1ParseTaskDef {
+public class TigerParse extends JsglrParseTaskDef {
     private final Provider<TigerParser> parserProvider;
 
     @Inject public TigerParse(Provider<TigerParser> parserProvider) {
@@ -27,7 +27,7 @@ public class TigerParse extends JSGLR1ParseTaskDef {
         return getClass().getName();
     }
 
-    @Override protected Result<JSGLR1ParseOutput, JSGLR1ParseException> parse(
+    @Override protected Result<JsglrParseOutput, JsglrParseException> parse(
         ExecContext context,
         String text,
         @Nullable String startSymbol,
@@ -36,8 +36,8 @@ public class TigerParse extends JSGLR1ParseTaskDef {
     ) throws InterruptedException {
         final TigerParser parser = parserProvider.get();
         try {
-            return Result.ofOk(parser.parse(new JSGLR1ParseInput(text, startSymbol != null ? startSymbol : "Module", fileHint, rootDirectoryHint)));
-        } catch(JSGLR1ParseException e) {
+            return Result.ofOk(parser.parse(new JsglrParseInput(text, startSymbol != null ? startSymbol : "Module", fileHint, rootDirectoryHint)));
+        } catch(JsglrParseException e) {
             return Result.ofErr(e);
         }
     }

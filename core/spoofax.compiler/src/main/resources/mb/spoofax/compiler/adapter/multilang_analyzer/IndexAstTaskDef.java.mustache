@@ -1,8 +1,8 @@
 package {{baseIndexAstTaskDef.packageId}};
 
 import mb.common.result.Result;
-import mb.jsglr1.common.JSGLR1ParseException;
-import mb.jsglr1.pie.JSGLR1ParseTaskInput;
+import mb.jsglr.common.JsglrParseException;
+import mb.jsglr.pie.JsglrParseTaskInput;
 import mb.pie.api.Function;
 import mb.pie.api.SerializableFunction;
 import mb.pie.api.Supplier;
@@ -15,15 +15,15 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 @{{adapterProject.scope.qualifiedId}}
-public class {{baseIndexAstTaskDef.id}} extends SmlIndexAstTaskDef<JSGLR1ParseException> {
+public class {{baseIndexAstTaskDef.id}} extends SmlIndexAstTaskDef<JsglrParseException> {
 
     @Inject public {{baseIndexAstTaskDef.id}}(
         Provider<StrategoRuntime> strategoRuntimeProvider,
-        Function<JSGLR1ParseTaskInput, Result<IStrategoTerm, JSGLR1ParseException>> astSupplier
+        Function<JsglrParseTaskInput, Result<IStrategoTerm, JsglrParseException>> astSupplier
     ) {
-        super(strategoRuntimeProvider, astSupplier.mapInput(new SerializableFunction<Supplier<String>, JSGLR1ParseTaskInput>() {
-            @Override public JSGLR1ParseTaskInput apply(Supplier<String> stringSupplier) {
-                return JSGLR1ParseTaskInput.builder().stringSupplier(stringSupplier).build();
+        super(strategoRuntimeProvider, astSupplier.mapInput(new SerializableFunction<Supplier<String>, JsglrParseTaskInput>() {
+            @Override public JsglrParseTaskInput apply(Supplier<String> stringSupplier) {
+                return JsglrParseTaskInput.builder().stringSupplier(stringSupplier).build();
             }
 
             @Override public boolean equals(@Nullable Object other) {

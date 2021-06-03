@@ -5,7 +5,7 @@ import mb.common.util.MapView;
 import mb.constraint.common.ConstraintAnalyzer;
 import mb.constraint.common.ConstraintAnalyzer.MultiFileResult;
 import mb.constraint.common.ConstraintAnalyzer.SingleFileResult;
-import mb.jsglr1.common.JSGLR1ParseOutput;
+import mb.jsglr.common.JsglrParseOutput;
 import mb.resource.ReadableResource;
 import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class TigerConstraintAnalyzerTest extends TestBase {
     @Test void analyzeSingleErrors() throws Exception {
         final ReadableResource file = textFile("a.tig", "1 + nil");
-        final JSGLR1ParseOutput parsed = parse(file);
+        final JsglrParseOutput parsed = parse(file);
         final SingleFileResult result = analyze(file, parsed.ast);
         assertNotNull(result.ast);
         assertNotNull(result.analysis);
@@ -29,7 +29,7 @@ class TigerConstraintAnalyzerTest extends TestBase {
 
     @Test void analyzeSingleSuccess() throws Exception {
         final ReadableResource file = textFile("a.tig", "1 + 2");
-        final JSGLR1ParseOutput parsed = parse(file);
+        final JsglrParseOutput parsed = parse(file);
         final SingleFileResult result = analyze(file, parsed.ast);
         assertNotNull(result.ast);
         assertNotNull(result.analysis);
@@ -39,11 +39,11 @@ class TigerConstraintAnalyzerTest extends TestBase {
     @Disabled("Term doesn't have OriginAttachment(TermIndex(\"test##a.tig\",3)).")
     @Test void analyzeMultipleErrors() throws Exception {
         final ReadableResource file1 = textFile("a.tig", "1 + 1");
-        final JSGLR1ParseOutput parsed1 = parse(file1);
+        final JsglrParseOutput parsed1 = parse(file1);
         final ReadableResource file2 = textFile("b.tig", "1 + 2");
-        final JSGLR1ParseOutput parsed2 = parse(file2);
+        final JsglrParseOutput parsed2 = parse(file2);
         final ReadableResource file3 = textFile("c.tig", "1 + nil");
-        final JSGLR1ParseOutput parsed3 = parse(file3);
+        final JsglrParseOutput parsed3 = parse(file3);
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
         asts.put(file1.getKey(), parsed1.ast);
         asts.put(file2.getKey(), parsed2.ast);
@@ -72,11 +72,11 @@ class TigerConstraintAnalyzerTest extends TestBase {
 
     @Test void analyzeMultipleSuccess() throws Exception {
         final ReadableResource file1 = textFile("a.tig", "1 + 1");
-        final JSGLR1ParseOutput parsed1 = parse(file1);
+        final JsglrParseOutput parsed1 = parse(file1);
         final ReadableResource file2 = textFile("b.tig", "1 + 2");
-        final JSGLR1ParseOutput parsed2 = parse(file2);
+        final JsglrParseOutput parsed2 = parse(file2);
         final ReadableResource file3 = textFile("c.tig", "1 + 3");
-        final JSGLR1ParseOutput parsed3 = parse(file3);
+        final JsglrParseOutput parsed3 = parse(file3);
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
         asts.put(file1.getKey(), parsed1.ast);
         asts.put(file2.getKey(), parsed2.ast);

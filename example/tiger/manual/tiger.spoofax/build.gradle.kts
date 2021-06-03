@@ -14,7 +14,7 @@ dependencies {
   // Main
   api(project(":tiger"))
   api(compositeBuild("spoofax.core"))
-  api(compositeBuild("jsglr1.pie"))
+  api(compositeBuild("jsglr.pie"))
   api(compositeBuild("constraint.pie"))
   api("org.metaborg:pie.api")
   api("org.metaborg:pie.dagger")

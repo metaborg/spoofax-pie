@@ -10,7 +10,7 @@ import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.common.util.StreamIterable;
 import mb.esv.task.EsvConfig;
-import mb.jsglr1.pie.JSGLR1ParseTaskInput;
+import mb.jsglr.pie.JsglrParseTaskInput;
 import mb.libspoofax2.LibSpoofax2ClassLoaderResources;
 import mb.libspoofax2.LibSpoofax2Exports;
 import mb.pie.api.ExecContext;
@@ -168,7 +168,7 @@ public class ConfigureEsv implements TaskDef<ResourcePath, Result<Option<EsvConf
         // noinspection ConstantConditions (value is present)
         configureSdf3Result.get().ifSomeThrowing(sdf3Config -> {
             final HierarchicalResource sdf3SourceDirectory = context.getHierarchicalResource(sdf3Config.mainSourceDirectory);
-            final JSGLR1ParseTaskInput.Builder parseInputBuilder = sdf3Parse.inputBuilder().rootDirectoryHint(rootDirectory);
+            final JsglrParseTaskInput.Builder parseInputBuilder = sdf3Parse.inputBuilder().rootDirectoryHint(rootDirectory);
             final ResourceWalker resourceWalker = Sdf3Util.createResourceWalker();
             final ResourceMatcher resourceMatcher = Sdf3Util.createResourceMatcher();
             context.require(sdf3SourceDirectory, ResourceStampers.modifiedDirRec(resourceWalker, resourceMatcher));

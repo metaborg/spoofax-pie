@@ -4,8 +4,8 @@ import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.esv.task.spoofax.EsvParseWrapper;
-import mb.jsglr1.common.JSGLR1ParseException;
-import mb.jsglr1.common.JSGLR1ParseOutput;
+import mb.jsglr.common.JsglrParseException;
+import mb.jsglr.common.JsglrParseOutput;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ResourceStringSupplier;
 import mb.pie.api.Supplier;
@@ -48,9 +48,9 @@ public abstract class EsvVisitor {
 
     protected void acceptUnresolvedImport(IStrategoTerm importTerm, String importName) {}
 
-    protected void acceptParseFail(JSGLR1ParseException parseException) {}
+    protected void acceptParseFail(JsglrParseException parseException) {}
 
-    protected void acceptParse(JSGLR1ParseOutput parseOutput) {}
+    protected void acceptParse(JsglrParseOutput parseOutput) {}
 
 
     public void visitMainFile(
@@ -127,7 +127,7 @@ public abstract class EsvVisitor {
         if(origin != null) {
             supplier = new SupplierWithOrigin<>(supplier, origin);
         }
-        final Result<JSGLR1ParseOutput, JSGLR1ParseException> parseResult = context.require(parse, parse.inputBuilder()
+        final Result<JsglrParseOutput, JsglrParseException> parseResult = context.require(parse, parse.inputBuilder()
             .stringSupplier(supplier)
             .fileHint(file)
             .rootDirectoryHint(rootDirectory)
@@ -137,7 +137,7 @@ public abstract class EsvVisitor {
             acceptParseFail(parseResult.getErr());
             return Option.ofNone();
         } else {
-            final JSGLR1ParseOutput output = parseResult.get();
+            final JsglrParseOutput output = parseResult.get();
             acceptParse(output);
             return Option.ofSome(output.ast);
         }

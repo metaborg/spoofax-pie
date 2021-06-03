@@ -14,7 +14,7 @@ import mb.common.util.MapView;
 import mb.common.util.SetView;
 import mb.completions.common.CompletionResult;
 import mb.jsglr.common.JSGLRTokens;
-import mb.jsglr1.common.JSGLR1ParseException;
+import mb.jsglr.common.JsglrParseException;
 import mb.pie.api.StatelessSerializableFunction;
 import mb.pie.api.Task;
 import mb.resource.ResourceKey;
@@ -156,10 +156,10 @@ public class {{baseInstance.id}} implements LanguageInstance {
     }
 }
 
-class TokensResultToOkFunction extends StatelessSerializableFunction<Result<JSGLRTokens, JSGLR1ParseException>, Option<JSGLRTokens>> {
+class TokensResultToOkFunction extends StatelessSerializableFunction<Result<JSGLRTokens, JsglrParseException>, Option<JSGLRTokens>> {
     public static final TokensResultToOkFunction instance = new TokensResultToOkFunction();
 
-    @Override public Option<JSGLRTokens> apply(Result<JSGLRTokens, JSGLR1ParseException> result) {
+    @Override public Option<JSGLRTokens> apply(Result<JSGLRTokens, JsglrParseException> result) {
         return result.ok();
     }
 

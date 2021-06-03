@@ -5,6 +5,7 @@ import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Messages;
 import mb.common.message.Severity;
 import mb.common.result.Result;
+import mb.jsglr.pie.JsglrParseTaskInput;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
@@ -67,7 +68,7 @@ public class TigerCheck implements TaskDef<TigerCheck.Input, KeyedMessages> {
     @Override
     public KeyedMessages exec(ExecContext context, TigerCheck.Input input) throws IOException {
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
-        final mb.jsglr1.pie.JSGLR1ParseTaskInput.Builder parseInputBuilder = parse.inputBuilder().withFile(input.file).rootDirectoryHint(Optional.ofNullable(input.rootDirectoryHint));
+        final JsglrParseTaskInput.Builder parseInputBuilder = parse.inputBuilder().withFile(input.file).rootDirectoryHint(Optional.ofNullable(input.rootDirectoryHint));
         final Messages parseMessages = context.require(parseInputBuilder.buildMessagesSupplier());
         messagesBuilder.addMessages(input.file, parseMessages);
         final Result<TigerAnalyze.Output, ?> analysisResult = context.require(analyze, new TigerAnalyze.Input(input.file, parseInputBuilder.buildRecoverableAstSupplier()));

@@ -72,7 +72,7 @@ public class {{baseCheckTaskDef.id}} implements TaskDef<{{baseCheckTaskDef.id}}.
         context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
         {{#parser}}
-        final mb.jsglr1.pie.JSGLR1ParseTaskInput.Builder parseInputBuilder = parse.inputBuilder().withFile(input.file).rootDirectoryHint(Optional.ofNullable(input.rootDirectoryHint));
+        final mb.jsglr.pie.JsglrParseTaskInput.Builder parseInputBuilder = parse.inputBuilder().withFile(input.file).rootDirectoryHint(Optional.ofNullable(input.rootDirectoryHint));
         final Messages parseMessages = context.require(parseInputBuilder.buildMessagesSupplier());
         messagesBuilder.addMessages(input.file, parseMessages);
         {{/parser}}

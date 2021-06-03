@@ -1,4 +1,4 @@
-package mb.jsglr1.pie;
+package mb.jsglr.pie;
 
 import mb.pie.api.SerializableFunction;
 import org.checkerframework.checker.nullness.qual.Nullable;

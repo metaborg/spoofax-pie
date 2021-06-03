@@ -5,7 +5,7 @@ import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Messages;
 import mb.common.message.Severity;
 import mb.common.result.Result;
-import mb.jsglr1.pie.JSGLR1ParseTaskInput;
+import mb.jsglr.pie.JsglrParseTaskInput;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
@@ -47,7 +47,7 @@ public class Sdf3CheckSpec implements TaskDef<Sdf3SpecConfig, KeyedMessages> {
         final ResourceMatcher matcher = Sdf3Util.createResourceMatcher();
         final HierarchicalResource mainSourceDirectory = context.require(input.mainSourceDirectory, ResourceStampers.modifiedDirRec(walker, matcher));
         try(final Stream<? extends HierarchicalResource> stream = mainSourceDirectory.walk(walker, matcher)) {
-            final JSGLR1ParseTaskInput.Builder parseInputBuilder = parse.inputBuilder().rootDirectoryHint(input.rootDirectory);
+            final JsglrParseTaskInput.Builder parseInputBuilder = parse.inputBuilder().rootDirectoryHint(input.rootDirectory);
             stream.forEach(file -> {
                 final ResourcePath filePath = file.getPath();
                 final Messages messages = context.require(parseInputBuilder.withFile(filePath).buildMessagesSupplier());

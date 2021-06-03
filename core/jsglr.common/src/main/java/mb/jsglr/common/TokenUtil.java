@@ -41,14 +41,14 @@ public class TokenUtil {
         return new JSGLRTokens(tokenStream);
     }
 
-    private static Token<IStrategoTerm> convertToken(IToken token) {
+    public static Token<IStrategoTerm> convertToken(IToken token) {
         final TokenType tokenType = convertTokenKind(token.getKind());
         final Region region = RegionUtil.fromToken(token);
         final IStrategoTerm fragment = (IStrategoTerm)token.getAstNode();
         return new TokenImpl<>(tokenType, region, fragment);
     }
 
-    private static TokenType convertTokenKind(IToken.Kind kind) {
+    public static TokenType convertTokenKind(IToken.Kind kind) {
         switch(kind) {
             case TK_IDENTIFIER:
                 return TokenTypes.identifier();

@@ -10,7 +10,7 @@ import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.common.util.StreamIterable;
 import mb.constraint.pie.ConstraintAnalyzeMultiTaskDef;
-import mb.jsglr1.pie.JSGLR1ParseTaskInput;
+import mb.jsglr.pie.JsglrParseTaskInput;
 import mb.libspoofax2.LibSpoofax2ClassLoaderResources;
 import mb.libspoofax2.LibSpoofax2Exports;
 import mb.libstatix.LibStatixClassLoaderResources;
@@ -60,7 +60,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<StrategoCompileConfig>, StrategoConfigureException>> {
@@ -247,7 +246,7 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
 
             final ResourceWalker walker = Sdf3Util.createResourceWalker();
             final ResourceMatcher matcher = Sdf3Util.createResourceMatcher();
-            final JSGLR1ParseTaskInput.Builder parseInputBuilder = sdf3Parse.inputBuilder().rootDirectoryHint(rootDirectory);
+            final JsglrParseTaskInput.Builder parseInputBuilder = sdf3Parse.inputBuilder().rootDirectoryHint(rootDirectory);
             final Sdf3AnalyzeMulti.Input analyzeInput = new Sdf3AnalyzeMulti.Input(sdf3Config.mainSourceDirectory, sdf3Parse.createRecoverableMultiAstSupplierFunction(walker, matcher));
             final HierarchicalResource sdfMainSourceDirectory = context.require(sdf3Config.mainSourceDirectory, ResourceStampers.modifiedDirRec(walker, matcher));
             try(final Stream<? extends HierarchicalResource> stream = sdfMainSourceDirectory.walk(walker, matcher)) {

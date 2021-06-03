@@ -1,9 +1,9 @@
 package mb.spoofax.compiler.interfaces.spoofaxcore;
 
-import mb.jsglr1.common.JSGLR1ParseException;
-import mb.jsglr1.common.JSGLR1ParseInput;
-import mb.jsglr1.common.JSGLR1ParseOutput;
+import mb.jsglr.common.JsglrParseException;
+import mb.jsglr.common.JsglrParseInput;
+import mb.jsglr.common.JsglrParseOutput;
 
 public interface Parser {
-    JSGLR1ParseOutput parse(JSGLR1ParseInput input) throws JSGLR1ParseException, InterruptedException;
+    JsglrParseOutput parse(JsglrParseInput input) throws JsglrParseException, InterruptedException;
 }

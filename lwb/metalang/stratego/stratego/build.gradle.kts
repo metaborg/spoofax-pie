@@ -41,6 +41,7 @@ languageProject {
   compilerInput {
     withParser().run {
       startSymbol("Module")
+      jsglrVersion(mb.spoofax.compiler.language.ParserLanguageCompiler.JsglrVersion.V2)
     }
     withStyler()
     withStrategoRuntime().run {

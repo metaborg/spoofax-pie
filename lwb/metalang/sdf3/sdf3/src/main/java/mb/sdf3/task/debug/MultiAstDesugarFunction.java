@@ -2,7 +2,7 @@ package mb.sdf3.task.debug;
 
 import mb.common.result.Result;
 import mb.common.util.MapView;
-import mb.jsglr1.common.JSGLR1ParseException;
+import mb.jsglr.common.JsglrParseException;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Function;
 import mb.pie.api.Supplier;
@@ -12,7 +12,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import java.util.HashMap;
 
-public class MultiAstDesugarFunction implements Function<MapView<ResourceKey, Supplier<Result<IStrategoTerm, JSGLR1ParseException>>>, MapView<ResourceKey, ? extends Supplier<? extends Result<IStrategoTerm, ?>>>> {
+public class MultiAstDesugarFunction implements Function<MapView<ResourceKey, Supplier<Result<IStrategoTerm, JsglrParseException>>>, MapView<ResourceKey, ? extends Supplier<? extends Result<IStrategoTerm, ?>>>> {
     private final Function<Supplier<? extends Result<IStrategoTerm, ?>>, Result<IStrategoTerm, ?>> desugar;
 
     public MultiAstDesugarFunction(Function<Supplier<? extends Result<IStrategoTerm, ?>>, Result<IStrategoTerm, ?>> desugar) {
@@ -20,7 +20,7 @@ public class MultiAstDesugarFunction implements Function<MapView<ResourceKey, Su
     }
 
     @Override
-    public MapView<ResourceKey, ? extends Supplier<? extends Result<IStrategoTerm, ?>>> apply(ExecContext context, MapView<ResourceKey, Supplier<Result<IStrategoTerm, JSGLR1ParseException>>> output) {
+    public MapView<ResourceKey, ? extends Supplier<? extends Result<IStrategoTerm, ?>>> apply(ExecContext context, MapView<ResourceKey, Supplier<Result<IStrategoTerm, JsglrParseException>>> output) {
         final HashMap<ResourceKey, Supplier<? extends Result<IStrategoTerm, ?>>> desugaredAstsAndErrors = new HashMap<>();
         output.forEach(entry -> {
             desugaredAstsAndErrors.put(entry.getKey(), desugar.createSupplier(entry.getValue()));

@@ -1,9 +1,9 @@
 package mb.statix.task.spoofax;
 
 import mb.common.result.Result;
-import mb.jsglr1.common.JSGLR1ParseException;
-import mb.jsglr1.common.JSGLR1ParseOutput;
-import mb.jsglr1.pie.JSGLR1ParseTaskInput;
+import mb.jsglr.common.JsglrParseException;
+import mb.jsglr.common.JsglrParseOutput;
+import mb.jsglr.pie.JsglrParseTaskInput;
 import mb.pie.api.ExecContext;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.statix.StatixClassLoaderResources;
@@ -34,7 +34,7 @@ public class StatixParseWrapper extends StatixParse {
     }
 
     @Override
-    public Result<JSGLR1ParseOutput, JSGLR1ParseException> exec(ExecContext context, JSGLR1ParseTaskInput input) throws Exception {
+    public Result<JsglrParseOutput, JsglrParseException> exec(ExecContext context, JsglrParseTaskInput input) throws Exception {
         context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
         // TODO: enable when config has source origins.
         // TODO: instead of requiring all origins for each file to parse, only require the origins that corresponds to a certain file.

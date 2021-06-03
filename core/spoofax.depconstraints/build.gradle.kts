@@ -29,7 +29,7 @@ dependencies {
     api(project(":completions.common"))
     api(project(":jsglr.common"))
     api(project(":jsglr1.common"))
-    api(project(":jsglr1.pie"))
+    api(project(":jsglr.pie"))
     api(project(":jsglr2.common"))
     api(project(":esv.common"))
     api(project(":stratego.common"))

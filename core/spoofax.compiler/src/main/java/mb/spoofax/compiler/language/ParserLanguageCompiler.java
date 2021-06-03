@@ -53,7 +53,7 @@ public class ParserLanguageCompiler implements TaskDef<ParserLanguageCompiler.In
     public ListView<GradleConfiguredDependency> getDependencies(Input input) {
         return ListView.of(
             GradleConfiguredDependency.api(input.shared().jsglrCommonDep()),
-            GradleConfiguredDependency.api(input.shared().jsglr1CommonDep())
+            GradleConfiguredDependency.api(input.jsglrVersion() == JsglrVersion.V1 ? input.shared().jsglr1CommonDep() : input.shared().jsglr2CommonDep())
         );
     }
 
@@ -69,11 +69,12 @@ public class ParserLanguageCompiler implements TaskDef<ParserLanguageCompiler.In
 
         String startSymbol();
 
-
         /**
          * @return path to the parse table to load, relative to the classloader resources.
          */
         String parseTableRelativePath();
+
+        @Value.Default default JsglrVersion jsglrVersion() { return JsglrVersion.V1; }
 
 
         /// Kinds of classes (generated/extended/manual)
@@ -126,6 +127,39 @@ public class ParserLanguageCompiler implements TaskDef<ParserLanguageCompiler.In
         }
 
 
+        /// Mustache template helpers
+
+        default TypeInfo parseTableType() {
+            switch(jsglrVersion()) {
+                default:
+                case V1:
+                    return TypeInfo.of("mb.jsglr1.common.JSGLR1ParseTable");
+                case V2:
+                    return TypeInfo.of("mb.jsglr2.common.Jsglr2ParseTable");
+            }
+        }
+
+        default TypeInfo parseTableExceptionType() {
+            switch(jsglrVersion()) {
+                default:
+                case V1:
+                    return TypeInfo.of("mb.jsglr1.common.JSGLR1ParseTableException");
+                case V2:
+                    return TypeInfo.of("mb.jsglr2.common.Jsglr2ParseTableException");
+            }
+        }
+
+        default TypeInfo parserType() {
+            switch(jsglrVersion()) {
+                default:
+                case V1:
+                    return TypeInfo.of("mb.jsglr1.common.JSGLR1Parser");
+                case V2:
+                    return TypeInfo.of("mb.jsglr2.common.Jsglr2Parser");
+            }
+        }
+
+
         /// Files information, known up-front for build systems with static dependencies such as Gradle.
 
         default ListView<ResourcePath> javaSourceFiles() {
@@ -151,5 +185,9 @@ public class ParserLanguageCompiler implements TaskDef<ParserLanguageCompiler.In
         @Value.Check default void check() {
 
         }
+    }
+
+    public enum JsglrVersion implements Serializable {
+        V1, V2
     }
 }

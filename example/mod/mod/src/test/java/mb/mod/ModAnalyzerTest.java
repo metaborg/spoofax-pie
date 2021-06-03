@@ -6,7 +6,7 @@ import mb.constraint.common.ConstraintAnalyzer;
 import mb.constraint.common.ConstraintAnalyzer.MultiFileResult;
 import mb.constraint.common.ConstraintAnalyzer.SingleFileResult;
 import mb.constraint.common.ConstraintAnalyzerContext;
-import mb.jsglr1.common.JSGLR1ParseOutput;
+import mb.jsglr.common.JsglrParseOutput;
 import mb.resource.ReadableResource;
 import mb.resource.ResourceKey;
 import mb.stratego.common.StrategoUtil;
@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ModAnalyzerTest extends ModTestBase {
     @Test void analyzeSingleErrors() throws Exception {
         final ReadableResource file = textFile("a.mod", "let a = mod {}; dbg a.b;");
-        final JSGLR1ParseOutput parsed = parse(file);
+        final JsglrParseOutput parsed = parse(file);
         final SingleFileResult result = analyze(file.getKey(), parsed.ast);
         assertNotNull(result.ast);
         assertNotNull(result.analysis);
@@ -30,7 +30,7 @@ class ModAnalyzerTest extends ModTestBase {
 
     @Test void analyzeSingleSuccess() throws Exception {
         final ReadableResource file = textFile("a.mod", "let a = mod { let b = 1; }; dbg a.b;");
-        final JSGLR1ParseOutput parsed = parse(file);
+        final JsglrParseOutput parsed = parse(file);
         final SingleFileResult result = analyze(file, parsed.ast);
         assertNotNull(result.ast);
         assertNotNull(result.analysis);
@@ -39,11 +39,11 @@ class ModAnalyzerTest extends ModTestBase {
 
     @Test void analyzeMultipleErrors() throws Exception {
         final ReadableResource file1 = textFile("a.mod", "let a = 1;");
-        final JSGLR1ParseOutput parsed1 = parse(file1);
+        final JsglrParseOutput parsed1 = parse(file1);
         final ReadableResource file2 = textFile("b.mod", "let b = 2;");
-        final JSGLR1ParseOutput parsed2 = parse(file2);
+        final JsglrParseOutput parsed2 = parse(file2);
         final ReadableResource file3 = textFile("c.mod", "let c = d;");
-        final JSGLR1ParseOutput parsed3 = parse(file3);
+        final JsglrParseOutput parsed3 = parse(file3);
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
         asts.put(file1.getKey(), parsed1.ast);
         asts.put(file2.getKey(), parsed2.ast);
@@ -72,11 +72,11 @@ class ModAnalyzerTest extends ModTestBase {
 
     @Test void analyzeMultipleSuccess() throws Exception {
         final ReadableResource file1 = textFile("a.mod", "let a = 1;");
-        final JSGLR1ParseOutput parsed1 = parse(file1);
+        final JsglrParseOutput parsed1 = parse(file1);
         final ReadableResource file2 = textFile("b.mod", "let b = 1;");
-        final JSGLR1ParseOutput parsed2 = parse(file2);
+        final JsglrParseOutput parsed2 = parse(file2);
         final ReadableResource file3 = textFile("c.mod", "let c = 1;");
-        final JSGLR1ParseOutput parsed3 = parse(file3);
+        final JsglrParseOutput parsed3 = parse(file3);
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
         asts.put(file1.getKey(), parsed1.ast);
         asts.put(file2.getKey(), parsed2.ast);
@@ -99,7 +99,7 @@ class ModAnalyzerTest extends ModTestBase {
 
     @Test void showScopeGraph() throws Exception {
         final ReadableResource file = textFile("a.mod", "let a = 1;");
-        final JSGLR1ParseOutput parsed = parse(file);
+        final JsglrParseOutput parsed = parse(file);
         final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext(true, rootPath);
         final SingleFileResult result = analyze(rootPath, file, parsed.ast, constraintAnalyzerContext);
         assertNotNull(result.ast);

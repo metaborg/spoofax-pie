@@ -1,8 +1,8 @@
 package mb.calc;
 
 import mb.common.result.Result;
-import mb.jsglr1.common.JSGLR1ParseException;
-import mb.jsglr1.common.JSGLR1ParseOutput;
+import mb.jsglr.common.JsglrParseException;
+import mb.jsglr.common.JsglrParseOutput;
 import mb.pie.api.MixedSession;
 import mb.resource.fs.FSResource;
 import mb.stratego.common.StrategoRuntime;
@@ -17,7 +17,7 @@ class PrettyPrintTest extends TestBase {
         final String text = "1 + 2 * 3;";
         final FSResource resource = textFile("test.calc", text);
         try(final MixedSession session = newSession()) {
-            final Result<JSGLR1ParseOutput, JSGLR1ParseException> result = session.require(component.getCalcParse().createTask(component.getCalcParse().inputBuilder().withFile(resource.getKey()).build()));
+            final Result<JsglrParseOutput, JsglrParseException> result = session.require(component.getCalcParse().createTask(component.getCalcParse().inputBuilder().withFile(resource.getKey()).build()));
             assertTrue(result.isOk());
             final IStrategoTerm ast = result.unwrap().ast;
             final StrategoRuntime strategoRuntime = component.getStrategoRuntimeProvider().get();

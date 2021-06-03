@@ -6,9 +6,9 @@ import mb.common.util.MapView;
 import mb.constraint.common.ConstraintAnalyzer;
 import mb.constraint.common.ConstraintAnalyzerContext;
 import mb.constraint.common.ConstraintAnalyzerException;
-import mb.jsglr1.common.JSGLR1ParseException;
-import mb.jsglr1.common.JSGLR1ParseInput;
-import mb.jsglr1.common.JSGLR1ParseOutput;
+import mb.jsglr.common.JsglrParseException;
+import mb.jsglr.common.JsglrParseInput;
+import mb.jsglr.common.JsglrParseOutput;
 import mb.log.api.LoggerFactory;
 import mb.log.dagger.LoggerComponent;
 import mb.resource.DefaultResourceService;
@@ -84,19 +84,19 @@ public class SingleBaseLanguageTestBase extends TestBase {
     }
 
 
-    public JSGLR1ParseOutput parse(String text, @Nullable ResourceKey fileHint, @Nullable ResourcePath rootDirectoryHint) throws JSGLR1ParseException, InterruptedException {
-        return parser.parse(new JSGLR1ParseInput(text, startSymbol, fileHint, rootDirectoryHint));
+    public JsglrParseOutput parse(String text, @Nullable ResourceKey fileHint, @Nullable ResourcePath rootDirectoryHint) throws JsglrParseException, InterruptedException {
+        return parser.parse(new JsglrParseInput(text, startSymbol, fileHint, rootDirectoryHint));
     }
 
-    public JSGLR1ParseOutput parse(String text, @Nullable ResourceKey fileHint) throws JSGLR1ParseException, InterruptedException {
+    public JsglrParseOutput parse(String text, @Nullable ResourceKey fileHint) throws JsglrParseException, InterruptedException {
         return parse(text, fileHint, rootPath);
     }
 
-    public JSGLR1ParseOutput parse(String text) throws JSGLR1ParseException, InterruptedException {
+    public JsglrParseOutput parse(String text) throws JsglrParseException, InterruptedException {
         return parse(text, null);
     }
 
-    public JSGLR1ParseOutput parse(ReadableResource file) throws JSGLR1ParseException, InterruptedException, IOException {
+    public JsglrParseOutput parse(ReadableResource file) throws JsglrParseException, InterruptedException, IOException {
         return parse(file.readString(), file.getKey());
     }
 

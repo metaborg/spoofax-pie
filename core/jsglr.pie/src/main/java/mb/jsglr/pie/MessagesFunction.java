@@ -1,15 +1,15 @@
-package mb.jsglr1.pie;
+package mb.jsglr.pie;
 
 import mb.common.message.KeyedMessages;
 import mb.common.message.Messages;
 import mb.common.result.Result;
-import mb.jsglr1.common.JSGLR1ParseException;
-import mb.jsglr1.common.JSGLR1ParseOutput;
+import mb.jsglr.common.JsglrParseException;
+import mb.jsglr.common.JsglrParseOutput;
 
-class MessagesFunction extends MapperFunction<Result<JSGLR1ParseOutput, JSGLR1ParseException>, Messages> {
+class MessagesFunction extends MapperFunction<Result<JsglrParseOutput, JsglrParseException>, Messages> {
     public static final MessagesFunction instance = new MessagesFunction();
 
-    @Override public Messages apply(Result<JSGLR1ParseOutput, JSGLR1ParseException> result) {
+    @Override public Messages apply(Result<JsglrParseOutput, JsglrParseException> result) {
         // TODO: output KeyedMessages instead.
         return result.mapOrElse(v -> v.messages.asMessages(), e -> e.getOptionalMessages().map(KeyedMessages::asMessages).orElseGet(Messages::of));
     }

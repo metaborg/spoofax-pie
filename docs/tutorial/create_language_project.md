@@ -93,7 +93,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import mb.common.result.Result;
 import mb.helloworld.HelloWorldClassLoaderResources;
 import mb.helloworld.HelloWorldScope;
-import mb.jsglr1.common.JSGLR1ParseException;
+import mb.jsglr.common.JSGLR1ParseException;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;

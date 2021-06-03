@@ -2,7 +2,7 @@ package {{baseCheckTaskDef.packageId}};
 
 import dagger.Lazy;
 import mb.common.message.Messages;
-import mb.jsglr1.pie.JSGLR1ParseTaskInput;
+import mb.jsglr.pie.JsglrParseTaskInput;
 import mb.pie.api.Function;
 import mb.pie.api.SerializableFunction;
 import mb.resource.ResourceKey;
@@ -19,14 +19,14 @@ import javax.inject.Inject;
 public class {{baseCheckTaskDef.id}} extends SmlCheckTaskDef {
 
     @Inject public {{baseCheckTaskDef.id}}(
-        Function<JSGLR1ParseTaskInput, Messages> messagesSupplier,
+        Function<JsglrParseTaskInput, Messages> messagesSupplier,
         SmlBuildContextConfiguration buildContextConfiguration,
         SmlSolveProject solveProject,
         Lazy<LanguageMetadataManager> languageMetadataManager
     ) {
-        super(messagesSupplier.mapInput(new SerializableFunction<ResourceKey, JSGLR1ParseTaskInput>() {
-            @Override public JSGLR1ParseTaskInput apply(ResourceKey file) {
-                return JSGLR1ParseTaskInput.builder().withFile(file).build();
+        super(messagesSupplier.mapInput(new SerializableFunction<ResourceKey, JsglrParseTaskInput>() {
+            @Override public JsglrParseTaskInput apply(ResourceKey file) {
+                return JsglrParseTaskInput.builder().withFile(file).build();
             }
 
             @Override public boolean equals(@Nullable Object other) {

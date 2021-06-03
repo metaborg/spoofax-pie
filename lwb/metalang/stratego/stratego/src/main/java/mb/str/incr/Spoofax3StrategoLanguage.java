@@ -1,8 +1,8 @@
 package mb.str.incr;
 
 import mb.common.util.IOUtil;
-import mb.jsglr1.common.JSGLR1ParseException;
-import mb.jsglr1.common.JSGLR1ParseInput;
+import mb.jsglr.common.JsglrParseException;
+import mb.jsglr.common.JsglrParseInput;
 import mb.pie.api.ExecException;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceKeyString;
@@ -54,7 +54,7 @@ public class Spoofax3StrategoLanguage implements StrategoLanguage {
 
 
     @Override
-    public IStrategoTerm parse(InputStream inputStream, Charset charset, @Nullable String path) throws JSGLR1ParseException, IOException, InterruptedException {
+    public IStrategoTerm parse(InputStream inputStream, Charset charset, @Nullable String path) throws JsglrParseException, IOException, InterruptedException {
         final StrategoParser parser = parserProvider.get();
         final String text = new String(IOUtil.toByteArray(inputStream), charset);
 
@@ -66,7 +66,7 @@ public class Spoofax3StrategoLanguage implements StrategoLanguage {
             resourceKey = null;
         }
 
-        final IStrategoTerm ast = parser.parse(new JSGLR1ParseInput(text, "Module", resourceKey)).ast;
+        final IStrategoTerm ast = parser.parse(new JsglrParseInput(text, "Module", resourceKey)).ast;
 
         // Remove ambiguity that occurs in old table from sdf2table when using JSGLR2 parser
         return new DisambiguateAsAnno(strContext).visit(ast);

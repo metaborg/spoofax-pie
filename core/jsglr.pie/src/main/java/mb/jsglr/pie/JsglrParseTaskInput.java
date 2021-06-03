@@ -1,11 +1,11 @@
-package mb.jsglr1.pie;
+package mb.jsglr.pie;
 
 import mb.common.message.Messages;
 import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.jsglr.common.JSGLRTokens;
-import mb.jsglr1.common.JSGLR1ParseException;
-import mb.jsglr1.common.JSGLR1ParseOutput;
+import mb.jsglr.common.JsglrParseException;
+import mb.jsglr.common.JsglrParseOutput;
 import mb.pie.api.ResourceStringSupplier;
 import mb.pie.api.Supplier;
 import mb.pie.api.stamp.ResourceStamper;
@@ -22,16 +22,16 @@ import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 @Value.Immutable
-public interface JSGLR1ParseTaskInput extends Serializable {
-    class Builder extends ImmutableJSGLR1ParseTaskInput.Builder {
-        private final @Nullable JSGLR1ParseTaskDef parse;
+public interface JsglrParseTaskInput extends Serializable {
+    class Builder extends ImmutableJsglrParseTaskInput.Builder {
+        private final @Nullable JsglrParseTaskDef parse;
 
 
         public Builder() {
             this.parse = null;
         }
 
-        public Builder(JSGLR1ParseTaskDef parse) {
+        public Builder(JsglrParseTaskDef parse) {
             this.parse = parse;
         }
 
@@ -59,27 +59,27 @@ public interface JSGLR1ParseTaskInput extends Serializable {
         }
 
 
-        public Supplier<Result<JSGLR1ParseOutput, JSGLR1ParseException>> buildSupplier() {
+        public Supplier<Result<JsglrParseOutput, JsglrParseException>> buildSupplier() {
             checkBuildPossible();
             return parse.createSupplier(build());
         }
 
-        public Supplier<Result<IStrategoTerm, JSGLR1ParseException>> buildRecoverableAstSupplier() {
+        public Supplier<Result<IStrategoTerm, JsglrParseException>> buildRecoverableAstSupplier() {
             checkBuildPossible();
             return parse.createRecoverableAstSupplier(build());
         }
 
-        public Supplier<Result<IStrategoTerm, JSGLR1ParseException>> buildAstSupplier() {
+        public Supplier<Result<IStrategoTerm, JsglrParseException>> buildAstSupplier() {
             checkBuildPossible();
             return parse.createAstSupplier(build());
         }
 
-        public Supplier<Result<JSGLRTokens, JSGLR1ParseException>> buildRecoverableTokensSupplier() {
+        public Supplier<Result<JSGLRTokens, JsglrParseException>> buildRecoverableTokensSupplier() {
             checkBuildPossible();
             return parse.createRecoverableTokensSupplier(build());
         }
 
-        public Supplier<Result<JSGLRTokens, JSGLR1ParseException>> buildTokensSupplier() {
+        public Supplier<Result<JSGLRTokens, JsglrParseException>> buildTokensSupplier() {
             checkBuildPossible();
             return parse.createTokensSupplier(build());
         }
@@ -99,7 +99,7 @@ public interface JSGLR1ParseTaskInput extends Serializable {
         return new Builder();
     }
 
-    static Builder builder(JSGLR1ParseTaskDef parse) {
+    static Builder builder(JsglrParseTaskDef parse) {
         return new Builder(parse);
     }
 

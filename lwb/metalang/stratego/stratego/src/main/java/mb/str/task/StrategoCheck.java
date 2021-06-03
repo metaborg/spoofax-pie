@@ -3,7 +3,7 @@ package mb.str.task;
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Messages;
-import mb.jsglr1.pie.JSGLR1ParseTaskInput;
+import mb.jsglr.pie.JsglrParseTaskInput;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
@@ -49,7 +49,7 @@ public class StrategoCheck implements TaskDef<StrategoAnalyzeConfig, KeyedMessag
         final ResourceMatcher matcher = StrategoUtil.createResourceMatcher();
         final HierarchicalResource rootDirectory = context.require(config.rootDirectory, ResourceStampers.modifiedDirRec(walker, matcher));
         try {
-            final JSGLR1ParseTaskInput.Builder parseInputBuilder = strategoParse.inputBuilder().rootDirectoryHint(config.rootDirectory);
+            final JsglrParseTaskInput.Builder parseInputBuilder = strategoParse.inputBuilder().rootDirectoryHint(config.rootDirectory);
             rootDirectory.walk(walker, matcher).forEach(file -> {
                 final ResourcePath filePath = file.getPath();
                 final Messages messages = context.require(parseInputBuilder.withFile(filePath).buildMessagesSupplier());

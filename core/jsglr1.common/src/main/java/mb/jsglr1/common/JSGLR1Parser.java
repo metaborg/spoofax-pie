@@ -2,6 +2,9 @@ package mb.jsglr1.common;
 
 import mb.common.message.KeyedMessages;
 import mb.common.message.Messages;
+import mb.jsglr.common.JsglrParseException;
+import mb.jsglr.common.JsglrParseOutput;
+import mb.jsglr.common.JsglrParseInput;
 import mb.jsglr.common.JSGLRTokens;
 import mb.jsglr.common.ResourceKeyAttachment;
 import mb.jsglr.common.TokenUtil;
@@ -40,7 +43,7 @@ public class JSGLR1Parser {
         disambiguator.setHeuristicFilters(false);
     }
 
-    public JSGLR1ParseOutput parse(JSGLR1ParseInput input) throws JSGLR1ParseException, InterruptedException {
+    public JsglrParseOutput parse(JsglrParseInput input) throws JsglrParseException, InterruptedException {
         try {
             final SGLRParseResult result = parser.parse(input.text, input.fileHint != null ? input.fileHint.toString() : null, input.startSymbol);
             if(result.output == null) {
@@ -58,12 +61,12 @@ public class JSGLR1Parser {
             messagesUtil.gatherNonFatalErrors(ast);
             final Messages messages = messagesUtil.getMessages();
             final boolean recovered = messages.containsError();
-            return new JSGLR1ParseOutput(ast, tokens, toMessages(messages, input.fileHint), recovered, input.startSymbol, input.fileHint, input.rootDirectoryHint);
+            return new JsglrParseOutput(ast, tokens, toMessages(messages, input.fileHint), recovered, false /* TODO */, input.startSymbol, input.fileHint, input.rootDirectoryHint);
         } catch(SGLRException e) {
             final MessagesUtil messagesUtil = new MessagesUtil(true, true, parser.getCollectedErrors());
             messagesUtil.processFatalException(new NullTokenizer(input.text, null), e);
             final Messages messages = messagesUtil.getMessages();
-            throw JSGLR1ParseException.parseFail(toMessages(messages, input.fileHint), input.startSymbol, input.fileHint, input.rootDirectoryHint);
+            throw JsglrParseException.parseFail(toMessages(messages, input.fileHint), input.startSymbol, input.fileHint, input.rootDirectoryHint);
         }
     }
 

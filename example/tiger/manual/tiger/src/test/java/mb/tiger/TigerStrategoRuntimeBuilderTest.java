@@ -1,6 +1,6 @@
 package mb.tiger;
 
-import mb.jsglr1.common.JSGLR1ParseOutput;
+import mb.jsglr.common.JsglrParseOutput;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Test;
 import org.spoofax.interpreter.terms.IStrategoString;
@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class TigerStrategoRuntimeBuilderTest extends TestBase {
     @Test void parseUnparse() throws Exception {
         final String str = "1 + 2";
-        final JSGLR1ParseOutput parsed = parse(str);
+        final JsglrParseOutput parsed = parse(str);
         final @Nullable IStrategoTerm unparsedTerm = strategoRuntime.invoke("pp-Tiger-string", parsed.ast);
         assertNotNull(unparsedTerm);
         final IStrategoString unparsedStringTerm = (IStrategoString)unparsedTerm;

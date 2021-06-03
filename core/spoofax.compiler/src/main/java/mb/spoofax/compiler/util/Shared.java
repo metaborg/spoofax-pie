@@ -222,12 +222,12 @@ public interface Shared extends Serializable {
         return GradleDependency.module(Coordinate.of("org.metaborg", "jsglr.common", spoofax3Version()));
     }
 
-    @Value.Default default GradleDependency jsglr1CommonDep() {
-        return GradleDependency.module(Coordinate.of("org.metaborg", "jsglr1.common", spoofax3Version()));
+    @Value.Default default GradleDependency jsglrPieDep() {
+        return GradleDependency.module(Coordinate.of("org.metaborg", "jsglr.pie", spoofax3Version()));
     }
 
-    @Value.Default default GradleDependency jsglr1PieDep() {
-        return GradleDependency.module(Coordinate.of("org.metaborg", "jsglr1.pie", spoofax3Version()));
+    @Value.Default default GradleDependency jsglr1CommonDep() {
+        return GradleDependency.module(Coordinate.of("org.metaborg", "jsglr1.common", spoofax3Version()));
     }
 
     @Value.Default default GradleDependency jsglr2CommonDep() {

@@ -3,7 +3,7 @@ package mb.cfg.task;
 import mb.cfg.CfgScope;
 import mb.common.result.Result;
 import mb.common.util.Properties;
-import mb.jsglr1.common.JSGLR1ParseException;
+import mb.jsglr.common.JsglrParseException;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
@@ -49,7 +49,7 @@ public class CfgRootDirectoryToObject implements TaskDef<ResourcePath, Result<Cf
     @Override
     public Result<CfgToObject.Output, CfgRootDirectoryToObjectException> exec(ExecContext context, ResourcePath rootDirectory) throws Exception {
         final ResourcePath cfgFile = rootDirectory.appendRelativePath("spoofaxc.cfg");
-        final Supplier<Result<IStrategoTerm, JSGLR1ParseException>> astSupplier = parse.inputBuilder().withFile(cfgFile).rootDirectoryHint(rootDirectory).buildAstSupplier();
+        final Supplier<Result<IStrategoTerm, JsglrParseException>> astSupplier = parse.inputBuilder().withFile(cfgFile).rootDirectoryHint(rootDirectory).buildAstSupplier();
         final Supplier<Result<CfgAnalyze.Output, ?>> analyzeOutputSupplier = analyze.createSupplier(new CfgAnalyze.Input(cfgFile, astSupplier));
         final ResourcePath lockFilePath = rootDirectory.appendRelativePath("spoofaxc.lock");
         final WritableResource lockFile = resourceService.getWritableResource(lockFilePath);

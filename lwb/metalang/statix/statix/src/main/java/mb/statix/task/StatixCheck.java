@@ -5,7 +5,7 @@ import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Messages;
 import mb.common.message.Severity;
 import mb.common.result.Result;
-import mb.jsglr1.pie.JSGLR1ParseTaskInput;
+import mb.jsglr.pie.JsglrParseTaskInput;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
@@ -46,7 +46,7 @@ public class StatixCheck implements TaskDef<StatixConfig, KeyedMessages> {
 
         final ResourceWalker walker = StatixUtil.createResourceWalker();
         final ResourceMatcher matcher = StatixUtil.createResourceMatcher();
-        final JSGLR1ParseTaskInput.Builder parseInputBuilder = parse.inputBuilder().rootDirectoryHint(config.rootDirectory);
+        final JsglrParseTaskInput.Builder parseInputBuilder = parse.inputBuilder().rootDirectoryHint(config.rootDirectory);
         for(ResourcePath sourceOrIncludeDirectory : config.sourceAndIncludePaths()) {
             final HierarchicalResource directory = context.require(sourceOrIncludeDirectory, ResourceStampers.modifiedDirRec(walker, matcher));
             try(final Stream<? extends HierarchicalResource> stream = directory.walk(walker, matcher)) {
