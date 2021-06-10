@@ -68,7 +68,7 @@ public class StrategoCheck implements TaskDef<StrategoAnalyzeConfig, KeyedMessag
             config.builtinLibs.asCopy(),
             true
         ));
-        MessageConverter.addMessagesToBuilder(messagesBuilder, output.messages);
+        MessageConverter.addMessagesToBuilder(messagesBuilder, output.messages, resourceService);
 
         return messagesBuilder.build(config.rootDirectory);
     }
