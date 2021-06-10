@@ -29,6 +29,7 @@ import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.EclipseLifecycleParticipant;
 import mb.spoofax.eclipse.EclipsePlatformComponent;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
+import mb.spoofax.lwb.compiler.CompileLanguage;
 import mb.spoofax.lwb.compiler.dagger.Spoofax3Compiler;
 import mb.spoofax.lwb.compiler.dagger.Spoofax3CompilerModule;
 import mb.spoofax.lwb.dynamicloading.DynamicLoadingPieModule;
@@ -36,6 +37,9 @@ import mb.spoofax.lwb.eclipse.compiler.DaggerEclipseSpoofax3CompilerComponent;
 import mb.spoofax.lwb.eclipse.compiler.EclipseSpoofax3CompilerComponent;
 import mb.spoofax.lwb.eclipse.dynamicloading.DaggerEclipseDynamicLoadingComponent;
 import mb.spoofax.lwb.eclipse.dynamicloading.EclipseDynamicLoadingComponent;
+import mb.spoofax.lwb.eclipse.util.ClassPathUtil;
+import mb.spt.dynamicloading.CompileAndLoadLanguageUnderTestProvider;
+import mb.spt.eclipse.SptLanguageFactory;
 import mb.statix.eclipse.StatixEclipseComponent;
 import mb.statix.eclipse.StatixLanguageFactory;
 import mb.str.eclipse.StrategoEclipseComponent;
@@ -43,8 +47,10 @@ import mb.str.eclipse.StrategoLanguageFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.runtime.IExecutableExtensionFactory;
 
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
+import java.util.List;
 
 public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipant {
     private static @Nullable SpoofaxLwbLifecycleParticipant instance;
@@ -186,6 +192,18 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
                     .spoofax3CompilerComponent(spoofax3Compiler.component)
                     .build();
             }
+            SptLanguageFactory.getLanguage().getComponent().getLanguageUnderTestProviderWrapper().set(new CompileAndLoadLanguageUnderTestProvider(
+                SpoofaxLwbLifecycleParticipant.getInstance().getDynamicLoadingComponent().getDynamicLoad(),
+                rootDirectory -> {
+                    // TODO: reduce code completion with SpoofaxLwbBuilder
+                    final List<File> classPath = ClassPathUtil.getClassPath();
+                    return CompileLanguage.Args.builder()
+                        .rootDirectory(rootDirectory)
+                        .additionalJavaClassPath(classPath)
+                        .additionalJavaAnnotationProcessorPath(classPath)
+                        .build();
+                }
+            ));
             if(spoofaxLwbComponent == null) {
                 spoofaxLwbComponent = DaggerSpoofaxLwbComponent.builder()
                     .loggerComponent(loggerComponent)

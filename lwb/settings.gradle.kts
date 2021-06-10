@@ -52,6 +52,13 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
   includeProject("statix.eclipse")
   includeProject("statix.intellij")
 }
+"metalang/spt".run {
+  includeProject("spt")
+  includeProject("spt.dynamicloading")
+  includeProject("spt.cli")
+  includeProject("spt.eclipse")
+  includeProject("spt.intellij")
+}
 "metalib/libspoofax2".run {
   includeProject("libspoofax2")
   includeProject("libspoofax2.eclipse")

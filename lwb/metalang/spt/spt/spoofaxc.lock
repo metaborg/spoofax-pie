@@ -1,0 +1,5 @@
+shared.defaultArtifactId=spt
+shared.defaultClassPrefix=Spt
+shared.defaultGroupId=org.metaborg
+shared.defaultPackageId=mb.spt
+shared.defaultVersion=0.1.0

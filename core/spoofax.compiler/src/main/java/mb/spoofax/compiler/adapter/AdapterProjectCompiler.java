@@ -32,6 +32,7 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -118,40 +119,43 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         // Collect all task definitions.
         final ArrayList<TypeInfo> allTaskDefs = new ArrayList<>(input.taskDefs());
         if(input.parser().isPresent()) {
-            allTaskDefs.add(input.parser().get().tokenizeTaskDef());
-            allTaskDefs.add(input.parser().get().parseTaskDef());
+            final ParserAdapterCompiler.Input i = input.parser().get();
+            addTaskDef(allTaskDefs, i.tokenizeTaskDef(), i.baseTokenizeTaskDef());
+            addTaskDef(allTaskDefs, i.parseTaskDef(), i.baseParseTaskDef());
         } else {
             allTaskDefs.add(TypeInfo.of(NoneTokenizer.class));
         }
         if(input.styler().isPresent()) {
-            allTaskDefs.add(input.styler().get().styleTaskDef());
+            final StylerAdapterCompiler.Input i = input.styler().get();
+            addTaskDef(allTaskDefs, i.styleTaskDef(), i.baseStyleTaskDef());
         } else {
             allTaskDefs.add(TypeInfo.of(NoneStyler.class));
         }
         if(input.completer().isPresent()) {
-            allTaskDefs.add(input.completer().get().completeTaskDef());
+            final CompleterAdapterCompiler.Input i = input.completer().get();
+            addTaskDef(allTaskDefs, i.completeTaskDef(), i.baseCompleteTaskDef());
         } else {
             allTaskDefs.add(TypeInfo.of(NullCompleteTaskDef.class));
         }
         input.strategoRuntime().ifPresent((i) -> {
-            allTaskDefs.add(i.getStrategoRuntimeProviderTaskDef());
+            addTaskDef(allTaskDefs, i.getStrategoRuntimeProviderTaskDef(), i.baseGetStrategoRuntimeProviderTaskDef());
         });
         input.constraintAnalyzer().ifPresent((i) -> {
-            allTaskDefs.add(i.analyzeTaskDef());
-            allTaskDefs.add(i.analyzeMultiTaskDef());
+            addTaskDef(allTaskDefs, i.analyzeTaskDef(), i.baseAnalyzeTaskDef());
+            addTaskDef(allTaskDefs, i.analyzeMultiTaskDef(), i.baseAnalyzeMultiTaskDef());
         });
         input.multilangAnalyzer().ifPresent((i) -> {
-            allTaskDefs.add(i.analyzeTaskDef());
-            allTaskDefs.add(i.indexAstTaskDef());
-            allTaskDefs.add(i.preStatixTaskDef());
-            allTaskDefs.add(i.postStatixTaskDef());
-            allTaskDefs.add(i.checkTaskDef());
+            addTaskDef(allTaskDefs, i.analyzeTaskDef(), i.baseAnalyzeTaskDef());
+            addTaskDef(allTaskDefs, i.indexAstTaskDef(), i.baseIndexAstTaskDef());
+            addTaskDef(allTaskDefs, i.preStatixTaskDef(), i.basePreStatixTaskDef());
+            addTaskDef(allTaskDefs, i.postStatixTaskDef(), i.basePostStatixTaskDef());
+            addTaskDef(allTaskDefs, i.checkTaskDef(), i.baseCheckTaskDef());
             allTaskDefs.addAll(i.libraryTaskDefs());
         });
-        allTaskDefs.add(input.checkTaskDef());
-        allTaskDefs.add(input.checkMultiTaskDef());
-        allTaskDefs.add(input.checkAggregatorTaskDef());
-        allTaskDefs.add(input.checkDeaggregatorTaskDef());
+        addTaskDef(allTaskDefs, input.checkTaskDef(), input.baseCheckTaskDef());
+        addTaskDef(allTaskDefs, input.checkMultiTaskDef(), input.baseCheckMultiTaskDef());
+        addTaskDef(allTaskDefs, input.checkAggregatorTaskDef(), input.baseCheckAggregatorTaskDef());
+        addTaskDef(allTaskDefs, input.checkDeaggregatorTaskDef(), input.baseCheckDeaggregatorTaskDef());
 
         // Class files
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
@@ -278,6 +282,13 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         }
 
         return None.instance;
+    }
+
+    private void addTaskDef(Collection<TypeInfo> taskDefs, TypeInfo taskDef, TypeInfo base) {
+        taskDefs.add(taskDef);
+        if(!taskDef.equals(base)) {
+            taskDefs.add(base);
+        }
     }
 
 

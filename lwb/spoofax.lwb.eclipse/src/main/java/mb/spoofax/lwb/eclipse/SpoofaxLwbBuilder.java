@@ -181,7 +181,6 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
     }
 
     private CompileLanguage.Args createCompileArgs(ResourcePath rootDirectory) {
-        // OPTO: only scan for classpath once?
         final List<File> classPath = ClassPathUtil.getClassPath();
         logger.trace("Using class path: {}", classPath);
         return CompileLanguage.Args.builder()

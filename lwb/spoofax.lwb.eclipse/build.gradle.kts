@@ -28,6 +28,7 @@ dependencies {
   bundleImplementation(project(":esv.eclipse"))
   bundleImplementation(project(":stratego.eclipse"))
   bundleImplementation(project(":statix.eclipse"))
+  bundleImplementation(project(":spt.eclipse"))
 
   bundleImplementation(project(":libspoofax2.eclipse"))
   bundleImplementation(project(":libstatix.eclipse"))
@@ -77,6 +78,9 @@ dependencies {
     exclude("com.google.dagger", "dagger-compiler")
   }
 
+  // Embed `:spt.dynamicloading`.
+  bundleEmbedImplementation(project(":spt.dynamicloading"))
+
   // Embed `org.metaborg:pie.task.archive` and `org.metaborg:pie.task.java`
   bundleEmbedImplementation("org.metaborg:pie.task.archive")
   bundleEmbedImplementation("org.metaborg:pie.task.java")
@@ -93,6 +97,8 @@ val privatePackage = listOf(
   "mb.spoofax.lwb.compiler.*;-split-package:=merge-first",
   // Embed `mb.spoofax.lwb`, `mb.spoofax.lwb.dynamicloading`, and co.
   "mb.spoofax.lwb.*",
+  // Embed `mb.spt.dynamicloading`
+  "mb.spt.dynamicloading.*",
   // Embed `javax.inject`
   "javax.inject.*",
   // Embed `org.checkerframework:checker-qual-android`

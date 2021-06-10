@@ -60,12 +60,6 @@ public class {{baseModule.id}} {
     @Provides @Named("artifactId") String provideArtifactId() {
         return "{{adapterProject.project.coordinate.artifactId}}";
     }
-{{#adapterProject.project.coordinate.version}}
-
-    @Provides @Named("version") String provideVersion() {
-        return "{{adapterProject.project.coordinate.version}}";
-    }
-{{/adapterProject.project.coordinate.version}}
 
     @Provides @Named("packageId") String providePackageId() {
         return "{{adapterProject.packageId}}";
