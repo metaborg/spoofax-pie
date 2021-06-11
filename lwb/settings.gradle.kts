@@ -53,6 +53,7 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
   includeProject("statix.intellij")
 }
 "metalang/spt".run {
+  includeProject("spt.api")
   includeProject("spt")
   includeProject("spt.dynamicloading")
   includeProject("spt.cli")

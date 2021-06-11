@@ -1,5 +1,6 @@
 package mb.chars;
 
+import mb.aterm.common.TermToString;
 import mb.chars.task.CharsParse;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
@@ -7,7 +8,6 @@ import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
-import mb.stratego.common.StrategoUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
@@ -67,7 +67,7 @@ public class CharsDebugRemoveA implements TaskDef<CharsDebugRemoveA.Args, Comman
         return context
             .require(removeA, parse.inputBuilder().withFile(file).buildAstSupplier())
             .mapOrElse(
-                ast -> CommandFeedback.of(ShowFeedback.showText(StrategoUtil.toString(ast), "A characters removed from '" + file + "'")),
+                ast -> CommandFeedback.of(ShowFeedback.showText(TermToString.toString(ast), "A characters removed from '" + file + "'")),
                 e -> CommandFeedback.ofTryExtractMessagesFrom(e, file)
             );
     }

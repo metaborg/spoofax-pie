@@ -1,5 +1,6 @@
 package mb.str.task.debug;
 
+import mb.aterm.common.TermToString;
 import mb.common.region.Region;
 import mb.jsglr.common.TermTracer;
 import mb.pie.api.ExecContext;
@@ -11,7 +12,6 @@ import mb.spoofax.core.language.command.ShowFeedback;
 import mb.str.StrategoScope;
 import mb.str.task.StrategoParse;
 import mb.stratego.common.StrategoRuntime;
-import mb.stratego.common.StrategoUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
@@ -46,7 +46,7 @@ public class StrategoShowDesugaredAst implements TaskDef<StrategoShowArgs, Comma
                     return ast;
                 }
             })
-            .mapCatching(ast -> StrategoUtil.toString(strategoRuntimeProvider.get().invoke("basic-desugar-top", ast)))
+            .mapCatching(ast -> TermToString.toString(strategoRuntimeProvider.get().invoke("basic-desugar-top", ast)))
             .mapOrElse(text -> CommandFeedback.of(ShowFeedback.showText(text, "Desugared AST for '" + key + "'")), e -> CommandFeedback.ofTryExtractMessagesFrom(e, key));
     }
 

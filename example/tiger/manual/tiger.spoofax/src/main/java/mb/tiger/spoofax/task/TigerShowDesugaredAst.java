@@ -1,5 +1,6 @@
 package mb.tiger.spoofax.task;
 
+import mb.aterm.common.TermToString;
 import mb.common.region.Region;
 import mb.jsglr.common.TermTracer;
 import mb.pie.api.ExecContext;
@@ -9,7 +10,6 @@ import mb.resource.ResourceKey;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
 import mb.stratego.common.StrategoRuntime;
-import mb.stratego.common.StrategoUtil;
 import mb.tiger.spoofax.TigerScope;
 import mb.tiger.spoofax.task.reusable.TigerParse;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -46,7 +46,7 @@ public class TigerShowDesugaredAst implements TaskDef<TigerShowArgs, CommandFeed
                     return ast;
                 }
             })
-            .mapCatching(ast -> StrategoUtil.toString(strategoRuntimeProvider.get().invoke("desugar-all", ast)))
+            .mapCatching(ast -> TermToString.toString(strategoRuntimeProvider.get().invoke("desugar-all", ast)))
             .mapOrElse(text -> CommandFeedback.of(ShowFeedback.showText(text, "Desugared AST for '" + key + "'")), e -> CommandFeedback.ofTryExtractMessagesFrom(e, key));
     }
 

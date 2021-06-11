@@ -52,6 +52,7 @@ public class ParserLanguageCompiler implements TaskDef<ParserLanguageCompiler.In
 
     public ListView<GradleConfiguredDependency> getDependencies(Input input) {
         return ListView.of(
+            GradleConfiguredDependency.api(input.shared().atermCommonDep()),
             GradleConfiguredDependency.api(input.shared().jsglrCommonDep()),
             GradleConfiguredDependency.api(input.jsglrVersion() == JsglrVersion.V1 ? input.shared().jsglr1CommonDep() : input.shared().jsglr2CommonDep())
         );

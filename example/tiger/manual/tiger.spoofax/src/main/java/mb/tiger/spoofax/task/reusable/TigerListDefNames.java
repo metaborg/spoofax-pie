@@ -1,11 +1,11 @@
 package mb.tiger.spoofax.task.reusable;
 
+import mb.aterm.common.TermToString;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.stratego.common.StrategoRuntime;
-import mb.stratego.common.StrategoUtil;
 import mb.tiger.spoofax.TigerScope;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -27,6 +27,6 @@ public class TigerListDefNames implements TaskDef<Supplier<? extends Result<IStr
     @Override
     public Result<String, ?> exec(ExecContext context, Supplier<? extends Result<IStrategoTerm, ?>> astSupplier) throws Exception {
         return context.require(astSupplier)
-            .mapCatching((ast) -> StrategoUtil.toString(strategoRuntimeProvider.get().invoke("list-of-def-names", ast), Integer.MAX_VALUE));
+            .mapCatching((ast) -> TermToString.toString(strategoRuntimeProvider.get().invoke("list-of-def-names", ast), Integer.MAX_VALUE));
     }
 }

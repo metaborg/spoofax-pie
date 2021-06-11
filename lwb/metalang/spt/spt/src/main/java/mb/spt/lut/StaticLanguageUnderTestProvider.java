@@ -1,4 +1,4 @@
-package mb.spt;
+package mb.spt.lut;
 
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;

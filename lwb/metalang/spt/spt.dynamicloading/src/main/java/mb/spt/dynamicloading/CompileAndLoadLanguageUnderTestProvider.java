@@ -8,7 +8,7 @@ import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.lwb.compiler.CompileLanguage;
 import mb.spoofax.lwb.dynamicloading.DynamicLanguage;
 import mb.spoofax.lwb.dynamicloading.DynamicLoad;
-import mb.spt.LanguageUnderTestProvider;
+import mb.spt.lut.LanguageUnderTestProvider;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.Function;

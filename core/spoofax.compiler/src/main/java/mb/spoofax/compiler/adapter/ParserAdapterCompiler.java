@@ -51,6 +51,7 @@ public class ParserAdapterCompiler implements TaskDef<ParserAdapterCompiler.Inpu
 
     public ListView<GradleConfiguredDependency> getDependencies(Input input) {
         return ListView.of(
+            GradleConfiguredDependency.api(input.shared().atermCommonDep()),
             GradleConfiguredDependency.api(input.shared().jsglrPieDep())
         );
     }

@@ -1,5 +1,6 @@
 package mb.stratego.common;
 
+import mb.aterm.common.TermToString;
 import mb.common.util.ADT;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.core.InterpreterErrorExit;
@@ -61,7 +62,7 @@ public abstract class StrategoException extends Exception {
                 final int count = innerTrace.getSubtermCount();
                 finalTrace = new String[count];
                 for(int i = 0; i < count; i++) {
-                    finalTrace[i] = StrategoUtil.toString(innerTrace.getSubterm(i));
+                    finalTrace[i] = TermToString.toString(innerTrace.getSubterm(i));
                 }
             } else {
                 finalTrace = trace;
@@ -105,7 +106,7 @@ public abstract class StrategoException extends Exception {
         return caseOf()
             .strategyFail((strategyName, input, trace) -> createMessage(strategyName, input, trace, ""))
             .fatalFail((strategyName, input, trace) -> createMessage(strategyName, input, trace, "fatally"))
-            .fatalFailWithTerm((strategyName, input, trace, term) -> createMessage(strategyName, input, trace, " fatally at term:\n\t" + StrategoUtil.toString(term)))
+            .fatalFailWithTerm((strategyName, input, trace, term) -> createMessage(strategyName, input, trace, " fatally at term:\n\t" + TermToString.toString(term)))
             .exitFail((strategyName, input, trace, exitCode) -> createMessage(strategyName, input, trace, "with exit code '" + exitCode + "'"))
             .strategyUndefined((strategyName, input, trace, undefinedStrategyName) -> createMessage(strategyName, input, trace, "because strategy '" + undefinedStrategyName + "' is undefined"))
             .exceptionalFail((strategyName, input, trace, cause) -> createMessage(strategyName, input, trace, "exceptionally"))
@@ -128,7 +129,7 @@ public abstract class StrategoException extends Exception {
             }
         }
         sb.append("\nStratego input term:\n");
-        sb.append(StrategoUtil.toString(input));
+        sb.append(TermToString.toString(input));
         return sb.toString();
     }
 

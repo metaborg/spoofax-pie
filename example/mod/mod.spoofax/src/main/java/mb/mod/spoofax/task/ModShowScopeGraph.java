@@ -1,5 +1,6 @@
 package mb.mod.spoofax.task;
 
+import mb.aterm.common.TermToString;
 import mb.mod.spoofax.ModScope;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Task;
@@ -84,7 +85,7 @@ public class ModShowScopeGraph implements TaskDef<ModShowScopeGraph.Args, Comman
                 final StrategoRuntime strategoRuntime = strategoRuntimeProvider.get().addContextObject(output.context);
                 final ITermFactory termFactory = strategoRuntime.getTermFactory();
                 final IStrategoTerm inputTerm = StrategoUtil.createLegacyBuilderInputTerm(strategoRuntime.getTermFactory(), output.result.ast, file.asString(), project.asString());
-                return StrategoUtil.toString(strategoRuntime.invoke("stx--show-scopegraph", inputTerm));
+                return TermToString.toString(strategoRuntime.invoke("stx--show-scopegraph", inputTerm));
             })
             .mapOrElse(text -> CommandFeedback.of(ShowFeedback.showText(text, "Scope graph for '" + file + "'")), e -> CommandFeedback.ofTryExtractMessagesFrom(e, file));
     }

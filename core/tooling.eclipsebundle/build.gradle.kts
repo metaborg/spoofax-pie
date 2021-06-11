@@ -13,6 +13,7 @@ dependencies {
 
   bundleApi(project(":spoofax.eclipse"))
 
+  bundleEmbedApi(project(":aterm.common"))
   bundleEmbedApi(project(":constraint.common"))
   bundleEmbedApi(project(":constraint.pie"))
   bundleEmbedApi(project(":esv.common"))

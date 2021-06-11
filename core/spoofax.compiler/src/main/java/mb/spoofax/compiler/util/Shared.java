@@ -214,6 +214,10 @@ public interface Shared extends Serializable {
 
     /// Spoofax 3.x
 
+    @Value.Default default GradleDependency atermCommonDep() {
+        return GradleDependency.module(Coordinate.of("org.metaborg", "aterm.common", spoofax3Version()));
+    }
+
     @Value.Default default GradleDependency completionsCommonDep() {
         return GradleDependency.module(Coordinate.of("org.metaborg", "completions.common", spoofax3Version()));
     }

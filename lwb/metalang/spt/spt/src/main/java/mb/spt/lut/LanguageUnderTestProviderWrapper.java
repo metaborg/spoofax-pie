@@ -1,5 +1,6 @@
-package mb.spt;
+package mb.spt.lut;
 
+import mb.spt.SptScope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;

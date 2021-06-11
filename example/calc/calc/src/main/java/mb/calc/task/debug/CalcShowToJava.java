@@ -1,5 +1,6 @@
 package mb.calc.task.debug;
 
+import mb.aterm.common.TermToString;
 import mb.calc.task.CalcAnalyze;
 import mb.calc.task.CalcParse;
 import mb.calc.task.CalcToJava;
@@ -9,7 +10,6 @@ import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
-import mb.stratego.common.StrategoUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
@@ -63,7 +63,7 @@ public class CalcShowToJava implements TaskDef<CalcShowToJava.Args, CommandFeedb
         return context
             .require(calcToJava, analyze.createSupplier(new ConstraintAnalyzeTaskDef.Input(file, parse.inputBuilder().withFile(file).buildAstSupplier())))
             .mapOrElse(
-                ast -> CommandFeedback.of(ShowFeedback.showText(StrategoUtil.toString(ast), "Java implementation of '" + file + "'")),
+                ast -> CommandFeedback.of(ShowFeedback.showText(TermToString.toString(ast), "Java implementation of '" + file + "'")),
                 e -> CommandFeedback.ofTryExtractMessagesFrom(e, file)
             );
     }

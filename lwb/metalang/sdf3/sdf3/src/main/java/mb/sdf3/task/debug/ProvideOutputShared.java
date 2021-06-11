@@ -1,5 +1,6 @@
 package mb.sdf3.task.debug;
 
+import mb.aterm.common.TermToString;
 import mb.common.util.StringUtil;
 import mb.pie.api.ExecContext;
 import mb.pie.api.None;
@@ -9,7 +10,6 @@ import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
 import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
-import mb.stratego.common.StrategoUtil;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 class ProvideOutputShared {
@@ -32,12 +32,12 @@ class ProvideOutputShared {
             try {
                 final StrategoRuntime strategoRuntime = context.require(getStrategoRuntimeProvider, None.instance).getValue().get();
                 final IStrategoTerm text = strategoRuntime.invoke(prettyPrintStrategy, ast);
-                return CommandFeedback.of(ShowFeedback.showText(StrategoUtil.toString(text), getName(isConcrete, file)));
+                return CommandFeedback.of(ShowFeedback.showText(TermToString.toString(text), getName(isConcrete, file)));
             } catch(StrategoException e) {
                 return CommandFeedback.of(new Exception("Pretty-printing '" + resultName + "' AST failed", e));
             }
         } else {
-            return CommandFeedback.of(ShowFeedback.showText(StrategoUtil.toString(ast), getName(isConcrete, file)));
+            return CommandFeedback.of(ShowFeedback.showText(TermToString.toString(ast), getName(isConcrete, file)));
         }
     }
 }

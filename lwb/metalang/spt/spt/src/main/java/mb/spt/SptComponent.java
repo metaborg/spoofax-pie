@@ -4,11 +4,13 @@ import dagger.Component;
 import mb.log.dagger.LoggerComponent;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.core.platform.PlatformComponent;
+import mb.spt.lut.LanguageUnderTestProviderWrapper;
 
 @SptScope
 @Component(
     modules = {
         SptModule.class,
+        SptExpectationFromTermsModule.class,
     },
     dependencies = {
         LoggerComponent.class,

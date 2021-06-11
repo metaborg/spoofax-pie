@@ -1,5 +1,6 @@
 package mb.sdf3.task.debug;
 
+import mb.aterm.common.TermToString;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
@@ -10,7 +11,6 @@ import mb.sdf3.task.spec.Sdf3SpecToParseTable;
 import mb.sdf3.task.spoofax.Sdf3SpecConfigFunctionWrapper;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
-import mb.stratego.common.StrategoUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.sdf2table.io.ParseTableIO;
 import org.metaborg.sdf2table.parsetable.ParseTable;
@@ -82,7 +82,7 @@ public class Sdf3ShowSpecParseTable implements TaskDef<Sdf3ShowSpecParseTable.Ar
         return parseTableResult
             .mapCatching(ParseTableIO::generateATerm)
             .mapOrElse(
-                ast -> CommandFeedback.of(ShowFeedback.showText(StrategoUtil.toString(ast), name)),
+                ast -> CommandFeedback.of(ShowFeedback.showText(TermToString.toString(ast), name)),
                 e -> CommandFeedback.ofTryExtractMessagesFrom(e, args.root)
             );
     }

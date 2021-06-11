@@ -7,7 +7,7 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.lwb.dynamicloading.DynamicLanguage;
 import mb.spoofax.lwb.dynamicloading.DynamicLanguageRegistry;
-import mb.spt.LanguageUnderTestProvider;
+import mb.spt.lut.LanguageUnderTestProvider;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class DynamicLanguageRegistryLanguageUnderTestProvider implements LanguageUnderTestProvider {

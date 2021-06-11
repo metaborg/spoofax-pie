@@ -1,5 +1,6 @@
 package mb.str.task.debug;
 
+import mb.aterm.common.TermToString;
 import mb.common.region.Region;
 import mb.jsglr.common.TermTracer;
 import mb.pie.api.ExecContext;
@@ -10,7 +11,6 @@ import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
 import mb.str.StrategoScope;
 import mb.str.task.StrategoParse;
-import mb.stratego.common.StrategoUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
@@ -39,7 +39,7 @@ public class StrategoShowParsedAst implements TaskDef<StrategoShowArgs, CommandF
                     return ast;
                 }
             })
-            .map(StrategoUtil::toString)
+            .map(TermToString::toString)
             .mapOrElse(text -> CommandFeedback.of(ShowFeedback.showText(text, "Parsed AST for '" + key + "'")), e -> CommandFeedback.ofTryExtractMessagesFrom(e, key));
     }
 

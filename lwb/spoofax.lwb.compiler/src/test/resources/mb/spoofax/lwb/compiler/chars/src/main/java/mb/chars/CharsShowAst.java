@@ -1,12 +1,12 @@
 package mb.chars;
 
+import mb.aterm.common.TermToString;
 import mb.chars.task.CharsParse;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
-import mb.stratego.common.StrategoUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
@@ -56,7 +56,7 @@ public class CharsShowAst implements TaskDef<CharsShowAst.Args, CommandFeedback>
         return context
             .require(parse.inputBuilder().withFile(file).buildAstSupplier())
             .mapOrElse(
-                ast -> CommandFeedback.of(ShowFeedback.showText(StrategoUtil.toString(ast), "Parsed AST of '" + file + "'")),
+                ast -> CommandFeedback.of(ShowFeedback.showText(TermToString.toString(ast), "Parsed AST of '" + file + "'")),
                 e -> CommandFeedback.ofTryExtractMessagesFrom(e, file)
             );
     }

@@ -1,5 +1,6 @@
 package mb.tiger.spoofax.task;
 
+import mb.aterm.common.TermToString;
 import mb.common.region.Region;
 import mb.jsglr.common.TermTracer;
 import mb.pie.api.ExecContext;
@@ -8,7 +9,6 @@ import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
-import mb.stratego.common.StrategoUtil;
 import mb.tiger.spoofax.TigerScope;
 import mb.tiger.spoofax.task.reusable.TigerAnalyze;
 import mb.tiger.spoofax.task.reusable.TigerParse;
@@ -41,7 +41,7 @@ public class TigerShowAnalyzedAst implements TaskDef<TigerShowArgs, CommandFeedb
                     return output.result.ast;
                 }
             })
-            .map(StrategoUtil::toString)
+            .map(TermToString::toString)
             .mapOrElse(text -> CommandFeedback.of(ShowFeedback.showText(text, "Analyzed AST for '" + key + "'")), e -> CommandFeedback.ofTryExtractMessagesFrom(e, key));
     }
 
