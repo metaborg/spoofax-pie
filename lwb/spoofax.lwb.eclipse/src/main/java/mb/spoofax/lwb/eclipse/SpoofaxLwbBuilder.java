@@ -14,6 +14,7 @@ import mb.pie.dagger.PieComponent;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.eclipse.SpoofaxPlugin;
+import mb.spoofax.eclipse.pie.MonitorCancelableToken;
 import mb.spoofax.eclipse.resource.EclipseResourcePath;
 import mb.spoofax.lwb.compiler.CompileLanguage;
 import mb.spoofax.lwb.compiler.CompileLanguageException;
@@ -90,7 +91,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         logger.debug("Running full language build of {}", rootDirectory);
         final PieComponent pieComponent = SpoofaxLwbLifecycleParticipant.getInstance().getPieComponent();
         try(final MixedSession session = pieComponent.getPie().newSession()) {
-            topDownBuild(rootDirectory, session, createCompileTask(rootDirectory), monitor);
+            topDownBuild(rootDirectory, session, monitor);
         } catch(ExecException e) {
             cancel(monitor);
             throw toCoreException(rootDirectory, e);
@@ -102,13 +103,8 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         final ResourcePath rootDirectory = getResourcePath(eclipseProject);
         logger.debug("Running incremental language build of {}", rootDirectory);
         final PieComponent pieComponent = SpoofaxLwbLifecycleParticipant.getInstance().getPieComponent();
-        final Task<Result<CompileLanguage.Output, CompileLanguageException>> compileTask = createCompileTask(rootDirectory);
         try(final MixedSession session = pieComponent.newSession()) {
-            if(!pieComponent.getPie().hasBeenExecuted(compileTask) || !session.isObserved(compileTask)) {
-                topDownBuild(rootDirectory, session, compileTask, monitor);
-            } else {
-                bottomUpBuild(rootDirectory, delta, session, monitor);
-            }
+            bottomUpBuild(rootDirectory, delta, session, monitor);
         } catch(ExecException e) {
             cancel(monitor);
             throw toCoreException(rootDirectory, e);
@@ -119,17 +115,17 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
     private void topDownBuild(
         ResourcePath rootDirectory,
         MixedSession session,
-        Task<Result<CompileLanguage.Output, CompileLanguageException>> compileTask,
         @Nullable IProgressMonitor monitor
     ) throws InterruptedException, CoreException, ExecException {
         logger.debug("Top-down language build of {}", rootDirectory);
+
         final KeyedMessages messages = session.require(createCheckTask(rootDirectory));
         if(messages.containsError()) {
             logger.debug("Checking language specification revealed errors; skipping compilation");
             return;
         }
 
-        final Result<CompileLanguage.Output, CompileLanguageException> result = session.require(compileTask);
+        final Result<CompileLanguage.Output, CompileLanguageException> result = session.require(createCompileTask(rootDirectory));
         handleCompileResult(rootDirectory, result, monitor);
 
         final OutTransient<Result<DynamicLanguage, ?>> dynamicLanguage = session.require(createDynamicLoadTask(rootDirectory));
@@ -156,28 +152,17 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         logger.debug("Bottom-up language build of {} with changed resources {}", rootDirectory, changedResources);
         final TopDownSession topDownSession = session.updateAffectedBy(changedResources);
 
-        final KeyedMessages messages;
-        final Task<KeyedMessages> checkTask = createCheckTask(rootDirectory);
-        if(!topDownSession.hasBeenExecuted(checkTask) || !topDownSession.isObserved(checkTask)) {
-            messages = topDownSession.require(checkTask);
-        } else {
-            messages = topDownSession.getOutput(checkTask);
-        }
+        final MonitorCancelableToken cancelToken = new MonitorCancelableToken(monitor);
+        final KeyedMessages messages = topDownSession.getOutputOrRequireAndEnsureExplicitlyObserved(createCheckTask(rootDirectory), cancelToken);
         if(messages.containsError()) {
-            logger.debug("Checking language specification revealed errors; skipping handling of compile result");
+            logger.debug("Checking language specification revealed errors; skipping handling of compile and dynamic load result");
             return;
         }
 
-        final Result<CompileLanguage.Output, CompileLanguageException> result = topDownSession.getOutput(createCompileTask(rootDirectory));
+        final Result<CompileLanguage.Output, CompileLanguageException> result = topDownSession.getOutputOrRequireAndEnsureExplicitlyObserved(createCompileTask(rootDirectory), cancelToken);
         handleCompileResult(rootDirectory, result, monitor);
 
-        final Task<OutTransient<Result<DynamicLanguage, ?>>> dynamicLoadTask = createDynamicLoadTask(rootDirectory);
-        final OutTransient<Result<DynamicLanguage, ?>> dynamicLanguage;
-        if(!topDownSession.hasBeenExecuted(dynamicLoadTask) || !topDownSession.isObserved(dynamicLoadTask)) {
-            dynamicLanguage = topDownSession.require(dynamicLoadTask);
-        } else {
-            dynamicLanguage = topDownSession.getOutput(dynamicLoadTask);
-        }
+        final OutTransient<Result<DynamicLanguage, ?>> dynamicLanguage = topDownSession.getOutputOrRequireAndEnsureExplicitlyObserved(createDynamicLoadTask(rootDirectory), cancelToken);
         handleDynamicLoadResult(dynamicLanguage);
     }
 

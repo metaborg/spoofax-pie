@@ -2,6 +2,7 @@ package mb.spoofax.eclipse.pie;
 
 import mb.pie.api.exec.Cancelable;
 import mb.pie.api.exec.CancelToken;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 
@@ -17,7 +18,7 @@ public final class MonitorCancelableToken implements CancelToken, Cancelable {
      *
      * @param monitor The progress monitor to monitor; or {@code null}.
      */
-    public MonitorCancelableToken(IProgressMonitor monitor) {
+    public MonitorCancelableToken(@Nullable IProgressMonitor monitor) {
         this.monitor = SubMonitor.convert(monitor);
     }
 
