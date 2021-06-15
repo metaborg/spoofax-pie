@@ -17,6 +17,7 @@ dependencies {
   api(compositeBuild("aterm.common"))
   api(compositeBuild("jsglr.pie"))
   api(compositeBuild("constraint.pie"))
+  api(compositeBuild("spt.api"))
   api("org.metaborg:pie.api")
   api("org.metaborg:pie.dagger")
   api("com.google.dagger:dagger")

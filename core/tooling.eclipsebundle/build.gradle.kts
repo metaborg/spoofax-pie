@@ -26,6 +26,7 @@ dependencies {
   bundleEmbedApi(project(":statix.common"))
   bundleEmbedApi(project(":stratego.common"))
   bundleEmbedApi(project(":stratego.pie"))
+  bundleEmbedApi(project(":spt.api"))
 
   bundleEmbedApi(project(":spoofax.compiler.interfaces"))
 }

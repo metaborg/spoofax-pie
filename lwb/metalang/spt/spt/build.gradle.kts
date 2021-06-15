@@ -10,8 +10,9 @@ plugins {
   id("org.metaborg.spoofax.compiler.gradle.adapter")
 }
 
+fun compositeBuild(name: String) = "$group:$name:$version"
 dependencies {
-  api(project(":spt.api"))
+  api(compositeBuild("spt.api"))
 
   // Required because @Nullable has runtime retention (which includes classfile retention), and the Java compiler requires access to it.
   compileOnly("com.google.code.findbugs:jsr305")
@@ -28,10 +29,7 @@ languageProject {
       startSymbol("TestSuite")
     }
     withStyler()
-    withStrategoRuntime().run {
-      addStrategyPackageIds("org.metaborg.meta.lang.spt.trans")
-      addInteropRegisterersByReflection("org.metaborg.meta.lang.spt.trans.InteropRegisterer")
-    }
+    withStrategoRuntime()
   }
 }
 spoofax2BasedLanguageProject {

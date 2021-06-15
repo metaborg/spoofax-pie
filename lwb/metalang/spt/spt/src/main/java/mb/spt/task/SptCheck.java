@@ -7,20 +7,30 @@ import mb.common.util.MapView;
 import mb.jsglr.common.JsglrParseException;
 import mb.jsglr.common.JsglrParseOutput;
 import mb.pie.api.ExecContext;
+import mb.pie.api.MixedSession;
+import mb.pie.api.None;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.core.language.LanguageComponent;
-import mb.spt.fromterm.TestExpectationFromTerm;
-import mb.spt.lut.LanguageUnderTestProviderWrapper;
 import mb.spt.SptClassLoaderResources;
 import mb.spt.SptScope;
+import mb.spt.api.model.LanguageUnderTest;
+import mb.spt.api.model.TestCase;
+import mb.spt.api.model.TestExpectation;
+import mb.spt.api.model.TestSuite;
+import mb.spt.fromterm.FromTermException;
+import mb.spt.fromterm.TestExpectationFromTerm;
+import mb.spt.fromterm.TestSuiteFromTerm;
+import mb.spt.lut.LanguageUnderTestProviderWrapper;
+import mb.stratego.common.StrategoException;
+import mb.stratego.common.StrategoRuntime;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoConstructor;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Optional;
 
@@ -60,6 +70,7 @@ public class SptCheck implements TaskDef<SptCheck.Input, KeyedMessages> {
 
     private final SptClassLoaderResources classLoaderResources;
     private final SptParse parse;
+    private final SptGetStrategoRuntimeProvider getStrategoRuntimeProvider;
     private final LanguageUnderTestProviderWrapper wrapper;
     private final MapView<IStrategoConstructor, TestExpectationFromTerm> testExpectationFromTerms;
 
@@ -67,11 +78,13 @@ public class SptCheck implements TaskDef<SptCheck.Input, KeyedMessages> {
     @Inject public SptCheck(
         SptClassLoaderResources classLoaderResources,
         SptParse parse,
+        SptGetStrategoRuntimeProvider getStrategoRuntimeProvider,
         LanguageUnderTestProviderWrapper wrapper,
         MapView<IStrategoConstructor, TestExpectationFromTerm> testExpectationFromTerms
     ) {
         this.classLoaderResources = classLoaderResources;
         this.parse = parse;
+        this.getStrategoRuntimeProvider = getStrategoRuntimeProvider;
         this.wrapper = wrapper;
         this.testExpectationFromTerms = testExpectationFromTerms;
     }
@@ -81,12 +94,12 @@ public class SptCheck implements TaskDef<SptCheck.Input, KeyedMessages> {
         return getClass().getName();
     }
 
-    @Override public KeyedMessages exec(ExecContext context, Input input) throws Exception {
+    @Override public KeyedMessages exec(ExecContext context, Input input) throws IOException, InterruptedException {
         context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
         final mb.jsglr.pie.JsglrParseTaskInput.Builder parseInputBuilder = parse.inputBuilder().withFile(input.file).rootDirectoryHint(Optional.ofNullable(input.rootDirectoryHint));
         final Result<JsglrParseOutput, JsglrParseException> parseResult = context.require(parse, parseInputBuilder.build());
-        parseResult.ifElse(o -> {
+        parseResult.ifThrowingElse(o -> {
                 messagesBuilder.addMessages(o.messages);
                 runTests(context, messagesBuilder, input.file, input.rootDirectoryHint, o.ast);
             },
@@ -102,20 +115,39 @@ public class SptCheck implements TaskDef<SptCheck.Input, KeyedMessages> {
         ResourceKey file,
         @Nullable ResourcePath rootDirectoryHint,
         IStrategoTerm ast
-    ) {
-        // TODO: extract language id hint from AST.
-        final Result<LanguageComponent, ?> languageUnderTestResult = wrapper.get().provide(context, file, rootDirectoryHint, null);
-        languageUnderTestResult.ifElse(lc -> runTests(context, lc, messagesBuilder, file, rootDirectoryHint, ast), messagesBuilder::extractMessagesRecursively);
+    ) throws InterruptedException {
+        final IStrategoTerm desugaredAst;
+        try {
+            final StrategoRuntime strategoRuntime = context.require(getStrategoRuntimeProvider, None.instance).getValue().get();
+            desugaredAst = strategoRuntime.invoke("desugar-before", ast);
+        } catch(StrategoException e) {
+            messagesBuilder.extractMessagesRecursivelyWithFallbackKey(e, file);
+            return;
+        }
+
+        final TestSuite testSuite;
+        try {
+            testSuite = TestSuiteFromTerm.testSuiteFromTerm(desugaredAst, testExpectationFromTerms, file, rootDirectoryHint);
+        } catch(FromTermException e) {
+            messagesBuilder.extractMessagesRecursivelyWithFallbackKey(e, file);
+            return;
+        }
+
+        final Result<LanguageUnderTest, ?> languageUnderTestResult = wrapper.get().provide(context, file, rootDirectoryHint, testSuite.languageIdHint);
+        languageUnderTestResult.ifThrowingElse(lc -> runTests(lc, messagesBuilder, testSuite), messagesBuilder::extractMessagesRecursively);
     }
 
     private void runTests(
-        ExecContext context,
-        LanguageComponent languageComponent,
+        LanguageUnderTest languageUnderTest,
         KeyedMessagesBuilder messagesBuilder,
-        ResourceKey file,
-        @Nullable ResourcePath rootDirectoryHint,
-        IStrategoTerm ast
-    ) {
-        // TODO: run tests.
+        TestSuite testSuite
+    ) throws InterruptedException {
+        try(final MixedSession session = languageUnderTest.getPieComponent().newSession()) {
+            for(TestCase testCase : testSuite.testCases) {
+                for(TestExpectation expectation : testCase.expectations) {
+                    messagesBuilder.addMessages(expectation.evaluate(languageUnderTest, session, testCase));
+                }
+            }
+        }
     }
 }

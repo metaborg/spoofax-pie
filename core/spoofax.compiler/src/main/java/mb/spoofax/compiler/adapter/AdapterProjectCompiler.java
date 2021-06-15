@@ -306,6 +306,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         input.parser().ifPresent((i) -> parserCompiler.getDependencies(i).addAllTo(dependencies));
         input.constraintAnalyzer().ifPresent((i) -> constraintAnalyzerCompiler.getDependencies(i).addAllTo(dependencies));
         input.strategoRuntime().ifPresent((i) -> strategoRuntimeCompiler.getDependencies(i).addAllTo(dependencies));
+        dependencies.add(GradleConfiguredDependency.api(shared.sptApiDep()));
         return dependencies;
     }
 

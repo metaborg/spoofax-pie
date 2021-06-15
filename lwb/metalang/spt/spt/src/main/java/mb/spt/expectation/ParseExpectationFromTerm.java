@@ -1,9 +1,10 @@
 package mb.spt.expectation;
 
+import mb.common.option.Option;
 import mb.common.region.Region;
 import mb.common.util.SetView;
 import mb.jsglr.common.TermTracer;
-import mb.spt.api.parse.ParseResult;
+import mb.spt.api.parse.ExpectedParseResult;
 import mb.spt.fromterm.FromTermException;
 import mb.spt.fromterm.TestExpectationFromTerm;
 import mb.spt.api.model.TestExpectation;
@@ -22,7 +23,7 @@ public class ParseExpectationFromTerm implements TestExpectationFromTerm {
     }
 
     @Override public TestExpectation convert(IStrategoAppl term) throws FromTermException {
-        final ParseResult expected = convertParseResult(term);
+        final ExpectedParseResult expected = convertParseResult(term);
         final @Nullable Region sourceRegion = TermTracer.getRegion(term);
         if(sourceRegion == null) {
             throw new FromTermException("Cannot convert term '" + term + "' to a ParseExpectation; term has no location information");
@@ -30,18 +31,18 @@ public class ParseExpectationFromTerm implements TestExpectationFromTerm {
         return new ParseExpectation(expected, sourceRegion);
     }
 
-    private ParseResult convertParseResult(IStrategoAppl term) throws FromTermException {
+    private ExpectedParseResult convertParseResult(IStrategoAppl term) throws FromTermException {
         final IStrategoConstructor constructor = term.getConstructor();
         if(constructor.getArity() > 0) {
             throw new FromTermException("Cannot convert term '" + term + "' to a ParseExpectation; term is not a valid parse expectation (arity > 0)");
         }
         switch(constructor.getName()) {
             case "ParseSucceeds":
-                return new ParseResult(true, false, false);
+                return new ExpectedParseResult(true, Option.ofNone(), Option.ofNone());
             case "ParseFails":
-                return new ParseResult(false, false, false);
+                return new ExpectedParseResult(false, Option.ofNone(), Option.ofNone());
             case "ParseAmbiguous":
-                return new ParseResult(true, false, true);
+                return new ExpectedParseResult(true, Option.ofNone(), Option.ofSome(true));
             default:
                 throw new FromTermException("Cannot convert term '" + term + "' to a ParseExpectation; term is not a valid parse expectation (no matching constructor)");
         }

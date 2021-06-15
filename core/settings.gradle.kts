@@ -27,6 +27,7 @@ include("nabl2.common")
 include("statix.common")
 include("statix.multilang")
 include("statix.multilang.eclipse")
+include("spt.api")
 include("spoofax2.common")
 include("tooling.eclipsebundle")
 

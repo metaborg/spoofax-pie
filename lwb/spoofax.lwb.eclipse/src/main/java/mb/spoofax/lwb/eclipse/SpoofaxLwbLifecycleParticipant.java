@@ -38,7 +38,7 @@ import mb.spoofax.lwb.eclipse.compiler.EclipseSpoofax3CompilerComponent;
 import mb.spoofax.lwb.eclipse.dynamicloading.DaggerEclipseDynamicLoadingComponent;
 import mb.spoofax.lwb.eclipse.dynamicloading.EclipseDynamicLoadingComponent;
 import mb.spoofax.lwb.eclipse.util.ClassPathUtil;
-import mb.spt.dynamicloading.CompileAndLoadLanguageUnderTestProvider;
+import mb.spt.dynamicloading.DynamicLanguageUnderTestProvider;
 import mb.spt.eclipse.SptLanguageFactory;
 import mb.statix.eclipse.StatixEclipseComponent;
 import mb.statix.eclipse.StatixLanguageFactory;
@@ -192,10 +192,11 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
                     .spoofax3CompilerComponent(spoofax3Compiler.component)
                     .build();
             }
-            SptLanguageFactory.getLanguage().getComponent().getLanguageUnderTestProviderWrapper().set(new CompileAndLoadLanguageUnderTestProvider(
+            SptLanguageFactory.getLanguage().getComponent().getLanguageUnderTestProviderWrapper().set(new DynamicLanguageUnderTestProvider(
+                SpoofaxLwbLifecycleParticipant.getInstance().getDynamicLoadingComponent().getDynamicLanguageRegistry(),
                 SpoofaxLwbLifecycleParticipant.getInstance().getDynamicLoadingComponent().getDynamicLoad(),
                 rootDirectory -> {
-                    // TODO: reduce code completion with SpoofaxLwbBuilder
+                    // TODO: reduce code duplication with SpoofaxLwbBuilder
                     final List<File> classPath = ClassPathUtil.getClassPath();
                     return CompileLanguage.Args.builder()
                         .rootDirectory(rootDirectory)

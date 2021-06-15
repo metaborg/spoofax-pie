@@ -11,7 +11,13 @@ import mb.common.util.MapView;
 import mb.common.util.SetView;
 import mb.completions.common.CompletionResult;
 import mb.jsglr.common.JSGLRTokens;
+import mb.jsglr.common.JsglrParseException;
+import mb.jsglr.common.JsglrParseOutput;
+import mb.jsglr.pie.JsglrParseTaskInput;
+import mb.pie.api.ExecException;
+import mb.pie.api.Session;
 import mb.pie.api.Task;
+import mb.pie.api.ValueSupplier;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.LanguageInstance;
@@ -22,6 +28,9 @@ import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.spoofax.core.language.menu.CommandAction;
 import mb.spoofax.core.language.menu.MenuItem;
+import mb.spt.api.model.TestCase;
+import mb.spt.api.parse.ParseResult;
+import mb.spt.api.parse.TestableParse;
 import mb.tiger.spoofax.command.TigerCompileDirectoryCommand;
 import mb.tiger.spoofax.command.TigerCompileFileAltCommand;
 import mb.tiger.spoofax.command.TigerCompileFileCommand;
@@ -41,7 +50,7 @@ import javax.inject.Inject;
 import java.util.Optional;
 import java.util.Set;
 
-public class TigerInstance implements LanguageInstance {
+public class TigerInstance implements LanguageInstance, TestableParse {
     private final static SetView<String> extensions = SetView.of("tig");
 
     private final TigerParse parse;
@@ -117,7 +126,8 @@ public class TigerInstance implements LanguageInstance {
         return tokenize.createTask(resourceKey);
     }
 
-    @Override public Task<Option<Styling>> createStyleTask(ResourceKey resourceKey, @Nullable ResourcePath rootDirectoryHint) {
+    @Override
+    public Task<Option<Styling>> createStyleTask(ResourceKey resourceKey, @Nullable ResourcePath rootDirectoryHint) {
         return style.createTask(parse.inputBuilder().withFile(resourceKey).rootDirectoryHint(Optional.ofNullable(rootDirectoryHint)).buildRecoverableTokensSupplier().map(Result::ok));
     }
 
@@ -242,5 +252,27 @@ public class TigerInstance implements LanguageInstance {
                 )
             )
         );
+    }
+
+
+    @Override
+    public Result<ParseResult, ?> testParse(Session session, TestCase testCase) throws InterruptedException {
+        final Result<JsglrParseOutput, JsglrParseException> result;
+        try {
+            result = session.requireWithoutObserving(parse.createTask(JsglrParseTaskInput.builder()
+                .fileHint(testCase.file)
+                .rootDirectoryHint(Optional.ofNullable(testCase.rootDirectoryHint))
+                .stringSupplier(new ValueSupplier<>(testCase.fragment.asText()))
+                .build()
+            ));
+            return result.mapOrElse(
+                o -> Result.ofOk(new ParseResult(true, o.recovered, o.ambiguous, o.messages)),
+                e -> e.caseOf()
+                    .parseFail_(Result.ofOk(new ParseResult()))
+                    .otherwise_(Result.ofErr(e))
+            );
+        } catch(ExecException e) {
+            return Result.ofErr(e);
+        }
     }
 }

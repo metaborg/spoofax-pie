@@ -302,6 +302,10 @@ public interface Shared extends Serializable {
         return GradleDependency.module(Coordinate.of("org.metaborg", "statix.multilang.eclipse", spoofax3Version()));
     }
 
+    @Value.Default default GradleDependency sptApiDep() {
+        return GradleDependency.module(Coordinate.of("org.metaborg", "spt.api", spoofax3Version()));
+    }
+
 
     default void savePersistentProperties(Properties properties) {
         properties.setProperty(Builder.defaultClassPrefix, defaultClassPrefix());

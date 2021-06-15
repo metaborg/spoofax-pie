@@ -15,8 +15,13 @@ import mb.common.util.SetView;
 import mb.completions.common.CompletionResult;
 import mb.jsglr.common.JSGLRTokens;
 import mb.jsglr.common.JsglrParseException;
+import mb.jsglr.common.JsglrParseOutput;
 import mb.pie.api.StatelessSerializableFunction;
+import mb.pie.api.ExecContext;
+import mb.pie.api.ExecException;
+import mb.pie.api.Session;
 import mb.pie.api.Task;
+import mb.pie.api.ValueSupplier;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.PathResourceMatcher;
@@ -37,6 +42,9 @@ import mb.spoofax.core.language.command.HierarchicalResourceType;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.spoofax.core.language.menu.CommandAction;
 import mb.spoofax.core.language.menu.MenuItem;
+import mb.spt.api.parse.TestableParse;
+import mb.spt.api.parse.ParseResult;
+import mb.spt.api.model.TestCase;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
@@ -45,7 +53,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Set;
 
-public class {{baseInstance.id}} implements LanguageInstance {
+public class {{baseInstance.id}} implements LanguageInstance{{#parseInjection}}, TestableParse{{/parseInjection}} {
     private final static SetView<String> fileExtensions = SetView.of({{#shared.fileExtensions}}"{{this}}"{{^-last}}, {{/-last}}{{/shared.fileExtensions}});
 
 {{#injected}}
@@ -154,6 +162,29 @@ public class {{baseInstance.id}} implements LanguageInstance {
 {{/editorContextMenuItems}}
         );
     }
+{{#parseInjection}}
+
+    @Override
+    public Result<ParseResult, ?> testParse(Session session, TestCase testCase) throws InterruptedException {
+        final Result<JsglrParseOutput, JsglrParseException> result;
+        try {
+            result = session.requireWithoutObserving({{this.name}}.createTask(mb.jsglr.pie.JsglrParseTaskInput.builder()
+                .fileHint(testCase.file)
+                .rootDirectoryHint(Optional.ofNullable(testCase.rootDirectoryHint))
+                .stringSupplier(new ValueSupplier<>(testCase.fragment.asText()))
+                .build()
+            ));
+            return result.mapOrElse(
+                o -> Result.ofOk(new ParseResult(true, o.recovered, o.ambiguous, o.messages)),
+                e -> e.caseOf()
+                    .parseFail_(Result.ofOk(new ParseResult()))
+                    .otherwise_(Result.ofErr(e))
+            );
+        } catch(ExecException e) {
+            return Result.ofErr(e);
+        }
+    }
+{{/parseInjection}}
 }
 
 class TokensResultToOkFunction extends StatelessSerializableFunction<Result<JSGLRTokens, JsglrParseException>, Option<JSGLRTokens>> {

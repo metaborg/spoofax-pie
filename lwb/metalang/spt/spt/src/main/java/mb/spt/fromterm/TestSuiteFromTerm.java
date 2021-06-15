@@ -7,6 +7,7 @@ import mb.jsglr.common.TermTracer;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spt.api.model.Fragment;
+import mb.spt.model.FragmentImpl;
 import mb.spt.api.model.FragmentPart;
 import mb.spt.api.model.TestCase;
 import mb.spt.api.model.TestExpectation;
@@ -35,7 +36,7 @@ public class TestSuiteFromTerm {
 
         String name = "";
         @Nullable String languageIdHint = null;
-        final IStrategoList headers = TermUtils.asListAt(appl, 1).orElseThrow(() -> new InvalidAstShapeException("a term list as first subterm", appl));
+        final IStrategoList headers = TermUtils.asListAt(appl, 0).orElseThrow(() -> new InvalidAstShapeException("a term list as first subterm", appl));
         for(IStrategoTerm header : headers) {
             if(TermUtils.isAppl(header, "Name", 1)) {
                 name = TermUtils.asJavaStringAt(header, 0).orElseThrow(() -> new InvalidAstShapeException("a string as first subterm", header));
@@ -85,7 +86,7 @@ public class TestSuiteFromTerm {
         return new TestCase(file, rootDirectoryHint, description, descriptionRegion, fragment, ListView.of(testExpectations));
     }
 
-    public static Fragment fragmentFromTerm(IStrategoTerm ast) throws FromTermException {
+    public static FragmentImpl fragmentFromTerm(IStrategoTerm ast) throws FromTermException {
         final @Nullable Region region = TermTracer.getRegion(ast);
         if(region == null) {
             throw new InvalidAstShapeException("a fragment term with location information", ast);
@@ -135,7 +136,7 @@ public class TestSuiteFromTerm {
                 }
             }
         }
-        return new Fragment(region, ListView.of(selections), ListView.of(parts));
+        return new FragmentImpl(region, ListView.of(selections), ListView.of(parts));
     }
 
     public static TestExpectation testExpectationFromTerm(

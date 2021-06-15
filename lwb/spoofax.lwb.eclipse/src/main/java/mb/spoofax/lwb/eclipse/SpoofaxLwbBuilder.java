@@ -90,7 +90,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         logger.debug("Running full language build of {}", rootDirectory);
         final PieComponent pieComponent = SpoofaxLwbLifecycleParticipant.getInstance().getPieComponent();
         try(final MixedSession session = pieComponent.getPie().newSession()) {
-            topDownBuild(rootDirectory, session, monitor);
+            topDownBuild(rootDirectory, session, createCompileTask(rootDirectory), monitor);
         } catch(ExecException e) {
             cancel(monitor);
             throw toCoreException(rootDirectory, e);
@@ -104,8 +104,8 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         final PieComponent pieComponent = SpoofaxLwbLifecycleParticipant.getInstance().getPieComponent();
         final Task<Result<CompileLanguage.Output, CompileLanguageException>> compileTask = createCompileTask(rootDirectory);
         try(final MixedSession session = pieComponent.newSession()) {
-            if(!pieComponent.getPie().hasBeenExecuted(compileTask)) {
-                topDownBuild(rootDirectory, session, monitor);
+            if(!pieComponent.getPie().hasBeenExecuted(compileTask) || !session.isObserved(compileTask)) {
+                topDownBuild(rootDirectory, session, compileTask, monitor);
             } else {
                 bottomUpBuild(rootDirectory, delta, session, monitor);
             }
@@ -116,7 +116,12 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
     }
 
 
-    private void topDownBuild(ResourcePath rootDirectory, MixedSession session, @Nullable IProgressMonitor monitor) throws InterruptedException, CoreException, ExecException {
+    private void topDownBuild(
+        ResourcePath rootDirectory,
+        MixedSession session,
+        Task<Result<CompileLanguage.Output, CompileLanguageException>> compileTask,
+        @Nullable IProgressMonitor monitor
+    ) throws InterruptedException, CoreException, ExecException {
         logger.debug("Top-down language build of {}", rootDirectory);
         final KeyedMessages messages = session.require(createCheckTask(rootDirectory));
         if(messages.containsError()) {
@@ -124,14 +129,19 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
             return;
         }
 
-        final Result<CompileLanguage.Output, CompileLanguageException> result = session.require(createCompileTask(rootDirectory));
+        final Result<CompileLanguage.Output, CompileLanguageException> result = session.require(compileTask);
         handleCompileResult(rootDirectory, result, monitor);
 
         final OutTransient<Result<DynamicLanguage, ?>> dynamicLanguage = session.require(createDynamicLoadTask(rootDirectory));
         handleDynamicLoadResult(dynamicLanguage);
     }
 
-    private void bottomUpBuild(ResourcePath rootDirectory, IResourceDelta delta, MixedSession session, @Nullable IProgressMonitor monitor) throws InterruptedException, CoreException, ExecException {
+    private void bottomUpBuild(
+        ResourcePath rootDirectory,
+        IResourceDelta delta,
+        MixedSession session,
+        @Nullable IProgressMonitor monitor
+    ) throws InterruptedException, CoreException, ExecException {
         final LinkedHashSet<ResourceKey> changedResources = new LinkedHashSet<>();
         delta.accept((d) -> {
             final int kind = d.getKind();
@@ -148,7 +158,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
 
         final KeyedMessages messages;
         final Task<KeyedMessages> checkTask = createCheckTask(rootDirectory);
-        if(!topDownSession.hasBeenExecuted(checkTask)) {
+        if(!topDownSession.hasBeenExecuted(checkTask) || !topDownSession.isObserved(checkTask)) {
             messages = topDownSession.require(checkTask);
         } else {
             messages = topDownSession.getOutput(checkTask);
@@ -163,7 +173,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
 
         final Task<OutTransient<Result<DynamicLanguage, ?>>> dynamicLoadTask = createDynamicLoadTask(rootDirectory);
         final OutTransient<Result<DynamicLanguage, ?>> dynamicLanguage;
-        if(!topDownSession.hasBeenExecuted(dynamicLoadTask)) {
+        if(!topDownSession.hasBeenExecuted(dynamicLoadTask) || !topDownSession.isObserved(dynamicLoadTask)) {
             dynamicLanguage = topDownSession.require(dynamicLoadTask);
         } else {
             dynamicLanguage = topDownSession.getOutput(dynamicLoadTask);
