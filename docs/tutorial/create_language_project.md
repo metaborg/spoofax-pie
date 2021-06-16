@@ -93,14 +93,14 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import mb.common.result.Result;
 import mb.helloworld.HelloWorldClassLoaderResources;
 import mb.helloworld.HelloWorldScope;
-import mb.jsglr.common.JSGLR1ParseException;
+import mb.jsglr.common.JsglrParseException;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
-import mb.stratego.common.StrategoUtil;
+import mb.aterm.common.TermToString;
 
 @HelloWorldScope // (10)
 public class HelloWorldShowParsedAst implements TaskDef<HelloWorldShowParsedAst.Args, CommandFeedback> { // (1)
@@ -137,9 +137,9 @@ public class HelloWorldShowParsedAst implements TaskDef<HelloWorldShowParsedAst.
     public CommandFeedback exec(ExecContext context, Args args) throws Exception { // (3)
         context.require(classloaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile()); // (4)
         final ResourceKey file = args.file;
-        final Result<IStrategoTerm, JSGLR1ParseException> astResult = context.require(parse.inputBuilder().withFile(file).buildAstSupplier()); // (5)
+        final Result<IStrategoTerm, JsglrParseException> astResult = context.require(parse.inputBuilder().withFile(file).buildAstSupplier()); // (5)
         return astResult.mapOrElse( // (6)
-            ast -> CommandFeedback.of(ShowFeedback.showText(StrategoUtil.toString(ast), "Parsed AST for '" + file + "'")),
+            ast -> CommandFeedback.of(ShowFeedback.showText(TermToString.toString(ast), "Parsed AST for '" + file + "'")),
             e -> CommandFeedback.ofTryExtractMessagesFrom(e, file)
         );
     }
@@ -475,7 +475,7 @@ import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
-import mb.stratego.common.StrategoUtil;
+import mb.aterm.common.TermToString;
 
 @HelloWorldScope
 public class HelloWorldShowReplaceWorlds implements TaskDef<HelloWorldShowReplaceWorlds.Args, CommandFeedback> {
@@ -525,7 +525,7 @@ public class HelloWorldShowReplaceWorlds implements TaskDef<HelloWorldShowReplac
         context.require(classloaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
         final ResourceKey file = args.file;
         return context.require(replaceWorlds, parse.inputBuilder().withFile(file).buildAstSupplier()).mapOrElse(
-            ast -> CommandFeedback.of(ShowFeedback.showText(StrategoUtil.toString(ast), "Replaced World()s with Hello()s for '" + file + "'")),
+            ast -> CommandFeedback.of(ShowFeedback.showText(TermToString.toString(ast), "Replaced World()s with Hello()s for '" + file + "'")),
             e -> CommandFeedback.ofTryExtractMessagesFrom(e, file)
         );
     }
