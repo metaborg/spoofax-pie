@@ -1,9 +1,10 @@
-package mb.spt;
+package mb.spt.fromterm;
 
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ElementsIntoSet;
 import mb.common.util.MapView;
+import mb.spt.expectation.CheckExpectationFromTerm;
 import mb.spt.expectation.ParseExpectationFromTerm;
 import mb.spt.fromterm.TestExpectationFromTerm;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -16,11 +17,12 @@ import java.util.Map;
 import java.util.Set;
 
 @Module
-public class SptExpectationFromTermsModule {
+public class ExpectationFromTermsModule {
     @Provides @ElementsIntoSet
     static Set<TestExpectationFromTerm> provideTestExpectationFromTermsIntoSet() {
         final HashSet<TestExpectationFromTerm> testExpectations = new HashSet<>();
         testExpectations.add(new ParseExpectationFromTerm());
+        testExpectations.add(new CheckExpectationFromTerm());
         return testExpectations;
     }
 

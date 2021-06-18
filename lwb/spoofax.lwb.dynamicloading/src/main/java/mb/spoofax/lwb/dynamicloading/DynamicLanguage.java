@@ -11,6 +11,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
 import java.net.URLClassLoader;
+import java.time.Instant;
 
 public class DynamicLanguage {
     protected final ResourcePath rootDirectory;
@@ -20,6 +21,7 @@ public class DynamicLanguage {
     protected final ResourceServiceComponent resourceServiceComponent;
     protected final LanguageComponent languageComponent;
     protected final PieComponent pieComponent;
+    protected final Instant created;
     protected boolean closed = false;
 
     public DynamicLanguage(
@@ -38,6 +40,7 @@ public class DynamicLanguage {
         this.resourceServiceComponent = resourceServiceComponent;
         this.languageComponent = languageComponent;
         this.pieComponent = pieComponent;
+        this.created = Instant.now();
     }
 
 
@@ -165,11 +168,14 @@ public class DynamicLanguage {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
         final DynamicLanguage that = (DynamicLanguage)o;
-        return rootDirectory.equals(that.rootDirectory);
+        if(!rootDirectory.equals(that.rootDirectory)) return false;
+        return created.equals(that.created);
     }
 
     @Override public int hashCode() {
-        return rootDirectory.hashCode();
+        int result = rootDirectory.hashCode();
+        result = 31 * result + created.hashCode();
+        return result;
     }
 
     @Override public String toString() {

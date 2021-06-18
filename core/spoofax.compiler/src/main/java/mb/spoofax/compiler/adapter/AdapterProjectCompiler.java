@@ -348,6 +348,8 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
 
         List<TypeInfo> additionalModules();
 
+        List<TypeInfo> additionalResourcesModules();
+
         List<TypeInfo> taskDefs();
 
         List<CommandDefRepr> commandDefs();

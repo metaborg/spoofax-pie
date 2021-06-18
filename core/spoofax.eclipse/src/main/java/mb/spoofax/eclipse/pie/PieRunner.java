@@ -115,14 +115,17 @@ public class PieRunner {
         final EclipseResourcePath file = new EclipseResourcePath(eclipseFile);
         resourceRegistry.putDocumentOverride(file, document);
 
-        final WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
+        final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
+        final Task<KeyedMessages> checkTask = createCheckOneTask(languageInstance, file, rootDirectoryHint);
+        // Remove check callback before running PIE build, as this method updates the messages already.
+        pie.removeCallback(checkTask);
+
+        final WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent.getEclipseIdentifiers());
         try(final MixedSession session = pie.newSession()) {
             // First run a bottom-up build, to ensure that tasks affected by changed file are brought up-to-date.
             final HashSet<ResourceKey> changedResources = new HashSet<>();
             changedResources.add(file);
             final TopDownSession topDownSession = updateAffectedBy(changedResources, session, monitor);
-
-            final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
 
             final Task<Option<Styling>> styleTask = createStyleTask(languageInstance, file, rootDirectoryHint);
             final String text = document.get();
@@ -132,12 +135,17 @@ public class PieRunner {
                 () -> workspaceUpdate.removeStyle(editor, text.length())
             );
 
-            final Task<KeyedMessages> checkTask = createCheckOneTask(languageInstance, file, rootDirectoryHint);
             final KeyedMessages messages = getOrRequire(checkTask, topDownSession, monitor);
             workspaceUpdate.replaceMessages(messages, file);
         }
-
         workspaceUpdate.update(eclipseFile, eclipseFile, monitor);
+
+        // Add callback (back again) that updates messages for when the check task is re-executed for other reasons.
+        pie.setCallback(checkTask, messages -> {
+            final WorkspaceUpdate callbackWorkspaceUpdate = workspaceUpdateFactory.create(languageComponent.getEclipseIdentifiers());
+            callbackWorkspaceUpdate.replaceMessages(messages, file);
+            callbackWorkspaceUpdate.update(eclipseFile, eclipseFile, monitor);
+        });
     }
 
     public void removeEditor(
@@ -160,7 +168,9 @@ public class PieRunner {
             final ResourceKey file = new EclipseResourcePath(eclipseFile);
             final @Nullable ResourcePath rootDirectoryHint = eclipseProject != null ? new EclipseResourcePath(eclipseProject) : null;
             unobserve(createStyleTask(languageInstance, file, rootDirectoryHint), session, null);
-            unobserve(createCheckOneTask(languageInstance, file, rootDirectoryHint), session, null);
+            final Task<KeyedMessages> checkTask = createCheckOneTask(languageInstance, file, rootDirectoryHint);
+            unobserve(checkTask, session, null);
+            pie.removeCallback(checkTask);
         }
         resourceRegistry.removeDocumentOverride(new EclipseResourcePath(eclipseFile));
     }
@@ -205,7 +215,7 @@ public class PieRunner {
         logger.trace("Running incremental build for project '{}'", project);
 
         final ResourceChanges resourceChanges = new ResourceChanges(delta);
-        bottomUpWorkspaceUpdate = workspaceUpdateFactory.create(languageComponent);
+        bottomUpWorkspaceUpdate = workspaceUpdateFactory.create(languageComponent.getEclipseIdentifiers());
         try(final MixedSession session = pie.newSession()) {
             final TopDownSession afterSession = updateAffectedBy(resourceChanges.changed, session, monitor);
             observeAndUnobserveAutoTransforms(languageComponent, resourceChanges, pie, afterSession, monitor);
@@ -249,7 +259,7 @@ public class PieRunner {
             }
             // Unobserve inspection tasks and clear messages.
             final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
-            final WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
+            final WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent.getEclipseIdentifiers());
             final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(projectResource.getPath());
             unobserve(checkTask, session, monitor);
             workspaceUpdate.clearMessages(project, true);
@@ -455,7 +465,7 @@ public class PieRunner {
     }
 
     public void clearMessages(IProject project, @Nullable IProgressMonitor monitor, EclipseLanguageComponent languageComponent) {
-        WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
+        WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent.getEclipseIdentifiers());
         workspaceUpdate.clearMessages(new EclipseResourcePath(project), true);
         workspaceUpdate.update(project, null, monitor);
     }
@@ -638,7 +648,7 @@ public class PieRunner {
         @Nullable IProgressMonitor monitor
     ) throws ExecException, InterruptedException {
         final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
-        final WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent);
+        final WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent.getEclipseIdentifiers());
         try {
             resourceChanges.newProjects.forEach(newProject -> {
                 final Task<KeyedMessages> task = languageInstance.createCheckTask(newProject);
@@ -647,7 +657,7 @@ public class PieRunner {
                         bottomUpWorkspaceUpdate.replaceMessages(messages, newProject);
                     } else {
                         // Perform local messages update
-                        WorkspaceUpdate localUpdate = workspaceUpdateFactory.create(languageComponent);
+                        WorkspaceUpdate localUpdate = workspaceUpdateFactory.create(languageComponent.getEclipseIdentifiers());
                         localUpdate.replaceMessages(messages, newProject);
                         localUpdate.update(resourceUtil.getEclipseResource(newProject), null, monitor);
                     }

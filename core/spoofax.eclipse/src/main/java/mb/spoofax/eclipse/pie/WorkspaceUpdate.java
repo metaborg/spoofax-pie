@@ -8,7 +8,7 @@ import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.platform.PlatformScope;
-import mb.spoofax.eclipse.EclipseLanguageComponent;
+import mb.spoofax.eclipse.EclipseIdentifiers;
 import mb.spoofax.eclipse.editor.SpoofaxEditorBase;
 import mb.spoofax.eclipse.util.MarkerUtil;
 import mb.spoofax.eclipse.util.ResourceUtil;
@@ -43,8 +43,8 @@ public class WorkspaceUpdate {
             this.styleUtil = styleUtil;
         }
 
-        public WorkspaceUpdate create(EclipseLanguageComponent languageComponent) {
-            return new WorkspaceUpdate(loggerFactory, resourceUtil, styleUtil, languageComponent);
+        public WorkspaceUpdate create(EclipseIdentifiers eclipseIdentifiers) {
+            return new WorkspaceUpdate(loggerFactory, resourceUtil, styleUtil, eclipseIdentifiers);
         }
     }
 
@@ -63,18 +63,18 @@ public class WorkspaceUpdate {
     private final ResourceUtil resourceUtil;
     private final StyleUtil styleUtil;
 
-    private final EclipseLanguageComponent languageComponent;
+    private final EclipseIdentifiers eclipseIdentifiers;
 
     private final ArrayList<ClearMessages> clears = new ArrayList<>();
     private final KeyedMessagesBuilder keyedMessagesBuilder = new KeyedMessagesBuilder();
     private final ArrayList<StyleUpdate> styleUpdates = new ArrayList<>();
 
 
-    public WorkspaceUpdate(LoggerFactory loggerFactory, ResourceUtil resourceService, StyleUtil styleUtil, EclipseLanguageComponent languageComponent) {
+    public WorkspaceUpdate(LoggerFactory loggerFactory, ResourceUtil resourceService, StyleUtil styleUtil, EclipseIdentifiers eclipseIdentifiers) {
         this.logger = loggerFactory.create(getClass());
         this.resourceUtil = resourceService;
         this.styleUtil = styleUtil;
-        this.languageComponent = languageComponent;
+        this.eclipseIdentifiers = eclipseIdentifiers;
     }
 
 
@@ -153,7 +153,7 @@ public class WorkspaceUpdate {
                 if(workspaceMonitor != null && workspaceMonitor.isCanceled()) return;
                 final IResource resource = resourceUtil.getEclipseResource(clear.origin);
                 if(!resource.exists()) continue;
-                MarkerUtil.clear(languageComponent.getEclipseIdentifiers(), resource, clear.recursive);
+                MarkerUtil.clear(eclipseIdentifiers, resource, clear.recursive);
             }
             try {
                 if(workspaceMonitor == null || !workspaceMonitor.isCanceled()) {
@@ -162,7 +162,7 @@ public class WorkspaceUpdate {
                         entry.getValue().forEach(message -> {
                             final IResource resource = resourceUtil.getEclipseResource(resourceKey);
                             try {
-                                MarkerUtil.create(languageComponent.getEclipseIdentifiers(), message.text, message.severity, resource, message.region);
+                                MarkerUtil.create(eclipseIdentifiers, message.text, message.severity, resource, message.region);
                             } catch(CoreException e) {
                                 throw new UncheckedCoreException(e);
                             }
@@ -170,7 +170,7 @@ public class WorkspaceUpdate {
                     });
                     keyedMessages.getMessagesWithoutKey().forEach(message -> {
                         try {
-                            MarkerUtil.create(languageComponent.getEclipseIdentifiers(), message.text, message.severity, defaultOrigin, message.region);
+                            MarkerUtil.create(eclipseIdentifiers, message.text, message.severity, defaultOrigin, message.region);
                         } catch(CoreException e) {
                             throw new UncheckedCoreException(e);
                         }

@@ -10,7 +10,12 @@ import mb.resource.dagger.ResourceRegistriesProvider;
 import java.util.Set;
 
 @{{resourcesScope.qualifiedId}}
-@Component(modules = {{resourcesModule.qualifiedId}}.class)
+@Component(
+    modules = {
+        {{resourcesModule.qualifiedId}}.class{{#additionalResourcesModules}}{{#-first}}, {{/-first}}
+        {{qualifiedId}}.class{{^-last}},{{/-last}}{{/additionalResourcesModules}}
+    }
+)
 public interface {{baseResourcesComponent.id}} extends ResourceRegistriesProvider {
     {{classLoaderResources.classLoaderResources.qualifiedId}} getClassloaderResources();
 

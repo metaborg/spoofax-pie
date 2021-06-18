@@ -7,6 +7,7 @@ import mb.pie.dagger.RootPieComponent;
 import mb.pie.dagger.RootPieModule;
 import mb.pie.dagger.TaskDefsProvider;
 import mb.pie.runtime.PieBuilderImpl;
+import mb.resource.ResourceRegistry;
 import mb.resource.dagger.DaggerResourceServiceComponent;
 import mb.resource.dagger.ResourceRegistriesProvider;
 import mb.resource.dagger.ResourceServiceComponent;
@@ -123,14 +124,18 @@ public class LifecycleParticipantManager implements AutoCloseable {
         });
     }
 
-    public DynamicGroup registerDynamic(ResourcePath rootDirectory, EclipseLifecycleParticipant participant) {
+    public DynamicGroup registerDynamic(
+        ResourcePath rootDirectory,
+        EclipseLifecycleParticipant participant,
+        ResourceRegistry... additionalResourceRegistries
+    ) {
         final @Nullable DynamicGroup previousGroup = dynamicGroups.remove(rootDirectory);
         if(previousGroup != null) {
             previousGroup.close();
         }
         final List<EclipseLifecycleParticipant> participants = Collections.singletonList(participant);
         final ResourceRegistriesProvider resourceRegistriesProvider = participant.getResourceRegistriesProvider(loggerComponent);
-        final ResourceServiceComponent resourceServiceComponent = createResourceComponent(participants);
+        final ResourceServiceComponent resourceServiceComponent = createResourceComponent(participants, additionalResourceRegistries);
         final RootPieComponent rootPieComponent = createPieComponent(participants, resourceServiceComponent);
         final @Nullable EclipseLanguageComponent languageComponent = participant.getLanguageComponent(loggerComponent, resourceServiceComponent, platformComponent);
         if(languageComponent == null) {
@@ -144,9 +149,10 @@ public class LifecycleParticipantManager implements AutoCloseable {
 
 
     private ResourceServiceComponent createResourceComponent(
-        Iterable<EclipseLifecycleParticipant> participants
+        Iterable<EclipseLifecycleParticipant> participants,
+        ResourceRegistry... additionalResourceRegistries
     ) {
-        final ResourceServiceModule resourceServiceModule = baseResourceServiceComponent.createChildModule();
+        final ResourceServiceModule resourceServiceModule = baseResourceServiceComponent.createChildModule(additionalResourceRegistries);
         for(EclipseLifecycleParticipant participant : participants) {
             resourceServiceModule.addRegistriesFrom(participant.getResourceRegistriesProvider(loggerComponent));
         }

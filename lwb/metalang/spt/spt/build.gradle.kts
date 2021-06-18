@@ -57,11 +57,15 @@ languageAdapterProject {
   }
 }
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
-  // Extend component
+  // Extend resources component and add modules
+  baseResourcesComponent(packageId, "BaseSptResourcesComponent")
+  extendResourcesComponent(packageId, "SptResourcesComponent")
+  addAdditionalResourcesModules("$packageId.resource", "SptTestCaseResourceModule")
+
+  // Extend component and add modules
   baseComponent(packageId, "BaseSptComponent")
   extendComponent(packageId, "SptComponent")
-  // Add modules
-  addAdditionalModules(packageId, "SptExpectationFromTermsModule");
+  addAdditionalModules("$packageId.fromterm", "ExpectationFromTermsModule")
 
   // Wrap Check and rename base tasks
   isMultiFile(false)

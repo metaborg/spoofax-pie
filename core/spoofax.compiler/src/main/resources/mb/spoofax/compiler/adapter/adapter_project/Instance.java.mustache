@@ -169,9 +169,8 @@ public class {{baseInstance.id}} implements LanguageInstance{{#parseInjection}},
         final Result<JsglrParseOutput, JsglrParseException> result;
         try {
             result = session.requireWithoutObserving({{this.name}}.createTask(mb.jsglr.pie.JsglrParseTaskInput.builder()
-                .fileHint(testCase.file)
+                .withFile(testCase.resource)
                 .rootDirectoryHint(Optional.ofNullable(testCase.rootDirectoryHint))
-                .stringSupplier(new ValueSupplier<>(testCase.fragment.asText()))
                 .build()
             ));
             return result.mapOrElse(

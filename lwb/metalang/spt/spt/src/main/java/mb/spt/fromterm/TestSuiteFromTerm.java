@@ -7,11 +7,13 @@ import mb.jsglr.common.TermTracer;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spt.api.model.Fragment;
-import mb.spt.model.FragmentImpl;
 import mb.spt.api.model.FragmentPart;
 import mb.spt.api.model.TestCase;
 import mb.spt.api.model.TestExpectation;
 import mb.spt.api.model.TestSuite;
+import mb.spt.model.FragmentImpl;
+import mb.spt.resource.SptTestCaseResource;
+import mb.spt.resource.SptTestCaseResourceRegistry;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoConstructor;
@@ -26,9 +28,12 @@ public class TestSuiteFromTerm {
     public static TestSuite testSuiteFromTerm(
         IStrategoTerm ast,
         MapView<IStrategoConstructor, TestExpectationFromTerm> expectationsFromTerms,
+        SptTestCaseResourceRegistry testCaseResourceRegistry,
         ResourceKey file,
         @Nullable ResourcePath rootDirectoryHint
     ) throws FromTermException {
+        testCaseResourceRegistry.clearTestSuite(file);
+
         final IStrategoAppl appl = TermUtils.asAppl(ast).orElseThrow(() -> new InvalidAstShapeException("a term application", ast));
         if(!TermUtils.isAppl(appl, "TestSuite", 3)) {
             throw new InvalidAstShapeException("a TestSuite/3 term application", appl);
@@ -53,7 +58,7 @@ public class TestSuiteFromTerm {
         final IStrategoList testCaseTerms = TermUtils.asListAt(appl, 2).orElseThrow(() -> new InvalidAstShapeException("a term list as third subterm", appl));
         final ArrayList<TestCase> testCases = new ArrayList<>(testCaseTerms.size());
         for(IStrategoTerm testCaseTerm : testCaseTerms) {
-            final TestCase testCase = testCaseFromTerm(testCaseTerm, file, rootDirectoryHint, expectationsFromTerms);
+            final TestCase testCase = testCaseFromTerm(testCaseTerm, file, rootDirectoryHint, expectationsFromTerms, testCaseResourceRegistry);
             testCases.add(testCase);
         }
 
@@ -62,9 +67,10 @@ public class TestSuiteFromTerm {
 
     public static TestCase testCaseFromTerm(
         IStrategoTerm ast,
-        ResourceKey file,
+        ResourceKey suiteFile,
         @Nullable ResourcePath rootDirectoryHint,
-        MapView<IStrategoConstructor, TestExpectationFromTerm> expectationsFromTerms
+        MapView<IStrategoConstructor, TestExpectationFromTerm> expectationsFromTerms,
+        SptTestCaseResourceRegistry testCaseResourceRegistry
     ) throws FromTermException {
         final IStrategoAppl appl = TermUtils.asAppl(ast).orElseThrow(() -> new InvalidAstShapeException("a term application", ast));
         if(!TermUtils.isAppl(appl, "Test", 5)) {
@@ -81,9 +87,10 @@ public class TestSuiteFromTerm {
         final IStrategoList testExpectationTerms = TermUtils.asListAt(appl, 4).orElseThrow(() -> new InvalidAstShapeException("a term list as fifth subterm", appl));
         final ArrayList<TestExpectation> testExpectations = new ArrayList<>(testExpectationTerms.size());
         for(IStrategoTerm testExpectationTerm : testExpectationTerms) {
-            testExpectations.add(testExpectationFromTerm(testExpectationTerm, expectationsFromTerms));
+            testExpectations.add(testExpectationFromTerm(testExpectationTerm, expectationsFromTerms, descriptionRegion));
         }
-        return new TestCase(file, rootDirectoryHint, description, descriptionRegion, fragment, ListView.of(testExpectations));
+        final SptTestCaseResource resource = testCaseResourceRegistry.registerTestCase(suiteFile, description, fragment.asText()); // TODO: no whitespace hack for text.
+        return new TestCase(resource.getKey(), suiteFile, rootDirectoryHint, description, descriptionRegion, fragment, ListView.of(testExpectations));
     }
 
     public static FragmentImpl fragmentFromTerm(IStrategoTerm ast) throws FromTermException {
@@ -141,13 +148,14 @@ public class TestSuiteFromTerm {
 
     public static TestExpectation testExpectationFromTerm(
         IStrategoTerm ast,
-        MapView<IStrategoConstructor, TestExpectationFromTerm> expectationsFromTerms
+        MapView<IStrategoConstructor, TestExpectationFromTerm> expectationsFromTerms,
+        Region fallbackRegion
     ) throws FromTermException {
         final IStrategoAppl appl = TermUtils.asAppl(ast).orElseThrow(() -> new InvalidAstShapeException("a term application", ast));
         final @Nullable TestExpectationFromTerm testExpectationFromTerm = expectationsFromTerms.get(appl.getConstructor());
         if(testExpectationFromTerm == null) {
             throw new InvalidAstShapeException("a supported TestExpectationFromTerm instance for constructor of this term application", appl);
         }
-        return testExpectationFromTerm.convert(appl);
+        return testExpectationFromTerm.convert(appl, fallbackRegion);
     }
 }

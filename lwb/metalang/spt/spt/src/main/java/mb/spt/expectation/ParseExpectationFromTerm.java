@@ -22,19 +22,16 @@ public class ParseExpectationFromTerm implements TestExpectationFromTerm {
         );
     }
 
-    @Override public TestExpectation convert(IStrategoAppl term) throws FromTermException {
+    @Override public TestExpectation convert(IStrategoAppl term, Region fallbackRegion) throws FromTermException {
         final ExpectedParseResult expected = convertParseResult(term);
         final @Nullable Region sourceRegion = TermTracer.getRegion(term);
-        if(sourceRegion == null) {
-            throw new FromTermException("Cannot convert term '" + term + "' to a ParseExpectation; term has no location information");
-        }
-        return new ParseExpectation(expected, sourceRegion);
+        return new ParseExpectation(expected, sourceRegion != null ? sourceRegion : fallbackRegion);
     }
 
     private ExpectedParseResult convertParseResult(IStrategoAppl term) throws FromTermException {
         final IStrategoConstructor constructor = term.getConstructor();
         if(constructor.getArity() > 0) {
-            throw new FromTermException("Cannot convert term '" + term + "' to a ParseExpectation; term is not a valid parse expectation (arity > 0)");
+            throw new FromTermException("Cannot convert term '" + term + "' to a parse expectation; term is not a valid parse expectation (arity > 0)");
         }
         switch(constructor.getName()) {
             case "ParseSucceeds":
@@ -44,7 +41,7 @@ public class ParseExpectationFromTerm implements TestExpectationFromTerm {
             case "ParseAmbiguous":
                 return new ExpectedParseResult(true, Option.ofNone(), Option.ofSome(true));
             default:
-                throw new FromTermException("Cannot convert term '" + term + "' to a ParseExpectation; term is not a valid parse expectation (no matching constructor)");
+                throw new FromTermException("Cannot convert term '" + term + "' to a parse expectation; term is not a valid parse expectation (no matching constructor)");
         }
     }
 }

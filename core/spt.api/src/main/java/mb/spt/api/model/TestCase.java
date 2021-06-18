@@ -7,7 +7,8 @@ import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class TestCase {
-    public final ResourceKey file;
+    public final ResourceKey resource;
+    public final ResourceKey testSuiteFile;
     public final @Nullable ResourcePath rootDirectoryHint;
     public final String description;
     public final Region descriptionRegion;
@@ -15,14 +16,16 @@ public class TestCase {
     public final ListView<TestExpectation> expectations;
 
     public TestCase(
-        ResourceKey file,
+        ResourceKey resource,
+        ResourceKey testSuiteFile,
         @Nullable ResourcePath rootDirectoryHint,
         String description,
         Region descriptionRegion,
         Fragment fragment,
         ListView<TestExpectation> expectations
     ) {
-        this.file = file;
+        this.resource = resource;
+        this.testSuiteFile = testSuiteFile;
         this.rootDirectoryHint = rootDirectoryHint;
         this.description = description;
         this.descriptionRegion = descriptionRegion;
@@ -30,13 +33,12 @@ public class TestCase {
         this.expectations = expectations;
     }
 
-    @Override public boolean equals(Object o) {
+    @Override public boolean equals(@Nullable Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
-
         final TestCase testCase = (TestCase)o;
-
-        if(!file.equals(testCase.file)) return false;
+        if(!resource.equals(testCase.resource)) return false;
+        if(!testSuiteFile.equals(testCase.testSuiteFile)) return false;
         if(rootDirectoryHint != null ? !rootDirectoryHint.equals(testCase.rootDirectoryHint) : testCase.rootDirectoryHint != null)
             return false;
         if(!description.equals(testCase.description)) return false;
@@ -46,7 +48,8 @@ public class TestCase {
     }
 
     @Override public int hashCode() {
-        int result = file.hashCode();
+        int result = resource.hashCode();
+        result = 31 * result + testSuiteFile.hashCode();
         result = 31 * result + (rootDirectoryHint != null ? rootDirectoryHint.hashCode() : 0);
         result = 31 * result + description.hashCode();
         result = 31 * result + descriptionRegion.hashCode();
@@ -57,7 +60,8 @@ public class TestCase {
 
     @Override public String toString() {
         return "TestCase{" +
-            "file=" + file +
+            "resource=" + resource +
+            ", testSuiteFile=" + testSuiteFile +
             ", rootDirectoryHint=" + rootDirectoryHint +
             ", description='" + description + '\'' +
             ", descriptionRegion=" + descriptionRegion +

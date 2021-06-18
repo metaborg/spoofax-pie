@@ -10,6 +10,7 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.MixedSession;
 import mb.pie.api.None;
 import mb.pie.api.TaskDef;
+import mb.pie.api.exec.CancelToken;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
@@ -23,6 +24,7 @@ import mb.spt.fromterm.FromTermException;
 import mb.spt.fromterm.TestExpectationFromTerm;
 import mb.spt.fromterm.TestSuiteFromTerm;
 import mb.spt.lut.LanguageUnderTestProviderWrapper;
+import mb.spt.resource.SptTestCaseResourceRegistry;
 import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -69,6 +71,7 @@ public class SptCheck implements TaskDef<SptCheck.Input, KeyedMessages> {
 
 
     private final SptClassLoaderResources classLoaderResources;
+    private final SptTestCaseResourceRegistry testCaseResourceRegistry;
     private final SptParse parse;
     private final SptGetStrategoRuntimeProvider getStrategoRuntimeProvider;
     private final LanguageUnderTestProviderWrapper wrapper;
@@ -77,12 +80,14 @@ public class SptCheck implements TaskDef<SptCheck.Input, KeyedMessages> {
 
     @Inject public SptCheck(
         SptClassLoaderResources classLoaderResources,
+        SptTestCaseResourceRegistry testCaseResourceRegistry,
         SptParse parse,
         SptGetStrategoRuntimeProvider getStrategoRuntimeProvider,
         LanguageUnderTestProviderWrapper wrapper,
         MapView<IStrategoConstructor, TestExpectationFromTerm> testExpectationFromTerms
     ) {
         this.classLoaderResources = classLoaderResources;
+        this.testCaseResourceRegistry = testCaseResourceRegistry;
         this.parse = parse;
         this.getStrategoRuntimeProvider = getStrategoRuntimeProvider;
         this.wrapper = wrapper;
@@ -127,25 +132,30 @@ public class SptCheck implements TaskDef<SptCheck.Input, KeyedMessages> {
 
         final TestSuite testSuite;
         try {
-            testSuite = TestSuiteFromTerm.testSuiteFromTerm(desugaredAst, testExpectationFromTerms, file, rootDirectoryHint);
+            testSuite = TestSuiteFromTerm.testSuiteFromTerm(desugaredAst, testExpectationFromTerms, testCaseResourceRegistry, file, rootDirectoryHint);
         } catch(FromTermException e) {
             messagesBuilder.extractMessagesRecursivelyWithFallbackKey(e, file);
             return;
         }
 
         final Result<LanguageUnderTest, ?> languageUnderTestResult = wrapper.get().provide(context, file, rootDirectoryHint, testSuite.languageIdHint);
-        languageUnderTestResult.ifThrowingElse(lc -> runTests(lc, messagesBuilder, testSuite), messagesBuilder::extractMessagesRecursively);
+        final CancelToken cancelToken = context.cancelToken();
+        languageUnderTestResult.ifThrowingElse(
+            languageUnderTest -> runTests(languageUnderTest, cancelToken, messagesBuilder, testSuite),
+            messagesBuilder::extractMessagesRecursively
+        );
     }
 
     private void runTests(
         LanguageUnderTest languageUnderTest,
+        CancelToken cancelToken,
         KeyedMessagesBuilder messagesBuilder,
         TestSuite testSuite
     ) throws InterruptedException {
         try(final MixedSession session = languageUnderTest.getPieComponent().newSession()) {
             for(TestCase testCase : testSuite.testCases) {
                 for(TestExpectation expectation : testCase.expectations) {
-                    messagesBuilder.addMessages(expectation.evaluate(languageUnderTest, session, testCase));
+                    messagesBuilder.addMessages(expectation.evaluate(languageUnderTest, session, cancelToken, testCase));
                 }
             }
         }

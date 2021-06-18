@@ -17,7 +17,6 @@ import mb.jsglr.pie.JsglrParseTaskInput;
 import mb.pie.api.ExecException;
 import mb.pie.api.Session;
 import mb.pie.api.Task;
-import mb.pie.api.ValueSupplier;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.LanguageInstance;
@@ -260,9 +259,8 @@ public class TigerInstance implements LanguageInstance, TestableParse {
         final Result<JsglrParseOutput, JsglrParseException> result;
         try {
             result = session.requireWithoutObserving(parse.createTask(JsglrParseTaskInput.builder()
-                .fileHint(testCase.file)
+                .withFile(testCase.resource)
                 .rootDirectoryHint(Optional.ofNullable(testCase.rootDirectoryHint))
-                .stringSupplier(new ValueSupplier<>(testCase.fragment.asText()))
                 .build()
             ));
             return result.mapOrElse(
