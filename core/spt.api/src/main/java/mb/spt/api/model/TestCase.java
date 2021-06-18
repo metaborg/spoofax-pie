@@ -6,6 +6,8 @@ import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Objects;
+
 public class TestCase {
     public final ResourceKey resource;
     public final ResourceKey testSuiteFile;
@@ -39,8 +41,7 @@ public class TestCase {
         final TestCase testCase = (TestCase)o;
         if(!resource.equals(testCase.resource)) return false;
         if(!testSuiteFile.equals(testCase.testSuiteFile)) return false;
-        if(rootDirectoryHint != null ? !rootDirectoryHint.equals(testCase.rootDirectoryHint) : testCase.rootDirectoryHint != null)
-            return false;
+        if(!Objects.equals(rootDirectoryHint, testCase.rootDirectoryHint)) return false;
         if(!description.equals(testCase.description)) return false;
         if(!descriptionRegion.equals(testCase.descriptionRegion)) return false;
         if(!fragment.equals(testCase.fragment)) return false;

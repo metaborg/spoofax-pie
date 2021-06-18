@@ -23,6 +23,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.util.TermUtils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class TestSuiteFromTerm {
     public static TestSuite testSuiteFromTerm(
@@ -50,25 +51,27 @@ public class TestSuiteFromTerm {
             }
         }
         if(name.isEmpty()) {
-            // TODO: add error
+            // TODO: add error?
         }
 
         // TODO: test fixture
 
         final IStrategoList testCaseTerms = TermUtils.asListAt(appl, 2).orElseThrow(() -> new InvalidAstShapeException("a term list as third subterm", appl));
         final ArrayList<TestCase> testCases = new ArrayList<>(testCaseTerms.size());
+        final HashSet<String> usedResourceNames = new HashSet<>();
         for(IStrategoTerm testCaseTerm : testCaseTerms) {
-            final TestCase testCase = testCaseFromTerm(testCaseTerm, file, rootDirectoryHint, expectationsFromTerms, testCaseResourceRegistry);
+            final TestCase testCase = testCaseFromTerm(testCaseTerm, file, rootDirectoryHint, usedResourceNames, expectationsFromTerms, testCaseResourceRegistry);
             testCases.add(testCase);
         }
 
         return new TestSuite(name, file, ListView.of(testCases), languageIdHint, rootDirectoryHint);
     }
 
-    public static TestCase testCaseFromTerm(
+    private static TestCase testCaseFromTerm(
         IStrategoTerm ast,
         ResourceKey suiteFile,
         @Nullable ResourcePath rootDirectoryHint,
+        HashSet<String> usedResourceNames,
         MapView<IStrategoConstructor, TestExpectationFromTerm> expectationsFromTerms,
         SptTestCaseResourceRegistry testCaseResourceRegistry
     ) throws FromTermException {
@@ -89,11 +92,24 @@ public class TestSuiteFromTerm {
         for(IStrategoTerm testExpectationTerm : testExpectationTerms) {
             testExpectations.add(testExpectationFromTerm(testExpectationTerm, expectationsFromTerms, descriptionRegion));
         }
-        final SptTestCaseResource resource = testCaseResourceRegistry.registerTestCase(suiteFile, description, fragment.asText()); // TODO: no whitespace hack for text.
+        final String resourceName = getResourceName(usedResourceNames, description);
+        final SptTestCaseResource resource = testCaseResourceRegistry.registerTestCase(suiteFile, resourceName, fragment.asText()); // TODO: no whitespace hack for text.
         return new TestCase(resource.getKey(), suiteFile, rootDirectoryHint, description, descriptionRegion, fragment, ListView.of(testExpectations));
     }
 
-    public static FragmentImpl fragmentFromTerm(IStrategoTerm ast) throws FromTermException {
+    private static String getResourceName(HashSet<String> usedResourceNames, String name) {
+        name = name.trim();
+        int i = 1;
+        while(usedResourceNames.contains(name)) {
+            if(i > 1) name = name.substring(0, name.length() - 1) + i;
+            else name = name + i;
+            ++i;
+        }
+        usedResourceNames.add(name);
+        return name;
+    }
+
+    private static FragmentImpl fragmentFromTerm(IStrategoTerm ast) throws FromTermException {
         final @Nullable Region region = TermTracer.getRegion(ast);
         if(region == null) {
             throw new InvalidAstShapeException("a fragment term with location information", ast);
@@ -146,7 +162,7 @@ public class TestSuiteFromTerm {
         return new FragmentImpl(region, ListView.of(selections), ListView.of(parts));
     }
 
-    public static TestExpectation testExpectationFromTerm(
+    private static TestExpectation testExpectationFromTerm(
         IStrategoTerm ast,
         MapView<IStrategoConstructor, TestExpectationFromTerm> expectationsFromTerms,
         Region fallbackRegion
