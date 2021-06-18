@@ -8,13 +8,18 @@ import mb.spt.api.model.TestExpectation;
 import mb.spt.expectation.CheckCountExpectation.Operator;
 import mb.spt.fromterm.FromTermException;
 import mb.spt.fromterm.InvalidAstShapeException;
+import mb.spt.fromterm.SptFromTermUtil;
 import mb.spt.fromterm.TestExpectationFromTerm;
+import mb.spt.model.SelectionReference;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoConstructor;
+import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.TermFactory;
 import org.spoofax.terms.util.TermUtils;
+
+import java.util.ArrayList;
 
 public class CheckExpectationFromTerm implements TestExpectationFromTerm {
     @Override public SetView<IStrategoConstructor> getMatchingConstructors(TermFactory termFactory) {
@@ -45,8 +50,8 @@ public class CheckExpectationFromTerm implements TestExpectationFromTerm {
             .orElseThrow(() -> new InvalidAstShapeException("a count as second subterm", term));
         final Severity severity = convertSeverity(TermUtils.asApplAt(term, 2)
             .orElseThrow(() -> new InvalidAstShapeException("a severity term as third subterm", term)));
-        // TODO: atpart
-        return new CheckCountExpectation(operator, count, severity, sourceRegion);
+        final ArrayList<SelectionReference> selections = convertSelections(term.getSubterm(3), sourceRegion);
+        return new CheckCountExpectation(operator, count, severity, selections, sourceRegion);
     }
 
     private TestExpectation convertCheckPattern(IStrategoAppl term, Region sourceRegion) { // <<Severity> like <STRING> <AtPart?>>
@@ -54,35 +59,34 @@ public class CheckExpectationFromTerm implements TestExpectationFromTerm {
             .orElseThrow(() -> new InvalidAstShapeException("a severity term as first subterm", term)));
         final String like = TermUtils.asJavaStringAt(term, 1)
             .orElseThrow(() -> new InvalidAstShapeException("a like string term as second subterm", term));
-        // TODO: atpart
-        return new CheckPatternExpectation(severity, like);
+        final ArrayList<SelectionReference> selections = convertSelections(term.getSubterm(2), sourceRegion);
+        return new CheckPatternExpectation(severity, like, selections, sourceRegion);
     }
 
 
     private Operator convertOperator(IStrategoTerm term) {
-        final IStrategoAppl appl = TermUtils.asAppl(term)
-            .orElseThrow(() -> new InvalidAstShapeException("a term application", term));
-        if(appl.getConstructor().getName().equals("None")) {
-            return Operator.Equal;
-        } else {
-            final IStrategoAppl operatorAppl = TermUtils.asApplAt(appl, 0)
-                .orElseThrow(() -> new InvalidAstShapeException("an operator as first subterm", appl));
-            switch(operatorAppl.getConstructor().getName()) {
-                case "Equal":
-                    return Operator.Equal;
-                case "Less":
-                    return Operator.Less;
-                case "LessOrEqual":
-                    return Operator.LessOrEqual;
-                case "More":
-                    return Operator.More;
-                case "MoreOrEqual":
-                    return Operator.MoreOrEqual;
-                default:
-                    throw new FromTermException("Cannot convert term '" + appl + "' to an Operator; term is not a valid operator (no matching constructor)");
-            }
-        }
+        return SptFromTermUtil.getOptional(term)
+            .map(someTerm -> {
+                final IStrategoAppl operatorAppl = TermUtils.asAppl(someTerm)
+                    .orElseThrow(() -> new InvalidAstShapeException("a term application", someTerm));
+                switch(operatorAppl.getConstructor().getName()) {
+                    case "Equal":
+                        return Operator.Equal;
+                    case "Less":
+                        return Operator.Less;
+                    case "LessOrEqual":
+                        return Operator.LessOrEqual;
+                    case "More":
+                        return Operator.More;
+                    case "MoreOrEqual":
+                        return Operator.MoreOrEqual;
+                    default:
+                        throw new FromTermException("Cannot convert term '" + someTerm + "' to an Operator; term is not a valid operator (no matching constructor)");
+                }
+            })
+            .orElse(Operator.Equal);
     }
+
 
     private Severity convertSeverity(IStrategoTerm term) {
         final IStrategoAppl appl = TermUtils.asAppl(term)
@@ -97,5 +101,21 @@ public class CheckExpectationFromTerm implements TestExpectationFromTerm {
             default:
                 throw new FromTermException("Cannot convert term '" + appl + "' to a Severity; term is not a valid severity (no matching constructor)");
         }
+    }
+
+    private ArrayList<SelectionReference> convertSelections(IStrategoTerm term, Region fallbackRegion) {
+        return SptFromTermUtil.getOptional(term)
+            .map(someTerm -> {
+                final IStrategoList selectionsList = TermUtils.asListAt(someTerm, 0)
+                    .orElseThrow(() -> new InvalidAstShapeException("a term list as first subterm", someTerm));
+                final ArrayList<SelectionReference> selections = new ArrayList<>(selectionsList.size());
+                for(IStrategoTerm selectionTerm : selectionsList) {
+                    final int selection = TermUtils.asJavaInt(selectionTerm).orElseThrow(() -> new InvalidAstShapeException("an integer", selectionTerm));
+                    final @Nullable Region region = TermTracer.getRegion(selectionTerm);
+                    selections.add(new SelectionReference(selection, region != null ? region : fallbackRegion));
+                }
+                return selections;
+            })
+            .orElse(new ArrayList<>(0));
     }
 }
