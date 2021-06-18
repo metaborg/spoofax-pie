@@ -6,7 +6,7 @@ import mb.spt.api.model.TestCase;
 import mb.spt.model.SelectionReference;
 
 public class SelectionUtil {
-    public static boolean checkSelections(TestCase testCase, Iterable<SelectionReference> selectionReferences, KeyedMessagesBuilder messagesBuilder) {
+    public static boolean checkSelectionReferences(Iterable<SelectionReference> selectionReferences, KeyedMessagesBuilder messagesBuilder, TestCase testCase) {
         final int numSelections = testCase.fragment.getSelections().size();
         boolean errors = false;
         for(SelectionReference selectionReference : selectionReferences) {
@@ -17,4 +17,6 @@ public class SelectionUtil {
         }
         return !errors;
     }
+
+
 }

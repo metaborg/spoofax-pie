@@ -13,11 +13,8 @@ import mb.spt.api.model.TestCase;
 import mb.spt.api.model.TestExpectation;
 import mb.spt.model.SelectionReference;
 import mb.spt.util.MessageRemap;
-import mb.spt.util.SelectionUtil;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.stream.Collectors;
 
 public class CheckCountExpectation implements TestExpectation {
     public enum Operator {
@@ -59,25 +56,8 @@ public class CheckCountExpectation implements TestExpectation {
             messagesBuilder.addMessage("Expected " + operatorString(operator) + " " + expectedCount + " " + severity.toDisplayString() + " message(s), but got " + count, Severity.Error, file, sourceRegion);
         }
 
-        if(SelectionUtil.checkSelections(testCase, selectionReferences, messagesBuilder)) {
-            final ArrayList<Region> messageRegions = result.stream().filter(m -> m.region != null).map(m -> m.region).collect(Collectors.toCollection(ArrayList::new));
-            for(SelectionReference selectionReference : selectionReferences) {
-                final Region selection = testCase.fragment.getSelections().get(selectionReference.selection - 1);
-                final Iterator<Region> iterator = messageRegions.iterator();
-                boolean found = false;
-                while(iterator.hasNext()) {
-                    final Region messageRegion = iterator.next();
-                    if(selection.contains(messageRegion)) {
-                        iterator.remove();
-                        found = true;
-                        break;
-                    }
-                }
-                if(!found) {
-                    addMessages = true;
-                    messagesBuilder.addMessage("Expected " + severity.toDisplayString() + " at selection " + selectionReference.selection + ", but found none", Severity.Error, file, selectionReference.region);
-                }
-            }
+        if(!CheckExpectationUtil.checkSelections(result.stream(), selectionReferences, severity.toDisplayString(), messagesBuilder, testCase)) {
+            addMessages = true;
         }
 
         if(addMessages) {
