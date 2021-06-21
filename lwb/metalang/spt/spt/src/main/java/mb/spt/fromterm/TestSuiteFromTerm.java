@@ -12,6 +12,7 @@ import mb.spt.api.model.TestCase;
 import mb.spt.api.model.TestExpectation;
 import mb.spt.api.model.TestSuite;
 import mb.spt.model.FragmentImpl;
+import mb.spt.model.TestFixture;
 import mb.spt.resource.SptTestCaseResource;
 import mb.spt.resource.SptTestCaseResourceRegistry;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -36,7 +37,7 @@ public class TestSuiteFromTerm {
         testCaseResourceRegistry.clearTestSuite(file);
 
         final IStrategoAppl appl = TermUtils.asAppl(ast).orElseThrow(() -> new InvalidAstShapeException("a term application", ast));
-        if(!TermUtils.isAppl(appl, "TestSuite", 3)) {
+        if(!TermUtils.isAppl(appl, "TestSuite", 3)) { // TestSuite(<Header+> <TestFixture?> <TestDecl*>)
             throw new InvalidAstShapeException("a TestSuite/3 term application", appl);
         }
 
@@ -54,13 +55,29 @@ public class TestSuiteFromTerm {
             // TODO: add error?
         }
 
-        // TODO: test fixture
+
+        final @Nullable TestFixture testFixture = SptFromTermUtil.getOptional(appl.getSubterm(1))
+            .map(testFixtureTerm -> { // Fixture("[[", <text1>, "[[", "]]", <text2>, "]]")
+                if(!TermUtils.isAppl(testFixtureTerm, "Fixture", 6)) {
+                    throw new InvalidAstShapeException("a Fixture/6 term application", testFixtureTerm);
+                }
+                final Region beforeRegion = TermTracer.getRegionOptional(testFixtureTerm.getSubterm(1))
+                    .orElseThrow(() -> new InvalidAstShapeException("test fixture start text term as first subterm with location information", testFixtureTerm));
+                final String beforeText = TermUtils.asJavaStringAt(testFixtureTerm, 1)
+                    .orElseThrow(() -> new InvalidAstShapeException("test fixture start text as first subterm", testFixtureTerm));
+                final Region afterRegion = TermTracer.getRegionOptional(testFixtureTerm.getSubterm(4))
+                    .orElseThrow(() -> new InvalidAstShapeException("test fixture start text term as fifth subterm with location information", testFixtureTerm));
+                final String afterText = TermUtils.asJavaStringAt(testFixtureTerm, 4)
+                    .orElseThrow(() -> new InvalidAstShapeException("test fixture start text as fifth subterm", testFixtureTerm));
+                return new TestFixture(beforeText, beforeRegion.getStartOffset(), afterText, afterRegion.getStartOffset());
+            })
+            .orElse(null);
 
         final IStrategoList testCaseTerms = TermUtils.asListAt(appl, 2).orElseThrow(() -> new InvalidAstShapeException("a term list as third subterm", appl));
         final ArrayList<TestCase> testCases = new ArrayList<>(testCaseTerms.size());
         final HashSet<String> usedResourceNames = new HashSet<>();
         for(IStrategoTerm testCaseTerm : testCaseTerms) {
-            final TestCase testCase = testCaseFromTerm(testCaseTerm, file, rootDirectoryHint, usedResourceNames, expectationsFromTerms, testCaseResourceRegistry);
+            final TestCase testCase = testCaseFromTerm(testCaseTerm, testFixture, file, rootDirectoryHint, usedResourceNames, expectationsFromTerms, testCaseResourceRegistry);
             testCases.add(testCase);
         }
 
@@ -69,6 +86,7 @@ public class TestSuiteFromTerm {
 
     private static TestCase testCaseFromTerm(
         IStrategoTerm ast,
+        @Nullable TestFixture testFixture,
         ResourceKey suiteFile,
         @Nullable ResourcePath rootDirectoryHint,
         HashSet<String> usedResourceNames,
@@ -86,7 +104,7 @@ public class TestSuiteFromTerm {
             throw new InvalidAstShapeException("a description term with location information", descriptionTerm);
         }
         final IStrategoAppl fragmentTerm = TermUtils.asApplAt(ast, 2).orElseThrow(() -> new InvalidAstShapeException("a term application as third subterm", ast));
-        final Fragment fragment = fragmentFromTerm(fragmentTerm);
+        final Fragment fragment = fragmentFromTerm(fragmentTerm, testFixture);
         final IStrategoList testExpectationTerms = TermUtils.asListAt(appl, 4).orElseThrow(() -> new InvalidAstShapeException("a term list as fifth subterm", appl));
         final ArrayList<TestExpectation> testExpectations = new ArrayList<>(testExpectationTerms.size());
         for(IStrategoTerm testExpectationTerm : testExpectationTerms) {
@@ -109,13 +127,16 @@ public class TestSuiteFromTerm {
         return name;
     }
 
-    private static FragmentImpl fragmentFromTerm(IStrategoTerm ast) throws FromTermException {
+    private static FragmentImpl fragmentFromTerm(IStrategoTerm ast, @Nullable TestFixture testFixture) throws FromTermException {
         final @Nullable Region region = TermTracer.getRegion(ast);
         if(region == null) {
             throw new InvalidAstShapeException("a fragment term with location information", ast);
         }
         final ArrayList<Region> selections = new ArrayList<>();
         final ArrayList<FragmentPart> parts = new ArrayList<>();
+        if(testFixture != null) {
+            parts.add(new FragmentPart(testFixture.beforeStartOffset, testFixture.beforeText));
+        }
         IStrategoAppl appl = TermUtils.asAppl(ast).orElseThrow(() -> new InvalidAstShapeException("a term application", ast));
         while(!appl.getConstructor().getName().equals("Done")) {
             switch(appl.getConstructor().getName()) {
@@ -158,6 +179,9 @@ public class TestSuiteFromTerm {
                     break;
                 }
             }
+        }
+        if(testFixture != null) {
+            parts.add(new FragmentPart(testFixture.afterStartOffset, testFixture.afterText));
         }
         return new FragmentImpl(region, ListView.of(selections), ListView.of(parts));
     }

@@ -2,6 +2,7 @@ package mb.spt.expectation;
 
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
+import mb.common.message.Message;
 import mb.common.message.Severity;
 import mb.common.region.Region;
 import mb.pie.api.ExecException;
@@ -15,6 +16,7 @@ import mb.spt.model.SelectionReference;
 import mb.spt.util.MessageRemap;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 public class CheckCountExpectation implements TestExpectation {
     public enum Operator {
@@ -50,13 +52,16 @@ public class CheckCountExpectation implements TestExpectation {
 
         boolean addMessages = false;
 
-        final long count = result.getMessagesOfSeverity(severity).count();
+        final ArrayList<Message> messages = result
+            .getMessagesOfSeverity(severity)
+            .collect(Collectors.toCollection(ArrayList::new));
+        final long count = messages.size();
         if(!test(count)) {
             addMessages = true;
             messagesBuilder.addMessage("Expected " + operatorString(operator) + " " + expectedCount + " " + severity.toDisplayString() + " message(s), but got " + count, Severity.Error, file, sourceRegion);
         }
 
-        if(!CheckExpectationUtil.checkSelections(result.stream(), selectionReferences, severity.toDisplayString(), messagesBuilder, testCase)) {
+        if(!CheckExpectationUtil.checkSelections(messages.stream(), selectionReferences, severity.toDisplayString(), messagesBuilder, testCase)) {
             addMessages = true;
         }
 

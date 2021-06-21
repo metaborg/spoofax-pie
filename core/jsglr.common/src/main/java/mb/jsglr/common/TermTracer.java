@@ -8,6 +8,7 @@ import org.spoofax.jsglr.client.imploder.IToken;
 import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 import org.spoofax.terms.attachments.OriginAttachment;
 
+import java.util.Optional;
 import java.util.Stack;
 
 public class TermTracer {
@@ -38,6 +39,10 @@ public class TermTracer {
         final @Nullable IToken right = ImploderAttachment.getRightToken(term);
         if(left == null || right == null) return null;
         return RegionUtil.fromTokens(left, right);
+    }
+
+    public static Optional<Region> getRegionOptional(IStrategoTerm term) {
+        return Optional.ofNullable(getRegion(term));
     }
 
     /**
