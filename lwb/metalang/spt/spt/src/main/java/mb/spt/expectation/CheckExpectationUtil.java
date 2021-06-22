@@ -17,6 +17,8 @@ public class CheckExpectationUtil {
     public static boolean checkSelections(
         Stream<Message> messages,
         Iterable<SelectionReference> selectionReferences,
+        CheckCountExpectation.Operator operator,
+        long expectedCount,
         String expected,
         KeyedMessagesBuilder messagesBuilder,
         TestCase testCase
@@ -24,6 +26,7 @@ public class CheckExpectationUtil {
         if(!SelectionUtil.checkSelectionReferences(selectionReferences, messagesBuilder, testCase)) {
             return false;
         }
+        boolean success = true;
         final ArrayList<Region> messageRegions = messages
             .filter(m -> m.region != null)
             .map(m -> m.region)
@@ -31,20 +34,22 @@ public class CheckExpectationUtil {
         for(SelectionReference selectionReference : selectionReferences) {
             final Region selection = testCase.testFragment.getSelections().get(selectionReference.selection - 1);
             final Iterator<Region> iterator = messageRegions.iterator();
-            boolean found = false;
+            int count = 0;
             while(iterator.hasNext()) {
                 final Region messageRegion = iterator.next();
                 if(selection.contains(messageRegion)) {
                     iterator.remove();
-                    found = true;
-                    break;
+                    ++count;
+                    if(expectedCount == -1 || operator.test(count, expectedCount)) {
+                        break;
+                    }
                 }
             }
-            if(!found) {
-                messagesBuilder.addMessage("Expected " + expected + " at selection " + selectionReference.selection + ", but found none", Severity.Error, testCase.testSuiteFile, selectionReference.region);
-                return false;
+            if(count == 0 || (expectedCount != -1 && !operator.test(count, expectedCount))) {
+                messagesBuilder.addMessage("Expected " + expected + " at selection " + selectionReference.selection, Severity.Error, testCase.testSuiteFile, selectionReference.region);
+                success = false;
             }
         }
-        return true;
+        return success;
     }
 }

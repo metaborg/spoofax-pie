@@ -20,7 +20,39 @@ import java.util.stream.Collectors;
 
 public class CheckCountExpectation implements TestExpectation {
     public enum Operator {
-        Equal, Less, LessOrEqual, More, MoreOrEqual
+        Equal, Less, LessOrEqual, More, MoreOrEqual;
+
+        public boolean test(long count, long expectedCount) {
+            switch(this) {
+                default:
+                case Equal:
+                    return count == expectedCount;
+                case Less:
+                    return count < expectedCount;
+                case LessOrEqual:
+                    return count <= expectedCount;
+                case More:
+                    return count > expectedCount;
+                case MoreOrEqual:
+                    return count >= expectedCount;
+            }
+        }
+
+        @Override public String toString() {
+            switch(this) {
+                default:
+                case Equal:
+                    return "==";
+                case Less:
+                    return "<";
+                case LessOrEqual:
+                    return "<=";
+                case More:
+                    return ">";
+                case MoreOrEqual:
+                    return ">=";
+            }
+        }
     }
 
     private final Operator operator;
@@ -55,17 +87,17 @@ public class CheckCountExpectation implements TestExpectation {
             .getMessagesOfSeverity(severity)
             .filter(m -> m.region == null || testCase.testFragment.getRegion().contains(m.region))
             .collect(Collectors.toCollection(ArrayList::new));
-        final String expected = operatorString(operator) + " " + expectedCount + " " + severity.toDisplayString();
+        final String expected = operator + " " + expectedCount + " " + severity.toDisplayString();
 
         if(selectionReferences.isEmpty()) {
             final long count = messages.size();
-            if(!test(count)) {
+            if(!operator.test(count, expectedCount)) {
                 addMessages = true;
-                messagesBuilder.addMessage("Expected " + expected+ " message(s), but got " + count, Severity.Error, file, sourceRegion);
+                messagesBuilder.addMessage("Expected " + expected + " message(s), but got " + count, Severity.Error, file, sourceRegion);
             }
         }
 
-        if(!CheckExpectationUtil.checkSelections(messages.stream(), selectionReferences, expected, messagesBuilder, testCase)) {
+        if(!CheckExpectationUtil.checkSelections(messages.stream(), selectionReferences, operator, expectedCount, expected, messagesBuilder, testCase)) {
             addMessages = true;
         }
 
@@ -74,37 +106,5 @@ public class CheckCountExpectation implements TestExpectation {
         }
 
         return messagesBuilder.build(file);
-    }
-
-    private boolean test(long count) {
-        switch(operator) {
-            default:
-            case Equal:
-                return count == expectedCount;
-            case Less:
-                return count < expectedCount;
-            case LessOrEqual:
-                return count <= expectedCount;
-            case More:
-                return count > expectedCount;
-            case MoreOrEqual:
-                return count >= expectedCount;
-        }
-    }
-
-    private String operatorString(Operator operator) {
-        switch(operator) {
-            default:
-            case Equal:
-                return "==";
-            case Less:
-                return "<";
-            case LessOrEqual:
-                return "<=";
-            case More:
-                return ">";
-            case MoreOrEqual:
-                return ">=";
-        }
     }
 }

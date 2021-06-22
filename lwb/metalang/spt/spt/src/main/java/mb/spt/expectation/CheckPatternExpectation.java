@@ -57,7 +57,7 @@ public class CheckPatternExpectation implements TestExpectation {
             messagesBuilder.addMessage("Expected " + expected + ", but found none", Severity.Error, file, sourceRegion);
         }
 
-        if(!CheckExpectationUtil.checkSelections(messages.stream(), selectionReferences, expected, messagesBuilder, testCase)) {
+        if(!CheckExpectationUtil.checkSelections(messages.stream(), selectionReferences, CheckCountExpectation.Operator.Equal, -1, expected, messagesBuilder, testCase)) {
             addMessages = true;
         }
 
