@@ -51,17 +51,21 @@ public class CheckCountExpectation implements TestExpectation {
         }
 
         boolean addMessages = false;
-
         final ArrayList<Message> messages = result
             .getMessagesOfSeverity(severity)
+            .filter(m -> m.region == null || testCase.testFragment.getRegion().contains(m.region))
             .collect(Collectors.toCollection(ArrayList::new));
-        final long count = messages.size();
-        if(!test(count)) {
-            addMessages = true;
-            messagesBuilder.addMessage("Expected " + operatorString(operator) + " " + expectedCount + " " + severity.toDisplayString() + " message(s), but got " + count, Severity.Error, file, sourceRegion);
+        final String expected = operatorString(operator) + " " + expectedCount + " " + severity.toDisplayString();
+
+        if(selectionReferences.isEmpty()) {
+            final long count = messages.size();
+            if(!test(count)) {
+                addMessages = true;
+                messagesBuilder.addMessage("Expected " + expected+ " message(s), but got " + count, Severity.Error, file, sourceRegion);
+            }
         }
 
-        if(!CheckExpectationUtil.checkSelections(messages.stream(), selectionReferences, severity.toDisplayString(), messagesBuilder, testCase)) {
+        if(!CheckExpectationUtil.checkSelections(messages.stream(), selectionReferences, expected, messagesBuilder, testCase)) {
             addMessages = true;
         }
 

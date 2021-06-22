@@ -45,12 +45,13 @@ public class CheckPatternExpectation implements TestExpectation {
         }
 
         boolean addMessages = false;
-
         final ArrayList<Message> messages = result.stream()
             .filter(m -> m.severity == severity)
             .filter(m -> m.text.contains(like))
+            .filter(m -> m.region == null || testCase.testFragment.getRegion().contains(m.region))
             .collect(Collectors.toCollection(ArrayList::new));
         final String expected = severity.toDisplayString() + " message containing '" + like + "'";
+
         if(messages.isEmpty()) {
             addMessages = true;
             messagesBuilder.addMessage("Expected " + expected + ", but found none", Severity.Error, file, sourceRegion);
