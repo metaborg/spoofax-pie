@@ -139,7 +139,14 @@ public class CfgAstToObject {
             final CompileSdf3Input.Builder builder = languageCompilerInputBuilder.withSdf3();
             subParts.forOneSubtermAsPath("Sdf3MainSourceDirectory", rootDirectory, builder::mainSourceDirectory);
             subParts.forOneSubtermAsPath("Sdf3MainFile", rootDirectory, builder::mainFile);
-            // TODO: more SDF3 properties
+            subParts.getAllSubTermsInListAsParts("Sdf3ParseTableGeneratorSection").ifSome(ptgParts -> {
+                ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorDynamic", builder::createDynamicParseTable);
+                ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorDataDependent", builder::createDataDependentParseTable);
+                ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorLayoutSensitive", builder::createLayoutSensitiveParseTable);
+                ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorSolveDeepConflicts", builder::solveDeepConflictsInParseTable);
+                ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorCheckOverlap", builder::checkOverlapInParseTable);
+                ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorCheckPriorities", builder::checkPrioritiesInParseTable);
+            });
         });
         parts.getAllSubTermsInListAsParts("EsvSection").ifSome(subParts -> {
             final CompileEsvInput.Builder builder = languageCompilerInputBuilder.withEsv();

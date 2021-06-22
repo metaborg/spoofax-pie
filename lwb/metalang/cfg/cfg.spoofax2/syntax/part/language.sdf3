@@ -7,7 +7,11 @@ imports
 
 context-free sorts
 
-  Sdf3Option EsvOption StatixOption StrategoOption
+  Sdf3Option
+  Sdf3ParseTableGeneratorOption
+  EsvOption
+  StatixOption
+  StrategoOption
 
 context-free syntax
 
@@ -16,6 +20,16 @@ context-free syntax
 }>
   Sdf3Option.Sdf3MainSourceDirectory   = <main-source-directory = <Expr>>
   Sdf3Option.Sdf3MainFile              = <main-file = <Expr>>
+  Sdf3Option.Sdf3ParseTableGeneratorSection = <parse-table-generator {
+  <{Sdf3ParseTableGeneratorOption "\n"}*>
+}>
+
+  Sdf3ParseTableGeneratorOption.Sdf3ParseTableGeneratorDynamic = <dynamic = <Expr>>
+  Sdf3ParseTableGeneratorOption.Sdf3ParseTableGeneratorDataDependent = <data-dependent = <Expr>>
+  Sdf3ParseTableGeneratorOption.Sdf3ParseTableGeneratorLayoutSensitive = <layout-sensitive = <Expr>>
+  Sdf3ParseTableGeneratorOption.Sdf3ParseTableGeneratorSolveDeepConflicts = <solve-deep-conflicts = <Expr>>
+  Sdf3ParseTableGeneratorOption.Sdf3ParseTableGeneratorCheckOverlap = <check-overlap = <Expr>>
+  Sdf3ParseTableGeneratorOption.Sdf3ParseTableGeneratorCheckPriorities = <check-priorities = <Expr>>
 
   Part.EsvSection = <esv {
   <{EsvOption "\n"}*>
