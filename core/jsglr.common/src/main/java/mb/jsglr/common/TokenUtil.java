@@ -7,22 +7,16 @@ import mb.common.token.TokenType;
 import mb.common.token.TokenTypes;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.imploder.IToken;
-import org.spoofax.jsglr.client.imploder.ITokenizer;
 import org.spoofax.jsglr.client.imploder.ITokens;
-import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 
 import java.util.ArrayList;
 
 public class TokenUtil {
-    public static JSGLRTokens extract(IStrategoTerm ast) {
-        final ImploderAttachment rootImploderAttachment = ImploderAttachment.get(ast);
-        final ITokenizer tokenizer = (ITokenizer)rootImploderAttachment.getLeftToken().getTokenizer();
-        final int tokenCount = tokenizer.getTokenCount();
-        final ArrayList<Token<IStrategoTerm>> tokenStream = new ArrayList<>(tokenCount);
+    public static JSGLRTokens extract(ITokens tokens, boolean ambiguous) {
+        final ArrayList<Token<IStrategoTerm>> tokenStream = new ArrayList<>(tokens.getTokenCount());
         int offset = -1;
-        for(int i = 0; i < tokenCount; ++i) {
-            final IToken jsglrToken = tokenizer.getTokenAt(i);
-            if(tokenizer.isAmbiguous() && jsglrToken.getStartOffset() < offset) {
+        for(IToken jsglrToken : tokens) {
+            if(ambiguous && jsglrToken.getStartOffset() < offset) {
                 // In case of ambiguities, tokens inside the ambiguity are duplicated, ignore.
                 continue;
             }

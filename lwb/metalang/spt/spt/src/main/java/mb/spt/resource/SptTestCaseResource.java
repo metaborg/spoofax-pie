@@ -1,6 +1,7 @@
 package mb.spt.resource;
 
-import mb.resource.ReadableResource;
+import mb.common.text.Text;
+import mb.spoofax.core.resource.TextResource;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.ByteArrayInputStream;
@@ -9,12 +10,12 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
-public class SptTestCaseResource implements ReadableResource {
+public class SptTestCaseResource implements TextResource {
     private final SptTestCaseResourceKey key;
-    private final String text;
+    private final Text text;
     private final Instant modified;
 
-    public SptTestCaseResource(SptTestCaseResourceKey key, String text) {
+    public SptTestCaseResource(SptTestCaseResourceKey key, Text text) {
         this.key = key;
         this.text = text;
         this.modified = Instant.now();
@@ -22,6 +23,11 @@ public class SptTestCaseResource implements ReadableResource {
 
     @Override public void close() {
         // Nothing to close.
+    }
+
+
+    @Override public Text getText() {
+        return text;
     }
 
 
@@ -42,7 +48,7 @@ public class SptTestCaseResource implements ReadableResource {
     }
 
     @Override public long getSize() {
-        return text.length() * 2L; // UTF-16 is 2 bytes per character.
+        return text.toString().length() * 2L; // UTF-16 is 2 bytes per character.
     }
 
     @Override
@@ -52,12 +58,12 @@ public class SptTestCaseResource implements ReadableResource {
 
     @Override
     public byte[] readBytes() {
-        return text.getBytes(StandardCharsets.UTF_8); // Encode as UTF-8 bytes.
+        return text.toString().getBytes(StandardCharsets.UTF_8); // Encode as UTF-8 bytes.
     }
 
     @Override
     public String readString(Charset fromCharset) {
-        return text; // Ignore the character set, we do not need to decode from bytes.
+        return text.toString(); // Ignore the character set, we do not need to decode from bytes.
     }
 
     @Override public boolean equals(@Nullable Object o) {

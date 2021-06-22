@@ -30,6 +30,7 @@ import mb.spoofax.core.language.menu.MenuItem;
 import mb.spt.api.model.TestCase;
 import mb.spt.api.parse.ParseResult;
 import mb.spt.api.parse.TestableParse;
+import mb.spoofax.core.resource.ResourceTextSupplier;
 import mb.tiger.spoofax.command.TigerCompileDirectoryCommand;
 import mb.tiger.spoofax.command.TigerCompileFileAltCommand;
 import mb.tiger.spoofax.command.TigerCompileFileCommand;

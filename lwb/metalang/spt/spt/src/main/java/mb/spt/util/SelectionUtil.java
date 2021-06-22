@@ -7,7 +7,7 @@ import mb.spt.model.SelectionReference;
 
 public class SelectionUtil {
     public static boolean checkSelectionReferences(Iterable<SelectionReference> selectionReferences, KeyedMessagesBuilder messagesBuilder, TestCase testCase) {
-        final int numSelections = testCase.fragment.getSelections().size();
+        final int numSelections = testCase.testFragment.getSelections().size();
         boolean errors = false;
         for(SelectionReference selectionReference : selectionReferences) {
             if(selectionReference.selection > numSelections) {

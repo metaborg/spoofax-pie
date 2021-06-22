@@ -1,6 +1,7 @@
 package mb.tiger.spoofax.task.reusable;
 
 import mb.common.result.Result;
+import mb.common.text.Text;
 import mb.jsglr.common.JsglrParseException;
 import mb.jsglr.common.JsglrParseInput;
 import mb.jsglr.common.JsglrParseOutput;
@@ -29,7 +30,7 @@ public class TigerParse extends JsglrParseTaskDef {
 
     @Override protected Result<JsglrParseOutput, JsglrParseException> parse(
         ExecContext context,
-        String text,
+        Text text,
         @Nullable String startSymbol,
         @Nullable ResourceKey fileHint,
         @Nullable ResourcePath rootDirectoryHint

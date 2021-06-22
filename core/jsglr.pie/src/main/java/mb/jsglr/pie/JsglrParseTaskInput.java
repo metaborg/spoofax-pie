@@ -3,15 +3,16 @@ package mb.jsglr.pie;
 import mb.common.message.Messages;
 import mb.common.option.Option;
 import mb.common.result.Result;
+import mb.common.text.Text;
 import mb.jsglr.common.JSGLRTokens;
 import mb.jsglr.common.JsglrParseException;
 import mb.jsglr.common.JsglrParseOutput;
-import mb.pie.api.ResourceStringSupplier;
 import mb.pie.api.Supplier;
 import mb.pie.api.stamp.ResourceStamper;
 import mb.resource.ReadableResource;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.core.resource.ResourceTextSupplier;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -42,7 +43,7 @@ public interface JsglrParseTaskInput extends Serializable {
 
 
         public Builder withFile(ResourceKey file, @Nullable ResourceStamper<ReadableResource> stamper, Charset charset) {
-            stringSupplier(new ResourceStringSupplier(file, stamper, charset));
+            textSupplier(new ResourceTextSupplier(file, stamper, charset));
             return fileHint(Option.ofSome(file));
         }
 
@@ -104,14 +105,14 @@ public interface JsglrParseTaskInput extends Serializable {
     }
 
 
-    Supplier<String> stringSupplier();
+    Supplier<Text> textSupplier();
 
     Optional<String> startSymbol();
 
     @Value.Default default Option<ResourceKey> fileHint() {
-        final Supplier<String> stringSupplier = stringSupplier();
-        if(stringSupplier instanceof ResourceStringSupplier) {
-            return Option.ofSome(((ResourceStringSupplier)stringSupplier).key);
+        final Supplier<Text> supplier = textSupplier();
+        if(supplier instanceof ResourceTextSupplier) {
+            return Option.ofSome(((ResourceTextSupplier)supplier).key);
         } else {
             return Option.ofNone();
         }

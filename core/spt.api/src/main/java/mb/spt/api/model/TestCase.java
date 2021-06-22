@@ -14,7 +14,7 @@ public class TestCase {
     public final @Nullable ResourcePath rootDirectoryHint;
     public final String description;
     public final Region descriptionRegion;
-    public final Fragment fragment;
+    public final TestFragment testFragment;
     public final ListView<TestExpectation> expectations;
 
     public TestCase(
@@ -23,7 +23,7 @@ public class TestCase {
         @Nullable ResourcePath rootDirectoryHint,
         String description,
         Region descriptionRegion,
-        Fragment fragment,
+        TestFragment testFragment,
         ListView<TestExpectation> expectations
     ) {
         this.resource = resource;
@@ -31,7 +31,7 @@ public class TestCase {
         this.rootDirectoryHint = rootDirectoryHint;
         this.description = description;
         this.descriptionRegion = descriptionRegion;
-        this.fragment = fragment;
+        this.testFragment = testFragment;
         this.expectations = expectations;
     }
 
@@ -44,7 +44,7 @@ public class TestCase {
         if(!Objects.equals(rootDirectoryHint, testCase.rootDirectoryHint)) return false;
         if(!description.equals(testCase.description)) return false;
         if(!descriptionRegion.equals(testCase.descriptionRegion)) return false;
-        if(!fragment.equals(testCase.fragment)) return false;
+        if(!testFragment.equals(testCase.testFragment)) return false;
         return expectations.equals(testCase.expectations);
     }
 
@@ -54,7 +54,7 @@ public class TestCase {
         result = 31 * result + (rootDirectoryHint != null ? rootDirectoryHint.hashCode() : 0);
         result = 31 * result + description.hashCode();
         result = 31 * result + descriptionRegion.hashCode();
-        result = 31 * result + fragment.hashCode();
+        result = 31 * result + testFragment.hashCode();
         result = 31 * result + expectations.hashCode();
         return result;
     }
@@ -66,7 +66,7 @@ public class TestCase {
             ", rootDirectoryHint=" + rootDirectoryHint +
             ", description='" + description + '\'' +
             ", descriptionRegion=" + descriptionRegion +
-            ", fragment=" + fragment +
+            ", fragment=" + testFragment +
             ", expectations=" + expectations +
             '}';
     }

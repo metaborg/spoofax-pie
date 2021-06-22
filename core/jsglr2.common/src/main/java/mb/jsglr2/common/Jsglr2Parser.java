@@ -5,6 +5,7 @@ import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Severity;
 import mb.common.region.Region;
 import mb.common.token.Token;
+import mb.jsglr.common.FragmentedOriginLocationFixer;
 import mb.jsglr.common.JSGLRTokens;
 import mb.jsglr.common.JsglrParseException;
 import mb.jsglr.common.JsglrParseInput;
@@ -47,7 +48,7 @@ public class Jsglr2Parser {
     }
 
     public JsglrParseOutput parse(JsglrParseInput input) throws JsglrParseException {
-        final JSGLR2Request request = new JSGLR2Request(input.text, input.fileHint != null ? input.fileHint.toString() : "", input.startSymbol)
+        final JSGLR2Request request = new JSGLR2Request(input.text.toString(), input.fileHint != null ? input.fileHint.toString() : "", input.startSymbol)
             .withAmbiguitiesReporting(true);
         final ParseResult<?> parseResult = jsglr2.parser.parse(request);
         if(!parseResult.isSuccess()) {
@@ -60,10 +61,19 @@ public class Jsglr2Parser {
         if(input.fileHint != null) {
             ResourceKeyAttachment.setResourceKey(ast, input.fileHint);
         }
+
         final ITokens tokenStream = jsglr2.tokenizer.tokenize(request, implodeResult.intermediateResult()).tokens;
-        final JSGLRTokens tokens = convertTokens(tokenStream);
         parseResult.postProcessMessages(tokenStream);
-        final KeyedMessages messages = collectMessages(parseResult.messages, input.fileHint, input.rootDirectoryHint);
+
+        final FragmentedOriginLocationFixer.Result fixResult = FragmentedOriginLocationFixer.fixOriginLocations(
+            input.text,
+            ast,
+            tokenStream,
+            collectMessages(parseResult.messages, input.fileHint, input.rootDirectoryHint)
+        );
+
+        final JSGLRTokens tokens = convertTokens(fixResult.tokens);
+
         final boolean recovered;
         if(parseResult.parseState instanceof IRecoveryParseState) {
             recovered = ((IRecoveryParseState<?, ?, ?>)parseResult.parseState).appliedRecovery();
@@ -71,7 +81,8 @@ public class Jsglr2Parser {
             recovered = false;
         }
         final boolean ambiguous = implodeResult.isAmbiguous();
-        return new JsglrParseOutput(ast, tokens, messages, recovered, ambiguous, input.startSymbol, input.fileHint, input.rootDirectoryHint);
+
+        return new JsglrParseOutput(fixResult.ast, tokens, fixResult.messages, recovered, ambiguous, input.startSymbol, input.fileHint, input.rootDirectoryHint);
     }
 
     private static KeyedMessages collectMessages(Collection<Message> messages, @Nullable ResourceKey fileHint, @Nullable ResourcePath rootDirectoryHint) {

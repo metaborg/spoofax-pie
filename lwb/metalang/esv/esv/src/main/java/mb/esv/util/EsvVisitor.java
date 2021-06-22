@@ -2,18 +2,19 @@ package mb.esv.util;
 
 import mb.common.option.Option;
 import mb.common.result.Result;
+import mb.common.text.Text;
 import mb.common.util.ListView;
 import mb.esv.task.spoofax.EsvParseWrapper;
 import mb.jsglr.common.JsglrParseException;
 import mb.jsglr.common.JsglrParseOutput;
 import mb.pie.api.ExecContext;
-import mb.pie.api.ResourceStringSupplier;
 import mb.pie.api.Supplier;
 import mb.pie.api.SupplierWithOrigin;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ReadableResource;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.core.resource.ResourceTextSupplier;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -23,7 +24,7 @@ import java.util.HashSet;
 
 public abstract class EsvVisitor {
     private final EsvParseWrapper parse;
-//    private final ListView<? extends Supplier<?>> sourceFileOrigins;
+    //    private final ListView<? extends Supplier<?>> sourceFileOrigins;
     private final ListView<Supplier<Result<ResourcePath, ?>>> includeDirectorySuppliers;
     private final ListView<Supplier<Result<IStrategoTerm, ?>>> includeAstSuppliers;
 
@@ -123,12 +124,12 @@ public abstract class EsvVisitor {
     }
 
     private Option<IStrategoTerm> parse(ExecContext context, ResourceKey file, ResourcePath rootDirectory, @Nullable Supplier<?> origin) {
-        Supplier<String> supplier = new ResourceStringSupplier(file);
+        Supplier<Text> supplier = new ResourceTextSupplier(file);
         if(origin != null) {
             supplier = new SupplierWithOrigin<>(supplier, origin);
         }
         final Result<JsglrParseOutput, JsglrParseException> parseResult = context.require(parse, parse.inputBuilder()
-            .stringSupplier(supplier)
+            .textSupplier(supplier)
             .fileHint(file)
             .rootDirectoryHint(rootDirectory)
             .build()

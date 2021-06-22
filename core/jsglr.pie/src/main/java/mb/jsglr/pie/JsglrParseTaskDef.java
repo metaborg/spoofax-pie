@@ -2,6 +2,7 @@ package mb.jsglr.pie;
 
 import mb.common.message.Messages;
 import mb.common.result.Result;
+import mb.common.text.Text;
 import mb.common.util.MapView;
 import mb.jsglr.common.JSGLRTokens;
 import mb.jsglr.common.JsglrParseException;
@@ -83,7 +84,7 @@ public abstract class JsglrParseTaskDef implements TaskDef<JsglrParseTaskInput, 
 
     protected abstract Result<JsglrParseOutput, JsglrParseException> parse(
         ExecContext context,
-        String text,
+        Text text,
         @Nullable String startSymbol,
         @Nullable ResourceKey fileHint,
         @Nullable ResourcePath rootDirectoryHint
@@ -96,7 +97,7 @@ public abstract class JsglrParseTaskDef implements TaskDef<JsglrParseTaskInput, 
         final @Nullable ResourceKey fileHint = input.fileHint().getOr(null);
         final @Nullable ResourcePath rootDirectoryHint = input.rootDirectoryHint().orElse(null);
         try {
-            return parse(context, context.require(input.stringSupplier()), startSymbol, fileHint, rootDirectoryHint);
+            return parse(context, context.require(input.textSupplier()), startSymbol, fileHint, rootDirectoryHint);
         } catch(UncheckedIOException e) {
             return Result.ofErr(JsglrParseException.readStringFail(e.getCause(), startSymbol, fileHint, rootDirectoryHint));
         }

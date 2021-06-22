@@ -21,7 +21,7 @@ public class CheckExpectationUtil {
                 .map(m -> m.region)
                 .collect(Collectors.toCollection(ArrayList::new));
             for(SelectionReference selectionReference : selectionReferences) {
-                final Region selection = testCase.fragment.getSelections().get(selectionReference.selection - 1);
+                final Region selection = testCase.testFragment.getSelections().get(selectionReference.selection - 1);
                 final Iterator<Region> iterator = messageRegions.iterator();
                 boolean found = false;
                 while(iterator.hasNext()) {

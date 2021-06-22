@@ -1,5 +1,6 @@
 package mb.jsglr.common;
 
+import mb.common.text.Text;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -7,24 +8,36 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.io.Serializable;
 
 public class JsglrParseInput implements Serializable {
-    public final String text;
+    public final Text text;
     public final String startSymbol;
     public final @Nullable ResourceKey fileHint;
     public final @Nullable ResourcePath rootDirectoryHint;
 
-    public JsglrParseInput(String text, String startSymbol, @Nullable ResourceKey fileHint, @Nullable ResourcePath rootDirectoryHint) {
+    public JsglrParseInput(Text text, String startSymbol, @Nullable ResourceKey fileHint, @Nullable ResourcePath rootDirectoryHint) {
         this.text = text;
         this.startSymbol = startSymbol;
         this.fileHint = fileHint;
         this.rootDirectoryHint = rootDirectoryHint;
     }
 
-    public JsglrParseInput(String text, String startSymbol, @Nullable ResourceKey fileHint) {
+    public JsglrParseInput(Text text, String startSymbol, @Nullable ResourceKey fileHint) {
         this(text, startSymbol, fileHint, null);
     }
 
-    public JsglrParseInput(String text, String startSymbol) {
+    public JsglrParseInput(Text text, String startSymbol) {
         this(text, startSymbol, null);
+    }
+
+    public JsglrParseInput(String text, String startSymbol, @Nullable ResourceKey fileHint, @Nullable ResourcePath rootDirectoryHint) {
+        this(Text.string(text), startSymbol, fileHint, rootDirectoryHint);
+    }
+
+    public JsglrParseInput(String text, String startSymbol, @Nullable ResourceKey fileHint) {
+        this(Text.string(text), startSymbol, fileHint);
+    }
+
+    public JsglrParseInput(String text, String startSymbol) {
+        this(Text.string(text), startSymbol);
     }
 
     @Override public boolean equals(@Nullable Object o) {

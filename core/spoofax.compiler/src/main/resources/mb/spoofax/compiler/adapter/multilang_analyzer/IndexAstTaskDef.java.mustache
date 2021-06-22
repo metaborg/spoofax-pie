@@ -1,6 +1,7 @@
 package {{baseIndexAstTaskDef.packageId}};
 
 import mb.common.result.Result;
+import mb.common.text.Text;
 import mb.jsglr.common.JsglrParseException;
 import mb.jsglr.pie.JsglrParseTaskInput;
 import mb.pie.api.Function;
@@ -21,9 +22,9 @@ public class {{baseIndexAstTaskDef.id}} extends SmlIndexAstTaskDef<JsglrParseExc
         Provider<StrategoRuntime> strategoRuntimeProvider,
         Function<JsglrParseTaskInput, Result<IStrategoTerm, JsglrParseException>> astSupplier
     ) {
-        super(strategoRuntimeProvider, astSupplier.mapInput(new SerializableFunction<Supplier<String>, JsglrParseTaskInput>() {
-            @Override public JsglrParseTaskInput apply(Supplier<String> stringSupplier) {
-                return JsglrParseTaskInput.builder().stringSupplier(stringSupplier).build();
+        super(strategoRuntimeProvider, astSupplier.mapInput(new SerializableFunction<Supplier<Text>, JsglrParseTaskInput>() {
+            @Override public JsglrParseTaskInput apply(Supplier<Text> textSupplier) {
+                return JsglrParseTaskInput.builder().textSupplier(textSupplier).build();
             }
 
             @Override public boolean equals(@Nullable Object other) {

@@ -1,18 +1,19 @@
 package mb.spt.fromterm;
 
 import mb.common.region.Region;
+import mb.common.text.FragmentedString;
+import mb.common.text.StringFragment;
 import mb.common.util.ListView;
 import mb.common.util.MapView;
 import mb.jsglr.common.TermTracer;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spt.api.model.Fragment;
-import mb.spt.api.model.FragmentPart;
 import mb.spt.api.model.TestCase;
 import mb.spt.api.model.TestExpectation;
+import mb.spt.api.model.TestFragment;
 import mb.spt.api.model.TestSuite;
-import mb.spt.model.FragmentImpl;
 import mb.spt.model.TestFixture;
+import mb.spt.model.TestFragmentImpl;
 import mb.spt.resource.SptTestCaseResource;
 import mb.spt.resource.SptTestCaseResourceRegistry;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -104,15 +105,15 @@ public class TestSuiteFromTerm {
             throw new InvalidAstShapeException("a description term with location information", descriptionTerm);
         }
         final IStrategoAppl fragmentTerm = TermUtils.asApplAt(ast, 2).orElseThrow(() -> new InvalidAstShapeException("a term application as third subterm", ast));
-        final Fragment fragment = fragmentFromTerm(fragmentTerm, testFixture);
+        final TestFragment testFragment = fragmentFromTerm(fragmentTerm, testFixture);
         final IStrategoList testExpectationTerms = TermUtils.asListAt(appl, 4).orElseThrow(() -> new InvalidAstShapeException("a term list as fifth subterm", appl));
         final ArrayList<TestExpectation> testExpectations = new ArrayList<>(testExpectationTerms.size());
         for(IStrategoTerm testExpectationTerm : testExpectationTerms) {
             testExpectations.add(testExpectationFromTerm(testExpectationTerm, expectationsFromTerms, descriptionRegion));
         }
         final String resourceName = getResourceName(usedResourceNames, description);
-        final SptTestCaseResource resource = testCaseResourceRegistry.registerTestCase(suiteFile, resourceName, fragment.asText()); // TODO: no whitespace hack for text.
-        return new TestCase(resource.getKey(), suiteFile, rootDirectoryHint, description, descriptionRegion, fragment, ListView.of(testExpectations));
+        final SptTestCaseResource resource = testCaseResourceRegistry.registerTestCase(suiteFile, resourceName, testFragment.asText());
+        return new TestCase(resource.getKey(), suiteFile, rootDirectoryHint, description, descriptionRegion, testFragment, ListView.of(testExpectations));
     }
 
     private static String getResourceName(HashSet<String> usedResourceNames, String name) {
@@ -127,15 +128,15 @@ public class TestSuiteFromTerm {
         return name;
     }
 
-    private static FragmentImpl fragmentFromTerm(IStrategoTerm ast, @Nullable TestFixture testFixture) throws FromTermException {
+    private static TestFragmentImpl fragmentFromTerm(IStrategoTerm ast, @Nullable TestFixture testFixture) throws FromTermException {
         final @Nullable Region region = TermTracer.getRegion(ast);
         if(region == null) {
             throw new InvalidAstShapeException("a fragment term with location information", ast);
         }
         final ArrayList<Region> selections = new ArrayList<>();
-        final ArrayList<FragmentPart> parts = new ArrayList<>();
+        final ArrayList<StringFragment> stringFragments = new ArrayList<>();
         if(testFixture != null) {
-            parts.add(new FragmentPart(testFixture.beforeStartOffset, testFixture.beforeText));
+            stringFragments.add(new StringFragment(testFixture.beforeStartOffset, testFixture.beforeText));
         }
         IStrategoAppl appl = TermUtils.asAppl(ast).orElseThrow(() -> new InvalidAstShapeException("a term application", ast));
         while(!appl.getConstructor().getName().equals("Done")) {
@@ -148,7 +149,7 @@ public class TestSuiteFromTerm {
                     if(textRegion == null) {
                         throw new InvalidAstShapeException("a fragment text term with location information", textTerm);
                     }
-                    parts.add(new FragmentPart(textRegion.getStartOffset(), textTerm.stringValue()));
+                    stringFragments.add(new StringFragment(textRegion.getStartOffset(), textTerm.stringValue()));
                     // Tail
                     appl = TermUtils.asApplAt(appl, 1).orElseThrow(() -> new InvalidAstShapeException("a tail part as second subterm", fragment));
                     break;
@@ -165,7 +166,7 @@ public class TestSuiteFromTerm {
                     if(selectionTextRegion == null) {
                         throw new InvalidAstShapeException("a selection term with location information", selectionTextTerm);
                     }
-                    parts.add(new FragmentPart(selectionTextRegion.getStartOffset(), selectionTextTerm.stringValue()));
+                    stringFragments.add(new StringFragment(selectionTextRegion.getStartOffset(), selectionTextTerm.stringValue()));
                     selections.add(selectionTextRegion);
                     // Text
                     final IStrategoString textTerm = TermUtils.asStringAt(more, 1).orElseThrow(() -> new InvalidAstShapeException("a term string as second subterm", more));
@@ -173,7 +174,7 @@ public class TestSuiteFromTerm {
                     if(textRegion == null) {
                         throw new InvalidAstShapeException("a more text term with location information", textTerm);
                     }
-                    parts.add(new FragmentPart(textRegion.getStartOffset(), textTerm.stringValue()));
+                    stringFragments.add(new StringFragment(textRegion.getStartOffset(), textTerm.stringValue()));
                     // Tail
                     appl = TermUtils.asApplAt(appl, 2).orElseThrow(() -> new InvalidAstShapeException("a tail part as third subterm", more));
                     break;
@@ -181,9 +182,9 @@ public class TestSuiteFromTerm {
             }
         }
         if(testFixture != null) {
-            parts.add(new FragmentPart(testFixture.afterStartOffset, testFixture.afterText));
+            stringFragments.add(new StringFragment(testFixture.afterStartOffset, testFixture.afterText));
         }
-        return new FragmentImpl(region, ListView.of(selections), ListView.of(parts));
+        return new TestFragmentImpl(region, ListView.of(selections), new FragmentedString(ListView.of(stringFragments)));
     }
 
     private static TestExpectation testExpectationFromTerm(

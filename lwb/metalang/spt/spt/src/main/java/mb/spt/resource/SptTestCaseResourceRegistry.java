@@ -1,5 +1,6 @@
 package mb.spt.resource;
 
+import mb.common.text.Text;
 import mb.common.util.MultiMap;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceKeyString;
@@ -42,7 +43,7 @@ public class SptTestCaseResourceRegistry implements ResourceRegistry {
     }
 
 
-    public SptTestCaseResource registerTestCase(ResourceKey testSuiteFile, String testCase, String text) {
+    public SptTestCaseResource registerTestCase(ResourceKey testSuiteFile, String testCase, Text text) {
         final String testSuite = testSuiteFile.getIdAsString();
         final SptTestCaseResourceKey key = new SptTestCaseResourceKey(testSuiteFile.getIdAsString(), testCase);
         final SptTestCaseResource resource = new SptTestCaseResource(key, text);

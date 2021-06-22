@@ -1,5 +1,6 @@
 package {{baseParseTaskDef.packageId}};
 
+import mb.common.text.Text;
 import mb.common.result.Result;
 import mb.jsglr.common.JsglrParseException;
 import mb.jsglr.common.JsglrParseInput;
@@ -33,7 +34,7 @@ public class {{baseParseTaskDef.id}} extends JsglrParseTaskDef {
 
     @Override protected Result<JsglrParseOutput, JsglrParseException> parse(
         ExecContext context,
-        String text,
+        Text text,
         @Nullable String startSymbol,
         @Nullable ResourceKey fileHint,
         @Nullable ResourcePath rootDirectoryHint
