@@ -36,6 +36,7 @@ import mb.spoofax.compiler.language.LanguageProjectCompiler;
 import mb.spoofax.compiler.language.LanguageProjectCompilerInputBuilder;
 import mb.spoofax.compiler.language.MultilangAnalyzerLanguageCompiler;
 import mb.spoofax.compiler.language.ParserLanguageCompiler;
+import mb.spoofax.compiler.language.ParserVariant;
 import mb.spoofax.compiler.language.StrategoRuntimeLanguageCompiler;
 import mb.spoofax.compiler.language.StylerLanguageCompiler;
 import mb.spoofax.compiler.platform.EclipseProjectCompiler;
@@ -158,14 +159,12 @@ public class CfgAstToObject {
             final CompileStatixInput.Builder builder = languageCompilerInputBuilder.withStatix();
             subParts.forOneSubtermAsPath("StatixMainSourceDirectory", rootDirectory, builder::mainSourceDirectory);
             subParts.forOneSubtermAsPath("StatixMainFile", rootDirectory, builder::mainFile);
-            // TODO: more Statix properties
         });
         parts.getAllSubTermsInListAsParts("StrategoSection").ifSome(subParts -> {
             final CompileStrategoInput.Builder builder = languageCompilerInputBuilder.withStratego();
             subParts.forOneSubtermAsPath("StrategoMainSourceDirectory", rootDirectory, builder::mainSourceDirectory);
             subParts.forOneSubtermAsPath("StrategoMainFile", rootDirectory, builder::mainFile);
             subParts.forOneSubtermAsString("StrategoLanguageStrategyAffix", builder::languageStrategyAffix);
-            // TODO: more Stratego properties
         });
         customizer.customize(languageCompilerInputBuilder);
         final CompileLanguageSpecificationInput languageCompilerInput = languageCompilerInputBuilder.build(properties, shared, languageShared);
@@ -176,6 +175,52 @@ public class CfgAstToObject {
         parts.getAllSubTermsInListAsParts("ParserSection").ifSome(subParts -> {
             final ParserLanguageCompiler.Input.Builder base = baseBuilder.withParser();
             subParts.forOneSubtermAsString("DefaultStartSymbol", base::startSymbol);
+            subParts.getOneSubterm("ParserVariant").ifSome(variant -> {
+                if(TermUtils.isAppl(variant, "Jsglr1", 0)) {
+                    base.variant(ParserVariant.jsglr1());
+                    return;
+                }
+                if(TermUtils.isAppl(variant, "Jsglr2", 1)) {
+                    base.variant(ParserVariant.jsglr2());
+                    final Parts variantParts = subParts.subParts(variant.getSubterm(0));
+                    variantParts.getOneSubterm("Jsglr2Preset").ifSome(presetTerm -> {
+                        final IStrategoAppl appl = TermUtils.asAppl(presetTerm)
+                            .orElseThrow(() -> new InvalidAstShapeException("constructor application", presetTerm));
+                        final ParserVariant.Jsglr2Preset preset;
+                        switch(appl.getConstructor().getName()) {
+                            default:
+                            case "Standard":
+                                preset = ParserVariant.Jsglr2Preset.Standard;
+                                break;
+                            case "Elkhound":
+                                preset = ParserVariant.Jsglr2Preset.Elkhound;
+                                break;
+                            case "Recovery":
+                                preset = ParserVariant.Jsglr2Preset.Recovery;
+                                break;
+                            case "RecoveryElkhound":
+                                preset = ParserVariant.Jsglr2Preset.RecoveryElkhound;
+                                break;
+                            case "DataDependent":
+                                preset = ParserVariant.Jsglr2Preset.DataDependent;
+                                break;
+                            case "LayoutSensitive":
+                                preset = ParserVariant.Jsglr2Preset.LayoutSensitive;
+                                break;
+                            case "Composite":
+                                preset = ParserVariant.Jsglr2Preset.Composite;
+                                break;
+                            case "Incremental":
+                                preset = ParserVariant.Jsglr2Preset.Incremental;
+                                break;
+                            case "IncrementalRecovery":
+                                preset = ParserVariant.Jsglr2Preset.IncrementalRecovery;
+                                break;
+                        }
+                        base.variant(ParserVariant.jsglr2(preset));
+                    });
+                }
+            });
             // TODO: parser language properties
             final ParserAdapterCompiler.Input.Builder adapter = adapterBuilder.withParser();
             // TODO: parser adapter properties

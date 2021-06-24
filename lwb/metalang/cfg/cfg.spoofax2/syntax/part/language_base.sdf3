@@ -7,7 +7,11 @@ imports
 
 context-free sorts
 
-  ParserOption 
+  ParserOption
+  ParserVariant
+  Jsglr2Option
+  Jsglr2Preset
+  
   StylerOption 
   ConstraintAnalyzerOption
   MultilangAnalyzerOption
@@ -22,6 +26,24 @@ context-free syntax
 }>
 
   ParserOption.DefaultStartSymbol = <default-start-symbol = <Expr>>
+  ParserOption.ParserVariant = <variant = <ParserVariant>>
+  
+  ParserVariant.Jsglr1 = <jsglr1>
+  ParserVariant.Jsglr2 = <jsglr2 {
+  <{Jsglr2Option "\n"}*>
+}>
+
+  Jsglr2Option.Jsglr2Preset = <preset = <Jsglr2Preset>>
+  
+  Jsglr2Preset.Jsglr2StandardPreset            = <Standard>
+  Jsglr2Preset.Jsglr2ElkhoundPreset            = <Elkhound>
+  Jsglr2Preset.Jsglr2RecoveryPreset            = <Recovery>
+  Jsglr2Preset.Jsglr2RecoveryElkhoundPreset    = <RecoveryElkhound>
+  Jsglr2Preset.Jsglr2DataDependentPreset       = <DataDependent>
+  Jsglr2Preset.Jsglr2LayoutSensitivePreset     = <LayoutSensitive>
+  Jsglr2Preset.Jsglr2CompositePreset           = <Composite>
+  Jsglr2Preset.Jsglr2IncrementalPreset         = <Incremental>
+  Jsglr2Preset.Jsglr2IncrementalRecoveryPreset = <IncrementalRecovery>
 
 context-free syntax
 

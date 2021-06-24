@@ -13,13 +13,30 @@ rules // Parser section and options
   partOk(s, t@ParserSection(options)) :-
     parserOptionsOk(s, options),
     hasDefaultStartSymbol(options) == TRUE() | error $['default-start-symbol' option has not been set]@t.
-    
+
+
   parserOptionOk : scope * ParserOption
   parserOptionsOk maps parserOptionOk(*, list(*))
   
   parserOptionOk(s, DefaultStartSymbol(e)) :-
     typeOfExpr(s, e) == SORT() | error $[Expected sort].
-    
+  parserOptionOk(s, ParserVariant(variant)) :-
+    parserVariantOk(s, variant).
+
+
+  parserVariantOk : scope * ParserVariant
+  
+  parserVariantOk(s, Jsglr1()).
+  parserVariantOk(s, Jsglr2(options)) :-
+    jsglr2OptionsOk(s, options).
+
+
+  jsglr2OptionOk : scope * Jsglr2Option
+  jsglr2OptionsOk maps jsglr2OptionOk(*, list(*))
+  
+  jsglr2OptionOk(s, Jsglr2Preset(_)).
+
+
   hasDefaultStartSymbol: list(ParserOption) -> BOOL
   hasDefaultStartSymbol([DefaultStartSymbol(_)|_]) = TRUE().
   hasDefaultStartSymbol([_|s]) = hasDefaultStartSymbol(s).

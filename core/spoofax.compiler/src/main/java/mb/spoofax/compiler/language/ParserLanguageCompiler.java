@@ -54,7 +54,10 @@ public class ParserLanguageCompiler implements TaskDef<ParserLanguageCompiler.In
         return ListView.of(
             GradleConfiguredDependency.api(input.shared().atermCommonDep()),
             GradleConfiguredDependency.api(input.shared().jsglrCommonDep()),
-            GradleConfiguredDependency.api(input.jsglrVersion() == JsglrVersion.V1 ? input.shared().jsglr1CommonDep() : input.shared().jsglr2CommonDep())
+            GradleConfiguredDependency.api(input.variant().caseOf()
+                .jsglr1(() -> input.shared().jsglr1CommonDep())
+                .jsglr2(preset -> input.shared().jsglr2CommonDep())
+            )
         );
     }
 
@@ -75,7 +78,7 @@ public class ParserLanguageCompiler implements TaskDef<ParserLanguageCompiler.In
          */
         String parseTableRelativePath();
 
-        @Value.Default default JsglrVersion jsglrVersion() { return JsglrVersion.V1; }
+        @Value.Default default ParserVariant variant() { return ParserVariant.jsglr1(); }
 
 
         /// Kinds of classes (generated/extended/manual)
@@ -131,33 +134,21 @@ public class ParserLanguageCompiler implements TaskDef<ParserLanguageCompiler.In
         /// Mustache template helpers
 
         default TypeInfo parseTableType() {
-            switch(jsglrVersion()) {
-                default:
-                case V1:
-                    return TypeInfo.of("mb.jsglr1.common.JSGLR1ParseTable");
-                case V2:
-                    return TypeInfo.of("mb.jsglr2.common.Jsglr2ParseTable");
-            }
+            return variant().caseOf()
+                .jsglr1(() -> TypeInfo.of("mb.jsglr1.common.JSGLR1ParseTable"))
+                .jsglr2(preset -> TypeInfo.of("mb.jsglr2.common.Jsglr2ParseTable"));
         }
 
         default TypeInfo parseTableExceptionType() {
-            switch(jsglrVersion()) {
-                default:
-                case V1:
-                    return TypeInfo.of("mb.jsglr1.common.JSGLR1ParseTableException");
-                case V2:
-                    return TypeInfo.of("mb.jsglr2.common.Jsglr2ParseTableException");
-            }
+            return variant().caseOf()
+                .jsglr1(() -> TypeInfo.of("mb.jsglr1.common.JSGLR1ParseTableException"))
+                .jsglr2(preset -> TypeInfo.of("mb.jsglr2.common.Jsglr2ParseTableException"));
         }
 
         default TypeInfo parserType() {
-            switch(jsglrVersion()) {
-                default:
-                case V1:
-                    return TypeInfo.of("mb.jsglr1.common.JSGLR1Parser");
-                case V2:
-                    return TypeInfo.of("mb.jsglr2.common.Jsglr2Parser");
-            }
+            return variant().caseOf()
+                .jsglr1(() -> TypeInfo.of("mb.jsglr1.common.JSGLR1Parser"))
+                .jsglr2(preset -> TypeInfo.of("mb.jsglr2.common.Jsglr2Parser"));
         }
 
 
@@ -186,9 +177,5 @@ public class ParserLanguageCompiler implements TaskDef<ParserLanguageCompiler.In
         @Value.Check default void check() {
 
         }
-    }
-
-    public enum JsglrVersion implements Serializable {
-        V1, V2
     }
 }
