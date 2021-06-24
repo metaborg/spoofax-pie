@@ -74,9 +74,14 @@ public class ParserLanguageCompiler implements TaskDef<ParserLanguageCompiler.In
         String startSymbol();
 
         /**
-         * @return path to the parse table to load, relative to the classloader resources.
+         * @return path to the parse table aterm file to load, relative to the classloader resources.
          */
-        String parseTableRelativePath();
+        String parseTableAtermFileRelativePath();
+
+        /**
+         * @return path to the parse table persisted file to load, relative to the classloader resources.
+         */
+        String parseTablePersistedFileRelativePath();
 
         @Value.Default default ParserVariant variant() { return ParserVariant.jsglr1(); }
 
@@ -132,6 +137,10 @@ public class ParserLanguageCompiler implements TaskDef<ParserLanguageCompiler.In
 
 
         /// Mustache template helpers
+
+        default boolean isJsglr2() {
+            return variant().isJsglr2();
+        }
 
         default TypeInfo parseTableType() {
             return variant().caseOf()

@@ -26,7 +26,10 @@ public class Spoofax2ParserLanguageCompiler implements TaskDef<Spoofax2ParserLan
 
 
     public ListView<String> getCopyResources(Input input) {
-        return ListView.of(input.parseTableRelativePath());
+        return ListView.of(
+            input.parseTableAtermFileRelativePath(),
+            input.parseTablePersistedFileRelativePath()
+        );
     }
 
 
@@ -38,15 +41,25 @@ public class Spoofax2ParserLanguageCompiler implements TaskDef<Spoofax2ParserLan
 
 
         /**
-         * @return path to the parse table to copy, relative to the Spoofax 2 language specification project directory.
+         * @return path to the parse table aterm file to copy, relative to the Spoofax 2 language specification project
+         * directory.
          */
-        @Value.Default default String parseTableRelativePath() {
+        @Value.Default default String parseTableAtermFileRelativePath() {
             return "target/metaborg/sdf.tbl";
+        }
+
+        /**
+         * @return path to the parse table persisted file to copy, relative to the Spoofax 2 language specification
+         * project directory.
+         */
+        @Value.Default default String parseTablePersistedFileRelativePath() {
+            return "target/metaborg/table.bin";
         }
 
 
         default void syncTo(ParserLanguageCompiler.Input.Builder builder) {
-            builder.parseTableRelativePath(parseTableRelativePath());
+            builder.parseTableAtermFileRelativePath(parseTableAtermFileRelativePath());
+            builder.parseTablePersistedFileRelativePath(parseTablePersistedFileRelativePath());
         }
     }
 }

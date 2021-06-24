@@ -188,7 +188,8 @@ public class TigerInputs {
 
     private void setLanguageProjectCompilerInput(ResourcePath rootDirectory, Shared shared, LanguageProjectCompilerInputBuilder languageProjectCompilerInputBuilder) {
         languageProjectCompilerInputBuilder.withParser()
-            .parseTableRelativePath("target/metaborg/sdf.tbl")
+            .parseTableAtermFileRelativePath("target/metaborg/sdf.tbl")
+            .parseTablePersistedFileRelativePath("target/metaborg/table.bin")
             .startSymbol("Module");
         languageProjectCompilerInputBuilder.withStyler()
             .packedEsvRelativePath("target/metaborg/editor.esv.af");

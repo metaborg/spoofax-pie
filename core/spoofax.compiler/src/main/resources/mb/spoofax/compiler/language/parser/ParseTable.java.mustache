@@ -14,12 +14,15 @@ public class {{baseParseTable.id}} implements Serializable {
     }
 
     public static {{baseParseTable.id}} fromDefinitionDir(HierarchicalResource definitionDir) {
-        final HierarchicalResource resource = definitionDir.appendRelativePath("{{parseTableRelativePath}}");
-        try(final InputStream inputStream = resource.openRead()) {
-            final {{parseTableType.qualifiedId}} parseTable = {{parseTableType.qualifiedId}}.fromStream(inputStream);
+        final HierarchicalResource atermFile = definitionDir.appendRelativePath("{{parseTableAtermFileRelativePath}}");
+{{#isJsglr2}}
+    final HierarchicalResource persistedFile = definitionDir.appendRelativePath("{{parseTablePersistedFileRelativePath}}");
+{{/isJsglr2}}
+        try(final InputStream atermInputStream = atermFile.openRead(){{#isJsglr2}}; final InputStream persistedInputStream = persistedFile.openRead(){{/isJsglr2}}) {
+            final {{parseTableType.qualifiedId}} parseTable = {{parseTableType.qualifiedId}}.fromStream(atermInputStream{{#isJsglr2}}, persistedInputStream{{/isJsglr2}});
             return new {{baseParseTable.id}}(parseTable);
         } catch({{parseTableExceptionType.qualifiedId}} | IOException e) {
-            throw new RuntimeException("Cannot create parse table; cannot read parse table from resource '" + resource + "' in classloader resources");
+            throw new RuntimeException("Cannot create parse table; cannot read parse table from resource '" + atermFile + "'{{#isJsglr2}} or '" + persistedFile + "'{{/isJsglr2}} in classloader resources");
         }
     }
 }

@@ -14,37 +14,83 @@ import org.metaborg.sdf2table.parsetable.ParseTable;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
-import java.util.Objects;
 
 @Sdf3Scope
-public class Sdf3ParseTableToFile implements TaskDef<Sdf3ParseTableToFile.Args, Result<None, ?>> {
-    public static class Args implements Serializable {
+public class Sdf3ParseTableToFile implements TaskDef<Sdf3ParseTableToFile.Input, Result<None, ?>> {
+    public static class Input implements Serializable {
         private final Supplier<? extends Result<ParseTable, ?>> parseTableSupplier;
-        private final ResourcePath outputFile;
+        private final ResourcePath atermOutputFile;
+        private final ResourcePath persistedOutputFile;
 
-        public Args(Supplier<? extends Result<ParseTable, ?>> parseTableSupplier, ResourcePath outputFile) {
+        public Input(
+            Supplier<? extends Result<ParseTable, ?>> parseTableSupplier,
+            ResourcePath atermOutputFile,
+            ResourcePath persistedOutputFile
+        ) {
             this.parseTableSupplier = parseTableSupplier;
-            this.outputFile = outputFile;
+            this.atermOutputFile = atermOutputFile;
+            this.persistedOutputFile = persistedOutputFile;
+        }
+
+        public Key getKey() {
+            return new Key(atermOutputFile, persistedOutputFile);
         }
 
         @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
-            Args args = (Args)o;
-            return parseTableSupplier.equals(args.parseTableSupplier) && outputFile.equals(args.outputFile);
+            final Input input = (Input)o;
+            if(!parseTableSupplier.equals(input.parseTableSupplier)) return false;
+            if(!atermOutputFile.equals(input.atermOutputFile)) return false;
+            return persistedOutputFile.equals(input.persistedOutputFile);
         }
 
-        @Override
-        public int hashCode() {
-            return Objects.hash(parseTableSupplier, outputFile);
+        @Override public int hashCode() {
+            int result = parseTableSupplier.hashCode();
+            result = 31 * result + atermOutputFile.hashCode();
+            result = 31 * result + persistedOutputFile.hashCode();
+            return result;
         }
 
         @Override public String toString() {
-            return "Sdf3ParseTableToFile$Args{" +
+            return "Sdf3ParseTableToFile$Input{" +
                 "parseTableSupplier=" + parseTableSupplier +
-                ", outputFile=" + outputFile +
+                ", atermOutputFile=" + atermOutputFile +
+                ", persistedOutputFile=" + persistedOutputFile +
+                '}';
+        }
+    }
+
+    public static class Key implements Serializable {
+        private final ResourcePath atermOutputFile;
+        private final ResourcePath persistedOutputFile;
+
+        public Key(ResourcePath atermOutputFile, ResourcePath persistedOutputFile) {
+            this.atermOutputFile = atermOutputFile;
+            this.persistedOutputFile = persistedOutputFile;
+        }
+
+        @Override public boolean equals(@Nullable Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            final Key key = (Key)o;
+            if(!atermOutputFile.equals(key.atermOutputFile)) return false;
+            return persistedOutputFile.equals(key.persistedOutputFile);
+        }
+
+        @Override public int hashCode() {
+            int result = atermOutputFile.hashCode();
+            result = 31 * result + persistedOutputFile.hashCode();
+            return result;
+        }
+
+        @Override public String toString() {
+            return "Sdf3ParseTableToFile$Key{" +
+                "atermOutputFile=" + atermOutputFile +
+                ", persistedOutputFile=" + persistedOutputFile +
                 '}';
         }
     }
@@ -55,18 +101,25 @@ public class Sdf3ParseTableToFile implements TaskDef<Sdf3ParseTableToFile.Args, 
         return getClass().getName();
     }
 
-    @Override public Result<None, ?> exec(ExecContext context, Args args) throws IOException {
-        return context.require(args.parseTableSupplier)
+    @Override public Result<None, ?> exec(ExecContext context, Input input) throws IOException {
+        return context.require(input.parseTableSupplier)
             .mapCatching(parseTable -> {
-                final HierarchicalResource resource = context.getHierarchicalResource(args.outputFile);
-                resource.ensureFileExists();
-                resource.writeString(ParseTableIO.generateATerm(parseTable).toString(), StandardCharsets.UTF_8);
-                context.provide(resource);
+                final HierarchicalResource atermOutputFile = context.getHierarchicalResource(input.atermOutputFile);
+                atermOutputFile.ensureFileExists();
+                atermOutputFile.writeString(ParseTableIO.generateATerm(parseTable).toString(), StandardCharsets.UTF_8);
+                context.provide(atermOutputFile);
+
+                final HierarchicalResource persistedOutputFile = context.getHierarchicalResource(input.persistedOutputFile);
+                persistedOutputFile.ensureFileExists();
+                try(final ObjectOutputStream stream = new ObjectOutputStream(persistedOutputFile.openWrite())) {
+                    stream.writeObject(parseTable);
+                    stream.flush();
+                }
                 return None.instance;
             });
     }
 
-    @Override public Serializable key(Args input) {
-        return input.outputFile;
+    @Override public Serializable key(Input input) {
+        return input.getKey();
     }
 }

@@ -39,7 +39,10 @@ public class {{baseParseTaskDef.id}} extends JsglrParseTaskDef {
         @Nullable ResourceKey fileHint,
         @Nullable ResourcePath rootDirectoryHint
     ) throws Exception {
-        context.require(classLoaderResources.tryGetAsLocalDefinitionResource("{{languageProjectInput.parseTableRelativePath}}"));
+        context.require(classLoaderResources.tryGetAsLocalDefinitionResource("{{languageProjectInput.parseTableAtermFileRelativePath}}"));
+{{#languageProjectInput.isJsglr2}}
+        context.require(classLoaderResources.tryGetAsLocalDefinitionResource("{{languageProjectInput.parseTablePersistedFileRelativePath}}"));
+{{/languageProjectInput.isJsglr2}}
         context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
         context.require(classLoaderResources.tryGetAsLocalResource({{languageProjectInput.parser.qualifiedId}}.class), ResourceStampers.hashFile());
         context.require(classLoaderResources.tryGetAsLocalResource({{languageProjectInput.parserFactory.qualifiedId}}.class), ResourceStampers.hashFile());

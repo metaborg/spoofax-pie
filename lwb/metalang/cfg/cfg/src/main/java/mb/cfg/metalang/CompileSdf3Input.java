@@ -52,14 +52,25 @@ public interface CompileSdf3Input extends Serializable {
     }
 
 
-    @Value.Default default String parseTableRelativePath() {
+    @Value.Default default String parseTableAtermFileRelativePath() {
         return "sdf.tbl";
     }
 
-    default ResourcePath parseTableOutputFile() {
+    default ResourcePath parseTableAtermOutputFile() {
         return compileLanguageShared().generatedResourcesDirectory() // Generated resources directory, so that Gradle includes the parse table in the JAR file.
             .appendRelativePath(compileLanguageShared().languageProject().packagePath()) // Append package path to make location unique, enabling JAR files to be merged.
-            .appendRelativePath(parseTableRelativePath()) // Append the relative path to the parse table.
+            .appendRelativePath(parseTableAtermFileRelativePath()) // Append the relative path to the parse table.
+            ;
+    }
+
+    @Value.Default default String parseTablePersistedFileRelativePath() {
+        return "sdf.bin";
+    }
+
+    default ResourcePath parseTablePersistedOutputFile() {
+        return compileLanguageShared().generatedResourcesDirectory() // Generated resources directory, so that Gradle includes the parse table in the JAR file.
+            .appendRelativePath(compileLanguageShared().languageProject().packagePath()) // Append package path to make location unique, enabling JAR files to be merged.
+            .appendRelativePath(parseTablePersistedFileRelativePath()) // Append the relative path to the parse table.
             ;
     }
 
@@ -70,6 +81,7 @@ public interface CompileSdf3Input extends Serializable {
 
 
     default void syncTo(ParserLanguageCompiler.Input.Builder builder) {
-        builder.parseTableRelativePath(parseTableRelativePath());
+        builder.parseTableAtermFileRelativePath(parseTableAtermFileRelativePath());
+        builder.parseTablePersistedFileRelativePath(parseTablePersistedFileRelativePath());
     }
 }

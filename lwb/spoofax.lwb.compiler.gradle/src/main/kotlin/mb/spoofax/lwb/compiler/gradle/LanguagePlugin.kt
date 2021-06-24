@@ -167,11 +167,11 @@ open class LanguagePlugin : Plugin<Project> {
         }
 
         // Output: parse table file
-        val outputFile = resourceService.toLocalFile(it.parseTableOutputFile())
+        val outputFile = resourceService.toLocalFile(it.parseTableAtermOutputFile())
         if(outputFile != null) {
           outputs.file(outputFile)
         } else {
-          logger.warn("Cannot set the SDF3 parse table as a task output, because ${it.parseTableOutputFile()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
+          logger.warn("Cannot set the SDF3 parse table as a task output, because ${it.parseTableAtermOutputFile()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
         }
       }
       input.esv().ifPresent {

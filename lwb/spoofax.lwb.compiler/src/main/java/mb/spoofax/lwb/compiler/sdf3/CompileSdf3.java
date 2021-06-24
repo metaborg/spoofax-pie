@@ -73,7 +73,11 @@ public class CompileSdf3 implements TaskDef<ResourcePath, Result<KeyedMessages, 
         }
 
         final Supplier<Result<ParseTable, ?>> parseTableSupplier = toParseTable.createSupplier(new Sdf3SpecToParseTable.Input(config, false));
-        final Result<None, ? extends Exception> compileResult = context.require(parseTableToFile, new Sdf3ParseTableToFile.Args(parseTableSupplier, input.parseTableOutputFile()));
+        final Result<None, ? extends Exception> compileResult = context.require(parseTableToFile, new Sdf3ParseTableToFile.Input(
+            parseTableSupplier,
+            input.parseTableAtermOutputFile(),
+            input.parseTablePersistedOutputFile()
+        ));
         if(compileResult.isErr()) {
             return Result.ofErr(Sdf3CompileException.parseTableCompileFail(compileResult.getErr()));
         }
