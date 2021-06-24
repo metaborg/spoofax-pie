@@ -151,6 +151,12 @@ public class ParserLanguageCompiler implements TaskDef<ParserLanguageCompiler.In
                 .jsglr2(preset -> TypeInfo.of("mb.jsglr2.common.Jsglr2Parser"));
         }
 
+        default Optional<String> parserConstructorAdditionalArguments() {
+            return variant().caseOf()
+                .jsglr2(preset -> ", org.spoofax.jsglr2.JSGLR2Variant.Preset." + preset.toJsglr2PresetString())
+                .otherwiseEmpty();
+        }
+
 
         /// Files information, known up-front for build systems with static dependencies such as Gradle.
 

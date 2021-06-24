@@ -39,12 +39,16 @@ public class Jsglr2Parser {
         this.jsglr2 = jsglr2;
     }
 
-    public Jsglr2Parser(Jsglr2ParseTable parseTable) {
-        final JSGLR2<IStrategoTerm> jsglr2 = JSGLR2Variant.Preset.recovery.getJSGLR2(parseTable.parseTable);
+    public Jsglr2Parser(Jsglr2ParseTable parseTable, JSGLR2Variant.Preset preset) {
+        final JSGLR2<IStrategoTerm> jsglr2 = preset.getJSGLR2(parseTable.parseTable);
         if(!(jsglr2 instanceof JSGLR2Implementation)) {
             throw new IllegalStateException("Cannot create JSGLR2 parser, JSGLR2 implementation '" + jsglr2 + "' does not implement JSGLR2Implementation");
         }
         this.jsglr2 = (JSGLR2Implementation<IParseForest, Object, ?, IStrategoTerm, ?, ITokens>)jsglr2;
+    }
+
+    public Jsglr2Parser(Jsglr2ParseTable parseTable) {
+        this(parseTable, JSGLR2Variant.Preset.recovery);
     }
 
     public JsglrParseOutput parse(JsglrParseInput input) throws JsglrParseException {

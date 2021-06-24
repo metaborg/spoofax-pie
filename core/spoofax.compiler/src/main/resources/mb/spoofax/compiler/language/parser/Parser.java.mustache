@@ -11,7 +11,7 @@ public class {{baseParser.id}} implements Parser {
     private final {{parserType.qualifiedId}} parser;
 
     public {{baseParser.id}}({{parseTable.id}} parseTable) {
-        this.parser = new {{parserType.qualifiedId}}(parseTable.parseTable);
+        this.parser = new {{parserType.qualifiedId}}(parseTable.parseTable{{#parserConstructorAdditionalArguments}}{{this}}{{/parserConstructorAdditionalArguments}});
     }
 
     @Override

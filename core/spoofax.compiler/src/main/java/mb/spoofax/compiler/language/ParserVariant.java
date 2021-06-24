@@ -8,8 +8,39 @@ import java.io.Serializable;
 @ADT
 public abstract class ParserVariant implements Serializable {
     public enum Jsglr2Preset implements Serializable {
-        Standard, Elkhound, Recovery, RecoveryElkhound, DataDependent, LayoutSensitive, Composite, Incremental,
-        IncrementalRecovery
+        Standard,
+        Elkhound,
+        Recovery,
+        RecoveryElkhound,
+        DataDependent,
+        LayoutSensitive,
+        Composite,
+        Incremental,
+        IncrementalRecovery;
+
+        public String toJsglr2PresetString() {
+            switch(this) {
+                default:
+                case Standard:
+                    return "standard";
+                case Elkhound:
+                    return "elkhound";
+                case Recovery:
+                    return "recovery";
+                case RecoveryElkhound:
+                    return "recoveryElkhound";
+                case DataDependent:
+                    return "dataDependent";
+                case LayoutSensitive:
+                    return "layoutSensitive";
+                case Composite:
+                    return "composite";
+                case Incremental:
+                    return "incremental";
+                case IncrementalRecovery:
+                    return "incrementalRecovery";
+            }
+        }
     }
 
     interface Cases<R> {
@@ -23,7 +54,7 @@ public abstract class ParserVariant implements Serializable {
     }
 
     public static ParserVariant jsglr2() {
-        return jsglr2(Jsglr2Preset.Standard);
+        return jsglr2(Jsglr2Preset.Recovery);
     }
 
     public static ParserVariant jsglr2(Jsglr2Preset preset) {
