@@ -130,7 +130,9 @@ class Parts {
     }
 
     Option<Boolean> getOneSubtermAsBool(String name) {
-        return getOneSubterm(name).flatMap(t -> Option.ofOptional(TermUtils.asAppl(t))).map(a -> a.getConstructor().getName().equals("True"));
+        return getOneSubterm(name)
+            .flatMap(t -> Option.ofOptional(TermUtils.asApplAt(t, 0)))
+            .map(a -> a.getConstructor().getName().equals("True"));
     }
 
     void forOneSubtermAsBool(String name, Consumer<Boolean> consumer) {

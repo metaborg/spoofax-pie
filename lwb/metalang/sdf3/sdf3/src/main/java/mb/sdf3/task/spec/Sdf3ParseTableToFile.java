@@ -65,4 +65,8 @@ public class Sdf3ParseTableToFile implements TaskDef<Sdf3ParseTableToFile.Args, 
                 return None.instance;
             });
     }
+
+    @Override public Serializable key(Args input) {
+        return input.outputFile;
+    }
 }
