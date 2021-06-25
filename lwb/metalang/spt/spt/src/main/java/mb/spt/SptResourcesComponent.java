@@ -11,6 +11,10 @@ import mb.spt.resource.SptTestCaseResourceRegistry;
         SptTestCaseResourceModule.class,
     }
 )
-public interface SptResourcesComponent extends BaseSptResourcesComponent {
+public interface SptResourcesComponent extends BaseSptResourcesComponent, AutoCloseable {
     SptTestCaseResourceRegistry getTestCaseResourceRegistry();
+
+    @Override default void close() {
+        getTestCaseResourceRegistry().close();
+    }
 }

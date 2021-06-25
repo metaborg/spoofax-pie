@@ -10,11 +10,17 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.HashMap;
 
-public class SptTestCaseResourceRegistry implements ResourceRegistry {
+public class SptTestCaseResourceRegistry implements ResourceRegistry, AutoCloseable {
     public static final String qualifier = "spt";
 
     private final HashMap<String, SptTestCaseResource> identifierToResource = new HashMap<>();
     private final MultiMap<String, String> testSuiteToIdentifiers = MultiMap.withHash();
+
+
+    @Override public void close() {
+        identifierToResource.clear();
+        testSuiteToIdentifiers.clear();
+    }
 
 
     @Override public String qualifier() {

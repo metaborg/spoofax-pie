@@ -53,6 +53,8 @@ class DynamicLanguageTest extends CharsTestBase {
             try(final MixedSession session = newSession()) {
                 dynamicLanguage = requireDynamicLoad(session, rootDirectory);
                 previousInput = dynamicLanguage.getCompileInput();
+                final KeyedMessages sptMessages = requireSptCheck(session, rootDirectory);
+                assertFalse(sptMessages.containsError());
             } catch(ExecException | RuntimeException e) {
                 printThrowable(e);
                 throw e;
@@ -114,8 +116,11 @@ class DynamicLanguageTest extends CharsTestBase {
             System.out.println("Change styler and reload");
             final DynamicLanguage dynamicLanguage;
             try(final MixedSession session = newSession()) {
-                dynamicLanguage = getDynamicLoadOutput(modifyStyler(session, previousInput), rootDirectory);
+                final TopDownSession topDownSession = modifyStyler(session, previousInput);
+                dynamicLanguage = getDynamicLoadOutput(topDownSession, rootDirectory);
                 previousInput = dynamicLanguage.getCompileInput();
+                final KeyedMessages sptMessages = getSptCheckOutput(topDownSession, rootDirectory);
+                assertFalse(sptMessages.containsError());
             } catch(ExecException | RuntimeException e) {
                 printThrowable(e);
                 throw e;
@@ -163,6 +168,8 @@ class DynamicLanguageTest extends CharsTestBase {
                 dynamicLanguage = getDynamicLoadOutput(topDownSession, rootDirectory);
                 previousInput = dynamicLanguage.getCompileInput();
                 providedResources = topDownSession.getProvidedResources();
+                final KeyedMessages sptMessages = getSptCheckOutput(topDownSession, rootDirectory);
+                assertFalse(sptMessages.containsError());
             } catch(ExecException | RuntimeException e) {
                 printThrowable(e);
                 throw e;
@@ -196,6 +203,8 @@ class DynamicLanguageTest extends CharsTestBase {
                 dynamicLanguage = getDynamicLoadOutput(topDownSession, rootDirectory);
                 previousInput = dynamicLanguage.getCompileInput();
                 providedResources = topDownSession.getProvidedResources();
+                final KeyedMessages sptMessages = getSptCheckOutput(topDownSession, rootDirectory);
+                assertFalse(sptMessages.containsError());
             } catch(ExecException | RuntimeException e) {
                 printThrowable(e);
                 throw e;
@@ -237,6 +246,8 @@ class DynamicLanguageTest extends CharsTestBase {
                 dynamicLanguage = getDynamicLoadOutput(topDownSession, rootDirectory);
                 previousInput = dynamicLanguage.getCompileInput();
                 providedResources = topDownSession.getProvidedResources();
+                final KeyedMessages sptMessages = getSptCheckOutput(topDownSession, rootDirectory);
+                assertFalse(sptMessages.containsError());
             } catch(ExecException | RuntimeException e) {
                 printThrowable(e);
                 throw e;
@@ -278,6 +289,8 @@ class DynamicLanguageTest extends CharsTestBase {
                 dynamicLanguage = getDynamicLoadOutput(topDownSession, rootDirectory);
                 previousInput = dynamicLanguage.getCompileInput();
                 providedResources = topDownSession.getProvidedResources();
+                final KeyedMessages sptMessages = getSptCheckOutput(topDownSession, rootDirectory);
+                assertFalse(sptMessages.containsError());
             } catch(ExecException | RuntimeException e) {
                 printThrowable(e);
                 throw e;

@@ -19,11 +19,13 @@ dependencies {
   annotationProcessor("com.google.dagger:dagger-compiler")
 
   testImplementation("org.slf4j:slf4j-nop:1.7.30")
+  testImplementation(project(":spt"))
+  testImplementation(project(":spt.dynamicloading"))
   testImplementation("org.metaborg:pie.runtime")
 }
 
 tasks.test {
-  enableAssertions = false // HACK: disable assertions until we support JSGLR2 parsing for Stratego
+  enableAssertions = false // HACK: disable assertions due to assertion in the Stratego compiler.
   // Show stderr in tests.
   testLogging {
     events(org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR)

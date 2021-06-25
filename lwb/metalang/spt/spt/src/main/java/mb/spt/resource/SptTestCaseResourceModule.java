@@ -4,6 +4,7 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
 import mb.resource.ResourceRegistry;
+import mb.spt.SptQualifier;
 import mb.spt.SptResourcesScope;
 
 @Module
@@ -13,7 +14,7 @@ public abstract class SptTestCaseResourceModule {
         return new SptTestCaseResourceRegistry();
     }
 
-    @Provides @SptResourcesScope @IntoSet
+    @Provides @SptResourcesScope @SptQualifier @IntoSet
     static ResourceRegistry provideClassLoaderResourceRegistryIntoSet(SptTestCaseResourceRegistry registry) {
         return registry;
     }

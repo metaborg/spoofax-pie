@@ -1,5 +1,6 @@
 package mb.spoofax.lwb.dynamicloading;
 
+import mb.common.message.KeyedMessages;
 import mb.common.result.Result;
 import mb.common.util.ExceptionPrinter;
 import mb.log.api.LoggerFactory;
@@ -38,6 +39,11 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.lwb.compiler.CompileLanguage;
 import mb.spoofax.lwb.compiler.dagger.StandaloneSpoofax3Compiler;
+import mb.spt.DaggerSptComponent;
+import mb.spt.DaggerSptResourcesComponent;
+import mb.spt.SptComponent;
+import mb.spt.SptResourcesComponent;
+import mb.spt.dynamicloading.DynamicLanguageUnderTestProvider;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -49,8 +55,10 @@ class TestBase {
     HierarchicalResource temporaryDirectory;
     MetricsTracer metricsTracer;
     LoggerComponent loggerComponent;
+    SptResourcesComponent sptResourcesComponent;
     RootResourceServiceComponent rootResourceServiceComponent;
     StandaloneSpoofax3Compiler standaloneSpoofax3Compiler;
+    SptComponent sptComponent;
     ResourceService resourceService;
     DynamicLoadingComponent dynamicLoadingComponent;
     DynamicLoad dynamicLoad;
@@ -68,8 +76,9 @@ class TestBase {
         loggerComponent = DaggerLoggerComponent.builder()
             .loggerModule(LoggerModule.stdOutVeryVerbose())
             .build();
+        sptResourcesComponent = DaggerSptResourcesComponent.create();
         rootResourceServiceComponent = DaggerRootResourceServiceComponent.builder()
-            .rootResourceServiceModule(new RootResourceServiceModule(classLoaderResourceRegistry))
+            .rootResourceServiceModule(new RootResourceServiceModule(classLoaderResourceRegistry).addRegistriesFrom(sptResourcesComponent))
             .loggerComponent(loggerComponent)
             .build();
         standaloneSpoofax3Compiler = new StandaloneSpoofax3Compiler(
@@ -77,6 +86,12 @@ class TestBase {
             rootResourceServiceComponent.createChildModule(classLoaderResourceRegistry),
             new PieModule(PieBuilderImpl::new)
         );
+        sptComponent = DaggerSptComponent.builder()
+            .loggerComponent(loggerComponent)
+            .sptResourcesComponent(sptResourcesComponent)
+            .resourceServiceComponent(standaloneSpoofax3Compiler.compiler.resourceServiceComponent)
+            .platformComponent(standaloneSpoofax3Compiler.compiler.platformComponent)
+            .build();
         resourceService = standaloneSpoofax3Compiler.compiler.resourceServiceComponent.getResourceService();
         dynamicLoadingComponent = DaggerDynamicLoadingComponent.builder()
             .dynamicLoadingPieModule(new DynamicLoadingPieModule(() -> new RootPieModule(PieBuilderImpl::new)
@@ -91,8 +106,13 @@ class TestBase {
             .build();
         dynamicLoad = dynamicLoadingComponent.getDynamicLoad();
         dynamicLanguageRegistry = dynamicLoadingComponent.getDynamicLanguageRegistry();
+        sptComponent.getLanguageUnderTestProviderWrapper().set(new DynamicLanguageUnderTestProvider(
+            dynamicLanguageRegistry,
+            dynamicLoad,
+            TestBase::compileLanguageArgs
+        ));
         pieComponent = DaggerPieComponent.builder()
-            .pieModule(standaloneSpoofax3Compiler.pieComponent.createChildModule(dynamicLoadingComponent))
+            .pieModule(standaloneSpoofax3Compiler.pieComponent.createChildModule(dynamicLoadingComponent, sptComponent))
             .loggerComponent(loggerComponent)
             .resourceServiceComponent(standaloneSpoofax3Compiler.compiler.resourceServiceComponent)
             .build();
@@ -106,10 +126,14 @@ class TestBase {
         dynamicLoadingComponent.close();
         dynamicLoadingComponent = null;
         resourceService = null;
+        sptComponent.close();
+        sptComponent = null;
         standaloneSpoofax3Compiler.close();
         standaloneSpoofax3Compiler = null;
         rootResourceServiceComponent.close();
         rootResourceServiceComponent = null;
+        sptResourcesComponent.close();
+        sptResourcesComponent = null;
         loggerComponent = null;
         metricsTracer = null;
         temporaryDirectory.close();
@@ -117,32 +141,37 @@ class TestBase {
     }
 
 
+    static CompileLanguage.Args compileLanguageArgs(ResourcePath rootDirectory) {
+        return CompileLanguage.Args.builder().rootDirectory(rootDirectory).build();
+    }
+
+
     MixedSession newSession() {
         return pieComponent.newSession();
     }
 
-    Task<OutTransient<Result<DynamicLanguage, ?>>> dynamicLoadTask(CompileLanguage.Args args) {
-        return dynamicLoad.createTask(args);
-    }
-
     Task<OutTransient<Result<DynamicLanguage, ?>>> dynamicLoadTask(ResourcePath rootDirectory) {
-        return dynamicLoad.createTask(CompileLanguage.Args.builder().rootDirectory(rootDirectory).build());
-    }
-
-    DynamicLanguage requireDynamicLoad(Session session, CompileLanguage.Args args) throws Exception {
-        return session.require(dynamicLoadTask(args)).getValue().unwrap();
+        return dynamicLoad.createTask(compileLanguageArgs(rootDirectory));
     }
 
     DynamicLanguage requireDynamicLoad(Session session, ResourcePath rootDirectory) throws Exception {
         return session.require(dynamicLoadTask(rootDirectory)).getValue().unwrap();
     }
 
-    DynamicLanguage getDynamicLoadOutput(TopDownSession session, CompileLanguage.Args args) throws Exception {
-        return session.getOutput(dynamicLoadTask(args)).getValue().unwrap();
+    DynamicLanguage getDynamicLoadOutput(TopDownSession session, ResourcePath rootDirectory) throws Exception {
+        return session.getOutputOrRequireAndEnsureExplicitlyObserved(dynamicLoadTask(rootDirectory)).getValue().unwrap();
     }
 
-    DynamicLanguage getDynamicLoadOutput(TopDownSession session, ResourcePath rootDirectory) throws Exception {
-        return session.getOutput(dynamicLoadTask(rootDirectory)).getValue().unwrap();
+    Task<KeyedMessages> sptCheckTask(ResourcePath rootDirectory) {
+        return sptComponent.getLanguageInstance().createCheckTask(rootDirectory);
+    }
+
+    KeyedMessages requireSptCheck(Session session, ResourcePath rootDirectory) throws Exception {
+        return session.require(sptCheckTask(rootDirectory));
+    }
+
+    KeyedMessages getSptCheckOutput(TopDownSession session, ResourcePath rootDirectory) throws Exception {
+        return session.getOutputOrRequireAndEnsureExplicitlyObserved(sptCheckTask(rootDirectory));
     }
 
 
