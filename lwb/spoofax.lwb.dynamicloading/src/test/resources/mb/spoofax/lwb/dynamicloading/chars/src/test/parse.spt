@@ -1,0 +1,6 @@
+module parse
+
+test parse succeeds 1 [[a]] parse succeeds
+test parse succeeds 2 [[abcdefg]] parse succeeds
+test parse succeeds 3 [[a a]] parse succeeds
+test parse succeeds 4 [[abcdefg abcdefg]] parse succeeds

@@ -1,0 +1,24 @@
+module start
+
+context-free sorts
+
+  Start Stmt
+
+context-free syntax
+
+  Start.Start = <<stmts:Stmt*>> {layout(align-list stmts)}
+  Stmt.Pass = <pass> {layout(1.first.line == 1.last.line)}
+
+context-free start-symbols
+
+  Start
+
+lexical syntax
+
+  CHARS  = ~[\ \t\n\v\f\r]*
+  LAYOUT = [\ \t\n\v\f\r]
+
+context-free restrictions
+
+  CHARS   -/- ~[\ \t\n\v\f\r]
+  LAYOUT? -/- [\ \t\n\v\f\r]

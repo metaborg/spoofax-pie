@@ -35,7 +35,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class DynamicLanguageTest extends CharsTestBase {
+class DynamicLoadingTest extends CharsTestBase {
     @BeforeEach void setup(@TempDir Path temporaryDirectoryPath) throws IOException {
         super.setup(temporaryDirectoryPath);
     }
@@ -44,7 +44,7 @@ class DynamicLanguageTest extends CharsTestBase {
         super.teardown();
     }
 
-    @Test void testLanguageSpecificationChanges() throws Exception {
+    @Test void testLanguageCompilationAndDynamicLoading() throws Exception {
         CompileLanguageInput previousInput;
 
         {
@@ -328,7 +328,7 @@ class DynamicLanguageTest extends CharsTestBase {
         }
     }
 
-    @Disabled @Test void testCloseLanguage() throws Exception {
+    @Disabled @Test void testDynamicLanguage() throws Exception {
         CompileLanguageInput previousInput;
 
         DynamicLanguage lang1a;

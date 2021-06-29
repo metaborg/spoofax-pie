@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.net.URLClassLoader;
 import java.time.Instant;
 
-public class DynamicLanguage {
+public class DynamicLanguage implements AutoCloseable {
     protected final ResourcePath rootDirectory;
     protected final CompileLanguageInput compileInput;
     protected final URLClassLoader classLoader;
@@ -51,7 +51,7 @@ public class DynamicLanguage {
      *
      * @throws IOException when {@link URLClassLoader#close() closing the classloader} fails.
      */
-    public void close() throws IOException {
+    @Override public void close() throws IOException {
         if(closed) return;
         try {
             pieComponent.close();

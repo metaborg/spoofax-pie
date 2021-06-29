@@ -49,6 +49,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.function.Function;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 class TestBase {
     final ClassLoaderResourceRegistry classLoaderResourceRegistry = new ClassLoaderResourceRegistry("spoofax.dynamicloading", TestBase.class.getClassLoader());
 
@@ -64,9 +66,11 @@ class TestBase {
     DynamicLoad dynamicLoad;
     DynamicLanguageRegistry dynamicLanguageRegistry;
     PieComponent pieComponent;
+    ExceptionPrinter exceptionPrinter;
 
     void setup(Path temporaryDirectoryPath) throws IOException {
         temporaryDirectory = new FSResource(temporaryDirectoryPath);
+        exceptionPrinter = new ExceptionPrinter().addCurrentDirectoryContext(temporaryDirectory);
 
         final WritableResource pieStore = temporaryDirectory.appendRelativePath("pie.store");
         final PieBuilder.StoreFactory storeFactory = (serde, __, ___) -> new SerializingStore<>(serde, pieStore, InMemoryStore::new, InMemoryStore.class, false);
@@ -119,6 +123,7 @@ class TestBase {
     }
 
     void teardown() throws Exception {
+        exceptionPrinter = null;
         pieComponent.close();
         pieComponent = null;
         dynamicLanguageRegistry = null;
@@ -190,5 +195,14 @@ class TestBase {
         final ExceptionPrinter exceptionPrinter = new ExceptionPrinter();
         exceptionPrinter.addCurrentDirectoryContext(temporaryDirectory);
         exceptionPrinter.printException(throwable, System.err);
+    }
+
+
+    protected void assertNoErrors(KeyedMessages messages) {
+        assertNoErrors(messages, "no errors, but found errors");
+    }
+
+    protected void assertNoErrors(KeyedMessages messages, String failure) {
+        assertFalse(messages.containsError(), () -> "Expected " + failure + ".\n" + exceptionPrinter.printMessagesToString(messages));
     }
 }
