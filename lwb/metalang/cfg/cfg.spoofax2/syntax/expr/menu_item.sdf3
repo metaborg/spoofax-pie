@@ -9,7 +9,7 @@ context-free sorts
 
   MenuItem
   CommandActionProperty
-  
+
 context-free syntax
 
   MenuItem.Separator = <separator>
@@ -29,21 +29,21 @@ context-free syntax
   CommandActionProperty.CommandActionRequiredEditorSelectionTypes      = <required-editor-selection-types = [<{EditorSelectionType ", "}+>]>
   CommandActionProperty.CommandActionRequiredEditorFileTypes           = <required-editor-file-types = [<{EditorFileType ","}+>]>
   CommandActionProperty.CommandActionRequiredHierarchicalResourceTypes = <required-resource-types = [<{HierarchicalResourceType ", "}+>]>
-  CommandActionProperty.CommandActionRequiredEnclosingResourceTypes    = <required-enclosing-command-contexts = [<{EnclosingCommandContext ", "}+>]>
+  CommandActionProperty.CommandActionRequiredEnclosingResourceTypes    = <required-enclosing-resource-types = [<{EnclosingCommandContext ", "}+>]>
 
 context-free sorts // Editor selection type
 
   EditorSelectionType
-  
+
 context-free syntax
 
   EditorSelectionType.Region = <Region>
   EditorSelectionType.Offset = <Offset>
-  
+
 context-free sorts // Editor file type
 
   EditorFileType
-  
+
 context-free syntax
 
   EditorFileType.HierarchicalResource = <HierarchicalResource>
@@ -52,7 +52,7 @@ context-free syntax
 context-free sorts // Hierarchical resource type
 
   HierarchicalResourceType
-  
+
 context-free syntax
 
   //HierarchicalResourceType.Project   = <Project>

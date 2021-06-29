@@ -9,6 +9,7 @@ nav:
 #  - Guides:
 #      - guide/adding_commands_and_menus.md
   - Reference:
+      - reference/language_definition.md
       - reference/anatomy_language_implementation.md
   - Background:
       - background/documentation.md
