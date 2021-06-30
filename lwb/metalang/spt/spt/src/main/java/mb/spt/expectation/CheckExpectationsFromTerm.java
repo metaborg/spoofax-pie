@@ -21,7 +21,7 @@ import org.spoofax.terms.util.TermUtils;
 
 import java.util.ArrayList;
 
-public class CheckExpectationFromTerm implements TestExpectationFromTerm {
+public class CheckExpectationsFromTerm implements TestExpectationFromTerm {
     @Override public SetView<IStrategoConstructor> getMatchingConstructors(TermFactory termFactory) {
         return SetView.of(
             termFactory.makeConstructor("AnalyzeMessages", 4),

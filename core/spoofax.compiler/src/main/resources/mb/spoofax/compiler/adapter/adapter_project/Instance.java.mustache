@@ -165,12 +165,12 @@ public class {{baseInstance.id}} implements LanguageInstance{{#parseInjection}},
 {{#parseInjection}}
 
     @Override
-    public Result<ParseResult, ?> testParse(Session session, TestCase testCase) throws InterruptedException {
+    public Result<ParseResult, ?> testParse(Session session, ResourceKey resource, @Nullable ResourcePath rootDirectoryHint) throws InterruptedException {
         final Result<JsglrParseOutput, JsglrParseException> result;
         try {
             result = session.requireWithoutObserving({{this.name}}.createTask(mb.jsglr.pie.JsglrParseTaskInput.builder()
-                .withFile(testCase.resource)
-                .rootDirectoryHint(Optional.ofNullable(testCase.rootDirectoryHint))
+                .withFile(resource)
+                .rootDirectoryHint(Optional.ofNullable(rootDirectoryHint))
                 .build()
             ));
             return result.mapOrElse(
@@ -179,6 +179,19 @@ public class {{baseInstance.id}} implements LanguageInstance{{#parseInjection}},
                     .parseFail_(Result.ofOk(new ParseResult()))
                     .otherwise_(Result.ofErr(e))
             );
+        } catch(ExecException e) {
+            return Result.ofErr(e);
+        }
+    }
+
+    @Override
+    public Result<org.spoofax.interpreter.terms.IStrategoTerm, ?> testParseToAterm(Session session, ResourceKey resource, @Nullable ResourcePath rootDirectoryHint) throws InterruptedException {
+        try {
+            return session.requireWithoutObserving({{this.name}}.createTask(mb.jsglr.pie.JsglrParseTaskInput.builder()
+                .withFile(resource)
+                .rootDirectoryHint(Optional.ofNullable(rootDirectoryHint))
+                .build()
+            )).map(r -> r.ast);
         } catch(ExecException e) {
             return Result.ofErr(e);
         }

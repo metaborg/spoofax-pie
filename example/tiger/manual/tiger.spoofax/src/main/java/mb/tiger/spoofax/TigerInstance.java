@@ -27,10 +27,8 @@ import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.spoofax.core.language.menu.CommandAction;
 import mb.spoofax.core.language.menu.MenuItem;
-import mb.spt.api.model.TestCase;
 import mb.spt.api.parse.ParseResult;
 import mb.spt.api.parse.TestableParse;
-import mb.spoofax.core.resource.ResourceTextSupplier;
 import mb.tiger.spoofax.command.TigerCompileDirectoryCommand;
 import mb.tiger.spoofax.command.TigerCompileFileAltCommand;
 import mb.tiger.spoofax.command.TigerCompileFileCommand;
@@ -45,6 +43,7 @@ import mb.tiger.spoofax.task.reusable.TigerCompleteTaskDef;
 import mb.tiger.spoofax.task.reusable.TigerParse;
 import mb.tiger.spoofax.task.reusable.TigerStyle;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 import java.util.Optional;
@@ -256,12 +255,12 @@ public class TigerInstance implements LanguageInstance, TestableParse {
 
 
     @Override
-    public Result<ParseResult, ?> testParse(Session session, TestCase testCase) throws InterruptedException {
+    public Result<ParseResult, ?> testParse(Session session, ResourceKey resource, @Nullable ResourcePath rootDirectoryHint) throws InterruptedException {
         final Result<JsglrParseOutput, JsglrParseException> result;
         try {
             result = session.requireWithoutObserving(parse.createTask(JsglrParseTaskInput.builder()
-                .withFile(testCase.resource)
-                .rootDirectoryHint(Optional.ofNullable(testCase.rootDirectoryHint))
+                .withFile(resource)
+                .rootDirectoryHint(Optional.ofNullable(rootDirectoryHint))
                 .build()
             ));
             return result.mapOrElse(
@@ -270,6 +269,19 @@ public class TigerInstance implements LanguageInstance, TestableParse {
                     .parseFail_(Result.ofOk(new ParseResult()))
                     .otherwise_(Result.ofErr(e))
             );
+        } catch(ExecException e) {
+            return Result.ofErr(e);
+        }
+    }
+
+    @Override
+    public Result<IStrategoTerm, ?> testParseToAterm(Session session, ResourceKey resource, @Nullable ResourcePath rootDirectoryHint) throws InterruptedException {
+        try {
+            return session.requireWithoutObserving(parse.createTask(JsglrParseTaskInput.builder()
+                .withFile(resource)
+                .rootDirectoryHint(Optional.ofNullable(rootDirectoryHint))
+                .build()
+            )).map(r -> r.ast);
         } catch(ExecException e) {
             return Result.ofErr(e);
         }

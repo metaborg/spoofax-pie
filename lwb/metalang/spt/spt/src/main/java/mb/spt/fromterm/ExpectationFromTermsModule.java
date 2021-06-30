@@ -4,9 +4,8 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ElementsIntoSet;
 import mb.common.util.MapView;
-import mb.spt.expectation.CheckExpectationFromTerm;
-import mb.spt.expectation.ParseExpectationFromTerm;
-import mb.spt.fromterm.TestExpectationFromTerm;
+import mb.spt.expectation.CheckExpectationsFromTerm;
+import mb.spt.expectation.ParseExpectationsFromTerm;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoConstructor;
 import org.spoofax.terms.TermFactory;
@@ -21,8 +20,8 @@ public class ExpectationFromTermsModule {
     @Provides @ElementsIntoSet
     static Set<TestExpectationFromTerm> provideTestExpectationFromTermsIntoSet() {
         final HashSet<TestExpectationFromTerm> testExpectations = new HashSet<>();
-        testExpectations.add(new ParseExpectationFromTerm());
-        testExpectations.add(new CheckExpectationFromTerm());
+        testExpectations.add(new ParseExpectationsFromTerm());
+        testExpectations.add(new CheckExpectationsFromTerm());
         return testExpectations;
     }
 

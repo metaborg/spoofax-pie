@@ -3,6 +3,7 @@ package mb.spt.expectation;
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Severity;
+import mb.common.option.Option;
 import mb.common.region.Region;
 import mb.common.result.Result;
 import mb.pie.api.Session;
@@ -12,17 +13,20 @@ import mb.spoofax.core.language.LanguageInstance;
 import mb.spt.api.model.LanguageUnderTest;
 import mb.spt.api.model.TestCase;
 import mb.spt.api.model.TestExpectation;
-import mb.spt.api.parse.ExpectedParseResult;
 import mb.spt.api.parse.ParseResult;
 import mb.spt.api.parse.TestableParse;
 import mb.spt.util.MessageRemap;
 
 public class ParseExpectation implements TestExpectation {
-    private final ExpectedParseResult expected;
+    public final boolean expectSuccess;
+    public final Option<Boolean> expectRecovered;
+    public final Option<Boolean> expectAmbiguous;
     private final Region sourceRegion;
 
-    public ParseExpectation(ExpectedParseResult expected, Region sourceRegion) {
-        this.expected = expected;
+    public ParseExpectation(boolean expectSuccess, Option<Boolean> expectRecovered, Option<Boolean> expectAmbiguous, Region sourceRegion) {
+        this.expectSuccess = expectSuccess;
+        this.expectRecovered = expectRecovered;
+        this.expectAmbiguous = expectAmbiguous;
         this.sourceRegion = sourceRegion;
     }
 
@@ -36,22 +40,22 @@ public class ParseExpectation implements TestExpectation {
             return messagesBuilder.build(file);
         }
         final TestableParse testableParse = (TestableParse)languageInstance;
-        final Result<ParseResult, ?> result = testableParse.testParse(session, testCase);
+        final Result<ParseResult, ?> result = testableParse.testParse(session, testCase.resource, testCase.rootDirectoryHint);
         result.ifElse(r -> {
             final boolean actualSuccess = r.success && !r.messages.containsError();
             final boolean[] addParseMessages = {false};
-            if(expected.success != actualSuccess) {
+            if(expectSuccess != actualSuccess) {
                 addParseMessages[0] = true;
-                messagesBuilder.addMessage("Expected parsing to " + successString(expected.success, false) + ", but it " + successString(actualSuccess, true), Severity.Error, file, sourceRegion);
+                messagesBuilder.addMessage("Expected parsing to " + successString(expectSuccess, false) + ", but it " + successString(actualSuccess, true), Severity.Error, file, sourceRegion);
             }
             if(actualSuccess) {
-                expected.ambiguous.ifSome(ambiguous -> {
+                expectAmbiguous.ifSome(ambiguous -> {
                     if(ambiguous != r.ambiguous) {
                         addParseMessages[0] = true;
                         messagesBuilder.addMessage("Expected " + ambiguousString(ambiguous, false) + " parse, but it parsed " + ambiguousString(r.ambiguous, true), Severity.Error, file, sourceRegion);
                     }
                 });
-                expected.recovered.ifSome(recovered -> {
+                expectRecovered.ifSome(recovered -> {
                     if(recovered != r.recovered) {
                         addParseMessages[0] = true;
                         messagesBuilder.addMessage("Expected parsing to " + recoveredString(recovered, false) + ", but it " + recoveredString(r.recovered, true), Severity.Error, file, sourceRegion);
@@ -62,7 +66,7 @@ public class ParseExpectation implements TestExpectation {
                 MessageRemap.addMessagesRemapped(messagesBuilder, testCase.resource, file, r.messages);
             }
         }, e -> {
-            messagesBuilder.addMessage("Failed to evaluate parse expectation; see exception", e, Severity.Error, file, sourceRegion);
+            messagesBuilder.addMessage("Failed to parse test fragment; see exception", e, Severity.Error, file, sourceRegion);
         });
         return messagesBuilder.build(file);
     }
