@@ -11,18 +11,18 @@ import mb.pie.api.Session;
 import mb.pie.api.exec.CancelToken;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageInstance;
+import mb.spt.api.parse.ParseResult;
+import mb.spt.api.parse.TestableParse;
 import mb.spt.lut.LanguageUnderTestProvider;
 import mb.spt.model.LanguageUnderTest;
 import mb.spt.model.TestCase;
-import mb.spt.api.parse.ParseResult;
-import mb.spt.api.parse.TestableParse;
 import mb.spt.model.TestExpectation;
 import mb.spt.util.SptMessageRemap;
 
 public class ParseExpectation implements TestExpectation {
-    public final boolean expectSuccess;
-    public final Option<Boolean> expectRecovered;
-    public final Option<Boolean> expectAmbiguous;
+    private final boolean expectSuccess;
+    private final Option<Boolean> expectRecovered;
+    private final Option<Boolean> expectAmbiguous;
     private final Region sourceRegion;
 
     public ParseExpectation(boolean expectSuccess, Option<Boolean> expectRecovered, Option<Boolean> expectAmbiguous, Region sourceRegion) {

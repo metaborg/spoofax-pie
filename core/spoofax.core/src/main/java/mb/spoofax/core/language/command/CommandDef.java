@@ -42,4 +42,12 @@ public interface CommandDef<A extends Serializable> {
         final A args = fromRawArgs(rawArgs);
         return createTask(args);
     }
+
+    default Task<CommandFeedback> createTask(CommandExecutionType executionType, CommandContext context, ArgConverters argConverters) {
+        return createTask(request(executionType), context, argConverters);
+    }
+
+    default Task<CommandFeedback> createTask(CommandExecutionType executionType, RawArgs initialArgs, CommandContext context, ArgConverters argConverters) {
+        return createTask(request(executionType, initialArgs), context, argConverters);
+    }
 }

@@ -35,7 +35,7 @@ context-free sorts // Parameter
 
   Parameter
   ParameterProperty
-  
+
 context-free syntax
 
   Parameter.Parameter = <<JavaIdLit> = parameter {
@@ -60,11 +60,11 @@ context-free syntax
   ArgumentProvider.ContextArgumentProvider          = <Context(<CommandContext>)>
   ArgumentProvider.EnclosingContextArgumentProvider = <EnclosingContext(<EnclosingCommandContext>)>
 
-  
+
 context-free sorts // Execution type
 
   ExecutionType
-  
+
 context-free syntax
 
   ExecutionType.Once          = <Once>
@@ -75,7 +75,7 @@ context-free sorts // (Enclosing) command context
 
   CommandContext
   EnclosingCommandContext
-  
+
 context-free syntax
 
   CommandContext.ProjectContext      = <Project>
@@ -84,8 +84,8 @@ context-free syntax
   CommandContext.ResourcePathContext = <ResourcePath>
   CommandContext.ResourceKeyContext  = <ResourceKey>
   CommandContext.RegionContext       = <Region>
-  CommandContext.OffsetContext       = <Offset>  
-  
+  CommandContext.OffsetContext       = <Offset>
+
   EnclosingCommandContext.ProjectEnclosingContext   = <Project>
   EnclosingCommandContext.DirectoryEnclosingContext = <Directory>
 

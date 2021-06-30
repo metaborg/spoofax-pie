@@ -53,15 +53,15 @@ public class ParseExpectationsFromTerm implements TestExpectationFromTerm {
             case "ParseAmbiguous":
                 return new ParseExpectation(true, Option.ofNone(), Option.ofSome(true), sourceRegion);
             case "ParseToAterm":
-                return convertParseToAtermExpectation(term, sourceRegion);
+                return convertToAtermExpectation(term, sourceRegion);
             case "ParseTo":
-                return convertParseToExpectation(term, sourceRegion, testSuiteDescription, testSuiteFile, testCaseResourceRegistry, usedResourceNames);
+                return convertToFragmentExpectation(term, sourceRegion, testSuiteDescription, testSuiteFile, testCaseResourceRegistry, usedResourceNames);
             default:
                 throw new FromTermException("Cannot convert term '" + term + "' to a parse expectation; term is not a valid parse expectation (no matching constructor)");
         }
     }
 
-    private ParseToAtermExpectation convertParseToAtermExpectation(IStrategoAppl appl, Region sourceRegion) {
+    private ParseToAtermExpectation convertToAtermExpectation(IStrategoAppl appl, Region sourceRegion) {
         final IStrategoAppl toAterm = TermUtils.asApplAt(appl, 0)
             .orElseThrow(() -> new InvalidAstShapeException("term application as first subterm", appl));
         if(!TermUtils.isAppl(toAterm, "ToAterm", 1)) {
@@ -72,7 +72,7 @@ public class ParseExpectationsFromTerm implements TestExpectationFromTerm {
         return new ParseToAtermExpectation(aterm, sourceRegion);
     }
 
-    private ParseToFragmentExpectation convertParseToExpectation(
+    private ParseToFragmentExpectation convertToFragmentExpectation(
         IStrategoAppl appl,
         Region sourceRegion,
         String testSuiteDescription,
