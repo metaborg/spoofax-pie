@@ -1,5 +1,6 @@
-package mb.spt.fromterm;
+package mb.spt.util;
 
+import mb.spt.fromterm.InvalidAstShapeException;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.util.TermUtils;

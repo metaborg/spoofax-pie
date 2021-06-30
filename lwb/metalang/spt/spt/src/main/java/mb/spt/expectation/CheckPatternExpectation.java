@@ -5,15 +5,17 @@ import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Message;
 import mb.common.message.Severity;
 import mb.common.region.Region;
+import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
 import mb.pie.api.Session;
 import mb.pie.api.exec.CancelToken;
 import mb.resource.ResourceKey;
-import mb.spt.api.model.LanguageUnderTest;
-import mb.spt.api.model.TestCase;
-import mb.spt.api.model.TestExpectation;
+import mb.spt.lut.LanguageUnderTestProvider;
+import mb.spt.model.LanguageUnderTest;
 import mb.spt.model.SelectionReference;
-import mb.spt.util.MessageRemap;
+import mb.spt.model.TestCase;
+import mb.spt.model.TestExpectation;
+import mb.spt.util.SptMessageRemap;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
@@ -32,13 +34,20 @@ public class CheckPatternExpectation implements TestExpectation {
     }
 
     @Override
-    public KeyedMessages evaluate(LanguageUnderTest languageUnderTest, Session session, CancelToken cancel, TestCase testCase) throws InterruptedException {
+    public KeyedMessages evaluate(
+        TestCase testCase,
+        LanguageUnderTest languageUnderTest,
+        Session languageUnderTestSession,
+        LanguageUnderTestProvider languageUnderTestProvider,
+        ExecContext context,
+        CancelToken cancel
+    ) throws InterruptedException {
         final ResourceKey file = testCase.testSuiteFile;
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
 
         final KeyedMessages result;
         try {
-            result = session.requireWithoutObserving(languageUnderTest.getLanguageComponent().getLanguageInstance().createCheckOneTask(testCase.resource, testCase.rootDirectoryHint), cancel);
+            result = languageUnderTestSession.requireWithoutObserving(languageUnderTest.getLanguageComponent().getLanguageInstance().createCheckOneTask(testCase.resource, testCase.rootDirectoryHint), cancel);
         } catch(ExecException e) {
             messagesBuilder.addMessage("Failed to evaluate check expectation; see exception", e, Severity.Error, file, sourceRegion);
             return messagesBuilder.build(file);
@@ -62,7 +71,7 @@ public class CheckPatternExpectation implements TestExpectation {
         }
 
         if(addMessages) {
-            MessageRemap.addMessagesRemapped(messagesBuilder, testCase.resource, file, result);
+            SptMessageRemap.addMessagesRemapped(messagesBuilder, testCase.resource, file, result);
         }
 
         return messagesBuilder.build(file);

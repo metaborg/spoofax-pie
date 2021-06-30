@@ -4,7 +4,6 @@ import mb.common.result.Result;
 import mb.pie.api.Session;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spt.api.model.TestCase;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 

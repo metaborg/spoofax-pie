@@ -4,15 +4,24 @@ import mb.common.option.Option;
 import mb.common.region.Region;
 import mb.common.util.SetView;
 import mb.jsglr.common.TermTracer;
-import mb.spt.api.model.TestExpectation;
+import mb.resource.ResourceKey;
 import mb.spt.fromterm.FromTermException;
 import mb.spt.fromterm.InvalidAstShapeException;
 import mb.spt.fromterm.TestExpectationFromTerm;
+import mb.spt.fromterm.TestSuiteFromTerm;
+import mb.spt.model.TestExpectation;
+import mb.spt.model.TestFragmentImpl;
+import mb.spt.resource.SptTestCaseResource;
+import mb.spt.resource.SptTestCaseResourceRegistry;
+import mb.spt.util.SptFromTermUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoConstructor;
 import org.spoofax.terms.TermFactory;
 import org.spoofax.terms.util.TermUtils;
+
+import java.util.HashSet;
+import java.util.Optional;
 
 public class ParseExpectationsFromTerm implements TestExpectationFromTerm {
     @Override public SetView<IStrategoConstructor> getMatchingConstructors(TermFactory termFactory) {
@@ -25,7 +34,14 @@ public class ParseExpectationsFromTerm implements TestExpectationFromTerm {
         );
     }
 
-    @Override public TestExpectation convert(IStrategoAppl term, Region fallbackRegion) throws FromTermException {
+    @Override public TestExpectation convert(
+        IStrategoAppl term,
+        Region fallbackRegion,
+        String testSuiteDescription,
+        ResourceKey testSuiteFile,
+        SptTestCaseResourceRegistry testCaseResourceRegistry,
+        HashSet<String> usedResourceNames
+    ) throws FromTermException {
         final @Nullable Region expectationSourceRegion = TermTracer.getRegion(term);
         final Region sourceRegion = expectationSourceRegion != null ? expectationSourceRegion : fallbackRegion;
         final IStrategoConstructor constructor = term.getConstructor();
@@ -38,6 +54,8 @@ public class ParseExpectationsFromTerm implements TestExpectationFromTerm {
                 return new ParseExpectation(true, Option.ofNone(), Option.ofSome(true), sourceRegion);
             case "ParseToAterm":
                 return convertParseToAtermExpectation(term, sourceRegion);
+            case "ParseTo":
+                return convertParseToExpectation(term, sourceRegion, testSuiteDescription, testSuiteFile, testCaseResourceRegistry, usedResourceNames);
             default:
                 throw new FromTermException("Cannot convert term '" + term + "' to a parse expectation; term is not a valid parse expectation (no matching constructor)");
         }
@@ -52,5 +70,26 @@ public class ParseExpectationsFromTerm implements TestExpectationFromTerm {
         final IStrategoAppl aterm = TermUtils.asApplAt(toAterm, 0)
             .orElseThrow(() -> new InvalidAstShapeException("term application as first subterm", toAterm));
         return new ParseToAtermExpectation(aterm, sourceRegion);
+    }
+
+    private ParseToFragmentExpectation convertParseToExpectation(
+        IStrategoAppl appl,
+        Region sourceRegion,
+        String testSuiteDescription,
+        ResourceKey testSuiteFile,
+        SptTestCaseResourceRegistry testCaseResourceRegistry,
+        HashSet<String> usedResourceNames
+    ) {
+        final IStrategoAppl toPart = TermUtils.asApplAt(appl, 0)
+            .orElseThrow(() -> new InvalidAstShapeException("term application as first subterm", appl));
+        if(!TermUtils.isAppl(toPart, "ToPart", 4)) {
+            throw new InvalidAstShapeException("ToPart/4 term application", toPart);
+        }
+        final Optional<String> languageIdHint = SptFromTermUtil.getOptional(toPart.getSubterm(0))
+            .map(t -> TermUtils.asJavaString(t).orElseThrow(() -> new InvalidAstShapeException("term string", t)));
+        final TestFragmentImpl fragment = TestSuiteFromTerm.fragmentFromTerm(toPart.getSubterm(2), null);
+        final String resourceName = TestSuiteFromTerm.getResourceName(usedResourceNames, testSuiteDescription);
+        final SptTestCaseResource resource = testCaseResourceRegistry.registerTestCase(testSuiteFile, resourceName, fragment.asText());
+        return new ParseToFragmentExpectation(resource.getKey(), languageIdHint.orElse(null), sourceRegion);
     }
 }

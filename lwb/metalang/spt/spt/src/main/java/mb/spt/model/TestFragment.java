@@ -1,4 +1,4 @@
-package mb.spt.api.model;
+package mb.spt.model;
 
 import mb.common.region.Region;
 import mb.common.text.FragmentedString;

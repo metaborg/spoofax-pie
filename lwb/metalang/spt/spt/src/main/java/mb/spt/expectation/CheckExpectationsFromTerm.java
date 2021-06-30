@@ -4,11 +4,13 @@ import mb.common.message.Severity;
 import mb.common.region.Region;
 import mb.common.util.SetView;
 import mb.jsglr.common.TermTracer;
-import mb.spt.api.model.TestExpectation;
+import mb.resource.ResourceKey;
 import mb.spt.expectation.CheckCountExpectation.Operator;
 import mb.spt.fromterm.FromTermException;
 import mb.spt.fromterm.InvalidAstShapeException;
-import mb.spt.fromterm.SptFromTermUtil;
+import mb.spt.model.TestExpectation;
+import mb.spt.resource.SptTestCaseResourceRegistry;
+import mb.spt.util.SptFromTermUtil;
 import mb.spt.fromterm.TestExpectationFromTerm;
 import mb.spt.model.SelectionReference;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -20,6 +22,7 @@ import org.spoofax.terms.TermFactory;
 import org.spoofax.terms.util.TermUtils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class CheckExpectationsFromTerm implements TestExpectationFromTerm {
     @Override public SetView<IStrategoConstructor> getMatchingConstructors(TermFactory termFactory) {
@@ -29,7 +32,12 @@ public class CheckExpectationsFromTerm implements TestExpectationFromTerm {
         );
     }
 
-    @Override public TestExpectation convert(IStrategoAppl term, Region fallbackRegion) throws FromTermException {
+    @Override public TestExpectation convert(
+        IStrategoAppl term,
+        Region fallbackRegion,
+        String testSuiteDescription, ResourceKey testSuiteFile, SptTestCaseResourceRegistry testCaseResourceRegistry,
+        HashSet<String> usedResourceNames
+    ) throws FromTermException {
         final @Nullable Region termSourceRegion = TermTracer.getRegion(term);
         final Region sourceRegion = termSourceRegion != null ? termSourceRegion : fallbackRegion;
         final IStrategoConstructor constructor = term.getConstructor();

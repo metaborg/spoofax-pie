@@ -2,10 +2,10 @@ package mb.spt.util;
 
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Severity;
-import mb.spt.api.model.TestCase;
+import mb.spt.model.TestCase;
 import mb.spt.model.SelectionReference;
 
-public class SelectionUtil {
+public class SptSelectionUtil {
     public static boolean checkSelectionReferences(Iterable<SelectionReference> selectionReferences, KeyedMessagesBuilder messagesBuilder, TestCase testCase) {
         final int numSelections = testCase.testFragment.getSelections().size();
         boolean errors = false;

@@ -16,14 +16,15 @@ import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spt.SptClassLoaderResources;
 import mb.spt.SptScope;
-import mb.spt.api.model.LanguageUnderTest;
-import mb.spt.api.model.TestCase;
-import mb.spt.api.model.TestExpectation;
-import mb.spt.api.model.TestSuite;
 import mb.spt.fromterm.FromTermException;
 import mb.spt.fromterm.TestExpectationFromTerm;
 import mb.spt.fromterm.TestSuiteFromTerm;
+import mb.spt.lut.LanguageUnderTestProvider;
 import mb.spt.lut.LanguageUnderTestProviderWrapper;
+import mb.spt.model.LanguageUnderTest;
+import mb.spt.model.TestCase;
+import mb.spt.model.TestExpectation;
+import mb.spt.model.TestSuite;
 import mb.spt.resource.SptTestCaseResourceRegistry;
 import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
@@ -138,24 +139,27 @@ public class SptCheck implements TaskDef<SptCheck.Input, KeyedMessages> {
             return;
         }
 
-        final Result<LanguageUnderTest, ?> languageUnderTestResult = wrapper.get().provide(context, file, rootDirectoryHint, testSuite.languageIdHint);
+        final LanguageUnderTestProvider languageUnderTestProvider = wrapper.get();
+        final Result<LanguageUnderTest, ?> languageUnderTestResult = languageUnderTestProvider.provide(context, file, rootDirectoryHint, testSuite.languageIdHint);
         final CancelToken cancelToken = context.cancelToken();
         languageUnderTestResult.ifThrowingElse(
-            languageUnderTest -> runTests(languageUnderTest, cancelToken, messagesBuilder, testSuite),
+            languageUnderTest -> runTests(languageUnderTestProvider, context, languageUnderTest, cancelToken, messagesBuilder, testSuite),
             messagesBuilder::extractMessagesRecursively
         );
     }
 
     private void runTests(
+        LanguageUnderTestProvider languageUnderTestProvider,
+        ExecContext context,
         LanguageUnderTest languageUnderTest,
         CancelToken cancelToken,
         KeyedMessagesBuilder messagesBuilder,
         TestSuite testSuite
     ) throws InterruptedException {
-        try(final MixedSession session = languageUnderTest.getPieComponent().newSession()) {
+        try(final MixedSession languageUnderTestSession = languageUnderTest.getPieComponent().newSession()) {
             for(TestCase testCase : testSuite.testCases) {
                 for(TestExpectation expectation : testCase.expectations) {
-                    messagesBuilder.addMessages(expectation.evaluate(languageUnderTest, session, cancelToken, testCase));
+                    messagesBuilder.addMessages(expectation.evaluate(testCase, languageUnderTest, languageUnderTestSession, languageUnderTestProvider, context, cancelToken));
                 }
             }
         }

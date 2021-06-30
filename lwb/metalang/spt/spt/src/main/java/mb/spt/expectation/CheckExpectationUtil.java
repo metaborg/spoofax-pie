@@ -4,9 +4,9 @@ import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Message;
 import mb.common.message.Severity;
 import mb.common.region.Region;
-import mb.spt.api.model.TestCase;
+import mb.spt.model.TestCase;
 import mb.spt.model.SelectionReference;
-import mb.spt.util.SelectionUtil;
+import mb.spt.util.SptSelectionUtil;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -23,7 +23,7 @@ public class CheckExpectationUtil {
         KeyedMessagesBuilder messagesBuilder,
         TestCase testCase
     ) {
-        if(!SelectionUtil.checkSelectionReferences(selectionReferences, messagesBuilder, testCase)) {
+        if(!SptSelectionUtil.checkSelectionReferences(selectionReferences, messagesBuilder, testCase)) {
             return false;
         }
         boolean success = true;

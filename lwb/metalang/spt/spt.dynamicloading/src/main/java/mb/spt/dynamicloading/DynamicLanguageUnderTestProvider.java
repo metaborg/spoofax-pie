@@ -8,7 +8,7 @@ import mb.spoofax.lwb.compiler.CompileLanguage;
 import mb.spoofax.lwb.dynamicloading.DynamicLanguage;
 import mb.spoofax.lwb.dynamicloading.DynamicLanguageRegistry;
 import mb.spoofax.lwb.dynamicloading.DynamicLoad;
-import mb.spt.api.model.LanguageUnderTest;
+import mb.spt.model.LanguageUnderTest;
 import mb.spt.lut.LanguageUnderTestProvider;
 import mb.spt.model.LanguageUnderTestImpl;
 import org.checkerframework.checker.nullness.qual.Nullable;

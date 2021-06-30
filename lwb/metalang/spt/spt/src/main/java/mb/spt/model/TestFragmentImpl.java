@@ -4,7 +4,6 @@ import mb.common.region.Region;
 import mb.common.text.FragmentedString;
 import mb.common.text.Text;
 import mb.common.util.ListView;
-import mb.spt.api.model.TestFragment;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class TestFragmentImpl implements TestFragment {

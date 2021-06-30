@@ -10,7 +10,7 @@ import org.spoofax.terms.util.TermUtils;
 
 import java.util.Iterator;
 
-public class AtermMatcher {
+public class SptAtermMatcher {
     private static final String ANNO_CONS = "Anno";
     private static final String LIST_CONS = "List";
     private static final String APPL_CONS = "Appl";

@@ -1,4 +1,4 @@
-package mb.spt.api.model;
+package mb.spt.model;
 
 import mb.common.util.ListView;
 import mb.resource.ResourceKey;

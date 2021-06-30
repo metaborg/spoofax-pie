@@ -6,16 +6,18 @@ import mb.common.message.Severity;
 import mb.common.option.Option;
 import mb.common.region.Region;
 import mb.common.result.Result;
+import mb.pie.api.ExecContext;
 import mb.pie.api.Session;
 import mb.pie.api.exec.CancelToken;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageInstance;
-import mb.spt.api.model.LanguageUnderTest;
-import mb.spt.api.model.TestCase;
-import mb.spt.api.model.TestExpectation;
+import mb.spt.lut.LanguageUnderTestProvider;
+import mb.spt.model.LanguageUnderTest;
+import mb.spt.model.TestCase;
 import mb.spt.api.parse.ParseResult;
 import mb.spt.api.parse.TestableParse;
-import mb.spt.util.MessageRemap;
+import mb.spt.model.TestExpectation;
+import mb.spt.util.SptMessageRemap;
 
 public class ParseExpectation implements TestExpectation {
     public final boolean expectSuccess;
@@ -31,7 +33,14 @@ public class ParseExpectation implements TestExpectation {
     }
 
     @Override
-    public KeyedMessages evaluate(LanguageUnderTest languageUnderTest, Session session, CancelToken cancel, TestCase testCase) throws InterruptedException {
+    public KeyedMessages evaluate(
+        TestCase testCase,
+        LanguageUnderTest languageUnderTest,
+        Session languageUnderTestSession,
+        LanguageUnderTestProvider languageUnderTestProvider,
+        ExecContext context,
+        CancelToken cancel
+    ) throws InterruptedException {
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
         final ResourceKey file = testCase.testSuiteFile;
         final LanguageInstance languageInstance = languageUnderTest.getLanguageComponent().getLanguageInstance();
@@ -40,7 +49,7 @@ public class ParseExpectation implements TestExpectation {
             return messagesBuilder.build(file);
         }
         final TestableParse testableParse = (TestableParse)languageInstance;
-        final Result<ParseResult, ?> result = testableParse.testParse(session, testCase.resource, testCase.rootDirectoryHint);
+        final Result<ParseResult, ?> result = testableParse.testParse(languageUnderTestSession, testCase.resource, testCase.rootDirectoryHint);
         result.ifElse(r -> {
             final boolean actualSuccess = r.success && !r.messages.containsError();
             final boolean[] addParseMessages = {false};
@@ -63,7 +72,7 @@ public class ParseExpectation implements TestExpectation {
                 });
             }
             if(addParseMessages[0]) {
-                MessageRemap.addMessagesRemapped(messagesBuilder, testCase.resource, file, r.messages);
+                SptMessageRemap.addMessagesRemapped(messagesBuilder, testCase.resource, file, r.messages);
             }
         }, e -> {
             messagesBuilder.addMessage("Failed to parse test fragment; see exception", e, Severity.Error, file, sourceRegion);

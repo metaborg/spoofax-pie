@@ -3,7 +3,6 @@ package mb.spt.model;
 import mb.pie.dagger.PieComponent;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.core.language.LanguageComponent;
-import mb.spt.api.model.LanguageUnderTest;
 
 public class LanguageUnderTestImpl implements LanguageUnderTest {
     private final ResourceServiceComponent resourceServiceComponent;

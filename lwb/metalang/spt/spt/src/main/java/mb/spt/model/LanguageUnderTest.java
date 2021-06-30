@@ -1,4 +1,4 @@
-package mb.spt.api.model;
+package mb.spt.model;
 
 import mb.pie.dagger.PieComponent;
 import mb.resource.dagger.ResourceServiceComponent;

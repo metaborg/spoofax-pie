@@ -42,9 +42,6 @@ import mb.spoofax.core.language.command.HierarchicalResourceType;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.spoofax.core.language.menu.CommandAction;
 import mb.spoofax.core.language.menu.MenuItem;
-import mb.spt.api.parse.TestableParse;
-import mb.spt.api.parse.ParseResult;
-import mb.spt.api.model.TestCase;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
@@ -53,7 +50,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Set;
 
-public class {{baseInstance.id}} implements LanguageInstance{{#parseInjection}}, TestableParse{{/parseInjection}} {
+public class {{baseInstance.id}} implements LanguageInstance{{#parseInjection}}, mb.spt.api.parse.TestableParse{{/parseInjection}} {
     private final static SetView<String> fileExtensions = SetView.of({{#shared.fileExtensions}}"{{this}}"{{^-last}}, {{/-last}}{{/shared.fileExtensions}});
 
 {{#injected}}
@@ -165,7 +162,7 @@ public class {{baseInstance.id}} implements LanguageInstance{{#parseInjection}},
 {{#parseInjection}}
 
     @Override
-    public Result<ParseResult, ?> testParse(Session session, ResourceKey resource, @Nullable ResourcePath rootDirectoryHint) throws InterruptedException {
+    public Result<mb.spt.api.parse.ParseResult, ?> testParse(Session session, ResourceKey resource, @Nullable ResourcePath rootDirectoryHint) throws InterruptedException {
         final Result<JsglrParseOutput, JsglrParseException> result;
         try {
             result = session.requireWithoutObserving({{this.name}}.createTask(mb.jsglr.pie.JsglrParseTaskInput.builder()
@@ -174,9 +171,9 @@ public class {{baseInstance.id}} implements LanguageInstance{{#parseInjection}},
                 .build()
             ));
             return result.mapOrElse(
-                o -> Result.ofOk(new ParseResult(true, o.recovered, o.ambiguous, o.messages)),
+                o -> Result.ofOk(new mb.spt.api.parse.ParseResult(true, o.recovered, o.ambiguous, o.messages)),
                 e -> e.caseOf()
-                    .parseFail_(Result.ofOk(new ParseResult()))
+                    .parseFail_(Result.ofOk(new mb.spt.api.parse.ParseResult()))
                     .otherwise_(Result.ofErr(e))
             );
         } catch(ExecException e) {
