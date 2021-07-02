@@ -458,6 +458,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#menus" class="md-nav__link">
+    Menus
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#options" class="md-nav__link">
     Options
   </a>
@@ -719,6 +726,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#menus" class="md-nav__link">
+    Menus
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#options" class="md-nav__link">
     Options
   </a>
@@ -787,7 +801,7 @@
 The source files of a language definition are mostly written in high-level domain-specific meta-languages, with some parts being written in Java.
 The Spoofax 3 compiler compiles language definitions into language implementations which are essentially standard Java libraries (e.g., JAR files) consisting of Java classes and bundled resources.
 These classes implement the various aspects of a language, and may use bundled resources such as a parse table which is loaded and interpreted at runtime.</p>
-<p>In this reference manual we explain the basic anatomy of a language definition, its configuration and file structure, Java classes, and how they are instantiated, as well as how a definition is compiled into an implementation.</p>
+<p>In this reference manual we explain the basic anatomy of a language definition, its configuration and file structure, Java classes and how they are instantiated, as well as how a language definition is compiled into a language implementation.</p>
 <h2 id="anatomy">Anatomy<a class="headerlink" href="#anatomy" title="Permanent link">&para;</a></h2>
 <p>configuration in CFG
 syntax in SDF3
@@ -804,10 +818,10 @@ The goal of this config file is to configure basic options, enable/disable featu
 The directory that the <code>spoofaxc.cfg</code> file is in is called the "root directory" of the language definition, and any relative paths are resolved relative to that directory.</p>
 <p>The CFG language has domain-specific syntax for configuring language definitions. However, the syntax follows these conventions:</p>
 <ul>
-<li>Options are assigned a value with <code>option = expression</code>.</li>
-<li>Sections <code>section { ... }</code> may enable features and group options.</li>
-<li>Lists <code>list [ ..., ... ]</code> indicate an option/section may be given 0-many times.</li>
-<li>Let bindings <code>let name = expression</code> can be used to give values a name that can be (re-)used in the rest of the configuration file.</li>
+<li>Options are assigned a value with <code>$Option = $Expression</code>.</li>
+<li>Sections <code>$Section { ... }</code> may enable features and group options.</li>
+<li>Lists <code>$List [ ..., ... ]</code> indicate an option/section may be given 0-many times.</li>
+<li>Let bindings <code>let $Name = $Expression</code> can be used to give values a name that can be (re-)used in the rest of the configuration file.</li>
 </ul>
 <p>In its most basic form, the <code>spoofaxc.cfg</code> file for a language named <code>Calc</code> looks as follows:</p>
 <div class="highlight"><pre><span></span><code><span class="na">name</span> <span class="o">=</span> <span class="s">&quot;Calc&quot;</span>
@@ -854,17 +868,17 @@ CFG has the following literals:</p>
 <td>Filesystem path</td>
 </tr>
 <tr>
-<td><code>&lt;JavaIdChars&gt;</code></td>
+<td><code>$JavaIdChars</code></td>
 <td><code>Java foo</code></td>
 <td>Java identifier</td>
 </tr>
 <tr>
-<td><code>&lt;JavaQIdLit&gt;</code></td>
+<td><code>$JavaQIdLit</code></td>
 <td><code>Java foo.bar.Baz</code></td>
 <td>Qualified Java identifier</td>
 </tr>
 <tr>
-<td><code>task-def &lt;JavaQIdLit&gt;</code></td>
+<td><code>task-def $JavaQIdLit</code></td>
 <td><code>task-def foo.bar.Baz</code></td>
 <td>Qualified Java identifier that represents a task definition</td>
 </tr>
@@ -895,13 +909,13 @@ CFG has the following literals:</p>
 </tr>
 <tr>
 <td><code>JavaQIdLit</code></td>
-<td><code>&lt;JavaIdChars&gt;(\.&lt;JavaIdChars&gt;)*</code></td>
+<td><code>$JavaIdChars(\.$JavaIdChars)*</code></td>
 </tr>
 </tbody>
 </table>
 <p>For Java, SDF3 sort, and Stratego strategy identifiers, the corresponding keywords of those languages are rejected as identifiers.</p>
 <h3 id="let-bindings">Let bindings<a class="headerlink" href="#let-bindings" title="Permanent link">&para;</a></h3>
-<p>Let bindings of the form <code>let name = expression</code> bind a name to an expression, for example:</p>
+<p>Let bindings of the form <code>let $Name = $Expression</code> bind a name to an expression, for example:</p>
 <div class="highlight"><pre><span></span><code><span class="na">let showParsedAst</span> <span class="o">=</span> <span class="s">task-def mb.helloworld.task.HelloWorldShowParsedAst</span>
 <span class="na">let showParsedAstCommand</span> <span class="o">=</span> <span class="s">command-def {</span>
   <span class="na">task-def</span> <span class="o">=</span> <span class="s">showParsedAst</span>
@@ -920,8 +934,8 @@ CFG has the following literals:</p>
 The command in turn is bound to <code>showParsedAstCommand</code>, assigned to the <code>command-def</code> option in a <code>command-action</code> section.</p>
 <h3 id="commands">Commands<a class="headerlink" href="#commands" title="Permanent link">&para;</a></h3>
 <p>Commands are sections that are also expressions, typically assigned to a name with a let binding, with the following form:</p>
-<div class="highlight"><pre><span></span><code><span class="na">let name</span> <span class="o">=</span> <span class="s">command-def {</span>
-  <span class="na">options</span>
+<div class="highlight"><pre><span></span><code><span class="na">let $Name</span> <span class="o">=</span> <span class="s">command-def {</span>
+  <span class="na">$CommandOption*</span>
 <span class="na">}</span>
 </code></pre></div>
 <p>The following options are available in a command:</p>
@@ -936,55 +950,55 @@ The command in turn is bound to <code>showParsedAstCommand</code>, assigned to t
 </thead>
 <tbody>
 <tr>
-<td><code>task-def = &lt;Expression&gt;</code></td>
+<td><code>task-def = $Expression</code></td>
 <td>yes</td>
 <td>The task definition that the command will execute.</td>
 <td>Qualified Java identifier that represents a task definition, or qualified Java identifier</td>
 </tr>
 <tr>
-<td><code>type = &lt;Expression&gt;</code></td>
+<td><code>type = $Expression</code></td>
 <td>no</td>
 <td>The fully qualified Java type we want this command to be generated as. Can be omitted to generate a type based on the name of the task definition.</td>
 <td>Qualified Java identifier</td>
 </tr>
 <tr>
-<td><code>display-name = &lt;Expression&gt;</code></td>
+<td><code>display-name = $Expression</code></td>
 <td>yes</td>
 <td>The display name of the command.</td>
 <td>String</td>
 </tr>
 <tr>
-<td><code>description = &lt;Expression&gt;</code></td>
+<td><code>description = $Expression</code></td>
 <td>no</td>
 <td>The optional description of the command.</td>
 <td>String</td>
 </tr>
 <tr>
-<td><code>supported-execution-types = [&lt;ExecutionType ,&gt;*]</code></td>
+<td><code>supported-execution-types = [($ExecutionType ,)*]</code></td>
 <td>no</td>
 <td>The optional supported execution types of the command. Defaults to <code>[Once, Continuous]</code>.</td>
 <td>n/a</td>
 </tr>
 <tr>
-<td><code>args-type = &lt;Expression&gt;</code></td>
+<td><code>args-type = $Expression</code></td>
 <td>no</td>
 <td>The fully qualified Java type of the argument class. Can be omitted if the argument class is a nested class named <code>Args</code> of the task definition.</td>
 <td>Qualified Java identifier</td>
 </tr>
 <tr>
-<td><code>parameters = [ &lt;Parameter&gt;* ]</code></td>
+<td><code>parameters = [ $Parameter* ]</code></td>
 <td>yes</td>
 <td>The description of the parameters of the command</td>
 <td>n/a</td>
 </tr>
 </tbody>
 </table>
-<p>The following execution types are supported:</p>
+<p>The following <code>ExecutionType</code>s are supported:</p>
 <ul>
 <li><code>Once</code> indicates a that this command supports being executed as a one-shot command.</li>
 <li><code>Continuous</code> indicates that this command supports being executed every time the source file changes.</li>
 </ul>
-<p>A parameter has the form <code>identifier = parameter { options }</code> with the following options:</p>
+<p>A <code>$Parameter</code> has the form <code>$Identifier = parameter { $ParameterOptions }</code> with the following options:</p>
 <table>
 <thead>
 <tr>
@@ -996,42 +1010,43 @@ The command in turn is bound to <code>showParsedAstCommand</code>, assigned to t
 </thead>
 <tbody>
 <tr>
-<td><code>type = &lt;Expression&gt;</code></td>
+<td><code>type = $Expression</code></td>
 <td>yes</td>
 <td>The fully qualified Java of the type of the parameter. This must match the type of the parameter inside the <code>args-type</code> of the command.</td>
 <td>Qualified Java identifier</td>
 </tr>
 <tr>
-<td><code>required = &lt;Expression&gt;</code></td>
+<td><code>required = $Expression</code></td>
 <td>no</td>
 <td>Whether the parameter is required. Defaults to <code>true</code>.</td>
 <td>Boolean</td>
 </tr>
 <tr>
-<td><code>converter-type = &lt;Expression&gt;</code></td>
+<td><code>converter-type = $Expression</code></td>
 <td>no</td>
 <td>The argument converter for this parameter, which can convert a <code>String</code> value to the <code>type</code> of this parameter. Must implement the <code>ArgConverter</code> interface.</td>
 <td>Qualified Java identifier</td>
 </tr>
 <tr>
-<td><code>argument-providers = [&lt;ArgumentProvider ,&gt;*]</code></td>
+<td><code>argument-providers = [($ArgumentProvider ,)*]</code></td>
 <td>no</td>
 <td>Argument providers for this parameter that attempt to automatically provide a fitting argument. When providing an argument fails, the next argument provider in the list will be attempted. If no arguments can be provided, and the argument is required, then the argument <em>must be</em> provided by the user that executes the command, or executing the command will fail.</td>
 <td>n/a</td>
 </tr>
 </tbody>
 </table>
-<p>The following argument providers are supported:</p>
+<p>The following <code>ArgumentProvider</code>s are supported:</p>
 <ul>
-<li><code>Value(&lt;Expression&gt;)</code> provides a default value given by the expression. The expression must match the type of the parameter, even though this is not currently checked.</li>
-<li><code>Context(&lt;CommandContext&gt;)</code> attempts to infer the argument by context. The following contexts are supported:<ul>
+<li><code>Value($Expression)</code> provides a default value given by the expression. The expression must match the type of the parameter, even though this is not currently checked.</li>
+<li><code>Context($CommandContext)</code> attempts to infer the argument by context. The following <code>CommandContext</code>s are supported:<ul>
 <li><code>Directory</code>: attempt to infer a <code>ResourcePath</code> to an existing directory. For example, when right-clicking a directory in an IDE to execute a command on that directory.</li>
 <li><code>File</code>: attempt to infer a <code>ResourcePath</code> to an existing file. For example, when right-clicking a file in an IDE to execute a command on that directory, or when executing a command in an editor for a file.</li>
+<li><code>ResourceKey</code>: attempt to infer a <code>ResourceKey</code> to a readable resource. This is more general than <code>File</code>, as we only ask for a resource that can be read, not one that belongs to a (local) filesystem. Use this when the command does not rely on the resource being in a filesystem.</li>
 <li><code>Region</code>: attempt to infer a <code>Region</code> in a source file. Inference succeeds when the context has a selection of size 1 or larger. For example, when executing a command in an editor that has a selection, the region will be that selection.</li>
 <li><code>Offset</code>: attempt to infer an <code>int</code> representing an offset in a source file. Inference succeeds when the context has a cursor offset (i.e., a selection of size 0 or larger). For example, when executing a command in an editor, the offset will be the offset to the cursor in the editor.</li>
 </ul>
 </li>
-<li><code>EnclosingContext(&lt;EnclosingCommandContext&gt;)</code> attempts to infer the argument by the enclosing context. The following enclosing contexts are supported:<ul>
+<li><code>EnclosingContext($EnclosingCommandContext)</code> attempts to infer the argument by the enclosing context. The following <code>EnclosingCommandContext</code>s are supported:<ul>
 <li><code>Project</code>: attempt to infer a <code>ResourcePath</code> to the enclosing project. For example, when executing a command in an IDE on a file, directory, or editor for a file, that belongs to a project. Or when executing a command in a CLI, the directory will be the current working directory.</li>
 <li><code>Directory</code>: attempt to infer a <code>ResourcePath</code> to the enclosing directory. For example, when executing a command in the context of a file, directory, or editor for a file, the directory will be the parent of that file/directory.</li>
 </ul>
@@ -1049,7 +1064,7 @@ The command in turn is bound to <code>showParsedAstCommand</code>, assigned to t
     <span class="na">file</span> <span class="o">=</span> <span class="s">parameter {</span>
       <span class="na">type</span> <span class="o">=</span> <span class="s">java mb.resource.ResourceKey</span>
       <span class="na">required</span> <span class="o">=</span> <span class="s">true</span>
-      <span class="na">argument-providers</span> <span class="o">=</span> <span class="s">[Context(File)]</span>
+      <span class="na">argument-providers</span> <span class="o">=</span> <span class="s">[Context(ResourceKey)]</span>
     <span class="na">}</span>
   <span class="na">]</span>
 <span class="na">}</span>
@@ -1058,8 +1073,8 @@ The command in turn is bound to <code>showParsedAstCommand</code>, assigned to t
 <p>Menu items take the form of:</p>
 <ul>
 <li>a <code>separator</code> representing a horizontal line in a menu used to separate groups of menu items.</li>
-<li>a <code>menu &lt;Expression&gt; [ &lt;MenuItem*&gt; ]</code> representing a (nested) menu with a display name defined by the expression which must be a string, and a list of nested menu items.</li>
-<li>a <code>command-action { options }</code> representing an action that executes a command when a user clicks on it.</li>
+<li>a <code>menu $Expression [ $MenuItem* ]</code> representing a (nested) menu with a display name defined by the expression which must be a string, and a list of nested menu items.</li>
+<li>a <code>command-action { $CommandActionOption* }</code> representing an action that executes a command when a user clicks on it.</li>
 </ul>
 <p>A command action has the following options:</p>
 <table>
@@ -1073,56 +1088,105 @@ The command in turn is bound to <code>showParsedAstCommand</code>, assigned to t
 </thead>
 <tbody>
 <tr>
-<td><code>command-def = &lt;Expression&gt;</code></td>
+<td><code>command-def = $Expression</code></td>
 <td>yes</td>
 <td>The command to execute.</td>
 <td>Command or qualified Java identifier</td>
 </tr>
 <tr>
-<td><code>execution-type = &lt;ExecutionType&gt;</code></td>
+<td><code>execution-type = $ExecutionType</code></td>
 <td>yes</td>
 <td>How the command should be executed.</td>
 <td>n/a</td>
 </tr>
 <tr>
-<td><code>required-resource-types = [&lt;ResourceType ,&gt;*]</code></td>
+<td><code>required-resource-types = [($ResourceType ,)*]</code></td>
 <td>no</td>
-<td>On which kinds of resources this menu item will be shown. Defaults to empty. If empty, it will not be hidden based on resources.</td>
+<td>On which kinds of resources this menu item will be shown on resource context menus. Defaults to empty. If empty, it will not be hidden based on resources.</td>
 <td>n/a</td>
 </tr>
 <tr>
-<td><code>required-enclosing-resource-types = [&lt;EnclosingResourceType ,&gt;*]</code></td>
+<td><code>required-enclosing-resource-types = [($EnclosingResourceType ,)*]</code></td>
 <td>no</td>
-<td>On which kinds of enclosing resources this menu item will be shown. Defaults to empty. If empty, it will not be hidden based on enclosing resource.</td>
+<td>On which kinds of enclosing resources this menu item will be shown on resource context menus. Defaults to empty. If empty, it will not be hidden based on enclosing resource.</td>
 <td>n/a</td>
 </tr>
 <tr>
-<td><code>required-editor-file-types = [&lt;EditorFileType ,&gt;*]</code></td>
+<td><code>required-editor-file-types = [($EditorFileType ,)*]</code></td>
 <td>no</td>
 <td>On which kinds of editors belonging to certain file types this menu item will be shown. Defaults to empty. If empty, it will not be hidden based on editor file types.</td>
 <td>n/a</td>
 </tr>
 <tr>
-<td><code>required-editor-selection-types = [&lt;EditorSelectionType ,&gt;*]</code></td>
+<td><code>required-editor-selection-types = [($EditorSelectionType ,)*]</code></td>
 <td>no</td>
 <td>On which kinds of editor selection types this menu item will be shown. Defaults to empty. If empty, it will not be hidden based on editor selections.</td>
 <td>n/a</td>
 </tr>
 <tr>
-<td><code>display-name = &lt;Expression&gt;</code></td>
+<td><code>display-name = $Expression</code></td>
 <td>no</td>
 <td>The display name of the command action. Defaults to the display name of the command</td>
 <td>String</td>
 </tr>
 <tr>
-<td><code>description = &lt;Expression&gt;</code></td>
+<td><code>description = $Expression</code></td>
 <td>no</td>
 <td>The description of he command action. Defaults to the description of the command</td>
 <td>String</td>
 </tr>
 </tbody>
 </table>
-<p>TODO: document type requirements.</p>
+<p>The following <code>ResourceType</code>s are supported:</p>
+<ul>
+<li><code>Directory</code>: the menu item will only be shown when a directory is selected.</li>
+<li><code>File</code>: the menu item will only be shown when a file is selected.</li>
+</ul>
+<p>The following <code>EnclosingResourceType</code>s are supported:</p>
+<ul>
+<li><code>Project</code>: the menu item will only be shown when the selected resource has an enclosing project.</li>
+<li><code>Directory:</code>: the menu item will only be shown when the selected resource has an enclosing directory.</li>
+</ul>
+<p>The following <code>EditorFileType</code>s are supported:</p>
+<ul>
+<li><code>HierarchicalResource</code>: the menu item will only be shown when the editor belongs to a hierarchical resource. That is, a resource that belongs to a tree, such as a file on the local filesystem.</li>
+<li><code>Resource</code>: the menu item will only be shown when the editor belongs to a readable resource.</li>
+</ul>
+<p>The following <code>EditorSelectionType</code>s are supported:</p>
+<ul>
+<li><code>Region</code>: the menu item will only be shown when a region with size &gt;0 in the source file is selected.</li>
+<li><code>Offset</code>: the menu item will only be shown in the context of an editor with a cursor.</li>
+</ul>
+<h3 id="menus">Menus<a class="headerlink" href="#menus" title="Permanent link">&para;</a></h3>
+<p>Menu items are assigned to 3 particular menus:</p>
+<ul>
+<li><code>editor-context-menu [ $MenuItem* ]</code>: the context menu that gets shown in editors of the language, for example when right-clicking in an editor of the language in an IDE. Spoofax automatically creates a top-level submenu with the name of the language to host the editor context menu items. The <code>required-editor-file-types</code> and <code>required-editor-selection-types</code> options are used to filter menu items.</li>
+<li><code>resource-context-menu [ $MenuItem* ]</code>: the context menu that gets shown in resource explorers, for example when right-clicking in the file browser in an IDE. Spoofax automatically creates a top-level submenu with the name of the language to host the editor context menu items. The <code>required-resource-types</code> and <code>required-enclosing-resource-types</code> options are used to filter menu items.</li>
+<li><code>main-menu [ $MenuIitem* ]</code>: the main menu of the language, which is shown on the menu bar in IDEs. When no <code>main-menu</code> section is given, it defaults to the same menu as <code>editor-context-menu</code>.</li>
+</ul>
+<p>For example, we can assign the command defined earlier to several menus:</p>
+<div class="highlight"><pre><span></span><code><span class="na">editor-context-menu [</span>
+  <span class="na">menu &quot;Debug&quot; [</span>
+    <span class="na">command-action {</span>
+      <span class="na">command-def</span> <span class="o">=</span> <span class="s">showParsedAstCommand</span>
+      <span class="na">execution-type</span> <span class="o">=</span> <span class="s">Once</span>
+    <span class="na">}</span>
+    <span class="na">command-action {</span>
+      <span class="na">command-def</span> <span class="o">=</span> <span class="s">showParsedAstCommand</span>
+      <span class="na">execution-type</span> <span class="o">=</span> <span class="s">Continuous</span>
+    <span class="na">}</span>
+  <span class="na">]</span>
+<span class="na">]</span>
+<span class="na">resource-context-menu [</span>
+  <span class="na">menu &quot;Debug&quot; [</span>
+    <span class="na">command-action {</span>
+      <span class="na">command-def</span> <span class="o">=</span> <span class="s">showParsedAstCommand</span>
+      <span class="na">execution-type</span> <span class="o">=</span> <span class="s">Once</span>
+      <span class="na">required-resource-types</span> <span class="o">=</span> <span class="s">[File]</span>
+    <span class="na">}</span>
+  <span class="na">]</span>
+<span class="na">]</span>
+</code></pre></div>
 <h3 id="options">Options<a class="headerlink" href="#options" title="Permanent link">&para;</a></h3>
 <h3 id="sections">Sections<a class="headerlink" href="#sections" title="Permanent link">&para;</a></h3>
 <p>conventions and defaults
