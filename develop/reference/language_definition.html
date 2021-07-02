@@ -846,11 +846,12 @@ The goal of this config file is to configure basic options, enable/disable featu
 The directory that the <code>spoofaxc.cfg</code> file is in is called the "root directory" of the language definition, and any relative paths are resolved relative to that directory.</p>
 <p>The CFG language has domain-specific syntax for configuring language definitions. However, the syntax follows these conventions:</p>
 <ul>
-<li>Options are assigned a value with <code>$Option = $Expression</code>.</li>
+<li>Options are assigned a value with <code>$Option = $Expression</code>. Unless specified otherwise, options may only be given once.</li>
 <li>Sections <code>$Section { ... }</code> may enable features and group options.</li>
 <li>Lists <code>$List [ ..., ... ]</code> indicate an option/section may be given 0-many times.</li>
 <li>Let bindings <code>let $Name = $Expression</code> can be used to give values a name that can be (re-)used in the rest of the configuration file.</li>
 </ul>
+<p>If something in the documentation is unclear, the <a href="https://github.com/metaborg/spoofax-pie/tree/develop/lwb/metalang/cfg/cfg.spoofax2">CFG language definition can be found here</a>.</p>
 <p>In its most basic form, the <code>spoofaxc.cfg</code> file for a language named <code>Calc</code> looks as follows:</p>
 <div class="highlight"><pre><span></span><code><span class="na">name</span> <span class="o">=</span> <span class="s">&quot;Calc&quot;</span>
 </code></pre></div>
@@ -961,15 +962,73 @@ CFG has the following literals:</p>
 <p>creates a binding from name <code>showParsedAst</code> to <code>task-def mb.helloworld.task.HelloWorldShowParsedAst</code>, which we then pass to the <code>task-def</code> option in <code>command-def</code>.
 The command in turn is bound to <code>showParsedAstCommand</code>, assigned to the <code>command-def</code> option in a <code>command-action</code> section.</p>
 <h3 id="top-level-options">Top-level options<a class="headerlink" href="#top-level-options" title="Permanent link">&para;</a></h3>
-<p>group
-id
-name
-version
-file-extension
-java-package-id-prefix
-java-class-id-prefix
-source-directory
-build-directory</p>
+<p>The following top-level options exist:</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Required?</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>group = $Expression</code></td>
+<td>no</td>
+<td>Group identifier of the language, used as the <code>group</code>/<code>groupId</code> in the Java ecosystem. Defaults to <code>org.metaborg</code>.</td>
+<td>String</td>
+</tr>
+<tr>
+<td><code>id = $Expression</code></td>
+<td>no</td>
+<td>Artifact identifier of the language, used as the <code>name</code>/<code>artifactId</code> in the Java ecosystem. Defaults to the name of the language uncapitalized.</td>
+<td>String</td>
+</tr>
+<tr>
+<td><code>name = $Expression</code></td>
+<td>yes</td>
+<td>Name of the language.</td>
+<td>String</td>
+</tr>
+<tr>
+<td><code>version = $Expression</code></td>
+<td>no</td>
+<td>Version of the language, used as the <code>version</code> in the Java ecosystem. Defaults to <code>0.1.0</code>.</td>
+<td>String</td>
+</tr>
+<tr>
+<td><code>file-extension = $Expression</code></td>
+<td>no</td>
+<td>File extension of the language. May be given multiple times. Defaults to the name of the language transformed to fit in 3 characters.</td>
+<td>String</td>
+</tr>
+<tr>
+<td><code>java-package-id-prefix = $Expression</code></td>
+<td>no</td>
+<td>The prefix to add before all package identifiers in Java source files. Defaults to <code>mb.$Name</code> where <code>$Name</code> is transformed to be a valid package identifier.</td>
+<td>Qualified Java identifier</td>
+</tr>
+<tr>
+<td><code>java-class-id-prefix = $Expression</code></td>
+<td>no</td>
+<td>The prefix to add before all Java classes. Defaults to the name of the language transformed to be a valid class identifier.</td>
+<td>Java identifier</td>
+</tr>
+<tr>
+<td><code>source-directory = $Expression</code></td>
+<td>no</td>
+<td>Path relative to the root directory that has the sources of the language definition. Defaults to <code>src</code>.</td>
+<td>Path</td>
+</tr>
+<tr>
+<td><code>build-directory = $Expression</code></td>
+<td>no</td>
+<td>Path relative to the root directory that has the generated sources and build outputs when building the language definition. Defaults to <code>build</code>.</td>
+<td>Path</td>
+</tr>
+</tbody>
+</table>
 <h3 id="commands">Commands<a class="headerlink" href="#commands" title="Permanent link">&para;</a></h3>
 <p>Commands are sections that are also expressions, typically assigned to a name with a let binding, with the following form:</p>
 <div class="highlight"><pre><span></span><code><span class="na">let $Name</span> <span class="o">=</span> <span class="s">command-def {</span>
