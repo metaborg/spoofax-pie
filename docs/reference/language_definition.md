@@ -7,6 +7,7 @@ These classes implement the various aspects of a language, and may use bundled r
 
 In this reference manual we explain the basic anatomy of a language definition, its configuration and file structure, Java classes and how they are instantiated, as well as how a language definition is compiled into a language implementation.
 
+
 ## Anatomy
 
 configuration in CFG
@@ -22,8 +23,6 @@ commands, specified in configuration, generated for you
 menu bindings
 
 CLI bindings
-
-
 
 
 ## Configuration
@@ -108,8 +107,21 @@ editor-context-menu [
 ]
 ```
 
+
 creates a binding from name `showParsedAst` to `task-def mb.helloworld.task.HelloWorldShowParsedAst`, which we then pass to the `task-def` option in `command-def`.
 The command in turn is bound to `showParsedAstCommand`, assigned to the `command-def` option in a `command-action` section.
+
+### Top-level options
+
+group
+id
+name
+version
+file-extension
+java-package-id-prefix
+java-class-id-prefix
+source-directory
+build-directory
 
 ### Commands
 
@@ -180,7 +192,7 @@ let showParsedAstCommand = command-def {
 }
 ```
 
-### Menu item
+### Menu items
 
 Menu items take the form of:
 
@@ -255,14 +267,36 @@ resource-context-menu [
 ]
 ```
 
-### Options
+### Language feature sections
 
-### Sections
+parser
+styler
+constraint-analyzer
+multilang-analyzer
+stratego-runtime
+completer
+exports
 
-conventions and defaults
-spoofaxc.lock
+### Meta-language sections
+
+sdf3
+esv
+statix
+stratego
+
+### spoofaxc.lock
+
+The `spoofaxc.lock` file, which resides next to the `spoofaxc.cfg` file, contains values for several options that have defaults derived from other options, in order to keep these derived values stable even when the options they are derived from are changed.
+For example, when no `java-class-id-prefix` option is set in `spoofaxc.cfg`, it will be derived from the `name` option with some changes to make it compatible as a Java identifier, and is stored under `shared.defaultClassPrefix` in the `spoofaxc.lock` file.
+When you change the `name` of your language, the stored value will be used, keeping the class prefix the same, making it possible to rename the language without having to rename all class files.
+Therefore, the `spoofaxc.lock` file should be checked in to source control, in order to have reproducible builds.
+
+If you **do** want to re-derive a default from other options, remove the option from the `spoofaxc.lock` file and rebuild the language.
+The value will be re-derived and stored in `spoofaxc.lock`, after which you need to check it into source control again.
+
 
 ## File structure
+
 
 ## Java classes
 
@@ -312,7 +346,9 @@ GetStrategoRuntimeProvider
 
 commands:
 
-## Instantation
+## Instantiation
+
+dependency injection
 
 ## Compilation
 
