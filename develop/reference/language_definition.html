@@ -444,6 +444,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#top-level-options" class="md-nav__link">
+    Top-level options
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#commands" class="md-nav__link">
     Commands
   </a>
@@ -451,8 +458,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#menu-item" class="md-nav__link">
-    Menu item
+  <a href="#menu-items" class="md-nav__link">
+    Menu items
   </a>
   
 </li>
@@ -465,15 +472,22 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#options" class="md-nav__link">
-    Options
+  <a href="#language-feature-sections" class="md-nav__link">
+    Language feature sections
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#sections" class="md-nav__link">
-    Sections
+  <a href="#meta-language-sections" class="md-nav__link">
+    Meta-language sections
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#spoofaxclock" class="md-nav__link">
+    spoofaxc.lock
   </a>
   
 </li>
@@ -498,8 +512,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#instantation" class="md-nav__link">
-    Instantation
+  <a href="#instantiation" class="md-nav__link">
+    Instantiation
   </a>
   
 </li>
@@ -712,6 +726,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#top-level-options" class="md-nav__link">
+    Top-level options
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#commands" class="md-nav__link">
     Commands
   </a>
@@ -719,8 +740,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#menu-item" class="md-nav__link">
-    Menu item
+  <a href="#menu-items" class="md-nav__link">
+    Menu items
   </a>
   
 </li>
@@ -733,15 +754,22 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#options" class="md-nav__link">
-    Options
+  <a href="#language-feature-sections" class="md-nav__link">
+    Language feature sections
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#sections" class="md-nav__link">
-    Sections
+  <a href="#meta-language-sections" class="md-nav__link">
+    Meta-language sections
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#spoofaxclock" class="md-nav__link">
+    spoofaxc.lock
   </a>
   
 </li>
@@ -766,8 +794,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#instantation" class="md-nav__link">
-    Instantation
+  <a href="#instantiation" class="md-nav__link">
+    Instantiation
   </a>
   
 </li>
@@ -932,6 +960,16 @@ CFG has the following literals:</p>
 </code></pre></div>
 <p>creates a binding from name <code>showParsedAst</code> to <code>task-def mb.helloworld.task.HelloWorldShowParsedAst</code>, which we then pass to the <code>task-def</code> option in <code>command-def</code>.
 The command in turn is bound to <code>showParsedAstCommand</code>, assigned to the <code>command-def</code> option in a <code>command-action</code> section.</p>
+<h3 id="top-level-options">Top-level options<a class="headerlink" href="#top-level-options" title="Permanent link">&para;</a></h3>
+<p>group
+id
+name
+version
+file-extension
+java-package-id-prefix
+java-class-id-prefix
+source-directory
+build-directory</p>
 <h3 id="commands">Commands<a class="headerlink" href="#commands" title="Permanent link">&para;</a></h3>
 <p>Commands are sections that are also expressions, typically assigned to a name with a let binding, with the following form:</p>
 <div class="highlight"><pre><span></span><code><span class="na">let $Name</span> <span class="o">=</span> <span class="s">command-def {</span>
@@ -1069,7 +1107,7 @@ The command in turn is bound to <code>showParsedAstCommand</code>, assigned to t
   <span class="na">]</span>
 <span class="na">}</span>
 </code></pre></div>
-<h3 id="menu-item">Menu item<a class="headerlink" href="#menu-item" title="Permanent link">&para;</a></h3>
+<h3 id="menu-items">Menu items<a class="headerlink" href="#menu-items" title="Permanent link">&para;</a></h3>
 <p>Menu items take the form of:</p>
 <ul>
 <li>a <code>separator</code> representing a horizontal line in a menu used to separate groups of menu items.</li>
@@ -1187,10 +1225,26 @@ The command in turn is bound to <code>showParsedAstCommand</code>, assigned to t
   <span class="na">]</span>
 <span class="na">]</span>
 </code></pre></div>
-<h3 id="options">Options<a class="headerlink" href="#options" title="Permanent link">&para;</a></h3>
-<h3 id="sections">Sections<a class="headerlink" href="#sections" title="Permanent link">&para;</a></h3>
-<p>conventions and defaults
-spoofaxc.lock</p>
+<h3 id="language-feature-sections">Language feature sections<a class="headerlink" href="#language-feature-sections" title="Permanent link">&para;</a></h3>
+<p>parser
+styler
+constraint-analyzer
+multilang-analyzer
+stratego-runtime
+completer
+exports</p>
+<h3 id="meta-language-sections">Meta-language sections<a class="headerlink" href="#meta-language-sections" title="Permanent link">&para;</a></h3>
+<p>sdf3
+esv
+statix
+stratego</p>
+<h3 id="spoofaxclock">spoofaxc.lock<a class="headerlink" href="#spoofaxclock" title="Permanent link">&para;</a></h3>
+<p>The <code>spoofaxc.lock</code> file, which resides next to the <code>spoofaxc.cfg</code> file, contains values for several options that have defaults derived from other options, in order to keep these derived values stable even when the options they are derived from are changed.
+For example, when no <code>java-class-id-prefix</code> option is set in <code>spoofaxc.cfg</code>, it will be derived from the <code>name</code> option with some changes to make it compatible as a Java identifier, and is stored under <code>shared.defaultClassPrefix</code> in the <code>spoofaxc.lock</code> file.
+When you change the <code>name</code> of your language, the stored value will be used, keeping the class prefix the same, making it possible to rename the language without having to rename all class files.
+Therefore, the <code>spoofaxc.lock</code> file should be checked in to source control, in order to have reproducible builds.</p>
+<p>If you <strong>do</strong> want to re-derive a default from other options, remove the option from the <code>spoofaxc.lock</code> file and rebuild the language.
+The value will be re-derived and stored in <code>spoofaxc.lock</code>, after which you need to check it into source control again.</p>
 <h2 id="file-structure">File structure<a class="headerlink" href="#file-structure" title="Permanent link">&para;</a></h2>
 <h2 id="java-classes">Java classes<a class="headerlink" href="#java-classes" title="Permanent link">&para;</a></h2>
 <p>description of the Java classes, their instances, and how they are instantiated</p>
@@ -1220,7 +1274,8 @@ Check/CheckMulti/CheckAggregator/CheckDeaggregator</p>
 Analyze/AnalyzeMulti
 GetStrategoRuntimeProvider</p>
 <p>commands:</p>
-<h2 id="instantation">Instantation<a class="headerlink" href="#instantation" title="Permanent link">&para;</a></h2>
+<h2 id="instantiation">Instantiation<a class="headerlink" href="#instantiation" title="Permanent link">&para;</a></h2>
+<p>dependency injection</p>
 <h2 id="compilation">Compilation<a class="headerlink" href="#compilation" title="Permanent link">&para;</a></h2>
 <p>description of how a language definition is compiled into a language implementation, and what the compiled form looks like.</p>
 <p>generate Java sources into:</p>
