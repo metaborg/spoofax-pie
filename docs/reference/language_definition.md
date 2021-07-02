@@ -33,10 +33,12 @@ The directory that the `spoofaxc.cfg` file is in is called the "root directory" 
 
 The CFG language has domain-specific syntax for configuring language definitions. However, the syntax follows these conventions:
 
-* Options are assigned a value with `$Option = $Expression`.
+* Options are assigned a value with `$Option = $Expression`. Unless specified otherwise, options may only be given once.
 * Sections `$Section { ... }` may enable features and group options.
 * Lists `$List [ ..., ... ]` indicate an option/section may be given 0-many times.
 * Let bindings `let $Name = $Expression` can be used to give values a name that can be (re-)used in the rest of the configuration file.
+
+If something in the documentation is unclear, the [CFG language definition can be found here](https://github.com/metaborg/spoofax-pie/tree/develop/lwb/metalang/cfg/cfg.spoofax2).
 
 In its most basic form, the `spoofaxc.cfg` file for a language named `Calc` looks as follows:
 
@@ -113,15 +115,19 @@ The command in turn is bound to `showParsedAstCommand`, assigned to the `command
 
 ### Top-level options
 
-group
-id
-name
-version
-file-extension
-java-package-id-prefix
-java-class-id-prefix
-source-directory
-build-directory
+The following top-level options exist:
+
+| Syntax | Required? | Description | Type |
+| - | - | - | - |
+| `group = $Expression` | no | Group identifier of the language, used as the `group`/`groupId` in the Java ecosystem. Defaults to `org.metaborg`. | String |
+| `id = $Expression` | no | Artifact identifier of the language, used as the `name`/`artifactId` in the Java ecosystem. Defaults to the name of the language uncapitalized. | String |
+| `name = $Expression` | yes | Name of the language. | String |
+| `version = $Expression` | no | Version of the language, used as the `version` in the Java ecosystem. Defaults to `0.1.0`. | String |
+| `file-extension = $Expression` | no | File extension of the language. May be given multiple times. Defaults to the name of the language transformed to fit in 3 characters. | String |
+| `java-package-id-prefix = $Expression` | no | The prefix to add before all package identifiers in Java source files. Defaults to `mb.$Name` where `$Name` is transformed to be a valid package identifier.  | Qualified Java identifier |
+| `java-class-id-prefix = $Expression` | no | The prefix to add before all Java classes. Defaults to the name of the language transformed to be a valid class identifier. | Java identifier |
+| `source-directory = $Expression` | no | Path relative to the root directory that has the sources of the language definition. Defaults to `src`. | Path |
+| `build-directory = $Expression` | no | Path relative to the root directory that has the generated sources and build outputs when building the language definition. Defaults to `build`. | Path |
 
 ### Commands
 
