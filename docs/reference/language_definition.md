@@ -275,20 +275,126 @@ resource-context-menu [
 
 ### Language feature sections
 
-parser
-styler
-constraint-analyzer
-multilang-analyzer
-stratego-runtime
-completer
-exports
+#### Parser
+
+The `parser { $ParserOption* }` section enables generation of a parser, and groups options.
+The `sdf3` section must be enabled when the `parser` section is enabled.
+The following `ParserOption`s are supported:
+
+| Syntax | Required? | Description | Type |
+| - | - | - | - |
+| `default-start-symbol = $Expression` | yes | The start symbol to use when no specific one is provided. | SDF3 sort identifier |
+| `variant = $ParserVariant` | no | The parser variant to use. Defaults to `jsglr1`. | n/a |
+
+The following `ParserVariant`s are supported:
+
+* `jsglr1`: uses the [JSGLR1](https://github.com/metaborg/jsglr/tree/master/org.spoofax.jsglr) parser.
+* `jsglr2 { $Jsglr2Option* }`: uses the [JSGLR2](https://github.com/metaborg/jsglr/tree/master/org.spoofax.jsglr2) parser. The following `Jsglr2Option`s are supported:
+    * `preset = $Jsglr2Preset`: sets the [JSGLR2 preset](https://github.com/metaborg/jsglr/blob/master/org.spoofax.jsglr2/src/main/java/org/spoofax/jsglr2/JSGLR2Variant.java#L120) to use. The following `Jsglr2Preset`s are supported:
+        * `Standard`
+        * `Elkhound`
+        * `Recovery`
+        * `RecoveryElkhound`
+        * `DataDependent`
+        * `LayoutSensitive`
+        * `Composite`
+        * `Incremental`
+        * `IncrementalRecovery`
+
+#### Styler
+
+The `styler { $StylerOption* }` section enables generation of a styler, and groups options.
+The `esv` section must be enabled when the `styler` section is enabled.
+Currently, no `StylerOption`s are supported.
+
+#### Constraint analyzer
+
+The `constraint-analyzer { $ConstraintAnalyzerOption* }` section enables generation of a constraint analyzer, and groups options.
+The `statix` section must be enabled when the `constraint-analyzer` section is enabled.
+The following `ConstraintAnalyzerOption`s are supported:
+
+| Syntax | Required? | Description | Type |
+| - | - | - | - |
+| `multi-file = $Expression` | no | Whether multi-file analysis is enabled. Defaults to `false`. | Boolean |
+| `stratego-strategy = Expression` | no | The stratego strategy entry-point that handles communication with the constraint-solver. Defaults to `editor-analyze`. | Stratego strategy identifier |
+
+#### Multi-language analyzer
+
+The `multilang-analyzer { $MultilangAnalyzerOption* }` section enables generation of a multi-language analyzer, and groups options.
+The `constraint-analyzer` and `statix` sections must be enabled when the `multilang-analyzer` section is enabled.
+Currently, no `MultilangAnalyzerOption`s are supported.
+
+#### Stratego runtime
+
+The `stratego-runtime { $StrategoRuntimeOption* }` section enables generation of a stratego runtime, and groups options.
+The `stratego` section must be enabled when the `stratego-runtime` section is enabled.
+Currently, no `StrategoRuntimeOption`s are supported.
+
+#### Completer
+
+The `completer { $CompleterOption* }` section enables generation of a code completer, and groups options.
+The `constraint-analyzer` and `statix` sections must be enabled when the `completer` section is enabled.
+Currently, no `CompleterOption`s are supported.
 
 ### Meta-language sections
 
-sdf3
-esv
-statix
-stratego
+#### SDF3
+
+The `sdf3 { $Sdf3Option* }` section enables syntax definition with [SDF3](https://www.spoofax.dev/spoofax-docs/references/syntax/).
+The `parser` section must be enabled when the `sdf3` section is enabled.
+The following `Sdf3Option`s are supported:
+
+| Syntax | Required? | Description | Type |
+| - | - | - | - |
+| `main-source-directory = $Expression` | no | The directory relative to the root directory that contains the main SDF3 file. Defaults to the value of the top-level `source-directory` option. | Path |
+| `main-file = $Expression` | no | The main SDF3 file relative to the `main-source-directory`. Defaults to `./start.sdf3`. | Path |
+| `parse-table-generator { $ParseTableGeneratorOption* }` | no | Parse table generator options. | n/a |
+
+The following `ParseTableGeneratorOption`s are supported:
+
+| Syntax | Required? | Description | Type |
+| - | - | - | - |
+| `dynamic = $Expression` | no | Whether the generated parse table is dynamic. Defaults to `false`. | Boolean |
+| `data-dependent = $Expression` | no | Whether the generated parse table is data-dependent. Defaults to `false`. | Boolean |
+| `layout-sensitive = $Expression` | no | Whether the generated parse table is layout-sensitive. Defaults to `false`. | Boolean |
+| `solve-deep-conflicts = $Expression` | no | Whether the parse table generator solves deep priority conflicts. Defaults to `true`. | Boolean |
+| `check-overlap = $Expression` | no | Whether the parse table generator checks for overlap. Defaults to `false`. | Boolean |
+| `check-priorities = $Expression` | no | Whether the parse table generator checks priorities. Defaults to `false`. | Boolean |
+
+#### ESV
+
+The `esv { $EsvOption* }` section enables syntax-based styling definition with [ESV](https://www.spoofax.dev/spoofax-docs/references/editor-services/syntax-highlighting/).
+The `styler` section must be enabled when the `esv` section is enabled.
+The following `EsvOption`s are supported:
+
+| Syntax | Required? | Description | Type |
+| - | - | - | - |
+| `main-source-directory = $Expression` | no | The directory relative to the root directory that contains the main ESV file. Defaults to the value of the top-level `source-directory` option. | Path |
+| `main-file = $Expression` | no | The main ESV file relative to the `main-source-directory`. Defaults to `./main.esv`. | Path |
+| `include-directory = $Expression` | no | Adds an include directory from which to resolve ESV imports. May be given multiple times. | Path |
+
+#### Statix
+
+The `statix { $StatixOption* }` section enables static semantics definition with [Statix](https://www.spoofax.dev/spoofax-docs/references/statix/).
+The `constraint-anaylzer` section must be enabled when the `statix` section is enabled.
+The following `StatixOption`s are supported:
+
+| Syntax | Required? | Description | Type |
+| - | - | - | - |
+| `main-source-directory = $Expression` | no | The directory relative to the root directory that contains the main Statix file. Defaults to the value of the top-level `source-directory` option. | Path |
+| `main-file = $Expression` | no | The main Statix file relative to the `main-source-directory`. Defaults to `./main.stx`. | Path |
+
+#### Stratego
+
+The `stratego { $StrategoOption* }` section enables definition of transformations with [Stratego](https://www.spoofax.dev/spoofax-docs/references/stratego/).
+The `stratego-runtime` section must be enabled when the `stratego` section is enabled.
+The following `StrategoOption`s are supported:
+
+| Syntax | Required? | Description | Type |
+| - | - | - | - |
+| `main-source-directory = $Expression` | no | The directory relative to the root directory that contains the main Stratego file. Defaults to the value of the top-level `source-directory` option. | Path |
+| `main-file = $Expression` | no | The main Stratego file relative to the `main-source-directory`. Defaults to `./main.stx`. | Path |
+| `language-strategy-affix = $Expression` | no | The affix that is used to make certain generated strategies unique to the language. This is used both as a prefix and suffix. Defaults to name of the language transformed to a Stratego strategy identifier. | Stratego strategy identifier |
 
 ### spoofaxc.lock
 
