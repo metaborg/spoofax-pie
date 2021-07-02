@@ -476,12 +476,94 @@
     Language feature sections
   </a>
   
+    <nav class="md-nav" aria-label="Language feature sections">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parser" class="md-nav__link">
+    Parser
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#styler" class="md-nav__link">
+    Styler
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#constraint-analyzer" class="md-nav__link">
+    Constraint analyzer
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-language-analyzer" class="md-nav__link">
+    Multi-language analyzer
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stratego-runtime" class="md-nav__link">
+    Stratego runtime
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#completer" class="md-nav__link">
+    Completer
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
   <a href="#meta-language-sections" class="md-nav__link">
     Meta-language sections
   </a>
+  
+    <nav class="md-nav" aria-label="Meta-language sections">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sdf3" class="md-nav__link">
+    SDF3
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#esv" class="md-nav__link">
+    ESV
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#statix" class="md-nav__link">
+    Statix
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stratego" class="md-nav__link">
+    Stratego
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -758,12 +840,94 @@
     Language feature sections
   </a>
   
+    <nav class="md-nav" aria-label="Language feature sections">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parser" class="md-nav__link">
+    Parser
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#styler" class="md-nav__link">
+    Styler
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#constraint-analyzer" class="md-nav__link">
+    Constraint analyzer
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-language-analyzer" class="md-nav__link">
+    Multi-language analyzer
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stratego-runtime" class="md-nav__link">
+    Stratego runtime
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#completer" class="md-nav__link">
+    Completer
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
   <a href="#meta-language-sections" class="md-nav__link">
     Meta-language sections
   </a>
+  
+    <nav class="md-nav" aria-label="Meta-language sections">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sdf3" class="md-nav__link">
+    SDF3
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#esv" class="md-nav__link">
+    ESV
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#statix" class="md-nav__link">
+    Statix
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stratego" class="md-nav__link">
+    Stratego
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -1285,18 +1449,277 @@ The command in turn is bound to <code>showParsedAstCommand</code>, assigned to t
 <span class="na">]</span>
 </code></pre></div>
 <h3 id="language-feature-sections">Language feature sections<a class="headerlink" href="#language-feature-sections" title="Permanent link">&para;</a></h3>
-<p>parser
-styler
-constraint-analyzer
-multilang-analyzer
-stratego-runtime
-completer
-exports</p>
+<h4 id="parser">Parser<a class="headerlink" href="#parser" title="Permanent link">&para;</a></h4>
+<p>The <code>parser { $ParserOption* }</code> section enables generation of a parser, and groups options.
+The <code>sdf3</code> section must be enabled when the <code>parser</code> section is enabled.
+The following <code>ParserOption</code>s are supported:</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Required?</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>default-start-symbol = $Expression</code></td>
+<td>yes</td>
+<td>The start symbol to use when no specific one is provided.</td>
+<td>SDF3 sort identifier</td>
+</tr>
+<tr>
+<td><code>variant = $ParserVariant</code></td>
+<td>no</td>
+<td>The parser variant to use. Defaults to <code>jsglr1</code>.</td>
+<td>n/a</td>
+</tr>
+</tbody>
+</table>
+<p>The following <code>ParserVariant</code>s are supported:</p>
+<ul>
+<li><code>jsglr1</code>: uses the <a href="https://github.com/metaborg/jsglr/tree/master/org.spoofax.jsglr">JSGLR1</a> parser.</li>
+<li><code>jsglr2 { $Jsglr2Option* }</code>: uses the <a href="https://github.com/metaborg/jsglr/tree/master/org.spoofax.jsglr2">JSGLR2</a> parser. The following <code>Jsglr2Option</code>s are supported:<ul>
+<li><code>preset = $Jsglr2Preset</code>: sets the <a href="https://github.com/metaborg/jsglr/blob/master/org.spoofax.jsglr2/src/main/java/org/spoofax/jsglr2/JSGLR2Variant.java#L120">JSGLR2 preset</a> to use. The following <code>Jsglr2Preset</code>s are supported:<ul>
+<li><code>Standard</code></li>
+<li><code>Elkhound</code></li>
+<li><code>Recovery</code></li>
+<li><code>RecoveryElkhound</code></li>
+<li><code>DataDependent</code></li>
+<li><code>LayoutSensitive</code></li>
+<li><code>Composite</code></li>
+<li><code>Incremental</code></li>
+<li><code>IncrementalRecovery</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="styler">Styler<a class="headerlink" href="#styler" title="Permanent link">&para;</a></h4>
+<p>The <code>styler { $StylerOption* }</code> section enables generation of a styler, and groups options.
+The <code>esv</code> section must be enabled when the <code>styler</code> section is enabled.
+Currently, no <code>StylerOption</code>s are supported.</p>
+<h4 id="constraint-analyzer">Constraint analyzer<a class="headerlink" href="#constraint-analyzer" title="Permanent link">&para;</a></h4>
+<p>The <code>constraint-analyzer { $ConstraintAnalyzerOption* }</code> section enables generation of a constraint analyzer, and groups options.
+The <code>statix</code> section must be enabled when the <code>constraint-analyzer</code> section is enabled.
+The following <code>ConstraintAnalyzerOption</code>s are supported:</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Required?</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>multi-file = $Expression</code></td>
+<td>no</td>
+<td>Whether multi-file analysis is enabled. Defaults to <code>false</code>.</td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td><code>stratego-strategy = Expression</code></td>
+<td>no</td>
+<td>The stratego strategy entry-point that handles communication with the constraint-solver. Defaults to <code>editor-analyze</code>.</td>
+<td>Stratego strategy identifier</td>
+</tr>
+</tbody>
+</table>
+<h4 id="multi-language-analyzer">Multi-language analyzer<a class="headerlink" href="#multi-language-analyzer" title="Permanent link">&para;</a></h4>
+<p>The <code>multilang-analyzer { $MultilangAnalyzerOption* }</code> section enables generation of a multi-language analyzer, and groups options.
+The <code>constraint-analyzer</code> and <code>statix</code> sections must be enabled when the <code>multilang-analyzer</code> section is enabled.
+Currently, no <code>MultilangAnalyzerOption</code>s are supported.</p>
+<h4 id="stratego-runtime">Stratego runtime<a class="headerlink" href="#stratego-runtime" title="Permanent link">&para;</a></h4>
+<p>The <code>stratego-runtime { $StrategoRuntimeOption* }</code> section enables generation of a stratego runtime, and groups options.
+The <code>stratego</code> section must be enabled when the <code>stratego-runtime</code> section is enabled.
+Currently, no <code>StrategoRuntimeOption</code>s are supported.</p>
+<h4 id="completer">Completer<a class="headerlink" href="#completer" title="Permanent link">&para;</a></h4>
+<p>The <code>completer { $CompleterOption* }</code> section enables generation of a code completer, and groups options.
+The <code>constraint-analyzer</code> and <code>statix</code> sections must be enabled when the <code>completer</code> section is enabled.
+Currently, no <code>CompleterOption</code>s are supported.</p>
 <h3 id="meta-language-sections">Meta-language sections<a class="headerlink" href="#meta-language-sections" title="Permanent link">&para;</a></h3>
-<p>sdf3
-esv
-statix
-stratego</p>
+<h4 id="sdf3">SDF3<a class="headerlink" href="#sdf3" title="Permanent link">&para;</a></h4>
+<p>The <code>sdf3 { $Sdf3Option* }</code> section enables syntax definition with <a href="https://www.spoofax.dev/spoofax-docs/references/syntax/">SDF3</a>.
+The <code>parser</code> section must be enabled when the <code>sdf3</code> section is enabled.
+The following <code>Sdf3Option</code>s are supported:</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Required?</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>main-source-directory = $Expression</code></td>
+<td>no</td>
+<td>The directory relative to the root directory that contains the main SDF3 file. Defaults to the value of the top-level <code>source-directory</code> option.</td>
+<td>Path</td>
+</tr>
+<tr>
+<td><code>main-file = $Expression</code></td>
+<td>no</td>
+<td>The main SDF3 file relative to the <code>main-source-directory</code>. Defaults to <code>./start.sdf3</code>.</td>
+<td>Path</td>
+</tr>
+<tr>
+<td><code>parse-table-generator { $ParseTableGeneratorOption* }</code></td>
+<td>no</td>
+<td>Parse table generator options.</td>
+<td>n/a</td>
+</tr>
+</tbody>
+</table>
+<p>The following <code>ParseTableGeneratorOption</code>s are supported:</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Required?</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dynamic = $Expression</code></td>
+<td>no</td>
+<td>Whether the generated parse table is dynamic. Defaults to <code>false</code>.</td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td><code>data-dependent = $Expression</code></td>
+<td>no</td>
+<td>Whether the generated parse table is data-dependent. Defaults to <code>false</code>.</td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td><code>layout-sensitive = $Expression</code></td>
+<td>no</td>
+<td>Whether the generated parse table is layout-sensitive. Defaults to <code>false</code>.</td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td><code>solve-deep-conflicts = $Expression</code></td>
+<td>no</td>
+<td>Whether the parse table generator solves deep priority conflicts. Defaults to <code>true</code>.</td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td><code>check-overlap = $Expression</code></td>
+<td>no</td>
+<td>Whether the parse table generator checks for overlap. Defaults to <code>false</code>.</td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td><code>check-priorities = $Expression</code></td>
+<td>no</td>
+<td>Whether the parse table generator checks priorities. Defaults to <code>false</code>.</td>
+<td>Boolean</td>
+</tr>
+</tbody>
+</table>
+<h4 id="esv">ESV<a class="headerlink" href="#esv" title="Permanent link">&para;</a></h4>
+<p>The <code>esv { $EsvOption* }</code> section enables syntax-based styling definition with <a href="https://www.spoofax.dev/spoofax-docs/references/editor-services/syntax-highlighting/">ESV</a>.
+The <code>styler</code> section must be enabled when the <code>esv</code> section is enabled.
+The following <code>EsvOption</code>s are supported:</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Required?</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>main-source-directory = $Expression</code></td>
+<td>no</td>
+<td>The directory relative to the root directory that contains the main ESV file. Defaults to the value of the top-level <code>source-directory</code> option.</td>
+<td>Path</td>
+</tr>
+<tr>
+<td><code>main-file = $Expression</code></td>
+<td>no</td>
+<td>The main ESV file relative to the <code>main-source-directory</code>. Defaults to <code>./main.esv</code>.</td>
+<td>Path</td>
+</tr>
+<tr>
+<td><code>include-directory = $Expression</code></td>
+<td>no</td>
+<td>Adds an include directory from which to resolve ESV imports. May be given multiple times.</td>
+<td>Path</td>
+</tr>
+</tbody>
+</table>
+<h4 id="statix">Statix<a class="headerlink" href="#statix" title="Permanent link">&para;</a></h4>
+<p>The <code>statix { $StatixOption* }</code> section enables static semantics definition with <a href="https://www.spoofax.dev/spoofax-docs/references/statix/">Statix</a>.
+The <code>constraint-anaylzer</code> section must be enabled when the <code>statix</code> section is enabled.
+The following <code>StatixOption</code>s are supported:</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Required?</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>main-source-directory = $Expression</code></td>
+<td>no</td>
+<td>The directory relative to the root directory that contains the main Statix file. Defaults to the value of the top-level <code>source-directory</code> option.</td>
+<td>Path</td>
+</tr>
+<tr>
+<td><code>main-file = $Expression</code></td>
+<td>no</td>
+<td>The main Statix file relative to the <code>main-source-directory</code>. Defaults to <code>./main.stx</code>.</td>
+<td>Path</td>
+</tr>
+</tbody>
+</table>
+<h4 id="stratego">Stratego<a class="headerlink" href="#stratego" title="Permanent link">&para;</a></h4>
+<p>The <code>stratego { $StrategoOption* }</code> section enables definition of transformations with <a href="https://www.spoofax.dev/spoofax-docs/references/stratego/">Stratego</a>.
+The <code>stratego-runtime</code> section must be enabled when the <code>stratego</code> section is enabled.
+The following <code>StrategoOption</code>s are supported:</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Required?</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>main-source-directory = $Expression</code></td>
+<td>no</td>
+<td>The directory relative to the root directory that contains the main Stratego file. Defaults to the value of the top-level <code>source-directory</code> option.</td>
+<td>Path</td>
+</tr>
+<tr>
+<td><code>main-file = $Expression</code></td>
+<td>no</td>
+<td>The main Stratego file relative to the <code>main-source-directory</code>. Defaults to <code>./main.stx</code>.</td>
+<td>Path</td>
+</tr>
+<tr>
+<td><code>language-strategy-affix = $Expression</code></td>
+<td>no</td>
+<td>The affix that is used to make certain generated strategies unique to the language. This is used both as a prefix and suffix. Defaults to name of the language transformed to a Stratego strategy identifier.</td>
+<td>Stratego strategy identifier</td>
+</tr>
+</tbody>
+</table>
 <h3 id="spoofaxclock">spoofaxc.lock<a class="headerlink" href="#spoofaxclock" title="Permanent link">&para;</a></h3>
 <p>The <code>spoofaxc.lock</code> file, which resides next to the <code>spoofaxc.cfg</code> file, contains values for several options that have defaults derived from other options, in order to keep these derived values stable even when the options they are derived from are changed.
 For example, when no <code>java-class-id-prefix</code> option is set in <code>spoofaxc.cfg</code>, it will be derived from the <code>name</code> option with some changes to make it compatible as a Java identifier, and is stored under <code>shared.defaultClassPrefix</code> in the <code>spoofaxc.lock</code> file.
