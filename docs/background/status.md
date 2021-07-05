@@ -21,11 +21,15 @@ We now discuss the current status of Spoofax 3 by summarizing the key ideas and 
     * [x] **Separate commands from how they are executed**: Commands can be bound to IDE/editor menus, command-line commands, or to resource changes.
     * [x] **Command parameters/arguments**: Commands can specify parameters, which must be provided as arguments when executed.
 * [x] **Modular and incremental development**: Use Gradle (instead of Maven) to build Spoofax 3, which increases modularity and provides incremental builds for faster iteration times.
+    * Certain changes to core components may trigger long rebuilds, as a lot of projects (indirectly) depend on these core components and require recompilation.
+    * Certain changes trigger recompilation of Gradle plugins which are required by the rest of the build. This may cause a long configuration phase which is not parallelized.
+    * Our Gradle plugins do not support the Gradle build cache yet.
+    * Our Gradle plugins do not support the configuration cache yet.
+    * Sometimes multiple imports into IntelliJ are required to have it recognize all dependencies.
 
 Furthermore, we now discuss the status of features that were not new key ideas.
 
 * [x] Language builds
-  * We have an initial version of a Spoofax 3 compiler which is completely based on Spoofax 3 and PIE (independent from Spoofax 2), but it is still unstable.
 * [ ] Meta-language bootstrapping
     * Bootstrapping requires implementation of the meta-languages in Spoofax 3, which we have not done yet.
 * Meta-tools
@@ -34,22 +38,22 @@ Furthermore, we now discuss the status of features that were not new key ideas.
     * Parsing
         * [x] JSGLR1
         * [x] JSGLR2
-            * [x] Incremental parsing (but incompatible with recovery)
             * [ ] New water rules
+            * [x] Incremental parsing (but incompatible with recovery)
     * Styling specification
         * [x] ESV (syntax-based)
     * Semantic analysis
         * [x] NaBL2
             * Only supported for Spoofax 2-based language definitions
-    * [x] Statix
-        * [ ] Statix signature generation based on SDF3 specification
-    * [ ] FlowSpec
-    * [x] Stratego
+        * [x] Statix
+            * [ ] Statix signature generation based on SDF3 specification
+        * [ ] FlowSpec
+        * [x] Stratego
   * Transformation (compilation)
-      * [x] Stratego
+      * [x] Stratego 2
   * Testing
       * [x] SPT
-          * Not all expectations have been ported over.
+          * Not all expectations have been ported over yet
 * Editor services
     * [x] Syntax-based styling
     * [x] Inline error/warning/note messages
@@ -58,7 +62,7 @@ Furthermore, we now discuss the status of features that were not new key ideas.
 * Platforms
     * [x] Command-line
     * [x] Eclipse
-        * Concurrency/parallelism is completely ignored. Therefore, things may run concurrently that are not suppose to which cause data races and crashes.
+        * Concurrency/parallelism is mostly ignored. Therefore, things may run concurrently that are not suppose to which cause data races and crashes.
         * Several editor services and other conveniences are still missing or work in progress.
     * [ ] IntelliJ
         * A very minimal IntelliJ plugin for your language is provided, currently only supporting syntax highlighting and inline parse errors.
