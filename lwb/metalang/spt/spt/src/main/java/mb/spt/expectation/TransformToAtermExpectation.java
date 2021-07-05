@@ -16,12 +16,15 @@ import mb.spt.model.TestCase;
 import mb.spt.model.TestExpectation;
 import mb.spt.util.SptMessageRemap;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spoofax.interpreter.terms.IStrategoTerm;
 
-public class TransformExpectation implements TestExpectation {
+public class TransformToAtermExpectation implements TestExpectation {
+    private final IStrategoTerm expectedMatch;
     private final String commandDisplayName;
     private final Region sourceRegion;
 
-    public TransformExpectation(String commandDisplayName, Region sourceRegion) {
+    public TransformToAtermExpectation(IStrategoTerm expectedMatch, String commandDisplayName, Region sourceRegion) {
+        this.expectedMatch = expectedMatch;
         this.commandDisplayName = commandDisplayName;
         this.sourceRegion = sourceRegion;
     }
@@ -52,6 +55,8 @@ public class TransformExpectation implements TestExpectation {
             messagesBuilder.addMessage("Expected executing command '" + commandDef + "' to succeed, but it threw an exception", feedback.getException(), Severity.Error, file, sourceRegion);
         } else if(feedback.hasErrorMessages()) {
             messagesBuilder.addMessage("Expected executing command '" + commandDef + "' to succeed, but it returned error messages", Severity.Error, file, sourceRegion);
+        } else {
+            // TODO: check that `feedback` matches `expectedMatch`.
         }
 
         if(feedback.hasErrorMessages()) {

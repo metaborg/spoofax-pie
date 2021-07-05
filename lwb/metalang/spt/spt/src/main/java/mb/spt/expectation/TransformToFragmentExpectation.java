@@ -17,11 +17,15 @@ import mb.spt.model.TestExpectation;
 import mb.spt.util.SptMessageRemap;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class TransformExpectation implements TestExpectation {
+public class TransformToFragmentExpectation implements TestExpectation {
+    private final ResourceKey fragmentResource;
+    private final @Nullable String languageIdHint;
     private final String commandDisplayName;
     private final Region sourceRegion;
 
-    public TransformExpectation(String commandDisplayName, Region sourceRegion) {
+    public TransformToFragmentExpectation(ResourceKey fragmentResource, @Nullable String languageIdHint, String commandDisplayName, Region sourceRegion) {
+        this.fragmentResource = fragmentResource;
+        this.languageIdHint = languageIdHint;
         this.commandDisplayName = commandDisplayName;
         this.sourceRegion = sourceRegion;
     }
@@ -42,9 +46,22 @@ public class TransformExpectation implements TestExpectation {
         if(commandDef == null) {
             return messagesBuilder.build(file);
         }
-
         final @Nullable CommandFeedback feedback = TransformExpectationUtil.runCommand(testCase.resource, commandDef, languageUnderTest, languageUnderTestSession, messagesBuilder, file, sourceRegion);
         if(feedback == null) {
+            return messagesBuilder.build(file);
+        }
+
+        final @Nullable LanguageUnderTest fragmentLanguageUnderTest = ExpectationFragmentUtil.getLanguageUnderTest(testCase, languageUnderTest, languageUnderTestProvider, context, languageIdHint);
+        if(fragmentLanguageUnderTest == null) {
+            messagesBuilder.addMessage("Cannot evaluate parse to fragment expectation because providing language under test for language id '" + languageIdHint + "' failed unexpectedly", Severity.Error, file, sourceRegion);
+            return messagesBuilder.build(file);
+        }
+        final @Nullable CommandDef<?> fragmentCommandDef = TransformExpectationUtil.getCommandDef(fragmentLanguageUnderTest, commandDisplayName, messagesBuilder, file, sourceRegion);
+        if(fragmentCommandDef == null) {
+            return messagesBuilder.build(file);
+        }
+        final @Nullable CommandFeedback fragmentFeedback = TransformExpectationUtil.runCommand(fragmentResource, commandDef, fragmentLanguageUnderTest, fragmentLanguageUnderTest.getPieComponent().newSession() /* OPTO: share a single session for one test suite run. */, messagesBuilder, file, sourceRegion);
+        if(fragmentFeedback == null) {
             return messagesBuilder.build(file);
         }
 
@@ -52,6 +69,8 @@ public class TransformExpectation implements TestExpectation {
             messagesBuilder.addMessage("Expected executing command '" + commandDef + "' to succeed, but it threw an exception", feedback.getException(), Severity.Error, file, sourceRegion);
         } else if(feedback.hasErrorMessages()) {
             messagesBuilder.addMessage("Expected executing command '" + commandDef + "' to succeed, but it returned error messages", Severity.Error, file, sourceRegion);
+        } else {
+            // TODO: check that `feedback` matches `fragmentFeedback`.
         }
 
         if(feedback.hasErrorMessages()) {

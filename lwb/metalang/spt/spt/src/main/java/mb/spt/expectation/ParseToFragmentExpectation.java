@@ -49,17 +49,9 @@ public class ParseToFragmentExpectation implements TestExpectation {
         }
         final TestableParse testableParse = (TestableParse)languageInstance;
 
-        final @Nullable LanguageUnderTest fragmentLanguageUnderTest;
-        if(languageIdHint == null) {
-            fragmentLanguageUnderTest = languageUnderTest;
-        } else {
-            fragmentLanguageUnderTest = languageUnderTestProvider.provide(context, file, testCase.rootDirectoryHint, languageIdHint).mapOrElse(lut -> lut, e -> {
-                messagesBuilder.addMessage("Cannot evaluate parse to fragment expectation because providing language under test for language id '" + languageIdHint + "' failed unexpectedly", Severity.Error, file, sourceRegion);
-                return null;
-            });
-        }
-        // noinspection ConstantConditions (fragmentLanguageUnderTest can really be null)
+        final @Nullable LanguageUnderTest fragmentLanguageUnderTest = ExpectationFragmentUtil.getLanguageUnderTest(testCase, languageUnderTest, languageUnderTestProvider, context, languageIdHint);
         if(fragmentLanguageUnderTest == null) {
+            messagesBuilder.addMessage("Cannot evaluate parse to fragment expectation because providing language under test for language id '" + languageIdHint + "' failed unexpectedly", Severity.Error, file, sourceRegion);
             return messagesBuilder.build(file);
         }
 
