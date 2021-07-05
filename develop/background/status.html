@@ -600,17 +600,23 @@ We now discuss the current status of Spoofax 3 by summarizing the key ideas and 
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>Command parameters/arguments</strong>: Commands can specify parameters, which must be provided as arguments when executed.</li>
 </ul>
 </li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>Modular and incremental development</strong>: Use Gradle (instead of Maven) to build Spoofax 3, which increases modularity and provides incremental builds for faster iteration times.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>Modular and incremental development</strong>: Use Gradle (instead of Maven) to build Spoofax 3, which increases modularity and provides incremental builds for faster iteration times.<ul>
+<li>Certain changes to core components may trigger long rebuilds, as a lot of projects (indirectly) depend on these core components and require recompilation.</li>
+<li>Certain changes trigger recompilation of Gradle plugins which are required by the rest of the build. This may cause a long configuration phase which is not parallelized.</li>
+<li>Our Gradle plugins do not support the Gradle build cache yet.</li>
+<li>Our Gradle plugins do not support the configuration cache yet.</li>
+<li>Sometimes multiple imports into IntelliJ are required to have it recognize all dependencies.</li>
+</ul>
+</li>
 </ul>
 <p>Furthermore, we now discuss the status of features that were not new key ideas.</p>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Language builds</li>
-<li>We have an initial version of a Spoofax 3 compiler which is completely based on Spoofax 3 and PIE (independent from Spoofax 2), but it is still unstable.</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Meta-language bootstrapping<ul>
 <li>Bootstrapping requires implementation of the meta-languages in Spoofax 3, which we have not done yet.</li>
 </ul>
 </li>
-<li>Meta-tools<ul class="task-list">
+<li>Meta-tools<ul>
 <li>Syntax specification<ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> SDF3</li>
 </ul>
@@ -618,8 +624,8 @@ We now discuss the current status of Spoofax 3 by summarizing the key ideas and 
 <li>Parsing<ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> JSGLR1</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> JSGLR2<ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Incremental parsing (but incompatible with recovery)</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> New water rules</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Incremental parsing (but incompatible with recovery)</li>
 </ul>
 </li>
 </ul>
@@ -633,8 +639,6 @@ We now discuss the current status of Spoofax 3 by summarizing the key ideas and 
 <li>Only supported for Spoofax 2-based language definitions</li>
 </ul>
 </li>
-</ul>
-</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Statix<ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Statix signature generation based on SDF3 specification</li>
 </ul>
@@ -643,13 +647,15 @@ We now discuss the current status of Spoofax 3 by summarizing the key ideas and 
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Stratego</li>
 </ul>
 </li>
+</ul>
+</li>
 <li>Transformation (compilation)<ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Stratego</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Stratego 2</li>
 </ul>
 </li>
 <li>Testing<ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> SPT<ul>
-<li>Not all expectations have been ported over.</li>
+<li>Not all expectations have been ported over yet</li>
 </ul>
 </li>
 </ul>
@@ -664,7 +670,7 @@ We now discuss the current status of Spoofax 3 by summarizing the key ideas and 
 <li>Platforms<ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Command-line</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Eclipse<ul>
-<li>Concurrency/parallelism is completely ignored. Therefore, things may run concurrently that are not suppose to which cause data races and crashes.</li>
+<li>Concurrency/parallelism is mostly ignored. Therefore, things may run concurrently that are not suppose to which cause data races and crashes.</li>
 <li>Several editor services and other conveniences are still missing or work in progress.</li>
 </ul>
 </li>
