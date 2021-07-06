@@ -38,7 +38,6 @@ Furthermore, we now discuss the status of features that were not new key ideas.
     * Parsing
         * [x] JSGLR1
         * [x] JSGLR2
-            * [ ] New water rules
             * [x] Incremental parsing (but incompatible with recovery)
     * Styling specification
         * [x] ESV (syntax-based)
