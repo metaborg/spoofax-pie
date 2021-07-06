@@ -1,0 +1,5 @@
+shared.defaultArtifactId=sdf3extstatix
+shared.defaultClassPrefix=Sdf3ExtStatix
+shared.defaultGroupId=org.metaborg
+shared.defaultPackageId=mb.sdf3_ext_statix
+shared.defaultVersion=0.1.0
