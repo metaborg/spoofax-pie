@@ -11,6 +11,7 @@ import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.walk.ResourceWalker;
+import mb.sdf3.Sdf3ClassLoaderResources;
 import mb.sdf3.Sdf3Scope;
 import mb.sdf3.task.Sdf3Desugar;
 import mb.sdf3.task.Sdf3Parse;
@@ -64,6 +65,7 @@ public class Sdf3SpecToParseTable implements TaskDef<Sdf3SpecToParseTable.Input,
         }
     }
 
+    private final Sdf3ClassLoaderResources classLoaderResources;
     private final Sdf3Parse parse;
     private final Sdf3Desugar desugar;
     private final Sdf3ToPermissive toPermissive;
@@ -71,12 +73,14 @@ public class Sdf3SpecToParseTable implements TaskDef<Sdf3SpecToParseTable.Input,
     private final Sdf3ToNormalForm toNormalForm;
 
     @Inject public Sdf3SpecToParseTable(
+        Sdf3ClassLoaderResources classLoaderResources,
         Sdf3Parse parse,
         Sdf3Desugar desugar,
         Sdf3ToPermissive toPermissive,
         Sdf3ToCompletion toCompletion,
         Sdf3ToNormalForm toNormalForm
     ) {
+        this.classLoaderResources = classLoaderResources;
         this.parse = parse;
         this.desugar = desugar;
         this.toPermissive = toPermissive;
@@ -96,13 +100,14 @@ public class Sdf3SpecToParseTable implements TaskDef<Sdf3SpecToParseTable.Input,
         final ResourceMatcher matcher = Sdf3Util.createResourceMatcher();
         final HierarchicalResource mainSourceDirectory = context.require(input.config.mainSourceDirectory, ResourceStampers.modifiedDirRec(walker, matcher));
         context.require(mainSourceDirectory, ResourceStampers.modifiedDirRec(walker, matcher));
-        final ArrayList<Supplier<Result<IStrategoTerm, ?>>> modulesAstSuppliers;
+        final ArrayList<Supplier<? extends Result<IStrategoTerm, ?>>> modulesAstSuppliers;
         try(final Stream<? extends HierarchicalResource> stream = mainSourceDirectory.walk(walker, matcher)) {
             modulesAstSuppliers = stream
                 .filter(file -> !file.getPath().equals(input.config.mainFile)) // Filter out main module, as it is supplied separately.
                 .map(file -> desugar.createSupplier(parseInputBuilder.withFile(file.getKey()).buildAstSupplier()))
                 .collect(Collectors.toCollection(ArrayList::new));
         }
+        modulesAstSuppliers.add(parseInputBuilder.withFile(classLoaderResources.getDefinitionResource("permissive-water.sdf3").getPath()).buildAstSupplier());
 
         try {
             final IStrategoTerm mainNormalizedGrammar = context.require(toNormalized(mainModuleAstSupplier))
