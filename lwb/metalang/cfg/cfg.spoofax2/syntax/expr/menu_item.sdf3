@@ -55,6 +55,7 @@ context-free sorts // Hierarchical resource type
 
 context-free syntax
 
+  HierarchicalResourceType.Project   = <Project>
   HierarchicalResourceType.Directory = <Directory>
   HierarchicalResourceType.File      = <File>
 

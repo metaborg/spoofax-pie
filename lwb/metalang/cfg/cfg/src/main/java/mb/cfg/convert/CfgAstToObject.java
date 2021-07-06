@@ -420,9 +420,9 @@ public class CfgAstToObject {
                 return CommandContextType.Directory;
             case "FileContext":
                 return CommandContextType.File;
-            case "ResourcePathContext":
+            case "HierarchicalResourceContext":
                 return CommandContextType.HierarchicalResource;
-            case "ResourceKeyContext":
+            case "ReadableResourceContext":
                 return CommandContextType.ReadableResource;
             case "RegionContext":
                 return CommandContextType.Region;
@@ -527,8 +527,8 @@ public class CfgAstToObject {
         switch(appl.getConstructor().getName()) {
             case "HierarchicalResource":
                 return EditorFileType.HierarchicalResource;
-            case "Resource":
-                return EditorFileType.Resource;
+            case "ReadableResource":
+                return EditorFileType.ReadableResource;
             default:
                 throw new InvalidAstShapeException("a term of sort EditorFileType", appl);
         }

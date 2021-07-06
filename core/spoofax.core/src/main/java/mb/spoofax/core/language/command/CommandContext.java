@@ -152,7 +152,7 @@ public class CommandContext implements Serializable {
         switch(type) {
             case HierarchicalResource:
                 return resourcePath != null;
-            case Resource:
+            case ReadableResource:
                 return resourceKey != null;
         }
         return false;
