@@ -70,6 +70,7 @@ public class TransformToFragmentExpectation implements TestExpectation {
         } else if(feedback.hasErrorMessages()) {
             messagesBuilder.addMessage("Expected executing command '" + commandDef + "' to succeed, but it returned error messages", Severity.Error, file, sourceRegion);
         } else {
+            messagesBuilder.addMessage("This expectation is not checked yet", Severity.Warning, file, sourceRegion);
             // TODO: check that `feedback` matches `fragmentFeedback`.
         }
 
