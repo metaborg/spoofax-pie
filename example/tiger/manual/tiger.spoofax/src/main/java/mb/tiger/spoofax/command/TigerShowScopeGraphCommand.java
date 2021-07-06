@@ -50,7 +50,7 @@ public class TigerShowScopeGraphCommand implements CommandDef<TigerShowArgs> {
 
     @Override public ParamDef getParamDef() {
         return new ParamDef(
-            Param.of("resource", ResourceKey.class, true, ListView.of(ArgProvider.context(CommandContextType.ResourceKey)))
+            Param.of("resource", ResourceKey.class, true, ListView.of(ArgProvider.context(CommandContextType.ReadableResource)))
         );
     }
 

@@ -44,7 +44,7 @@ public class TransformExpectationUtil {
         ResourceKey failMessageFile,
         Region fileMessageRegion
     ) throws InterruptedException {
-        final CommandContext commandContext = CommandContext.ofResource(resource);
+        final CommandContext commandContext = CommandContext.ofReadableResource(resource);
         final Task<CommandFeedback> task = commandDef.createTask(CommandExecutionType.ManualOnce, commandContext, new ArgConverters(languageUnderTest.getResourceServiceComponent().getResourceService()));
         try {
             return languageUnderTestSession.require(task);

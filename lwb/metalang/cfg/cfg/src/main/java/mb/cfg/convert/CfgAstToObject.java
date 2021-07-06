@@ -421,9 +421,9 @@ public class CfgAstToObject {
             case "FileContext":
                 return CommandContextType.File;
             case "ResourcePathContext":
-                return CommandContextType.ResourcePath;
+                return CommandContextType.HierarchicalResource;
             case "ResourceKeyContext":
-                return CommandContextType.ResourceKey;
+                return CommandContextType.ReadableResource;
             case "RegionContext":
                 return CommandContextType.Region;
             case "OffsetContext":

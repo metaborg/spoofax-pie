@@ -78,13 +78,13 @@ context-free sorts // (Enclosing) command context
 
 context-free syntax
 
-  CommandContext.ProjectContext      = <Project>
-  CommandContext.DirectoryContext    = <Directory>
-  CommandContext.FileContext         = <File>
-  CommandContext.ResourcePathContext = <ResourcePath>
-  CommandContext.ResourceKeyContext  = <ResourceKey>
-  CommandContext.RegionContext       = <Region>
-  CommandContext.OffsetContext       = <Offset>
+  CommandContext.ProjectContext              = <Project>
+  CommandContext.DirectoryContext            = <Directory>
+  CommandContext.FileContext                 = <File>
+  CommandContext.HierarchicalResourceContext = <HierarchicalResource>
+  CommandContext.ReadableResourceContext     = <ReadableResource>
+  CommandContext.RegionContext               = <Region>
+  CommandContext.OffsetContext               = <Offset>
 
   EnclosingCommandContext.ProjectEnclosingContext   = <Project>
   EnclosingCommandContext.DirectoryEnclosingContext = <Directory>

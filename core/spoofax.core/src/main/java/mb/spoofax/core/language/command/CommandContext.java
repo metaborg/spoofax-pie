@@ -71,19 +71,19 @@ public class CommandContext implements Serializable {
         return new CommandContext(ResourcePathWithKind.file(file), Selections.offset(offset));
     }
 
-    public static CommandContext ofResource(ResourceKey resource) {
+    public static CommandContext ofReadableResource(ResourceKey resource) {
         return new CommandContext(resource);
     }
 
-    public static CommandContext ofResource(ResourceKey resource, Selection selection) {
+    public static CommandContext ofReadableResource(ResourceKey resource, Selection selection) {
         return new CommandContext(resource, selection);
     }
 
-    public static CommandContext ofResource(ResourceKey resource, Region region) {
+    public static CommandContext ofReadableResource(ResourceKey resource, Region region) {
         return new CommandContext(resource, Selections.region(region));
     }
 
-    public static CommandContext ofResource(ResourceKey resource, int offset) {
+    public static CommandContext ofReadableResource(ResourceKey resource, int offset) {
         return new CommandContext(resource, Selections.offset(offset));
     }
 
@@ -130,9 +130,9 @@ public class CommandContext implements Serializable {
                     .project_(false)
                     .directory_(false)
                     .file_(true);
-            case ResourcePath:
+            case HierarchicalResource:
                 return resourcePath != null;
-            case ResourceKey:
+            case ReadableResource:
                 return resourceKey != null;
             case Region:
                 if(selection == null) return false;

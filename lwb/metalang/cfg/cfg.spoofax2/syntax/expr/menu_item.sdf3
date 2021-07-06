@@ -47,7 +47,7 @@ context-free sorts // Editor file type
 context-free syntax
 
   EditorFileType.HierarchicalResource = <HierarchicalResource>
-  EditorFileType.Resource             = <Resource>
+  EditorFileType.ReadableResource     = <ReadableResource>
 
 context-free sorts // Hierarchical resource type
 
@@ -55,7 +55,6 @@ context-free sorts // Hierarchical resource type
 
 context-free syntax
 
-  //HierarchicalResourceType.Project   = <Project>
   HierarchicalResourceType.Directory = <Directory>
   HierarchicalResourceType.File      = <File>
 

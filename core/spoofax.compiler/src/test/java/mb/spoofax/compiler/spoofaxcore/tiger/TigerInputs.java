@@ -224,7 +224,7 @@ public class TigerInputs {
             .displayName("Show parsed AST")
             .description("Shows the parsed Abstract Syntax Tree of the program.")
             .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous)
-            .addParams("resource", TypeInfo.of("mb.resource", "ResourceKey"), true, Optional.empty(), Collections.singletonList(ArgProviderRepr.context(CommandContextType.ResourceKey)))
+            .addParams("resource", TypeInfo.of("mb.resource", "ResourceKey"), true, Optional.empty(), Collections.singletonList(ArgProviderRepr.context(CommandContextType.ReadableResource)))
             .addParams("region", TypeInfo.of("mb.common.region", "Region"), false, Optional.empty(), Collections.singletonList(ArgProviderRepr.context(CommandContextType.Region)))
             .build();
 

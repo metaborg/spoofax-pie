@@ -238,7 +238,7 @@ let showParsedAstCommand = command-def {
     file = parameter { // (7a)
       type = java mb.resource.ResourceKey // (7b)
       required = true // (7c)
-      argument-providers = [Context(File)] // (7d)
+      argument-providers = [Context(ReadableResource)] // (7d)
     }
   ]
 }
@@ -256,7 +256,7 @@ let showParsedAstCommand = command-def {
     3. Whether the parameter is required. Defaults to `#!cfg true`.
     4. Argument providers for this parameter that attempt to automatically provide a fitting argument. When providing an argument fails, the next argument provider in the list will be attempted.
 
-        Because this argument is a file, we want to try to infer the file from context, so we use `#!cfg Context(File)`. When we execute this command on a "Hello world" file in the IDE, Spoofax will automatically infer that file as the argument for the parameter.
+        Because this argument is a `ResourceKey` that should point to a readable resource, we want to try to infer the file from context, so we use `#!cfg Context(ReadableResource)`. When we execute this command on a "Hello world" file in the IDE, Spoofax will automatically infer that file as the argument for the parameter, because the file is a readable resource.
 
         Currently, Spoofax does not support running commands in the IDE without an argument provider, so a working argument provider is currently required.
 
@@ -272,7 +272,7 @@ let showParsedAstCommand = command-def {
   parameters = [
     file = parameter {
       type = java mb.resource.ResourceKey
-      argument-providers = [Context(File)]
+      argument-providers = [Context(ReadableResource)]
     }
   ]
 }
@@ -312,7 +312,7 @@ resource-context-menu [ // (4)
     1. The command to execute.
     2. How the command should be executed. `#!cfg Once` to execute it once, `#!cfg Continuous` to continuously execute the command when the source file changes.
  4. A `#!cfg resource-context-menu` section adds menu items to the context menu of the resource browser. That is, the menu that pops up when you right-click a file of your language.
- 5. For menu items inside a `#!cfg resource-context-menu` to show up, they must specify on what kind of resource types they are shown. In this case, we want the command to show up for files of our language, so we choose `[File]`.
+ 5. For menu items inside a `#!cfg resource-context-menu` to show up, they must specify on what kind of resource types they are shown. In this case, we want the command to show up when files of our language are selected in when the resource context menu pops up, so we choose `[File]`.
 
 Build the project so that we can test our changes.
 Open the `test.hel` file and right-click inside the editor area to open the context menu.
@@ -555,7 +555,7 @@ let showReplaceWorldsCommand = command-def {
   parameters = [
     file = parameter {
       type = java mb.resource.ResourceKey
-      argument-providers = [Context(File)]
+      argument-providers = [Context(ReadableResource)]
     }
   ]
 }

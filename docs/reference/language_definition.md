@@ -171,7 +171,8 @@ The following `ArgumentProvider`s are supported:
 * `Context($CommandContext)` attempts to infer the argument by context. The following `CommandContext`s are supported:
     * `Directory`: attempt to infer a `ResourcePath` to an existing directory. For example, when right-clicking a directory in an IDE to execute a command on that directory.
     * `File`: attempt to infer a `ResourcePath` to an existing file. For example, when right-clicking a file in an IDE to execute a command on that directory, or when executing a command in an editor for a file.
-    * `ResourceKey`: attempt to infer a `ResourceKey` to a readable resource. This is more general than `File`, as we only ask for a resource that can be read, not one that belongs to a (local) filesystem. Use this when the command does not rely on the resource being in a filesystem.
+    * `HierarchicalResource`: attempt to infer a `ResourcePath` to a hierarchical resource. A hierarchical resource is a resource that belongs to a (tree) hierarchy, such as a file or directory on the local filesystem. Use this when the command relies on the resource being in a filesystem, but does not care whether it is a directory or a file.
+    * `ReadableResource`: attempt to infer a `ResourceKey` to a readable resource. This is more general than `File`, as we only ask for a resource that can be read, not one that belongs to a (local) filesystem. Use this when the command does not rely on the resource being in a filesystem.
     * `Region`: attempt to infer a `Region` in a source file. Inference succeeds when the context has a selection of size 1 or larger. For example, when executing a command in an editor that has a selection, the region will be that selection.
     * `Offset`: attempt to infer an `int` representing an offset in a source file. Inference succeeds when the context has a cursor offset (i.e., a selection of size 0 or larger). For example, when executing a command in an editor, the offset will be the offset to the cursor in the editor.
 * `EnclosingContext($EnclosingCommandContext)` attempts to infer the argument by the enclosing context. The following `EnclosingCommandContext`s are supported:
@@ -231,8 +232,8 @@ The following `EnclosingResourceType`s are supported:
 
 The following `EditorFileType`s are supported:
 
-* `HierarchicalResource`: the menu item will only be shown when the editor belongs to a hierarchical resource. That is, a resource that belongs to a tree, such as a file on the local filesystem.
-* `Resource`: the menu item will only be shown when the editor belongs to a readable resource.
+* `HierarchicalResource`: the menu item will only be shown when the editor belongs to a hierarchical resource. That is, a resource that belongs to a tree, such as a file or directory on the local filesystem.
+* `ReadableResource`: the menu item will only be shown when the editor belongs to a readable resource.
 
 The following `EditorSelectionType`s are supported:
 
