@@ -1043,7 +1043,7 @@ Add the following configuration to the end of the file:</p>
     <span class="na">file</span> <span class="o">=</span> <span class="s">parameter { // (7a)</span>
       <span class="na">type</span> <span class="o">=</span> <span class="s">java mb.resource.ResourceKey // (7b)</span>
       <span class="na">required</span> <span class="o">=</span> <span class="s">true // (7c)</span>
-      <span class="na">argument-providers</span> <span class="o">=</span> <span class="s">[Context(File)] // (7d)</span>
+      <span class="na">argument-providers</span> <span class="o">=</span> <span class="s">[Context(ReadableResource)] // (7d)</span>
     <span class="na">}</span>
   <span class="na">]</span>
 <span class="na">}</span>
@@ -1061,7 +1061,7 @@ Add the following configuration to the end of the file:</p>
 <li>Whether the parameter is required. Defaults to <code class="highlight"><span class="na">true</span></code>.</li>
 <li>
 <p>Argument providers for this parameter that attempt to automatically provide a fitting argument. When providing an argument fails, the next argument provider in the list will be attempted.</p>
-<p>Because this argument is a file, we want to try to infer the file from context, so we use <code class="highlight"><span class="na">Context(File)</span></code>. When we execute this command on a "Hello world" file in the IDE, Spoofax will automatically infer that file as the argument for the parameter.</p>
+<p>Because this argument is a <code>ResourceKey</code> that should point to a readable resource, we want to try to infer the file from context, so we use <code class="highlight"><span class="na">Context(ReadableResource)</span></code>. When we execute this command on a "Hello world" file in the IDE, Spoofax will automatically infer that file as the argument for the parameter, because the file is a readable resource.</p>
 <p>Currently, Spoofax does not support running commands in the IDE without an argument provider, so a working argument provider is currently required.</p>
 </li>
 </ol>
@@ -1078,7 +1078,7 @@ Add the following configuration to the end of the file:</p>
   <span class="na">parameters</span> <span class="o">=</span> <span class="s">[</span>
     <span class="na">file</span> <span class="o">=</span> <span class="s">parameter {</span>
       <span class="na">type</span> <span class="o">=</span> <span class="s">java mb.resource.ResourceKey</span>
-      <span class="na">argument-providers</span> <span class="o">=</span> <span class="s">[Context(File)]</span>
+      <span class="na">argument-providers</span> <span class="o">=</span> <span class="s">[Context(ReadableResource)]</span>
     <span class="na">}</span>
   <span class="na">]</span>
 <span class="na">}</span>
@@ -1116,7 +1116,7 @@ Add the following configuration to the end of the file:</p>
 </ol>
 </li>
 <li>A <code class="highlight"><span class="na">resource-context-menu</span></code> section adds menu items to the context menu of the resource browser. That is, the menu that pops up when you right-click a file of your language.</li>
-<li>For menu items inside a <code class="highlight"><span class="na">resource-context-menu</span></code> to show up, they must specify on what kind of resource types they are shown. In this case, we want the command to show up for files of our language, so we choose <code>[File]</code>.</li>
+<li>For menu items inside a <code class="highlight"><span class="na">resource-context-menu</span></code> to show up, they must specify on what kind of resource types they are shown. In this case, we want the command to show up when files of our language are selected in when the resource context menu pops up, so we choose <code>[File]</code>.</li>
 </ol>
 <p>Build the project so that we can test our changes.
 Open the <code>test.hel</code> file and right-click inside the editor area to open the context menu.
@@ -1433,7 +1433,7 @@ Right-click the <code>mb.helloworld.task</code> package and create the <code>Hel
   <span class="na">parameters</span> <span class="o">=</span> <span class="s">[</span>
     <span class="na">file</span> <span class="o">=</span> <span class="s">parameter {</span>
       <span class="na">type</span> <span class="o">=</span> <span class="s">java mb.resource.ResourceKey</span>
-      <span class="na">argument-providers</span> <span class="o">=</span> <span class="s">[Context(File)]</span>
+      <span class="na">argument-providers</span> <span class="o">=</span> <span class="s">[Context(ReadableResource)]</span>
     <span class="na">}</span>
   <span class="na">]</span>
 <span class="na">}</span>
