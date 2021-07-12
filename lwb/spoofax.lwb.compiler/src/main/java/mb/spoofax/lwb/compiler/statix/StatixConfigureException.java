@@ -4,6 +4,8 @@ import mb.cfg.task.CfgRootDirectoryToObjectException;
 import mb.common.util.ADT;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.lwb.compiler.sdf3.Sdf3ConfigureException;
+import mb.spoofax.lwb.compiler.stratego.StrategoConfigureException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 @ADT
@@ -14,6 +16,10 @@ public abstract class StatixConfigureException extends Exception {
         R mainSourceDirectoryFail(ResourcePath mainSourceDirectory);
 
         R mainFileFail(ResourceKey mainFile);
+
+        R sdf3ConfigureFail(Sdf3ConfigureException sdf3ConfigureException);
+
+        R sdf3ExtStatixGenInjFail(Exception cause);
     }
 
     public static StatixConfigureException getLanguageCompilerConfigurationFail(CfgRootDirectoryToObjectException cfgRootDirectoryToObjectException) {
@@ -26,6 +32,14 @@ public abstract class StatixConfigureException extends Exception {
 
     public static StatixConfigureException mainFileFail(ResourceKey mainFile) {
         return StatixConfigureExceptions.mainFileFail(mainFile);
+    }
+
+    public static StatixConfigureException sdf3ConfigureFail(Sdf3ConfigureException sdf3ConfigureException) {
+        return withCause(StatixConfigureExceptions.sdf3ConfigureFail(sdf3ConfigureException), sdf3ConfigureException);
+    }
+
+    public static StatixConfigureException sdf3ExtStatixGenInjFail(Exception cause) {
+        return withCause(StatixConfigureExceptions.sdf3ExtStatixGenInjFail(cause), cause);
     }
 
     private static StatixConfigureException withCause(StatixConfigureException e, Exception cause) {
@@ -50,6 +64,8 @@ public abstract class StatixConfigureException extends Exception {
             .getLanguageCompilerConfigurationFail((cause) -> "Getting language compiler configuration failed")
             .mainSourceDirectoryFail((mainSourceDirectory) -> "Statix main source directory '" + mainSourceDirectory + "' does not exist or is not a directory")
             .mainFileFail((mainFile) -> "Statix main file '" + mainFile + "' does not exist or is not a file")
+            .sdf3ConfigureFail(cause -> "Configuring SDF3 failed")
+            .sdf3ExtStatixGenInjFail(cause -> "SDF3 to Statix signature generator failed")
             ;
     }
 

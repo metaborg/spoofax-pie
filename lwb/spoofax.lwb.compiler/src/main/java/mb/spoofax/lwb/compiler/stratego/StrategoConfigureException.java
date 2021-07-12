@@ -29,6 +29,8 @@ public abstract class StrategoConfigureException extends Exception {
         R sdf3ParenthesizerGenerateFail(Exception cause);
 
         R sdf3CompletionRuntimeGenerateFail(Exception cause);
+
+        R sdf3ExtStatixGenInjFail(Exception cause);
     }
 
     public static StrategoConfigureException getLanguageCompilerConfigurationFail(CfgRootDirectoryToObjectException cfgRootDirectoryToObjectException) {
@@ -71,6 +73,10 @@ public abstract class StrategoConfigureException extends Exception {
         return withCause(StrategoConfigureExceptions.sdf3CompletionRuntimeGenerateFail(cause), cause);
     }
 
+    public static StrategoConfigureException sdf3ExtStatixGenInjFail(Exception cause) {
+        return withCause(StrategoConfigureExceptions.sdf3ExtStatixGenInjFail(cause), cause);
+    }
+
     private static StrategoConfigureException withCause(StrategoConfigureException e, Exception cause) {
         e.initCause(cause);
         return e;
@@ -100,6 +106,7 @@ public abstract class StrategoConfigureException extends Exception {
             .sdf3PrettyPrinterGenerateFail(cause -> "SDF3 to pretty-printer generator failed")
             .sdf3ParenthesizerGenerateFail(cause -> "SDF3 to parenthesizer generator failed")
             .sdf3CompletionRuntimeGenerateFail(cause -> "SDF3 to completion runtime generator failed")
+            .sdf3ExtStatixGenInjFail(cause -> "SDF3 to Statix injection explication/implication generator failed")
             ;
     }
 

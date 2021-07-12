@@ -12,6 +12,7 @@ import mb.log.dagger.LoggerComponent;
 import mb.pie.api.StatelessSerializableFunction;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.sdf3.Sdf3Component;
+import mb.sdf3_ext_statix.Sdf3ExtStatixComponent;
 import mb.spoofax.compiler.dagger.DaggerSpoofaxCompilerComponent;
 import mb.spoofax.compiler.dagger.SpoofaxCompilerComponent;
 import mb.spoofax.compiler.dagger.SpoofaxCompilerModule;
@@ -35,6 +36,7 @@ public class Spoofax3Compiler implements AutoCloseable {
     public final StrategoComponent strategoComponent;
     public final EsvComponent esvComponent;
     public final StatixComponent statixComponent;
+    public final Sdf3ExtStatixComponent sdf3ExtStatixComponent;
     public final LibSpoofax2Component libSpoofax2Component;
     public final LibSpoofax2ResourcesComponent libSpoofax2ResourcesComponent;
     public final LibStatixComponent libStatixComponent;
@@ -54,6 +56,7 @@ public class Spoofax3Compiler implements AutoCloseable {
         StrategoComponent strategoComponent,
         EsvComponent esvComponent,
         StatixComponent statixComponent,
+        Sdf3ExtStatixComponent sdf3ExtStatixComponent,
         LibSpoofax2Component libSpoofax2Component,
         LibSpoofax2ResourcesComponent libSpoofax2ResourcesComponent,
         LibStatixComponent libStatixComponent,
@@ -72,6 +75,7 @@ public class Spoofax3Compiler implements AutoCloseable {
         this.strategoComponent = strategoComponent;
         this.esvComponent = esvComponent;
         this.statixComponent = statixComponent;
+        this.sdf3ExtStatixComponent = sdf3ExtStatixComponent;
         this.libSpoofax2Component = libSpoofax2Component;
         this.libSpoofax2ResourcesComponent = libSpoofax2ResourcesComponent;
         this.libStatixComponent = libStatixComponent;
@@ -102,6 +106,7 @@ public class Spoofax3Compiler implements AutoCloseable {
         StrategoComponent strategoComponent,
         EsvComponent esvComponent,
         StatixComponent statixComponent,
+        Sdf3ExtStatixComponent sdf3ExtStatixComponent,
         LibSpoofax2Component libSpoofax2Component,
         LibSpoofax2ResourcesComponent libSpoofax2ResourcesComponent,
         LibStatixComponent libStatixComponent,
@@ -122,6 +127,7 @@ public class Spoofax3Compiler implements AutoCloseable {
             .strategoComponent(strategoComponent)
             .esvComponent(esvComponent)
             .statixComponent(statixComponent)
+            .sdf3ExtStatixComponent(sdf3ExtStatixComponent)
             .libSpoofax2Component(libSpoofax2Component)
             .libSpoofax2ResourcesComponent(libSpoofax2ResourcesComponent)
             .libStatixComponent(libStatixComponent)
@@ -137,11 +143,12 @@ public class Spoofax3Compiler implements AutoCloseable {
             strategoComponent,
             esvComponent,
             statixComponent,
+            sdf3ExtStatixComponent,
             libSpoofax2Component,
             libSpoofax2ResourcesComponent,
             libStatixComponent,
             libStatixResourcesComponent,
-            
+
             templateCompiler,
             spoofaxCompilerComponent,
             component

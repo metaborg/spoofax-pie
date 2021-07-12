@@ -10,6 +10,7 @@ import mb.libstatix.LibStatixResourcesComponent;
 import mb.log.dagger.LoggerComponent;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.sdf3.Sdf3Component;
+import mb.sdf3_ext_statix.Sdf3ExtStatixComponent;
 import mb.spoofax.lwb.compiler.dagger.Spoofax3CompilerComponent;
 import mb.spoofax.lwb.compiler.dagger.Spoofax3CompilerModule;
 import mb.spoofax.lwb.compiler.dagger.Spoofax3CompilerScope;
@@ -30,6 +31,7 @@ import mb.str.StrategoComponent;
         StrategoComponent.class,
         EsvComponent.class,
         StatixComponent.class,
+        Sdf3ExtStatixComponent.class,
         LibSpoofax2Component.class,
         LibSpoofax2ResourcesComponent.class,
         LibStatixComponent.class,

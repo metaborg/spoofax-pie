@@ -43,4 +43,9 @@ languageAdapterProject {
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   val packageId = "mb.sdf3_ext_statix"
   val taskPackageId = "$packageId.task"
+
+  addTaskDefs(
+    TypeInfo.of(taskPackageId, "Sdf3ExtStatixGenerateStatix"),
+    TypeInfo.of(taskPackageId, "Sdf3ExtStatixGenerateStratego")
+  )
 }

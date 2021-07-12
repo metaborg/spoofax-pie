@@ -40,6 +40,10 @@ public interface CompileLanguageSpecificationShared extends Serializable {
         return generatedSourcesDirectory().appendRelativePath("java");
     }
 
+    @Value.Default default ResourcePath generatedStatixSourcesDirectory() {
+        return generatedSourcesDirectory().appendRelativePath("statix");
+    }
+
     @Value.Default default ResourcePath generatedStrategoSourcesDirectory() {
         return generatedSourcesDirectory().appendRelativePath("stratego");
     }

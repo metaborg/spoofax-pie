@@ -90,6 +90,8 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   baseCheckMultiTaskDef(spoofaxTaskPackageId, "BaseStatixCheckMulti")
   extendCheckMultiTaskDef(spoofaxTaskPackageId, "StatixCheckMultiWrapper")
 
+  addTaskDefs(taskPackageId, "StatixPrettyPrint")
+
   addTaskDefs(taskPackageId, "StatixCheck")
   addTaskDefs(taskPackageId, "StatixCompile")
 }

@@ -24,6 +24,7 @@ dependencies {
   api(project(":stratego"))
   api(project(":esv"))
   api(project(":statix"))
+  api(project(":sdf3_ext_statix"))
 
   api(project(":libspoofax2"))
   api(project(":libstatix"))

@@ -21,6 +21,8 @@ import mb.resource.dagger.ResourceRegistriesProvider;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.sdf3.Sdf3Component;
 import mb.sdf3.eclipse.Sdf3LanguageFactory;
+import mb.sdf3_ext_statix.Sdf3ExtStatixComponent;
+import mb.sdf3_ext_statix.eclipse.Sdf3ExtStatixLanguageFactory;
 import mb.spoofax.compiler.dagger.DaggerSpoofaxCompilerComponent;
 import mb.spoofax.compiler.dagger.SpoofaxCompilerComponent;
 import mb.spoofax.compiler.dagger.SpoofaxCompilerModule;
@@ -142,6 +144,7 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
                 final StrategoEclipseComponent strategoComponent = StrategoLanguageFactory.getLanguage().getComponent();
                 final EsvEclipseComponent esvComponent = EsvLanguageFactory.getLanguage().getComponent();
                 final StatixEclipseComponent statixComponent = StatixLanguageFactory.getLanguage().getComponent();
+                final Sdf3ExtStatixComponent sdf3ExtStatixComponent = Sdf3ExtStatixLanguageFactory.getLanguage().getComponent();
                 final LibSpoofax2EclipseComponent libSpoofax2Component = LibSpoofax2LanguageFactory.getLanguage().getComponent();
                 final LibSpoofax2ResourcesComponent libSpoofax2ResourcesComponent = LibSpoofax2LanguageFactory.getLanguage().getResourcesComponent();
                 final LibStatixEclipseComponent libStatixComponent = LibStatixLanguageFactory.getLanguage().getComponent();
@@ -156,6 +159,7 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
                     .strategoComponent(strategoComponent)
                     .esvComponent(esvComponent)
                     .statixComponent(statixComponent)
+                    .sdf3ExtStatixComponent(sdf3ExtStatixComponent)
                     .libSpoofax2Component(libSpoofax2Component)
                     .libSpoofax2ResourcesComponent(libSpoofax2ResourcesComponent)
                     .libStatixComponent(libStatixComponent)
@@ -172,6 +176,7 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
                     strategoComponent,
                     esvComponent,
                     statixComponent,
+                    sdf3ExtStatixComponent,
                     libSpoofax2Component,
                     libSpoofax2ResourcesComponent,
                     libStatixComponent,

@@ -60,6 +60,11 @@ public interface CompileStrategoInput extends Serializable {
     }
 
 
+    @Value.Default default boolean enableSdf3ExtStatixGenInj() {
+        return false;
+    }
+
+
     @Value.Default default String languageStrategyAffix() {
         // TODO: convert to Stratego ID instead of Java ID.
         return Conversion.nameToJavaId(shared().name().toLowerCase());
