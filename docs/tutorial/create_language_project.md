@@ -420,7 +420,7 @@ The `#!stratego replace-worlds` strategy tries to apply `#!stratego replace-worl
 
       statixruntime
       statix/api
-
+      injections/-
       signatures/-
 
     rules // Analysis
