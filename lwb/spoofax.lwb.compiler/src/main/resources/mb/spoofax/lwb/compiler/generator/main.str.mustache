@@ -4,13 +4,13 @@ imports
 
   statixruntime
   statix/api
-
+  injections/-
   signatures/-
 
 rules // Analysis
 
-  pre-analyze  = id
-  post-analyze = id
+  pre-analyze  = explicate-injections-{{ppName}}-Start
+  post-analyze = implicate-injections-{{ppName}}-Start
 
 {{#multiFileAnalysis}}
   editor-analyze = stx-editor-analyze(pre-analyze, post-analyze|"main", "projectOk", "fileOk")

@@ -1,5 +1,6 @@
 package mb.spoofax2.common.primitive.generic;
 
+import mb.common.util.IterableUtil;
 import mb.common.util.MultiMapView;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -25,6 +26,12 @@ public class Spoofax2ProjectContext implements Serializable {
     public Spoofax2ProjectContext(ResourcePath projectPath) {
         this(projectPath, MultiMapView.of(), MultiMapView.of());
     }
+
+
+    public Iterable<ResourcePath> sourceAndIncludePaths(String languageId) {
+        return IterableUtil.concat(languageIdToSourcePaths.get(languageId), languageIdToIncludePaths.get(languageId));
+    }
+
 
     @Override public boolean equals(@Nullable Object o) {
         if(this == o) return true;

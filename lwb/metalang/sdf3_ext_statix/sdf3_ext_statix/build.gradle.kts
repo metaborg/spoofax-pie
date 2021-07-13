@@ -21,7 +21,10 @@ languageProject {
     fileExtensions(listOf()) // No file extensions.
   }
   compilerInput {
-    withStrategoRuntime()
+    withStrategoRuntime().run {
+      baseStrategoRuntimeBuilderFactory("mb.sdf3_ext_statix.stratego", "BaseSdf3ExtStatixStrategoRuntimeBuilderFactory")
+      extendStrategoRuntimeBuilderFactory("mb.sdf3_ext_statix.stratego", "Sdf3ExtStatixStrategoRuntimeBuilderFactory")
+    }
   }
 }
 spoofax2BasedLanguageProject {

@@ -1,12 +1,12 @@
-package mb.sdf3;
+package mb.sdf3.stratego;
 
 import mb.log.api.LoggerFactory;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.stratego.common.StrategoRuntimeBuilder;
 
-public class Sdf3ManualStrategoRuntimeBuilderFactory extends Sdf3StrategoRuntimeBuilderFactory {
-    public Sdf3ManualStrategoRuntimeBuilderFactory(LoggerFactory loggerFactory, ResourceService resourceService, HierarchicalResource definitionDir) {
+public class Sdf3StrategoRuntimeBuilderFactory extends BaseSdf3StrategoRuntimeBuilderFactory {
+    public Sdf3StrategoRuntimeBuilderFactory(LoggerFactory loggerFactory, ResourceService resourceService, HierarchicalResource definitionDir) {
         super(loggerFactory, resourceService, definitionDir);
     }
 

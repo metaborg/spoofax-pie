@@ -30,7 +30,7 @@ public interface CompileStatixInput extends Serializable {
     List<ResourcePath> includeDirectories();
 
 
-    @Value.Default default boolean enableSdf3ExtStatixGenInj() {
+    @Value.Default default boolean enableSdf3SignatureGen() {
         return false;
     }
 

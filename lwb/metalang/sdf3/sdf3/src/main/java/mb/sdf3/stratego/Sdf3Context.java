@@ -1,4 +1,4 @@
-package mb.sdf3;
+package mb.sdf3.stratego;
 
 public class Sdf3Context {
     public final String strategoQualifier;

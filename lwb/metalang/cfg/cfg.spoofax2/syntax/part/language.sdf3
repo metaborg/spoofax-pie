@@ -9,9 +9,6 @@ context-free sorts
 
   Sdf3Option
   Sdf3ParseTableGeneratorOption
-  EsvOption
-  StatixOption
-  StrategoOption
 
 context-free syntax
 
@@ -31,6 +28,12 @@ context-free syntax
   Sdf3ParseTableGeneratorOption.Sdf3ParseTableGeneratorCheckOverlap = <check-overlap = <Expr>>
   Sdf3ParseTableGeneratorOption.Sdf3ParseTableGeneratorCheckPriorities = <check-priorities = <Expr>>
 
+context-free sorts
+
+  EsvOption
+
+context-free syntax
+
   Part.EsvSection = <esv {
   <{EsvOption "\n"}*>
 }>
@@ -38,15 +41,29 @@ context-free syntax
   EsvOption.EsvMainFile            = <main-file = <Expr>>
   EsvOption.EsvIncludeDirectory    = <include-directory = <Expr>>
 
+context-free sorts
+
+  StatixOption
+
+context-free syntax
+
   Part.StatixSection = <statix {
   <{StatixOption "\n"}*>
 }>
   StatixOption.StatixMainSourceDirectory = <main-source-directory = <Expr>>
   StatixOption.StatixMainFile            = <main-file = <Expr>>
+  StatixOption.StatixSdf3SignatureGen    = <sdf3-statix-signature-generation = <Expr>>
+
+context-free sorts
+
+  StrategoOption
+
+context-free syntax
 
   Part.StrategoSection = <stratego {
   <{StrategoOption "\n"}*>
 }>
-  StrategoOption.StrategoMainSourceDirectory = <main-source-directory = <Expr>>
-  StrategoOption.StrategoMainFile            = <main-file = <Expr>>
-  StrategoOption.StrategoLanguageStrategyAffix = <language-strategy-affix = <Expr>>
+  StrategoOption.StrategoMainSourceDirectory      = <main-source-directory = <Expr>>
+  StrategoOption.StrategoMainFile                 = <main-file = <Expr>>
+  StrategoOption.StrategoLanguageStrategyAffix    = <language-strategy-affix = <Expr>>
+  StrategoOption.StrategoSdf3StatixExplicationGen = <sdf3-statix-explication-generation = <Expr>>

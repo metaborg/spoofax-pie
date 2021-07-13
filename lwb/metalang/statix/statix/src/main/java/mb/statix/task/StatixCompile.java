@@ -4,6 +4,7 @@ import mb.common.result.Result;
 import mb.constraint.pie.ConstraintAnalyzeMultiTaskDef;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
+import mb.pie.api.stamp.output.OutputStampers;
 import mb.resource.hierarchical.ResourcePath;
 import mb.statix.StatixScope;
 import mb.statix.task.spoofax.StatixAnalyzeMultiWrapper;
@@ -102,6 +103,9 @@ public class StatixCompile implements TaskDef<StatixCompile.Input, Result<Statix
     }
 
     @Override public Result<Output, ?> exec(ExecContext context, StatixCompile.Input input) throws Exception {
+        // Require source file origin tasks.
+        input.config.sourceFileOrigins.forEach(origin -> context.require(origin, OutputStampers.inconsequential()));
+
         // TODO: this does not analyze all source and include directories
         return context.require(analyze.createSingleFileOutputSupplier(
             new ConstraintAnalyzeMultiTaskDef.Input(input.config.rootDirectory, parse.createMultiAstSupplierFunction(StatixUtil.createResourceWalker(), StatixUtil.createResourceMatcher())),

@@ -159,12 +159,14 @@ public class CfgAstToObject {
             final CompileStatixInput.Builder builder = languageCompilerInputBuilder.withStatix();
             subParts.forOneSubtermAsPath("StatixMainSourceDirectory", rootDirectory, builder::mainSourceDirectory);
             subParts.forOneSubtermAsPath("StatixMainFile", rootDirectory, builder::mainFile);
+            subParts.forOneSubtermAsBool("StatixSdf3SignatureGen", builder::enableSdf3SignatureGen);
         });
         parts.getAllSubTermsInListAsParts("StrategoSection").ifSome(subParts -> {
             final CompileStrategoInput.Builder builder = languageCompilerInputBuilder.withStratego();
             subParts.forOneSubtermAsPath("StrategoMainSourceDirectory", rootDirectory, builder::mainSourceDirectory);
             subParts.forOneSubtermAsPath("StrategoMainFile", rootDirectory, builder::mainFile);
             subParts.forOneSubtermAsString("StrategoLanguageStrategyAffix", builder::languageStrategyAffix);
+            subParts.forOneSubtermAsBool("StrategoSdf3StatixExplicationGen", builder::enableSdf3StatixExplicationGen);
         });
         customizer.customize(languageCompilerInputBuilder);
         final CompileLanguageSpecificationInput languageCompilerInput = languageCompilerInputBuilder.build(properties, shared, languageShared);

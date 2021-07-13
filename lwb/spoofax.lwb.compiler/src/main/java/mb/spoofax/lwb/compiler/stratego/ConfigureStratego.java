@@ -234,9 +234,9 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
                     } catch(Exception e) {
                         throw StrategoConfigureException.sdf3CompletionRuntimeGenerateFail(e);
                     }
-                    if(strategoInput.enableSdf3ExtStatixGenInj()) {
+                    if(strategoInput.enableSdf3StatixExplicationGen()) {
                         try {
-                            sdf3ToStatixGenInj(context, generatedSourcesDirectory, astSupplier);
+                            sdf3ToStatixGenInj(context, strategyAffix, generatedSourcesDirectory, astSupplier);
                         } catch(RuntimeException | InterruptedException e) {
                             throw e; // Do not wrap runtime and interrupted exceptions, rethrow them.
                         } catch(Exception e) {
@@ -278,7 +278,7 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
 
                     // Add generated sources directory as an include for Stratego imports.
                     includeDirectories.add(generatedSourcesDirectory);
-                    // Add this as an origin, as this task provides the Stratego files (in writePrettyPrintedStrategoFile).
+                    // Add this as an origin, as this task provides the Stratego files (in strategoGenerationUtil.writePrettyPrintedFile).
                     sourceFileOrigins.add(createSupplier(rootDirectory));
                 }
             });
@@ -351,10 +351,11 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
 
     private void sdf3ToStatixGenInj(
         ExecContext context,
+        String strategyAffix,
         ResourcePath generatesSourcesDirectory,
         STask<Result<IStrategoTerm, ?>> astSupplier
     ) throws Exception {
-        final STask<Result<IStrategoTerm, ?>> supplier = sdf3ExtStatixGenerateStratego.createSupplier(astSupplier);
+        final STask<Result<IStrategoTerm, ?>> supplier = sdf3ExtStatixGenerateStratego.createSupplier(new Sdf3ExtStatixGenerateStratego.Input(astSupplier, strategyAffix));
         strategoGenerationUtil.writePrettyPrintedFile(context, generatesSourcesDirectory, supplier);
     }
 }

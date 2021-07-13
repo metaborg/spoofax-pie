@@ -36,7 +36,7 @@ public class RelativeSourceOrIncludePath extends ASpoofaxPrimitive {
         final ResourcePath path = resourceService.getResourcePath(ResourceKeyString.parse(resourceName));
 
         ResourcePath base = projectContext.projectPath;
-        final Iterable<ResourcePath> sourceLocations = projectContext.languageIdToSourcePaths.get(languageId);
+        final Iterable<ResourcePath> sourceLocations = projectContext.sourceAndIncludePaths(languageId);
         for(ResourcePath sourceLocation : sourceLocations) {
             if(path.startsWith(sourceLocation)) {
                 base = sourceLocation;

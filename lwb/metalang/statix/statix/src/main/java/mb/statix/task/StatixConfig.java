@@ -1,6 +1,7 @@
 package mb.statix.task;
 
 import mb.common.util.ListView;
+import mb.pie.api.STask;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -12,22 +13,24 @@ public class StatixConfig implements Serializable {
     public final ResourcePath mainFile;
     public final ListView<ResourcePath> sourcePaths;
     public final ListView<ResourcePath> includePaths;
+    public final ListView<STask<?>> sourceFileOrigins;
 
     public StatixConfig(
         ResourcePath rootDirectory,
         ResourcePath mainFile,
         ListView<ResourcePath> sourcePaths,
-        ListView<ResourcePath> includePaths
-    ) {
+        ListView<ResourcePath> includePaths,
+        ListView<STask<?>> sourceFileOrigins) {
         this.rootDirectory = rootDirectory;
         this.mainFile = mainFile;
         this.sourcePaths = sourcePaths;
         this.includePaths = includePaths;
+        this.sourceFileOrigins = sourceFileOrigins;
     }
 
     public static StatixConfig createDefault(ResourcePath rootDirectory) {
         final ResourcePath sourceDirectory = rootDirectory.appendRelativePath("src");
-        return new StatixConfig(rootDirectory, sourceDirectory.appendRelativePath("main.stx"), ListView.of(sourceDirectory), ListView.of());
+        return new StatixConfig(rootDirectory, sourceDirectory.appendRelativePath("main.stx"), ListView.of(sourceDirectory), ListView.of(), ListView.of());
     }
 
     public ArrayList<ResourcePath> sourceAndIncludePaths() {
@@ -44,7 +47,8 @@ public class StatixConfig implements Serializable {
         if(!rootDirectory.equals(that.rootDirectory)) return false;
         if(!mainFile.equals(that.mainFile)) return false;
         if(!sourcePaths.equals(that.sourcePaths)) return false;
-        return includePaths.equals(that.includePaths);
+        if(!includePaths.equals(that.includePaths)) return false;
+        return sourceFileOrigins.equals(that.sourceFileOrigins);
     }
 
     @Override public int hashCode() {
@@ -52,6 +56,7 @@ public class StatixConfig implements Serializable {
         result = 31 * result + mainFile.hashCode();
         result = 31 * result + sourcePaths.hashCode();
         result = 31 * result + includePaths.hashCode();
+        result = 31 * result + sourceFileOrigins.hashCode();
         return result;
     }
 
@@ -61,6 +66,7 @@ public class StatixConfig implements Serializable {
             ", mainFile=" + mainFile +
             ", sourcePaths=" + sourcePaths +
             ", includePaths=" + includePaths +
+            ", sourceFileOrigins=" + sourceFileOrigins +
             '}';
     }
 }

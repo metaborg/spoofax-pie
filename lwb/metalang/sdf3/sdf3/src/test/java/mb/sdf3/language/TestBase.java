@@ -6,7 +6,7 @@ import mb.resource.classloader.NoopClassLoaderUrlResolver;
 import mb.sdf3.Sdf3ClassLoaderResources;
 import mb.sdf3.Sdf3ConstraintAnalyzerFactory;
 import mb.sdf3.Sdf3ParserFactory;
-import mb.sdf3.Sdf3StrategoRuntimeBuilderFactory;
+import mb.sdf3.stratego.Sdf3StrategoRuntimeBuilderFactory;
 import mb.sdf3.Sdf3StylerFactory;
 import mb.spoofax.test.SingleBaseLanguageTestBase;
 

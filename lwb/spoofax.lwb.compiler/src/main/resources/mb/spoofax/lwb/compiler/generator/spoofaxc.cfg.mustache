@@ -6,8 +6,12 @@ file-extension = "{{this}}"
 
 sdf3 {}
 esv {}
-statix {}
-stratego {}
+statix {
+  sdf3-statix-signature-generation = true
+}
+stratego {
+  sdf3-statix-explication-generation = true
+}
 
 parser {
   default-start-symbol = sort Start

@@ -23,6 +23,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 
 public class ConfigureStatix implements TaskDef<ResourcePath, Result<Option<StatixConfig>, StatixConfigureException>> {
@@ -77,14 +78,16 @@ public class ConfigureStatix implements TaskDef<ResourcePath, Result<Option<Stat
         // TODO: check include directories.
         // TODO: check source directories (if added to input).
 
-        final LinkedHashSet<ResourcePath> includeDirectories = new LinkedHashSet<>(); // LinkedHashSet to remove duplicates while keeping insertion order.
-        includeDirectories.addAll(statixInput.includeDirectories());
+        // Gather origins for provided Statix files.
+        final ArrayList<STask<?>> sourceFileOrigins = new ArrayList<>();
+        // Gather include directories. Use LinkedHashSet to remove duplicates while keeping insertion order.
+        final LinkedHashSet<ResourcePath> includeDirectories = new LinkedHashSet<>(statixInput.includeDirectories());
 
         // Compile each SDF3 source file (if SDF3 is enabled) to a Statix signature module (if enabled).
         final CompileLanguageSpecificationInput compileLanguageSpecificationInput = input.compileLanguageSpecificationInput();
         final CompileLanguageSpecificationShared compileLanguageSpecificationShared = compileLanguageSpecificationInput.compileLanguageShared();
         final ResourcePath generatedSourcesDirectory = compileLanguageSpecificationShared.generatedStatixSourcesDirectory();
-        if(statixInput.enableSdf3ExtStatixGenInj()) {
+        if(statixInput.enableSdf3SignatureGen()) {
             try {
                 sdf3GenerationUtil.performSdf3GenerationIfEnabled(context, rootDirectory, new Sdf3GenerationUtil.Callbacks<StatixConfigureException>() {
                     @Override
@@ -100,8 +103,10 @@ public class ConfigureStatix implements TaskDef<ResourcePath, Result<Option<Stat
 
                     @Override
                     public void generateFromConfig(ExecContext context, Sdf3SpecConfig sdf3Config) {
-                        // Add generated sources directory as an include for Statix imports.
+                        // Add generated sources directory as an include Statix imports.
                         includeDirectories.add(generatedSourcesDirectory);
+                        // Add this as an origin, as this task provides the Statix files (in statixGenerationUtil.writePrettyPrintedFile).
+                        sourceFileOrigins.add(createSupplier(rootDirectory));
                     }
                 });
             } catch(StatixConfigureException e) {
@@ -115,7 +120,8 @@ public class ConfigureStatix implements TaskDef<ResourcePath, Result<Option<Stat
             rootDirectory,
             mainFile.getPath(),
             ListView.of(mainSourceDirectory.getPath()),
-            ListView.copyOf(includeDirectories)
+            ListView.copyOf(includeDirectories),
+            ListView.of(sourceFileOrigins)
         ));
     }
 

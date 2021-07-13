@@ -5,6 +5,7 @@ import mb.jsglr.common.JsglrParseException;
 import mb.jsglr.common.JsglrParseOutput;
 import mb.jsglr.pie.JsglrParseTaskInput;
 import mb.pie.api.ExecContext;
+import mb.pie.api.stamp.output.OutputStampers;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.statix.StatixClassLoaderResources;
 import mb.statix.StatixParser;
@@ -36,9 +37,8 @@ public class StatixParseWrapper extends StatixParse {
     @Override
     public Result<JsglrParseOutput, JsglrParseException> exec(ExecContext context, JsglrParseTaskInput input) throws Exception {
         context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
-        // TODO: enable when config has source origins.
-        // TODO: instead of requiring all origins for each file to parse, only require the origins that corresponds to a certain file.
-        //input.rootDirectoryHint().ifPresent(d -> configFunctionWrapper.get().apply(context, d).ifOk(o -> o.ifSome(c -> c.sourceFileOrigins.forEach(context::require))));
+        // TODO: instead of requiring all origins for each file to parse, only require the origins that corresponds to a certain file?
+        input.rootDirectoryHint().ifPresent(d -> configFunctionWrapper.get().apply(context, d).ifOk(o -> o.ifSome(c -> c.sourceFileOrigins.forEach((origin -> context.require(origin, OutputStampers.inconsequential()))))));
         return super.exec(context, input);
     }
 }

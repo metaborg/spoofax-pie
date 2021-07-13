@@ -1,4 +1,4 @@
-package mb.sdf3;
+package mb.sdf3.stratego;
 
 import mb.stratego.common.AdaptableContext;
 import org.spoofax.interpreter.core.IContext;

@@ -4,7 +4,7 @@ import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
-import mb.sdf3.Sdf3Context;
+import mb.sdf3.stratego.Sdf3Context;
 import mb.sdf3.Sdf3Scope;
 import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;

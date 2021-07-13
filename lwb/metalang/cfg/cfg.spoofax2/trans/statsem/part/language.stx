@@ -62,7 +62,9 @@ rules // Statix section and options
     typeOfExpr(s, e) == PATH() | error $[Expected path]. 
   statixOptionOk(s, StatixMainFile(e)) :-
     typeOfExpr(s, e) == PATH() | error $[Expected path]. 
-  
+  statixOptionOk(s, StatixSdf3SignatureGen(e)) :-
+    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]. 
+      
 rules // Stratego section and options
 
   partOk(s, StrategoSection(options)) :- strategoOptionsOk(s, options).
@@ -75,4 +77,7 @@ rules // Stratego section and options
   strategoOptionOk(s, StrategoMainFile(e)) :-
     typeOfExpr(s, e) == PATH() | error $[Expected path]. 
   strategoOptionOk(s, StrategoLanguageStrategyAffix(e)) :-
-    typeOfExpr(s, e) == STRATEGY() | error $[Expected Stratego strategy identifier]. 
+    typeOfExpr(s, e) == STRATEGY() | error $[Expected Stratego strategy identifier].
+  strategoOptionOk(s, StrategoSdf3StatixExplicationGen(e)) :-
+    typeOfExpr(s, e) == BOOL() | error $[Expected boolean].
+

@@ -44,7 +44,8 @@ languageProject {
     withStrategoRuntime().run {
       addStrategyPackageIds("org.metaborg.meta.lang.template.strategies")
       addInteropRegisterersByReflection("org.metaborg.meta.lang.template.strategies.InteropRegisterer")
-      extendStrategoRuntimeBuilderFactory("mb.sdf3", "Sdf3ManualStrategoRuntimeBuilderFactory")
+      baseStrategoRuntimeBuilderFactory("mb.sdf3.stratego", "BaseSdf3StrategoRuntimeBuilderFactory")
+      extendStrategoRuntimeBuilderFactory("mb.sdf3.stratego", "Sdf3StrategoRuntimeBuilderFactory")
     }
   }
 }

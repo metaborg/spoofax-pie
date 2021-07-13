@@ -3,6 +3,7 @@ package mb.spoofax.lwb.compiler.generator;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.compiler.util.Conversion;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
 import org.immutables.value.Value;
@@ -32,6 +33,12 @@ public class LanguageProjectGenerator {
         List<String> fileExtensions();
 
         boolean multiFileAnalysis();
+
+
+        @Value.Default default String ppName() {
+            // TODO: convert to Stratego ID instead of Java ID.
+            return Conversion.nameToJavaId(name().toLowerCase());
+        }
     }
 
     private final TemplateWriter spoofaxcCfgTemplate;

@@ -60,7 +60,7 @@ public interface CompileStrategoInput extends Serializable {
     }
 
 
-    @Value.Default default boolean enableSdf3ExtStatixGenInj() {
+    @Value.Default default boolean enableSdf3StatixExplicationGen() {
         return false;
     }
 
