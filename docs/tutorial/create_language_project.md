@@ -19,17 +19,45 @@ First we will add some syntax to the language.
 Open the main SDF3 file `helloworld/src/start.sdf3` file by expanding the folders and double-clicking the file.
 SDF3 is a meta-language (i.e., a language to describe languages) for describing the syntax of a language, from which Spoofax will derive the parser of your language.
 Under the `#!sdf3 context-free syntax` section, replace the `#!sdf3 Start.Empty = <>` line with `#!sdf3 Start.Program = <<{Part " "}*>>`, indicating that the language accepts programs which consists of one or more parts.
-Then add `#!sdf3 Part.Hello = <hello>` on a new line, indicating that one sort of part is the word `hello.`
-Finally, add `#!sdf3 Part.World = <world>` on a new line, indicating that one sort of part is the word `world`.
-The context-free syntax section should now look as follows:
+
+`#!sdf3 Part` is a *sort* and must be defined by adding a `#!sdf3 context-free sorts` section before the `#!sdf3 context-free syntax` section and by defining `#!sdf3 Part` there, looking as follows:
 
 ```sdf3
-context-free syntax
+context-free sorts
 
-  Start.Program = <<{Part " "}*>>
-  Part.Hello = <hello>
-  Part.World = <world>
+  Part
 ```
+
+Now we will add syntax productions to `#!sdf3 Part` to the `#!sdf3 context-free syntax` section.
+Add `#!sdf3 Part.Hello = <hello>` on a new line, indicating that one sort of `#!sdf3 Part` is the word `hello.`
+Then add `#!sdf3 Part.World = <world>` on a new line, indicating that one sort of `#!sdf3 Part` is the word `world`.
+
+??? note "`src/start.sdf3` full contents"
+    ```sdf3
+    module start
+
+    context-free start-symbols
+
+      Start
+
+    context-free sorts
+
+      Start Part
+
+    context-free syntax
+
+      Start.Program = <<{Part " "}*>>
+      Part.Hello = <hello>
+      Part.World = <world>
+
+    lexical syntax
+
+      LAYOUT = [\ \n\v\f\r]
+
+    context-free restrictions
+
+      LAYOUT? -/- [\ \n\v\f\r]
+    ```
 
 To test our change, build the project by clicking on the project in the <span class="guilabel">Package Explorer</span> and choosing <span class="guilabel">Project ‣ Build Project</span> from the main menu, or by pressing ++cmd+b++ on macOS or ++ctrl+b++ on others.
 To see when the build is done, open the progress window by choosing <span class="guilabel">Window ‣ Show View ‣ Progress</span>.
@@ -331,41 +359,7 @@ Open the main Statix file `helloworld/src/main.stx`
 Statix is a meta-language for defining the static semantics of your language, which includes type checking.
 
 First we will update the Statix specification to handle the new language constructs.
-Replace the `#!statix signature` section with the following:
-
-```statix
-signature
-
-  sorts Start constructors
-    Program : list(Part) -> Start
-  sorts Part constructors
-    Hello : Part
-    World : Part
-```
-
-This defines the AST signature of the language.
-In a future version of Spoofax 3, this will be automatically derived from the SDF3 specification.
-
-Now, replace the `#!statix programOk(Empty()).` line with `#!statix programOk(Program(parts)).`, meaning that we accept all programs consisting of parts, which is always true due to the syntax of the language.
-The file should now look like this:
-
-```statix
-module main
-
-signature
-
-  sorts Start constructors
-    Program : list(Part) -> Start
-  sorts Part constructors
-    Hello : Part
-    World : Part
-
-rules
-
-  programOk : Start
-  programOk(Program(parts)).
-```
-
+Replace the `#!statix programOk(Empty()).` line with `#!statix programOk(Program(parts)).`, meaning that we accept all programs consisting of parts, which is always true due to the syntax of the language.
 Build the project, and the error marker should disappear from your example program.
 
 As a silly rule, we will add a warning to all instances of `world` in the program.
@@ -381,6 +375,26 @@ Add the following code to the end of the Statix definition:
 This adds a `#!statix partOk` rule that lets all `#!statix Hello()` parts pass, but will add a warning to all `#!statix World()` parts.
 `#!statix partsOk` goes over a list of parts and applies `#!statix partOk`.
 Replace the `#!statix programOk(Program(parts)).` line with `#!statix programOk(Program(parts)) :- partsOk(parts).` to apply the `#!statix partsOk` rule.
+
+??? note "`src/main.stx` full contents"
+    ```statix
+    module main
+
+    imports
+
+      signatures/start-sig
+
+    rules
+
+      programOk : Start
+      programOk(Program(parts)) :- partsOk(parts).
+
+      partOk : Part
+      partOk(Hello()).
+      partOk(World()) :- try { false } | warning $[World!].
+      partsOk maps partOk(list(*))
+    ```
+
 Build the project, and a warning marker should appear under all instances of `world` in the program.
 
 ## Adding a transformation
@@ -402,6 +416,32 @@ rules
 
 The `#!stratego replace-world` rule passes `#!stratego Hello()` terms but rewrites `#!stratego World()` terms to `#!stratego Hello()`.
 The `#!stratego replace-worlds` strategy tries to apply `#!stratego replace-world` in a top-down manner over the entire AST.
+
+??? note "`src/main.str` full contents"
+    ```stratego
+    module main
+
+    imports
+
+      statixruntime
+      statix/api
+
+      signatures/-
+
+    rules // Analysis
+
+      pre-analyze  = explicate-injections-helloworld-Start
+      post-analyze = implicate-injections-helloworld-Start
+
+      editor-analyze = stx-editor-analyze(pre-analyze, post-analyze|"main", "programOk")
+
+    rules
+
+      replace-world: Hello() -> Hello()
+      replace-world: World() -> Hello()
+      replace-worlds = topdown(try(replace-world))
+    ```
+
 
 Now we add a task and command-task for this transformation.
 We define two separate tasks to keep separate
