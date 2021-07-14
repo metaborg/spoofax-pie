@@ -3,11 +3,11 @@ plugins {
   `maven-publish`
 }
 
-val commonVersion = "0.9.0"
-val logVersion = "0.5.3"
+val commonVersion = "0.9.1"
+val logVersion = "0.5.4"
 val slf4jVersion = "1.7.30"
-val resourceVersion = "0.11.2"
-val pieVersion = "0.16.3"
+val resourceVersion = "0.11.3"
+val pieVersion = "0.16.4"
 
 val spoofax2Version: String by ext
 val spoofax2DevenvVersion: String by ext
@@ -17,7 +17,7 @@ val picocliVersion = "4.5.0"
 val javaxInjectVersion = "1"
 val checkerframeworkVersion = "3.16.0"
 
-val daggerVersion = "2.37"
+val daggerVersion = "2.36" // Do not upgrade, causes Gradle/Kotlin compatibility issues due to upgrade to Kotlin 1.5.
 val derive4jVersion = "1.1.1"
 val immutablesVersion = "2.8.2"
 
