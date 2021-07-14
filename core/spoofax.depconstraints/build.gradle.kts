@@ -3,11 +3,11 @@ plugins {
   `maven-publish`
 }
 
-val commonVersion = "0.8.0"
-val logVersion = "0.5.2"
+val commonVersion = "0.9.0"
+val logVersion = "0.5.3"
 val slf4jVersion = "1.7.30"
-val resourceVersion = "0.11.0"
-val pieVersion = "0.16.0"
+val resourceVersion = "0.11.2"
+val pieVersion = "0.16.3"
 
 val spoofax2Version: String by ext
 val spoofax2DevenvVersion: String by ext
@@ -15,9 +15,9 @@ val spoofax2DevenvVersion: String by ext
 val picocliVersion = "4.5.0"
 
 val javaxInjectVersion = "1"
-val checkerframeworkVersion = "3.10.0"
+val checkerframeworkVersion = "3.16.0"
 
-val daggerVersion = "2.34.1"
+val daggerVersion = "2.37"
 val derive4jVersion = "1.1.1"
 val immutablesVersion = "2.8.2"
 
@@ -75,6 +75,7 @@ dependencies {
     api("org.metaborg.devenv:org.metaborg.util:$spoofax2DevenvVersion")
     api("org.metaborg.devenv:org.spoofax.interpreter.core:$spoofax2DevenvVersion")
     api("org.metaborg.devenv:org.spoofax.jsglr:$spoofax2DevenvVersion")
+    api("org.metaborg.devenv:org.spoofax.jsglr2:$spoofax2DevenvVersion")
     api("org.metaborg.devenv:sdf2table:$spoofax2DevenvVersion")
     api("org.metaborg.devenv:sdf2parenthesize:$spoofax2DevenvVersion")
     api("org.metaborg.devenv:org.metaborg.parsetable:$spoofax2DevenvVersion")
