@@ -1,0 +1,1848 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Spoofax 3 documentation website">
+      
+      
+      
+      
+      <link rel="icon" href="../assets/spoofax.png">
+      <meta name="generator" content="mkdocs-1.2.1, mkdocs-material-7.1.4">
+    
+    
+      
+        <title>Language definition - Spoofax 3</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.bde7dde4.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ef6f36e2.min.css">
+        
+          
+          
+          <meta name="theme-color" content="#4051b5">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=:300,400,400i,700%7CJetBrains+Mono&display=fallback">
+        <style>:root{--md-text-font-family:"";--md-code-font-family:"JetBrains Mono"}</style>
+      
+    
+    
+    
+      <link rel="stylesheet" href="../extra.css">
+    
+    
+      
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <script>function __prefix(e){return new URL("..",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#language-definition" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../index.html" title="Spoofax 3" class="md-header__button md-logo" aria-label="Spoofax 3" data-md-component="logo">
+      
+  <img src="../assets/spoofax.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Spoofax 3
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Language definition
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        
+<a href="https://github.com/metaborg/spoofax-pie/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    metaborg/spoofax-pie
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../index.html" class="md-tabs__link">
+      Home
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../tutorial/install.html" class="md-tabs__link">
+        Tutorials
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="language_definition.html" class="md-tabs__link md-tabs__link--active">
+        Reference
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../background/documentation.html" class="md-tabs__link">
+        Background
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../release/download.html" class="md-tabs__link">
+        Releases
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../index.html" title="Spoofax 3" class="md-nav__button md-logo" aria-label="Spoofax 3" data-md-component="logo">
+      
+  <img src="../assets/spoofax.svg" alt="logo">
+
+    </a>
+    Spoofax 3
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/metaborg/spoofax-pie/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    metaborg/spoofax-pie
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../index.html" class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
+      
+      <label class="md-nav__link" for="__nav_2">
+        Tutorials
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Tutorials" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Tutorials
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/install.html" class="md-nav__link">
+        Installing the Spoofax 3 language workbench
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/create_language_project.html" class="md-nav__link">
+        Creating a language project
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" checked>
+      
+      <label class="md-nav__link" for="__nav_3">
+        Reference
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Reference" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Reference
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Language definition
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="language_definition.html" class="md-nav__link md-nav__link--active">
+        Language definition
+      </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#anatomy" class="md-nav__link">
+    Anatomy
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    Configuration
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#literals" class="md-nav__link">
+    Literals
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#let-bindings" class="md-nav__link">
+    Let bindings
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#top-level-options" class="md-nav__link">
+    Top-level options
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#commands" class="md-nav__link">
+    Commands
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#menu-items" class="md-nav__link">
+    Menu items
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#menus" class="md-nav__link">
+    Menus
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#language-feature-sections" class="md-nav__link">
+    Language feature sections
+  </a>
+  
+    <nav class="md-nav" aria-label="Language feature sections">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parser" class="md-nav__link">
+    Parser
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#styler" class="md-nav__link">
+    Styler
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#constraint-analyzer" class="md-nav__link">
+    Constraint analyzer
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-language-analyzer" class="md-nav__link">
+    Multi-language analyzer
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stratego-runtime" class="md-nav__link">
+    Stratego runtime
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#completer" class="md-nav__link">
+    Completer
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#meta-language-sections" class="md-nav__link">
+    Meta-language sections
+  </a>
+  
+    <nav class="md-nav" aria-label="Meta-language sections">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sdf3" class="md-nav__link">
+    SDF3
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#esv" class="md-nav__link">
+    ESV
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#statix" class="md-nav__link">
+    Statix
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stratego" class="md-nav__link">
+    Stratego
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#spoofaxclock" class="md-nav__link">
+    spoofaxc.lock
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#file-structure" class="md-nav__link">
+    File structure
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#java-classes" class="md-nav__link">
+    Java classes
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#instantiation" class="md-nav__link">
+    Instantiation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#compilation" class="md-nav__link">
+    Compilation
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="anatomy_language_implementation.html" class="md-nav__link">
+        Anatomy of a language implementation
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
+      
+      <label class="md-nav__link" for="__nav_4">
+        Background
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Background" data-md-level="1">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Background
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../background/documentation.html" class="md-nav__link">
+        Documentation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../background/motivation.html" class="md-nav__link">
+        Motivation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../background/key_ideas.html" class="md-nav__link">
+        Key ideas
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../background/status.html" class="md-nav__link">
+        Current Status
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+      
+      <label class="md-nav__link" for="__nav_5">
+        Releases
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Releases" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Releases
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../release/download.html" class="md-nav__link">
+        Downloads
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#anatomy" class="md-nav__link">
+    Anatomy
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    Configuration
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#literals" class="md-nav__link">
+    Literals
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#let-bindings" class="md-nav__link">
+    Let bindings
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#top-level-options" class="md-nav__link">
+    Top-level options
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#commands" class="md-nav__link">
+    Commands
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#menu-items" class="md-nav__link">
+    Menu items
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#menus" class="md-nav__link">
+    Menus
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#language-feature-sections" class="md-nav__link">
+    Language feature sections
+  </a>
+  
+    <nav class="md-nav" aria-label="Language feature sections">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parser" class="md-nav__link">
+    Parser
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#styler" class="md-nav__link">
+    Styler
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#constraint-analyzer" class="md-nav__link">
+    Constraint analyzer
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-language-analyzer" class="md-nav__link">
+    Multi-language analyzer
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stratego-runtime" class="md-nav__link">
+    Stratego runtime
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#completer" class="md-nav__link">
+    Completer
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#meta-language-sections" class="md-nav__link">
+    Meta-language sections
+  </a>
+  
+    <nav class="md-nav" aria-label="Meta-language sections">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sdf3" class="md-nav__link">
+    SDF3
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#esv" class="md-nav__link">
+    ESV
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#statix" class="md-nav__link">
+    Statix
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stratego" class="md-nav__link">
+    Stratego
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#spoofaxclock" class="md-nav__link">
+    spoofaxc.lock
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#file-structure" class="md-nav__link">
+    File structure
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#java-classes" class="md-nav__link">
+    Java classes
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#instantiation" class="md-nav__link">
+    Instantiation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#compilation" class="md-nav__link">
+    Compilation
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/metaborg/spoofax-pie/edit/master/docs/reference/language_definition.md" title="Edit this page" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                <h1 id="language-definition">Language definition<a class="headerlink" href="#language-definition" title="Permanent link">&para;</a></h1>
+<p>In essence, a language definition in Spoofax 3 consists of several source files along with configuration that specify and implement the various aspects of a language, such as its tokenizer, parser, styler, completer, checker, compiler, commands, and so forth.
+The source files of a language definition are mostly written in high-level domain-specific meta-languages, with some parts being written in Java.
+The Spoofax 3 compiler compiles language definitions into language implementations which are essentially standard Java libraries (e.g., JAR files) consisting of Java classes and bundled resources.
+These classes implement the various aspects of a language, and may use bundled resources such as a parse table which is loaded and interpreted at runtime.</p>
+<p>In this reference manual we explain the basic anatomy of a language definition, its configuration and file structure, Java classes and how they are instantiated, as well as how a language definition is compiled into a language implementation.</p>
+<h2 id="anatomy">Anatomy<a class="headerlink" href="#anatomy" title="Permanent link">&para;</a></h2>
+<p>configuration in CFG
+syntax in SDF3
+styling in ESV
+static semantics in Statix
+transformations in Stratego</p>
+<p>tasks in java (future: PIE DSL)</p>
+<p>commands, specified in configuration, generated for you</p>
+<p>menu bindings</p>
+<p>CLI bindings</p>
+<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
+<p>The main entry point of a language definition is the <code>spoofaxc.cfg</code> (Spoofax compiler configuration) file, written in the CFG language.
+The goal of this config file is to configure basic options, enable/disable features, point to main source files of meta-languages, to add/override behaviour, and to serve as an anchor on the filesystem.
+The directory that the <code>spoofaxc.cfg</code> file is in is called the "root directory" of the language definition, and any relative paths are resolved relative to that directory.</p>
+<p>The CFG language has domain-specific syntax for configuring language definitions. However, the syntax follows these conventions:</p>
+<ul>
+<li>Options are assigned a value with <code>$Option = $Expression</code>. Unless specified otherwise, options may only be given once.</li>
+<li>Sections <code>$Section { ... }</code> may enable features and group options.</li>
+<li>Lists <code>$List [ ..., ... ]</code> indicate an option/section may be given 0-many times.</li>
+<li>Let bindings <code>let $Name = $Expression</code> can be used to give values a name that can be (re-)used in the rest of the configuration file.</li>
+</ul>
+<p>If something in the documentation is unclear, the <a href="https://github.com/metaborg/spoofax-pie/tree/develop/lwb/metalang/cfg/cfg.spoofax2">CFG language definition can be found here</a>.</p>
+<p>In its most basic form, the <code>spoofaxc.cfg</code> file for a language named <code>Calc</code> looks as follows:</p>
+<div class="highlight"><pre><span></span><code><span class="na">name</span> <span class="o">=</span> <span class="s">&quot;Calc&quot;</span>
+</code></pre></div>
+<p>which assigns the string <code>"Calc"</code> to the <code>name</code> option.
+A more interesting example configures more options and enables syntax definition:</p>
+<div class="highlight"><pre><span></span><code><span class="na">name</span> <span class="o">=</span> <span class="s">&quot;Calc&quot;</span>
+<span class="na">java-class-id-prefix</span> <span class="o">=</span> <span class="s">java Calc</span>
+<span class="na">file-extension</span> <span class="o">=</span> <span class="s">&quot;calc&quot;</span>
+
+<span class="na">sdf3 {}</span>
+<span class="na">parser {</span>
+  <span class="na">default-start-symbol</span> <span class="o">=</span> <span class="s">sort Program</span>
+<span class="na">}</span>
+</code></pre></div>
+<p>Here, <code>java Calc</code> is assigned to the <code>java-class-id-prefix</code> option.
+The <code>sdf3 {}</code> section from the example is empty, but is used to <em>enable</em> the SDF3 meta-language.
+The <code>parser</code> section enables generation of a parser, and also sets the default start symbol to use to <code>sort Program</code>.</p>
+<h3 id="literals">Literals<a class="headerlink" href="#literals" title="Permanent link">&para;</a></h3>
+<p>Literals are expressions that are usually directly assigned to options, or bound to a name with let bindings.
+CFG has the following literals:</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Example(s)</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>(true|false)</code></td>
+<td><code>true</code> <code>false</code></td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td><code>"(~[\"\$\n\r\\] | \\~[\n\r])*"</code></td>
+<td><code>"foo"</code> <code>"bar"</code></td>
+<td>String</td>
+</tr>
+<tr>
+<td><code>(./|/)~[\n\r\,\;\]\)\}\ ]*</code></td>
+<td><code>./relative/file</code> <code>/absolute/file</code></td>
+<td>Filesystem path</td>
+</tr>
+<tr>
+<td><code>$JavaIdChars</code></td>
+<td><code>Java foo</code></td>
+<td>Java identifier</td>
+</tr>
+<tr>
+<td><code>$JavaQIdLit</code></td>
+<td><code>Java foo.bar.Baz</code></td>
+<td>Qualified Java identifier</td>
+</tr>
+<tr>
+<td><code>task-def $JavaQIdLit</code></td>
+<td><code>task-def foo.bar.Baz</code></td>
+<td>Qualified Java identifier that represents a task definition</td>
+</tr>
+<tr>
+<td><code>sort [a-zA-Z0-9\-\_\$]+</code></td>
+<td><code>sort Start</code></td>
+<td>SDF3 sort identifier</td>
+</tr>
+<tr>
+<td><code>strategy [a-zA-Z0-9\-\_\$]+</code></td>
+<td><code>strategy Start</code></td>
+<td>Stratego strategy identifier</td>
+</tr>
+</tbody>
+</table>
+<p>With the following syntax non-terminals:</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Syntax</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>JavaIdChars</code></td>
+<td><code>[a-zA-Z\_\$][a-zA-Z0-9\_\$]*</code></td>
+</tr>
+<tr>
+<td><code>JavaQIdLit</code></td>
+<td><code>$JavaIdChars(\.$JavaIdChars)*</code></td>
+</tr>
+</tbody>
+</table>
+<p>For Java, SDF3 sort, and Stratego strategy identifiers, the corresponding keywords of those languages are rejected as identifiers.</p>
+<h3 id="let-bindings">Let bindings<a class="headerlink" href="#let-bindings" title="Permanent link">&para;</a></h3>
+<p>Let bindings of the form <code>let $Name = $Expression</code> bind a name to an expression, for example:</p>
+<div class="highlight"><pre><span></span><code><span class="na">let showParsedAst</span> <span class="o">=</span> <span class="s">task-def mb.helloworld.task.HelloWorldShowParsedAst</span>
+<span class="na">let showParsedAstCommand</span> <span class="o">=</span> <span class="s">command-def {</span>
+  <span class="na">task-def</span> <span class="o">=</span> <span class="s">showParsedAst</span>
+  <span class="na">...</span>
+<span class="na">}</span>
+<span class="na">editor-context-menu [</span>
+  <span class="na">menu &quot;Debug&quot; [</span>
+    <span class="na">command-action {</span>
+      <span class="na">command-def</span> <span class="o">=</span> <span class="s">showParsedAstCommand</span>
+      <span class="na">...</span>
+    <span class="na">}</span>
+  <span class="na">]</span>
+<span class="na">]</span>
+</code></pre></div>
+<p>creates a binding from name <code>showParsedAst</code> to <code>task-def mb.helloworld.task.HelloWorldShowParsedAst</code>, which we then pass to the <code>task-def</code> option in <code>command-def</code>.
+The command in turn is bound to <code>showParsedAstCommand</code>, assigned to the <code>command-def</code> option in a <code>command-action</code> section.</p>
+<h3 id="top-level-options">Top-level options<a class="headerlink" href="#top-level-options" title="Permanent link">&para;</a></h3>
+<p>The following top-level options exist:</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Required?</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>group = $Expression</code></td>
+<td>no</td>
+<td>Group identifier of the language, used as the <code>group</code>/<code>groupId</code> in the Java ecosystem. Defaults to <code>org.metaborg</code>.</td>
+<td>String</td>
+</tr>
+<tr>
+<td><code>id = $Expression</code></td>
+<td>no</td>
+<td>Artifact identifier of the language, used as the <code>name</code>/<code>artifactId</code> in the Java ecosystem. Defaults to the name of the language uncapitalized.</td>
+<td>String</td>
+</tr>
+<tr>
+<td><code>name = $Expression</code></td>
+<td>yes</td>
+<td>Name of the language.</td>
+<td>String</td>
+</tr>
+<tr>
+<td><code>version = $Expression</code></td>
+<td>no</td>
+<td>Version of the language, used as the <code>version</code> in the Java ecosystem. Defaults to <code>0.1.0</code>.</td>
+<td>String</td>
+</tr>
+<tr>
+<td><code>file-extension = $Expression</code></td>
+<td>no</td>
+<td>File extension of the language. May be given multiple times. Defaults to the name of the language transformed to fit in 3 characters.</td>
+<td>String</td>
+</tr>
+<tr>
+<td><code>java-package-id-prefix = $Expression</code></td>
+<td>no</td>
+<td>The prefix to add before all package identifiers in Java source files. Defaults to <code>mb.$Name</code> where <code>$Name</code> is transformed to be a valid package identifier.</td>
+<td>Qualified Java identifier</td>
+</tr>
+<tr>
+<td><code>java-class-id-prefix = $Expression</code></td>
+<td>no</td>
+<td>The prefix to add before all Java classes. Defaults to the name of the language transformed to be a valid class identifier.</td>
+<td>Java identifier</td>
+</tr>
+<tr>
+<td><code>source-directory = $Expression</code></td>
+<td>no</td>
+<td>Path relative to the root directory that has the sources of the language definition. Defaults to <code>src</code>.</td>
+<td>Path</td>
+</tr>
+<tr>
+<td><code>build-directory = $Expression</code></td>
+<td>no</td>
+<td>Path relative to the root directory that has the generated sources and build outputs when building the language definition. Defaults to <code>build</code>.</td>
+<td>Path</td>
+</tr>
+</tbody>
+</table>
+<h3 id="commands">Commands<a class="headerlink" href="#commands" title="Permanent link">&para;</a></h3>
+<p>Commands are sections that are also expressions, typically assigned to a name with a let binding, with the following form:</p>
+<div class="highlight"><pre><span></span><code><span class="na">let $Name</span> <span class="o">=</span> <span class="s">command-def {</span>
+  <span class="na">$CommandOption*</span>
+<span class="na">}</span>
+</code></pre></div>
+<p>The following options are available in a command:</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Required?</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>task-def = $Expression</code></td>
+<td>yes</td>
+<td>The task definition that the command will execute.</td>
+<td>Qualified Java identifier that represents a task definition, or qualified Java identifier</td>
+</tr>
+<tr>
+<td><code>type = $Expression</code></td>
+<td>no</td>
+<td>The fully qualified Java type we want this command to be generated as. Can be omitted to generate a type based on the name of the task definition.</td>
+<td>Qualified Java identifier</td>
+</tr>
+<tr>
+<td><code>display-name = $Expression</code></td>
+<td>yes</td>
+<td>The display name of the command.</td>
+<td>String</td>
+</tr>
+<tr>
+<td><code>description = $Expression</code></td>
+<td>no</td>
+<td>The optional description of the command.</td>
+<td>String</td>
+</tr>
+<tr>
+<td><code>supported-execution-types = [($ExecutionType ,)*]</code></td>
+<td>no</td>
+<td>The optional supported execution types of the command. Defaults to <code>[Once, Continuous]</code>.</td>
+<td>n/a</td>
+</tr>
+<tr>
+<td><code>args-type = $Expression</code></td>
+<td>no</td>
+<td>The fully qualified Java type of the argument class. Can be omitted if the argument class is a nested class named <code>Args</code> of the task definition.</td>
+<td>Qualified Java identifier</td>
+</tr>
+<tr>
+<td><code>parameters = [ $Parameter* ]</code></td>
+<td>yes</td>
+<td>The description of the parameters of the command</td>
+<td>n/a</td>
+</tr>
+</tbody>
+</table>
+<p>The following <code>ExecutionType</code>s are supported:</p>
+<ul>
+<li><code>Once</code> indicates a that this command supports being executed as a one-shot command.</li>
+<li><code>Continuous</code> indicates that this command supports being executed every time the source file changes.</li>
+</ul>
+<p>A <code>$Parameter</code> has the form <code>$Identifier = parameter { $ParameterOptions }</code> with the following options:</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Required?</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>type = $Expression</code></td>
+<td>yes</td>
+<td>The fully qualified Java of the type of the parameter. This must match the type of the parameter inside the <code>args-type</code> of the command.</td>
+<td>Qualified Java identifier</td>
+</tr>
+<tr>
+<td><code>required = $Expression</code></td>
+<td>no</td>
+<td>Whether the parameter is required. Defaults to <code>true</code>.</td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td><code>converter-type = $Expression</code></td>
+<td>no</td>
+<td>The argument converter for this parameter, which can convert a <code>String</code> value to the <code>type</code> of this parameter. Must implement the <code>ArgConverter</code> interface.</td>
+<td>Qualified Java identifier</td>
+</tr>
+<tr>
+<td><code>argument-providers = [($ArgumentProvider ,)*]</code></td>
+<td>no</td>
+<td>Argument providers for this parameter that attempt to automatically provide a fitting argument. When providing an argument fails, the next argument provider in the list will be attempted. If no arguments can be provided, and the argument is required, then the argument <em>must be</em> provided by the user that executes the command, or executing the command will fail.</td>
+<td>n/a</td>
+</tr>
+</tbody>
+</table>
+<p>The following <code>ArgumentProvider</code>s are supported:</p>
+<ul>
+<li><code>Value($Expression)</code> provides a default value given by the expression. The expression must match the type of the parameter, even though this is not currently checked.</li>
+<li><code>Context($CommandContext)</code> attempts to infer the argument by context. The following <code>CommandContext</code>s are supported:<ul>
+<li><code>Directory</code>: attempt to infer a <code>ResourcePath</code> to an existing directory. For example, when right-clicking a directory in an IDE to execute a command on that directory.</li>
+<li><code>File</code>: attempt to infer a <code>ResourcePath</code> to an existing file. For example, when right-clicking a file in an IDE to execute a command on that directory, or when executing a command in an editor for a file.</li>
+<li><code>HierarchicalResource</code>: attempt to infer a <code>ResourcePath</code> to a hierarchical resource. A hierarchical resource is a resource that belongs to a (tree) hierarchy, such as a file or directory on the local filesystem. Use this when the command relies on the resource being in a filesystem, but does not care whether it is a directory or a file.</li>
+<li><code>ReadableResource</code>: attempt to infer a <code>ResourceKey</code> to a readable resource. This is more general than <code>File</code>, as we only ask for a resource that can be read, not one that belongs to a (local) filesystem. Use this when the command does not rely on the resource being in a filesystem.</li>
+<li><code>Region</code>: attempt to infer a <code>Region</code> in a source file. Inference succeeds when the context has a selection of size 1 or larger. For example, when executing a command in an editor that has a selection, the region will be that selection.</li>
+<li><code>Offset</code>: attempt to infer an <code>int</code> representing an offset in a source file. Inference succeeds when the context has a cursor offset (i.e., a selection of size 0 or larger). For example, when executing a command in an editor, the offset will be the offset to the cursor in the editor.</li>
+</ul>
+</li>
+<li><code>EnclosingContext($EnclosingCommandContext)</code> attempts to infer the argument by the enclosing context. The following <code>EnclosingCommandContext</code>s are supported:<ul>
+<li><code>Project</code>: attempt to infer a <code>ResourcePath</code> to the enclosing project. For example, when executing a command in an IDE on a file, directory, or editor for a file, that belongs to a project. Or when executing a command in a CLI, the directory will be the current working directory.</li>
+<li><code>Directory</code>: attempt to infer a <code>ResourcePath</code> to the enclosing directory. For example, when executing a command in the context of a file, directory, or editor for a file, the directory will be the parent of that file/directory.</li>
+</ul>
+</li>
+</ul>
+<p>Here is an example of a command that shows the parsed AST by taking one file argument that is inferred from context:</p>
+<div class="highlight"><pre><span></span><code><span class="na">let showParsedAstCommand</span> <span class="o">=</span> <span class="s">command-def {</span>
+  <span class="na">type</span> <span class="o">=</span> <span class="s">java mb.helloworld.command.HelloWorldShowParsedAstCommand</span>
+  <span class="na">task-def</span> <span class="o">=</span> <span class="s">showParsedAst</span>
+  <span class="na">args-type</span> <span class="o">=</span> <span class="s">java mb.helloworld.task.HelloWorldShowParsedAst.Args</span>
+  <span class="na">display-name</span> <span class="o">=</span> <span class="s">&quot;Show parsed AST&quot;</span>
+  <span class="na">description</span> <span class="o">=</span> <span class="s">&quot;Shows the parsed AST&quot;</span>
+  <span class="na">supported-execution-types</span> <span class="o">=</span> <span class="s">[Once, Continuous]</span>
+  <span class="na">parameters</span> <span class="o">=</span> <span class="s">[</span>
+    <span class="na">file</span> <span class="o">=</span> <span class="s">parameter {</span>
+      <span class="na">type</span> <span class="o">=</span> <span class="s">java mb.resource.ResourceKey</span>
+      <span class="na">required</span> <span class="o">=</span> <span class="s">true</span>
+      <span class="na">argument-providers</span> <span class="o">=</span> <span class="s">[Context(ResourceKey)]</span>
+    <span class="na">}</span>
+  <span class="na">]</span>
+<span class="na">}</span>
+</code></pre></div>
+<h3 id="menu-items">Menu items<a class="headerlink" href="#menu-items" title="Permanent link">&para;</a></h3>
+<p>Menu items take the form of:</p>
+<ul>
+<li>a <code>separator</code> representing a horizontal line in a menu used to separate groups of menu items.</li>
+<li>a <code>menu $Expression [ $MenuItem* ]</code> representing a (nested) menu with a display name defined by the expression which must be a string, and a list of nested menu items.</li>
+<li>a <code>command-action { $CommandActionOption* }</code> representing an action that executes a command when a user clicks on it.</li>
+</ul>
+<p>A command action has the following options:</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Required?</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>command-def = $Expression</code></td>
+<td>yes</td>
+<td>The command to execute.</td>
+<td>Command or qualified Java identifier</td>
+</tr>
+<tr>
+<td><code>execution-type = $ExecutionType</code></td>
+<td>yes</td>
+<td>How the command should be executed.</td>
+<td>n/a</td>
+</tr>
+<tr>
+<td><code>required-resource-types = [($ResourceType ,)*]</code></td>
+<td>no</td>
+<td>On which kinds of resources this menu item will be shown on resource context menus. Defaults to empty. If empty, it will not be hidden based on resources.</td>
+<td>n/a</td>
+</tr>
+<tr>
+<td><code>required-enclosing-resource-types = [($EnclosingResourceType ,)*]</code></td>
+<td>no</td>
+<td>On which kinds of enclosing resources this menu item will be shown on resource context menus. Defaults to empty. If empty, it will not be hidden based on enclosing resource.</td>
+<td>n/a</td>
+</tr>
+<tr>
+<td><code>required-editor-file-types = [($EditorFileType ,)*]</code></td>
+<td>no</td>
+<td>On which kinds of editors belonging to certain file types this menu item will be shown. Defaults to empty. If empty, it will not be hidden based on editor file types.</td>
+<td>n/a</td>
+</tr>
+<tr>
+<td><code>required-editor-selection-types = [($EditorSelectionType ,)*]</code></td>
+<td>no</td>
+<td>On which kinds of editor selection types this menu item will be shown. Defaults to empty. If empty, it will not be hidden based on editor selections.</td>
+<td>n/a</td>
+</tr>
+<tr>
+<td><code>display-name = $Expression</code></td>
+<td>no</td>
+<td>The display name of the command action. Defaults to the display name of the command</td>
+<td>String</td>
+</tr>
+<tr>
+<td><code>description = $Expression</code></td>
+<td>no</td>
+<td>The description of he command action. Defaults to the description of the command</td>
+<td>String</td>
+</tr>
+</tbody>
+</table>
+<p>The following <code>ResourceType</code>s are supported:</p>
+<ul>
+<li><code>Directory</code>: the menu item will only be shown when a directory is selected.</li>
+<li><code>File</code>: the menu item will only be shown when a file is selected.</li>
+</ul>
+<p>The following <code>EnclosingResourceType</code>s are supported:</p>
+<ul>
+<li><code>Project</code>: the menu item will only be shown when the selected resource has an enclosing project.</li>
+<li><code>Directory:</code>: the menu item will only be shown when the selected resource has an enclosing directory.</li>
+</ul>
+<p>The following <code>EditorFileType</code>s are supported:</p>
+<ul>
+<li><code>HierarchicalResource</code>: the menu item will only be shown when the editor belongs to a hierarchical resource. That is, a resource that belongs to a tree, such as a file or directory on the local filesystem.</li>
+<li><code>ReadableResource</code>: the menu item will only be shown when the editor belongs to a readable resource.</li>
+</ul>
+<p>The following <code>EditorSelectionType</code>s are supported:</p>
+<ul>
+<li><code>Region</code>: the menu item will only be shown when a region with size &gt;0 in the source file is selected.</li>
+<li><code>Offset</code>: the menu item will only be shown in the context of an editor with a cursor.</li>
+</ul>
+<h3 id="menus">Menus<a class="headerlink" href="#menus" title="Permanent link">&para;</a></h3>
+<p>Menu items are assigned to 3 particular menus:</p>
+<ul>
+<li><code>editor-context-menu [ $MenuItem* ]</code>: the context menu that gets shown in editors of the language, for example when right-clicking in an editor of the language in an IDE. Spoofax automatically creates a top-level submenu with the name of the language to host the editor context menu items. The <code>required-editor-file-types</code> and <code>required-editor-selection-types</code> options are used to filter menu items.</li>
+<li><code>resource-context-menu [ $MenuItem* ]</code>: the context menu that gets shown in resource explorers, for example when right-clicking in the file browser in an IDE. Spoofax automatically creates a top-level submenu with the name of the language to host the editor context menu items. The <code>required-resource-types</code> and <code>required-enclosing-resource-types</code> options are used to filter menu items.</li>
+<li><code>main-menu [ $MenuIitem* ]</code>: the main menu of the language, which is shown on the menu bar in IDEs. When no <code>main-menu</code> section is given, it defaults to the same menu as <code>editor-context-menu</code>.</li>
+</ul>
+<p>For example, we can assign the command defined earlier to several menus:</p>
+<div class="highlight"><pre><span></span><code><span class="na">editor-context-menu [</span>
+  <span class="na">menu &quot;Debug&quot; [</span>
+    <span class="na">command-action {</span>
+      <span class="na">command-def</span> <span class="o">=</span> <span class="s">showParsedAstCommand</span>
+      <span class="na">execution-type</span> <span class="o">=</span> <span class="s">Once</span>
+    <span class="na">}</span>
+    <span class="na">command-action {</span>
+      <span class="na">command-def</span> <span class="o">=</span> <span class="s">showParsedAstCommand</span>
+      <span class="na">execution-type</span> <span class="o">=</span> <span class="s">Continuous</span>
+    <span class="na">}</span>
+  <span class="na">]</span>
+<span class="na">]</span>
+<span class="na">resource-context-menu [</span>
+  <span class="na">menu &quot;Debug&quot; [</span>
+    <span class="na">command-action {</span>
+      <span class="na">command-def</span> <span class="o">=</span> <span class="s">showParsedAstCommand</span>
+      <span class="na">execution-type</span> <span class="o">=</span> <span class="s">Once</span>
+      <span class="na">required-resource-types</span> <span class="o">=</span> <span class="s">[File]</span>
+    <span class="na">}</span>
+  <span class="na">]</span>
+<span class="na">]</span>
+</code></pre></div>
+<h3 id="language-feature-sections">Language feature sections<a class="headerlink" href="#language-feature-sections" title="Permanent link">&para;</a></h3>
+<h4 id="parser">Parser<a class="headerlink" href="#parser" title="Permanent link">&para;</a></h4>
+<p>The <code>parser { $ParserOption* }</code> section enables generation of a parser, and groups options.
+The <code>sdf3</code> section must be enabled when the <code>parser</code> section is enabled.
+The following <code>ParserOption</code>s are supported:</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Required?</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>default-start-symbol = $Expression</code></td>
+<td>yes</td>
+<td>The start symbol to use when no specific one is provided.</td>
+<td>SDF3 sort identifier</td>
+</tr>
+<tr>
+<td><code>variant = $ParserVariant</code></td>
+<td>no</td>
+<td>The parser variant to use. Defaults to <code>jsglr1</code>.</td>
+<td>n/a</td>
+</tr>
+</tbody>
+</table>
+<p>The following <code>ParserVariant</code>s are supported:</p>
+<ul>
+<li><code>jsglr1</code>: uses the <a href="https://github.com/metaborg/jsglr/tree/master/org.spoofax.jsglr">JSGLR1</a> parser.</li>
+<li><code>jsglr2 { $Jsglr2Option* }</code>: uses the <a href="https://github.com/metaborg/jsglr/tree/master/org.spoofax.jsglr2">JSGLR2</a> parser. The following <code>Jsglr2Option</code>s are supported:<ul>
+<li><code>preset = $Jsglr2Preset</code>: sets the <a href="https://github.com/metaborg/jsglr/blob/master/org.spoofax.jsglr2/src/main/java/org/spoofax/jsglr2/JSGLR2Variant.java#L120">JSGLR2 preset</a> to use. The following <code>Jsglr2Preset</code>s are supported:<ul>
+<li><code>Standard</code></li>
+<li><code>Elkhound</code></li>
+<li><code>Recovery</code></li>
+<li><code>RecoveryElkhound</code></li>
+<li><code>DataDependent</code></li>
+<li><code>LayoutSensitive</code></li>
+<li><code>Composite</code></li>
+<li><code>Incremental</code></li>
+<li><code>IncrementalRecovery</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="styler">Styler<a class="headerlink" href="#styler" title="Permanent link">&para;</a></h4>
+<p>The <code>styler { $StylerOption* }</code> section enables generation of a styler, and groups options.
+The <code>esv</code> section must be enabled when the <code>styler</code> section is enabled.
+Currently, no <code>StylerOption</code>s are supported.</p>
+<h4 id="constraint-analyzer">Constraint analyzer<a class="headerlink" href="#constraint-analyzer" title="Permanent link">&para;</a></h4>
+<p>The <code>constraint-analyzer { $ConstraintAnalyzerOption* }</code> section enables generation of a constraint analyzer, and groups options.
+The <code>statix</code> section must be enabled when the <code>constraint-analyzer</code> section is enabled.
+The following <code>ConstraintAnalyzerOption</code>s are supported:</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Required?</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>multi-file = $Expression</code></td>
+<td>no</td>
+<td>Whether multi-file analysis is enabled. Defaults to <code>false</code>.</td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td><code>stratego-strategy = Expression</code></td>
+<td>no</td>
+<td>The stratego strategy entry-point that handles communication with the constraint-solver. Defaults to <code>editor-analyze</code>.</td>
+<td>Stratego strategy identifier</td>
+</tr>
+</tbody>
+</table>
+<h4 id="multi-language-analyzer">Multi-language analyzer<a class="headerlink" href="#multi-language-analyzer" title="Permanent link">&para;</a></h4>
+<p>The <code>multilang-analyzer { $MultilangAnalyzerOption* }</code> section enables generation of a multi-language analyzer, and groups options.
+The <code>constraint-analyzer</code> and <code>statix</code> sections must be enabled when the <code>multilang-analyzer</code> section is enabled.
+Currently, no <code>MultilangAnalyzerOption</code>s are supported.</p>
+<h4 id="stratego-runtime">Stratego runtime<a class="headerlink" href="#stratego-runtime" title="Permanent link">&para;</a></h4>
+<p>The <code>stratego-runtime { $StrategoRuntimeOption* }</code> section enables generation of a stratego runtime, and groups options.
+The <code>stratego</code> section must be enabled when the <code>stratego-runtime</code> section is enabled.
+Currently, no <code>StrategoRuntimeOption</code>s are supported.</p>
+<h4 id="completer">Completer<a class="headerlink" href="#completer" title="Permanent link">&para;</a></h4>
+<p>The <code>completer { $CompleterOption* }</code> section enables generation of a code completer, and groups options.
+The <code>constraint-analyzer</code> and <code>statix</code> sections must be enabled when the <code>completer</code> section is enabled.
+Currently, no <code>CompleterOption</code>s are supported.</p>
+<h3 id="meta-language-sections">Meta-language sections<a class="headerlink" href="#meta-language-sections" title="Permanent link">&para;</a></h3>
+<h4 id="sdf3">SDF3<a class="headerlink" href="#sdf3" title="Permanent link">&para;</a></h4>
+<p>The <code>sdf3 { $Sdf3Option* }</code> section enables syntax definition with <a href="https://www.spoofax.dev/spoofax-docs/references/syntax/">SDF3</a>.
+The <code>parser</code> section must be enabled when the <code>sdf3</code> section is enabled.
+The following <code>Sdf3Option</code>s are supported:</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Required?</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>main-source-directory = $Expression</code></td>
+<td>no</td>
+<td>The directory relative to the root directory that contains the main SDF3 file. Defaults to the value of the top-level <code>source-directory</code> option.</td>
+<td>Path</td>
+</tr>
+<tr>
+<td><code>main-file = $Expression</code></td>
+<td>no</td>
+<td>The main SDF3 file relative to the <code>main-source-directory</code>. Defaults to <code>./start.sdf3</code>.</td>
+<td>Path</td>
+</tr>
+<tr>
+<td><code>parse-table-generator { $ParseTableGeneratorOption* }</code></td>
+<td>no</td>
+<td>Parse table generator options.</td>
+<td>n/a</td>
+</tr>
+</tbody>
+</table>
+<p>The following <code>ParseTableGeneratorOption</code>s are supported:</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Required?</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dynamic = $Expression</code></td>
+<td>no</td>
+<td>Whether the generated parse table is dynamic. Defaults to <code>false</code>.</td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td><code>data-dependent = $Expression</code></td>
+<td>no</td>
+<td>Whether the generated parse table is data-dependent. Defaults to <code>false</code>.</td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td><code>layout-sensitive = $Expression</code></td>
+<td>no</td>
+<td>Whether the generated parse table is layout-sensitive. Defaults to <code>false</code>.</td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td><code>solve-deep-conflicts = $Expression</code></td>
+<td>no</td>
+<td>Whether the parse table generator solves deep priority conflicts. Defaults to <code>true</code>.</td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td><code>check-overlap = $Expression</code></td>
+<td>no</td>
+<td>Whether the parse table generator checks for overlap. Defaults to <code>false</code>.</td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td><code>check-priorities = $Expression</code></td>
+<td>no</td>
+<td>Whether the parse table generator checks priorities. Defaults to <code>false</code>.</td>
+<td>Boolean</td>
+</tr>
+</tbody>
+</table>
+<h4 id="esv">ESV<a class="headerlink" href="#esv" title="Permanent link">&para;</a></h4>
+<p>The <code>esv { $EsvOption* }</code> section enables syntax-based styling definition with <a href="https://www.spoofax.dev/spoofax-docs/references/editor-services/syntax-highlighting/">ESV</a>.
+The <code>styler</code> section must be enabled when the <code>esv</code> section is enabled.
+The following <code>EsvOption</code>s are supported:</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Required?</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>main-source-directory = $Expression</code></td>
+<td>no</td>
+<td>The directory relative to the root directory that contains the main ESV file. Defaults to the value of the top-level <code>source-directory</code> option.</td>
+<td>Path</td>
+</tr>
+<tr>
+<td><code>main-file = $Expression</code></td>
+<td>no</td>
+<td>The main ESV file relative to the <code>main-source-directory</code>. Defaults to <code>./main.esv</code>.</td>
+<td>Path</td>
+</tr>
+<tr>
+<td><code>include-directory = $Expression</code></td>
+<td>no</td>
+<td>Adds an include directory from which to resolve ESV imports. May be given multiple times.</td>
+<td>Path</td>
+</tr>
+</tbody>
+</table>
+<h4 id="statix">Statix<a class="headerlink" href="#statix" title="Permanent link">&para;</a></h4>
+<p>The <code>statix { $StatixOption* }</code> section enables static semantics definition with <a href="https://www.spoofax.dev/spoofax-docs/references/statix/">Statix</a>.
+The <code>constraint-anaylzer</code> section must be enabled when the <code>statix</code> section is enabled.
+The following <code>StatixOption</code>s are supported:</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Required?</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>main-source-directory = $Expression</code></td>
+<td>no</td>
+<td>The directory relative to the root directory that contains the main Statix file. Defaults to the value of the top-level <code>source-directory</code> option.</td>
+<td>Path</td>
+</tr>
+<tr>
+<td><code>main-file = $Expression</code></td>
+<td>no</td>
+<td>The main Statix file relative to the <code>main-source-directory</code>. Defaults to <code>./main.stx</code>.</td>
+<td>Path</td>
+</tr>
+</tbody>
+</table>
+<h4 id="stratego">Stratego<a class="headerlink" href="#stratego" title="Permanent link">&para;</a></h4>
+<p>The <code>stratego { $StrategoOption* }</code> section enables definition of transformations with <a href="https://www.spoofax.dev/spoofax-docs/references/stratego/">Stratego</a>.
+The <code>stratego-runtime</code> section must be enabled when the <code>stratego</code> section is enabled.
+The following <code>StrategoOption</code>s are supported:</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Required?</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>main-source-directory = $Expression</code></td>
+<td>no</td>
+<td>The directory relative to the root directory that contains the main Stratego file. Defaults to the value of the top-level <code>source-directory</code> option.</td>
+<td>Path</td>
+</tr>
+<tr>
+<td><code>main-file = $Expression</code></td>
+<td>no</td>
+<td>The main Stratego file relative to the <code>main-source-directory</code>. Defaults to <code>./main.stx</code>.</td>
+<td>Path</td>
+</tr>
+<tr>
+<td><code>language-strategy-affix = $Expression</code></td>
+<td>no</td>
+<td>The affix that is used to make certain generated strategies unique to the language. This is used both as a prefix and suffix. Defaults to name of the language transformed to a Stratego strategy identifier.</td>
+<td>Stratego strategy identifier</td>
+</tr>
+</tbody>
+</table>
+<h3 id="spoofaxclock">spoofaxc.lock<a class="headerlink" href="#spoofaxclock" title="Permanent link">&para;</a></h3>
+<p>The <code>spoofaxc.lock</code> file, which resides next to the <code>spoofaxc.cfg</code> file, contains values for several options that have defaults derived from other options, in order to keep these derived values stable even when the options they are derived from are changed.
+For example, when no <code>java-class-id-prefix</code> option is set in <code>spoofaxc.cfg</code>, it will be derived from the <code>name</code> option with some changes to make it compatible as a Java identifier, and is stored under <code>shared.defaultClassPrefix</code> in the <code>spoofaxc.lock</code> file.
+When you change the <code>name</code> of your language, the stored value will be used, keeping the class prefix the same, making it possible to rename the language without having to rename all class files.
+Therefore, the <code>spoofaxc.lock</code> file should be checked in to source control, in order to have reproducible builds.</p>
+<p>If you <strong>do</strong> want to re-derive a default from other options, remove the option from the <code>spoofaxc.lock</code> file and rebuild the language.
+The value will be re-derived and stored in <code>spoofaxc.lock</code>, after which you need to check it into source control again.</p>
+<h2 id="file-structure">File structure<a class="headerlink" href="#file-structure" title="Permanent link">&para;</a></h2>
+<h2 id="java-classes">Java classes<a class="headerlink" href="#java-classes" title="Permanent link">&para;</a></h2>
+<p>description of the Java classes, their instances, and how they are instantiated</p>
+<p>basic classes:</p>
+<p>ClassLoaderResources
+ParseTable/ParserFactory/Parser
+StylingRules/StylerFactory/Styler
+StrategoRuntimeBuilderFactory
+ConstraintAnalyzerFactory/ConstraintAnalyzer</p>
+<p>components:</p>
+<p>ResourcesComponent/ResourcesModule
+Component/Module
+Scope/Qualifier
+how they are instantiated by Dagger</p>
+<p>LanguageInstance:</p>
+<p>tasks</p>
+<p>command defs
+auto command request</p>
+<p>CLI commands</p>
+<p>menu items</p>
+<p>task definitions:</p>
+<p>Tokenize
+Style
+Completion
+Check/CheckMulti/CheckAggregator/CheckDeaggregator</p>
+<p>Parse
+Analyze/AnalyzeMulti
+GetStrategoRuntimeProvider</p>
+<p>commands:</p>
+<h2 id="instantiation">Instantiation<a class="headerlink" href="#instantiation" title="Permanent link">&para;</a></h2>
+<p>dependency injection</p>
+<h2 id="compilation">Compilation<a class="headerlink" href="#compilation" title="Permanent link">&para;</a></h2>
+<p>description of how a language definition is compiled into a language implementation, and what the compiled form looks like.</p>
+<p>generate Java sources into:</p>
+<p>build/generated/sources/language</p>
+<p>build/generated/sources/adapter</p>
+<p>generate Stratego sources into:</p>
+<p>build/generated/sources/languageSpecification/stratego</p>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+        
+          <a href="#" class="md-top md-icon" title="Back to top" data-md-component="top" data-md-state="hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"/></svg>
+          </a>
+        
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        <a href="../tutorial/create_language_project.html" class="md-footer__link md-footer__link--prev" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Creating a language project
+            </div>
+          </div>
+        </a>
+      
+      
+        <a href="anatomy_language_implementation.html" class="md-footer__link md-footer__link--next" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Anatomy of a language implementation
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+        
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.instant", "navigation.tabs", "navigation.top"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../assets/javascripts/workers/search.4fa0e4ee.min.js", "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.1d3bfcf1.min.js"></script>
+      
+    
+  </body>
+</html>
