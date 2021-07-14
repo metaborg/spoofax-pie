@@ -52,7 +52,11 @@ public class JavaProjectUtil {
 
         // Add built-in class path entries to classpath.
         for(File classPathEntry : ClassPathUtil.getClassPath()) {
-            classpathEntries.add(JavaCore.newLibraryEntry(Path.fromOSString(classPathEntry.getAbsolutePath()), null, null));
+            if(classPathEntry.isFile()) {
+                // For some reason, on non-macOS systems, the ant plugin directory is listed as a class path entry here,
+                // which causes an exception. Therefore, we only add JAR class path entries.
+                classpathEntries.add(JavaCore.newLibraryEntry(Path.fromOSString(classPathEntry.getPath()), null, null));
+            }
         }
 
         // Add installed JRE to classpath.
