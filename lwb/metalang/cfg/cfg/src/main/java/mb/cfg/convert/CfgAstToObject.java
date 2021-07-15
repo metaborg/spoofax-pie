@@ -191,31 +191,31 @@ public class CfgAstToObject {
                         final ParserVariant.Jsglr2Preset preset;
                         switch(appl.getConstructor().getName()) {
                             default:
-                            case "Standard":
+                            case "Jsglr2StandardPreset":
                                 preset = ParserVariant.Jsglr2Preset.Standard;
                                 break;
-                            case "Elkhound":
+                            case "Jsglr2ElkhoundPreset":
                                 preset = ParserVariant.Jsglr2Preset.Elkhound;
                                 break;
-                            case "Recovery":
+                            case "Jsglr2RecoveryPreset":
                                 preset = ParserVariant.Jsglr2Preset.Recovery;
                                 break;
-                            case "RecoveryElkhound":
+                            case "Jsglr2RecoveryElkhoundPreset":
                                 preset = ParserVariant.Jsglr2Preset.RecoveryElkhound;
                                 break;
-                            case "DataDependent":
+                            case "Jsglr2DataDependentPreset":
                                 preset = ParserVariant.Jsglr2Preset.DataDependent;
                                 break;
-                            case "LayoutSensitive":
+                            case "Jsglr2LayoutSensitivePreset":
                                 preset = ParserVariant.Jsglr2Preset.LayoutSensitive;
                                 break;
-                            case "Composite":
+                            case "Jsglr2CompositePreset":
                                 preset = ParserVariant.Jsglr2Preset.Composite;
                                 break;
-                            case "Incremental":
+                            case "Jsglr2IncrementalPreset":
                                 preset = ParserVariant.Jsglr2Preset.Incremental;
                                 break;
-                            case "IncrementalRecovery":
+                            case "Jsglr2IncrementalRecoveryPreset":
                                 preset = ParserVariant.Jsglr2Preset.IncrementalRecovery;
                                 break;
                         }
