@@ -7,7 +7,7 @@ context-free sorts
 context-free syntax
 
   Start.Start = <<stmts:Stmt*>> {layout(align-list stmts)}
-  Stmt.Pass = <pass> {layout(1.first.line == 1.last.line)}
+  Stmt.Pass = <pass> {layout(0.first.line == 0.last.line)}
 
 context-free start-symbols
 

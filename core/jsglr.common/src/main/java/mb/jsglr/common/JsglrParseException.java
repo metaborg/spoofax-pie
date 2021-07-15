@@ -2,6 +2,7 @@ package mb.jsglr.common;
 
 import mb.common.message.HasOptionalMessages;
 import mb.common.message.KeyedMessages;
+import mb.common.option.Option;
 import mb.common.util.ADT;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
@@ -10,50 +11,50 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.io.IOException;
 import java.util.Optional;
 
-@ADT @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+@ADT
 public abstract class JsglrParseException extends Exception implements HasOptionalMessages {
     public interface Cases<R> {
-        R readStringFail(IOException ioException, Optional<String> startSymbol, Optional<ResourceKey> fileHint, Optional<ResourcePath> rootDirectoryHint);
+        R readStringFail(IOException ioException, Option<String> startSymbol, Option<ResourceKey> fileHint, Option<ResourcePath> rootDirectoryHint);
 
-        R parseFail(KeyedMessages messages, Optional<String> startSymbol, Optional<ResourceKey> fileHint, Optional<ResourcePath> rootDirectoryHint);
+        R parseFail(KeyedMessages messages, Option<String> startSymbol, Option<ResourceKey> fileHint, Option<ResourcePath> rootDirectoryHint);
 
-        R recoveryDisallowedFail(KeyedMessages messages, Optional<String> startSymbol, Optional<ResourceKey> fileHint, Optional<ResourcePath> rootDirectoryHint);
+        R recoveryDisallowedFail(KeyedMessages messages, Option<String> startSymbol, Option<ResourceKey> fileHint, Option<ResourcePath> rootDirectoryHint);
 
-        R otherFail(Exception cause, Optional<String> startSymbol, Optional<ResourceKey> fileHint, Optional<ResourcePath> rootDirectoryHint);
+        R otherFail(Exception cause, Option<String> startSymbol, Option<ResourceKey> fileHint, Option<ResourcePath> rootDirectoryHint);
     }
 
-    public static JsglrParseException readStringFail(IOException cause, Optional<String> startSymbol, Optional<ResourceKey> fileHint, Optional<ResourcePath> rootDirectoryHint) {
+    public static JsglrParseException readStringFail(IOException cause, Option<String> startSymbol, Option<ResourceKey> fileHint, Option<ResourcePath> rootDirectoryHint) {
         final JsglrParseException e = JsglrParseExceptions.readStringFail(cause, startSymbol, fileHint, rootDirectoryHint);
         e.initCause(cause);
         return e;
     }
 
     public static JsglrParseException readStringFail(IOException ioException, @Nullable String startSymbol, @Nullable ResourceKey fileHint, @Nullable ResourcePath rootDirectoryHint) {
-        return readStringFail(ioException, Optional.ofNullable(startSymbol), Optional.ofNullable(fileHint), Optional.ofNullable(rootDirectoryHint));
+        return readStringFail(ioException, Option.ofNullable(startSymbol), Option.ofNullable(fileHint), Option.ofNullable(rootDirectoryHint));
     }
 
-    public static JsglrParseException parseFail(KeyedMessages messages, Optional<String> startSymbol, Optional<ResourceKey> fileHint, Optional<ResourcePath> rootDirectoryHint) {
+    public static JsglrParseException parseFail(KeyedMessages messages, Option<String> startSymbol, Option<ResourceKey> fileHint, Option<ResourcePath> rootDirectoryHint) {
         return JsglrParseExceptions.parseFail(messages, startSymbol, fileHint, rootDirectoryHint);
     }
 
     public static JsglrParseException parseFail(KeyedMessages messages, @Nullable String startSymbol, @Nullable ResourceKey fileHint, @Nullable ResourcePath rootDirectoryHint) {
-        return parseFail(messages, Optional.ofNullable(startSymbol), Optional.ofNullable(fileHint), Optional.ofNullable(rootDirectoryHint));
+        return parseFail(messages, Option.ofNullable(startSymbol), Option.ofNullable(fileHint), Option.ofNullable(rootDirectoryHint));
     }
 
-    public static JsglrParseException recoveryDisallowedFail(KeyedMessages messages, Optional<String> startSymbol, Optional<ResourceKey> fileHint, Optional<ResourcePath> rootDirectoryHint) {
+    public static JsglrParseException recoveryDisallowedFail(KeyedMessages messages, Option<String> startSymbol, Option<ResourceKey> fileHint, Option<ResourcePath> rootDirectoryHint) {
         return JsglrParseExceptions.recoveryDisallowedFail(messages, startSymbol, fileHint, rootDirectoryHint);
     }
 
     public static JsglrParseException recoveryDisallowedFail(KeyedMessages messages, @Nullable String startSymbol, @Nullable ResourceKey fileHint, @Nullable ResourcePath rootDirectoryHint) {
-        return recoveryDisallowedFail(messages, Optional.ofNullable(startSymbol), Optional.ofNullable(fileHint), Optional.ofNullable(rootDirectoryHint));
+        return recoveryDisallowedFail(messages, Option.ofNullable(startSymbol), Option.ofNullable(fileHint), Option.ofNullable(rootDirectoryHint));
     }
 
-    public static JsglrParseException otherFail(Exception cause, Optional<String> startSymbol, Optional<ResourceKey> fileHint, Optional<ResourcePath> rootDirectoryHint) {
+    public static JsglrParseException otherFail(Exception cause, Option<String> startSymbol, Option<ResourceKey> fileHint, Option<ResourcePath> rootDirectoryHint) {
         return JsglrParseExceptions.otherFail(cause, startSymbol, fileHint, rootDirectoryHint);
     }
 
     public static JsglrParseException otherFail(Exception cause, @Nullable String startSymbol, @Nullable ResourceKey fileHint, @Nullable ResourcePath rootDirectoryHint) {
-        return otherFail(cause, Optional.ofNullable(startSymbol), Optional.ofNullable(fileHint), Optional.ofNullable(rootDirectoryHint));
+        return otherFail(cause, Option.ofNullable(startSymbol), Option.ofNullable(fileHint), Option.ofNullable(rootDirectoryHint));
     }
 
 
@@ -67,15 +68,15 @@ public abstract class JsglrParseException extends Exception implements HasOption
         return JsglrParseExceptions.caseOf(this);
     }
 
-    public Optional<String> getStartSymbol() {
+    public Option<String> getStartSymbol() {
         return JsglrParseExceptions.getStartSymbol(this);
     }
 
-    public Optional<ResourceKey> getFileHint() {
+    public Option<ResourceKey> getFileHint() {
         return JsglrParseExceptions.getFileHint(this);
     }
 
-    public Optional<ResourcePath> getRootDirectoryHint() {
+    public Option<ResourcePath> getRootDirectoryHint() {
         return JsglrParseExceptions.getRootDirectoryHint(this);
     }
 

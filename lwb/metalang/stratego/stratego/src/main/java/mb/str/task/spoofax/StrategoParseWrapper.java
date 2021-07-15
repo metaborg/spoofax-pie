@@ -47,7 +47,7 @@ public class StrategoParseWrapper extends StrategoParse {
                     },
                     () -> super.exec(context, input) // Stratego is not configured -> parse normally.
                 ),
-                e -> Result.ofErr(JsglrParseException.otherFail(e, input.startSymbol(), input.fileHint().toOptional(), input.rootDirectoryHint())) // Stratego configuration failed -> fail.
+                e -> Result.ofErr(JsglrParseException.otherFail(e, Option.ofOptional(input.startSymbol()), input.fileHint(), Option.ofOptional(input.rootDirectoryHint()))) // Stratego configuration failed -> fail.
             ),
             () -> super.exec(context, input) // No directory hint is given, cannot get configuration -> parse normally.
         );

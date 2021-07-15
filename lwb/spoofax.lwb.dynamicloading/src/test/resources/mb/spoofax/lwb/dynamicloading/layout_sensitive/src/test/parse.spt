@@ -1,8 +1,9 @@
 module parse
 
 test parse succeeds 1 [[pass]] parse succeeds
-test parse succeeds 2 [[pass pass]] parse succeeds
 test parse succeeds 3 [[
   pass
   pass
 ]] parse succeeds
+
+test parse fails 1 [[pass pass]] parse fails
