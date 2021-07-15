@@ -3,7 +3,9 @@ package mb.spoofax.lwb.eclipse;
 import mb.common.message.KeyedMessages;
 import mb.common.result.Result;
 import mb.common.util.ExceptionPrinter;
+import mb.log.api.Level;
 import mb.log.api.Logger;
+import mb.log.stream.LoggingOutputStream;
 import mb.pie.api.ExecException;
 import mb.pie.api.MixedSession;
 import mb.pie.api.OutTransient;
@@ -35,6 +37,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import java.io.File;
+import java.io.PrintStream;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -122,6 +125,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         final KeyedMessages messages = session.require(createCheckTask(rootDirectory));
         if(messages.containsError()) {
             logger.debug("Checking language specification revealed errors; skipping compilation");
+            new ExceptionPrinter().addCurrentDirectoryContext(rootDirectory).printMessages(messages, new PrintStream(new LoggingOutputStream(logger, Level.Debug)));
             return;
         }
 
@@ -156,6 +160,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         final KeyedMessages messages = topDownSession.getOutputOrRequireAndEnsureExplicitlyObserved(createCheckTask(rootDirectory), cancelToken);
         if(messages.containsError()) {
             logger.debug("Checking language specification revealed errors; skipping handling of compile and dynamic load result");
+            new ExceptionPrinter().addCurrentDirectoryContext(rootDirectory).printMessages(messages, new PrintStream(new LoggingOutputStream(logger, Level.Debug)));
             return;
         }
 
