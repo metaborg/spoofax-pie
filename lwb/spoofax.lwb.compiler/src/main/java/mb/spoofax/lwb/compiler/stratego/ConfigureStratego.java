@@ -39,7 +39,6 @@ import mb.spoofax.lwb.compiler.sdf3.Sdf3GenerationUtil;
 import mb.str.config.StrategoCompileConfig;
 import mb.stratego.build.strincr.BuiltinLibraryIdentifier;
 import mb.stratego.build.strincr.ModuleIdentifier;
-import mb.stratego.build.util.StrategoGradualSetting;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.sdf2table.parsetable.ParseTable;
 import org.metaborg.util.cmd.Arguments;
@@ -299,10 +298,9 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
 
         return Result.ofOk(new StrategoCompileConfig(
             rootDirectory,
-            new ModuleIdentifier(false, strategoInput.mainModule(), mainFile.getPath()),
+            new ModuleIdentifier(true, false, strategoInput.mainModule(), mainFile.getPath()),
             ListView.copyOf(includeDirectories),
             ListView.of(builtinLibraryIdentifiers),
-            StrategoGradualSetting.NONE, // TODO: add to input and configure
             new Arguments(), // TODO: add to input and configure
             ListView.of(sourceFileOrigins),
             null, //strategoInput.cacheDirectory(), // TODO: settings this crashes the compiler, most likely due to the ## symbols in the path.

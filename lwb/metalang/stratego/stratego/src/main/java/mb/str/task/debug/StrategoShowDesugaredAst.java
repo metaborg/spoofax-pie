@@ -11,19 +11,21 @@ import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
 import mb.str.StrategoScope;
 import mb.str.task.StrategoParse;
+import mb.str.task.spoofax.StrategoParseWrapper;
 import mb.stratego.common.StrategoRuntime;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import java.util.Optional;
 
 @StrategoScope
 public class StrategoShowDesugaredAst implements TaskDef<StrategoShowArgs, CommandFeedback> {
-    private final StrategoParse parse;
+    private final StrategoParseWrapper parse;
     private final Provider<StrategoRuntime> strategoRuntimeProvider;
 
     @Inject public StrategoShowDesugaredAst(
-        StrategoParse parse,
+        StrategoParseWrapper parse,
         Provider<StrategoRuntime> strategoRuntimeProvider
     ) {
         this.parse = parse;
@@ -35,10 +37,10 @@ public class StrategoShowDesugaredAst implements TaskDef<StrategoShowArgs, Comma
     }
 
     @Override public CommandFeedback exec(ExecContext context, StrategoShowArgs input) throws Exception {
-        final ResourceKey key = input.key;
+        final ResourceKey key = input.file;
         final @Nullable Region region = input.region;
         return context
-            .require(parse.inputBuilder().withFile(key).buildAstSupplier())
+            .require(parse.inputBuilder().withFile(key).rootDirectoryHint(Optional.ofNullable(input.rootDirectoryHint)).buildAstSupplier())
             .map(ast -> {
                 if(region != null) {
                     return TermTracer.getSmallestTermEncompassingRegion(ast, region);

@@ -7,6 +7,7 @@ import mb.common.style.Styling;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.resource.ResourceKey;
+import mb.resource.ResourceRuntimeException;
 import mb.spoofax.core.platform.PlatformScope;
 import mb.spoofax.eclipse.EclipseIdentifiers;
 import mb.spoofax.eclipse.editor.SpoofaxEditorBase;
@@ -151,20 +152,29 @@ public class WorkspaceUpdate {
         final ICoreRunnable makerUpdate = (IWorkspaceRunnable)workspaceMonitor -> {
             for(ClearMessages clear : clears) {
                 if(workspaceMonitor != null && workspaceMonitor.isCanceled()) return;
-                final IResource resource = resourceUtil.getEclipseResource(clear.origin);
-                if(!resource.exists()) continue;
-                MarkerUtil.clear(eclipseIdentifiers, resource, clear.recursive);
+                try {
+                    final IResource resource = resourceUtil.getEclipseResource(clear.origin);
+                    if(!resource.exists()) {
+                        logger.error("Cannot clear markers for resource '{}'; resource does not exist", resource);
+                        continue;
+                    }
+                    MarkerUtil.clear(eclipseIdentifiers, resource, clear.recursive);
+                } catch(ResourceRuntimeException e) {
+                    logger.error("Cannot clear markers for resource '{}'; getting Eclipse resource failed unexpectedly", e, clear.origin);
+                }
             }
             try {
                 if(workspaceMonitor == null || !workspaceMonitor.isCanceled()) {
                     keyedMessages.getMessagesWithKey().forEach(entry -> {
                         ResourceKey resourceKey = entry.getKey();
                         entry.getValue().forEach(message -> {
-                            final IResource resource = resourceUtil.getEclipseResource(resourceKey);
                             try {
+                                final IResource resource = resourceUtil.getEclipseResource(resourceKey);
                                 MarkerUtil.create(eclipseIdentifiers, message.text, message.severity, resource, message.region);
                             } catch(CoreException e) {
                                 throw new UncheckedCoreException(e);
+                            }  catch(ResourceRuntimeException e) {
+                                logger.error("Cannot create markers for resource '{}'; getting Eclipse resource failed unexpectedly", e, resourceKey);
                             }
                         });
                     });

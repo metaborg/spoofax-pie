@@ -62,7 +62,6 @@ public class StrategoCheck implements TaskDef<StrategoAnalyzeConfig, KeyedMessag
         final CheckOutput output = context.require(check, new CheckInput(
             config.mainModule,
             config.rootDirectory,
-            config.gradualTypingSetting,
             config.sourceFileOrigins.asCopy(),
             config.includeDirs.asCopy(),
             config.builtinLibs.asCopy(),

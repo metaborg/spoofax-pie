@@ -5,7 +5,6 @@ import mb.pie.api.STask;
 import mb.resource.hierarchical.ResourcePath;
 import mb.stratego.build.strincr.BuiltinLibraryIdentifier;
 import mb.stratego.build.strincr.ModuleIdentifier;
-import mb.stratego.build.util.StrategoGradualSetting;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
@@ -15,7 +14,6 @@ public class StrategoAnalyzeConfig implements Serializable {
     public final ModuleIdentifier mainModule;
     public final ListView<ResourcePath> includeDirs;
     public final ListView<BuiltinLibraryIdentifier> builtinLibs;
-    public final StrategoGradualSetting gradualTypingSetting;
     public final ListView<STask<?>> sourceFileOrigins;
 
     public StrategoAnalyzeConfig(
@@ -23,14 +21,12 @@ public class StrategoAnalyzeConfig implements Serializable {
         ModuleIdentifier mainModule,
         ListView<ResourcePath> includeDirs,
         ListView<BuiltinLibraryIdentifier> builtinLibs,
-        StrategoGradualSetting gradualTypingSetting,
         ListView<STask<?>> sourceFileOrigins
     ) {
         this.rootDirectory = rootDirectory;
         this.mainModule = mainModule;
         this.includeDirs = includeDirs;
         this.builtinLibs = builtinLibs;
-        this.gradualTypingSetting = gradualTypingSetting;
         this.sourceFileOrigins = sourceFileOrigins;
     }
 
@@ -39,7 +35,6 @@ public class StrategoAnalyzeConfig implements Serializable {
         ResourcePath mainFile,
         ListView<ResourcePath> includeDirs,
         ListView<BuiltinLibraryIdentifier> builtinLibs,
-        StrategoGradualSetting gradualTypingSetting,
         ListView<STask<?>> sourceFileOrigins
     ) {
         this(
@@ -47,7 +42,6 @@ public class StrategoAnalyzeConfig implements Serializable {
             StrategoConfig.fromRootDirectoryAndMainFile(rootDirectory, mainFile),
             includeDirs,
             builtinLibs,
-            gradualTypingSetting,
             sourceFileOrigins
         );
     }
@@ -58,7 +52,6 @@ public class StrategoAnalyzeConfig implements Serializable {
             StrategoConfig.defaultMainModule(rootDirectory),
             ListView.of(),
             StrategoConfig.defaultBuiltinLibs(),
-            StrategoConfig.defaultGradualTypingSetting(),
             ListView.of()
         );
     }
@@ -71,7 +64,6 @@ public class StrategoAnalyzeConfig implements Serializable {
         if(!mainModule.equals(that.mainModule)) return false;
         if(!includeDirs.equals(that.includeDirs)) return false;
         if(!builtinLibs.equals(that.builtinLibs)) return false;
-        if(gradualTypingSetting != that.gradualTypingSetting) return false;
         return sourceFileOrigins.equals(that.sourceFileOrigins);
     }
 
@@ -80,7 +72,6 @@ public class StrategoAnalyzeConfig implements Serializable {
         result = 31 * result + mainModule.hashCode();
         result = 31 * result + includeDirs.hashCode();
         result = 31 * result + builtinLibs.hashCode();
-        result = 31 * result + gradualTypingSetting.hashCode();
         result = 31 * result + sourceFileOrigins.hashCode();
         return result;
     }
@@ -91,7 +82,6 @@ public class StrategoAnalyzeConfig implements Serializable {
             ", mainModule=" + mainModule +
             ", includeDirs=" + includeDirs +
             ", builtinLibs=" + builtinLibs +
-            ", gradualTypingSetting=" + gradualTypingSetting +
             ", sourceFileOrigins=" + sourceFileOrigins +
             '}';
     }

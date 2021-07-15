@@ -9,7 +9,6 @@ import mb.resource.fs.FSResource;
 import mb.str.config.StrategoAnalyzeConfig;
 import mb.str.util.TestBase;
 import mb.stratego.build.strincr.BuiltinLibraryIdentifier;
-import mb.stratego.build.util.StrategoGradualSetting;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +26,6 @@ class AnalyzeTest extends TestBase {
                 mainFile.getPath(),
                 ListView.of(projectDir.getPath()),
                 ListView.of(BuiltinLibraryIdentifier.StrategoLib),
-                StrategoGradualSetting.NONE,
                 ListView.of()
             );
             final KeyedMessages messages = session.require(check.createTask(config));

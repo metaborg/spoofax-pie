@@ -9,12 +9,10 @@ import mb.pie.task.archive.ArchiveDirectory;
 import mb.pie.task.archive.ArchiveToJar;
 import mb.pie.task.java.CompileJava;
 import mb.resource.fs.FSResource;
-import mb.resource.hierarchical.ResourcePath;
 import mb.str.config.StrategoCompileConfig;
 import mb.str.util.TestBase;
 import mb.stratego.build.strincr.BuiltinLibraryIdentifier;
 import mb.stratego.build.strincr.task.output.CompileOutput;
-import mb.stratego.build.util.StrategoGradualSetting;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -24,7 +22,6 @@ import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import java.io.File;
-import java.util.LinkedHashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -59,7 +56,6 @@ class CompileTest extends TestBase {
                 strategoMainFile.getPath(),
                 ListView.of(strategoSourceDir.getPath()),
                 ListView.of(BuiltinLibraryIdentifier.StrategoLib),
-                StrategoGradualSetting.NONE,
                 new Arguments(),
                 ListView.of(),
                 null,

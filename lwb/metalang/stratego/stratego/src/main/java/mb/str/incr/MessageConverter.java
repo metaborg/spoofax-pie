@@ -25,9 +25,13 @@ public class MessageConverter {
                 region = null;
             }
             @Nullable ResourceKey resourceKey;
-            try {
-                resourceKey = resourceService.getResourceKey(ResourceKeyString.parse(message.locationTermString));
-            } catch(ResourceRuntimeException e) {
+            if(message.filename != null) {
+                try {
+                    resourceKey = resourceService.getResourceKey(ResourceKeyString.parse(message.filename));
+                } catch(ResourceRuntimeException e) {
+                    resourceKey = null;
+                }
+            } else {
                 resourceKey = null;
             }
             final Severity severity = convertSeverity(message.severity);

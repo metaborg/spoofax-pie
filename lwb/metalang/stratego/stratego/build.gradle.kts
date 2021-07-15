@@ -1,11 +1,10 @@
 import mb.spoofax.compiler.adapter.*
 import mb.spoofax.compiler.adapter.data.*
-import mb.spoofax.compiler.gradle.plugin.*
-import mb.spoofax.compiler.gradle.spoofax2.plugin.*
 import mb.spoofax.compiler.language.*
-import mb.spoofax.compiler.spoofax2.language.*
 import mb.spoofax.compiler.util.*
-import mb.spoofax.core.language.command.*
+import mb.spoofax.core.language.command.CommandContextType
+import mb.spoofax.core.language.command.CommandExecutionType
+import mb.spoofax.core.language.command.EnclosingCommandContextType
 
 plugins {
   id("org.metaborg.gradle.config.java-library")
@@ -41,7 +40,7 @@ languageProject {
   compilerInput {
     withParser().run {
       startSymbol("Module")
-      variant(ParserVariant.jsglr2())
+      variant(ParserVariant.jsglr2(ParserVariant.Jsglr2Preset.Recovery))
     }
     withStyler()
     withStrategoRuntime().run {
@@ -126,7 +125,6 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
       ParamRepr.of("mainFile", resourcePathType, true, ArgProviderRepr.context(CommandContextType.File)),
       ParamRepr.of("includeDirs", TypeInfo.of("mb.common.util", "ListView"), false, ArgProviderRepr.value("mb.common.util.ListView.of()")),
       ParamRepr.of("builtinLibs", TypeInfo.of("mb.common.util", "ListView"), false, ArgProviderRepr.value("mb.common.util.ListView.of()")),
-      ParamRepr.of("gradualTypingSetting", TypeInfo.of("mb.stratego.build.util", "StrategoGradualSetting"), false, ArgProviderRepr.value("mb.stratego.build.util.StrategoGradualSetting.NONE")),
       ParamRepr.of("extraCompilerArguments", TypeInfo.of("org.metaborg.util.cmd", "Arguments"), false, ArgProviderRepr.value("new org.metaborg.util.cmd.Arguments()")),
       ParamRepr.of("sourceFileOrigins", TypeInfo.of("mb.common.util", "ListView"), false, ArgProviderRepr.value("mb.common.util.ListView.of()")),
       ParamRepr.of("cacheDir", resourcePathType, false),
@@ -150,7 +148,8 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
     .description("Shows the $resultName of the file")
     .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous)
     .addAllParams(listOf(
-      ParamRepr.of("key", TypeInfo.of("mb.resource", "ResourceKey"), true, ArgProviderRepr.context(CommandContextType.File)),
+      ParamRepr.of("file", TypeInfo.of("mb.resource", "ResourceKey"), true, ArgProviderRepr.context(CommandContextType.File)),
+      ParamRepr.of("rootDirectoryHint", TypeInfo.of("mb.resource.hierarchical", "ResourcePath"), true, ArgProviderRepr.enclosingContext(mb.spoofax.core.language.command.EnclosingCommandContextType.Project)),
       ParamRepr.of("region", TypeInfo.of("mb.common.region", "Region"), false)
     ))
     .build()

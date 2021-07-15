@@ -42,7 +42,6 @@ public class StrategoCompileToJava implements TaskDef<StrategoCompileConfig, Res
             config.builtinLibs.asCopy(),
             config.extraCompilerArguments,
             config.sourceFileOrigins.asCopy(),
-            config.gradualTypingSetting,
             true,
             true
         ));

@@ -2,33 +2,40 @@ package mb.str.task.debug;
 
 import mb.common.region.Region;
 import mb.resource.ResourceKey;
+import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
-import java.util.Objects;
 
 public class StrategoShowArgs implements Serializable {
-    public final ResourceKey key;
+    public final ResourceKey file;
+    public final @Nullable ResourcePath rootDirectoryHint;
     public final @Nullable Region region;
 
-    public StrategoShowArgs(ResourceKey key, @Nullable Region region) {
-        this.key = key;
+    public StrategoShowArgs(ResourceKey file, @Nullable ResourcePath rootDirectoryHint, @Nullable Region region) {
+        this.file = file;
+        this.rootDirectoryHint = rootDirectoryHint;
         this.region = region;
     }
 
-    @Override public boolean equals(@Nullable Object obj) {
-        if(this == obj) return true;
-        if(obj == null || getClass() != obj.getClass()) return false;
-        final StrategoShowArgs other = (StrategoShowArgs)obj;
-        return key.equals(other.key) &&
-            Objects.equals(region, other.region);
+    @Override public boolean equals(@Nullable Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+        final StrategoShowArgs that = (StrategoShowArgs)o;
+        if(!file.equals(that.file)) return false;
+        if(rootDirectoryHint != null ? !rootDirectoryHint.equals(that.rootDirectoryHint) : that.rootDirectoryHint != null)
+            return false;
+        return region != null ? region.equals(that.region) : that.region == null;
     }
 
     @Override public int hashCode() {
-        return Objects.hash(key, region);
+        int result = file.hashCode();
+        result = 31 * result + (rootDirectoryHint != null ? rootDirectoryHint.hashCode() : 0);
+        result = 31 * result + (region != null ? region.hashCode() : 0);
+        return result;
     }
 
     @Override public String toString() {
-        return key.toString() + (region != null ? "@" + region : "");
+        return file + (region != null ? "@" + region : "");
     }
 }
