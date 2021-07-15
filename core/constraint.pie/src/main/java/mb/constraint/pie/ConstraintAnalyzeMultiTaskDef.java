@@ -86,8 +86,6 @@ public abstract class ConstraintAnalyzeMultiTaskDef implements TaskDef<Constrain
         @Override public String toString() {
             return "Output{" +
                 "messagesFromAstProviders=" + messagesFromAstProviders +
-                ", context=" + context +
-                ", result=" + result +
                 '}';
         }
     }
