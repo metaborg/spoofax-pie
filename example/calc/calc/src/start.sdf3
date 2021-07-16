@@ -31,8 +31,8 @@ context-free syntax // numbers
 
 context-free syntax // booleans
 
-  Exp.True  = <true>
-  Exp.False = <false>
+  Exp.True  = "true"
+  Exp.False = "false"
   Exp.Not   = <!<Exp>>
   Exp.And   = <<Exp> & <Exp>> {left}
   Exp.Or    = <<Exp> | <Exp>> {left}

@@ -237,6 +237,7 @@ open class LanguagePlugin : Plugin<Project> {
               val exceptionPrinter = ExceptionPrinter()
               exceptionPrinter.addCurrentDirectoryContext(projectDir)
               project.logger.error(exceptionPrinter.printExceptionToString(it))
+              throw GradleException("Compiling language produced errors")
             }
           }
         }
