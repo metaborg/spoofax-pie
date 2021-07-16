@@ -2,7 +2,7 @@
 [![Jenkins](https://img.shields.io/jenkins/build/https/buildfarm.metaborg.org/job/metaborg/job/spoofax-pie/job/master)](https://buildfarm.metaborg.org/job/metaborg/job/spoofax-pie/job/master/lastBuild)
 [![Jenkins Tests](https://img.shields.io/jenkins/tests/https/buildfarm.metaborg.org/job/metaborg/job/spoofax-pie/job/master)](https://buildfarm.metaborg.org/job/metaborg/job/spoofax-pie/job/master/lastBuild/testReport/)
 [![Spoofax 3 core](https://img.shields.io/maven-metadata/v?label=spoofax.core&metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fspoofax.core%2Fmaven-metadata.xml)](https://mvnrepository.com/artifact/org.metaborg/spoofax.core?repo=metaborg-releases)
-[![Documentation](https://img.shields.io/badge/docs-latest-brightgreen)](https://metaborg.github.io/spoofax-pie/)
+[![Documentation](https://img.shields.io/badge/docs-latest-brightgreen)](https://metaborg.github.io/spoofax-pie/develop/)
 
 # Spoofax 3
 
@@ -13,7 +13,7 @@ Currently, Spoofax 3 is experimental and still a work-in-progress.
 Therefore, it does not have a stable API, lacks documentation and test coverage, and has not yet been applied to real-world use cases.
 If you are looking for a more mature alternative, see [Spoofax 2](http://spoofax.org), which Spoofax 3 is based on.
 
-**See the (incomplete/under construction) [documentation website](https://metaborg.github.io/spoofax-pie/) for the motivation, key ideas, and current status of Spoofax 3**.
+**See the (incomplete/under construction) [documentation website](https://metaborg.github.io/spoofax-pie/develop/) for the motivation, key ideas, and current status of Spoofax 3**.
 
 ## Copyright and License
 
