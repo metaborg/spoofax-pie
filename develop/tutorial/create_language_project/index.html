@@ -804,9 +804,7 @@ If the progress view is empty, the build is done.
 The initial build can be a bit slow because there is a lot of code to compile in the background.
 Subsequent builds will be faster due to incrementalization.</p>
 <p>Create a test file for your language by right-clicking the project and choosing <span class="guilabel">New ‣ File</span>, filling in <code>test.hel</code> as file name, and pressing <span class="guilabel">Finish</span>.
-Type a valid sentence such as <code>hello world hello hello world</code> in this file, and it will highlight purple indicating that <code>hello</code> and <code>world</code> are keywords.
-There will also be an error marker on the file because we have not yet updated the static semantics (i.e., type checker) of the language to handle the language constructs we just added.
-That is ok for now, we will fix this later.</p>
+Type a valid sentence such as <code>hello world hello hello world</code> in this file, and it will highlight purple indicating that <code>hello</code> and <code>world</code> are keywords.</p>
 <h2 id="changing-syntax-highlighting">Changing syntax highlighting<a class="headerlink" href="#changing-syntax-highlighting" title="Permanent link">&para;</a></h2>
 <p>Now we will change the syntax highlighter of the language.
 Open the main ESV file <code>helloworld/src/main.esv</code>.
@@ -1148,13 +1146,12 @@ Drag the resulting editor to the side and edit the example project, the resultin
 <p>We can also run the command by activating the <code>test.hel</code> editor by choosing <span class="guilabel">Spoofax ‣ Debug ‣ Show parsed <abbr title="Abstract Syntax Tree">AST</abbr></span> from the main menu.
 Finally, we can run the command by right-clicking the <code>test.hel</code> file in the <span class="guilabel">Package Explorer</span> by choosing <span class="guilabel">Spoofax ‣ Debug ‣ Show parsed <abbr title="Abstract Syntax Tree">AST</abbr></span> from the context menu.</p>
 <h2 id="changing-the-static-semantics">Changing the static semantics<a class="headerlink" href="#changing-the-static-semantics" title="Permanent link">&para;</a></h2>
-<p>Now we will fix the static semantics of the language.
+<p>Now we will change the static semantics of the language.
 Open the main Statix file <code>helloworld/src/main.stx</code>
 Statix is a meta-language for defining the static semantics of your language, which includes type checking.</p>
 <p>First we will update the Statix specification to handle the new language constructs.
-Replace the <code class="highlight"><span class="nv">programOk</span><span class="p">(</span><span class="nv">_</span><span class="p">).</span><span class="w"></span></code> line with <code class="highlight"><span class="nv">programOk</span><span class="p">(</span><span class="nv">Program</span><span class="p">(</span><span class="nv">parts</span><span class="p">)).</span><span class="w"></span></code>, meaning that we accept all programs consisting of parts, which is always true due to the syntax of the language.
-Build the project, and the error marker should disappear from your example program.</p>
-<p>As a silly rule, we will add a warning to all instances of <code>world</code> in the program.
+Replace the <code class="highlight"><span class="nv">programOk</span><span class="p">(</span><span class="nv">_</span><span class="p">).</span><span class="w"></span></code> line with <code>programOk(Program(parts)) :- partsOk(parts).</code>, meaning that we accept programs consisting of parts, as long as their parts are ok.
+As a silly rule, we will add a warning to all instances of <code>world</code> in the program.
 Add the following code to the end of the Statix definition:</p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nv">partOk</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="nv">Part</span><span class="w"></span>
 <span class="w">  </span><span class="nv">partOk</span><span class="p">(</span><span class="nv">Hello</span><span class="p">()).</span><span class="w"></span>
@@ -1162,8 +1159,7 @@ Add the following code to the end of the Statix definition:</p>
 <span class="w">  </span><span class="nv">partsOk</span><span class="w"> </span><span class="k">maps</span><span class="w"> </span><span class="nv">partOk</span><span class="p">(</span><span class="k">list</span><span class="p">(</span>*<span class="p">))</span><span class="w"></span>
 </code></pre></div>
 <p>This adds a <code class="highlight"><span class="nv">partOk</span><span class="w"></span></code> rule that lets all <code class="highlight"><span class="nv">Hello</span><span class="p">()</span><span class="w"></span></code> parts pass, but will add a warning to all <code class="highlight"><span class="nv">World</span><span class="p">()</span><span class="w"></span></code> parts.
-<code class="highlight"><span class="nv">partsOk</span><span class="w"></span></code> goes over a list of parts and applies <code class="highlight"><span class="nv">partOk</span><span class="w"></span></code>.
-Replace the <code class="highlight"><span class="nv">programOk</span><span class="p">(</span><span class="nv">Program</span><span class="p">(</span><span class="nv">parts</span><span class="p">)).</span><span class="w"></span></code> line with <code class="highlight"><span class="nv">programOk</span><span class="p">(</span><span class="nv">Program</span><span class="p">(</span><span class="nv">parts</span><span class="p">))</span><span class="w"> </span><span class="p">:</span><span class="nv">-</span><span class="w"> </span><span class="nv">partsOk</span><span class="p">(</span><span class="nv">parts</span><span class="p">).</span><span class="w"></span></code> to apply the <code class="highlight"><span class="nv">partsOk</span><span class="w"></span></code> rule.</p>
+<code class="highlight"><span class="nv">partsOk</span><span class="w"></span></code> goes over a list of parts and applies <code class="highlight"><span class="nv">partOk</span><span class="w"></span></code>.</p>
 <details class="note"><summary><code>src/main.stx</code> full contents</summary><div class="highlight"><pre><span></span><code><span class="k">module</span><span class="w"> </span><span class="nv">main</span><span class="w"></span>
 
 <span class="k">imports</span><span class="w"></span>
@@ -1181,7 +1177,7 @@ Replace the <code class="highlight"><span class="nv">programOk</span><span class
 <span class="w">  </span><span class="nv">partsOk</span><span class="w"> </span><span class="k">maps</span><span class="w"> </span><span class="nv">partOk</span><span class="p">(</span><span class="k">list</span><span class="p">(</span>*<span class="p">))</span><span class="w"></span>
 </code></pre></div>
 </details>
-<p>Build the project, and a warning marker should appear under all instances of <code>world</code> in the program.</p>
+<p>Build the project, and a warning marker should appear under all instances of <code>world</code> in the example program.</p>
 <h2 id="adding-a-transformation">Adding a transformation<a class="headerlink" href="#adding-a-transformation" title="Permanent link">&para;</a></h2>
 <p>Finally, we will define a transformation for our language and add a task, command-tasks, command, and menu item for it.
 Open the main Stratego file <code>helloworld/src/main.str</code>.
