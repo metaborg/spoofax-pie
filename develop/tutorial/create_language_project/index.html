@@ -1152,7 +1152,7 @@ Finally, we can run the command by right-clicking the <code>test.hel</code> file
 Open the main Statix file <code>helloworld/src/main.stx</code>
 Statix is a meta-language for defining the static semantics of your language, which includes type checking.</p>
 <p>First we will update the Statix specification to handle the new language constructs.
-Replace the <code class="highlight"><span class="nv">programOk</span><span class="p">(</span><span class="nv">Empty</span><span class="p">()).</span><span class="w"></span></code> line with <code class="highlight"><span class="nv">programOk</span><span class="p">(</span><span class="nv">Program</span><span class="p">(</span><span class="nv">parts</span><span class="p">)).</span><span class="w"></span></code>, meaning that we accept all programs consisting of parts, which is always true due to the syntax of the language.
+Replace the <code class="highlight"><span class="nv">programOk</span><span class="p">(</span><span class="nv">_</span><span class="p">).</span><span class="w"></span></code> line with <code class="highlight"><span class="nv">programOk</span><span class="p">(</span><span class="nv">Program</span><span class="p">(</span><span class="nv">parts</span><span class="p">)).</span><span class="w"></span></code>, meaning that we accept all programs consisting of parts, which is always true due to the syntax of the language.
 Build the project, and the error marker should disappear from your example program.</p>
 <p>As a silly rule, we will add a warning to all instances of <code>world</code> in the program.
 Add the following code to the end of the Statix definition:</p>
