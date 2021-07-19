@@ -62,8 +62,6 @@ Subsequent builds will be faster due to incrementalization.
 
 Create a test file for your language by right-clicking the project and choosing <span class="guilabel">New ‣ File</span>, filling in `test.hel` as file name, and pressing <span class="guilabel">Finish</span>.
 Type a valid sentence such as `hello world hello hello world` in this file, and it will highlight purple indicating that `hello` and `world` are keywords.
-There will also be an error marker on the file because we have not yet updated the static semantics (i.e., type checker) of the language to handle the language constructs we just added.
-That is ok for now, we will fix this later.
 
 ## Changing syntax highlighting
 
@@ -349,14 +347,12 @@ Finally, we can run the command by right-clicking the `test.hel` file in the <sp
 
 ## Changing the static semantics
 
-Now we will fix the static semantics of the language.
+Now we will change the static semantics of the language.
 Open the main Statix file `helloworld/src/main.stx`
 Statix is a meta-language for defining the static semantics of your language, which includes type checking.
 
 First we will update the Statix specification to handle the new language constructs.
-Replace the `#!statix programOk(_).` line with `#!statix programOk(Program(parts)).`, meaning that we accept all programs consisting of parts, which is always true due to the syntax of the language.
-Build the project, and the error marker should disappear from your example program.
-
+Replace the `#!statix programOk(_).` line with `programOk(Program(parts)) :- partsOk(parts).`, meaning that we accept programs consisting of parts, as long as their parts are ok.
 As a silly rule, we will add a warning to all instances of `world` in the program.
 Add the following code to the end of the Statix definition:
 
@@ -369,7 +365,6 @@ Add the following code to the end of the Statix definition:
 
 This adds a `#!statix partOk` rule that lets all `#!statix Hello()` parts pass, but will add a warning to all `#!statix World()` parts.
 `#!statix partsOk` goes over a list of parts and applies `#!statix partOk`.
-Replace the `#!statix programOk(Program(parts)).` line with `#!statix programOk(Program(parts)) :- partsOk(parts).` to apply the `#!statix partsOk` rule.
 
 ??? note "`src/main.stx` full contents"
     ```statix
@@ -390,7 +385,7 @@ Replace the `#!statix programOk(Program(parts)).` line with `#!statix programOk(
       partsOk maps partOk(list(*))
     ```
 
-Build the project, and a warning marker should appear under all instances of `world` in the program.
+Build the project, and a warning marker should appear under all instances of `world` in the example program.
 
 ## Adding a transformation
 
