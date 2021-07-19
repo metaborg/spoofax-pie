@@ -11,9 +11,9 @@ rules
   projectOk(s).
 
   fileOk : scope * Start
-  fileOk(s, Empty()).
+  fileOk(s, _).
 {{/multiFileAnalysis}}
 {{^multiFileAnalysis}}
   programOk : Start
-  programOk(Empty()).
+  programOk(_).
 {{/multiFileAnalysis}}

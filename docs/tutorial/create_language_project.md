@@ -354,7 +354,7 @@ Open the main Statix file `helloworld/src/main.stx`
 Statix is a meta-language for defining the static semantics of your language, which includes type checking.
 
 First we will update the Statix specification to handle the new language constructs.
-Replace the `#!statix programOk(Empty()).` line with `#!statix programOk(Program(parts)).`, meaning that we accept all programs consisting of parts, which is always true due to the syntax of the language.
+Replace the `#!statix programOk(_).` line with `#!statix programOk(Program(parts)).`, meaning that we accept all programs consisting of parts, which is always true due to the syntax of the language.
 Build the project, and the error marker should disappear from your example program.
 
 As a silly rule, we will add a warning to all instances of `world` in the program.

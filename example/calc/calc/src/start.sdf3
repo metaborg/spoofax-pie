@@ -11,31 +11,37 @@ context-free syntax
   Stat.Exp  = <<Exp>;>
   Stat.Bind = <<ID> = <Exp>;>
 
-sorts Exp
+sorts Exp UnOp BinOp
+context-free syntax
+
+  Exp = UnOp
+  Exp = BinOp
+
 context-free syntax // numbers
 
   Exp = <(<Exp>)> {bracket}
 
   Exp.Num = NUM
-  Exp.Min = <-<Exp>>
-  Exp.Pow = <<Exp> ^ <Exp>> {right}
-  Exp.Mul = <<Exp> * <Exp>> {left}
-  Exp.Div = <<Exp> / <Exp>> {left}
-  Exp.Sub = <<Exp> - <Exp>> {left, prefer}
-  Exp.Add = <<Exp> + <Exp>> {left}
 
-  Exp.Eq  = <<Exp> == <Exp>> {non-assoc}
-  Exp.Neq = <<Exp> != <Exp>> {non-assoc}
-  Exp.Gt  = [[Exp] > [Exp]]  {non-assoc}
-  Exp.Lt  = [[Exp] < [Exp]]  {non-assoc}
+  UnOp.Min = <-<Exp>>
+
+  BinOp.Pow = <<Exp> ^ <Exp>> {right}
+  BinOp.Mul = <<Exp> * <Exp>> {left}
+  BinOp.Div = <<Exp> / <Exp>> {left}
+  BinOp.Sub = <<Exp> - <Exp>> {left, prefer}
+  BinOp.Add = <<Exp> + <Exp>> {left}
+  BinOp.Eq  = <<Exp> == <Exp>> {non-assoc}
+  BinOp.Neq = <<Exp> != <Exp>> {non-assoc}
+  BinOp.Gt  = [[Exp] > [Exp]]  {non-assoc}
+  BinOp.Lt  = [[Exp] < [Exp]]  {non-assoc}
 
 context-free syntax // booleans
 
   Exp.True  = "true"
   Exp.False = "false"
-  Exp.Not   = <!<Exp>>
-  Exp.And   = <<Exp> & <Exp>> {left}
-  Exp.Or    = <<Exp> | <Exp>> {left}
+  UnOp.Not   = <!<Exp>>
+  BinOp.And   = <<Exp> & <Exp>> {left}
+  BinOp.Or    = <<Exp> | <Exp>> {left}
 
   Exp.If = <
     if(<Exp>)
@@ -55,15 +61,15 @@ context-free syntax // variables and functions
   Exp.App = <<Exp> <Exp>> {left}
 
 context-free priorities
-  Exp.Min
+  UnOp.Min
   > Exp.App
-  > Exp.Pow
-  > {left: Exp.Mul Exp.Div}
-  > {left: Exp.Add Exp.Sub}
-  > {non-assoc: Exp.Eq Exp.Neq Exp.Gt Exp.Lt}
-  > Exp.Not
-  > Exp.And
-  > Exp.Or
+  > BinOp.Pow
+  > {left: BinOp.Mul BinOp.Div}
+  > {left: BinOp.Add BinOp.Sub}
+  > {non-assoc: BinOp.Eq BinOp.Neq BinOp.Gt BinOp.Lt}
+  > UnOp.Not
+  > BinOp.And
+  > BinOp.Or
   > Exp.If
   > Exp.Let
   > Exp.Fun
