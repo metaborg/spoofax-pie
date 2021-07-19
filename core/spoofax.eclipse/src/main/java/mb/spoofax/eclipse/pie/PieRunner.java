@@ -116,9 +116,9 @@ public class PieRunner {
         resourceRegistry.putDocumentOverride(file, document);
 
         final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
-        final Task<KeyedMessages> checkTask = createCheckOneTask(languageInstance, file, rootDirectoryHint);
+        final Task<KeyedMessages> checkOneTask = createCheckOneTask(languageInstance, file, rootDirectoryHint);
         // Remove check callback before running PIE build, as this method updates the messages already.
-        pie.removeCallback(checkTask);
+        pie.removeCallback(checkOneTask);
 
         final WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent.getEclipseIdentifiers());
         try(final MixedSession session = pie.newSession()) {
@@ -135,13 +135,13 @@ public class PieRunner {
                 () -> workspaceUpdate.removeStyle(editor, text.length())
             );
 
-            final KeyedMessages messages = getOrRequire(checkTask, topDownSession, monitor);
+            final KeyedMessages messages = getOrRequire(checkOneTask, topDownSession, monitor);
             workspaceUpdate.replaceMessages(messages, file);
         }
         workspaceUpdate.update(eclipseFile, eclipseFile, monitor);
 
         // Add callback (back again) that updates messages for when the check task is re-executed for other reasons.
-        pie.setCallback(checkTask, messages -> {
+        pie.setCallback(checkOneTask, messages -> {
             final WorkspaceUpdate callbackWorkspaceUpdate = workspaceUpdateFactory.create(languageComponent.getEclipseIdentifiers());
             callbackWorkspaceUpdate.replaceMessages(messages, file);
             callbackWorkspaceUpdate.update(eclipseFile, eclipseFile, monitor);
@@ -168,9 +168,9 @@ public class PieRunner {
             final ResourceKey file = new EclipseResourcePath(eclipseFile);
             final @Nullable ResourcePath rootDirectoryHint = eclipseProject != null ? new EclipseResourcePath(eclipseProject) : null;
             unobserve(createStyleTask(languageInstance, file, rootDirectoryHint), session, null);
-            final Task<KeyedMessages> checkTask = createCheckOneTask(languageInstance, file, rootDirectoryHint);
-            unobserve(checkTask, session, null);
-            pie.removeCallback(checkTask);
+            final Task<KeyedMessages> checkOneTask = createCheckOneTask(languageInstance, file, rootDirectoryHint);
+            unobserve(checkOneTask, session, null);
+            pie.removeCallback(checkOneTask);
         }
         resourceRegistry.removeDocumentOverride(new EclipseResourcePath(eclipseFile));
     }

@@ -7,8 +7,8 @@ import org.spoofax.interpreter.library.AbstractPrimitive;
 import org.spoofax.interpreter.stratego.Strategy;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
-public class Sdf3PpLanguageSpecNamePrimitive extends AbstractPrimitive {
-    public Sdf3PpLanguageSpecNamePrimitive() {
+public class Sdf3ExtStatixPpLanguageSpecNamePrimitive extends AbstractPrimitive {
+    public Sdf3ExtStatixPpLanguageSpecNamePrimitive() {
         super("pp_language_spec_name", 0, 0);
     }
 
