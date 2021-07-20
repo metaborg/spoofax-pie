@@ -100,7 +100,7 @@ public class FragmentedOriginLocationFixer {
                         newStart = stringFragment.startOffset + (startOffset - offset);
                     }
                     int endOffset = region.getEndOffset();
-                    if(endOffset >= offset && endOffset < pieceEndExclusive) {
+                    if(endOffset >= offset && endOffset <= pieceEndExclusive) {
                         newEnd = stringFragment.startOffset + (endOffset - offset);
                     }
                     offset += stringFragment.text.length();
