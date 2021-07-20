@@ -1,24 +1,30 @@
 package mb.spoofax.lwb.compiler;
 
-import mb.common.util.ExceptionPrinter;
 import mb.pie.api.MixedSession;
-import mb.resource.fs.FSResource;
 import mb.spoofax.lwb.compiler.generator.LanguageProjectGenerator;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.io.IOException;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class GenerateLanguageTest extends TestBase {
-    final LanguageProjectGenerator languageProjectGenerator = compiler.compiler.component.getLanguageProjectGenerator();
+class GenerateLanguageTest extends TestBase {
+    @BeforeEach void setup(@TempDir Path temporaryDirectoryPath) throws IOException {
+        super.setup(temporaryDirectoryPath);
+    }
+
+    @AfterEach void teardown() throws Exception {
+        super.teardown();
+    }
 
     @ParameterizedTest
     @ValueSource(booleans = {false, true})
-    void testGenerateAndCompileLanguage(boolean multiFileAnalysis, @TempDir Path temporaryDirectoryPath) throws Exception {
-        final FSResource rootDirectory = new FSResource(temporaryDirectoryPath).appendRelativePath("chars");
+    void testGenerateAndCompileLanguage(boolean multiFileAnalysis) throws Exception {
         final LanguageProjectGenerator.Input input = LanguageProjectGenerator.Input.builder()
             .rootDirectory(rootDirectory.getPath())
             .id("chars")
@@ -27,16 +33,14 @@ public class GenerateLanguageTest extends TestBase {
             .addFileExtensions("chars")
             .multiFileAnalysis(multiFileAnalysis)
             .build();
-        languageProjectGenerator.generate(input);
+        compiler.compiler.component.getLanguageProjectGenerator().generate(input);
         assertTrue(rootDirectory.exists());
-        try(final MixedSession session = pie.newSession()) {
+        try(final MixedSession session = pieComponent.getPie().newSession()) {
             final CompileLanguage.Args args = CompileLanguage.Args.builder()
                 .rootDirectory(rootDirectory.getPath())
                 .build();
             session.require(compileLanguage.createTask(args)).unwrap();
         } catch(CompileLanguageException e) {
-            final ExceptionPrinter exceptionPrinter = new ExceptionPrinter();
-            exceptionPrinter.addCurrentDirectoryContext(rootDirectory);
             System.err.println(exceptionPrinter.printExceptionToString(e));
             throw e;
         }

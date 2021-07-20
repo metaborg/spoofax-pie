@@ -1,27 +1,31 @@
 package mb.spoofax.lwb.compiler;
 
-import mb.common.util.ExceptionPrinter;
 import mb.pie.api.MixedSession;
-import mb.pie.api.Pie;
-import mb.resource.fs.FSResource;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.io.IOException;
 import java.nio.file.Path;
 
 class CompileLanguageTest extends TestBase {
-    @Test void testCompileCharsLanguage(@TempDir Path temporaryDirectoryPath) throws Exception {
-        // Copy language specification sources to the temporary directory.
-        final FSResource temporaryDirectory = new FSResource(temporaryDirectoryPath);
-        copyResourcesToTemporaryDirectory("mb/spoofax/lwb/compiler/chars", temporaryDirectory);
-        try(final MixedSession session = pie.newSession()) {
+    @BeforeEach void setup(@TempDir Path temporaryDirectoryPath) throws IOException {
+        super.setup(temporaryDirectoryPath);
+    }
+
+    @AfterEach void teardown() throws Exception {
+        super.teardown();
+    }
+
+    @Test void testCompileCharsLanguage() throws Exception {
+        copyResourcesToTemporaryDirectory("mb/spoofax/lwb/compiler/chars");
+        try(final MixedSession session = pieComponent.getPie().newSession()) {
             final CompileLanguage.Args args = CompileLanguage.Args.builder()
-                .rootDirectory(temporaryDirectory.getPath())
+                .rootDirectory(rootDirectory.getPath())
                 .build();
             session.require(compileLanguage.createTask(args)).unwrap();
         } catch(CompileLanguageException e) {
-            final ExceptionPrinter exceptionPrinter = new ExceptionPrinter();
-            exceptionPrinter.addCurrentDirectoryContext(temporaryDirectory);
             System.err.println(exceptionPrinter.printExceptionToString(e));
             throw e;
         }
