@@ -54,8 +54,8 @@ class DynamicLoadingTest extends CharsTestBase {
                 dynamicLanguage = requireDynamicLoad(session, rootDirectory);
                 previousInput = dynamicLanguage.getCompileInput();
                 final KeyedMessages sptMessages = requireSptCheck(session, rootDirectory);
-                assertFalse(sptMessages.containsError());
-            } catch(ExecException | RuntimeException e) {
+                assertNoErrors(sptMessages);
+            } catch(Exception e) {
                 printThrowable(e);
                 throw e;
             }
@@ -106,7 +106,7 @@ class DynamicLoadingTest extends CharsTestBase {
                 assertTrue(hasDebugRemoveATaskDefExecuted(report));
                 assertTrue(hasConstraintAnalysisTaskExecuted(report, dynamicLanguage));
                 assertTrue(hasCheckTaskExecuted(report, dynamicLanguage));
-            } catch(ExecException | RuntimeException e) {
+            } catch(Exception e) {
                 printThrowable(e);
                 throw e;
             }
@@ -120,8 +120,8 @@ class DynamicLoadingTest extends CharsTestBase {
                 dynamicLanguage = getDynamicLoadOutput(topDownSession, rootDirectory);
                 previousInput = dynamicLanguage.getCompileInput();
                 final KeyedMessages sptMessages = getSptCheckOutput(topDownSession, rootDirectory);
-                assertFalse(sptMessages.containsError());
-            } catch(ExecException | RuntimeException e) {
+                assertNoErrors(sptMessages);
+            } catch(Exception e) {
                 printThrowable(e);
                 throw e;
             }
@@ -169,8 +169,8 @@ class DynamicLoadingTest extends CharsTestBase {
                 previousInput = dynamicLanguage.getCompileInput();
                 providedResources = topDownSession.getProvidedResources();
                 final KeyedMessages sptMessages = getSptCheckOutput(topDownSession, rootDirectory);
-                assertFalse(sptMessages.containsError());
-            } catch(ExecException | RuntimeException e) {
+                assertNoErrors(sptMessages);
+            } catch(Exception e) {
                 printThrowable(e);
                 throw e;
             }
@@ -188,7 +188,7 @@ class DynamicLoadingTest extends CharsTestBase {
                 assertFalse(hasDebugRemoveATaskDefExecuted(report));
                 assertFalse(hasConstraintAnalysisTaskExecuted(report, dynamicLanguage));
                 assertFalse(hasCheckTaskExecuted(report, dynamicLanguage));
-            } catch(ExecException | RuntimeException e) {
+            } catch(Exception e) {
                 printThrowable(e);
                 throw e;
             }
@@ -204,8 +204,8 @@ class DynamicLoadingTest extends CharsTestBase {
                 previousInput = dynamicLanguage.getCompileInput();
                 providedResources = topDownSession.getProvidedResources();
                 final KeyedMessages sptMessages = getSptCheckOutput(topDownSession, rootDirectory);
-                assertFalse(sptMessages.containsError());
-            } catch(ExecException | RuntimeException e) {
+                assertNoErrors(sptMessages);
+            } catch(Exception e) {
                 printThrowable(e);
                 throw e;
             }
@@ -231,7 +231,7 @@ class DynamicLoadingTest extends CharsTestBase {
                 assertTrue(hasDebugRemoveATaskDefExecuted(report));
                 assertTrue(hasConstraintAnalysisTaskExecuted(report, dynamicLanguage)); // Unfortunately this is re-executed, because the Stratego runtime has changed. We cannot know if this affects the constraint analysis or not.
                 assertTrue(hasCheckTaskExecuted(report, dynamicLanguage)); // TODO: this is executed because the result of constraint analysis changes, but we are only interested in the messages, which do not change.
-            } catch(ExecException | RuntimeException e) {
+            } catch(Exception e) {
                 printThrowable(e);
                 throw e;
             }
@@ -247,8 +247,8 @@ class DynamicLoadingTest extends CharsTestBase {
                 previousInput = dynamicLanguage.getCompileInput();
                 providedResources = topDownSession.getProvidedResources();
                 final KeyedMessages sptMessages = getSptCheckOutput(topDownSession, rootDirectory);
-                assertFalse(sptMessages.containsError());
-            } catch(ExecException | RuntimeException e) {
+                assertNoErrors(sptMessages);
+            } catch(Exception e) {
                 printThrowable(e);
                 throw e;
             }
@@ -274,7 +274,7 @@ class DynamicLoadingTest extends CharsTestBase {
                 assertTrue(hasDebugRemoveATaskDefExecuted(report));
                 assertFalse(hasConstraintAnalysisTaskExecuted(report, dynamicLanguage));
                 assertFalse(hasCheckTaskExecuted(report, dynamicLanguage));
-            } catch(ExecException | RuntimeException e) {
+            } catch(Exception e) {
                 printThrowable(e);
                 throw e;
             }
@@ -290,8 +290,8 @@ class DynamicLoadingTest extends CharsTestBase {
                 previousInput = dynamicLanguage.getCompileInput();
                 providedResources = topDownSession.getProvidedResources();
                 final KeyedMessages sptMessages = getSptCheckOutput(topDownSession, rootDirectory);
-                assertFalse(sptMessages.containsError());
-            } catch(ExecException | RuntimeException e) {
+                assertNoErrors(sptMessages);
+            } catch(Exception e) {
                 printThrowable(e);
                 throw e;
             }
@@ -314,7 +314,7 @@ class DynamicLoadingTest extends CharsTestBase {
                 assertTrue(hasConstraintAnalysisTaskExecuted(report, dynamicLanguage));
                 assertTrue(hasCheckTaskExecuted(report, dynamicLanguage));
                 // TODO: check execution here and in previous steps.
-            } catch(ExecException | RuntimeException e) {
+            } catch(Exception e) {
                 printThrowable(e);
                 throw e;
             }

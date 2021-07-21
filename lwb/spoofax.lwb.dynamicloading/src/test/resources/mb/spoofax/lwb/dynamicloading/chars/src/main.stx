@@ -1,16 +1,12 @@
 module main
 
-signature
+imports
 
-  sorts Program constructors
-    Program : list(Expr) -> Program
-
-  sorts Expr constructors
-    Chars : string -> Expr
+  signatures/start-sig
 
 rules
 
-  programOk : Program
+  programOk : Start
   programOk(Program(exprs)) :- exprsOk(exprs).
 
   exprOk : Expr

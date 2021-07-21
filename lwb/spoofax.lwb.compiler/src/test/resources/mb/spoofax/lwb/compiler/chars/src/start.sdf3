@@ -1,12 +1,20 @@
-module test
+module start
 
-context-free syntax
+context-free sorts
 
-  Start.Start = <<CHARS>>
+  Start
 
 context-free start-symbols
 
   Start
+
+context-free syntax
+
+  Start.Chars = <<CHARS>>
+
+lexical sorts
+
+  CHARS
 
 lexical syntax
 

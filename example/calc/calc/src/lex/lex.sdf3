@@ -1,10 +1,12 @@
 module lex/lex
 
+lexical sorts ID
 lexical syntax
   ID = [a-zA-Z] [a-zA-Z0-9]*
 lexical restrictions
   ID -/- [a-zA-Z0-9\_]
 
+lexical sorts INT IntGroup IntPref INT FLOAT NUM
 lexical syntax // numbers
   INT      = "-"? [0-9]+
   IntGroup = [0-9][0-9][0-9]
@@ -17,6 +19,7 @@ lexical restrictions
   FLOAT -/- [0-9]
   NUM   -/- [0-9]
 
+lexical sorts STRING StringChar BackSlashChar
 lexical syntax
   STRING         = "\"" StringChar* "\""
   StringChar     = ~[\"\n]
@@ -27,6 +30,7 @@ lexical restrictions
   // Backslash chars in strings may not be followed by "
   BackSlashChar -/- [\"]
 
+lexical sorts CommentChar InsideComment NewLineEOF EOF
 lexical syntax // layout: whitespace and comments
   LAYOUT         = [\ \t\n\r]
   CommentChar    = [\*]

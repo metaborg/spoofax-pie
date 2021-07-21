@@ -18,10 +18,9 @@ There should now be a project named `helloworld` in the <span class="guilabel">P
 First we will add some syntax to the language.
 Open the main SDF3 file `helloworld/src/start.sdf3` file by expanding the folders and double-clicking the file.
 SDF3 is a meta-language (i.e., a language to describe languages) for describing the syntax of a language, from which Spoofax will derive the parser of your language.
-Under the `#!sdf3 context-free syntax` section, replace the `#!sdf3 Start.Empty = <>` line with `#!sdf3 Start.Program = <<{Part " "}*>>`, indicating that the language accepts programs which consists of one or more parts.
+Under the `#!sdf3 context-free syntax` section, replace the `#!sdf3 Start.Empty = <>` line with `#!sdf3 Start.Program = <<{Part " "}*>>`, indicating that the language accepts programs which consists of zero or more parts.
 
 `#!sdf3 Part` is a *sort* and must be defined by adding its name to the `#!sdf3 context-free sorts` section on a new line.
-Failing to define sorts currently is not an error, but will become an error in the near future, as other meta-languages will not work properly without them.
 
 Now we will add syntax productions to `#!sdf3 Part` to the `#!sdf3 context-free syntax` section.
 Add `#!sdf3 Part.Hello = <hello>` on a new line, indicating that one sort of `#!sdf3 Part` is the word `hello.`
@@ -37,7 +36,8 @@ Then add `#!sdf3 Part.World = <world>` on a new line, indicating that one sort o
 
     context-free sorts
 
-      Start Part
+      Start
+      Part
 
     context-free syntax
 

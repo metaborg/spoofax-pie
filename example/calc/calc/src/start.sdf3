@@ -3,7 +3,7 @@ imports lex/lex
 
 context-free start-symbols Program Exp
 
-sorts Program Stat
+context-free sorts Program Stat
 context-free syntax
 
   Program.Program = <<{Stat "\n"}+>>
@@ -11,7 +11,7 @@ context-free syntax
   Stat.Exp  = <<Exp>;>
   Stat.Bind = <<ID> = <Exp>;>
 
-sorts Exp UnOp BinOp
+context-free sorts Exp UnOp BinOp
 context-free syntax
 
   Exp = UnOp
@@ -74,7 +74,7 @@ context-free priorities
   > Exp.Let
   > Exp.Fun
 
-sorts Type
+context-free sorts Type
 context-free syntax
   Type.NumT  = <Num>
   Type.BoolT = <Bool>

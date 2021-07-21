@@ -1,14 +1,23 @@
 module start
 
+context-free sorts
+
+  Start
+  Expr
+
+context-free start-symbols
+
+  Start
+
 context-free syntax
 
   Start.Program = <<{Expr " "}*>>
 
   Expr.Chars = <<CHARS>>
 
-context-free start-symbols
+lexical sorts
 
-  Start
+  CHARS
 
 lexical syntax
 
