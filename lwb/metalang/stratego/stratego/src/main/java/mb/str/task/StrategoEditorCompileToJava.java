@@ -1,12 +1,14 @@
 package mb.str.task;
 
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
 import mb.pie.api.TaskDef;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.str.StrategoScope;
 import mb.str.config.StrategoCompileConfig;
 
 import javax.inject.Inject;
+import java.util.Set;
 
 @StrategoScope
 public class StrategoEditorCompileToJava implements TaskDef<StrategoCompileConfig, CommandFeedback> {
@@ -25,5 +27,9 @@ public class StrategoEditorCompileToJava implements TaskDef<StrategoCompileConfi
     public CommandFeedback exec(ExecContext context, StrategoCompileConfig input) throws Exception {
         return context.require(compileToJava, input)
             .mapErrOrElse(e -> CommandFeedback.ofTryExtractMessagesFrom(e, input.mainModule.path), () -> CommandFeedback.of());
+    }
+
+    @Override public boolean shouldExecWhenAffected(StrategoCompileConfig input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 }

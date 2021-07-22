@@ -4,6 +4,7 @@ import mb.common.result.ExpectException;
 import mb.common.result.Result;
 import mb.jsglr.pie.JsglrParseTaskInput;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
 import mb.pie.api.Supplier;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
@@ -29,6 +30,7 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -156,6 +158,10 @@ public class Sdf3SpecToParseTable implements TaskDef<Sdf3SpecToParseTable.Input,
         } catch(ExpectException e) {
             return Result.ofErr(e);
         }
+    }
+
+    @Override public boolean shouldExecWhenAffected(Input input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 
     private Task<Result<IStrategoTerm, ?>> toNormalized(Supplier<? extends Result<IStrategoTerm, ?>> astSupplier) {

@@ -3,6 +3,7 @@ package mb.str.task;
 import mb.common.result.MessagesException;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceService;
 import mb.str.StrategoScope;
@@ -14,6 +15,7 @@ import mb.stratego.build.strincr.task.output.CompileOutput;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Set;
 
 @StrategoScope
 public class StrategoCompileToJava implements TaskDef<StrategoCompileConfig, Result<CompileOutput.Success, MessagesException>> {
@@ -51,5 +53,9 @@ public class StrategoCompileToJava implements TaskDef<StrategoCompileConfig, Res
         }
         final CompileOutput.Success success = (CompileOutput.Success)output;
         return Result.ofOk(success);
+    }
+
+    @Override public boolean shouldExecWhenAffected(StrategoCompileConfig input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 }

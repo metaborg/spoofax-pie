@@ -2,6 +2,7 @@ package mb.sdf3.task.spec;
 
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.sdf3.Sdf3Scope;
@@ -14,6 +15,7 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.Set;
 
 @Sdf3Scope
 public class Sdf3ParseTableToParenthesizer implements TaskDef<Sdf3ParseTableToParenthesizer.Args, Result<IStrategoTerm, ?>> {
@@ -56,5 +58,9 @@ public class Sdf3ParseTableToParenthesizer implements TaskDef<Sdf3ParseTableToPa
     @Override public Result<IStrategoTerm, ?> exec(ExecContext context, Args args) throws IOException {
         return context.require(args.parseTableSupplier)
             .map(pt -> Parenthesizer.generateParenthesizer(args.moduleName, null, pt));
+    }
+
+    @Override public boolean shouldExecWhenAffected(Args input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 }

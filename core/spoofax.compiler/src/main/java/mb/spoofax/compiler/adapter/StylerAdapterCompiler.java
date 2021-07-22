@@ -2,6 +2,7 @@ package mb.spoofax.compiler.adapter;
 
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
 import mb.pie.api.None;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
@@ -18,6 +19,7 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Optional;
+import java.util.Set;
 
 @Value.Enclosing
 public class StylerAdapterCompiler implements TaskDef<StylerAdapterCompiler.Input, None> {
@@ -38,6 +40,10 @@ public class StylerAdapterCompiler implements TaskDef<StylerAdapterCompiler.Inpu
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         styleTaskDefTemplate.write(context, input.baseStyleTaskDef().file(generatedJavaSourcesDirectory), input);
         return None.instance;
+    }
+
+    @Override public boolean shouldExecWhenAffected(Input input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 
     @Override public Serializable key(Input input) {

@@ -1,7 +1,10 @@
 package mb.sdf3.task;
 
+import mb.common.result.Result;
 import mb.constraint.pie.ConstraintAnalyzeMultiTaskDef;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
+import mb.pie.api.Supplier;
 import mb.sdf3.Sdf3Scope;
 import mb.sdf3.task.util.AnalyzedStrategoTransformTaskDef;
 import mb.stratego.common.StrategoRuntime;
@@ -9,6 +12,7 @@ import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.core.InterpreterException;
 
 import javax.inject.Inject;
+import java.util.Set;
 
 @Sdf3Scope
 public class Sdf3ToSignature extends AnalyzedStrategoTransformTaskDef {
@@ -31,5 +35,10 @@ public class Sdf3ToSignature extends AnalyzedStrategoTransformTaskDef {
             throw new RuntimeException("Could not override 'get-sdf3-type' to 'statix-get-type'", e);
         }
         return strategoRuntime;
+    }
+
+    @Override
+    public boolean shouldExecWhenAffected(Supplier<? extends Result<ConstraintAnalyzeMultiTaskDef.SingleFileOutput, ?>> input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 }

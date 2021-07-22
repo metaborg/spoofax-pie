@@ -6,6 +6,7 @@ import mb.common.message.KeyedMessages;
 import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
 import mb.pie.api.None;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
@@ -18,6 +19,7 @@ import org.metaborg.sdf2table.parsetable.ParseTable;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.util.Set;
 
 public class CompileSdf3 implements TaskDef<ResourcePath, Result<KeyedMessages, Sdf3CompileException>> {
     private final CfgRootDirectoryToObject cfgRootDirectoryToObject;
@@ -64,6 +66,10 @@ public class CompileSdf3 implements TaskDef<ResourcePath, Result<KeyedMessages, 
                     )),
                 Result.ofOk(KeyedMessages.of())
             ));
+    }
+
+    @Override public boolean shouldExecWhenAffected(ResourcePath input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 
     public Result<KeyedMessages, Sdf3CompileException> checkAndCompile(ExecContext context, Sdf3SpecConfig config, CompileSdf3Input input) throws IOException {

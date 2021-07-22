@@ -5,6 +5,7 @@ import mb.cfg.task.CfgToObject;
 import mb.common.result.Result;
 import mb.common.util.StreamIterable;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
 import mb.pie.api.OutTransient;
 import mb.pie.api.OutTransientImpl;
 import mb.pie.api.TaskDef;
@@ -16,6 +17,7 @@ import mb.resource.hierarchical.walk.ResourceWalker;
 import mb.spoofax.lwb.compiler.CompileLanguage;
 
 import javax.inject.Inject;
+import java.util.Set;
 import java.util.stream.Stream;
 
 @DynamicLoadingScope
@@ -51,6 +53,10 @@ public class DynamicLoad implements TaskDef<CompileLanguage.Args, OutTransient<R
                     .mapErr(e -> e)
             ),
             true);
+    }
+
+    @Override public boolean shouldExecWhenAffected(CompileLanguage.Args input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 
     public DynamicLanguage run(

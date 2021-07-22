@@ -7,6 +7,7 @@ import mb.common.option.Option;
 import mb.common.result.MessagesException;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.str.config.StrategoAnalyzeConfig;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @Value.Enclosing
 public class CompileStratego implements TaskDef<ResourcePath, Result<CompileStratego.Output, StrategoCompileException>> {
@@ -75,6 +77,10 @@ public class CompileStratego implements TaskDef<ResourcePath, Result<CompileStra
                     )),
                 Result.ofOk(Output.builder().build())
             ));
+    }
+
+    @Override public boolean shouldExecWhenAffected(ResourcePath input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 
     public Result<Output, StrategoCompileException> checkAndCompile(ExecContext context, StrategoCompileConfig config, CompileStrategoInput input) throws IOException {

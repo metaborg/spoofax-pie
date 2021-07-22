@@ -7,9 +7,6 @@ languageEclipseProject {
   adapterProject.set(project(":sdf3"))
   compilerInput {
     languageGroup("mb.spoofax.lwb")
-
-    baseLanguage("mb.sdf3.eclipse", "BaseSdf3Language")
-    extendLanguage("mb.sdf3.eclipse", "Sdf3Language")
   }
 }
 

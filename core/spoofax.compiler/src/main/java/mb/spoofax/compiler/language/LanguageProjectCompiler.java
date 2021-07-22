@@ -2,6 +2,7 @@ package mb.spoofax.compiler.language;
 
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
 import mb.pie.api.None;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
@@ -20,6 +21,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Value.Enclosing
 public class LanguageProjectCompiler implements TaskDef<Supplier<Result<LanguageProjectCompiler.Input, ?>>, Result<None, ?>> {
@@ -65,6 +67,10 @@ public class LanguageProjectCompiler implements TaskDef<Supplier<Result<Language
     @Override
     public Result<None, ?> exec(ExecContext context, Supplier<Result<Input, ?>> input) throws IOException {
         return context.require(input).mapThrowing(i -> compile(context, i));
+    }
+
+    @Override public boolean shouldExecWhenAffected(Supplier<Result<Input, ?>> input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 
     private None compile(ExecContext context, Input input) throws IOException {

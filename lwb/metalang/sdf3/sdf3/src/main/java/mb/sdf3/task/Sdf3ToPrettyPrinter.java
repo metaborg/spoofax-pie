@@ -2,6 +2,7 @@ package mb.sdf3.task;
 
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.sdf3.stratego.Sdf3Context;
@@ -15,6 +16,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.Set;
 
 @Sdf3Scope
 public class Sdf3ToPrettyPrinter implements TaskDef<Sdf3ToPrettyPrinter.Input, Result<IStrategoTerm, ?>> {
@@ -67,5 +69,9 @@ public class Sdf3ToPrettyPrinter implements TaskDef<Sdf3ToPrettyPrinter.Input, R
                 return Result.ofErr(e);
             }
         }, Result::ofErr);
+    }
+
+    @Override public boolean shouldExecWhenAffected(Input input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 }

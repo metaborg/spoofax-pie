@@ -12,9 +12,6 @@ languageEclipseProject {
   adapterProject.set(project(":statix"))
   compilerInput {
     languageGroup("mb.spoofax.lwb")
-
-    baseLanguage("mb.statix.eclipse", "BaseStatixLanguage")
-    extendLanguage("mb.statix.eclipse", "StatixLanguage")
   }
 }
 

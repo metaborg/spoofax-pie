@@ -3,6 +3,7 @@ package mb.statix.task;
 import mb.common.result.Result;
 import mb.constraint.pie.ConstraintAnalyzeMultiTaskDef;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.output.OutputStampers;
 import mb.resource.hierarchical.ResourcePath;
@@ -21,6 +22,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.Set;
 
 @StatixScope
 public class StatixCompile implements TaskDef<StatixCompile.Input, Result<StatixCompile.Output, ?>> {
@@ -123,5 +125,9 @@ public class StatixCompile implements TaskDef<StatixCompile.Input, Result<Statix
                 return Result.ofErr(e); // TODO: better error/exception
             }
         }, Result::ofErr); // TODO: better error/exception
+    }
+
+    @Override public boolean shouldExecWhenAffected(Input input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 }

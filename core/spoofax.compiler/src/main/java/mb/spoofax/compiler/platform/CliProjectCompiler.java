@@ -1,6 +1,7 @@
 package mb.spoofax.compiler.platform;
 
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
@@ -19,6 +20,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Value.Enclosing
 public class CliProjectCompiler implements TaskDef<CliProjectCompiler.Input, CliProjectCompiler.Output> {
@@ -47,6 +49,10 @@ public class CliProjectCompiler implements TaskDef<CliProjectCompiler.Input, Cli
         mainTemplate.write(context, input.baseMain().file(generatedJavaSourcesDirectory), input);
 
         return outputBuilder.build();
+    }
+
+    @Override public boolean shouldExecWhenAffected(Input input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 
     @Override public Serializable key(Input input) {

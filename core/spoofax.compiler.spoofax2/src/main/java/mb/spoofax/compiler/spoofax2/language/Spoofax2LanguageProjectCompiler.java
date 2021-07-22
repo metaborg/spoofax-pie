@@ -1,6 +1,7 @@
 package mb.spoofax.compiler.spoofax2.language;
 
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
 import mb.pie.api.None;
 import mb.pie.api.TaskDef;
 import mb.spoofax.compiler.language.LanguageProjectCompilerInputBuilder;
@@ -12,6 +13,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Value.Enclosing
 public class Spoofax2LanguageProjectCompiler implements TaskDef<Spoofax2LanguageProjectCompiler.Input, None> {
@@ -50,6 +52,9 @@ public class Spoofax2LanguageProjectCompiler implements TaskDef<Spoofax2Language
         return None.instance;
     }
 
+    @Override public boolean shouldExecWhenAffected(Input input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
+    }
 
     public HashSet<String> getCopyResources(Input input) {
         final HashSet<String> copyResources = new HashSet<>(input.additionalCopyResources());

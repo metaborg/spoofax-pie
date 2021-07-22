@@ -2,6 +2,7 @@ package mb.spoofax.compiler.spoofax2.language;
 
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
 import mb.pie.api.None;
 import mb.pie.api.TaskDef;
 import mb.spoofax.compiler.language.StrategoRuntimeLanguageCompiler;
@@ -10,6 +11,7 @@ import org.immutables.value.Value;
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Set;
 
 @Value.Enclosing
 public class Spoofax2StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax2StrategoRuntimeLanguageCompiler.Input, None> {
@@ -25,6 +27,9 @@ public class Spoofax2StrategoRuntimeLanguageCompiler implements TaskDef<Spoofax2
         return None.instance;
     }
 
+    @Override public boolean shouldExecWhenAffected(Input input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
+    }
 
     public ListView<String> getCopyResources(Input input) {
         final ArrayList<String> copyResources = new ArrayList<>();

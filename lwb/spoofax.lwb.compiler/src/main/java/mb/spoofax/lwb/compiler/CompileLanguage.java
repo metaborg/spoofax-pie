@@ -9,13 +9,13 @@ import mb.common.message.KeyedMessagesBuilder;
 import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
 import mb.pie.api.None;
 import mb.pie.api.STask;
 import mb.pie.api.Stateful1Supplier;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.pie.task.java.CompileJava;
-import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
 import mb.spoofax.compiler.language.LanguageProjectCompiler;
@@ -26,6 +26,7 @@ import javax.inject.Inject;
 import java.io.File;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Fully compiles a language by running the {@link LanguageProjectCompiler language project compiler}, {@link
@@ -67,7 +68,6 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
     }
 
 
-    private final ResourceService resourceService;
     private final CfgRootDirectoryToObject cfgRootDirectoryToObject;
     private final LanguageProjectCompiler languageProjectCompiler;
     private final CompileLanguageSpecification compileLanguage;
@@ -77,7 +77,6 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
 
 
     @Inject public CompileLanguage(
-        ResourceService resourceService,
         CfgRootDirectoryToObject cfgRootDirectoryToObject,
         LanguageProjectCompiler languageProjectCompiler,
         CompileLanguageSpecification compileLanguage,
@@ -85,7 +84,6 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
         EclipseProjectCompiler eclipseProjectCompiler,
         CompileJava compileJava
     ) {
-        this.resourceService = resourceService;
         this.cfgRootDirectoryToObject = cfgRootDirectoryToObject;
         this.languageProjectCompiler = languageProjectCompiler;
         this.compileLanguage = compileLanguage;
@@ -157,6 +155,7 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
             .sourceFileOutputDirectory(input.javaSourceFileOutputDirectory())
             .classFileOutputDirectory(input.javaClassFileOutputDirectory())
             .reportWarnings(false)
+            .addShouldExecWhenAffectedTags(Interactivity.NonInteractive)
         ;
         final KeyedMessages javaCompilationMessages = context.require(compileJava, compileJavaInputBuilder.build());
         messagesBuilder.addMessages(javaCompilationMessages);
@@ -170,6 +169,10 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
             .messages(messagesBuilder.build())
             .build()
         );
+    }
+
+    @Override public boolean shouldExecWhenAffected(Args input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 
     @Override public Serializable key(Args input) {

@@ -9,6 +9,7 @@ import mb.esv.task.EsvCheck;
 import mb.esv.task.EsvCompile;
 import mb.esv.task.EsvConfig;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
 import mb.pie.api.TaskDef;
 import mb.resource.WritableResource;
 import mb.resource.hierarchical.ResourcePath;
@@ -16,6 +17,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.util.Set;
 
 public class CompileEsv implements TaskDef<ResourcePath, Result<KeyedMessages, EsvCompileException>> {
     private final CfgRootDirectoryToObject cfgRootDirectoryToObject;
@@ -56,6 +58,10 @@ public class CompileEsv implements TaskDef<ResourcePath, Result<KeyedMessages, E
                     )),
                 Result.ofOk(KeyedMessages.of())
             ));
+    }
+
+    @Override public boolean shouldExecWhenAffected(ResourcePath input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 
     public Result<KeyedMessages, EsvCompileException> checkAndCompile(ExecContext context, EsvConfig config, CompileEsvInput input) {

@@ -2,6 +2,7 @@ package mb.sdf3_ext_statix.task;
 
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
 import mb.pie.api.None;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
@@ -15,6 +16,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.Set;
 
 @Sdf3ExtStatixScope
 public class Sdf3ExtStatixGenerateStratego implements TaskDef<Sdf3ExtStatixGenerateStratego.Input, Result<IStrategoTerm, ?>> {
@@ -68,5 +70,9 @@ public class Sdf3ExtStatixGenerateStratego implements TaskDef<Sdf3ExtStatixGener
                 return Result.ofErr(e);
             }
         }, Result::ofErr);
+    }
+
+    @Override public boolean shouldExecWhenAffected(Input input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 }

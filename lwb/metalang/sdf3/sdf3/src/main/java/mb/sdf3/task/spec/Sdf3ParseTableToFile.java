@@ -2,6 +2,7 @@ package mb.sdf3.task.spec;
 
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
 import mb.pie.api.None;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
+import java.util.Set;
 
 @Sdf3Scope
 public class Sdf3ParseTableToFile implements TaskDef<Sdf3ParseTableToFile.Input, Result<None, ?>> {
@@ -117,6 +119,10 @@ public class Sdf3ParseTableToFile implements TaskDef<Sdf3ParseTableToFile.Input,
                 }
                 return None.instance;
             });
+    }
+
+    @Override public boolean shouldExecWhenAffected(Input input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 
     @Override public Serializable key(Input input) {

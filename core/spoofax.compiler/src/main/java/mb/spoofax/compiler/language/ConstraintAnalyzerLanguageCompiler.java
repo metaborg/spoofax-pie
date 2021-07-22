@@ -2,6 +2,7 @@ package mb.spoofax.compiler.language;
 
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
@@ -15,6 +16,7 @@ import org.immutables.value.Value;
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.Optional;
+import java.util.Set;
 
 @Value.Enclosing
 public class ConstraintAnalyzerLanguageCompiler implements TaskDef<ConstraintAnalyzerLanguageCompiler.Input, ConstraintAnalyzerLanguageCompiler.Output> {
@@ -39,6 +41,10 @@ public class ConstraintAnalyzerLanguageCompiler implements TaskDef<ConstraintAna
         constraintAnalyzerTemplate.write(context, input.baseConstraintAnalyzer().file(generatedJavaSourcesDirectory), input);
         factoryTemplate.write(context, input.baseConstraintAnalyzerFactory().file(generatedJavaSourcesDirectory), input);
         return outputBuilder.build();
+    }
+
+    @Override public boolean shouldExecWhenAffected(Input input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 
     @Override public Serializable key(Input input) {

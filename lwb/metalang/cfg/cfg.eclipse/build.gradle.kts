@@ -17,8 +17,5 @@ languageEclipseProject {
   adapterProject.set(project(":cfg"))
   compilerInput {
     languageGroup("mb.spoofax.lwb")
-
-    baseLanguage("mb.cfg.eclipse", "BaseCfgLanguage")
-    extendLanguage("mb.cfg.eclipse", "CfgLanguage")
   }
 }

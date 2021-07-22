@@ -2,6 +2,7 @@ package mb.spoofax.compiler.spoofax2.language;
 
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
 import mb.pie.api.None;
 import mb.pie.api.TaskDef;
 import mb.spoofax.compiler.language.ParserLanguageCompiler;
@@ -9,6 +10,7 @@ import org.immutables.value.Value;
 
 import javax.inject.Inject;
 import java.io.Serializable;
+import java.util.Set;
 
 @Value.Enclosing
 public class Spoofax2ParserLanguageCompiler implements TaskDef<Spoofax2ParserLanguageCompiler.Input, None> {
@@ -24,6 +26,9 @@ public class Spoofax2ParserLanguageCompiler implements TaskDef<Spoofax2ParserLan
         return None.instance;
     }
 
+    @Override public boolean shouldExecWhenAffected(Input input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
+    }
 
     public ListView<String> getCopyResources(Input input) {
         return ListView.of(

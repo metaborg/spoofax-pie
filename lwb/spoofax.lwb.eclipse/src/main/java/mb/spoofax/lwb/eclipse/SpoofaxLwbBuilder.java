@@ -7,6 +7,7 @@ import mb.log.api.Level;
 import mb.log.api.Logger;
 import mb.log.stream.LoggingOutputStream;
 import mb.pie.api.ExecException;
+import mb.pie.api.Interactivity;
 import mb.pie.api.MixedSession;
 import mb.pie.api.OutTransient;
 import mb.pie.api.Pie;
@@ -37,18 +38,22 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
     public static final String id = SpoofaxLwbPlugin.id + ".builder";
 
     private final Logger logger;
+    private final Set<Interactivity> compileTags;
 
     public SpoofaxLwbBuilder() {
         this.logger = SpoofaxPlugin.getLoggerComponent().getLoggerFactory().create(getClass());
+        this.compileTags = Interactivity.NonInteractive.asSingletonSet();
     }
 
     @Override
@@ -95,7 +100,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         final PieComponent pieComponent = SpoofaxLwbLifecycleParticipant.getInstance().getPieComponent();
         try(final MixedSession session = pieComponent.getPie().newSession()) {
             topDownBuild(rootDirectory, session, monitor);
-        } catch(ExecException e) {
+        } catch(ExecException | IOException e) {
             cancel(monitor);
             throw toCoreException(rootDirectory, e);
         }
@@ -108,7 +113,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         final PieComponent pieComponent = SpoofaxLwbLifecycleParticipant.getInstance().getPieComponent();
         try(final MixedSession session = pieComponent.newSession()) {
             bottomUpBuild(rootDirectory, delta, session, monitor);
-        } catch(ExecException e) {
+        } catch(ExecException | IOException e) {
             cancel(monitor);
             throw toCoreException(rootDirectory, e);
         }
@@ -119,21 +124,26 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         ResourcePath rootDirectory,
         MixedSession session,
         @Nullable IProgressMonitor monitor
-    ) throws InterruptedException, CoreException, ExecException {
+    ) throws InterruptedException, CoreException, ExecException, IOException {
         logger.debug("Top-down language build of {}", rootDirectory);
 
-        final KeyedMessages messages = session.require(createCheckTask(rootDirectory));
+        final MonitorCancelableToken cancelToken = new MonitorCancelableToken(monitor);
+
+        final KeyedMessages messages = session.require(createCheckTask(rootDirectory), cancelToken);
         if(messages.containsError()) {
             logger.debug("Checking language specification revealed errors; skipping compilation");
             new ExceptionPrinter().addCurrentDirectoryContext(rootDirectory).printMessages(messages, new PrintStream(new LoggingOutputStream(logger, Level.Debug)));
             return;
         }
 
-        final Result<CompileLanguage.Output, CompileLanguageException> result = session.require(createCompileTask(rootDirectory));
+        final Result<CompileLanguage.Output, CompileLanguageException> result = session.require(createCompileTask(rootDirectory), cancelToken);
         handleCompileResult(rootDirectory, result, monitor);
 
-        final OutTransient<Result<DynamicLanguage, ?>> dynamicLanguage = session.require(createDynamicLoadTask(rootDirectory));
+        final OutTransient<Result<DynamicLanguage, ?>> dynamicLanguage = session.require(createDynamicLoadTask(rootDirectory), cancelToken);
         handleDynamicLoadResult(dynamicLanguage);
+
+        logger.debug("Deleting unobserved tasks");
+        session.deleteUnobservedTasks(t -> true, (t, r) -> false);
     }
 
     private void bottomUpBuild(
@@ -141,7 +151,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         IResourceDelta delta,
         MixedSession session,
         @Nullable IProgressMonitor monitor
-    ) throws InterruptedException, CoreException, ExecException {
+    ) throws InterruptedException, CoreException, ExecException, IOException {
         final LinkedHashSet<ResourceKey> changedResources = new LinkedHashSet<>();
         delta.accept((d) -> {
             final int kind = d.getKind();
@@ -153,10 +163,11 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
             return false;
         });
 
-        logger.debug("Bottom-up language build of {} with changed resources {}", rootDirectory, changedResources);
-        final TopDownSession topDownSession = session.updateAffectedBy(changedResources);
-
         final MonitorCancelableToken cancelToken = new MonitorCancelableToken(monitor);
+
+        logger.debug("Bottom-up language build of {} with changed resources {}", rootDirectory, changedResources);
+        final TopDownSession topDownSession = session.updateAffectedBy(changedResources, compileTags, cancelToken);
+
         final KeyedMessages messages = topDownSession.getOutputOrRequireAndEnsureExplicitlyObserved(createCheckTask(rootDirectory), cancelToken);
         if(messages.containsError()) {
             logger.debug("Checking language specification revealed errors; skipping handling of compile and dynamic load result");
@@ -169,6 +180,9 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
 
         final OutTransient<Result<DynamicLanguage, ?>> dynamicLanguage = topDownSession.getOutputOrRequireAndEnsureExplicitlyObserved(createDynamicLoadTask(rootDirectory), cancelToken);
         handleDynamicLoadResult(dynamicLanguage);
+
+        logger.debug("Deleting unobserved tasks");
+        session.deleteUnobservedTasks(t -> true, (t, r) -> false);
     }
 
     private ResourcePath getResourcePath(IResource eclipseResource) {

@@ -2,6 +2,7 @@ package mb.spoofax.compiler.adapter;
 
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.language.CompleterLanguageCompiler;
@@ -16,6 +17,7 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Optional;
+import java.util.Set;
 
 @Value.Enclosing
 public class CompleterAdapterCompiler implements TaskDef<CompleterAdapterCompiler.Input, CompleterAdapterCompiler.Output> {
@@ -37,6 +39,10 @@ public class CompleterAdapterCompiler implements TaskDef<CompleterAdapterCompile
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         completeTaskDefTemplate.write(context, input.baseCompleteTaskDef().file(generatedJavaSourcesDirectory), input);
         return outputBuilder.build();
+    }
+
+    @Override public boolean shouldExecWhenAffected(Input input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 
     @Override public Serializable key(Input input) {

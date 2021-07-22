@@ -5,6 +5,7 @@ import mb.common.result.Result;
 import mb.common.util.Properties;
 import mb.jsglr.common.JsglrParseException;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ReadableResource;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
+import java.util.Set;
 
 @CfgScope
 public class CfgRootDirectoryToObject implements TaskDef<ResourcePath, Result<CfgToObject.Output, CfgRootDirectoryToObjectException>> {
@@ -70,6 +72,10 @@ public class CfgRootDirectoryToObject implements TaskDef<ResourcePath, Result<Cf
                 }
                 return Result.ofOk(output);
             });
+    }
+
+    @Override public boolean shouldExecWhenAffected(ResourcePath input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 
     private static class PropertiesSupplier implements Supplier<Result<Properties, IOException>>, Serializable {

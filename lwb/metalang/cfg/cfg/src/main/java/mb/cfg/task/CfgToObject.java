@@ -9,6 +9,7 @@ import mb.common.message.KeyedMessages;
 import mb.common.result.Result;
 import mb.common.util.Properties;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
 import mb.pie.api.None;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
@@ -22,6 +23,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import java.io.Serializable;
+import java.util.Set;
 
 @CfgScope
 public class CfgToObject implements TaskDef<CfgToObject.Input, Result<CfgToObject.Output, CfgToObjectException>> {
@@ -135,6 +137,10 @@ public class CfgToObject implements TaskDef<CfgToObject.Input, Result<CfgToObjec
                 .mapErr(CfgToObjectException::analyzeExceptionalFail)
                 .flatMap(properties -> toOutput(context, input.rootDirectory, input.cfgResource, analysisOutput, properties))
             );
+    }
+
+    @Override public boolean shouldExecWhenAffected(Input input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 
     private Result<Output, CfgToObjectException> toOutput(

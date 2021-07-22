@@ -10,6 +10,7 @@ import mb.common.util.UncheckedException;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecException;
+import mb.pie.api.Interactivity;
 import mb.pie.api.MixedSession;
 import mb.pie.api.Pie;
 import mb.pie.api.Session;
@@ -76,6 +77,7 @@ public class PieRunner {
     private final WorkspaceUpdate.Factory workspaceUpdateFactory;
     private final ResourceUtil resourceUtil;
     private final PartClosedCallback partClosedCallback;
+    private final Set<Interactivity> editorUpdateTags;
 
     private @Nullable WorkspaceUpdate bottomUpWorkspaceUpdate = null;
 
@@ -95,6 +97,7 @@ public class PieRunner {
         this.resourceRegistry = resourceRegistry;
         this.workspaceUpdateFactory = workspaceUpdateFactory;
         this.partClosedCallback = partClosedCallback;
+        this.editorUpdateTags = Interactivity.Interactive.asSingletonSet();
     }
 
 
@@ -125,7 +128,7 @@ public class PieRunner {
             // First run a bottom-up build, to ensure that tasks affected by changed file are brought up-to-date.
             final HashSet<ResourceKey> changedResources = new HashSet<>();
             changedResources.add(file);
-            final TopDownSession topDownSession = updateAffectedBy(changedResources, session, monitor);
+            final TopDownSession topDownSession = updateAffectedBy(changedResources, editorUpdateTags, session, monitor);
 
             final Task<Option<Styling>> styleTask = createStyleTask(languageInstance, file, rootDirectoryHint);
             final String text = document.get();
@@ -437,8 +440,13 @@ public class PieRunner {
         }
     }
 
+    public TopDownSession updateAffectedBy(Set<? extends ResourceKey> changedResources, Set<?> tags, MixedSession session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
+        logger.trace("Update affected by {} resources with tags '{}'", changedResources.size(), tags);
+        return session.updateAffectedBy(changedResources, tags, monitorCancelled(monitor));
+    }
+
     public TopDownSession updateAffectedBy(Set<? extends ResourceKey> changedResources, MixedSession session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
-        logger.trace("Update affected by '{}'", changedResources);
+        logger.trace("Update affected by {} resources", changedResources.size());
         return session.updateAffectedBy(changedResources, monitorCancelled(monitor));
     }
 

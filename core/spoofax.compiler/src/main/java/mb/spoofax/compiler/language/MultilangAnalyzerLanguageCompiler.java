@@ -2,6 +2,7 @@ package mb.spoofax.compiler.language;
 
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
@@ -18,6 +19,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Value.Enclosing
 public class MultilangAnalyzerLanguageCompiler implements TaskDef<MultilangAnalyzerLanguageCompiler.Input, MultilangAnalyzerLanguageCompiler.Output> {
@@ -41,11 +43,15 @@ public class MultilangAnalyzerLanguageCompiler implements TaskDef<MultilangAnaly
         return outputBuilder.build();
     }
 
+    @Override public boolean shouldExecWhenAffected(Input input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
+    }
+
     @Override public Serializable key(Input input) {
         return input.languageProject().project().baseDirectory();
     }
 
-    
+
     public ListView<GradleConfiguredDependency> getDependencies(Input input) {
         return ListView.of(GradleConfiguredDependency.api(input.shared().multilangDep()));
     }

@@ -6,6 +6,7 @@ import mb.esv.task.spoofax.EsvParseWrapper;
 import mb.esv.util.EsvUtil;
 import mb.esv.util.EsvVisitor;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
 import mb.pie.api.TaskDef;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.TermFactory;
@@ -13,6 +14,7 @@ import org.spoofax.terms.TermFactory;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Set;
 
 @EsvScope
 public class EsvCompile implements TaskDef<EsvConfig, Result<IStrategoTerm, ?>> {
@@ -37,5 +39,9 @@ public class EsvCompile implements TaskDef<EsvConfig, Result<IStrategoTerm, ?>> 
         visitor.visitMainFile(context, config.mainFile, config.rootDirectory);
         final TermFactory termFactory = new TermFactory();
         return Result.ofOk(termFactory.makeAppl("Module", termFactory.makeString("editor"), termFactory.makeAppl("NoImports"), termFactory.makeList(sections)));
+    }
+
+    @Override public boolean shouldExecWhenAffected(EsvConfig input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 }

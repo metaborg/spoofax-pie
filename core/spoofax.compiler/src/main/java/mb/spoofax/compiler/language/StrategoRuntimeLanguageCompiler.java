@@ -2,6 +2,7 @@ package mb.spoofax.compiler.language;
 
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
 import mb.pie.api.None;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
@@ -20,6 +21,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Value.Enclosing
@@ -41,6 +43,10 @@ public class StrategoRuntimeLanguageCompiler implements TaskDef<StrategoRuntimeL
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         factoryTemplate.write(context, input.baseStrategoRuntimeBuilderFactory().file(generatedJavaSourcesDirectory), input);
         return None.instance;
+    }
+
+    @Override public boolean shouldExecWhenAffected(Input input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 
     @Override public Serializable key(Input input) {

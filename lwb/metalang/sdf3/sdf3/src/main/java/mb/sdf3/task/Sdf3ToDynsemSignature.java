@@ -1,11 +1,14 @@
 package mb.sdf3.task;
 
+import mb.common.result.Result;
+import mb.constraint.pie.ConstraintAnalyzeMultiTaskDef;
+import mb.pie.api.Interactivity;
+import mb.pie.api.Supplier;
 import mb.sdf3.Sdf3Scope;
 import mb.sdf3.task.util.AnalyzedStrategoTransformTaskDef;
-import mb.stratego.common.StrategoRuntime;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
+import java.util.Set;
 
 @Sdf3Scope
 public class Sdf3ToDynsemSignature extends AnalyzedStrategoTransformTaskDef {
@@ -15,5 +18,10 @@ public class Sdf3ToDynsemSignature extends AnalyzedStrategoTransformTaskDef {
 
     @Override public String getId() {
         return getClass().getName();
+    }
+
+    @Override
+    public boolean shouldExecWhenAffected(Supplier<? extends Result<ConstraintAnalyzeMultiTaskDef.SingleFileOutput, ?>> input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 }

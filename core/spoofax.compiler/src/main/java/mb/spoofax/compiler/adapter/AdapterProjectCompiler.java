@@ -4,6 +4,7 @@ import com.samskivert.mustache.Mustache;
 import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
 import mb.pie.api.None;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
@@ -36,6 +37,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Value.Enclosing
@@ -103,6 +105,10 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
     @Override
     public Result<None, ?> exec(ExecContext context, Supplier<Result<Input, ?>> input) throws IOException {
         return context.require(input).mapThrowing(i -> compile(context, i));
+    }
+
+    @Override public boolean shouldExecWhenAffected(Supplier<Result<Input, ?>> input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 
     public None compile(ExecContext context, Input input) throws IOException {

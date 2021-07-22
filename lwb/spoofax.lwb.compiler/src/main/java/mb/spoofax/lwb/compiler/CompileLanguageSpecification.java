@@ -4,6 +4,7 @@ import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.lwb.compiler.esv.CompileEsv;
@@ -16,6 +17,7 @@ import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Compiles a language specification by running the meta-language compilers.
@@ -86,5 +88,9 @@ public class CompileLanguageSpecification implements TaskDef<ResourcePath, Resul
             );
         if(result.isErr()) return result.ignoreValueIfErr();
         return Result.ofOk(Output.builder().providedJavaFiles(providedJavaFiles).messages(messagesBuilder.build()).build());
+    }
+
+    @Override public boolean shouldExecWhenAffected(ResourcePath input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 }

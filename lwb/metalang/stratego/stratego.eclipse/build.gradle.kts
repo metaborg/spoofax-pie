@@ -12,9 +12,6 @@ languageEclipseProject {
   adapterProject.set(project(":stratego"))
   compilerInput {
     languageGroup("mb.spoofax.lwb")
-
-    baseLanguage("mb.str.eclipse", "BaseStrategoLanguage")
-    extendLanguage("mb.str.eclipse", "StrategoLanguage")
   }
 }
 

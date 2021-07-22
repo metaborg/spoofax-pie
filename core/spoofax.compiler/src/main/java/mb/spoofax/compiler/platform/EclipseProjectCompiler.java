@@ -3,6 +3,7 @@ package mb.spoofax.compiler.platform;
 import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
 import mb.pie.api.None;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Value.Enclosing
 public class EclipseProjectCompiler implements TaskDef<Supplier<Result<Option<EclipseProjectCompiler.Input>, ?>>, Result<None, ?>> {
@@ -91,6 +93,10 @@ public class EclipseProjectCompiler implements TaskDef<Supplier<Result<Option<Ec
     @Override
     public Result<None, ?> exec(ExecContext context, Supplier<Result<Option<EclipseProjectCompiler.Input>, ?>> input) throws IOException {
         return context.require(input).mapThrowing(o -> o.mapThrowingOrElse(i -> compile(context, i), () -> None.instance));
+    }
+
+    @Override public boolean shouldExecWhenAffected(Supplier<Result<Option<Input>, ?>> input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 
     public None compile(ExecContext context, Input input) throws IOException {

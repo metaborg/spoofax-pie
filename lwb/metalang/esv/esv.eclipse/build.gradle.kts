@@ -12,8 +12,5 @@ languageEclipseProject {
   adapterProject.set(project(":esv"))
   compilerInput {
     languageGroup("mb.spoofax.lwb")
-
-    baseLanguage("mb.esv.eclipse", "BaseEsvLanguage")
-    extendLanguage("mb.esv.eclipse", "EsvLanguage")
   }
 }
