@@ -2,6 +2,7 @@ package mb.spt.task;
 
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
+import mb.common.message.Severity;
 import mb.common.result.Result;
 import mb.common.util.MapView;
 import mb.jsglr.common.JsglrParseException;
@@ -144,7 +145,7 @@ public class SptCheck implements TaskDef<SptCheck.Input, KeyedMessages> {
         final CancelToken cancelToken = context.cancelToken();
         languageUnderTestResult.ifThrowingElse(
             languageUnderTest -> runTests(languageUnderTestProvider, context, languageUnderTest, cancelToken, messagesBuilder, testSuite),
-            messagesBuilder::extractMessagesRecursively
+            e -> messagesBuilder.addMessage("Cannot run tests, failed to get language under test", e, Severity.Error, file)
         );
     }
 
