@@ -69,20 +69,10 @@ public class SptCheckForOutput implements TaskDef<SptCheckForOutput.Input, TestS
         }
 
         @Override public String toString() {
-            return "SptCheckWrapper$Input{" +
+            return "SptCheckForOutput$Input{" +
                 "file=" + file +
                 ", rootDirectoryHint=" + rootDirectoryHint +
                 '}';
-        }
-    }
-
-    public static class Output implements Serializable {
-        public final KeyedMessages messages;
-        public final Map<String, Boolean> testCases;
-
-        public Output(KeyedMessages messages, Map<String, Boolean> testCases) {
-            this.messages = messages;
-            this.testCases = testCases;
         }
     }
 

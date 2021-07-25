@@ -82,4 +82,13 @@ public class TestCaseRun {
     public long duration() {
         return duration;
     }
+
+    public String toLog() {
+        if(messages != null && !messages.containsError()) {
+            return this.test.description + ": PASS\n";
+        } else {
+            return this.test.description + ": FAIL\n";
+        }
+    }
+    // TODO: Add equality, hash and toString functions
 }

@@ -2,6 +2,7 @@ import mb.spoofax.compiler.adapter.*
 import mb.spoofax.compiler.adapter.data.*
 import mb.spoofax.compiler.util.*
 import mb.spoofax.core.language.command.CommandContextType
+import mb.spoofax.core.language.command.EnclosingCommandContextType
 import mb.spoofax.core.language.command.CommandExecutionType
 
 plugins {
@@ -76,6 +77,8 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   // Internal task definitions
   val check = TypeInfo.of(taskPackageId, "SptCheck")
   addTaskDefs(check)
+  val checkForOutput = TypeInfo.of(taskPackageId, "SptCheckForOutput")
+  addTaskDefs(checkForOutput)
 
   // Show (debugging) task definitions
   val debugTaskPackageId = "$taskPackageId.debug"
@@ -102,6 +105,24 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
     showParsedTokensCommand
   )
   addAllCommandDefs(showCommands)
+  val runTestSuite = TypeInfo.of(taskPackageId, "SptRunTestSuite")
+  addTaskDefs(runTestSuite)
+  val runTestSuiteCommand = CommandDefRepr.builder()
+    .type(commandPackageId, runTestSuite.id() + "Command")
+    .taskDefType(runTestSuite)
+    .argType(TypeInfo.of(taskPackageId, "SptRunTestSuite.Args"))
+    .displayName("Run SPT tests")
+    .description("Run the SPT tests in this file")
+    .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous)
+    .addAllParams(listOf(
+      ParamRepr.of(
+        "rootDir", TypeInfo.of("mb.resource.hierarchical", "ResourcePath"),
+        true, ArgProviderRepr.enclosingContext(EnclosingCommandContextType.Project)
+      ),
+      ParamRepr.of("file", TypeInfo.of("mb.resource", "ResourceKey"), true, ArgProviderRepr.context(CommandContextType.File))
+    ))
+    .build()
+  addCommandDefs(runTestSuiteCommand)
 
   // Menu bindings
   val mainAndEditorMenu = listOf(
@@ -112,13 +133,16 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
           CommandActionRepr.builder().manualContinuous(it).fileRequired().buildItem()
         )
       }
-    )
+    ),
+    CommandActionRepr.builder().manualOnce(runTestSuiteCommand).fileRequired().enclosingProjectRequired().buildItem(),
+    CommandActionRepr.builder().manualContinuous(runTestSuiteCommand).fileRequired().enclosingProjectRequired().buildItem()
   )
   addAllMainMenuItems(mainAndEditorMenu)
   addAllEditorContextMenuItems(mainAndEditorMenu)
   addResourceContextMenuItems(
     MenuItemRepr.menu("Debug",
       showCommands.flatMap { listOf(CommandActionRepr.builder().manualOnce(it).fileRequired().buildItem()) }
-    )
+    ),
+    CommandActionRepr.builder().manualOnce(runTestSuiteCommand).fileRequired().enclosingProjectRequired().buildItem()
   )
 }

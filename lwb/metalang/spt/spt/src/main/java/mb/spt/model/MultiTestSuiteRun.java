@@ -1,12 +1,13 @@
 package mb.spt.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Container for multiple {@link TestSuiteRun}s.
  */
-public class MultiTestSuiteRun {
+public class MultiTestSuiteRun implements Serializable {
 
     public final List<TestSuiteRun> suites = new ArrayList<>();
 
@@ -56,4 +57,19 @@ public class MultiTestSuiteRun {
         return i;
     }
 
+    public void add(TestSuiteRun suiteRun) {
+        suites.add(suiteRun);
+        numFailed += suiteRun.numFailed();
+        numPassed += suiteRun.numPassed();
+    }
+
+    public String toLog() {
+        StringBuilder builder = new StringBuilder();
+        for (TestSuiteRun suite : suites) {
+            builder.append(suite.toLog());
+        }
+        return builder.toString();
+    }
+
+    // TODO: Add equality, hash and toString functions
 }

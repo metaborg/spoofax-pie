@@ -90,4 +90,19 @@ public class TestSuiteRun implements Serializable {
         }
     }
 
+    public String toLog() {
+        StringBuilder builder = new StringBuilder();
+        builder
+            .append("TestSuite ")
+            .append(this.name)
+            .append('\n')
+            .append(tests.size())
+            .append(" tests\n");
+        for (TestCaseRun test : tests) {
+            builder.append(test.toLog());
+        }
+        return builder.toString();
+    }
+
+    // TODO: Add equality, hash and toString functions
 }
