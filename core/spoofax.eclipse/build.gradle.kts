@@ -21,6 +21,7 @@ dependencies {
   bundleTargetPlatformApi(eclipse("org.eclipse.ui.workbench"))
   bundleTargetPlatformApi(eclipse("org.eclipse.ui.workbench.texteditor"))
   bundleTargetPlatformApi(eclipse("org.eclipse.ui.ide"))
+  bundleTargetPlatformApi(eclipse("org.eclipse.ui.forms"))
   bundleTargetPlatformApi(eclipse("org.eclipse.jface.text"))
   bundleTargetPlatformApi(eclipse("org.eclipse.swt"))
   bundleTargetPlatformApi(eclipse("com.ibm.icu"))
