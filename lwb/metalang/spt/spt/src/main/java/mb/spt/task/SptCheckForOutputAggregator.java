@@ -1,7 +1,5 @@
 package mb.spt.task;
 
-import mb.common.message.KeyedMessages;
-import mb.common.message.KeyedMessagesBuilder;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
@@ -17,10 +15,43 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.io.Serializable;
+import java.util.Objects;
 
-public class SptCheckForOutputAggregator implements TaskDef<ResourcePath, MultiTestSuiteRun> {
+public class SptCheckForOutputAggregator implements TaskDef<SptCheckForOutputAggregator.Input, MultiTestSuiteRun> {
     private final mb.spt.SptClassLoaderResources classLoaderResources;
     private final SptCheckForOutput check;
+
+    public static class Input implements Serializable {
+        public final ResourcePath directory;
+        public final @Nullable ResourcePath rootDirectory;
+
+        public Input(ResourcePath directory, @Nullable ResourcePath rootDirectory) {
+            this.directory = directory;
+            this.rootDirectory = rootDirectory;
+        }
+
+        @Override public boolean equals(@Nullable Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            final SptCheckForOutputAggregator.Input input = (SptCheckForOutputAggregator.Input)o;
+            if(!directory.equals(input.directory)) return false;
+            return Objects.equals(rootDirectory, input.rootDirectory);
+        }
+
+        @Override public int hashCode() {
+            int result = directory.hashCode();
+            result = 31 * result + (rootDirectory != null ? rootDirectory.hashCode() : 0);
+            return result;
+        }
+
+        @Override public String toString() {
+            return "SptCheckForOutput$Input{" +
+                "directory=" + directory +
+                ", rootDirectoryHint=" + rootDirectory +
+                '}';
+        }
+    }
 
     @Inject public SptCheckForOutputAggregator(
         mb.spt.SptClassLoaderResources classLoaderResources,
@@ -34,18 +65,18 @@ public class SptCheckForOutputAggregator implements TaskDef<ResourcePath, MultiT
         return "mb.spt.task.SptCheckForOutputAggregator";
     }
 
-    @Override public @Nullable MultiTestSuiteRun exec(ExecContext context, ResourcePath input) throws IOException {
+    @Override public @Nullable MultiTestSuiteRun exec(ExecContext context, SptCheckForOutputAggregator.Input input) throws IOException {
         context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
         final ResourceWalker walker = ResourceWalker.ofPath(PathMatcher.ofNoHidden());
-        final HierarchicalResource rootDirectory = context.getHierarchicalResource(input);
+        final HierarchicalResource rootDirectory = context.getHierarchicalResource(input.rootDirectory);
+        final HierarchicalResource selectedDirectory = context.getHierarchicalResource(input.directory);
         // Require directories recursively, so we re-execute whenever a file is added/removed from a directory.
         rootDirectory.walkForEach(walker, ResourceMatcher.ofDirectory(), context::require);
         final ResourceMatcher matcher = ResourceMatcher.ofFile().and(ResourceMatcher.ofPath(PathMatcher.ofExtensions("spt")));
         final MultiTestSuiteRun testResults = new MultiTestSuiteRun();
-        rootDirectory.walkForEach(walker, matcher, file -> {
+        selectedDirectory.walkForEach(walker, matcher, file -> {
             final ResourceKey fileKey = file.getKey();
-            final TestSuiteRun result = context.require(check, new SptCheckForOutput.Input(fileKey, input));
-            testResults.add(result);
+            final TestSuiteRun result = context.require(check, new SptCheckForOutput.Input(fileKey, input.rootDirectory, testResults));
         });
         return testResults;
     }

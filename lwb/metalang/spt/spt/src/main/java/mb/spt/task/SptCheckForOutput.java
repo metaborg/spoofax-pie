@@ -22,6 +22,7 @@ import mb.spt.fromterm.TestSuiteFromTerm;
 import mb.spt.lut.LanguageUnderTestProvider;
 import mb.spt.lut.LanguageUnderTestProviderWrapper;
 import mb.spt.model.LanguageUnderTest;
+import mb.spt.model.MultiTestSuiteRun;
 import mb.spt.model.TestCase;
 import mb.spt.model.TestCaseRun;
 import mb.spt.model.TestExpectation;
@@ -41,6 +42,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 @SptScope
@@ -48,10 +50,24 @@ public class SptCheckForOutput implements TaskDef<SptCheckForOutput.Input, TestS
     public static class Input implements Serializable {
         public final ResourceKey file;
         public final @Nullable ResourcePath rootDirectoryHint;
+        public final @Nullable MultiTestSuiteRun multiTestSuiteRun;
 
-        public Input(ResourceKey file, @Nullable ResourcePath rootDirectoryHint) {
+        public Input(ResourceKey file) {
+            this.file = file;
+            this.rootDirectoryHint = null;
+            this.multiTestSuiteRun = null;
+        }
+
+        public Input(ResourceKey file, ResourcePath rootDirectoryHint) {
             this.file = file;
             this.rootDirectoryHint = rootDirectoryHint;
+            this.multiTestSuiteRun = null;
+        }
+
+        public Input(ResourceKey file, ResourcePath rootDirectoryHint, MultiTestSuiteRun multiTestSuiteRun) {
+            this.file = file;
+            this.rootDirectoryHint = rootDirectoryHint;
+            this.multiTestSuiteRun = multiTestSuiteRun;
         }
 
         @Override public boolean equals(@Nullable Object o) {
@@ -59,7 +75,7 @@ public class SptCheckForOutput implements TaskDef<SptCheckForOutput.Input, TestS
             if(o == null || getClass() != o.getClass()) return false;
             final Input input = (Input)o;
             if(!file.equals(input.file)) return false;
-            return rootDirectoryHint != null ? rootDirectoryHint.equals(input.rootDirectoryHint) : input.rootDirectoryHint == null;
+            return Objects.equals(rootDirectoryHint, input.rootDirectoryHint);
         }
 
         @Override public int hashCode() {
@@ -111,7 +127,10 @@ public class SptCheckForOutput implements TaskDef<SptCheckForOutput.Input, TestS
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
         final mb.jsglr.pie.JsglrParseTaskInput.Builder parseInputBuilder = parse.inputBuilder().withFile(input.file).rootDirectoryHint(Optional.ofNullable(input.rootDirectoryHint));
         final Result<JsglrParseOutput, JsglrParseException> parseResult = context.require(parse, parseInputBuilder.build());
-        final TestSuiteRun testResults = new TestSuiteRun(null, input.file, input.file.asString());
+        final TestSuiteRun testResults = new TestSuiteRun(null, input.file, input.multiTestSuiteRun, input.file.asString());
+        if (input.multiTestSuiteRun != null) {
+            input.multiTestSuiteRun.add(testResults);
+        }
         parseResult.ifThrowingElse(o -> {
                 messagesBuilder.addMessages(o.messages);
                 runTests(context, testResults, messagesBuilder, input.file, input.rootDirectoryHint, o.ast);

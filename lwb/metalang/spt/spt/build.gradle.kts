@@ -78,7 +78,8 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   val check = TypeInfo.of(taskPackageId, "SptCheck")
   addTaskDefs(check)
   val checkForOutput = TypeInfo.of(taskPackageId, "SptCheckForOutput")
-  addTaskDefs(checkForOutput)
+  val checkForOutputAggregator = TypeInfo.of(taskPackageId, "SptCheckForOutputAggregator")
+  addTaskDefs(checkForOutput, checkForOutputAggregator)
 
   // Show (debugging) task definitions
   val debugTaskPackageId = "$taskPackageId.debug"
@@ -105,15 +106,20 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
     showParsedTokensCommand
   )
   addAllCommandDefs(showCommands)
+
+  // Add test running tasks
   val runTestSuite = TypeInfo.of(taskPackageId, "SptRunTestSuite")
-  addTaskDefs(runTestSuite)
+  val runTestSuites = TypeInfo.of(taskPackageId, "SptRunTestSuites")
+  addTaskDefs(runTestSuite, runTestSuites)
+
+  // Add test running commands
   val runTestSuiteCommand = CommandDefRepr.builder()
     .type(commandPackageId, runTestSuite.id() + "Command")
     .taskDefType(runTestSuite)
     .argType(TypeInfo.of(taskPackageId, "SptRunTestSuite.Args"))
     .displayName("Run SPT tests")
     .description("Run the SPT tests in this file")
-    .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous)
+    .addSupportedExecutionTypes(CommandExecutionType.ManualOnce)
     .addAllParams(listOf(
       ParamRepr.of(
         "rootDir", TypeInfo.of("mb.resource.hierarchical", "ResourcePath"),
@@ -122,7 +128,27 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
       ParamRepr.of("file", TypeInfo.of("mb.resource", "ResourceKey"), true, ArgProviderRepr.context(CommandContextType.File))
     ))
     .build()
-  addCommandDefs(runTestSuiteCommand)
+  val runTestSuitesCommand = CommandDefRepr.builder()
+    .type(commandPackageId, runTestSuites.id() + "Command")
+    .taskDefType(runTestSuites)
+    .argType(TypeInfo.of(taskPackageId, "SptRunTestSuites.Args"))
+    .displayName("Run SPT tests")
+    .description("Run the SPT tests in this directory")
+    .addSupportedExecutionTypes(CommandExecutionType.ManualOnce)
+    .addAllParams(listOf(
+      ParamRepr.of(
+        "rootDir",
+        TypeInfo.of("mb.resource.hierarchical", "ResourcePath"),
+        true,
+        ArgProviderRepr.enclosingContext(EnclosingCommandContextType.Project)
+      ),
+      ParamRepr.of("directory",
+        TypeInfo.of("mb.resource.hierarchical", "ResourcePath"),
+        true,
+        ArgProviderRepr.context(CommandContextType.Directory))
+    ))
+    .build()
+  addCommandDefs(runTestSuiteCommand, runTestSuitesCommand)
 
   // Menu bindings
   val mainAndEditorMenu = listOf(
@@ -134,8 +160,7 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
         )
       }
     ),
-    CommandActionRepr.builder().manualOnce(runTestSuiteCommand).fileRequired().enclosingProjectRequired().buildItem(),
-    CommandActionRepr.builder().manualContinuous(runTestSuiteCommand).fileRequired().enclosingProjectRequired().buildItem()
+    CommandActionRepr.builder().manualOnce(runTestSuiteCommand).fileRequired().enclosingProjectRequired().buildItem()
   )
   addAllMainMenuItems(mainAndEditorMenu)
   addAllEditorContextMenuItems(mainAndEditorMenu)
@@ -143,6 +168,7 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
     MenuItemRepr.menu("Debug",
       showCommands.flatMap { listOf(CommandActionRepr.builder().manualOnce(it).fileRequired().buildItem()) }
     ),
-    CommandActionRepr.builder().manualOnce(runTestSuiteCommand).fileRequired().enclosingProjectRequired().buildItem()
+    CommandActionRepr.builder().manualOnce(runTestSuiteCommand).fileRequired().enclosingProjectRequired().buildItem(),
+    CommandActionRepr.builder().manualOnce(runTestSuitesCommand).directoryRequired().enclosingProjectRequired().buildItem()
   )
 }
