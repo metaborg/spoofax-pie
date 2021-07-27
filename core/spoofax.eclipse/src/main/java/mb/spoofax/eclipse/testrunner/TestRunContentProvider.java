@@ -1,10 +1,10 @@
-package mb.spoofax.lwb.eclipse.testrunner;
+package mb.spoofax.eclipse.testrunner;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.Viewer;
-import mb.spt.model.MultiTestSuiteRun;
-import mb.spt.model.TestCaseRun;
-import mb.spt.model.TestSuiteRun;
+import mb.spoofax.core.language.model.MultiTestSuiteRun;
+import mb.spoofax.core.language.model.TestCaseRun;
+import mb.spoofax.core.language.model.TestSuiteRun;
 
 /**
  * A content provider to turn our data model into something the treeviewer can understand.
@@ -24,7 +24,7 @@ public class TestRunContentProvider implements ITreeContentProvider {
         return new Object[] {};
     }
 
-    @Override public Object getParent(Object element) {
+    @Override @Nullable public Object getParent(Object element) {
         if(element instanceof TestCaseRun) {
             return ((TestCaseRun) element).parent;
         } else if(element instanceof TestSuiteRun) {

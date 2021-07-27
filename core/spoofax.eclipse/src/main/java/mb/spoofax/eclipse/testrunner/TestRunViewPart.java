@@ -1,4 +1,4 @@
-package mb.spoofax.lwb.eclipse.testrunner;
+package mb.spoofax.eclipse.testrunner;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -35,9 +35,9 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.ViewPart;
-import mb.spt.model.MultiTestSuiteRun;
-import mb.spt.model.TestCaseRun;
-import mb.spt.model.TestSuiteRun;
+import mb.spoofax.core.language.model.MultiTestSuiteRun;
+import mb.spoofax.core.language.model.TestCaseRun;
+import mb.spoofax.core.language.model.TestSuiteRun;
 
 /**
  * The main View for the test runner.
@@ -54,7 +54,7 @@ import mb.spt.model.TestSuiteRun;
  */
 public class TestRunViewPart extends ViewPart {
 
-    public final static String VIEW_ID = "org.metaborg.spt.testrunner.eclipse.testrunviewpart";
+    public final static String VIEW_ID = "mb.spoofax.eclipse.testrunner.testrunviewpart";
 
     private final FormToolkit toolkit = new FormToolkit(Display.getCurrent());
     private Label lblRatio;
@@ -311,8 +311,8 @@ public class TestRunViewPart extends ViewPart {
 
             if(selectObject instanceof TestCaseRun) {
                 TestCaseRun tcr = (TestCaseRun) selectObject;
-                file = tcr.test.resource;
-                offset = tcr.test.descriptionRegion.getStartOffset();
+                //file = tcr.test.resource;
+                //offset = tcr.test.descriptionRegion.getStartOffset();
             } else if(selectObject instanceof TestSuiteRun) {
                 TestSuiteRun tsr = ((TestSuiteRun) selectObject);
                 file = tsr.file;

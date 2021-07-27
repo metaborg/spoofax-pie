@@ -9,8 +9,8 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.match.path.PathMatcher;
 import mb.resource.hierarchical.walk.ResourceWalker;
-import mb.spt.model.MultiTestSuiteRun;
-import mb.spt.model.TestSuiteRun;
+import mb.spoofax.core.language.model.MultiTestSuiteRun;
+import mb.spoofax.core.language.model.TestSuiteRun;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
@@ -24,9 +24,9 @@ public class SptCheckForOutputAggregator implements TaskDef<SptCheckForOutputAgg
 
     public static class Input implements Serializable {
         public final ResourcePath directory;
-        public final @Nullable ResourcePath rootDirectory;
+        public final ResourcePath rootDirectory;
 
-        public Input(ResourcePath directory, @Nullable ResourcePath rootDirectory) {
+        public Input(ResourcePath directory, ResourcePath rootDirectory) {
             this.directory = directory;
             this.rootDirectory = rootDirectory;
         }
@@ -41,7 +41,7 @@ public class SptCheckForOutputAggregator implements TaskDef<SptCheckForOutputAgg
 
         @Override public int hashCode() {
             int result = directory.hashCode();
-            result = 31 * result + (rootDirectory != null ? rootDirectory.hashCode() : 0);
+            result = 31 * result + rootDirectory.hashCode();
             return result;
         }
 
@@ -65,7 +65,7 @@ public class SptCheckForOutputAggregator implements TaskDef<SptCheckForOutputAgg
         return "mb.spt.task.SptCheckForOutputAggregator";
     }
 
-    @Override public @Nullable MultiTestSuiteRun exec(ExecContext context, SptCheckForOutputAggregator.Input input) throws IOException {
+    @Override public MultiTestSuiteRun exec(ExecContext context, SptCheckForOutputAggregator.Input input) throws IOException {
         context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
         final ResourceWalker walker = ResourceWalker.ofPath(PathMatcher.ofNoHidden());
         final HierarchicalResource rootDirectory = context.getHierarchicalResource(input.rootDirectory);

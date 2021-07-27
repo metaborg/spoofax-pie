@@ -273,46 +273,4 @@
       class="mb.spoofax.lwb.eclipse.dynamicloading.DynamicRunCommandHandler"
     />
   </extension>
-
-  <!-- View -->
-  <extension point="org.eclipse.ui.views">
-    <view
-      class="mb.spoofax.lwb.eclipse.testrunner.TestRunViewPart"
-      id="mb.spoofax.lwb.eclipse.testrunner.testrunviewpart"
-      name="SPT Test Runner"
-    />
-  </extension>
-
-<!--  &lt;!&ndash; SPT commands and menus &ndash;&gt;-->
-<!--  <extension point="org.eclipse.ui.commands">-->
-<!--    <command-->
-<!--      defaultHandler="mb.spoofax.lwb.eclipse.testrunner.RunAllHandler"-->
-<!--      id="mb.spoofax.lwb.eclipse.testrunner.command.runall"-->
-<!--      name="Run all SPT tests"-->
-<!--    />-->
-<!--    <command-->
-<!--      defaultHandler="mb.spoofax.lwb.eclipse.testrunner.RunOneHandler"-->
-<!--      id="mb.spoofax.lwb.eclipse.testrunner.command.runone"-->
-<!--      name="Run one SPT test"-->
-<!--    />-->
-<!--  </extension>-->
-
-<!--  <extension point="org.eclipse.ui.menus">-->
-<!--    <menuContribution-->
-<!--      allPopups="true"-->
-<!--      locationURI="menu:org.metaborg.spoofax.eclipse.meta.menu.main?after=org.metaborg.spoofax.eclipse.meta.separator.additions"-->
-<!--    >-->
-<!--      <command-->
-<!--        commandId="mb.spoofax.lwb.eclipse.testrunner.command.runone"-->
-<!--        label="Run selected test"-->
-<!--        style="push"-->
-<!--      />-->
-<!--      <command-->
-<!--        commandId="mb.spoofax.lwb.eclipse.testrunner.command.runall"-->
-<!--        label="Run all selected tests"-->
-<!--        style="push"-->
-<!--      />-->
-<!--      <separator name="org.metaborg.spt.testrunner.eclipse.separator" visible="true" />-->
-<!--    </menuContribution>-->
-<!--  </extension>-->
 </plugin>

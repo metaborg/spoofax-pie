@@ -1,12 +1,11 @@
-package mb.spoofax.lwb.eclipse.testrunner;
+package mb.spoofax.eclipse.testrunner;
 
 import mb.common.message.KeyedMessages;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
-import mb.spt.model.TestCaseRun;
-import mb.spt.model.TestSuiteRun;
-
-import javax.annotation.Nullable;
+import mb.spoofax.core.language.model.TestCaseRun;
+import mb.spoofax.core.language.model.TestSuiteRun;
 
 public class FailedTestsFilter extends ViewerFilter {
 

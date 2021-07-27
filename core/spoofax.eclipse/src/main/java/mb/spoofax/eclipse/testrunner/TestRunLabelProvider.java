@@ -1,4 +1,4 @@
-package mb.spoofax.lwb.eclipse.testrunner;
+package mb.spoofax.eclipse.testrunner;
 
 import org.eclipse.jface.viewers.ITableColorProvider;
 import org.eclipse.jface.viewers.ITableFontProvider;
@@ -8,8 +8,8 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
-import mb.spt.model.TestCaseRun;
-import mb.spt.model.TestSuiteRun;
+import mb.spoofax.core.language.model.TestCaseRun;
+import mb.spoofax.core.language.model.TestSuiteRun;
 
 /**
  * Returns the labels for the suites and test cases.
@@ -24,7 +24,7 @@ public class TestRunLabelProvider extends LabelProvider
             return failed == 0 ? tsr.name : String.format("%s (%d failed)", tsr.name, failed);
         } else if(element instanceof TestCaseRun) {
             TestCaseRun tcr = (TestCaseRun) element;
-            String lbl = tcr.test.description;
+            String lbl = tcr.test;
             if(tcr.result() != null) {
                 lbl = lbl + " (" + String.format("%.2f", tcr.duration() / 1000.0) + "s)";
                 if(tcr.result().containsError()) {

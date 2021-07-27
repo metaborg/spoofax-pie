@@ -1,8 +1,7 @@
-package mb.spt.model;
+package mb.spoofax.core.language.model;
 
 import mb.common.message.KeyedMessages;
-
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Represents a testcase that is being run.
@@ -13,7 +12,7 @@ import javax.annotation.Nullable;
 public class TestCaseRun {
 
     public final TestSuiteRun parent;
-    public final TestCase test;
+    public final String test;
 
     @Nullable private KeyedMessages messages;
     private boolean success;
@@ -24,13 +23,12 @@ public class TestCaseRun {
 
     /**
      * Create a TestCaseRun, representing a run of an ITestCase.
-     *
-     * @param parent
+     *  @param parent
      *            the parent test suite (may be null).
-     * @param test
-     *            the test that you will run.
+     *  @param test
+     *            Name of the test case
      */
-    public TestCaseRun(TestSuiteRun parent, TestCase test) {
+    public TestCaseRun(TestSuiteRun parent, String test) {
         this.parent = parent;
         this.test = test;
         this.start = System.currentTimeMillis();
@@ -85,9 +83,9 @@ public class TestCaseRun {
 
     public String toLog() {
         if(messages != null && !messages.containsError()) {
-            return this.test.description + ": PASS\n";
+            return this.test + ": PASS\n";
         } else {
-            return this.test.description + ": FAIL\n";
+            return this.test + ": FAIL\n";
         }
     }
     // TODO: Add equality, hash and toString functions

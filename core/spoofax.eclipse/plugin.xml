@@ -23,4 +23,13 @@
       id="spoofax.eclipse.NamedDocumentProvider">
     </provider>
   </extension>
+
+  <!-- Test Runner View -->
+  <extension point="org.eclipse.ui.views">
+    <view
+      class="mb.spoofax.eclipse.testrunner.TestRunViewPart"
+      id="mb.spoofax.eclipse.testrunner.testrunviewpart"
+      name="SPT Test Runner"
+    />
+  </extension>
 </plugin>

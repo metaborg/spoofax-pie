@@ -7,8 +7,7 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
 import mb.spt.SptClassLoaderResources;
-import mb.spt.model.MultiTestSuiteRun;
-import mb.spt.model.TestSuiteRun;
+import mb.spoofax.core.language.model.MultiTestSuiteRun;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
@@ -57,7 +56,7 @@ public class SptRunTestSuites implements TaskDef<SptRunTestSuites.Args, CommandF
     public CommandFeedback exec(ExecContext context, Args input) throws Exception {
         context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
         MultiTestSuiteRun result = context.require(checkForOutputAggregator, new SptCheckForOutputAggregator.Input(input.directory, input.rootDir));
-        return CommandFeedback.of(ShowFeedback.showText(result.toLog(), "Test results"));
+        return CommandFeedback.of(ShowFeedback.showTests(result));
     }
 
     @Inject

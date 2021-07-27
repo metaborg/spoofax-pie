@@ -22,12 +22,12 @@ import mb.spt.fromterm.TestSuiteFromTerm;
 import mb.spt.lut.LanguageUnderTestProvider;
 import mb.spt.lut.LanguageUnderTestProviderWrapper;
 import mb.spt.model.LanguageUnderTest;
-import mb.spt.model.MultiTestSuiteRun;
+import mb.spoofax.core.language.model.MultiTestSuiteRun;
 import mb.spt.model.TestCase;
-import mb.spt.model.TestCaseRun;
+import mb.spoofax.core.language.model.TestCaseRun;
 import mb.spt.model.TestExpectation;
 import mb.spt.model.TestSuite;
-import mb.spt.model.TestSuiteRun;
+import mb.spoofax.core.language.model.TestSuiteRun;
 import mb.spt.resource.SptTestCaseResourceRegistry;
 import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
@@ -38,10 +38,6 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -192,9 +188,8 @@ public class SptCheckForOutput implements TaskDef<SptCheckForOutput.Input, TestS
                     );
                 }
                 KeyedMessages messages = testMessageBuilder.build();
-                TestCaseRun run = new TestCaseRun(testResults, testCase);
+                TestCaseRun run = new TestCaseRun(testResults, testCase.description);
                 run.finish(messages);
-                messagesBuilder.addMessages(messages);
                 testResults.tests.add(run);
             }
         }

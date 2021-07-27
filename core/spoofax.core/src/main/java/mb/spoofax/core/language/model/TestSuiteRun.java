@@ -1,4 +1,4 @@
-package mb.spt.model;
+package mb.spoofax.core.language.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -6,8 +6,7 @@ import java.util.List;
 
 import mb.common.message.KeyedMessages;
 import mb.resource.ResourceKey;
-
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Represents running all the tests in a test suite.
