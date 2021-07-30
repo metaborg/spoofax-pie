@@ -35,9 +35,9 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.ViewPart;
-import mb.spoofax.core.language.model.MultiTestSuiteRun;
-import mb.spoofax.core.language.model.TestCaseRun;
-import mb.spoofax.core.language.model.TestSuiteRun;
+import mb.spoofax.core.language.testrunner.MultiTestSuiteRun;
+import mb.spoofax.core.language.testrunner.TestCaseRun;
+import mb.spoofax.core.language.testrunner.TestSuiteRun;
 
 /**
  * The main View for the test runner.

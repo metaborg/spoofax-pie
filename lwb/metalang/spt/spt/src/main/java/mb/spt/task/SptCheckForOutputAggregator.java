@@ -9,8 +9,8 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.match.path.PathMatcher;
 import mb.resource.hierarchical.walk.ResourceWalker;
-import mb.spoofax.core.language.model.MultiTestSuiteRun;
-import mb.spoofax.core.language.model.TestSuiteRun;
+import mb.spoofax.core.language.testrunner.MultiTestSuiteRun;
+import mb.spoofax.core.language.testrunner.TestSuiteRun;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;

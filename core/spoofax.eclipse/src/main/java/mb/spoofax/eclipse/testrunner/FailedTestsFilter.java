@@ -4,8 +4,8 @@ import mb.common.message.KeyedMessages;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
-import mb.spoofax.core.language.model.TestCaseRun;
-import mb.spoofax.core.language.model.TestSuiteRun;
+import mb.spoofax.core.language.testrunner.TestCaseRun;
+import mb.spoofax.core.language.testrunner.TestSuiteRun;
 
 public class FailedTestsFilter extends ViewerFilter {
 

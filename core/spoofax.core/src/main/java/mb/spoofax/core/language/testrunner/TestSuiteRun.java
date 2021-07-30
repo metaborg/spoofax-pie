@@ -1,4 +1,4 @@
-package mb.spoofax.core.language.model;
+package mb.spoofax.core.language.testrunner;
 
 import java.io.Serializable;
 import java.util.ArrayList;

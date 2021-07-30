@@ -7,9 +7,9 @@ import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
-import mb.spoofax.core.language.model.MultiTestSuiteRun;
+import mb.spoofax.core.language.testrunner.MultiTestSuiteRun;
 import mb.spt.SptClassLoaderResources;
-import mb.spoofax.core.language.model.TestSuiteRun;
+import mb.spoofax.core.language.testrunner.TestSuiteRun;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;

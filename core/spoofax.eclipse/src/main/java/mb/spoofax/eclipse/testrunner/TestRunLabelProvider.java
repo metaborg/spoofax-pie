@@ -8,8 +8,8 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
-import mb.spoofax.core.language.model.TestCaseRun;
-import mb.spoofax.core.language.model.TestSuiteRun;
+import mb.spoofax.core.language.testrunner.TestCaseRun;
+import mb.spoofax.core.language.testrunner.TestSuiteRun;
 
 /**
  * Returns the labels for the suites and test cases.

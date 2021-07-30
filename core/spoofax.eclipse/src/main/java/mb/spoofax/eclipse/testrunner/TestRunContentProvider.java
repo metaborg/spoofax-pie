@@ -2,9 +2,9 @@ package mb.spoofax.eclipse.testrunner;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import mb.spoofax.core.language.model.MultiTestSuiteRun;
-import mb.spoofax.core.language.model.TestCaseRun;
-import mb.spoofax.core.language.model.TestSuiteRun;
+import mb.spoofax.core.language.testrunner.MultiTestSuiteRun;
+import mb.spoofax.core.language.testrunner.TestCaseRun;
+import mb.spoofax.core.language.testrunner.TestSuiteRun;
 
 /**
  * A content provider to turn our data model into something the treeviewer can understand.

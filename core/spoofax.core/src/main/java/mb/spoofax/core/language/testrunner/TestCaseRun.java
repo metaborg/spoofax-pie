@@ -1,4 +1,4 @@
-package mb.spoofax.core.language.model;
+package mb.spoofax.core.language.testrunner;
 
 import mb.common.message.KeyedMessages;
 import org.checkerframework.checker.nullness.qual.Nullable;

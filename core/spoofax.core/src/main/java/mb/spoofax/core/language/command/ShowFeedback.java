@@ -3,7 +3,7 @@ package mb.spoofax.core.language.command;
 import mb.common.region.Region;
 import mb.common.util.ADT;
 import mb.resource.ResourceKey;
-import mb.spoofax.core.language.model.MultiTestSuiteRun;
+import mb.spoofax.core.language.testrunner.MultiTestSuiteRun;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
