@@ -3,6 +3,8 @@ package mb.spoofax.core.language.testrunner;
 import mb.common.message.KeyedMessages;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Objects;
+
 /**
  * Represents a testcase that is being run.
  *
@@ -12,7 +14,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class TestCaseRun {
 
     public final TestSuiteRun parent;
-    public final String test;
+    public final String description;
 
     @Nullable private KeyedMessages messages;
     private boolean success;
@@ -25,12 +27,12 @@ public class TestCaseRun {
      * Create a TestCaseRun, representing a run of an ITestCase.
      *  @param parent
      *            the parent test suite (may be null).
-     *  @param test
+     *  @param description
      *            Name of the test case
      */
-    public TestCaseRun(TestSuiteRun parent, String test) {
+    public TestCaseRun(TestSuiteRun parent, String description) {
         this.parent = parent;
-        this.test = test;
+        this.description = description;
         this.start = System.currentTimeMillis();
     }
 
@@ -81,12 +83,37 @@ public class TestCaseRun {
         return duration;
     }
 
-    public String toLog() {
-        if(messages != null && !messages.containsError()) {
-            return this.test + ": PASS\n";
+    public void addToStringBuilder(StringBuilder builder) {
+        builder.append(this.description);
+        if(messages != null) {
+            if(!messages.containsError()) {
+                builder.append(": PASS\n");
+            } else {
+                builder.append(": FAIL\n");
+            }
+            messages.addToStringBuilder(builder);
         } else {
-            return this.test + ": FAIL\n";
+            builder.append(": FAIL\n");
         }
     }
-    // TODO: Add equality, hash and toString functions
+
+    @Override
+    public boolean equals(@Nullable Object o) {
+        if (this == o) return true;
+        if (o == null || this.getClass() != o.getClass()) return false;
+        final TestCaseRun other = (TestCaseRun)o;
+        return this.description.equals(other.description)
+            && this.success == other.success
+            && Objects.equals(this.messages, other.messages);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(description, success, messages);
+    }
+
+    @Override
+    public String toString() {
+        return "TestCaseRun{description=" + description + ", success=" + success + "}";
+    }
 }

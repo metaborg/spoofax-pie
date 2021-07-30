@@ -1,8 +1,11 @@
 package mb.spoofax.core.language.testrunner;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Container for multiple {@link TestSuiteRun}s.
@@ -63,13 +66,27 @@ public class MultiTestSuiteRun implements Serializable {
         numPassed += suiteRun.numPassed();
     }
 
-    public String toLog() {
-        StringBuilder builder = new StringBuilder();
+    public void addToStringBuilder(StringBuilder builder) {
         for (TestSuiteRun suite : suites) {
-            builder.append(suite.toLog());
+            suite.addToStringBuilder(builder);
         }
-        return builder.toString();
     }
 
-    // TODO: Add equality, hash and toString functions
+    @Override
+    public boolean equals(@Nullable Object o) {
+        if (this == o) return true;
+        if (o == null || this.getClass() != o.getClass()) return false;
+        final MultiTestSuiteRun other = (MultiTestSuiteRun)o;
+        return this.suites.equals(other.suites);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(suites);
+    }
+
+    @Override
+    public String toString() {
+        return "MultiTestSuiteRun{suites=" + suites + "}";
+    }
 }

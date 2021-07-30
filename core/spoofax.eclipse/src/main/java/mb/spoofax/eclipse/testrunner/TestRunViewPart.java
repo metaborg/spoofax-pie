@@ -6,6 +6,10 @@ import java.io.StringWriter;
 import mb.common.message.KeyedMessages;
 import mb.common.message.Message;
 import mb.resource.ResourceKey;
+import org.checkerframework.checker.initialization.qual.UnderInitialization;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.common.initializedfields.qual.EnsuresInitializedFields;
+import org.checkerframework.common.initializedfields.qual.InitializedFields;
 import org.eclipse.jdt.internal.junit.ui.JUnitProgressBar;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
@@ -73,16 +77,17 @@ public class TestRunViewPart extends ViewPart {
 
     // the model part
     private int nrFailedTests = 0;
-    private MultiTestSuiteRun run = null;
+    private @Nullable MultiTestSuiteRun run = null;
 
     /**
      * Create contents of the view part.
      *
      * @param prnt
+     *      Parent of the part
      */
     @Override public void createPartControl(Composite prnt) {
         this.parent = prnt;
-        GridData gd = null;
+        GridData gd;
 
         GridLayout layout = new GridLayout(1, false);
         parent.setLayout(layout);
@@ -389,7 +394,6 @@ public class TestRunViewPart extends ViewPart {
                     }
                 }
             }
-            return;
         }
 
         private void printMessage(Message m, PrintWriter pw) {

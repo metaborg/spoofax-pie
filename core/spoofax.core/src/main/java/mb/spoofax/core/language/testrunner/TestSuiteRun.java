@@ -3,6 +3,7 @@ package mb.spoofax.core.language.testrunner;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import mb.common.message.KeyedMessages;
 import mb.resource.ResourceKey;
@@ -89,19 +90,40 @@ public class TestSuiteRun implements Serializable {
         }
     }
 
-    public String toLog() {
-        StringBuilder builder = new StringBuilder();
+    public void addToStringBuilder(StringBuilder builder) {
         builder
             .append("TestSuite ")
             .append(this.name)
-            .append('\n')
+            .append('\n');
+        if(messages != null) {
+            messages.addToStringBuilder(builder);
+        }
+        builder
             .append(tests.size())
             .append(" tests\n");
         for (TestCaseRun test : tests) {
-            builder.append(test.toLog());
+            test.addToStringBuilder(builder);
         }
-        return builder.toString();
     }
 
-    // TODO: Add equality, hash and toString functions
+    @Override
+    public boolean equals(@Nullable Object o) {
+        if (this == o) return true;
+        if (o == null || this.getClass() != o.getClass()) return false;
+        final TestSuiteRun other = (TestSuiteRun)o;
+        return this.name.equals(other.name)
+            && this.tests.equals(other.tests)
+            && this.file.equals(other.file)
+            && Objects.equals(this.messages, other.messages);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, tests, file, messages);
+    }
+
+    @Override
+    public String toString() {
+        return "TestSuiteRun{name=" + name + ", tests=" + tests + ", file=" + file + "}";
+    }
 }

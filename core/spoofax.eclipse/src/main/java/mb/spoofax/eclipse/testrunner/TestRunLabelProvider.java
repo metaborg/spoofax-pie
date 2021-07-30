@@ -1,5 +1,6 @@
 package mb.spoofax.eclipse.testrunner;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.jface.viewers.ITableColorProvider;
 import org.eclipse.jface.viewers.ITableFontProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
@@ -24,7 +25,7 @@ public class TestRunLabelProvider extends LabelProvider
             return failed == 0 ? tsr.name : String.format("%s (%d failed)", tsr.name, failed);
         } else if(element instanceof TestCaseRun) {
             TestCaseRun tcr = (TestCaseRun) element;
-            String lbl = tcr.test;
+            String lbl = tcr.description;
             if(tcr.result() != null) {
                 lbl = lbl + " (" + String.format("%.2f", tcr.duration() / 1000.0) + "s)";
                 if(tcr.result().containsError()) {
@@ -36,7 +37,7 @@ public class TestRunLabelProvider extends LabelProvider
         return super.getText(element);
     }
 
-    @Override public Color getForeground(Object element, int columnIndex) {
+    @Override @Nullable public Color getForeground(Object element, int columnIndex) {
         if(element instanceof TestSuiteRun) {
             TestSuiteRun tsr = (TestSuiteRun) element;
             if(tsr.messages != null && !tsr.messages.containsError()) {
@@ -56,19 +57,19 @@ public class TestRunLabelProvider extends LabelProvider
         return null;
     }
 
-    @Override public Color getBackground(Object element, int columnIndex) {
+    @Override @Nullable public Color getBackground(Object element, int columnIndex) {
         return null;
     }
 
-    @Override public Font getFont(Object element, int columnIndex) {
+    @Override @Nullable public Font getFont(Object element, int columnIndex) {
         return null;
     }
 
-    @Override public Image getColumnImage(Object element, int columnIndex) {
+    @Override @Nullable public Image getColumnImage(Object element, int columnIndex) {
         return getImage(element);
     }
 
-    @Override public String getColumnText(Object element, int columnIndex) {
+    @Override @Nullable public String getColumnText(Object element, int columnIndex) {
         return getText(element);
     }
 
