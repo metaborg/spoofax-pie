@@ -76,7 +76,8 @@ public class SptCheckForOutputAggregator implements TaskDef<SptCheckForOutputAgg
         final MultiTestSuiteRun testResults = new MultiTestSuiteRun();
         selectedDirectory.walkForEach(walker, matcher, file -> {
             final ResourceKey fileKey = file.getKey();
-            final TestSuiteRun result = context.require(check, new SptCheckForOutput.Input(fileKey, input.rootDirectory, testResults));
+            final TestSuiteRun result = context.require(check, new SptCheckForOutput.Input(fileKey, input.rootDirectory));
+            testResults.add(result);
         });
         return testResults;
     }

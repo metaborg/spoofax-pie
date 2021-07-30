@@ -46,24 +46,15 @@ public class SptCheckForOutput implements TaskDef<SptCheckForOutput.Input, TestS
     public static class Input implements Serializable {
         public final ResourceKey file;
         public final @Nullable ResourcePath rootDirectoryHint;
-        public final @Nullable MultiTestSuiteRun multiTestSuiteRun;
 
         public Input(ResourceKey file) {
             this.file = file;
             this.rootDirectoryHint = null;
-            this.multiTestSuiteRun = null;
         }
 
         public Input(ResourceKey file, ResourcePath rootDirectoryHint) {
             this.file = file;
             this.rootDirectoryHint = rootDirectoryHint;
-            this.multiTestSuiteRun = null;
-        }
-
-        public Input(ResourceKey file, ResourcePath rootDirectoryHint, MultiTestSuiteRun multiTestSuiteRun) {
-            this.file = file;
-            this.rootDirectoryHint = rootDirectoryHint;
-            this.multiTestSuiteRun = multiTestSuiteRun;
         }
 
         @Override public boolean equals(@Nullable Object o) {
@@ -123,10 +114,7 @@ public class SptCheckForOutput implements TaskDef<SptCheckForOutput.Input, TestS
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
         final mb.jsglr.pie.JsglrParseTaskInput.Builder parseInputBuilder = parse.inputBuilder().withFile(input.file).rootDirectoryHint(Optional.ofNullable(input.rootDirectoryHint));
         final Result<JsglrParseOutput, JsglrParseException> parseResult = context.require(parse, parseInputBuilder.build());
-        final TestSuiteRun testResults = new TestSuiteRun(null, input.file, input.multiTestSuiteRun, input.file.asString());
-        if (input.multiTestSuiteRun != null) {
-            input.multiTestSuiteRun.add(testResults);
-        }
+        final TestSuiteRun testResults = new TestSuiteRun(null, input.file, input.file.asString());
         parseResult.ifThrowingElse(o -> {
                 messagesBuilder.addMessages(o.messages);
                 runTests(context, testResults, messagesBuilder, input.file, input.rootDirectoryHint, o.ast);
@@ -181,14 +169,15 @@ public class SptCheckForOutput implements TaskDef<SptCheckForOutput.Input, TestS
         TestSuiteRun testResults) throws InterruptedException {
         try(final MixedSession languageUnderTestSession = languageUnderTest.getPieComponent().newSession()) {
             for(TestCase testCase : testSuite.testCases) {
+                TestCaseRun run = new TestCaseRun(testResults, testCase.description);
                 KeyedMessagesBuilder testMessageBuilder = new KeyedMessagesBuilder();
+                run.start();
                 for(TestExpectation expectation : testCase.expectations) {
                     testMessageBuilder.addMessages(
                         expectation.evaluate(testCase, languageUnderTest, languageUnderTestSession, languageUnderTestProvider, context, cancelToken)
                     );
                 }
                 KeyedMessages messages = testMessageBuilder.build();
-                TestCaseRun run = new TestCaseRun(testResults, testCase.description);
                 run.finish(messages);
                 testResults.tests.add(run);
             }

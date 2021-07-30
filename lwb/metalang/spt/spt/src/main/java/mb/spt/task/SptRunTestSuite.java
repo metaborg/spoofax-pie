@@ -58,7 +58,8 @@ public class SptRunTestSuite implements TaskDef<SptRunTestSuite.Args, CommandFee
     public CommandFeedback exec(ExecContext context, Args input) throws Exception {
         context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
         MultiTestSuiteRun totalResult = new MultiTestSuiteRun();
-        TestSuiteRun result = context.require(checkForOutput, new SptCheckForOutput.Input(input.file, input.rootDir, totalResult));
+        TestSuiteRun result = context.require(checkForOutput, new SptCheckForOutput.Input(input.file, input.rootDir));
+        totalResult.add(result);
         return CommandFeedback.of(ShowFeedback.showTests(totalResult));
     }
 

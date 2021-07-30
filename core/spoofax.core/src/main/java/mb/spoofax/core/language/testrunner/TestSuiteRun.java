@@ -14,7 +14,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public class TestSuiteRun implements Serializable {
 
-    @Nullable public final MultiTestSuiteRun parent;
+    @Nullable public MultiTestSuiteRun parent = null;
     public final String name;
     public final List<TestCaseRun> tests = new ArrayList<>();
     public final ResourceKey file;
@@ -34,25 +34,8 @@ public class TestSuiteRun implements Serializable {
      *            the name of the test suite.
      */
     public TestSuiteRun(@Nullable KeyedMessages messages, ResourceKey file, String name) {
-        this(messages, file, null, name);
-    }
-
-    /**
-     * Create a TestSuiteRun to represent the running of all tests in the test suite with the given name.
-     *
-     * @param file
-     *            the file containing the module (required so double clicking opens the module)
-     * @param parent
-     *            if you want to run multiple test suites, you can group them in a {@link MultiTestSuiteRun} to keep
-     *            track of them.
-     * @param name
-     *            the name of the test suite.
-     */
-    public TestSuiteRun(@Nullable KeyedMessages messages, ResourceKey file,
-                        @Nullable MultiTestSuiteRun parent, String name) {
         this.messages = messages;
         this.file = file;
-        this.parent = parent;
         this.name = name;
     }
 

@@ -377,13 +377,13 @@ public class TestRunViewPart extends ViewPart {
                     final TestCaseRun tcr = (TestCaseRun) selObj;
                     if(tcr.result() == null) {
                         cons.setText(
-                            "This test case has not yet been executed.\nPlease select it again when it's done.");
+                            "Test case has not yet been executed.\nPlease select it again when it's done.");
                     } else if(!tcr.result().containsError()) {
                         cons.setText("");
                     } else {
                         final StringWriter sw = new StringWriter();
                         final PrintWriter pw = new PrintWriter(sw);
-                        pw.println("This test cased failed:");
+                        pw.println("Test case failed:");
                         for(Message m : tcr.result().asMessages()) {
                             printMessage(m, pw);
                             pw.println();

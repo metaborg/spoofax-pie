@@ -17,7 +17,7 @@ public class TestCaseRun {
     public final String description;
 
     @Nullable private KeyedMessages messages;
-    private boolean success;
+
     // keep track of the duration here
     // maybe at some point we will move that job to mbt.core
     private long start;
@@ -103,17 +103,16 @@ public class TestCaseRun {
         if (o == null || this.getClass() != o.getClass()) return false;
         final TestCaseRun other = (TestCaseRun)o;
         return this.description.equals(other.description)
-            && this.success == other.success
             && Objects.equals(this.messages, other.messages);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(description, success, messages);
+        return Objects.hash(description, messages);
     }
 
     @Override
     public String toString() {
-        return "TestCaseRun{description=" + description + ", success=" + success + "}";
+        return "TestCaseRun{description=" + description + "}";
     }
 }
