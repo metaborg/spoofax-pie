@@ -1,0 +1,52 @@
+package {{baseTestStrategoTaskDef.packageId}};
+
+import mb.common.region.Region;
+import mb.common.util.ListView;
+import mb.common.option.Option;
+import mb.constraint.pie.ConstraintAnalyzeTaskDef;
+import mb.jsglr.common.TermTracer;
+import mb.pie.api.ExecContext;
+import mb.stratego.pie.StrategoTransformTaskDef;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+
+import javax.inject.Inject;
+import java.io.Serializable;
+
+public class {{baseTestStrategoTaskDef.id}} extends StrategoTransformTaskDef<{{baseTestStrategoTaskDef.id}}.Input> {
+    public static class Input implements Serializable {
+        public final ConstraintAnalyzeTaskDef.Output analysisResult;
+        public final String strategy;
+        public final Option<Region> region;
+
+        public Input(ConstraintAnalyzeTaskDef.Output analysisResult, String strategy, Option<Region> region) {
+            this.analysisResult = analysisResult;
+            this.strategy = strategy;
+            this.region = region;
+        }
+
+        // TODO: Implement hashCode toString and equals
+    }
+
+    @Override
+    public String getId() {
+        return getClass().getName();
+    }
+
+    @Override
+    protected IStrategoTerm getAst(ExecContext context, Input input) {
+        return input.region.mapOr(
+            (region) -> TermTracer.getSmallestTermEncompassingRegion(input.analysisResult.result.ast, region),
+            input.analysisResult.result.ast
+        );
+    }
+
+    @Override
+    protected ListView<String> getStrategyNames(ExecContext context, Input input) {
+        return ListView.of(input.strategy);
+    }
+
+    @Inject
+    public {{baseTestStrategoTaskDef.id}}({{#strategoRuntime}}{{getStrategoRuntimeProviderTaskDef.qualifiedId}}{{/strategoRuntime}} getStrategoRuntimeProvider) {
+        super(getStrategoRuntimeProvider, ListView.of());
+    }
+}

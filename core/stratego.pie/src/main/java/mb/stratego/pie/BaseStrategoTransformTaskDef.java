@@ -39,13 +39,15 @@ public abstract class BaseStrategoTransformTaskDef<T> implements TaskDef<Supplie
 
     protected abstract IStrategoTerm getAst(ExecContext context, T input);
 
+    protected ListView<String> getStrategyNames(ExecContext context, T input) { return strategyNames; }
+
     @Override
     public Result<IStrategoTerm, ?> exec(ExecContext context, Supplier<? extends Result<T, ?>> supplier) throws Exception {
         createDependencies(context);
         return context.require(supplier).flatMapOrElse((t) -> {
             final StrategoRuntime strategoRuntime = getStrategoRuntime(context, t);
             IStrategoTerm ast = getAst(context, t);
-            for(String strategyName : strategyNames) {
+            for(String strategyName : getStrategyNames(context, t)) {
                 try {
                     ast = strategoRuntime.invoke(strategyName, ast);
                 } catch(StrategoException e) {

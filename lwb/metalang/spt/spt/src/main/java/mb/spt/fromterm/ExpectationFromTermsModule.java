@@ -6,6 +6,7 @@ import dagger.multibindings.ElementsIntoSet;
 import mb.common.util.MapView;
 import mb.spt.expectation.CheckExpectationsFromTerm;
 import mb.spt.expectation.ParseExpectationsFromTerm;
+import mb.spt.expectation.RunExpectationFromTerm;
 import mb.spt.expectation.TransformExpectationsFromTerm;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoConstructor;
@@ -24,6 +25,7 @@ public class ExpectationFromTermsModule {
         testExpectations.add(new CheckExpectationsFromTerm());
         testExpectations.add(new ParseExpectationsFromTerm());
         testExpectations.add(new TransformExpectationsFromTerm());
+        testExpectations.add(new RunExpectationFromTerm());
         return testExpectations;
     }
 
