@@ -52,12 +52,14 @@ public class RunExpectation implements TestExpectation {
             return messagesBuilder.build(file);
         }
         final TestableAnalysis testableAnalysis = (TestableAnalysis)languageInstance;
-        Option<Region> region = selectionReference.map((sel) -> sel.region);
+        Option<Region> region = selectionReference.map(
+            (sel) -> testCase.testFragment.getSelections().get(sel.selection - 1)
+        );
         final Result<IStrategoTerm, ?> result = testableAnalysis.testRunStrategy(languageUnderTestSession, testCase.resource, strategy, region, testCase.rootDirectoryHint);
 
         result
             .ifOk(
-                (o) -> messagesBuilder.addMessage(o.toString(), Severity.Warning)
+                (o) -> messagesBuilder.addMessage(o.toString(), Severity.Warning, file, sourceRegion)
             )
             .ifErr(
             (e) -> messagesBuilder.addMessage(
