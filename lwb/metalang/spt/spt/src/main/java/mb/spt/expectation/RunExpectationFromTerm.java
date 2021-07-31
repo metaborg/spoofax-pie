@@ -50,10 +50,28 @@ public class RunExpectationFromTerm implements TestExpectationFromTerm {
             case "Run":
                 return convertToRunExpectation(term, sourceRegion, testSuiteDescription, testSuiteFile, testCaseResourceRegistry, usedResourceNames);
             case "RunToAterm":
+                return convertToRunToAtermExpectation(term, sourceRegion);
             default:
                 throw new FromTermException("Cannot convert term '" + term + "' to a run expectation;" +
                     " term is not a valid run expectation (no matching constructor)");
         }
+    }
+
+    private RunToAtermExpectation convertToRunToAtermExpectation(IStrategoAppl term, Region sourceRegion) {
+        final String strategyName = TermUtils.asJavaStringAt(term, 0)
+            .orElseThrow(() -> new InvalidAstShapeException("term string as first subterm", term));
+        final Option<SelectionReference> selection = convertSelections(
+            TermUtils.asApplAt(term, 1)
+                .orElseThrow(() -> new InvalidAstShapeException("term application as second subterm", term)),
+            sourceRegion);
+        final IStrategoAppl toAterm = TermUtils.asApplAt(term, 2)
+            .orElseThrow(() -> new InvalidAstShapeException("term application as third subterm", term));
+        if(!TermUtils.isAppl(toAterm, "ToAterm", 1)) {
+            throw new InvalidAstShapeException("ToAterm/1 term application", toAterm);
+        }
+        final IStrategoAppl aterm = TermUtils.asApplAt(toAterm, 0)
+            .orElseThrow(() -> new InvalidAstShapeException("term application as first subterm", toAterm));
+        return new RunToAtermExpectation(strategyName, selection, aterm, sourceRegion);
     }
 
     private TestExpectation convertToRunExpectation(
