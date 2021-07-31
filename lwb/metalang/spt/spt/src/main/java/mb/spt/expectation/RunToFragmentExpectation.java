@@ -1,0 +1,97 @@
+package mb.spt.expectation;
+
+import mb.aterm.common.TermToString;
+import mb.common.message.KeyedMessagesBuilder;
+import mb.common.message.Severity;
+import mb.common.option.Option;
+import mb.common.region.Region;
+import mb.common.result.Result;
+import mb.pie.api.ExecContext;
+import mb.pie.api.Session;
+import mb.resource.ResourceKey;
+import mb.spoofax.core.language.LanguageInstance;
+import mb.spt.api.parse.TestableParse;
+import mb.spt.lut.LanguageUnderTestProvider;
+import mb.spt.model.LanguageUnderTest;
+import mb.spt.model.SelectionReference;
+import mb.spt.model.TestCase;
+import mb.spt.util.SptAtermMatcher;
+import mb.spt.util.SptFromTermUtil;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.terms.Term;
+import org.spoofax.terms.TermFactory;
+import org.spoofax.terms.TermTransformer;
+import org.spoofax.terms.util.TermUtils;
+
+public class RunToFragmentExpectation extends RunExpectation {
+    private final ResourceKey fragmentResource;
+    private final Option<String> languageIdHint;
+
+    public RunToFragmentExpectation(
+        String strategyName,
+        Option<SelectionReference> selection,
+        ResourceKey fragmentResource,
+        Option<String> languageIdHint,
+        Region sourceRegion
+    ) {
+        super(strategyName, selection, sourceRegion, false);
+        this.fragmentResource = fragmentResource;
+        this.languageIdHint = languageIdHint;
+    }
+
+    @Override
+    protected void checkAst(
+        IStrategoTerm ast,
+        KeyedMessagesBuilder messagesBuilder,
+        TestCase testCase,
+        LanguageUnderTest languageUnderTest,
+        Session languageUnderTestSession, LanguageUnderTestProvider languageUnderTestProvider,
+        ExecContext context,
+        Region sourceRegion
+    ) throws InterruptedException {
+        ResourceKey file = testCase.testSuiteFile;
+        final @Nullable LanguageUnderTest fragmentLanguageUnderTest = ExpectationFragmentUtil.getLanguageUnderTest(testCase, languageUnderTest, languageUnderTestProvider, context, languageIdHint.get());
+        if (fragmentLanguageUnderTest == null) {
+            messagesBuilder.addMessage(
+                "Cannot evaluate parse to fragment expectation because providing language under test for language id '" + languageIdHint + "' failed unexpectedly",
+                Severity.Error,
+                file,
+                sourceRegion
+            );
+            return;
+        }
+        final LanguageInstance fragmentInstance = fragmentLanguageUnderTest.getLanguageComponent().getLanguageInstance();
+        if (!(fragmentInstance instanceof TestableParse)) {
+            messagesBuilder.addMessage(
+                "Cannot evaluate run to fragment expectation because language instance '" + fragmentInstance + "' does not implement TestableParse",
+                Severity.Error,
+                file,
+                sourceRegion
+            );
+            return;
+        }
+        final TestableParse testableParse = (TestableParse)fragmentInstance;
+        final Session session;
+        if (fragmentLanguageUnderTest == languageUnderTest) {
+            session = languageUnderTestSession;
+        } else {
+            session = fragmentLanguageUnderTest.getPieComponent().newSession();
+        }
+        final Result<IStrategoTerm, ?> result = testableParse.testParseToAterm(session, fragmentResource, null);
+
+        final IStrategoTerm strippedAst = Term.removeAnnotations(ast, new TermFactory()); // TODO: rewrite to not use Term.removeAnnotations
+        result
+            .ifElse((expectedAst) -> {
+                if (!strippedAst.match(expectedAst)) {
+                    messagesBuilder.addMessage(
+                        "Expected run to " + TermToString.toString(expectedAst) + ", but got " + TermToString.toString(ast),
+                        Severity.Error,
+                        file,
+                        sourceRegion
+                    );
+                }
+            }, e -> messagesBuilder.addMessage("Failed to parse reference fragment; see exception", e, Severity.Error, file, sourceRegion)
+            );
+    }
+}
