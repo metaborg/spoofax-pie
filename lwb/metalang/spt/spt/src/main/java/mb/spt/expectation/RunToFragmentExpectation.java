@@ -10,6 +10,7 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.Session;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageInstance;
+import mb.spt.api.analyze.TestableAnalysis;
 import mb.spt.api.parse.TestableParse;
 import mb.spt.lut.LanguageUnderTestProvider;
 import mb.spt.model.LanguageUnderTest;
@@ -23,6 +24,7 @@ import org.spoofax.terms.Term;
 import org.spoofax.terms.TermFactory;
 import org.spoofax.terms.TermTransformer;
 import org.spoofax.terms.util.TermUtils;
+import org.strategoxt.lang.TermEqualityUtil;
 
 public class RunToFragmentExpectation extends RunExpectation {
     private final ResourceKey fragmentResource;
@@ -62,28 +64,27 @@ public class RunToFragmentExpectation extends RunExpectation {
             return;
         }
         final LanguageInstance fragmentInstance = fragmentLanguageUnderTest.getLanguageComponent().getLanguageInstance();
-        if (!(fragmentInstance instanceof TestableParse)) {
+        if (!(fragmentInstance instanceof TestableAnalysis)) {
             messagesBuilder.addMessage(
-                "Cannot evaluate run to fragment expectation because language instance '" + fragmentInstance + "' does not implement TestableParse",
+                "Cannot evaluate run to fragment expectation because language instance '" + fragmentInstance + "' does not implement TestableAnalysis",
                 Severity.Error,
                 file,
                 sourceRegion
             );
             return;
         }
-        final TestableParse testableParse = (TestableParse)fragmentInstance;
+        final TestableAnalysis testableParse = (TestableAnalysis)fragmentInstance;
         final Session session;
         if (fragmentLanguageUnderTest == languageUnderTest) {
             session = languageUnderTestSession;
         } else {
             session = fragmentLanguageUnderTest.getPieComponent().newSession();
         }
-        final Result<IStrategoTerm, ?> result = testableParse.testParseToAterm(session, fragmentResource, null);
+        final Result<IStrategoTerm, ?> result = testableParse.testAnalyze(session, fragmentResource, testCase.rootDirectoryHint);
 
-        final IStrategoTerm strippedAst = Term.removeAnnotations(ast, new TermFactory()); // TODO: rewrite to not use Term.removeAnnotations
         result
             .ifElse((expectedAst) -> {
-                if (!strippedAst.match(expectedAst)) {
+                if (!TermEqualityUtil.equalsIgnoreAnnos(ast, expectedAst, new TermFactory())) {
                     messagesBuilder.addMessage(
                         "Expected run to " + TermToString.toString(expectedAst) + ", but got " + TermToString.toString(ast),
                         Severity.Error,
@@ -91,7 +92,7 @@ public class RunToFragmentExpectation extends RunExpectation {
                         sourceRegion
                     );
                 }
-            }, e -> messagesBuilder.addMessage("Failed to parse reference fragment; see exception", e, Severity.Error, file, sourceRegion)
+            }, e -> messagesBuilder.addMessage("Failed to analyze reference fragment; see exception", e, Severity.Error, file, sourceRegion)
             );
     }
 }
