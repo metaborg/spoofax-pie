@@ -40,6 +40,22 @@ public class TestSuiteRun implements Serializable {
     }
 
     /**
+     * Create a TestSuiteRun to represent the running of all tests in the test suite with the given name.
+     * The name of the test suite is inferred from the ResourceKey.
+     * Used as fallback if the testsuite can't be processed
+     *
+     * @param messages
+     *            messages generated during evaluation of the test suite file
+     * @param file
+     *            the file containing the module (required so double clicking opens the module)
+     */
+    public TestSuiteRun(@Nullable KeyedMessages messages, ResourceKey file) {
+        this.messages = messages;
+        this.file = file;
+        this.name = file.getIdAsString();
+    }
+
+    /**
      * The number of failed test case runs (so far) in this test suite.
      */
     public int numFailed() {

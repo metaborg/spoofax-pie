@@ -6,10 +6,19 @@ import java.io.StringWriter;
 import mb.common.message.KeyedMessages;
 import mb.common.message.Message;
 import mb.resource.ResourceKey;
+import mb.spoofax.eclipse.resource.EclipseDocumentKey;
+import mb.spoofax.eclipse.resource.EclipseDocumentResourceRegistry;
+import mb.spoofax.eclipse.resource.EclipseResourcePath;
+import mb.spoofax.eclipse.resource.EclipseResourceRegistry;
 import org.checkerframework.checker.initialization.qual.UnderInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.common.initializedfields.qual.EnsuresInitializedFields;
 import org.checkerframework.common.initializedfields.qual.InitializedFields;
+import org.eclipse.core.internal.resources.File;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.internal.junit.ui.JUnitProgressBar;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
@@ -37,11 +46,18 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.ViewPart;
 import mb.spoofax.core.language.testrunner.MultiTestSuiteRun;
 import mb.spoofax.core.language.testrunner.TestCaseRun;
 import mb.spoofax.core.language.testrunner.TestSuiteRun;
+import org.eclipse.ui.texteditor.ITextEditor;
 
 /**
  * The main View for the test runner.
@@ -277,8 +293,7 @@ public class TestRunViewPart extends ViewPart {
         this.run = run;
         this.nrFailedTests = run.numFailed();
         treeViewer.setInput(run);
-        pb.reset();
-        pb.setMaximum(run.numTests());
+        pb.reset(nrFailedTests > 0, false, run.numFailed() + run.numPassed(), run.numTests());
         if(!refreshDisabled) {
             refresh();
         }
@@ -311,33 +326,30 @@ public class TestRunViewPart extends ViewPart {
         public void doubleClick(DoubleClickEvent event) {
             Object selectObject = ((IStructuredSelection) treeViewer.getSelection()).getFirstElement();
 
-            ResourceKey file = null;
+            @Nullable ResourceKey resource = null;
             int offset = 0;
 
             if(selectObject instanceof TestCaseRun) {
                 TestCaseRun tcr = (TestCaseRun) selectObject;
-                //file = tcr.test.resource;
-                //offset = tcr.test.descriptionRegion.getStartOffset();
+                resource = tcr.parent.file;
+                offset = tcr.descriptionRegion.getStartOffset();
             } else if(selectObject instanceof TestSuiteRun) {
                 TestSuiteRun tsr = ((TestSuiteRun) selectObject);
-                file = tsr.file;
+                resource = tsr.file;
             }
 
-            if(file != null) {
-                // GROSS!
-//                final Spoofax spoofax = SpoofaxPlugin.spoofax();
-//                IEclipseResourceService r = spoofax.injector.getInstance(IEclipseResourceService.class);
-//                IPath p = resourceUtil;
-//                IFile f = ResourcesPlugin.getWorkspace().getRoot().getFile(p);
-//                IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-//                try {
-//                    IEditorPart ep = IDE.openEditor(page, f);
-//                    if(ep instanceof ITextEditor) {
-//                        ((ITextEditor) ep).selectAndReveal(offset, 0);
-//                    }
-//                } catch(PartInitException e) {
-//                    // whatever
-//                }
+            if(resource instanceof EclipseResourcePath) {
+                IPath p = ((EclipseResourcePath)resource).getEclipsePath();
+                IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(p);
+                IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+                try {
+                    IEditorPart ep = IDE.openEditor(page, file);
+                    if(ep instanceof ITextEditor) {
+                        ((ITextEditor) ep).selectAndReveal(offset, 0);
+                    }
+                } catch(PartInitException e) {
+                    // whatever
+                }
             }
         }
     }

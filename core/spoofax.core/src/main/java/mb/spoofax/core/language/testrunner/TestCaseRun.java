@@ -1,6 +1,7 @@
 package mb.spoofax.core.language.testrunner;
 
 import mb.common.message.KeyedMessages;
+import mb.common.region.Region;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Objects;
@@ -15,6 +16,7 @@ public class TestCaseRun {
 
     public final TestSuiteRun parent;
     public final String description;
+    public final Region descriptionRegion;
 
     @Nullable private KeyedMessages messages;
 
@@ -25,14 +27,17 @@ public class TestCaseRun {
 
     /**
      * Create a TestCaseRun, representing a run of an ITestCase.
-     *  @param parent
+     * @param parent
      *            the parent test suite (may be null).
-     *  @param description
-     *            Name of the test case
+     * @param description
+     *            description of the testcase
+     * @param descriptionRegion
+     *            region of the description text (needed for the doubleclick handler)
      */
-    public TestCaseRun(TestSuiteRun parent, String description) {
+    public TestCaseRun(TestSuiteRun parent, String description, Region descriptionRegion) {
         this.parent = parent;
         this.description = description;
+        this.descriptionRegion = descriptionRegion;
         this.start = System.currentTimeMillis();
     }
 

@@ -22,7 +22,6 @@ import mb.spt.fromterm.TestSuiteFromTerm;
 import mb.spt.lut.LanguageUnderTestProvider;
 import mb.spt.lut.LanguageUnderTestProviderWrapper;
 import mb.spt.model.LanguageUnderTest;
-import mb.spoofax.core.language.testrunner.MultiTestSuiteRun;
 import mb.spt.model.TestCase;
 import mb.spoofax.core.language.testrunner.TestCaseRun;
 import mb.spt.model.TestExpectation;
@@ -114,21 +113,23 @@ public class SptCheckForOutput implements TaskDef<SptCheckForOutput.Input, TestS
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
         final mb.jsglr.pie.JsglrParseTaskInput.Builder parseInputBuilder = parse.inputBuilder().withFile(input.file).rootDirectoryHint(Optional.ofNullable(input.rootDirectoryHint));
         final Result<JsglrParseOutput, JsglrParseException> parseResult = context.require(parse, parseInputBuilder.build());
-        final TestSuiteRun testResults = new TestSuiteRun(null, input.file, input.file.asString());
-        parseResult.ifThrowingElse(o -> {
+        final TestSuiteRun testResults = parseResult.mapThrowingOrElse(o -> {
                 messagesBuilder.addMessages(o.messages);
-                runTests(context, testResults, messagesBuilder, input.file, input.rootDirectoryHint, o.ast);
+                return runTests(context, messagesBuilder, input.file, input.rootDirectoryHint, o.ast);
             },
-            messagesBuilder::extractMessagesRecursively
+            (e) -> {
+                messagesBuilder.extractMessagesRecursively(e);
+                return new TestSuiteRun(null, input.file);
+            }
         );
         testResults.messages = messagesBuilder.build();
         return testResults;
     }
 
 
-    private void runTests(
+    private TestSuiteRun runTests(
         ExecContext context,
-        TestSuiteRun testResults, KeyedMessagesBuilder messagesBuilder,
+        KeyedMessagesBuilder messagesBuilder,
         ResourceKey file,
         @Nullable ResourcePath rootDirectoryHint,
         IStrategoTerm ast
@@ -139,7 +140,7 @@ public class SptCheckForOutput implements TaskDef<SptCheckForOutput.Input, TestS
             desugaredAst = strategoRuntime.invoke("desugar-before", ast);
         } catch(StrategoException e) {
             messagesBuilder.extractMessagesRecursivelyWithFallbackKey(e, file);
-            return;
+            return new TestSuiteRun(null, file);
         }
 
         final TestSuite testSuite;
@@ -147,8 +148,9 @@ public class SptCheckForOutput implements TaskDef<SptCheckForOutput.Input, TestS
             testSuite = TestSuiteFromTerm.testSuiteFromTerm(desugaredAst, testExpectationFromTerms, testCaseResourceRegistry, file, rootDirectoryHint);
         } catch(FromTermException e) {
             messagesBuilder.extractMessagesRecursivelyWithFallbackKey(e, file);
-            return;
+            return new TestSuiteRun(null, file);
         }
+        final TestSuiteRun testResults = new TestSuiteRun(null, file, testSuite.name);
 
         final LanguageUnderTestProvider languageUnderTestProvider = wrapper.get();
         final Result<LanguageUnderTest, ?> languageUnderTestResult = languageUnderTestProvider.provide(context, file, rootDirectoryHint, testSuite.languageIdHint);
@@ -157,6 +159,7 @@ public class SptCheckForOutput implements TaskDef<SptCheckForOutput.Input, TestS
             languageUnderTest -> runTests(languageUnderTestProvider, context, languageUnderTest, cancelToken, messagesBuilder, testSuite, testResults),
             messagesBuilder::extractMessagesRecursively
         );
+        return testResults;
     }
 
     private void runTests(
@@ -169,7 +172,7 @@ public class SptCheckForOutput implements TaskDef<SptCheckForOutput.Input, TestS
         TestSuiteRun testResults) throws InterruptedException {
         try(final MixedSession languageUnderTestSession = languageUnderTest.getPieComponent().newSession()) {
             for(TestCase testCase : testSuite.testCases) {
-                TestCaseRun run = new TestCaseRun(testResults, testCase.description);
+                TestCaseRun run = new TestCaseRun(testResults, testCase.description, testCase.descriptionRegion);
                 KeyedMessagesBuilder testMessageBuilder = new KeyedMessagesBuilder();
                 run.start();
                 for(TestExpectation expectation : testCase.expectations) {
