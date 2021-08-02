@@ -141,13 +141,13 @@ public class PieRunner {
             final KeyedMessages messages = getOrRequire(checkOneTask, topDownSession, monitor);
             workspaceUpdate.replaceMessages(messages, file);
         }
-        workspaceUpdate.update(eclipseFile, eclipseFile, monitor);
+        workspaceUpdate.update(eclipseFile, monitor);
 
         // Add callback (back again) that updates messages for when the check task is re-executed for other reasons.
         pie.setCallback(checkOneTask, messages -> {
             final WorkspaceUpdate callbackWorkspaceUpdate = workspaceUpdateFactory.create(languageComponent.getEclipseIdentifiers());
             callbackWorkspaceUpdate.replaceMessages(messages, file);
-            callbackWorkspaceUpdate.update(eclipseFile, eclipseFile, monitor);
+            callbackWorkspaceUpdate.update(eclipseFile, monitor);
         });
     }
 
@@ -224,7 +224,7 @@ public class PieRunner {
             observeAndUnobserveAutoTransforms(languageComponent, resourceChanges, pie, afterSession, monitor);
             observeAndUnobserveInspections(languageComponent, resourceChanges, pie, afterSession, monitor);
         }
-        bottomUpWorkspaceUpdate.update(project, null, monitor);
+        bottomUpWorkspaceUpdate.update(null, monitor);
         bottomUpWorkspaceUpdate = null;
     }
 
@@ -266,7 +266,7 @@ public class PieRunner {
             final Task<KeyedMessages> checkTask = languageInstance.createCheckTask(projectResource.getPath());
             unobserve(checkTask, session, monitor);
             workspaceUpdate.clearMessages(project, true);
-            workspaceUpdate.update(eclipseProject, null, monitor);
+            workspaceUpdate.update(null, monitor);
             // Delete unobserved tasks and their provided files.
             deleteUnobservedTasks(session, monitor);
         }
@@ -475,7 +475,7 @@ public class PieRunner {
     public void clearMessages(IProject project, @Nullable IProgressMonitor monitor, EclipseLanguageComponent languageComponent) {
         WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent.getEclipseIdentifiers());
         workspaceUpdate.clearMessages(new EclipseResourcePath(project), true);
-        workspaceUpdate.update(project, null, monitor);
+        workspaceUpdate.update(null, monitor);
     }
 
 
@@ -667,7 +667,7 @@ public class PieRunner {
                         // Perform local messages update
                         WorkspaceUpdate localUpdate = workspaceUpdateFactory.create(languageComponent.getEclipseIdentifiers());
                         localUpdate.replaceMessages(messages, newProject);
-                        localUpdate.update(resourceUtil.getEclipseResource(newProject), null, monitor);
+                        localUpdate.update(null, monitor);
                     }
                 });
                 if(!pie.isObserved(task)) {
@@ -694,6 +694,6 @@ public class PieRunner {
             }
             throw e;
         }
-        workspaceUpdate.update(ResourcesPlugin.getWorkspace().getRoot(), null, monitor);
+        workspaceUpdate.update(null, monitor);
     }
 }

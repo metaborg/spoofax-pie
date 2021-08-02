@@ -8,6 +8,7 @@ import mb.spoofax.eclipse.editor.PartClosedCallback;
 import mb.spoofax.eclipse.editor.ScopeManager;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 import mb.spoofax.eclipse.pie.PieRunner;
+import mb.spoofax.eclipse.pie.WorkspaceUpdate;
 import mb.spoofax.eclipse.util.ColorShare;
 import mb.spoofax.eclipse.util.ResourceUtil;
 import mb.spoofax.eclipse.util.StyleUtil;
@@ -36,6 +37,8 @@ public interface EclipsePlatformComponent extends PlatformComponent {
     PartClosedCallback getPartClosedCallback();
 
     EnclosingCommandContextProvider getEnclosingCommandContextProvider();
+
+    WorkspaceUpdate.Factory getWorkspaceUpdateFactory();
 
 
     default void init() {

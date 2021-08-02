@@ -3,6 +3,7 @@ package mb.spoofax.lwb.eclipse;
 import mb.common.message.KeyedMessages;
 import mb.common.result.Result;
 import mb.common.util.ExceptionPrinter;
+import mb.esv.eclipse.EsvLanguageFactory;
 import mb.log.api.Level;
 import mb.log.api.Logger;
 import mb.log.stream.LoggingOutputStream;
@@ -11,19 +12,28 @@ import mb.pie.api.Interactivity;
 import mb.pie.api.MixedSession;
 import mb.pie.api.OutTransient;
 import mb.pie.api.Pie;
+import mb.pie.api.Session;
 import mb.pie.api.Task;
+import mb.pie.api.TaskDef;
 import mb.pie.api.TopDownSession;
+import mb.pie.api.exec.CancelToken;
 import mb.pie.dagger.PieComponent;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
+import mb.sdf3.eclipse.Sdf3LanguageFactory;
+import mb.spoofax.eclipse.EclipseIdentifiers;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.pie.MonitorCancelableToken;
+import mb.spoofax.eclipse.pie.WorkspaceUpdate;
 import mb.spoofax.eclipse.resource.EclipseResourcePath;
 import mb.spoofax.lwb.compiler.CompileLanguage;
 import mb.spoofax.lwb.compiler.CompileLanguageException;
+import mb.spoofax.lwb.compiler.dagger.Spoofax3CompilerComponent;
 import mb.spoofax.lwb.dynamicloading.DynamicLanguage;
 import mb.spoofax.lwb.eclipse.util.ClassPathUtil;
 import mb.spoofax.lwb.eclipse.util.JavaProjectUtil;
+import mb.statix.eclipse.StatixLanguageFactory;
+import mb.str.eclipse.StrategoLanguageFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -50,9 +60,11 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
 
     private final Logger logger;
     private final Set<Interactivity> compileTags;
+    private final WorkspaceUpdate.Factory workspaceUpdateFactory;
 
     public SpoofaxLwbBuilder() {
         this.logger = SpoofaxPlugin.getLoggerComponent().getLoggerFactory().create(getClass());
+        this.workspaceUpdateFactory = SpoofaxPlugin.getPlatformComponent().getWorkspaceUpdateFactory();
         this.compileTags = Interactivity.NonInteractive.asSingletonSet();
     }
 
@@ -99,7 +111,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         logger.debug("Running full language build of {}", rootDirectory);
         final PieComponent pieComponent = SpoofaxLwbLifecycleParticipant.getInstance().getPieComponent();
         try(final MixedSession session = pieComponent.getPie().newSession()) {
-            topDownBuild(rootDirectory, session, monitor);
+            topDownBuild(eclipseProject, rootDirectory, session, monitor);
         } catch(ExecException | IOException e) {
             cancel(monitor);
             throw toCoreException(rootDirectory, e);
@@ -112,7 +124,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         logger.debug("Running incremental language build of {}", rootDirectory);
         final PieComponent pieComponent = SpoofaxLwbLifecycleParticipant.getInstance().getPieComponent();
         try(final MixedSession session = pieComponent.newSession()) {
-            bottomUpBuild(rootDirectory, delta, session, monitor);
+            bottomUpBuild(eclipseProject, rootDirectory, delta, session, monitor);
         } catch(ExecException | IOException e) {
             cancel(monitor);
             throw toCoreException(rootDirectory, e);
@@ -121,6 +133,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
 
 
     private void topDownBuild(
+        IProject eclipseProject,
         ResourcePath rootDirectory,
         MixedSession session,
         @Nullable IProgressMonitor monitor
@@ -130,6 +143,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         final MonitorCancelableToken cancelToken = new MonitorCancelableToken(monitor);
 
         final KeyedMessages messages = session.require(createCheckTask(rootDirectory), cancelToken);
+        updateCheckMessages(eclipseProject, rootDirectory, session, monitor);
         if(messages.containsError()) {
             logger.debug("Checking language specification revealed errors; skipping compilation");
             new ExceptionPrinter().addCurrentDirectoryContext(rootDirectory).printMessages(messages, new PrintStream(new LoggingOutputStream(logger, Level.Debug)));
@@ -147,6 +161,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
     }
 
     private void bottomUpBuild(
+        IProject eclipseProject,
         ResourcePath rootDirectory,
         IResourceDelta delta,
         MixedSession session,
@@ -169,6 +184,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         final TopDownSession topDownSession = session.updateAffectedBy(changedResources, compileTags, cancelToken);
 
         final KeyedMessages messages = topDownSession.getOutputOrRequireAndEnsureExplicitlyObserved(createCheckTask(rootDirectory), cancelToken);
+        updateCheckMessages(eclipseProject, rootDirectory, topDownSession, monitor);
         if(messages.containsError()) {
             logger.debug("Checking language specification revealed errors; skipping handling of compile and dynamic load result");
             new ExceptionPrinter().addCurrentDirectoryContext(rootDirectory).printMessages(messages, new PrintStream(new LoggingOutputStream(logger, Level.Debug)));
@@ -213,6 +229,29 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         return SpoofaxLwbLifecycleParticipant.getInstance().getDynamicLoadingComponent().getDynamicLoad().createTask(createCompileArgs(rootDirectory));
     }
 
+
+    private void updateCheckMessages(IProject eclipseProject, ResourcePath rootDirectory, Session session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException, CoreException {
+        final MonitorCancelableToken cancelToken = new MonitorCancelableToken(monitor);
+        final Spoofax3CompilerComponent spoofax3CompilerComponent = SpoofaxLwbLifecycleParticipant.getInstance().getSpoofax3Compiler().component;
+        final WorkspaceUpdate esvUpdate = createUpdate(session, rootDirectory, cancelToken, EsvLanguageFactory.getLanguage().getComponent().getEclipseIdentifiers(), spoofax3CompilerComponent.getCheckEsv());
+        final WorkspaceUpdate sdf3Update = createUpdate(session, rootDirectory, cancelToken, Sdf3LanguageFactory.getLanguage().getComponent().getEclipseIdentifiers(), spoofax3CompilerComponent.getCheckSdf3());
+        final WorkspaceUpdate statixUpdate = createUpdate(session, rootDirectory, cancelToken, StatixLanguageFactory.getLanguage().getComponent().getEclipseIdentifiers(), spoofax3CompilerComponent.getCheckStatix());
+        final WorkspaceUpdate strategoUpdate = createUpdate(session, rootDirectory, cancelToken, StrategoLanguageFactory.getLanguage().getComponent().getEclipseIdentifiers(), spoofax3CompilerComponent.getCheckStratego());
+        final ICoreRunnable runnable = runnableMonitor -> {
+            esvUpdate.createMarkerUpdate().run(runnableMonitor);
+            sdf3Update.createMarkerUpdate().run(runnableMonitor);
+            statixUpdate.createMarkerUpdate().run(runnableMonitor);
+            strategoUpdate.createMarkerUpdate().run(runnableMonitor);
+        };
+        ResourcesPlugin.getWorkspace().run(runnable, eclipseProject, IWorkspace.AVOID_UPDATE, monitor);
+    }
+
+    private WorkspaceUpdate createUpdate(Session session, ResourcePath rootDirectory, CancelToken cancelToken, EclipseIdentifiers identifiers, TaskDef<ResourcePath, KeyedMessages> taskDef) throws ExecException, InterruptedException {
+        final KeyedMessages messages = session.require(taskDef.createTask(rootDirectory), cancelToken);
+        final WorkspaceUpdate update = workspaceUpdateFactory.create(identifiers);
+        update.replaceMessages(messages, rootDirectory);
+        return update;
+    }
 
     private void handleCompileResult(ResourcePath rootDirectory, Result<CompileLanguage.Output, CompileLanguageException> result, @Nullable IProgressMonitor monitor) throws CoreException {
         try {

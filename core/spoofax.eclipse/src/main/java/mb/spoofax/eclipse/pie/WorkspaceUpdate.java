@@ -18,7 +18,6 @@ import mb.spoofax.eclipse.util.UncheckedCoreException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ICoreRunnable;
@@ -146,10 +145,9 @@ public class WorkspaceUpdate {
     }
 
 
-    public void update(IResource defaultOrigin, @Nullable ISchedulingRule rule, @Nullable IProgressMonitor monitor) {
-        if(monitor != null && monitor.isCanceled()) return;
+    public ICoreRunnable createMarkerUpdate() {
         final KeyedMessages keyedMessages = keyedMessagesBuilder.build();
-        final ICoreRunnable makerUpdate = (IWorkspaceRunnable)workspaceMonitor -> {
+        return workspaceMonitor -> {
             for(ClearMessages clear : clears) {
                 if(workspaceMonitor != null && workspaceMonitor.isCanceled()) return;
                 try {
@@ -166,30 +164,41 @@ public class WorkspaceUpdate {
             try {
                 if(workspaceMonitor == null || !workspaceMonitor.isCanceled()) {
                     keyedMessages.getMessagesWithKey().forEach(entry -> {
-                        ResourceKey resourceKey = entry.getKey();
-                        entry.getValue().forEach(message -> {
-                            try {
-                                final IResource resource = resourceUtil.getEclipseResource(resourceKey);
-                                MarkerUtil.create(eclipseIdentifiers, message.text, message.severity, resource, message.region);
-                            } catch(CoreException e) {
-                                throw new UncheckedCoreException(e);
-                            }  catch(ResourceRuntimeException e) {
-                                logger.error("Cannot create markers for resource '{}'; getting Eclipse resource failed unexpectedly", e, resourceKey);
-                            }
-                        });
-                    });
-                    keyedMessages.getMessagesWithoutKey().forEach(message -> {
+                        final ResourceKey resourceKey = entry.getKey();
                         try {
-                            MarkerUtil.create(eclipseIdentifiers, message.text, message.severity, defaultOrigin, message.region);
-                        } catch(CoreException e) {
-                            throw new UncheckedCoreException(e);
+                            final IResource resource = resourceUtil.getEclipseResource(resourceKey);
+                            entry.getValue().forEach(m -> createMarker(m, resource));
+                        } catch(ResourceRuntimeException e) {
+                            logger.error("Cannot create markers for resource '{}'; getting Eclipse resource failed unexpectedly", e, resourceKey);
                         }
                     });
+                    final @Nullable ResourceKey resourceForMessagesWithoutKey = keyedMessages.getResourceForMessagesWithoutKeys();
+                    if(resourceForMessagesWithoutKey != null) {
+                        try {
+                            final IResource resource = resourceUtil.getEclipseResource(resourceForMessagesWithoutKey);
+                            keyedMessages.getMessagesWithoutKey().forEach(m -> createMarker(m, resource));
+                        } catch(ResourceRuntimeException e) {
+                            logger.error("Cannot create markers for resource '{}'; getting Eclipse resource failed unexpectedly", e, resourceForMessagesWithoutKey);
+                        }
+                    }
                 }
             } catch(UncheckedCoreException e) {
                 throw e.getCause();
             }
         };
+    }
+
+    private void createMarker(Message message, IResource resource) {
+        try {
+            MarkerUtil.create(eclipseIdentifiers, message.text, message.severity, resource, message.region);
+        } catch(CoreException e) {
+            throw new UncheckedCoreException(e);
+        }
+    }
+
+    public void update(@Nullable ISchedulingRule rule, @Nullable IProgressMonitor monitor) {
+        if(monitor != null && monitor.isCanceled()) return;
+        final ICoreRunnable makerUpdate = createMarkerUpdate();
         try {
             ResourcesPlugin.getWorkspace().run(makerUpdate, rule, IWorkspace.AVOID_UPDATE, monitor);
         } catch(CoreException e) {
