@@ -4,6 +4,7 @@ import mb.common.region.Region;
 import mb.common.util.ListView;
 import mb.common.option.Option;
 import mb.constraint.pie.ConstraintAnalyzeTaskDef;
+import mb.spt.api.analyze.RunArgument;
 import mb.jsglr.common.TermTracer;
 import mb.pie.api.ExecContext;
 import mb.stratego.common.StrategoRuntime;
@@ -12,20 +13,37 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 import java.io.Serializable;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class {{baseTestStrategoTaskDef.id}} extends StrategoTransformTaskDef<{{baseTestStrategoTaskDef.id}}.Input> {
     public static class Input implements Serializable {
         public final ConstraintAnalyzeTaskDef.Output analysisResult;
         public final String strategy;
+        public final Option<ListView<RunArgument>> arguments;
         public final Option<Region> region;
 
-        public Input(ConstraintAnalyzeTaskDef.Output analysisResult, String strategy, Option<Region> region) {
+        public Input(ConstraintAnalyzeTaskDef.Output analysisResult, String strategy, Option<ListView<RunArgument>> arguments, Option<Region> region) {
             this.analysisResult = analysisResult;
             this.strategy = strategy;
+            this.arguments = arguments;
             this.region = region;
         }
 
         // TODO: Implement hashCode toString and equals
+    }
+
+    private Option<ListView<IStrategoTerm>> processArguments(Option<ListView<RunArgument>> arguments, ExecContext context, Input input) {
+        return arguments.map((args) -> {
+            List<IStrategoTerm> terms = args.stream()
+                .map((term) ->
+                    term.caseOf()
+                        .intArg((x) -> (IStrategoTerm)x)
+                        .stringArg((x) -> (IStrategoTerm)x)
+                        .selectionArg((region) -> TermTracer.getBiggestTermInsideRegion(input.analysisResult.result.ast, region))
+                ).collect(Collectors.toList());
+            return ListView.of(terms);
+        });
     }
 
     @Override
@@ -42,8 +60,8 @@ public class {{baseTestStrategoTaskDef.id}} extends StrategoTransformTaskDef<{{b
     }
 
     @Override
-    protected ListView<String> getStrategyNames(ExecContext context, Input input) {
-        return ListView.of(input.strategy);
+    protected ListView<Strategy> getStrategies(ExecContext context, Input input) {
+        return ListView.of(new Strategy(input.strategy, processArguments(input.arguments, context, input)));
     }
 
     @Override

@@ -6,24 +6,20 @@ import mb.common.message.Severity;
 import mb.common.option.Option;
 import mb.common.region.Region;
 import mb.common.result.Result;
+import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Session;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spt.api.analyze.TestableAnalysis;
-import mb.spt.api.parse.TestableParse;
 import mb.spt.lut.LanguageUnderTestProvider;
 import mb.spt.model.LanguageUnderTest;
 import mb.spt.model.SelectionReference;
 import mb.spt.model.TestCase;
-import mb.spt.util.SptAtermMatcher;
-import mb.spt.util.SptFromTermUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.terms.Term;
 import org.spoofax.terms.TermFactory;
-import org.spoofax.terms.TermTransformer;
-import org.spoofax.terms.util.TermUtils;
 import org.strategoxt.lang.TermEqualityUtil;
 
 public class RunToFragmentExpectation extends RunExpectation {
@@ -32,12 +28,13 @@ public class RunToFragmentExpectation extends RunExpectation {
 
     public RunToFragmentExpectation(
         String strategyName,
+        Option<ListView<IStrategoAppl>> arguments,
         Option<SelectionReference> selection,
         ResourceKey fragmentResource,
         Option<String> languageIdHint,
         Region sourceRegion
     ) {
-        super(strategyName, selection, sourceRegion, false);
+        super(strategyName, arguments, selection, sourceRegion, false);
         this.fragmentResource = fragmentResource;
         this.languageIdHint = languageIdHint;
     }

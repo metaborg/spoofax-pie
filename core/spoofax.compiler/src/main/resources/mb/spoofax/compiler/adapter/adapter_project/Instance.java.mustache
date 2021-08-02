@@ -196,7 +196,7 @@ public class {{baseInstance.id}} implements LanguageInstance{{#parseInjection}},
 {{/parseInjection}}
 {{#testStrategoInjection}}
     @Override
-    public Result<org.spoofax.interpreter.terms.IStrategoTerm, ?> testRunStrategy(Session session, ResourceKey resource, String strategy, mb.common.option.Option<Region> region, @Nullable ResourcePath rootDirectoryHint) throws InterruptedException {
+    public Result<org.spoofax.interpreter.terms.IStrategoTerm, ?> testRunStrategy(Session session, ResourceKey resource, String strategy, mb.common.option.Option<ListView<mb.spt.api.analyze.RunArgument>> arguments, mb.common.option.Option<Region> region, @Nullable ResourcePath rootDirectoryHint) throws InterruptedException {
         try {
             return session.requireWithoutObserving(
                 {{testStrategoInjection.name}}.createTask(
@@ -205,7 +205,7 @@ public class {{baseInstance.id}} implements LanguageInstance{{#parseInjection}},
                     ).map(
                         (output) ->
                             output.mapOrElse(
-                                (output2) -> Result.ofOk(new {{testStrategoTaskDef.qualifiedId}}.Input(output2, strategy, region)),
+                                (output2) -> Result.ofOk(new {{testStrategoTaskDef.qualifiedId}}.Input(output2, strategy, arguments, region)),
                                 Result::ofErr
                             )
                     )
