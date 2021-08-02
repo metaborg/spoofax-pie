@@ -2,6 +2,7 @@ package mb.spoofax.lwb.compiler.dagger;
 
 import dagger.Component;
 import mb.cfg.CfgComponent;
+import mb.cfg.task.spoofax.CfgCheck;
 import mb.esv.EsvComponent;
 import mb.libspoofax2.LibSpoofax2Component;
 import mb.libspoofax2.LibSpoofax2ResourcesComponent;
@@ -16,6 +17,7 @@ import mb.sdf3_ext_statix.Sdf3ExtStatixComponent;
 import mb.spoofax.lwb.compiler.CheckLanguageSpecification;
 import mb.spoofax.lwb.compiler.CompileLanguage;
 import mb.spoofax.lwb.compiler.CompileLanguageSpecification;
+import mb.spoofax.lwb.compiler.cfg.CheckCfg;
 import mb.spoofax.lwb.compiler.esv.CheckEsv;
 import mb.spoofax.lwb.compiler.esv.ConfigureEsv;
 import mb.spoofax.lwb.compiler.generator.LanguageProjectGenerator;
@@ -58,6 +60,8 @@ public interface Spoofax3CompilerComponent extends TaskDefsProvider {
 
     CompileLanguageSpecification getCompileLanguageSpecification();
 
+
+    CheckCfg getCfgCheck();
 
     CheckEsv getCheckEsv();
 
