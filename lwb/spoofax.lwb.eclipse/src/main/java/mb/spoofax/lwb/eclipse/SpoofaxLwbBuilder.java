@@ -2,6 +2,7 @@ package mb.spoofax.lwb.eclipse;
 
 import mb.cfg.eclipse.CfgLanguageFactory;
 import mb.common.message.KeyedMessages;
+import mb.common.message.Message;
 import mb.common.result.Result;
 import mb.common.util.ExceptionPrinter;
 import mb.esv.eclipse.EsvLanguageFactory;
@@ -147,7 +148,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         updateCheckMessages(eclipseProject, rootDirectory, session, monitor);
         if(messages.containsError()) {
             logger.debug("Checking language specification revealed errors; skipping compilation");
-            new ExceptionPrinter().addCurrentDirectoryContext(rootDirectory).printMessages(messages, new PrintStream(new LoggingOutputStream(logger, Level.Debug)));
+            new ExceptionPrinter().addCurrentDirectoryContext(rootDirectory).printMessages(messages.filter(Message::isError), new PrintStream(new LoggingOutputStream(logger, Level.Debug)));
             return;
         }
 
@@ -188,7 +189,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         updateCheckMessages(eclipseProject, rootDirectory, topDownSession, monitor);
         if(messages.containsError()) {
             logger.debug("Checking language specification revealed errors; skipping handling of compile and dynamic load result");
-            new ExceptionPrinter().addCurrentDirectoryContext(rootDirectory).printMessages(messages, new PrintStream(new LoggingOutputStream(logger, Level.Debug)));
+            new ExceptionPrinter().addCurrentDirectoryContext(rootDirectory).printMessages(messages.filter(Message::isError), new PrintStream(new LoggingOutputStream(logger, Level.Debug)));
             return;
         }
 
