@@ -1,6 +1,5 @@
 package mb.spoofax.lwb.compiler;
 
-import mb.pie.api.MixedSession;
 import mb.spoofax.lwb.compiler.generator.LanguageProjectGenerator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,14 +34,12 @@ class GenerateLanguageTest extends TestBase {
             .build();
         compiler.compiler.component.getLanguageProjectGenerator().generate(input);
         assertTrue(rootDirectory.exists());
-        try(final MixedSession session = pieComponent.getPie().newSession()) {
-            final CompileLanguage.Args args = CompileLanguage.Args.builder()
-                .rootDirectory(rootDirectory.getPath())
-                .build();
-            session.require(compileLanguage.createTask(args)).unwrap();
-        } catch(CompileLanguageException e) {
-            System.err.println(exceptionPrinter.printExceptionToString(e));
-            throw e;
-        }
+
+        // Check and compile generated language.
+        checkAndCompileLanguage();
+
+        // Recreate compiler (including PIE component) and compile again to test serialize/deserialize roundtrip.
+        recreateCompiler();
+        checkAndCompileLanguage();
     }
 }

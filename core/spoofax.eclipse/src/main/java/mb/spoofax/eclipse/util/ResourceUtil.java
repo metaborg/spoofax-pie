@@ -63,12 +63,16 @@ public class ResourceUtil {
         if(path == null) {
             return Optional.empty();
         }
-        return Optional.of(path.makeAbsolute().toFile());
+        return Optional.of(toLocalFile(path));
     }
 
     public static File toLocalFile(IResource resource) {
         return asLocalFile(resource)
             .orElseThrow(() -> new ResourceRuntimeException("Cannot convert Eclipse resource '" + resource + "' to a local file"));
+    }
+
+    public static File toLocalFile(IPath path) {
+        return path.makeAbsolute().toFile();
     }
 
     public static Optional<FSResource> asFsResource(IResource resource) {
@@ -80,6 +84,10 @@ public class ResourceUtil {
             .orElseThrow(() -> new ResourceRuntimeException("Cannot convert Eclipse resource '" + resource + "' to a Java filesystem resource"));
     }
 
+    public static FSResource toFsResource(IPath path) {
+        return new FSResource(toLocalFile(path));
+    }
+
     public static Optional<FSPath> asFsPath(IResource resource) {
         return asLocalFile(resource).map(FSPath::new);
     }
@@ -87,5 +95,9 @@ public class ResourceUtil {
     public static FSPath toFsPath(IResource resource) {
         return asFsPath(resource)
             .orElseThrow(() -> new ResourceRuntimeException("Cannot convert Eclipse resource '" + resource + "' to a Java filesystem path"));
+    }
+
+    public static FSPath toFsPath(IPath path) {
+        return new FSPath(toLocalFile(path));
     }
 }

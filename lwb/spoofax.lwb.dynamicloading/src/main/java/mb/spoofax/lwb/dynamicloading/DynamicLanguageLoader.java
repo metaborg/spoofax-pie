@@ -9,17 +9,16 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
 
 public interface DynamicLanguageLoader {
     DynamicLanguage load(
         ResourcePath rootDirectory,
         CompileLanguageInput compileInput,
-        List<ResourcePath> classPath
+        Iterable<ResourcePath> classPath
     ) throws Exception;
 
 
-    static URL[] classPathToUrl(List<ResourcePath> classPath, ResourceService resourceService) throws IOException {
+    static URL[] classPathToUrl(Iterable<ResourcePath> classPath, ResourceService resourceService) throws IOException {
         final ArrayList<URL> classPathUrls = new ArrayList<>();
         for(ResourcePath path : classPath) {
             final @Nullable File file = resourceService.toLocalFile(path);

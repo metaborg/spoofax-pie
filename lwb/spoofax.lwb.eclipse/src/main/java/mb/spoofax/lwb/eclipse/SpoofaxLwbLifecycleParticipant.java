@@ -15,10 +15,14 @@ import mb.pie.dagger.PieComponent;
 import mb.pie.dagger.RootPieModule;
 import mb.pie.dagger.TaskDefsProvider;
 import mb.pie.runtime.PieBuilderImpl;
+import mb.pie.runtime.store.InMemoryStore;
+import mb.pie.runtime.store.SerializingStore;
 import mb.pie.runtime.tracer.LoggingTracer;
+import mb.pie.serde.fst.FstSerde;
 import mb.resource.dagger.EmptyResourceRegistriesProvider;
 import mb.resource.dagger.ResourceRegistriesProvider;
 import mb.resource.dagger.ResourceServiceComponent;
+import mb.resource.fs.FSResource;
 import mb.sdf3.Sdf3Component;
 import mb.sdf3.eclipse.Sdf3LanguageFactory;
 import mb.sdf3_ext_statix.Sdf3ExtStatixComponent;
@@ -31,6 +35,7 @@ import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.EclipseLifecycleParticipant;
 import mb.spoofax.eclipse.EclipsePlatformComponent;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
+import mb.spoofax.eclipse.util.ResourceUtil;
 import mb.spoofax.lwb.compiler.CompileLanguage;
 import mb.spoofax.lwb.compiler.dagger.Spoofax3Compiler;
 import mb.spoofax.lwb.compiler.dagger.Spoofax3CompilerModule;
@@ -48,6 +53,7 @@ import mb.str.eclipse.StrategoEclipseComponent;
 import mb.str.eclipse.StrategoLanguageFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.runtime.IExecutableExtensionFactory;
+import org.eclipse.core.runtime.IPath;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -234,7 +240,14 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
     }
 
     @Override public void customizePieModule(RootPieModule pieModule) {
-        pieModule.withTracerFactory(LoggingTracer::new);
+        pieModule
+            .withSerdeFactory((loggerFactory) -> new FstSerde())
+            .withStoreFactory((serde, resourceService, loggerFactory) -> {
+                final IPath statePath = SpoofaxLwbPlugin.getPlugin().getStateLocation();
+                final FSResource stateDir = ResourceUtil.toFsResource(statePath);
+                return new SerializingStore<>(serde, loggerFactory, stateDir.appendRelativePath("pieStore"), InMemoryStore::new, InMemoryStore.class);
+            })
+            .withTracerFactory(LoggingTracer::new);
     }
 
     @Override

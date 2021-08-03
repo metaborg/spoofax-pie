@@ -11,10 +11,7 @@ import mb.spoofax.eclipse.menu.MenuShared;
 import mb.spoofax.lwb.dynamicloading.DynamicLanguage;
 import mb.spoofax.lwb.dynamicloading.DynamicLanguageLoader;
 import mb.spoofax.lwb.dynamicloading.DynamicLoadingScope;
-import mb.spt.SptResourcesComponent;
-import mb.spt.eclipse.SptLanguage;
 import mb.spt.eclipse.SptLanguageFactory;
-import mb.spt.resource.SptTestCaseResourceRegistry;
 import org.eclipse.core.commands.AbstractHandler;
 
 import javax.inject.Inject;
@@ -30,7 +27,7 @@ public class EclipseDynamicLanguageLoader implements DynamicLanguageLoader {
     public DynamicLanguage load(
         ResourcePath rootDirectory,
         CompileLanguageInput compileInput,
-        List<ResourcePath> classPath
+        Iterable<ResourcePath> classPath
     ) throws Exception {
         if(!compileInput.eclipseProjectInput().isPresent()) {
             throw new RuntimeException("Cannot dynamically load language at '" + rootDirectory + "' because it has no Eclipse project input");
@@ -42,7 +39,7 @@ public class EclipseDynamicLanguageLoader implements DynamicLanguageLoader {
         ResourcePath rootDirectory,
         CompileLanguageInput compileInput,
         EclipseProjectCompiler.Input eclipseInput,
-        List<ResourcePath> classPath
+        Iterable<ResourcePath> classPath
     ) throws Exception {
         final URLClassLoader classLoader = new URLClassLoader(DynamicLanguageLoader.classPathToUrl(classPath, SpoofaxPlugin.getBaseResourceServiceComponent().getResourceService()), EclipseDynamicLanguageLoader.class.getClassLoader());
         final Class<?> factoryClass = classLoader.loadClass(eclipseInput.languageFactory().qualifiedId());

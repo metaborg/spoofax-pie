@@ -18,3 +18,9 @@ repository {
 dependencies {
   feature(project(":spoofax.lwb.eclipse.feature"))
 }
+
+tasks {
+  withType<mb.coronium.task.EclipseRun> {
+    jvmArgs("-Xss16M") // Set required stack size, mainly for serialization.
+  }
+}

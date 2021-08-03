@@ -1,6 +1,5 @@
 package mb.spoofax.lwb.compiler;
 
-import mb.pie.api.MixedSession;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,14 +19,9 @@ class CompileLanguageTest extends TestBase {
 
     @Test void testCompileCharsLanguage() throws Exception {
         copyResourcesToTemporaryDirectory("mb/spoofax/lwb/compiler/chars");
-        try(final MixedSession session = pieComponent.getPie().newSession()) {
-            final CompileLanguage.Args args = CompileLanguage.Args.builder()
-                .rootDirectory(rootDirectory.getPath())
-                .build();
-            session.require(compileLanguage.createTask(args)).unwrap();
-        } catch(CompileLanguageException e) {
-            System.err.println(exceptionPrinter.printExceptionToString(e));
-            throw e;
-        }
+        checkAndCompileLanguage();
+        // Recreate compiler (including PIE component) and compile again to test serialize/deserialize roundtrip.
+        recreateCompiler();
+        checkAndCompileLanguage();
     }
 }

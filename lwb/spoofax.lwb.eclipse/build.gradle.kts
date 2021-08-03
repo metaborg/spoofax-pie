@@ -86,6 +86,9 @@ dependencies {
   bundleEmbedImplementation("org.metaborg:pie.task.archive")
   bundleEmbedImplementation("org.metaborg:pie.task.java")
 
+  // Embed FST serialize/deserialize implementation.
+  bundleEmbedImplementation("org.metaborg:pie.serde.fst")
+
   annotationProcessor("com.google.dagger:dagger-compiler")
 }
 
@@ -118,6 +121,11 @@ val privatePackage = listOf(
   // Embed PIE task modules
   "mb.pie.task.archive.*",
   "mb.pie.task.java.*",
+  // Embed PIE FST Serde, FST, and its dependencies.
+  "mb.pie.serde.fst.*",
+  "org.nustaq.*",
+  "com.fasterxml.jackson.core.*",
+  "org.objenesis.*",
   // Embed services, to make the embedded Dagger annotation processor work.
   "META-INF.services.*;-split-package:=merge-first"
 )
@@ -128,5 +136,8 @@ tasks {
         Pair("Private-Package", privatePackage.joinToString(", "))
       )
     }
+  }
+  withType<mb.coronium.task.EclipseRun> {
+    jvmArgs("-Xss16M") // Set required stack size, mainly for serialization.
   }
 }

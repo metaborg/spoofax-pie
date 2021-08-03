@@ -30,4 +30,5 @@ tasks.test {
   testLogging {
     events(org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR)
   }
+  jvmArgs("-Xss16M") // Set required stack size, mainly for serialization.
 }

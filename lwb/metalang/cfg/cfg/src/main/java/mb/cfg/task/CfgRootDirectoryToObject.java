@@ -55,7 +55,7 @@ public class CfgRootDirectoryToObject implements TaskDef<ResourcePath, Result<Cf
         final Supplier<Result<CfgAnalyze.Output, ?>> analyzeOutputSupplier = analyze.createSupplier(new CfgAnalyze.Input(cfgFile, astSupplier));
         final ResourcePath lockFilePath = rootDirectory.appendRelativePath("spoofaxc.lock");
         final WritableResource lockFile = resourceService.getWritableResource(lockFilePath);
-        final Supplier<Result<Properties, IOException>> propertiesSupplier = new PropertiesSupplier(lockFile);
+        final Supplier<Result<Properties, IOException>> propertiesSupplier = new PropertiesSupplier(lockFilePath);
         return context.require(toObject, new CfgToObject.Input(rootDirectory, cfgFile, analyzeOutputSupplier, propertiesSupplier))
             .mapErr(e -> CfgRootDirectoryToObjectException.convertFail(e, cfgFile, lockFilePath))
             .flatMap(output -> {
@@ -79,15 +79,16 @@ public class CfgRootDirectoryToObject implements TaskDef<ResourcePath, Result<Cf
     }
 
     private static class PropertiesSupplier implements Supplier<Result<Properties, IOException>>, Serializable {
-        private final ReadableResource lockFile;
+        private final ResourcePath lockFilePath;
 
-        public PropertiesSupplier(ReadableResource lockFile) {
-            this.lockFile = lockFile;
+        public PropertiesSupplier(ResourcePath lockFilePath) {
+            this.lockFilePath = lockFilePath;
         }
 
         @Override public Result<Properties, IOException> get(ExecContext ctx) {
             final Properties properties = new Properties();
             try {
+                final ReadableResource lockFile = ctx.require(lockFilePath);
                 if(lockFile.exists()) {
                     try(final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(lockFile.openRead()))) {
                         properties.load(bufferedReader);
@@ -103,16 +104,16 @@ public class CfgRootDirectoryToObject implements TaskDef<ResourcePath, Result<Cf
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             final PropertiesSupplier that = (PropertiesSupplier)o;
-            return lockFile.equals(that.lockFile);
+            return lockFilePath.equals(that.lockFilePath);
         }
 
         @Override public int hashCode() {
-            return lockFile.hashCode();
+            return lockFilePath.hashCode();
         }
 
         @Override public String toString() {
             return "PropertiesSupplier{" +
-                "lockFile=" + lockFile +
+                "lockFilePath=" + lockFilePath +
                 '}';
         }
     }

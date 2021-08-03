@@ -67,6 +67,7 @@ dependencies {
     api("org.metaborg:pie.dagger:$pieVersion")
     api("org.metaborg:pie.task.java:$pieVersion")
     api("org.metaborg:pie.task.archive:$pieVersion")
+    api("org.metaborg:pie.serde.fst:$pieVersion")
     /// Spoofax 2.x
     runtime("org.metaborg:strategoxt-min-jar:$spoofax2Version")
     /// Spoofax 2.x with devenv override

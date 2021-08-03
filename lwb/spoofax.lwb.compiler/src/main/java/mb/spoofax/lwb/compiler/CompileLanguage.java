@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
 
 /**
  * Fully compiles a language by running the {@link LanguageProjectCompiler language project compiler}, {@link
@@ -51,9 +52,11 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
 
         ResourcePath rootDirectory();
 
-        List<File> additionalJavaClassPath();
+        @Value.NaturalOrder
+        SortedSet<File> additionalJavaClassPath();
 
-        List<File> additionalJavaAnnotationProcessorPath();
+        @Value.NaturalOrder
+        SortedSet<File> additionalJavaAnnotationProcessorPath();
     }
 
     @Value.Immutable
@@ -62,7 +65,8 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
 
         static Builder builder() { return new Builder(); }
 
-        List<ResourcePath> classPath();
+        @Value.NaturalOrder
+        SortedSet<ResourcePath> classPath();
 
         KeyedMessages messages();
     }

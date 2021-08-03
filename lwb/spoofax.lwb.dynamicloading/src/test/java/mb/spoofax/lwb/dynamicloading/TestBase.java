@@ -72,8 +72,14 @@ class TestBase {
         temporaryDirectory = new FSResource(temporaryDirectoryPath);
         exceptionPrinter = new ExceptionPrinter().addCurrentDirectoryContext(temporaryDirectory);
 
-        final WritableResource pieStore = temporaryDirectory.appendRelativePath("pie.store");
-        final PieBuilder.StoreFactory storeFactory = (serde, __, ___) -> new SerializingStore<>(serde, pieStore, InMemoryStore::new, InMemoryStore.class, false);
+        final WritableResource pieStoreFile = temporaryDirectory.appendRelativePath("pie.store").createParents();
+        final PieBuilder.StoreFactory storeFactory = (serde, resourceService, loggerFactory) -> new SerializingStore<>(
+            serde,
+            loggerFactory,
+            pieStoreFile,
+            InMemoryStore::new,
+            InMemoryStore.class
+        );
         metricsTracer = new MetricsTracer();
         final Function<LoggerFactory, Tracer> tracerFactory = loggerFactory -> new CompositeTracer(new LoggingTracer(loggerFactory), metricsTracer);
 

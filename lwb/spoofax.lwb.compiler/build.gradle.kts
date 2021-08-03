@@ -44,6 +44,7 @@ dependencies {
 
   testImplementation("org.junit.jupiter:junit-jupiter-params:${metaborg.junitVersion}")
   testImplementation("org.metaborg:pie.runtime")
+  testImplementation("org.metaborg:pie.serde.fst")
   testImplementation(project(":spoofax.lwb.compiler.dagger"))
   testCompileOnly("org.checkerframework:checker-qual-android")
 }
@@ -54,4 +55,5 @@ tasks.test {
   testLogging {
     events(org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR)
   }
+  jvmArgs("-Xss16M") // Set required stack size, mainly for serialization.
 }

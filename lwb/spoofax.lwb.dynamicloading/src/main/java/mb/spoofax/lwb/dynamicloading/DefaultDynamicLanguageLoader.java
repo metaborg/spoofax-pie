@@ -18,7 +18,6 @@ import javax.inject.Provider;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URLClassLoader;
-import java.util.List;
 
 @DynamicLoadingScope
 public class DefaultDynamicLanguageLoader implements DynamicLanguageLoader {
@@ -42,7 +41,7 @@ public class DefaultDynamicLanguageLoader implements DynamicLanguageLoader {
     @Override public DynamicLanguage load(
         ResourcePath rootDirectory,
         CompileLanguageInput compileInput,
-        List<ResourcePath> classPath
+        Iterable<ResourcePath> classPath
     ) throws ReflectiveOperationException, IOException {
         final URLClassLoader classLoader = new URLClassLoader(DynamicLanguageLoader.classPathToUrl(classPath, parentResourceServiceComponent.getResourceService()), DynamicLanguage.class.getClassLoader());
 
