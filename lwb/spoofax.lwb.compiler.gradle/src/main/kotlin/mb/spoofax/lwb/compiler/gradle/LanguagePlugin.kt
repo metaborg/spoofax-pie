@@ -10,8 +10,10 @@ import mb.common.message.Messages
 import mb.common.message.Severity
 import mb.common.result.Result
 import mb.common.util.ExceptionPrinter
+import mb.log.api.Level
 import mb.log.dagger.DaggerLoggerComponent
 import mb.log.dagger.LoggerModule
+import mb.log.stream.LoggingOutputStream
 import mb.pie.api.Pie
 import mb.pie.api.ValueSupplier
 import mb.pie.dagger.PieModule
@@ -25,6 +27,7 @@ import mb.resource.hierarchical.ResourcePath
 import mb.spoofax.compiler.adapter.*
 import mb.spoofax.compiler.language.*
 import mb.spoofax.compiler.util.*
+import mb.spoofax.lwb.compiler.CheckLanguageSpecification
 import mb.spoofax.lwb.compiler.CompileLanguageSpecification
 import mb.spoofax.lwb.compiler.dagger.StandaloneSpoofax3Compiler
 import org.gradle.api.GradleException
@@ -34,6 +37,7 @@ import org.gradle.api.artifacts.Dependency
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.kotlin.dsl.*
+import java.io.PrintStream
 import java.util.*
 
 open class LanguageExtension() {
@@ -85,12 +89,13 @@ open class LanguagePlugin : Plugin<Project> {
   ) {
     val resourceService = spoofax3Compiler.compiler.resourceServiceComponent.resourceService
     val languageProjectCompiler = spoofax3Compiler.compiler.spoofaxCompilerComponent.languageProjectCompiler
-    val compileLanguage = spoofax3Compiler.compiler.component.compileLanguageSpecification
+    val check = spoofax3Compiler.compiler.component.checkLanguageSpecification
+    val compile = spoofax3Compiler.compiler.component.compileLanguageSpecification
     val adapterProjectCompiler = spoofax3Compiler.compiler.spoofaxCompilerComponent.adapterProjectCompiler
     val pie = spoofax3Compiler.pieComponent.pie
     configureProject(project, resourceService, languageProjectCompiler, adapterProjectCompiler, input)
     configureCompileLanguageProjectTask(project, resourceService, pie, languageProjectCompiler, input.languageProjectInput())
-    configureCompileLanguageTask(project, resourceService, pie, compileLanguage, input.compileLanguageSpecificationInput())
+    configureCompileLanguageTask(project, resourceService, pie, check, compile, input.compileLanguageSpecificationInput())
     configureCompileAdapterProjectTask(project, resourceService, pie, adapterProjectCompiler, input.adapterProjectInput())
   }
 
@@ -149,7 +154,8 @@ open class LanguagePlugin : Plugin<Project> {
     project: Project,
     resourceService: ResourceService,
     pie: Pie,
-    compiler: CompileLanguageSpecification,
+    check: CheckLanguageSpecification,
+    compile: CompileLanguageSpecification,
     input: CompileLanguageSpecificationInput
   ) {
     val compileTask = project.tasks.register("compileLanguage") {
@@ -229,13 +235,22 @@ open class LanguagePlugin : Plugin<Project> {
       doLast {
         synchronized(pie) {
           pie.newSession().use { session ->
-            val result = session.require(compiler.createTask(FSPath(project.projectDir)))
-            val projectDir = FSPath(project.projectDir)
-            result.ifOk {
-              project.logMessages(it.messages(), projectDir)
+            val rootDirectory = FSPath(project.projectDir)
+
+            val messages = session.require(check.createTask(rootDirectory))
+            if(messages.containsError()) {
+              val exceptionPrinter = ExceptionPrinter()
+              exceptionPrinter.addCurrentDirectoryContext(rootDirectory)
+              project.logger.error(exceptionPrinter.printMessagesToString(messages.filter { it.isError }))
+              throw GradleException("Checking language produced errors")
+            }
+
+            val compileResult = session.require(compile.createTask(rootDirectory))
+            compileResult.ifOk {
+              project.logMessages(it.messages(), rootDirectory)
             }.ifErr {
               val exceptionPrinter = ExceptionPrinter()
-              exceptionPrinter.addCurrentDirectoryContext(projectDir)
+              exceptionPrinter.addCurrentDirectoryContext(rootDirectory)
               project.logger.error(exceptionPrinter.printExceptionToString(it))
               throw GradleException("Compiling language produced errors")
             }

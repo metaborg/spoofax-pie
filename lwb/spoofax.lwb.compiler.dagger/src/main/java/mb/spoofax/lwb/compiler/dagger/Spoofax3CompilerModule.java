@@ -10,6 +10,7 @@ import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.lwb.compiler.CheckLanguageSpecification;
 import mb.spoofax.lwb.compiler.CompileLanguage;
 import mb.spoofax.lwb.compiler.CompileLanguageSpecification;
+import mb.spoofax.lwb.compiler.cfg.CheckCfg;
 import mb.spoofax.lwb.compiler.esv.CheckEsv;
 import mb.spoofax.lwb.compiler.esv.CompileEsv;
 import mb.spoofax.lwb.compiler.esv.ConfigureEsv;
@@ -53,6 +54,8 @@ public class Spoofax3CompilerModule {
         CheckLanguageSpecification checkLanguageSpecification,
         CompileLanguageSpecification compileLanguageSpecification,
 
+        CheckCfg checkCfg,
+
         ConfigureSdf3 configureSdf3,
         CheckSdf3 checkSdf3,
         CompileSdf3 compileSdf3,
@@ -76,6 +79,8 @@ public class Spoofax3CompilerModule {
         taskDefs.add(compileLanguage);
         taskDefs.add(checkLanguageSpecification);
         taskDefs.add(compileLanguageSpecification);
+
+        taskDefs.add(checkCfg);
 
         taskDefs.add(configureSdf3);
         taskDefs.add(checkSdf3);
