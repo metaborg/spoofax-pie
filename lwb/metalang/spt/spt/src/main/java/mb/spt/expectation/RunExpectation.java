@@ -13,7 +13,7 @@ import mb.pie.api.exec.CancelToken;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spt.api.analyze.StrategoRunArgument;
-import mb.spt.api.analyze.TestableAnalysis;
+import mb.spt.api.stratego.TestableStratego;
 import mb.spt.fromterm.InvalidAstShapeException;
 import mb.spt.lut.LanguageUnderTestProvider;
 import mb.spt.model.LanguageUnderTest;
@@ -68,15 +68,15 @@ public class RunExpectation implements TestExpectation {
         final ResourceKey file = testCase.testSuiteFile;
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
         final LanguageInstance languageInstance = languageUnderTest.getLanguageComponent().getLanguageInstance();
-        if(!(languageInstance instanceof TestableAnalysis)) {
-            messagesBuilder.addMessage("Cannot evaluate run expectation because language instance '" + languageInstance + "' does not implement TestableAnalysis", Severity.Error, file, sourceRegion);
+        if(!(languageInstance instanceof TestableStratego)) {
+            messagesBuilder.addMessage("Cannot evaluate run expectation because language instance '" + languageInstance + "' does not implement TestableStratego", Severity.Error, file, sourceRegion);
             return messagesBuilder.build(file);
         }
-        final TestableAnalysis testableAnalysis = (TestableAnalysis)languageInstance;
+        final TestableStratego testableStratego = (TestableStratego)languageInstance;
         Option<Region> region = selectionReference.map(
             (sel) -> testCase.testFragment.getSelections().get(sel.selection - 1)
         );
-        final Result<IStrategoTerm, ?> result = testableAnalysis.testRunStrategy(languageUnderTestSession, testCase.resource, strategy, parseArguments(arguments, testCase), region, testCase.rootDirectoryHint);
+        final Result<IStrategoTerm, ?> result = testableStratego.testRunStrategy(languageUnderTestSession, testCase.resource, strategy, parseArguments(arguments, testCase), region, testCase.rootDirectoryHint);
 
         result
             .ifOkThrowing(

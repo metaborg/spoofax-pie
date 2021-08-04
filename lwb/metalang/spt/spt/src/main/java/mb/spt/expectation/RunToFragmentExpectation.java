@@ -12,6 +12,7 @@ import mb.pie.api.Session;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spt.api.analyze.TestableAnalysis;
+import mb.spt.api.parse.TestableParse;
 import mb.spt.lut.LanguageUnderTestProvider;
 import mb.spt.model.LanguageUnderTest;
 import mb.spt.model.SelectionReference;
@@ -61,23 +62,28 @@ public class RunToFragmentExpectation extends RunExpectation {
             return;
         }
         final LanguageInstance fragmentInstance = fragmentLanguageUnderTest.getLanguageComponent().getLanguageInstance();
-        if (!(fragmentInstance instanceof TestableAnalysis)) {
-            messagesBuilder.addMessage(
-                "Cannot evaluate run to fragment expectation because language instance '" + fragmentInstance + "' does not implement TestableAnalysis",
-                Severity.Error,
-                file,
-                sourceRegion
-            );
-            return;
-        }
-        final TestableAnalysis testableParse = (TestableAnalysis)fragmentInstance;
+
         final Session session;
         if (fragmentLanguageUnderTest == languageUnderTest) {
             session = languageUnderTestSession;
         } else {
             session = fragmentLanguageUnderTest.getPieComponent().newSession();
         }
-        final Result<IStrategoTerm, ?> result = testableParse.testAnalyze(session, fragmentResource, testCase.rootDirectoryHint);
+
+        final Result<IStrategoTerm, ?> result;
+        if(fragmentInstance instanceof TestableAnalysis) {
+            result = ((TestableAnalysis)fragmentInstance).testAnalyze(session, fragmentResource, testCase.rootDirectoryHint);
+        } else if (fragmentInstance instanceof TestableParse) {
+            result = ((TestableParse)fragmentInstance).testParseToAterm(session, fragmentResource, testCase.rootDirectoryHint);
+        } else {
+            messagesBuilder.addMessage(
+                "Cannot evaluate run to fragment expectation because language instance '" + fragmentInstance + "' does not implement TestableAnalysis nor TestableParse",
+                Severity.Error,
+                file,
+                sourceRegion
+            );
+            return;
+        }
 
         result
             .ifElse((expectedAst) -> {

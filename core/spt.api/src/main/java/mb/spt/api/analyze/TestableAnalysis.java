@@ -11,6 +11,5 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 public interface TestableAnalysis {
-    Result<IStrategoTerm, ?> testRunStrategy(Session session, ResourceKey resource, String strategy, ListView<StrategoRunArgument> arguments, Option<Region> region, @Nullable ResourcePath rootDirectoryHint) throws InterruptedException;
     Result<IStrategoTerm, ?> testAnalyze(Session session, ResourceKey resource, @Nullable ResourcePath rootDirectoryHint) throws InterruptedException;
 }

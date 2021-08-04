@@ -165,7 +165,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         addTaskDef(allTaskDefs, input.checkAggregatorTaskDef(), input.baseCheckAggregatorTaskDef());
         addTaskDef(allTaskDefs, input.checkDeaggregatorTaskDef(), input.baseCheckDeaggregatorTaskDef());
 
-        if (input.strategoRuntime().isPresent() && input.constraintAnalyzer().isPresent()) {
+        if (input.strategoRuntime().isPresent() && input.parser().isPresent()) {
             addTaskDef(allTaskDefs, input.testStrategoTaskDef(), input.baseTestStrategoTaskDef());
         }
 
@@ -196,8 +196,16 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             commandDefTemplate.write(context, commandDef.type().file(generatedJavaSourcesDirectory), commandDef, map);
         }
 
-        if (input.strategoRuntime().isPresent() && input.constraintAnalyzer().isPresent()) {
-            testStrategoTaskDef.write(context, input.baseTestStrategoTaskDef().file(generatedJavaSourcesDirectory), input);
+        if (input.strategoRuntime().isPresent() && input.parser().isPresent()) {
+            final HashMap<String, Object> map = new HashMap<>();
+            if (input.constraintAnalyzer().isPresent()) {
+                map.put("taskInput", TypeInfo.of("mb.constraint.pie", "ConstraintAnalyzeTaskDef.Output"));
+                map.put("astMember", ".result.ast");
+            } else {
+                map.put("taskInput", TypeInfo.of("org.spoofax.interpreter.terms", "IStrategoTerm"));
+                map.put("astMember", "");
+            }
+            testStrategoTaskDef.write(context, input.baseTestStrategoTaskDef().file(generatedJavaSourcesDirectory), input, map);
         }
 
         { // Component
@@ -293,15 +301,19 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
                 }
                 out.write(name);
             });
-            if (input.strategoRuntime().isPresent() && input.constraintAnalyzer().isPresent()) {
+            if (input.strategoRuntime().isPresent() && input.parser().isPresent()) {
                 final NamedTypeInfo testStrategoInjection = uniqueNamer.makeUnique(input.testStrategoTaskDef());
                 map.put("testStrategoInjection", testStrategoInjection);
                 injected.add(testStrategoInjection);
-                final NamedTypeInfo analyze = uniqueNamer.makeUnique(input.constraintAnalyzer().get().analyzeTaskDef());
-                map.put("analyze", analyze);
-                injected.add(analyze);
             } else {
                 map.put("testStrategoInjection", false);
+            }
+            if (input.constraintAnalyzer().isPresent() && input.parser().isPresent()) {
+                final NamedTypeInfo analyzeInjection = uniqueNamer.makeUnique(input.constraintAnalyzer().get().analyzeTaskDef());
+                map.put("analyzeInjection", analyzeInjection);
+                injected.add(analyzeInjection);
+            } else {
+                map.put("analyzeInjection", false);
             }
 
             instanceTemplate.write(context, input.baseInstance().file(generatedJavaSourcesDirectory), input, map);

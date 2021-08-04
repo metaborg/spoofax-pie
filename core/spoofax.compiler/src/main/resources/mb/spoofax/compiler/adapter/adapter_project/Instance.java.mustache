@@ -50,7 +50,9 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Set;
 
-public class {{baseInstance.id}} implements LanguageInstance{{#parseInjection}}, mb.spt.api.parse.TestableParse{{/parseInjection}}{{#testStrategoInjection}}, mb.spt.api.analyze.TestableAnalysis{{/testStrategoInjection}} {
+public class {{baseInstance.id}} implements LanguageInstance{{#parseInjection}}, mb.spt.api.parse.TestableParse{{/parseInjection}}
+    {{#testStrategoInjection}}, mb.spt.api.stratego.TestableStratego{{/testStrategoInjection}}
+    {{#analyzeInjection}}, mb.spt.api.analyze.TestableAnalysis{{/analyzeInjection}} {
     private final static SetView<String> fileExtensions = SetView.of({{#shared.fileExtensions}}"{{this}}"{{^-last}}, {{/-last}}{{/shared.fileExtensions}});
 
 {{#injected}}
@@ -200,13 +202,22 @@ public class {{baseInstance.id}} implements LanguageInstance{{#parseInjection}},
         try {
             return session.requireWithoutObserving(
                 {{testStrategoInjection.name}}.createTask(
-                    {{analyze.name}}.createSupplier(
+        {{#analyzeInjection}}
+                    {{analyzeInjection.name}}.createSupplier(
                         new mb.constraint.pie.ConstraintAnalyzeTaskDef.Input(resource,{{parseInjection.name}}.inputBuilder()
                             .withFile(resource)
                             .rootDirectoryHint(Optional.ofNullable(rootDirectoryHint))
                             .buildAstSupplier()
                         )
-                    ).map(
+                    )
+        {{/analyzeInjection}}
+        {{^analyzeInjection}}
+                    {{parseInjection.name}}.inputBuilder()
+                    .withFile(resource)
+                    .rootDirectoryHint(Optional.ofNullable(rootDirectoryHint))
+                    .buildAstSupplier()
+        {{/analyzeInjection}}
+                    .map(
                         (output) ->
                             output.mapOrElse(
                                 (output2) -> Result.ofOk(new {{testStrategoTaskDef.qualifiedId}}.Input(output2, strategy, arguments, region)),
@@ -219,12 +230,13 @@ public class {{baseInstance.id}} implements LanguageInstance{{#parseInjection}},
             return Result.ofErr(e);
         }
     }
-
+{{/testStrategoInjection}}
+{{#analyzeInjection}}
     @Override
     public Result<org.spoofax.interpreter.terms.IStrategoTerm, ?> testAnalyze(Session session, ResourceKey resource, @Nullable ResourcePath rootDirectoryHint) throws InterruptedException {
         try {
             return session.requireWithoutObserving(
-                {{analyze.name}}.createTask(
+                {{analyzeInjection.name}}.createTask(
                     new mb.constraint.pie.ConstraintAnalyzeTaskDef.Input(resource, {{parseInjection.name}}.inputBuilder()
                         .withFile(resource)
                         .rootDirectoryHint(rootDirectoryHint)
@@ -236,7 +248,7 @@ public class {{baseInstance.id}} implements LanguageInstance{{#parseInjection}},
             return Result.ofErr(e);
         }
     }
-{{/testStrategoInjection}}
+{{/analyzeInjection}}
 }
 
 class TokensResultToOkFunction extends StatelessSerializableFunction<Result<JSGLRTokens, JsglrParseException>, Option<JSGLRTokens>> {
