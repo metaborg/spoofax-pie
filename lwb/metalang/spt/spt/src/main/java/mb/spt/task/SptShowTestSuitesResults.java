@@ -43,7 +43,7 @@ public class SptShowTestSuitesResults implements TaskDef<SptShowTestSuitesResult
 
         @Override
         public String toString() {
-            return "Args{" + "directory=" + directory + ", rootDir=" + rootDir + '}';
+            return "SptShowTestSuitesResults$Args{" + "directory=" + directory + ", rootDir=" + rootDir + '}';
         }
     }
 

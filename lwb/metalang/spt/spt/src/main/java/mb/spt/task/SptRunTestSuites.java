@@ -49,7 +49,7 @@ public class SptRunTestSuites implements TaskDef<SptRunTestSuites.Input, TestRes
         }
 
         @Override public String toString() {
-            return "SptCheckForOutput$Input{" +
+            return "SptRunTestSuites$Input{" +
                 "directory=" + directory +
                 ", rootDirectoryHint=" + rootDirectory +
                 '}';
@@ -65,7 +65,7 @@ public class SptRunTestSuites implements TaskDef<SptRunTestSuites.Input, TestRes
     }
 
     @Override public String getId() {
-        return "mb.spt.task.SptCheckForOutputAggregator";
+        return getClass().getName();
     }
 
     @Override public TestResults exec(ExecContext context, SptRunTestSuites.Input input) throws IOException {

@@ -46,7 +46,7 @@ public class SptShowTestSuiteResults implements TaskDef<SptShowTestSuiteResults.
 
         @Override
         public String toString() {
-            return "Args{" + "file=" + file + ", rootDir=" + rootDir + '}';
+            return "SptShowTestSuiteResults$Args{" + "file=" + file + ", rootDir=" + rootDir + '}';
         }
     }
 

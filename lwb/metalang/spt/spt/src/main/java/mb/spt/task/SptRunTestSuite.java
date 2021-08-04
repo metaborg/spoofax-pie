@@ -74,7 +74,7 @@ public class SptRunTestSuite implements TaskDef<SptRunTestSuite.Input, TestSuite
         }
 
         @Override public String toString() {
-            return "SptCheckForOutput$Input{" +
+            return "SptRunTestSuite$Input{" +
                 "file=" + file +
                 ", rootDirectoryHint=" + rootDirectoryHint +
                 '}';
