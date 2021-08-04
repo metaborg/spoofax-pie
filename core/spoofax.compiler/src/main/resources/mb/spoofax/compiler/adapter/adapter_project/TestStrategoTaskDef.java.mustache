@@ -4,7 +4,7 @@ import mb.common.region.Region;
 import mb.common.util.ListView;
 import mb.common.option.Option;
 import mb.constraint.pie.ConstraintAnalyzeTaskDef;
-import mb.spt.api.analyze.RunArgument;
+import mb.spt.api.analyze.StrategoRunArgument;
 import mb.jsglr.common.TermTracer;
 import mb.pie.api.ExecContext;
 import mb.stratego.common.StrategoRuntime;
@@ -22,10 +22,10 @@ public class {{baseTestStrategoTaskDef.id}} extends StrategoTransformTaskDef<{{b
     public static class Input implements Serializable {
         public final ConstraintAnalyzeTaskDef.Output analysisResult;
         public final String strategy;
-        public final Option<ListView<RunArgument>> arguments;
+        public final ListView<StrategoRunArgument> arguments;
         public final Option<Region> region;
 
-        public Input(ConstraintAnalyzeTaskDef.Output analysisResult, String strategy, Option<ListView<RunArgument>> arguments, Option<Region> region) {
+        public Input(ConstraintAnalyzeTaskDef.Output analysisResult, String strategy, ListView<StrategoRunArgument> arguments, Option<Region> region) {
             this.analysisResult = analysisResult;
             this.strategy = strategy;
             this.arguments = arguments;
@@ -50,17 +50,15 @@ public class {{baseTestStrategoTaskDef.id}} extends StrategoTransformTaskDef<{{b
         }
     }
 
-    private Option<ListView<IStrategoTerm>> processArguments(Option<ListView<RunArgument>> arguments, ExecContext context, Input input) {
-        return arguments.map((args) -> {
-            List<IStrategoTerm> terms = args.stream()
-                .map((term) ->
-                    term.caseOf()
-                        .intArg((x) -> (IStrategoTerm)x)
-                        .stringArg((x) -> (IStrategoTerm)x)
-                        .selectionArg((region) -> TermTracer.getBiggestTermInsideRegion(input.analysisResult.result.ast, region))
-                ).collect(Collectors.toList());
-            return ListView.of(terms);
-        });
+    private ListView<IStrategoTerm> processArguments(ListView<StrategoRunArgument> arguments, ExecContext context, Input input) {
+        List<IStrategoTerm> terms = arguments.stream()
+            .map((term) ->
+                term.caseOf()
+                    .intArg((x) -> (IStrategoTerm)x)
+                    .stringArg((x) -> (IStrategoTerm)x)
+                    .selectionArg((region) -> TermTracer.getBiggestTermInsideRegion(input.analysisResult.result.ast, region))
+            ).collect(Collectors.toList());
+        return ListView.of(terms);
     }
 
     @Override

@@ -28,7 +28,7 @@ public class RunToFragmentExpectation extends RunExpectation {
 
     public RunToFragmentExpectation(
         String strategyName,
-        Option<ListView<IStrategoAppl>> arguments,
+        ListView<IStrategoAppl> arguments,
         Option<SelectionReference> selection,
         ResourceKey fragmentResource,
         Option<String> languageIdHint,

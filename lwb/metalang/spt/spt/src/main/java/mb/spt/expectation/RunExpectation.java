@@ -12,7 +12,7 @@ import mb.pie.api.Session;
 import mb.pie.api.exec.CancelToken;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageInstance;
-import mb.spt.api.analyze.RunArgument;
+import mb.spt.api.analyze.StrategoRunArgument;
 import mb.spt.api.analyze.TestableAnalysis;
 import mb.spt.fromterm.InvalidAstShapeException;
 import mb.spt.lut.LanguageUnderTestProvider;
@@ -32,12 +32,12 @@ import java.util.List;
 
 public class RunExpectation implements TestExpectation {
     private final String strategy;
-    private final Option<ListView<IStrategoAppl>> arguments;
+    private final ListView<IStrategoAppl> arguments;
     private final Option<SelectionReference> selectionReference;
     private final Region sourceRegion;
     private final boolean expectFailure;
 
-    public RunExpectation(String strategy, Option<ListView<IStrategoAppl>> arguments, Option<SelectionReference> selectionReference, Region sourceRegion, boolean expectFailure) {
+    public RunExpectation(String strategy, ListView<IStrategoAppl> arguments, Option<SelectionReference> selectionReference, Region sourceRegion, boolean expectFailure) {
         this.strategy = strategy;
         this.arguments = arguments;
         this.selectionReference = selectionReference;
@@ -108,33 +108,31 @@ public class RunExpectation implements TestExpectation {
         return messagesBuilder.build();
     }
 
-    private Option<ListView<RunArgument>> parseArguments(Option<ListView<IStrategoAppl>> arguments, TestCase testCase) {
-        return arguments.map((terms) -> {
-            List<RunArgument> args = new ArrayList<>();
-            for(IStrategoAppl term : terms) {
-                switch(term.getName()) {
-                    case "Int": {
-                        IStrategoInt value = TermUtils.toIntAt(term, 0);
-                        args.add(RunArgument.intArg(value));
-                        break;
-                    }
-                    case "String": {
-                        IStrategoString value = TermUtils.toStringAt(term, 0);
-                        args.add(RunArgument.stringArg(value));
-                        break;
-                    }
-                    case "SelectionRef": {
-                        int index = Integer.parseInt(TermUtils.toJavaStringAt(term, 0));
-                        Region region = testCase.testFragment.getSelections().get(index - 1);
-                        args.add(RunArgument.selectionArg(region));
-                        break;
-                    }
-                    default: {
-                        throw new InvalidAstShapeException("Int/1, String/1 or SelectionRef/1", term);
-                    }
+    private ListView<StrategoRunArgument> parseArguments(ListView<IStrategoAppl> terms, TestCase testCase) {
+        List<StrategoRunArgument> args = new ArrayList<>();
+        for(IStrategoAppl term : terms) {
+            switch(term.getName()) {
+                case "Int": {
+                    IStrategoInt value = TermUtils.toIntAt(term, 0);
+                    args.add(StrategoRunArgument.intArg(value));
+                    break;
+                }
+                case "String": {
+                    IStrategoString value = TermUtils.toStringAt(term, 0);
+                    args.add(StrategoRunArgument.stringArg(value));
+                    break;
+                }
+                case "SelectionRef": {
+                    int index = Integer.parseInt(TermUtils.toJavaStringAt(term, 0));
+                    Region region = testCase.testFragment.getSelections().get(index - 1);
+                    args.add(StrategoRunArgument.selectionArg(region));
+                    break;
+                }
+                default: {
+                    throw new InvalidAstShapeException("Int/1, String/1 or SelectionRef/1", term);
                 }
             }
-            return ListView.of(args);
-        });
+        }
+        return ListView.of(args);
     }
 }

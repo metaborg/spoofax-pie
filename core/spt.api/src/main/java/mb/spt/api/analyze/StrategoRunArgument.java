@@ -10,7 +10,7 @@ import java.io.Serializable;
 import java.util.Optional;
 
 @ADT
-public abstract class RunArgument implements Serializable {
+public abstract class StrategoRunArgument implements Serializable {
     public interface Cases<R> {
         R intArg(IStrategoInt number);
         R stringArg(IStrategoString string);
@@ -19,32 +19,32 @@ public abstract class RunArgument implements Serializable {
 
     public abstract <R> R match(Cases<R> cases);
 
-    public static RunArgument intArg(IStrategoInt value) {
-        return RunArguments.intArg(value);
+    public static StrategoRunArgument intArg(IStrategoInt value) {
+        return StrategoRunArguments.intArg(value);
     }
 
-    public static RunArgument stringArg(IStrategoString value) {
-        return RunArguments.stringArg(value);
+    public static StrategoRunArgument stringArg(IStrategoString value) {
+        return StrategoRunArguments.stringArg(value);
     }
 
-    public static RunArgument selectionArg(Region value) {
-        return RunArguments.selectionArg(value);
+    public static StrategoRunArgument selectionArg(Region value) {
+        return StrategoRunArguments.selectionArg(value);
     }
 
-    public RunArguments.CaseOfMatchers.TotalMatcher_IntArg caseOf() {
-        return RunArguments.caseOf(this);
+    public StrategoRunArguments.CaseOfMatchers.TotalMatcher_IntArg caseOf() {
+        return StrategoRunArguments.caseOf(this);
     }
 
     public Optional<IStrategoInt> getNumber() {
-        return RunArguments.getNumber(this);
+        return StrategoRunArguments.getNumber(this);
     }
 
     public Optional<IStrategoString> getString() {
-        return RunArguments.getString(this);
+        return StrategoRunArguments.getString(this);
     }
 
     public Optional<Region> getRegion() {
-        return RunArguments.getRegion(this);
+        return StrategoRunArguments.getRegion(this);
     }
 
     @Override public abstract int hashCode();

@@ -1,6 +1,5 @@
 package mb.stratego.pie;
 
-import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
@@ -26,11 +25,16 @@ import java.util.stream.Collectors;
 public abstract class BaseStrategoTransformTaskDef<T> implements TaskDef<Supplier<? extends Result<T, ?>>, Result<IStrategoTerm, ?>> {
     public static class Strategy {
         public final String name;
-        public final Option<ListView<IStrategoTerm>> arguments;
+        public final ListView<IStrategoTerm> arguments;
 
-        public Strategy(String name, Option<ListView<IStrategoTerm>> arguments) {
+        public Strategy(String name, ListView<IStrategoTerm> arguments) {
             this.name = name;
             this.arguments = arguments;
+        }
+
+        public Strategy(String name) {
+            this.name = name;
+            this.arguments = ListView.of();
         }
     }
 
@@ -39,7 +43,7 @@ public abstract class BaseStrategoTransformTaskDef<T> implements TaskDef<Supplie
     public BaseStrategoTransformTaskDef(ListView<String> strategyNames) {
         this.strategies = ListView.of(
             strategyNames.stream()
-            .map((name) -> new Strategy(name, Option.ofNone()))
+            .map(Strategy::new)
             .collect(Collectors.toList())
         );
     }
@@ -47,7 +51,7 @@ public abstract class BaseStrategoTransformTaskDef<T> implements TaskDef<Supplie
     public BaseStrategoTransformTaskDef(String... strategyNames) {
         this.strategies = ListView.of(
             Arrays.stream(strategyNames)
-                .map((name) -> new Strategy(name, Option.ofNone()))
+                .map(Strategy::new)
                 .collect(Collectors.toList())
         );
     }
@@ -68,11 +72,7 @@ public abstract class BaseStrategoTransformTaskDef<T> implements TaskDef<Supplie
             IStrategoTerm ast = getAst(context, t);
             for(Strategy strategy : getStrategies(context, t)) {
                 try {
-                    IStrategoTerm inputAst = ast;
-                    ast = strategy.arguments.mapThrowingOrElseThrowing(
-                        (args) -> strategoRuntime.invoke(strategy.name, inputAst, args),
-                        () -> strategoRuntime.invoke(strategy.name, inputAst)
-                    );
+                    ast = strategoRuntime.invoke(strategy.name, ast, strategy.arguments);
                 } catch(StrategoException e) {
                     return Result.ofErr(e);
                 }

@@ -86,7 +86,7 @@ public class RunExpectationFromTerm implements TestExpectationFromTerm {
     ) {
         final String strategyName = TermUtils.asJavaStringAt(term, 0)
             .orElseThrow(() -> new InvalidAstShapeException("term string as first subterm", term));
-        final Option<ListView<IStrategoAppl>> arguments = convertArguments(
+        final ListView<IStrategoAppl> arguments = convertArguments(
             TermUtils.asApplAt(term, 1)
                 .orElseThrow(() -> new InvalidAstShapeException("term application as second subterm", term))
         );
@@ -122,16 +122,16 @@ public class RunExpectationFromTerm implements TestExpectationFromTerm {
             .orElseGet(() -> new RunExpectation(strategyName, arguments, selection, sourceRegion, false));
     }
 
-    private Option<ListView<IStrategoAppl>> convertArguments(IStrategoAppl arguments) {
+    private ListView<IStrategoAppl> convertArguments(IStrategoAppl arguments) {
         return SptFromTermUtil.getOptional(arguments).map(
-            (args) -> Option.ofSome(ListView.of(
+            (args) -> ListView.of(
                 TermUtils.asJavaListAt(args, 0)
                     .orElseThrow(() -> new InvalidAstShapeException("list", args))
                     .stream()
                     .map(this::convertArgument)
                     .collect(Collectors.toList())
-            ))
-        ).orElse(Option.ofNone());
+            )
+        ).orElse(ListView.of());
     }
 
     private IStrategoAppl convertArgument(IStrategoTerm term) {
@@ -153,7 +153,7 @@ public class RunExpectationFromTerm implements TestExpectationFromTerm {
 
     private TestExpectation convertToRunToFragmentExpectation(
         String strategyName,
-        Option<ListView<IStrategoAppl>> arguments,
+        ListView<IStrategoAppl> arguments,
         Option<SelectionReference> selection,
         IStrategoTerm toPart,
         Region sourceRegion,
