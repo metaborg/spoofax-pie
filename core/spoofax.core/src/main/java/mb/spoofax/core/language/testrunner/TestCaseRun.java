@@ -4,6 +4,7 @@ import mb.common.message.KeyedMessages;
 import mb.common.region.Region;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
@@ -12,7 +13,7 @@ import java.util.Objects;
  * Used by the Eclipse UI part of the runner. It notifies its parent (if any) when it gets the result for the test whose
  * run it represents.
  */
-public class TestCaseRun {
+public class TestCaseRun implements Serializable {
 
     public final TestSuiteRun parent;
     public final String description;
