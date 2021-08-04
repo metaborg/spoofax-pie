@@ -1,6 +1,7 @@
 package mb.stratego.common;
 
 import mb.common.util.ListView;
+import org.spoofax.interpreter.core.Interpreter;
 import org.spoofax.interpreter.core.InterpreterException;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -62,7 +63,7 @@ public class StrategoRuntime {
         hybridInterpreter.getContext().setContextObject(contextObject);
         hybridInterpreter.getCompiledContext().setContextObject(contextObject);
         ITermFactory termFactory = getTermFactory();
-        IStrategoTerm strategyName = termFactory.makeString(strategy + "_0_" + arguments.size());
+        IStrategoTerm strategyName = termFactory.makeString(Interpreter.cify(strategy) + "_0_" + arguments.size());
         IStrategoTerm strategyNameTerm = termFactory.makeAppl("SVar", strategyName);
         IStrategoAppl strategyCallTerm = termFactory.makeAppl(
             "CallT",
