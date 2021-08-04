@@ -20,6 +20,7 @@ import mb.spt.model.LanguageUnderTest;
 import mb.spt.model.SelectionReference;
 import mb.spt.model.TestCase;
 import mb.spt.model.TestExpectation;
+import mb.stratego.common.StrategoException;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoInt;
 import org.spoofax.interpreter.terms.IStrategoString;
@@ -82,20 +83,23 @@ public class RunExpectation implements TestExpectation {
                     if (expectFailure) {
                         messagesBuilder.addMessage("Expected strategy to fail, but it succeeded", Severity.Error, file, sourceRegion);
                     }
-                    messagesBuilder.addMessage(o.toString(), Severity.Info, file, sourceRegion);
                     checkAst(o, messagesBuilder, testCase, languageUnderTest, languageUnderTestSession, languageUnderTestProvider, context, sourceRegion);
                 }
             )
             .ifErr(
                 (e) -> {
-                    if (!expectFailure) {
-                        messagesBuilder.addMessage(
-                            "Expected executing strategy '" + strategy + "' to succeed but it threw an exception",
-                            e,
-                            Severity.Error,
-                            file,
-                            sourceRegion
-                        );
+                    if (e instanceof StrategoException) {
+                        if(!expectFailure) {
+                            messagesBuilder.addMessage(
+                                ((StrategoException)e).getMessage(),
+                                e,
+                                Severity.Error,
+                                file,
+                                sourceRegion
+                            );
+                        }
+                    } else {
+                        messagesBuilder.extractMessagesRecursively(e);
                     }
                 }
             );
