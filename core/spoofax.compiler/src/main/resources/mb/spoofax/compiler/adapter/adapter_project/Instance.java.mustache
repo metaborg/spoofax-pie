@@ -201,7 +201,11 @@ public class {{baseInstance.id}} implements LanguageInstance{{#parseInjection}},
             return session.requireWithoutObserving(
                 {{testStrategoInjection.name}}.createTask(
                     {{analyze.name}}.createSupplier(
-                        new mb.constraint.pie.ConstraintAnalyzeTaskDef.Input(resource,{{parseInjection.name}}.inputBuilder().withFile(resource).buildAstSupplier())
+                        new mb.constraint.pie.ConstraintAnalyzeTaskDef.Input(resource,{{parseInjection.name}}.inputBuilder()
+                            .withFile(resource)
+                            .rootDirectoryHint(Optional.ofNullable(rootDirectoryHint))
+                            .buildAstSupplier()
+                        )
                     ).map(
                         (output) ->
                             output.mapOrElse(
@@ -221,7 +225,11 @@ public class {{baseInstance.id}} implements LanguageInstance{{#parseInjection}},
         try {
             return session.requireWithoutObserving(
                 {{analyze.name}}.createTask(
-                    new mb.constraint.pie.ConstraintAnalyzeTaskDef.Input(resource, {{parseInjection.name}}.inputBuilder().withFile(resource).buildAstSupplier())
+                    new mb.constraint.pie.ConstraintAnalyzeTaskDef.Input(resource, {{parseInjection.name}}.inputBuilder()
+                        .withFile(resource)
+                        .rootDirectoryHint(rootDirectoryHint)
+                        .buildAstSupplier()
+                    )
                 )
             ).map((output) -> output.result.ast);
         } catch(ExecException e) {
