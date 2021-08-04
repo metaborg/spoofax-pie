@@ -5,6 +5,7 @@ import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Severity;
 import mb.common.option.Option;
 import mb.common.region.Region;
+import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Session;
 import mb.spt.lut.LanguageUnderTestProvider;
@@ -24,7 +25,7 @@ public class RunToAtermExpectation extends RunExpectation {
         IStrategoTerm expectedMatch,
         Region sourceRegion
     ) {
-        super(strategyName, Option.ofNone(), selection, sourceRegion, false);
+        super(strategyName, ListView.of(), selection, sourceRegion, false);
         this.expectedMatch = expectedMatch;
     }
 

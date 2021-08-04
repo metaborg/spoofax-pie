@@ -81,6 +81,10 @@ public class StrategoRuntime {
         }
     }
 
+    public IStrategoTerm invoke(String strategy, IStrategoTerm input, IStrategoTerm... arguments) throws StrategoException {
+        return invoke(strategy, input, ListView.of(arguments));
+    }
+
     public StrategoRuntime withIoAgent(StrategoIOAgent ioAgent) {
         return new StrategoRuntime(this, ioAgent);
     }
