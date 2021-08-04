@@ -184,7 +184,7 @@ public class SptRunTestSuite implements TaskDef<SptRunTestSuite.Input, TestSuite
                         expectation.evaluate(testCase, languageUnderTest, languageUnderTestSession, languageUnderTestProvider, context, cancelToken)
                     );
                 }
-                long duration = startTime - System.currentTimeMillis();
+                long duration = System.currentTimeMillis() - startTime;
                 KeyedMessages messages = testMessageBuilder.build();
                 TestCaseResult run = new TestCaseResult(testCase.description, testCase.descriptionRegion, testSuite.file, messages, duration);
                 results.add(run);
