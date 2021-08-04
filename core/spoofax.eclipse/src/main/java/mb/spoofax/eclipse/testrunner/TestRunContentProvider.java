@@ -24,11 +24,6 @@ public class TestRunContentProvider implements ITreeContentProvider {
     }
 
     @Override @Nullable public Object getParent(Object element) {
-//        if(element instanceof TestCaseResult) {
-//            return ((TestCaseResult) element).parent;
-//        } else if(element instanceof TestSuiteResult) {
-//            return ((TestSuiteResult) element).parent;
-//        }
         return null;
     }
 
