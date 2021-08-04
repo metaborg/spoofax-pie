@@ -2,9 +2,9 @@ package mb.spoofax.eclipse.testrunner;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import mb.spoofax.core.language.testrunner.MultiTestSuiteRun;
-import mb.spoofax.core.language.testrunner.TestCaseRun;
-import mb.spoofax.core.language.testrunner.TestSuiteRun;
+import mb.spoofax.core.language.testrunner.TestResults;
+import mb.spoofax.core.language.testrunner.TestCaseResult;
+import mb.spoofax.core.language.testrunner.TestSuiteResult;
 
 /**
  * A content provider to turn our data model into something the treeviewer can understand.
@@ -16,19 +16,19 @@ public class TestRunContentProvider implements ITreeContentProvider {
     }
 
     @Override public Object[] getChildren(Object parentElement) {
-        if(parentElement instanceof TestSuiteRun) {
-            return ((TestSuiteRun) parentElement).tests.toArray();
-        } else if(parentElement instanceof MultiTestSuiteRun) {
-            return ((MultiTestSuiteRun) parentElement).suites.toArray();
+        if(parentElement instanceof TestSuiteResult) {
+            return ((TestSuiteResult) parentElement).tests.toArray();
+        } else if(parentElement instanceof TestResults) {
+            return ((TestResults) parentElement).suites.toArray();
         }
         return new Object[] {};
     }
 
     @Override @Nullable public Object getParent(Object element) {
-        if(element instanceof TestCaseRun) {
-            return ((TestCaseRun) element).parent;
-        } else if(element instanceof TestSuiteRun) {
-            return ((TestSuiteRun) element).parent;
+        if(element instanceof TestCaseResult) {
+            return ((TestCaseResult) element).parent;
+        } else if(element instanceof TestSuiteResult) {
+            return ((TestSuiteResult) element).parent;
         }
         return null;
     }

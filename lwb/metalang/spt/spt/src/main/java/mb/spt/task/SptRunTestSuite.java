@@ -1,71 +1,189 @@
 package mb.spt.task;
 
+import mb.common.message.KeyedMessages;
+import mb.common.message.KeyedMessagesBuilder;
+import mb.common.result.Result;
+import mb.common.util.MapView;
+import mb.jsglr.common.JsglrParseException;
+import mb.jsglr.common.JsglrParseOutput;
 import mb.pie.api.ExecContext;
+import mb.pie.api.MixedSession;
+import mb.pie.api.None;
 import mb.pie.api.TaskDef;
+import mb.pie.api.exec.CancelToken;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.core.language.command.CommandFeedback;
-import mb.spoofax.core.language.command.ShowFeedback;
-import mb.spoofax.core.language.testrunner.MultiTestSuiteRun;
 import mb.spt.SptClassLoaderResources;
-import mb.spoofax.core.language.testrunner.TestSuiteRun;
+import mb.spt.SptScope;
+import mb.spt.fromterm.FromTermException;
+import mb.spt.fromterm.TestExpectationFromTerm;
+import mb.spt.fromterm.TestSuiteFromTerm;
+import mb.spt.lut.LanguageUnderTestProvider;
+import mb.spt.lut.LanguageUnderTestProviderWrapper;
+import mb.spt.model.LanguageUnderTest;
+import mb.spt.model.TestCase;
+import mb.spoofax.core.language.testrunner.TestCaseResult;
+import mb.spt.model.TestExpectation;
+import mb.spt.model.TestSuite;
+import mb.spoofax.core.language.testrunner.TestSuiteResult;
+import mb.spt.resource.SptTestCaseResourceRegistry;
+import mb.stratego.common.StrategoException;
+import mb.stratego.common.StrategoRuntime;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spoofax.interpreter.terms.IStrategoConstructor;
+import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.Optional;
 
-public class SptRunTestSuite implements TaskDef<SptRunTestSuite.Args, CommandFeedback> {
-
-    private final SptClassLoaderResources classLoaderResources;
-    private final SptCheckForOutput checkForOutput;
-
-    public static class Args implements Serializable {
-        public final ResourcePath rootDir;
+@SptScope
+public class SptRunTestSuite implements TaskDef<SptRunTestSuite.Input, TestSuiteResult> {
+    public static class Input implements Serializable {
         public final ResourceKey file;
+        public final @Nullable ResourcePath rootDirectoryHint;
 
-        public Args(ResourcePath rootDir, ResourceKey file) {
-            this.rootDir = rootDir;
+        public Input(ResourceKey file) {
             this.file = file;
+            this.rootDirectoryHint = null;
         }
 
-        @Override
-        public boolean equals(@Nullable Object o) {
+        public Input(ResourceKey file, ResourcePath rootDirectoryHint) {
+            this.file = file;
+            this.rootDirectoryHint = rootDirectoryHint;
+        }
+
+        @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
-            final Args args = (Args)o;
-            return file.equals(args.file) && rootDir.equals(args.rootDir);
+            final Input input = (Input)o;
+            if(!file.equals(input.file)) return false;
+            return Objects.equals(rootDirectoryHint, input.rootDirectoryHint);
         }
 
-        @Override
-        public int hashCode() {
-            return Objects.hash(file, rootDir);
+        @Override public int hashCode() {
+            int result = file.hashCode();
+            result = 31 * result + (rootDirectoryHint != null ? rootDirectoryHint.hashCode() : 0);
+            return result;
         }
 
-        @Override
-        public String toString() {
-            return "Args{" + "file=" + file + ", rootDir=" + rootDir + '}';
+        @Override public String toString() {
+            return "SptCheckForOutput$Input{" +
+                "file=" + file +
+                ", rootDirectoryHint=" + rootDirectoryHint +
+                '}';
         }
     }
 
-    @Override
-    public String getId() {
+
+    private final SptClassLoaderResources classLoaderResources;
+    private final SptTestCaseResourceRegistry testCaseResourceRegistry;
+    private final SptParse parse;
+    private final SptGetStrategoRuntimeProvider getStrategoRuntimeProvider;
+    private final LanguageUnderTestProviderWrapper wrapper;
+    private final MapView<IStrategoConstructor, TestExpectationFromTerm> testExpectationFromTerms;
+
+
+    @Inject public SptRunTestSuite(
+        SptClassLoaderResources classLoaderResources,
+        SptTestCaseResourceRegistry testCaseResourceRegistry,
+        SptParse parse,
+        SptGetStrategoRuntimeProvider getStrategoRuntimeProvider,
+        LanguageUnderTestProviderWrapper wrapper,
+        MapView<IStrategoConstructor, TestExpectationFromTerm> testExpectationFromTerms
+    ) {
+        this.classLoaderResources = classLoaderResources;
+        this.testCaseResourceRegistry = testCaseResourceRegistry;
+        this.parse = parse;
+        this.getStrategoRuntimeProvider = getStrategoRuntimeProvider;
+        this.wrapper = wrapper;
+        this.testExpectationFromTerms = testExpectationFromTerms;
+    }
+
+
+    @Override public String getId() {
         return getClass().getName();
     }
 
-    @Override
-    public CommandFeedback exec(ExecContext context, Args input) throws Exception {
+    @Override public TestSuiteResult exec(ExecContext context, Input input) throws IOException, InterruptedException {
         context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
-        MultiTestSuiteRun totalResult = new MultiTestSuiteRun();
-        TestSuiteRun result = context.require(checkForOutput, new SptCheckForOutput.Input(input.file, input.rootDir));
-        totalResult.add(result);
-        return CommandFeedback.of(ShowFeedback.showTests(totalResult));
+        final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
+        final mb.jsglr.pie.JsglrParseTaskInput.Builder parseInputBuilder = parse.inputBuilder().withFile(input.file).rootDirectoryHint(Optional.ofNullable(input.rootDirectoryHint));
+        final Result<JsglrParseOutput, JsglrParseException> parseResult = context.require(parse, parseInputBuilder.build());
+        final TestSuiteResult testResults = parseResult.mapThrowingOrElse(o -> {
+                messagesBuilder.addMessages(o.messages);
+                return runTests(context, messagesBuilder, input.file, input.rootDirectoryHint, o.ast);
+            },
+            (e) -> {
+                messagesBuilder.extractMessagesRecursively(e);
+                return new TestSuiteResult(null, input.file);
+            }
+        );
+        testResults.messages = messagesBuilder.build();
+        return testResults;
     }
 
-    @Inject
-    public SptRunTestSuite(SptClassLoaderResources classLoaderResources, SptCheckForOutput checkForOutput) {
-        this.classLoaderResources = classLoaderResources;
-        this.checkForOutput = checkForOutput;
+
+    private TestSuiteResult runTests(
+        ExecContext context,
+        KeyedMessagesBuilder messagesBuilder,
+        ResourceKey file,
+        @Nullable ResourcePath rootDirectoryHint,
+        IStrategoTerm ast
+    ) throws InterruptedException {
+        final IStrategoTerm desugaredAst;
+        try {
+            final StrategoRuntime strategoRuntime = context.require(getStrategoRuntimeProvider, None.instance).getValue().get();
+            desugaredAst = strategoRuntime.invoke("desugar-before", ast);
+        } catch(StrategoException e) {
+            messagesBuilder.extractMessagesRecursivelyWithFallbackKey(e, file);
+            return new TestSuiteResult(null, file);
+        }
+
+        final TestSuite testSuite;
+        try {
+            testSuite = TestSuiteFromTerm.testSuiteFromTerm(desugaredAst, testExpectationFromTerms, testCaseResourceRegistry, file, rootDirectoryHint);
+        } catch(FromTermException e) {
+            messagesBuilder.extractMessagesRecursivelyWithFallbackKey(e, file);
+            return new TestSuiteResult(null, file);
+        }
+        final TestSuiteResult testResults = new TestSuiteResult(null, file, testSuite.name);
+
+        final LanguageUnderTestProvider languageUnderTestProvider = wrapper.get();
+        final Result<LanguageUnderTest, ?> languageUnderTestResult = languageUnderTestProvider.provide(context, file, rootDirectoryHint, testSuite.languageIdHint);
+        final CancelToken cancelToken = context.cancelToken();
+        languageUnderTestResult.ifThrowingElse(
+            languageUnderTest -> runTests(languageUnderTestProvider, context, languageUnderTest, cancelToken, messagesBuilder, testSuite, testResults),
+            messagesBuilder::extractMessagesRecursively
+        );
+        return testResults;
+    }
+
+    private void runTests(
+        LanguageUnderTestProvider languageUnderTestProvider,
+        ExecContext context,
+        LanguageUnderTest languageUnderTest,
+        CancelToken cancelToken,
+        KeyedMessagesBuilder messagesBuilder,
+        TestSuite testSuite,
+        TestSuiteResult testResults) throws InterruptedException {
+        try(final MixedSession languageUnderTestSession = languageUnderTest.getPieComponent().newSession()) {
+            for(TestCase testCase : testSuite.testCases) {
+                TestCaseResult run = new TestCaseResult(testResults, testCase.description, testCase.descriptionRegion);
+                KeyedMessagesBuilder testMessageBuilder = new KeyedMessagesBuilder();
+                run.start();
+                for(TestExpectation expectation : testCase.expectations) {
+                    testMessageBuilder.addMessages(
+                        expectation.evaluate(testCase, languageUnderTest, languageUnderTestSession, languageUnderTestProvider, context, cancelToken)
+                    );
+                }
+                KeyedMessages messages = testMessageBuilder.build();
+                run.finish(messages);
+                testResults.tests.add(run);
+            }
+        }
     }
 }

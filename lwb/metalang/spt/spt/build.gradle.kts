@@ -77,9 +77,9 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   // Internal task definitions
   val check = TypeInfo.of(taskPackageId, "SptCheck")
   addTaskDefs(check)
-  val checkForOutput = TypeInfo.of(taskPackageId, "SptCheckForOutput")
-  val checkForOutputAggregator = TypeInfo.of(taskPackageId, "SptCheckForOutputAggregator")
-  addTaskDefs(checkForOutput, checkForOutputAggregator)
+  val runTestSuite = TypeInfo.of(taskPackageId, "SptRunTestSuite")
+  val runTestSuites = TypeInfo.of(taskPackageId, "SptRunTestSuites")
+  addTaskDefs(runTestSuite, runTestSuites)
 
   // Show (debugging) task definitions
   val debugTaskPackageId = "$taskPackageId.debug"
@@ -108,15 +108,15 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   addAllCommandDefs(showCommands)
 
   // Add test running tasks
-  val runTestSuite = TypeInfo.of(taskPackageId, "SptRunTestSuite")
-  val runTestSuites = TypeInfo.of(taskPackageId, "SptRunTestSuites")
-  addTaskDefs(runTestSuite, runTestSuites)
+  val showTestSuiteResults = TypeInfo.of(taskPackageId, "SptShowTestSuiteResults")
+  val showTestResults = TypeInfo.of(taskPackageId, "SptShowTestSuitesResults")
+  addTaskDefs(showTestSuiteResults, showTestResults)
 
   // Add test running commands
-  val runTestSuiteCommand = CommandDefRepr.builder()
-    .type(commandPackageId, runTestSuite.id() + "Command")
-    .taskDefType(runTestSuite)
-    .argType(TypeInfo.of(taskPackageId, "SptRunTestSuite.Args"))
+  val showTestSuiteCommand = CommandDefRepr.builder()
+    .type(commandPackageId, showTestSuiteResults.id() + "Command")
+    .taskDefType(showTestSuiteResults)
+    .argType(TypeInfo.of(taskPackageId, "SptShowTestSuiteResults.Args"))
     .displayName("Run SPT tests")
     .description("Run the SPT tests in this file")
     .addSupportedExecutionTypes(CommandExecutionType.ManualOnce)
@@ -128,10 +128,10 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
       ParamRepr.of("file", TypeInfo.of("mb.resource", "ResourceKey"), true, ArgProviderRepr.context(CommandContextType.File))
     ))
     .build()
-  val runTestSuitesCommand = CommandDefRepr.builder()
-    .type(commandPackageId, runTestSuites.id() + "Command")
-    .taskDefType(runTestSuites)
-    .argType(TypeInfo.of(taskPackageId, "SptRunTestSuites.Args"))
+  val showTestSuitesCommand = CommandDefRepr.builder()
+    .type(commandPackageId, showTestResults.id() + "Command")
+    .taskDefType(showTestResults)
+    .argType(TypeInfo.of(taskPackageId, "SptShowTestSuitesResults.Args"))
     .displayName("Run SPT tests")
     .description("Run the SPT tests in this directory")
     .addSupportedExecutionTypes(CommandExecutionType.ManualOnce)
@@ -148,7 +148,7 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
         ArgProviderRepr.context(CommandContextType.Directory))
     ))
     .build()
-  addCommandDefs(runTestSuiteCommand, runTestSuitesCommand)
+  addCommandDefs(showTestSuiteCommand, showTestSuitesCommand)
 
   // Menu bindings
   val mainAndEditorMenu = listOf(
@@ -160,7 +160,7 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
         )
       }
     ),
-    CommandActionRepr.builder().manualOnce(runTestSuiteCommand).fileRequired().enclosingProjectRequired().buildItem()
+    CommandActionRepr.builder().manualOnce(showTestSuiteCommand).fileRequired().enclosingProjectRequired().buildItem()
   )
   addAllMainMenuItems(mainAndEditorMenu)
   addAllEditorContextMenuItems(mainAndEditorMenu)
@@ -168,7 +168,7 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
     MenuItemRepr.menu("Debug",
       showCommands.flatMap { listOf(CommandActionRepr.builder().manualOnce(it).fileRequired().buildItem()) }
     ),
-    CommandActionRepr.builder().manualOnce(runTestSuiteCommand).fileRequired().enclosingProjectRequired().buildItem(),
-    CommandActionRepr.builder().manualOnce(runTestSuitesCommand).directoryRequired().enclosingProjectRequired().buildItem()
+    CommandActionRepr.builder().manualOnce(showTestSuiteCommand).fileRequired().enclosingProjectRequired().buildItem(),
+    CommandActionRepr.builder().manualOnce(showTestSuitesCommand).directoryRequired().enclosingProjectRequired().buildItem()
   )
 }

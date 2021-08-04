@@ -12,11 +12,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 /**
  * Represents running all the tests in a test suite.
  */
-public class TestSuiteRun implements Serializable {
+public class TestSuiteResult implements Serializable {
 
-    @Nullable public MultiTestSuiteRun parent = null;
+    @Nullable public TestResults parent = null;
     public final String name;
-    public final List<TestCaseRun> tests = new ArrayList<>();
+    public final List<TestCaseResult> tests = new ArrayList<>();
     public final ResourceKey file;
     @Nullable public KeyedMessages messages;
 
@@ -33,7 +33,7 @@ public class TestSuiteRun implements Serializable {
      * @param name
      *            the name of the test suite.
      */
-    public TestSuiteRun(@Nullable KeyedMessages messages, ResourceKey file, String name) {
+    public TestSuiteResult(@Nullable KeyedMessages messages, ResourceKey file, String name) {
         this.messages = messages;
         this.file = file;
         this.name = name;
@@ -49,7 +49,7 @@ public class TestSuiteRun implements Serializable {
      * @param file
      *            the file containing the module (required so double clicking opens the module)
      */
-    public TestSuiteRun(@Nullable KeyedMessages messages, ResourceKey file) {
+    public TestSuiteResult(@Nullable KeyedMessages messages, ResourceKey file) {
         this.messages = messages;
         this.file = file;
         this.name = file.getIdAsString();
@@ -100,7 +100,7 @@ public class TestSuiteRun implements Serializable {
         builder
             .append(tests.size())
             .append(" tests\n");
-        for (TestCaseRun test : tests) {
+        for (TestCaseResult test : tests) {
             test.addToStringBuilder(builder);
         }
     }
@@ -109,7 +109,7 @@ public class TestSuiteRun implements Serializable {
     public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || this.getClass() != o.getClass()) return false;
-        final TestSuiteRun other = (TestSuiteRun)o;
+        final TestSuiteResult other = (TestSuiteResult)o;
         return this.name.equals(other.name)
             && this.tests.equals(other.tests)
             && this.file.equals(other.file)
@@ -123,6 +123,6 @@ public class TestSuiteRun implements Serializable {
 
     @Override
     public String toString() {
-        return "TestSuiteRun{name=" + name + ", tests=" + tests + ", file=" + file + "}";
+        return "TestSuiteResult{name=" + name + ", tests=" + tests + ", file=" + file + "}";
     }
 }

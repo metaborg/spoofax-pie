@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Container for multiple {@link TestSuiteRun}s.
+ * Container for multiple {@link TestSuiteResult}s.
  */
-public class MultiTestSuiteRun implements Serializable {
+public class TestResults implements Serializable {
 
-    public final List<TestSuiteRun> suites = new ArrayList<>();
+    public final List<TestSuiteResult> suites = new ArrayList<>();
 
     private int numFailed = 0;
     private int numPassed = 0;
@@ -54,20 +54,20 @@ public class MultiTestSuiteRun implements Serializable {
      */
     public int numTests() {
         int i = 0;
-        for(TestSuiteRun suites : suites) {
+        for(TestSuiteResult suites : suites) {
             i += suites.tests.size();
         }
         return i;
     }
 
-    public void add(TestSuiteRun suiteRun) {
+    public void add(TestSuiteResult suiteRun) {
         suites.add(suiteRun);
         numFailed += suiteRun.numFailed();
         numPassed += suiteRun.numPassed();
     }
 
     public void addToStringBuilder(StringBuilder builder) {
-        for (TestSuiteRun suite : suites) {
+        for (TestSuiteResult suite : suites) {
             suite.addToStringBuilder(builder);
         }
     }
@@ -76,7 +76,7 @@ public class MultiTestSuiteRun implements Serializable {
     public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || this.getClass() != o.getClass()) return false;
-        final MultiTestSuiteRun other = (MultiTestSuiteRun)o;
+        final TestResults other = (TestResults)o;
         return this.suites.equals(other.suites);
     }
 
@@ -87,6 +87,6 @@ public class MultiTestSuiteRun implements Serializable {
 
     @Override
     public String toString() {
-        return "MultiTestSuiteRun{suites=" + suites + "}";
+        return "TestResults{suites=" + suites + "}";
     }
 }

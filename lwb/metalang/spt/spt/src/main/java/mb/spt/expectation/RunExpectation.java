@@ -50,7 +50,8 @@ public class RunExpectation implements TestExpectation {
         KeyedMessagesBuilder messagesBuilder,
         TestCase testCase,
         LanguageUnderTest languageUnderTest,
-        Session languageUnderTestSession, LanguageUnderTestProvider languageUnderTestProvider,
+        Session languageUnderTestSession,
+        LanguageUnderTestProvider languageUnderTestProvider,
         ExecContext context,
         Region sourceRegion
     ) throws InterruptedException {}
@@ -68,7 +69,7 @@ public class RunExpectation implements TestExpectation {
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
         final LanguageInstance languageInstance = languageUnderTest.getLanguageComponent().getLanguageInstance();
         if(!(languageInstance instanceof TestableAnalysis)) {
-            messagesBuilder.addMessage("Cannot evaluate parse to ATerm expectation because language instance '" + languageInstance + "' does not implement TestableAnalysis", Severity.Error, file, sourceRegion);
+            messagesBuilder.addMessage("Cannot evaluate run expectation because language instance '" + languageInstance + "' does not implement TestableAnalysis", Severity.Error, file, sourceRegion);
             return messagesBuilder.build(file);
         }
         final TestableAnalysis testableAnalysis = (TestableAnalysis)languageInstance;

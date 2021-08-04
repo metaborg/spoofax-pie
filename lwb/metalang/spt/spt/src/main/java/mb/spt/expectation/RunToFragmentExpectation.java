@@ -53,7 +53,7 @@ public class RunToFragmentExpectation extends RunExpectation {
         final @Nullable LanguageUnderTest fragmentLanguageUnderTest = ExpectationFragmentUtil.getLanguageUnderTest(testCase, languageUnderTest, languageUnderTestProvider, context, languageIdHint.get());
         if (fragmentLanguageUnderTest == null) {
             messagesBuilder.addMessage(
-                "Cannot evaluate parse to fragment expectation because providing language under test for language id '" + languageIdHint + "' failed unexpectedly",
+                "Cannot evaluate run to fragment expectation because providing language under test for language id '" + languageIdHint + "' failed unexpectedly",
                 Severity.Error,
                 file,
                 sourceRegion

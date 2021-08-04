@@ -6,19 +6,12 @@ import java.io.StringWriter;
 import mb.common.message.KeyedMessages;
 import mb.common.message.Message;
 import mb.resource.ResourceKey;
-import mb.spoofax.eclipse.resource.EclipseDocumentKey;
-import mb.spoofax.eclipse.resource.EclipseDocumentResourceRegistry;
+import mb.spoofax.core.language.testrunner.TestResults;
 import mb.spoofax.eclipse.resource.EclipseResourcePath;
-import mb.spoofax.eclipse.resource.EclipseResourceRegistry;
-import org.checkerframework.checker.initialization.qual.UnderInitialization;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.common.initializedfields.qual.EnsuresInitializedFields;
-import org.checkerframework.common.initializedfields.qual.InitializedFields;
-import org.eclipse.core.internal.resources.File;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.internal.junit.ui.JUnitProgressBar;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
@@ -47,16 +40,14 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.ViewPart;
-import mb.spoofax.core.language.testrunner.MultiTestSuiteRun;
-import mb.spoofax.core.language.testrunner.TestCaseRun;
-import mb.spoofax.core.language.testrunner.TestSuiteRun;
+import mb.spoofax.core.language.testrunner.TestCaseResult;
+import mb.spoofax.core.language.testrunner.TestSuiteResult;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 /**
@@ -67,9 +58,9 @@ import org.eclipse.ui.texteditor.ITextEditor;
  * Basic usage:
  * <ul>
  * <li>call {@link #reset()} to reset the view.</li>
- * <li>call {@link #setData(MultiTestSuiteRun)} with the model of all the suites and tests you want to display.</li>
+ * <li>call {@link #setData(TestResults)} with the model of all the suites and tests you want to display.</li>
  * <li>call {@link #refresh()} if the model is updated.</li>
- * <li>call {@link #setTestResult(TestCaseRun, KeyedMessages)} for each TestCaseRun that finished running.</li>
+ * <li>call {@link #setTestResult(TestCaseResult, KeyedMessages)} for each TestCaseRun that finished running.</li>
  * </ul>
  */
 public class TestRunViewPart extends ViewPart {
@@ -93,7 +84,7 @@ public class TestRunViewPart extends ViewPart {
 
     // the model part
     private int nrFailedTests = 0;
-    private @Nullable MultiTestSuiteRun run = null;
+    private @Nullable TestResults run = null;
 
     /**
      * Create contents of the view part.
@@ -207,7 +198,7 @@ public class TestRunViewPart extends ViewPart {
 
         reset();
 
-        run = new MultiTestSuiteRun();
+        run = new TestResults();
 
         treeViewer.expandAll();
 
@@ -275,7 +266,7 @@ public class TestRunViewPart extends ViewPart {
 
     public void reset() {
         nrFailedTests = 0;
-        run = new MultiTestSuiteRun();
+        run = new TestResults();
         treeViewer.setInput(run);
         pb.reset();
         if(!refreshDisabled)
@@ -289,7 +280,7 @@ public class TestRunViewPart extends ViewPart {
         packColumns();
     }
 
-    public void setData(MultiTestSuiteRun run) {
+    public void setData(TestResults run) {
         this.run = run;
         this.nrFailedTests = run.numFailed();
         treeViewer.setInput(run);
@@ -299,7 +290,7 @@ public class TestRunViewPart extends ViewPart {
         }
     }
 
-    public void setTestResult(TestCaseRun t, KeyedMessages res) {
+    public void setTestResult(TestCaseResult t, KeyedMessages res) {
         t.finish(res);
         if(res.containsError()) {
             nrFailedTests++;
@@ -329,12 +320,12 @@ public class TestRunViewPart extends ViewPart {
             @Nullable ResourceKey resource = null;
             int offset = 0;
 
-            if(selectObject instanceof TestCaseRun) {
-                TestCaseRun tcr = (TestCaseRun) selectObject;
+            if(selectObject instanceof TestCaseResult) {
+                TestCaseResult tcr = (TestCaseResult) selectObject;
                 resource = tcr.parent.file;
                 offset = tcr.descriptionRegion.getStartOffset();
-            } else if(selectObject instanceof TestSuiteRun) {
-                TestSuiteRun tsr = ((TestSuiteRun) selectObject);
+            } else if(selectObject instanceof TestSuiteResult) {
+                TestSuiteResult tsr = ((TestSuiteResult) selectObject);
                 resource = tsr.file;
             }
 
@@ -367,8 +358,8 @@ public class TestRunViewPart extends ViewPart {
             }
             if(generalSel instanceof ITreeSelection) {
                 final Object selObj = ((ITreeSelection) generalSel).getFirstElement();
-                if(selObj instanceof TestSuiteRun) {
-                    final TestSuiteRun tsr = (TestSuiteRun) selObj;
+                if(selObj instanceof TestSuiteResult) {
+                    final TestSuiteResult tsr = (TestSuiteResult) selObj;
                     if(tsr.messages == null) {
                         cons.setText("Failed to load the contents of this test suite due to an IO error.");
                     } else if(!tsr.messages.containsError()) {
@@ -385,8 +376,8 @@ public class TestRunViewPart extends ViewPart {
                         pw.close();
                         cons.setText(strW.toString());
                     }
-                } else if(selObj instanceof TestCaseRun) {
-                    final TestCaseRun tcr = (TestCaseRun) selObj;
+                } else if(selObj instanceof TestCaseResult) {
+                    final TestCaseResult tcr = (TestCaseResult) selObj;
                     if(tcr.result() == null) {
                         cons.setText(
                             "Test case has not yet been executed.\nPlease select it again when it's done.");

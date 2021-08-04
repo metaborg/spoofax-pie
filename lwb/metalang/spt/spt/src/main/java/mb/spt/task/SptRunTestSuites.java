@@ -3,65 +3,82 @@ package mb.spt.task;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
+import mb.resource.ResourceKey;
+import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.core.language.command.CommandFeedback;
-import mb.spoofax.core.language.command.ShowFeedback;
-import mb.spt.SptClassLoaderResources;
-import mb.spoofax.core.language.testrunner.MultiTestSuiteRun;
+import mb.resource.hierarchical.match.ResourceMatcher;
+import mb.resource.hierarchical.match.path.PathMatcher;
+import mb.resource.hierarchical.walk.ResourceWalker;
+import mb.spoofax.core.language.testrunner.TestResults;
+import mb.spoofax.core.language.testrunner.TestSuiteResult;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class SptRunTestSuites implements TaskDef<SptRunTestSuites.Args, CommandFeedback> {
+public class SptRunTestSuites implements TaskDef<SptRunTestSuites.Input, TestResults> {
+    private final mb.spt.SptClassLoaderResources classLoaderResources;
+    private final SptRunTestSuite check;
 
-    private final SptClassLoaderResources classLoaderResources;
-    private final SptCheckForOutputAggregator checkForOutputAggregator;
-
-    public static class Args implements Serializable {
-        public final ResourcePath rootDir;
+    public static class Input implements Serializable {
         public final ResourcePath directory;
+        public final ResourcePath rootDirectory;
 
-        public Args(ResourcePath rootDir, ResourcePath directory) {
-            this.rootDir = rootDir;
+        public Input(ResourcePath directory, ResourcePath rootDirectory) {
             this.directory = directory;
+            this.rootDirectory = rootDirectory;
         }
 
-        @Override
-        public boolean equals(@Nullable Object o) {
+        @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
-            final Args args = (Args)o;
-            return directory.equals(args.directory) && rootDir.equals(args.rootDir);
+            final SptRunTestSuites.Input input = (SptRunTestSuites.Input)o;
+            if(!directory.equals(input.directory)) return false;
+            return Objects.equals(rootDirectory, input.rootDirectory);
         }
 
-        @Override
-        public int hashCode() {
-            return Objects.hash(directory, rootDir);
+        @Override public int hashCode() {
+            int result = directory.hashCode();
+            result = 31 * result + rootDirectory.hashCode();
+            return result;
         }
 
-        @Override
-        public String toString() {
-            return "Args{" + "directory=" + directory + ", rootDir=" + rootDir + '}';
+        @Override public String toString() {
+            return "SptCheckForOutput$Input{" +
+                "directory=" + directory +
+                ", rootDirectoryHint=" + rootDirectory +
+                '}';
         }
     }
 
-    @Override
-    public String getId() {
-        return getClass().getName();
-    }
-
-    @Override
-    public CommandFeedback exec(ExecContext context, Args input) throws Exception {
-        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
-        MultiTestSuiteRun result = context.require(checkForOutputAggregator, new SptCheckForOutputAggregator.Input(input.directory, input.rootDir));
-        return CommandFeedback.of(ShowFeedback.showTests(result));
-    }
-
-    @Inject
-    public SptRunTestSuites(SptClassLoaderResources classLoaderResources, SptCheckForOutputAggregator checkForOutputAggregator) {
+    @Inject public SptRunTestSuites(
+        mb.spt.SptClassLoaderResources classLoaderResources,
+        SptRunTestSuite check
+    ){
         this.classLoaderResources = classLoaderResources;
-        this.checkForOutputAggregator = checkForOutputAggregator;
+        this.check = check;
+    }
+
+    @Override public String getId() {
+        return "mb.spt.task.SptCheckForOutputAggregator";
+    }
+
+    @Override public TestResults exec(ExecContext context, SptRunTestSuites.Input input) throws IOException {
+        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+        final ResourceWalker walker = ResourceWalker.ofPath(PathMatcher.ofNoHidden());
+        final HierarchicalResource rootDirectory = context.getHierarchicalResource(input.rootDirectory);
+        final HierarchicalResource selectedDirectory = context.getHierarchicalResource(input.directory);
+        // Require directories recursively, so we re-execute whenever a file is added/removed from a directory.
+        rootDirectory.walkForEach(walker, ResourceMatcher.ofDirectory(), context::require);
+        final ResourceMatcher matcher = ResourceMatcher.ofFile().and(ResourceMatcher.ofPath(PathMatcher.ofExtensions("spt")));
+        final TestResults testResults = new TestResults();
+        selectedDirectory.walkForEach(walker, matcher, file -> {
+            final ResourceKey fileKey = file.getKey();
+            final TestSuiteResult result = context.require(check, new SptRunTestSuite.Input(fileKey, input.rootDirectory));
+            testResults.add(result);
+        });
+        return testResults;
     }
 }

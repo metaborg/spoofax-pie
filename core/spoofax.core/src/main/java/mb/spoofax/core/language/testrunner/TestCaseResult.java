@@ -13,9 +13,9 @@ import java.util.Objects;
  * Used by the Eclipse UI part of the runner. It notifies its parent (if any) when it gets the result for the test whose
  * run it represents.
  */
-public class TestCaseRun implements Serializable {
+public class TestCaseResult implements Serializable {
 
-    public final TestSuiteRun parent;
+    public final TestSuiteResult parent;
     public final String description;
     public final Region descriptionRegion;
 
@@ -35,7 +35,7 @@ public class TestCaseRun implements Serializable {
      * @param descriptionRegion
      *            region of the description text (needed for the doubleclick handler)
      */
-    public TestCaseRun(TestSuiteRun parent, String description, Region descriptionRegion) {
+    public TestCaseResult(TestSuiteResult parent, String description, Region descriptionRegion) {
         this.parent = parent;
         this.description = description;
         this.descriptionRegion = descriptionRegion;
@@ -107,7 +107,7 @@ public class TestCaseRun implements Serializable {
     public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || this.getClass() != o.getClass()) return false;
-        final TestCaseRun other = (TestCaseRun)o;
+        final TestCaseResult other = (TestCaseResult)o;
         return this.description.equals(other.description)
             && Objects.equals(this.messages, other.messages);
     }
@@ -119,6 +119,6 @@ public class TestCaseRun implements Serializable {
 
     @Override
     public String toString() {
-        return "TestCaseRun{description=" + description + "}";
+        return "TestCaseResult{description=" + description + "}";
     }
 }

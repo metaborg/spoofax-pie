@@ -416,7 +416,7 @@ public class PieRunner {
 
                 return Optional.empty(); // Return value is required.
             })
-            .showTests((tests, region) -> {
+            .showTestResults((tests, region) -> {
                 IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
                 TestRunViewPart viewPart;
                 try {
