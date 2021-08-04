@@ -3,17 +3,14 @@ package mb.spoofax.lwb.dynamicloading;
 import mb.common.message.KeyedMessages;
 import mb.common.result.Result;
 import mb.common.util.ExceptionPrinter;
-import mb.log.api.LoggerFactory;
 import mb.log.dagger.DaggerLoggerComponent;
 import mb.log.dagger.LoggerComponent;
 import mb.log.dagger.LoggerModule;
 import mb.pie.api.MixedSession;
 import mb.pie.api.OutTransient;
-import mb.pie.api.PieBuilder;
 import mb.pie.api.Session;
 import mb.pie.api.Task;
 import mb.pie.api.TopDownSession;
-import mb.pie.api.Tracer;
 import mb.pie.dagger.DaggerPieComponent;
 import mb.pie.dagger.PieComponent;
 import mb.pie.dagger.PieModule;
@@ -24,6 +21,7 @@ import mb.pie.runtime.store.SerializingStore;
 import mb.pie.runtime.tracer.CompositeTracer;
 import mb.pie.runtime.tracer.LoggingTracer;
 import mb.pie.runtime.tracer.MetricsTracer;
+import mb.pie.serde.fst.FstSerde;
 import mb.pie.task.archive.UnarchiveCommon;
 import mb.resource.ResourceService;
 import mb.resource.WritableResource;
@@ -47,7 +45,6 @@ import mb.spt.dynamicloading.DynamicLanguageUnderTestProvider;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -55,13 +52,14 @@ class TestBase {
     final ClassLoaderResourceRegistry classLoaderResourceRegistry = new ClassLoaderResourceRegistry("spoofax.dynamicloading", TestBase.class.getClassLoader());
 
     HierarchicalResource temporaryDirectory;
-    MetricsTracer metricsTracer;
+    HierarchicalResource rootDirectory;
     LoggerComponent loggerComponent;
     SptResourcesComponent sptResourcesComponent;
     RootResourceServiceComponent rootResourceServiceComponent;
     StandaloneSpoofax3Compiler standaloneSpoofax3Compiler;
     SptComponent sptComponent;
     ResourceService resourceService;
+    MetricsTracer languageMetricsTracer;
     DynamicLoadingComponent dynamicLoadingComponent;
     DynamicLoad dynamicLoad;
     DynamicLanguageRegistry dynamicLanguageRegistry;
@@ -70,18 +68,8 @@ class TestBase {
 
     void setup(Path temporaryDirectoryPath) throws IOException {
         temporaryDirectory = new FSResource(temporaryDirectoryPath);
-        exceptionPrinter = new ExceptionPrinter().addCurrentDirectoryContext(temporaryDirectory);
-
-        final WritableResource pieStoreFile = temporaryDirectory.appendRelativePath("pie.store").createParents();
-        final PieBuilder.StoreFactory storeFactory = (serde, resourceService, loggerFactory) -> new SerializingStore<>(
-            serde,
-            loggerFactory,
-            pieStoreFile,
-            InMemoryStore::new,
-            InMemoryStore.class
-        );
-        metricsTracer = new MetricsTracer();
-        final Function<LoggerFactory, Tracer> tracerFactory = loggerFactory -> new CompositeTracer(new LoggingTracer(loggerFactory), metricsTracer);
+        rootDirectory = temporaryDirectory.appendRelativePath("language").createDirectory();
+        exceptionPrinter = new ExceptionPrinter().addCurrentDirectoryContext(rootDirectory);
 
         loggerComponent = DaggerLoggerComponent.builder()
             .loggerModule(LoggerModule.stdOutVeryVerbose())
@@ -91,10 +79,19 @@ class TestBase {
             .rootResourceServiceModule(new RootResourceServiceModule(classLoaderResourceRegistry).addRegistriesFrom(sptResourcesComponent))
             .loggerComponent(loggerComponent)
             .build();
+        final WritableResource compilerPieStoreFile = temporaryDirectory.appendRelativePath(".build/compiler.piestore").createParents();
         standaloneSpoofax3Compiler = new StandaloneSpoofax3Compiler(
             loggerComponent,
             rootResourceServiceComponent.createChildModule(classLoaderResourceRegistry),
             new PieModule(PieBuilderImpl::new)
+                .withSerdeFactory(loggerFactory -> new FstSerde())
+                .withStoreFactory((serde, resourceService, loggerFactory) -> new SerializingStore<>(
+                    serde,
+                    loggerFactory,
+                    compilerPieStoreFile,
+                    InMemoryStore::new,
+                    InMemoryStore.class
+                ))
         );
         sptComponent = DaggerSptComponent.builder()
             .loggerComponent(loggerComponent)
@@ -103,10 +100,20 @@ class TestBase {
             .platformComponent(standaloneSpoofax3Compiler.compiler.platformComponent)
             .build();
         resourceService = standaloneSpoofax3Compiler.compiler.resourceServiceComponent.getResourceService();
+
+        final WritableResource languagePieStoreFile = temporaryDirectory.appendRelativePath(".build/language.piestore").createParents();
+        languageMetricsTracer = new MetricsTracer();
         dynamicLoadingComponent = DaggerDynamicLoadingComponent.builder()
             .dynamicLoadingPieModule(new DynamicLoadingPieModule(() -> new RootPieModule(PieBuilderImpl::new)
-                .withStoreFactory(storeFactory)
-                .withTracerFactory(tracerFactory))
+                .withSerdeFactory(loggerFactory -> new FstSerde())
+                .withStoreFactory((serde, resourceService, loggerFactory) -> new SerializingStore<>(
+                    serde,
+                    loggerFactory,
+                    languagePieStoreFile,
+                    InMemoryStore::new,
+                    InMemoryStore.class
+                ))
+                .withTracerFactory(loggerFactory -> new CompositeTracer(new LoggingTracer(loggerFactory), languageMetricsTracer)))
             )
             .loggerComponent(loggerComponent)
             .resourceServiceComponent(standaloneSpoofax3Compiler.compiler.resourceServiceComponent)
@@ -116,11 +123,13 @@ class TestBase {
             .build();
         dynamicLoad = dynamicLoadingComponent.getDynamicLoad();
         dynamicLanguageRegistry = dynamicLoadingComponent.getDynamicLanguageRegistry();
+
         sptComponent.getLanguageUnderTestProviderWrapper().set(new DynamicLanguageUnderTestProvider(
             dynamicLanguageRegistry,
             dynamicLoad,
             TestBase::compileLanguageArgs
         ));
+
         pieComponent = DaggerPieComponent.builder()
             .pieModule(standaloneSpoofax3Compiler.pieComponent.createChildModule(dynamicLoadingComponent, sptComponent))
             .loggerComponent(loggerComponent)
@@ -136,6 +145,7 @@ class TestBase {
         dynamicLoad = null;
         dynamicLoadingComponent.close();
         dynamicLoadingComponent = null;
+        languageMetricsTracer = null;
         resourceService = null;
         sptComponent.close();
         sptComponent = null;
@@ -146,7 +156,8 @@ class TestBase {
         sptResourcesComponent.close();
         sptResourcesComponent = null;
         loggerComponent = null;
-        metricsTracer = null;
+        rootDirectory.close();
+        rootDirectory = null;
         temporaryDirectory.close();
         temporaryDirectory = null;
     }
@@ -190,16 +201,16 @@ class TestBase {
         final ClassLoaderResource sourceFilesDirectory = classLoaderResourceRegistry.getResource(sourceFilesPath);
         final ClassLoaderResourceLocations locations = sourceFilesDirectory.getLocations();
         for(FSResource directory : locations.directories) {
-            directory.copyRecursivelyTo(temporaryDirectory);
+            directory.copyRecursivelyTo(rootDirectory);
         }
         for(JarFileWithPath jarFileWithPath : locations.jarFiles) {
-            UnarchiveCommon.unarchiveJar(jarFileWithPath.file, temporaryDirectory, false, false);
+            UnarchiveCommon.unarchiveJar(jarFileWithPath.file, rootDirectory, false, false);
         }
     }
 
     void printThrowable(Throwable throwable) {
         final ExceptionPrinter exceptionPrinter = new ExceptionPrinter();
-        exceptionPrinter.addCurrentDirectoryContext(temporaryDirectory);
+        exceptionPrinter.addCurrentDirectoryContext(rootDirectory);
         exceptionPrinter.printException(throwable, System.err);
     }
 

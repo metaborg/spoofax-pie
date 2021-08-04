@@ -22,6 +22,7 @@ dependencies {
   testImplementation(project(":spt"))
   testImplementation(project(":spt.dynamicloading"))
   testImplementation("org.metaborg:pie.runtime")
+  testImplementation("org.metaborg:pie.serde.fst")
 }
 
 tasks.test {

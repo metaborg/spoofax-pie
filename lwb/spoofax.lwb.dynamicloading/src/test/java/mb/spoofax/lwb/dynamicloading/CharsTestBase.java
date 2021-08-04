@@ -22,7 +22,7 @@ import java.util.Collections;
 import java.util.Optional;
 
 class CharsTestBase extends TestBase {
-    ResourcePath rootDirectory;
+    ResourcePath rootDirectoryPath;
     HierarchicalResource charsProject;
     ResourcePath charsProjectPath;
     HierarchicalResource charsFile;
@@ -31,8 +31,8 @@ class CharsTestBase extends TestBase {
     void setup(Path temporaryDirectoryPath) throws IOException {
         super.setup(temporaryDirectoryPath);
         copyResourcesToTemporaryDirectory("mb/spoofax/lwb/dynamicloading/chars");
-        rootDirectory = temporaryDirectory.getPath();
-        charsProject = temporaryDirectory.appendRelativePath("test");
+        rootDirectoryPath = rootDirectory.getPath();
+        charsProject = rootDirectory.appendRelativePath("test");
         charsProjectPath = charsProject.getPath();
         charsFile = charsProject.appendSegment("test.chars").ensureFileExists();
         charsFilePath = charsFile.getPath();
@@ -44,7 +44,7 @@ class CharsTestBase extends TestBase {
         charsFile = null;
         charsProjectPath = null;
         charsProject = null;
-        rootDirectory = null;
+        rootDirectoryPath = null;
         super.teardown();
     }
 

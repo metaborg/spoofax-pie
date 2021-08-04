@@ -51,9 +51,9 @@ class DynamicLoadingTest extends CharsTestBase {
             System.out.println("Initial dynamic load");
             final DynamicLanguage dynamicLanguage;
             try(final MixedSession session = newSession()) {
-                dynamicLanguage = requireDynamicLoad(session, rootDirectory);
+                dynamicLanguage = requireDynamicLoad(session, rootDirectoryPath);
                 previousInput = dynamicLanguage.getCompileInput();
-                final KeyedMessages sptMessages = requireSptCheck(session, rootDirectory);
+                final KeyedMessages sptMessages = requireSptCheck(session, rootDirectoryPath);
                 assertNoErrors(sptMessages);
             } catch(Exception e) {
                 printThrowable(e);
@@ -64,7 +64,7 @@ class DynamicLoadingTest extends CharsTestBase {
             final LanguageComponent languageComponent = dynamicLanguage.getLanguageComponent();
             try(final MixedSession session = dynamicLanguage.getPieComponent().newSession()) {
                 final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
-                metricsTracer.reset();
+                languageMetricsTracer.reset();
                 // Get tokens and check.
                 final Option<? extends Tokens<?>> tokensResult = session.require(languageInstance.createTokenizeTask(charsFilePath));
                 assertTrue(tokensResult.isSome());
@@ -74,7 +74,7 @@ class DynamicLoadingTest extends CharsTestBase {
                 assertEquals(TokenType.identifier(), token.getType());
                 assertEquals(Region.fromOffsets(0, 7, 0), token.getRegion());
                 // Get styling and check.
-                final Option<Styling> stylingResult = session.require(languageInstance.createStyleTask(charsFilePath, rootDirectory));
+                final Option<Styling> stylingResult = session.require(languageInstance.createStyleTask(charsFilePath, rootDirectoryPath));
                 assertTrue(stylingResult.isSome());
                 final Styling styling = stylingResult.unwrap();
                 final ArrayList<TokenStyle> stylingPerToken = styling.getStylePerToken();
@@ -98,7 +98,7 @@ class DynamicLoadingTest extends CharsTestBase {
                 assertEquals(1, debugRemoveAShowFeedbacks.size());
                 assertEquals("Program([Chars(\"abcdefg\")])", debugRemoveAShowFeedbacks.get(0).getText().get()); // remove-a does not work yet.
                 // Check executed tasks.
-                final MetricsTracer.Report report = metricsTracer.reportAndReset();
+                final MetricsTracer.Report report = languageMetricsTracer.reportAndReset();
                 assertTrue(hasTokenizeTaskDefExecuted(report, dynamicLanguage));
                 assertTrue(hasParseTaskDefExecuted(report, dynamicLanguage));
                 assertTrue(hasStyleTaskDefExecuted(report, dynamicLanguage));
@@ -117,9 +117,9 @@ class DynamicLoadingTest extends CharsTestBase {
             final DynamicLanguage dynamicLanguage;
             try(final MixedSession session = newSession()) {
                 final TopDownSession topDownSession = modifyStyler(session, previousInput);
-                dynamicLanguage = getDynamicLoadOutput(topDownSession, rootDirectory);
+                dynamicLanguage = getDynamicLoadOutput(topDownSession, rootDirectoryPath);
                 previousInput = dynamicLanguage.getCompileInput();
-                final KeyedMessages sptMessages = getSptCheckOutput(topDownSession, rootDirectory);
+                final KeyedMessages sptMessages = getSptCheckOutput(topDownSession, rootDirectoryPath);
                 assertNoErrors(sptMessages);
             } catch(Exception e) {
                 printThrowable(e);
@@ -129,10 +129,10 @@ class DynamicLoadingTest extends CharsTestBase {
             System.out.println("Change styler test");
             final LanguageComponent languageComponent = dynamicLanguage.getLanguageComponent();
             try(final MixedSession session = dynamicLanguage.getPieComponent().newSession()) {
-                metricsTracer.reset();
-                final Option<Styling> result = session.require(languageComponent.getLanguageInstance().createStyleTask(charsFile.getPath(), rootDirectory));
+                languageMetricsTracer.reset();
+                final Option<Styling> result = session.require(languageComponent.getLanguageInstance().createStyleTask(charsFile.getPath(), rootDirectoryPath));
                 // Check executed tasks.
-                final MetricsTracer.Report report = metricsTracer.reportAndReset();
+                final MetricsTracer.Report report = languageMetricsTracer.reportAndReset();
                 assertFalse(hasTokenizeTaskDefExecuted(report, dynamicLanguage));
                 assertFalse(hasParseTaskDefExecuted(report, dynamicLanguage));
                 assertTrue(hasStyleTaskDefExecuted(report, dynamicLanguage));
@@ -165,10 +165,10 @@ class DynamicLoadingTest extends CharsTestBase {
             final Set<ResourceKey> providedResources;
             try(final MixedSession session = newSession()) {
                 final TopDownSession topDownSession = modifyParser(session, previousInput);
-                dynamicLanguage = getDynamicLoadOutput(topDownSession, rootDirectory);
+                dynamicLanguage = getDynamicLoadOutput(topDownSession, rootDirectoryPath);
                 previousInput = dynamicLanguage.getCompileInput();
                 providedResources = topDownSession.getProvidedResources();
-                final KeyedMessages sptMessages = getSptCheckOutput(topDownSession, rootDirectory);
+                final KeyedMessages sptMessages = getSptCheckOutput(topDownSession, rootDirectoryPath);
                 assertNoErrors(sptMessages);
             } catch(Exception e) {
                 printThrowable(e);
@@ -177,10 +177,10 @@ class DynamicLoadingTest extends CharsTestBase {
 
             System.out.println("Change parser test");
             try(final MixedSession session = dynamicLanguage.getPieComponent().newSession()) {
-                metricsTracer.reset();
+                languageMetricsTracer.reset();
                 session.updateAffectedBy(providedResources);
                 // Check executed tasks.
-                final MetricsTracer.Report report = metricsTracer.reportAndReset();
+                final MetricsTracer.Report report = languageMetricsTracer.reportAndReset();
                 assertFalse(hasTokenizeTaskDefExecuted(report, dynamicLanguage));
                 assertTrue(hasParseTaskDefExecuted(report, dynamicLanguage));
                 assertFalse(hasStyleTaskDefExecuted(report, dynamicLanguage));
@@ -200,10 +200,10 @@ class DynamicLoadingTest extends CharsTestBase {
             final Set<ResourceKey> providedResources;
             try(final MixedSession session = newSession()) {
                 final TopDownSession topDownSession = modifyTransformation(session, previousInput);
-                dynamicLanguage = getDynamicLoadOutput(topDownSession, rootDirectory);
+                dynamicLanguage = getDynamicLoadOutput(topDownSession, rootDirectoryPath);
                 previousInput = dynamicLanguage.getCompileInput();
                 providedResources = topDownSession.getProvidedResources();
-                final KeyedMessages sptMessages = getSptCheckOutput(topDownSession, rootDirectory);
+                final KeyedMessages sptMessages = getSptCheckOutput(topDownSession, rootDirectoryPath);
                 assertNoErrors(sptMessages);
             } catch(Exception e) {
                 printThrowable(e);
@@ -213,7 +213,7 @@ class DynamicLoadingTest extends CharsTestBase {
             System.out.println("Change transformation test");
             final LanguageComponent languageComponent = dynamicLanguage.getLanguageComponent();
             try(final MixedSession session = dynamicLanguage.getPieComponent().newSession()) {
-                metricsTracer.reset();
+                languageMetricsTracer.reset();
                 final TopDownSession topDownSession = session.updateAffectedBy(providedResources);
                 // Run command and check.
                 final Task<CommandFeedback> debugRemoveATask = getTaskForFirstCommand(languageComponent.getLanguageInstance());
@@ -223,7 +223,7 @@ class DynamicLoadingTest extends CharsTestBase {
                 assertEquals(1, debugRemoveAShowFeedbacks.size());
                 assertEquals("Program([Chars(\"bcdefg\")])", debugRemoveAShowFeedbacks.get(0).getText().get()); // remove-a works now.
                 // Check executed tasks.
-                final MetricsTracer.Report report = metricsTracer.reportAndReset();
+                final MetricsTracer.Report report = languageMetricsTracer.reportAndReset();
                 assertFalse(hasTokenizeTaskDefExecuted(report, dynamicLanguage));
                 assertFalse(hasParseTaskDefExecuted(report, dynamicLanguage));
                 assertFalse(hasStyleTaskDefExecuted(report, dynamicLanguage));
@@ -243,10 +243,10 @@ class DynamicLoadingTest extends CharsTestBase {
             final Set<ResourceKey> providedResources;
             try(final MixedSession session = newSession()) {
                 final TopDownSession topDownSession = modifyCommand(session, previousInput);
-                dynamicLanguage = getDynamicLoadOutput(topDownSession, rootDirectory);
+                dynamicLanguage = getDynamicLoadOutput(topDownSession, rootDirectoryPath);
                 previousInput = dynamicLanguage.getCompileInput();
                 providedResources = topDownSession.getProvidedResources();
-                final KeyedMessages sptMessages = getSptCheckOutput(topDownSession, rootDirectory);
+                final KeyedMessages sptMessages = getSptCheckOutput(topDownSession, rootDirectoryPath);
                 assertNoErrors(sptMessages);
             } catch(Exception e) {
                 printThrowable(e);
@@ -256,7 +256,7 @@ class DynamicLoadingTest extends CharsTestBase {
             System.out.println("Change command test");
             final LanguageComponent languageComponent = dynamicLanguage.getLanguageComponent();
             try(final MixedSession session = dynamicLanguage.getPieComponent().newSession()) {
-                metricsTracer.reset();
+                languageMetricsTracer.reset();
                 final TopDownSession topDownSession = session.updateAffectedBy(providedResources);
                 // Run command and check.
                 final Task<CommandFeedback> debugRemoveATask = getTaskForFirstCommand(languageComponent.getLanguageInstance());
@@ -266,7 +266,7 @@ class DynamicLoadingTest extends CharsTestBase {
                 assertEquals(1, debugRemoveAShowFeedbacks.size());
                 assertTrue(debugRemoveAShowFeedbacks.get(0).getName().get().contains("'A' characters removed from"));
                 // Check executed tasks.
-                final MetricsTracer.Report report = metricsTracer.reportAndReset();
+                final MetricsTracer.Report report = languageMetricsTracer.reportAndReset();
                 assertFalse(hasTokenizeTaskDefExecuted(report, dynamicLanguage));
                 assertFalse(hasParseTaskDefExecuted(report, dynamicLanguage));
                 assertFalse(hasStyleTaskDefExecuted(report, dynamicLanguage));
@@ -286,10 +286,10 @@ class DynamicLoadingTest extends CharsTestBase {
             final Set<ResourceKey> providedResources;
             try(final MixedSession session = newSession()) {
                 final TopDownSession topDownSession = modifyAnalyzer(session, previousInput);
-                dynamicLanguage = getDynamicLoadOutput(topDownSession, rootDirectory);
+                dynamicLanguage = getDynamicLoadOutput(topDownSession, rootDirectoryPath);
                 previousInput = dynamicLanguage.getCompileInput();
                 providedResources = topDownSession.getProvidedResources();
-                final KeyedMessages sptMessages = getSptCheckOutput(topDownSession, rootDirectory);
+                final KeyedMessages sptMessages = getSptCheckOutput(topDownSession, rootDirectoryPath);
                 assertNoErrors(sptMessages);
             } catch(Exception e) {
                 printThrowable(e);
@@ -299,13 +299,13 @@ class DynamicLoadingTest extends CharsTestBase {
             System.out.println("Change analyzer test");
             final LanguageComponent languageComponent = dynamicLanguage.getLanguageComponent();
             try(final MixedSession session = dynamicLanguage.getPieComponent().newSession()) {
-                metricsTracer.reset();
+                languageMetricsTracer.reset();
                 final TopDownSession topDownSession = session.updateAffectedBy(providedResources);
                 // Run check task and check.
                 final KeyedMessages messages = topDownSession.require(languageComponent.getLanguageInstance().createCheckTask(charsProjectPath));
                 assertTrue(messages.containsError());
                 // Check executed tasks.
-                final MetricsTracer.Report report = metricsTracer.reportAndReset();
+                final MetricsTracer.Report report = languageMetricsTracer.reportAndReset();
                 assertFalse(hasTokenizeTaskDefExecuted(report, dynamicLanguage));
                 assertFalse(hasParseTaskDefExecuted(report, dynamicLanguage));
                 assertFalse(hasStyleTaskDefExecuted(report, dynamicLanguage));
@@ -322,7 +322,7 @@ class DynamicLoadingTest extends CharsTestBase {
 
         try(final MixedSession session = newSession()) {
             System.out.println("Unload language");
-            dynamicLanguageRegistry.unload(rootDirectory);
+            dynamicLanguageRegistry.unload(rootDirectoryPath);
             previousInput = null;
             session.deleteUnobservedTasks(t -> true, (t, r) -> false);
         }
@@ -334,7 +334,7 @@ class DynamicLoadingTest extends CharsTestBase {
         DynamicLanguage lang1a;
         try(MixedSession session = newSession()) {
             // Load language.
-            lang1a = requireDynamicLoad(session, rootDirectory);
+            lang1a = requireDynamicLoad(session, rootDirectoryPath);
             previousInput = lang1a.getCompileInput();
             // Dynamic language 1 has not yet been closed.
             assertNotNull(lang1a.getClassLoader());
@@ -345,7 +345,7 @@ class DynamicLoadingTest extends CharsTestBase {
         DynamicLanguage lang1b;
         try(MixedSession session = newSession()) {
             // Load language again, but nothing has changed.
-            lang1b = requireDynamicLoad(session, rootDirectory);
+            lang1b = requireDynamicLoad(session, rootDirectoryPath);
             previousInput = lang1b.getCompileInput();
             // Dynamic language 1b has not yet been closed.
             assertNotNull(lang1b.getClassLoader());
@@ -356,7 +356,7 @@ class DynamicLoadingTest extends CharsTestBase {
         DynamicLanguage lang2;
         try(MixedSession session = newSession()) {
             // Modify language specification and reload language.
-            lang2 = getDynamicLoadOutput(modifyStyler(session, previousInput), rootDirectory);
+            lang2 = getDynamicLoadOutput(modifyStyler(session, previousInput), rootDirectoryPath);
             previousInput = lang2.getCompileInput();
             // Dynamic language 2 has not yet been closed.
             assertNotNull(lang2.getClassLoader());
@@ -376,7 +376,7 @@ class DynamicLoadingTest extends CharsTestBase {
         DynamicLanguage lang3;
         try(MixedSession session = newSession()) {
             // Modify language specification and reload language.
-            lang3 = getDynamicLoadOutput(modifyParser(session, previousInput), rootDirectory);
+            lang3 = getDynamicLoadOutput(modifyParser(session, previousInput), rootDirectoryPath);
             previousInput = lang3.getCompileInput();
             // Dynamic language 3 has not yet been closed.
             assertNotNull(lang3.getClassLoader());
@@ -390,7 +390,7 @@ class DynamicLoadingTest extends CharsTestBase {
         }
 
         // Unload dynamic language.
-        dynamicLanguageRegistry.unload(rootDirectory);
+        dynamicLanguageRegistry.unload(rootDirectoryPath);
         previousInput = null;
         // Dynamic language 3 should be closed.
         assertThrows(IllegalStateException.class, lang3::getClassLoader);

@@ -36,6 +36,7 @@ class TestBase {
     final ClassLoaderResourceRegistry classLoaderResourceRegistry =
         new ClassLoaderResourceRegistry("language-compiler", CompileLanguageTest.class.getClassLoader());
 
+    HierarchicalResource tempDirectory;
     HierarchicalResource rootDirectory;
     ExceptionPrinter exceptionPrinter;
     LoggerComponent loggerComponent;
@@ -47,7 +48,8 @@ class TestBase {
     CompileLanguage compileLanguage;
 
     void setup(Path temporaryDirectoryPath) throws IOException {
-        rootDirectory = new FSResource(temporaryDirectoryPath).appendRelativePath("test").ensureDirectoryExists();
+        tempDirectory = new FSResource(temporaryDirectoryPath);
+        rootDirectory = tempDirectory.appendRelativePath("language").ensureDirectoryExists();
         exceptionPrinter = new ExceptionPrinter().addCurrentDirectoryContext(rootDirectory);
         loggerComponent = DaggerLoggerComponent.builder()
             .loggerModule(LoggerModule.stdOutVeryVerbose())
@@ -108,7 +110,7 @@ class TestBase {
             compiler = null;
         }
 
-        final WritableResource pieStoreFile = rootDirectory.appendRelativePath(".pieStore").createParents();
+        final WritableResource pieStoreFile = tempDirectory.appendRelativePath(".build/compiler.piestore").createParents();
         compiler = new StandaloneSpoofax3Compiler(
             loggerComponent,
             rootResourceServiceComponent.createChildModule(classLoaderResourceRegistry),

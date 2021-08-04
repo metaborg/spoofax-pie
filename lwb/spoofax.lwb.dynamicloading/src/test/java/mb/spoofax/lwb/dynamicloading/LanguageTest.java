@@ -24,14 +24,14 @@ public class LanguageTest extends TestBase {
     @Test void testCompileLayoutSensitiveLanguage() throws Exception {
         copyResourcesToTemporaryDirectory("mb/spoofax/lwb/dynamicloading/layout_sensitive");
         try(final MixedSession session = newSession()) {
-            final ResourcePath rootDirectory = temporaryDirectory.getPath();
+            final ResourcePath rootDirectory = this.rootDirectory.getPath();
             try(final DynamicLanguage ignored = requireDynamicLoad(session, rootDirectory)) {
                 final KeyedMessages messages = requireSptCheck(session, rootDirectory);
                 assertNoErrors(messages, "SPT tests to succeed, but one or more failed");
             }
         } catch(Exception e) {
             final ExceptionPrinter exceptionPrinter = new ExceptionPrinter();
-            exceptionPrinter.addCurrentDirectoryContext(temporaryDirectory);
+            exceptionPrinter.addCurrentDirectoryContext(rootDirectory);
             System.err.println(exceptionPrinter.printExceptionToString(e));
             throw e;
         }
