@@ -1,10 +1,9 @@
 package mb.spoofax.core.language.testrunner;
 
+import mb.common.util.ListView;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -12,58 +11,28 @@ import java.util.Objects;
  */
 public class TestResults implements Serializable {
 
-    public final List<TestSuiteResult> suites = new ArrayList<>();
+    public final ListView<TestSuiteResult> suites;
 
-    private int numFailed = 0;
-    private int numPassed = 0;
+    public final int numFailed;
+    public final int numPassed;
 
-    /**
-     * The number of test cases that failed.
-     *
-     * Accumulated over all our test suites.
-     */
-    public int numFailed() {
-        return numFailed;
-    }
-
-    /**
-     * The number of test cases that passed.
-     *
-     * Accumulated over all our test suites.
-     */
-    public int numPassed() {
-        return numPassed;
-    }
-
-    /**
-     * Our children should notify whenever they have a failing test case run
-     */
-    protected void fail() {
-        numFailed++;
-    }
-
-    /**
-     * Our children should notify whenever they have a passing test case run
-     */
-    protected void pass() {
-        numPassed++;
+    public TestResults(ListView<TestSuiteResult> suites) {
+        this.suites = suites;
+        int failed = 0;
+        int passed = 0;
+        for(TestSuiteResult suite : suites) {
+            failed += suite.numFailed;
+            passed += suite.numPassed;
+        }
+        this.numFailed = failed;
+        this.numPassed = passed;
     }
 
     /**
      * The number of test cases of all our children combined.
      */
     public int numTests() {
-        int i = 0;
-        for(TestSuiteResult suites : suites) {
-            i += suites.tests.size();
-        }
-        return i;
-    }
-
-    public void add(TestSuiteResult suiteRun) {
-        suites.add(suiteRun);
-        numFailed += suiteRun.numFailed();
-        numPassed += suiteRun.numPassed();
+        return numFailed + numPassed;
     }
 
     public void addToStringBuilder(StringBuilder builder) {
@@ -87,6 +56,6 @@ public class TestResults implements Serializable {
 
     @Override
     public String toString() {
-        return "TestResults{suites=" + suites + "}";
+        return "TestResults{suites=" + suites + ", passed=" + numPassed + ", failed=" + numFailed + "}";
     }
 }

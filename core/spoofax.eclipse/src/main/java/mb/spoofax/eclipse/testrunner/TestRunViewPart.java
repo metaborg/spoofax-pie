@@ -3,8 +3,8 @@ package mb.spoofax.eclipse.testrunner;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import mb.common.message.KeyedMessages;
 import mb.common.message.Message;
+import mb.common.util.ListView;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.testrunner.TestResults;
 import mb.spoofax.eclipse.resource.EclipseResourcePath;
@@ -60,7 +60,6 @@ import org.eclipse.ui.texteditor.ITextEditor;
  * <li>call {@link #reset()} to reset the view.</li>
  * <li>call {@link #setData(TestResults)} with the model of all the suites and tests you want to display.</li>
  * <li>call {@link #refresh()} if the model is updated.</li>
- * <li>call {@link #setTestResult(TestCaseResult, KeyedMessages)} for each TestCaseRun that finished running.</li>
  * </ul>
  */
 public class TestRunViewPart extends ViewPart {
@@ -198,7 +197,7 @@ public class TestRunViewPart extends ViewPart {
 
         reset();
 
-        run = new TestResults();
+        run = new TestResults(ListView.of());
 
         treeViewer.expandAll();
 
@@ -208,21 +207,19 @@ public class TestRunViewPart extends ViewPart {
 
     private void packColumns() {
         final Tree tree = treeViewer.getTree();
-        Display.getDefault().asyncExec(new Runnable() {
-            public void run() {
-                for(TreeColumn c : tree.getColumns()) {
-                    c.pack();
-                }
+        Display.getDefault().asyncExec(() -> {
+            for(TreeColumn c : tree.getColumns()) {
+                c.pack();
             }
         });
     }
 
     private void updateHeader() {
-        int nrTests = run.numTests();
+        int nrTests = run != null ? run.numTests() : 0;
         if(nrTests == 0) {
             lblRatio.setText("0 / 0");
         } else {
-            lblRatio.setText(String.format("%d / %d    ", run.numPassed(), nrTests));
+            lblRatio.setText(String.format("%d / %d    ", run.numPassed, nrTests));
         }
         pb.setMaximum(nrTests);
     }
@@ -266,7 +263,7 @@ public class TestRunViewPart extends ViewPart {
 
     public void reset() {
         nrFailedTests = 0;
-        run = new TestResults();
+        run = new TestResults(ListView.of());
         treeViewer.setInput(run);
         pb.reset();
         if(!refreshDisabled)
@@ -282,22 +279,12 @@ public class TestRunViewPart extends ViewPart {
 
     public void setData(TestResults run) {
         this.run = run;
-        this.nrFailedTests = run.numFailed();
+        this.nrFailedTests = run.numFailed;
         treeViewer.setInput(run);
-        pb.reset(nrFailedTests > 0, false, run.numFailed() + run.numPassed(), run.numTests());
+        pb.reset(nrFailedTests > 0, false, run.numFailed + run.numPassed, run.numTests());
         if(!refreshDisabled) {
             refresh();
         }
-    }
-
-    public void setTestResult(TestCaseResult t, KeyedMessages res) {
-        t.finish(res);
-        if(res.containsError()) {
-            nrFailedTests++;
-        }
-        pb.step(nrFailedTests);
-        if(!refreshDisabled)
-            refresh();
     }
 
     private boolean refreshDisabled = false;
@@ -322,7 +309,7 @@ public class TestRunViewPart extends ViewPart {
 
             if(selectObject instanceof TestCaseResult) {
                 TestCaseResult tcr = (TestCaseResult) selectObject;
-                resource = tcr.parent.file;
+                resource = tcr.file;
                 offset = tcr.descriptionRegion.getStartOffset();
             } else if(selectObject instanceof TestSuiteResult) {
                 TestSuiteResult tsr = ((TestSuiteResult) selectObject);
@@ -360,9 +347,7 @@ public class TestRunViewPart extends ViewPart {
                 final Object selObj = ((ITreeSelection) generalSel).getFirstElement();
                 if(selObj instanceof TestSuiteResult) {
                     final TestSuiteResult tsr = (TestSuiteResult) selObj;
-                    if(tsr.messages == null) {
-                        cons.setText("Failed to load the contents of this test suite due to an IO error.");
-                    } else if(!tsr.messages.containsError()) {
+                    if(!tsr.messages.containsError()) {
                         cons.setText("");
                     } else {
                         final StringWriter strW = new StringWriter();
@@ -378,16 +363,13 @@ public class TestRunViewPart extends ViewPart {
                     }
                 } else if(selObj instanceof TestCaseResult) {
                     final TestCaseResult tcr = (TestCaseResult) selObj;
-                    if(tcr.result() == null) {
-                        cons.setText(
-                            "Test case has not yet been executed.\nPlease select it again when it's done.");
-                    } else if(!tcr.result().containsError()) {
+                    if(!tcr.messages.containsError()) {
                         cons.setText("");
                     } else {
                         final StringWriter sw = new StringWriter();
                         final PrintWriter pw = new PrintWriter(sw);
                         pw.println("Test case failed:");
-                        for(Message m : tcr.result().asMessages()) {
+                        for(Message m : tcr.messages.asMessages()) {
                             printMessage(m, pw);
                             pw.println();
                         }

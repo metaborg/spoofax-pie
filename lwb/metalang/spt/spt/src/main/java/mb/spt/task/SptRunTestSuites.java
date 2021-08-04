@@ -1,5 +1,6 @@
 package mb.spt.task;
 
+import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
@@ -16,6 +17,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class SptRunTestSuites implements TaskDef<SptRunTestSuites.Input, TestResults> {
@@ -73,12 +76,12 @@ public class SptRunTestSuites implements TaskDef<SptRunTestSuites.Input, TestRes
         // Require directories recursively, so we re-execute whenever a file is added/removed from a directory.
         rootDirectory.walkForEach(walker, ResourceMatcher.ofDirectory(), context::require);
         final ResourceMatcher matcher = ResourceMatcher.ofFile().and(ResourceMatcher.ofPath(PathMatcher.ofExtensions("spt")));
-        final TestResults testResults = new TestResults();
+        final List<TestSuiteResult> suiteResults = new ArrayList<>();
         selectedDirectory.walkForEach(walker, matcher, file -> {
             final ResourceKey fileKey = file.getKey();
             final TestSuiteResult result = context.require(check, new SptRunTestSuite.Input(fileKey, input.rootDirectory));
-            testResults.add(result);
+            suiteResults.add(result);
         });
-        return testResults;
+        return new TestResults(ListView.of(suiteResults));
     }
 }

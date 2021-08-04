@@ -3,6 +3,7 @@ package mb.spt.task;
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.result.Result;
+import mb.common.util.ListView;
 import mb.common.util.MapView;
 import mb.jsglr.common.JsglrParseException;
 import mb.jsglr.common.JsglrParseOutput;
@@ -37,6 +38,8 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -113,17 +116,15 @@ public class SptRunTestSuite implements TaskDef<SptRunTestSuite.Input, TestSuite
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
         final mb.jsglr.pie.JsglrParseTaskInput.Builder parseInputBuilder = parse.inputBuilder().withFile(input.file).rootDirectoryHint(Optional.ofNullable(input.rootDirectoryHint));
         final Result<JsglrParseOutput, JsglrParseException> parseResult = context.require(parse, parseInputBuilder.build());
-        final TestSuiteResult testResults = parseResult.mapThrowingOrElse(o -> {
+        return parseResult.mapThrowingOrElse(o -> {
                 messagesBuilder.addMessages(o.messages);
                 return runTests(context, messagesBuilder, input.file, input.rootDirectoryHint, o.ast);
             },
             (e) -> {
                 messagesBuilder.extractMessagesRecursively(e);
-                return new TestSuiteResult(null, input.file);
+                return new TestSuiteResult(messagesBuilder.build(), input.file);
             }
         );
-        testResults.messages = messagesBuilder.build();
-        return testResults;
     }
 
 
@@ -140,7 +141,7 @@ public class SptRunTestSuite implements TaskDef<SptRunTestSuite.Input, TestSuite
             desugaredAst = strategoRuntime.invoke("desugar-before", ast);
         } catch(StrategoException e) {
             messagesBuilder.extractMessagesRecursivelyWithFallbackKey(e, file);
-            return new TestSuiteResult(null, file);
+            return new TestSuiteResult(messagesBuilder.build(), file);
         }
 
         final TestSuite testSuite;
@@ -148,42 +149,47 @@ public class SptRunTestSuite implements TaskDef<SptRunTestSuite.Input, TestSuite
             testSuite = TestSuiteFromTerm.testSuiteFromTerm(desugaredAst, testExpectationFromTerms, testCaseResourceRegistry, file, rootDirectoryHint);
         } catch(FromTermException e) {
             messagesBuilder.extractMessagesRecursivelyWithFallbackKey(e, file);
-            return new TestSuiteResult(null, file);
+            return new TestSuiteResult(messagesBuilder.build(), file);
         }
-        final TestSuiteResult testResults = new TestSuiteResult(null, file, testSuite.name);
 
         final LanguageUnderTestProvider languageUnderTestProvider = wrapper.get();
         final Result<LanguageUnderTest, ?> languageUnderTestResult = languageUnderTestProvider.provide(context, file, rootDirectoryHint, testSuite.languageIdHint);
         final CancelToken cancelToken = context.cancelToken();
-        languageUnderTestResult.ifThrowingElse(
-            languageUnderTest -> runTests(languageUnderTestProvider, context, languageUnderTest, cancelToken, messagesBuilder, testSuite, testResults),
-            messagesBuilder::extractMessagesRecursively
+        return languageUnderTestResult.mapThrowingOrElse(
+            languageUnderTest -> {
+                ListView<TestCaseResult> results = runTests(languageUnderTestProvider, context, languageUnderTest, cancelToken, messagesBuilder, testSuite);
+                return new TestSuiteResult(messagesBuilder.build(), file, testSuite.name, results);
+            },
+            (e) -> {
+                messagesBuilder.extractMessagesRecursively(e);
+                return new TestSuiteResult(messagesBuilder.build(), file, testSuite.name, ListView.of());
+            }
         );
-        return testResults;
     }
 
-    private void runTests(
+    private ListView<TestCaseResult> runTests(
         LanguageUnderTestProvider languageUnderTestProvider,
         ExecContext context,
         LanguageUnderTest languageUnderTest,
         CancelToken cancelToken,
         KeyedMessagesBuilder messagesBuilder,
-        TestSuite testSuite,
-        TestSuiteResult testResults) throws InterruptedException {
+        TestSuite testSuite) throws InterruptedException {
+        List<TestCaseResult> results = new ArrayList<>();
         try(final MixedSession languageUnderTestSession = languageUnderTest.getPieComponent().newSession()) {
             for(TestCase testCase : testSuite.testCases) {
-                TestCaseResult run = new TestCaseResult(testResults, testCase.description, testCase.descriptionRegion);
                 KeyedMessagesBuilder testMessageBuilder = new KeyedMessagesBuilder();
-                run.start();
+                long startTime = System.currentTimeMillis();
                 for(TestExpectation expectation : testCase.expectations) {
                     testMessageBuilder.addMessages(
                         expectation.evaluate(testCase, languageUnderTest, languageUnderTestSession, languageUnderTestProvider, context, cancelToken)
                     );
                 }
+                long duration = startTime - System.currentTimeMillis();
                 KeyedMessages messages = testMessageBuilder.build();
-                run.finish(messages);
-                testResults.tests.add(run);
+                TestCaseResult run = new TestCaseResult(testCase.description, testCase.descriptionRegion, testSuite.file, messages, duration);
+                results.add(run);
             }
         }
+        return ListView.of(results);
     }
 }

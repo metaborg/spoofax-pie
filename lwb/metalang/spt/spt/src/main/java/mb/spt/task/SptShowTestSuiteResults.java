@@ -1,5 +1,6 @@
 package mb.spt.task;
 
+import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
@@ -57,10 +58,8 @@ public class SptShowTestSuiteResults implements TaskDef<SptShowTestSuiteResults.
     @Override
     public CommandFeedback exec(ExecContext context, Args input) throws Exception {
         context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
-        TestResults totalResult = new TestResults();
         TestSuiteResult result = context.require(checkForOutput, new SptRunTestSuite.Input(input.file, input.rootDir));
-        totalResult.add(result);
-        return CommandFeedback.of(ShowFeedback.showTestResults(totalResult));
+        return CommandFeedback.of(ShowFeedback.showTestResults(new TestResults(ListView.of(result))));
     }
 
     @Inject

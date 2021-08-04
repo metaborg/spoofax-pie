@@ -21,16 +21,14 @@ public class TestRunLabelProvider extends LabelProvider
     @Override public String getText(Object element) {
         if(element instanceof TestSuiteResult) {
             TestSuiteResult tsr = (TestSuiteResult) element;
-            int failed = tsr.numFailed();
+            int failed = tsr.numFailed;
             return failed == 0 ? tsr.name : String.format("%s (%d failed)", tsr.name, failed);
         } else if(element instanceof TestCaseResult) {
             TestCaseResult tcr = (TestCaseResult) element;
             String lbl = tcr.description;
-            if(tcr.result() != null) {
-                lbl = lbl + " (" + String.format("%.2f", tcr.duration() / 1000.0) + "s)";
-                if(tcr.result().containsError()) {
-                    lbl += " : FAILED";
-                }
+            lbl = lbl + " (" + String.format("%.2f", tcr.duration / 1000.0) + "s)";
+            if(tcr.messages.containsError()) {
+                lbl += " : FAILED";
             }
             return lbl;
         }
@@ -40,7 +38,7 @@ public class TestRunLabelProvider extends LabelProvider
     @Override @Nullable public Color getForeground(Object element, int columnIndex) {
         if(element instanceof TestSuiteResult) {
             TestSuiteResult tsr = (TestSuiteResult) element;
-            if(tsr.messages != null && !tsr.messages.containsError()) {
+            if(!tsr.messages.containsError()) {
                 // use default color;
                 return null;
             } else {
@@ -49,10 +47,8 @@ public class TestRunLabelProvider extends LabelProvider
             }
         } else if(element instanceof TestCaseResult) {
             TestCaseResult tcr = (TestCaseResult) element;
-            if(tcr.result() != null) {
-                return !tcr.result().containsError() ? new Color(Display.getCurrent(), 10, 100, 10)
-                    : new Color(Display.getCurrent(), 159, 63, 63);
-            }
+            return !tcr.messages.containsError() ? new Color(Display.getCurrent(), 10, 100, 10)
+                : new Color(Display.getCurrent(), 159, 63, 63);
         }
         return null;
     }
