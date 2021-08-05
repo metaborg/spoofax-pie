@@ -57,7 +57,7 @@ public class Sdf3ParseTableToParenthesizer implements TaskDef<Sdf3ParseTableToPa
 
     @Override public Result<IStrategoTerm, ?> exec(ExecContext context, Args args) throws IOException {
         return context.require(args.parseTableSupplier)
-            .map(pt -> Parenthesizer.generateParenthesizer(args.moduleName, null, pt));
+            .map(pt -> Parenthesizer.generateParenthesizer(args.moduleName, null, pt, true));
     }
 
     @Override public boolean shouldExecWhenAffected(Args input, Set<?> tags) {
