@@ -56,7 +56,7 @@ public class ReferenceResolutionAdapterCompiler implements TaskDef<ReferenceReso
         }
 
         /// Configuration
-        Optional<String> resolveStrategy();
+        String resolveStrategy();
 
 
         /// Kinds of classes (generated/extended/manual)

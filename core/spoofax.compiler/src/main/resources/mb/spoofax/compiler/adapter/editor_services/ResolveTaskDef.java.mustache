@@ -1,0 +1,172 @@
+package {{baseResolveTaskDef.packageId}};
+
+import mb.aterm.common.TermToString;
+import mb.common.editor.ReferenceResolutionResult;
+import mb.common.option.Option;
+import mb.common.region.Region;
+import mb.common.result.Result;
+import mb.common.util.ListView;
+import mb.constraint.pie.ConstraintAnalyzeTaskDef;
+import mb.jsglr.common.JsglrParseException;
+import mb.jsglr.common.TermTracer;
+import mb.pie.api.ExecContext;
+import mb.pie.api.None;
+import mb.pie.api.OutTransient;
+import mb.pie.api.Supplier;
+import mb.pie.api.TaskDef;
+import mb.resource.ResourceKey;
+import mb.resource.hierarchical.ResourcePath;
+import mb.stratego.common.StrategoException;
+import mb.stratego.common.StrategoRuntime;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spoofax.interpreter.terms.IStrategoList;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+
+import javax.inject.Inject;
+import javax.inject.Provider;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@{{adapterProject.scope.qualifiedId}}
+public class {{baseResolveTaskDef.id}} implements TaskDef<{{baseResolveTaskDef.id}}.Args, Option<ReferenceResolutionResult>> {
+    public static class Args implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        public final ResourceKey file;
+        public final @Nullable ResourcePath rootDirectoryHint;
+        public final Region position;
+
+        public Args(ResourceKey file, @Nullable ResourcePath rootDirectoryHint, Region position) {
+            this.file = file;
+            this.rootDirectoryHint = rootDirectoryHint;
+            this.position = position;
+        }
+
+        @Override public boolean equals(Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+
+            Args args = (Args)o;
+
+            if(!file.equals(args.file)) return false;
+            if(rootDirectoryHint != null ? !rootDirectoryHint.equals(args.rootDirectoryHint) : args.rootDirectoryHint != null)
+                return false;
+            if(!position.equals(args.position)) return false;
+
+            return true;
+        }
+
+        @Override public int hashCode() {
+            int result = file.hashCode();
+            result = 31 * result + (rootDirectoryHint != null ? rootDirectoryHint.hashCode() : 0);
+            result = 31 * result + position.hashCode();
+            return result;
+        }
+
+        @Override public String toString() {
+            return "Args{" +
+                "file=" + file +
+                ", rootDirectoryHint=" + rootDirectoryHint +
+                ", offset=" + position +
+                '}';
+        }
+    }
+
+    private final {{parseInput.parseTaskDef.qualifiedId}} parse;
+    private final {{constraintAnalyzerInput.analyzeTaskDef.qualifiedId}} analyze;
+    private final {{strategoRuntimeInput.getStrategoRuntimeProviderTaskDef.qualifiedId}} getStrategoRuntimeProvider;
+
+    @Inject
+    public {{baseResolveTaskDef.id}}(
+        {{parseInput.parseTaskDef.qualifiedId}} parse,
+        {{constraintAnalyzerInput.analyzeTaskDef.qualifiedId}} analyze,
+        {{strategoRuntimeInput.getStrategoRuntimeProviderTaskDef.qualifiedId}} getStrategoRuntimeProvider
+    ) {
+        this.parse = parse;
+        this.analyze = analyze;
+        this.getStrategoRuntimeProvider = getStrategoRuntimeProvider;
+    }
+
+    @Override public String getId() {
+        return "{{baseResolveTaskDef.qualifiedId}}";
+    }
+
+    @Override public Option<ResolveResult> exec(ExecContext context, Args args) throws Exception {
+        System.err.println("ResolveTaskDef.exec()");
+        final ResourceKey file = args.file;
+
+        // Step 1: get analysis
+        final Supplier<Result<IStrategoTerm, JsglrParseException>> astSupplier = parse
+            .inputBuilder()
+            .withFile(file)
+            .rootDirectoryHint(Optional.ofNullable(args.rootDirectoryHint))
+            .buildAstSupplier();
+        final Result<ConstraintAnalyzeTaskDef.Output, ?> analysis = context.require(analyze.createTask(new ConstraintAnalyzeTaskDef.Input(file, astSupplier)));
+        if(!analysis.isOk()) {
+            System.err.println("analysis not ok");
+            return Option.ofNone();
+        }
+
+        // Step 2: get a stratego instance
+        final OutTransient<Provider<StrategoRuntime>> strategoProvider = context.require(getStrategoRuntimeProvider, None.instance);
+        final StrategoRuntime strategoRuntime = strategoProvider.getValue().get().addContextObject(analysis.get().context);
+
+        // Step 3: find the AST nodes for the relevant offset (innermost first)
+        final Collection<IStrategoTerm> terms = TermTracer.getTermsEncompassingRegion(analysis.get().result.ast, args.position);
+
+        // Step 3: run our stratego strategy, finding the first term that doesn't fail
+        for(IStrategoTerm term : terms) {
+            try {
+                final IStrategoTerm input = strategoRuntime.getTermFactory().makeTuple(
+                    term,
+                    strategoRuntime.getTermFactory().makeList(),
+                    term,
+                    strategoRuntime.getTermFactory().makeString("."),
+                    strategoRuntime.getTermFactory().makeString(file.asString())
+                );
+                final IStrategoTerm result = strategoRuntime.invoke("{{resolveStrategy}}", input);
+
+                // Resolve strategy can either return a single AST or a list of
+                // results. Convert both to a list, then map them to resolve results.
+                final List<IStrategoTerm> results;
+                if (result instanceof IStrategoList) {
+                    results = ((IStrategoList) result).getSubterms();
+                } else {
+                    results = Collections.singletonList(result);
+                }
+
+                return Option.ofSome(
+                    new ReferenceResolutionResult(
+                        TermTracer.getRegion(term),
+                        new ListView<>(results.stream().map(matchedTerm -> {
+                            final @Nullable IStrategoTerm originNode = TermTracer.getOrigin(matchedTerm);
+                            final @Nullable ResourceKey termFile = TermTracer.getResourceKey(matchedTerm);
+                            final @Nullable Region termRegion = TermTracer.getRegion(matchedTerm);
+                            if(termFile == null || termRegion == null) {
+                                // TODO: better exception
+                                // should we maybe ignore those without region? spoofax 2 does it like that.
+                                if(originNode == null) System.err.println("origin is null");
+                                else System.err.println("Origin file: " + TermTracer.getResourceKey(originNode));
+                                if(termFile == null) System.err.println("termfile is null");
+                                if(termRegion == null) System.err.println("termregion is null");
+                                throw new RuntimeException("Result of stratego resolve yielded AST node without position.");
+                            }
+
+                            return new ReferenceResolutionResult.ResolvedEntry(termFile, termRegion, TermToString.toString(matchedTerm));
+                        }).collect(Collectors.toList()))
+                    )
+                );
+            } catch(StrategoException ex) {
+                // ignored
+            }
+        }
+
+        System.err.println("No terms matched.");
+
+        return Option.ofNone();
+    }
+}

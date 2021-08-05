@@ -8,8 +8,13 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.jsglr.client.imploder.IToken;
 import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 import org.spoofax.terms.attachments.OriginAttachment;
+import org.spoofax.terms.visitor.AStrategoTermVisitor;
+import org.spoofax.terms.visitor.IStrategoTermVisitor;
+import org.spoofax.terms.visitor.StrategoTermVisitee;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
@@ -144,5 +149,33 @@ public class TermTracer {
             }
         }
         return ListView.of(terms);
+    }
+
+    /**
+     * Gets all terms that contain the specified region. These terms are ordered
+     * in a bottom-up fashion, such that the first element is the deepest nested
+     * (and therefore smallest) element that contains the given region. Will always
+     * return at least one element as long as the specified region is contained
+     * within the AST.
+     *
+     * @param ast AST to find terms in
+     * @param region the region that terms should be in. The entire region must
+     *               fit within the term in order for it to be returned
+     * @return all terms that contain the given region, ordered in bottom-up fashion
+     */
+    public static Collection<IStrategoTerm> getTermsEncompassingRegion(IStrategoTerm ast, Region region) {
+        final Collection<IStrategoTerm> parsed = new LinkedList<>();
+        final IStrategoTermVisitor visitor = new AStrategoTermVisitor() {
+            @Override public boolean visit(IStrategoTerm term) {
+                final @Nullable Region location = TermTracer.getRegion(term);
+                if(location != null && location.contains(region)) {
+                    parsed.add(term);
+                    return false;
+                }
+                return true;
+            }
+        };
+        StrategoTermVisitee.bottomup(visitor, ast);
+        return parsed;
     }
 }
