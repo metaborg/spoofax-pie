@@ -4,6 +4,10 @@ imports
 
   part
   expr
+  
+context-free sorts
+  EditorServicesOption
+  ReferenceResolutionVariant
 
 context-free syntax
 
@@ -16,3 +20,15 @@ context-free syntax
   Part.EditorContextMenu = <editor-context-menu [
   <{Expr "\n"}*>
 ]>
+
+context-free syntax
+ 
+  Part.EditorServicesSection = <editor-services {
+    <{EditorServicesOption "\n"}*>
+  }>
+  
+  EditorServicesOption.EditorServicesReferenceResolutionOption = <reference-resolution = <ReferenceResolutionVariant>>
+  
+  ReferenceResolutionVariant.ReferenceResolutionStrategoVariant = <stratego {
+    strategy = <Expr>
+  }>

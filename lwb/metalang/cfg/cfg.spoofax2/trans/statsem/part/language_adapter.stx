@@ -16,3 +16,18 @@ rules
     exprsAreMenuItems(s, e_menu_items).
   partOk(s, EditorContextMenu(e_menu_items)) :-
     exprsAreMenuItems(s, e_menu_items).
+
+rules // Editor services section and options
+
+  partOk(s, EditorServicesSection(options)) :-
+    editorServicesOptionsOk(s, options).
+
+  editorServicesOptionOk : scope * EditorServicesOption
+  editorServicesOptionsOk maps editorServicesOptionOk(*, list(*))
+
+  editorServicesOptionOk(s, EditorServicesReferenceResolutionOption(e)) :-
+    referenceResolutionVariantOk(s, e).
+    
+  referenceResolutionVariantOk : scope * ReferenceResolutionVariant
+  referenceResolutionVariantOk(s, ReferenceResolutionStrategoVariant(e)) :-
+    typeOfExpr(s, e) == STRATEGY() | error $[Expected Stratego strategy identifier].
