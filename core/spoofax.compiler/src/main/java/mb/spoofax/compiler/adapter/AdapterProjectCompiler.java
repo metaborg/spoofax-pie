@@ -23,6 +23,7 @@ import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
 import mb.spoofax.compiler.util.UniqueNamer;
+import mb.spoofax.core.language.taskdef.NoneResolveTaskDef;
 import mb.spoofax.core.language.taskdef.NoneStyler;
 import mb.spoofax.core.language.taskdef.NoneTokenizer;
 import mb.spoofax.core.language.taskdef.NullCompleteTaskDef;
@@ -64,6 +65,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
     private final StrategoRuntimeAdapterCompiler strategoRuntimeCompiler;
     private final ConstraintAnalyzerAdapterCompiler constraintAnalyzerCompiler;
     private final MultilangAnalyzerAdapterCompiler multilangAnalyzerCompiler;
+    private final ReferenceResolutionAdapterCompiler referenceResolutionAdapterCompiler;
 
     @Inject public AdapterProjectCompiler(
         TemplateCompiler templateCompiler,
@@ -72,7 +74,8 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         CompleterAdapterCompiler completerCompiler,
         StrategoRuntimeAdapterCompiler strategoRuntimeCompiler,
         ConstraintAnalyzerAdapterCompiler constraintAnalyzerCompiler,
-        MultilangAnalyzerAdapterCompiler multilangAnalyzerCompiler
+        MultilangAnalyzerAdapterCompiler multilangAnalyzerCompiler,
+        ReferenceResolutionAdapterCompiler referenceResolutionAdapterCompiler
     ) {
         templateCompiler = templateCompiler.loadingFromClass(getClass());
         this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("adapter_project/package-info.java.mustache");
@@ -97,6 +100,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         this.strategoRuntimeCompiler = strategoRuntimeCompiler;
         this.constraintAnalyzerCompiler = constraintAnalyzerCompiler;
         this.multilangAnalyzerCompiler = multilangAnalyzerCompiler;
+        this.referenceResolutionAdapterCompiler = referenceResolutionAdapterCompiler;
     }
 
 
@@ -121,6 +125,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         input.strategoRuntime().ifPresent((i) -> context.require(strategoRuntimeCompiler, i));
         input.constraintAnalyzer().ifPresent((i) -> context.require(constraintAnalyzerCompiler, i));
         input.multilangAnalyzer().ifPresent((i) -> context.require(multilangAnalyzerCompiler, i));
+        input.referenceResolution().ifPresent((i) -> context.require(referenceResolutionAdapterCompiler, i));
 
         if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
 
@@ -160,6 +165,12 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             addTaskDef(allTaskDefs, i.checkTaskDef(), i.baseCheckTaskDef());
             allTaskDefs.addAll(i.libraryTaskDefs());
         });
+        input.referenceResolution().ifPresent((i) -> {
+            addTaskDef(allTaskDefs, i.resolveTaskDef(), i.baseResolveTaskDef());
+        });
+        if(!input.referenceResolution().isPresent()) {
+            allTaskDefs.add(TypeInfo.of(NoneResolveTaskDef.class));
+        }
         addTaskDef(allTaskDefs, input.checkTaskDef(), input.baseCheckTaskDef());
         addTaskDef(allTaskDefs, input.checkMultiTaskDef(), input.baseCheckMultiTaskDef());
         addTaskDef(allTaskDefs, input.checkAggregatorTaskDef(), input.baseCheckAggregatorTaskDef());
@@ -289,6 +300,16 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             }
             map.put("completeInjection", completeInjection);
             injected.add(completeInjection);
+            final NamedTypeInfo resolveInjection;
+            if(input.referenceResolution().isPresent()) {
+                resolveInjection = uniqueNamer.makeUnique(input.referenceResolution().get().resolveTaskDef());
+                map.put("hasResolveInjection", true);
+            } else {
+                resolveInjection = uniqueNamer.makeUnique(TypeInfo.of(NoneResolveTaskDef.class));
+                map.put("hasResolveInjection", false);
+            }
+            map.put("resolveInjection", resolveInjection);
+            injected.add(resolveInjection);
 
             // Create injections for all command definitions. TODO: only inject needed command definitions?
             injected.addAll(input.commandDefs().stream().map(CommandDefRepr::type).map(uniqueNamer::makeUnique).collect(Collectors.toList()));
@@ -375,6 +396,8 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         Optional<ConstraintAnalyzerAdapterCompiler.Input> constraintAnalyzer();
 
         Optional<MultilangAnalyzerAdapterCompiler.Input> multilangAnalyzer();
+
+        Optional<ReferenceResolutionAdapterCompiler.Input> referenceResolution();
 
 
         /// Configuration

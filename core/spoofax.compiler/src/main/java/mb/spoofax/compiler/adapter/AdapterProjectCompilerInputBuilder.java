@@ -32,6 +32,9 @@ public class AdapterProjectCompilerInputBuilder {
     private boolean completerEnabled = false;
     public final CompleterAdapterCompiler.Input.Builder completer = CompleterAdapterCompiler.Input.builder();
 
+    private boolean referenceResolutionEnabled = false;
+    public final ReferenceResolutionAdapterCompiler.Input.Builder referenceResolution = ReferenceResolutionAdapterCompiler.Input.builder();
+
     public AdapterProjectCompiler.Input.Builder project = AdapterProjectCompiler.Input.builder();
 
 
@@ -69,6 +72,11 @@ public class AdapterProjectCompilerInputBuilder {
         return completer;
     }
 
+    public ReferenceResolutionAdapterCompiler.Input.Builder withReferenceResolution() {
+        referenceResolutionEnabled = true;
+        return referenceResolution;
+    }
+
 
     public AdapterProjectCompiler.Input build(LanguageProjectCompiler.Input languageProjectInput, Option<GradleDependency> languageProjectDependency, AdapterProject adapterProject) {
         final Shared shared = languageProjectInput.shared();
@@ -90,6 +98,9 @@ public class AdapterProjectCompilerInputBuilder {
 
         final MultilangAnalyzerAdapterCompiler.@Nullable Input multilangAnalyzer = buildMultilangAnalyzer(shared, adapterProject, languageProjectInput, strategoRuntime);
         if(multilangAnalyzer != null) project.multilangAnalyzer(multilangAnalyzer);
+
+        final ReferenceResolutionAdapterCompiler.@Nullable Input referenceResolution = buildReferenceResolution(shared, adapterProject, strategoRuntime, parser, constraintAnalyzer);
+        if(referenceResolution != null) project.referenceResolution(referenceResolution);
 
         final CompleterAdapterCompiler.@Nullable Input completer = buildCompleter(shared, adapterProject, languageProjectInput);
 
@@ -203,6 +214,23 @@ public class AdapterProjectCompilerInputBuilder {
             .shared(shared)
             .adapterProject(adapterProject)
             .languageProjectInput(languageProjectInput.completer().orElseThrow(() -> new RuntimeException("Mismatch between presence of completer input between language project and adapter project")))
+            .build();
+    }
+
+    private ReferenceResolutionAdapterCompiler.@Nullable Input buildReferenceResolution(
+        Shared shared,
+        AdapterProject adapterProject,
+        StrategoRuntimeAdapterCompiler.@Nullable Input strategoRuntimeInput,
+        ParserAdapterCompiler.@Nullable Input parseInput,
+        ConstraintAnalyzerAdapterCompiler.@Nullable Input constraintAnalyzerInput
+    ) {
+        if(!referenceResolutionEnabled) return null;
+        return referenceResolution
+            .shared(shared)
+            .adapterProject(adapterProject)
+            .strategoRuntimeInput(strategoRuntimeInput)
+            .parseInput(parseInput)
+            .constraintAnalyzerInput(constraintAnalyzerInput)
             .build();
     }
 }

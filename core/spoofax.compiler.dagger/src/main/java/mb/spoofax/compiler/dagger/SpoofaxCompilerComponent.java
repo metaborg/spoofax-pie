@@ -10,6 +10,7 @@ import mb.spoofax.compiler.adapter.CompleterAdapterCompiler;
 import mb.spoofax.compiler.adapter.ConstraintAnalyzerAdapterCompiler;
 import mb.spoofax.compiler.adapter.MultilangAnalyzerAdapterCompiler;
 import mb.spoofax.compiler.adapter.ParserAdapterCompiler;
+import mb.spoofax.compiler.adapter.ReferenceResolutionAdapterCompiler;
 import mb.spoofax.compiler.adapter.StrategoRuntimeAdapterCompiler;
 import mb.spoofax.compiler.adapter.StylerAdapterCompiler;
 import mb.spoofax.compiler.language.ClassLoaderResourcesCompiler;
@@ -68,6 +69,8 @@ public interface SpoofaxCompilerComponent extends TaskDefsProvider {
     ConstraintAnalyzerAdapterCompiler getConstraintAnalyzerAdapterCompiler();
 
     MultilangAnalyzerAdapterCompiler getMultilangAnalyzerAdapterCompiler();
+
+    ReferenceResolutionAdapterCompiler getReferenceResolutionAdapterCompiler();
 
 
     CliProjectCompiler getCliProjectCompiler();

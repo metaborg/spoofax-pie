@@ -1,5 +1,6 @@
 package {{baseInstance.packageId}};
 
+import mb.common.editor.ReferenceResolutionResult;
 import mb.common.message.KeyedMessages;
 import mb.common.message.Messages;
 import mb.common.option.Option;
@@ -161,6 +162,17 @@ public class {{baseInstance.id}} implements LanguageInstance{{#parseInjection}},
 {{/editorContextMenuItems}}
         );
     }
+
+    @Override
+    public Task<Option<ReferenceResolutionResult>> createResolveTask(ResourceKey file, @Nullable ResourcePath rootDirectoryHint, Region region) {
+{{#hasResolveInjection}}
+        return {{resolveInjection.name}}.createTask(new {{resolveInjection.type.qualifiedId}}.Args(file, rootDirectoryHint, region));
+{{/hasResolveInjection}}
+{{^hasResolveInjection}}
+        return {{resolveInjection.name}}.createTask({{resolveInjection.type.qualifiedId}}.Args.Empty);
+{{/hasResolveInjection}}
+    }
+
 {{#parseInjection}}
 
     @Override
