@@ -74,7 +74,7 @@ public class RunStrategoExpectation implements TestExpectation {
         }
         final TestableStratego testableStratego = (TestableStratego)languageInstance;
         Option<Region> region = selectionReference.map(
-            (sel) -> testCase.testFragment.getSelections().get(sel.selection - 1)
+            (sel) -> testCase.testFragment.getInFragmentSelections().get(sel.selection - 1)
         );
         final Result<IStrategoTerm, ?> result = testableStratego.testRunStrategy(languageUnderTestSession, testCase.resource, strategy, processArguments(arguments, testCase), region, testCase.rootDirectoryHint);
 
@@ -124,7 +124,7 @@ public class RunStrategoExpectation implements TestExpectation {
                 }
                 case "SelectionRef": {
                     int index = Integer.parseInt(TermUtils.toJavaStringAt(term, 0));
-                    Region region = testCase.testFragment.getSelections().get(index - 1);
+                    Region region = testCase.testFragment.getInFragmentSelections().get(index - 1);
                     args.add(StrategoRunArgument.selectionArg(region));
                     break;
                 }

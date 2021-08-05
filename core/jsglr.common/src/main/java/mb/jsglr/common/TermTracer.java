@@ -49,6 +49,25 @@ public class TermTracer {
     }
 
     /**
+     * Gets the source code region given term originated from, automatically getting the originating term if needed.
+     * If the term is inside a fragment, the region will be relative to the start of the fragment,
+     * instead of relative to the start of the SPT file.
+     *
+     * @return Region, or {@code null} if no region could be found.
+     */
+    public static @Nullable Region getInFragmentRegion(IStrategoTerm term) {
+        term = ImploderAttachment.getImploderOrigin(term);
+        if(term == null) return null;
+        final @Nullable IToken left = ImploderAttachment.getLeftToken(term);
+        final @Nullable IToken right = ImploderAttachment.getRightToken(term);
+        if(left == null || right == null) return null;
+        return RegionUtil.fromTokens(
+            FragmentedOriginLocationFixer.getOriginalToken(left),
+            FragmentedOriginLocationFixer.getOriginalToken(right)
+        );
+    }
+
+    /**
      * Gets the key of the resource given term originated from, automatically getting the originating term if needed.
      *
      * @return Resource key, or {@code null} if no resource key could be found.
@@ -62,9 +81,11 @@ public class TermTracer {
 
     /**
      * Gets the smallest term from the {@code ast} that encompasses given {@code region}.
+     * If the AST is part of a fragment, the region should be relative to the start of the fragment,
+     * not relative to the SPT file.
      *
      * @param ast    AST to select a term from.
-     * @param region Selection region.
+     * @param region Selection region. If in a fragment, relative to the fragment start.
      * @return Smallest term that encompasses given region, or the entire AST if no terms have region information.
      */
     public static IStrategoTerm getSmallestTermEncompassingRegion(IStrategoTerm ast, Region region) {
@@ -74,7 +95,7 @@ public class TermTracer {
         stack.push(ast);
         while(!stack.empty()) {
             final IStrategoTerm term = stack.pop();
-            final @Nullable Region termRegion = getRegion(term);
+            final @Nullable Region termRegion = getInFragmentRegion(term);
             if(termRegion != null) {
                 final int length = termRegion.getLength();
                 if(termRegion.contains(region) && length < minimalLength) {
@@ -91,9 +112,11 @@ public class TermTracer {
 
     /**
      * Gets the term that spans the largest region from the {@code ast} that resides inside given {@code region}.
+     * If the AST is part of a fragment, the region should be relative to the start of the fragment,
+     * not relative to the SPT file.
      *
      * @param ast    AST to select a term from.
-     * @param region Selection region.
+     * @param region Selection region. If in a fragment, relative to the fragment start.
      * @return Biggest term that resides inside given region, or the entire AST if no terms have region information.
      */
     public static IStrategoTerm getBiggestTermInsideRegion(IStrategoTerm ast, Region region) {
@@ -103,7 +126,7 @@ public class TermTracer {
         stack.push(ast);
         while(!stack.empty()) {
             final IStrategoTerm term = stack.pop();
-            final @Nullable Region termRegion = getRegion(term);
+            final @Nullable Region termRegion = getInFragmentRegion(term);
             if(termRegion != null && region.contains(termRegion)) {
                 final int length = termRegion.getLength();
                 if (length > maxLength) {
@@ -123,9 +146,11 @@ public class TermTracer {
     /**
      * Gets the terms from the {@code ast} that resides inside given {@code region} in order of occurrence.
      * If a term occurs inside the region, it's subterms won't be included in the result.
+     * If the AST is part of a fragment, the region should be relative to the start of the fragment,
+     * not relative to the SPT file.
      *
      * @param ast    AST to select a term from.
-     * @param region Selection region.
+     * @param region Selection region. If in a fragment, relative to the fragment start.
      * @return Terms that reside inside given region.
      */
     public static ListView<IStrategoTerm> getTermsInsideRegion(IStrategoTerm ast, Region region) {
@@ -134,7 +159,7 @@ public class TermTracer {
         stack.push(ast);
         while(!stack.empty()) {
             final IStrategoTerm term = stack.pop();
-            final @Nullable Region termRegion = getRegion(term);
+            final @Nullable Region termRegion = getInFragmentRegion(term);
             if(termRegion != null && region.contains(termRegion)) {
                 terms.add(term);
             } else {

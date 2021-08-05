@@ -135,9 +135,12 @@ public class TestSuiteFromTerm {
             throw new InvalidAstShapeException("a fragment term with location information", ast);
         }
         final ArrayList<Region> selections = new ArrayList<>();
+        final ArrayList<Region> inFragmentSelections = new ArrayList<>();
         final ArrayList<StringFragment> stringFragments = new ArrayList<>();
+        int offset = 0;
         if(testFixture != null) {
             stringFragments.add(new StringFragment(testFixture.beforeStartOffset, testFixture.beforeText));
+            offset += testFixture.beforeText.length();
         }
         IStrategoAppl appl = TermUtils.asAppl(ast).orElseThrow(() -> new InvalidAstShapeException("a term application", ast));
         while(!appl.getConstructor().getName().equals("Done")) {
@@ -153,6 +156,7 @@ public class TestSuiteFromTerm {
                     stringFragments.add(new StringFragment(textRegion.getStartOffset(), textTerm.stringValue()));
                     // Tail
                     appl = TermUtils.asApplAt(appl, 1).orElseThrow(() -> new InvalidAstShapeException("a tail part as second subterm", fragment));
+                    offset += textRegion.getLength();
                     break;
                 }
                 case "More": { // More(Selection("[", "text", "]"), "text", <TailPart>)
@@ -169,6 +173,7 @@ public class TestSuiteFromTerm {
                     }
                     stringFragments.add(new StringFragment(selectionTextRegion.getStartOffset(), selectionTextTerm.stringValue()));
                     selections.add(selectionTextRegion);
+                    inFragmentSelections.add(Region.fromOffsetLength(offset, selectionTextRegion.getLength()));
                     // Text
                     final IStrategoString textTerm = TermUtils.asStringAt(more, 1).orElseThrow(() -> new InvalidAstShapeException("a term string as second subterm", more));
                     final @Nullable Region textRegion = TermTracer.getRegion(textTerm);
@@ -178,6 +183,7 @@ public class TestSuiteFromTerm {
                     stringFragments.add(new StringFragment(textRegion.getStartOffset(), textTerm.stringValue()));
                     // Tail
                     appl = TermUtils.asApplAt(appl, 2).orElseThrow(() -> new InvalidAstShapeException("a tail part as third subterm", more));
+                    offset += selectionTextRegion.getLength() + textRegion.getLength();
                     break;
                 }
             }
@@ -185,7 +191,7 @@ public class TestSuiteFromTerm {
         if(testFixture != null) {
             stringFragments.add(new StringFragment(testFixture.afterStartOffset, testFixture.afterText));
         }
-        return new TestFragmentImpl(region, ListView.of(selections), new FragmentedString(ListView.of(stringFragments)));
+        return new TestFragmentImpl(region, ListView.of(selections), ListView.of(inFragmentSelections), new FragmentedString(ListView.of(stringFragments)));
     }
 
     private static TestExpectation testExpectationFromTerm(

@@ -9,11 +9,13 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class TestFragmentImpl implements TestFragment {
     private final Region region;
     private final ListView<Region> selections;
+    private final ListView<Region> inFragmentSelections;
     private final FragmentedString fragmentedString;
 
-    public TestFragmentImpl(Region region, ListView<Region> selections, FragmentedString fragmentedString) {
+    public TestFragmentImpl(Region region, ListView<Region> selections, ListView<Region> inFragmentSelections, FragmentedString fragmentedString) {
         this.region = region;
         this.selections = selections;
+        this.inFragmentSelections = inFragmentSelections;
         this.fragmentedString = fragmentedString;
     }
 
@@ -23,6 +25,11 @@ public class TestFragmentImpl implements TestFragment {
 
     @Override public ListView<Region> getSelections() {
         return selections;
+    }
+
+    @Override
+    public ListView<Region> getInFragmentSelections() {
+        return inFragmentSelections;
     }
 
     @Override public FragmentedString getFragmentedString() {
