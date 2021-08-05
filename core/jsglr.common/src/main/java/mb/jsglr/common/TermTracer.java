@@ -90,34 +90,43 @@ public class TermTracer {
     }
 
     /**
-     * Gets the biggest term from the {@code ast} that resides inside given {@code region}.
+     * Gets the term that spans the largest region from the {@code ast} that resides inside given {@code region}.
      *
      * @param ast    AST to select a term from.
      * @param region Selection region.
      * @return Biggest term that resides inside given region, or the entire AST if no terms have region information.
      */
     public static IStrategoTerm getBiggestTermInsideRegion(IStrategoTerm ast, Region region) {
+        IStrategoTerm maxTerm = ast;
+        int maxLength= -1;
         final Stack<IStrategoTerm> stack = new Stack<>();
         stack.push(ast);
         while(!stack.empty()) {
             final IStrategoTerm term = stack.pop();
             final @Nullable Region termRegion = getRegion(term);
             if(termRegion != null && region.contains(termRegion)) {
-                return term;
-            }
-            for(int i = term.getSubtermCount() - 1; i >= 0; --i) {
-                stack.push(term.getSubterm(i));
+                final int length = termRegion.getLength();
+                if (length > maxLength) {
+                    maxTerm = term;
+                    maxLength = length;
+                }
+                // If a term fits inside the region, do not evaluate it's subterms, since these will always be smaller
+            } else {
+                for(int i = term.getSubtermCount() - 1; i >= 0; --i) {
+                    stack.push(term.getSubterm(i));
+                }
             }
         }
-        return ast;
+        return maxTerm;
     }
 
     /**
-     * Gets the outermost terms from the {@code ast} that resides inside given {@code region}.
+     * Gets the terms from the {@code ast} that resides inside given {@code region} in order of occurrence.
+     * If a term occurs inside the region, it's subterms won't be included in the result.
      *
      * @param ast    AST to select a term from.
      * @param region Selection region.
-     * @return Outermost terms that reside inside given region.
+     * @return Terms that reside inside given region.
      */
     public static ListView<IStrategoTerm> getTermsInsideRegion(IStrategoTerm ast, Region region) {
         final Stack<IStrategoTerm> stack = new Stack<>();
@@ -128,10 +137,10 @@ public class TermTracer {
             final @Nullable Region termRegion = getRegion(term);
             if(termRegion != null && region.contains(termRegion)) {
                 terms.add(term);
-                continue;
-            }
-            for(int i = term.getSubtermCount() - 1; i >= 0; --i) {
-                stack.push(term.getSubterm(i));
+            } else {
+                for(int i = term.getSubtermCount() - 1; i >= 0; --i) {
+                    stack.push(term.getSubterm(i));
+                }
             }
         }
         return ListView.of(terms);
