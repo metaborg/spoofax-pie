@@ -16,10 +16,10 @@ import mb.spt.util.SptAtermMatcher;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.TermFactory;
 
-public class RunToAtermExpectation extends RunExpectation {
+public class RunStrategoToAtermExpectation extends RunStrategoExpectation {
     private final IStrategoTerm expectedMatch;
 
-    public RunToAtermExpectation(
+    public RunStrategoToAtermExpectation(
         String strategyName,
         Option<SelectionReference> selection,
         IStrategoTerm expectedMatch,

@@ -30,14 +30,14 @@ import org.spoofax.terms.util.TermUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RunExpectation implements TestExpectation {
+public class RunStrategoExpectation implements TestExpectation {
     private final String strategy;
     private final ListView<IStrategoAppl> arguments;
     private final Option<SelectionReference> selectionReference;
     private final Region sourceRegion;
     private final boolean expectFailure;
 
-    public RunExpectation(String strategy, ListView<IStrategoAppl> arguments, Option<SelectionReference> selectionReference, Region sourceRegion, boolean expectFailure) {
+    public RunStrategoExpectation(String strategy, ListView<IStrategoAppl> arguments, Option<SelectionReference> selectionReference, Region sourceRegion, boolean expectFailure) {
         this.strategy = strategy;
         this.arguments = arguments;
         this.selectionReference = selectionReference;

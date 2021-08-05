@@ -27,7 +27,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class RunExpectationFromTerm implements TestExpectationFromTerm {
+public class RunStrategoExpectationFromTerm implements TestExpectationFromTerm {
     @Override
     public SetView<IStrategoConstructor> getMatchingConstructors(TermFactory termFactory) {
         return SetView.of(
@@ -59,7 +59,7 @@ public class RunExpectationFromTerm implements TestExpectationFromTerm {
         }
     }
 
-    private RunToAtermExpectation convertToRunToAtermExpectation(IStrategoAppl term, Region sourceRegion) {
+    private RunStrategoToAtermExpectation convertToRunToAtermExpectation(IStrategoAppl term, Region sourceRegion) {
         final String strategyName = TermUtils.asJavaStringAt(term, 0)
             .orElseThrow(() -> new InvalidAstShapeException("term string as first subterm", term));
         final Option<SelectionReference> selection = convertSelections(
@@ -73,7 +73,7 @@ public class RunExpectationFromTerm implements TestExpectationFromTerm {
         }
         final IStrategoAppl aterm = TermUtils.asApplAt(toAterm, 0)
             .orElseThrow(() -> new InvalidAstShapeException("term application as first subterm", toAterm));
-        return new RunToAtermExpectation(strategyName, selection, aterm, sourceRegion);
+        return new RunStrategoToAtermExpectation(strategyName, selection, aterm, sourceRegion);
     }
 
     private TestExpectation convertToRunExpectation(
@@ -102,7 +102,7 @@ public class RunExpectationFromTerm implements TestExpectationFromTerm {
                     .orElseThrow(() -> new InvalidAstShapeException("term application as subterm", term));
                 switch (resultExpectation.getConstructor().getName()) {
                     case "Fails":
-                        return new RunExpectation(strategyName, arguments, selection, sourceRegion, true);
+                        return new RunStrategoExpectation(strategyName, arguments, selection, sourceRegion, true);
                     case "ToPart":
                         return convertToRunToFragmentExpectation(
                             strategyName,
@@ -119,7 +119,7 @@ public class RunExpectationFromTerm implements TestExpectationFromTerm {
                         throw new InvalidAstShapeException("Fails/0 or ToPart/1 as subterm", resultExp);
                 }
             })
-            .orElseGet(() -> new RunExpectation(strategyName, arguments, selection, sourceRegion, false));
+            .orElseGet(() -> new RunStrategoExpectation(strategyName, arguments, selection, sourceRegion, false));
     }
 
     private ListView<IStrategoAppl> convertArguments(IStrategoAppl arguments) {
@@ -170,7 +170,7 @@ public class RunExpectationFromTerm implements TestExpectationFromTerm {
         final TestFragmentImpl fragment = TestSuiteFromTerm.fragmentFromTerm(toPart.getSubterm(2), null);
         final String resourceName = TestSuiteFromTerm.getResourceName(usedResourceNames, testSuiteDescription);
         final SptTestCaseResource resource = testCaseResourceRegistry.registerTestCase(testSuiteFile, resourceName, fragment.asText());
-        return new RunToFragmentExpectation(strategyName, arguments, selection, resource.getKey(), Option.ofOptional(languageIdHint), sourceRegion);
+        return new RunStrategoToFragmentExpectation(strategyName, arguments, selection, resource.getKey(), Option.ofOptional(languageIdHint), sourceRegion);
     }
 
     private Option<SelectionReference> convertSelections(IStrategoAppl term, Region fallbackRegion) {

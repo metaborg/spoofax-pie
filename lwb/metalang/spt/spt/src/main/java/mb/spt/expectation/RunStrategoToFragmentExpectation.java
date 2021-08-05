@@ -23,11 +23,11 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.TermFactory;
 import org.strategoxt.lang.TermEqualityUtil;
 
-public class RunToFragmentExpectation extends RunExpectation {
+public class RunStrategoToFragmentExpectation extends RunStrategoExpectation {
     private final ResourceKey fragmentResource;
     private final Option<String> languageIdHint;
 
-    public RunToFragmentExpectation(
+    public RunStrategoToFragmentExpectation(
         String strategyName,
         ListView<IStrategoAppl> arguments,
         Option<SelectionReference> selection,
