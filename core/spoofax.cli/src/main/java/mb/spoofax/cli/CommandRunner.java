@@ -80,7 +80,13 @@ class CommandRunner<A extends Serializable> implements Callable {
                     System.out.println();
                     System.out.println(text);
                     return Optional.empty();
-                });
+                })
+                .showTestResults(((testResults, region) -> {
+                    StringBuilder builder = new StringBuilder();
+                    testResults.addToStringBuilder(builder);
+                    System.out.print(builder);
+                    return Optional.empty();
+                }));
         }
         return null;
     }

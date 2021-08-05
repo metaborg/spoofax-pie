@@ -56,6 +56,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
     private final TemplateWriter moduleTemplate;
     private final TemplateWriter instanceTemplate;
     private final TemplateWriter commandDefTemplate;
+    private final TemplateWriter testStrategoTaskDef;
 
     private final ParserAdapterCompiler parserCompiler;
     private final StylerAdapterCompiler stylerCompiler;
@@ -88,6 +89,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         this.moduleTemplate = templateCompiler.getOrCompileToWriter("adapter_project/Module.java.mustache");
         this.instanceTemplate = templateCompiler.getOrCompileToWriter("adapter_project/Instance.java.mustache");
         this.commandDefTemplate = templateCompiler.getOrCompileToWriter("adapter_project/CommandDef.java.mustache");
+        this.testStrategoTaskDef = templateCompiler.getOrCompileToWriter("adapter_project/TestStrategoTaskDef.java.mustache");
 
         this.parserCompiler = parserCompiler;
         this.stylerCompiler = stylerCompiler;
@@ -163,6 +165,10 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         addTaskDef(allTaskDefs, input.checkAggregatorTaskDef(), input.baseCheckAggregatorTaskDef());
         addTaskDef(allTaskDefs, input.checkDeaggregatorTaskDef(), input.baseCheckDeaggregatorTaskDef());
 
+        if (input.strategoRuntime().isPresent() && input.parser().isPresent()) {
+            addTaskDef(allTaskDefs, input.testStrategoTaskDef(), input.baseTestStrategoTaskDef());
+        }
+
         // Class files
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         if(input.languageProjectDependency().isSome()) {
@@ -188,6 +194,18 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             map.put("scope", input.scope());
             map.put("taskDefInjection", uniqueNamer.makeUnique(commandDef.taskDefType()));
             commandDefTemplate.write(context, commandDef.type().file(generatedJavaSourcesDirectory), commandDef, map);
+        }
+
+        if (input.strategoRuntime().isPresent() && input.parser().isPresent()) {
+            final HashMap<String, Object> map = new HashMap<>();
+            if (input.constraintAnalyzer().isPresent()) {
+                map.put("taskInput", TypeInfo.of("mb.constraint.pie", "ConstraintAnalyzeTaskDef.Output"));
+                map.put("astMember", ".result.ast");
+            } else {
+                map.put("taskInput", TypeInfo.of("org.spoofax.interpreter.terms", "IStrategoTerm"));
+                map.put("astMember", "");
+            }
+            testStrategoTaskDef.write(context, input.baseTestStrategoTaskDef().file(generatedJavaSourcesDirectory), input, map);
         }
 
         { // Component
@@ -283,6 +301,20 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
                 }
                 out.write(name);
             });
+            if (input.strategoRuntime().isPresent() && input.parser().isPresent()) {
+                final NamedTypeInfo testStrategoInjection = uniqueNamer.makeUnique(input.testStrategoTaskDef());
+                map.put("testStrategoInjection", testStrategoInjection);
+                injected.add(testStrategoInjection);
+            } else {
+                map.put("testStrategoInjection", false);
+            }
+            if (input.constraintAnalyzer().isPresent() && input.parser().isPresent()) {
+                final NamedTypeInfo analyzeInjection = uniqueNamer.makeUnique(input.constraintAnalyzer().get().analyzeTaskDef());
+                map.put("analyzeInjection", analyzeInjection);
+                injected.add(analyzeInjection);
+            } else {
+                map.put("analyzeInjection", false);
+            }
 
             instanceTemplate.write(context, input.baseInstance().file(generatedJavaSourcesDirectory), input, map);
         }
@@ -579,6 +611,17 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             return extendCheckDeaggregatorTaskDef().orElseGet(this::baseCheckDeaggregatorTaskDef);
         }
 
+        // Stratego strategy SPT test task definition
+
+        @Value.Default default TypeInfo baseTestStrategoTaskDef() {
+            return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "TestStrategoTaskDef");
+        }
+
+        Optional<TypeInfo> extendTestStrategoTaskDef();
+
+        default TypeInfo testStrategoTaskDef() {
+            return extendTestStrategoTaskDef().orElseGet(this::baseTestStrategoTaskDef);
+        }
 
         /// Files information, known up-front for build systems with static dependencies such as Gradle.
 

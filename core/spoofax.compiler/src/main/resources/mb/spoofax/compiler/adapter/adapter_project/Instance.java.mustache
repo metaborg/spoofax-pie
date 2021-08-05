@@ -50,7 +50,9 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Set;
 
-public class {{baseInstance.id}} implements LanguageInstance{{#parseInjection}}, mb.spt.api.parse.TestableParse{{/parseInjection}} {
+public class {{baseInstance.id}} implements LanguageInstance{{#parseInjection}}, mb.spt.api.parse.TestableParse{{/parseInjection}}
+    {{#testStrategoInjection}}, mb.spt.api.stratego.TestableStratego{{/testStrategoInjection}}
+    {{#analyzeInjection}}, mb.spt.api.analyze.TestableAnalysis{{/analyzeInjection}} {
     private final static SetView<String> fileExtensions = SetView.of({{#shared.fileExtensions}}"{{this}}"{{^-last}}, {{/-last}}{{/shared.fileExtensions}});
 
 {{#injected}}
@@ -194,6 +196,59 @@ public class {{baseInstance.id}} implements LanguageInstance{{#parseInjection}},
         }
     }
 {{/parseInjection}}
+{{#testStrategoInjection}}
+    @Override
+    public Result<org.spoofax.interpreter.terms.IStrategoTerm, ?> testRunStrategy(Session session, ResourceKey resource, String strategy, ListView<mb.spt.api.analyze.StrategoRunArgument> termArguments, mb.common.option.Option<Region> region, @Nullable ResourcePath rootDirectoryHint) throws InterruptedException {
+        try {
+            return session.requireWithoutObserving(
+                {{testStrategoInjection.name}}.createTask(
+        {{#analyzeInjection}}
+                    {{analyzeInjection.name}}.createSupplier(
+                        new mb.constraint.pie.ConstraintAnalyzeTaskDef.Input(resource,{{parseInjection.name}}.inputBuilder()
+                            .withFile(resource)
+                            .rootDirectoryHint(Optional.ofNullable(rootDirectoryHint))
+                            .buildAstSupplier()
+                        )
+                    )
+        {{/analyzeInjection}}
+        {{^analyzeInjection}}
+                    {{parseInjection.name}}.inputBuilder()
+                    .withFile(resource)
+                    .rootDirectoryHint(Optional.ofNullable(rootDirectoryHint))
+                    .buildAstSupplier()
+        {{/analyzeInjection}}
+                    .map(
+                        (output) ->
+                            output.mapOrElse(
+                                (output2) -> Result.ofOk(new {{testStrategoTaskDef.qualifiedId}}.Input(output2, strategy, termArguments, region)),
+                                Result::ofErr
+                            )
+                    )
+                )
+            );
+        } catch(ExecException e) {
+            return Result.ofErr(e);
+        }
+    }
+{{/testStrategoInjection}}
+{{#analyzeInjection}}
+    @Override
+    public Result<org.spoofax.interpreter.terms.IStrategoTerm, ?> testAnalyze(Session session, ResourceKey resource, @Nullable ResourcePath rootDirectoryHint) throws InterruptedException {
+        try {
+            return session.requireWithoutObserving(
+                {{analyzeInjection.name}}.createTask(
+                    new mb.constraint.pie.ConstraintAnalyzeTaskDef.Input(resource, {{parseInjection.name}}.inputBuilder()
+                        .withFile(resource)
+                        .rootDirectoryHint(rootDirectoryHint)
+                        .buildAstSupplier()
+                    )
+                )
+            ).map((output) -> output.result.ast);
+        } catch(ExecException e) {
+            return Result.ofErr(e);
+        }
+    }
+{{/analyzeInjection}}
 }
 
 class TokensResultToOkFunction extends StatelessSerializableFunction<Result<JSGLRTokens, JsglrParseException>, Option<JSGLRTokens>> {

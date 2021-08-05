@@ -1,0 +1,97 @@
+package {{baseTestStrategoTaskDef.packageId}};
+
+import mb.common.region.Region;
+import mb.common.util.ListView;
+import mb.common.option.Option;
+import mb.spt.api.analyze.StrategoRunArgument;
+import mb.jsglr.common.TermTracer;
+import mb.pie.api.ExecContext;
+import mb.stratego.common.StrategoRuntime;
+import mb.stratego.pie.StrategoTransformTaskDef;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+
+import javax.inject.Inject;
+import java.io.Serializable;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+public class {{baseTestStrategoTaskDef.id}} extends StrategoTransformTaskDef<{{baseTestStrategoTaskDef.id}}.Input> {
+    public static class Input implements Serializable {
+        public final {{taskInput.qualifiedId}} analysisResult;
+        public final String strategy;
+        public final ListView<StrategoRunArgument> termArguments;
+        public final Option<Region> region;
+
+        public Input(
+            {{taskInput.qualifiedId}} analysisResult,
+            String strategy,
+            ListView<StrategoRunArgument> termArguments,
+            Option<Region> region
+        ) {
+            this.analysisResult = analysisResult;
+            this.strategy = strategy;
+            this.termArguments = termArguments;
+            this.region = region;
+        }
+
+        @Override public boolean equals(@Nullable Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            Input input = (Input)o;
+            return analysisResult.equals(input.analysisResult) && strategy.equals(input.strategy) && termArguments.equals(input.termArguments) && region.equals(input.region);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(analysisResult, strategy, termArguments, region);
+        }
+
+        @Override
+        public String toString() {
+            return "{{baseTestStrategoTaskDef.id}}$Input{strategy=" + strategy + ", termArguments=" + termArguments + ", region=" + region + "}";
+        }
+    }
+
+    private ListView<IStrategoTerm> processArguments(ListView<StrategoRunArgument> termArguments, ExecContext context, Input input) {
+        List<IStrategoTerm> terms = termArguments.stream()
+            .map((term) ->
+                term.caseOf()
+                    .intArg((x) -> (IStrategoTerm)x)
+                    .stringArg((x) -> (IStrategoTerm)x)
+                    .selectionArg((region) -> TermTracer.getBiggestTermInsideRegion(input.analysisResult{{astMember}}, region))
+            ).collect(Collectors.toList());
+        return ListView.of(terms);
+    }
+
+    @Override
+    public String getId() {
+        return getClass().getName();
+    }
+
+    @Override
+    protected IStrategoTerm getAst(ExecContext context, Input input) {
+        return input.region.mapOr(
+            (region) -> TermTracer.getBiggestTermInsideRegion(input.analysisResult{{astMember}}, region),
+            input.analysisResult{{astMember}}
+        );
+    }
+
+    @Override
+    protected ListView<Strategy> getStrategies(ExecContext context, Input input) {
+        return ListView.of(new Strategy(input.strategy, processArguments(input.termArguments, context, input)));
+    }
+
+    {{#constraintAnalyzer}}
+    @Override
+    protected StrategoRuntime getStrategoRuntime(ExecContext context, Input input) {
+        return super.getStrategoRuntime(context, input).addContextObject(input.analysisResult.context);
+    }
+    {{/constraintAnalyzer}}
+
+    @Inject
+    public {{baseTestStrategoTaskDef.id}}({{#strategoRuntime}}{{getStrategoRuntimeProviderTaskDef.qualifiedId}}{{/strategoRuntime}} getStrategoRuntimeProvider) {
+        super(getStrategoRuntimeProvider, ListView.of());
+    }
+}

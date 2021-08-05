@@ -38,6 +38,7 @@ import mb.spoofax.eclipse.editor.SpoofaxEditorBase;
 import mb.spoofax.eclipse.resource.EclipseResource;
 import mb.spoofax.eclipse.resource.EclipseResourcePath;
 import mb.spoofax.eclipse.resource.EclipseResourceRegistry;
+import mb.spoofax.eclipse.testrunner.TestRunViewPart;
 import mb.spoofax.eclipse.util.ResourceUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.IFile;
@@ -414,6 +415,19 @@ public class PieRunner {
                 });
 
                 return Optional.empty(); // Return value is required.
+            })
+            .showTestResults((tests, region) -> {
+                IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+                TestRunViewPart viewPart;
+                try {
+                    viewPart = (TestRunViewPart)page.showView(TestRunViewPart.VIEW_ID);
+                } catch(PartInitException e) {
+                    logger.error("Can't load Test run viewpart", e);
+                    return Optional.empty();
+                }
+                viewPart.reset();
+                viewPart.setData(tests);
+                return Optional.empty();
             })
         ;
     }

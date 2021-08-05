@@ -9,7 +9,8 @@ import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
-import java.io.IOException;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 /**
  * Abstract base task definition class that executes a sequence of Stratego strategies. The Stratego runtime to execute
@@ -22,16 +23,38 @@ import java.io.IOException;
  * @param <T> Type of wrapped inputs to this task definition, from which an {@link IStrategoTerm AST} can be extracted.
  */
 public abstract class BaseStrategoTransformTaskDef<T> implements TaskDef<Supplier<? extends Result<T, ?>>, Result<IStrategoTerm, ?>> {
-    private final ListView<String> strategyNames;
+    public static class Strategy {
+        public final String name;
+        public final ListView<IStrategoTerm> termArguments;
+
+        public Strategy(String name, ListView<IStrategoTerm> termArguments) {
+            this.name = name;
+            this.termArguments = termArguments;
+        }
+
+        public Strategy(String name) {
+            this.name = name;
+            this.termArguments = ListView.of();
+        }
+    }
+
+    private final ListView<Strategy> strategies;
 
     public BaseStrategoTransformTaskDef(ListView<String> strategyNames) {
-        this.strategyNames = strategyNames;
+        this.strategies = ListView.of(
+            strategyNames.stream()
+            .map(Strategy::new)
+            .collect(Collectors.toList())
+        );
     }
 
     public BaseStrategoTransformTaskDef(String... strategyNames) {
-        this.strategyNames = ListView.of(strategyNames);
+        this.strategies = ListView.of(
+            Arrays.stream(strategyNames)
+                .map(Strategy::new)
+                .collect(Collectors.toList())
+        );
     }
-
 
     protected void createDependencies(ExecContext context) throws Exception {}
 
@@ -39,15 +62,17 @@ public abstract class BaseStrategoTransformTaskDef<T> implements TaskDef<Supplie
 
     protected abstract IStrategoTerm getAst(ExecContext context, T input);
 
+    protected ListView<Strategy> getStrategies(ExecContext context, T input) { return strategies; }
+
     @Override
     public Result<IStrategoTerm, ?> exec(ExecContext context, Supplier<? extends Result<T, ?>> supplier) throws Exception {
         createDependencies(context);
         return context.require(supplier).flatMapOrElse((t) -> {
             final StrategoRuntime strategoRuntime = getStrategoRuntime(context, t);
             IStrategoTerm ast = getAst(context, t);
-            for(String strategyName : strategyNames) {
+            for(Strategy strategy : getStrategies(context, t)) {
                 try {
-                    ast = strategoRuntime.invoke(strategyName, ast);
+                    ast = strategoRuntime.invoke(strategy.name, ast, strategy.termArguments);
                 } catch(StrategoException e) {
                     return Result.ofErr(e);
                 }

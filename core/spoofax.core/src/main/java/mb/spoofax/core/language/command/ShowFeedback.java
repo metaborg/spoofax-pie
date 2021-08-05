@@ -3,6 +3,7 @@ package mb.spoofax.core.language.command;
 import mb.common.region.Region;
 import mb.common.util.ADT;
 import mb.resource.ResourceKey;
+import mb.spoofax.core.language.testrunner.TestResults;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
@@ -14,6 +15,8 @@ public abstract class ShowFeedback implements Serializable {
         R showFile(ResourceKey file, @Nullable Region region);
 
         R showText(String text, String name, @Nullable Region region);
+
+        R showTestResults(TestResults testResults, @Nullable Region region);
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -36,6 +39,7 @@ public abstract class ShowFeedback implements Serializable {
         return ShowFeedbacks.showText(text, name, null);
     }
 
+    public static ShowFeedback showTestResults(TestResults testResults) { return ShowFeedbacks.showTestResults(testResults, null); }
 
     public abstract <R> R match(Cases<R> cases);
 
@@ -60,6 +64,9 @@ public abstract class ShowFeedback implements Serializable {
         return Optional.ofNullable(region);
     }
 
+    public Optional<TestResults> getTestResults() {
+        return ShowFeedbacks.getTestResults(this);
+    }
 
     @Override public abstract int hashCode();
 

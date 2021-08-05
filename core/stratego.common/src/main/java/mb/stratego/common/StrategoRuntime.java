@@ -1,6 +1,9 @@
 package mb.stratego.common;
 
+import mb.common.util.ListView;
+import org.spoofax.interpreter.core.Interpreter;
 import org.spoofax.interpreter.core.InterpreterException;
+import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.strategoxt.HybridInterpreter;
@@ -54,6 +57,34 @@ public class StrategoRuntime {
         }
     }
 
+    public IStrategoTerm invoke(String strategy, IStrategoTerm input, ListView<IStrategoTerm> termArguments) throws StrategoException {
+        hybridInterpreter.setCurrent(input);
+        hybridInterpreter.setIOAgent(ioAgent);
+        hybridInterpreter.getContext().setContextObject(contextObject);
+        hybridInterpreter.getCompiledContext().setContextObject(contextObject);
+        ITermFactory termFactory = getTermFactory();
+        IStrategoTerm strategyName = termFactory.makeString(Interpreter.cify(strategy) + "_0_" + termArguments.size());
+        IStrategoTerm strategyNameTerm = termFactory.makeAppl("SVar", strategyName);
+        IStrategoAppl strategyCallTerm = termFactory.makeAppl(
+            "CallT",
+            strategyNameTerm,
+            termFactory.makeList(),
+            termFactory.makeList(termArguments.asUnmodifiable())
+        );
+        try {
+            final boolean success = hybridInterpreter.evaluate(strategyCallTerm);
+            if(!success) {
+                throw StrategoException.strategyFail(strategy, input, hybridInterpreter.getCompiledContext().getTrace());
+            }
+            return hybridInterpreter.current();
+        } catch(InterpreterException e) {
+            throw StrategoException.fromInterpreterException(strategy, input, hybridInterpreter.getCompiledContext().getTrace(), e);
+        }
+    }
+
+    public IStrategoTerm invoke(String strategy, IStrategoTerm input, IStrategoTerm... arguments) throws StrategoException {
+        return invoke(strategy, input, ListView.of(arguments));
+    }
 
     public StrategoRuntime withIoAgent(StrategoIOAgent ioAgent) {
         return new StrategoRuntime(this, ioAgent);
