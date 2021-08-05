@@ -16,7 +16,7 @@ public interface TestableStratego {
         Session session,
         ResourceKey resource,
         String strategy,
-        ListView<StrategoRunArgument> arguments,
+        ListView<StrategoRunArgument> termArguments,
         Option<Region> region,
         @Nullable ResourcePath rootDirectoryHint
     ) throws InterruptedException;

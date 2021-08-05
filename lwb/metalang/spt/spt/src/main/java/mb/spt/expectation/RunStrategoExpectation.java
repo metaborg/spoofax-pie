@@ -76,7 +76,7 @@ public class RunStrategoExpectation implements TestExpectation {
         Option<Region> region = selectionReference.map(
             (sel) -> testCase.testFragment.getSelections().get(sel.selection - 1)
         );
-        final Result<IStrategoTerm, ?> result = testableStratego.testRunStrategy(languageUnderTestSession, testCase.resource, strategy, parseArguments(arguments, testCase), region, testCase.rootDirectoryHint);
+        final Result<IStrategoTerm, ?> result = testableStratego.testRunStrategy(languageUnderTestSession, testCase.resource, strategy, processArguments(arguments, testCase), region, testCase.rootDirectoryHint);
 
         result
             .ifOkThrowing(
@@ -108,7 +108,7 @@ public class RunStrategoExpectation implements TestExpectation {
         return messagesBuilder.build();
     }
 
-    private ListView<StrategoRunArgument> parseArguments(ListView<IStrategoAppl> terms, TestCase testCase) {
+    private ListView<StrategoRunArgument> processArguments(ListView<IStrategoAppl> terms, TestCase testCase) {
         List<StrategoRunArgument> args = new ArrayList<>();
         for(IStrategoAppl term : terms) {
             switch(term.getName()) {

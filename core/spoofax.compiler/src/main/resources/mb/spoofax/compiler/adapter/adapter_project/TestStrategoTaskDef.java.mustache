@@ -21,18 +21,18 @@ public class {{baseTestStrategoTaskDef.id}} extends StrategoTransformTaskDef<{{b
     public static class Input implements Serializable {
         public final {{taskInput.qualifiedId}} analysisResult;
         public final String strategy;
-        public final ListView<StrategoRunArgument> arguments;
+        public final ListView<StrategoRunArgument> termArguments;
         public final Option<Region> region;
 
         public Input(
             {{taskInput.qualifiedId}} analysisResult,
             String strategy,
-            ListView<StrategoRunArgument> arguments,
+            ListView<StrategoRunArgument> termArguments,
             Option<Region> region
         ) {
             this.analysisResult = analysisResult;
             this.strategy = strategy;
-            this.arguments = arguments;
+            this.termArguments = termArguments;
             this.region = region;
         }
 
@@ -40,22 +40,22 @@ public class {{baseTestStrategoTaskDef.id}} extends StrategoTransformTaskDef<{{b
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             Input input = (Input)o;
-            return analysisResult.equals(input.analysisResult) && strategy.equals(input.strategy) && arguments.equals(input.arguments) && region.equals(input.region);
+            return analysisResult.equals(input.analysisResult) && strategy.equals(input.strategy) && termArguments.equals(input.termArguments) && region.equals(input.region);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(analysisResult, strategy, arguments, region);
+            return Objects.hash(analysisResult, strategy, termArguments, region);
         }
 
         @Override
         public String toString() {
-            return "{{baseTestStrategoTaskDef.id}}$Input{strategy=" + strategy + ", arguments=" + arguments + ", region=" + region + "}";
+            return "{{baseTestStrategoTaskDef.id}}$Input{strategy=" + strategy + ", termArguments=" + termArguments + ", region=" + region + "}";
         }
     }
 
-    private ListView<IStrategoTerm> processArguments(ListView<StrategoRunArgument> arguments, ExecContext context, Input input) {
-        List<IStrategoTerm> terms = arguments.stream()
+    private ListView<IStrategoTerm> processArguments(ListView<StrategoRunArgument> termArguments, ExecContext context, Input input) {
+        List<IStrategoTerm> terms = termArguments.stream()
             .map((term) ->
                 term.caseOf()
                     .intArg((x) -> (IStrategoTerm)x)
@@ -80,7 +80,7 @@ public class {{baseTestStrategoTaskDef.id}} extends StrategoTransformTaskDef<{{b
 
     @Override
     protected ListView<Strategy> getStrategies(ExecContext context, Input input) {
-        return ListView.of(new Strategy(input.strategy, processArguments(input.arguments, context, input)));
+        return ListView.of(new Strategy(input.strategy, processArguments(input.termArguments, context, input)));
     }
 
     {{#constraintAnalyzer}}

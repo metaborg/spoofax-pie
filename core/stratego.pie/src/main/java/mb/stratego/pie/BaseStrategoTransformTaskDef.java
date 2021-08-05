@@ -25,16 +25,16 @@ import java.util.stream.Collectors;
 public abstract class BaseStrategoTransformTaskDef<T> implements TaskDef<Supplier<? extends Result<T, ?>>, Result<IStrategoTerm, ?>> {
     public static class Strategy {
         public final String name;
-        public final ListView<IStrategoTerm> arguments;
+        public final ListView<IStrategoTerm> termArguments;
 
-        public Strategy(String name, ListView<IStrategoTerm> arguments) {
+        public Strategy(String name, ListView<IStrategoTerm> termArguments) {
             this.name = name;
-            this.arguments = arguments;
+            this.termArguments = termArguments;
         }
 
         public Strategy(String name) {
             this.name = name;
-            this.arguments = ListView.of();
+            this.termArguments = ListView.of();
         }
     }
 
@@ -72,7 +72,7 @@ public abstract class BaseStrategoTransformTaskDef<T> implements TaskDef<Supplie
             IStrategoTerm ast = getAst(context, t);
             for(Strategy strategy : getStrategies(context, t)) {
                 try {
-                    ast = strategoRuntime.invoke(strategy.name, ast, strategy.arguments);
+                    ast = strategoRuntime.invoke(strategy.name, ast, strategy.termArguments);
                 } catch(StrategoException e) {
                     return Result.ofErr(e);
                 }

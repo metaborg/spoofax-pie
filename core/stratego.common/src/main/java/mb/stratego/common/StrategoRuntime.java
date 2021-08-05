@@ -57,19 +57,19 @@ public class StrategoRuntime {
         }
     }
 
-    public IStrategoTerm invoke(String strategy, IStrategoTerm input, ListView<IStrategoTerm> arguments) throws StrategoException {
+    public IStrategoTerm invoke(String strategy, IStrategoTerm input, ListView<IStrategoTerm> termArguments) throws StrategoException {
         hybridInterpreter.setCurrent(input);
         hybridInterpreter.setIOAgent(ioAgent);
         hybridInterpreter.getContext().setContextObject(contextObject);
         hybridInterpreter.getCompiledContext().setContextObject(contextObject);
         ITermFactory termFactory = getTermFactory();
-        IStrategoTerm strategyName = termFactory.makeString(Interpreter.cify(strategy) + "_0_" + arguments.size());
+        IStrategoTerm strategyName = termFactory.makeString(Interpreter.cify(strategy) + "_0_" + termArguments.size());
         IStrategoTerm strategyNameTerm = termFactory.makeAppl("SVar", strategyName);
         IStrategoAppl strategyCallTerm = termFactory.makeAppl(
             "CallT",
             strategyNameTerm,
             termFactory.makeList(),
-            termFactory.makeList(arguments.asUnmodifiable())
+            termFactory.makeList(termArguments.asUnmodifiable())
         );
         try {
             final boolean success = hybridInterpreter.evaluate(strategyCallTerm);
