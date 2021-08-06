@@ -1,6 +1,5 @@
 package mb.spt.expectation;
 
-import mb.common.option.Option;
 import mb.common.region.Region;
 import mb.common.util.SetView;
 import mb.jsglr.common.TermTracer;
@@ -47,7 +46,7 @@ public class ResolveExpectationFromTerm implements TestExpectationFromTerm {
 
     private TestExpectation convertResolveExpectation(IStrategoAppl term, Region fallbackRegion, String testSuiteDescription, ResourceKey testSuiteFile, SptTestCaseResourceRegistry testCaseResourceRegistry, HashSet<String> usedResourceNames, Region sourceRegion) {
         SelectionReference fromRef = convertSelectionReference(term, fallbackRegion, 0, "int as first subterm");
-        return new ResolveToExpectation(fromRef, Option.ofNone(), sourceRegion);
+        return new ResolveExpectation(fromRef, sourceRegion);
     }
 
     private TestExpectation convertResolveToExpectation(IStrategoAppl term, Region fallbackRegion, String testSuiteDescription, ResourceKey testSuiteFile, SptTestCaseResourceRegistry testCaseResourceRegistry, HashSet<String> usedResourceNames, Region sourceRegion) {
@@ -55,7 +54,7 @@ public class ResolveExpectationFromTerm implements TestExpectationFromTerm {
 
         SelectionReference toRef = convertSelectionReference(term, fallbackRegion, 1, "int as second subterm");
 
-        return new ResolveToExpectation(fromRef, Option.ofSome(toRef), sourceRegion);
+        return new ResolveToExpectation(fromRef, toRef, sourceRegion);
     }
 
     private SelectionReference convertSelectionReference(IStrategoAppl term, Region fallbackRegion, int index, String expected) {
