@@ -242,6 +242,40 @@ public class {{baseInstance.id}} implements LanguageInstance{{#parseInjection}},
             return Result.ofErr(e);
         }
     }
+
+    @Override
+    public Result<org.spoofax.interpreter.terms.IStrategoTerm, ?> testResolve(Session session, ResourceKey resource, Region region, @Nullable ResourcePath rootDirectoryHint) throws InterruptedException {
+        try {
+            return session.requireWithoutObserving(
+                {{testResolveInjection.name}}.createTask(
+        {{#analyzeInjection}}
+                    {{analyzeInjection.name}}.createSupplier(
+                        new mb.constraint.pie.ConstraintAnalyzeTaskDef.Input(resource,{{parseInjection.name}}.inputBuilder()
+                            .withFile(resource)
+                            .rootDirectoryHint(Optional.ofNullable(rootDirectoryHint))
+                            .buildAstSupplier()
+                        )
+                    )
+        {{/analyzeInjection}}
+        {{^analyzeInjection}}
+                    {{parseInjection.name}}.inputBuilder()
+                    .withFile(resource)
+                    .rootDirectoryHint(Optional.ofNullable(rootDirectoryHint))
+                    .buildAstSupplier()
+        {{/analyzeInjection}}
+                    .map(
+                        (output) ->
+                            output.mapOrElse(
+                                (output2) -> Result.ofOk(new {{testResolveTaskDef.qualifiedId}}.Input(output2, region)),
+                                Result::ofErr
+                            )
+                    )
+                )
+            );
+        } catch(ExecException e) {
+            return Result.ofErr(e);
+        }
+    }
 {{/testStrategoInjection}}
 {{#analyzeInjection}}
     @Override

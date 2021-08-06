@@ -1,0 +1,82 @@
+package {{baseTestStrategoTaskDef.packageId}};
+
+import mb.common.region.Region;
+import mb.common.result.Result;
+import mb.common.util.ListView;
+import mb.common.option.Option;
+import mb.jsglr.common.TermTracer;
+import mb.pie.api.ExecContext;
+import mb.pie.api.Supplier;
+import mb.stratego.common.StrategoRuntime;
+import mb.stratego.pie.StrategoTransformTaskDef;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spoofax.interpreter.terms.IStrategoInt;
+import org.spoofax.interpreter.terms.IStrategoString;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.terms.TermFactory;
+
+import javax.inject.Inject;
+import java.io.Serializable;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+public class {{baseTestResolveTaskDef.id}} extends StrategoTransformTaskDef<{{baseTestResolveTaskDef.id}}.Input> {
+    public static class Input implements Serializable {
+        public final {{taskInput.qualifiedId}} analysisResult;
+        public final Region region;
+
+        public Input({{taskInput.qualifiedId}} analysisResult, Region region) {
+            this.analysisResult = analysisResult;
+            this.region = region;
+        }
+
+        @Override public boolean equals(@Nullable Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            Input input = (Input)o;
+            return analysisResult.equals(input.analysisResult) && region.equals(input.region);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(analysisResult, region);
+        }
+
+        @Override
+        public String toString() {
+            return "{{baseTestResolveTaskDef.id}}$Input{region=" + region + "}";
+        }
+    }
+
+    @Override
+    public String getId() {
+        return getClass().getName();
+    }
+
+    @Override
+    protected IStrategoTerm getAst(ExecContext context, Input input) {
+        TermFactory termFactory = new TermFactory();
+        IStrategoTerm node = TermTracer.getBiggestTermInsideRegion(input.analysisResult{{astMember}}, input.region);
+        IStrategoInt position = termFactory.makeInt(input.region.getStartOffset());
+        IStrategoString path = termFactory.makeString("path");
+        return termFactory.makeTuple(node, position, input.analysisResult{{astMember}}, path, path);
+    }
+
+    @Override
+    protected ListView<Strategy> getStrategies(ExecContext context, Input input) {
+        return ListView.of(new Strategy("editor-resolve", ListView.of()));
+    }
+
+    {{#constraintAnalyzer}}
+    @Override
+    protected StrategoRuntime getStrategoRuntime(ExecContext context, Input input) {
+        return super.getStrategoRuntime(context, input).addContextObject(input.analysisResult.context);
+    }
+    {{/constraintAnalyzer}}
+
+    @Inject
+    public {{baseTestResolveTaskDef.id}}({{#strategoRuntime}}{{getStrategoRuntimeProviderTaskDef.qualifiedId}}{{/strategoRuntime}} getStrategoRuntimeProvider) {
+        super(getStrategoRuntimeProvider, ListView.of());
+    }
+}

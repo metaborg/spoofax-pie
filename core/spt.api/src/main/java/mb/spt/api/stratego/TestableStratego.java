@@ -20,4 +20,10 @@ public interface TestableStratego {
         Option<Region> region,
         @Nullable ResourcePath rootDirectoryHint
     ) throws InterruptedException;
+    Result<IStrategoTerm, ?> testResolve(
+        Session session,
+        ResourceKey resource,
+        Region region,
+        @Nullable ResourcePath rootDirectoryHint
+    ) throws InterruptedException;
 }
