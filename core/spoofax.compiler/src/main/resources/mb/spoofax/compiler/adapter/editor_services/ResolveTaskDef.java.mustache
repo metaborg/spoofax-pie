@@ -95,7 +95,7 @@ public class {{baseResolveTaskDef.id}} implements TaskDef<{{baseResolveTaskDef.i
         return "{{baseResolveTaskDef.qualifiedId}}";
     }
 
-    @Override public Option<ResolveResult> exec(ExecContext context, Args args) throws Exception {
+    @Override public Option<ReferenceResolutionResult> exec(ExecContext context, Args args) throws Exception {
         System.err.println("ResolveTaskDef.exec()");
         final ResourceKey file = args.file;
 
@@ -104,8 +104,9 @@ public class {{baseResolveTaskDef.id}} implements TaskDef<{{baseResolveTaskDef.i
             .inputBuilder()
             .withFile(file)
             .rootDirectoryHint(Optional.ofNullable(args.rootDirectoryHint))
+            .fileHint(file)
             .buildAstSupplier();
-        final Result<ConstraintAnalyzeTaskDef.Output, ?> analysis = context.require(analyze.createTask(new ConstraintAnalyzeTaskDef.Input(file, astSupplier)));
+        final Result<ConstraintAnalyzeTaskDef.Output, ?> analysis = context.require(analyze, new ConstraintAnalyzeTaskDef.Input(file, astSupplier));
         if(!analysis.isOk()) {
             System.err.println("analysis not ok");
             return Option.ofNone();
@@ -144,7 +145,7 @@ public class {{baseResolveTaskDef.id}} implements TaskDef<{{baseResolveTaskDef.i
                         TermTracer.getRegion(term),
                         new ListView<>(results.stream().map(matchedTerm -> {
                             final @Nullable IStrategoTerm originNode = TermTracer.getOrigin(matchedTerm);
-                            final @Nullable ResourceKey termFile = TermTracer.getResourceKey(matchedTerm);
+                            final @Nullable ResourceKey termFile = file; // TermTracer.getResourceKey(matchedTerm);
                             final @Nullable Region termRegion = TermTracer.getRegion(matchedTerm);
                             if(termFile == null || termRegion == null) {
                                 // TODO: better exception

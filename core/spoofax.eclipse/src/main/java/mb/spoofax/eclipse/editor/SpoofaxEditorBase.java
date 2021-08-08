@@ -25,6 +25,7 @@ import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.ISourceViewerExtension2;
 import org.eclipse.jface.text.source.IVerticalRuler;
+import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -159,7 +160,7 @@ public abstract class SpoofaxEditorBase extends TextEditor {
         final Display display = Display.getDefault();
         display.asyncExec(() -> {
             sourceViewerExt2.unconfigure();
-            setSourceViewerConfiguration(new SpoofaxSourceViewerConfiguration());
+            setSourceViewerConfiguration(this.createSourceViewerConfiguration());
             sourceViewer.configure(getSourceViewerConfiguration());
             final SourceViewerDecorationSupport decorationSupport = getSourceViewerDecorationSupport(sourceViewer);
             configureSourceViewerDecorationSupport(decorationSupport);
@@ -171,6 +172,7 @@ public abstract class SpoofaxEditorBase extends TextEditor {
 
     protected abstract void scheduleJob(boolean initialUpdate);
 
+    protected abstract SourceViewerConfiguration createSourceViewerConfiguration();
 
     @Override
     protected void initializeEditor() {
@@ -183,7 +185,7 @@ public abstract class SpoofaxEditorBase extends TextEditor {
         this.logger = loggerFactory.create(getClass());
 
         setDocumentProvider(new SpoofaxDocumentProvider());
-        setSourceViewerConfiguration(new SpoofaxSourceViewerConfiguration());
+        setSourceViewerConfiguration(this.createSourceViewerConfiguration());
         setEditorContextMenuId("#SpoofaxEditorContext");
     }
 
