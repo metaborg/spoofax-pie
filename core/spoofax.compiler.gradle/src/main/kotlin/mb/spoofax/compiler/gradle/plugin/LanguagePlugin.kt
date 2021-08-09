@@ -78,7 +78,7 @@ open class LanguageProjectExtension(project: Project) {
 
   val components: Components by lazy { Components() }
 
-  val sharedFinalized: Shared by lazy {
+  open val sharedFinalized: Shared by lazy {
     project.logger.debug("Finalizing $name shared settings in $project")
     shared.finalizeValue()
 
@@ -100,7 +100,7 @@ open class LanguageProjectExtension(project: Project) {
       .build()
   }
 
-  val compilerInputFinalized: LanguageProjectCompiler.Input by lazy {
+  open val compilerInputFinalized: LanguageProjectCompiler.Input by lazy {
     project.logger.debug("Finalizing $name's compiler input in $project")
     compilerInput.finalizeValue()
     val languageProjectBuilder = compilerInput.get()
@@ -126,7 +126,7 @@ open class LanguageProjectExtension(project: Project) {
     languageProjectBuilder.build(sharedFinalized, languageProjectFinalized)
   }
 
-  val statixDependenciesFinalized: List<Project> by lazy {
+  open val statixDependenciesFinalized: List<Project> by lazy {
     project.logger.debug("Finalizing $name statix dependencies in $project")
     statixDependencies.finalizeValue()
     statixDependencies.get()
