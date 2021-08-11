@@ -40,4 +40,22 @@ public class MultiAstSupplierFunction implements Function<ResourcePath, MapView<
         }
         return MapView.of(astsAndErrors);
     }
+
+    @Override public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+
+        MultiAstSupplierFunction that = (MultiAstSupplierFunction)o;
+
+        if(!parseToAstFunction.equals(that.parseToAstFunction)) return false;
+        if(!walker.equals(that.walker)) return false;
+        return matcher.equals(that.matcher);
+    }
+
+    @Override public int hashCode() {
+        int result = parseToAstFunction.hashCode();
+        result = 31 * result + walker.hashCode();
+        result = 31 * result + matcher.hashCode();
+        return result;
+    }
 }
