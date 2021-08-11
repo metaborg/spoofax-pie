@@ -164,9 +164,9 @@ public class {{baseInstance.id}} implements LanguageInstance{{#parseInjection}},
     }
 
     @Override
-    public Task<Option<ReferenceResolutionResult>> createResolveTask(ResourceKey file, @Nullable ResourcePath rootDirectoryHint, Region region) {
+    public Task<Option<ReferenceResolutionResult>> createResolveTask(ResourcePath rootDirectory, ResourceKey file, Region region) {
 {{#hasResolveInjection}}
-        return {{resolveInjection.name}}.createTask(new {{resolveInjection.type.qualifiedId}}.Args(file, rootDirectoryHint, region));
+        return {{resolveInjection.name}}.createTask(new {{resolveInjection.type.qualifiedId}}.Args(file, rootDirectory, region));
 {{/hasResolveInjection}}
 {{^hasResolveInjection}}
         return {{resolveInjection.name}}.createTask({{resolveInjection.type.qualifiedId}}.Args.Empty);

@@ -51,7 +51,7 @@ public interface LanguageInstance {
     Task<KeyedMessages> createCheckTask(ResourcePath rootDirectory);
 
 
-    Task<Option<ReferenceResolutionResult>> createResolveTask(ResourceKey file, @Nullable ResourcePath rootDirectoryHint, Region region);
+    Task<Option<ReferenceResolutionResult>> createResolveTask(ResourcePath rootDirectory, ResourceKey file, Region region);
 
 
     CollectionView<CommandDef<?>> getCommandDefs();

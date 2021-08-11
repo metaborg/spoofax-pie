@@ -5,6 +5,7 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.None;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.compiler.language.ClassLoaderResourcesCompiler;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.TemplateCompiler;
@@ -97,6 +98,19 @@ public class ReferenceResolutionAdapterCompiler implements TaskDef<ReferenceReso
             );
         }
 
+        /// Automatically computed values
+
+        @Value.Derived default boolean isMultiFile() {
+            return constraintAnalyzerInput().languageProjectInput().multiFile();
+        }
+
+        @Value.Derived default TypeInfo analyzeTaskDef() {
+            if (this.isMultiFile()) {
+                return constraintAnalyzerInput().analyzeMultiTaskDef();
+            } else {
+                return constraintAnalyzerInput().analyzeTaskDef();
+            }
+        }
 
         /// Automatically provided sub-inputs
 
@@ -109,5 +123,7 @@ public class ReferenceResolutionAdapterCompiler implements TaskDef<ReferenceReso
         ParserAdapterCompiler.Input parseInput();
 
         ConstraintAnalyzerAdapterCompiler.Input constraintAnalyzerInput();
+
+        ClassLoaderResourcesCompiler.Input classLoaderResourcesInput();
     }
 }

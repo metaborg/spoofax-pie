@@ -6,6 +6,7 @@ import mb.common.option.Option;
 import mb.common.region.Region;
 import mb.common.result.Result;
 import mb.common.util.ListView;
+import mb.constraint.pie.ConstraintAnalyzeMultiTaskDef;
 import mb.constraint.pie.ConstraintAnalyzeTaskDef;
 import mb.jsglr.common.JsglrParseException;
 import mb.jsglr.common.TermTracer;
@@ -14,8 +15,12 @@ import mb.pie.api.None;
 import mb.pie.api.OutTransient;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
+import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
+import mb.resource.hierarchical.match.ResourceMatcher;
+import mb.resource.hierarchical.match.path.PathMatcher;
+import mb.resource.hierarchical.walk.ResourceWalker;
 import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -28,6 +33,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -37,12 +43,12 @@ public class {{baseResolveTaskDef.id}} implements TaskDef<{{baseResolveTaskDef.i
         private static final long serialVersionUID = 1L;
 
         public final ResourceKey file;
-        public final @Nullable ResourcePath rootDirectoryHint;
+        public final ResourcePath rootDirectory;
         public final Region position;
 
-        public Args(ResourceKey file, @Nullable ResourcePath rootDirectoryHint, Region position) {
+        public Args(ResourceKey file, ResourcePath rootDirectory, Region position) {
             this.file = file;
-            this.rootDirectoryHint = rootDirectoryHint;
+            this.rootDirectory = rootDirectory;
             this.position = position;
         }
 
@@ -53,8 +59,7 @@ public class {{baseResolveTaskDef.id}} implements TaskDef<{{baseResolveTaskDef.i
             Args args = (Args)o;
 
             if(!file.equals(args.file)) return false;
-            if(rootDirectoryHint != null ? !rootDirectoryHint.equals(args.rootDirectoryHint) : args.rootDirectoryHint != null)
-                return false;
+            if(!rootDirectory.equals(args.rootDirectory)) return false;
             if(!position.equals(args.position)) return false;
 
             return true;
@@ -62,7 +67,7 @@ public class {{baseResolveTaskDef.id}} implements TaskDef<{{baseResolveTaskDef.i
 
         @Override public int hashCode() {
             int result = file.hashCode();
-            result = 31 * result + (rootDirectoryHint != null ? rootDirectoryHint.hashCode() : 0);
+            result = 31 * result + rootDirectory.hashCode();
             result = 31 * result + position.hashCode();
             return result;
         }
@@ -70,22 +75,25 @@ public class {{baseResolveTaskDef.id}} implements TaskDef<{{baseResolveTaskDef.i
         @Override public String toString() {
             return "Args{" +
                 "file=" + file +
-                ", rootDirectoryHint=" + rootDirectoryHint +
+                ", rootDirectory=" + rootDirectory +
                 ", offset=" + position +
                 '}';
         }
     }
 
+    private final {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources;
     private final {{parseInput.parseTaskDef.qualifiedId}} parse;
-    private final {{constraintAnalyzerInput.analyzeTaskDef.qualifiedId}} analyze;
+    private final {{analyzeTaskDef.qualifiedId}} analyze;
     private final {{strategoRuntimeInput.getStrategoRuntimeProviderTaskDef.qualifiedId}} getStrategoRuntimeProvider;
 
     @Inject
     public {{baseResolveTaskDef.id}}(
+        {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources,
         {{parseInput.parseTaskDef.qualifiedId}} parse,
-        {{constraintAnalyzerInput.analyzeTaskDef.qualifiedId}} analyze,
+        {{analyzeTaskDef.qualifiedId}} analyze,
         {{strategoRuntimeInput.getStrategoRuntimeProviderTaskDef.qualifiedId}} getStrategoRuntimeProvider
     ) {
+        this.classLoaderResources = classLoaderResources;
         this.parse = parse;
         this.analyze = analyze;
         this.getStrategoRuntimeProvider = getStrategoRuntimeProvider;
@@ -96,19 +104,42 @@ public class {{baseResolveTaskDef.id}} implements TaskDef<{{baseResolveTaskDef.i
     }
 
     @Override public Option<ReferenceResolutionResult> exec(ExecContext context, Args args) throws Exception {
-        System.err.println("ResolveTaskDef.exec()");
+        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+
         final ResourceKey file = args.file;
 
         // Step 1: get analysis
+{{#isMultiFile}}
+        final ResourceWalker walker = ResourceWalker.ofPath(PathMatcher.ofNoHidden());
+        final ResourceMatcher matcher = ResourceMatcher.ofPath(
+            PathMatcher.ofExtensions({{#shared.fileExtensions}}"{{this}}"{{^-last}}, {{/-last}}{{/shared.fileExtensions}})
+        ).and(ResourceMatcher.ofFile());
+
+        final Result<ConstraintAnalyzeMultiTaskDef.SingleFileOutput, ?> analysis = context.require(
+            analyze.createSingleFileOutputSupplier(
+                new ConstraintAnalyzeMultiTaskDef.Input(
+                    args.rootDirectory,
+                    parse.createRecoverableMultiAstSupplierFunction(walker, matcher)
+                ),
+                args.file
+            )
+        );
+{{/isMultiFile}}
+{{^isMultiFile}}
         final Supplier<Result<IStrategoTerm, JsglrParseException>> astSupplier = parse
             .inputBuilder()
             .withFile(file)
-            .rootDirectoryHint(Optional.ofNullable(args.rootDirectoryHint))
+            .rootDirectoryHint(Optional.of(args.rootDirectory))
             .fileHint(file)
             .buildAstSupplier();
-        final Result<ConstraintAnalyzeTaskDef.Output, ?> analysis = context.require(analyze, new ConstraintAnalyzeTaskDef.Input(file, astSupplier));
+
+        final Result<ConstraintAnalyzeTaskDef.Output, ?> analysis = context.require(
+            analyze,
+            new ConstraintAnalyzeTaskDef.Input(file, astSupplier)
+        );
+{{/isMultiFile}}
+
         if(!analysis.isOk()) {
-            System.err.println("analysis not ok");
             return Option.ofNone();
         }
 
@@ -134,39 +165,33 @@ public class {{baseResolveTaskDef.id}} implements TaskDef<{{baseResolveTaskDef.i
                 // Resolve strategy can either return a single AST or a list of
                 // results. Convert both to a list, then map them to resolve results.
                 final List<IStrategoTerm> results;
-                if (result instanceof IStrategoList) {
-                    results = ((IStrategoList) result).getSubterms();
+                if(result instanceof IStrategoList) {
+                    results = ((IStrategoList)result).getSubterms();
                 } else {
                     results = Collections.singletonList(result);
                 }
 
-                return Option.ofSome(
-                    new ReferenceResolutionResult(
-                        TermTracer.getRegion(term),
-                        new ListView<>(results.stream().map(matchedTerm -> {
-                            final @Nullable IStrategoTerm originNode = TermTracer.getOrigin(matchedTerm);
-                            final @Nullable ResourceKey termFile = file; // TermTracer.getResourceKey(matchedTerm);
-                            final @Nullable Region termRegion = TermTracer.getRegion(matchedTerm);
-                            if(termFile == null || termRegion == null) {
-                                // TODO: better exception
-                                // should we maybe ignore those without region? spoofax 2 does it like that.
-                                if(originNode == null) System.err.println("origin is null");
-                                else System.err.println("Origin file: " + TermTracer.getResourceKey(originNode));
-                                if(termFile == null) System.err.println("termfile is null");
-                                if(termRegion == null) System.err.println("termregion is null");
-                                throw new RuntimeException("Result of stratego resolve yielded AST node without position.");
-                            }
+                final List<ReferenceResolutionResult.ResolvedEntry> entries = results.stream().map(matchedTerm -> {
+                    final @Nullable ResourceKey termFile = TermTracer.getResourceKey(matchedTerm);
+                    final @Nullable Region termRegion = TermTracer.getRegion(matchedTerm);
 
-                            return new ReferenceResolutionResult.ResolvedEntry(termFile, termRegion, TermToString.toString(matchedTerm));
-                        }).collect(Collectors.toList()))
-                    )
-                );
+                    if(termFile == null || termRegion == null) {
+                        // Ignore results that don't have a location.
+                        return null;
+                    }
+
+                    return new ReferenceResolutionResult.ResolvedEntry(termFile, termRegion, TermToString.toString(matchedTerm));
+                }).filter(Objects::nonNull).collect(Collectors.toList());
+
+                if(entries.isEmpty()) {
+                    return Option.ofNone();
+                }
+
+                return Option.ofSome(new ReferenceResolutionResult(TermTracer.getRegion(term), ListView.of(entries)));
             } catch(StrategoException ex) {
                 // ignored
             }
         }
-
-        System.err.println("No terms matched.");
 
         return Option.ofNone();
     }
