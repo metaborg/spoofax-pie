@@ -7,6 +7,7 @@ import mb.pie.api.ExecException;
 import mb.pie.api.Interactivity;
 import mb.pie.api.MixedSession;
 import mb.pie.api.TopDownSession;
+import mb.pie.api.UncheckedExecException;
 import mb.pie.dagger.PieComponent;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
@@ -55,7 +56,10 @@ public class SpoofaxHyperlinkDetector implements IHyperlinkDetector {
             }
 
             return referenceResolutionResultToHyperlinks(resolveResult.get());
-        } catch(ExecException | InterruptedException e) {
+        } catch(ExecException e) {
+            // bubble error up to eclipse, which will handle it and show a dialog
+            throw new UncheckedExecException("Resolving references failed unexpectedly", e);
+        } catch(InterruptedException e) {
             return null;
         }
     }

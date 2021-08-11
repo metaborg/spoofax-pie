@@ -4,8 +4,6 @@ import mb.common.editor.ReferenceResolutionResult;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.util.UncheckedCoreException;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.eclipse.core.filesystem.EFS;
-import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -66,10 +64,10 @@ public class SpoofaxHyperlink implements IHyperlink {
         display.asyncExec(() -> {
             final IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
             try {
-                final IFileStore fileStore = EFS.getStore(
-                    SpoofaxPlugin.getPlatformComponent().getResourceUtil().getEclipseFile(entry.getFile()).getLocationURI()
+                final IEditorPart editorPart = IDE.openEditor(
+                    page,
+                    SpoofaxPlugin.getPlatformComponent().getResourceUtil().getEclipseFile(entry.getFile())
                 );
-                final IEditorPart editorPart = IDE.openEditorOnFileStore(page, fileStore);
 
                 if(editorPart instanceof ITextEditor) {
                     final ITextEditor editor = (ITextEditor)editorPart;
