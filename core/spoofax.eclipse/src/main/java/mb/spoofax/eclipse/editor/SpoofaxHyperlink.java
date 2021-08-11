@@ -1,7 +1,8 @@
 package mb.spoofax.eclipse.editor;
 
 import mb.common.editor.ReferenceResolutionResult;
-import mb.spoofax.eclipse.util.ResourceUtil;
+import mb.spoofax.eclipse.SpoofaxPlugin;
+import mb.spoofax.eclipse.util.UncheckedCoreException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
@@ -54,14 +55,10 @@ public class SpoofaxHyperlink implements IHyperlink {
                 this.entry.getRegion().getLength()
             );
             textEditor.setFocus();
-            return;
         } else {
             // Open a new editor containing the specified file.
             this.openInNewEditor();
         }
-
-        // TODO
-        System.err.println("Open: " + this.getHyperlinkText());
     }
 
     private void openInNewEditor() {
@@ -69,7 +66,9 @@ public class SpoofaxHyperlink implements IHyperlink {
         display.asyncExec(() -> {
             final IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
             try {
-                final IFileStore fileStore = EFS.getStore(ResourceUtil.toLocalFile(this.path).toURI());
+                final IFileStore fileStore = EFS.getStore(
+                    SpoofaxPlugin.getPlatformComponent().getResourceUtil().getEclipseFile(entry.getFile()).getLocationURI()
+                );
                 final IEditorPart editorPart = IDE.openEditorOnFileStore(page, fileStore);
 
                 if(editorPart instanceof ITextEditor) {
@@ -82,7 +81,8 @@ public class SpoofaxHyperlink implements IHyperlink {
                     editor.setFocus();
                 }
             } catch(CoreException e) {
-                // TODO
+                // Nothing we can do here.
+                throw new UncheckedCoreException(e);
             }
         });
     }

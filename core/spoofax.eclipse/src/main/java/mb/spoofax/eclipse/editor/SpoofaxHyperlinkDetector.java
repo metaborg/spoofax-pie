@@ -4,7 +4,9 @@ import mb.common.editor.ReferenceResolutionResult;
 import mb.common.option.Option;
 import mb.common.region.Region;
 import mb.pie.api.ExecException;
+import mb.pie.api.Interactivity;
 import mb.pie.api.MixedSession;
+import mb.pie.api.TopDownSession;
 import mb.pie.dagger.PieComponent;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
@@ -16,6 +18,7 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 
+import java.util.Collections;
 import java.util.Objects;
 
 public class SpoofaxHyperlinkDetector implements IHyperlinkDetector {
@@ -31,17 +34,21 @@ public class SpoofaxHyperlinkDetector implements IHyperlinkDetector {
 
     @Override
     public @Nullable IHyperlink[] detectHyperlinks(ITextViewer textViewer, IRegion region, boolean canShowMultipleHyperlinks) {
-        // TODO: Run this from pierunner?
-        try(final MixedSession session = pieComponent.newSession()) {
-            final ResourceKey file = new EclipseResourcePath(editorBase.file);
-            final @Nullable ResourcePath rootDirectoryHint = editorBase.project != null ? new EclipseResourcePath(editorBase.project) : null;
-            final Region targetRegion = Region.fromOffsetLength(region.getOffset(), region.getLength());
+        final ResourceKey file = new EclipseResourcePath(editorBase.file);
+        final @Nullable ResourcePath rootDirectory = editorBase.project != null ? new EclipseResourcePath(editorBase.project) : null;
+        final Region targetRegion = Region.fromOffsetLength(region.getOffset(), region.getLength());
 
-            final long start = System.currentTimeMillis();
-            final Option<ReferenceResolutionResult> resolveResult = session.require(
-                languageComponent.getLanguageInstance().createResolveTask(file, rootDirectoryHint, targetRegion)
+        // We cannot do reference resolution if we're not in a project.
+        if(rootDirectory == null) {
+            return null;
+        }
+
+        try(final MixedSession mixedSession = pieComponent.newSession()) {
+            final TopDownSession topDownSession = mixedSession.updateAffectedBy(Collections.emptySet(), Collections.singleton(Interactivity.Interactive));
+
+            final Option<ReferenceResolutionResult> resolveResult = topDownSession.requireWithoutObserving(
+                languageComponent.getLanguageInstance().createResolveTask(rootDirectory, file, targetRegion)
             );
-            System.err.println("Took " + (System.currentTimeMillis() - start) + "ms to do entire resolve.");
 
             if(!resolveResult.isSome()) {
                 return null;
@@ -49,11 +56,8 @@ public class SpoofaxHyperlinkDetector implements IHyperlinkDetector {
 
             return referenceResolutionResultToHyperlinks(resolveResult.get());
         } catch(ExecException | InterruptedException e) {
-            // TODO
-            e.printStackTrace();
+            return null;
         }
-
-        return null;
     }
 
     private @Nullable IHyperlink[] referenceResolutionResultToHyperlinks(ReferenceResolutionResult result) {

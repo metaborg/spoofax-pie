@@ -68,8 +68,8 @@ public class DynamicEditor extends SpoofaxEditorBase {
     }
 
     @Override public void reconfigure() {
-        super.reconfigure();
         setLanguageId();
+        super.reconfigure();
         scheduleJob(true);
     }
 
