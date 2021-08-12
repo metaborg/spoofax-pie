@@ -21,6 +21,7 @@ import mb.spoofax.compiler.adapter.AdapterProjectCompilerInputBuilder;
 import mb.spoofax.compiler.adapter.ConstraintAnalyzerAdapterCompiler;
 import mb.spoofax.compiler.adapter.MultilangAnalyzerAdapterCompiler;
 import mb.spoofax.compiler.adapter.ParserAdapterCompiler;
+import mb.spoofax.compiler.adapter.ReferenceResolutionAdapterCompiler;
 import mb.spoofax.compiler.adapter.StrategoRuntimeAdapterCompiler;
 import mb.spoofax.compiler.adapter.StylerAdapterCompiler;
 import mb.spoofax.compiler.adapter.data.ArgProviderRepr;
@@ -264,6 +265,14 @@ public class CfgAstToObject {
         parts.getAllSubTermsInListAsParts("ExportsSection").ifSome(subParts -> {
             final ExportsLanguageCompiler.Input.Builder builder = baseBuilder.withExports();
             // TODO: exports language properties
+        });
+        parts.getAllSubTermsInListAsParts("EditorServicesSection").ifSome(subParts -> {
+            // Reference resolution.
+            subParts.getAllSubTermsInListAsParts("EditorServicesReferenceResolutionOption").ifSome(referenceResolutionSubParts -> {
+                final ReferenceResolutionAdapterCompiler.Input.Builder builder = adapterBuilder.withReferenceResolution();
+                // todo: should probably actually look at the variant here
+                referenceResolutionSubParts.forOneSubtermAsString("StrategyId", builder::resolveStrategy);
+            });
         });
 
         // LanguageAdapterCompilerInput > Task definitions

@@ -1,5 +1,6 @@
 package mb.spoofax.core.language;
 
+import mb.common.editor.ReferenceResolutionResult;
 import mb.common.message.KeyedMessages;
 import mb.common.option.Option;
 import mb.common.region.Region;
@@ -48,6 +49,9 @@ public interface LanguageInstance {
     Task<KeyedMessages> createCheckOneTask(ResourceKey file, @Nullable ResourcePath rootDirectoryHint);
 
     Task<KeyedMessages> createCheckTask(ResourcePath rootDirectory);
+
+
+    Task<Option<ReferenceResolutionResult>> createResolveTask(ResourcePath rootDirectory, ResourceKey file, Region region);
 
 
     CollectionView<CommandDef<?>> getCommandDefs();

@@ -9,6 +9,7 @@ import mb.spoofax.compiler.adapter.CompleterAdapterCompiler;
 import mb.spoofax.compiler.adapter.ConstraintAnalyzerAdapterCompiler;
 import mb.spoofax.compiler.adapter.MultilangAnalyzerAdapterCompiler;
 import mb.spoofax.compiler.adapter.ParserAdapterCompiler;
+import mb.spoofax.compiler.adapter.ReferenceResolutionAdapterCompiler;
 import mb.spoofax.compiler.adapter.StrategoRuntimeAdapterCompiler;
 import mb.spoofax.compiler.adapter.StylerAdapterCompiler;
 import mb.spoofax.compiler.language.ClassLoaderResourcesCompiler;
@@ -60,6 +61,7 @@ public class SpoofaxCompilerModule {
         MultilangAnalyzerAdapterCompiler multilangAnalyzerAdapterCompiler,
         CompleterAdapterCompiler completerAdapterCompiler,
         StrategoRuntimeAdapterCompiler strategoRuntimeAdapterCompiler,
+        ReferenceResolutionAdapterCompiler referenceResolutionAdapterCompiler,
 
         CliProjectCompiler cliProjectCompiler,
         EclipseProjectCompiler eclipseProjectCompiler,
@@ -83,6 +85,7 @@ public class SpoofaxCompilerModule {
         taskDefs.add(multilangAnalyzerAdapterCompiler);
         taskDefs.add(strategoRuntimeAdapterCompiler);
         taskDefs.add(completerAdapterCompiler);
+        taskDefs.add(referenceResolutionAdapterCompiler);
 
         taskDefs.add(cliProjectCompiler);
         taskDefs.add(eclipseProjectCompiler);

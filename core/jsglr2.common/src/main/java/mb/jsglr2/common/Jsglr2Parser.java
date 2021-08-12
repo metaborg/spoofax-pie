@@ -28,6 +28,7 @@ import org.spoofax.jsglr2.parseforest.IParseForest;
 import org.spoofax.jsglr2.parser.result.ParseResult;
 import org.spoofax.jsglr2.parser.result.ParseSuccess;
 import org.spoofax.jsglr2.recovery.IRecoveryParseState;
+import org.spoofax.terms.attachments.ParentAttachment;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -63,6 +64,7 @@ public class Jsglr2Parser {
         final IImplodeResult<Object, ?, IStrategoTerm> implodeResult = jsglr2.imploder.implode(request, parseForest);
         final IStrategoTerm ast = implodeResult.ast();
         if(input.fileHint != null) {
+            ParentAttachment.setParentAttachments(ast);
             ResourceKeyAttachment.setResourceKey(ast, input.fileHint);
         }
 

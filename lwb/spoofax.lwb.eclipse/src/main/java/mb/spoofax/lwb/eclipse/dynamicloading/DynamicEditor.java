@@ -3,6 +3,7 @@ package mb.spoofax.lwb.eclipse.dynamicloading;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.editor.SpoofaxEditorBase;
+import mb.spoofax.eclipse.editor.SpoofaxSourceViewerConfiguration;
 import mb.spoofax.eclipse.util.StyleUtil;
 import mb.spoofax.lwb.dynamicloading.DynamicLanguage;
 import mb.spoofax.lwb.dynamicloading.DynamicLanguageRegistry;
@@ -14,6 +15,7 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.MultiRule;
 import org.eclipse.jface.text.TextPresentation;
+import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.swt.widgets.Display;
 
 public class DynamicEditor extends SpoofaxEditorBase {
@@ -66,8 +68,8 @@ public class DynamicEditor extends SpoofaxEditorBase {
     }
 
     @Override public void reconfigure() {
-        super.reconfigure();
         setLanguageId();
+        super.reconfigure();
         scheduleJob(true);
     }
 
@@ -81,6 +83,22 @@ public class DynamicEditor extends SpoofaxEditorBase {
     @Override protected void setInput() {
         super.setInput();
         setLanguageId();
+    }
+
+    @Override protected SourceViewerConfiguration createSourceViewerConfiguration() {
+        final @Nullable EclipseDynamicLanguage language;
+
+        if(input == null || document == null || file == null || languageId == null) {
+            language = null;
+        } else {
+            language = (EclipseDynamicLanguage)languageRegistry.getLanguageForId(languageId);
+        }
+
+        return new SpoofaxSourceViewerConfiguration(
+            this,
+            language == null ? null : language.getLanguageComponent(),
+            language == null ? null : language.getPieComponent()
+        );
     }
 
     private void setLanguageId() {
