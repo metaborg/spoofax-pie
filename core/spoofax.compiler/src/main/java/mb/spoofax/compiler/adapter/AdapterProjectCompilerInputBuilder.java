@@ -103,7 +103,7 @@ public class AdapterProjectCompilerInputBuilder {
         final MultilangAnalyzerAdapterCompiler.@Nullable Input multilangAnalyzer = buildMultilangAnalyzer(shared, adapterProject, languageProjectInput, strategoRuntime);
         if(multilangAnalyzer != null) project.multilangAnalyzer(multilangAnalyzer);
 
-        final ReferenceResolutionAdapterCompiler.@Nullable Input referenceResolution = buildReferenceResolution(shared, adapterProject, strategoRuntime, parser, constraintAnalyzer, classLoaderResources);
+        final ReferenceResolutionAdapterCompiler.@Nullable Input referenceResolution = buildReferenceResolution(shared, adapterProject, strategoRuntime, parser, constraintAnalyzer, classLoaderResources, getSourceFiles);
         if(referenceResolution != null) project.referenceResolution(referenceResolution);
 
         final CompleterAdapterCompiler.@Nullable Input completer = buildCompleter(shared, adapterProject, languageProjectInput);
@@ -239,7 +239,8 @@ public class AdapterProjectCompilerInputBuilder {
         StrategoRuntimeAdapterCompiler.@Nullable Input strategoRuntimeInput,
         ParserAdapterCompiler.@Nullable Input parseInput,
         ConstraintAnalyzerAdapterCompiler.@Nullable Input constraintAnalyzerInput,
-        ClassLoaderResourcesCompiler.Input classloaderResources
+        ClassLoaderResourcesCompiler.Input classloaderResources,
+        GetSourceFilesAdapterCompiler.Input getSourceFiles
     ) {
         if(!referenceResolutionEnabled) return null;
         return referenceResolution
@@ -249,6 +250,7 @@ public class AdapterProjectCompilerInputBuilder {
             .parseInput(parseInput)
             .constraintAnalyzerInput(constraintAnalyzerInput)
             .classLoaderResourcesInput(classloaderResources)
+            .sourceFilesInput(getSourceFiles)
             .build();
     }
 }

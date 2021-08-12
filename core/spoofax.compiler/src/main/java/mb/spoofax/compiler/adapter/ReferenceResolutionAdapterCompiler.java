@@ -125,5 +125,7 @@ public class ReferenceResolutionAdapterCompiler implements TaskDef<ReferenceReso
         ConstraintAnalyzerAdapterCompiler.Input constraintAnalyzerInput();
 
         ClassLoaderResourcesCompiler.Input classLoaderResourcesInput();
+
+        GetSourceFilesAdapterCompiler.Input getSourceFilesInput();
     }
 }

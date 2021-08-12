@@ -461,6 +461,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         default List<NamedTypeInfo> checkMultiInjections() {
             ArrayList<NamedTypeInfo> results = new ArrayList<>();
             results.add(NamedTypeInfo.of("classLoaderResources", classLoaderResources().classLoaderResources()));
+            results.add(NamedTypeInfo.of("getSourceFiles", getSourceFiles().getSourceFilesTaskDef()));
             parser().ifPresent(i -> results.add(NamedTypeInfo.of("parse", i.parseTaskDef())));
             constraintAnalyzer().ifPresent(i -> results.add(NamedTypeInfo.of("analyze", i.analyzeMultiTaskDef())));
             return results;

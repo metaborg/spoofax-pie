@@ -3,6 +3,7 @@ package mb.jsglr.pie;
 import mb.common.message.Messages;
 import mb.common.result.Result;
 import mb.common.text.Text;
+import mb.common.util.ListView;
 import mb.common.util.MapView;
 import mb.jsglr.common.JSGLRTokens;
 import mb.jsglr.common.JsglrParseException;
@@ -56,11 +57,19 @@ public abstract class JsglrParseTaskDef implements TaskDef<JsglrParseTaskInput, 
     }
 
     public Function<ResourcePath, MapView<ResourceKey, Supplier<Result<IStrategoTerm, JsglrParseException>>>> createMultiAstSupplierFunction(ResourceWalker walker, ResourceMatcher matcher) {
-        return new MultiAstSupplierFunction(astFunction, walker, matcher);
+        return new WalkingMultiAstSupplierFunction(astFunction, walker, matcher);
     }
 
     public Function<ResourcePath, MapView<ResourceKey, Supplier<Result<IStrategoTerm, JsglrParseException>>>> createRecoverableMultiAstSupplierFunction(ResourceWalker walker, ResourceMatcher matcher) {
-        return new MultiAstSupplierFunction(recoverableAstFunction, walker, matcher);
+        return new WalkingMultiAstSupplierFunction(recoverableAstFunction, walker, matcher);
+    }
+
+    public Function<ResourcePath, MapView<ResourceKey, Supplier<Result<IStrategoTerm, JsglrParseException>>>> createMultiAstSupplierFunction(ListView<ResourceKey> files) {
+        return new MultiAstSupplierFunction(astFunction, files);
+    }
+
+    public Function<ResourcePath, MapView<ResourceKey, Supplier<Result<IStrategoTerm, JsglrParseException>>>> createRecoverableMultiAstSupplierFunction(ListView<ResourceKey> files) {
+        return new MultiAstSupplierFunction(recoverableAstFunction, files);
     }
 
     public Function<JsglrParseTaskInput, Result<JSGLRTokens, JsglrParseException>> createTokensFunction() {
