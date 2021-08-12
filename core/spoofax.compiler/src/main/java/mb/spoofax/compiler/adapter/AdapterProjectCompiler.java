@@ -66,6 +66,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
     private final ConstraintAnalyzerAdapterCompiler constraintAnalyzerCompiler;
     private final MultilangAnalyzerAdapterCompiler multilangAnalyzerCompiler;
     private final ReferenceResolutionAdapterCompiler referenceResolutionAdapterCompiler;
+    private final GetSourceFilesAdapterCompiler getSourceFilesAdapterCompiler;
 
     @Inject public AdapterProjectCompiler(
         TemplateCompiler templateCompiler,
@@ -75,7 +76,8 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         StrategoRuntimeAdapterCompiler strategoRuntimeCompiler,
         ConstraintAnalyzerAdapterCompiler constraintAnalyzerCompiler,
         MultilangAnalyzerAdapterCompiler multilangAnalyzerCompiler,
-        ReferenceResolutionAdapterCompiler referenceResolutionAdapterCompiler
+        ReferenceResolutionAdapterCompiler referenceResolutionAdapterCompiler,
+        GetSourceFilesAdapterCompiler getSourceFilesAdapterCompiler
     ) {
         templateCompiler = templateCompiler.loadingFromClass(getClass());
         this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("adapter_project/package-info.java.mustache");
@@ -101,6 +103,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         this.constraintAnalyzerCompiler = constraintAnalyzerCompiler;
         this.multilangAnalyzerCompiler = multilangAnalyzerCompiler;
         this.referenceResolutionAdapterCompiler = referenceResolutionAdapterCompiler;
+        this.getSourceFilesAdapterCompiler = getSourceFilesAdapterCompiler;
     }
 
 
@@ -126,6 +129,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         input.constraintAnalyzer().ifPresent((i) -> context.require(constraintAnalyzerCompiler, i));
         input.multilangAnalyzer().ifPresent((i) -> context.require(multilangAnalyzerCompiler, i));
         input.referenceResolution().ifPresent((i) -> context.require(referenceResolutionAdapterCompiler, i));
+        context.require(getSourceFilesAdapterCompiler, input.getSourceFiles());
 
         if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
 
@@ -175,6 +179,8 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         addTaskDef(allTaskDefs, input.checkMultiTaskDef(), input.baseCheckMultiTaskDef());
         addTaskDef(allTaskDefs, input.checkAggregatorTaskDef(), input.baseCheckAggregatorTaskDef());
         addTaskDef(allTaskDefs, input.checkDeaggregatorTaskDef(), input.baseCheckDeaggregatorTaskDef());
+
+        addTaskDef(allTaskDefs, input.getSourceFiles().getSourceFilesTaskDef(), input.getSourceFiles().baseGetSourceFilesTaskDef());
 
         if (input.strategoRuntime().isPresent() && input.parser().isPresent()) {
             addTaskDef(allTaskDefs, input.testStrategoTaskDef(), input.baseTestStrategoTaskDef());
@@ -398,6 +404,8 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         Optional<MultilangAnalyzerAdapterCompiler.Input> multilangAnalyzer();
 
         Optional<ReferenceResolutionAdapterCompiler.Input> referenceResolution();
+
+        GetSourceFilesAdapterCompiler.Input getSourceFiles();
 
 
         /// Configuration
@@ -691,6 +699,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             constraintAnalyzer().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             referenceResolution().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             multilangAnalyzer().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
+            getSourceFiles().javaSourceFiles().addAllTo(javaSourceFiles);
             return javaSourceFiles;
         }
 

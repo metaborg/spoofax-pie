@@ -8,6 +8,7 @@ import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
 import mb.spoofax.compiler.adapter.CompleterAdapterCompiler;
 import mb.spoofax.compiler.adapter.ConstraintAnalyzerAdapterCompiler;
+import mb.spoofax.compiler.adapter.GetSourceFilesAdapterCompiler;
 import mb.spoofax.compiler.adapter.MultilangAnalyzerAdapterCompiler;
 import mb.spoofax.compiler.adapter.ParserAdapterCompiler;
 import mb.spoofax.compiler.adapter.ReferenceResolutionAdapterCompiler;
@@ -71,6 +72,8 @@ public interface SpoofaxCompilerComponent extends TaskDefsProvider {
     MultilangAnalyzerAdapterCompiler getMultilangAnalyzerAdapterCompiler();
 
     ReferenceResolutionAdapterCompiler getReferenceResolutionAdapterCompiler();
+
+    GetSourceFilesAdapterCompiler getGetSourceFilesAdapterCompiler();
 
 
     CliProjectCompiler getCliProjectCompiler();
