@@ -1,5 +1,6 @@
 package mb.tiger.spoofax;
 
+import mb.common.editor.ReferenceResolutionResult;
 import mb.common.message.KeyedMessages;
 import mb.common.option.Option;
 import mb.common.region.Region;
@@ -27,6 +28,7 @@ import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.spoofax.core.language.menu.CommandAction;
 import mb.spoofax.core.language.menu.MenuItem;
+import mb.spoofax.core.language.taskdef.NoneResolveTaskDef;
 import mb.spt.api.parse.ParseResult;
 import mb.spt.api.parse.TestableParse;
 import mb.tiger.spoofax.command.TigerCompileDirectoryCommand;
@@ -58,6 +60,7 @@ public class TigerInstance implements LanguageInstance, TestableParse {
     private final TigerStyle style;
     private final TigerIdeTokenize tokenize;
     private final TigerCompleteTaskDef complete;
+    private final NoneResolveTaskDef resolve;
 
     private final TigerShowParsedAstCommand showParsedAstCommand;
     private final TigerShowPrettyPrintedTextCommand showPrettyPrintedTextCommand;
@@ -78,6 +81,7 @@ public class TigerInstance implements LanguageInstance, TestableParse {
         TigerStyle style,
         TigerIdeTokenize tokenize,
         TigerCompleteTaskDef complete,
+        NoneResolveTaskDef resolve,
 
         TigerShowParsedAstCommand showParsedAstCommand,
         TigerShowPrettyPrintedTextCommand showPrettyPrintedTextCommand,
@@ -96,6 +100,7 @@ public class TigerInstance implements LanguageInstance, TestableParse {
         this.style = style;
         this.tokenize = tokenize;
         this.complete = complete;
+        this.resolve = resolve;
 
         this.showParsedAstCommand = showParsedAstCommand;
         this.showPrettyPrintedTextCommand = showPrettyPrintedTextCommand;
@@ -143,6 +148,11 @@ public class TigerInstance implements LanguageInstance, TestableParse {
     @Override
     public Task<KeyedMessages> createCheckTask(ResourcePath projectRoot) {
         return checkAggregate.createTask(projectRoot);
+    }
+
+    @Override
+    public Task<Option<ReferenceResolutionResult>> createResolveTask(ResourcePath rootDirectory, ResourceKey file, Region region) {
+        return resolve.createTask(NoneResolveTaskDef.Args.Empty);
     }
 
     @Override public CollectionView<CommandDef<?>> getCommandDefs() {

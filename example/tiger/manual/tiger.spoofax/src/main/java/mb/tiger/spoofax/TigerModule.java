@@ -62,6 +62,9 @@ public class TigerModule {
         return parserFactory.create();
     }
 
+    @Provides @Named("packageId") String providePackageId() {
+        return "mb.tiger.spoofax";
+    }
 
     @Provides @TigerScope
     static TigerStylerFactory provideStylerFactory(LoggerFactory loggerFactory, @TigerQualifier("definition-directory") HierarchicalResource definitionDir) {
