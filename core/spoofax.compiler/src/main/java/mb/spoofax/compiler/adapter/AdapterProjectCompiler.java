@@ -675,6 +675,11 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
                 javaSourceFiles.add(baseCheckMultiTaskDef().file(generatedJavaSourcesDirectory));
                 javaSourceFiles.add(baseCheckAggregatorTaskDef().file(generatedJavaSourcesDirectory));
                 javaSourceFiles.add(baseCheckDeaggregatorTaskDef().file(generatedJavaSourcesDirectory));
+
+                if (strategoRuntime().isPresent() && parser().isPresent()) {
+                    javaSourceFiles.add(baseTestStrategoTaskDef().file(generatedJavaSourcesDirectory));
+                }
+
                 for(CommandDefRepr commandDef : commandDefs()) {
                     javaSourceFiles.add(commandDef.type().file(generatedJavaSourcesDirectory));
                 }
@@ -684,6 +689,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             completer().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             strategoRuntime().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             constraintAnalyzer().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
+            referenceResolution().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             multilangAnalyzer().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             return javaSourceFiles;
         }
