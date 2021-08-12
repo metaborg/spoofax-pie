@@ -1,6 +1,7 @@
 package mb.spoofax.lwb.dynamicloading;
 
 import mb.common.message.KeyedMessages;
+import mb.common.message.Message;
 import mb.common.result.Result;
 import mb.common.util.ExceptionPrinter;
 import mb.log.dagger.DaggerLoggerComponent;
@@ -209,8 +210,6 @@ class TestBase {
     }
 
     void printThrowable(Throwable throwable) {
-        final ExceptionPrinter exceptionPrinter = new ExceptionPrinter();
-        exceptionPrinter.addCurrentDirectoryContext(rootDirectory);
         exceptionPrinter.printException(throwable, System.err);
     }
 
@@ -220,6 +219,6 @@ class TestBase {
     }
 
     protected void assertNoErrors(KeyedMessages messages, String failure) {
-        assertFalse(messages.containsError(), () -> "Expected " + failure + ".\n" + exceptionPrinter.printMessagesToString(messages));
+        assertFalse(messages.containsError(), () -> "Expected " + failure + ".\n" + exceptionPrinter.printMessagesToString(messages.filter(Message::isErrorOrHigher)));
     }
 }

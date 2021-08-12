@@ -16,7 +16,7 @@ class ToCompletionRuntimeTest extends TestBase {
         final Sdf3ToCompletionRuntime taskDef = component.getSdf3ToCompletionRuntime();
         try(final MixedSession session = newSession()) {
             final Result<IStrategoTerm, ?> result = session.require(taskDef.createTask(desugarSupplier(resource)));
-            assertTrue(result.isOk());
+            assertOk(result);
             final IStrategoTerm output = result.unwrap();
             log.info("{}", output);
             assertNotNull(output);

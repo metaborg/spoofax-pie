@@ -16,6 +16,8 @@ import mb.spoofax.lwb.compiler.dagger.Spoofax3CompilerModule;
 import mb.spoofax.lwb.compiler.dagger.Spoofax3CompilerScope;
 import mb.statix.StatixComponent;
 import mb.str.StrategoComponent;
+import mb.strategolib.StrategoLibComponent;
+import mb.strategolib.StrategoLibResourcesComponent;
 
 @Spoofax3CompilerScope
 @Component(
@@ -31,7 +33,11 @@ import mb.str.StrategoComponent;
         StrategoComponent.class,
         EsvComponent.class,
         StatixComponent.class,
+
         Sdf3ExtStatixComponent.class,
+
+        StrategoLibComponent.class,
+        StrategoLibResourcesComponent.class,
         LibSpoofax2Component.class,
         LibSpoofax2ResourcesComponent.class,
         LibStatixComponent.class,

@@ -47,6 +47,11 @@ public abstract class StrategoTransformTaskDef<T> extends BaseStrategoTransformT
         this.getStrategoRuntimeProvider = getStrategoRuntimeProvider;
     }
 
+    public StrategoTransformTaskDef(GetStrategoRuntimeProvider getStrategoRuntimeProvider, Strategy... strategies) {
+        super(strategies);
+        this.getStrategoRuntimeProvider = getStrategoRuntimeProvider;
+    }
+
     @Override protected StrategoRuntime getStrategoRuntime(ExecContext context, T input) {
         final OutTransient<Provider<StrategoRuntime>> provider = context.require(getStrategoRuntimeProvider, None.instance);
         return provider.getValue().get();

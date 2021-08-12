@@ -1,6 +1,7 @@
 package mb.spoofax.lwb.compiler;
 
 import mb.common.message.KeyedMessages;
+import mb.common.message.Message;
 import mb.common.util.ExceptionPrinter;
 import mb.log.dagger.DaggerLoggerComponent;
 import mb.log.dagger.LoggerComponent;
@@ -92,7 +93,8 @@ class TestBase {
             .rootDirectory(rootDirectory.getPath())
             .build();
         try(final MixedSession session = pieComponent.getPie().newSession()) {
-            assertNoErrors(session.require(checkLanguageSpecification.createTask(rootDirectory.getPath())));
+            final KeyedMessages messages = session.require(checkLanguageSpecification.createTask(rootDirectory.getPath()));
+            assertNoErrors(messages);
             session.require(compileLanguage.createTask(args)).unwrap();
         } catch(CompileLanguageException e) {
             System.err.println(exceptionPrinter.printExceptionToString(e));
@@ -136,6 +138,6 @@ class TestBase {
     }
 
     void assertNoErrors(KeyedMessages messages, String failure) {
-        assertFalse(messages.containsError(), () -> "Expected " + failure + ".\n" + exceptionPrinter.printMessagesToString(messages));
+        assertFalse(messages.containsError(), () -> "Expected " + failure + ".\n" + exceptionPrinter.printMessagesToString(messages.filter(Message::isErrorOrHigher)));
     }
 }

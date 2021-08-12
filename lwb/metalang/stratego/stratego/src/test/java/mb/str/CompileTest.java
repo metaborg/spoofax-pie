@@ -5,11 +5,13 @@ import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.pie.api.MixedSession;
 import mb.pie.api.Task;
+import mb.pie.api.ValueSupplier;
 import mb.pie.task.archive.ArchiveDirectory;
 import mb.pie.task.archive.ArchiveToJar;
 import mb.pie.task.java.CompileJava;
 import mb.resource.fs.FSResource;
 import mb.str.config.StrategoCompileConfig;
+import mb.str.task.StrategoCompileToJava;
 import mb.str.util.TestBase;
 import mb.stratego.build.strincr.BuiltinLibraryIdentifier;
 import mb.stratego.build.strincr.task.output.CompileOutput;
@@ -22,6 +24,8 @@ import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -46,8 +50,8 @@ class CompileTest extends TestBase {
 
         final FSResource buildDir = directory(rootDirectory, "build");
 
-        final FSResource strategoJavaOutputDir = directory(buildDir, "str/src/main/java/");
-        final FSResource strategoJavaPackageOutputDir = directory(strategoJavaOutputDir, "mb/test");
+        final FSResource strategoJavaSourceFileOutputDir = directory(buildDir, "java");
+        final FSResource strategoJavaClassFileOutputDir = directory(buildDir, "classes");
 
         try(final MixedSession session = newSession()) {
             // Compile Stratego source files to Java source files.
@@ -56,34 +60,40 @@ class CompileTest extends TestBase {
                 strategoMainFile.getPath(),
                 ListView.of(strategoSourceDir.getPath()),
                 ListView.of(BuiltinLibraryIdentifier.StrategoLib),
+                ListView.of(),
                 new Arguments(),
                 ListView.of(),
                 null,
-                strategoJavaPackageOutputDir.getPath(),
-                "mb.test"
+                strategoJavaSourceFileOutputDir.getPath(),
+                strategoJavaClassFileOutputDir.getPath(),
+                "mb.test",
+                "test",
+                ListView.of()
             );
-            final Task<Result<CompileOutput.Success, MessagesException>> strategoCompileTask = compile.createTask(config);
-            final Result<CompileOutput.Success, ?> result = session.require(strategoCompileTask);
-            assertTrue(result.isOk());
-            assertTrue(strategoJavaPackageOutputDir.exists());
-            assertTrue(strategoJavaPackageOutputDir.isDirectory());
-            final FSResource interopRegistererJavaFile = strategoJavaPackageOutputDir.appendRelativePath("InteropRegisterer.java");
+            final Task<Result<StrategoCompileToJava.Output, MessagesException>> strategoCompileTask = compile.createTask(config);
+            final Result<StrategoCompileToJava.Output, ?> result = session.require(strategoCompileTask);
+            assertOk(result);
+
+            final FSResource strategoJavaSourceFilePackageOutputDir = strategoJavaSourceFileOutputDir.appendRelativePath("mb/test");
+            assertTrue(strategoJavaSourceFilePackageOutputDir.exists());
+            assertTrue(strategoJavaSourceFilePackageOutputDir.isDirectory());
+            final FSResource interopRegistererJavaFile = strategoJavaSourceFilePackageOutputDir.appendRelativePath("InteropRegisterer.java");
             assertTrue(interopRegistererJavaFile.exists());
             assertTrue(interopRegistererJavaFile.isFile());
             assertTrue(interopRegistererJavaFile.readString().contains("InteropRegisterer"));
-            final FSResource mainJavaFile = strategoJavaPackageOutputDir.appendRelativePath("Main.java");
+            final FSResource mainJavaFile = strategoJavaSourceFilePackageOutputDir.appendRelativePath("Main.java");
             assertTrue(mainJavaFile.exists());
             assertTrue(mainJavaFile.isFile());
             assertTrue(mainJavaFile.readString().contains("Main"));
-            final FSResource mainStrategyJavaFile = strategoJavaPackageOutputDir.appendRelativePath("hello_0_0.java");
+            final FSResource mainStrategyJavaFile = strategoJavaSourceFilePackageOutputDir.appendRelativePath("hello_0_0.java");
             assertTrue(mainStrategyJavaFile.exists());
             assertTrue(mainStrategyJavaFile.isFile());
             assertTrue(mainStrategyJavaFile.readString().contains("hello_0_0"));
-            final FSResource worldStrategyJavaFile = strategoJavaPackageOutputDir.appendRelativePath("world_0_0.java");
+            final FSResource worldStrategyJavaFile = strategoJavaSourceFilePackageOutputDir.appendRelativePath("world_0_0.java");
             assertTrue(worldStrategyJavaFile.exists());
             assertTrue(worldStrategyJavaFile.isFile());
             assertTrue(worldStrategyJavaFile.readString().contains("world_0_0"));
-            final FSResource testPackageJavaFile = strategoJavaPackageOutputDir.appendRelativePath("test.java");
+            final FSResource testPackageJavaFile = strategoJavaSourceFilePackageOutputDir.appendRelativePath("test.java");
             assertTrue(testPackageJavaFile.exists());
             assertTrue(testPackageJavaFile.isFile());
             assertTrue(testPackageJavaFile.readString().contains("test"));
@@ -91,16 +101,14 @@ class CompileTest extends TestBase {
             // Compile Java source files to Java class files.
             final CompileJava.Input.Builder inputBuilder = CompileJava.Input.builder()
                 .sources(CompileJava.Sources.builder()
-                    .addAllSourceFiles(result.get().resultFiles)
-                    .addSourcePaths(strategoJavaOutputDir.getPath())
+                    .addAllSourceFiles(result.get().javaSourceFiles)
+                    .addSourcePaths(strategoJavaClassFileOutputDir.getPath())
                     .build()
                 )
                 .release("8");
             final @Nullable String classPathProperty = System.getProperty("classPath");
             assertNotNull(classPathProperty);
-            for(String classPathPart : classPathProperty.split(File.pathSeparator)) {
-                inputBuilder.addClassPaths(new File(classPathPart));
-            }
+            inputBuilder.addClassPathSuppliers(new ValueSupplier<>(ListView.of(Arrays.stream(classPathProperty.split(File.pathSeparator)).map(File::new).collect(Collectors.toList()))));
             final FSResource sourceFileOutputDirectory = directory(buildDir, "generated/sources/annotationProcessor/java/main");
             inputBuilder.sourceFileOutputDirectory(sourceFileOutputDirectory.getPath());
             final FSResource classFileOutputDirectory = directory(buildDir, "classes/java/main");

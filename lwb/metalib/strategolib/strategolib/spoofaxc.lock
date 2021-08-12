@@ -1,0 +1,5 @@
+shared.defaultArtifactId=strategolib
+shared.defaultClassPrefix=StrategoLib
+shared.defaultGroupId=org.metaborg
+shared.defaultPackageId=mb.strategolib
+shared.defaultVersion=0.1.0

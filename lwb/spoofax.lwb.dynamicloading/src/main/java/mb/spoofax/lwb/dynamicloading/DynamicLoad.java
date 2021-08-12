@@ -65,7 +65,7 @@ public class DynamicLoad implements TaskDef<CompileLanguage.Args, OutTransient<R
         CompileLanguage.Output compileLanguageOutput,
         CfgToObject.Output cfgOutput
     ) throws Exception {
-        for(ResourcePath path : compileLanguageOutput.classPath()) {
+        for(ResourcePath path : compileLanguageOutput.javaClassPaths()) {
             // HACK: create dependency to each file separately, instead of one for the directory, to ensure this task
             //       gets re-executed in a bottom-up build when any file changes
             try(Stream<? extends ReadableResource> files = context.require(path).walk(ResourceWalker.ofTrue(), ResourceMatcher.ofFile())) {
@@ -74,7 +74,7 @@ public class DynamicLoad implements TaskDef<CompileLanguage.Args, OutTransient<R
                 }
             }
         }
-        final DynamicLanguage dynamicLanguage = dynamicLanguageLoader.load(rootDirectory, cfgOutput.compileLanguageInput, compileLanguageOutput.classPath());
+        final DynamicLanguage dynamicLanguage = dynamicLanguageLoader.load(rootDirectory, cfgOutput.compileLanguageInput, compileLanguageOutput.javaClassPaths());
         dynamicLanguageRegistry.reload(rootDirectory, dynamicLanguage);
         return dynamicLanguage;
     }

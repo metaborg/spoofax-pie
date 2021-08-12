@@ -23,8 +23,7 @@ languageProject {
 spoofax2BasedLanguageProject {
   compilerInput {
     project.run {
-      addAdditionalCopyResources("trans/**/*.str")
-      addAdditionalCopyResources("src-gen/**/*.str")
+      addAdditionalCopyResources("trans/**/*.str", "trans/**/*.str2", "src-gen/**/*.str", "src-gen/**/*.str2")
       languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:statix.runtime:${ext["spoofax2DevenvVersion"]}"))
     }
   }

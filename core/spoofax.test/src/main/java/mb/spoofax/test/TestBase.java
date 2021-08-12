@@ -2,6 +2,9 @@ package mb.spoofax.test;
 
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
+import mb.common.message.KeyedMessages;
+import mb.common.result.Result;
+import mb.common.util.ExceptionPrinter;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.log.dagger.LoggerComponent;
@@ -20,7 +23,11 @@ import java.nio.file.FileSystem;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 public class TestBase {
+    public final ExceptionPrinter exceptionPrinter = new ExceptionPrinter();
+
     public final LoggerComponent loggerComponent;
     public final LoggerFactory loggerFactory;
     public final Logger log;
@@ -96,6 +103,32 @@ public class TestBase {
 
     public ResourceStringSupplier resourceStringSupplier(Resource resource) {
         return resourceStringSupplier(resource.getKey());
+    }
+
+
+    public void assertNoErrors(KeyedMessages messages) {
+        assertNoErrors(messages, "no errors, but found errors");
+    }
+
+    public void assertNoErrors(KeyedMessages messages, String failure) {
+        assertFalse(messages.containsError(), () -> "Expected " + failure + ".\n" + exceptionPrinter.printMessagesToString(messages));
+    }
+
+    public void assertErrors(KeyedMessages messages) {
+        assertNoErrors(messages, "errors, but found no errors");
+    }
+
+    public void assertErrors(KeyedMessages messages, String failure) {
+        assertTrue(messages.containsError(), () -> "Expected " + failure + ".\n" + exceptionPrinter.printMessagesToString(messages));
+    }
+
+    public <T, E extends Exception> void assertOk(Result<T, E> result) {
+        // noinspection ConstantConditions (err is present)
+        assertTrue(result.isOk(), () -> "Expected Ok Result, but found Err.\n" + exceptionPrinter.printExceptionToString(result.getErr()));
+    }
+
+    public <T, E extends Exception> void assertErr(Result<T, E> result) {
+        assertTrue(result.isErr(), () -> "Expected Err Result, but found Ok: " + result);
     }
 
 

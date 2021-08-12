@@ -14,6 +14,7 @@ import mb.spoofax.lwb.compiler.stratego.CompileStratego;
 import org.immutables.value.Value;
 
 import javax.inject.Inject;
+import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +37,8 @@ public class CompileLanguageSpecification implements TaskDef<ResourcePath, Resul
         static Builder builder() { return new Builder(); }
 
         List<ResourcePath> providedJavaFiles();
+
+        List<File> javaClassPaths();
 
         @Value.Default default KeyedMessages messages() { return KeyedMessages.of(); }
     }
@@ -67,6 +70,7 @@ public class CompileLanguageSpecification implements TaskDef<ResourcePath, Resul
     public Result<Output, CompileLanguageSpecificationException> exec(ExecContext context, ResourcePath rootDirectory) {
         final ArrayList<ResourcePath> providedJavaFiles = new ArrayList<>();
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
+        final ArrayList<File> javaClassPaths = new ArrayList<>();
         final Result<?, CompileLanguageSpecificationException> result = context.require(compileSdf3, rootDirectory)
             .ifOk(messagesBuilder::addMessages)
             .mapErr(CompileLanguageSpecificationException::sdf3CompileFail)
@@ -83,11 +87,17 @@ public class CompileLanguageSpecification implements TaskDef<ResourcePath, Resul
                     .ifOk(o -> {
                         messagesBuilder.addMessages(o.messages());
                         providedJavaFiles.addAll(o.providedJavaFiles());
+                        javaClassPaths.addAll(o.javaClassPaths());
                     })
                     .mapErr(CompileLanguageSpecificationException::strategoCompileFail)
             );
         if(result.isErr()) return result.ignoreValueIfErr();
-        return Result.ofOk(Output.builder().providedJavaFiles(providedJavaFiles).messages(messagesBuilder.build()).build());
+        return Result.ofOk(Output.builder()
+            .providedJavaFiles(providedJavaFiles)
+            .javaClassPaths(javaClassPaths)
+            .messages(messagesBuilder.build())
+            .build()
+        );
     }
 
     @Override public boolean shouldExecWhenAffected(ResourcePath input, Set<?> tags) {

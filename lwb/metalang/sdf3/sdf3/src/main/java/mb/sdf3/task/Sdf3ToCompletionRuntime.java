@@ -6,14 +6,16 @@ import mb.pie.api.Supplier;
 import mb.sdf3.Sdf3Scope;
 import mb.stratego.pie.AstStrategoTransformTaskDef;
 import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.interpreter.terms.ITermFactory;
 
 import javax.inject.Inject;
 import java.util.Set;
 
 @Sdf3Scope
 public class Sdf3ToCompletionRuntime extends AstStrategoTransformTaskDef {
-    @Inject public Sdf3ToCompletionRuntime(Sdf3GetStrategoRuntimeProvider getStrategoRuntimeProvider) {
-        super(getStrategoRuntimeProvider, "module-to-new-cmp");
+    @Inject
+    public Sdf3ToCompletionRuntime(Sdf3GetStrategoRuntimeProvider getStrategoRuntimeProvider, ITermFactory termFactory) {
+        super(getStrategoRuntimeProvider, new Strategy("module-to-new-cmp", termFactory.makeString("2")));
     }
 
     @Override public String getId() {

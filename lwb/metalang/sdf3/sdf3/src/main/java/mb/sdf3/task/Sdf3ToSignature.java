@@ -10,14 +10,16 @@ import mb.sdf3.task.util.AnalyzedStrategoTransformTaskDef;
 import mb.stratego.common.StrategoRuntime;
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.core.InterpreterException;
+import org.spoofax.interpreter.terms.ITermFactory;
 
 import javax.inject.Inject;
 import java.util.Set;
 
 @Sdf3Scope
 public class Sdf3ToSignature extends AnalyzedStrategoTransformTaskDef {
-    @Inject public Sdf3ToSignature(Sdf3GetStrategoRuntimeProvider getStrategoRuntimeProvider) {
-        super(getStrategoRuntimeProvider, "desugar-templates", "module-to-sig");
+    @Inject
+    public Sdf3ToSignature(Sdf3GetStrategoRuntimeProvider getStrategoRuntimeProvider, ITermFactory termFactory) {
+        super(getStrategoRuntimeProvider, new Strategy("desugar-templates"), new Strategy("module-to-sig", termFactory.makeString("2")));
     }
 
     @Override public String getId() {

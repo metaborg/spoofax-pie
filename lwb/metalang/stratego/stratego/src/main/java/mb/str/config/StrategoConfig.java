@@ -11,14 +11,18 @@ interface StrategoConfig {
     }
 
     static ModuleIdentifier defaultMainModule(ResourcePath rootDirectory) {
-        return new ModuleIdentifier(true, false, "main", defaultMainFile(rootDirectory));
+        return new ModuleIdentifier(false, false, "main", defaultMainFile(rootDirectory));
     }
 
     static ModuleIdentifier fromRootDirectoryAndMainFile(ResourcePath rootDirectory, ResourcePath mainFile) {
-        return new ModuleIdentifier(true, false, rootDirectory.relativize(mainFile.removeLeafExtension()), mainFile);
+        return new ModuleIdentifier(false, false, rootDirectory.relativize(mainFile.removeLeafExtension()), mainFile);
     }
 
     static ListView<BuiltinLibraryIdentifier> defaultBuiltinLibs() {
-        return ListView.of(BuiltinLibraryIdentifier.StrategoLib, BuiltinLibraryIdentifier.StrategoGpp, BuiltinLibraryIdentifier.StrategoSglr);
+        return ListView.of(
+//            BuiltinLibraryIdentifier.StrategoLib,
+            BuiltinLibraryIdentifier.StrategoGpp,
+            BuiltinLibraryIdentifier.StrategoSglr
+        );
     }
 }

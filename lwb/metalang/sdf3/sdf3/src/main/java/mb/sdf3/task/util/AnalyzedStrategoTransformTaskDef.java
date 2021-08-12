@@ -17,6 +17,10 @@ public abstract class AnalyzedStrategoTransformTaskDef extends StrategoTransform
         super(getStrategoRuntimeProvider, strategyNames);
     }
 
+    public AnalyzedStrategoTransformTaskDef(Sdf3GetStrategoRuntimeProvider getStrategoRuntimeProvider, Strategy... strategies) {
+        super(getStrategoRuntimeProvider, strategies);
+    }
+
     @Override
     protected StrategoRuntime getStrategoRuntime(ExecContext context, ConstraintAnalyzeMultiTaskDef.SingleFileOutput input) {
         return super.getStrategoRuntime(context, input).addContextObject(input.context);

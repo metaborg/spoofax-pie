@@ -9,26 +9,34 @@ plugins {
 
 languageProject {
   shared {
-    name("LibSpoofax2")
-    defaultClassPrefix("LibSpoofax2")
-    defaultPackageId("mb.libspoofax2")
+    name("StrategoLib")
+    defaultClassPrefix("StrategoLib")
+    defaultPackageId("mb.strategolib")
   }
   compilerInput {
+    withStrategoRuntime().run {
+      addStrategyPackageIds("strategolib.trans")
+      addInteropRegisterersByReflection("strategolib.trans.InteropRegisterer")
+    }
     withExports().run {
       addExports("Stratego", "trans")
-      addExports("Esv", "editor")
+      addExports("Str2Lib", "src-gen/java/strategolib/trans/strategolib.str2lib")
     }
   }
 }
 spoofax2BasedLanguageProject {
   compilerInput {
+    withStrategoRuntime().run {
+      copyCtree(false)
+      copyClasses(true)
+    }
     project.run {
       addAdditionalCopyResources(
         "trans/**/*.str",
         "trans/**/*.str2",
-        "editor/**/*.esv"
+        "src-gen/java/strategolib/trans/strategolib.str2lib"
       )
-      languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:meta.lib.spoofax:${ext["spoofax2DevenvVersion"]}"))
+      languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:strategolib:${ext["spoofax2DevenvVersion"]}"))
     }
   }
 }

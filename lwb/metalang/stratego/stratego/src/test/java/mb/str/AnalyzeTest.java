@@ -26,10 +26,11 @@ class AnalyzeTest extends TestBase {
                 mainFile.getPath(),
                 ListView.of(projectDir.getPath()),
                 ListView.of(BuiltinLibraryIdentifier.StrategoLib),
+                ListView.of(),
                 ListView.of()
             );
             final KeyedMessages messages = session.require(check.createTask(config));
-            assertTrue(messages.containsError());
+            assertErrors(messages);
             final ListView<Message> mainMessages = messages.getMessagesOfKey(mainFile.getKey());
             assertEquals(1, mainMessages.size());
             assertEquals(Severity.Error, mainMessages.get(0).severity);

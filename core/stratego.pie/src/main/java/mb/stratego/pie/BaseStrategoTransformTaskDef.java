@@ -32,6 +32,11 @@ public abstract class BaseStrategoTransformTaskDef<T> implements TaskDef<Supplie
             this.termArguments = termArguments;
         }
 
+        public Strategy(String name, IStrategoTerm... termArguments) {
+            this.name = name;
+            this.termArguments = ListView.of(termArguments);
+        }
+
         public Strategy(String name) {
             this.name = name;
             this.termArguments = ListView.of();
@@ -54,6 +59,10 @@ public abstract class BaseStrategoTransformTaskDef<T> implements TaskDef<Supplie
                 .map(Strategy::new)
                 .collect(Collectors.toList())
         );
+    }
+
+    public BaseStrategoTransformTaskDef(Strategy... strategies) {
+        this.strategies = ListView.of(strategies);
     }
 
     protected void createDependencies(ExecContext context) throws Exception {}

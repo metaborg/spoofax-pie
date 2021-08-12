@@ -3,6 +3,7 @@ package mb.str.incr;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+import mb.pie.task.archive.UnarchiveFromJar;
 import mb.str.StrategoScope;
 import mb.stratego.build.strincr.IModuleImportService;
 import mb.stratego.build.strincr.ModuleImportService;
@@ -31,7 +32,7 @@ public abstract class StrategoIncrModule {
 
 
     @Provides @StrategoScope
-    public static ITermFactory provideTermFactory(@Named("prototype") StrategoRuntime prototypeStrategoRuntime) {
-        return new TermFactory(); // HACK: Stratego incremental compiler requires a term factory that does not implement OriginTermFactory.
+    public static UnarchiveFromJar provideUnarchiveFromJar() {
+        return new UnarchiveFromJar();
     }
 }

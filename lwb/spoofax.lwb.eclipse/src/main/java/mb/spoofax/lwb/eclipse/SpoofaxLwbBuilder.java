@@ -49,11 +49,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -213,12 +211,11 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
     }
 
     private CompileLanguage.Args createCompileArgs(ResourcePath rootDirectory) {
-        final List<File> classPath = ClassPathUtil.getClassPath();
-        logger.trace("Using class path: {}", classPath);
+        logger.trace("Using class path: {}", ClassPathUtil.getClassPath());
         return CompileLanguage.Args.builder()
             .rootDirectory(rootDirectory)
-            .additionalJavaClassPath(classPath)
-            .additionalJavaAnnotationProcessorPath(classPath)
+            .addJavaClassPathSuppliers(ClassPathUtil.getClassPathSupplier())
+            .addJavaAnnotationProcessorPathSuppliers(ClassPathUtil.getClassPathSupplier())
             .build();
 
     }
@@ -275,7 +272,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
     private void handleDynamicLoadResult(OutTransient<Result<DynamicLanguage, ?>> dynamicLanguage) {
         if(dynamicLanguage.isConsistent()) {
             dynamicLanguage.getValue().ifElse(
-                l -> logger.debug("Possibly dynamically loaded language '{}'", l.getLanguageComponent().getLanguageInstance().getDisplayName()),
+                l -> logger.debug("Possibly dynamically loaded language '{}'", l),
                 e -> logger.debug("Dynamic load task failed", e)
             );
         } else {

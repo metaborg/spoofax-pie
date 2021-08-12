@@ -10,6 +10,6 @@ public class StrategoUtil {
     }
 
     public static ResourceMatcher createResourceMatcher() {
-        return ResourceMatcher.ofPath(PathMatcher.ofExtension("str")).and(ResourceMatcher.ofFile());
+        return ResourceMatcher.ofPath(PathMatcher.ofExtensions("str", "str2")).and(ResourceMatcher.ofFile());
     }
 }

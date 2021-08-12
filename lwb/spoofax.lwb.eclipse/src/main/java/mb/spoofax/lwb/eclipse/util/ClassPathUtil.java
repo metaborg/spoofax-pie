@@ -1,9 +1,13 @@
 package mb.spoofax.lwb.eclipse.util;
 
 import io.github.classgraph.ClassGraph;
+import mb.common.util.ListView;
+import mb.pie.api.ExecContext;
+import mb.pie.api.Supplier;
 import mb.spoofax.compiler.eclipsebundle.SpoofaxCompilerEclipseBundle;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.lwb.eclipse.SpoofaxLwbPlugin;
+import mb.strategolib.eclipse.StrategoLibLanguage;
 import mb.tooling.eclipsebundle.ToolingEclipseBundle;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.resources.IProjectNature;
@@ -24,6 +28,7 @@ import org.osgi.framework.BundleActivator;
 import javax.annotation.Generated;
 import javax.annotation.Nullable;
 import java.io.File;
+import java.util.Comparator;
 import java.util.List;
 
 public class ClassPathUtil {
@@ -38,6 +43,7 @@ public class ClassPathUtil {
             .addClassLoader(SpoofaxPlugin.class.getClassLoader())
             .addClassLoader(ToolingEclipseBundle.class.getClassLoader())
             .addClassLoader(SpoofaxCompilerEclipseBundle.class.getClassLoader())
+            .addClassLoader(StrategoLibLanguage.class.getClassLoader())
 
             .addClassLoader(Generated.class.getClassLoader()) // Artifact: javax.annotation:jsr250-api:1.0
 
@@ -58,6 +64,33 @@ public class ClassPathUtil {
             .addClassLoader(Composite.class.getClassLoader()) // Bundle: org.eclipse.swt.*
             ;
         classPath = classGraph.getClasspathFiles();
+        classPath.sort(Comparator.naturalOrder());
         return classPath;
+    }
+
+    public static class ClassPathSupplier implements Supplier<ListView<File>> {
+        private static final ClassPathSupplier instance = new ClassPathSupplier();
+
+        private ClassPathSupplier() {}
+
+        @Override public ListView<File> get(ExecContext context) {
+            return ListView.of(getClassPath());
+        }
+
+        @Override public boolean equals(@org.checkerframework.checker.nullness.qual.Nullable Object other) {
+            return this == other || other != null && this.getClass() == other.getClass();
+        }
+
+        @Override public int hashCode() { return 0; }
+
+        @Override public String toString() { return getClass().getSimpleName(); }
+
+        private Object readResolve() {
+            return instance;
+        }
+    }
+
+    public static Supplier<ListView<File>> getClassPathSupplier() {
+        return ClassPathSupplier.instance;
     }
 }

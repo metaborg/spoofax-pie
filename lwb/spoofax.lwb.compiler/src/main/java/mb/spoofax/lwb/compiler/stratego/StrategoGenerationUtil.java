@@ -31,7 +31,7 @@ public class StrategoGenerationUtil {
         final IStrategoTerm prettyPrintedTerm = prettyPrintedResult.unwrap();
         final String prettyPrinted = TermUtils.toJavaString(prettyPrintedTerm);
 
-        final HierarchicalResource file = context.getHierarchicalResource(generatesSourcesDirectory.appendRelativePath(moduleName).appendToLeaf(".str"));
+        final HierarchicalResource file = context.getHierarchicalResource(generatesSourcesDirectory.appendRelativePath(moduleName).appendToLeaf(".str2"));
         file.ensureFileExists();
         file.writeString(prettyPrinted);
         context.provide(file);

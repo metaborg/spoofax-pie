@@ -51,14 +51,15 @@ import mb.statix.eclipse.StatixEclipseComponent;
 import mb.statix.eclipse.StatixLanguageFactory;
 import mb.str.eclipse.StrategoEclipseComponent;
 import mb.str.eclipse.StrategoLanguageFactory;
+import mb.strategolib.StrategoLibComponent;
+import mb.strategolib.StrategoLibResourcesComponent;
+import mb.strategolib.eclipse.StrategoLibLanguageFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.runtime.IExecutableExtensionFactory;
 import org.eclipse.core.runtime.IPath;
 
-import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
-import java.util.List;
 
 public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipant {
     private static @Nullable SpoofaxLwbLifecycleParticipant instance;
@@ -150,7 +151,11 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
                 final StrategoEclipseComponent strategoComponent = StrategoLanguageFactory.getLanguage().getComponent();
                 final EsvEclipseComponent esvComponent = EsvLanguageFactory.getLanguage().getComponent();
                 final StatixEclipseComponent statixComponent = StatixLanguageFactory.getLanguage().getComponent();
+
                 final Sdf3ExtStatixComponent sdf3ExtStatixComponent = Sdf3ExtStatixLanguageFactory.getLanguage().getComponent();
+
+                final StrategoLibComponent strategoLibComponent = StrategoLibLanguageFactory.getLanguage().getComponent();
+                final StrategoLibResourcesComponent strategoLibResourcesComponent = StrategoLibLanguageFactory.getLanguage().getResourcesComponent();
                 final LibSpoofax2EclipseComponent libSpoofax2Component = LibSpoofax2LanguageFactory.getLanguage().getComponent();
                 final LibSpoofax2ResourcesComponent libSpoofax2ResourcesComponent = LibSpoofax2LanguageFactory.getLanguage().getResourcesComponent();
                 final LibStatixEclipseComponent libStatixComponent = LibStatixLanguageFactory.getLanguage().getComponent();
@@ -165,7 +170,11 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
                     .strategoComponent(strategoComponent)
                     .esvComponent(esvComponent)
                     .statixComponent(statixComponent)
+
                     .sdf3ExtStatixComponent(sdf3ExtStatixComponent)
+
+                    .strategoLibComponent(strategoLibComponent)
+                    .strategoLibResourcesComponent(strategoLibResourcesComponent)
                     .libSpoofax2Component(libSpoofax2Component)
                     .libSpoofax2ResourcesComponent(libSpoofax2ResourcesComponent)
                     .libStatixComponent(libStatixComponent)
@@ -183,6 +192,9 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
                     esvComponent,
                     statixComponent,
                     sdf3ExtStatixComponent,
+
+                    strategoLibComponent,
+                    strategoLibResourcesComponent,
                     libSpoofax2Component,
                     libSpoofax2ResourcesComponent,
                     libStatixComponent,
@@ -208,11 +220,10 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
                 SpoofaxLwbLifecycleParticipant.getInstance().getDynamicLoadingComponent().getDynamicLoad(),
                 rootDirectory -> {
                     // TODO: reduce code duplication with SpoofaxLwbBuilder
-                    final List<File> classPath = ClassPathUtil.getClassPath();
                     return CompileLanguage.Args.builder()
                         .rootDirectory(rootDirectory)
-                        .additionalJavaClassPath(classPath)
-                        .additionalJavaAnnotationProcessorPath(classPath)
+                        .addJavaClassPathSuppliers(ClassPathUtil.getClassPathSupplier())
+                        .addJavaAnnotationProcessorPathSuppliers(ClassPathUtil.getClassPathSupplier())
                         .build();
                 }
             ));

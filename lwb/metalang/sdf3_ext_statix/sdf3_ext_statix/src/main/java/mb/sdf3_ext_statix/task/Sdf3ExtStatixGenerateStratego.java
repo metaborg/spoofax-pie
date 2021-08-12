@@ -64,7 +64,7 @@ public class Sdf3ExtStatixGenerateStratego implements TaskDef<Sdf3ExtStatixGener
             .addContextObject(new Sdf3ExtStatixContext(input.strategyAffix));
         return context.require(input.astSupplier).flatMapOrElse((ast) -> {
             try {
-                ast = strategoRuntime.invoke("geninj-generate-stratego", ast);
+                ast = strategoRuntime.invoke("geninj-generate-stratego", ast, strategoRuntime.getTermFactory().makeString("2"));
                 return Result.ofOk(ast);
             } catch(StrategoException e) {
                 return Result.ofErr(e);

@@ -31,6 +31,7 @@ dependencies {
   bundleImplementation(project(":sdf3_ext_statix.eclipse"))
   bundleImplementation(project(":spt.eclipse"))
 
+  bundleImplementation(project(":strategolib.eclipse"))
   bundleImplementation(project(":libspoofax2.eclipse"))
   bundleImplementation(project(":libstatix.eclipse"))
 

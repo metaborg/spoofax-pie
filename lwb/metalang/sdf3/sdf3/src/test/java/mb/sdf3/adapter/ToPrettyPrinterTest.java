@@ -16,7 +16,7 @@ class ToPrettyPrinterTest extends TestBase {
         final Sdf3ToPrettyPrinter taskDef = component.getSdf3ToPrettyPrinter();
         try(final MixedSession session = newSession()) {
             final Result<IStrategoTerm, ?> result = session.require(taskDef.createTask(new Sdf3ToPrettyPrinter.Input(desugarSupplier(resource), "lang")));
-            assertTrue(result.isOk());
+            assertOk(result);
             final IStrategoTerm output = result.unwrap();
             log.info("{}", output);
             assertNotNull(output);

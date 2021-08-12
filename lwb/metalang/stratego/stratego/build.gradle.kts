@@ -105,6 +105,7 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   addTaskDefs(strBuildTaskPackageId, "Front")
   addTaskDefs(strBuildTaskPackageId, "FrontSplit")
   addTaskDefs(strBuildTaskPackageId, "Resolve")
+  addTaskDefs(strBuildTaskPackageId, "CopyLibraryClassFiles")
 
   // Task definitions
   addTaskDefs(taskPackageId, "StrategoCompileToJava")
@@ -127,11 +128,15 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
       ParamRepr.of("mainFile", resourcePathType, true, ArgProviderRepr.context(CommandContextType.File)),
       ParamRepr.of("includeDirs", TypeInfo.of("mb.common.util", "ListView"), false, ArgProviderRepr.value("mb.common.util.ListView.of()")),
       ParamRepr.of("builtinLibs", TypeInfo.of("mb.common.util", "ListView"), false, ArgProviderRepr.value("mb.common.util.ListView.of()")),
+      ParamRepr.of("str2libraries", TypeInfo.of("mb.common.util", "ListView"), false, ArgProviderRepr.value("mb.common.util.ListView.of()")),
       ParamRepr.of("extraCompilerArguments", TypeInfo.of("org.metaborg.util.cmd", "Arguments"), false, ArgProviderRepr.value("new org.metaborg.util.cmd.Arguments()")),
       ParamRepr.of("sourceFileOrigins", TypeInfo.of("mb.common.util", "ListView"), false, ArgProviderRepr.value("mb.common.util.ListView.of()")),
       ParamRepr.of("cacheDir", resourcePathType, false),
-      ParamRepr.of("outputDir", resourcePathType, true),
-      ParamRepr.of("outputJavaPackageId", TypeInfo.ofString(), true)
+      ParamRepr.of("javaSourceFileOutputDir", resourcePathType, true),
+      ParamRepr.of("javaClassFileOutputDir", resourcePathType, true),
+      ParamRepr.of("outputJavaPackageId", TypeInfo.ofString(), true),
+      ParamRepr.of("outputLibraryName", TypeInfo.ofString(), true),
+      ParamRepr.of("javaClassPaths", TypeInfo.of("mb.common.util", "ListView"), false, ArgProviderRepr.value("mb.common.util.ListView.of()"))
     ))
     .build()
   addCommandDefs(compileToJavaCommand)

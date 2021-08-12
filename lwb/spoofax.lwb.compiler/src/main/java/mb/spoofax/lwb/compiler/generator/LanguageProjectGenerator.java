@@ -57,7 +57,7 @@ public class LanguageProjectGenerator {
         this.mainEsvTemplate = templateCompiler.getOrCompileToWriter("main.esv.mustache");
         this.startSdf3Template = templateCompiler.getOrCompileToWriter("start.sdf3.mustache");
         this.mainStatixTemplate = templateCompiler.getOrCompileToWriter("main.stx.mustache");
-        this.mainStrategoTemplate = templateCompiler.getOrCompileToWriter("main.str.mustache");
+        this.mainStrategoTemplate = templateCompiler.getOrCompileToWriter("main.str2.mustache");
         this.resourceService = resourceService;
     }
 
@@ -68,6 +68,6 @@ public class LanguageProjectGenerator {
         mainEsvTemplate.write(rootDirectory.appendRelativePath("src/main.esv"), input);
         startSdf3Template.write(rootDirectory.appendRelativePath("src/start.sdf3"), input);
         mainStatixTemplate.write(rootDirectory.appendRelativePath("src/main.stx"), input);
-        mainStrategoTemplate.write(rootDirectory.appendRelativePath("src/main.str"), input);
+        mainStrategoTemplate.write(rootDirectory.appendRelativePath("src/main.str2"), input);
     }
 }

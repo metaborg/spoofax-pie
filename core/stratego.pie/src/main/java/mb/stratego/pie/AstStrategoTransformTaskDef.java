@@ -35,6 +35,10 @@ public abstract class AstStrategoTransformTaskDef extends StrategoTransformTaskD
         super(getStrategoRuntimeProvider, strategyNames);
     }
 
+    public AstStrategoTransformTaskDef(GetStrategoRuntimeProvider getStrategoRuntimeProvider, Strategy... strategies) {
+        super(getStrategoRuntimeProvider, strategies);
+    }
+
     @Override protected IStrategoTerm getAst(ExecContext context, IStrategoTerm input) {
         return input;
     }

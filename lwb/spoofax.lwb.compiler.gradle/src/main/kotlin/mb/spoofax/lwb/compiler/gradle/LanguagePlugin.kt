@@ -10,10 +10,8 @@ import mb.common.message.Messages
 import mb.common.message.Severity
 import mb.common.result.Result
 import mb.common.util.ExceptionPrinter
-import mb.log.api.Level
 import mb.log.dagger.DaggerLoggerComponent
 import mb.log.dagger.LoggerModule
-import mb.log.stream.LoggingOutputStream
 import mb.pie.api.Pie
 import mb.pie.api.ValueSupplier
 import mb.pie.dagger.PieModule
@@ -30,14 +28,15 @@ import mb.spoofax.compiler.util.*
 import mb.spoofax.lwb.compiler.CheckLanguageSpecification
 import mb.spoofax.lwb.compiler.CompileLanguageSpecification
 import mb.spoofax.lwb.compiler.dagger.StandaloneSpoofax3Compiler
+import mb.spoofax.lwb.compiler.stratego.StrategoLibUtil
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
+import org.gradle.api.file.FileCollection
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.kotlin.dsl.*
-import java.io.PrintStream
 import java.util.*
 
 open class LanguageExtension() {
@@ -93,7 +92,7 @@ open class LanguagePlugin : Plugin<Project> {
     val compile = spoofax3Compiler.compiler.component.compileLanguageSpecification
     val adapterProjectCompiler = spoofax3Compiler.compiler.spoofaxCompilerComponent.adapterProjectCompiler
     val pie = spoofax3Compiler.pieComponent.pie
-    configureProject(project, resourceService, languageProjectCompiler, adapterProjectCompiler, input)
+    configureProject(project, resourceService, languageProjectCompiler, input, spoofax3Compiler.compiler.component.strategoLibUtil, adapterProjectCompiler)
     configureCompileLanguageProjectTask(project, resourceService, pie, languageProjectCompiler, input.languageProjectInput())
     configureCompileLanguageTask(project, resourceService, pie, check, compile, input.compileLanguageSpecificationInput())
     configureCompileAdapterProjectTask(project, resourceService, pie, adapterProjectCompiler, input.adapterProjectInput())
@@ -103,8 +102,9 @@ open class LanguagePlugin : Plugin<Project> {
     project: Project,
     resourceService: ResourceService,
     languageProjectCompiler: LanguageProjectCompiler,
-    adapterProjectCompiler: AdapterProjectCompiler,
-    input: CompileLanguageInput
+    input: CompileLanguageInput,
+    strategoLibUtil: StrategoLibUtil,
+    adapterProjectCompiler: AdapterProjectCompiler
   ) {
     // Language project compiler
     val languageProjectInput = input.languageProjectInput()
@@ -116,6 +116,7 @@ open class LanguagePlugin : Plugin<Project> {
     val languageSpecificationInput = input.compileLanguageSpecificationInput()
     project.addMainResourceDirectory(languageSpecificationInput.compileLanguageShared().generatedResourcesDirectory(), resourceService)
     project.addMainJavaSourceDirectory(languageSpecificationInput.compileLanguageShared().generatedJavaSourcesDirectory(), resourceService)
+    project.dependencies.add("implementation", project.files(strategoLibUtil.strategoLibJavaClassPaths))
     // Adapter project compiler
     val adapterProjectInput = input.adapterProjectInput()
     project.addMainJavaSourceDirectory(adapterProjectInput.adapterProject().generatedJavaSourcesDirectory(), resourceService)
@@ -224,11 +225,11 @@ open class LanguagePlugin : Plugin<Project> {
         }
 
         // Output: Stratego output directory
-        val outputDirectory = resourceService.toLocalFile(it.outputDirectory())
+        val outputDirectory = resourceService.toLocalFile(it.javaSourceFileOutputDir())
         if(outputDirectory != null) {
           outputs.dir(outputDirectory)
         } else {
-          logger.warn("Cannot set the Stratego output directory as a task output, because ${it.outputDirectory()} cannot be converted into a local file. This disables incrementality for this Gradle task")
+          logger.warn("Cannot set the Stratego output directory as a task output, because ${it.javaSourceFileOutputDir()} cannot be converted into a local file. This disables incrementality for this Gradle task")
         }
       }
 

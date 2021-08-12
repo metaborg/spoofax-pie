@@ -63,6 +63,10 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
   includeProject("spt.eclipse")
   includeProject("spt.intellij")
 }
+"metalib/strategolib".run {
+  includeProject("strategolib")
+  includeProject("strategolib.eclipse")
+}
 "metalib/libspoofax2".run {
   includeProject("libspoofax2")
   includeProject("libspoofax2.eclipse")

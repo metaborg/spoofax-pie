@@ -8,14 +8,18 @@ import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.option.Option;
 import mb.common.result.Result;
+import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Interactivity;
 import mb.pie.api.None;
 import mb.pie.api.STask;
 import mb.pie.api.Stateful1Supplier;
+import mb.pie.api.Supplier;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
+import mb.pie.api.ValueSupplier;
 import mb.pie.task.java.CompileJava;
+import mb.resource.fs.FSPath;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
 import mb.spoofax.compiler.language.LanguageProjectCompiler;
@@ -52,11 +56,9 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
 
         ResourcePath rootDirectory();
 
-        @Value.NaturalOrder
-        SortedSet<File> additionalJavaClassPath();
+        List<Supplier<ListView<File>>> javaClassPathSuppliers();
 
-        @Value.NaturalOrder
-        SortedSet<File> additionalJavaAnnotationProcessorPath();
+        List<Supplier<ListView<File>>> javaAnnotationProcessorPathSuppliers();
     }
 
     @Value.Immutable
@@ -66,7 +68,7 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
         static Builder builder() { return new Builder(); }
 
         @Value.NaturalOrder
-        SortedSet<ResourcePath> classPath();
+        SortedSet<ResourcePath> javaClassPaths();
 
         KeyedMessages messages();
     }
@@ -119,6 +121,7 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
 
         final CompileLanguageInput input = cfgOutput.compileLanguageInput;
         final CompileJava.Input.Builder compileJavaInputBuilder = CompileJava.Input.builder().key(args.rootDirectory());
+        final Output.Builder outputBuilder = Output.builder();
 
 
         final Task<Result<None, ?>> languageProjectCompilerTask = languageProjectCompiler.createTask(new LanguageProjectInputSupplier(cfgSupplier));
@@ -127,16 +130,20 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
         compileJavaInputBuilder.addOriginTasks(languageProjectCompilerTask.toSupplier());
 
         final Task<Result<CompileLanguageSpecification.Output, CompileLanguageSpecificationException>> languageSpecificationCompilerTask = compileLanguage.createTask(rootDirectory);
-        final Result<CompileLanguageSpecification.Output, CompileLanguageSpecificationException> spoofax3CompilerResult = context.require(languageSpecificationCompilerTask);
+        final Result<CompileLanguageSpecification.Output, CompileLanguageSpecificationException> languageSpecificationCompilerResult = context.require(languageSpecificationCompilerTask);
         compileJavaInputBuilder.addSourceTasks(new LanguageSpecificationJavaSourcesSupplier(languageSpecificationCompilerTask.toSupplier()));
-        if(spoofax3CompilerResult.isErr()) {
+        if(languageSpecificationCompilerResult.isErr()) {
             // noinspection ConstantConditions (error is present)
-            return Result.ofErr(CompileLanguageException.compileLanguageFail(spoofax3CompilerResult.getErr()));
+            return Result.ofErr(CompileLanguageException.compileLanguageFail(languageSpecificationCompilerResult.getErr()));
         } else {
             // noinspection ConstantConditions (value is present)
-            final CompileLanguageSpecification.Output output = spoofax3CompilerResult.get();
-            //noinspection ConstantConditions (value is present)
+            final CompileLanguageSpecification.Output output = languageSpecificationCompilerResult.get();
+            // noinspection ConstantConditions (value is really present)
             messagesBuilder.addMessages(output.messages());
+            compileJavaInputBuilder.addClassPathSuppliers(new ValueSupplier<>(ListView.of(output.javaClassPaths())));
+            for(File javaClassPath : output.javaClassPaths()) {
+                outputBuilder.addJavaClassPaths(new FSPath(javaClassPath));
+            }
         }
 
         final Task<Result<None, ?>> adapterProjectCompilerTask = adapterProjectCompiler.createTask(new AdapterProjectInputSupplier(cfgSupplier));
@@ -151,10 +158,12 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
 
         compileJavaInputBuilder
             .addSourceTasks(new JavaSourcesSupplier(cfgSupplier))
-            .addAllClassPaths(input.javaClassPaths())
-            .addAllClassPaths(args.additionalJavaClassPath())
-            .addAllAnnotationProcessorPaths(input.javaAnnotationProcessorPaths())
-            .addAllAnnotationProcessorPaths(args.additionalJavaAnnotationProcessorPath())
+            .addClassPathSuppliers(new ValueSupplier<>(ListView.of(input.javaClassPaths())))
+            .addAllClassPathSuppliers(args.javaClassPathSuppliers())
+            .addEnvironmentToClassPaths(true)
+            .addAnnotationProcessorPathSuppliers(new ValueSupplier<>(ListView.of(input.javaAnnotationProcessorPaths())))
+            .addAllAnnotationProcessorPathSuppliers(args.javaAnnotationProcessorPathSuppliers())
+            .addEnvironmentToAnnotationProcessorPaths(true)
             .release(input.javaRelease())
             .sourceFileOutputDirectory(input.javaSourceFileOutputDirectory())
             .classFileOutputDirectory(input.javaClassFileOutputDirectory())
@@ -167,9 +176,9 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
             return Result.ofErr(CompileLanguageException.javaCompilationFail(messagesBuilder.build()));
         }
 
-        return Result.ofOk(Output.builder()
-            .addClassPath(input.javaClassFileOutputDirectory())
-            .addAllClassPath(input.resourcePaths())
+        return Result.ofOk(outputBuilder
+            .addJavaClassPaths(input.javaClassFileOutputDirectory())
+            .addAllJavaClassPaths(input.resourcePaths())
             .messages(messagesBuilder.build())
             .build()
         );
@@ -177,10 +186,6 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
 
     @Override public boolean shouldExecWhenAffected(Args input, Set<?> tags) {
         return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
-    }
-
-    @Override public Serializable key(Args input) {
-        return input.rootDirectory();
     }
 
 

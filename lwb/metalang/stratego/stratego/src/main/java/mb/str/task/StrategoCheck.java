@@ -17,6 +17,7 @@ import mb.str.config.StrategoAnalyzeConfig;
 import mb.str.incr.MessageConverter;
 import mb.str.task.spoofax.StrategoParseWrapper;
 import mb.str.util.StrategoUtil;
+import mb.stratego.build.strincr.IModuleImportService;
 import mb.stratego.build.strincr.task.Check;
 import mb.stratego.build.strincr.task.input.CheckInput;
 import mb.stratego.build.strincr.task.output.CheckOutput;
@@ -62,9 +63,12 @@ public class StrategoCheck implements TaskDef<StrategoAnalyzeConfig, KeyedMessag
         final CheckOutput output = context.require(check, new CheckInput(
             config.mainModule,
             config.rootDirectory,
-            config.sourceFileOrigins.asCopy(),
-            config.includeDirs.asCopy(),
-            config.builtinLibs.asCopy(),
+            new IModuleImportService.ImportResolutionInfo(
+                config.sourceFileOrigins.asCopy(),
+                config.includeDirs.asCopy(),
+                config.builtinLibs.asCopy(),
+                config.str2libraries.asCopy()
+            ),
             true
         ));
         MessageConverter.addMessagesToBuilder(messagesBuilder, output.messages, resourceService);

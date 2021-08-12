@@ -42,6 +42,7 @@ import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
+import org.spoofax.terms.TermFactory;
 
 import {{scope.qualifiedId}};
 import {{qualifier.qualifiedId}};
@@ -105,6 +106,11 @@ public class {{baseModule.id}} {
 {{/constraintAnalyzer}}
 {{#strategoRuntime}}
 
+
+    @Provides @{{scope.id}}
+    static ITermFactory provideTermFactory() {
+        return new TermFactory();
+    }
 
     @Provides @{{scope.id}}
     static {{this.languageProjectInput.strategoRuntimeBuilderFactory.qualifiedId}} provideStrategoRuntimeBuilderFactory(LoggerFactory loggerFactory, ResourceService resourceService, @{{qualifier.id}}("definition-directory") HierarchicalResource definitionDir) {

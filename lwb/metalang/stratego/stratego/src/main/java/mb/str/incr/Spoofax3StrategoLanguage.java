@@ -30,12 +30,15 @@ import javax.inject.Provider;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collection;
 
 @StrategoScope
 public class Spoofax3StrategoLanguage implements StrategoLanguage {
     private final ResourceService resourceService;
     private final Provider<StrategoParser> parserProvider;
     private final Provider<StrategoRuntime> strategoRuntimeProvider;
+    private final ITermFactory termFactory;
     private final StrIncrContext strContext;
 
 
@@ -49,6 +52,7 @@ public class Spoofax3StrategoLanguage implements StrategoLanguage {
         this.resourceService = resourceService;
         this.parserProvider = parserProvider;
         this.strategoRuntimeProvider = strategoRuntimeProvider;
+        this.termFactory = strategoRuntimeProvider.get().getTermFactory();
         this.strContext = strContext;
     }
 
@@ -73,7 +77,6 @@ public class Spoofax3StrategoLanguage implements StrategoLanguage {
     }
 
     @Override public IStrategoTerm parseRtree(InputStream inputStream) throws Exception {
-        final ITermFactory termFactory = strategoRuntimeProvider.get().getTermFactory();
         // TODO: reduce code duplication with Spoofax2StrategoLanguage.
         final IStrategoTerm ast = new TermReader(termFactory).parseFromStream(inputStream);
         if(!(TermUtils.isAppl(ast) && ((IStrategoAppl)ast).getName().equals("Module") && ast.getSubtermCount() == 2)) {
@@ -81,6 +84,17 @@ public class Spoofax3StrategoLanguage implements StrategoLanguage {
                 throw new IOException("Custom library detected with Specification/1 term in RTree file. This is currently not supported");
             }
             throw new ExecException("Did not find Module/2 in RTree file. Found: \n" + ast.toString(2));
+        }
+        return ast;
+    }
+
+    @Override public IStrategoTerm parseStr2Lib(InputStream inputStream) throws Exception {
+        // TODO: reduce code duplication with Spoofax2StrategoLanguage.
+        final IStrategoTerm ast = new TermReader(termFactory).parseFromStream(inputStream);
+        if(!(TermUtils.isAppl(ast) && ((IStrategoAppl)ast).getName().equals("Str2Lib")
+            && ast.getSubtermCount() == 3)) {
+            throw new ExecException(
+                "Did not find Str2Lib/3 in Str2Lib file. Found: \n" + ast.toString(2));
         }
         return ast;
     }
@@ -100,6 +114,17 @@ public class Spoofax3StrategoLanguage implements StrategoLanguage {
 
     @Override public IStrategoAppl toCongruenceAst(IStrategoTerm ast, String projectPath) throws ExecException {
         return TermUtils.toAppl(callStrategy(ast, projectPath, "stratego2-mk-cong-def"));
+    }
+
+    @Override
+    public Collection<? extends IStrategoAppl> toCongruenceAsts(Collection<? extends IStrategoAppl> asts, String projectPath) throws ExecException {
+        // TODO: reduce code duplication with Spoofax2StrategoLanguage.
+        final IStrategoList result = TermUtils.toList(callStrategy(termFactory.makeList(asts), projectPath, "stratego2-mk-cong-defs"));
+        final ArrayList<IStrategoAppl> congruences = new ArrayList<>(result.size());
+        for(IStrategoTerm t : result) {
+            congruences.add(TermUtils.toAppl(t));
+        }
+        return congruences;
     }
 
     @Override public IStrategoTerm auxSignatures(IStrategoTerm ast, String projectPath) throws ExecException {

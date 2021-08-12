@@ -1,7 +1,6 @@
 package mb.cfg.metalang;
 
 import mb.cfg.CompileLanguageSpecificationShared;
-import mb.common.util.ListView;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.language.StrategoRuntimeLanguageCompiler;
 import mb.spoofax.compiler.util.BuilderBase;
@@ -38,7 +37,7 @@ public interface CompileStrategoInput extends Serializable {
     }
 
     @Value.Default default ResourcePath mainFile() {
-        return mainSourceDirectory().appendRelativePath("main.str");
+        return mainSourceDirectory().appendRelativePath("main.str2");
     }
 
     @Value.Default default String mainModule() {
@@ -49,7 +48,7 @@ public interface CompileStrategoInput extends Serializable {
 
     @Value.Default default List<String> includeBuiltinLibraries() {
         final ArrayList<String> strategoBuiltinLibs = new ArrayList<>();
-        strategoBuiltinLibs.add("stratego-lib");
+//        strategoBuiltinLibs.add("stratego-lib");
         strategoBuiltinLibs.add("stratego-gpp");
         strategoBuiltinLibs.add("libstratego-sglr");
         return strategoBuiltinLibs;
@@ -71,10 +70,14 @@ public interface CompileStrategoInput extends Serializable {
     }
 
 
-    @Value.Default default ResourcePath outputDirectory() {
+    @Value.Default default ResourcePath javaSourceFileOutputDir() {
         return compileLanguageShared().generatedJavaSourcesDirectory() // Generated Java sources directory, so that Gradle compiles the Java sources into classes.
-            .appendRelativePath(outputJavaPackagePath()) // Append package path.
+            //.appendRelativePath(outputJavaPackagePath()) // Append package path.
             ;
+    }
+
+    @Value.Default default ResourcePath javaClassFileOutputDir() {
+        return compileLanguageShared().languageProject().project().buildClassesDirectory();
     }
 
     @Value.Default default String outputJavaPackageId() {
@@ -85,12 +88,16 @@ public interface CompileStrategoInput extends Serializable {
         return Conversion.packageIdToPath(outputJavaPackageId());
     }
 
+    default String outputLibraryName() {
+        return compileLanguageShared().languageProject().project().coordinate().artifactId();
+    }
+
     default ResourcePath outputJavaInteropRegistererFile() {
-        return outputDirectory().appendRelativePath("InteropRegisterer.java");
+        return javaSourceFileOutputDir().appendRelativePath("InteropRegisterer.java");
     }
 
     default ResourcePath outputJavaMainFile() {
-        return outputDirectory().appendRelativePath("Main.java");
+        return javaSourceFileOutputDir().appendRelativePath("Main.java");
     }
 
 

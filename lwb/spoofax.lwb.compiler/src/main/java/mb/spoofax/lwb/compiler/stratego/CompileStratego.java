@@ -14,13 +14,12 @@ import mb.str.config.StrategoAnalyzeConfig;
 import mb.str.config.StrategoCompileConfig;
 import mb.str.task.StrategoCheck;
 import mb.str.task.StrategoCompileToJava;
-import mb.stratego.build.strincr.task.output.CompileOutput;
 import org.immutables.value.Value;
 
 import javax.inject.Inject;
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -33,6 +32,8 @@ public class CompileStratego implements TaskDef<ResourcePath, Result<CompileStra
         static Builder builder() { return new Builder(); }
 
         List<ResourcePath> providedJavaFiles();
+
+        List<File> javaClassPaths();
 
         @Value.Default default KeyedMessages messages() { return KeyedMessages.of(); }
     }
@@ -90,14 +91,20 @@ public class CompileStratego implements TaskDef<ResourcePath, Result<CompileStra
             return Result.ofErr(StrategoCompileException.checkFail(messages, analyzeConfig));
         }
 
-        final Result<CompileOutput.Success, MessagesException> compileResult = context.require(compileToJava, config);
+        final Result<StrategoCompileToJava.Output, MessagesException> compileResult = context.require(compileToJava, config);
         if(compileResult.isErr()) {
             // noinspection ConstantConditions (error is present)
             return Result.ofErr(StrategoCompileException.compileFail(compileResult.getErr(), config));
+        } else {
+            // noinspection ConstantConditions (value is present)
+            final StrategoCompileToJava.Output output = compileResult.get();
+            // noinspection ConstantConditions (value is really really present)
+            return Result.ofOk(Output.builder()
+                .providedJavaFiles(output.javaSourceFiles)
+                .addAllJavaClassPaths(config.javaClassPaths)
+                .messages(output.messages)
+                .build()
+            );
         }
-        // noinspection ConstantConditions (value is present)
-        final LinkedHashSet<ResourcePath> providedJavaFiles = compileResult.get().resultFiles;
-
-        return Result.ofOk(Output.builder().providedJavaFiles(providedJavaFiles).messages(messages).build());
     }
 }

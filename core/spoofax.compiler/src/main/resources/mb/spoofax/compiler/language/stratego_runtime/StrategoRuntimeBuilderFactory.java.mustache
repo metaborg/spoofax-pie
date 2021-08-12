@@ -27,6 +27,7 @@ public class {{baseStrategoRuntimeBuilderFactory.id}} implements StrategoRuntime
 {{/ctreeRelativePaths}}
         builder.withJarParentClassLoader({{baseStrategoRuntimeBuilderFactory.id}}.class.getClassLoader());
         builder.withInteropRegistererByReflectionClassLoader({{baseStrategoRuntimeBuilderFactory.id}}.class.getClassLoader());
+        builder.addLibrary(new mb.stratego.common.StrategoPrimitiveLibrary());
 {{#addNaBL2Primitives}}
         builder.addLibrary(new mb.nabl2.common.NaBL2PrimitiveLibrary());
 {{/addNaBL2Primitives}}

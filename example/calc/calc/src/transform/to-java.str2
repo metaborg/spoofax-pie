@@ -1,6 +1,8 @@
 module transform/to-java
 
 imports
+
+  strategolib
   signatures/-
 
 rules // programs

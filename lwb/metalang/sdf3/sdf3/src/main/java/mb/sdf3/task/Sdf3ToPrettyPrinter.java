@@ -63,7 +63,7 @@ public class Sdf3ToPrettyPrinter implements TaskDef<Sdf3ToPrettyPrinter.Input, R
         final StrategoRuntime strategoRuntime = strategoRuntimeProvider.get().addContextObject(new Sdf3Context(input.strategoQualifier));
         return context.require(input.astSupplier).flatMapOrElse((ast) -> {
             try {
-                ast = strategoRuntime.invoke("module-to-pp", ast);
+                ast = strategoRuntime.invoke("module-to-pp", ast, strategoRuntime.getTermFactory().makeString("2"));
                 return Result.ofOk(ast);
             } catch(StrategoException e) {
                 return Result.ofErr(e);

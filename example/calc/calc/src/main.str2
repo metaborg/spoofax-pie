@@ -2,6 +2,7 @@ module main
 
 imports
 
+  strategolib
   statixruntime
   statix/api
 
