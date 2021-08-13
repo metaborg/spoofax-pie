@@ -5,11 +5,17 @@ imports
   strategolib
   statixruntime
   statix/api
-
-  transform/to-java
+  injections/-
+  signatures/-
   pp
   completion
 
+  transform/to-java
+
 rules
 
-  editor-analyze = stx-editor-analyze(id, id|"main", "programOk")
+  pre-analyze  = explicate-injections-calc-Program
+  post-analyze = implicate-injections-calc-Program
+
+  editor-analyze = stx-editor-analyze(pre-analyze, post-analyze|"main", "programOk")
+  editor-resolve = stx-editor-resolve

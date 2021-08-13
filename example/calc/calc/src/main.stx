@@ -1,9 +1,8 @@
 module main
 
-signature
+imports
 
-  sorts Program constructors
-    Program : list(string) -> Program
+  signatures/start-sig
 
 rules
 

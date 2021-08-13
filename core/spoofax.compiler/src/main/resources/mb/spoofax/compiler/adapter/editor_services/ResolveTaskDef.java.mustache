@@ -119,7 +119,7 @@ public class {{baseResolveTaskDef.id}} implements TaskDef<{{baseResolveTaskDef.i
             analyze.createSingleFileOutputSupplier(
                 new ConstraintAnalyzeMultiTaskDef.Input(
                     args.rootDirectory,
-                    parse.createRecoverableMultiAstSupplierFunction(sourceFiles)
+                    parse.createRecoverableMultiAstSupplierFunction(getSourceFiles.createFunction())
                 ),
                 args.file
             )

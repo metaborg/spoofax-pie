@@ -4,7 +4,6 @@ import mb.common.message.Messages;
 import mb.common.result.Result;
 import mb.common.text.Text;
 import mb.common.util.ListView;
-import mb.common.util.MapView;
 import mb.jsglr.common.JSGLRTokens;
 import mb.jsglr.common.JsglrParseException;
 import mb.jsglr.common.JsglrParseOutput;
@@ -56,20 +55,20 @@ public abstract class JsglrParseTaskDef implements TaskDef<JsglrParseTaskInput, 
         return recoverableAstFunction;
     }
 
-    public Function<ResourcePath, MapView<ResourceKey, Supplier<Result<IStrategoTerm, JsglrParseException>>>> createMultiAstSupplierFunction(ResourceWalker walker, ResourceMatcher matcher) {
+    public WalkingMultiAstSupplierFunction createMultiAstSupplierFunction(ResourceWalker walker, ResourceMatcher matcher) {
         return new WalkingMultiAstSupplierFunction(astFunction, walker, matcher);
     }
 
-    public Function<ResourcePath, MapView<ResourceKey, Supplier<Result<IStrategoTerm, JsglrParseException>>>> createRecoverableMultiAstSupplierFunction(ResourceWalker walker, ResourceMatcher matcher) {
+    public WalkingMultiAstSupplierFunction createRecoverableMultiAstSupplierFunction(ResourceWalker walker, ResourceMatcher matcher) {
         return new WalkingMultiAstSupplierFunction(recoverableAstFunction, walker, matcher);
     }
 
-    public Function<ResourcePath, MapView<ResourceKey, Supplier<Result<IStrategoTerm, JsglrParseException>>>> createMultiAstSupplierFunction(ListView<ResourceKey> files) {
-        return new MultiAstSupplierFunction(astFunction, files);
+    public MultiAstSupplierFunction createMultiAstSupplierFunction(Function<ResourcePath, ListView<ResourceKey>> sourceFilesFunction) {
+        return new MultiAstSupplierFunction(sourceFilesFunction, astFunction);
     }
 
-    public Function<ResourcePath, MapView<ResourceKey, Supplier<Result<IStrategoTerm, JsglrParseException>>>> createRecoverableMultiAstSupplierFunction(ListView<ResourceKey> files) {
-        return new MultiAstSupplierFunction(recoverableAstFunction, files);
+    public MultiAstSupplierFunction createRecoverableMultiAstSupplierFunction(Function<ResourcePath, ListView<ResourceKey>> sourceFilesFunction) {
+        return new MultiAstSupplierFunction(sourceFilesFunction, recoverableAstFunction);
     }
 
     public Function<JsglrParseTaskInput, Result<JSGLRTokens, JsglrParseException>> createTokensFunction() {

@@ -6,7 +6,7 @@ lexical syntax
 lexical restrictions
   ID -/- [a-zA-Z0-9\_]
 
-lexical sorts INT IntGroup IntPref INT FLOAT NUM
+lexical sorts IntGroup IntPref INT FLOAT NUM
 lexical syntax // numbers
   INT      = "-"? [0-9]+
   IntGroup = [0-9][0-9][0-9]

@@ -49,7 +49,7 @@ public class {{baseCheckMultiTaskDef.id}} implements TaskDef<ResourcePath, Keyed
         {{/parser}}
 
         {{#constraintAnalyzer}}
-        final {{this.analyzeMultiTaskDef.qualifiedId}}.Input analyzeInput = new {{this.analyzeMultiTaskDef.qualifiedId}}.Input(input, parse.createRecoverableMultiAstSupplierFunction(sourceFiles));
+        final {{this.analyzeMultiTaskDef.qualifiedId}}.Input analyzeInput = new {{this.analyzeMultiTaskDef.qualifiedId}}.Input(input, parse.createRecoverableMultiAstSupplierFunction(getSourceFiles.createFunction()));
         final Result<{{this.analyzeMultiTaskDef.qualifiedId}}.Output, ?> analysisResult = context.require(analyze, analyzeInput);
         analysisResult
             .ifOk(output -> {

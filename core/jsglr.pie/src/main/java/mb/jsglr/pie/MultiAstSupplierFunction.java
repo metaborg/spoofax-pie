@@ -10,6 +10,7 @@ import mb.pie.api.Supplier;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import java.io.IOException;
@@ -17,44 +18,50 @@ import java.io.UncheckedIOException;
 import java.util.HashMap;
 
 public class MultiAstSupplierFunction implements Function<ResourcePath, MapView<ResourceKey, Supplier<Result<IStrategoTerm, JsglrParseException>>>> {
+    private final Function<ResourcePath, ListView<ResourceKey>> sourceFilesFunction;
     private final Function<JsglrParseTaskInput, Result<IStrategoTerm, JsglrParseException>> parseToAstFunction;
-    private final ListView<ResourceKey> files;
 
-    public MultiAstSupplierFunction(Function<JsglrParseTaskInput, Result<IStrategoTerm, JsglrParseException>> parseToAstFunction, ListView<ResourceKey> files) {
+    public MultiAstSupplierFunction(
+        Function<ResourcePath, ListView<ResourceKey>> sourceFilesFunction,
+        Function<JsglrParseTaskInput, Result<IStrategoTerm, JsglrParseException>> parseToAstFunction
+    ) {
+        this.sourceFilesFunction = sourceFilesFunction;
         this.parseToAstFunction = parseToAstFunction;
-        this.files = files;
     }
 
     @Override
     public MapView<ResourceKey, Supplier<Result<IStrategoTerm, JsglrParseException>>> apply(ExecContext context, ResourcePath rootDirectory) {
         final HashMap<ResourceKey, Supplier<Result<IStrategoTerm, JsglrParseException>>> astsAndErrors = new HashMap<>();
-
-        for(final ResourceKey file : files) {
+        final JsglrParseTaskInput.Builder parseInputBuilder = JsglrParseTaskInput.builder().rootDirectoryHint(rootDirectory);
+        for(final ResourceKey file : context.require(sourceFilesFunction, rootDirectory)) {
             try {
                 context.require(file, ResourceStampers.modifiedFile());
             } catch(IOException e) {
                 throw new UncheckedIOException(e);
             }
-
-            astsAndErrors.put(file, parseToAstFunction.createSupplier(JsglrParseTaskInput.builder().withFile(file).rootDirectoryHint(rootDirectory).build()));
+            astsAndErrors.put(file, parseToAstFunction.createSupplier(parseInputBuilder.withFile(file).build()));
         }
-
         return MapView.of(astsAndErrors);
     }
 
-    @Override public boolean equals(Object o) {
+    @Override public boolean equals(@Nullable Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
-
-        MultiAstSupplierFunction that = (MultiAstSupplierFunction)o;
-
-        if(!parseToAstFunction.equals(that.parseToAstFunction)) return false;
-        return files.equals(that.files);
+        final MultiAstSupplierFunction that = (MultiAstSupplierFunction)o;
+        if(!sourceFilesFunction.equals(that.sourceFilesFunction)) return false;
+        return parseToAstFunction.equals(that.parseToAstFunction);
     }
 
     @Override public int hashCode() {
-        int result = parseToAstFunction.hashCode();
-        result = 31 * result + files.hashCode();
+        int result = sourceFilesFunction.hashCode();
+        result = 31 * result + parseToAstFunction.hashCode();
         return result;
+    }
+
+    @Override public String toString() {
+        return "MultiAstSupplierFunction{" +
+            "sourceFilesFunction=" + sourceFilesFunction +
+            ", parseToAstFunction=" + parseToAstFunction +
+            '}';
     }
 }
