@@ -1,0 +1,54 @@
+package {{baseGetSourceFilesTaskDef.packageId}};
+
+import mb.common.util.ListView;
+import mb.pie.api.ExecContext;
+import mb.pie.api.TaskDef;
+import mb.pie.api.stamp.resource.ResourceStampers;
+import mb.resource.ResourceKey;
+import mb.resource.hierarchical.HierarchicalResource;
+import mb.resource.hierarchical.ResourcePath;
+import mb.resource.hierarchical.match.ResourceMatcher;
+import mb.resource.hierarchical.match.path.PathMatcher;
+import mb.resource.hierarchical.walk.ResourceWalker;
+
+import javax.inject.Inject;
+import java.util.LinkedList;
+import java.util.List;
+
+@{{adapterProject.scope.qualifiedId}}
+public class {{baseGetSourceFilesTaskDef.id}} implements TaskDef<ResourcePath, ListView<ResourceKey>> {
+    private static final ResourceWalker WALKER = ResourceWalker.ofNoHidden();
+    private static final ResourceMatcher MATCHER = ResourceMatcher.ofPath(
+        PathMatcher.ofExtensions({{#shared.fileExtensions}}"{{this}}"{{^-last}}, {{/-last}}{{/shared.fileExtensions}})
+    ).and(ResourceMatcher.ofFile());
+
+    private final {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources;
+
+    @Inject
+    public {{baseGetSourceFilesTaskDef.id}}(
+        {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources
+    ) {
+        this.classLoaderResources = classLoaderResources;
+    }
+
+    @Override public String getId() {
+        return "{{baseGetSourceFilesTaskDef.qualifiedId}}";
+    }
+
+    @Override public ListView<ResourceKey> exec(ExecContext context, ResourcePath input) throws Exception {
+        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+
+        final HierarchicalResource rootDirectory = context.getHierarchicalResource(input);
+        // Require directories recursively, so we re-execute whenever a file is added/removed from a directory.
+        rootDirectory.walkForEach(WALKER, ResourceMatcher.ofDirectory(), context::require);
+
+        final List<ResourceKey> files = new LinkedList<>();
+
+        rootDirectory.walkForEach(WALKER, MATCHER, file -> {
+            final ResourceKey fileKey = file.getKey();
+            files.add(fileKey);
+        });
+
+        return ListView.of(files);
+    }
+}

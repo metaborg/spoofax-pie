@@ -84,6 +84,7 @@ public class {{baseResolveTaskDef.id}} implements TaskDef<{{baseResolveTaskDef.i
     private final {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources;
     private final {{parseInput.parseTaskDef.qualifiedId}} parse;
     private final {{analyzeTaskDef.qualifiedId}} analyze;
+    private final {{getSourceFilesInput.getSourceFilesTaskDef.qualifiedId}} getSourceFiles;
     private final {{strategoRuntimeInput.getStrategoRuntimeProviderTaskDef.qualifiedId}} getStrategoRuntimeProvider;
 
     @Inject
@@ -91,11 +92,13 @@ public class {{baseResolveTaskDef.id}} implements TaskDef<{{baseResolveTaskDef.i
         {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources,
         {{parseInput.parseTaskDef.qualifiedId}} parse,
         {{analyzeTaskDef.qualifiedId}} analyze,
+        {{getSourceFilesInput.getSourceFilesTaskDef.qualifiedId}} getSourceFiles,
         {{strategoRuntimeInput.getStrategoRuntimeProviderTaskDef.qualifiedId}} getStrategoRuntimeProvider
     ) {
         this.classLoaderResources = classLoaderResources;
         this.parse = parse;
         this.analyze = analyze;
+        this.getSourceFiles = getSourceFiles;
         this.getStrategoRuntimeProvider = getStrategoRuntimeProvider;
     }
 
@@ -110,16 +113,13 @@ public class {{baseResolveTaskDef.id}} implements TaskDef<{{baseResolveTaskDef.i
 
         // Step 1: get analysis
 {{#isMultiFile}}
-        final ResourceWalker walker = ResourceWalker.ofPath(PathMatcher.ofNoHidden());
-        final ResourceMatcher matcher = ResourceMatcher.ofPath(
-            PathMatcher.ofExtensions({{#shared.fileExtensions}}"{{this}}"{{^-last}}, {{/-last}}{{/shared.fileExtensions}})
-        ).and(ResourceMatcher.ofFile());
+        final ListView<ResourceKey> sourceFiles = context.require(getSourceFiles, args.rootDirectory);
 
         final Result<ConstraintAnalyzeMultiTaskDef.SingleFileOutput, ?> analysis = context.require(
             analyze.createSingleFileOutputSupplier(
                 new ConstraintAnalyzeMultiTaskDef.Input(
                     args.rootDirectory,
-                    parse.createRecoverableMultiAstSupplierFunction(walker, matcher)
+                    parse.createRecoverableMultiAstSupplierFunction(sourceFiles)
                 ),
                 args.file
             )

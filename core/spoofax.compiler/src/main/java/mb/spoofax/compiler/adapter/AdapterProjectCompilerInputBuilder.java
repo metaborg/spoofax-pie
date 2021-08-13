@@ -13,6 +13,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public class AdapterProjectCompilerInputBuilder {
     public final ClassLoaderResourcesCompiler.Input.Builder classLoaderResources = ClassLoaderResourcesCompiler.Input.builder();
+    public final GetSourceFilesAdapterCompiler.Input.Builder getSourceFiles = GetSourceFilesAdapterCompiler.Input.builder();
 
     private boolean parserEnabled = false;
     public final ParserAdapterCompiler.Input.Builder parser = ParserAdapterCompiler.Input.builder();
@@ -84,6 +85,9 @@ public class AdapterProjectCompilerInputBuilder {
         final ClassLoaderResourcesCompiler.Input classLoaderResources = buildClassLoaderResources(shared, languageProjectInput.languageProject());
         project.classLoaderResources(classLoaderResources);
 
+        final GetSourceFilesAdapterCompiler.Input getSourceFiles = buildGetSourceFiles(shared, adapterProject, classLoaderResources);
+        project.sourceFiles(getSourceFiles);
+
         final ParserAdapterCompiler.@Nullable Input parser = buildParser(shared, adapterProject, languageProjectInput, classLoaderResources);
         if(parser != null) project.parser(parser);
 
@@ -99,7 +103,7 @@ public class AdapterProjectCompilerInputBuilder {
         final MultilangAnalyzerAdapterCompiler.@Nullable Input multilangAnalyzer = buildMultilangAnalyzer(shared, adapterProject, languageProjectInput, strategoRuntime);
         if(multilangAnalyzer != null) project.multilangAnalyzer(multilangAnalyzer);
 
-        final ReferenceResolutionAdapterCompiler.@Nullable Input referenceResolution = buildReferenceResolution(shared, adapterProject, strategoRuntime, parser, constraintAnalyzer, classLoaderResources);
+        final ReferenceResolutionAdapterCompiler.@Nullable Input referenceResolution = buildReferenceResolution(shared, adapterProject, strategoRuntime, parser, constraintAnalyzer, classLoaderResources, getSourceFiles);
         if(referenceResolution != null) project.referenceResolution(referenceResolution);
 
         final CompleterAdapterCompiler.@Nullable Input completer = buildCompleter(shared, adapterProject, languageProjectInput);
@@ -118,6 +122,18 @@ public class AdapterProjectCompilerInputBuilder {
         return classLoaderResources
             .shared(shared)
             .languageProject(languageProject)
+            .build();
+    }
+
+    private GetSourceFilesAdapterCompiler.Input buildGetSourceFiles(
+        Shared shared,
+        AdapterProject adapterProject,
+        ClassLoaderResourcesCompiler.Input classloaderResources
+    ) {
+        return getSourceFiles
+            .shared(shared)
+            .adapterProject(adapterProject)
+            .classLoaderResourcesInput(classloaderResources)
             .build();
     }
 
@@ -223,7 +239,8 @@ public class AdapterProjectCompilerInputBuilder {
         StrategoRuntimeAdapterCompiler.@Nullable Input strategoRuntimeInput,
         ParserAdapterCompiler.@Nullable Input parseInput,
         ConstraintAnalyzerAdapterCompiler.@Nullable Input constraintAnalyzerInput,
-        ClassLoaderResourcesCompiler.Input classloaderResources
+        ClassLoaderResourcesCompiler.Input classloaderResources,
+        GetSourceFilesAdapterCompiler.Input getSourceFiles
     ) {
         if(!referenceResolutionEnabled) return null;
         return referenceResolution
@@ -233,6 +250,7 @@ public class AdapterProjectCompilerInputBuilder {
             .parseInput(parseInput)
             .constraintAnalyzerInput(constraintAnalyzerInput)
             .classLoaderResourcesInput(classloaderResources)
+            .sourceFilesInput(getSourceFiles)
             .build();
     }
 }

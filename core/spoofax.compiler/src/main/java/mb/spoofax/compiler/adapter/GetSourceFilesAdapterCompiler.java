@@ -6,11 +6,7 @@ import mb.pie.api.None;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.language.ClassLoaderResourcesCompiler;
-import mb.spoofax.compiler.util.ClassKind;
-import mb.spoofax.compiler.util.Shared;
-import mb.spoofax.compiler.util.TemplateCompiler;
-import mb.spoofax.compiler.util.TemplateWriter;
-import mb.spoofax.compiler.util.TypeInfo;
+import mb.spoofax.compiler.util.*;
 import org.immutables.value.Value;
 
 import javax.inject.Inject;
@@ -19,13 +15,13 @@ import java.io.Serializable;
 import java.util.Optional;
 
 @Value.Enclosing
-public class ReferenceResolutionAdapterCompiler implements TaskDef<ReferenceResolutionAdapterCompiler.Input, None> {
-    private final TemplateWriter resolveTaskDefTemplate;
+public class GetSourceFilesAdapterCompiler implements TaskDef<GetSourceFilesAdapterCompiler.Input, None> {
+    private final TemplateWriter getSourceFilesTaskDefTemplate;
 
-    @Inject public ReferenceResolutionAdapterCompiler(TemplateCompiler templateCompiler) {
+    @Inject public GetSourceFilesAdapterCompiler(TemplateCompiler templateCompiler) {
         templateCompiler = templateCompiler.loadingFromClass(getClass());
 
-        this.resolveTaskDefTemplate = templateCompiler.getOrCompileToWriter("editor_services/ResolveTaskDef.java.mustache");
+        this.getSourceFilesTaskDefTemplate = templateCompiler.getOrCompileToWriter("adapter_project/GetSourceFilesTaskDef.java.mustache");
     }
 
     @Override public String getId() {
@@ -36,8 +32,7 @@ public class ReferenceResolutionAdapterCompiler implements TaskDef<ReferenceReso
         if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
 
-        // only generate resolve if we have a strategy
-        resolveTaskDefTemplate.write(context, input.resolveTaskDef().file(generatedJavaSourcesDirectory), input);
+        getSourceFilesTaskDefTemplate.write(context, input.getSourceFilesTaskDef().file(generatedJavaSourcesDirectory), input);
 
         return None.instance;
     }
@@ -49,16 +44,12 @@ public class ReferenceResolutionAdapterCompiler implements TaskDef<ReferenceReso
 
     @Value.Immutable
     public interface Input extends Serializable {
-        class Builder extends ReferenceResolutionAdapterCompilerData.Input.Builder {
+        class Builder extends GetSourceFilesAdapterCompilerData.Input.Builder {
         }
 
         static Builder builder() {
             return new Builder();
         }
-
-        /// Configuration
-        String resolveStrategy();
-
 
         /// Kinds of classes (generated/extended/manual)
 
@@ -73,16 +64,16 @@ public class ReferenceResolutionAdapterCompiler implements TaskDef<ReferenceReso
             return adapterProject().generatedJavaSourcesDirectory();
         }
 
-        // Resolve task definitions
+        // Get language source files definition
 
-        @Value.Default default TypeInfo baseResolveTaskDef() {
-            return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "Resolve");
+        @Value.Default default TypeInfo baseGetSourceFilesTaskDef() {
+            return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "GetSourceFiles");
         }
 
-        Optional<TypeInfo> extendResolveTaskDef();
+        Optional<TypeInfo> extendGetSourceFilesTaskDef();
 
-        default TypeInfo resolveTaskDef() {
-            return extendResolveTaskDef().orElseGet(this::baseResolveTaskDef);
+        default TypeInfo getSourceFilesTaskDef() {
+            return extendGetSourceFilesTaskDef().orElseGet(this::baseGetSourceFilesTaskDef);
         }
 
 
@@ -94,22 +85,8 @@ public class ReferenceResolutionAdapterCompiler implements TaskDef<ReferenceReso
             }
             final ResourcePath generatedJavaSourcesDirectory = generatedJavaSourcesDirectory();
             return ListView.of(
-                resolveTaskDef().file(generatedJavaSourcesDirectory)
+                getSourceFilesTaskDef().file(generatedJavaSourcesDirectory)
             );
-        }
-
-        /// Automatically computed values
-
-        @Value.Derived default boolean isMultiFile() {
-            return constraintAnalyzerInput().languageProjectInput().multiFile();
-        }
-
-        @Value.Derived default TypeInfo analyzeTaskDef() {
-            if (this.isMultiFile()) {
-                return constraintAnalyzerInput().analyzeMultiTaskDef();
-            } else {
-                return constraintAnalyzerInput().analyzeTaskDef();
-            }
         }
 
         /// Automatically provided sub-inputs
@@ -118,14 +95,6 @@ public class ReferenceResolutionAdapterCompiler implements TaskDef<ReferenceReso
 
         AdapterProject adapterProject();
 
-        StrategoRuntimeAdapterCompiler.Input strategoRuntimeInput();
-
-        ParserAdapterCompiler.Input parseInput();
-
-        ConstraintAnalyzerAdapterCompiler.Input constraintAnalyzerInput();
-
         ClassLoaderResourcesCompiler.Input classLoaderResourcesInput();
-
-        GetSourceFilesAdapterCompiler.Input getSourceFilesInput();
     }
 }
