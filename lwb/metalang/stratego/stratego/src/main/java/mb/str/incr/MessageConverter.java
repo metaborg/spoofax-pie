@@ -20,7 +20,7 @@ public class MessageConverter {
             final @Nullable SourceRegion sourceRegion = message.sourceRegion;
             final @Nullable Region region;
             if(sourceRegion != null) {
-                region = Region.fromOffsets(sourceRegion.startOffset, sourceRegion.endOffset, sourceRegion.startRow, sourceRegion.endRow);
+                region = Region.fromOffsets(sourceRegion.startOffset, sourceRegion.endOffset + 1, sourceRegion.startRow, sourceRegion.endRow + 1);
             } else {
                 region = null;
             }
