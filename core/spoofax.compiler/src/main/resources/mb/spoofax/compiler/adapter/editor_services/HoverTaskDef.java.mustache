@@ -1,0 +1,123 @@
+package {{baseHoverTaskDef.packageId}};
+
+import mb.aterm.common.TermToString;
+import mb.common.editor.HoverResult;
+import mb.common.option.Option;
+import mb.common.region.Region;
+import mb.common.result.Result;
+import mb.jsglr.common.TermTracer;
+import mb.pie.api.ExecContext;
+import mb.pie.api.None;
+import mb.pie.api.OutTransient;
+import mb.pie.api.TaskDef;
+import mb.pie.api.stamp.resource.ResourceStampers;
+import mb.resource.ResourceKey;
+import mb.resource.hierarchical.ResourcePath;
+import mb.stratego.common.StrategoException;
+import mb.stratego.common.StrategoRuntime;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+
+import javax.inject.Inject;
+import javax.inject.Provider;
+import java.io.Serializable;
+import java.util.Collection;
+
+@{{adapterProject.scope.qualifiedId}}
+public class {{baseHoverTaskDef.id}} implements TaskDef<{{baseHoverTaskDef.id}}.Args, Option<HoverResult>> {
+    public static class Args implements Serializable {
+        private static final long serialVersionUID = 1L;
+        public final ResourceKey file;
+        public final ResourcePath rootDirectory;
+        public final Region position;
+        public Args(ResourceKey file, ResourcePath rootDirectory, Region position) {
+            this.file = file;
+            this.rootDirectory = rootDirectory;
+            this.position = position;
+        }
+
+        @Override public boolean equals(Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            Args args = (Args)o;
+            if(!file.equals(args.file)) return false;
+            if(!rootDirectory.equals(args.rootDirectory)) return false;
+            if(!position.equals(args.position)) return false;
+            return true;
+        }
+
+        @Override public int hashCode() {
+            int result = file.hashCode();
+            result = 31 * result + rootDirectory.hashCode();
+            result = 31 * result + position.hashCode();
+            return result;
+        }
+
+        @Override public String toString() {
+            return "Args{" +
+                "file=" + file +
+                ", rootDirectory=" + rootDirectory +
+                ", offset=" + position +
+                '}';
+        }
+    }
+
+    private final {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources;
+    private final {{constraintAnalyzerInput.analyzeFileTaskDef.qualifiedId}} analyzeFile;
+    private final {{strategoRuntimeInput.getStrategoRuntimeProviderTaskDef.qualifiedId}} getStrategoRuntimeProvider;
+
+    @Inject
+    public {{baseHoverTaskDef.id}}(
+        {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources,
+        {{constraintAnalyzerInput.analyzeFileTaskDef.qualifiedId}} analyzeFile,
+        {{strategoRuntimeInput.getStrategoRuntimeProviderTaskDef.qualifiedId}} getStrategoRuntimeProvider
+    ) {
+        this.classLoaderResources = classLoaderResources;
+        this.analyzeFile = analyzeFile;
+        this.getStrategoRuntimeProvider = getStrategoRuntimeProvider;
+    }
+
+    @Override public String getId() {
+        return "{{baseHoverTaskDef.qualifiedId}}";
+    }
+
+    @Override public Option<HoverResult> exec(ExecContext context, Args args) throws Exception {
+        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+        final Result<{{constraintAnalyzerInput.analyzeFileTaskDef.qualifiedId}}.Output, ?> analysis = context.require(
+            analyzeFile,
+            new {{constraintAnalyzerInput.analyzeFileTaskDef.qualifiedId}}.Input(args.rootDirectory, args.file)
+        );
+
+        if(!analysis.isOk()) {
+            return Option.ofNone();
+        }
+
+        final OutTransient<Provider<StrategoRuntime>> strategoProvider = context.require(getStrategoRuntimeProvider, None.instance);
+        final StrategoRuntime strategoRuntime = strategoProvider.getValue().get().addContextObject(analysis.get().analyzerContext);
+
+        // find the AST nodes for the relevant offset (innermost first)
+        final Collection<IStrategoTerm> terms = TermTracer.getTermsEncompassingRegion(analysis.get().inputAst, args.position);
+
+        // attempt to run stratego strategy on every ast in turn
+        for(IStrategoTerm term : terms) {
+            try {
+                final IStrategoTerm input = strategoRuntime.getTermFactory().makeTuple(
+                    term,
+                    strategoRuntime.getTermFactory().makeList(),
+                    term,
+                    strategoRuntime.getTermFactory().makeString("."),
+                    strategoRuntime.getTermFactory().makeString(args.file.asString())
+                );
+                final IStrategoTerm result = strategoRuntime.invoke("{{hoverStrategy}}", input);
+
+                // Convert the result to a string.
+                return Option.ofSome(
+                    new HoverResult(TermTracer.getRegion(term), TermToString.toString(result))
+                );
+            } catch(StrategoException ex) {
+                // ignored
+            }
+        }
+
+        return Option.ofNone();
+    }
+}

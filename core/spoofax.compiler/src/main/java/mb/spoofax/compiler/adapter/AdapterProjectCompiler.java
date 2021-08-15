@@ -23,6 +23,7 @@ import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
 import mb.spoofax.compiler.util.UniqueNamer;
+import mb.spoofax.core.language.taskdef.NoneHoverTaskDef;
 import mb.spoofax.core.language.taskdef.NoneResolveTaskDef;
 import mb.spoofax.core.language.taskdef.NoneStyler;
 import mb.spoofax.core.language.taskdef.NoneTokenizer;
@@ -66,6 +67,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
     private final ConstraintAnalyzerAdapterCompiler constraintAnalyzerCompiler;
     private final MultilangAnalyzerAdapterCompiler multilangAnalyzerCompiler;
     private final ReferenceResolutionAdapterCompiler referenceResolutionAdapterCompiler;
+    private final HoverAdapterCompiler hoverAdapterCompiler;
     private final GetSourceFilesAdapterCompiler getSourceFilesAdapterCompiler;
 
     @Inject public AdapterProjectCompiler(
@@ -77,6 +79,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         ConstraintAnalyzerAdapterCompiler constraintAnalyzerCompiler,
         MultilangAnalyzerAdapterCompiler multilangAnalyzerCompiler,
         ReferenceResolutionAdapterCompiler referenceResolutionAdapterCompiler,
+        HoverAdapterCompiler hoverAdapterCompiler,
         GetSourceFilesAdapterCompiler getSourceFilesAdapterCompiler
     ) {
         templateCompiler = templateCompiler.loadingFromClass(getClass());
@@ -103,6 +106,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         this.constraintAnalyzerCompiler = constraintAnalyzerCompiler;
         this.multilangAnalyzerCompiler = multilangAnalyzerCompiler;
         this.referenceResolutionAdapterCompiler = referenceResolutionAdapterCompiler;
+        this.hoverAdapterCompiler = hoverAdapterCompiler;
         this.getSourceFilesAdapterCompiler = getSourceFilesAdapterCompiler;
     }
 
@@ -129,6 +133,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         input.constraintAnalyzer().ifPresent((i) -> context.require(constraintAnalyzerCompiler, i));
         input.multilangAnalyzer().ifPresent((i) -> context.require(multilangAnalyzerCompiler, i));
         input.referenceResolution().ifPresent((i) -> context.require(referenceResolutionAdapterCompiler, i));
+        input.hover().ifPresent((i) -> context.require(hoverAdapterCompiler, i));
         context.require(getSourceFilesAdapterCompiler, input.getSourceFiles());
 
         if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
@@ -175,6 +180,12 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         });
         if(!input.referenceResolution().isPresent()) {
             allTaskDefs.add(TypeInfo.of(NoneResolveTaskDef.class));
+        }
+        input.hover().ifPresent((i) -> {
+            addTaskDef(allTaskDefs, i.hoverTaskDef(), i.baseHoverTaskDef());
+        });
+        if(!input.hover().isPresent()) {
+            allTaskDefs.add(TypeInfo.of(NoneHoverTaskDef.class));
         }
         addTaskDef(allTaskDefs, input.checkTaskDef(), input.baseCheckTaskDef());
         addTaskDef(allTaskDefs, input.checkMultiTaskDef(), input.baseCheckMultiTaskDef());
@@ -317,6 +328,16 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             }
             map.put("resolveInjection", resolveInjection);
             injected.add(resolveInjection);
+            final NamedTypeInfo hoverInjection;
+            if(input.hover().isPresent()) {
+                hoverInjection = uniqueNamer.makeUnique(input.hover().get().hoverTaskDef());
+                map.put("hasHoverInjection", true);
+            } else {
+                hoverInjection = uniqueNamer.makeUnique(TypeInfo.of(NoneHoverTaskDef.class));
+                map.put("hasHoverInjection", false);
+            }
+            map.put("hoverInjection", hoverInjection);
+            injected.add(hoverInjection);
 
             // Create injections for all command definitions. TODO: only inject needed command definitions?
             injected.addAll(input.commandDefs().stream().map(CommandDefRepr::type).map(uniqueNamer::makeUnique).collect(Collectors.toList()));
@@ -405,6 +426,8 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         Optional<MultilangAnalyzerAdapterCompiler.Input> multilangAnalyzer();
 
         Optional<ReferenceResolutionAdapterCompiler.Input> referenceResolution();
+
+        Optional<HoverAdapterCompiler.Input> hover();
 
         GetSourceFilesAdapterCompiler.Input getSourceFiles();
 
@@ -701,6 +724,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             constraintAnalyzer().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             referenceResolution().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             multilangAnalyzer().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
+            hover().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             getSourceFiles().javaSourceFiles().addAllTo(javaSourceFiles);
             return javaSourceFiles;
         }

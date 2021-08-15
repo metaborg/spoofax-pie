@@ -36,6 +36,9 @@ public class AdapterProjectCompilerInputBuilder {
     private boolean referenceResolutionEnabled = false;
     public final ReferenceResolutionAdapterCompiler.Input.Builder referenceResolution = ReferenceResolutionAdapterCompiler.Input.builder();
 
+    private boolean hoverEnabled = false;
+    public final HoverAdapterCompiler.Input.Builder hover = HoverAdapterCompiler.Input.builder();
+
     public AdapterProjectCompiler.Input.Builder project = AdapterProjectCompiler.Input.builder();
 
 
@@ -78,6 +81,11 @@ public class AdapterProjectCompilerInputBuilder {
         return referenceResolution;
     }
 
+    public HoverAdapterCompiler.Input.Builder withHover() {
+        hoverEnabled = true;
+        return hover;
+    }
+
 
     public AdapterProjectCompiler.Input build(LanguageProjectCompiler.Input languageProjectInput, Option<GradleDependency> languageProjectDependency, AdapterProject adapterProject) {
         final Shared shared = languageProjectInput.shared();
@@ -105,6 +113,9 @@ public class AdapterProjectCompilerInputBuilder {
 
         final ReferenceResolutionAdapterCompiler.@Nullable Input referenceResolution = buildReferenceResolution(shared, adapterProject, strategoRuntime, constraintAnalyzer, classLoaderResources);
         if(referenceResolution != null) project.referenceResolution(referenceResolution);
+
+        final HoverAdapterCompiler.@Nullable Input hover = buildHover(shared, adapterProject, strategoRuntime, constraintAnalyzer, classLoaderResources);
+        if(hover != null) project.hover(hover);
 
         final CompleterAdapterCompiler.@Nullable Input completer = buildCompleter(shared, adapterProject, languageProjectInput);
 
@@ -246,6 +257,23 @@ public class AdapterProjectCompilerInputBuilder {
     ) {
         if(!referenceResolutionEnabled) return null;
         return referenceResolution
+            .shared(shared)
+            .adapterProject(adapterProject)
+            .strategoRuntimeInput(strategoRuntimeInput)
+            .constraintAnalyzerInput(constraintAnalyzerInput)
+            .classLoaderResourcesInput(classloaderResources)
+            .build();
+    }
+
+    private HoverAdapterCompiler.@Nullable Input buildHover(
+        Shared shared,
+        AdapterProject adapterProject,
+        StrategoRuntimeAdapterCompiler.@Nullable Input strategoRuntimeInput,
+        ConstraintAnalyzerAdapterCompiler.@Nullable Input constraintAnalyzerInput,
+        ClassLoaderResourcesCompiler.Input classloaderResources
+    ) {
+        if(!hoverEnabled) return null;
+        return hover
             .shared(shared)
             .adapterProject(adapterProject)
             .strategoRuntimeInput(strategoRuntimeInput)

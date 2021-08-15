@@ -19,6 +19,7 @@ import mb.spoofax.compiler.adapter.AdapterProject;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
 import mb.spoofax.compiler.adapter.AdapterProjectCompilerInputBuilder;
 import mb.spoofax.compiler.adapter.ConstraintAnalyzerAdapterCompiler;
+import mb.spoofax.compiler.adapter.HoverAdapterCompiler;
 import mb.spoofax.compiler.adapter.MultilangAnalyzerAdapterCompiler;
 import mb.spoofax.compiler.adapter.ParserAdapterCompiler;
 import mb.spoofax.compiler.adapter.ReferenceResolutionAdapterCompiler;
@@ -272,6 +273,12 @@ public class CfgAstToObject {
                 final ReferenceResolutionAdapterCompiler.Input.Builder builder = adapterBuilder.withReferenceResolution();
                 // todo: should probably actually look at the variant here
                 referenceResolutionSubParts.forOneSubtermAsString("StrategyId", builder::resolveStrategy);
+            });
+
+            // Hover
+            subParts.getAllSubTermsInListAsParts("EditorServicesHoverOption").ifSome(hoverSubParts -> {
+                final HoverAdapterCompiler.Input.Builder builder = adapterBuilder.withHover();
+                hoverSubParts.forOneSubtermAsString("StrategyId", builder::hoverStrategy);
             });
         });
 
