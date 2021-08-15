@@ -28,7 +28,7 @@ public class SpoofaxSourceViewerConfiguration extends TextSourceViewerConfigurat
     }
 
     @Override public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType) {
-        return new SpoofaxTextHover(sourceViewer);
+        return new SpoofaxTextHover(sourceViewer, editorBase, languageComponent, pieComponent);
     }
 
     public IInformationControlCreator getInformationControlCreator(ISourceViewer sourceViewer) {
