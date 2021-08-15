@@ -160,6 +160,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         input.constraintAnalyzer().ifPresent((i) -> {
             addTaskDef(allTaskDefs, i.analyzeTaskDef(), i.baseAnalyzeTaskDef());
             addTaskDef(allTaskDefs, i.analyzeMultiTaskDef(), i.baseAnalyzeMultiTaskDef());
+            addTaskDef(allTaskDefs, i.analyzeFileTaskDef(), i.baseAnalyzeFileTaskDef());
         });
         input.multilangAnalyzer().ifPresent((i) -> {
             addTaskDef(allTaskDefs, i.analyzeTaskDef(), i.baseAnalyzeTaskDef());

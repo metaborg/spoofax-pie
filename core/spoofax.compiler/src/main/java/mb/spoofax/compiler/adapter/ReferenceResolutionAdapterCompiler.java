@@ -36,7 +36,6 @@ public class ReferenceResolutionAdapterCompiler implements TaskDef<ReferenceReso
         if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
 
-        // only generate resolve if we have a strategy
         resolveTaskDefTemplate.write(context, input.resolveTaskDef().file(generatedJavaSourcesDirectory), input);
 
         return None.instance;
@@ -98,20 +97,6 @@ public class ReferenceResolutionAdapterCompiler implements TaskDef<ReferenceReso
             );
         }
 
-        /// Automatically computed values
-
-        @Value.Derived default boolean isMultiFile() {
-            return constraintAnalyzerInput().languageProjectInput().multiFile();
-        }
-
-        @Value.Derived default TypeInfo analyzeTaskDef() {
-            if (this.isMultiFile()) {
-                return constraintAnalyzerInput().analyzeMultiTaskDef();
-            } else {
-                return constraintAnalyzerInput().analyzeTaskDef();
-            }
-        }
-
         /// Automatically provided sub-inputs
 
         @Value.Auxiliary Shared shared();
@@ -120,12 +105,8 @@ public class ReferenceResolutionAdapterCompiler implements TaskDef<ReferenceReso
 
         StrategoRuntimeAdapterCompiler.Input strategoRuntimeInput();
 
-        ParserAdapterCompiler.Input parseInput();
-
         ConstraintAnalyzerAdapterCompiler.Input constraintAnalyzerInput();
 
         ClassLoaderResourcesCompiler.Input classLoaderResourcesInput();
-
-        GetSourceFilesAdapterCompiler.Input getSourceFilesInput();
     }
 }

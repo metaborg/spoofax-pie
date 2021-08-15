@@ -25,11 +25,13 @@ import java.util.Set;
 public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnalyzerAdapterCompiler.Input, None> {
     private final TemplateWriter analyzeTaskDefTemplate;
     private final TemplateWriter analyzeMultiTaskDefTemplate;
+    private final TemplateWriter analyzeFileTaskDefTemplate;
 
     @Inject public ConstraintAnalyzerAdapterCompiler(TemplateCompiler templateCompiler) {
         templateCompiler = templateCompiler.loadingFromClass(getClass());
         this.analyzeTaskDefTemplate = templateCompiler.getOrCompileToWriter("constraint_analyzer/AnalyzeTaskDef.java.mustache");
         this.analyzeMultiTaskDefTemplate = templateCompiler.getOrCompileToWriter("constraint_analyzer/AnalyzeMultiTaskDef.java.mustache");
+        this.analyzeFileTaskDefTemplate = templateCompiler.getOrCompileToWriter("constraint_analyzer/AnalyzeFileTaskDef.java.mustache");
     }
 
 
@@ -42,6 +44,7 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         analyzeTaskDefTemplate.write(context, input.baseAnalyzeTaskDef().file(generatedJavaSourcesDirectory), input);
         analyzeMultiTaskDefTemplate.write(context, input.baseAnalyzeMultiTaskDef().file(generatedJavaSourcesDirectory), input);
+        analyzeFileTaskDefTemplate.write(context, input.baseAnalyzeFileTaskDef().file(generatedJavaSourcesDirectory), input);
         return None.instance;
     }
 
@@ -100,6 +103,17 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
             return extendAnalyzeMultiTaskDef().orElseGet(this::baseAnalyzeMultiTaskDef);
         }
 
+        // Analyze specified file helper
+
+        @Value.Default default TypeInfo baseAnalyzeFileTaskDef() {
+            return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "AnalyzeFile");
+        }
+
+        Optional<TypeInfo> extendAnalyzeFileTaskDef();
+
+        default TypeInfo analyzeFileTaskDef() {
+            return extendAnalyzeFileTaskDef().orElseGet(this::baseAnalyzeFileTaskDef);
+        }
 
         /// Files information, known up-front for build systems with static dependencies such as Gradle.
 
@@ -110,8 +124,23 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
             final ResourcePath generatedJavaSourcesDirectory = generatedJavaSourcesDirectory();
             return ListView.of(
                 baseAnalyzeTaskDef().file(generatedJavaSourcesDirectory),
-                baseAnalyzeMultiTaskDef().file(generatedJavaSourcesDirectory)
+                baseAnalyzeMultiTaskDef().file(generatedJavaSourcesDirectory),
+                baseAnalyzeFileTaskDef().file(generatedJavaSourcesDirectory)
             );
+        }
+
+        /// Automatically computed values
+
+        @Value.Derived default boolean isMultiFile() {
+            return languageProjectInput().multiFile();
+        }
+
+        @Value.Derived default TypeInfo runtimeAnalyzeTaskDef() {
+            if (this.isMultiFile()) {
+                return analyzeMultiTaskDef();
+            } else {
+                return analyzeTaskDef();
+            }
         }
 
 
@@ -122,6 +151,10 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
         AdapterProject adapterProject();
 
         ConstraintAnalyzerLanguageCompiler.Input languageProjectInput();
+
+        ParserAdapterCompiler.Input parseInput();
+
+        GetSourceFilesAdapterCompiler.Input getSourceFilesInput();
 
         ClassLoaderResourcesCompiler.Input classLoaderResourcesInput();
 
