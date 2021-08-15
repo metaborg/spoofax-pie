@@ -4,10 +4,11 @@ imports
 
   part
   expr
-  
+
 context-free sorts
   EditorServicesOption
   ReferenceResolutionVariant
+  HoverVariant
 
 context-free syntax
 
@@ -22,13 +23,18 @@ context-free syntax
 ]>
 
 context-free syntax
- 
+
   Part.EditorServicesSection = <editor-services {
     <{EditorServicesOption "\n"}*>
   }>
-  
+
   EditorServicesOption.EditorServicesReferenceResolutionOption = <reference-resolution = <ReferenceResolutionVariant>>
-  
+  EditorServicesOption.EditorServicesHoverOption = <hover = <HoverVariant>>
+
   ReferenceResolutionVariant.ReferenceResolutionStrategoVariant = <stratego {
+    strategy = <Expr>
+  }>
+
+  HoverVariant.HoverStrategoVariant = <stratego {
     strategy = <Expr>
   }>
