@@ -1,5 +1,6 @@
 package mb.spoofax.core.language;
 
+import mb.common.editor.HoverResult;
 import mb.common.editor.ReferenceResolutionResult;
 import mb.common.message.KeyedMessages;
 import mb.common.option.Option;
@@ -52,6 +53,8 @@ public interface LanguageInstance {
 
 
     Task<Option<ReferenceResolutionResult>> createResolveTask(ResourcePath rootDirectory, ResourceKey file, Region region);
+
+    Task<Option<HoverResult>> createHoverTask(ResourcePath rootDirectory, ResourceKey file, Region region);
 
 
     CollectionView<CommandDef<?>> getCommandDefs();
