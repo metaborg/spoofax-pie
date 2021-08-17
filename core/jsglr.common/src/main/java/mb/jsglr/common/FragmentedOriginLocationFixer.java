@@ -115,6 +115,13 @@ public class FragmentedOriginLocationFixer {
         });
     }
 
+    public static IToken getOriginalToken(IToken token) {
+        if (token instanceof MappedToken) {
+            return ((MappedToken)token).originalToken;
+        }
+        return token;
+    }
+
     private static class MappingTokens implements ITokens {
         private final ArrayList<IToken> tokens = new ArrayList<>();
         private final LinkedHashMap<IToken, IToken> oldToNewTokens = new LinkedHashMap<>();
