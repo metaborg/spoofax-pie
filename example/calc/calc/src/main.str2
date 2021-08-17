@@ -19,3 +19,4 @@ rules
 
   editor-analyze = stx-editor-analyze(pre-analyze, post-analyze|"main", "programOk")
   editor-resolve = stx-editor-resolve
+  editor-hover   = stx-editor-hover
