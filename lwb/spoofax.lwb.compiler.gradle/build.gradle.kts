@@ -17,6 +17,7 @@ dependencies {
   api(platform(compositeBuild("spoofax.depconstraints")))
   kapt(platform(compositeBuild("spoofax.depconstraints")))
 
+  compileOnly("org.metaborg:spoofax.compiler.gradle")
   api(project(":spoofax.lwb.compiler"))
   api(project(":spoofax.lwb.compiler.dagger"))
   api("com.google.dagger:dagger")

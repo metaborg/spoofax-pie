@@ -40,7 +40,7 @@ open class AdapterProjectExtension(project: Project) {
     private const val name = "language adapter project"
   }
 
-  internal val languageProjectFinalized: Project? by lazy {
+  open val languageProjectFinalized: Project? by lazy {
     project.logger.debug("Finalizing $name's language project reference in $project")
     languageProject.finalizeValue()
     if(languageProject.isPresent) {
@@ -67,7 +67,7 @@ open class AdapterProjectExtension(project: Project) {
       .build()
   }
 
-  internal val compilerInputFinalized: AdapterProjectCompiler.Input by lazy {
+  open val compilerInputFinalized: AdapterProjectCompiler.Input by lazy {
     project.logger.debug("Finalizing $name's compiler input in $project")
     compilerInput.finalizeValue()
     val languageProjectDependency = Option.ofNullable(languageProjectFinalized).map { it.toSpoofaxCompilerProject().asProjectDependency() }

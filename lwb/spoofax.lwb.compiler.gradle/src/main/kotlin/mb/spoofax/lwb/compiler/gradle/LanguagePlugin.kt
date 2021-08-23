@@ -10,8 +10,10 @@ import mb.common.message.Messages
 import mb.common.message.Severity
 import mb.common.result.Result
 import mb.common.util.ExceptionPrinter
+import mb.log.api.Level
 import mb.log.dagger.DaggerLoggerComponent
 import mb.log.dagger.LoggerModule
+import mb.log.stream.LoggingOutputStream
 import mb.pie.api.Pie
 import mb.pie.api.ValueSupplier
 import mb.pie.dagger.PieModule
@@ -23,6 +25,9 @@ import mb.resource.dagger.DaggerRootResourceServiceComponent
 import mb.resource.fs.FSPath
 import mb.resource.hierarchical.ResourcePath
 import mb.spoofax.compiler.adapter.*
+import mb.spoofax.compiler.gradle.*
+import mb.spoofax.compiler.gradle.plugin.AdapterProjectExtension
+import mb.spoofax.compiler.gradle.plugin.LanguageProjectExtension
 import mb.spoofax.compiler.language.*
 import mb.spoofax.compiler.util.*
 import mb.spoofax.lwb.compiler.CheckLanguageSpecification
@@ -37,12 +42,32 @@ import org.gradle.api.file.FileCollection
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.kotlin.dsl.*
+import java.io.PrintStream
 import java.util.*
 
 open class LanguageExtension() {
   companion object {
     internal const val id = "spoofaxLanguage"
   }
+}
+
+open class Spoofax3AdapterExtension(project: Project, input: CompileLanguageInput) : AdapterProjectExtension(project) {
+  companion object {
+    internal const val id = "spoofax3LanguageAdapterProject"
+  }
+
+  override val languageProjectFinalized: Project? = null
+  override val compilerInputFinalized: AdapterProjectCompiler.Input = input.adapterProjectInput()
+}
+
+open class Spoofax3LanguageExtension(project: Project, input: CompileLanguageInput) : LanguageProjectExtension(project) {
+  companion object {
+    internal const val id = "spoofax3LanguageProject"
+  }
+
+  override val sharedFinalized: Shared = input.shared()
+  override val compilerInputFinalized = input.languageProjectInput()
+  override val statixDependenciesFinalized: List<Project> = listOf()
 }
 
 @Suppress("unused")
@@ -64,7 +89,10 @@ open class LanguagePlugin : Plugin<Project> {
     val extension = LanguageExtension()
     project.extensions.add(LanguageExtension.id, extension)
 
-    val input = getInput(project, spoofax3Compiler);
+    val input = getInput(project, spoofax3Compiler)
+
+    project.extensions.add(Spoofax3AdapterExtension.id, Spoofax3AdapterExtension(project, input))
+    project.extensions.add(Spoofax3LanguageExtension.id, Spoofax3LanguageExtension(project, input))
 
     project.afterEvaluate {
       configure(project, spoofax3Compiler, input)
@@ -342,66 +370,3 @@ fun Project.logMessage(message: Message, resource: ResourceKey?) {
     }
   }
 }
-
-// Utilities copied from base LanguagePlugin.
-
-fun Project.addMainJavaSourceDirectory(directory: ResourcePath, resourceService: ResourceService) {
-  configure<SourceSetContainer> {
-    named("main") {
-      java {
-        srcDir(resourceService.toLocalFile(directory)
-          ?: throw GradleException("Cannot configure java sources directory, directory '$directory' is not on the local filesystem"))
-      }
-    }
-  }
-}
-
-fun Project.addMainResourceDirectory(directory: ResourcePath, resourceService: ResourceService) {
-  configure<SourceSetContainer> {
-    named("main") {
-      resources {
-        srcDir(resourceService.toLocalFile(directory)
-          ?: throw GradleException("Cannot configure resources directory, directory '$directory' is not on the local filesystem"))
-      }
-    }
-  }
-}
-
-fun GradleConfiguredDependency.addToDependencies(project: Project): Dependency {
-  val (configurationName, isPlatform) = caseOf()
-    .api_("api" to false)
-    .implementation_("implementation" to false)
-    .compileOnly_("compileOnly" to false)
-    .runtimeOnly_("runtimeOnly" to false)
-    .testImplementation_("testImplementation" to false)
-    .testCompileOnly_("testCompileOnly" to false)
-    .testRuntimeOnly_("testRuntimeOnly" to false)
-    .annotationProcessor_("annotationProcessor" to false)
-    .testAnnotationProcessor_("testAnnotationProcessor" to false)
-    .apiPlatform_("api" to true)
-    .implementationPlatform_("implementation" to true)
-    .annotationProcessorPlatform_("annotationProcessor" to true)
-  var dependency = this.dependency.toGradleDependency(project)
-  if(isPlatform) {
-    dependency = project.dependencies.platform(dependency)
-  }
-  project.dependencies.add(configurationName, dependency)
-  return dependency
-}
-
-fun GradleDependency.toGradleDependency(project: Project): Dependency {
-  return caseOf()
-    .project<Dependency> { project.dependencies.project(it) }
-    .module { project.dependencies.create(it.groupId(), it.artifactId(), it.version().orElse(null)) }
-    .files { project.dependencies.create(project.files(it)) }
-}
-
-fun Project.deleteDirectory(directory: ResourcePath, resourceService: ResourceService) {
-  try {
-    val genSourceDir = resourceService.getHierarchicalResource(directory)
-    genSourceDir.delete(true)
-  } catch(e: ResourceRuntimeException) {
-    project.logger.warn("Failed to delete directory", e)
-  }
-}
-
