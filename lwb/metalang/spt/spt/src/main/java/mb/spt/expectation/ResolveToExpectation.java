@@ -27,24 +27,31 @@ public class ResolveToExpectation extends ResolveExpectation{
         ListView<ReferenceResolutionResult.ResolvedEntry> entries = result.getEntries();
         if (entries.isEmpty()) {
             messagesBuilder.addMessage("Term does not resolve to any other term", Severity.Error, file, sourceRegion);
-        } else if (entries.size() > 1) {
-            messagesBuilder.addMessage("Resolved to multiple terms, expecting 1 term", Severity.Error, file, sourceRegion);
         } else {
-            ReferenceResolutionResult.ResolvedEntry entry = entries.get(0);
-            Region nodeRegion = entry.getRegion();
-            ResourceKey nodeResource = entry.getFile();
-            if(toRegion.getStartOffset() != nodeRegion.getStartOffset() || toRegion.getEndOffset() != nodeRegion.getEndOffset()) {
+            boolean found = false;
+            for(ReferenceResolutionResult.ResolvedEntry entry : entries) {
+                Region nodeRegion = entry.getRegion();
+                ResourceKey nodeResource = entry.getFile();
+                if(toRegion.getStartOffset() == nodeRegion.getStartOffset() && toRegion.getEndOffset() == nodeRegion.getEndOffset()) {
+                    if(testCase.resource.equals(nodeResource)) {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            if (!found) {
+                ReferenceResolutionResult.ResolvedEntry entry = entries.get(0);
+                Region nodeRegion = entry.getRegion();
+                ResourceKey nodeResource = entry.getFile();
                 messagesBuilder.addMessage(
                     "Resolved to region (" + nodeRegion.getStartOffset() +
-                        ", " + nodeRegion.getEndOffset() + ") instead of selection #" +
+                        ", " + nodeRegion.getEndOffset() + ") in file " + nodeResource + " instead of selection #" +
                         (toTerm.selection) + " at region (" + toRegion.getStartOffset() + ", " +
                         toRegion.getEndOffset() + ")",
                     Severity.Error,
                     file,
                     sourceRegion
                 );
-            } else if (!testCase.resource.equals(nodeResource)) {
-                messagesBuilder.addMessage("Resolved to a term in a different file: " + nodeResource.getIdAsString(), Severity.Error, file, sourceRegion);
             }
         }
     }

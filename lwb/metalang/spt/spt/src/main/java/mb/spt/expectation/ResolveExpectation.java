@@ -17,7 +17,6 @@ import mb.spt.model.LanguageUnderTest;
 import mb.spt.model.SelectionReference;
 import mb.spt.model.TestCase;
 import mb.spt.model.TestExpectation;
-import mb.stratego.common.StrategoException;
 
 public class ResolveExpectation implements TestExpectation {
 
