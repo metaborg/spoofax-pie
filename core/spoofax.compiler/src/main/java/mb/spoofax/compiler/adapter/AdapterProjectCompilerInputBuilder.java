@@ -203,6 +203,9 @@ public class AdapterProjectCompilerInputBuilder {
         StrategoRuntimeAdapterCompiler.@Nullable Input strategoRuntimeInput
     ) {
         if(!constraintAnalyzerEnabled) return null;
+        if(parseInput == null) {
+            throw new RuntimeException("Constraint analyzer input requires a parser, but the parser has not been set");
+        }
         if(strategoRuntimeInput == null) {
             throw new RuntimeException("Constraint analyzer input requires a Stratego runtime, but the Stratego runtime has not been set");
         }
@@ -256,6 +259,12 @@ public class AdapterProjectCompilerInputBuilder {
         ClassLoaderResourcesCompiler.Input classloaderResources
     ) {
         if(!referenceResolutionEnabled) return null;
+        if(strategoRuntimeInput == null) {
+            throw new RuntimeException("Reference resolution input requires a Stratego runtime, but the Stratego runtime has not been set");
+        }
+        if(constraintAnalyzerInput == null) {
+            throw new RuntimeException("Reference resolution input requires a constraint analyzer, but the constraint analyzer has not been set");
+        }
         return referenceResolution
             .shared(shared)
             .adapterProject(adapterProject)
@@ -273,6 +282,12 @@ public class AdapterProjectCompilerInputBuilder {
         ClassLoaderResourcesCompiler.Input classloaderResources
     ) {
         if(!hoverEnabled) return null;
+        if(strategoRuntimeInput == null) {
+            throw new RuntimeException("Hover tooltip input requires a Stratego runtime, but the Stratego runtime has not been set");
+        }
+        if(constraintAnalyzerInput == null) {
+            throw new RuntimeException("Hover tooltip input requires a constraint analyzer, but the constraint analyzer has not been set");
+        }
         return hover
             .shared(shared)
             .adapterProject(adapterProject)
