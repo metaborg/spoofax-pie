@@ -192,7 +192,7 @@ public class TermTracer {
         final Collection<IStrategoTerm> parsed = new LinkedList<>();
         final IStrategoTermVisitor visitor = new AStrategoTermVisitor() {
             @Override public boolean visit(IStrategoTerm term) {
-                final @Nullable Region location = TermTracer.getRegion(term);
+                final @Nullable Region location = TermTracer.getInFragmentRegion(term);
                 if(location != null && location.contains(region)) {
                     parsed.add(term);
                     return false;

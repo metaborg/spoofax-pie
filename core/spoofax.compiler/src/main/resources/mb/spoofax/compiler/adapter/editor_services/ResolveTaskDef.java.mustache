@@ -173,7 +173,7 @@ public class {{baseResolveTaskDef.id}} implements TaskDef<{{baseResolveTaskDef.i
 
                 final List<ReferenceResolutionResult.ResolvedEntry> entries = results.stream().map(matchedTerm -> {
                     final @Nullable ResourceKey termFile = TermTracer.getResourceKey(matchedTerm);
-                    final @Nullable Region termRegion = TermTracer.getRegion(matchedTerm);
+                    final @Nullable Region termRegion = TermTracer.getInFragmentRegion(matchedTerm);
 
                     if(termFile == null || termRegion == null) {
                         // Ignore results that don't have a location.
@@ -187,7 +187,7 @@ public class {{baseResolveTaskDef.id}} implements TaskDef<{{baseResolveTaskDef.i
                     return Option.ofNone();
                 }
 
-                return Option.ofSome(new ReferenceResolutionResult(TermTracer.getRegion(term), ListView.of(entries)));
+                return Option.ofSome(new ReferenceResolutionResult(TermTracer.getInFragmentRegion(term), ListView.of(entries)));
             } catch(StrategoException ex) {
                 // ignored
             }

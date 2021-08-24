@@ -52,17 +52,13 @@ public class ResolveExpectation implements TestExpectation {
                 checkResults(resolution, testCase, languageUnderTest, languageUnderTestSession, messagesBuilder);
             })
             .ifErr((e) -> {
-                if (e instanceof StrategoException) {
-                    messagesBuilder.addMessage(
-                        ((StrategoException)e).getMessage(),
-                        e,
-                        Severity.Error,
-                        file,
-                        sourceRegion
-                    );
-                } else {
-                    messagesBuilder.extractMessagesRecursively(e);
-                }
+                messagesBuilder.addMessage(
+                    e.getMessage(),
+                    e,
+                    Severity.Error,
+                    file,
+                    sourceRegion
+                );
             });
 
         return messagesBuilder.build(testCase.testSuiteFile);
