@@ -11,3 +11,5 @@ imports
 rules // Analysis boilerplate
 
   editor-analyze = stx-editor-analyze(id, id|"main", "programOk")
+  editor-resolve = stx-editor-resolve
+  editor-hover   = stx-editor-hover

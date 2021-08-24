@@ -1,11 +1,10 @@
-package {{baseResolveTaskDef.packageId}};
+package {{baseHoverTaskDef.packageId}};
 
 import mb.aterm.common.TermToString;
-import mb.common.editor.ReferenceResolutionResult;
+import mb.common.editor.HoverResult;
 import mb.common.option.Option;
 import mb.common.region.Region;
 import mb.common.result.Result;
-import mb.common.util.ListView;
 import mb.jsglr.common.TermTracer;
 import mb.pie.api.ExecContext;
 import mb.pie.api.None;
@@ -16,28 +15,20 @@ import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @{{adapterProject.scope.qualifiedId}}
-public class {{baseResolveTaskDef.id}} implements TaskDef<{{baseResolveTaskDef.id}}.Args, Option<ReferenceResolutionResult>> {
+public class {{baseHoverTaskDef.id}} implements TaskDef<{{baseHoverTaskDef.id}}.Args, Option<HoverResult>> {
     public static class Args implements Serializable {
         private static final long serialVersionUID = 1L;
-
         public final ResourceKey file;
         public final ResourcePath rootDirectory;
         public final Region position;
-
         public Args(ResourceKey file, ResourcePath rootDirectory, Region position) {
             this.file = file;
             this.rootDirectory = rootDirectory;
@@ -47,13 +38,10 @@ public class {{baseResolveTaskDef.id}} implements TaskDef<{{baseResolveTaskDef.i
         @Override public boolean equals(Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
-
             Args args = (Args)o;
-
             if(!file.equals(args.file)) return false;
             if(!rootDirectory.equals(args.rootDirectory)) return false;
             if(!position.equals(args.position)) return false;
-
             return true;
         }
 
@@ -78,7 +66,7 @@ public class {{baseResolveTaskDef.id}} implements TaskDef<{{baseResolveTaskDef.i
     private final {{strategoRuntimeInput.getStrategoRuntimeProviderTaskDef.qualifiedId}} getStrategoRuntimeProvider;
 
     @Inject
-    public {{baseResolveTaskDef.id}}(
+    public {{baseHoverTaskDef.id}}(
         {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources,
         {{constraintAnalyzerInput.analyzeFileTaskDef.qualifiedId}} analyzeFile,
         {{strategoRuntimeInput.getStrategoRuntimeProviderTaskDef.qualifiedId}} getStrategoRuntimeProvider
@@ -89,12 +77,11 @@ public class {{baseResolveTaskDef.id}} implements TaskDef<{{baseResolveTaskDef.i
     }
 
     @Override public String getId() {
-        return "{{baseResolveTaskDef.qualifiedId}}";
+        return "{{baseHoverTaskDef.qualifiedId}}";
     }
 
-    @Override public Option<ReferenceResolutionResult> exec(ExecContext context, Args args) throws Exception {
+    @Override public Option<HoverResult> exec(ExecContext context, Args args) throws Exception {
         context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
-
         final Result<{{constraintAnalyzerInput.analyzeFileTaskDef.qualifiedId}}.Output, ?> analysis = context.require(
             analyzeFile,
             new {{constraintAnalyzerInput.analyzeFileTaskDef.qualifiedId}}.Input(args.rootDirectory, args.file)
@@ -120,34 +107,12 @@ public class {{baseResolveTaskDef.id}} implements TaskDef<{{baseResolveTaskDef.i
                     strategoRuntime.getTermFactory().makeString("."),
                     strategoRuntime.getTermFactory().makeString(args.file.asString())
                 );
-                final IStrategoTerm result = strategoRuntime.invoke("{{resolveStrategy}}", input);
+                final IStrategoTerm result = strategoRuntime.invoke("{{hoverStrategy}}", input);
 
-                // Resolve strategy can either return a single AST or a list of
-                // results. Convert both to a list, then map them to resolve results.
-                final List<IStrategoTerm> results;
-                if(result instanceof IStrategoList) {
-                    results = ((IStrategoList)result).getSubterms();
-                } else {
-                    results = Collections.singletonList(result);
-                }
-
-                final List<ReferenceResolutionResult.ResolvedEntry> entries = results.stream().map(matchedTerm -> {
-                    final @Nullable ResourceKey termFile = TermTracer.getResourceKey(matchedTerm);
-                    final @Nullable Region termRegion = TermTracer.getRegion(matchedTerm);
-
-                    if(termFile == null || termRegion == null) {
-                        // Ignore results that don't have a location.
-                        return null;
-                    }
-
-                    return new ReferenceResolutionResult.ResolvedEntry(termFile, termRegion, TermToString.toString(matchedTerm));
-                }).filter(Objects::nonNull).collect(Collectors.toList());
-
-                if(entries.isEmpty()) {
-                    return Option.ofNone();
-                }
-
-                return Option.ofSome(new ReferenceResolutionResult(TermTracer.getRegion(term), ListView.of(entries)));
+                // Convert the result to a string.
+                return Option.ofSome(
+                    new HoverResult(TermTracer.getRegion(term), TermToString.toString(result))
+                );
             } catch(StrategoException ex) {
                 // ignored
             }

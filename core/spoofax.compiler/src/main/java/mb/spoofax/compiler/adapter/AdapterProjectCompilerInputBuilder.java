@@ -36,6 +36,9 @@ public class AdapterProjectCompilerInputBuilder {
     private boolean referenceResolutionEnabled = false;
     public final ReferenceResolutionAdapterCompiler.Input.Builder referenceResolution = ReferenceResolutionAdapterCompiler.Input.builder();
 
+    private boolean hoverEnabled = false;
+    public final HoverAdapterCompiler.Input.Builder hover = HoverAdapterCompiler.Input.builder();
+
     public AdapterProjectCompiler.Input.Builder project = AdapterProjectCompiler.Input.builder();
 
 
@@ -78,6 +81,11 @@ public class AdapterProjectCompilerInputBuilder {
         return referenceResolution;
     }
 
+    public HoverAdapterCompiler.Input.Builder withHover() {
+        hoverEnabled = true;
+        return hover;
+    }
+
 
     public AdapterProjectCompiler.Input build(LanguageProjectCompiler.Input languageProjectInput, Option<GradleDependency> languageProjectDependency, AdapterProject adapterProject) {
         final Shared shared = languageProjectInput.shared();
@@ -97,14 +105,17 @@ public class AdapterProjectCompilerInputBuilder {
         final StrategoRuntimeAdapterCompiler.@Nullable Input strategoRuntime = buildStrategoRuntime(shared, adapterProject, languageProjectInput, classLoaderResources);
         if(strategoRuntime != null) project.strategoRuntime(strategoRuntime);
 
-        final ConstraintAnalyzerAdapterCompiler.@Nullable Input constraintAnalyzer = buildConstraintAnalyzer(shared, adapterProject, languageProjectInput, classLoaderResources, strategoRuntime);
+        final ConstraintAnalyzerAdapterCompiler.@Nullable Input constraintAnalyzer = buildConstraintAnalyzer(shared, adapterProject, languageProjectInput, parser, getSourceFiles, classLoaderResources, strategoRuntime);
         if(constraintAnalyzer != null) project.constraintAnalyzer(constraintAnalyzer);
 
         final MultilangAnalyzerAdapterCompiler.@Nullable Input multilangAnalyzer = buildMultilangAnalyzer(shared, adapterProject, languageProjectInput, strategoRuntime);
         if(multilangAnalyzer != null) project.multilangAnalyzer(multilangAnalyzer);
 
-        final ReferenceResolutionAdapterCompiler.@Nullable Input referenceResolution = buildReferenceResolution(shared, adapterProject, strategoRuntime, parser, constraintAnalyzer, classLoaderResources, getSourceFiles);
+        final ReferenceResolutionAdapterCompiler.@Nullable Input referenceResolution = buildReferenceResolution(shared, adapterProject, strategoRuntime, constraintAnalyzer, classLoaderResources);
         if(referenceResolution != null) project.referenceResolution(referenceResolution);
+
+        final HoverAdapterCompiler.@Nullable Input hover = buildHover(shared, adapterProject, strategoRuntime, constraintAnalyzer, classLoaderResources);
+        if(hover != null) project.hover(hover);
 
         final CompleterAdapterCompiler.@Nullable Input completer = buildCompleter(shared, adapterProject, languageProjectInput);
 
@@ -186,6 +197,8 @@ public class AdapterProjectCompilerInputBuilder {
         Shared shared,
         AdapterProject adapterProject,
         LanguageProjectCompiler.Input languageProjectInput,
+        ParserAdapterCompiler.@Nullable Input parseInput,
+        GetSourceFilesAdapterCompiler.Input getSourceFilesInput,
         ClassLoaderResourcesCompiler.Input classloaderResources,
         StrategoRuntimeAdapterCompiler.@Nullable Input strategoRuntimeInput
     ) {
@@ -199,6 +212,8 @@ public class AdapterProjectCompilerInputBuilder {
             .languageProjectInput(languageProjectInput.constraintAnalyzer().orElseThrow(() -> new RuntimeException("Mismatch between presence of constraint analyzer input between language project and adapter project")))
             .classLoaderResourcesInput(classloaderResources)
             .strategoRuntimeInput(strategoRuntimeInput)
+            .parseInput(parseInput)
+            .sourceFilesInput(getSourceFilesInput)
             .build();
     }
 
@@ -237,20 +252,33 @@ public class AdapterProjectCompilerInputBuilder {
         Shared shared,
         AdapterProject adapterProject,
         StrategoRuntimeAdapterCompiler.@Nullable Input strategoRuntimeInput,
-        ParserAdapterCompiler.@Nullable Input parseInput,
         ConstraintAnalyzerAdapterCompiler.@Nullable Input constraintAnalyzerInput,
-        ClassLoaderResourcesCompiler.Input classloaderResources,
-        GetSourceFilesAdapterCompiler.Input getSourceFiles
+        ClassLoaderResourcesCompiler.Input classloaderResources
     ) {
         if(!referenceResolutionEnabled) return null;
         return referenceResolution
             .shared(shared)
             .adapterProject(adapterProject)
             .strategoRuntimeInput(strategoRuntimeInput)
-            .parseInput(parseInput)
             .constraintAnalyzerInput(constraintAnalyzerInput)
             .classLoaderResourcesInput(classloaderResources)
-            .sourceFilesInput(getSourceFiles)
+            .build();
+    }
+
+    private HoverAdapterCompiler.@Nullable Input buildHover(
+        Shared shared,
+        AdapterProject adapterProject,
+        StrategoRuntimeAdapterCompiler.@Nullable Input strategoRuntimeInput,
+        ConstraintAnalyzerAdapterCompiler.@Nullable Input constraintAnalyzerInput,
+        ClassLoaderResourcesCompiler.Input classloaderResources
+    ) {
+        if(!hoverEnabled) return null;
+        return hover
+            .shared(shared)
+            .adapterProject(adapterProject)
+            .strategoRuntimeInput(strategoRuntimeInput)
+            .constraintAnalyzerInput(constraintAnalyzerInput)
+            .classLoaderResourcesInput(classloaderResources)
             .build();
     }
 }

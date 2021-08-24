@@ -1,6 +1,7 @@
 package mb.spoofax.lwb.dynamicloading;
 
 import mb.cfg.CompileLanguageInput;
+import mb.common.editor.HoverResult;
 import mb.common.message.KeyedMessages;
 import mb.common.option.Option;
 import mb.common.region.Region;
@@ -31,6 +32,7 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -274,6 +276,47 @@ class DynamicLoadingTest extends CharsTestBase {
                 assertTrue(hasDebugRemoveATaskDefExecuted(report));
                 assertFalse(hasConstraintAnalysisTaskExecuted(report, dynamicLanguage));
                 assertFalse(hasCheckTaskExecuted(report, dynamicLanguage));
+            } catch(Exception e) {
+                printThrowable(e);
+                throw e;
+            }
+        }
+
+        {
+            System.out.println("Hover test");
+            final DynamicLanguage dynamicLanguage;
+            final Set<ResourceKey> providedResources;
+            try(final MixedSession session = newSession()) {
+                final TopDownSession topDownSession = session.updateAffectedBy(Collections.emptySet());
+                dynamicLanguage = getDynamicLoadOutput(topDownSession, rootDirectoryPath);
+                previousInput = dynamicLanguage.getCompileInput();
+                providedResources = topDownSession.getProvidedResources();
+                final KeyedMessages sptMessages = getSptCheckOutput(topDownSession, rootDirectoryPath);
+                assertNoErrors(sptMessages);
+            } catch(Exception e) {
+                printThrowable(e);
+                throw e;
+            }
+
+            final LanguageComponent languageComponent = dynamicLanguage.getLanguageComponent();
+            try(final MixedSession session = dynamicLanguage.getPieComponent().newSession()) {
+                languageMetricsTracer.reset();
+                final TopDownSession topDownSession = session.updateAffectedBy(providedResources);
+                // Run hover task and check.
+                final Option<HoverResult> hoverResult = topDownSession.require(languageComponent.getLanguageInstance().createHoverTask(rootDirectoryPath, charsFile.getPath(), Region.atOffset(2)));
+                assertTrue(hoverResult.isSome());
+                assertEquals(hoverResult.get().getText(), "Type: \"Chars\"");
+                // Check executed tasks.
+                final MetricsTracer.Report report = languageMetricsTracer.reportAndReset();
+                assertFalse(hasTokenizeTaskDefExecuted(report, dynamicLanguage));
+                assertFalse(hasParseTaskDefExecuted(report, dynamicLanguage));
+                assertFalse(hasStyleTaskDefExecuted(report, dynamicLanguage));
+                assertFalse(hasRemoveATaskDefExecuted(report));
+                assertFalse(hasDebugRemoveATaskDefExecuted(report));
+                assertTrue(hasConstraintAnalysisTaskExecuted(report, dynamicLanguage));
+                assertFalse(hasCheckTaskExecuted(report, dynamicLanguage)); // hover doesn't require check
+                assertTrue(hasHoverTaskExecuted(report, dynamicLanguage));
+                // TODO: check execution here and in previous steps.
             } catch(Exception e) {
                 printThrowable(e);
                 throw e;

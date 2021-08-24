@@ -11,5 +11,5 @@ rules
 
   exprOk : Expr
   exprOk(Chars("")) :- false | error $[The character combination '' is not allowed].
-  exprOk(_).
+  exprOk(t) :- @t.type := "Chars".
   exprsOk maps exprOk(list(*))

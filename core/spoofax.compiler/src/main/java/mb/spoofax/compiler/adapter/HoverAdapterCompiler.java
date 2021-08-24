@@ -6,11 +6,7 @@ import mb.pie.api.None;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.language.ClassLoaderResourcesCompiler;
-import mb.spoofax.compiler.util.ClassKind;
-import mb.spoofax.compiler.util.Shared;
-import mb.spoofax.compiler.util.TemplateCompiler;
-import mb.spoofax.compiler.util.TemplateWriter;
-import mb.spoofax.compiler.util.TypeInfo;
+import mb.spoofax.compiler.util.*;
 import org.immutables.value.Value;
 
 import javax.inject.Inject;
@@ -19,13 +15,13 @@ import java.io.Serializable;
 import java.util.Optional;
 
 @Value.Enclosing
-public class ReferenceResolutionAdapterCompiler implements TaskDef<ReferenceResolutionAdapterCompiler.Input, None> {
-    private final TemplateWriter resolveTaskDefTemplate;
+public class HoverAdapterCompiler implements TaskDef<HoverAdapterCompiler.Input, None> {
+    private final TemplateWriter hoverTaskDefTemplate;
 
-    @Inject public ReferenceResolutionAdapterCompiler(TemplateCompiler templateCompiler) {
+    @Inject public HoverAdapterCompiler(TemplateCompiler templateCompiler) {
         templateCompiler = templateCompiler.loadingFromClass(getClass());
 
-        this.resolveTaskDefTemplate = templateCompiler.getOrCompileToWriter("editor_services/ResolveTaskDef.java.mustache");
+        this.hoverTaskDefTemplate = templateCompiler.getOrCompileToWriter("editor_services/HoverTaskDef.java.mustache");
     }
 
     @Override public String getId() {
@@ -36,7 +32,7 @@ public class ReferenceResolutionAdapterCompiler implements TaskDef<ReferenceReso
         if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
 
-        resolveTaskDefTemplate.write(context, input.resolveTaskDef().file(generatedJavaSourcesDirectory), input);
+        hoverTaskDefTemplate.write(context, input.hoverTaskDef().file(generatedJavaSourcesDirectory), input);
 
         return None.instance;
     }
@@ -48,7 +44,7 @@ public class ReferenceResolutionAdapterCompiler implements TaskDef<ReferenceReso
 
     @Value.Immutable
     public interface Input extends Serializable {
-        class Builder extends ReferenceResolutionAdapterCompilerData.Input.Builder {
+        class Builder extends HoverAdapterCompilerData.Input.Builder {
         }
 
         static Builder builder() {
@@ -56,7 +52,7 @@ public class ReferenceResolutionAdapterCompiler implements TaskDef<ReferenceReso
         }
 
         /// Configuration
-        String resolveStrategy();
+        String hoverStrategy();
 
 
         /// Kinds of classes (generated/extended/manual)
@@ -74,14 +70,14 @@ public class ReferenceResolutionAdapterCompiler implements TaskDef<ReferenceReso
 
         // Resolve task definitions
 
-        @Value.Default default TypeInfo baseResolveTaskDef() {
-            return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "Resolve");
+        @Value.Default default TypeInfo baseHoverTaskDef() {
+            return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "Hover");
         }
 
-        Optional<TypeInfo> extendResolveTaskDef();
+        Optional<TypeInfo> extendHoverTaskDef();
 
-        default TypeInfo resolveTaskDef() {
-            return extendResolveTaskDef().orElseGet(this::baseResolveTaskDef);
+        default TypeInfo hoverTaskDef() {
+            return extendHoverTaskDef().orElseGet(this::baseHoverTaskDef);
         }
 
 
@@ -93,7 +89,7 @@ public class ReferenceResolutionAdapterCompiler implements TaskDef<ReferenceReso
             }
             final ResourcePath generatedJavaSourcesDirectory = generatedJavaSourcesDirectory();
             return ListView.of(
-                resolveTaskDef().file(generatedJavaSourcesDirectory)
+                hoverTaskDef().file(generatedJavaSourcesDirectory)
             );
         }
 

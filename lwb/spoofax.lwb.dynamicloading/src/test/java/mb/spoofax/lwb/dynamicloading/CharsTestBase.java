@@ -86,6 +86,10 @@ class CharsTestBase extends TestBase {
         return report.hasTaskDefExecuted(language.getCompileInput().adapterProjectInput().checkTaskDef().qualifiedId());
     }
 
+    boolean hasHoverTaskExecuted(MetricsTracer.Report report, DynamicLanguage language) {
+        return report.hasTaskDefExecuted(language.getCompileInput().adapterProjectInput().hover().get().hoverTaskDef().qualifiedId());
+    }
+
 
     TopDownSession modifyStyler(MixedSession session, CompileLanguageInput input) throws IOException, ExecException, InterruptedException {
         final ResourcePath path = input.compileLanguageSpecificationInput().esv().get().mainFile();

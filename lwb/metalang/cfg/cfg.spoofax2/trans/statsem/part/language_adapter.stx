@@ -5,7 +5,7 @@ imports
   statsem/part
   statsem/expr
   statsem/expr/menu_item
-  
+
   signatures/part/language_adapter-sig
 
 rules
@@ -27,7 +27,14 @@ rules // Editor services section and options
 
   editorServicesOptionOk(s, EditorServicesReferenceResolutionOption(e)) :-
     referenceResolutionVariantOk(s, e).
-    
+
+  editorServicesOptionOk(s, EditorServicesHoverOption(e)) :-
+    hoverVariantOk(s, e).
+
   referenceResolutionVariantOk : scope * ReferenceResolutionVariant
   referenceResolutionVariantOk(s, ReferenceResolutionStrategoVariant(e)) :-
-    typeOfExpr(s, e) == STRATEGY() | error $[Expected Stratego strategy identifier].
+    typeOfExpr(s, e) == STRATEGY() | error $[Expected Stratego strategy identifier]@e.
+
+  hoverVariantOk : scope * HoverVariant
+  hoverVariantOk(s, HoverStrategoVariant(e)) :-
+    typeOfExpr(s, e) == STRATEGY() | error $[Expected Stratego strategy identifier]@e.

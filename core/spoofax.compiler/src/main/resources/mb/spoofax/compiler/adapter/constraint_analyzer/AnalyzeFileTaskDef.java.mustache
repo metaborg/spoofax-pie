@@ -1,0 +1,133 @@
+package {{baseAnalyzeFileTaskDef.packageId}};
+
+import mb.common.result.Result;
+import mb.common.util.ListView;
+import mb.constraint.common.ConstraintAnalyzerContext;
+import mb.constraint.pie.ConstraintAnalyzeMultiTaskDef;
+import mb.constraint.pie.ConstraintAnalyzeTaskDef;
+import mb.jsglr.common.JsglrParseException;
+import mb.pie.api.ExecContext;
+import mb.pie.api.Supplier;
+import mb.pie.api.TaskDef;
+import mb.pie.api.stamp.resource.ResourceStampers;
+import mb.resource.ResourceKey;
+import mb.resource.hierarchical.ResourcePath;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+
+import javax.inject.Inject;
+import java.io.Serializable;
+import java.util.Optional;
+
+@{{adapterProject.scope.qualifiedId}}
+public class {{baseAnalyzeFileTaskDef.id}} implements TaskDef<{{baseAnalyzeFileTaskDef.id}}.Input, Result<{{baseAnalyzeFileTaskDef.id}}.Output, ?>> {
+    public static final class Input implements Serializable {
+        public final ResourcePath rootDirectory;
+        public final ResourceKey file;
+        public Input(ResourcePath rootDirectory, ResourceKey file) {
+            this.rootDirectory = rootDirectory;
+            this.file = file;
+        }
+
+        @Override public boolean equals(Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            Input input = (Input)o;
+            if(!rootDirectory.equals(input.rootDirectory)) return false;
+            return file.equals(input.file);
+        }
+
+        @Override public int hashCode() {
+            int result = rootDirectory.hashCode();
+            result = 31 * result + file.hashCode();
+            return result;
+        }
+
+        @Override public String toString() {
+            return "Input{" +
+                "rootDirectory=" + rootDirectory +
+                ", file=" + file +
+                '}';
+        }
+    }
+
+    public static final class Output implements Serializable {
+        public final ConstraintAnalyzerContext analyzerContext;
+        public final IStrategoTerm inputAst;
+        public final IStrategoTerm analyzedAst;
+        public Output(ConstraintAnalyzerContext analyzerContext, IStrategoTerm inputAst, IStrategoTerm analyzedAst) {
+            this.analyzerContext = analyzerContext;
+            this.inputAst = inputAst;
+            this.analyzedAst = analyzedAst;
+        }
+
+        @Override public boolean equals(Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            Output output = (Output)o;
+            if(!analyzerContext.equals(output.analyzerContext)) return false;
+            if(!inputAst.equals(output.inputAst)) return false;
+            return analyzedAst.equals(output.analyzedAst);
+        }
+
+        @Override public int hashCode() {
+            int result = analyzerContext.hashCode();
+            result = 31 * result + inputAst.hashCode();
+            result = 31 * result + analyzedAst.hashCode();
+            return result;
+        }
+    }
+
+    private final {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources;
+    private final {{parseInput.parseTaskDef.qualifiedId}} parse;
+    private final {{runtimeAnalyzeTaskDef.qualifiedId}} analyze;
+    private final {{getSourceFilesInput.getSourceFilesTaskDef.qualifiedId}} getSourceFiles;
+
+    @Inject
+    public {{baseAnalyzeFileTaskDef.id}}(
+        {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources,
+        {{parseInput.parseTaskDef.qualifiedId}} parse,
+        {{runtimeAnalyzeTaskDef.qualifiedId}} analyze,
+        {{getSourceFilesInput.getSourceFilesTaskDef.qualifiedId}} getSourceFiles
+    ) {
+        this.classLoaderResources = classLoaderResources;
+        this.parse = parse;
+        this.analyze = analyze;
+        this.getSourceFiles = getSourceFiles;
+    }
+
+    @Override public String getId() {
+        return "{{baseAnalyzeFileTaskDef.qualifiedId}}";
+    }
+
+{{#isMultiFile}}
+    @Override public Result<Output, ?> exec(ExecContext context, Input input) throws Exception {
+        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+        final Result<ConstraintAnalyzeMultiTaskDef.SingleFileOutput, ?> analysis = context.require(
+            analyze.createSingleFileOutputSupplier(
+                new ConstraintAnalyzeMultiTaskDef.Input(
+                    input.rootDirectory,
+                    parse.createRecoverableMultiAstSupplierFunction(getSourceFiles.createFunction())
+                ),
+                input.file
+            )
+        );
+        return analysis.map(output -> new Output(output.context, output.result.ast, output.result.analysis));
+    }
+{{/isMultiFile}}
+{{^isMultiFile}}
+    @Override public Result<Output, ?> exec(ExecContext context, Input input) throws Exception {
+        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+        final Supplier<Result<IStrategoTerm, JsglrParseException>> astSupplier = parse
+            .inputBuilder()
+            .withFile(input.file)
+            .rootDirectoryHint(Optional.of(input.rootDirectory))
+            .fileHint(input.file)
+            .buildAstSupplier();
+        final Result<ConstraintAnalyzeTaskDef.Output, ?> analysis = context.require(
+            analyze,
+            new ConstraintAnalyzeTaskDef.Input(input.file, astSupplier)
+        );
+        return analysis.map(output -> new Output(output.context, output.result.ast, output.result.analysis));
+    }
+{{/isMultiFile}}
+}

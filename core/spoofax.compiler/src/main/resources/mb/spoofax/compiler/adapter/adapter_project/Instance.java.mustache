@@ -1,5 +1,6 @@
 package {{baseInstance.packageId}};
 
+import mb.common.editor.HoverResult;
 import mb.common.editor.ReferenceResolutionResult;
 import mb.common.message.KeyedMessages;
 import mb.common.message.Messages;
@@ -171,6 +172,16 @@ public class {{baseInstance.id}} implements LanguageInstance{{#parseInjection}},
 {{^hasResolveInjection}}
         return {{resolveInjection.name}}.createTask({{resolveInjection.type.qualifiedId}}.Args.Empty);
 {{/hasResolveInjection}}
+    }
+
+    @Override
+    public Task<Option<HoverResult>> createHoverTask(ResourcePath rootDirectory, ResourceKey file, Region region) {
+{{#hasHoverInjection}}
+        return {{hoverInjection.name}}.createTask(new {{hoverInjection.type.qualifiedId}}.Args(file, rootDirectory, region));
+{{/hasHoverInjection}}
+{{^hasHoverInjection}}
+        return {{hoverInjection.name}}.createTask({{hoverInjection.type.qualifiedId}}.Args.Empty);
+{{/hasHoverInjection}}
     }
 
 {{#parseInjection}}
