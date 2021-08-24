@@ -521,6 +521,33 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#editor-services" class="md-nav__link">
+    Editor services
+  </a>
+  
+    <nav class="md-nav" aria-label="Editor services">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reference-resolution" class="md-nav__link">
+    Reference resolution
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hover-tooltips" class="md-nav__link">
+    Hover tooltips
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -882,6 +909,33 @@
   <a href="#completer" class="md-nav__link">
     Completer
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#editor-services" class="md-nav__link">
+    Editor services
+  </a>
+  
+    <nav class="md-nav" aria-label="Editor services">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reference-resolution" class="md-nav__link">
+    Reference resolution
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hover-tooltips" class="md-nav__link">
+    Hover tooltips
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -1541,6 +1595,19 @@ Currently, no <code>StrategoRuntimeOption</code>s are supported.</p>
 <p>The <code>completer { $CompleterOption* }</code> section enables generation of a code completer, and groups options.
 The <code>constraint-analyzer</code> and <code>statix</code> sections must be enabled when the <code>completer</code> section is enabled.
 Currently, no <code>CompleterOption</code>s are supported.</p>
+<h4 id="editor-services">Editor services<a class="headerlink" href="#editor-services" title="Permanent link">&para;</a></h4>
+<p>The <code>editor-services { $EditorServiceSubsection* }</code> groups editor service sub-sections.
+The following <code>EditorServiceSubsection</code>s are supported.</p>
+<h5 id="reference-resolution">Reference resolution<a class="headerlink" href="#reference-resolution" title="Permanent link">&para;</a></h5>
+<p>The reference resolution editor service is enabled with <code>reference-resolution = $ReferenceResolutionVariant</code>. The following <code>ReferenceResolutionVariant</code>s are supported:</p>
+<ul>
+<li>Stratego-based: <code>stratego { strategy = strategy $Strategy }</code> where <code>Strategy</code> is a Stratego strategy, typically <code>editor-resolve</code>.</li>
+</ul>
+<h5 id="hover-tooltips">Hover tooltips<a class="headerlink" href="#hover-tooltips" title="Permanent link">&para;</a></h5>
+<p>The hover tooltip editor service is enabled with <code>hover = $HoverVariant</code>. The following <code>$HoverVariant</code>s are supported:</p>
+<ul>
+<li>Stratego-based: <code>stratego { strategy = strategy $Strategy }</code> where <code>Strategy</code> is a Stratego strategy, typically <code>editor-hover</code>.</li>
+</ul>
 <h3 id="meta-language-sections">Meta-language sections<a class="headerlink" href="#meta-language-sections" title="Permanent link">&para;</a></h3>
 <h4 id="sdf3">SDF3<a class="headerlink" href="#sdf3" title="Permanent link">&para;</a></h4>
 <p>The <code>sdf3 { $Sdf3Option* }</code> section enables syntax definition with <a href="https://www.spoofax.dev/spoofax-docs/references/syntax/">SDF3</a>.
@@ -1685,6 +1752,12 @@ The following <code>StatixOption</code>s are supported:</p>
 <td>The main Statix file relative to the <code>main-source-directory</code>. Defaults to <code>./main.stx</code>.</td>
 <td>Path</td>
 </tr>
+<tr>
+<td><code>sdf3-statix-signature-generation = $Expression</code></td>
+<td>no</td>
+<td>Whether SDF3 to Statix signature generation is enabled. When enabled, <code>stratego { sdf3-statix-explication-generation = true }</code> must also be enabled. Defaults to <code>false</code>.</td>
+<td>Boolean</td>
+</tr>
 </tbody>
 </table>
 <h4 id="stratego">Stratego<a class="headerlink" href="#stratego" title="Permanent link">&para;</a></h4>
@@ -1718,6 +1791,12 @@ The following <code>StrategoOption</code>s are supported:</p>
 <td>no</td>
 <td>The affix that is used to make certain generated strategies unique to the language. This is used both as a prefix and suffix. Defaults to name of the language transformed to a Stratego strategy identifier.</td>
 <td>Stratego strategy identifier</td>
+</tr>
+<tr>
+<td><code>sdf3-statix-explication-generation = $Expression</code></td>
+<td>no</td>
+<td>Whether SDF3 to Statix injection explication/implication generation is enabled. When enabled, <code>statix { sdf3-statix-signature-generation = true }</code> must also be enabled. Defaults to <code>false</code>.</td>
+<td>Boolean</td>
 </tr>
 </tbody>
 </table>
