@@ -337,6 +337,23 @@ The `completer { $CompleterOption* }` section enables generation of a code compl
 The `constraint-analyzer` and `statix` sections must be enabled when the `completer` section is enabled.
 Currently, no `CompleterOption`s are supported.
 
+#### Editor services
+
+The `editor-services { $EditorServiceSubsection* }` groups editor service sub-sections.
+The following `EditorServiceSubsection`s are supported.
+
+##### Reference resolution
+
+The reference resolution editor service is enabled with `reference-resolution = $ReferenceResolutionVariant`. The following `ReferenceResolutionVariant`s are supported:
+
+* Stratego-based: `stratego { strategy = strategy $Strategy }` where `Strategy` is a Stratego strategy, typically `editor-resolve`.
+
+##### Hover tooltips
+
+The hover tooltip editor service is enabled with `hover = $HoverVariant`. The following `$HoverVariant`s are supported:
+
+* Stratego-based: `stratego { strategy = strategy $Strategy }` where `Strategy` is a Stratego strategy, typically `editor-hover`.
+
 ### Meta-language sections
 
 #### SDF3
@@ -384,6 +401,7 @@ The following `StatixOption`s are supported:
 | - | - | - | - |
 | `main-source-directory = $Expression` | no | The directory relative to the root directory that contains the main Statix file. Defaults to the value of the top-level `source-directory` option. | Path |
 | `main-file = $Expression` | no | The main Statix file relative to the `main-source-directory`. Defaults to `./main.stx`. | Path |
+| `sdf3-statix-signature-generation = $Expression` | no | Whether SDF3 to Statix signature generation is enabled. When enabled, `stratego { sdf3-statix-explication-generation = true }` must also be enabled. Defaults to `false`. | Boolean |
 
 #### Stratego
 
@@ -396,6 +414,7 @@ The following `StrategoOption`s are supported:
 | `main-source-directory = $Expression` | no | The directory relative to the root directory that contains the main Stratego file. Defaults to the value of the top-level `source-directory` option. | Path |
 | `main-file = $Expression` | no | The main Stratego file relative to the `main-source-directory`. Defaults to `./main.stx`. | Path |
 | `language-strategy-affix = $Expression` | no | The affix that is used to make certain generated strategies unique to the language. This is used both as a prefix and suffix. Defaults to name of the language transformed to a Stratego strategy identifier. | Stratego strategy identifier |
+| `sdf3-statix-explication-generation = $Expression` | no | Whether SDF3 to Statix injection explication/implication generation is enabled. When enabled, `statix { sdf3-statix-signature-generation = true }` must also be enabled. Defaults to `false`. | Boolean |
 
 ### spoofaxc.lock
 
