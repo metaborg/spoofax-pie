@@ -73,6 +73,12 @@ languageAdapterProject {
     withStyler()
     withStrategoRuntime()
     withConstraintAnalyzer()
+    withReferenceResolution().run {
+      resolveStrategy("statix-editor-resolve")
+    }
+    withHover().run {
+      hoverStrategy("statix-editor-hover")
+    }
     project.configureCompilerInput()
   }
 }

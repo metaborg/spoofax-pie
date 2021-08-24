@@ -76,6 +76,12 @@ languageAdapterProject {
       extendAnalyzeMultiTaskDef(spoofaxTaskPackageId, "StatixAnalyzeMultiWrapper")
     }
     withStrategoRuntime()
+    withReferenceResolution().run {
+      resolveStrategy("nabl2--editor-resolve")
+    }
+    withHover().run {
+      hoverStrategy("nabl2--editor-hover")
+    }
     project.configureCompilerInput()
   }
 }

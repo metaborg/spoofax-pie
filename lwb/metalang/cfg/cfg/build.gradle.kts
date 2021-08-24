@@ -64,6 +64,12 @@ languageAdapterProject {
     withStyler()
     withConstraintAnalyzer()
     withStrategoRuntime()
+    withReferenceResolution().run {
+      resolveStrategy("editor-resolve")
+    }
+    withHover().run {
+      hoverStrategy("editor-hover")
+    }
     project.configureCompilerInput()
   }
 }

@@ -4,7 +4,7 @@ imports
 
   statsem/expr
   statsem/part
-  
+
   signatures/lex/id-sig
   signatures/value-sig
 
@@ -28,17 +28,18 @@ rules
 
   typeOfExpr(s, Ref(id)) = T :- {id' e}
     resolveVal(s, id) == [(_, (id', (T, e)))|_] | error $[Value [id] is not defined],
-    @id.ref := id'.
-    
+    @id.ref := id',
+    @id.type := T.
+
 rules
 
   declareVal : scope * Id * TYPE * Expr
-  declareVal(s, id, T, e) :- 
+  declareVal(s, id, T, e) :-
     !val[id, (T, e)] in s,
     resolveVal(s, id) == [(_, (_, _))] | error $[Duplicate definition of value [id]],
     @id.type := T,
     @id.val := e.
-    
+
   resolveVal : scope * Id -> list((path * (Id * (TYPE * Expr))))
   resolveVal(s, id) = ps :-
     query val
