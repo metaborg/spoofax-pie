@@ -45,9 +45,9 @@ Furthermore, we now discuss the status of features that were not new key ideas.
         * [x] NaBL2
             * Only supported for Spoofax 2-based language definitions
         * [x] Statix
-            * [ ] Statix signature generation based on SDF3 specification
+            * [x] Statix signature generation based on SDF3 specification
         * [ ] FlowSpec
-        * [x] Stratego
+        * [x] Stratego 2
   * Transformation (compilation)
       * [x] Stratego 2
   * Testing
@@ -56,7 +56,11 @@ Furthermore, we now discuss the status of features that were not new key ideas.
 * Editor services
     * [x] Syntax-based styling
     * [x] Inline error/warning/note messages
+    * [x] Reference resolution
+    * [x] Hover tooltips
     * [ ] Code completion
+        * [ ] Syntactic
+        * [ ] Semantic (i.e., based on static semantics)
     * [ ] Outline
 * Platforms
     * [x] Command-line
