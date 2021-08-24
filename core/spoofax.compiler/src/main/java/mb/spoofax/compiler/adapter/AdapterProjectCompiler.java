@@ -350,6 +350,8 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
                 }
                 out.write(name);
             });
+
+            // injections for testing language features with SPT
             if (input.strategoRuntime().isPresent() && input.parser().isPresent()) {
                 final NamedTypeInfo testStrategoInjection = uniqueNamer.makeUnique(input.testStrategoTaskDef());
                 map.put("testStrategoInjection", testStrategoInjection);
