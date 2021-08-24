@@ -55,7 +55,7 @@ public class {{baseInstance.id}} implements LanguageInstance
     {{#parseInjection}}, mb.spt.api.parse.TestableParse{{/parseInjection}}
     {{#testStrategoInjection}}, mb.spt.api.stratego.TestableStratego{{/testStrategoInjection}}
     {{#analyzeInjection}}, mb.spt.api.analyze.TestableAnalysis{{/analyzeInjection}}
-    {{#testResolveInjection}}, mb.spt.api.resolve.TestableResolve{{/testResolveInjection}} {
+    {{#referenceResolution}}, mb.spt.api.resolve.TestableResolve{{/referenceResolution}} {
     private final static SetView<String> fileExtensions = SetView.of({{#shared.fileExtensions}}"{{this}}"{{^-last}}, {{/-last}}{{/shared.fileExtensions}});
 
 {{#injected}}
@@ -245,7 +245,7 @@ public class {{baseInstance.id}} implements LanguageInstance
         }
     }
 {{/testStrategoInjection}}
-{{#testResolveInjection}}
+{{#referenceResolution}}
     @Override
     public Result<mb.common.editor.ReferenceResolutionResult, ?> testResolve(Session session, ResourceKey resource, Region region, @Nullable ResourcePath rootDirectoryHint) throws InterruptedException {
         try {
@@ -259,7 +259,7 @@ public class {{baseInstance.id}} implements LanguageInstance
             return Result.ofErr(e);
         }
     }
-{{/testResolveInjection}}
+{{/referenceResolution}}
 {{#analyzeInjection}}
     @Override
     public Result<org.spoofax.interpreter.terms.IStrategoTerm, ?> testAnalyze(Session session, ResourceKey resource, @Nullable ResourcePath rootDirectoryHint) throws InterruptedException {

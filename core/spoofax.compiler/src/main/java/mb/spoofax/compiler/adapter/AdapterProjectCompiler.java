@@ -58,7 +58,6 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
     private final TemplateWriter instanceTemplate;
     private final TemplateWriter commandDefTemplate;
     private final TemplateWriter testStrategoTaskDef;
-    private final TemplateWriter testResolveTaskDef;
 
     private final ParserAdapterCompiler parserCompiler;
     private final StylerAdapterCompiler stylerCompiler;
@@ -96,7 +95,6 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         this.instanceTemplate = templateCompiler.getOrCompileToWriter("adapter_project/Instance.java.mustache");
         this.commandDefTemplate = templateCompiler.getOrCompileToWriter("adapter_project/CommandDef.java.mustache");
         this.testStrategoTaskDef = templateCompiler.getOrCompileToWriter("adapter_project/TestStrategoTaskDef.java.mustache");
-        this.testResolveTaskDef = templateCompiler.getOrCompileToWriter("adapter_project/TestResolveTaskDef.java.mustache");
 
         this.parserCompiler = parserCompiler;
         this.stylerCompiler = stylerCompiler;
@@ -186,7 +184,6 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
 
         if (input.strategoRuntime().isPresent() && input.parser().isPresent()) {
             addTaskDef(allTaskDefs, input.testStrategoTaskDef(), input.baseTestStrategoTaskDef());
-            addTaskDef(allTaskDefs, input.testResolveTaskDef(), input.baseTestResolveTaskDef());
         }
 
         // Class files
@@ -226,7 +223,6 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
                 map.put("astMember", "");
             }
             testStrategoTaskDef.write(context, input.baseTestStrategoTaskDef().file(generatedJavaSourcesDirectory), input, map);
-            testResolveTaskDef.write(context, input.baseTestResolveTaskDef().file(generatedJavaSourcesDirectory), input, map);
         }
 
         { // Component
@@ -340,13 +336,6 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
                 injected.add(testStrategoInjection);
             } else {
                 map.put("testStrategoInjection", false);
-            }
-            if (input.referenceResolution().isPresent()) {
-                final NamedTypeInfo testResolveInjection = uniqueNamer.makeUnique(input.testResolveTaskDef());
-                map.put("testResolveInjection", testResolveInjection);
-                injected.add(testResolveInjection);
-            } else {
-                map.put("testResolveInjection", false);
             }
             if (input.constraintAnalyzer().isPresent() && input.parser().isPresent()) {
                 final NamedTypeInfo analyzeInjection = uniqueNamer.makeUnique(input.constraintAnalyzer().get().analyzeTaskDef());
@@ -666,16 +655,6 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
 
         default TypeInfo testStrategoTaskDef() {
             return extendTestStrategoTaskDef().orElseGet(this::baseTestStrategoTaskDef);
-        }
-
-        @Value.Default default TypeInfo baseTestResolveTaskDef() {
-            return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "TestResolveTaskDef");
-        }
-
-        Optional<TypeInfo> extendTestResolveTaskDef();
-
-        default TypeInfo testResolveTaskDef() {
-            return extendTestResolveTaskDef().orElseGet(this::baseTestResolveTaskDef);
         }
 
         /// Files information, known up-front for build systems with static dependencies such as Gradle.
