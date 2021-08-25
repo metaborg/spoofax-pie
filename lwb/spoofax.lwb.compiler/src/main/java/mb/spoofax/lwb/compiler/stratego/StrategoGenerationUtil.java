@@ -3,6 +3,7 @@ package mb.spoofax.lwb.compiler.stratego;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.STask;
+import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.str.task.StrategoPrettyPrint;
@@ -34,6 +35,6 @@ public class StrategoGenerationUtil {
         final HierarchicalResource file = context.getHierarchicalResource(generatesSourcesDirectory.appendRelativePath(moduleName).appendToLeaf(".str2"));
         file.ensureFileExists();
         file.writeString(prettyPrinted);
-        context.provide(file);
+        context.provide(file, ResourceStampers.hashFile());
     }
 }

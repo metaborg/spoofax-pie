@@ -2,6 +2,7 @@ package mb.spoofax.compiler.util;
 
 import com.samskivert.mustache.Template;
 import mb.pie.api.ExecContext;
+import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.WritableResource;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
@@ -45,7 +46,7 @@ public class TemplateWriter {
             template.execute(context, writer);
             writer.flush();
         }
-        execContext.provide(resource);
+        execContext.provide(resource, ResourceStampers.hashFile());
         return resource;
     }
 
@@ -56,7 +57,7 @@ public class TemplateWriter {
             template.execute(context, parentContext, writer);
             writer.flush();
         }
-        execContext.provide(resource);
+        execContext.provide(resource, ResourceStampers.hashFile());
         return resource;
     }
 
