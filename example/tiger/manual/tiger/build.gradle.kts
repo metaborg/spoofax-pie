@@ -17,8 +17,8 @@ fun compositeBuild(name: String) = "$group:$name:$version"
 dependencies {
   api(platform(compositeBuild("spoofax.depconstraints")))
 
+  api("org.metaborg:common")
   api(compositeBuild("spoofax.compiler.interfaces"))
-  api(compositeBuild("common"))
   api(compositeBuild("completions.common"))
   api(compositeBuild("jsglr1.common"))
   api(compositeBuild("esv.common"))

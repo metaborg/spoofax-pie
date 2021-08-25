@@ -10,9 +10,9 @@ dependencies {
   annotationProcessor(platform(compositeBuild("spoofax.depconstraints")))
 
 
-  api(compositeBuild("common"))
   api(compositeBuild("spoofax.core"))
   api(compositeBuild("spoofax.compiler"))
+  api("org.metaborg:common")
   api("org.metaborg:resource")
   api("org.metaborg:pie.api")
   api("org.metaborg:pie.task.archive")
