@@ -105,6 +105,10 @@ public class CommandContext implements Serializable {
         return enclosingContexts.get(type);
     }
 
+    public Collection<CommandContext> getEnclosings() {
+        return enclosingContexts.values();
+    }
+
     public void setEnclosing(EnclosingCommandContextType type, CommandContext context) {
         enclosingContexts.put(type, context);
     }

@@ -375,12 +375,10 @@ public class PieRunner {
                         throw new RuntimeException("Cannot open editor for file '" + file + "', opening editor failed unexpectedly", e);
                     }
                 });
-
                 return Optional.empty(); // Return value is required.
             })
             .showText((text, name, region) -> {
                 final NamedEditorInput editorInput = new NamedEditorInput(name);
-
                 // Execute in UI thread because getActiveWorkbenchWindow is only available in the UI thread.
                 Display.getDefault().asyncExec(() -> {
                     try {
@@ -413,23 +411,24 @@ public class PieRunner {
                         throw new RuntimeException("Cannot open editor (for text) with name '" + name + "', opening editor failed unexpectedly", e);
                     }
                 });
-
                 return Optional.empty(); // Return value is required.
             })
             .showTestResults((tests, region) -> {
-                IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-                TestRunViewPart viewPart;
-                try {
-                    viewPart = (TestRunViewPart)page.showView(TestRunViewPart.VIEW_ID);
-                } catch(PartInitException e) {
-                    logger.error("Can't load Test run viewpart", e);
-                    return Optional.empty();
-                }
-                viewPart.reset();
-                viewPart.setData(tests);
-                return Optional.empty();
-            })
-        ;
+                // Execute in UI thread because getActiveWorkbenchWindow is only available in the UI thread.
+                Display.getDefault().asyncExec(() -> {
+                    final IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+                    final TestRunViewPart viewPart;
+                    try {
+                        viewPart = (TestRunViewPart)page.showView(TestRunViewPart.VIEW_ID);
+                    } catch(PartInitException e) {
+                        logger.error("Cannot load Test run viewpart", e);
+                        return;
+                    }
+                    viewPart.reset();
+                    viewPart.setData(tests);
+                });
+                return Optional.empty(); // Return value is required.
+            });
     }
 
 

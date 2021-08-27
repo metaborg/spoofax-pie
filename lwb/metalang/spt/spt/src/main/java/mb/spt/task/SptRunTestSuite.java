@@ -15,6 +15,8 @@ import mb.pie.api.exec.CancelToken;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.core.language.testrunner.TestCaseResult;
+import mb.spoofax.core.language.testrunner.TestSuiteResult;
 import mb.spt.SptClassLoaderResources;
 import mb.spt.SptScope;
 import mb.spt.fromterm.FromTermException;
@@ -24,10 +26,8 @@ import mb.spt.lut.LanguageUnderTestProvider;
 import mb.spt.lut.LanguageUnderTestProviderWrapper;
 import mb.spt.model.LanguageUnderTest;
 import mb.spt.model.TestCase;
-import mb.spoofax.core.language.testrunner.TestCaseResult;
 import mb.spt.model.TestExpectation;
 import mb.spt.model.TestSuite;
-import mb.spoofax.core.language.testrunner.TestSuiteResult;
 import mb.spt.resource.SptTestCaseResourceRegistry;
 import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
@@ -117,14 +117,12 @@ public class SptRunTestSuite implements TaskDef<SptRunTestSuite.Input, TestSuite
         final mb.jsglr.pie.JsglrParseTaskInput.Builder parseInputBuilder = parse.inputBuilder().withFile(input.file).rootDirectoryHint(Optional.ofNullable(input.rootDirectoryHint));
         final Result<JsglrParseOutput, JsglrParseException> parseResult = context.require(parse, parseInputBuilder.build());
         return parseResult.mapThrowingOrElse(o -> {
-                messagesBuilder.addMessages(o.messages);
-                return runTests(context, messagesBuilder, input.file, input.rootDirectoryHint, o.ast);
-            },
-            (e) -> {
-                messagesBuilder.extractMessagesRecursively(e);
-                return new TestSuiteResult(messagesBuilder.build(), input.file);
-            }
-        );
+            messagesBuilder.addMessages(o.messages);
+            return runTests(context, messagesBuilder, input.file, input.rootDirectoryHint, o.ast);
+        }, (e) -> {
+            messagesBuilder.extractMessagesRecursively(e);
+            return new TestSuiteResult(messagesBuilder.build(), input.file);
+        });
     }
 
 
@@ -157,7 +155,7 @@ public class SptRunTestSuite implements TaskDef<SptRunTestSuite.Input, TestSuite
         final CancelToken cancelToken = context.cancelToken();
         return languageUnderTestResult.mapThrowingOrElse(
             languageUnderTest -> {
-                ListView<TestCaseResult> results = runTests(languageUnderTestProvider, context, languageUnderTest, cancelToken, messagesBuilder, testSuite);
+                ListView<TestCaseResult> results = runTests(languageUnderTestProvider, context, languageUnderTest, cancelToken, testSuite);
                 return new TestSuiteResult(messagesBuilder.build(), file, testSuite.name, results);
             },
             (e) -> {
@@ -172,21 +170,22 @@ public class SptRunTestSuite implements TaskDef<SptRunTestSuite.Input, TestSuite
         ExecContext context,
         LanguageUnderTest languageUnderTest,
         CancelToken cancelToken,
-        KeyedMessagesBuilder messagesBuilder,
-        TestSuite testSuite) throws InterruptedException {
+        TestSuite testSuite
+    ) throws InterruptedException {
         List<TestCaseResult> results = new ArrayList<>();
         try(final MixedSession languageUnderTestSession = languageUnderTest.getPieComponent().newSession()) {
             for(TestCase testCase : testSuite.testCases) {
-                KeyedMessagesBuilder testMessageBuilder = new KeyedMessagesBuilder();
-                long startTime = System.currentTimeMillis();
+                context.cancelToken().throwIfCanceled();
+                final KeyedMessagesBuilder testMessageBuilder = new KeyedMessagesBuilder();
+                final long startTime = System.currentTimeMillis();
                 for(TestExpectation expectation : testCase.expectations) {
                     testMessageBuilder.addMessages(
                         expectation.evaluate(testCase, languageUnderTest, languageUnderTestSession, languageUnderTestProvider, context, cancelToken)
                     );
                 }
-                long duration = System.currentTimeMillis() - startTime;
-                KeyedMessages messages = testMessageBuilder.build();
-                TestCaseResult run = new TestCaseResult(testCase.description, testCase.descriptionRegion, testSuite.file, messages, duration);
+                final long duration = System.currentTimeMillis() - startTime;
+                final KeyedMessages messages = testMessageBuilder.build();
+                final TestCaseResult run = new TestCaseResult(testCase.description, testCase.descriptionRegion, testSuite.file, messages, duration);
                 results.add(run);
             }
         }
