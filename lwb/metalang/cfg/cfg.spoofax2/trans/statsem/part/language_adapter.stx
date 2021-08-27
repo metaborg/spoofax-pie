@@ -17,24 +17,33 @@ rules
   partOk(s, EditorContextMenu(e_menu_items)) :-
     exprsAreMenuItems(s, e_menu_items).
 
-rules // Editor services section and options
+rules
 
-  partOk(s, EditorServicesSection(options)) :-
-    editorServicesOptionsOk(s, options).
+  partOk(s, ReferenceResolutionSection(options)) :-
+    referenceResolutionOptionsOk(s, options).
 
-  editorServicesOptionOk : scope * EditorServicesOption
-  editorServicesOptionsOk maps editorServicesOptionOk(*, list(*))
+  referenceResolutionOptionOk : scope * ReferenceResolutionOption
+  referenceResolutionOptionsOk maps referenceResolutionOptionOk(*, list(*))
 
-  editorServicesOptionOk(s, EditorServicesReferenceResolutionOption(e)) :-
-    referenceResolutionVariantOk(s, e).
-
-  editorServicesOptionOk(s, EditorServicesHoverOption(e)) :-
-    hoverVariantOk(s, e).
+  referenceResolutionOptionOk(s, ReferenceResolutionVariant(v)) :-
+    referenceResolutionVariantOk(s, v).
 
   referenceResolutionVariantOk : scope * ReferenceResolutionVariant
   referenceResolutionVariantOk(s, ReferenceResolutionStrategoVariant(e)) :-
     typeOfExpr(s, e) == STRATEGY() | error $[Expected Stratego strategy identifier]@e.
 
+rules
+
+  partOk(s, HoverSection(options)) :-
+    hoverOptionsOk(s, options).
+
+  hoverOptionOk : scope * HoverOption
+  hoverOptionsOk maps hoverOptionOk(*, list(*))
+
+  hoverOptionOk(s, HoverVariant(v)) :-
+    hoverVariantOk(s, v).
+
   hoverVariantOk : scope * HoverVariant
   hoverVariantOk(s, HoverStrategoVariant(e)) :-
     typeOfExpr(s, e) == STRATEGY() | error $[Expected Stratego strategy identifier]@e.
+    

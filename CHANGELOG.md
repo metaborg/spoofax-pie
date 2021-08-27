@@ -6,9 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 ### Added
 - Duplicate sort definition check in SDF3.
+- `reference-resolution` and `hover` sections in language CFG file, promoted from subsections inside `editor-services` section.
 
 ### Changed
 - Run commands in Eclipse plugins as jobs in order to not hang the IDE and to make them cancellable.
 - Long SPT test suites are cancellable.
+
+### Removed
+- `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 [Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.10.0...HEAD

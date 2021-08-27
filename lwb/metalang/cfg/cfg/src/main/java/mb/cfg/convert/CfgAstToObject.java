@@ -267,18 +267,16 @@ public class CfgAstToObject {
             final ExportsLanguageCompiler.Input.Builder builder = baseBuilder.withExports();
             // TODO: exports language properties
         });
-        parts.getAllSubTermsInListAsParts("EditorServicesSection").ifSome(subParts -> {
-            // Reference resolution.
-            subParts.getAllSubTermsInListAsParts("EditorServicesReferenceResolutionOption").ifSome(referenceResolutionSubParts -> {
-                final ReferenceResolutionAdapterCompiler.Input.Builder builder = adapterBuilder.withReferenceResolution();
-                // todo: should probably actually look at the variant here
-                referenceResolutionSubParts.forOneSubtermAsString("StrategyId", builder::resolveStrategy);
+        parts.getAllSubTermsInListAsParts("ReferenceResolutionSection").ifSome(subParts -> {
+            final ReferenceResolutionAdapterCompiler.Input.Builder builder = adapterBuilder.withReferenceResolution();
+            subParts.getOneSubterm("ReferenceResolutionVariant").ifSome(variant -> {
+                TermUtils.asJavaStringAt(variant.getSubterm(0), 0).ifPresent(builder::resolveStrategy);
             });
-
-            // Hover
-            subParts.getAllSubTermsInListAsParts("EditorServicesHoverOption").ifSome(hoverSubParts -> {
-                final HoverAdapterCompiler.Input.Builder builder = adapterBuilder.withHover();
-                hoverSubParts.forOneSubtermAsString("StrategyId", builder::hoverStrategy);
+        });
+        parts.getAllSubTermsInListAsParts("HoverSection").ifSome(subParts -> {
+            final HoverAdapterCompiler.Input.Builder builder = adapterBuilder.withHover();
+            subParts.getOneSubterm("HoverVariant").ifSome(variant -> {
+                TermUtils.asJavaStringAt(variant.getSubterm(0), 0).ifPresent(builder::hoverStrategy);
             });
         });
 

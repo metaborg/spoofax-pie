@@ -26,11 +26,13 @@ constraint-analyzer {
 constraint-analyzer {}
 {{/multiFileAnalysis}}
 stratego-runtime {}
-editor-services {
-  reference-resolution = stratego {
+reference-resolution {
+  variant = stratego {
     strategy = strategy editor-resolve
   }
-  hover = stratego {
+}
+hover {
+  variant = stratego {
     strategy = strategy editor-hover
   }
 }

@@ -310,20 +310,29 @@ The `completer { $CompleterOption* }` section enables generation of a code compl
 The `constraint-analyzer` and `statix` sections must be enabled when the `completer` section is enabled.
 Currently, no `CompleterOption`s are supported.
 
-### Editor services
+### Reference resolution
 
-The `editor-services { $EditorServiceSubsection* }` groups editor service sub-sections.
-The following `EditorServiceSubsection`s are supported.
+The `reference-resolution { $ReferenceResolutionOption* }` section enables generation of the reference resolver editor service, and groups options.
+The following `ReferenceResolutionOption`s are supported:
 
-#### Reference resolution
+| Syntax | Required? | Description | Type |
+| - | - | - | - |
+| `variant = $ReferenceResolutionVariant` | yes | The reference resolution variant to use. | n/a |
 
-The reference resolution editor service is enabled with `reference-resolution = $ReferenceResolutionVariant`. The following `ReferenceResolutionVariant`s are supported:
+The following `ReferenceResolutionVariant`s are supported:
 
 * Stratego-based: `stratego { strategy = strategy $Strategy }` where `Strategy` is a Stratego strategy, typically `editor-resolve`.
 
-#### Hover tooltips
+### Hover tooltips
 
-The hover tooltip editor service is enabled with `hover = $HoverVariant`. The following `$HoverVariant`s are supported:
+The `hover { $HoverOption* }` section enables generation of the hover text editor service, and groups options.
+The following `HoverOption`s are supported:
+
+| Syntax | Required? | Description | Type |
+| - | - | - | - |
+| `variant = $HoverVariant` | yes | The reference resolution variant to use. | n/a |
+
+The following `HoverVariant`s are supported:
 
 * Stratego-based: `stratego { strategy = strategy $Strategy }` where `Strategy` is a Stratego strategy, typically `editor-hover`.
 
