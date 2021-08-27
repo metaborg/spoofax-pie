@@ -507,14 +507,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#editor-services" class="md-nav__link">
-    Editor services
-  </a>
-  
-    <nav class="md-nav" aria-label="Editor services">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
   <a href="#reference-resolution" class="md-nav__link">
     Reference resolution
   </a>
@@ -525,11 +517,6 @@
   <a href="#hover-tooltips" class="md-nav__link">
     Hover tooltips
   </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
         
@@ -838,14 +825,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#editor-services" class="md-nav__link">
-    Editor services
-  </a>
-  
-    <nav class="md-nav" aria-label="Editor services">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
   <a href="#reference-resolution" class="md-nav__link">
     Reference resolution
   </a>
@@ -856,11 +835,6 @@
   <a href="#hover-tooltips" class="md-nav__link">
     Hover tooltips
   </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
         
@@ -1465,16 +1439,53 @@ Currently, no <code>StrategoRuntimeOption</code>s are supported.</p>
 <p>The <code>completer { $CompleterOption* }</code> section enables generation of a code completer, and groups options.
 The <code>constraint-analyzer</code> and <code>statix</code> sections must be enabled when the <code>completer</code> section is enabled.
 Currently, no <code>CompleterOption</code>s are supported.</p>
-<h3 id="editor-services">Editor services<a class="headerlink" href="#editor-services" title="Permanent link">&para;</a></h3>
-<p>The <code>editor-services { $EditorServiceSubsection* }</code> groups editor service sub-sections.
-The following <code>EditorServiceSubsection</code>s are supported.</p>
-<h4 id="reference-resolution">Reference resolution<a class="headerlink" href="#reference-resolution" title="Permanent link">&para;</a></h4>
-<p>The reference resolution editor service is enabled with <code>reference-resolution = $ReferenceResolutionVariant</code>. The following <code>ReferenceResolutionVariant</code>s are supported:</p>
+<h3 id="reference-resolution">Reference resolution<a class="headerlink" href="#reference-resolution" title="Permanent link">&para;</a></h3>
+<p>The <code>reference-resolution { $ReferenceResolutionOption* }</code> section enables generation of the reference resolver editor service, and groups options.
+The following <code>ReferenceResolutionOption</code>s are supported:</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Required?</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>variant = $ReferenceResolutionVariant</code></td>
+<td>yes</td>
+<td>The reference resolution variant to use.</td>
+<td>n/a</td>
+</tr>
+</tbody>
+</table>
+<p>The following <code>ReferenceResolutionVariant</code>s are supported:</p>
 <ul>
 <li>Stratego-based: <code>stratego { strategy = strategy $Strategy }</code> where <code>Strategy</code> is a Stratego strategy, typically <code>editor-resolve</code>.</li>
 </ul>
-<h4 id="hover-tooltips">Hover tooltips<a class="headerlink" href="#hover-tooltips" title="Permanent link">&para;</a></h4>
-<p>The hover tooltip editor service is enabled with <code>hover = $HoverVariant</code>. The following <code>$HoverVariant</code>s are supported:</p>
+<h3 id="hover-tooltips">Hover tooltips<a class="headerlink" href="#hover-tooltips" title="Permanent link">&para;</a></h3>
+<p>The <code>hover { $HoverOption* }</code> section enables generation of the hover text editor service, and groups options.
+The following <code>HoverOption</code>s are supported:</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Required?</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>variant = $HoverVariant</code></td>
+<td>yes</td>
+<td>The reference resolution variant to use.</td>
+<td>n/a</td>
+</tr>
+</tbody>
+</table>
+<p>The following <code>HoverVariant</code>s are supported:</p>
 <ul>
 <li>Stratego-based: <code>stratego { strategy = strategy $Strategy }</code> where <code>Strategy</code> is a Stratego strategy, typically <code>editor-hover</code>.</li>
 </ul>
