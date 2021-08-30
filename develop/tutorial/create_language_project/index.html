@@ -754,7 +754,7 @@ There should now be a project named <code>helloworld</code> in the <span class="
 <h2 id="adding-syntax">Adding syntax<a class="headerlink" href="#adding-syntax" title="Permanent link">&para;</a></h2>
 <p>First we will add some syntax to the language.
 Open the main SDF3 file <code>helloworld/src/start.sdf3</code> file by expanding the folders and double-clicking the file.
-SDF3 is a meta-language (i.e., a language to describe languages) for describing the syntax of a language, from which Spoofax will derive the parser of your language.
+<a href="https://www.spoofax.dev/references/syntax/">SDF3</a> is a meta-language (i.e., a language to describe languages) for describing the syntax of a language, from which Spoofax will derive the parser of your language.
 Under the <code class="highlight"><span class="k">context-free</span><span class="w"> </span><span class="k">syntax</span><span class="w"></span></code> section, replace the <code class="highlight"><span class="nv">Start</span><span class=" -Punctuation">.</span><span class="nv">Empty</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;&gt;</span><span class="w"></span></code> line with <code class="highlight"><span class="nv">Start</span><span class=" -Punctuation">.</span><span class="nv">Program</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;&lt;{</span><span class="nv">Part</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class=" -Punctuation">}</span><span class="o">*</span><span class=" -Punctuation">&gt;&gt;</span><span class="w"></span></code>, indicating that the language accepts programs which consists of zero or more parts.</p>
 <p><code class="highlight"><span class="nv">Part</span><span class="w"></span></code> is a <em>sort</em> and must be defined by adding its name to the <code class="highlight"><span class="k">context-free</span><span class="w"> </span><span class="k">sorts</span><span class="w"></span></code> section on a new line.</p>
 <p>Now we will add syntax productions to <code class="highlight"><span class="nv">Part</span><span class="w"></span></code> to the <code class="highlight"><span class="k">context-free</span><span class="w"> </span><span class="k">syntax</span><span class="w"></span></code> section.
@@ -1028,7 +1028,7 @@ Replace the entire Java file with the following code:</p>
 <h3 id="registering-the-task-definition">Registering the task definition<a class="headerlink" href="#registering-the-task-definition" title="Permanent link">&para;</a></h3>
 <p>We must register this task in order for Spoofax to know about it.
 Open the CFG <code>helloworld/spoofax.cfg</code> file.
-The CFG meta-language is a configuration language where we configure and glue together the various aspects of your language.
+The <a href="reference/configuration.md">CFG</a> meta-language is a configuration language where we configure and glue together the various aspects of your language.
 Add the following configuration to the end of the file:</p>
 <div class="highlight"><pre><span></span><code><span class="na">let showParsedAst</span> <span class="o">=</span> <span class="s">task-def mb.helloworld.task.HelloWorldShowParsedAst</span>
 </code></pre></div>
@@ -1136,7 +1136,7 @@ Finally, we can run the command by right-clicking the <code>test.hel</code> file
 <h2 id="changing-the-static-semantics">Changing the static semantics<a class="headerlink" href="#changing-the-static-semantics" title="Permanent link">&para;</a></h2>
 <p>Now we will change the static semantics of the language.
 Open the main Statix file <code>helloworld/src/main.stx</code>
-Statix is a meta-language for defining the static semantics of your language, which includes type checking.</p>
+<a href="https://www.spoofax.dev/references/statix/">Statix</a> is a meta-language for defining the static semantics of your language, which includes type checking.</p>
 <p>First we will update the Statix specification to handle the new language constructs.
 Replace the <code class="highlight"><span class="nv">programOk</span><span class="p">(</span><span class="nv">_</span><span class="p">).</span><span class="w"></span></code> line with <code>programOk(Program(parts)) :- partsOk(parts).</code>, meaning that we accept programs consisting of parts, as long as their parts are ok.
 As a silly rule, we will add a warning to all instances of <code>world</code> in the program.
@@ -1169,7 +1169,7 @@ Add the following code to the end of the Statix definition:</p>
 <h2 id="adding-a-transformation">Adding a transformation<a class="headerlink" href="#adding-a-transformation" title="Permanent link">&para;</a></h2>
 <p>Finally, we will define a transformation for our language and add a task, command-tasks, command, and menu item for it.
 Open the main Stratego file <code>helloworld/src/main.str</code>.
-Stratego is a meta-language for defining term (<abbr title="Abstract Syntax Tree">AST</abbr>) transformations through rewrite rules.
+<a href="https://www.spoofax.dev/references/stratego/">Stratego</a>. is a meta-language for defining term (<abbr title="Abstract Syntax Tree">AST</abbr>) transformations through rewrite rules.
 We will add a silly transformation that replaces all instances of <code class="highlight"><span class="nv">World</span><span class=" -Punctuation">()</span><span class="w"></span></code> with <code class="highlight"><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"></span></code>.</p>
 <p>Add the following code to the end of the Stratego file:</p>
 <div class="highlight"><pre><span></span><code><span class="k">rules</span><span class="w"></span>
