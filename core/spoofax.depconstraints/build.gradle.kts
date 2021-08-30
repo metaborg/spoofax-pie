@@ -36,6 +36,7 @@ dependencies {
     api(project(":constraint.common"))
     api(project(":nabl2.common"))
     api(project(":statix.common"))
+    api(project(":statix.strategies"))
     api(project(":statix.multilang"))
     api(project(":spoofax2.common"))
 
