@@ -231,7 +231,7 @@ We explain this class with numbered annotations in the above Java source file:
 
 We must register this task in order for Spoofax to know about it.
 Open the CFG `helloworld/spoofax.cfg` file.
-The [CFG](reference/configuration.md) meta-language is a configuration language where we configure and glue together the various aspects of your language.
+The [CFG](../../reference/configuration.md) meta-language is a configuration language where we configure and glue together the various aspects of your language.
 Add the following configuration to the end of the file:
 
 ```cfg
