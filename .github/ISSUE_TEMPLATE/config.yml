@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question
+    url: https://github.com/metaborg/spoofax-pie/discussions/categories/ask-a-question
+    about: Please ask and answer questions about Spoofax 3 in this GitHub discussions category.
+  - name: Feature Request
+    url: https://github.com/metaborg/spoofax-pie/discussions/categories/feature-requests
+    about: Please discuss feature requests or ideas in this GitHub discussions category.
