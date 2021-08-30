@@ -17,7 +17,7 @@ There should now be a project named `helloworld` in the <span class="guilabel">P
 
 First we will add some syntax to the language.
 Open the main SDF3 file `helloworld/src/start.sdf3` file by expanding the folders and double-clicking the file.
-SDF3 is a meta-language (i.e., a language to describe languages) for describing the syntax of a language, from which Spoofax will derive the parser of your language.
+[SDF3](https://www.spoofax.dev/references/syntax/) is a meta-language (i.e., a language to describe languages) for describing the syntax of a language, from which Spoofax will derive the parser of your language.
 Under the `#!sdf3 context-free syntax` section, replace the `#!sdf3 Start.Empty = <>` line with `#!sdf3 Start.Program = <<{Part " "}*>>`, indicating that the language accepts programs which consists of zero or more parts.
 
 `#!sdf3 Part` is a *sort* and must be defined by adding its name to the `#!sdf3 context-free sorts` section on a new line.
@@ -231,7 +231,7 @@ We explain this class with numbered annotations in the above Java source file:
 
 We must register this task in order for Spoofax to know about it.
 Open the CFG `helloworld/spoofax.cfg` file.
-The CFG meta-language is a configuration language where we configure and glue together the various aspects of your language.
+The [CFG](reference/configuration.md) meta-language is a configuration language where we configure and glue together the various aspects of your language.
 Add the following configuration to the end of the file:
 
 ```cfg
@@ -349,7 +349,7 @@ Finally, we can run the command by right-clicking the `test.hel` file in the <sp
 
 Now we will change the static semantics of the language.
 Open the main Statix file `helloworld/src/main.stx`
-Statix is a meta-language for defining the static semantics of your language, which includes type checking.
+[Statix](https://www.spoofax.dev/references/statix/) is a meta-language for defining the static semantics of your language, which includes type checking.
 
 First we will update the Statix specification to handle the new language constructs.
 Replace the `#!statix programOk(_).` line with `programOk(Program(parts)) :- partsOk(parts).`, meaning that we accept programs consisting of parts, as long as their parts are ok.
@@ -391,7 +391,7 @@ Build the project, and a warning marker should appear under all instances of `wo
 
 Finally, we will define a transformation for our language and add a task, command-tasks, command, and menu item for it.
 Open the main Stratego file `helloworld/src/main.str`.
-Stratego is a meta-language for defining term (AST) transformations through rewrite rules.
+[Stratego](https://www.spoofax.dev/references/stratego/). is a meta-language for defining term (AST) transformations through rewrite rules.
 We will add a silly transformation that replaces all instances of `#!stratego World()` with `#!stratego Hello()`.
 
 Add the following code to the end of the Stratego file:
