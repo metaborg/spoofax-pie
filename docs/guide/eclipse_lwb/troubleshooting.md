@@ -110,6 +110,6 @@ To share heap dumps, upload them to a cloud service such as [Mega](https://mega.
     Only share a heap dump if you are sure you have not entered any sensitive information into Eclipse.
 
 
-## Ask for help
+## Report a bug or ask for help
 
-If after troubleshooting the issue is not resolved, [reporting this bug](../report_a_bug.md) if you think this is a bug, or [ask for help](../ask_for_help.md).
+If after troubleshooting the issue is not resolved, [report this bug](../report_a_bug.md) if you think this is a bug, or [ask for help](../ask_for_help.md).
