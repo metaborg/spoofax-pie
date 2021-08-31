@@ -16,7 +16,7 @@ If you are looking for a more mature alternative, see [Spoofax 2]( https://www.s
 The documentation for Spoofax 3 is split into five parts:
 
 * **[Tutorials](tutorial/install.md)**: hands-on tutorials to getting you started with Spoofax 3.
-* **How-to guides**: step-by-step guides showing how to implement certain features or how to solve common problems. (Under construction)
+* **[How-to guides](guide/ask_for_help.md)**: step-by-step guides showing how to implement certain features or how to solve common problems.
 * **[Reference](reference/configuration.md)**: technical reference describing the various facets of Spoofax 3.
 * **[Background](background/documentation.md)**: background information and discussion on various key topics.
 * **[Releases](release/download.md)**: download links, changelogs, and migration guides.
