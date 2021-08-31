@@ -861,9 +861,9 @@ In case of deadlocks, please <a href="../../report_a_bug/">report this bug</a>.<
 <h2 id="checking-memory-and-making-a-heap-dump">Checking memory (and making a heap dump)<a class="headerlink" href="#checking-memory-and-making-a-heap-dump" title="Permanent link">&para;</a></h2>
 <p>If Eclipse seems to be using excessive amounts of memory or processor time, check how much heap space Eclipse is using.
 To show the heap space Eclipse is using, go to the Eclipse preferences, and in the <span class="guilabel">General</span> tab, enable <span class="guilabel">Show heap status</span>.
-The heap status shows up in the bottom right corner.
-Press the trash can icon to run garbage collection, which will free up any available memory.</p>
-<p>If after garbage collection, the memory is still near its maximum, Eclipse has run out of memory and will become very slow or unresponsive.</p>
+The heap status shows up in the bottom right corner.</p>
+<p>Press the trash can icon to run garbage collection, which will free up any available memory.
+If after garbage collection, the memory is still near its maximum, Eclipse has run out of memory and will become very slow or unresponsive.</p>
 <p>To diagnose the problem, first make a thread dump as was described in the previous section.
 A thread dump may give some clues as to what is generating or leaking heap memory.</p>
 <p>Then, make a heap dump by running <code>jmap -dump:live,format=b,file=heap.bin &lt;process-ID&gt;</code> using the process ID of Eclipse, as was described in the previous section.
@@ -871,6 +871,11 @@ This creates a heap dump file called <code>heap.bin</code> in the working direct
 This heap dump can then be loaded into a profiler such as <a href="https://visualvm.github.io/">VisualVM</a> for inspection.</p>
 <p>In case of excessive memory problems, please <a href="../../report_a_bug/">report this bug</a> and share the heap dump.
 To share heap dumps, upload them to a cloud service such as <a href="https://mega.io/">Mega</a> and share the link.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Heap dumps contain all the JVM memory in Eclipse, which can include any information that you have entered into Eclipse.
+Only share a heap dump if you are sure you have not entered any sensitive information into Eclipse.</p>
+</div>
 <h2 id="ask-for-help">Ask for help<a class="headerlink" href="#ask-for-help" title="Permanent link">&para;</a></h2>
 <p>If after troubleshooting the issue is not resolved, <a href="../../report_a_bug/">reporting this bug</a> if you think this is a bug, or <a href="../../ask_for_help/">ask for help</a>.</p>
                 
