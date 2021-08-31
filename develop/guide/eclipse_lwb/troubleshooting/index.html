@@ -506,6 +506,20 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#checking-for-deadlocks-and-making-a-thread-dump" class="md-nav__link">
+    Checking for deadlocks (and making a thread dump)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#checking-memory-and-making-a-heap-dump" class="md-nav__link">
+    Checking memory (and making a heap dump)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#ask-for-help" class="md-nav__link">
     Ask for help
   </a>
@@ -748,6 +762,20 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#checking-for-deadlocks-and-making-a-thread-dump" class="md-nav__link">
+    Checking for deadlocks (and making a thread dump)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#checking-memory-and-making-a-heap-dump" class="md-nav__link">
+    Checking memory (and making a heap dump)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#ask-for-help" class="md-nav__link">
     Ask for help
   </a>
@@ -791,6 +819,7 @@ You can try to look at the error in the generated file and see if you can solve 
 First consult the <span class="guilabel">Error Log</span> view.
 If this view is not open, open it by choosing <span class="guilabel">Window ‣ Show view ‣ Error Log</span> from the main menu.</p>
 <p>The error log contains warning and error events from all plugins running in Eclipse, including several Spoofax plugins.
+Most errors include stack traces, which help the Spoofax developers immensely in bug reports or when asking for help.
 Browse through the errors from Spoofax plugins to see if it can help you troubleshoot the problem.</p>
 <p>If nothing relevant is in the error log, try to consult the <span class="guilabel">Console</span> view.
 If this view is not open, open it by choosing <span class="guilabel">Window ‣ Show view ‣ Other...‣ search for Console, choose Console and open it</span> from the main menu.</p>
@@ -815,8 +844,35 @@ These directories are hidden, so you may need to enable showing hidden files, or
 <p>Then, start Eclipse again and build your language.
 Optionally, check the error log and console again.</p>
 <p>If this solves your problem, consider <a href="../../report_a_bug/">reporting this bug</a>, as we consider incrementality issues like these bugs.</p>
+<h2 id="checking-for-deadlocks-and-making-a-thread-dump">Checking for deadlocks (and making a thread dump)<a class="headerlink" href="#checking-for-deadlocks-and-making-a-thread-dump" title="Permanent link">&para;</a></h2>
+<p>If Eclipse seems to be stuck, hanging, or not making any progress, check for deadlocks by making a thread dump.
+It will print something like:</p>
+<div class="highlight"><pre><span></span><code>80035 Jps
+94805
+74294 org.eclipse.equinox.launcher_1.6.100.v20201223-0822.jar
+51515 Eclipse
+74236 GradleDaemon
+</code></pre></div>
+<p>In this case, <code>51515</code> is the process ID of Eclipse.
+Then run <code>jstack &lt;process-ID&gt;</code>, so <code>jstack 51515</code> in this case.</p>
+<p><code>jstack</code> prints a thread dump with a stack trace for each thread, alongside any detected deadlocks.
+While it may be hard to use this information to troubleshoot yourself, this can be useful information when asking for help or when reporting a bug.
+In case of deadlocks, please <a href="../../report_a_bug/">report this bug</a>.</p>
+<h2 id="checking-memory-and-making-a-heap-dump">Checking memory (and making a heap dump)<a class="headerlink" href="#checking-memory-and-making-a-heap-dump" title="Permanent link">&para;</a></h2>
+<p>If Eclipse seems to be using excessive amounts of memory or processor time, check how much heap space Eclipse is using.
+To show the heap space Eclipse is using, go to the Eclipse preferences, and in the <span class="guilabel">General</span> tab, enable <span class="guilabel">Show heap status</span>.
+The heap status shows up in the bottom right corner.
+Press the trash can icon to run garbage collection, which will free up any available memory.</p>
+<p>If after garbage collection, the memory is still near its maximum, Eclipse has run out of memory and will become very slow or unresponsive.</p>
+<p>To diagnose the problem, first make a thread dump as was described in the previous section.
+A thread dump may give some clues as to what is generating or leaking heap memory.</p>
+<p>Then, make a heap dump by running <code>jmap -dump:live,format=b,file=heap.bin &lt;process-ID&gt;</code> using the process ID of Eclipse, as was described in the previous section.
+This creates a heap dump file called <code>heap.bin</code> in the working directory.
+This heap dump can then be loaded into a profiler such as <a href="https://visualvm.github.io/">VisualVM</a> for inspection.</p>
+<p>In case of excessive memory problems, please <a href="../../report_a_bug/">report this bug</a> and share the heap dump.
+To share heap dumps, upload them to a cloud service such as <a href="https://mega.io/">Mega</a> and share the link.</p>
 <h2 id="ask-for-help">Ask for help<a class="headerlink" href="#ask-for-help" title="Permanent link">&para;</a></h2>
-<p>If after troubleshooting the issue is not resolved, <a href="../../ask_for_help/">ask for help</a>.</p>
+<p>If after troubleshooting the issue is not resolved, <a href="../../report_a_bug/">reporting this bug</a> if you think this is a bug, or <a href="../../ask_for_help/">ask for help</a>.</p>
                 
               
               
