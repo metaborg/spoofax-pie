@@ -91,8 +91,8 @@ In case of deadlocks, please [report this bug](../report_a_bug.md).
 If Eclipse seems to be using excessive amounts of memory or processor time, check how much heap space Eclipse is using.
 To show the heap space Eclipse is using, go to the Eclipse preferences, and in the <span class="guilabel">General</span> tab, enable <span class="guilabel">Show heap status</span>.
 The heap status shows up in the bottom right corner.
-Press the trash can icon to run garbage collection, which will free up any available memory.
 
+Press the trash can icon to run garbage collection, which will free up any available memory.
 If after garbage collection, the memory is still near its maximum, Eclipse has run out of memory and will become very slow or unresponsive.
 
 To diagnose the problem, first make a thread dump as was described in the previous section.
@@ -104,6 +104,11 @@ This heap dump can then be loaded into a profiler such as [VisualVM](https://vis
 
 In case of excessive memory problems, please [report this bug](../report_a_bug.md) and share the heap dump.
 To share heap dumps, upload them to a cloud service such as [Mega](https://mega.io/) and share the link.
+
+!!! warning
+    Heap dumps contain all the JVM memory in Eclipse, which can include any information that you have entered into Eclipse.
+    Only share a heap dump if you are sure you have not entered any sensitive information into Eclipse.
+
 
 ## Ask for help
 
