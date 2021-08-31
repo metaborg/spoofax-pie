@@ -506,23 +506,36 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#report-a-bug-or-ask-for-help" class="md-nav__link">
+    Report a bug or ask for help
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-troubleshooting" class="md-nav__link">
+    Advanced troubleshooting
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#checking-for-deadlocks-and-making-a-thread-dump" class="md-nav__link">
     Checking for deadlocks (and making a thread dump)
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#checking-memory-and-making-a-heap-dump" class="md-nav__link">
     Checking memory (and making a heap dump)
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#report-a-bug-or-ask-for-help" class="md-nav__link">
-    Report a bug or ask for help
-  </a>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -762,23 +775,36 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#report-a-bug-or-ask-for-help" class="md-nav__link">
+    Report a bug or ask for help
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-troubleshooting" class="md-nav__link">
+    Advanced troubleshooting
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#checking-for-deadlocks-and-making-a-thread-dump" class="md-nav__link">
     Checking for deadlocks (and making a thread dump)
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#checking-memory-and-making-a-heap-dump" class="md-nav__link">
     Checking memory (and making a heap dump)
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#report-a-bug-or-ask-for-help" class="md-nav__link">
-    Report a bug or ask for help
-  </a>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -844,7 +870,10 @@ These directories are hidden, so you may need to enable showing hidden files, or
 <p>Then, start Eclipse again and build your language.
 Optionally, check the error log and console again.</p>
 <p>If this solves your problem, consider <a href="../../report_a_bug/">reporting this bug</a>, as we consider incrementality issues like these bugs.</p>
-<h2 id="checking-for-deadlocks-and-making-a-thread-dump">Checking for deadlocks (and making a thread dump)<a class="headerlink" href="#checking-for-deadlocks-and-making-a-thread-dump" title="Permanent link">&para;</a></h2>
+<h2 id="report-a-bug-or-ask-for-help">Report a bug or ask for help<a class="headerlink" href="#report-a-bug-or-ask-for-help" title="Permanent link">&para;</a></h2>
+<p>If after troubleshooting the issue is not resolved, <a href="../../report_a_bug/">report this bug</a> if you think this is a bug, or <a href="../../ask_for_help/">ask for help</a>.</p>
+<h2 id="advanced-troubleshooting">Advanced troubleshooting<a class="headerlink" href="#advanced-troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="checking-for-deadlocks-and-making-a-thread-dump">Checking for deadlocks (and making a thread dump)<a class="headerlink" href="#checking-for-deadlocks-and-making-a-thread-dump" title="Permanent link">&para;</a></h3>
 <p>If Eclipse seems to be stuck, hanging, or not making any progress, check for deadlocks by making a thread dump.
 It will print something like:</p>
 <div class="highlight"><pre><span></span><code>80035 Jps
@@ -858,7 +887,7 @@ Then run <code>jstack &lt;process-ID&gt;</code>, so <code>jstack 51515</code> in
 <p><code>jstack</code> prints a thread dump with a stack trace for each thread, alongside any detected deadlocks.
 While it may be hard to use this information to troubleshoot yourself, this can be useful information when asking for help or when reporting a bug.
 In case of deadlocks, please <a href="../../report_a_bug/">report this bug</a>.</p>
-<h2 id="checking-memory-and-making-a-heap-dump">Checking memory (and making a heap dump)<a class="headerlink" href="#checking-memory-and-making-a-heap-dump" title="Permanent link">&para;</a></h2>
+<h3 id="checking-memory-and-making-a-heap-dump">Checking memory (and making a heap dump)<a class="headerlink" href="#checking-memory-and-making-a-heap-dump" title="Permanent link">&para;</a></h3>
 <p>If Eclipse seems to be using excessive amounts of memory or processor time, check how much heap space Eclipse is using.
 To show the heap space Eclipse is using, go to the Eclipse preferences, and in the <span class="guilabel">General</span> tab, enable <span class="guilabel">Show heap status</span>.
 The heap status shows up in the bottom right corner.</p>
@@ -876,8 +905,6 @@ To share heap dumps, upload them to a cloud service such as <a href="https://meg
 <p>Heap dumps contain all the JVM memory in Eclipse, which can include any information that you have entered into Eclipse.
 Only share a heap dump if you are sure you have not entered any sensitive information into Eclipse.</p>
 </div>
-<h2 id="report-a-bug-or-ask-for-help">Report a bug or ask for help<a class="headerlink" href="#report-a-bug-or-ask-for-help" title="Permanent link">&para;</a></h2>
-<p>If after troubleshooting the issue is not resolved, <a href="../../report_a_bug/">report this bug</a> if you think this is a bug, or <a href="../../ask_for_help/">ask for help</a>.</p>
                 
               
               

@@ -464,6 +464,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    Troubleshooting
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -834,6 +841,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    Troubleshooting
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1137,7 +1151,7 @@ Replace the entire Java file with the following code:</p>
 <h3 id="registering-the-task-definition">Registering the task definition<a class="headerlink" href="#registering-the-task-definition" title="Permanent link">&para;</a></h3>
 <p>We must register this task in order for Spoofax to know about it.
 Open the CFG <code>helloworld/spoofax.cfg</code> file.
-The <a href="../../reference/configuration.md">CFG</a> meta-language is a configuration language where we configure and glue together the various aspects of your language.
+The <a href="../../reference/configuration/">CFG</a> meta-language is a configuration language where we configure and glue together the various aspects of your language.
 Add the following configuration to the end of the file:</p>
 <div class="highlight"><pre><span></span><code><span class="na">let showParsedAst</span> <span class="o">=</span> <span class="s">task-def mb.helloworld.task.HelloWorldShowParsedAst</span>
 </code></pre></div>
@@ -1590,6 +1604,8 @@ Right-click the <code>mb.helloworld.task</code> package and create the <code>Hel
 </code></pre></div>
 <p>Build the project so that we can test our changes.
 Test the command similarly to testing the "Show parsed <abbr title="Abstract Syntax Tree">AST</abbr>" command.</p>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<p>Check the <a href="../../guide/eclipse_lwb/troubleshooting/">troubleshooting guide</a> if you run into problems.</p>
                 
               
               
