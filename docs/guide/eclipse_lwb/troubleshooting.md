@@ -66,7 +66,13 @@ Optionally, check the error log and console again.
 
 If this solves your problem, consider [reporting this bug](../report_a_bug.md), as we consider incrementality issues like these bugs.
 
-## Checking for deadlocks (and making a thread dump)
+## Report a bug or ask for help
+
+If after troubleshooting the issue is not resolved, [report this bug](../report_a_bug.md) if you think this is a bug, or [ask for help](../ask_for_help.md).
+
+## Advanced troubleshooting
+
+### Checking for deadlocks (and making a thread dump)
 
 If Eclipse seems to be stuck, hanging, or not making any progress, check for deadlocks by making a thread dump.
 It will print something like:
@@ -86,7 +92,7 @@ Then run `jstack <process-ID>`, so `jstack 51515` in this case.
 While it may be hard to use this information to troubleshoot yourself, this can be useful information when asking for help or when reporting a bug.
 In case of deadlocks, please [report this bug](../report_a_bug.md).
 
-## Checking memory (and making a heap dump)
+### Checking memory (and making a heap dump)
 
 If Eclipse seems to be using excessive amounts of memory or processor time, check how much heap space Eclipse is using.
 To show the heap space Eclipse is using, go to the Eclipse preferences, and in the <span class="guilabel">General</span> tab, enable <span class="guilabel">Show heap status</span>.
@@ -108,8 +114,3 @@ To share heap dumps, upload them to a cloud service such as [Mega](https://mega.
 !!! warning
     Heap dumps contain all the JVM memory in Eclipse, which can include any information that you have entered into Eclipse.
     Only share a heap dump if you are sure you have not entered any sensitive information into Eclipse.
-
-
-## Report a bug or ask for help
-
-If after troubleshooting the issue is not resolved, [report this bug](../report_a_bug.md) if you think this is a bug, or [ask for help](../ask_for_help.md).
