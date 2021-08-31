@@ -200,6 +200,22 @@
   
   
     <li class="md-tabs__item">
+      <a href="../../guide/ask_for_help/" class="md-tabs__link">
+        How-to Guides
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
       <a href="../../reference/configuration/" class="md-tabs__link">
         Reference
       </a>
@@ -448,6 +464,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    Troubleshooting
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -476,11 +499,104 @@
         <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
       
       <label class="md-nav__link" for="__nav_3">
+        How-to Guides
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="How-to Guides" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          How-to Guides
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/ask_for_help/" class="md-nav__link">
+        Ask for help
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/report_a_bug/" class="md-nav__link">
+        Report a bug
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3" type="checkbox" id="__nav_3_3" >
+      
+      <label class="md-nav__link" for="__nav_3_3">
+        Eclipse LWB plugin
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Eclipse LWB plugin" data-md-level="2">
+        <label class="md-nav__title" for="__nav_3_3">
+          <span class="md-nav__icon md-icon"></span>
+          Eclipse LWB plugin
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/eclipse_lwb/troubleshooting/" class="md-nav__link">
+        Troubleshooting
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
+      
+      <label class="md-nav__link" for="__nav_4">
         Reference
         <span class="md-nav__icon md-icon"></span>
       </label>
       <nav class="md-nav" aria-label="Reference" data-md-level="1">
-        <label class="md-nav__title" for="__nav_3">
+        <label class="md-nav__title" for="__nav_4">
           <span class="md-nav__icon md-icon"></span>
           Reference
         </label>
@@ -515,14 +631,14 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
       
-      <label class="md-nav__link" for="__nav_4">
+      <label class="md-nav__link" for="__nav_5">
         Background
         <span class="md-nav__icon md-icon"></span>
       </label>
       <nav class="md-nav" aria-label="Background" data-md-level="1">
-        <label class="md-nav__title" for="__nav_4">
+        <label class="md-nav__title" for="__nav_5">
           <span class="md-nav__icon md-icon"></span>
           Background
         </label>
@@ -593,14 +709,14 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" type="checkbox" id="__nav_6" >
       
-      <label class="md-nav__link" for="__nav_5">
+      <label class="md-nav__link" for="__nav_6">
         Releases
         <span class="md-nav__icon md-icon"></span>
       </label>
       <nav class="md-nav" aria-label="Releases" data-md-level="1">
-        <label class="md-nav__title" for="__nav_5">
+        <label class="md-nav__title" for="__nav_6">
           <span class="md-nav__icon md-icon"></span>
           Releases
         </label>
@@ -725,6 +841,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    Troubleshooting
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -754,7 +877,7 @@ There should now be a project named <code>helloworld</code> in the <span class="
 <h2 id="adding-syntax">Adding syntax<a class="headerlink" href="#adding-syntax" title="Permanent link">&para;</a></h2>
 <p>First we will add some syntax to the language.
 Open the main SDF3 file <code>helloworld/src/start.sdf3</code> file by expanding the folders and double-clicking the file.
-SDF3 is a meta-language (i.e., a language to describe languages) for describing the syntax of a language, from which Spoofax will derive the parser of your language.
+<a href="https://www.spoofax.dev/references/syntax/">SDF3</a> is a meta-language (i.e., a language to describe languages) for describing the syntax of a language, from which Spoofax will derive the parser of your language.
 Under the <code class="highlight"><span class="k">context-free</span><span class="w"> </span><span class="k">syntax</span><span class="w"></span></code> section, replace the <code class="highlight"><span class="nv">Start</span><span class=" -Punctuation">.</span><span class="nv">Empty</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;&gt;</span><span class="w"></span></code> line with <code class="highlight"><span class="nv">Start</span><span class=" -Punctuation">.</span><span class="nv">Program</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;&lt;{</span><span class="nv">Part</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class=" -Punctuation">}</span><span class="o">*</span><span class=" -Punctuation">&gt;&gt;</span><span class="w"></span></code>, indicating that the language accepts programs which consists of zero or more parts.</p>
 <p><code class="highlight"><span class="nv">Part</span><span class="w"></span></code> is a <em>sort</em> and must be defined by adding its name to the <code class="highlight"><span class="k">context-free</span><span class="w"> </span><span class="k">sorts</span><span class="w"></span></code> section on a new line.</p>
 <p>Now we will add syntax productions to <code class="highlight"><span class="nv">Part</span><span class="w"></span></code> to the <code class="highlight"><span class="k">context-free</span><span class="w"> </span><span class="k">syntax</span><span class="w"></span></code> section.
@@ -1028,7 +1151,7 @@ Replace the entire Java file with the following code:</p>
 <h3 id="registering-the-task-definition">Registering the task definition<a class="headerlink" href="#registering-the-task-definition" title="Permanent link">&para;</a></h3>
 <p>We must register this task in order for Spoofax to know about it.
 Open the CFG <code>helloworld/spoofax.cfg</code> file.
-The CFG meta-language is a configuration language where we configure and glue together the various aspects of your language.
+The <a href="../../reference/configuration/">CFG</a> meta-language is a configuration language where we configure and glue together the various aspects of your language.
 Add the following configuration to the end of the file:</p>
 <div class="highlight"><pre><span></span><code><span class="na">let showParsedAst</span> <span class="o">=</span> <span class="s">task-def mb.helloworld.task.HelloWorldShowParsedAst</span>
 </code></pre></div>
@@ -1136,7 +1259,7 @@ Finally, we can run the command by right-clicking the <code>test.hel</code> file
 <h2 id="changing-the-static-semantics">Changing the static semantics<a class="headerlink" href="#changing-the-static-semantics" title="Permanent link">&para;</a></h2>
 <p>Now we will change the static semantics of the language.
 Open the main Statix file <code>helloworld/src/main.stx</code>
-Statix is a meta-language for defining the static semantics of your language, which includes type checking.</p>
+<a href="https://www.spoofax.dev/references/statix/">Statix</a> is a meta-language for defining the static semantics of your language, which includes type checking.</p>
 <p>First we will update the Statix specification to handle the new language constructs.
 Replace the <code class="highlight"><span class="nv">programOk</span><span class="p">(</span><span class="nv">_</span><span class="p">).</span><span class="w"></span></code> line with <code>programOk(Program(parts)) :- partsOk(parts).</code>, meaning that we accept programs consisting of parts, as long as their parts are ok.
 As a silly rule, we will add a warning to all instances of <code>world</code> in the program.
@@ -1169,7 +1292,7 @@ Add the following code to the end of the Statix definition:</p>
 <h2 id="adding-a-transformation">Adding a transformation<a class="headerlink" href="#adding-a-transformation" title="Permanent link">&para;</a></h2>
 <p>Finally, we will define a transformation for our language and add a task, command-tasks, command, and menu item for it.
 Open the main Stratego file <code>helloworld/src/main.str</code>.
-Stratego is a meta-language for defining term (<abbr title="Abstract Syntax Tree">AST</abbr>) transformations through rewrite rules.
+<a href="https://www.spoofax.dev/references/stratego/">Stratego</a>. is a meta-language for defining term (<abbr title="Abstract Syntax Tree">AST</abbr>) transformations through rewrite rules.
 We will add a silly transformation that replaces all instances of <code class="highlight"><span class="nv">World</span><span class=" -Punctuation">()</span><span class="w"></span></code> with <code class="highlight"><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"></span></code>.</p>
 <p>Add the following code to the end of the Stratego file:</p>
 <div class="highlight"><pre><span></span><code><span class="k">rules</span><span class="w"></span>
@@ -1481,6 +1604,8 @@ Right-click the <code>mb.helloworld.task</code> package and create the <code>Hel
 </code></pre></div>
 <p>Build the project so that we can test our changes.
 Test the command similarly to testing the "Show parsed <abbr title="Abstract Syntax Tree">AST</abbr>" command.</p>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<p>Check the <a href="../../guide/eclipse_lwb/troubleshooting/">troubleshooting guide</a> if you run into problems.</p>
                 
               
               
@@ -1518,13 +1643,13 @@ Test the command similarly to testing the "Show parsed <abbr title="Abstract Syn
         </a>
       
       
-        <a href="../../reference/configuration/" class="md-footer__link md-footer__link--next" rel="next">
+        <a href="../../guide/ask_for_help/" class="md-footer__link md-footer__link--next" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Configuration
+              Ask for help
             </div>
           </div>
           <div class="md-footer__button md-icon">
