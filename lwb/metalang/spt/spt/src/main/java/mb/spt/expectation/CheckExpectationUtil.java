@@ -4,8 +4,8 @@ import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Message;
 import mb.common.message.Severity;
 import mb.common.region.Region;
-import mb.spt.model.TestCase;
 import mb.spt.model.SelectionReference;
+import mb.spt.model.TestCase;
 import mb.spt.util.SptSelectionUtil;
 
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ public class CheckExpectationUtil {
             .map(m -> m.region)
             .collect(Collectors.toCollection(ArrayList::new));
         for(SelectionReference selectionReference : selectionReferences) {
-            final Region selection = testCase.testFragment.getSelections().get(selectionReference.selection - 1);
+            final Region selection = testCase.testFragment.getSelections().get(Math.max(0, selectionReference.selection - 1));
             final Iterator<Region> iterator = messageRegions.iterator();
             int count = 0;
             while(iterator.hasNext()) {

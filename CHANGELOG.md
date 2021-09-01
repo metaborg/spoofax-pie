@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 - Restructure troubleshooting documentation.
 
+### Fixed
+- IndexOutOfBoundsException in SPT when selection reference `#0` is used.
+
 ## [0.11.0]
 ### Added
 - Duplicate sort definition check in SDF3.
