@@ -1,27 +1,20 @@
 # Troubleshooting
 
 This how-to guide explains how to troubleshoot issues when building and testing languages in the Spoofax Eclipse LWB plugin.
-Try to resolve your problem by going through this guide from top to bottom.
 
-## Looking for and solving errors
+## Diagnosing problems
+
+### Looking for errors
 
 If something is not working as expected, the first thing to check is whether there are errors in the project by looking in the <span class="guilabel">Project Explorer</span> or <span class="guilabel">Package Explorer</span> view, which is open on the left-hand side of the IDE by default.
 If there are any red markers on the project, or any directory or file in the project, that indicates an error.
 
 When there are errors on files that define your language (e.g., .cfg/.sdf3/.stx/.str2 files), the language is not compiled and reloaded, so building the language has no effect, and your change will not be taken into account.
 Errors on example and test (e.g., .spt) files are ok, and do not prevent the language from being compiled and reloaded.
-If there are errors on language definition files, solve them build the language.
 
 It is also possible to get a list of all the errors in the project by opening the <span class="guilabel">Problems</span> view. If this view is not open, open it by choosing <span class="guilabel">Window ‣ Show view ‣ Problems</span> from the main menu.
 
-If there are errors in generated files (i.e., files in the `build/generated` directory), first try to build the language, as building the language may re-generate these files.
-If the error persists, try deleting the generated file and then building the language.
-Also consider [reporting this bug](../report_a_bug.md), as we consider incrementality issues like these bugs.
-
-If after deleting the generated file and rebuilding the language, the generated file comes back with errors, definitely [report this as a bug](../report_a_bug.md).
-You can try to look at the error in the generated file and see if you can solve it.
-
-## Consulting the logs
+### Consulting the logs
 
 Spoofax logs a lot of information to make troubleshooting easier.
 First consult the <span class="guilabel">Error Log</span> view.
@@ -32,7 +25,7 @@ Most errors include stack traces, which help the Spoofax developers immensely in
 Browse through the errors from Spoofax plugins to see if it can help you troubleshoot the problem.
 
 If nothing relevant is in the error log, try to consult the <span class="guilabel">Console</span> view.
-If this view is not open, open it by choosing <span class="guilabel">Window ‣ Show view ‣ Other...‣ search for Console, choose Console and open it</span> from the main menu.
+If this view is not open, open it by choosing <span class="guilabel">Window ‣ Show view ‣ Other... ‣ search for Console ‣ choose Console and open it</span> from the main menu.
 
 ![Spoofax console select screenshot](../../assets/spoofax_console_select.png){ align=right width=250 }
 If the console view does not say `Spoofax` in the top-left corner, ensure the `Spoofax` console is open by pressing the small downward error on the blue monitor icon and selecting `Spoofax console` (see screenshot).
@@ -44,7 +37,31 @@ Rebuild your language and check the build log to see if it can help you troubles
 
 If you ask for help or report a bug, consider storing the log in a text file, so you can include it in your help request or bug report.
 
-## Cleaning the language project
+## Problems and solutions
+
+### Errors in language definition files
+
+Error markers in language definition files (e.g., .cfg/.sdf3/.stx/.str2 files) are expected.
+If there are errors on language definition files, solve them build the language.
+
+### Errors in generated files
+
+If there are errors in generated files (i.e., files in the `build/generated` directory), first try to build the language, as building the language may re-generate these files.
+If the error persists, try deleting the generated file and then building the language.
+Also consider [reporting this bug](../report_a_bug.md), as we consider incrementality issues like these bugs.
+
+If after deleting the generated file and rebuilding the language, the generated file comes back with errors, definitely [report this as a bug](../report_a_bug.md).
+Try to work around the problem first by [cleaning the language project](#clean_project) or by [deleting on-disk cache and restarting Eclipse](#clean_cache)
+
+### Errors occurred during the build
+
+If after building a language, an error popup appears, something unexpected went wrong.
+Please [report this as a bug](../report_a_bug.md).
+Try to work around the problem first by [cleaning the language project](#clean_project) or by [deleting on-disk cache and restarting Eclipse](#clean_cache)
+
+## Workarounds
+
+### Cleaning the language project {: #clean_project }
 
 Try cleaning the language project by first selecting (clicking) the language project in the <span class="guilabel">Project Explorer</span> or <span class="guilabel">Package Explorer</span> view, and then choosing <span class="guilabel">Project ‣ Clean...</span> from the main menu.
 In the clean window, deselect <span class="guilabel">Clean all projects</span>, select your project, and press <span class="guilabel">Clean</span>.
@@ -53,8 +70,9 @@ Then, rebuild your language.
 Optionally, check the error log and console again.
 
 If this solves your problem, consider [reporting this bug](../report_a_bug.md), as we consider incrementality issues like these bugs.
+If not, try the next workaround.
 
-## Deleting on-disk cache and restarting Eclipse
+### Deleting on-disk cache and restarting Eclipse {: #clean_cache }
 
 Finally, there may be a problem related to the on-disk cache.
 First, close Eclipse.
@@ -65,6 +83,7 @@ Then, start Eclipse again and build your language.
 Optionally, check the error log and console again.
 
 If this solves your problem, consider [reporting this bug](../report_a_bug.md), as we consider incrementality issues like these bugs.
+If not, [ask for help](../ask_for_help.md).
 
 ## Report a bug or ask for help
 

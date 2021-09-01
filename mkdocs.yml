@@ -9,8 +9,7 @@ nav:
   - How-to Guides:
       - guide/ask_for_help.md
       - guide/report_a_bug.md
-      - Eclipse LWB plugin:
-          - guide/eclipse_lwb/troubleshooting.md
+      - guide/eclipse_lwb/troubleshooting.md
   - Reference:
       - reference/configuration.md
   - Background:
