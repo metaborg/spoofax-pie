@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+
+## [0.11.1]
 ### Added
 - Show parsed AST and tokens debugging tasks/commands/menus generated for each language.
 - Show analyzed AST debugging tasks/commands/menus generated for each language.
@@ -34,5 +36,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Removed
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.0...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.1...HEAD
+[0.11.1]: https://github.com/metaborg/spoofax-pie/compare/release-0.10.0...release-0.11.1
 [0.11.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.10.0...release-0.11.0
