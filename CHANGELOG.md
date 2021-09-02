@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Update resource dependency to 0.11.5.
 - Update common dependency to 0.9.3.
 - Update pie dependency to 0.16.6.
+- Menus with the same display name are merged into one.
 
 ### Fixed
 - IndexOutOfBoundsException in SPT when selection reference `#0` is used.

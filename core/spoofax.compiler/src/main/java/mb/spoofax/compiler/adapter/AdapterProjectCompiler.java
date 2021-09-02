@@ -25,7 +25,6 @@ import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
 import mb.spoofax.compiler.util.TypeInfoCollection;
 import mb.spoofax.compiler.util.UniqueNamer;
-import mb.spoofax.core.language.menu.MenuItem;
 import mb.spoofax.core.language.taskdef.NoneHoverTaskDef;
 import mb.spoofax.core.language.taskdef.NoneResolveTaskDef;
 import mb.spoofax.core.language.taskdef.NoneStyler;
@@ -352,7 +351,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
                 out.write(name);
             });
 
-            // injections for testing language features with SPT
+            // Injections for testing language features with SPT.
             if(input.strategoRuntime().isPresent() && input.parser().isPresent()) {
                 final NamedTypeInfo testStrategoInjection = uniqueNamer.makeUnique(input.testStrategoTaskDef());
                 map.put("testStrategoInjection", testStrategoInjection);
@@ -368,7 +367,8 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
                 map.put("analyzeInjection", false);
             }
 
-            // Menu items
+            // Menu items.
+            allMenuItems.deduplicateMenus(); // First deduplicate menu items.
             map.put("allMainMenuItems", allMenuItems.getMainMenuItems());
             map.put("allResourceContextMenuItems", allMenuItems.getResourceContextMenuItems());
             map.put("allEditorContextMenuItems", allMenuItems.getEditorContextMenuItems());
