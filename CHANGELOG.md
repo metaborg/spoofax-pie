@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Added
+- Show parsed AST and tokens debugging tasks/commands/menus generated for each language.
+
 ### Changed
 - Restructure troubleshooting documentation.
 - Update resource dependency to 0.11.5.

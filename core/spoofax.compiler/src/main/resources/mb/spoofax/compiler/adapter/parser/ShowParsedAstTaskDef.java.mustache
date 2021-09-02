@@ -1,0 +1,27 @@
+package {{baseShowParsedAstTaskDef.packageId}};
+
+import mb.jsglr.pie.ShowParsedAstTaskDef;
+import mb.pie.api.ExecContext;
+import mb.pie.api.stamp.resource.ResourceStampers;
+import mb.spoofax.core.language.command.CommandFeedback;
+
+import javax.inject.Inject;
+
+@{{adapterProject.scope.qualifiedId}}
+public class {{baseShowParsedAstTaskDef.id}} extends ShowParsedAstTaskDef {
+    private final {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources;
+
+    @Inject public {{baseShowParsedAstTaskDef.id}}({{parseTaskDef.qualifiedId}} parse, {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources) {
+        super(parse);
+        this.classLoaderResources = classLoaderResources;
+    }
+
+    @Override public String getId() {
+        return "{{baseShowParsedAstTaskDef.qualifiedId}}";
+    }
+
+    @Override public CommandFeedback exec(ExecContext context, Args args) throws Exception {
+        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+        return super.exec(context, args);
+    }
+}

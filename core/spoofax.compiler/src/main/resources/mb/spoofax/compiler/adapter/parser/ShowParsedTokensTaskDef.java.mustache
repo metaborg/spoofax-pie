@@ -1,0 +1,27 @@
+package {{baseShowParsedTokensTaskDef.packageId}};
+
+import mb.jsglr.pie.ShowParsedTokensTaskDef;
+import mb.pie.api.ExecContext;
+import mb.pie.api.stamp.resource.ResourceStampers;
+import mb.spoofax.core.language.command.CommandFeedback;
+
+import javax.inject.Inject;
+
+@{{adapterProject.scope.qualifiedId}}
+public class {{baseShowParsedTokensTaskDef.id}} extends ShowParsedTokensTaskDef {
+    private final {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources;
+
+    @Inject public {{baseShowParsedTokensTaskDef.id}}({{parseTaskDef.qualifiedId}} parse, {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources) {
+        super(parse);
+        this.classLoaderResources = classLoaderResources;
+    }
+
+    @Override public String getId() {
+        return "{{baseShowParsedTokensTaskDef.qualifiedId}}";
+    }
+
+    @Override public CommandFeedback exec(ExecContext context, Args args) throws Exception {
+        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+        return super.exec(context, args);
+    }
+}

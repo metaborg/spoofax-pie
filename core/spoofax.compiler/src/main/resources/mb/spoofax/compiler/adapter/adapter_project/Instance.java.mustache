@@ -144,25 +144,25 @@ public class {{baseInstance.id}} implements LanguageInstance
 
     @Override public ListView<MenuItem> getMainMenuItems() {
         return ListView.of(
-{{#mainMenuItems}}
+{{#allMainMenuItems}}
             {{>adapter_project/partial/MenuItem.mustache}}{{^-last}},{{/-last}}
-{{/mainMenuItems}}
+{{/allMainMenuItems}}
         );
     }
 
     @Override public ListView<MenuItem> getResourceContextMenuItems() {
         return ListView.of(
-{{#resourceContextMenuItems}}
+{{#allResourceContextMenuItems}}
             {{>adapter_project/partial/MenuItem.mustache}}{{^-last}},{{/-last}}
-{{/resourceContextMenuItems}}
+{{/allResourceContextMenuItems}}
         );
     }
 
     @Override public ListView<MenuItem> getEditorContextMenuItems() {
         return ListView.of(
-{{#editorContextMenuItems}}
+{{#allEditorContextMenuItems}}
             {{>adapter_project/partial/MenuItem.mustache}}{{^-last}},{{/-last}}
-{{/editorContextMenuItems}}
+{{/allEditorContextMenuItems}}
         );
     }
 
