@@ -38,7 +38,7 @@ public abstract class ShowParsedTokensTaskDef implements TaskDef<ShowParsedToken
 
         @Override
         public String toString() {
-            return "Args{" + "file=" + file + '}';
+            return "ShowParsedTokensTaskDef.Args{" + "file=" + file + '}';
         }
     }
 

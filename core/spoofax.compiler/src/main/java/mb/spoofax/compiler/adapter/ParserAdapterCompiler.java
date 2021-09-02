@@ -194,6 +194,21 @@ public class ParserAdapterCompiler implements TaskDef<ParserAdapterCompiler.Inpu
         }
 
 
+        /// Collection methods
+
+        default void collectInto(TypeInfoCollection taskDefs, Collection<CommandDefRepr> commands, MenuItemCollection menuItems) {
+            taskDefs.add(tokenizeTaskDef(), baseTokenizeTaskDef());
+            taskDefs.add(parseTaskDef(), baseParseTaskDef());
+            taskDefs.add(showParsedAstTaskDef(), baseShowParsedAstTaskDef());
+            commands.add(showParsedAstCommand());
+            taskDefs.add(showParsedTokensTaskDef(), baseShowParsedTokensTaskDef());
+            commands.add(showParsedTokensCommand());
+            menuItems.addMainMenuItem(mainMenu());
+            menuItems.addResourceContextMenuItem(resourceContextMenu());
+            menuItems.addEditorContextMenuItem(editorContextMenu());
+        }
+
+
         /// Files information, known up-front for build systems with static dependencies such as Gradle.
 
         default ListView<ResourcePath> javaSourceFiles() {
@@ -207,21 +222,6 @@ public class ParserAdapterCompiler implements TaskDef<ParserAdapterCompiler.Inpu
                 baseShowParsedAstTaskDef().file(generatedJavaSourcesDirectory),
                 baseShowParsedTokensTaskDef().file(generatedJavaSourcesDirectory)
             );
-        }
-
-
-        /// Collection methods
-
-        default void collectInto(TypeInfoCollection taskDefs, Collection<CommandDefRepr> commands, MenuItemCollection menuItems) {
-            taskDefs.add(tokenizeTaskDef(), baseTokenizeTaskDef());
-            taskDefs.add(parseTaskDef(), baseParseTaskDef());
-            taskDefs.add(showParsedAstTaskDef(), baseShowParsedAstTaskDef());
-            commands.add(showParsedAstCommand());
-            taskDefs.add(showParsedTokensTaskDef(), baseShowParsedTokensTaskDef());
-            commands.add(showParsedTokensCommand());
-            menuItems.addMainMenuItem(mainMenu());
-            menuItems.addResourceContextMenuItem(resourceContextMenu());
-            menuItems.addEditorContextMenuItem(editorContextMenu());
         }
 
 

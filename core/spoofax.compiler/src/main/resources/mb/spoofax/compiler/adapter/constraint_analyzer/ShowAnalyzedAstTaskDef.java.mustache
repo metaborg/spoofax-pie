@@ -1,0 +1,27 @@
+package {{baseShowAnalyzedAstTaskDef.packageId}};
+
+import mb.constraint.pie.ShowAnalyzedAstTaskDef;
+import mb.pie.api.ExecContext;
+import mb.pie.api.stamp.resource.ResourceStampers;
+import mb.spoofax.core.language.command.CommandFeedback;
+
+import javax.inject.Inject;
+
+@{{adapterProject.scope.qualifiedId}}
+public class {{baseShowAnalyzedAstTaskDef.id}} extends ShowAnalyzedAstTaskDef {
+    private final {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources;
+
+    @Inject public {{baseShowAnalyzedAstTaskDef.id}}({{analyzeFileTaskDef.qualifiedId}} analyzeFile, {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources) {
+        super(analyzeFile);
+        this.classLoaderResources = classLoaderResources;
+    }
+
+    @Override public String getId() {
+        return "{{baseShowAnalyzedAstTaskDef.qualifiedId}}";
+    }
+
+    @Override public CommandFeedback exec(ExecContext context, Args args) throws Exception {
+        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+        return super.exec(context, args);
+    }
+}

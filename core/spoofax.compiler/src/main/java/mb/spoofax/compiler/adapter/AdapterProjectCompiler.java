@@ -166,9 +166,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             allTaskDefs.add(i.getStrategoRuntimeProviderTaskDef(), i.baseGetStrategoRuntimeProviderTaskDef());
         });
         input.constraintAnalyzer().ifPresent((i) -> {
-            allTaskDefs.add(i.analyzeTaskDef(), i.baseAnalyzeTaskDef());
-            allTaskDefs.add(i.analyzeMultiTaskDef(), i.baseAnalyzeMultiTaskDef());
-            allTaskDefs.add(i.analyzeFileTaskDef(), i.baseAnalyzeFileTaskDef());
+            i.collectInto(allTaskDefs, allCommandDefs, allMenuItems);
         });
         input.multilangAnalyzer().ifPresent((i) -> {
             allTaskDefs.add(i.analyzeTaskDef(), i.baseAnalyzeTaskDef());

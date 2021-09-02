@@ -36,7 +36,7 @@ public abstract class ShowParsedAstTaskDef implements TaskDef<ShowParsedAstTaskD
 
         @Override
         public String toString() {
-            return "Args{" + "file=" + file + '}';
+            return "ShowParsedAstTaskDef.Args{" + "file=" + file + '}';
         }
     }
 
