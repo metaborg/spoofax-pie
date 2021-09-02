@@ -37,5 +37,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 [Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.1...HEAD
-[0.11.1]: https://github.com/metaborg/spoofax-pie/compare/release-0.10.0...release-0.11.1
+[0.11.1]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.0...release-0.11.1
 [0.11.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.10.0...release-0.11.0
