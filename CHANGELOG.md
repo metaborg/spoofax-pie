@@ -2,6 +2,9 @@
 All notable changes to this project are documented in this file, based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+
+
+## [0.11.3] - 2021-09-03
 ### Fixed
 - Prefix generated commands with language's Java class prefix.
 
@@ -9,9 +12,11 @@ All notable changes to this project are documented in this file, based on [Keep 
 - Show scope graph debugging task/commands/menus generated for each language (that uses Statix).
 - Show pre-analyze AST debugging task/commands/menus generated for each language (that uses Statix).
 
+
 ## [0.11.2] - 2021-09-03
 ### Removed
 - `strategolib` import from template.
+
 
 ## [0.11.1] - 2021-09-02
 ### Added
@@ -27,6 +32,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 ### Fixed
 - IndexOutOfBoundsException in SPT when selection reference `#0` is used.
+
 
 ## [0.11.0] - 2021-08-31
 ### Added
@@ -44,7 +50,9 @@ All notable changes to this project are documented in this file, based on [Keep 
 ### Removed
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.2...HEAD
+
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.3...HEAD
+[0.11.3]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.2...release-0.11.3
 [0.11.2]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.1...release-0.11.2
 [0.11.1]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.0...release-0.11.1
 [0.11.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.10.0...release-0.11.0
