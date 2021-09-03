@@ -10,6 +10,7 @@ dependencies {
   api(project(":statix.common"))
   api(project(":spoofax.core"))
   api(project(":constraint.pie"))
+  api(project(":jsglr.pie"))
   api(project(":stratego.pie"))
   api("org.metaborg:pie.api")
 

@@ -6,7 +6,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 - Prefix generated commands with language's Java class prefix.
 
 ### Added
-- Show scope graph debugging task/commands/menus generated for each language.
+- Show scope graph debugging task/commands/menus generated for each language (that uses Statix).
+- Show pre-analyze AST debugging task/commands/menus generated for each language (that uses Statix).
 
 ## [0.11.2] - 2021-09-03
 ### Removed

@@ -64,9 +64,9 @@ public abstract class ShowScopeGraphTaskDef implements TaskDef<ShowScopeGraphTas
 
 
     @Override @SuppressWarnings("RedundantThrows")
-    public CommandFeedback exec(ExecContext context, Args input) throws Exception {
-        final ResourcePath rootDirectory = input.rootDirectory;
-        final ResourceKey file = input.file;
+    public CommandFeedback exec(ExecContext context, Args args) throws Exception {
+        final ResourcePath rootDirectory = args.rootDirectory;
+        final ResourceKey file = args.file;
         return context.require(analyzeFile, new ConstraintAnalyzeFile.Input(rootDirectory, file)).mapOrElse(
             output -> {
                 final StrategoRuntime strategoRuntime = context.require(getStrategoRuntimeProvider, None.instance).getValue().get().addContextObject(output.context);
