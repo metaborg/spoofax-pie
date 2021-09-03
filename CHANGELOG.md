@@ -1,18 +1,21 @@
 # Changelog
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+All notable changes to this project are documented in this file, based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Fixed
+- Prefix generated commands with language's Java class prefix.
+
+### Added
+- Show scope graph debugging task/commands/menus generated for each language.
 
 ## [0.11.2] - 2021-09-03
 ### Removed
-- Removed `strategolib` import from template.
+- `strategolib` import from template.
 
 ## [0.11.1] - 2021-09-02
 ### Added
 - Show parsed AST and tokens debugging tasks/commands/menus generated for each language.
-- Show analyzed AST debugging tasks/commands/menus generated for each language.
+- Show analyzed AST debugging task/commands/menus generated for each language.
 
 ### Changed
 - Restructure troubleshooting documentation.

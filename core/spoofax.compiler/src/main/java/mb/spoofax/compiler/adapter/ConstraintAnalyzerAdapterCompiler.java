@@ -29,6 +29,7 @@ import org.immutables.value.Value;
 
 import javax.inject.Inject;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
@@ -40,6 +41,7 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
     private final TemplateWriter analyzeMultiTaskDefTemplate;
     private final TemplateWriter analyzeFileTaskDefTemplate;
     private final TemplateWriter showAnalyzedAstTaskDef;
+    private final TemplateWriter showScopeGraphTaskDef;
 
     @Inject public ConstraintAnalyzerAdapterCompiler(TemplateCompiler templateCompiler) {
         templateCompiler = templateCompiler.loadingFromClass(getClass());
@@ -47,6 +49,7 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
         this.analyzeMultiTaskDefTemplate = templateCompiler.getOrCompileToWriter("constraint_analyzer/AnalyzeMultiTaskDef.java.mustache");
         this.analyzeFileTaskDefTemplate = templateCompiler.getOrCompileToWriter("constraint_analyzer/AnalyzeFileTaskDef.java.mustache");
         this.showAnalyzedAstTaskDef = templateCompiler.getOrCompileToWriter("constraint_analyzer/ShowAnalyzedAstTaskDef.java.mustache");
+        this.showScopeGraphTaskDef = templateCompiler.getOrCompileToWriter("constraint_analyzer/ShowScopeGraphTaskDef.java.mustache");
     }
 
 
@@ -61,6 +64,9 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
         analyzeMultiTaskDefTemplate.write(context, input.baseAnalyzeMultiTaskDef().file(generatedJavaSourcesDirectory), input);
         analyzeFileTaskDefTemplate.write(context, input.baseAnalyzeFileTaskDef().file(generatedJavaSourcesDirectory), input);
         showAnalyzedAstTaskDef.write(context, input.baseShowAnalyzedAstTaskDef().file(generatedJavaSourcesDirectory), input);
+        if(input.languageProjectInput().enableStatix()) {
+            showScopeGraphTaskDef.write(context, input.baseShowScopeGraphTaskDef().file(generatedJavaSourcesDirectory), input);
+        }
         return None.instance;
     }
 
@@ -74,7 +80,12 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
 
 
     public ListView<GradleConfiguredDependency> getDependencies(Input input) {
-        return ListView.of(GradleConfiguredDependency.api(input.shared().constraintPieDep()));
+        final ArrayList<GradleConfiguredDependency> dependencies = new ArrayList<>();
+        dependencies.add(GradleConfiguredDependency.api(input.shared().constraintPieDep()));
+        if(input.languageProjectInput().enableStatix()) {
+            dependencies.add(GradleConfiguredDependency.api(input.shared().statixPieDep()));
+        }
+        return ListView.of(dependencies);
     }
 
 
@@ -145,12 +156,35 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
 
         @Value.Default default CommandDefRepr showAnalyzedAstCommand() {
             return CommandDefRepr.builder()
-                .type(adapterProject().commandPackageId(), "ShowAnalyzedAstCommand")
+                .type(adapterProject().commandPackageId(), shared().defaultClassPrefix() + "ShowAnalyzedAstCommand")
                 .taskDefType(showAnalyzedAstTaskDef())
                 .displayName("Show analyzed AST")
                 .description("Shows the analyzed AST")
                 .addParams("rootDirectory", TypeInfo.of(ResourcePath.class), true, Optional.empty(), Collections.singletonList(ArgProviderRepr.enclosingContext(EnclosingCommandContextType.Project)))
                 .addParams("file", TypeInfo.of(ResourceKey.class), true, Optional.empty(), Collections.singletonList(ArgProviderRepr.context(CommandContextType.ReadableResource)))
+                .build();
+        }
+
+        // Show scope graph task definition and command
+
+        @Value.Default default TypeInfo baseShowScopeGraphTaskDef() {
+            return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "ShowScopeGraph");
+        }
+
+        Optional<TypeInfo> extendShowScopeGraphTaskDef();
+
+        default TypeInfo showScopeGraphTaskDef() {
+            return extendShowScopeGraphTaskDef().orElseGet(this::baseShowScopeGraphTaskDef);
+        }
+
+        @Value.Default default CommandDefRepr showScopeGraphCommand() {
+            return CommandDefRepr.builder()
+                .type(adapterProject().commandPackageId(), shared().defaultClassPrefix() + "ShowScopeGraphCommand")
+                .taskDefType(showScopeGraphTaskDef())
+                .displayName("Show scope graph")
+                .description("Shows the scope graph")
+                .addParams("rootDirectory", TypeInfo.of(ResourcePath.class), true, Optional.empty(), Collections.singletonList(ArgProviderRepr.enclosingContext(EnclosingCommandContextType.Project)))
+                .addParams("file", TypeInfo.of(ResourcePath.class), true, Optional.empty(), Collections.singletonList(ArgProviderRepr.context(CommandContextType.ReadableResource)))
                 .build();
         }
 
@@ -162,17 +196,25 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
         }
 
         @Value.Default default MenuItemRepr resourceContextMenu() {
-            return MenuItemRepr.menu("Debug",
-                MenuItemRepr.commandAction(CommandActionRepr.builder().manualOnce(showAnalyzedAstCommand()).addRequiredResourceTypes(HierarchicalResourceType.File).enclosingProjectRequired().build()),
-                MenuItemRepr.commandAction(CommandActionRepr.builder().manualContinuous(showAnalyzedAstCommand()).addRequiredResourceTypes(HierarchicalResourceType.File).enclosingProjectRequired().build())
-            );
+            final ArrayList<MenuItemRepr> menuItems = new ArrayList<>();
+            menuItems.add(MenuItemRepr.commandAction(CommandActionRepr.builder().manualOnce(showAnalyzedAstCommand()).addRequiredResourceTypes(HierarchicalResourceType.File).enclosingProjectRequired().build()));
+            menuItems.add(MenuItemRepr.commandAction(CommandActionRepr.builder().manualContinuous(showAnalyzedAstCommand()).addRequiredResourceTypes(HierarchicalResourceType.File).enclosingProjectRequired().build()));
+            if(languageProjectInput().enableStatix()) {
+                menuItems.add(MenuItemRepr.commandAction(CommandActionRepr.builder().manualOnce(showScopeGraphCommand()).addRequiredResourceTypes(HierarchicalResourceType.File).enclosingProjectRequired().build()));
+                menuItems.add(MenuItemRepr.commandAction(CommandActionRepr.builder().manualContinuous(showScopeGraphCommand()).addRequiredResourceTypes(HierarchicalResourceType.File).enclosingProjectRequired().build()));
+            }
+            return MenuItemRepr.menu("Debug", menuItems);
         }
 
         @Value.Default default MenuItemRepr editorContextMenu() {
-            return MenuItemRepr.menu("Debug",
-                MenuItemRepr.commandAction(CommandActionRepr.builder().manualOnce(showAnalyzedAstCommand()).addRequiredEditorFileTypes(EditorFileType.ReadableResource).enclosingProjectRequired().build()),
-                MenuItemRepr.commandAction(CommandActionRepr.builder().manualContinuous(showAnalyzedAstCommand()).addRequiredEditorFileTypes(EditorFileType.ReadableResource).enclosingProjectRequired().build())
-            );
+            final ArrayList<MenuItemRepr> menuItems = new ArrayList<>();
+            menuItems.add(MenuItemRepr.commandAction(CommandActionRepr.builder().manualOnce(showAnalyzedAstCommand()).addRequiredEditorFileTypes(EditorFileType.ReadableResource).enclosingProjectRequired().build()));
+            menuItems.add(MenuItemRepr.commandAction(CommandActionRepr.builder().manualContinuous(showAnalyzedAstCommand()).addRequiredEditorFileTypes(EditorFileType.ReadableResource).enclosingProjectRequired().build()));
+            if(languageProjectInput().enableStatix()) {
+                menuItems.add(MenuItemRepr.commandAction(CommandActionRepr.builder().manualOnce(showScopeGraphCommand()).addRequiredEditorFileTypes(EditorFileType.ReadableResource).enclosingProjectRequired().build()));
+                menuItems.add(MenuItemRepr.commandAction(CommandActionRepr.builder().manualContinuous(showScopeGraphCommand()).addRequiredEditorFileTypes(EditorFileType.ReadableResource).enclosingProjectRequired().build()));
+            }
+            return MenuItemRepr.menu("Debug", menuItems);
         }
 
 
@@ -188,6 +230,10 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
             taskDefs.add(analyzeFileTaskDef(), baseAnalyzeFileTaskDef());
             taskDefs.add(showAnalyzedAstTaskDef(), baseShowAnalyzedAstTaskDef());
             commands.add(showAnalyzedAstCommand());
+            if(languageProjectInput().enableStatix()) {
+                taskDefs.add(showScopeGraphTaskDef(), baseShowScopeGraphTaskDef());
+                commands.add(showScopeGraphCommand());
+            }
             menuItems.addMainMenuItem(mainMenu());
             menuItems.addResourceContextMenuItem(resourceContextMenu());
             menuItems.addEditorContextMenuItem(editorContextMenu());
@@ -201,12 +247,14 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
                 return ListView.of();
             }
             final ResourcePath generatedJavaSourcesDirectory = generatedJavaSourcesDirectory();
-            return ListView.of(
-                baseAnalyzeTaskDef().file(generatedJavaSourcesDirectory),
-                baseAnalyzeMultiTaskDef().file(generatedJavaSourcesDirectory),
-                baseAnalyzeFileTaskDef().file(generatedJavaSourcesDirectory),
-                baseShowAnalyzedAstTaskDef().file(generatedJavaSourcesDirectory)
-            );
+            final ArrayList<ResourcePath> javaSourceFiles = new ArrayList<>();
+            javaSourceFiles.add(baseAnalyzeTaskDef().file(generatedJavaSourcesDirectory));
+            javaSourceFiles.add(baseAnalyzeMultiTaskDef().file(generatedJavaSourcesDirectory));
+            javaSourceFiles.add(baseAnalyzeFileTaskDef().file(generatedJavaSourcesDirectory));
+            if(languageProjectInput().enableStatix()) {
+                javaSourceFiles.add(baseShowAnalyzedAstTaskDef().file(generatedJavaSourcesDirectory));
+            }
+            return ListView.of(javaSourceFiles);
         }
 
 

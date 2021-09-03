@@ -138,7 +138,7 @@ public class ParserAdapterCompiler implements TaskDef<ParserAdapterCompiler.Inpu
 
         @Value.Default default CommandDefRepr showParsedAstCommand() {
             return CommandDefRepr.builder()
-                .type(adapterProject().commandPackageId(), "ShowParsedAstCommand")
+                .type(adapterProject().commandPackageId(), shared().defaultClassPrefix() + "ShowParsedAstCommand")
                 .taskDefType(showParsedAstTaskDef())
                 .displayName("Show parsed AST")
                 .description("Shows the parsed AST")
@@ -160,7 +160,7 @@ public class ParserAdapterCompiler implements TaskDef<ParserAdapterCompiler.Inpu
 
         @Value.Default default CommandDefRepr showParsedTokensCommand() {
             return CommandDefRepr.builder()
-                .type(adapterProject().commandPackageId(), "ShowParsedTokensCommand")
+                .type(adapterProject().commandPackageId(), shared().defaultClassPrefix() + "ShowParsedTokensCommand")
                 .taskDefType(showParsedTokensTaskDef())
                 .displayName("Show parsed tokens")
                 .description("Shows the parsed tokens")

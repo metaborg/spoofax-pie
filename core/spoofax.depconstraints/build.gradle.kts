@@ -36,16 +36,19 @@ dependencies {
     api(project(":constraint.common"))
     api(project(":nabl2.common"))
     api(project(":statix.common"))
+    api(project(":statix.pie"))
     api(project(":statix.multilang"))
     api(project(":spoofax2.common"))
+    api(project(":tooling.eclipsebundle"))  // TODO: bundle versions are not picked up when consuming this platform?
 
     api(project(":spoofax.core"))
     api(project(":spoofax.cli"))
     api(project(":spoofax.intellij"))
-    api(project(":spoofax.eclipse")) // TODO: bundle versions are not picked up when consuming this platform
+    api(project(":spoofax.eclipse")) // TODO: bundle versions are not picked up when consuming this platform?
     api(project(":spoofax.compiler"))
     api(project(":spoofax.compiler.interfaces"))
     api(project(":spoofax.compiler.gradle"))
+    api(project(":spoofax.compiler.eclipsebundle"))  // TODO: bundle versions are not picked up when consuming this platform?
 
 
     // Main dependencies

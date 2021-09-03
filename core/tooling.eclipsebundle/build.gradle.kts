@@ -24,6 +24,7 @@ dependencies {
   bundleEmbedApi(project(":nabl2.common"))
   bundleEmbedApi(project(":spoofax2.common"))
   bundleEmbedApi(project(":statix.common"))
+  bundleEmbedApi(project(":statix.pie"))
   bundleEmbedApi(project(":stratego.common"))
   bundleEmbedApi(project(":stratego.pie"))
   bundleEmbedApi(project(":spt.api"))
