@@ -5,7 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-## [0.11.1]
+## [0.11.2] - 2021-09-03
+### Removed
+- Removed `strategolib` import from template.
+
+## [0.11.1] - 2021-09-02
 ### Added
 - Show parsed AST and tokens debugging tasks/commands/menus generated for each language.
 - Show analyzed AST debugging tasks/commands/menus generated for each language.
@@ -20,7 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 - IndexOutOfBoundsException in SPT when selection reference `#0` is used.
 
-## [0.11.0]
+## [0.11.0] - 2021-08-31
 ### Added
 - Duplicate sort definition check in SDF3.
 - `reference-resolution` and `hover` sections in language CFG file, promoted from subsections inside `editor-services` section.
@@ -36,6 +40,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Removed
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.1...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.2...HEAD
+[0.11.2]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.1...release-0.11.2
 [0.11.1]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.0...release-0.11.1
 [0.11.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.10.0...release-0.11.0
