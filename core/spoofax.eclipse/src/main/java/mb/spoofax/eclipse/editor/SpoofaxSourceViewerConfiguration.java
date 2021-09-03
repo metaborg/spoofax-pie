@@ -21,11 +21,17 @@ public class SpoofaxSourceViewerConfiguration extends TextSourceViewerConfigurat
     private final @Nullable LanguageComponent languageComponent;
     private final @Nullable PieComponent pieComponent;
 
+
     public SpoofaxSourceViewerConfiguration(SpoofaxEditorBase editorBase, @Nullable LanguageComponent languageComponent, @Nullable PieComponent pieComponent) {
         this.editorBase = editorBase;
         this.languageComponent = languageComponent;
         this.pieComponent = pieComponent;
     }
+
+    public SpoofaxSourceViewerConfiguration(SpoofaxEditorBase editorBase) {
+        this(editorBase, null, null);
+    }
+
 
     @Override public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType) {
         return new SpoofaxTextHover(sourceViewer, editorBase, languageComponent, pieComponent);

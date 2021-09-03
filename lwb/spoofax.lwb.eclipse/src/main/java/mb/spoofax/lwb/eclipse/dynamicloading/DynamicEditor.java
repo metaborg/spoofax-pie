@@ -86,19 +86,13 @@ public class DynamicEditor extends SpoofaxEditorBase {
     }
 
     @Override protected SourceViewerConfiguration createSourceViewerConfiguration() {
-        final @Nullable EclipseDynamicLanguage language;
-
-        if(input == null || document == null || file == null || languageId == null) {
-            language = null;
-        } else {
-            language = (EclipseDynamicLanguage)languageRegistry.getLanguageForId(languageId);
+        if(languageId != null) {
+            final @Nullable DynamicLanguage language = languageRegistry.getLanguageForId(languageId);
+            if(language != null) {
+                return new SpoofaxSourceViewerConfiguration(this, language.getLanguageComponent(), language.getPieComponent());
+            }
         }
-
-        return new SpoofaxSourceViewerConfiguration(
-            this,
-            language == null ? null : language.getLanguageComponent(),
-            language == null ? null : language.getPieComponent()
-        );
+        return new SpoofaxSourceViewerConfiguration(this);
     }
 
     private void setLanguageId() {
