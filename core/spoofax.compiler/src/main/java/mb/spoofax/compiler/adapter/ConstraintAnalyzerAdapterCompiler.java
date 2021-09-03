@@ -255,24 +255,26 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
 
         /// Collection methods
 
-        default void collectInto(
-            TypeInfoCollection taskDefs,
-            Collection<CommandDefRepr> commands,
-            MenuItemCollection menuItems
-        ) {
+        default void collectTaskDefs(TypeInfoCollection taskDefs) {
             taskDefs.add(analyzeTaskDef(), baseAnalyzeTaskDef());
             taskDefs.add(analyzeMultiTaskDef(), baseAnalyzeMultiTaskDef());
             taskDefs.add(analyzeFileTaskDef(), baseAnalyzeFileTaskDef());
             if(languageProjectInput().enableStatix()) {
                 taskDefs.add(showPreAnalyzeAstTaskDef(), baseShowPreAnalyzeAstTaskDef());
-                commands.add(showPreAnalyzeAstCommand());
+                taskDefs.add(showScopeGraphTaskDef(), baseShowScopeGraphTaskDef());
             }
             taskDefs.add(showAnalyzedAstTaskDef(), baseShowAnalyzedAstTaskDef());
-            commands.add(showAnalyzedAstCommand());
+        }
+
+        default void collectCommands(Collection<CommandDefRepr> commands) {
             if(languageProjectInput().enableStatix()) {
-                taskDefs.add(showScopeGraphTaskDef(), baseShowScopeGraphTaskDef());
+                commands.add(showPreAnalyzeAstCommand());
                 commands.add(showScopeGraphCommand());
             }
+            commands.add(showAnalyzedAstCommand());
+        }
+
+        default void collectMenus(MenuItemCollection menuItems) {
             menuItems.addMainMenuItem(mainMenu());
             menuItems.addResourceContextMenuItem(resourceContextMenu());
             menuItems.addEditorContextMenuItem(editorContextMenu());

@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -196,13 +197,19 @@ public class ParserAdapterCompiler implements TaskDef<ParserAdapterCompiler.Inpu
 
         /// Collection methods
 
-        default void collectInto(TypeInfoCollection taskDefs, Collection<CommandDefRepr> commands, MenuItemCollection menuItems) {
+        default void collectTaskDefs(TypeInfoCollection taskDefs) {
             taskDefs.add(tokenizeTaskDef(), baseTokenizeTaskDef());
             taskDefs.add(parseTaskDef(), baseParseTaskDef());
             taskDefs.add(showParsedAstTaskDef(), baseShowParsedAstTaskDef());
-            commands.add(showParsedAstCommand());
             taskDefs.add(showParsedTokensTaskDef(), baseShowParsedTokensTaskDef());
+        }
+
+        default void collectCommands(Collection<CommandDefRepr> commands) {
+            commands.add(showParsedAstCommand());
             commands.add(showParsedTokensCommand());
+        }
+
+        default void collectMenus(MenuItemCollection menuItems) {
             menuItems.addMainMenuItem(mainMenu());
             menuItems.addResourceContextMenuItem(resourceContextMenu());
             menuItems.addEditorContextMenuItem(editorContextMenu());

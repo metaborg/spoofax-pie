@@ -2,7 +2,8 @@
 All notable changes to this project are documented in this file, based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
-
+### Fixed
+- Return generated commands as Java source files, ensuring they get compiled by the Java compiler.
 
 ## [0.11.3] - 2021-09-03
 ### Fixed

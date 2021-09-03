@@ -140,64 +140,6 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
 
         if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
 
-        // Collect all task definitions, commands, and menus.
-        final TypeInfoCollection allTaskDefs = new TypeInfoCollection(input.taskDefs());
-        final ArrayList<CommandDefRepr> allCommandDefs = new ArrayList<>(input.commandDefs());
-        final MenuItemCollection allMenuItems = new MenuItemCollection(input.mainMenuItems(), input.resourceContextMenuItems(), input.editorContextMenuItems());
-        if(input.parser().isPresent()) {
-            input.parser().get().collectInto(allTaskDefs, allCommandDefs, allMenuItems);
-        } else {
-            allTaskDefs.add(TypeInfo.of(NoneTokenizer.class));
-        }
-        if(input.styler().isPresent()) {
-            final StylerAdapterCompiler.Input i = input.styler().get();
-            allTaskDefs.add(i.styleTaskDef(), i.baseStyleTaskDef());
-        } else {
-            allTaskDefs.add(TypeInfo.of(NoneStyler.class));
-        }
-        if(input.completer().isPresent()) {
-            final CompleterAdapterCompiler.Input i = input.completer().get();
-            allTaskDefs.add(i.completeTaskDef(), i.baseCompleteTaskDef());
-        } else {
-            allTaskDefs.add(TypeInfo.of(NullCompleteTaskDef.class));
-        }
-        input.strategoRuntime().ifPresent((i) -> {
-            allTaskDefs.add(i.getStrategoRuntimeProviderTaskDef(), i.baseGetStrategoRuntimeProviderTaskDef());
-        });
-        input.constraintAnalyzer().ifPresent((i) -> {
-            i.collectInto(allTaskDefs, allCommandDefs, allMenuItems);
-        });
-        input.multilangAnalyzer().ifPresent((i) -> {
-            allTaskDefs.add(i.analyzeTaskDef(), i.baseAnalyzeTaskDef());
-            allTaskDefs.add(i.indexAstTaskDef(), i.baseIndexAstTaskDef());
-            allTaskDefs.add(i.preStatixTaskDef(), i.basePreStatixTaskDef());
-            allTaskDefs.add(i.postStatixTaskDef(), i.basePostStatixTaskDef());
-            allTaskDefs.add(i.checkTaskDef(), i.baseCheckTaskDef());
-            allTaskDefs.addAll(i.libraryTaskDefs());
-        });
-        input.referenceResolution().ifPresent((i) -> {
-            allTaskDefs.add(i.resolveTaskDef(), i.baseResolveTaskDef());
-        });
-        if(!input.referenceResolution().isPresent()) {
-            allTaskDefs.add(TypeInfo.of(NoneResolveTaskDef.class));
-        }
-        input.hover().ifPresent((i) -> {
-            allTaskDefs.add(i.hoverTaskDef(), i.baseHoverTaskDef());
-        });
-        if(!input.hover().isPresent()) {
-            allTaskDefs.add(TypeInfo.of(NoneHoverTaskDef.class));
-        }
-        allTaskDefs.add(input.checkTaskDef(), input.baseCheckTaskDef());
-        allTaskDefs.add(input.checkMultiTaskDef(), input.baseCheckMultiTaskDef());
-        allTaskDefs.add(input.checkAggregatorTaskDef(), input.baseCheckAggregatorTaskDef());
-        allTaskDefs.add(input.checkDeaggregatorTaskDef(), input.baseCheckDeaggregatorTaskDef());
-
-        allTaskDefs.add(input.getSourceFiles().getSourceFilesTaskDef(), input.getSourceFiles().baseGetSourceFilesTaskDef());
-
-        if(input.strategoRuntime().isPresent() && input.parser().isPresent()) {
-            allTaskDefs.add(input.testStrategoTaskDef(), input.baseTestStrategoTaskDef());
-        }
-
         // Class files
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         if(input.languageProjectDependency().isSome()) {
@@ -217,7 +159,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         scopeTemplate.write(context, input.adapterProject().baseScope().file(generatedJavaSourcesDirectory), input);
         qualifierTemplate.write(context, input.baseQualifier().file(generatedJavaSourcesDirectory), input);
 
-        for(CommandDefRepr commandDef : allCommandDefs) {
+        for(CommandDefRepr commandDef : input.allCommandDefs()) {
             final UniqueNamer uniqueNamer = new UniqueNamer();
             final HashMap<String, Object> map = new HashMap<>();
             map.put("scope", input.scope());
@@ -240,17 +182,17 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         { // Component
             final UniqueNamer uniqueNamer = new UniqueNamer();
             final HashMap<String, Object> map = new HashMap<>();
-            map.put("providedTaskDefs", allTaskDefs.stream().map(uniqueNamer::makeUnique).collect(Collectors.toList()));
-            map.put("providedCommandDefs", allCommandDefs.stream().map(CommandDefRepr::type).map(uniqueNamer::makeUnique).collect(Collectors.toList()));
+            map.put("providedTaskDefs", input.allTaskDefs().stream().map(uniqueNamer::makeUnique).collect(Collectors.toList()));
+            map.put("providedCommandDefs", input.allCommandDefs().stream().map(CommandDefRepr::type).map(uniqueNamer::makeUnique).collect(Collectors.toList()));
             componentTemplate.write(context, input.baseComponent().file(generatedJavaSourcesDirectory), input, map);
         }
 
         { // Module
             final UniqueNamer uniqueNamer = new UniqueNamer();
             final HashMap<String, Object> map = new HashMap<>();
-            map.put("providedTaskDefs", allTaskDefs.stream().map(uniqueNamer::makeUnique).collect(Collectors.toList()));
+            map.put("providedTaskDefs", input.allTaskDefs().stream().map(uniqueNamer::makeUnique).collect(Collectors.toList()));
             uniqueNamer.reset(); // New method scope
-            map.put("providedCommandDefs", allCommandDefs.stream().map(CommandDefRepr::type).map(uniqueNamer::makeUnique).collect(Collectors.toList()));
+            map.put("providedCommandDefs", input.allCommandDefs().stream().map(CommandDefRepr::type).map(uniqueNamer::makeUnique).collect(Collectors.toList()));
             uniqueNamer.reset(); // New method scope
             map.put("providedAutoCommandDefs", input.autoCommandDefs().stream().map((c) -> uniqueNamer.makeUnique(c, c.commandDef().asVariableId())).collect(Collectors.toList()));
             moduleTemplate.write(context, input.baseModule().file(generatedJavaSourcesDirectory), input, map);
@@ -340,7 +282,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             injected.add(hoverInjection);
 
             // Create injections for all command definitions. TODO: only inject needed command definitions?
-            injected.addAll(allCommandDefs.stream().map(CommandDefRepr::type).map(uniqueNamer::makeUnique).collect(Collectors.toList()));
+            injected.addAll(input.allCommandDefs().stream().map(CommandDefRepr::type).map(uniqueNamer::makeUnique).collect(Collectors.toList()));
             // Provide a lambda that gets the name of the injected command definition from the context.
             map.put("getInjectedCommandDef", (Mustache.Lambda)(frag, out) -> {
                 final TypeInfo type = (TypeInfo)frag.context();
@@ -367,8 +309,13 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
                 map.put("analyzeInjection", false);
             }
 
-            // Menu items.
-            allMenuItems.deduplicateMenus(); // First deduplicate menu items.
+            // Collect all menus.
+            final MenuItemCollection allMenuItems = new MenuItemCollection(input.mainMenuItems(), input.resourceContextMenuItems(), input.editorContextMenuItems());
+            input.parser().ifPresent(i -> i.collectMenus(allMenuItems));
+            input.constraintAnalyzer().ifPresent(i -> i.collectMenus(allMenuItems));
+            // Deduplicate menu items.
+            allMenuItems.deduplicateMenus();
+            // Then add to map.
             map.put("allMainMenuItems", allMenuItems.getMainMenuItems());
             map.put("allResourceContextMenuItems", allMenuItems.getResourceContextMenuItems());
             map.put("allEditorContextMenuItems", allMenuItems.getEditorContextMenuItems());
@@ -453,7 +400,72 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
 
         List<TypeInfo> taskDefs();
 
+        @Value.Lazy default TypeInfoCollection allTaskDefs() {
+            final TypeInfoCollection taskDefs = new TypeInfoCollection(taskDefs());
+            if(parser().isPresent()) {
+                parser().get().collectTaskDefs(taskDefs);
+            } else {
+                taskDefs.add(TypeInfo.of(NoneTokenizer.class));
+            }
+            if(styler().isPresent()) {
+                final StylerAdapterCompiler.Input i = styler().get();
+                taskDefs.add(i.styleTaskDef(), i.baseStyleTaskDef());
+            } else {
+                taskDefs.add(TypeInfo.of(NoneStyler.class));
+            }
+            if(completer().isPresent()) {
+                final CompleterAdapterCompiler.Input i = completer().get();
+                taskDefs.add(i.completeTaskDef(), i.baseCompleteTaskDef());
+            } else {
+                taskDefs.add(TypeInfo.of(NullCompleteTaskDef.class));
+            }
+            strategoRuntime().ifPresent((i) -> {
+                taskDefs.add(i.getStrategoRuntimeProviderTaskDef(), i.baseGetStrategoRuntimeProviderTaskDef());
+            });
+            constraintAnalyzer().ifPresent((i) -> {
+                i.collectTaskDefs(taskDefs);
+            });
+            multilangAnalyzer().ifPresent((i) -> {
+                taskDefs.add(i.analyzeTaskDef(), i.baseAnalyzeTaskDef());
+                taskDefs.add(i.indexAstTaskDef(), i.baseIndexAstTaskDef());
+                taskDefs.add(i.preStatixTaskDef(), i.basePreStatixTaskDef());
+                taskDefs.add(i.postStatixTaskDef(), i.basePostStatixTaskDef());
+                taskDefs.add(i.checkTaskDef(), i.baseCheckTaskDef());
+                taskDefs.addAll(i.libraryTaskDefs());
+            });
+            referenceResolution().ifPresent((i) -> {
+                taskDefs.add(i.resolveTaskDef(), i.baseResolveTaskDef());
+            });
+            if(!referenceResolution().isPresent()) {
+                taskDefs.add(TypeInfo.of(NoneResolveTaskDef.class));
+            }
+            hover().ifPresent((i) -> {
+                taskDefs.add(i.hoverTaskDef(), i.baseHoverTaskDef());
+            });
+            if(!hover().isPresent()) {
+                taskDefs.add(TypeInfo.of(NoneHoverTaskDef.class));
+            }
+            taskDefs.add(checkTaskDef(), baseCheckTaskDef());
+            taskDefs.add(checkMultiTaskDef(), baseCheckMultiTaskDef());
+            taskDefs.add(checkAggregatorTaskDef(), baseCheckAggregatorTaskDef());
+            taskDefs.add(checkDeaggregatorTaskDef(), baseCheckDeaggregatorTaskDef());
+
+            taskDefs.add(getSourceFiles().getSourceFilesTaskDef(), getSourceFiles().baseGetSourceFilesTaskDef());
+
+            if(strategoRuntime().isPresent() && parser().isPresent()) {
+                taskDefs.add(testStrategoTaskDef(), baseTestStrategoTaskDef());
+            }
+            return taskDefs;
+        }
+
         List<CommandDefRepr> commandDefs();
+
+        @Value.Lazy default ArrayList<CommandDefRepr> allCommandDefs() {
+            final ArrayList<CommandDefRepr> commandDefs = new ArrayList<>(commandDefs());
+            parser().ifPresent(i -> i.collectCommands(commandDefs));
+            constraintAnalyzer().ifPresent((i) -> i.collectCommands(commandDefs));
+            return commandDefs;
+        }
 
         List<AutoCommandRequestRepr> autoCommandDefs();
 
@@ -721,7 +733,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
                     javaSourceFiles.add(baseTestStrategoTaskDef().file(generatedJavaSourcesDirectory));
                 }
 
-                for(CommandDefRepr commandDef : commandDefs()) {
+                for(CommandDefRepr commandDef : allCommandDefs()) {
                     javaSourceFiles.add(commandDef.type().file(generatedJavaSourcesDirectory));
                 }
             }
