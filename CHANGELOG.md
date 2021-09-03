@@ -1,9 +1,14 @@
 # Changelog
 All notable changes to this project are documented in this file, based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+
 ## [Unreleased]
+
+
+## [0.11.4] - 2021-09-03
 ### Fixed
 - Return generated commands as Java source files, ensuring they get compiled by the Java compiler.
+
 
 ## [0.11.3] - 2021-09-03
 ### Fixed
@@ -52,7 +57,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.3...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.4...HEAD
+[0.11.4]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.3...release-0.11.4
 [0.11.3]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.2...release-0.11.3
 [0.11.2]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.1...release-0.11.2
 [0.11.1]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.0...release-0.11.1
