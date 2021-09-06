@@ -59,6 +59,11 @@ If after building a language, an error popup appears, something unexpected went 
 Please [report this as a bug](../report_a_bug.md).
 Try to work around the problem first by [cleaning the language project](#clean_project) or by [deleting on-disk cache and restarting Eclipse](#clean_cache)
 
+### Many duplicate definition errors/other weird errors
+
+If there are many errors about duplicate definitions, things already being defined, or other weird errors, see if there is a `bin` directory in your language project.
+If so, delete the `bin` directory and rebuild the project.
+
 ## Workarounds
 
 ### Cleaning the language project {: #clean_project }
@@ -68,6 +73,7 @@ In the clean window, deselect <span class="guilabel">Clean all projects</span>, 
 
 Then, rebuild your language.
 Optionally, check the error log and console again.
+If this does not help, you can try to first delete the `build` directory, then clean the language project, and then build the project.
 
 If this solves your problem, consider [reporting this bug](../report_a_bug.md), as we consider incrementality issues like these bugs.
 If not, try the next workaround.
