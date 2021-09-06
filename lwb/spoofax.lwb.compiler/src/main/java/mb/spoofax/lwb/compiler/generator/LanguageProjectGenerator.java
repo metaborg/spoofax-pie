@@ -47,6 +47,7 @@ public class LanguageProjectGenerator {
     private final TemplateWriter mainStatixTemplate;
     private final TemplateWriter mainStrategoTemplate;
     private final TemplateWriter sptTemplate;
+    private final TemplateWriter gitIgnoreTemplate;
     private final ResourceService resourceService;
 
     @Inject public LanguageProjectGenerator(
@@ -60,6 +61,7 @@ public class LanguageProjectGenerator {
         this.mainStatixTemplate = templateCompiler.getOrCompileToWriter("main.stx.mustache");
         this.mainStrategoTemplate = templateCompiler.getOrCompileToWriter("main.str2.mustache");
         this.sptTemplate = templateCompiler.getOrCompileToWriter("test.spt.mustache");
+        this.gitIgnoreTemplate = templateCompiler.getOrCompileToWriter(".gitignore.mustache");
         this.resourceService = resourceService;
     }
 
@@ -72,5 +74,6 @@ public class LanguageProjectGenerator {
         mainStatixTemplate.write(rootDirectory.appendRelativePath("src/main.stx"), input);
         mainStrategoTemplate.write(rootDirectory.appendRelativePath("src/main.str2"), input);
         sptTemplate.write(rootDirectory.appendRelativePath("test/test.spt"), input);
+        gitIgnoreTemplate.write(rootDirectory.appendRelativePath(".gitignore"), input);
     }
 }
