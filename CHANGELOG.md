@@ -3,6 +3,9 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+
+
+## [0.11.6] - 2021-09-06
 ### Added
 - Several optional Eclipse preferences to tutorial.
 - `.gitignore` file when generating a language project.
@@ -12,7 +15,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 - Spoofax 2 devenv version to `0.1.8`.
 
 
-## [0.11.5]  - 2021-09-06
+## [0.11.5] - 2021-09-06
 ### Added
 - SPT file to new project template.
 - Short SPT tutorial.
