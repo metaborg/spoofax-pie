@@ -1,0 +1,975 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Spoofax 3 documentation website">
+      
+      
+      
+      
+      <link rel="icon" href="../../assets/spoofax.png">
+      <meta name="generator" content="mkdocs-1.2.2, mkdocs-material-7.1.4">
+    
+    
+      
+        <title>Adding a transformation - Spoofax 3</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.bde7dde4.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ef6f36e2.min.css">
+        
+          
+          
+          <meta name="theme-color" content="#4051b5">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=:300,400,400i,700%7CJetBrains+Mono&display=fallback">
+        <style>:root{--md-text-font-family:"";--md-code-font-family:"JetBrains Mono"}</style>
+      
+    
+    
+    
+      <link rel="stylesheet" href="../../extra.css">
+    
+    
+      
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <script>function __prefix(e){return new URL("../..",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#adding-a-transformation" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Spoofax 3" class="md-header__button md-logo" aria-label="Spoofax 3" data-md-component="logo">
+      
+  <img src="../../assets/spoofax.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Spoofax 3
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Adding a transformation
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        
+<a href="https://github.com/metaborg/spoofax-pie/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    metaborg/spoofax-pie
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../.." class="md-tabs__link">
+      Home
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../install/" class="md-tabs__link">
+        Tutorials
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../guide/ask_for_help/" class="md-tabs__link">
+        How-to Guides
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../reference/configuration/" class="md-tabs__link">
+        Reference
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../background/documentation/" class="md-tabs__link">
+        Background
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../release/download/" class="md-tabs__link">
+        Releases
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Spoofax 3" class="md-nav__button md-logo" aria-label="Spoofax 3" data-md-component="logo">
+      
+  <img src="../../assets/spoofax.svg" alt="logo">
+
+    </a>
+    Spoofax 3
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/metaborg/spoofax-pie/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    metaborg/spoofax-pie
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
+      
+      <label class="md-nav__link" for="__nav_2">
+        Tutorials
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Tutorials" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Tutorials
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../install/" class="md-nav__link">
+        Installing the Spoofax 3 language workbench
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../create_language_project/" class="md-nav__link">
+        Creating a language project
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../change_static_semantics/" class="md-nav__link">
+        Change static semantics
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
+      
+      <label class="md-nav__link" for="__nav_3">
+        How-to Guides
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="How-to Guides" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          How-to Guides
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/ask_for_help/" class="md-nav__link">
+        Ask for help
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/report_a_bug/" class="md-nav__link">
+        Report a bug
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/eclipse_lwb/troubleshooting/" class="md-nav__link">
+        Troubleshooting
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
+      
+      <label class="md-nav__link" for="__nav_4">
+        Reference
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Reference" data-md-level="1">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Reference
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/configuration/" class="md-nav__link">
+        Configuration
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+      
+      <label class="md-nav__link" for="__nav_5">
+        Background
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Background" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Background
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../background/documentation/" class="md-nav__link">
+        Documentation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../background/motivation/" class="md-nav__link">
+        Motivation
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../background/key_ideas/" class="md-nav__link">
+        Key ideas
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../background/status/" class="md-nav__link">
+        Current Status
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" type="checkbox" id="__nav_6" >
+      
+      <label class="md-nav__link" for="__nav_6">
+        Releases
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Releases" data-md-level="1">
+        <label class="md-nav__title" for="__nav_6">
+          <span class="md-nav__icon md-icon"></span>
+          Releases
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../release/download/" class="md-nav__link">
+        Downloads
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/metaborg/spoofax-pie/edit/master/docs/tutorial/add_transformation.md" title="Edit this page" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                <h1 id="adding-a-transformation">Adding a transformation<a class="headerlink" href="#adding-a-transformation" title="Permanent link">&para;</a></h1>
+<p>Finally, we will define a transformation for our language and add a task, command-tasks, command, and menu item for it.
+Open the main Stratego file <code>helloworld/src/main.str</code>.
+<a href="https://www.spoofax.dev/references/stratego/">Stratego</a>. is a meta-language for defining term (AST) transformations through rewrite rules.
+We will add a silly transformation that replaces all instances of <code class="highlight"><span class="nv">World</span><span class=" -Punctuation">()</span><span class="w"></span></code> with <code class="highlight"><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"></span></code>.</p>
+<p>Add the following code to the end of the Stratego file:</p>
+<div class="highlight"><pre><span></span><code><span class="k">rules</span><span class="w"></span>
+
+<span class="w">  </span><span class="nv">replace-world</span><span class=" -Punctuation">:</span><span class="w"> </span><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"> </span><span class="nv">-</span><span class=" -Punctuation">&gt;</span><span class="w"> </span><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"></span>
+<span class="w">  </span><span class="nv">replace-world</span><span class=" -Punctuation">:</span><span class="w"> </span><span class="nv">World</span><span class=" -Punctuation">()</span><span class="w"> </span><span class="nv">-</span><span class=" -Punctuation">&gt;</span><span class="w"> </span><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"></span>
+<span class="w">  </span><span class="nv">replace-worlds</span><span class="w"> </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">topdown</span><span class=" -Punctuation">(</span><span class="nv">try</span><span class=" -Punctuation">(</span><span class="nv">replace-world</span><span class=" -Punctuation">))</span><span class="w"></span>
+</code></pre></div>
+<p>The <code class="highlight"><span class="nv">replace-world</span><span class="w"></span></code> rule passes <code class="highlight"><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"></span></code> terms but rewrites <code class="highlight"><span class="nv">World</span><span class=" -Punctuation">()</span><span class="w"></span></code> terms to <code class="highlight"><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"></span></code>.
+The <code class="highlight"><span class="nv">replace-worlds</span><span class="w"></span></code> strategy tries to apply <code class="highlight"><span class="nv">replace-world</span><span class="w"></span></code> in a top-down manner over the entire AST.</p>
+<details class="note"><summary><code>src/main.str</code> full contents</summary></details>
+<div class="highlight"><pre><span></span><code><span class="k">module</span><span class="w"> </span><span class="nv">main</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">imports</span><span class="w"></span>
+
+<span class="w">      </span><span class="nv">statixruntime</span><span class="w"></span>
+<span class="w">      </span><span class="nv">statix</span>/<span class="nv">api</span><span class="w"></span>
+<span class="w">      </span><span class="nv">injections</span>/<span class="nv">-</span><span class="w"></span>
+<span class="w">      </span><span class="nv">signatures</span>/<span class="nv">-</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">rules</span><span class="w"> </span><span class="c c-Singleline">// Analysis</span><span class="w"></span>
+
+<span class="w">      </span><span class="nv">pre-analyze</span><span class="w">  </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">explicate-injections-helloworld-Start</span><span class="w"></span>
+<span class="w">      </span><span class="nv">post-analyze</span><span class="w"> </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">implicate-injections-helloworld-Start</span><span class="w"></span>
+
+<span class="w">      </span><span class="nv">editor-analyze</span><span class="w"> </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">stx-editor-analyze</span><span class=" -Punctuation">(</span><span class="nv">pre-analyze</span><span class=" -Punctuation">,</span><span class="w"> </span><span class="nv">post-analyze</span><span class=" -Punctuation">|</span><span class="s">&quot;main&quot;</span><span class=" -Punctuation">,</span><span class="w"> </span><span class="s">&quot;programOk&quot;</span><span class=" -Punctuation">)</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">rules</span><span class="w"></span>
+
+<span class="w">      </span><span class="nv">replace-world</span><span class=" -Punctuation">:</span><span class="w"> </span><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"> </span><span class="nv">-</span><span class=" -Punctuation">&gt;</span><span class="w"> </span><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"></span>
+<span class="w">      </span><span class="nv">replace-world</span><span class=" -Punctuation">:</span><span class="w"> </span><span class="nv">World</span><span class=" -Punctuation">()</span><span class="w"> </span><span class="nv">-</span><span class=" -Punctuation">&gt;</span><span class="w"> </span><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"></span>
+<span class="w">      </span><span class="nv">replace-worlds</span><span class="w"> </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">topdown</span><span class=" -Punctuation">(</span><span class="nv">try</span><span class=" -Punctuation">(</span><span class="nv">replace-world</span><span class=" -Punctuation">))</span><span class="w"></span>
+<span class="w">    </span>```<span class="w"></span>
+
+
+<span class="nv">Now</span><span class="w"> </span><span class="nv">we</span><span class="w"> </span><span class="nv">add</span><span class="w"> </span><span class="nv">a</span><span class="w"> </span><span class="nv">task</span><span class="w"> </span><span class="nv">and</span><span class="w"> </span><span class="nv">command-task</span><span class="w"> </span><span class="nv">for</span><span class="w"> </span><span class="nv">this</span><span class="w"> </span><span class="nv">transformation</span>.<span class="w"></span>
+<span class="nv">We</span><span class="w"> </span><span class="nv">define</span><span class="w"> </span><span class="nv">two</span><span class="w"> </span><span class="nv">separate</span><span class="w"> </span><span class="nv">tasks</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">keep</span><span class="w"> </span><span class="nv">separate</span><span class="w"></span>
+
+<span class="m">1</span>.<span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">act</span><span class="w"> </span><span class="nv">of</span><span class="w"> </span><span class="nv">transforming</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">program</span><span class=" -Punctuation">,</span><span class="w"> </span><span class="nv">and</span><span class="w"></span>
+<span class="m">2</span>.<span class="w"> </span><span class="nv">feeding</span><span class="w"> </span><span class="nv">back</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">result</span><span class="w"> </span><span class="nv">of</span><span class="w"> </span><span class="nv">that</span><span class="w"> </span><span class="nv">transformation</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">user</span><span class="w"> </span><span class="nv">that</span><span class="w"> </span><span class="nv">executes</span><span class="w"> </span><span class="nv">a</span><span class="w"> </span><span class="nv">command</span>.<span class="w"></span>
+
+<span class="nv">This</span><span class="w"> </span><span class="nv">practice</span><span class="w"> </span><span class="nv">later</span><span class="w"> </span><span class="nv">allows</span><span class="w"> </span><span class="nv">us</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">reuse</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">first</span><span class="w"> </span><span class="nv">task</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nv">a</span><span class="w"> </span><span class="nv">different</span><span class="w"> </span><span class="nv">task</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nv">we</span><span class="w"> </span><span class="nv">need</span><span class="w"> </span><span class="nv">to</span>.<span class="w"></span>
+<span class="nv">Right-click</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span>`<span class="nv">mb</span>.<span class="nv">helloworld</span>.<span class="nv">task</span>`<span class="w"> </span><span class="nv">package</span><span class="w"> </span><span class="nv">and</span><span class="w"> </span><span class="nv">create</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span>`<span class="nv">HelloWorldReplaceWorlds</span>`<span class="w"> </span><span class="nv">class</span><span class="w"> </span><span class="nv">and</span><span class="w"> </span><span class="nv">replace</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">entire</span><span class="w"> </span><span class="nv">Java</span><span class="w"> </span><span class="nv">file</span><span class="w"> </span><span class="k">with</span><span class=" -Punctuation">:</span><span class="w"></span>
+
+```<span class=" -Punctuation">{</span><span class="w"> </span>.<span class="nv">java</span><span class="w"> </span>.<span class="nv">annotate</span><span class="w"> </span><span class="nv">linenums</span><span class=" -Punctuation">=</span><span class="s">&quot;1&quot;</span><span class="w"> </span><span class=" -Punctuation">}</span><span class="w"></span>
+<span class="nv">package</span><span class="w"> </span><span class="nv">mb</span>.<span class="nv">helloworld</span>.<span class="nv">task</span><span class=" -Punctuation">;</span><span class="w"></span>
+
+<span class="nv">import</span><span class="w"> </span><span class="nv">mb</span>.<span class="nv">helloworld</span>.<span class="nv">HelloWorldClassLoaderResources</span><span class=" -Punctuation">;</span><span class="w"></span>
+<span class="nv">import</span><span class="w"> </span><span class="nv">mb</span>.<span class="nv">helloworld</span>.<span class="nv">HelloWorldScope</span><span class=" -Punctuation">;</span><span class="w"></span>
+<span class="nv">import</span><span class="w"> </span><span class="nv">mb</span>.<span class="nv">pie</span>.<span class="nv">api</span>.<span class="nv">ExecContext</span><span class=" -Punctuation">;</span><span class="w"></span>
+<span class="nv">import</span><span class="w"> </span><span class="nv">mb</span>.<span class="nv">pie</span>.<span class="nv">api</span>.<span class="nv">stamp</span>.<span class="nv">resource</span>.<span class="nv">ResourceStampers</span><span class=" -Punctuation">;</span><span class="w"></span>
+<span class="nv">import</span><span class="w"> </span><span class="nv">mb</span>.<span class="nv">stratego</span>.<span class="nv">pie</span>.<span class="nv">AstStrategoTransformTaskDef</span><span class=" -Punctuation">;</span><span class="w"></span>
+
+<span class="nv">import</span><span class="w"> </span><span class="nv">javax</span>.<span class="nv">inject</span>.<span class="nv">Inject</span><span class=" -Punctuation">;</span><span class="w"></span>
+<span class="nv">import</span><span class="w"> </span><span class="nv">java</span>.<span class="nv">io</span>.<span class="nv">IOException</span><span class=" -Punctuation">;</span><span class="w"></span>
+
+@<span class="nv">HelloWorldScope</span><span class="w"></span>
+<span class="nv">public</span><span class="w"> </span><span class="nv">class</span><span class="w"> </span><span class="nv">HelloWorldReplaceWorlds</span><span class="w"> </span><span class="nv">extends</span><span class="w"> </span><span class="nv">AstStrategoTransformTaskDef</span><span class="w"> </span><span class=" -Punctuation">{</span><span class="w"></span>
+<span class="w">  </span><span class="nv">private</span><span class="w"> </span><span class="nv">final</span><span class="w"> </span><span class="nv">HelloWorldClassLoaderResources</span><span class="w"> </span><span class="nv">classloaderResources</span><span class=" -Punctuation">;</span><span class="w"></span>
+
+<span class="w">  </span>@<span class="nv">Inject</span><span class="w"></span>
+<span class="w">  </span><span class="nv">public</span><span class="w"> </span><span class="nv">HelloWorldReplaceWorlds</span><span class=" -Punctuation">(</span><span class="w"> </span><span class="c c-Singleline">// 1</span><span class="w"></span>
+<span class="w">    </span><span class="nv">HelloWorldClassLoaderResources</span><span class="w"> </span><span class="nv">classloaderResources</span><span class=" -Punctuation">,</span><span class="w"></span>
+<span class="w">    </span><span class="nv">HelloWorldGetStrategoRuntimeProvider</span><span class="w"> </span><span class="nv">getStrategoRuntimeProvider</span><span class="w"></span>
+<span class="w">  </span><span class=" -Punctuation">)</span><span class="w"> </span><span class=" -Punctuation">{</span><span class="w"></span>
+<span class="w">    </span><span class="nv">super</span><span class=" -Punctuation">(</span><span class="nv">getStrategoRuntimeProvider</span><span class=" -Punctuation">,</span><span class="w"> </span><span class="s">&quot;replace-worlds&quot;</span><span class=" -Punctuation">);</span><span class="w"> </span><span class="c c-Singleline">// 2</span><span class="w"></span>
+<span class="w">    </span><span class="nv">this</span>.<span class="nv">classloaderResources</span><span class="w"> </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">classloaderResources</span><span class=" -Punctuation">;</span><span class="w"></span>
+<span class="w">  </span><span class=" -Punctuation">}</span><span class="w"></span>
+
+<span class="w">  </span>@<span class="nv">Override</span><span class="w"> </span><span class="nv">public</span><span class="w"> </span><span class="nv">String</span><span class="w"> </span><span class="nv">getId</span><span class=" -Punctuation">()</span><span class="w"> </span><span class=" -Punctuation">{</span><span class="w"> </span><span class="c c-Singleline">// 3</span><span class="w"></span>
+<span class="w">    </span><span class="nv">return</span><span class="w"> </span><span class="nv">getClass</span><span class=" -Punctuation">()</span>.<span class="nv">getName</span><span class=" -Punctuation">();</span><span class="w"></span>
+<span class="w">  </span><span class=" -Punctuation">}</span><span class="w"></span>
+
+<span class="w">  </span>@<span class="nv">Override</span><span class="w"> </span><span class="nv">protected</span><span class="w"> </span><span class="nv">void</span><span class="w"> </span><span class="nv">createDependencies</span><span class=" -Punctuation">(</span><span class="nv">ExecContext</span><span class="w"> </span><span class="nv">context</span><span class=" -Punctuation">)</span><span class="w"> </span><span class="nv">throws</span><span class="w"> </span><span class="nv">IOException</span><span class="w"> </span><span class=" -Punctuation">{</span><span class="w"> </span><span class="c c-Singleline">// 4</span><span class="w"></span>
+<span class="w">    </span><span class="nv">context</span>.<span class="nv">require</span><span class=" -Punctuation">(</span><span class="nv">classloaderResources</span>.<span class="nv">tryGetAsLocalResource</span><span class=" -Punctuation">(</span><span class="nv">getClass</span><span class=" -Punctuation">()),</span><span class="w"> </span><span class="nv">ResourceStampers</span>.<span class="nv">hashFile</span><span class=" -Punctuation">());</span><span class="w"></span>
+<span class="w">  </span><span class=" -Punctuation">}</span><span class="w"></span>
+<span class=" -Punctuation">}</span><span class="w"></span>
+</code></pre></div>
+<p>This task extends <code class="highlight"><span class="n">AstStrategoTransformTaskDef</span></code> which is a convenient abstract class for creating tasks that run Stratego transformations by implementing a constructor and a couple of methods:</p>
+<ol>
+<li>The constructor should inject <code class="highlight"><span class="n">HelloWorldClassLoaderResources</span></code> which we again will use to create a self-dependency, and <code class="highlight"><span class="n">HelloWorldGetStrategoRuntimeProvider</span></code> which is a task that Spoofax generates for your language, which provides a Stratego runtime to execute strategies with.</li>
+<li>The <code class="highlight"><span class="n">HelloWorldGetStrategoRuntimeProvider</span></code> instance is provided to the superclass constructor, along with the strategy that we want this task to execute, which is <code class="highlight"><span class="s">&quot;replace-worlds&quot;</span></code>.</li>
+<li>We override <code class="highlight"><span class="n">getId</span></code> of <code class="highlight"><span class="n">TaskDef</span></code> again to give this task a unique identifier.</li>
+<li>We override <code class="highlight"><span class="n">createDependencies</span></code> of <code class="highlight"><span class="n">AstStrategoTransformTaskDef</span></code> to create a self-dependency.</li>
+</ol>
+<p>Then create the <code>HelloWorldShowReplaceWorlds</code> class and replace the entire Java file with:</p>
+<table class="annotate highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span></pre></div></td><td class="code"><div class="annotate highlight"><pre><span></span><code><span class="kn">package</span> <span class="nn">mb.helloworld.task</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.Serializable</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Objects</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">javax.inject.Inject</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">org.checkerframework.checker.nullness.qual.Nullable</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">mb.helloworld.HelloWorldClassLoaderResources</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">mb.helloworld.HelloWorldScope</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">mb.pie.api.ExecContext</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">mb.pie.api.TaskDef</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">mb.pie.api.stamp.resource.ResourceStampers</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">mb.resource.ResourceKey</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">mb.spoofax.core.language.command.CommandFeedback</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">mb.spoofax.core.language.command.ShowFeedback</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">mb.aterm.common.TermToString</span><span class="p">;</span>
+
+<span class="nd">@HelloWorldScope</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">HelloWorldShowReplaceWorlds</span> <span class="kd">implements</span> <span class="n">TaskDef</span><span class="o">&lt;</span><span class="n">HelloWorldShowReplaceWorlds</span><span class="p">.</span><span class="na">Args</span><span class="p">,</span> <span class="n">CommandFeedback</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">Args</span> <span class="kd">implements</span> <span class="n">Serializable</span> <span class="p">{</span>
+        <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">long</span> <span class="n">serialVersionUID</span> <span class="o">=</span> <span class="mi">1L</span><span class="p">;</span>
+
+        <span class="kd">public</span> <span class="kd">final</span> <span class="n">ResourceKey</span> <span class="n">file</span><span class="p">;</span>
+
+        <span class="kd">public</span> <span class="nf">Args</span><span class="p">(</span><span class="n">ResourceKey</span> <span class="n">file</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="na">file</span> <span class="o">=</span> <span class="n">file</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">equals</span><span class="p">(</span><span class="nd">@Nullable</span> <span class="n">Object</span> <span class="n">o</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="k">this</span> <span class="o">==</span> <span class="n">o</span><span class="p">)</span> <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">o</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">||</span> <span class="n">getClass</span><span class="p">()</span> <span class="o">!=</span> <span class="n">o</span><span class="p">.</span><span class="na">getClass</span><span class="p">())</span> <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+            <span class="kd">final</span> <span class="n">Args</span> <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">Args</span><span class="p">)</span> <span class="n">o</span><span class="p">;</span>
+            <span class="k">return</span> <span class="n">file</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="na">file</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="kt">int</span> <span class="nf">hashCode</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">Objects</span><span class="p">.</span><span class="na">hash</span><span class="p">(</span><span class="n">file</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="n">String</span> <span class="nf">toString</span><span class="p">()</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="s">&quot;Args{&quot;</span> <span class="o">+</span> <span class="s">&quot;file=&quot;</span> <span class="o">+</span> <span class="n">file</span> <span class="o">+</span> <span class="sc">&#39;}&#39;</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">HelloWorldClassLoaderResources</span> <span class="n">classloaderResources</span><span class="p">;</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">HelloWorldParse</span> <span class="n">parse</span><span class="p">;</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">HelloWorldReplaceWorlds</span> <span class="n">replaceWorlds</span><span class="p">;</span>
+
+    <span class="nd">@Inject</span>
+    <span class="kd">public</span> <span class="nf">HelloWorldShowReplaceWorlds</span><span class="p">(</span><span class="n">HelloWorldClassLoaderResources</span> <span class="n">classloaderResources</span><span class="p">,</span> <span class="n">HelloWorldParse</span> <span class="n">parse</span><span class="p">,</span> <span class="n">HelloWorldReplaceWorlds</span> <span class="n">replaceWorlds</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">classloaderResources</span> <span class="o">=</span> <span class="n">classloaderResources</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">parse</span> <span class="o">=</span> <span class="n">parse</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">replaceWorlds</span> <span class="o">=</span> <span class="n">replaceWorlds</span><span class="p">;</span>
+    <span class="p">}</span>
+
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">CommandFeedback</span> <span class="nf">exec</span><span class="p">(</span><span class="n">ExecContext</span> <span class="n">context</span><span class="p">,</span> <span class="n">Args</span> <span class="n">args</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="p">{</span>
+        <span class="n">context</span><span class="p">.</span><span class="na">require</span><span class="p">(</span><span class="n">classloaderResources</span><span class="p">.</span><span class="na">tryGetAsLocalResource</span><span class="p">(</span><span class="n">getClass</span><span class="p">()),</span> <span class="n">ResourceStampers</span><span class="p">.</span><span class="na">hashFile</span><span class="p">());</span>
+        <span class="kd">final</span> <span class="n">ResourceKey</span> <span class="n">file</span> <span class="o">=</span> <span class="n">args</span><span class="p">.</span><span class="na">file</span><span class="p">;</span>
+        <span class="k">return</span> <span class="n">context</span><span class="p">.</span><span class="na">require</span><span class="p">(</span><span class="n">replaceWorlds</span><span class="p">,</span> <span class="n">parse</span><span class="p">.</span><span class="na">inputBuilder</span><span class="p">().</span><span class="na">withFile</span><span class="p">(</span><span class="n">file</span><span class="p">).</span><span class="na">buildAstSupplier</span><span class="p">()).</span><span class="na">mapOrElse</span><span class="p">(</span>
+            <span class="n">ast</span> <span class="o">-&gt;</span> <span class="n">CommandFeedback</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">ShowFeedback</span><span class="p">.</span><span class="na">showText</span><span class="p">(</span><span class="n">TermToString</span><span class="p">.</span><span class="na">toString</span><span class="p">(</span><span class="n">ast</span><span class="p">),</span> <span class="s">&quot;Replaced World()s with Hello()s for &#39;&quot;</span> <span class="o">+</span> <span class="n">file</span> <span class="o">+</span> <span class="s">&quot;&#39;&quot;</span><span class="p">)),</span>
+            <span class="n">e</span> <span class="o">-&gt;</span> <span class="n">CommandFeedback</span><span class="p">.</span><span class="na">ofTryExtractMessagesFrom</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+        <span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">String</span> <span class="nf">getId</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">getClass</span><span class="p">().</span><span class="na">getName</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+</td></tr></table>
+<p>This class very similar to <code>HelloWorldShowParsedAst</code>, but runs the <code>HelloWorldReplaceWorlds</code> task on the parsed AST, transforming the AST.</p>
+<p>Now open <code>helloworld/spoofax.cfg</code> again and register the tasks by adding:</p>
+<div class="highlight"><pre><span></span><code><span class="na">task-def mb.helloworld.task.HelloWorldReplaceWorlds</span>
+<span class="na">let showReplaceWorlds</span> <span class="o">=</span> <span class="s">task-def mb.helloworld.task.HelloWorldShowReplaceWorlds</span>
+</code></pre></div>
+<p>Then add a command for it by adding:</p>
+<div class="highlight"><pre><span></span><code><span class="na">let showReplaceWorldsCommand</span> <span class="o">=</span> <span class="s">command-def {</span>
+  <span class="na">task-def</span> <span class="o">=</span> <span class="s">showReplaceWorlds</span>
+  <span class="na">display-name</span> <span class="o">=</span> <span class="s">&quot;Replace world with hello&quot;</span>
+  <span class="na">parameters</span> <span class="o">=</span> <span class="s">[</span>
+    <span class="na">file</span> <span class="o">=</span> <span class="s">parameter {</span>
+      <span class="na">type</span> <span class="o">=</span> <span class="s">java mb.resource.ResourceKey</span>
+      <span class="na">argument-providers</span> <span class="o">=</span> <span class="s">[Context(ReadableResource)]</span>
+    <span class="na">}</span>
+  <span class="na">]</span>
+<span class="na">}</span>
+</code></pre></div>
+<p>Finally, add menu items for the command by adding:</p>
+<div class="highlight"><pre><span></span><code><span class="na">editor-context-menu [</span>
+  <span class="na">menu &quot;Transform&quot; [</span>
+    <span class="na">command-action {</span>
+      <span class="na">command-def</span> <span class="o">=</span> <span class="s">showReplaceWorldsCommand</span>
+      <span class="na">execution-type</span> <span class="o">=</span> <span class="s">Once</span>
+    <span class="na">}</span>
+    <span class="na">command-action {</span>
+      <span class="na">command-def</span> <span class="o">=</span> <span class="s">showReplaceWorldsCommand</span>
+      <span class="na">execution-type</span> <span class="o">=</span> <span class="s">Continuous</span>
+    <span class="na">}</span>
+  <span class="na">]</span>
+<span class="na">]</span>
+<span class="na">resource-context-menu [</span>
+  <span class="na">menu &quot;Transform&quot; [</span>
+    <span class="na">command-action {</span>
+      <span class="na">command-def</span> <span class="o">=</span> <span class="s">showReplaceWorldsCommand</span>
+      <span class="na">execution-type</span> <span class="o">=</span> <span class="s">Once</span>
+      <span class="na">required-resource-types</span> <span class="o">=</span> <span class="s">[File]</span>
+    <span class="na">}</span>
+  <span class="na">]</span>
+<span class="na">]</span>
+</code></pre></div>
+<p>Build the project so that we can test our changes.
+Test the command similarly to testing the "Show parsed AST" command.</p>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+        
+          <a href="#" class="md-top md-icon" title="Back to top" data-md-component="top" data-md-state="hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"/></svg>
+          </a>
+        
+      </main>
+      
+        
+<footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+        
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.tabs", "navigation.top"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../../assets/javascripts/workers/search.4fa0e4ee.min.js", "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.1d3bfcf1.min.js"></script>
+      
+    
+  </body>
+</html>
