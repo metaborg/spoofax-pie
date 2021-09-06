@@ -72,12 +72,25 @@ Some Eclipse preferences unfortunately have sub-optimal defaults. After you have
 * <span class="guilabel">General ‣ Workspace ‣ Build</span>
     * Enable: <span class="guilabel">Save automatically before manual build</span>
 
-Finally, we need to make sure that Eclipse has detected an installed JRE. Open the Eclipse preferences and go to the <span class="guilabel">Java ‣ Installed JREs</span> page:
+We need to make sure that Eclipse has detected an installed JRE. Open the Eclipse preferences and go to the <span class="guilabel">Java ‣ Installed JREs</span> page:
 
 * If there are no installed JREs, and you've downloaded an Eclipse installation *with an embedded JVM*, press <span class="guilabel">Search...</span> and navigate to the location where you unpacked the Eclipse installation, and choose the `jvm` directory in it. Then press the checkmark of the JRE to activate it.
 * If there are no installed JREs, and you've downloaded an Eclipse installation *without an embedded JVM*, press <span class="guilabel">Search...</span> and navigate to the location where your JVM installed, and choose it. Then press the checkmark of the JRE to activate it.
 * If there are one or more installed JVMs, but none are selected, select an appropriate one by pressing the checkmark.
 * If there are one or more installed JVMs, and one is selected, you are good to go.
+
+Finally, you may configure Eclipse to your liking.
+Some typical settings to adjust:
+
+* <span class="guilabel">General ‣ Editors ‣ Text Editors</span>
+    * <span class="guilabel">Displayed tab width</span>: change to your desired tab width. Most of Spoofax uses 2 by convention.
+    * <span class="guilabel">Insert spaces for tabs</span>: enable, as Spoofax uses spaces by convention.
+    * <span class="guilabel">Show print margin</span>: enable and set if you want to set a maximum line length.
+    * <span class="guilabel">Show line numbers</span>: enable if you want to see line numbers.
+* <span class="guilabel">General ‣ Appearance</span>: choose a Theme to your liking.
+* <span class="guilabel">General ‣ Appearance ‣ Colors and Fons ‣ Text Font</span>: the JetBrains Mono font supports ligatures and is used in (most of) the lecture slides (install separately).
+* <span class="guilabel">General ‣ Keys</span>: change keybindings.
+
 
 !!! tip
     These preferences are stored per workspace. If you create a fresh workspace, you have to re-do these settings. You can create a new workspace with copied preferences by selecting <span class="guilabel">File ‣ Switch workspace ‣ Other...</span>, and then checking <span class="guilabel">Preferences</span> under <span class="guilabel">Copy settings</span>.
