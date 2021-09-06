@@ -32,6 +32,12 @@ These are bundled with an embedded JVM so that you do not need to have a JVM ins
 
 Unpack the downloaded archive to a directory with write access. Write access is required because Eclipse needs to write to several configuration files inside its installation.
 
+On {{ os.macos }} Sierra (10.12) and above, after unpacking, open the Terminal and navigate to the directory where the `Spoofax3.app` file is located and execute:
+
+```shell
+xattr -rc Spoofax3.app
+```
+
 !!! warning
     The unpacked directory or application may be renamed, but do not include spaces or other characters that would not be allowed in a URI (i.e., `: ? # [ ] @`). The same is true for the directory the archive is extracted to. Failing to do so breaks a built-in classpath detection mechanism which will cause Java compilation errors.
 
@@ -57,7 +63,7 @@ After starting up, choose where your workspace will be stored. The Eclipse works
 
 ## Configuring Eclipse's preferences
 
-Some Eclipse preferences unfortunately have sub-optimal defaults. After you have chosen a workspace and Eclipse has completely started up (and you have closed the Welcome page), go to the Eclipse preferences by pressing ++cmd+comma++ on macOS and ??? on others, and set these options:
+Some Eclipse preferences unfortunately have sub-optimal defaults. After you have chosen a workspace and Eclipse has completely started up (and you have closed the Welcome page), go to the Eclipse preferences by pressing ++cmd+comma++ on macOS and by going to the <span class="guilabel">Window ‣ Preferences</span> menu on others, and set these options:
 
 * <span class="guilabel">General ‣ Startup and Shutdown</span>
     * Enable: <span class="guilabel">Refresh workspace on startup</span>

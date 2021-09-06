@@ -6,6 +6,8 @@ nav:
   - Tutorials:
       - tutorial/install.md
       - tutorial/create_language_project.md
+      - tutorial/change_static_semantics.md
+#      - tutorial/add_transformation.md
   - How-to Guides:
       - guide/ask_for_help.md
       - guide/report_a_bug.md
