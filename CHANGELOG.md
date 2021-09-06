@@ -3,6 +3,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+### Added
+- Several optional Eclipse preferences to tutorial.
 
 
 ## [0.11.5]  - 2021-09-06
