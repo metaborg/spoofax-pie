@@ -3,6 +3,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+### Added
+- SPT file to new project template.
 
 
 ## [0.11.4] - 2021-09-03
