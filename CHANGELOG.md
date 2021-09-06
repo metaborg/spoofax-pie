@@ -3,6 +3,9 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+
+
+## [0.11.6] - 2021-09-06
 ### Added
 - Several optional Eclipse preferences to tutorial.
 - `.gitignore` file when generating a language project.
@@ -12,7 +15,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 - Spoofax 2 devenv version to `0.1.8`.
 
 
-## [0.11.5]  - 2021-09-06
+## [0.11.5] - 2021-09-06
 ### Added
 - SPT file to new project template.
 - Short SPT tutorial.
@@ -74,7 +77,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.5...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.6...HEAD
+[0.11.6]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.5...release-0.11.6
 [0.11.5]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.4...release-0.11.5
 [0.11.4]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.3...release-0.11.4
 [0.11.3]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.2...release-0.11.3
