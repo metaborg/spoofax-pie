@@ -431,6 +431,18 @@
   
 
           
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../change_static_semantics/" class="md-nav__link">
+        Change static semantics
+      </a>
+    </li>
+  
+
+          
         </ul>
       </nav>
     </li>
@@ -767,6 +779,9 @@
 </ul>
 <h2 id="unpack">Unpack<a class="headerlink" href="#unpack" title="Permanent link">&para;</a></h2>
 <p>Unpack the downloaded archive to a directory with write access. Write access is required because Eclipse needs to write to several configuration files inside its installation.</p>
+<p>On <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg></span> macOS Sierra (10.12) and above, after unpacking, open the Terminal and navigate to the directory where the <code>Spoofax3.app</code> file is located and execute:</p>
+<div class="highlight"><pre><span></span><code>xattr -rc Spoofax3.app
+</code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>The unpacked directory or application may be renamed, but do not include spaces or other characters that would not be allowed in a URI (i.e., <code>: ? # [ ] @</code>). The same is true for the directory the archive is extracted to. Failing to do so breaks a built-in classpath detection mechanism which will cause Java compilation errors.</p>
@@ -790,7 +805,7 @@
 </div>
 <p>After starting up, choose where your workspace will be stored. The Eclipse workspace will contain all of your settings, and is the default location for new projects.</p>
 <h2 id="configuring-eclipses-preferences">Configuring Eclipse's preferences<a class="headerlink" href="#configuring-eclipses-preferences" title="Permanent link">&para;</a></h2>
-<p>Some Eclipse preferences unfortunately have sub-optimal defaults. After you have chosen a workspace and Eclipse has completely started up (and you have closed the Welcome page), go to the Eclipse preferences by pressing <span class="keys"><kbd class="key-command">Cmd</kbd><span>+</span><kbd class="key-comma">,</kbd></span> on macOS and ??? on others, and set these options:</p>
+<p>Some Eclipse preferences unfortunately have sub-optimal defaults. After you have chosen a workspace and Eclipse has completely started up (and you have closed the Welcome page), go to the Eclipse preferences by pressing <span class="keys"><kbd class="key-command">Cmd</kbd><span>+</span><kbd class="key-comma">,</kbd></span> on macOS and by going to the <span class="guilabel">Window ‣ Preferences</span> menu on others, and set these options:</p>
 <ul>
 <li><span class="guilabel">General ‣ Startup and Shutdown</span><ul>
 <li>Enable: <span class="guilabel">Refresh workspace on startup</span></li>
