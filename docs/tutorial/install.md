@@ -68,6 +68,9 @@ Start up Eclipse, depending on your operating system:
 
 After starting up, choose where your workspace will be stored. The Eclipse workspace will contain all of your settings, and is the default location for new projects.
 
+!!! warning
+    Currently, there are several bugs regarding spaces in the workspace path, so ensure there are no spaces on the workspace path.
+
 ## Configuring Eclipse's preferences
 
 Some Eclipse preferences unfortunately have sub-optimal defaults. After you have chosen a workspace and Eclipse has completely started up (and you have closed the Welcome page), go to the Eclipse preferences by pressing ++cmd+comma++ on macOS and by going to the <span class="guilabel">Window ‣ Preferences</span> menu on others, and set these options:
