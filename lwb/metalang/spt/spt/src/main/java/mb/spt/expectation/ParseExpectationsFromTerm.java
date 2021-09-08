@@ -1,6 +1,5 @@
 package mb.spt.expectation;
 
-import mb.common.option.Option;
 import mb.common.region.Region;
 import mb.common.util.SetView;
 import mb.jsglr.common.TermTracer;
@@ -47,11 +46,11 @@ public class ParseExpectationsFromTerm implements TestExpectationFromTerm {
         final IStrategoConstructor constructor = term.getConstructor();
         switch(constructor.getName()) {
             case "ParseSucceeds":
-                return new ParseExpectation(true, Option.ofNone(), Option.ofNone(), sourceRegion);
+                return new ParseExpectation(true, ParseExpectation.Ambiguity.Unambiguous, ParseExpectation.Recovery.NotRecovered, sourceRegion);
             case "ParseFails":
-                return new ParseExpectation(false, Option.ofNone(), Option.ofNone(), sourceRegion);
+                return new ParseExpectation(false, ParseExpectation.Ambiguity.DoNotCare, ParseExpectation.Recovery.DoNotCare, sourceRegion);
             case "ParseAmbiguous":
-                return new ParseExpectation(true, Option.ofNone(), Option.ofSome(true), sourceRegion);
+                return new ParseExpectation(true, ParseExpectation.Ambiguity.Ambiguous, ParseExpectation.Recovery.DoNotCare, sourceRegion);
             case "ParseToAterm":
                 return convertToAtermExpectation(term, sourceRegion);
             case "ParseTo":
