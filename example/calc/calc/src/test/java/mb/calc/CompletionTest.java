@@ -1,6 +1,7 @@
 package mb.calc;
 
 import mb.stratego.common.StrategoRuntime;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
@@ -9,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.spoofax.terms.util.TermUtils.*;
 
 class CompletionTest extends TestBase {
-    @Test void testCompletion() throws Exception {
+    @Test @Disabled("Completion generation is temporarily disabled") void testCompletion() throws Exception {
         final StrategoRuntime strategoRuntime = component.getStrategoRuntimeProvider().get();
         final ITermFactory tf = strategoRuntime.getTermFactory();
         final IStrategoTerm input = tf.makeTuple(tf.makeString("Program"), tf.makeAppl(tf.makeConstructor("Program-Plhdr", 0)));

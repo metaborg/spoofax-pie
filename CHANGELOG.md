@@ -3,6 +3,11 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+### Fixed
+- SPT `parse succeeds` now fails in case of ambiguities and recovery.
+
+### Removed
+- Temporarily removed SDF3 to syntactic completion generation to work around an incrementality issue in the Stratego compiler. Will be enabled again when the issue is resolved and completions are needed.
 
 
 ## [0.11.6] - 2021-09-06
