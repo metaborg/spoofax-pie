@@ -67,9 +67,9 @@ languageAdapterProject {
     withReferenceResolution().run {
       resolveStrategy("editor-resolve")
     }
-    withHover().run {
-      hoverStrategy("editor-hover")
-    }
+//    withHover().run {
+//      hoverStrategy("editor-hover")
+//    }
     project.configureCompilerInput()
   }
 }

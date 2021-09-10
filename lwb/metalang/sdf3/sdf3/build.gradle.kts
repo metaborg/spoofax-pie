@@ -76,9 +76,9 @@ languageAdapterProject {
     withReferenceResolution().run {
       resolveStrategy("statix-editor-resolve")
     }
-    withHover().run {
-      hoverStrategy("statix-editor-hover")
-    }
+//    withHover().run {
+//      hoverStrategy("statix-editor-hover")
+//    }
     project.configureCompilerInput()
   }
 }
