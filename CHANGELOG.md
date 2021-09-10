@@ -3,6 +3,14 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+### Fixed
+- Hidden dependency in MultiAstSupplierFunction.
+
+### Changed
+- PIE to 0.16.7.
+
+### Removed
+- CFG, SDF3, and Statix hover tooltips, as they do not provide useful information at the moment.
 
 
 ## [0.11.7] - 2021-09-08

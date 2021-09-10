@@ -34,11 +34,6 @@ public class MultiAstSupplierFunction implements Function<ResourcePath, MapView<
         final HashMap<ResourceKey, Supplier<Result<IStrategoTerm, JsglrParseException>>> astsAndErrors = new HashMap<>();
         final JsglrParseTaskInput.Builder parseInputBuilder = JsglrParseTaskInput.builder().rootDirectoryHint(rootDirectory);
         for(final ResourceKey file : context.require(sourceFilesFunction, rootDirectory)) {
-            try {
-                context.require(file, ResourceStampers.modifiedFile());
-            } catch(IOException e) {
-                throw new UncheckedIOException(e);
-            }
             astsAndErrors.put(file, parseToAstFunction.createSupplier(parseInputBuilder.withFile(file).build()));
         }
         return MapView.of(astsAndErrors);
