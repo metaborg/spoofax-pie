@@ -6,6 +6,12 @@ plugins {
 
 dependencies {
   api(platform(project(":spoofax.depconstraints")))
+  implementation(platform(project(":spoofax.depconstraints")))
+  compileOnly(platform(project(":spoofax.depconstraints")))
+  annotationProcessor(platform(project(":spoofax.depconstraints")))
+  testImplementation(platform(project(":spoofax.depconstraints")))
+  testCompileOnly(platform(project(":spoofax.depconstraints")))
+  testAnnotationProcessor(platform(project(":spoofax.depconstraints")))
 
   api("org.metaborg:common")
   api("org.metaborg:log.api")
