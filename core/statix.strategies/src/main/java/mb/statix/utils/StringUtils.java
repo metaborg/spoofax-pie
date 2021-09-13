@@ -1,5 +1,8 @@
 package mb.statix.utils;
 
+import java.io.PrintWriter;
+import java.util.function.Function;
+
 /**
  * String utility functions.
  */
@@ -33,4 +36,13 @@ public final class StringUtils {
         return sb.toString();
     }
 
+    /**
+     * Gets the size of a {@link CharSequence}; or 0 when it is {@code null}.
+     *
+     * @param cs the {@link CharSequence}
+     * @return the length of the {@link CharSequence}; or 0 when the sequence is {@code null}
+     */
+    public static int lengthOrZero(final CharSequence cs) {
+        return cs == null ? 0 : cs.length();
+    }
 }
