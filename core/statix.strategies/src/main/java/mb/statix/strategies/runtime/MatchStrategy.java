@@ -26,7 +26,7 @@ public final class MatchStrategy<CTX, T, R> extends NamedStrategy1<CTX, Pattern<
 
     private MatchStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    @Override public final Seq<R> eval(CTX ctx, Pattern<CTX, T, R> pattern, T input) {
+    @Override public final Seq<R> evalInternal(TegoEngine engine, CTX ctx, Pattern<CTX, T, R> pattern, T input) {
         return new SeqBase<R>() {
             // Implementation if `yield` and `yieldBreak` could actually suspend computation
             @SuppressWarnings("unused")

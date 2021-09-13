@@ -32,7 +32,7 @@ public final class FixSetStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<C
     private FixSetStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
     @Override
-    public Seq<T> eval(CTX ctx, Strategy<CTX, T, T> s, T input) {
+    public Seq<T> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, T> s, T input) {
         return new SeqBase<T>() {
             // Implementation if `yield` and `yieldBreak` could actually suspend computation
             @SuppressWarnings("unused")
@@ -72,7 +72,7 @@ public final class FixSetStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<C
                         // so we mark it visited and not handle it again
                         visited.add(element);
                         // We make the sequence peekable, so we can check whether it is empty
-                        final PeekableSeq<T> result = s.eval(ctx, element).peekable();
+                        final PeekableSeq<T> result = engine.eval(s, ctx, element).peekable();
                         if(!result.peek()) {
                             // The strategy failed. Yield the element itself.
                             yielded.add(element);
@@ -137,7 +137,7 @@ public final class FixSetStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<C
                             // We have not previously handled this element,
                             // so we mark it visited and not handle it again
                             visited.add(element);
-                            final PeekableSeq<T> result = s.eval(ctx, element).peekable();
+                            final PeekableSeq<T> result = engine.eval(s, ctx, element).peekable();
                             if (!result.peek()) {
                                 // The strategy failed. Yield the element itself.
                                 yielded.add(element);

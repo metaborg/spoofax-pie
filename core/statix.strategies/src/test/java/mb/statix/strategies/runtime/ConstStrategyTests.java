@@ -13,11 +13,12 @@ public final class ConstStrategyTests {
     @Test
     public void shouldReturnArgumentAsResult() throws InterruptedException {
         // Arrange
+        final TegoEngine engine = new TegoRuntimeImpl(null);
         final ConstStrategy<Object, Integer, String> strategy = ConstStrategy.getInstance();
         final String arg1 = "My arg";
 
         // Act
-        final Seq<String> result = strategy.eval(new Object(), arg1, 42);
+        final Seq<String> result = strategy.evalInternal(engine, new Object(), arg1, 42);
 
         // Assert
         assertTrue(result.next());

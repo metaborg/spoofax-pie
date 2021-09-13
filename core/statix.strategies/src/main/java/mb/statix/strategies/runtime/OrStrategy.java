@@ -26,7 +26,7 @@ public final class OrStrategy<CTX, T, R> extends NamedStrategy2<CTX, Strategy<CT
     private OrStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
     @Override
-    public Seq<R> eval(CTX ctx, Strategy<CTX, T, R> s1, Strategy<CTX, T, R> s2, T input) {
+    public Seq<R> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, R> s1, Strategy<CTX, T, R> s2, T input) {
         return new SeqBase<R>() {
 
             // Implementation if `yield` and `yieldBreak` could actually suspend computation
@@ -34,7 +34,7 @@ public final class OrStrategy<CTX, T, R> extends NamedStrategy2<CTX, Strategy<CT
             @ExcludeFromJacocoGeneratedReport
             private void computeNextCoroutine() throws InterruptedException {
                 // 0:
-                final Seq<R> s1Seq = s1.eval(ctx, input);
+                final Seq<R> s1Seq = engine.eval(s1, ctx, input);
                 // 1:
                 while (s1Seq.next()) {
                     // 2:
@@ -42,7 +42,7 @@ public final class OrStrategy<CTX, T, R> extends NamedStrategy2<CTX, Strategy<CT
                     // 3:
                 }
                 // 4:
-                final Seq<R> s2Seq = s2.eval(ctx, input);
+                final Seq<R> s2Seq = engine.eval(s2, ctx, input);
                 // 5:
                 while (s2Seq.next()) {
                     // 6:
@@ -64,7 +64,7 @@ public final class OrStrategy<CTX, T, R> extends NamedStrategy2<CTX, Strategy<CT
                 while (true) {
                     switch (state) {
                         case 0:
-                            s1Seq = s1.eval(ctx, input);
+                            s1Seq = engine.eval(s1, ctx, input);
                             this.state = 1;
                             continue;
                         case 1:
@@ -82,7 +82,7 @@ public final class OrStrategy<CTX, T, R> extends NamedStrategy2<CTX, Strategy<CT
                             this.state = 1;
                             continue;
                         case 4:
-                            s2Seq = s2.eval(ctx, input);
+                            s2Seq = engine.eval(s2, ctx, input);
                             this.state = 5;
                             continue;
                         case 5:

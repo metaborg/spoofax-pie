@@ -18,11 +18,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
     @Test
     public void shouldFail_whenStrategyFails() throws InterruptedException {
         // Arrange
+        final TegoEngine engine = new TegoRuntimeImpl(null);
         final SingleStrategy<Object, String, Integer> strategy = SingleStrategy.getInstance();
         final FailStrategy<Object, String, Integer> s = FailStrategy.getInstance();
 
         // Act
-        final Seq<Integer> result = strategy.eval(new Object(), s, "abc");
+        final Seq<Integer> result = strategy.evalInternal(engine, new Object(), s, "abc");
 
         // Assert
         assertEquals(Arrays.asList(), result.collect(Collectors.toList()));
@@ -31,11 +32,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
     @Test
     public void shouldYieldOneResult_whenStrategyYieldsOneResult() throws InterruptedException {
         // Arrange
+        final TegoEngine engine = new TegoRuntimeImpl(null);
         final SingleStrategy<Object, String, Integer> strategy = SingleStrategy.getInstance();
         final TestListStrategy<String, Integer> s = new TestListStrategy<>(it -> Arrays.asList(it.length()));
 
         // Act
-        final Seq<Integer> result = strategy.eval(new Object(), s, "abc");
+        final Seq<Integer> result = strategy.evalInternal(engine, new Object(), s, "abc");
 
         // Assert
         assertEquals(Arrays.asList(3), result.collect(Collectors.toList()));
@@ -44,11 +46,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
     @Test
     public void shouldFail_whenStrategyYieldsMoreThanOneResult() throws InterruptedException {
         // Arrange
+        final TegoEngine engine = new TegoRuntimeImpl(null);
         final SingleStrategy<Object, String, Integer> strategy = SingleStrategy.getInstance();
         final TestListStrategy<String, Integer> s = new TestListStrategy<>(it -> Arrays.asList(it.length(), it.length() + 1));
 
         // Act
-        final Seq<Integer> result = strategy.eval(new Object(), s, "abc");
+        final Seq<Integer> result = strategy.evalInternal(engine, new Object(), s, "abc");
 
         // Assert
         assertEquals(Arrays.asList(), result.collect(Collectors.toList()));
@@ -57,11 +60,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
     @Test
     public void shouldNotEvaluateMoreThanTwoElements() throws InterruptedException {
         // Arrange
+        final TegoEngine engine = new TegoRuntimeImpl(null);
         final SingleStrategy<Object, String, Integer> strategy = SingleStrategy.getInstance();
         final TestListStrategy<String, Integer> s = new TestListStrategy<>(it -> Arrays.asList(it.length(), it.length() + 1));
 
         // Act
-        final Seq<Integer> result = strategy.eval(new Object(), s, "abc");
+        final Seq<Integer> result = strategy.evalInternal(engine, new Object(), s, "abc");
         assertEquals(0, s.evalCalls.get());        // not yet called
         assertEquals(0, s.nextCalls.get());        // not yet called
 

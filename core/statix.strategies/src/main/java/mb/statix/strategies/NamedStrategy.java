@@ -1,6 +1,7 @@
 package mb.statix.strategies;
 
 import mb.statix.sequences.Seq;
+import mb.statix.strategies.runtime.TegoEngine;
 
 /**
  * Abstract class for a named strategy.
@@ -14,7 +15,7 @@ import mb.statix.sequences.Seq;
  */
 public abstract class NamedStrategy<CTX, T, R> implements Strategy<CTX, T, R> {
 
-    @Override public abstract Seq<R> eval(CTX ctx, T input);
+    @Override public abstract Seq<R> evalInternal(TegoEngine engine, CTX ctx, T input);
 
     @Override public abstract String getName();
 

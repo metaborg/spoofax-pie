@@ -21,13 +21,14 @@ public final class GlcStrategyTests {
     @Test
     public void shouldApplyConditionThenThenBranch_whenConditionSucceeds() throws InterruptedException {
         // Arrange
+        final TegoEngine engine = new TegoRuntimeImpl(null);
         final GlcStrategy<Object, Integer, Integer, Integer> strategy = GlcStrategy.getInstance();
         final TestListStrategy<Integer, Integer> sc = new TestListStrategy<>(it -> Arrays.asList(it + 0, it + 1, it + 2));
         final TestListStrategy<Integer, Integer> st = new TestListStrategy<>(it -> Arrays.asList(it + 5));
         final TestListStrategy<Integer, Integer> se = new TestListStrategy<>(it -> Arrays.asList(it * 10));
 
         // Act
-        final Seq<Integer> result = strategy.eval(new Object(), sc, st, se, 42);
+        final Seq<Integer> result = strategy.evalInternal(engine, new Object(), sc, st, se, 42);
 
         // Assert
         assertEquals(Arrays.asList(47, 48, 49), result.collect(Collectors.toList()));
@@ -36,13 +37,14 @@ public final class GlcStrategyTests {
     @Test
     public void shouldApplyElseBranch_whenConditionFails() throws InterruptedException {
         // Arrange
+        final TegoEngine engine = new TegoRuntimeImpl(null);
         final GlcStrategy<Object, Integer, Integer, Integer> strategy = GlcStrategy.getInstance();
         final TestListStrategy<Integer, Integer> sc = new TestListStrategy<>(it -> Collections.emptyList() /* fail */);
         final TestListStrategy<Integer, Integer> st = new TestListStrategy<>(it -> Arrays.asList(it + 5));
         final TestListStrategy<Integer, Integer> se = new TestListStrategy<>(it -> Arrays.asList(it * 10));
 
         // Act
-        final Seq<Integer> result = strategy.eval(new Object(), sc, st, se, 42);
+        final Seq<Integer> result = strategy.evalInternal(engine, new Object(), sc, st, se, 42);
 
         // Assert
         assertEquals(Arrays.asList(420), result.collect(Collectors.toList()));
@@ -51,13 +53,14 @@ public final class GlcStrategyTests {
     @Test
     public void shouldEvaluateSequenceLazy_whenConditionSucceeds() throws InterruptedException {
         // Arrange
+        final TegoEngine engine = new TegoRuntimeImpl(null);
         final GlcStrategy<Object, Integer, Integer, Integer> strategy = GlcStrategy.getInstance();
         final TestListStrategy<Integer, Integer> sc = new TestListStrategy<>(it -> Arrays.asList(it + 0, it + 1, it + 2));
         final TestListStrategy<Integer, Integer> st = new TestListStrategy<>(it -> Arrays.asList(it + 5));
         final TestListStrategy<Integer, Integer> se = new TestListStrategy<>(it -> Arrays.asList(it * 10));
 
         // Act/Assert
-        final Seq<Integer> result = strategy.eval(new Object(), sc, st, se, 42);
+        final Seq<Integer> result = strategy.evalInternal(engine, new Object(), sc, st, se, 42);
 
         assertTrue(result.next());
         assertEquals(1, sc.nextCalls.get());        // called to get the first element

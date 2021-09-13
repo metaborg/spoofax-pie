@@ -27,7 +27,7 @@ public final class RepeatStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<C
     private RepeatStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
     @Override
-    public Seq<T> eval(CTX ctx, Strategy<CTX, T, T> s, T input) {
+    public Seq<T> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, T> s, T input) {
         return new SeqBase<T>() {
             // Implementation if `yield` and `yieldBreak` could actually suspend computation
             @SuppressWarnings("unused")
@@ -51,7 +51,7 @@ public final class RepeatStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<C
                         continue;
                     }
                     final T element = seq.getCurrent();
-                    final PeekableSeq<T> result = s.eval(ctx, element).peekable();
+                    final PeekableSeq<T> result = engine.eval(s, ctx, element).peekable();
                     if (!result.peek()) {
                         // The strategy failed. Yield the element itself.
                         this.yield(element);
@@ -96,7 +96,7 @@ public final class RepeatStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<C
                                 continue;
                             }
                             final T element = seq.getCurrent();
-                            final PeekableSeq<T> result = s.eval(ctx, element).peekable();
+                            final PeekableSeq<T> result = engine.eval(s, ctx, element).peekable();
                             if (!result.peek()) {
                                 // The strategy failed. Yield the element itself.
                                 this.yield(element);

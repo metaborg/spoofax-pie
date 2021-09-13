@@ -2,6 +2,7 @@ package mb.statix.strategies;
 
 import mb.statix.functions.Function3;
 import mb.statix.sequences.Seq;
+import mb.statix.strategies.runtime.TegoEngine;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -43,8 +44,8 @@ public final class StrategyExt {
         // Wraps a strategy, and gives it a name.
         return new NamedStrategy<CTX, I, O>() {
             @Override
-            public Seq<O> eval(CTX ctx, I input) {
-                return strategy.eval(ctx, input);
+            public Seq<O> evalInternal(TegoEngine engine, CTX ctx, I input) {
+                return strategy.evalInternal(engine, ctx, input);
             }
 
             @Override
@@ -55,7 +56,6 @@ public final class StrategyExt {
     }
 
     // -- //
-
 
     /**
      * Defines a named strategy with one argument.
@@ -90,8 +90,8 @@ public final class StrategyExt {
             }
 
             @Override
-            public Seq<O> eval(CTX ctx, A1 arg1, I input) {
-                return apply(arg1).eval(ctx, input);
+            public Seq<O> evalInternal(TegoEngine engine, CTX ctx, A1 arg1, I input) {
+                return apply(arg1).evalInternal(engine, ctx, input);
             }
         };
     }
@@ -124,8 +124,8 @@ public final class StrategyExt {
             }
 
             @Override
-            public Seq<O> eval(CTX ctx, A1 arg1, I input) {
-                return strategy.eval(ctx, arg1, input);
+            public Seq<O> evalInternal(TegoEngine engine, CTX ctx, A1 arg1, I input) {
+                return strategy.evalInternal(engine, ctx, arg1, input);
             }
         };
     }
@@ -167,8 +167,8 @@ public final class StrategyExt {
             }
 
             @Override
-            public Seq<O> eval(CTX ctx, A1 arg1, A2 arg2, I input) {
-                return apply(arg1, arg2).eval(ctx, input);
+            public Seq<O> evalInternal(TegoEngine engine, CTX ctx, A1 arg1, A2 arg2, I input) {
+                return apply(arg1, arg2).evalInternal(engine, ctx, input);
             }
         };
     }
@@ -203,8 +203,8 @@ public final class StrategyExt {
             }
 
             @Override
-            public Seq<O> eval(CTX ctx, A1 arg1, A2 arg2, I input) {
-                return strategy.eval(ctx, arg1, arg2, input);
+            public Seq<O> evalInternal(TegoEngine engine, CTX ctx, A1 arg1, A2 arg2, I input) {
+                return strategy.evalInternal(engine, ctx, arg1, arg2, input);
             }
         };
     }
@@ -248,8 +248,8 @@ public final class StrategyExt {
             }
 
             @Override
-            public Seq<O> eval(CTX ctx, A1 arg1, A2 arg2, A3 arg3, I input) {
-                return apply(arg1, arg2, arg3).eval(ctx, input);
+            public Seq<O> evalInternal(TegoEngine engine, CTX ctx, A1 arg1, A2 arg2, A3 arg3, I input) {
+                return apply(arg1, arg2, arg3).evalInternal(engine, ctx, input);
             }
         };
     }
@@ -286,8 +286,8 @@ public final class StrategyExt {
             }
 
             @Override
-            public Seq<O> eval(CTX ctx, A1 arg1, A2 arg2, A3 arg3, I input) {
-                return strategy.eval(ctx, arg1, arg2, arg3, input);
+            public Seq<O> evalInternal(TegoEngine engine, CTX ctx, A1 arg1, A2 arg2, A3 arg3, I input) {
+                return strategy.evalInternal(engine, ctx, arg1, arg2, arg3, input);
             }
         };
     }

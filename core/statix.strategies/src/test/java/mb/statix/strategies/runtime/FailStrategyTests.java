@@ -15,10 +15,11 @@ public final class FailStrategyTests {
     @Test
     public void shouldAlwaysFail() throws InterruptedException {
         // Arrange
+        final TegoEngine engine = new TegoRuntimeImpl(null);
         final FailStrategy<Object, String, Integer> strategy = FailStrategy.getInstance();
 
         // Act
-        final Seq<Integer> result = strategy.eval(new Object(), "My input");
+        final Seq<Integer> result = strategy.evalInternal(engine, new Object(), "My input");
 
         // Assert
         assertFalse(result.next());

@@ -19,7 +19,7 @@ public final class FailStrategy<CTX, T, R> extends NamedStrategy<CTX, T, R> {
 
     private FailStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    @Override public final Seq<R> eval(CTX ctx, T input) {
+    @Override public final Seq<R> evalInternal(TegoEngine engine, CTX ctx, T input) {
         return Seq.of();
     }
 

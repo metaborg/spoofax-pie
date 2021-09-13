@@ -18,7 +18,7 @@ public final class IdStrategy<CTX, T> extends NamedStrategy<CTX, T, T> {
 
     private IdStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    @Override public final Seq<T> eval(CTX ctx, T input) {
+    @Override public final Seq<T> evalInternal(TegoEngine engine, CTX ctx, T input) {
         return Seq.of(input);
     }
 

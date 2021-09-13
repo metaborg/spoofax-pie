@@ -8,7 +8,7 @@ public class MyTestStrategy3 extends NamedStrategy3<Object, String, String, Stri
     public final AtomicInteger doEvalCalls = new AtomicInteger();
 
     @Override
-    public Seq<String> eval(Object ctx, String part1, String part2, String part3, String input) {
+    public Seq<String> evalInternal(Object ctx, String part1, String part2, String part3, String input) {
         doEvalCalls.incrementAndGet();
         return Seq.fromOnce(() -> part1 + part2 + part3 + input);
     }

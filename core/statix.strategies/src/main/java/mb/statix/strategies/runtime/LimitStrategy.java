@@ -25,14 +25,14 @@ public final class LimitStrategy<CTX, T, R> extends NamedStrategy2<CTX, Strategy
     private LimitStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
     @Override
-    public Seq<R> eval(CTX ctx, Strategy<CTX, T, R> s, Integer n, T input) {
+    public Seq<R> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, R> s, Integer n, T input) {
         return new SeqBase<R>() {
             // Implementation if `yield` and `yieldBreak` could actually suspend computation
             @SuppressWarnings("unused")
             @ExcludeFromJacocoGeneratedReport
             private void computeNextCoroutine() throws InterruptedException {
                 // 0:
-                final Seq<R> s1Seq = s.eval(ctx, input);
+                final Seq<R> s1Seq = engine.eval(s, ctx, input);
                 // 1:
                 while (remaining > 0 && s1Seq.next()) {
                     this.remaining -= 1;
@@ -54,7 +54,7 @@ public final class LimitStrategy<CTX, T, R> extends NamedStrategy2<CTX, Strategy
                 while (true) {
                     switch (state) {
                         case 0:
-                            s1Seq = s.eval(ctx, input);
+                            s1Seq = engine.eval(s, ctx, input);
                             this.state = 1;
                             continue;
                         case 1:

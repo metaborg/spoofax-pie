@@ -29,11 +29,12 @@ public final class RepeatStrategyTests {
     @Test
     public void shouldApplyStrategy_untilStrategyFails() throws InterruptedException {
         // Arrange
+        final TegoEngine engine = new TegoRuntimeImpl(null);
         final RepeatStrategy<Object, String> strategy = RepeatStrategy.getInstance();
         final TestListStrategy<String, String> s = new TestListStrategy<>(it -> scoreString(it) < 5 ? Arrays.asList(it + "A", it + "B", it + "C") : Arrays.asList());
 
         // Act
-        final Seq<String> result = strategy.eval(new Object(), s, "A");
+        final Seq<String> result = strategy.evalInternal(engine, new Object(), s, "A");
 
         // Assert
         assertEquals(Arrays.asList(
@@ -60,11 +61,12 @@ public final class RepeatStrategyTests {
     @Test
     public void shouldEvaluateSequenceLazy() throws InterruptedException {
         // Arrange
+        final TegoEngine engine = new TegoRuntimeImpl(null);
         final RepeatStrategy<Object, String> strategy = RepeatStrategy.getInstance();
         final TestListStrategy<String, String> s = new TestListStrategy<>(it -> scoreString(it) < 5 ? Arrays.asList(it + "A", it + "B") : Arrays.asList());
 
         // Act
-        final Seq<String> result = strategy.eval(new Object(), s, "A");
+        final Seq<String> result = strategy.evalInternal(engine, new Object(), s, "A");
         assertEquals(0, s.evalCalls.get());         // not called yet
         assertEquals(0, s.nextCalls.get());         // not called yet
 

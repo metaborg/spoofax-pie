@@ -15,11 +15,12 @@ public final class IdStrategyTests {
     @Test
     public void shouldReturnComputationOfInput() throws InterruptedException {
         // Arrange
+        final TegoEngine engine = new TegoRuntimeImpl(null);
         final IdStrategy<Object, String> strategy = IdStrategy.getInstance();
         final String input = "My input";
 
         // Act
-        final Seq<String> result = strategy.eval(new Object(), input);
+        final Seq<String> result = strategy.evalInternal(engine, new Object(), input);
 
         // Assert
         assertTrue(result.next());

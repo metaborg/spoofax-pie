@@ -1,5 +1,7 @@
 package mb.statix.strategies;
 
+import mb.statix.strategies.runtime.TegoEngine;
+import mb.statix.strategies.runtime.TegoRuntimeImpl;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -115,11 +117,12 @@ public final class Strategy1Tests {
     @Test
     public void apply_eval_shouldImplicitlyApplyArguments() throws InterruptedException {
         // Arrange
+        final TegoEngine engine = new TegoRuntimeImpl(null);
         final Strategy1<Object, String, String, String> strategy = new MyTestStrategy1();
 
         // Act
         final Strategy<Object, String, String> appliedStrategy = strategy.apply("Hello, ");
-        final String result = appliedStrategy.eval(new Object(), "World").single();
+        final String result = appliedStrategy.evalInternal(engine, new Object(), "World").single();
 
         // Assert
         assertEquals("Hello, World", result);

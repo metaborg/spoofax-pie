@@ -20,7 +20,7 @@ public final class ConstStrategy<CTX, T, R> extends NamedStrategy1<CTX, R, T, R>
 
     private ConstStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    @Override public final Seq<R> eval(CTX ctx, R v, T input) {
+    @Override public final Seq<R> evalInternal(TegoEngine engine, CTX ctx, R v, T input) {
         return Seq.of(v);
     }
 

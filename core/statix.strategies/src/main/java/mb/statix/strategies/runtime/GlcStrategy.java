@@ -24,20 +24,20 @@ public final class GlcStrategy<CTX, T, U, R> extends NamedStrategy3<CTX, Strateg
     private GlcStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
     @Override
-    public Seq<R> eval(CTX ctx, Strategy<CTX, T, U> condition, Strategy<CTX, U, R> onSuccess, Strategy<CTX, T, R> onFailure, T input) {
+    public Seq<R> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, U> condition, Strategy<CTX, U, R> onSuccess, Strategy<CTX, T, R> onFailure, T input) {
         return new SeqBase<R>() {
             // Implementation if `yield` and `yieldBreak` could actually suspend computation
             @SuppressWarnings("unused")
             @ExcludeFromJacocoGeneratedReport
             private void computeNextCoroutine() throws InterruptedException {
                 // 0:
-                final Seq<U> conditionSeq = condition.eval(ctx, input);
+                final Seq<U> conditionSeq = engine.eval(condition, ctx, input);
                 if (conditionSeq.next()) {
                     // 1:
                     do {
                         // 2:
                         final U current = conditionSeq.getCurrent();
-                        final Seq<R> onSuccessSeq = onSuccess.eval(ctx, current);
+                        final Seq<R> onSuccessSeq = engine.eval(onSuccess, ctx, current);
                         // 3:
                         while(onSuccessSeq.next()) {
                             // 4:
@@ -49,7 +49,7 @@ public final class GlcStrategy<CTX, T, U, R> extends NamedStrategy3<CTX, Strateg
                     // 7:
                 } else {
                     // 8:
-                    final Seq<R> onFailureSeq = onFailure.eval(ctx, input);
+                    final Seq<R> onFailureSeq = engine.eval(onFailure, ctx, input);
                     // 9:
                     while(onFailureSeq.next()) {
                         // 10:
@@ -74,7 +74,7 @@ public final class GlcStrategy<CTX, T, U, R> extends NamedStrategy3<CTX, Strateg
                 while (true) {
                     switch (state) {
                         case 0:
-                            conditionSeq = condition.eval(ctx, input);
+                            conditionSeq = engine.eval(condition, ctx, input);
                             if (!conditionSeq.next()) {
                                 this.state = 8;
                                 continue;
@@ -86,7 +86,7 @@ public final class GlcStrategy<CTX, T, U, R> extends NamedStrategy3<CTX, Strateg
                             continue;
                         case 2:
                             final U current = conditionSeq.getCurrent();
-                            onSuccessSeq = onSuccess.eval(ctx, current);
+                            onSuccessSeq = engine.eval(onSuccess, ctx, current);
                             this.state = 3;
                             continue;
                         case 3:
@@ -114,7 +114,7 @@ public final class GlcStrategy<CTX, T, U, R> extends NamedStrategy3<CTX, Strateg
                             this.state = 13;
                             continue;
                         case 8:
-                            onFailureSeq = onFailure.eval(ctx, input);
+                            onFailureSeq = engine.eval(onFailure, ctx, input);
                             this.state = 9;
                             continue;
                         case 9:

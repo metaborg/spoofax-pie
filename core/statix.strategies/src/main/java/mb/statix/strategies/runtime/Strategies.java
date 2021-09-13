@@ -23,8 +23,8 @@ public final class Strategies {
     public static <CTX, T, R> Strategy<CTX, T, R> rec(Function<Strategy<CTX, T, R>, Strategy<CTX, T, R>> f) {
         return new Strategy<CTX, T, R>() {
             @Override
-            public Seq<R> eval(CTX ctx, T input) {
-                return f.apply(this).eval(ctx, input);
+            public Seq<R> evalInternal(TegoEngine engine, CTX ctx, T input) {
+                return engine.eval(f.apply(this), ctx, input);
             }
         };
     }

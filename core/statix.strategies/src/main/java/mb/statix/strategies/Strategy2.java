@@ -1,6 +1,7 @@
 package mb.statix.strategies;
 
 import mb.statix.sequences.Seq;
+import mb.statix.strategies.runtime.TegoEngine;
 
 /**
  * A strategy.
@@ -20,13 +21,21 @@ public interface Strategy2<CTX, A1, A2, T, R> extends StrategyDecl, PrintableStr
     /**
      * Applies the strategy to the given arguments.
      *
+     * @param engine the Tego engine
      * @param ctx the context
      * @param arg1 the first argument
      * @param arg2 the second argument
      * @param input the input argument
      * @return the lazy sequence of results; or an empty sequence if the strategy failed
      */
-    Seq<R> eval(CTX ctx, A1 arg1, A2 arg2, T input);
+    Seq<R> evalInternal(TegoEngine engine, CTX ctx, A1 arg1, A2 arg2, T input);
+
+    @SuppressWarnings("unchecked")
+    @Override
+    default Seq<?> evalInternal(TegoEngine engine, Object ctx, Object[] args, Object input) {
+        assert args.length == 2 : "Expected 2 arguments, got " + args.length + ".";
+        return evalInternal(engine, (CTX)ctx, (A1)args[0], (A2)args[1], (T)input);
+    }
 
     /**
      * Partially applies the strategy, providing the first argument.
@@ -74,8 +83,8 @@ public interface Strategy2<CTX, A1, A2, T, R> extends StrategyDecl, PrintableStr
         }
 
         @Override
-        public Seq<R> eval(CTX ctx, A2 arg2, T input) {
-            return Strategy2.this.eval(ctx, arg1, arg2, input);
+        public Seq<R> evalInternal(TegoEngine engine, CTX ctx, A2 arg2, T input) {
+            return Strategy2.this.evalInternal(engine, ctx, arg1, arg2, input);
         }
 
         @Override
@@ -139,8 +148,8 @@ public interface Strategy2<CTX, A1, A2, T, R> extends StrategyDecl, PrintableStr
         }
 
         @Override
-        public Seq<R> eval(CTX ctx, T input) {
-            return Strategy2.this.eval(ctx, arg1, arg2, input);
+        public Seq<R> evalInternal(TegoEngine engine, CTX ctx, T input) {
+            return Strategy2.this.evalInternal(engine, ctx, arg1, arg2, input);
         }
 
         @Override

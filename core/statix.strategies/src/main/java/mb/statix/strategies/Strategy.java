@@ -1,12 +1,14 @@
 package mb.statix.strategies;
 
 import mb.statix.sequences.Seq;
+import mb.statix.strategies.runtime.TegoEngine;
+import mb.statix.strategies.runtime.TegoRuntime;
 
 /**
  * A strategy.
  *
- * The {@link #eval} method can be executed at any time, but no actual evaluations should take place.
- * The {@link Seq} returned by the {@link #eval} method is a lazy sequence that, when iterated, will
+ * The {@link #evalInternal} method can be executed at any time, but no actual evaluations should take place.
+ * The {@link Seq} returned by the {@link #evalInternal} method is a lazy sequence that, when iterated, will
  * compute its results. Multiple iterations will cause multiple computations, but all implementations
  * of strategies should instantiate only one iterable for each sequence, therefore only iterate once.
  *
@@ -23,10 +25,22 @@ public interface Strategy<CTX, T, R> extends StrategyDecl, PrintableStrategy {
     /**
      * Evaluates the strategy.
      *
+     * Typically, do <i>not</i> call this method directly.
+     * This method is intended for use by a {@link TegoRuntime} implementation.
+     * Instead, obtain a {@link TegoRuntime} implementation and call the
+     * appropriate {@link TegoRuntime#eval} method.
+     *
+     * @param engine the Tego engine
      * @param ctx the context
      * @param input the input argument
      * @return the lazy sequence of results; or an empty sequence if the strategy failed
      */
-    Seq<R> eval(CTX ctx, T input);
+    Seq<R> evalInternal(TegoEngine engine, CTX ctx, T input);
 
+    @SuppressWarnings("unchecked")
+    @Override
+    default Seq<?> evalInternal(TegoEngine engine, Object ctx, Object[] args, Object input) {
+        assert args.length == 0 : "Expected 0 arguments, got " + args.length + ".";
+        return evalInternal(engine, (CTX)ctx, (T)input);
+    }
 }
