@@ -16,6 +16,7 @@ import mb.spoofax.eclipse.util.ResourceUtil;
 import mb.spoofax.eclipse.util.StyleUtil;
 import mb.spoofax.eclipse.util.UncheckedCoreException;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -167,7 +168,9 @@ public class WorkspaceUpdate {
                         final ResourceKey resourceKey = entry.getKey();
                         try {
                             final IResource resource = resourceUtil.getEclipseResource(resourceKey);
-                            entry.getValue().forEach(m -> createMarker(m, resource));
+                            if(!(resource instanceof IContainer)) { // HACK: do not create errors on containers for now.
+                                entry.getValue().forEach(m -> createMarker(m, resource));
+                            }
                         } catch(ResourceRuntimeException e) {
                             logger.error("Cannot create markers for resource '{}'; getting Eclipse resource failed unexpectedly", e, resourceKey);
                         }
@@ -176,7 +179,9 @@ public class WorkspaceUpdate {
                     if(resourceForMessagesWithoutKey != null) {
                         try {
                             final IResource resource = resourceUtil.getEclipseResource(resourceForMessagesWithoutKey);
-                            keyedMessages.getMessagesWithoutKey().forEach(m -> createMarker(m, resource));
+                            if(!(resource instanceof IContainer)) { // HACK: do not create errors on containers for now.
+                                keyedMessages.getMessagesWithoutKey().forEach(m -> createMarker(m, resource));
+                            }
                         } catch(ResourceRuntimeException e) {
                             logger.error("Cannot create markers for resource '{}'; getting Eclipse resource failed unexpectedly", e, resourceForMessagesWithoutKey);
                         }

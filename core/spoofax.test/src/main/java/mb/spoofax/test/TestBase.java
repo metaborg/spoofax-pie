@@ -3,6 +3,7 @@ package mb.spoofax.test;
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
 import mb.common.message.KeyedMessages;
+import mb.common.message.Message;
 import mb.common.result.Result;
 import mb.common.util.ExceptionPrinter;
 import mb.log.api.Logger;
@@ -115,12 +116,23 @@ public class TestBase {
     }
 
     public void assertErrors(KeyedMessages messages) {
-        assertNoErrors(messages, "errors, but found no errors");
+        assertErrors(messages, "errors, but found no errors");
     }
 
     public void assertErrors(KeyedMessages messages, String failure) {
         assertTrue(messages.containsError(), () -> "Expected " + failure + ".\n" + exceptionPrinter.printMessagesToString(messages));
     }
+
+    public void assertNumErrorsEquals(KeyedMessages messages, long count) {
+        final long actualCount = messages.filter(Message::isError).stream().count();
+        assertEquals(count, actualCount, () -> "Expected " + count + " errors, but found " + actualCount + ".\n" + exceptionPrinter.printMessagesToString(messages));
+    }
+
+    public void assertNumErrorsEqualsOrMore(KeyedMessages messages, long count) {
+        final long actualCount = messages.filter(Message::isError).stream().count();
+        assertTrue(actualCount >= count, () -> "Expected or more" + count + " errors, but found " + actualCount + ".\n" + exceptionPrinter.printMessagesToString(messages));
+    }
+
 
     public <T, E extends Exception> void assertOk(Result<T, E> result) {
         // noinspection ConstantConditions (err is present)

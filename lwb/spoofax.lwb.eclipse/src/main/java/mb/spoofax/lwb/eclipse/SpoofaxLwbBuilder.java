@@ -97,10 +97,15 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         return null;
     }
 
-    @Override protected void clean(IProgressMonitor monitor) throws CoreException {
+    @Override protected void clean(@Nullable IProgressMonitor monitor) throws CoreException {
         final Pie pie = SpoofaxLwbLifecycleParticipant.getInstance().getPieComponent().getPie();
         pie.dropCallbacks();
         pie.dropStore();
+
+        final IProject eclipseProject = getProject();
+        final ResourcePath rootDirectory = getResourcePath(eclipseProject);
+        cleanCheckMessages(eclipseProject, rootDirectory, monitor);
+
         forgetLastBuiltState();
     }
 
@@ -247,10 +252,32 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         ResourcesPlugin.getWorkspace().run(runnable, eclipseProject, IWorkspace.AVOID_UPDATE, monitor);
     }
 
+    private void cleanCheckMessages(IProject eclipseProject, ResourcePath rootDirectory, @Nullable IProgressMonitor monitor) throws CoreException {
+        final WorkspaceUpdate cfgUpdate = createCleanUpdate(rootDirectory, CfgLanguageFactory.getLanguage().getComponent().getEclipseIdentifiers());
+        final WorkspaceUpdate esvUpdate = createCleanUpdate(rootDirectory, EsvLanguageFactory.getLanguage().getComponent().getEclipseIdentifiers());
+        final WorkspaceUpdate sdf3Update = createCleanUpdate(rootDirectory, Sdf3LanguageFactory.getLanguage().getComponent().getEclipseIdentifiers());
+        final WorkspaceUpdate statixUpdate = createCleanUpdate(rootDirectory, StatixLanguageFactory.getLanguage().getComponent().getEclipseIdentifiers());
+        final WorkspaceUpdate strategoUpdate = createCleanUpdate(rootDirectory, StrategoLanguageFactory.getLanguage().getComponent().getEclipseIdentifiers());
+        final ICoreRunnable runnable = runnableMonitor -> {
+            cfgUpdate.createMarkerUpdate().run(runnableMonitor);
+            esvUpdate.createMarkerUpdate().run(runnableMonitor);
+            sdf3Update.createMarkerUpdate().run(runnableMonitor);
+            statixUpdate.createMarkerUpdate().run(runnableMonitor);
+            strategoUpdate.createMarkerUpdate().run(runnableMonitor);
+        };
+        ResourcesPlugin.getWorkspace().run(runnable, eclipseProject, IWorkspace.AVOID_UPDATE, monitor);
+    }
+
     private WorkspaceUpdate createUpdate(Session session, ResourcePath rootDirectory, CancelToken cancelToken, EclipseIdentifiers identifiers, TaskDef<ResourcePath, KeyedMessages> taskDef) throws ExecException, InterruptedException {
         final KeyedMessages messages = session.require(taskDef.createTask(rootDirectory), cancelToken);
         final WorkspaceUpdate update = workspaceUpdateFactory.create(identifiers);
         update.replaceMessages(messages, rootDirectory);
+        return update;
+    }
+
+    private WorkspaceUpdate createCleanUpdate(ResourcePath rootDirectory, EclipseIdentifiers identifiers) {
+        final WorkspaceUpdate update = workspaceUpdateFactory.create(identifiers);
+        update.clearMessages(rootDirectory, true);
         return update;
     }
 

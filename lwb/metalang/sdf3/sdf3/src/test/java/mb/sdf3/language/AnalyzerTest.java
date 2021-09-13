@@ -39,11 +39,11 @@ class AnalyzerTest extends TestBase {
     }
 
     @Test void analyzeMultipleErrors() throws Exception {
-        final ReadableResource file1 = textFile("a.sdf3", "module a");
+        final ReadableResource file1 = textFile("a.sdf3", "module a sorts A");
         final JsglrParseOutput parsed1 = parse(file1);
-        final ReadableResource file2 = textFile("b.sdf3", "module b context-free sorts B context-free syntax B = A");
+        final ReadableResource file2 = textFile("b.sdf3", "module b imports a context-free sorts B context-free syntax B = A");
         final JsglrParseOutput parsed2 = parse(file2);
-        final ReadableResource file3 = textFile("c.sdf3", "module c context-free sorts C context-free syntax C = A B");
+        final ReadableResource file3 = textFile("c.sdf3", "module c imports a context-free context-free syntax C = A B");
         final JsglrParseOutput parsed3 = parse(file3);
         final HashMap<ResourceKey, IStrategoTerm> asts = new HashMap<>();
         asts.put(file1.getKey(), parsed1.ast);
@@ -63,7 +63,7 @@ class AnalyzerTest extends TestBase {
         assertNotNull(result3.ast);
         assertNotNull(result3.analysis);
 
-        assertEquals(3, result.messages.size());
+        assertNumErrorsEqualsOrMore(result.messages, 2);
         assertTrue(result.messages.containsError());
         boolean foundCorrectMessage = result.messages.getMessagesWithKey().stream()
             .filter(msg -> file3.getKey().equals(msg.getKey()))
