@@ -14,6 +14,7 @@ import mb.statix.spec.ApplyResult;
 import mb.statix.spec.Rule;
 import mb.statix.spec.RuleUtil;
 import mb.statix.strategies.NamedStrategy1;
+import mb.statix.strategies.runtime.TegoEngine;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
@@ -54,7 +55,7 @@ public final class ExpandPredicateConstraintStrategy extends NamedStrategy1<Solv
      * @return the sequence of new solver states
      */
     @Override
-    public Seq<SolverState> eval(SolverContext ctx, @Nullable ITermVar focus, SelectedConstraintSolverState<CUser> state) {
+    public Seq<SolverState> evalInternal(TegoEngine engine, SolverContext ctx, @Nullable ITermVar focus, SelectedConstraintSolverState<CUser> state) {
         final CUser selected = state.getSelected();
         // Get the rules for the given predicate constraint
         final ImmutableList<Rule> rules = ctx.getSpec().rules().getOrderIndependentRules(selected.name()).asList();
