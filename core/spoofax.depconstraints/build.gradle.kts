@@ -35,6 +35,7 @@ dependencies {
     api(project(":stratego.common"))
     api(project(":constraint.common"))
     api(project(":nabl2.common"))
+    api(project(":statix.codecompletion"))
     api(project(":statix.common"))
     api(project(":statix.strategies"))
     api(project(":statix.multilang"))
