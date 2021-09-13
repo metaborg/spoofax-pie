@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -170,6 +171,44 @@ public final class SeqTests {
         assertTrue(seq.next());
         assertEquals(2, seq.getCurrent());
         assertFalse(seq.next());
+    }
+
+    @Test
+    public void from_shouldReturnIteratorValues_whenWrappingIterable() throws InterruptedException {
+        // Arrange
+        final Iterable<Integer> iterable = Arrays.asList(0, 1, 2);
+
+        // Act
+        final Seq<Integer> seq = Seq.from(iterable);
+
+        // Assert
+        assertTrue(seq.next());
+        assertEquals(0, seq.getCurrent());
+        assertTrue(seq.next());
+        assertEquals(1, seq.getCurrent());
+        assertTrue(seq.next());
+        assertEquals(2, seq.getCurrent());
+        assertFalse(seq.next());
+    }
+
+    @Test
+    public void from_shouldNotInstantiateIterator_untilCalledForTheFirstTime() throws InterruptedException {
+        // Arrange
+        final List<Integer> list = Arrays.asList(0, 1, 2);
+        final AtomicBoolean iteratorCalled = new AtomicBoolean(false);
+        final Iterable<Integer> iterable = () -> {
+            iteratorCalled.set(true);
+            return list.iterator();
+        };
+
+        // Act
+        final Seq<Integer> seq = Seq.from(iterable);
+
+        // Assert
+        assertFalse(iteratorCalled.get());
+        assertTrue(seq.next());
+        assertEquals(0, seq.getCurrent());
+        assertTrue(iteratorCalled.get());
     }
 
     @Test

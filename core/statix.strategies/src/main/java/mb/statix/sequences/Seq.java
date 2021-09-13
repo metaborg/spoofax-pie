@@ -1,5 +1,7 @@
 package mb.statix.sequences;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.stream.Collector;
@@ -63,6 +65,25 @@ public interface Seq<T> extends AutoCloseable {
     @SafeVarargs static <T> Seq<T> of(T... elements) {
         if (elements.length == 0) return of();
         return new ArraySeq<>(elements);
+    }
+
+    /**
+     * Returns a lazy sequence that returns a sequence from an iterable.
+     *
+     * The returned sequence will not try to instantiate the iterable's iterator
+     * until it is called for the first time. Note that while the sequence
+     * is iterating, many collections do not allow modifications or the
+     * sequence iterator will fail.
+     *
+     * To create a lazy sequence from the current state of the iterable,
+     * call {@code asSeq(iterable.iterator())} instead.
+     *
+     * @param iterable the iterable
+     * @param <T> the type of values being supplied (covariant)
+     * @return the sequence
+     */
+    static <T> Seq<T> from(Iterable<T> iterable) {
+        return new IterableSeq<>(iterable);
     }
 
     /**
@@ -388,6 +409,32 @@ final class IteratorSeq<T> extends SeqBase<T> {
 
     @Override
     protected void computeNext() throws InterruptedException {
+        if (iterator.hasNext()) {
+            this.yield(iterator.next());
+        } else {
+            yieldBreak();
+        }
+    }
+}
+
+/**
+ * Sequence wrapping an {@link Iterable}.
+ *
+ * @param <T> the type of values in the iterable (covariant)
+ */
+final class IterableSeq<T> extends SeqBase<T> {
+    final Iterable<T> iterable;
+    @Nullable private Iterator<T> iterator = null;
+
+    public IterableSeq(Iterable<T> iterable) {
+        this.iterable = iterable;
+    }
+
+    @Override
+    protected void computeNext() throws InterruptedException {
+        if (iterator == null) {
+            iterator = iterable.iterator();
+        }
         if (iterator.hasNext()) {
             this.yield(iterator.next());
         } else {
