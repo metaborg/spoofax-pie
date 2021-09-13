@@ -3,6 +3,15 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+### Fixed
+- Injection explication failing on context-free productions without constructors that are not an injection, bracket, or rejection production. These productions now show an error.
+- Signature generation failing on context-free productions with optionals, alternations, and sequences. These productions now show an error.
+- Errors markers on directories never disappearing in the Eclipse LWB. Fixed for now by not adding error markers on directories.
+- Cleaning a project in the Eclipse LWB does not remove all markers.
+
+### Changed
+- Lexical productions with constructors show a warning to remove the constructor.
+- releng (devenv-release) to version 0.1.10.
 
 
 ## [0.11.8] - 2021-09-13
@@ -11,7 +20,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 ### Changed
 - PIE to version 0.16.7.
-- releng/devenv to version 0.1.9.
+- releng (devenv-release) to version 0.1.9.
 
 ### Removed
 - CFG, SDF3, and Statix hover tooltips, as they do not provide useful information at the moment.
