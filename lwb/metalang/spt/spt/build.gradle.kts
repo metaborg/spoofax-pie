@@ -81,32 +81,6 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   val runTestSuites = TypeInfo.of(taskPackageId, "SptRunTestSuites")
   addTaskDefs(runTestSuite, runTestSuites)
 
-  // Show (debugging) task definitions
-  val debugTaskPackageId = "$taskPackageId.debug"
-  val showParsedAst = TypeInfo.of(debugTaskPackageId, "SptShowParsedAst")
-  val showParsedTokens = TypeInfo.of(debugTaskPackageId, "SptShowParsedTokens")
-  addTaskDefs(showParsedAst, showParsedTokens)
-  // Show (debugging) commands
-  fun showCommand(taskDefType: TypeInfo, argType: TypeInfo, resultName: String) = CommandDefRepr.builder()
-    .type(commandPackageId, taskDefType.id() + "Command")
-    .taskDefType(taskDefType)
-    .argType(argType)
-    .displayName("Show $resultName")
-    .description("Shows the $resultName of the file")
-    .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous)
-    .addAllParams(listOf(
-      ParamRepr.of("file", TypeInfo.of("mb.resource", "ResourceKey"), true, ArgProviderRepr.context(CommandContextType.File))
-    ))
-    .build()
-
-  val showParsedAstCommand = showCommand(showParsedAst, TypeInfo.of("mb.jsglr.pie", "ShowParsedAstTaskDef.Args"), "parsed AST")
-  val showParsedTokensCommand = showCommand(showParsedTokens, TypeInfo.of("mb.jsglr.pie", "ShowParsedTokensTaskDef.Args"), "parsed tokens")
-  val showCommands = listOf(
-    showParsedAstCommand,
-    showParsedTokensCommand
-  )
-  addAllCommandDefs(showCommands)
-
   // Add test running tasks
   val showTestSuiteResults = TypeInfo.of(taskPackageId, "SptShowTestSuiteResults")
   val showTestResults = TypeInfo.of(taskPackageId, "SptShowTestSuitesResults")
@@ -152,22 +126,11 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
 
   // Menu bindings
   val mainAndEditorMenu = listOf(
-    MenuItemRepr.menu("Debug",
-      showCommands.flatMap {
-        listOf(
-          CommandActionRepr.builder().manualOnce(it).fileRequired().buildItem(),
-          CommandActionRepr.builder().manualContinuous(it).fileRequired().buildItem()
-        )
-      }
-    ),
     CommandActionRepr.builder().manualOnce(showTestSuiteCommand).fileRequired().enclosingProjectRequired().buildItem()
   )
   addAllMainMenuItems(mainAndEditorMenu)
   addAllEditorContextMenuItems(mainAndEditorMenu)
   addResourceContextMenuItems(
-    MenuItemRepr.menu("Debug",
-      showCommands.flatMap { listOf(CommandActionRepr.builder().manualOnce(it).fileRequired().buildItem()) }
-    ),
     CommandActionRepr.builder().manualOnce(showTestSuiteCommand).fileRequired().enclosingProjectRequired().buildItem(),
     CommandActionRepr.builder().manualOnce(showTestSuitesCommand).directoryRequired().enclosingProjectRequired().buildItem()
   )

@@ -140,7 +140,7 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
             final CompileLanguageSpecification.Output output = languageSpecificationCompilerResult.get();
             // noinspection ConstantConditions (value is really present)
             messagesBuilder.addMessages(output.messages());
-            compileJavaInputBuilder.addClassPathSuppliers(new ValueSupplier<>(ListView.of(output.javaClassPaths())));
+            compileJavaInputBuilder.addClassPathSuppliers(new ValueSupplier<>(ListView.of(output.javaClassPaths()))); // TODO: use real supplier
             for(File javaClassPath : output.javaClassPaths()) {
                 outputBuilder.addJavaClassPaths(new FSPath(javaClassPath));
             }

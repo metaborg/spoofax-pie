@@ -105,10 +105,10 @@ public class {{baseResolveTaskDef.id}} implements TaskDef<{{baseResolveTaskDef.i
         }
 
         final OutTransient<Provider<StrategoRuntime>> strategoProvider = context.require(getStrategoRuntimeProvider, None.instance);
-        final StrategoRuntime strategoRuntime = strategoProvider.getValue().get().addContextObject(analysis.get().analyzerContext);
+        final StrategoRuntime strategoRuntime = strategoProvider.getValue().get().addContextObject(analysis.get().context);
 
         // find the AST nodes for the relevant offset (innermost first)
-        final Collection<IStrategoTerm> terms = TermTracer.getTermsEncompassingRegion(analysis.get().inputAst, args.position);
+        final Collection<IStrategoTerm> terms = TermTracer.getTermsEncompassingRegion(analysis.get().ast, args.position);
 
         // attempt to run stratego strategy on every ast in turn
         for(IStrategoTerm term : terms) {

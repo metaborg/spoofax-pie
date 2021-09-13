@@ -234,13 +234,13 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
                     } catch(Exception e) {
                         throw StrategoConfigureException.sdf3PrettyPrinterGenerateFail(e);
                     }
-                    try {
-                        sdf3ToCompletionRuntime(context, generatedSourcesDirectory, astSupplier);
-                    } catch(RuntimeException | InterruptedException e) {
-                        throw e; // Do not wrap runtime and interrupted exceptions, rethrow them.
-                    } catch(Exception e) {
-                        throw StrategoConfigureException.sdf3CompletionRuntimeGenerateFail(e);
-                    }
+//                    try {
+//                        sdf3ToCompletionRuntime(context, generatedSourcesDirectory, astSupplier);
+//                    } catch(RuntimeException | InterruptedException e) {
+//                        throw e; // Do not wrap runtime and interrupted exceptions, rethrow them.
+//                    } catch(Exception e) {
+//                        throw StrategoConfigureException.sdf3CompletionRuntimeGenerateFail(e);
+//                    }
                     if(strategoInput.enableSdf3StatixExplicationGen()) {
                         try {
                             sdf3ToStatixGenInj(context, strategyAffix, generatedSourcesDirectory, astSupplier);

@@ -340,7 +340,7 @@ The following `HoverVariant`s are supported:
 
 ### SDF3
 
-The `sdf3 { $Sdf3Option* }` section enables syntax definition with [SDF3](https://www.spoofax.dev/spoofax-docs/references/syntax/).
+The `sdf3 { $Sdf3Option* }` section enables syntax definition with [SDF3](https://www.spoofax.dev/references/syntax/).
 The `parser` section must be enabled when the `sdf3` section is enabled.
 The following `Sdf3Option`s are supported:
 
@@ -363,7 +363,7 @@ The following `ParseTableGeneratorOption`s are supported:
 
 ### ESV
 
-The `esv { $EsvOption* }` section enables syntax-based styling definition with [ESV](https://www.spoofax.dev/spoofax-docs/references/editor-services/syntax-highlighting/).
+The `esv { $EsvOption* }` section enables syntax-based styling definition with [ESV](https://www.spoofax.dev/references/editor-services/esv/).
 The `styler` section must be enabled when the `esv` section is enabled.
 The following `EsvOption`s are supported:
 
@@ -375,7 +375,7 @@ The following `EsvOption`s are supported:
 
 ### Statix
 
-The `statix { $StatixOption* }` section enables static semantics definition with [Statix](https://www.spoofax.dev/spoofax-docs/references/statix/).
+The `statix { $StatixOption* }` section enables static semantics definition with [Statix](https://www.spoofax.dev/references/statix/).
 The `constraint-anaylzer` section must be enabled when the `statix` section is enabled.
 The following `StatixOption`s are supported:
 
@@ -387,7 +387,7 @@ The following `StatixOption`s are supported:
 
 ### Stratego
 
-The `stratego { $StrategoOption* }` section enables definition of transformations with [Stratego](https://www.spoofax.dev/spoofax-docs/references/stratego/).
+The `stratego { $StrategoOption* }` section enables definition of transformations with [Stratego](https://www.spoofax.dev/references/stratego/).
 The `stratego-runtime` section must be enabled when the `stratego` section is enabled.
 The following `StrategoOption`s are supported:
 

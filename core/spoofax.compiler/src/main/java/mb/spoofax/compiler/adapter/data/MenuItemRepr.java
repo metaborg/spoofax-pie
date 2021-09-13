@@ -21,6 +21,10 @@ public abstract class MenuItemRepr implements Serializable {
         return MenuItemReprs.commandAction(commandActionRepr);
     }
 
+    public static MenuItemRepr menu(MenuRepr menu) {
+        return MenuItemReprs.menu(menu);
+    }
+
     public static MenuItemRepr menu(String displayName, String description, List<MenuItemRepr> items) {
         return MenuItemReprs.menu(MenuRepr.of(displayName, description, items));
     }

@@ -93,7 +93,7 @@ class DynamicLoadingTest extends CharsTestBase {
                 final KeyedMessages messages = session.require(languageInstance.createCheckTask(charsProjectPath));
                 assertFalse(messages.containsError());
                 // Run command and check.
-                final Task<CommandFeedback> debugRemoveATask = getTaskForFirstCommand(languageInstance);
+                final Task<CommandFeedback> debugRemoveATask = getTaskForRemoveACommand(languageInstance);
                 final CommandFeedback debugRemoveAFeedback = session.require(debugRemoveATask);
                 assertFalse(debugRemoveAFeedback.hasErrorMessagesOrException());
                 final ListView<ShowFeedback> debugRemoveAShowFeedbacks = debugRemoveAFeedback.getShowFeedbacks();
@@ -218,7 +218,7 @@ class DynamicLoadingTest extends CharsTestBase {
                 languageMetricsTracer.reset();
                 final TopDownSession topDownSession = session.updateAffectedBy(providedResources);
                 // Run command and check.
-                final Task<CommandFeedback> debugRemoveATask = getTaskForFirstCommand(languageComponent.getLanguageInstance());
+                final Task<CommandFeedback> debugRemoveATask = getTaskForRemoveACommand(languageComponent.getLanguageInstance());
                 final CommandFeedback debugRemoveAFeedback = topDownSession.require(debugRemoveATask);
                 assertFalse(debugRemoveAFeedback.hasErrorMessagesOrException());
                 final ListView<ShowFeedback> debugRemoveAShowFeedbacks = debugRemoveAFeedback.getShowFeedbacks();
@@ -261,7 +261,7 @@ class DynamicLoadingTest extends CharsTestBase {
                 languageMetricsTracer.reset();
                 final TopDownSession topDownSession = session.updateAffectedBy(providedResources);
                 // Run command and check.
-                final Task<CommandFeedback> debugRemoveATask = getTaskForFirstCommand(languageComponent.getLanguageInstance());
+                final Task<CommandFeedback> debugRemoveATask = getTaskForRemoveACommand(languageComponent.getLanguageInstance());
                 final CommandFeedback debugRemoveAFeedback = topDownSession.require(debugRemoveATask);
                 assertFalse(debugRemoveAFeedback.hasErrorMessagesOrException());
                 final ListView<ShowFeedback> debugRemoveAShowFeedbacks = debugRemoveAFeedback.getShowFeedbacks();

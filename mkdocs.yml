@@ -6,12 +6,14 @@ nav:
   - Tutorials:
       - tutorial/install.md
       - tutorial/create_language_project.md
-#  - Guides:
-#      - guide/adding_commands_and_menus.md
+      - tutorial/change_static_semantics.md
+#      - tutorial/add_transformation.md
+  - How-to Guides:
+      - guide/ask_for_help.md
+      - guide/report_a_bug.md
+      - guide/eclipse_lwb/troubleshooting.md
   - Reference:
       - reference/configuration.md
-#      - reference/language_definition.md
-#      - reference/anatomy_language_implementation.md
   - Background:
       - background/documentation.md
       - background/motivation.md

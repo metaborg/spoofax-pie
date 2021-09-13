@@ -1,26 +1,23 @@
-package mb.spt.task.debug;
+package {{baseShowParsedTokensTaskDef.packageId}};
 
 import mb.jsglr.pie.ShowParsedTokensTaskDef;
 import mb.pie.api.ExecContext;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.spoofax.core.language.command.CommandFeedback;
-import mb.spt.SptClassLoaderResources;
-import mb.spt.SptScope;
-import mb.spt.task.SptParse;
 
 import javax.inject.Inject;
 
-@SptScope
-public class SptShowParsedTokens extends ShowParsedTokensTaskDef {
-    private final SptClassLoaderResources classLoaderResources;
+@{{adapterProject.scope.qualifiedId}}
+public class {{baseShowParsedTokensTaskDef.id}} extends ShowParsedTokensTaskDef {
+    private final {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources;
 
-    @Inject public SptShowParsedTokens(SptParse parse, SptClassLoaderResources classLoaderResources) {
+    @Inject public {{baseShowParsedTokensTaskDef.id}}({{parseTaskDef.qualifiedId}} parse, {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources) {
         super(parse);
         this.classLoaderResources = classLoaderResources;
     }
 
     @Override public String getId() {
-        return getClass().getName();
+        return "{{baseShowParsedTokensTaskDef.qualifiedId}}";
     }
 
     @Override public CommandFeedback exec(ExecContext context, Args args) throws Exception {

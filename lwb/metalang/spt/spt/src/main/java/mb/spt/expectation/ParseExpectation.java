@@ -3,7 +3,6 @@ package mb.spt.expectation;
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Severity;
-import mb.common.option.Option;
 import mb.common.region.Region;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
@@ -20,12 +19,24 @@ import mb.spt.model.TestExpectation;
 import mb.spt.util.SptMessageRemap;
 
 public class ParseExpectation implements TestExpectation {
+    public enum Recovery {
+        NotRecovered,
+        Recovered,
+        DoNotCare,
+    }
+
+    public enum Ambiguity {
+        Unambiguous,
+        Ambiguous,
+        DoNotCare,
+    }
+
     private final boolean expectSuccess;
-    private final Option<Boolean> expectRecovered;
-    private final Option<Boolean> expectAmbiguous;
+    private final Ambiguity expectAmbiguous;
+    private final Recovery expectRecovered;
     private final Region sourceRegion;
 
-    public ParseExpectation(boolean expectSuccess, Option<Boolean> expectRecovered, Option<Boolean> expectAmbiguous, Region sourceRegion) {
+    public ParseExpectation(boolean expectSuccess, Ambiguity expectAmbiguous, Recovery expectRecovered, Region sourceRegion) {
         this.expectSuccess = expectSuccess;
         this.expectRecovered = expectRecovered;
         this.expectAmbiguous = expectAmbiguous;
@@ -52,26 +63,48 @@ public class ParseExpectation implements TestExpectation {
         final Result<ParseResult, ?> result = testableParse.testParse(languageUnderTestSession, testCase.resource, testCase.rootDirectoryHint);
         result.ifElse(r -> {
             final boolean actualSuccess = r.success && !r.messages.containsError();
-            final boolean[] addParseMessages = {false};
+            boolean addParseMessages = false;
             if(expectSuccess != actualSuccess) {
-                addParseMessages[0] = true;
+                addParseMessages = true;
                 messagesBuilder.addMessage("Expected parsing to " + successString(expectSuccess, false) + ", but it " + successString(actualSuccess, true), Severity.Error, file, sourceRegion);
             }
             if(actualSuccess) {
-                expectAmbiguous.ifSome(ambiguous -> {
-                    if(ambiguous != r.ambiguous) {
-                        addParseMessages[0] = true;
-                        messagesBuilder.addMessage("Expected " + ambiguousString(ambiguous, false) + " parse, but it parsed " + ambiguousString(r.ambiguous, true), Severity.Error, file, sourceRegion);
-                    }
-                });
-                expectRecovered.ifSome(recovered -> {
-                    if(recovered != r.recovered) {
-                        addParseMessages[0] = true;
-                        messagesBuilder.addMessage("Expected parsing to " + recoveredString(recovered, false) + ", but it " + recoveredString(r.recovered, true), Severity.Error, file, sourceRegion);
-                    }
-                });
+                switch(expectAmbiguous) {
+                    case Unambiguous:
+                        if(r.ambiguous) {
+                            addParseMessages = true;
+                            messagesBuilder.addMessage("Expected " + ambiguousString(false, false) + " parse, but it parsed " + ambiguousString(r.ambiguous, true), Severity.Error, file, sourceRegion);
+                        }
+                        break;
+                    case Ambiguous:
+                        if(!r.ambiguous) {
+                            addParseMessages = true;
+                            messagesBuilder.addMessage("Expected " + ambiguousString(true, false) + " parse, but it parsed " + ambiguousString(r.ambiguous, true), Severity.Error, file, sourceRegion);
+                        }
+                        break;
+                    default:
+                    case DoNotCare:
+                        break;
+                }
+                switch(expectRecovered) {
+                    case NotRecovered:
+                        if(r.recovered) {
+                            addParseMessages = true;
+                            messagesBuilder.addMessage("Expected parsing to " + recoveredString(false, false) + " parse, but it " + recoveredString(r.ambiguous, true), Severity.Error, file, sourceRegion);
+                        }
+                        break;
+                    case Recovered:
+                        if(!r.recovered) {
+                            addParseMessages = true;
+                            messagesBuilder.addMessage("Expected parsing to " + recoveredString(true, false) + " parse, but it " + recoveredString(r.ambiguous, true), Severity.Error, file, sourceRegion);
+                        }
+                        break;
+                    default:
+                    case DoNotCare:
+                        break;
+                }
             }
-            if(addParseMessages[0]) {
+            if(addParseMessages) {
                 SptMessageRemap.addMessagesRemapped(messagesBuilder, testCase.resource, file, r.messages);
             }
         }, e -> {

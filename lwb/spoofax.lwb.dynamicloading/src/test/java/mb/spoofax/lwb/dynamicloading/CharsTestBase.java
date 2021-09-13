@@ -49,8 +49,8 @@ class CharsTestBase extends TestBase {
     }
 
 
-    Task<CommandFeedback> getTaskForFirstCommand(LanguageInstance languageInstance) {
-        final Optional<CommandDef<?>> debugRemoveACommandOption = languageInstance.getCommandDefs().stream().findFirst();
+    Task<CommandFeedback> getTaskForRemoveACommand(LanguageInstance languageInstance) {
+        final Optional<CommandDef<?>> debugRemoveACommandOption = languageInstance.getCommandDefs().stream().filter(cd -> cd.getDisplayName().contains("Show AST with 'A' characters removed")).findFirst();
         final CommandDef<?> debugRemoveACommand = debugRemoveACommandOption.get();
         return debugRemoveACommand
             .request(CommandExecutionType.ManualOnce)

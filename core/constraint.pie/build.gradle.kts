@@ -7,7 +7,9 @@ dependencies {
   annotationProcessor(platform(project(":spoofax.depconstraints")))
 
   api("org.metaborg:common")
+  implementation(project(":aterm.common"))
   api(project(":constraint.common"))
+  api(project(":spoofax.core"))
   api("org.metaborg:pie.api")
 
   compileOnly("org.checkerframework:checker-qual-android")
