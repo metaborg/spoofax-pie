@@ -1,11 +1,5 @@
 package mb.statix.strategies.runtime;
 
-import mb.statix.patterns.Tuple2Pattern;
-import mb.statix.sequences.Seq;
-import mb.statix.strategies.NamedStrategy;
-import mb.statix.tuples.Tuple2;
-
-import java.util.concurrent.atomic.AtomicReference;
 //
 ///**
 // * Concatenation strategy.

@@ -24,14 +24,14 @@ import java.util.stream.Collectors;
  * Given a state with a selected predicate constraint {@link CUser},
  * this strategy expands the initial state into as many states as there are rules defined for the predicate.
  */
-public final class ExpandPredicateConstraintStrategy extends NamedStrategy1<SolverContext, ITermVar, SelectedConstraintSolverState<CUser>, SolverState> {
+public final class ExpandPredicateStrategy extends NamedStrategy1<SolverContext, ITermVar, SelectedConstraintSolverState<CUser>, SolverState> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
-    private static final ExpandPredicateConstraintStrategy instance = new ExpandPredicateConstraintStrategy();
+    private static final ExpandPredicateStrategy instance = new ExpandPredicateStrategy();
     @SuppressWarnings({"unchecked", "unused", "RedundantCast", "RedundantSuppression"})
-    public static ExpandPredicateConstraintStrategy getInstance() { return (ExpandPredicateConstraintStrategy)instance; }
+    public static ExpandPredicateStrategy getInstance() { return (ExpandPredicateStrategy)instance; }
 
-    private ExpandPredicateConstraintStrategy() {}
+    private ExpandPredicateStrategy() {}
 
     @Override
     public String getName() {
