@@ -1,5 +1,8 @@
 package mb.statix.sequences;
 
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+
 /**
  * A function that accepts two arguments and produces a result,
  * optionally throwing an {@link InterruptedException}.
@@ -31,6 +34,20 @@ public interface InterruptibleBiFunction<T, U, R> {
      */
     default <V> InterruptibleBiFunction<T, U, V> andThen(InterruptibleFunction<? super R, ? extends V> after) {
         return (T t, U u) -> after.apply(apply(t, u));
+    }
+
+    /**
+     * Wraps a {@link BiFunction} into an {@link InterruptibleBiFunction}.
+     *
+     * @param function the function to wrap
+     * @param <T> the type of the first argument to this function
+     * @param <U> the type of the second argument to this function
+     * @param <R> the type of result
+     * @return the wrapped function
+     */
+    static <T, U, R> InterruptibleBiFunction<T, U, R> from(BiFunction<T, U, R> function) {
+        //noinspection NullableProblems
+        return function::apply;
     }
 
 }

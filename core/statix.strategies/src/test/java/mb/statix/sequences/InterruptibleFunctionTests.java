@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public final class InterruptibleFunctionTests {
 
-    @Test
+    @SuppressWarnings("Convert2MethodRef") @Test
     public void andThen_shouldApplySecondFunctionAfterFirst() throws InterruptedException {
         // Arrange
         final InterruptibleFunction<String, Integer> first = s -> s.length();
@@ -23,7 +23,7 @@ public final class InterruptibleFunctionTests {
         assertEquals("2", result);
     }
 
-    @Test
+    @SuppressWarnings("Convert2MethodRef") @Test
     public void compose_shouldApplySecondFunctionBeforeFirst() throws InterruptedException {
         // Arrange
         final InterruptibleFunction<Integer, String> first = i -> Integer.toString(i);
@@ -35,15 +35,6 @@ public final class InterruptibleFunctionTests {
 
         // Assert
         assertEquals("2", result);
-    }
-
-    @Test
-    public void identity_shouldReturnIdentityFunction() throws InterruptedException {
-        // Act
-        final Integer result = InterruptibleFunction.<Integer>identity().apply(10);
-
-        // Assert
-        assertEquals(10, result);
     }
 
 }
