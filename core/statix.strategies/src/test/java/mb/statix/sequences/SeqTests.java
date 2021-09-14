@@ -5,12 +5,14 @@ import mb.statix.sequences.Seq;
 import mb.statix.sequences.SeqBase;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -63,9 +65,7 @@ public final class SeqTests {
 
         // Assert
         assertFalse(seq.next());
-    }
-
-    @Test
+    }@Test
     public void from_shouldWrapSupplier() throws InterruptedException {
         // Arrange
         final AtomicInteger counter = new AtomicInteger();
@@ -135,12 +135,12 @@ public final class SeqTests {
         final AtomicInteger counter = new AtomicInteger();
         final InterruptibleSupplier<Integer> supplier = new CloseableSupplier<Integer>() {
             @Override
-            public Integer get() throws InterruptedException {
+            public Integer get() {
                 return counter.getAndIncrement();
             }
 
             @Override
-            public void close() throws Exception {
+            public void close() {
                 final boolean nowClosed = closed.compareAndSet(false, true);
                 if (!nowClosed) throw new IllegalStateException("Already closed");
             }
@@ -156,21 +156,73 @@ public final class SeqTests {
     }
 
     @Test
-    public void asSeq_shouldReturnIteratorValues_whenWrappingIterator() throws InterruptedException {
+    public void fromOnce_shouldWrapSupplier() throws InterruptedException {
         // Arrange
-        final Iterator<Integer> iterator = Arrays.asList(0, 1, 2).listIterator();
+        final AtomicInteger counter = new AtomicInteger();
+        final InterruptibleSupplier<Integer> supplier = counter::getAndIncrement;
 
         // Act
-        final Seq<Integer> seq = Seq.asSeq(iterator);
+        final Seq<Integer> seq = Seq.fromOnce(supplier);
 
         // Assert
         assertTrue(seq.next());
         assertEquals(0, seq.getCurrent());
-        assertTrue(seq.next());
-        assertEquals(1, seq.getCurrent());
-        assertTrue(seq.next());
-        assertEquals(2, seq.getCurrent());
         assertFalse(seq.next());
+    }
+
+    @Test
+    public void fromOnce_shouldFinishAndThrow_whenSupplierThrows() {
+        // Arrange
+        final InterruptibleSupplier<Integer> supplier = () -> {
+            throw new IllegalStateException("Exception thrown");
+        };
+
+        // Act
+        final Seq<Integer> seq = Seq.fromOnce(supplier);
+
+        // Assert
+        assertThrows(IllegalStateException.class, () -> seq.next());
+    }
+
+    @Test
+    public void fromOnce_shouldFinish_whenSupplierThrowsNoSuchElementException() throws InterruptedException {
+        // Arrange
+        final InterruptibleSupplier<Integer> supplier = () -> {
+            throw new NoSuchElementException("Done!");
+        };
+
+        // Act
+        final Seq<Integer> seq = Seq.fromOnce(supplier);
+
+        // Assert
+        assertFalse(seq.next());
+    }
+
+    @Test
+    public void fromOnce_shouldCloseSupplier_whenSupplierIsAutoCloseable() throws Exception {
+        // Arrange
+        final AtomicBoolean closed = new AtomicBoolean();
+        final AtomicInteger counter = new AtomicInteger();
+        final InterruptibleSupplier<Integer> supplier = new CloseableSupplier<Integer>() {
+            @Override
+            public Integer get() {
+                return counter.getAndIncrement();
+            }
+
+            @Override
+            public void close() {
+                final boolean nowClosed = closed.compareAndSet(false, true);
+                if (!nowClosed) throw new IllegalStateException("Already closed");
+            }
+        };
+
+        // Act
+        final Seq<Integer> seq = Seq.fromOnce(supplier);
+
+        // Assert
+        assertFalse(closed.get());
+        seq.close();
+        assertTrue(closed.get());
     }
 
     @Test
@@ -212,7 +264,25 @@ public final class SeqTests {
     }
 
     @Test
-    public void asSeq_shouldReturnOriginalSequence_whenWrappingIteratorWrappingSequence() throws InterruptedException {
+    public void asSeq_shouldReturnIteratorValues_whenWrappingIterator() throws InterruptedException {
+        // Arrange
+        final Iterator<Integer> iterator = Arrays.asList(0, 1, 2).listIterator();
+
+        // Act
+        final Seq<Integer> seq = Seq.asSeq(iterator);
+
+        // Assert
+        assertTrue(seq.next());
+        assertEquals(0, seq.getCurrent());
+        assertTrue(seq.next());
+        assertEquals(1, seq.getCurrent());
+        assertTrue(seq.next());
+        assertEquals(2, seq.getCurrent());
+        assertFalse(seq.next());
+    }
+
+    @Test
+    public void asSeq_shouldReturnOriginalSequence_whenWrappingIteratorWrappingSequence() {
         // Arrange
         final Seq<Integer> seq = Seq.of(0, 1, 2);
         final Iterator<Integer> iterator = Seq.asIterator(seq);
@@ -225,7 +295,7 @@ public final class SeqTests {
     }
 
     @Test
-    public void asIterator_shouldReturnSequenceValues_whenWrappingSequence() throws InterruptedException {
+    public void asIterator_shouldReturnSequenceValues_whenWrappingSequence() {
         // Arrange
         final Seq<Integer> seq = Seq.of(0, 1, 2);
 
@@ -245,7 +315,7 @@ public final class SeqTests {
 
 
     @Test
-    public void asIterator_shouldReturnOriginalIterator_whenWrappingSequenceWrappingIterator() throws InterruptedException {
+    public void asIterator_shouldReturnOriginalIterator_whenWrappingSequenceWrappingIterator() {
         // Arrange
         final Iterator<Integer> iterator = Arrays.asList(0, 1, 2).listIterator();
         final Seq<Integer> seq = Seq.asSeq(iterator);
@@ -281,6 +351,290 @@ public final class SeqTests {
         assertFalse(closed.get());
         ((AutoCloseable)iterator).close();
         assertTrue(closed.get());
+    }
+
+    @Test
+    public void collect_shouldCallCollectorOnEachElement_whenCollectingIntoList() throws InterruptedException {
+        // Arrange
+        final Seq<Integer> seq = Seq.of(1, 2, 3);
+
+        // Act
+        final List<Integer> result = seq.collect(Collectors.toList());
+
+        // Assert
+        assertEquals(Arrays.asList(1, 2, 3), result);
+    }
+
+    @Test
+    public void filter_shouldOnlyReturnElementsThatMatchThePredicate() throws InterruptedException {
+        // Arrange
+        final AtomicInteger counter = new AtomicInteger();
+        final InterruptibleSupplier<Integer> supplier = counter::getAndIncrement;
+        final Seq<Integer> seq = Seq.from(supplier);
+
+        // Act
+        final Seq<Integer> filteredSeq = seq.filter(i -> i % 2 == 0);
+
+        // Assert
+        assertTrue(filteredSeq.next());
+        assertEquals(0, filteredSeq.getCurrent());
+        assertTrue(filteredSeq.next());
+        assertEquals(2, filteredSeq.getCurrent());
+        assertTrue(filteredSeq.next());
+        assertEquals(4, filteredSeq.getCurrent());
+        assertTrue(filteredSeq.next());
+        assertEquals(6, filteredSeq.getCurrent());
+        // ... Infinite sequence
+    }
+
+    @Test
+    public void filterIsInstance_shouldOnlyReturnElementsThatMatchTheType() throws InterruptedException {
+        // Arrange
+        final AtomicInteger counter = new AtomicInteger();
+        final InterruptibleSupplier<Integer> supplier = counter::getAndIncrement;
+        final Seq<Object> seq = Seq.from(() -> {
+            final int value = counter.getAndIncrement();
+            if (value % 2 == 0) {
+                // Even values are returned as Integer
+                return value;
+            } else {
+                // Odd values are returned as String
+                return Integer.toString(value);
+            }
+        });
+
+        // Act
+        final Seq<Integer> filteredSeq = seq.filterIsInstance(Integer.class);
+
+        // Assert
+        assertTrue(filteredSeq.next());
+        assertEquals(0, filteredSeq.getCurrent());
+        assertTrue(filteredSeq.next());
+        assertEquals(2, filteredSeq.getCurrent());
+        assertTrue(filteredSeq.next());
+        assertEquals(4, filteredSeq.getCurrent());
+        assertTrue(filteredSeq.next());
+        assertEquals(6, filteredSeq.getCurrent());
+        // ... Infinite sequence
+    }
+
+    @Test
+    public void forEach_shouldApplyActionToEachElement() throws InterruptedException {
+        // Arrange
+        final Seq<Integer> seq = Seq.of(0, 1, 2);
+        final List<Integer> results = new ArrayList<>();
+
+        // Act
+        seq.forEach(e -> results.add(e));
+
+        // Assert
+        assertEquals(Arrays.asList(0, 1, 2), results);
+    }
+
+    @Test
+    public void map_shouldTransformEachElement() throws InterruptedException {
+        // Arrange
+        final AtomicInteger counter = new AtomicInteger();
+        final InterruptibleSupplier<Integer> supplier = counter::getAndIncrement;
+        final Seq<Integer> seq = Seq.from(supplier);
+
+        // Act
+        final Seq<String> mappedSeq = seq.map(i -> Integer.toString(i));
+
+        // Assert
+        assertTrue(mappedSeq.next());
+        assertEquals("0", mappedSeq.getCurrent());
+        assertTrue(mappedSeq.next());
+        assertEquals("1", mappedSeq.getCurrent());
+        assertTrue(mappedSeq.next());
+        assertEquals("2", mappedSeq.getCurrent());
+        assertTrue(mappedSeq.next());
+        assertEquals("3", mappedSeq.getCurrent());
+        // ... Infinite sequence
+    }
+
+    @Test
+    public void limit_shouldReturnOnlyTheSpecifiedNumberOfElements_whenTheSequenceIsLongerThanTheLimit() throws InterruptedException {
+        // Arrange
+        final AtomicInteger counter = new AtomicInteger();
+        final InterruptibleSupplier<Integer> supplier = counter::getAndIncrement;
+        final Seq<Integer> seq = Seq.from(supplier);
+
+        // Act
+        final Seq<Integer> limitedSeq = seq.limit(3);
+
+        // Assert
+        assertTrue(limitedSeq.next());
+        assertEquals(0, limitedSeq.getCurrent());
+        assertTrue(limitedSeq.next());
+        assertEquals(1, limitedSeq.getCurrent());
+        assertTrue(limitedSeq.next());
+        assertEquals(2, limitedSeq.getCurrent());
+        assertFalse(limitedSeq.next());
+    }
+
+    @Test
+    public void limit_shouldReturnAllElements_whenTheSequenceIsShorterThanTheLimit() throws InterruptedException {
+        // Arrange
+        final Seq<Integer> seq = Seq.of(0, 1);
+
+        // Act
+        final Seq<Integer> limitedSeq = seq.limit(3);
+
+        // Assert
+        assertTrue(limitedSeq.next());
+        assertEquals(0, limitedSeq.getCurrent());
+        assertTrue(limitedSeq.next());
+        assertEquals(1, limitedSeq.getCurrent());
+        assertFalse(limitedSeq.next());
+    }
+
+    @Test
+    public void limit_shouldReturnNothing_whenTheSequenceIsEmpty() throws InterruptedException {
+        // Arrange
+        final Seq<Integer> seq = Seq.of();
+
+        // Act
+        final Seq<Integer> limitedSeq = seq.limit(3);
+
+        // Assert
+        assertFalse(limitedSeq.next());
+    }
+
+    @Test
+    public void limit_shouldReturnNothing_whenTheLimitIsZero() throws InterruptedException {
+        // Arrange
+        final AtomicInteger counter = new AtomicInteger();
+        final InterruptibleSupplier<Integer> supplier = counter::getAndIncrement;
+        final Seq<Integer> seq = Seq.from(supplier);
+
+        // Act
+        final Seq<Integer> limitedSeq = seq.limit(0);
+
+        // Assert
+        assertFalse(limitedSeq.next());
+    }
+
+    @Test
+    public void single_shouldReturnTheLastElement_whenTheSequenceHasOnlyOneElementRemaining() throws InterruptedException {
+        // Arrange
+        final Seq<Integer> seq = Seq.of(0, 1);
+        seq.next(); // skip '0'
+
+        // Act
+        final Integer result = seq.single();
+
+        // Assert
+        assertEquals(1, result);
+    }
+
+    @Test
+    public void single_shouldThrow_whenTheSequenceIsEmpty() throws InterruptedException {
+        // Arrange
+        final Seq<Integer> seq = Seq.of(0);
+        seq.next(); // skip '0'
+
+        // Act/Assert
+        assertThrows(NoSuchElementException.class, () -> {
+            seq.single();
+        });
+    }
+
+    @Test
+    public void single_shouldThrow_whenTheSequenceHasMoreThanOneElementRemaining() throws InterruptedException {
+        // Arrange
+        final Seq<Integer> seq = Seq.of(0, 1, 2);
+        seq.next(); // skip '0'
+
+        // Act/Assert
+        assertThrows(IllegalStateException.class, () -> {
+            seq.single();
+        });
+    }
+
+    @Test
+    public void peekable_shouldReturnPeekableSequence() throws InterruptedException {
+        // Arrange
+        final AtomicInteger counter = new AtomicInteger();
+        final InterruptibleSupplier<Integer> supplier = counter::getAndIncrement;
+        final Seq<Integer> seq = Seq.from(supplier);
+
+        // Act
+        final PeekableSeq<Integer> peekableSeq = seq.peekable();
+
+        // Assert
+        assertTrue(peekableSeq.peek());
+        assertTrue(peekableSeq.next());
+        assertEquals(0, peekableSeq.getCurrent());
+        assertTrue(peekableSeq.peek());
+        assertTrue(peekableSeq.next());
+        assertEquals(1, peekableSeq.getCurrent());
+        assertTrue(peekableSeq.peek());
+        assertTrue(peekableSeq.next());
+        assertEquals(2, peekableSeq.getCurrent());
+        assertTrue(peekableSeq.peek());
+        assertTrue(peekableSeq.next());
+        // ... Infinite sequence
+    }
+
+    @Test
+    public void peekable_shouldPeekFalse_whenNoMoreElements() throws InterruptedException {
+        // Arrange
+        final Seq<Integer> seq = Seq.of(0, 1, 2);
+
+        // Act
+        final PeekableSeq<Integer> peekableSeq = seq.peekable();
+
+        // Assert
+        assertTrue(peekableSeq.peek());
+        assertTrue(peekableSeq.next());
+        assertEquals(0, peekableSeq.getCurrent());
+        assertTrue(peekableSeq.peek());
+        assertTrue(peekableSeq.next());
+        assertEquals(1, peekableSeq.getCurrent());
+        assertTrue(peekableSeq.peek());
+        assertTrue(peekableSeq.next());
+        assertEquals(2, peekableSeq.getCurrent());
+        assertFalse(peekableSeq.peek());
+        assertFalse(peekableSeq.next());
+    }
+
+    @Test
+    public void peekable_shouldPeekFalse_whenSequenceEmpty() throws InterruptedException {
+        // Arrange
+        final Seq<Integer> seq = Seq.of();
+
+        // Act
+        final PeekableSeq<Integer> peekableSeq = seq.peekable();
+
+        // Assert
+        assertFalse(peekableSeq.peek());
+        assertFalse(peekableSeq.next());
+    }
+
+    @Test
+    public void peekable_shouldNotAdvanceToNextElement_whenPeeking() throws InterruptedException {
+        // Arrange
+        final Seq<Integer> seq = Seq.of(0, 1, 2);
+
+        // Act
+        final PeekableSeq<Integer> peekableSeq = seq.peekable();
+
+        // Assert
+        assertTrue(peekableSeq.peek());
+        assertTrue(peekableSeq.next());
+        assertEquals(0, peekableSeq.getCurrent());
+        assertTrue(peekableSeq.peek());
+        assertEquals(0, peekableSeq.getCurrent());
+        assertTrue(peekableSeq.next());
+        assertEquals(1, peekableSeq.getCurrent());
+        assertTrue(peekableSeq.peek());
+        assertEquals(1, peekableSeq.getCurrent());
+        assertTrue(peekableSeq.next());
+        assertEquals(2, peekableSeq.getCurrent());
+        assertFalse(peekableSeq.peek());
+        assertEquals(2, peekableSeq.getCurrent());
+        assertFalse(peekableSeq.next());
     }
 
     private interface CloseableSupplier<T> extends InterruptibleSupplier<T>, AutoCloseable { }

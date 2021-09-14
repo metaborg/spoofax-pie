@@ -2,6 +2,8 @@ package mb.statix.sequences;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.NoSuchElementException;
+
 /**
  * Base class for lazy sequences.
  *
@@ -13,9 +15,9 @@ public abstract class SeqBase<T> implements Seq<T> {
      * Specifies the state of the iterator.
      */
     private enum State {
-        /** The iterator has not yet computed the next element. */
+        /** The iterator has not yet computed the element. */
         Preparing,
-        /** The iterator has computed the next element. */
+        /** The iterator has computed the element. */
         Ready,
         /** The iterator has no more elements. */
         Finished,
@@ -26,7 +28,8 @@ public abstract class SeqBase<T> implements Seq<T> {
     @Nullable private T current = null;
 
     @SuppressWarnings({"ConstantConditions", "NullableProblems"})
-    @Override public final T getCurrent() {
+    @Override
+    public final T getCurrent() {
         return this.current;
     }
 
@@ -34,8 +37,17 @@ public abstract class SeqBase<T> implements Seq<T> {
     public final boolean next() throws InterruptedException {
         if (this.state == State.Finished) return false;
         this.state = State.Preparing;
-        computeNext();
-        assert state != State.Preparing : "No call to either yield() or yieldBreak() was performed this iteration.";
+        try {
+            computeNext();
+        } catch (NoSuchElementException ex) {
+            yieldBreak();
+        } catch (Throwable ex) {
+            // NOTE: This may be an InterruptedException
+            onError();
+            // TODO: Should we close() here too?
+            throw ex;
+        }
+        assert this.state != State.Preparing : "No call to either yield() or yieldBreak() was performed this iteration.";
         return this.state == State.Ready;
     }
 
@@ -73,6 +85,17 @@ public abstract class SeqBase<T> implements Seq<T> {
     protected final void yieldBreak() {
         assert state == State.Preparing : "Only one call to either yield() or yieldBreak() is allowed per iteration.";
         // Set to null to release any object from this iterator for garbage collection.
+        this.current = null;
+        this.state = State.Finished;
+    }
+
+    /**
+     * Indicates that the iterator failed.
+     */
+    private void onError() {
+        // NOTE: We explicitly don't check for the state here,
+        // since we don't know whether the error occurred before
+        // or after a call to `yield()` or `yieldBreak()`.
         this.current = null;
         this.state = State.Finished;
     }
