@@ -44,7 +44,7 @@ public final class DelayStuckQueriesStrategy extends NamedStrategy<SolverContext
     @SuppressWarnings({"unchecked", "unused", "RedundantCast", "RedundantSuppression"})
     public static DelayStuckQueriesStrategy getInstance() { return instance; }
 
-    private DelayStuckQueriesStrategy() {}
+    private DelayStuckQueriesStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
     @Override
     public String getName() {

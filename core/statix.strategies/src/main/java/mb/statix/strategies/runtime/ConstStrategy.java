@@ -13,9 +13,9 @@ import mb.statix.strategies.NamedStrategy1;
  */
 public final class ConstStrategy<CTX, T, R> extends NamedStrategy1<CTX, R, T, R> {
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final ConstStrategy instance = new ConstStrategy();
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "unused", "RedundantCast", "RedundantSuppression"})
     public static <CTX, T, R> ConstStrategy<CTX, T, R> getInstance() { return (ConstStrategy<CTX, T, R>)instance; }
 
     private ConstStrategy() { /* Prevent instantiation. Use getInstance(). */ }

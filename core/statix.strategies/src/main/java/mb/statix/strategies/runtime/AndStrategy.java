@@ -18,9 +18,9 @@ import mb.statix.utils.ExcludeFromJacocoGeneratedReport;
  */
 public final class AndStrategy<CTX, T, R> extends NamedStrategy2<CTX, Strategy<CTX, T, R>, Strategy<CTX, T, R>, T, R> {
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final AndStrategy instance = new AndStrategy();
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "unused", "RedundantCast", "RedundantSuppression"})
     public static <CTX, T, R> AndStrategy<CTX, T, R> getInstance() { return (AndStrategy<CTX, T, R>)instance; }
 
     private AndStrategy() { /* Prevent instantiation. Use getInstance(). */ }

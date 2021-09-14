@@ -17,9 +17,9 @@ import mb.statix.utils.ExcludeFromJacocoGeneratedReport;
  */
 public final class LimitStrategy<CTX, T, R> extends NamedStrategy2<CTX, Strategy<CTX, T, R>, Integer, T, R> {
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final LimitStrategy instance = new LimitStrategy();
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "unused", "RedundantCast", "RedundantSuppression"})
     public static <CTX, T, R> LimitStrategy<CTX, T, R> getInstance() { return (LimitStrategy<CTX, T, R>)instance; }
 
     private LimitStrategy() { /* Prevent instantiation. Use getInstance(). */ }

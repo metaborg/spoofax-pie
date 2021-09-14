@@ -14,9 +14,9 @@ import mb.statix.strategies.Strategy;
  */
 public final class TryStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<CTX, T, T>, T, T> {
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final TryStrategy instance = new TryStrategy();
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "unused", "RedundantCast", "RedundantSuppression"})
     public static <CTX, T> TryStrategy<CTX, T> getInstance() { return (TryStrategy<CTX, T>)instance; }
 
     private TryStrategy() { /* Prevent instantiation. Use getInstance(). */ }

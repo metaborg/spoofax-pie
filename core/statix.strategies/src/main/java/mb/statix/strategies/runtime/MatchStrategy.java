@@ -19,9 +19,9 @@ import java.util.HashSet;
  */
 public final class MatchStrategy<CTX, T, R> extends NamedStrategy1<CTX, Pattern<CTX, T, R>, T, R> {
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final MatchStrategy instance = new MatchStrategy();
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "unused", "RedundantCast", "RedundantSuppression"})
     public static <CTX, T, R> MatchStrategy<CTX, T, R> getInstance() { return (MatchStrategy<CTX, T, R>)instance; }
 
     private MatchStrategy() { /* Prevent instantiation. Use getInstance(). */ }

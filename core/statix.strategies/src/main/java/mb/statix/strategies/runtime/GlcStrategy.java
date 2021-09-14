@@ -16,9 +16,9 @@ import mb.statix.utils.ExcludeFromJacocoGeneratedReport;
  */
 public final class GlcStrategy<CTX, T, U, R> extends NamedStrategy3<CTX, Strategy<CTX, T, U>, Strategy<CTX, U, R>, Strategy<CTX, T, R>, T, R> {
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final GlcStrategy instance = new GlcStrategy();
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "unused", "RedundantCast", "RedundantSuppression"})
     public static <CTX, T, U, R> GlcStrategy<CTX, T, U, R> getInstance() { return (GlcStrategy<CTX, T, U, R>)instance; }
 
     private GlcStrategy() { /* Prevent instantiation. Use getInstance(). */ }

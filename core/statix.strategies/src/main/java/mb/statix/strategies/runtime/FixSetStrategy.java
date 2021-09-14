@@ -24,9 +24,9 @@ import java.util.HashSet;
  */
 public final class FixSetStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<CTX, T, T>, T, T> {
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final FixSetStrategy instance = new FixSetStrategy();
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "unused", "RedundantCast", "RedundantSuppression"})
     public static <CTX, T> FixSetStrategy<CTX, T> getInstance() { return (FixSetStrategy<CTX, T>)instance; }
 
     private FixSetStrategy() { /* Prevent instantiation. Use getInstance(). */ }

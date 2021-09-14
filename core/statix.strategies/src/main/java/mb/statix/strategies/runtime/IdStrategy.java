@@ -11,9 +11,9 @@ import mb.statix.strategies.NamedStrategy;
  */
 public final class IdStrategy<CTX, T> extends NamedStrategy<CTX, T, T> {
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final IdStrategy instance = new IdStrategy();
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "unused", "RedundantCast", "RedundantSuppression"})
     public static <CTX, T> IdStrategy<CTX, T> getInstance() { return (IdStrategy<CTX, T>)instance; }
 
     private IdStrategy() { /* Prevent instantiation. Use getInstance(). */ }

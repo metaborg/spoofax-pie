@@ -19,9 +19,9 @@ import java.util.ArrayDeque;
  */
 public final class RepeatStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<CTX, T, T>, T, T> {
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final RepeatStrategy instance = new RepeatStrategy();
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "unused", "RedundantCast", "RedundantSuppression"})
     public static <CTX, T> RepeatStrategy<CTX, T> getInstance() { return (RepeatStrategy<CTX, T>)instance; }
 
     private RepeatStrategy() { /* Prevent instantiation. Use getInstance(). */ }

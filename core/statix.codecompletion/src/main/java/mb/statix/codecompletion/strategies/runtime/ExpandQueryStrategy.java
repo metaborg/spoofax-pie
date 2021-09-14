@@ -68,7 +68,7 @@ public final class ExpandQueryStrategy extends NamedStrategy<SolverContext, Sele
     @SuppressWarnings({"unchecked", "unused", "RedundantCast", "RedundantSuppression"})
     public static ExpandQueryStrategy getInstance() { return (ExpandQueryStrategy)instance; }
 
-    private ExpandQueryStrategy() {}
+    private ExpandQueryStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
     @Override
     public String getName() {

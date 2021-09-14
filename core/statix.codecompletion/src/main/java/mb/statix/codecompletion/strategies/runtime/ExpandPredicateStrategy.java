@@ -31,7 +31,7 @@ public final class ExpandPredicateStrategy extends NamedStrategy1<SolverContext,
     @SuppressWarnings({"unchecked", "unused", "RedundantCast", "RedundantSuppression"})
     public static ExpandPredicateStrategy getInstance() { return (ExpandPredicateStrategy)instance; }
 
-    private ExpandPredicateStrategy() {}
+    private ExpandPredicateStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
     @Override
     public String getName() {
