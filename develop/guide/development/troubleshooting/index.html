@@ -16,7 +16,7 @@
     
     
       
-        <title>Eclipse LWB Troubleshooting - Spoofax 3</title>
+        <title>Development Troubleshooting - Spoofax 3</title>
       
     
     
@@ -67,7 +67,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#eclipse-lwb-troubleshooting" class="md-skip">
+        <a href="#development-troubleshooting" class="md-skip">
           Skip to content
         </a>
       
@@ -96,7 +96,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Eclipse LWB Troubleshooting
+              Development Troubleshooting
             
           </span>
         </div>
@@ -432,6 +432,18 @@
             
   
   
+  
+    <li class="md-nav__item">
+      <a href="../../eclipse_lwb/troubleshooting/" class="md-nav__link">
+        Eclipse LWB Troubleshooting
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
     
   
   
@@ -444,12 +456,12 @@
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          Eclipse LWB Troubleshooting
+          Development Troubleshooting
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        Eclipse LWB Troubleshooting
+        Development Troubleshooting
       </a>
       
         
@@ -467,125 +479,79 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#diagnosing-problems" class="md-nav__link">
-    Diagnosing problems
+  <a href="#known-problems" class="md-nav__link">
+    Known Problems
   </a>
   
-    <nav class="md-nav" aria-label="Diagnosing problems">
+    <nav class="md-nav" aria-label="Known Problems">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#looking-for-errors" class="md-nav__link">
-    Looking for errors
+  <a href="#many-errors-about-unresolved-classes-in-intellij" class="md-nav__link">
+    Many errors about unresolved classes in IntelliJ
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#consulting-the-logs" class="md-nav__link">
-    Consulting the logs
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#problems-and-solutions" class="md-nav__link">
-    Problems and solutions
-  </a>
-  
-    <nav class="md-nav" aria-label="Problems and solutions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#errors-in-language-definition-files" class="md-nav__link">
-    Errors in language definition files
+  <a href="#cannot-debug-in-intellij" class="md-nav__link">
+    Cannot debug in IntelliJ
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#errors-in-generated-files" class="md-nav__link">
-    Errors in generated files
+  <a href="#profiling-in-intellij" class="md-nav__link">
+    Profiling in IntelliJ
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#errors-occurred-during-the-build" class="md-nav__link">
-    Errors occurred during the build
+  <a href="#spoofax-2-language-fails-to-build-with-previous-build-failed-and-no-change-in-the-build-input-has-been-observed" class="md-nav__link">
+    Spoofax 2 language fails to build with "Previous build failed and no change in the build input has been observed"
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#many-duplicate-definition-errorsother-weird-errors" class="md-nav__link">
-    Many duplicate definition errors/other weird errors
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#workarounds" class="md-nav__link">
-    Workarounds
-  </a>
-  
-    <nav class="md-nav" aria-label="Workarounds">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#clean_project" class="md-nav__link">
-    Cleaning the language project
+  <a href="#task-buildall-not-found-in-root-project-devenv" class="md-nav__link">
+    Task 'buildAll' not found in root project 'devenv'
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#clean_cache" class="md-nav__link">
-    Deleting on-disk cache and restarting Eclipse
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#report-a-bug-or-ask-for-help" class="md-nav__link">
-    Report a bug or ask for help
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#advanced-troubleshooting" class="md-nav__link">
-    Advanced troubleshooting
-  </a>
-  
-    <nav class="md-nav" aria-label="Advanced troubleshooting">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#checking-for-deadlocks-and-making-a-thread-dump" class="md-nav__link">
-    Checking for deadlocks (and making a thread dump)
+  <a href="#expiring-daemon-because-jvm-heap-space-is-exhausted" class="md-nav__link">
+    Expiring Daemon because JVM heap space is exhausted
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#checking-memory-and-making-a-heap-dump" class="md-nav__link">
-    Checking memory (and making a heap dump)
+  <a href="#could-not-create-service-of-type-fileaccesstimejournal-using-gradleuserhomescopeservicescreatefileaccesstimejournal" class="md-nav__link">
+    Could not create service of type FileAccessTimeJournal using GradleUserHomeScopeServices.createFileAccessTimeJournal()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#error-resolving-plugin-plugin-request-for-plugin-already-on-the-classpath-must-not-include-a-version" class="md-nav__link">
+    Error resolving plugin: Plugin request for plugin already on the classpath must not include a version
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unknown-command-line-option-args" class="md-nav__link">
+    Unknown command-line option '--args'
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#failed-to-create-jar-file" class="md-nav__link">
+    Failed to create Jar file
   </a>
   
 </li>
@@ -599,18 +565,6 @@
   
 </nav>
       
-    </li>
-  
-
-          
-            
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../development/troubleshooting/" class="md-nav__link">
-        Development Troubleshooting
-      </a>
     </li>
   
 
@@ -809,125 +763,79 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#diagnosing-problems" class="md-nav__link">
-    Diagnosing problems
+  <a href="#known-problems" class="md-nav__link">
+    Known Problems
   </a>
   
-    <nav class="md-nav" aria-label="Diagnosing problems">
+    <nav class="md-nav" aria-label="Known Problems">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#looking-for-errors" class="md-nav__link">
-    Looking for errors
+  <a href="#many-errors-about-unresolved-classes-in-intellij" class="md-nav__link">
+    Many errors about unresolved classes in IntelliJ
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#consulting-the-logs" class="md-nav__link">
-    Consulting the logs
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#problems-and-solutions" class="md-nav__link">
-    Problems and solutions
-  </a>
-  
-    <nav class="md-nav" aria-label="Problems and solutions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#errors-in-language-definition-files" class="md-nav__link">
-    Errors in language definition files
+  <a href="#cannot-debug-in-intellij" class="md-nav__link">
+    Cannot debug in IntelliJ
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#errors-in-generated-files" class="md-nav__link">
-    Errors in generated files
+  <a href="#profiling-in-intellij" class="md-nav__link">
+    Profiling in IntelliJ
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#errors-occurred-during-the-build" class="md-nav__link">
-    Errors occurred during the build
+  <a href="#spoofax-2-language-fails-to-build-with-previous-build-failed-and-no-change-in-the-build-input-has-been-observed" class="md-nav__link">
+    Spoofax 2 language fails to build with "Previous build failed and no change in the build input has been observed"
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#many-duplicate-definition-errorsother-weird-errors" class="md-nav__link">
-    Many duplicate definition errors/other weird errors
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#workarounds" class="md-nav__link">
-    Workarounds
-  </a>
-  
-    <nav class="md-nav" aria-label="Workarounds">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#clean_project" class="md-nav__link">
-    Cleaning the language project
+  <a href="#task-buildall-not-found-in-root-project-devenv" class="md-nav__link">
+    Task 'buildAll' not found in root project 'devenv'
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#clean_cache" class="md-nav__link">
-    Deleting on-disk cache and restarting Eclipse
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#report-a-bug-or-ask-for-help" class="md-nav__link">
-    Report a bug or ask for help
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#advanced-troubleshooting" class="md-nav__link">
-    Advanced troubleshooting
-  </a>
-  
-    <nav class="md-nav" aria-label="Advanced troubleshooting">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#checking-for-deadlocks-and-making-a-thread-dump" class="md-nav__link">
-    Checking for deadlocks (and making a thread dump)
+  <a href="#expiring-daemon-because-jvm-heap-space-is-exhausted" class="md-nav__link">
+    Expiring Daemon because JVM heap space is exhausted
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#checking-memory-and-making-a-heap-dump" class="md-nav__link">
-    Checking memory (and making a heap dump)
+  <a href="#could-not-create-service-of-type-fileaccesstimejournal-using-gradleuserhomescopeservicescreatefileaccesstimejournal" class="md-nav__link">
+    Could not create service of type FileAccessTimeJournal using GradleUserHomeScopeServices.createFileAccessTimeJournal()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#error-resolving-plugin-plugin-request-for-plugin-already-on-the-classpath-must-not-include-a-version" class="md-nav__link">
+    Error resolving plugin: Plugin request for plugin already on the classpath must not include a version
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unknown-command-line-option-args" class="md-nav__link">
+    Unknown command-line option '--args'
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#failed-to-create-jar-file" class="md-nav__link">
+    Failed to create Jar file
   </a>
   
 </li>
@@ -949,106 +857,90 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/metaborg/spoofax-pie/edit/master/docs/guide/eclipse_lwb/troubleshooting.md" title="Edit this page" class="md-content__button md-icon">
+                  <a href="https://github.com/metaborg/spoofax-pie/edit/master/docs/guide/development/troubleshooting.md" title="Edit this page" class="md-content__button md-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
                   </a>
                 
                 
-                <h1 id="eclipse-lwb-troubleshooting">Eclipse LWB Troubleshooting<a class="headerlink" href="#eclipse-lwb-troubleshooting" title="Permanent link">&para;</a></h1>
-<p>This how-to guide explains how to troubleshoot issues when building and testing languages in the Spoofax Eclipse LWB plugin.</p>
-<h2 id="diagnosing-problems">Diagnosing problems<a class="headerlink" href="#diagnosing-problems" title="Permanent link">&para;</a></h2>
-<h3 id="looking-for-errors">Looking for errors<a class="headerlink" href="#looking-for-errors" title="Permanent link">&para;</a></h3>
-<p>If something is not working as expected, the first thing to check is whether there are errors in the project by looking in the <span class="guilabel">Project Explorer</span> or <span class="guilabel">Package Explorer</span> view, which is open on the left-hand side of the IDE by default.
-If there are any red markers on the project, or any directory or file in the project, that indicates an error.</p>
-<p>When there are errors on files that define your language (e.g., .cfg/.sdf3/.stx/.str2 files), the language is not compiled and reloaded, so building the language has no effect, and your change will not be taken into account.
-Errors on example and test (e.g., .spt) files are ok, and do not prevent the language from being compiled and reloaded.</p>
-<p>It is also possible to get a list of all the errors in the project by opening the <span class="guilabel">Problems</span> view. If this view is not open, open it by choosing <span class="guilabel">Window ‣ Show view ‣ Problems</span> from the main menu.</p>
-<h3 id="consulting-the-logs">Consulting the logs<a class="headerlink" href="#consulting-the-logs" title="Permanent link">&para;</a></h3>
-<p>Spoofax logs a lot of information to make troubleshooting easier.
-First consult the <span class="guilabel">Error Log</span> view.
-If this view is not open, open it by choosing <span class="guilabel">Window ‣ Show view ‣ Error Log</span> from the main menu.</p>
-<p>The error log contains warning and error events from all plugins running in Eclipse, including several Spoofax plugins.
-Most errors include stack traces, which help the Spoofax developers immensely in bug reports or when asking for help.
-Browse through the errors from Spoofax plugins to see if it can help you troubleshoot the problem.</p>
-<p>If nothing relevant is in the error log, try to consult the <span class="guilabel">Console</span> view.
-If this view is not open, open it by choosing <span class="guilabel">Window ‣ Show view ‣ Other... ‣ search for Console ‣ choose Console and open it</span> from the main menu.</p>
-<p><img align="right" alt="Spoofax console select screenshot" src="../../../assets/spoofax_console_select.png" width="250" />
-If the console view does not say <code>Spoofax</code> in the top-left corner, ensure the <code>Spoofax</code> console is open by pressing the small downward error on the blue monitor icon and selecting <code>Spoofax console</code> (see screenshot).
-Browse through the log from Spoofax plugins to see if it can help you troubleshoot the problem.</p>
-<p>When building, Spoofax logs all tasks and files that are checked, and all tasks that are built.
-At the end of the build, Spoofax logs whether it completed or if something went wrong.
-Rebuild your language and check the build log to see if it can help you troubleshoot the problem.</p>
-<p>If you ask for help or report a bug, consider storing the log in a text file, so you can include it in your help request or bug report.</p>
-<h2 id="problems-and-solutions">Problems and solutions<a class="headerlink" href="#problems-and-solutions" title="Permanent link">&para;</a></h2>
-<h3 id="errors-in-language-definition-files">Errors in language definition files<a class="headerlink" href="#errors-in-language-definition-files" title="Permanent link">&para;</a></h3>
-<p>Error markers in language definition files (e.g., .cfg/.sdf3/.stx/.str2 files) are expected.
-If there are errors on language definition files, solve them build the language.</p>
-<h3 id="errors-in-generated-files">Errors in generated files<a class="headerlink" href="#errors-in-generated-files" title="Permanent link">&para;</a></h3>
-<p>If there are errors in generated files (i.e., files in the <code>build/generated</code> directory), first try to build the language, as building the language may re-generate these files.
-If the error persists, try deleting the generated file and then building the language.
-Also consider <a href="../../report_a_bug/">reporting this bug</a>, as we consider incrementality issues like these bugs.</p>
-<p>If after deleting the generated file and rebuilding the language, the generated file comes back with errors, definitely <a href="../../report_a_bug/">report this as a bug</a>.
-Try to work around the problem first by <a href="#clean_project">cleaning the language project</a> or by <a href="#clean_cache">deleting on-disk cache and restarting Eclipse</a></p>
-<h3 id="errors-occurred-during-the-build">Errors occurred during the build<a class="headerlink" href="#errors-occurred-during-the-build" title="Permanent link">&para;</a></h3>
-<p>If after building a language, an error popup appears, something unexpected went wrong.
-Please <a href="../../report_a_bug/">report this as a bug</a>.
-Try to work around the problem first by <a href="#clean_project">cleaning the language project</a> or by <a href="#clean_cache">deleting on-disk cache and restarting Eclipse</a></p>
-<h3 id="many-duplicate-definition-errorsother-weird-errors">Many duplicate definition errors/other weird errors<a class="headerlink" href="#many-duplicate-definition-errorsother-weird-errors" title="Permanent link">&para;</a></h3>
-<p>If there are many errors about duplicate definitions, things already being defined, or other weird errors, see if there is a <code>bin</code> directory in your language project.
-If so, delete the <code>bin</code> directory and rebuild the project.</p>
-<h2 id="workarounds">Workarounds<a class="headerlink" href="#workarounds" title="Permanent link">&para;</a></h2>
-<h3 id="clean_project">Cleaning the language project<a class="headerlink" href="#clean_project" title="Permanent link">&para;</a></h3>
-<p>Try cleaning the language project by first selecting (clicking) the language project in the <span class="guilabel">Project Explorer</span> or <span class="guilabel">Package Explorer</span> view, and then choosing <span class="guilabel">Project ‣ Clean...</span> from the main menu.
-In the clean window, deselect <span class="guilabel">Clean all projects</span>, select your project, and press <span class="guilabel">Clean</span>.</p>
-<p>Then, rebuild your language.
-Optionally, check the error log and console again.
-If this does not help, you can try to first delete the <code>build</code> directory, then clean the language project, and then build the project.</p>
-<p>If this solves your problem, consider <a href="../../report_a_bug/">reporting this bug</a>, as we consider incrementality issues like these bugs.
-If not, try the next workaround.</p>
-<h3 id="clean_cache">Deleting on-disk cache and restarting Eclipse<a class="headerlink" href="#clean_cache" title="Permanent link">&para;</a></h3>
-<p>Finally, there may be a problem related to the on-disk cache.
-First, close Eclipse.
-Then, navigate to your workspace directory and delete the <code>.metadata/.plugins/spoofax.lwb.eclipse/pieStore</code> file.
-These directories are hidden, so you may need to enable showing hidden files, or delete the file using your terminal.</p>
-<p>Then, start Eclipse again and build your language.
-Optionally, check the error log and console again.</p>
-<p>If this solves your problem, consider <a href="../../report_a_bug/">reporting this bug</a>, as we consider incrementality issues like these bugs.
-If not, <a href="../../ask_for_help/">ask for help</a>.</p>
-<h2 id="report-a-bug-or-ask-for-help">Report a bug or ask for help<a class="headerlink" href="#report-a-bug-or-ask-for-help" title="Permanent link">&para;</a></h2>
-<p>If after troubleshooting the issue is not resolved, <a href="../../report_a_bug/">report this bug</a> if you think this is a bug, or <a href="../../ask_for_help/">ask for help</a>.</p>
-<h2 id="advanced-troubleshooting">Advanced troubleshooting<a class="headerlink" href="#advanced-troubleshooting" title="Permanent link">&para;</a></h2>
-<h3 id="checking-for-deadlocks-and-making-a-thread-dump">Checking for deadlocks (and making a thread dump)<a class="headerlink" href="#checking-for-deadlocks-and-making-a-thread-dump" title="Permanent link">&para;</a></h3>
-<p>If Eclipse seems to be stuck, hanging, or not making any progress, check for deadlocks by making a thread dump.
-It will print something like:</p>
-<div class="highlight"><pre><span></span><code>80035 Jps
-94805
-74294 org.eclipse.equinox.launcher_1.6.100.v20201223-0822.jar
-51515 Eclipse
-74236 GradleDaemon
+                <h1 id="development-troubleshooting">Development Troubleshooting<a class="headerlink" href="#development-troubleshooting" title="Permanent link">&para;</a></h1>
+<p>This guide explains how to troubleshoot issues when developing Spoofax itself.</p>
+<p>In general, ensure you're calling <code>./repo</code> and <code>./gradlew</code> on Linux and MacOS (or <code>repo.bat</code> and <code>gradlew.bat</code> on Windows) instead of your local Gradle installation. The local one may be too old or too new.</p>
+<h2 id="known-problems">Known Problems<a class="headerlink" href="#known-problems" title="Permanent link">&para;</a></h2>
+<p>The following are known problems that can occur, and their solutions or workarounds.</p>
+<h3 id="many-errors-about-unresolved-classes-in-intellij">Many errors about unresolved classes in IntelliJ<a class="headerlink" href="#many-errors-about-unresolved-classes-in-intellij" title="Permanent link">&para;</a></h3>
+<p>If after importing there are many errors in files about classes not existing, re-import all the projects by pressing the <code>Reload All Gradle Projects</code> button in the Gradle tool window.</p>
+<h3 id="cannot-debug-in-intellij">Cannot debug in IntelliJ<a class="headerlink" href="#cannot-debug-in-intellij" title="Permanent link">&para;</a></h3>
+<p>Debugging in IntelliJ is a bit buggy at the moment. To force debugging, add the following environment variable to your run configuration:</p>
+<div class="highlight"><pre><span></span><code>JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005
 </code></pre></div>
-<p>In this case, <code>51515</code> is the process ID of Eclipse.
-Then run <code>jstack &lt;process-ID&gt;</code>, so <code>jstack 51515</code> in this case.</p>
-<p><code>jstack</code> prints a thread dump with a stack trace for each thread, alongside any detected deadlocks.
-While it may be hard to use this information to troubleshoot yourself, this can be useful information when asking for help or when reporting a bug.
-In case of deadlocks, please <a href="../../report_a_bug/">report this bug</a>.</p>
-<h3 id="checking-memory-and-making-a-heap-dump">Checking memory (and making a heap dump)<a class="headerlink" href="#checking-memory-and-making-a-heap-dump" title="Permanent link">&para;</a></h3>
-<p>If Eclipse seems to be using excessive amounts of memory or processor time, check how much heap space Eclipse is using.
-To show the heap space Eclipse is using, go to the Eclipse preferences, and in the <span class="guilabel">General</span> tab, enable <span class="guilabel">Show heap status</span>.
-The heap status shows up in the bottom right corner.</p>
-<p>Press the trash can icon to run garbage collection, which will free up any available memory.
-If after garbage collection, the memory is still near its maximum, Eclipse has run out of memory and will become very slow or unresponsive.</p>
-<p>To diagnose the problem, first make a thread dump as was described in the previous section.
-A thread dump may give some clues as to what is generating or leaking heap memory.</p>
-<p>Then, make a heap dump by running <code>jmap -dump:live,format=b,file=heap.bin &lt;process-ID&gt;</code> using the process ID of Eclipse, as was described in the previous section.
-This creates a heap dump file called <code>heap.bin</code> in the working directory.
-This heap dump can then be loaded into a profiler such as <a href="https://visualvm.github.io/">VisualVM</a> for inspection.</p>
-<p>In case of excessive memory problems, please <a href="../../report_a_bug/">report this bug</a> and share the heap dump.
-To share heap dumps, upload them to a cloud service such as <a href="https://mega.io/">Mega</a> and share the link.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>Heap dumps contain all the JVM memory in Eclipse, which can include any information that you have entered into Eclipse.
-Only share a heap dump if you are sure you have not entered any sensitive information into Eclipse.</p>
-</div>
+<p>Then start the run configuration in debug mode, and wait until the following shows up in the console:</p>
+<div class="highlight"><pre><span></span><code>Listening for transport dt_socket at address: 5005 Attach debugger
+</code></pre></div>
+<p>Then click the <span class="guilabel">Attach debugger</span> text in the console to attach the debugger and start debugging.</p>
+<p>Note that this enables debugging for any Gradle task that executes Java in an isolated way, including any (Java/Kotlin) compilation tasks that run in a separate process.
+Make sure to first build normally such that these tasks are no longer executed, then run your debugging configuration.</p>
+<p>If you are debugging tests, make sure that the test results are cleaned before by running <code>cleanTest</code>, otherwise Gradle may skip the test task. For example, run the following Gradle tasks as part of the run configuration:</p>
+<div class="highlight"><pre><span></span><code>:spoofax3.lwb.root:spoofax.dynamicloading:cleanTest :spoofax3.lwb.root:spoofax.dynamicloading:test
+</code></pre></div>
+<h3 id="profiling-in-intellij">Profiling in IntelliJ<a class="headerlink" href="#profiling-in-intellij" title="Permanent link">&para;</a></h3>
+<p>Profiling in IntelliJ can be done similarly to debugging. For example, to profile with YourKit, add the following environment variable to your run configuration:</p>
+<div class="highlight"><pre><span></span><code>JAVA_TOOL_OPTIONS=-agentpath:/Applications/YourKit-Java-Profiler-2020.9.app/Contents/Resources/bin/mac/libyjpagent.dylib=listen=all,sampling,onexit=snapshot
+</code></pre></div>
+<p>If you are using a different profiler, the <code>agentpath</code> needs to point to the corresponding agent of your profiler, and the settings after the agent will need to be tailored towards your profiler.
+In the example above, the YourKit profiler will attach to the program, enable CPU sampling, and create a snapshot when the program ends.
+The snapshot can then be opened and inspected in YourKit.</p>
+<p>Similar to debugging, this enables profiling for any Gradle task that executes Java in an isolated way, and tests must be cleaned before profiling to force tests to be executed.</p>
+<h3 id="spoofax-2-language-fails-to-build-with-previous-build-failed-and-no-change-in-the-build-input-has-been-observed">Spoofax 2 language fails to build with "Previous build failed and no change in the build input has been observed"<a class="headerlink" href="#spoofax-2-language-fails-to-build-with-previous-build-failed-and-no-change-in-the-build-input-has-been-observed" title="Permanent link">&para;</a></h3>
+<p>If building a Spoofax 2 language fails due to some ephemeral issue, or if building is cancelled (because you cancelled the Gradle build), the following exception may be thrown during the build:</p>
+<div class="highlight"><pre><span></span><code>org.metaborg.core.MetaborgException: Previous build failed and no change in the build input has been observed, not rebuilding. Fix the problem, or clean and rebuild the project to force a rebuild
+</code></pre></div>
+<p>This is an artefact of the Pluto build system refusing to rebuild if it failed but no changes to the input were detected.
+To force Pluto to rebuild, delete the <code>target/pluto</code> directory of the language.</p>
+<h3 id="task-buildall-not-found-in-root-project-devenv">Task 'buildAll' not found in root project 'devenv'<a class="headerlink" href="#task-buildall-not-found-in-root-project-devenv" title="Permanent link">&para;</a></h3>
+<p>You have 'configure on demand' enabled, such as <code>org.gradle.configureondemand=true</code> in your <code>~/.gradle/gradle.properties</code> file. Disable this.</p>
+<h3 id="expiring-daemon-because-jvm-heap-space-is-exhausted">Expiring Daemon because JVM heap space is exhausted<a class="headerlink" href="#expiring-daemon-because-jvm-heap-space-is-exhausted" title="Permanent link">&para;</a></h3>
+<p>The memory limits in <code>gradle.properties</code> may be too low, and may need to be increased.
+Running the build without <code>--parallel</code> may decrease memory pressure, as less tasks are executed concurrently.
+Or, there is a memory leak in the build: please make a heap dump and send this to the developers so it can be addressed.</p>
+<h3 id="could-not-create-service-of-type-fileaccesstimejournal-using-gradleuserhomescopeservicescreatefileaccesstimejournal">Could not create service of type FileAccessTimeJournal using GradleUserHomeScopeServices.createFileAccessTimeJournal()<a class="headerlink" href="#could-not-create-service-of-type-fileaccesstimejournal-using-gradleuserhomescopeservicescreatefileaccesstimejournal" title="Permanent link">&para;</a></h3>
+<p>The permissions in your <code>~/.gradle/</code> directory are too restrictive. For example, if you're using WSL, ensure the directory is not a symlink to the Windows' <code>.gradle/</code> directory.</p>
+<h3 id="error-resolving-plugin-plugin-request-for-plugin-already-on-the-classpath-must-not-include-a-version">Error resolving plugin: Plugin request for plugin already on the classpath must not include a version<a class="headerlink" href="#error-resolving-plugin-plugin-request-for-plugin-already-on-the-classpath-must-not-include-a-version" title="Permanent link">&para;</a></h3>
+<blockquote>
+<p>Error resolving plugin [id: 'org.metaborg.gradle.config.devenv', version: '?']</p>
+<p>Plugin request for plugin already on the classpath must not include a version</p>
+</blockquote>
+<p>You are not running with the recommended version of Gradle.</p>
+<h3 id="unknown-command-line-option-args">Unknown command-line option '--args'<a class="headerlink" href="#unknown-command-line-option-args" title="Permanent link">&para;</a></h3>
+<p>Command-line arguments such as <code>--args</code> are not supported for tasks in the root project, such as the <code>runSdf3Cli</code> task. Instead, go to the relevant included build and call the task directly.</p>
+<div class="highlight"><pre><span></span><code>cd spoofax.pie/example
+./gradlew :sdf3.cli:run --args=&quot;-V&quot;
+</code></pre></div>
+<p>The working directory is the directory with the <code>gradle.build.kts</code> file of the CLI project. This cannot be changed. For example, <code>spoofax.pie/example/sdf3/sdf3.cli/</code> for the <code>:sdf3.cli</code> project.</p>
+<h3 id="failed-to-create-jar-file">Failed to create Jar file<a class="headerlink" href="#failed-to-create-jar-file" title="Permanent link">&para;</a></h3>
+<p>Due to a bug in the Java 8 and 9 compiler, it sometimes generates the <a href="https://bugs.openjdk.java.net/browse/JDK-8144185">wrong byte code for annotations</a>. This, in turn, causes Gradle to fail reading the JAR file with the following error:</p>
+<div class="highlight"><pre><span></span><code>A problem occurred configuring project &#39;:spoofax3.example.root&#39;.
+&gt; Failed to create Jar file /Users/username/.gradle/caches/jars-8/defabc/jsglr.common-develop-SNAPSHOT.jar.
+</code></pre></div>
+<p>The stack trace will look something like this:</p>
+<div class="highlight"><pre><span></span><code>org.gradle.api.ProjectConfigurationException: A problem occurred configuring project &#39;:spoofax3.example.root&#39;.
+        at org.gradle.configuration.project.LifecycleProjectEvaluator.wrapException(LifecycleProjectEvaluator.java:75)
+        at org.gradle.configuration.project.LifecycleProjectEvaluator.addConfigurationFailure(LifecycleProjectEvaluator.java:68)
+        at org.gradle.configuration.project.LifecycleProjectEvaluator.access$400(LifecycleProjectEvaluator.java:51)
+        ... 142 more
+Caused by: org.gradle.api.GradleException: Failed to create Jar file /Users/username/.gradle/caches/jars-8/defabc/jsglr.common-develop-SNAPSHOT.jar.
+        at org.gradle.internal.classpath.ClasspathBuilder.jar(ClasspathBuilder.java:47)
+        at org.gradle.internal.classpath.InstrumentingClasspathFileTransformer.instrument(InstrumentingClasspathFileTransformer.java:83)
+        ... 6 more
+Caused by: java.lang.ArrayIndexOutOfBoundsException: 195
+        at org.objectweb.asm.ClassReader.readLabel(ClassReader.java:2654)
+        at org.objectweb.asm.ClassReader.createLabel(ClassReader.java:2670)
+        at org.objectweb.asm.ClassReader.readTypeAnnotations(ClassReader.java:2736)
+        at org.objectweb.asm.ClassReader.readCode(ClassReader.java:1912)
+        at org.objectweb.asm.ClassReader.readMethod(ClassReader.java:1492)
+        at org.objectweb.asm.ClassReader.accept(ClassReader.java:717)
+        ... 15 more
+</code></pre></div>
+<p>Determine the version of Java using <code>java -version</code>. Java 8 and 9 can exhibit this problem. The solution is to update your Java to version 11 or later. You can use a tool such as <a href="https://sdkman.io/">SDKMAN!</a> to easily manage the (default) versions of Java on your system.</p>
                 
               
               
@@ -1071,7 +963,7 @@ Only share a heap dump if you are sure you have not entered any sensitive inform
   
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
-        <a href="../../report_a_bug/" class="md-footer__link md-footer__link--prev" rel="prev">
+        <a href="../../eclipse_lwb/troubleshooting/" class="md-footer__link md-footer__link--prev" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -1080,19 +972,19 @@ Only share a heap dump if you are sure you have not entered any sensitive inform
               <span class="md-footer__direction">
                 Previous
               </span>
-              Report a bug
+              Eclipse LWB Troubleshooting
             </div>
           </div>
         </a>
       
       
-        <a href="../../development/troubleshooting/" class="md-footer__link md-footer__link--next" rel="next">
+        <a href="../../../reference/configuration/" class="md-footer__link md-footer__link--next" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Development Troubleshooting
+              Configuration
             </div>
           </div>
           <div class="md-footer__button md-icon">
