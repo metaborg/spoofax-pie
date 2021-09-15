@@ -5,6 +5,15 @@ All notable changes to this project are documented in this file, based on [Keep 
 ## [Unreleased]
 
 
+## [0.11.10]
+### Fixed
+- SDF3 label references (from layout constraints) that do not refer to a defined label causing compile errors. These undefined labels now show an error.
+
+### Changed
+- Missing imports in SDF3 now no longer give errors on everything due to improved cascaded error handling in the Statix constraint solver.
+- releng (devenv-release) to version 0.1.11.
+
+
 ## [0.11.9]
 ### Fixed
 - Injection explication failing on context-free productions without constructors that are not an injection, bracket, or rejection production. These productions now show an error.
@@ -109,7 +118,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.9...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.10...HEAD
+[0.11.10]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.9...release-0.11.10
 [0.11.9]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.8...release-0.11.9
 [0.11.8]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.7...release-0.11.8
 [0.11.7]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.6...release-0.11.7
