@@ -5,6 +5,9 @@ import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Messages;
 import mb.common.message.Severity;
 import mb.common.result.Result;
+import mb.jsglr.common.JsglrParseException;
+import mb.jsglr.common.JsglrParseOutput;
+import mb.jsglr.common.TermTracer;
 import mb.jsglr.pie.JsglrParseTaskInput;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
@@ -18,6 +21,9 @@ import mb.sdf3.Sdf3Scope;
 import mb.sdf3.task.Sdf3AnalyzeMulti;
 import mb.sdf3.task.Sdf3Parse;
 import mb.sdf3.task.util.Sdf3Util;
+import mb.stratego.common.InvalidAstShapeException;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.terms.util.TermUtils;
 
 import javax.inject.Inject;
 import java.util.stream.Stream;
@@ -50,8 +56,9 @@ public class Sdf3CheckSpec implements TaskDef<Sdf3SpecConfig, KeyedMessages> {
             final JsglrParseTaskInput.Builder parseInputBuilder = parse.inputBuilder().rootDirectoryHint(input.rootDirectory);
             stream.forEach(file -> {
                 final ResourcePath filePath = file.getPath();
-                final Messages messages = context.require(parseInputBuilder.withFile(filePath).buildMessagesSupplier());
-                messagesBuilder.addMessages(filePath, messages);
+                final Result<JsglrParseOutput, JsglrParseException> result = context.require(parseInputBuilder.withFile(filePath).buildSupplier());
+                messagesBuilder.addMessages(filePath, result.mapOrElse(v -> v.messages.asMessages(), e -> e.getOptionalMessages().map(KeyedMessages::asMessages).orElseGet(Messages::of)));
+                result.ifOk(output -> checkModuleName(filePath, output.ast, input, messagesBuilder));
             });
         }
 
@@ -64,5 +71,17 @@ public class Sdf3CheckSpec implements TaskDef<Sdf3SpecConfig, KeyedMessages> {
             })
             .ifErr(e -> messagesBuilder.addMessage("SDF3 analysis failed", e, Severity.Error, input.mainSourceDirectory));
         return messagesBuilder.build();
+    }
+
+    private void checkModuleName(ResourcePath file, IStrategoTerm ast, Sdf3SpecConfig input, KeyedMessagesBuilder messagesBuilder) {
+        final IStrategoTerm moduleNameTerm = TermUtils.asApplAt(ast, 0)
+            .orElseThrow(() -> new InvalidAstShapeException("constructor application as first subterm", ast));
+        final String moduleName = TermUtils.asJavaStringAt(moduleNameTerm, 0)
+            .orElseThrow(() -> new InvalidAstShapeException("module name string as first subterm", moduleNameTerm));
+        final String relativePath = input.mainSourceDirectory.relativize(file.removeLeafExtension());
+        if(!moduleName.equals(relativePath)) {
+            messagesBuilder.addMessage("Module name '" + moduleName + "' does not agree with relative file path '" +
+                relativePath + "'. Either change the module name or move/rename the file", Severity.Error, file, TermTracer.getRegion(moduleNameTerm));
+        }
     }
 }

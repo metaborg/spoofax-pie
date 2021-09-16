@@ -50,6 +50,7 @@ import mb.spoofax.core.language.command.EditorFileType;
 import mb.spoofax.core.language.command.EditorSelectionType;
 import mb.spoofax.core.language.command.EnclosingCommandContextType;
 import mb.spoofax.core.language.command.HierarchicalResourceType;
+import mb.stratego.common.InvalidAstShapeException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;

@@ -106,6 +106,7 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   addTaskDefs(strBuildTaskPackageId, "FrontSplit")
   addTaskDefs(strBuildTaskPackageId, "Resolve")
   addTaskDefs(strBuildTaskPackageId, "CopyLibraryClassFiles")
+  addTaskDefs(strBuildTaskPackageId, "CompileDynamicRules")
 
   // Task definitions
   addTaskDefs(taskPackageId, "StrategoCompileToJava")
