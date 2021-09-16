@@ -26,8 +26,7 @@ public final class RepeatStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<C
 
     private RepeatStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    @Override
-    public Seq<T> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, T> s, T input) {
+    public static <CTX, T> Seq<T> eval(TegoEngine engine, CTX ctx, Strategy<CTX, T, T> s, T input) {
         return new SeqBase<T>() {
             // Implementation if `yield` and `yieldBreak` could actually suspend computation
             @SuppressWarnings("unused")
@@ -123,6 +122,11 @@ public final class RepeatStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<C
                 }
             }
         };
+    }
+
+    @Override
+    public Seq<T> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, T> s, T input) {
+        return eval(engine, ctx, s, input);
     }
 
     @Override

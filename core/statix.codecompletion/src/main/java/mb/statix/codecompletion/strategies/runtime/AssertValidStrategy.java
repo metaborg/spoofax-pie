@@ -34,6 +34,16 @@ public final class AssertValidStrategy extends NamedStrategy1<SolverContext, ITe
         ITermVar v,
         SolverState input
     ) {
+        return eval(engine, ctx, v, input);
+    }
+
+    @SuppressWarnings("UnnecessaryLocalVariable")
+    public static Seq<SolverState> eval(
+        TegoEngine engine,
+        SolverContext ctx,
+        ITermVar v,
+        SolverState input
+    ) {
         // Tego:
         // def assertValid(v: ITermVar): SolverState -> [SolverState] =
         //    infer |> assertThat(\:- s ->
@@ -84,7 +94,7 @@ public final class AssertValidStrategy extends NamedStrategy1<SolverContext, ITe
         final AssertThatStrategy<SolverContext, SolverState> assertThat = AssertThatStrategy.getInstance();
         final FlatMapStrategy<SolverContext, SolverState, SolverState> flatMap = FlatMapStrategy.getInstance();
         final DelayStuckQueriesStrategy delayStuckQueries = DelayStuckQueriesStrategy.getInstance();
-        final Strategy<SolverContext, SolverState, Boolean> __lambda1 = this::eval__lambda1;
+        final Strategy<SolverContext, SolverState, Boolean> __lambda1 = AssertValidStrategy::eval__lambda1;
 
         final Seq<SolverState> r1 = engine.eval(infer, ctx, input);
 
@@ -97,7 +107,7 @@ public final class AssertValidStrategy extends NamedStrategy1<SolverContext, ITe
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
-    private Seq<Boolean> eval__lambda1(
+    private static Seq<Boolean> eval__lambda1(
         TegoEngine engine,
         SolverContext ctx,
         SolverState s

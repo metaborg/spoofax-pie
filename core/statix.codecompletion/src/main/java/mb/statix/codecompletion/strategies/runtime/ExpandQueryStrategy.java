@@ -85,9 +85,13 @@ public final class ExpandQueryStrategy extends NamedStrategy<SolverContext, Sele
 
     @Override
     public Seq<SolverState> evalInternal(TegoEngine engine, SolverContext ctx, SelectedConstraintSolverState<CResolveQuery> input) {
+        return eval(engine, ctx, input);
+    }
+
+    public static Seq<SolverState> eval(TegoEngine engine, SolverContext ctx, SelectedConstraintSolverState<CResolveQuery> input) {
         final CResolveQuery query = input.getSelected();
 
-        engine.log(this, "Expand query: {}", query);
+        engine.log(instance, "Expand query: {}", query);
 
         final IState.Immutable state = input.getState();
         final IUniDisunifier unifier = state.unifier();
@@ -123,26 +127,26 @@ public final class ExpandQueryStrategy extends NamedStrategy<SolverContext, Sele
             dataWF, isAlways, isComplete);
         // @formatter:on
 
-        engine.log(this, "Expanding:");
+        engine.log(instance, "Expanding:");
 
         // Find all possible declarations the resolution could resolve to.
         final int declarationCount = countDeclarations(nameResolution, scope);
-        engine.log(this, "  ▶ found {} declarations", declarationCount);
+        engine.log(instance, "  ▶ found {} declarations", declarationCount);
 
         // For each declaration:
         final ArrayList<SolverState> output = new ArrayList<>();
         for (int i = 0; i < declarationCount; i++) {
             final List<SolverState> newStates = expandResolution(engine, ctx.getSpec(), query, input,
                 unifier, nameResolution, scope, i);
-            engine.log(this, "  ▶ added {} possible states", newStates.size());
+            engine.log(instance, "  ▶ added {} possible states", newStates.size());
             output.addAll(newStates);
         }
-        engine.log(this, "▶ expanded {} declarations into {} possible states", declarationCount, output.size());
+        engine.log(instance, "▶ expanded {} declarations into {} possible states", declarationCount, output.size());
 
         @Nullable final ITermVar focusVar = ctx.getFocusVar();
-        if (focusVar != null && engine.isLogEnabled(this)) {
+        if (focusVar != null && engine.isLogEnabled(instance)) {
             for(SolverState s : output) {
-                engine.log(this, "- {}", s.project(focusVar));
+                engine.log(instance, "- {}", s.project(focusVar));
             }
         }
 
@@ -161,7 +165,7 @@ public final class ExpandQueryStrategy extends NamedStrategy<SolverContext, Sele
      * @param index the zero-based index of the resolution
      * @return the list of new solver states
      */
-    private List<SolverState> expandResolution(
+    private static List<SolverState> expandResolution(
         TegoEngine engine,
         Spec spec,
         CResolveQuery query,
@@ -173,7 +177,7 @@ public final class ExpandQueryStrategy extends NamedStrategy<SolverContext, Sele
     ) {
         final Env<Scope, ITerm, ITerm, CEqual> env = resolveByIndex(nameResolution, scope, index);
 
-        engine.log(this, "  ▶ ▶ declaration #{}: {} matches", index, env.matches.size());
+        engine.log(instance, "  ▶ ▶ declaration #{}: {} matches", index, env.matches.size());
 
         // No matches, so no results
         if(env.matches.isEmpty()) {
@@ -189,20 +193,20 @@ public final class ExpandQueryStrategy extends NamedStrategy<SolverContext, Sele
         // Unconditional rejects
         final List<Match<Scope, ITerm, ITerm, CEqual>> reqRejects = env.rejects;
 
-        engine.log(this, "  ▶ ▶ conditional matches {}", optMatches);
-        engine.log(this, "  ▶ ▶ unconditional matches {}", reqMatches);
-        engine.log(this, "  ▶ ▶ unconditional rejects {}", reqRejects);
+        engine.log(instance, "  ▶ ▶ conditional matches {}", optMatches);
+        engine.log(instance, "  ▶ ▶ unconditional matches {}", reqMatches);
+        engine.log(instance, "  ▶ ▶ unconditional rejects {}", reqRejects);
 
         // Group the conditional matches into groups that can be applied together
         final List<List<Match<Scope, ITerm, ITerm, CEqual>>> optMatchGroups = groupByCondition(optMatches);
 
         final List<SolverState> newStates = new ArrayList<>();
         for (List<Match<Scope, ITerm, ITerm, CEqual>> optMatchGroup : optMatchGroups) {
-            engine.log(this, "  ▶ ▶ ▶ match group {}", optMatchGroup);
+            engine.log(instance, "  ▶ ▶ ▶ match group {}", optMatchGroup);
             // Determine the range of sizes the query result set can be
             final Range<Integer> sizes = resultSize(query.resultTerm(), unifier, optMatchGroup.size());
 
-            engine.log(this, "  ▶ ▶ ▶ sizes {}", sizes);
+            engine.log(instance, "  ▶ ▶ ▶ sizes {}", sizes);
 
             // For each possible size:
             final List<SolverState> states = expandResolutionSets(
@@ -222,7 +226,7 @@ public final class ExpandQueryStrategy extends NamedStrategy<SolverContext, Sele
      *
      * @return the groups of conditional matches
      */
-    private List<List<Match<Scope, ITerm, ITerm, CEqual>>> groupByCondition(List<Match<Scope, ITerm, ITerm, CEqual>> matches) {
+    private static List<List<Match<Scope, ITerm, ITerm, CEqual>>> groupByCondition(List<Match<Scope, ITerm, ITerm, CEqual>> matches) {
         final Deque<Match<Scope, ITerm, ITerm, CEqual>> worklist = new LinkedList<>(matches);
         final List<List<Match<Scope, ITerm, ITerm, CEqual>>> matchGroups = new ArrayList<>();
         while (!worklist.isEmpty()) {
@@ -263,7 +267,7 @@ public final class ExpandQueryStrategy extends NamedStrategy<SolverContext, Sele
      * @param scope the starting scope
      * @return the number of declarations
      */
-    private int countDeclarations(
+    private static int countDeclarations(
         NameResolution<Scope, ITerm, ITerm, CEqual> nameResolution,
         Scope scope
     ) {
@@ -282,7 +286,7 @@ public final class ExpandQueryStrategy extends NamedStrategy<SolverContext, Sele
         return count.get();
     }
 
-    private Env<Scope, ITerm, ITerm, CEqual> resolveByIndex(
+    private static Env<Scope, ITerm, ITerm, CEqual> resolveByIndex(
         NameResolution<Scope, ITerm, ITerm, CEqual> nameResolution,
         Scope scope,
         int index
@@ -310,7 +314,7 @@ public final class ExpandQueryStrategy extends NamedStrategy<SolverContext, Sele
      * @param reqRejects the required rejects
      * @return a list of new solver states
      */
-    private List<SolverState> expandResolutionSets(
+    private static List<SolverState> expandResolutionSets(
         TegoEngine engine,
         Spec spec,
         CResolveQuery query,
@@ -326,7 +330,7 @@ public final class ExpandQueryStrategy extends NamedStrategy<SolverContext, Sele
         {
             final Stream<Collection<Match<Scope, ITerm, ITerm, CEqual>>> subsets = StreamUtils.subsetsOfSize(optMatches.stream(), size);
             final List<Collection<Match<Scope, ITerm, ITerm, CEqual>>> subsetsList = subsets.collect(Collectors.toList());
-            engine.log(this, "  ▶ ▶ ▶ for size {}: {}", size, subsetsList);
+            engine.log(instance, "  ▶ ▶ ▶ for size {}: {}", size, subsetsList);
             return subsetsList.stream().map(matches ->
                 updateSolverState(
                     spec, query, state,
@@ -355,7 +359,7 @@ public final class ExpandQueryStrategy extends NamedStrategy<SolverContext, Sele
      * @param reqRejects the required rejects
      * @return the new solver state
      */
-    private SolverState updateSolverState(
+    private static SolverState updateSolverState(
         Spec spec,
         CResolveQuery query,
         SolverState state,
@@ -409,7 +413,7 @@ public final class ExpandQueryStrategy extends NamedStrategy<SolverContext, Sele
      *
      * @param constraints the builder for the list of constraints
      */
-    private ImmutableList<IConstraint> removeTermIdConstraints(ImmutableList<IConstraint> constraints) {
+    private static ImmutableList<IConstraint> removeTermIdConstraints(ImmutableList<IConstraint> constraints) {
         return ImmutableList.copyOf(Collections2.filter(constraints, c -> !(c instanceof CAstId)));
     }
 
@@ -436,7 +440,7 @@ public final class ExpandQueryStrategy extends NamedStrategy<SolverContext, Sele
      * @param declarationCount the number of declarations found
      * @return the range of possible query result set sizes
      */
-    private Range<Integer> resultSize(ITerm result, IUniDisunifier unifier, int declarationCount) {
+    private static Range<Integer> resultSize(ITerm result, IUniDisunifier unifier, int declarationCount) {
         // @formatter:off
         final AtomicInteger min = new AtomicInteger(0);
         return M.<Range<Integer>>list(ListTerms.casesFix(

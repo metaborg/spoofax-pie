@@ -23,8 +23,7 @@ public final class AssertThatStrategy<CTX, T> extends NamedStrategy1<CTX, Strate
 
     private AssertThatStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    @Override
-    public Seq<T> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, Boolean> predicate, T input) {
+    public static <CTX, T> Seq<T> eval(TegoEngine engine, CTX ctx, Strategy<CTX, T, Boolean> predicate, T input) {
         try {
             final @Nullable Boolean[] success = {null};
             final Seq<Boolean> results = engine.eval(predicate, ctx, input);
@@ -38,6 +37,11 @@ public final class AssertThatStrategy<CTX, T> extends NamedStrategy1<CTX, Strate
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public Seq<T> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, Boolean> predicate, T input) {
+        return eval(engine, ctx, predicate, input);
     }
 
     @Override

@@ -61,6 +61,10 @@ public final class DelayStuckQueriesStrategy extends NamedStrategy<SolverContext
 
     @Override
     public Seq<SolverState> evalInternal(TegoEngine engine, SolverContext ctx, SolverState input) {
+        return eval(engine, ctx, input);
+    }
+
+    public static Seq<SolverState> eval(TegoEngine engine, SolverContext ctx, SolverState input) {
         final IState.Immutable state = input.getState();
         final ICompleteness.Immutable completeness = input.getCompleteness();
 
@@ -83,7 +87,7 @@ public final class DelayStuckQueriesStrategy extends NamedStrategy<SolverContext
         return Seq.of(input.withDelays(delays.entrySet()));
     }
 
-    private Optional<Delay> checkDelay(Spec spec, CResolveQuery query, IState.Immutable state,
+    private static Optional<Delay> checkDelay(Spec spec, CResolveQuery query, IState.Immutable state,
                                        ICompleteness.Immutable completeness) {
         final IUniDisunifier unifier = state.unifier();
 

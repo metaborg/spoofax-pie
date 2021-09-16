@@ -25,8 +25,7 @@ public final class OrStrategy<CTX, T, R> extends NamedStrategy2<CTX, Strategy<CT
 
     private OrStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    @Override
-    public Seq<R> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, R> s1, Strategy<CTX, T, R> s2, T input) {
+    public static <CTX, T, R> Seq<R> eval(TegoEngine engine, CTX ctx, Strategy<CTX, T, R> s1, Strategy<CTX, T, R> s2, T input) {
         return new SeqBase<R>() {
 
             // Implementation if `yield` and `yieldBreak` could actually suspend computation
@@ -109,6 +108,11 @@ public final class OrStrategy<CTX, T, R> extends NamedStrategy2<CTX, Strategy<CT
                 }
             }
         };
+    }
+
+    @Override
+    public Seq<R> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, R> s1, Strategy<CTX, T, R> s2, T input) {
+        return eval(engine, ctx, s1, s2, input);
     }
 
     @Override

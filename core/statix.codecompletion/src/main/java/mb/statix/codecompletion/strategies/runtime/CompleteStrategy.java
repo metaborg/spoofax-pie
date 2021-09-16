@@ -34,6 +34,17 @@ public final class CompleteStrategy extends NamedStrategy2<SolverContext, ITermV
         Set<String> visitedInjections,
         SolverState input
     ) {
+        return eval(engine, ctx, v, visitedInjections, input);
+    }
+
+    @SuppressWarnings("UnnecessaryLocalVariable")
+    public static Seq<SolverState> eval(
+        TegoEngine engine,
+        SolverContext ctx,
+        ITermVar v,
+        Set<String> visitedInjections,
+        SolverState input
+    ) {
         // Tego:
         // def complete(v: ITermVar, visitedInjections: Set<String>): SolverState -> [SolverState] =
         //     expandAllPredicates(v) |>

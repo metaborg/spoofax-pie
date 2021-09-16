@@ -31,6 +31,17 @@ public final class ExpandAllInjectionsStrategy extends NamedStrategy2<SolverCont
         Set<String> visitedInjections,
         SolverState input
     ) {
+        return eval(engine, ctx, v, visitedInjections, input);
+    }
+
+    @SuppressWarnings("UnnecessaryLocalVariable")
+    public static Seq<SolverState> eval(
+        TegoEngine engine,
+        SolverContext ctx,
+        ITermVar v,
+        Set<String> visitedInjections,
+        SolverState input
+    ) {
         // Tego:
         // def expandAllInjections(v: ITermVar, visitedInjections: Set<String>): SolverState -> SolverState =
         //     fixSet(try(expandInjection(visitedInjections, v))) |> assertValid(v)

@@ -23,8 +23,7 @@ public final class FlatMapStrategy<CTX, T, R> extends NamedStrategy1<CTX, Strate
 
     private FlatMapStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    @Override
-    public Seq<R> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, R> s, Seq<T> input) {
+    public static <CTX, T, R> Seq<R> eval(TegoEngine engine, CTX ctx, Strategy<CTX, T, R> s, Seq<T> input) {
         return new SeqBase<R>() {
 
             // Implementation if `yield` and `yieldBreak` could actually suspend computation
@@ -44,6 +43,11 @@ public final class FlatMapStrategy<CTX, T, R> extends NamedStrategy1<CTX, Strate
                 throw new UnsupportedOperationException("Not yet implemented");
             }
         };
+    }
+
+    @Override
+    public Seq<R> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, R> s, Seq<T> input) {
+        return eval(engine, ctx, s, input);
     }
 
     @Override

@@ -56,6 +56,18 @@ public final class ExpandPredicateStrategy extends NamedStrategy1<SolverContext,
      */
     @Override
     public Seq<SolverState> evalInternal(TegoEngine engine, SolverContext ctx, @Nullable ITermVar focus, SelectedConstraintSolverState<CUser> state) {
+        return eval(engine, ctx, focus, state);
+    }
+
+    /**
+     * Executes the strategy.
+     *
+     * @param ctx the context
+     * @param focus the focus, used for debugging; or {@code null}
+     * @param state the solver state with a selected constraint
+     * @return the sequence of new solver states
+     */
+    public static Seq<SolverState> eval(TegoEngine engine, SolverContext ctx, @Nullable ITermVar focus, SelectedConstraintSolverState<CUser> state) {
         final CUser selected = state.getSelected();
         // Get the rules for the given predicate constraint
         final ImmutableList<Rule> rules = ctx.getSpec().rules().getOrderIndependentRules(selected.name()).asList();

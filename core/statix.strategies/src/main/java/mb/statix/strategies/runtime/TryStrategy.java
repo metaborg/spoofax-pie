@@ -21,8 +21,7 @@ public final class TryStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<CTX,
 
     private TryStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    @Override
-    public Seq<T> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, T> s, T input) {
+    public static <CTX, T> Seq<T> eval(TegoEngine engine, CTX ctx, Strategy<CTX, T, T> s, T input) {
         // return <glc(s, id, id)> input
         return engine.eval(GlcStrategy.<CTX, T, T, T>getInstance().apply(
             s, IdStrategy.getInstance(), IdStrategy.getInstance()
@@ -30,11 +29,16 @@ public final class TryStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<CTX,
     }
 
     @Override
+    public Seq<T> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, T> s, T input) {
+        return eval(engine, ctx, s, input);
+    }
+
+    @Override
     public String getName() {
         return "try";
     }
 
-    @Override
+    @SuppressWarnings("SwitchStatementWithTooFewBranches") @Override
     public String getParamName(int index) {
         switch (index) {
             case 0: return "s";

@@ -33,6 +33,16 @@ public final class ExpandInjectionStrategy extends NamedStrategy2<SolverContext,
         Set<String> visitedInjections,
         SolverState input
     ) {
+        return eval(engine, ctx, v, visitedInjections, input);
+    }
+
+    public static Seq<SolverState> eval(
+        TegoEngine engine,
+        SolverContext ctx,
+        ITermVar v,
+        Set<String> visitedInjections,
+        SolverState input
+    ) {
         final CompleteStrategy complete = CompleteStrategy.getInstance();
 
         // Project the term

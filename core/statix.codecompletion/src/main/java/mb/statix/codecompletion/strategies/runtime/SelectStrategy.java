@@ -46,6 +46,17 @@ public final class SelectStrategy<C extends IConstraint> extends NamedStrategy2<
         BiPredicate<C, SolverState> predicate,
         SolverState input
     ) {
+        return eval(engine, ctx, constraintClass, predicate, input);
+    }
+
+    public static <C extends IConstraint> Seq<SelectedConstraintSolverState<C>> eval(
+        TegoEngine engine,
+        SolverContext ctx,
+        Class<C> constraintClass,
+        // TODO: This should probably be a strategy:
+        BiPredicate<C, SolverState> predicate,
+        SolverState input
+    ) {
         return Seq.from(input.getConstraints())
             .filterIsInstance(constraintClass)
             .filter(c -> predicate.test(c, input))

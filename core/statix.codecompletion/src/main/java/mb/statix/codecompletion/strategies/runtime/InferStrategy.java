@@ -39,6 +39,10 @@ public final class InferStrategy extends NamedStrategy<SolverContext, SolverStat
 
     @Override
     public Seq<SolverState> evalInternal(TegoEngine engine, SolverContext ctx, SolverState input) {
+        return eval(engine, ctx, input);
+    }
+
+    public static Seq<SolverState> eval(TegoEngine engine, SolverContext ctx, SolverState input) {
         try {
             final SolverResult result = Solver.solve(
                 ctx.getSpec(),

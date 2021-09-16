@@ -23,8 +23,7 @@ public final class GlcStrategy<CTX, T, U, R> extends NamedStrategy3<CTX, Strateg
 
     private GlcStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    @Override
-    public Seq<R> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, U> condition, Strategy<CTX, U, R> onSuccess, Strategy<CTX, T, R> onFailure, T input) {
+    public static <CTX, T, U, R> Seq<R> eval(TegoEngine engine, CTX ctx, Strategy<CTX, T, U> condition, Strategy<CTX, U, R> onSuccess, Strategy<CTX, T, R> onFailure, T input) {
         return new SeqBase<R>() {
             // Implementation if `yield` and `yieldBreak` could actually suspend computation
             @SuppressWarnings("unused")
@@ -144,6 +143,11 @@ public final class GlcStrategy<CTX, T, U, R> extends NamedStrategy3<CTX, Strateg
                 }
             }
         };
+    }
+
+    @Override
+    public Seq<R> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, U> condition, Strategy<CTX, U, R> onSuccess, Strategy<CTX, T, R> onFailure, T input) {
+        return eval(engine, ctx, condition, onSuccess, onFailure, input);
     }
 
     @Override

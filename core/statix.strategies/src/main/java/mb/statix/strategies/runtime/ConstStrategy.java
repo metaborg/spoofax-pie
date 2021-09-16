@@ -20,8 +20,12 @@ public final class ConstStrategy<CTX, T, R> extends NamedStrategy1<CTX, R, T, R>
 
     private ConstStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    @Override public final Seq<R> evalInternal(TegoEngine engine, CTX ctx, R v, T input) {
+    public static <CTX, T, R> Seq<R> eval(TegoEngine engine, CTX ctx, R v, T input) {
         return Seq.of(v);
+    }
+
+    @Override public Seq<R> evalInternal(TegoEngine engine, CTX ctx, R v, T input) {
+        return eval(engine, ctx, v, input);
     }
 
     @Override
@@ -29,7 +33,7 @@ public final class ConstStrategy<CTX, T, R> extends NamedStrategy1<CTX, R, T, R>
         return "const";
     }
 
-    @Override
+    @SuppressWarnings("SwitchStatementWithTooFewBranches") @Override
     public String getParamName(int index) {
         switch (index) {
             case 0: return "v";

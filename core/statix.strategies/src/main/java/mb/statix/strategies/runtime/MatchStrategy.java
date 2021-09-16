@@ -26,12 +26,12 @@ public final class MatchStrategy<CTX, T, R> extends NamedStrategy1<CTX, Pattern<
 
     private MatchStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    @Override public final Seq<R> evalInternal(TegoEngine engine, CTX ctx, Pattern<CTX, T, R> pattern, T input) {
+    public static <CTX, T, R> Seq<R> eval(TegoEngine engine, CTX ctx, Pattern<CTX, T, R> pattern, T input) {
         return new SeqBase<R>() {
             // Implementation if `yield` and `yieldBreak` could actually suspend computation
             @SuppressWarnings("unused")
             @ExcludeFromJacocoGeneratedReport
-            private void computeNextCoroutine() throws InterruptedException {
+            private void computeNextCoroutine() {
                 // 0:
                 final boolean matches = pattern.match(ctx, input);
                 if (matches) {
@@ -48,7 +48,7 @@ public final class MatchStrategy<CTX, T, R> extends NamedStrategy1<CTX, Pattern<
             // none
 
             @Override
-            protected void computeNext() throws InterruptedException {
+            protected void computeNext() {
                 while (true) {
                     switch(state) {
                         case 0:
@@ -73,12 +73,16 @@ public final class MatchStrategy<CTX, T, R> extends NamedStrategy1<CTX, Pattern<
         };
     }
 
+    @Override public Seq<R> evalInternal(TegoEngine engine, CTX ctx, Pattern<CTX, T, R> pattern, T input) {
+        return eval(engine, ctx, pattern, input);
+    }
+
     @Override
     public String getName() {
         return "match";
     }
 
-    @Override
+    @SuppressWarnings("SwitchStatementWithTooFewBranches") @Override
     public String getParamName(int index) {
         switch (index) {
             case 0: return "pattern";

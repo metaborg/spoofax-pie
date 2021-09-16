@@ -25,8 +25,7 @@ public final class SeqStrategy<CTX, T, U, R> extends NamedStrategy2<CTX, Strateg
 
     private SeqStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    @Override
-    public Seq<R> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, U> s1, Strategy<CTX, U, R> s2, T input) {
+    public static <CTX, T, U, R> Seq<R> eval(TegoEngine engine, CTX ctx, Strategy<CTX, T, U> s1, Strategy<CTX, U, R> s2, T input) {
         return new SeqBase<R>() {
 
             // Implementation if `yield` and `yieldBreak` could actually suspend computation
@@ -107,6 +106,11 @@ public final class SeqStrategy<CTX, T, U, R> extends NamedStrategy2<CTX, Strateg
                 }
             }
         };
+    }
+
+    @Override
+    public Seq<R> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, U> s1, Strategy<CTX, U, R> s2, T input) {
+        return eval(engine, ctx, s1, s2, input);
     }
 
     @Override

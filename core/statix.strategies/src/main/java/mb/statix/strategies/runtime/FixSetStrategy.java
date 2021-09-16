@@ -31,8 +31,7 @@ public final class FixSetStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<C
 
     private FixSetStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    @Override
-    public Seq<T> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, T> s, T input) {
+    public static <CTX, T> Seq<T> eval(TegoEngine engine, CTX ctx, Strategy<CTX, T, T> s, T input) {
         return new SeqBase<T>() {
             // Implementation if `yield` and `yieldBreak` could actually suspend computation
             @SuppressWarnings("unused")
@@ -171,11 +170,16 @@ public final class FixSetStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<C
     }
 
     @Override
+    public Seq<T> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, T> s, T input) {
+        return eval(engine, ctx, s, input);
+    }
+
+    @Override
     public String getName() {
         return "fixSet";
     }
 
-    @Override
+    @SuppressWarnings("SwitchStatementWithTooFewBranches") @Override
     public String getParamName(int index) {
         switch (index) {
             case 0: return "s";

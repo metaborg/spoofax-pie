@@ -24,8 +24,7 @@ public final class LimitStrategy<CTX, T, R> extends NamedStrategy2<CTX, Strategy
 
     private LimitStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    @Override
-    public Seq<R> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, R> s, Integer n, T input) {
+    public static <CTX, T, R> Seq<R> eval(TegoEngine engine, CTX ctx, Strategy<CTX, T, R> s, Integer n, T input) {
         return new SeqBase<R>() {
             // Implementation if `yield` and `yieldBreak` could actually suspend computation
             @SuppressWarnings("unused")
@@ -79,6 +78,11 @@ public final class LimitStrategy<CTX, T, R> extends NamedStrategy2<CTX, Strategy
                 }
             }
         };
+    }
+
+    @Override
+    public Seq<R> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, R> s, Integer n, T input) {
+        return eval(engine, ctx, s, n, input);
     }
 
     @Override
