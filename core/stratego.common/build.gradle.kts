@@ -11,6 +11,7 @@ dependencies {
   api("org.metaborg:resource")
 
   implementation(project(":aterm.common"))
+  implementation(project(":jsglr.common"))
 
   api("org.metaborg.devenv:org.spoofax.terms")
   api("org.metaborg.devenv:org.spoofax.interpreter.core")

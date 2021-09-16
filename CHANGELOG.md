@@ -6,6 +6,9 @@ All notable changes to this project are documented in this file, based on [Keep 
 ### Fixed
 - Stratego backend tasks triggering overlapping provided files, hidden dependencies, and visited multiple times errors in bottom-up builds when dynamic rules were added or removed.
 - Unremovable directories on Windows due to Stratego leaking directory streams.
+- Compile failures due to SDF3 module name not matching the relative file name. This now produces an error in the SDF3 file.
+- Compile failures due to duplicate constructors in SDF3. Constructors with the same name were allowed if they were defined on a different sort, but Statix does not support this at the moment. Duplicate constructor names now result in an error.
+- Compile failures due to constructor names starting with lowercase characters. This now produces an error in the SDF3 file.
 
 
 ## [0.11.10] - 2021-09-15

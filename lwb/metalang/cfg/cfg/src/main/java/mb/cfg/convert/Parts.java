@@ -10,7 +10,7 @@ import mb.jsglr.common.TermTracer;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.TypeInfo;
-import mb.stratego.common.InvalidAstShapeException;
+import mb.aterm.common.InvalidAstShapeException;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoAppl;

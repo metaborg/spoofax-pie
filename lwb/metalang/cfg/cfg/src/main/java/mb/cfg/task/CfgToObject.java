@@ -4,7 +4,7 @@ import mb.cfg.CfgScope;
 import mb.cfg.CompileLanguageInput;
 import mb.cfg.CompileLanguageInputCustomizer;
 import mb.cfg.convert.CfgAstToObject;
-import mb.stratego.common.InvalidAstShapeException;
+import mb.aterm.common.InvalidAstShapeException;
 import mb.common.message.KeyedMessages;
 import mb.common.result.Result;
 import mb.common.util.Properties;

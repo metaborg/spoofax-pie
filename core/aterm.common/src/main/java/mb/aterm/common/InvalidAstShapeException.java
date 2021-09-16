@@ -1,4 +1,4 @@
-package mb.stratego.common;
+package mb.aterm.common;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
