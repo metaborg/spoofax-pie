@@ -5,7 +5,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 ## [Unreleased]
 
 
-## [0.11.10]
+## [0.11.10] - 2021-09-15
 ### Fixed
 - SDF3 label references (from layout constraints) that do not refer to a defined label causing compile errors. These undefined labels now show an error.
 
@@ -14,7 +14,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 - releng (devenv-release) to version 0.1.11.
 
 
-## [0.11.9]
+## [0.11.9] - 2021-09-13
 ### Fixed
 - Injection explication failing on context-free productions without constructors that are not an injection, bracket, or rejection production. These productions now show an error.
 - Signature generation failing on context-free productions with optionals, alternations, and sequences. These productions now show an error.
