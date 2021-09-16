@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
  * Given a state with a selected predicate constraint {@link CUser},
  * this strategy expands the initial state into as many states as there are rules defined for the predicate.
  */
-public final class ExpandPredicateStrategy extends NamedStrategy1<SolverContext, ITermVar, SelectedConstraintSolverState<CUser>, SolverState> {
+public final class ExpandPredicateStrategy extends NamedStrategy1<SolverContext, ITermVar, SelectedConstraintSolverState<CUser>, Seq<SolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final ExpandPredicateStrategy instance = new ExpandPredicateStrategy();

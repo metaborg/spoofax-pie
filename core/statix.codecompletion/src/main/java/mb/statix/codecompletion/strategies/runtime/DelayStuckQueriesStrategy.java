@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 /**
  * Delays stuck queries.
  */
-public final class DelayStuckQueriesStrategy extends NamedStrategy<SolverContext, SolverState, SolverState> {
+public final class DelayStuckQueriesStrategy extends NamedStrategy<SolverContext, SolverState, Seq<SolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final DelayStuckQueriesStrategy instance = new DelayStuckQueriesStrategy();

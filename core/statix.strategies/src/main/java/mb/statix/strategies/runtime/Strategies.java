@@ -2,6 +2,7 @@ package mb.statix.strategies.runtime;
 
 import mb.statix.sequences.Seq;
 import mb.statix.strategies.Strategy;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.Function;
 
@@ -23,7 +24,7 @@ public final class Strategies {
     public static <CTX, T, R> Strategy<CTX, T, R> rec(Function<Strategy<CTX, T, R>, Strategy<CTX, T, R>> f) {
         return new Strategy<CTX, T, R>() {
             @Override
-            public Seq<R> evalInternal(TegoEngine engine, CTX ctx, T input) {
+            public @Nullable R evalInternal(TegoEngine engine, CTX ctx, T input) {
                 return engine.eval(f.apply(this), ctx, input);
             }
         };

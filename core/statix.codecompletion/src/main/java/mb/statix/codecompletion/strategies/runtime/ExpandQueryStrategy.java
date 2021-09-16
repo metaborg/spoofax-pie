@@ -61,7 +61,7 @@ import static mb.nabl2.terms.matching.TermMatch.M;
  * Expands the selected query.
  */
 @SuppressWarnings("UnstableApiUsage")
-public final class ExpandQueryStrategy extends NamedStrategy<SolverContext, SelectedConstraintSolverState<CResolveQuery>, SolverState> {
+public final class ExpandQueryStrategy extends NamedStrategy<SolverContext, SelectedConstraintSolverState<CResolveQuery>, Seq<SolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final ExpandQueryStrategy instance = new ExpandQueryStrategy();

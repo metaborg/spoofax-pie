@@ -14,7 +14,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @param <CTX> the type of context (invariant)
  * @param <T> the type of input (contravariant)
  */
-public final class AssertThatStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<CTX, T, Boolean>, T, T> {
+public final class AssertThatStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<CTX, T, Boolean>, T, Seq<T>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final AssertThatStrategy instance = new AssertThatStrategy();
@@ -24,18 +24,11 @@ public final class AssertThatStrategy<CTX, T> extends NamedStrategy1<CTX, Strate
     private AssertThatStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
     public static <CTX, T> Seq<T> eval(TegoEngine engine, CTX ctx, Strategy<CTX, T, Boolean> predicate, T input) {
-        try {
-            final @Nullable Boolean[] success = {null};
-            final Seq<Boolean> results = engine.eval(predicate, ctx, input);
-            results.forEach(r -> success[0] = (success[0] != null ? success[0] && r : r));
-            if (success[0] != null && success[0]) {
-                return Seq.of(input);
-            } else {
-                return Seq.of();
-            }
-        } catch(InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException(e);
+        final @Nullable Boolean success = engine.eval(predicate, ctx, input);
+        if (success != null && success) {
+            return Seq.of(input);
+        } else {
+            return Seq.of();
         }
     }
 

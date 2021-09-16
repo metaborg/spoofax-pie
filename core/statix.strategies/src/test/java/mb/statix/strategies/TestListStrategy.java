@@ -16,7 +16,7 @@ import java.util.function.Function;
  * @param <T> the type of input
  * @param <R> the type of output
  */
-public final class TestListStrategy<T, R> implements Strategy<Object, T, R> {
+public final class TestListStrategy<T, R> implements Strategy<Object, T, Seq<R>> {
     public final AtomicInteger evalCalls = new AtomicInteger();
     public final AtomicInteger nextCalls = new AtomicInteger();
     private final Function<T, List<R>> transformation;

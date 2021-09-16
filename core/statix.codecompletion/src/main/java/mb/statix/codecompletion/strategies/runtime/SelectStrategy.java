@@ -14,7 +14,7 @@ import java.util.function.BiPredicate;
 /**
  * Selects constraints that match the given predicate.
  */
-public final class SelectStrategy<C extends IConstraint> extends NamedStrategy2<SolverContext, Class<C>, BiPredicate<C, SolverState>, SolverState, SelectedConstraintSolverState<C>> {
+public final class SelectStrategy<C extends IConstraint> extends NamedStrategy2<SolverContext, Class<C>, BiPredicate<C, SolverState>, SolverState, Seq<SelectedConstraintSolverState<C>>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final SelectStrategy instance = new SelectStrategy();

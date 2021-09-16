@@ -21,12 +21,12 @@ public final class NotStrategy<CTX> extends NamedStrategy<CTX, Boolean, Boolean>
 
     private NotStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    public static <CTX> Seq<Boolean> eval(TegoEngine engine, CTX ctx, Boolean input) {
-        return Seq.of(!input);
+    public static <CTX> Boolean eval(TegoEngine engine, CTX ctx, Boolean input) {
+        return !input;
     }
 
     @Override
-    public Seq<Boolean> evalInternal(TegoEngine engine, CTX ctx, Boolean input) {
+    public Boolean evalInternal(TegoEngine engine, CTX ctx, Boolean input) {
         return eval(engine, ctx, input);
     }
 

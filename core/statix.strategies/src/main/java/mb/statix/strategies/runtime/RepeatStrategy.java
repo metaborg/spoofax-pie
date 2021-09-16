@@ -6,6 +6,7 @@ import mb.statix.sequences.PeekableSeq;
 import mb.statix.strategies.NamedStrategy1;
 import mb.statix.strategies.Strategy;
 import mb.statix.utils.ExcludeFromJacocoGeneratedReport;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayDeque;
 
@@ -17,7 +18,7 @@ import java.util.ArrayDeque;
  * @param <CTX> the type of context (invariant)
  * @param <T> the type of input and output (invariant)
  */
-public final class RepeatStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<CTX, T, T>, T, T> {
+public final class RepeatStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<CTX, T, Seq<T>>, T, Seq<T>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final RepeatStrategy instance = new RepeatStrategy();
@@ -26,7 +27,7 @@ public final class RepeatStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<C
 
     private RepeatStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    public static <CTX, T> Seq<T> eval(TegoEngine engine, CTX ctx, Strategy<CTX, T, T> s, T input) {
+    public static <CTX, T> Seq<T> eval(TegoEngine engine, CTX ctx, Strategy<CTX, T, Seq<T>> s, T input) {
         return new SeqBase<T>() {
             // Implementation if `yield` and `yieldBreak` could actually suspend computation
             @SuppressWarnings("unused")
@@ -50,8 +51,9 @@ public final class RepeatStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<C
                         continue;
                     }
                     final T element = seq.getCurrent();
-                    final PeekableSeq<T> result = engine.eval(s, ctx, element).peekable();
-                    if (!result.peek()) {
+                    final @Nullable Seq<T> resultSeq = engine.eval(s, ctx, element);
+                    final @Nullable PeekableSeq<T> result = resultSeq != null ? resultSeq.peekable() : null;
+                    if (result == null || !result.peek()) {
                         // The strategy failed. Yield the element itself.
                         this.yield(element);
                         // 3:
@@ -95,8 +97,9 @@ public final class RepeatStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<C
                                 continue;
                             }
                             final T element = seq.getCurrent();
-                            final PeekableSeq<T> result = engine.eval(s, ctx, element).peekable();
-                            if (!result.peek()) {
+                            final @Nullable Seq<T> resultSeq = engine.eval(s, ctx, element);
+                            final @Nullable PeekableSeq<T> result = resultSeq != null ? resultSeq.peekable() : null;
+                            if (result == null || !result.peek()) {
                                 // The strategy failed. Yield the element itself.
                                 this.yield(element);
                                 this.state = 3;
@@ -125,7 +128,7 @@ public final class RepeatStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<C
     }
 
     @Override
-    public Seq<T> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, T> s, T input) {
+    public Seq<T> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, Seq<T>> s, T input) {
         return eval(engine, ctx, s, input);
     }
 
@@ -134,7 +137,7 @@ public final class RepeatStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<C
         return "repeat";
     }
 
-    @Override
+    @SuppressWarnings("SwitchStatementWithTooFewBranches") @Override
     public String getParamName(int index) {
         switch (index) {
             case 0: return "s";

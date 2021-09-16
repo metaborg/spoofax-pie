@@ -2,6 +2,7 @@ package mb.statix.strategies.runtime;
 
 import mb.statix.sequences.Seq;
 import mb.statix.strategies.NamedStrategy;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Fail strategy.
@@ -10,6 +11,7 @@ import mb.statix.strategies.NamedStrategy;
  * @param <T> the type of input (contravariant)
  * @param <R> the type of output (covariant)
  */
+// TODO: Should take Object, should return @Nullable Void
 public final class FailStrategy<CTX, T, R> extends NamedStrategy<CTX, T, R> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
@@ -19,11 +21,11 @@ public final class FailStrategy<CTX, T, R> extends NamedStrategy<CTX, T, R> {
 
     private FailStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    public static <CTX, T, R> Seq<R> eval(TegoEngine engine, CTX ctx, T input) {
-        return Seq.of();
+    public static <CTX, T, R> @Nullable R eval(TegoEngine engine, CTX ctx, T input) {
+        return null;
     }
 
-    @Override public Seq<R> evalInternal(TegoEngine engine, CTX ctx, T input) {
+    @Override public @Nullable R evalInternal(TegoEngine engine, CTX ctx, T input) {
         return eval(engine, ctx, input);
     }
 

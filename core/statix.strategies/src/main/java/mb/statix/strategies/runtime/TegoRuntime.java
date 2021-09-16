@@ -6,6 +6,7 @@ import mb.statix.strategies.Strategy1;
 import mb.statix.strategies.Strategy2;
 import mb.statix.strategies.Strategy3;
 import mb.statix.strategies.StrategyDecl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * The Tego runtime.
@@ -25,7 +26,7 @@ public interface TegoRuntime {
      * @param input the input argument
      * @return the lazy sequence of results; or an empty sequence if the strategy failed
      */
-    Seq<?> eval(StrategyDecl strategy, Object ctx, Object[] args, Object input);
+    @Nullable Object eval(StrategyDecl strategy, Object ctx, Object[] args, Object input);
 //        // Call the right overload of `run` if we know this kind of strategy
 //        if (strategy instanceof Strategy) {
 //            final Strategy<? super Object, ? super Object, ?> strategy0
@@ -63,7 +64,7 @@ public interface TegoRuntime {
      * @param input the input argument
      * @return the lazy sequence of results; or an empty sequence if the strategy failed
      */
-    <CTX, T, R> Seq<R> eval(Strategy<CTX, T, R> strategy, CTX ctx, T input);
+    <CTX, T, R> @Nullable R eval(Strategy<CTX, T, R> strategy, CTX ctx, T input);
 
     /**
      * Evaluates the strategy.
@@ -74,7 +75,7 @@ public interface TegoRuntime {
      * @param input the input argument
      * @return the lazy sequence of results; or an empty sequence if the strategy failed
      */
-    <CTX, A1, T, R> Seq<R> eval(Strategy1<CTX, A1, T, R> strategy, CTX ctx, A1 arg1, T input);
+    <CTX, A1, T, R> @Nullable R eval(Strategy1<CTX, A1, T, R> strategy, CTX ctx, A1 arg1, T input);
 
     /**
      * Evaluates the strategy.
@@ -86,7 +87,7 @@ public interface TegoRuntime {
      * @param input the input argument
      * @return the lazy sequence of results; or an empty sequence if the strategy failed
      */
-    <CTX, A1, A2, T, R> Seq<R> eval(Strategy2<CTX, A1, A2, T, R> strategy, CTX ctx, A1 arg1, A2 arg2, T input);
+    <CTX, A1, A2, T, R> @Nullable R eval(Strategy2<CTX, A1, A2, T, R> strategy, CTX ctx, A1 arg1, A2 arg2, T input);
 
     /**
      * Evaluates the strategy.
@@ -99,6 +100,6 @@ public interface TegoRuntime {
      * @param input the input argument
      * @return the lazy sequence of results; or an empty sequence if the strategy failed
      */
-    <CTX, A1, A2, A3, T, R> Seq<R> eval(Strategy3<CTX, A1, A2, A3, T, R> strategy, CTX ctx, A1 arg1, A2 arg2, A3 arg3, T input);
+    <CTX, A1, A2, A3, T, R> @Nullable R eval(Strategy3<CTX, A1, A2, A3, T, R> strategy, CTX ctx, A1 arg1, A2 arg2, A3 arg3, T input);
 
 }

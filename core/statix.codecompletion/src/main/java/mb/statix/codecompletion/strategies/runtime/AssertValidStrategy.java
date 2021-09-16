@@ -13,11 +13,12 @@ import mb.statix.strategies.runtime.AssertThatStrategy;
 import mb.statix.strategies.runtime.FlatMapStrategy;
 import mb.statix.strategies.runtime.NotStrategy;
 import mb.statix.strategies.runtime.TegoEngine;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.Map;
 
-public final class AssertValidStrategy extends NamedStrategy1<SolverContext, ITermVar, SolverState, SolverState> {
+public final class AssertValidStrategy extends NamedStrategy1<SolverContext, ITermVar, SolverState, Seq<SolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final AssertValidStrategy instance = new AssertValidStrategy();
@@ -96,38 +97,39 @@ public final class AssertValidStrategy extends NamedStrategy1<SolverContext, ITe
         final DelayStuckQueriesStrategy delayStuckQueries = DelayStuckQueriesStrategy.getInstance();
         final Strategy<SolverContext, SolverState, Boolean> __lambda1 = AssertValidStrategy::eval__lambda1;
 
-        final Seq<SolverState> r1 = engine.eval(infer, ctx, input);
+        final @Nullable Seq<SolverState> r1 = engine.eval(infer, ctx, input);
+        if (r1 == null) return Seq.of();
 
-        final Strategy<SolverContext, SolverState, SolverState> s3 = assertThat.apply(__lambda1);
-        final Seq<SolverState> r3 = engine.eval(flatMap, ctx, s3, r1);
+        final @Nullable Strategy<SolverContext, SolverState, Seq<SolverState>> s3 = assertThat.apply(__lambda1);
+        final @Nullable Seq<SolverState> r3 = engine.eval(flatMap, ctx, s3, r1);
+        if (r3 == null) return Seq.of();
 
-        final Seq<SolverState> r4 = engine.eval(flatMap, ctx, delayStuckQueries, r3);
+        final @Nullable Seq<SolverState> r4 = engine.eval(flatMap, ctx, delayStuckQueries, r3);
+        if (r4 == null) return Seq.of();
 
         return r4;
     }
 
-    @SuppressWarnings("UnnecessaryLocalVariable")
-    private static Seq<Boolean> eval__lambda1(
+    @SuppressWarnings({"UnnecessaryLocalVariable", "RedundantIfStatement"})
+    private static @Nullable Boolean eval__lambda1(
         TegoEngine engine,
         SolverContext ctx,
         SolverState s
     ) {
-        try {
-            final Strategy<SolverContext, SolverContext, Collection<Map.Entry<IConstraint, IMessage>>> SolverContext_allowedErrors
-                = (engine1, ctx1, input1) -> Seq.of(input1.getAllowedErrors());
-            final Strategy1<SolverContext, Collection<Map.Entry<IConstraint, IMessage>>, SolverState, Boolean> SolverState_hasSeriousErrors
-                = (engine12, ctx12, allowedErrors, input12) -> Seq.of(input12.hasSeriousErrors(allowedErrors));
-            final NotStrategy<SolverContext> not = NotStrategy.getInstance();
+        final Strategy<SolverContext, SolverContext, Collection<Map.Entry<IConstraint, IMessage>>> SolverContext_allowedErrors
+            = (engine1, ctx1, input1) -> input1.getAllowedErrors();
+        final Strategy1<SolverContext, Collection<Map.Entry<IConstraint, IMessage>>, SolverState, Boolean> SolverState_hasSeriousErrors
+            = (engine12, ctx12, allowedErrors, input12) -> input12.hasSeriousErrors(allowedErrors);
+        final NotStrategy<SolverContext> not = NotStrategy.getInstance();
 
-            final Seq<Collection<Map.Entry<IConstraint, IMessage>>> r1 = engine.eval(SolverContext_allowedErrors, ctx, ctx);
-            final Seq<Boolean> r2 = engine.eval(SolverState_hasSeriousErrors, ctx, r1.single(), s);
-            final Seq<Boolean> r3 = engine.eval(not, ctx, r2.single());
+        final @Nullable Collection<Map.Entry<IConstraint, IMessage>> r1 = engine.eval(SolverContext_allowedErrors, ctx, ctx);
+        if (r1 == null) return null;
+        final @Nullable Boolean r2 = engine.eval(SolverState_hasSeriousErrors, ctx, r1, s);
+        if (r2 == null) return null;
+        final @Nullable Boolean r3 = engine.eval(not, ctx, r2);
+        if (r3 == null) return null;
 
-            return r3;
-        } catch (InterruptedException ex) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException(ex);
-        }
+        return r3;
     }
 
     @Override

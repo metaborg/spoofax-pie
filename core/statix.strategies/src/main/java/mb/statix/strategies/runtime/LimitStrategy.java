@@ -5,6 +5,7 @@ import mb.statix.sequences.SeqBase;
 import mb.statix.strategies.NamedStrategy2;
 import mb.statix.strategies.Strategy;
 import mb.statix.utils.ExcludeFromJacocoGeneratedReport;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Limiting strategy.
@@ -15,7 +16,7 @@ import mb.statix.utils.ExcludeFromJacocoGeneratedReport;
  * @param <T> the type of input (contravariant)
  * @param <R> the type of output (covariant)
  */
-public final class LimitStrategy<CTX, T, R> extends NamedStrategy2<CTX, Strategy<CTX, T, R>, Integer, T, R> {
+public final class LimitStrategy<CTX, T, R> extends NamedStrategy2<CTX, Strategy<CTX, T, Seq<R>>, Integer, T, Seq<R>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final LimitStrategy instance = new LimitStrategy();
@@ -24,16 +25,16 @@ public final class LimitStrategy<CTX, T, R> extends NamedStrategy2<CTX, Strategy
 
     private LimitStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    public static <CTX, T, R> Seq<R> eval(TegoEngine engine, CTX ctx, Strategy<CTX, T, R> s, Integer n, T input) {
+    public static <CTX, T, R> Seq<R> eval(TegoEngine engine, CTX ctx, Strategy<CTX, T, Seq<R>> s, Integer n, T input) {
         return new SeqBase<R>() {
             // Implementation if `yield` and `yieldBreak` could actually suspend computation
             @SuppressWarnings("unused")
             @ExcludeFromJacocoGeneratedReport
             private void computeNextCoroutine() throws InterruptedException {
                 // 0:
-                final Seq<R> s1Seq = engine.eval(s, ctx, input);
+                final @Nullable Seq<R> s1Seq = engine.eval(s, ctx, input);
                 // 1:
-                while (remaining > 0 && s1Seq.next()) {
+                while (remaining > 0 && s1Seq != null && s1Seq.next()) {
                     this.remaining -= 1;
                     this.yield(s1Seq.getCurrent());
                     // 2:
@@ -45,7 +46,7 @@ public final class LimitStrategy<CTX, T, R> extends NamedStrategy2<CTX, Strategy
             // STATE MACHINE
             private int state = 0;
             // LOCAL VARIABLES
-            private Seq<R> s1Seq;
+            private @Nullable Seq<R> s1Seq;
             private int remaining = n;
 
             @Override
@@ -57,7 +58,7 @@ public final class LimitStrategy<CTX, T, R> extends NamedStrategy2<CTX, Strategy
                             this.state = 1;
                             continue;
                         case 1:
-                            if (remaining <= 0 || !s1Seq.next()) {
+                            if (remaining <= 0 || s1Seq == null || !s1Seq.next()) {
                                 this.state = 3;
                                 continue;
                             }
@@ -81,7 +82,7 @@ public final class LimitStrategy<CTX, T, R> extends NamedStrategy2<CTX, Strategy
     }
 
     @Override
-    public Seq<R> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, R> s, Integer n, T input) {
+    public Seq<R> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, Seq<R>> s, Integer n, T input) {
         return eval(engine, ctx, s, n, input);
     }
 

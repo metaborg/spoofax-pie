@@ -14,7 +14,7 @@ import mb.statix.utils.ExcludeFromJacocoGeneratedReport;
  * @param <T> the type of input (contravariant)
  * @param <R> the type of output (covariant)
  */
-public final class FlatMapStrategy<CTX, T, R> extends NamedStrategy1<CTX, Strategy<CTX, T, R>, Seq<T>, R> {
+public final class FlatMapStrategy<CTX, T, R> extends NamedStrategy1<CTX, Strategy<CTX, T, Seq<R>>, Seq<T>, Seq<R>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final FlatMapStrategy instance = new FlatMapStrategy();
@@ -23,7 +23,7 @@ public final class FlatMapStrategy<CTX, T, R> extends NamedStrategy1<CTX, Strate
 
     private FlatMapStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    public static <CTX, T, R> Seq<R> eval(TegoEngine engine, CTX ctx, Strategy<CTX, T, R> s, Seq<T> input) {
+    public static <CTX, T, R> Seq<R> eval(TegoEngine engine, CTX ctx, Strategy<CTX, T, Seq<R>> s, Seq<T> input) {
         return new SeqBase<R>() {
 
             // Implementation if `yield` and `yieldBreak` could actually suspend computation
@@ -46,7 +46,7 @@ public final class FlatMapStrategy<CTX, T, R> extends NamedStrategy1<CTX, Strate
     }
 
     @Override
-    public Seq<R> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, R> s, Seq<T> input) {
+    public Seq<R> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, Seq<R>> s, Seq<T> input) {
         return eval(engine, ctx, s, input);
     }
 

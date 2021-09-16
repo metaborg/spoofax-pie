@@ -9,6 +9,7 @@ import mb.statix.strategies.NamedStrategy2;
 import mb.statix.strategies.Strategy;
 import mb.statix.strategies.runtime.FlatMapStrategy;
 import mb.statix.strategies.runtime.TegoEngine;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import java.util.Set;
@@ -16,7 +17,7 @@ import java.util.Set;
 /**
  * The main entry point strategy for code completion.
  */
-public final class CompleteStrategy extends NamedStrategy2<SolverContext, ITermVar, Set<String>, SolverState, SolverState> {
+public final class CompleteStrategy extends NamedStrategy2<SolverContext, ITermVar, Set<String>, SolverState, Seq<SolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final CompleteStrategy instance = new CompleteStrategy();
@@ -106,16 +107,20 @@ public final class CompleteStrategy extends NamedStrategy2<SolverContext, ITermV
 
         // NOTE: Here we optimize by merging the application and the evaluation.
         // It saves a method call and an object creation by combining the application and the evaluation in one call.
-        final Seq<SolverState> r1 = engine.eval(expandAllPredicates, ctx, v, input);
+        final @Nullable Seq<SolverState> r1 = engine.eval(expandAllPredicates, ctx, v, input);
+        if (r1 == null) return Seq.of();
 
-        final Strategy<SolverContext, SolverState, SolverState> s2 = expandAllInjections.apply(v, visitedInjections);
-        final Seq<SolverState> r2 = engine.eval(flatMap, ctx, s2, r1);
+        final Strategy<SolverContext, SolverState, Seq<SolverState>> s2 = expandAllInjections.apply(v, visitedInjections);
+        final @Nullable Seq<SolverState> r2 = engine.eval(flatMap, ctx, s2, r1);
+        if (r2 == null) return Seq.of();
 
-        final Strategy<SolverContext, SolverState, SolverState> s3 = expandAllQueries.apply(v);
-        final Seq<SolverState> r3 = engine.eval(flatMap, ctx, s3, r2);
+        final Strategy<SolverContext, SolverState, Seq<SolverState>> s3 = expandAllQueries.apply(v);
+        final @Nullable Seq<SolverState> r3 = engine.eval(flatMap, ctx, s3, r2);
+        if (r3 == null) return Seq.of();
 
-        final Strategy<SolverContext, SolverState, SolverState> s4 = expandDeterministic.apply(v);
-        final Seq<SolverState> r4 = engine.eval(flatMap, ctx, s4, r3);
+        final Strategy<SolverContext, SolverState, Seq<SolverState>> s4 = expandDeterministic.apply(v);
+        final @Nullable Seq<SolverState> r4 = engine.eval(flatMap, ctx, s4, r3);
+        if (r4 == null) return Seq.of();
 
         return r4;
     }

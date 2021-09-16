@@ -2,6 +2,7 @@ package mb.statix.strategies;
 
 import mb.statix.sequences.Seq;
 import mb.statix.strategies.runtime.TegoEngine;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * A strategy declaration.
@@ -30,11 +31,11 @@ public interface StrategyDecl {
      * @param ctx the context
      * @param args the arguments
      * @param input the input argument
-     * @return the lazy sequence of results; or an empty sequence if the strategy failed
+     * @return the result; or {@code null} if the strategy failed
      * @throws IllegalArgumentException if any of the arguments is of the wrong type;
      * if any of the arguments is {@code null}, if {@code args} has a number of elements
      * different from the strategy's arity
      */
-    Seq<?> evalInternal(TegoEngine engine, Object ctx, Object[] args, Object input);
+    @Nullable Object evalInternal(TegoEngine engine, Object ctx, Object[] args, Object input);
 
 }

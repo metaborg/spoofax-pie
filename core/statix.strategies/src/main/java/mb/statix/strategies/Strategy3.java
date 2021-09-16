@@ -2,6 +2,7 @@ package mb.statix.strategies;
 
 import mb.statix.sequences.Seq;
 import mb.statix.strategies.runtime.TegoEngine;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * A strategy.
@@ -28,13 +29,13 @@ public interface Strategy3<CTX, A1, A2, A3, T, R> extends StrategyDecl, Printabl
      * @param arg2 the second argument
      * @param arg3 the third argument
      * @param input the input argument
-     * @return the lazy sequence of results; or an empty sequence if the strategy failed
+     * @return the result; or {@code null} if the strategy failed
      */
-    Seq<R> evalInternal(TegoEngine engine, CTX ctx, A1 arg1, A2 arg2, A3 arg3, T input);
+    @Nullable R evalInternal(TegoEngine engine, CTX ctx, A1 arg1, A2 arg2, A3 arg3, T input);
 
     @SuppressWarnings("unchecked")
     @Override
-    default Seq<?> evalInternal(TegoEngine engine, Object ctx, Object[] args, Object input) {
+    default @Nullable Object evalInternal(TegoEngine engine, Object ctx, Object[] args, Object input) {
         assert args.length == 3 : "Expected 3 arguments, got " + args.length + ".";
         return evalInternal(engine, (CTX)ctx, (A1)args[0], (A2)args[1], (A3)args[2], (T)input);
     }
@@ -86,7 +87,7 @@ public interface Strategy3<CTX, A1, A2, A3, T, R> extends StrategyDecl, Printabl
         }
 
         @Override
-        public Seq<R> evalInternal(TegoEngine engine, CTX ctx, A2 arg2, A3 arg3, T input) {
+        public @Nullable R evalInternal(TegoEngine engine, CTX ctx, A2 arg2, A3 arg3, T input) {
             return Strategy3.this.evalInternal(engine, ctx, arg1, arg2, arg3, input);
         }
 
@@ -155,7 +156,7 @@ public interface Strategy3<CTX, A1, A2, A3, T, R> extends StrategyDecl, Printabl
         }
 
         @Override
-        public Seq<R> evalInternal(TegoEngine engine, CTX ctx, A3 arg3, T input) {
+        public @Nullable R evalInternal(TegoEngine engine, CTX ctx, A3 arg3, T input) {
             return Strategy3.this.evalInternal(engine, ctx, arg1, arg2, arg3, input);
         }
 
@@ -217,7 +218,7 @@ public interface Strategy3<CTX, A1, A2, A3, T, R> extends StrategyDecl, Printabl
         }
 
         @Override
-        public Seq<R> evalInternal(TegoEngine engine, CTX ctx, T input) {
+        public @Nullable R evalInternal(TegoEngine engine, CTX ctx, T input) {
             return Strategy3.this.evalInternal(engine, ctx, arg1, arg2, arg3, input);
         }
 

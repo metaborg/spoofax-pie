@@ -2,6 +2,7 @@ package mb.statix.strategies.runtime;
 
 import mb.statix.sequences.Seq;
 import mb.statix.strategies.TestListStrategy;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;

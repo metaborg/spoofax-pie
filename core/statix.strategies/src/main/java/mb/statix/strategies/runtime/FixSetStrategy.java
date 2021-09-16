@@ -6,6 +6,7 @@ import mb.statix.sequences.PeekableSeq;
 import mb.statix.strategies.NamedStrategy1;
 import mb.statix.strategies.Strategy;
 import mb.statix.utils.ExcludeFromJacocoGeneratedReport;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayDeque;
 import java.util.HashSet;
@@ -22,7 +23,7 @@ import java.util.HashSet;
  * @param <CTX> the type of context (invariant)
  * @param <T> the type of input and output (invariant)
  */
-public final class FixSetStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<CTX, T, T>, T, T> {
+public final class FixSetStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<CTX, T, Seq<T>>, T, Seq<T>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final FixSetStrategy instance = new FixSetStrategy();
@@ -31,7 +32,7 @@ public final class FixSetStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<C
 
     private FixSetStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    public static <CTX, T> Seq<T> eval(TegoEngine engine, CTX ctx, Strategy<CTX, T, T> s, T input) {
+    public static <CTX, T> Seq<T> eval(TegoEngine engine, CTX ctx, Strategy<CTX, T, Seq<T>> s, T input) {
         return new SeqBase<T>() {
             // Implementation if `yield` and `yieldBreak` could actually suspend computation
             @SuppressWarnings("unused")
@@ -71,8 +72,9 @@ public final class FixSetStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<C
                         // so we mark it visited and not handle it again
                         visited.add(element);
                         // We make the sequence peekable, so we can check whether it is empty
-                        final PeekableSeq<T> result = engine.eval(s, ctx, element).peekable();
-                        if(!result.peek()) {
+                        @Nullable final Seq<T> resultSeq = engine.eval(s, ctx, element);
+                        @Nullable final PeekableSeq<T> result = resultSeq != null ? resultSeq.peekable() : null;
+                        if(result == null || !result.peek()) {
                             // The strategy failed. Yield the element itself.
                             yielded.add(element);
                             this.yield(element);
@@ -136,8 +138,9 @@ public final class FixSetStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<C
                             // We have not previously handled this element,
                             // so we mark it visited and not handle it again
                             visited.add(element);
-                            final PeekableSeq<T> result = engine.eval(s, ctx, element).peekable();
-                            if (!result.peek()) {
+                            @Nullable final Seq<T> resultSeq = engine.eval(s, ctx, element);
+                            @Nullable final PeekableSeq<T> result = resultSeq != null ? resultSeq.peekable() : null;
+                            if (result == null || !result.peek()) {
                                 // The strategy failed. Yield the element itself.
                                 yielded.add(element);
                                 this.yield(element);
@@ -170,7 +173,7 @@ public final class FixSetStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<C
     }
 
     @Override
-    public Seq<T> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, T> s, T input) {
+    public Seq<T> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, Seq<T>> s, T input) {
         return eval(engine, ctx, s, input);
     }
 

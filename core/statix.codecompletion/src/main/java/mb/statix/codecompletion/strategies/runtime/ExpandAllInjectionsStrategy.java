@@ -10,10 +10,11 @@ import mb.statix.strategies.runtime.FixSetStrategy;
 import mb.statix.strategies.runtime.FlatMapStrategy;
 import mb.statix.strategies.runtime.TegoEngine;
 import mb.statix.strategies.runtime.TryStrategy;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Set;
 
-public final class ExpandAllInjectionsStrategy extends NamedStrategy2<SolverContext, ITermVar, Set<String>, SolverState, SolverState> {
+public final class ExpandAllInjectionsStrategy extends NamedStrategy2<SolverContext, ITermVar, Set<String>, SolverState, Seq<SolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final ExpandAllInjectionsStrategy instance = new ExpandAllInjectionsStrategy();
@@ -85,12 +86,14 @@ public final class ExpandAllInjectionsStrategy extends NamedStrategy2<SolverCont
         final AssertValidStrategy assertValid = AssertValidStrategy.getInstance();
         final FlatMapStrategy<SolverContext, SolverState, SolverState> flatMap = FlatMapStrategy.getInstance();
 
-        final Strategy<SolverContext, SolverState, SolverState> s1 = expandInjection.apply(v, visitedInjections);
-        final Strategy<SolverContext, SolverState, SolverState> s2 = try_.apply(s1);
-        final Seq<SolverState> r3 = engine.eval(fixSet, ctx, s2, input);
+        final Strategy<SolverContext, SolverState, Seq<SolverState>> s1 = expandInjection.apply(v, visitedInjections);
+        final Strategy<SolverContext, SolverState, Seq<SolverState>> s2 = try_.apply(s1);
+        final @Nullable Seq<SolverState> r3 = engine.eval(fixSet, ctx, s2, input);
+        if (r3 == null) return Seq.of();
 
-        final Strategy<SolverContext, SolverState, SolverState> s4 = assertValid.apply(v);
-        final Seq<SolverState> r4 = engine.eval(flatMap, ctx, s4, r3);
+        final Strategy<SolverContext, SolverState, Seq<SolverState>> s4 = assertValid.apply(v);
+        final @Nullable Seq<SolverState> r4 = engine.eval(flatMap, ctx, s4, r3);
+        if (r4 == null) return Seq.of();
 
         return r4;
     }

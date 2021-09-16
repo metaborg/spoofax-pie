@@ -10,7 +10,7 @@ import mb.statix.strategies.runtime.TegoEngine;
 
 import java.util.Set;
 
-public final class ExpandAllPredicatesStrategy extends NamedStrategy1<SolverContext, ITermVar, SolverState, SolverState> {
+public final class ExpandAllPredicatesStrategy extends NamedStrategy1<SolverContext, ITermVar, SolverState, Seq<SolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final ExpandAllPredicatesStrategy instance = new ExpandAllPredicatesStrategy();

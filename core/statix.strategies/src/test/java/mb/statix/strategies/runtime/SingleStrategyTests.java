@@ -1,6 +1,7 @@
 package mb.statix.strategies.runtime;
 
 import mb.statix.sequences.Seq;
+import mb.statix.strategies.Strategy;
 import mb.statix.strategies.TestListStrategy;
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
         // Arrange
         final TegoEngine engine = new TegoRuntimeImpl(null);
         final SingleStrategy<Object, String, Integer> strategy = SingleStrategy.getInstance();
-        final FailStrategy<Object, String, Integer> s = FailStrategy.getInstance();
+        final Strategy<Object, String, Seq<Integer>> s = (engine1, o, input) -> Seq.of();
 
         // Act
         final Seq<Integer> result = strategy.evalInternal(engine, new Object(), s, "abc");

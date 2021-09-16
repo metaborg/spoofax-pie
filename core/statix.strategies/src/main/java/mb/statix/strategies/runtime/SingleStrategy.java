@@ -5,6 +5,7 @@ import mb.statix.sequences.SeqBase;
 import mb.statix.strategies.NamedStrategy1;
 import mb.statix.strategies.Strategy;
 import mb.statix.utils.ExcludeFromJacocoGeneratedReport;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * single(s) strategy.
@@ -15,7 +16,7 @@ import mb.statix.utils.ExcludeFromJacocoGeneratedReport;
  * @param <T> the type of input (contravariant)
  * @param <R> the type of output (covariant)
  */
-public final class SingleStrategy<CTX, T, R> extends NamedStrategy1<CTX, Strategy<CTX, T, R>, T, R> {
+public final class SingleStrategy<CTX, T, R> extends NamedStrategy1<CTX, Strategy<CTX, T, Seq<R>>, T, Seq<R>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final SingleStrategy instance = new SingleStrategy();
@@ -24,15 +25,15 @@ public final class SingleStrategy<CTX, T, R> extends NamedStrategy1<CTX, Strateg
 
     private SingleStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    public static <CTX, T, R> Seq<R> eval(TegoEngine engine, CTX ctx, Strategy<CTX, T, R> s, T input) {
+    public static <CTX, T, R> Seq<R> eval(TegoEngine engine, CTX ctx, Strategy<CTX, T, Seq<R>> s, T input) {
         return new SeqBase<R>() {
             // Implementation if `yield` and `yieldBreak` could actually suspend computation
             @SuppressWarnings("unused")
             @ExcludeFromJacocoGeneratedReport
             private void computeNextCoroutine() throws InterruptedException {
                 // 0:
-                final Seq<R> sSeq = engine.eval(s, ctx, input);
-                if (sSeq.next()) {
+                final @Nullable Seq<R> sSeq = engine.eval(s, ctx, input);
+                if (sSeq != null && sSeq.next()) {
                     final R element = sSeq.getCurrent();
                     if(!sSeq.next()) {
                         // Only one result. Yield it.
@@ -55,8 +56,8 @@ public final class SingleStrategy<CTX, T, R> extends NamedStrategy1<CTX, Strateg
                 while (true) {
                     switch (state) {
                         case 0:
-                            final Seq<R> sSeq = engine.eval(s, ctx, input);
-                            if (sSeq.next()) {
+                            final @Nullable Seq<R> sSeq = engine.eval(s, ctx, input);
+                            if (sSeq != null && sSeq.next()) {
                                 final R element = sSeq.getCurrent();
                                 if(!sSeq.next()) {
                                     // Only one result. Yield it.
@@ -82,7 +83,7 @@ public final class SingleStrategy<CTX, T, R> extends NamedStrategy1<CTX, Strateg
     }
 
     @Override
-    public Seq<R> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, R> s, T input) {
+    public Seq<R> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, Seq<R>> s, T input) {
         return eval(engine, ctx, s, input);
     }
 
@@ -91,7 +92,7 @@ public final class SingleStrategy<CTX, T, R> extends NamedStrategy1<CTX, Strateg
         return "single";
     }
 
-    @Override
+    @SuppressWarnings("SwitchStatementWithTooFewBranches") @Override
     public String getParamName(int index) {
         switch (index) {
             case 0: return "s";

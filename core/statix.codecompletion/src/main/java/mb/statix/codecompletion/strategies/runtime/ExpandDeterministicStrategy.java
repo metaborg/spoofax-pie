@@ -7,7 +7,7 @@ import mb.statix.sequences.Seq;
 import mb.statix.strategies.NamedStrategy1;
 import mb.statix.strategies.runtime.TegoEngine;
 
-public final class ExpandDeterministicStrategy extends NamedStrategy1<SolverContext, ITermVar, SolverState, SolverState> {
+public final class ExpandDeterministicStrategy extends NamedStrategy1<SolverContext, ITermVar, SolverState, Seq<SolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final ExpandDeterministicStrategy instance = new ExpandDeterministicStrategy();

@@ -38,37 +38,37 @@ public final class TegoRuntimeImpl implements TegoRuntime, TegoEngine {
     }
 
     @Override
-    public Seq<?> eval(StrategyDecl strategy, Object ctx, Object[] args, Object input) {
+    public @Nullable Object eval(StrategyDecl strategy, Object ctx, Object[] args, Object input) {
         enterStrategy(strategy);
-        final Seq<?> result = strategy.evalInternal(this, ctx, args, input);
+        final @Nullable Object result = strategy.evalInternal(this, ctx, args, input);
         return exitStrategy(strategy, result);
     }
 
     @Override
-    public <CTX, T, R> Seq<R> eval(Strategy<CTX, T, R> strategy, CTX ctx, T input) {
+    public <CTX, T, R> @Nullable R eval(Strategy<CTX, T, R> strategy, CTX ctx, T input) {
         enterStrategy(strategy);
-        final Seq<R> result = strategy.evalInternal(this, ctx, input);
+        final @Nullable R result = strategy.evalInternal(this, ctx, input);
         return exitStrategy(strategy, result);
     }
 
     @Override
-    public <CTX, A1, T, R> Seq<R> eval(Strategy1<CTX, A1, T, R> strategy, CTX ctx, A1 arg1, T input) {
+    public <CTX, A1, T, R> @Nullable R eval(Strategy1<CTX, A1, T, R> strategy, CTX ctx, A1 arg1, T input) {
         enterStrategy(strategy);
-        final Seq<R> result = strategy.evalInternal(this, ctx, arg1, input);
+        final @Nullable R result = strategy.evalInternal(this, ctx, arg1, input);
         return exitStrategy(strategy, result);
     }
 
     @Override
-    public <CTX, A1, A2, T, R> Seq<R> eval(Strategy2<CTX, A1, A2, T, R> strategy, CTX ctx, A1 arg1, A2 arg2, T input) {
+    public <CTX, A1, A2, T, R> @Nullable R eval(Strategy2<CTX, A1, A2, T, R> strategy, CTX ctx, A1 arg1, A2 arg2, T input) {
         enterStrategy(strategy);
-        final Seq<R> result = strategy.evalInternal(this, ctx, arg1, arg2, input);
+        final @Nullable R result = strategy.evalInternal(this, ctx, arg1, arg2, input);
         return exitStrategy(strategy, result);
     }
 
     @Override
-    public <CTX, A1, A2, A3, T, R> Seq<R> eval(Strategy3<CTX, A1, A2, A3, T, R> strategy, CTX ctx, A1 arg1, A2 arg2, A3 arg3, T input) {
+    public <CTX, A1, A2, A3, T, R> @Nullable R eval(Strategy3<CTX, A1, A2, A3, T, R> strategy, CTX ctx, A1 arg1, A2 arg2, A3 arg3, T input) {
         enterStrategy(strategy);
-        final Seq<R> result = strategy.evalInternal(this, ctx, arg1, arg2, arg3, input);
+        final @Nullable R result = strategy.evalInternal(this, ctx, arg1, arg2, arg3, input);
         return exitStrategy(strategy, result);
     }
 
@@ -86,7 +86,7 @@ public final class TegoRuntimeImpl implements TegoRuntime, TegoEngine {
      *
      * @param strategy the strategy that was evaluated
      */
-    private <R> Seq<R> exitStrategy(StrategyDecl strategy, Seq<R> seq) {
+    private <R> @Nullable R exitStrategy(StrategyDecl strategy, @Nullable R seq) {
         log.trace("Exit: " + strategy);
         return seq;
     }

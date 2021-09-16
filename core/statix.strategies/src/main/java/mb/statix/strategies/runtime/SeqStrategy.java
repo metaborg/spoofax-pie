@@ -5,6 +5,7 @@ import mb.statix.sequences.SeqBase;
 import mb.statix.strategies.NamedStrategy2;
 import mb.statix.strategies.Strategy;
 import mb.statix.utils.ExcludeFromJacocoGeneratedReport;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Sequence strategy.
@@ -16,7 +17,7 @@ import mb.statix.utils.ExcludeFromJacocoGeneratedReport;
  * @param <U> the type of intermediate (invariant)
  * @param <R> the type of output (covariant)
  */
-public final class SeqStrategy<CTX, T, U, R> extends NamedStrategy2<CTX, Strategy<CTX, T, U>, Strategy<CTX, U, R>, T, R> {
+public final class SeqStrategy<CTX, T, U, R> extends NamedStrategy2<CTX, Strategy<CTX, T, Seq<U>>, Strategy<CTX, U, Seq<R>>, T, Seq<R>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final SeqStrategy instance = new SeqStrategy();
@@ -25,7 +26,7 @@ public final class SeqStrategy<CTX, T, U, R> extends NamedStrategy2<CTX, Strateg
 
     private SeqStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    public static <CTX, T, U, R> Seq<R> eval(TegoEngine engine, CTX ctx, Strategy<CTX, T, U> s1, Strategy<CTX, U, R> s2, T input) {
+    public static <CTX, T, U, R> Seq<R> eval(TegoEngine engine, CTX ctx, Strategy<CTX, T, Seq<U>> s1, Strategy<CTX, U, Seq<R>> s2, T input) {
         return new SeqBase<R>() {
 
             // Implementation if `yield` and `yieldBreak` could actually suspend computation
@@ -33,14 +34,14 @@ public final class SeqStrategy<CTX, T, U, R> extends NamedStrategy2<CTX, Strateg
             @ExcludeFromJacocoGeneratedReport
             private void computeNextCoroutine() throws InterruptedException {
                 // 0:
-                final Seq<U> s1Seq = engine.eval(s1, ctx, input);
+                final @Nullable Seq<U> s1Seq = engine.eval(s1, ctx, input);
                 // 1:
-                while (s1Seq.next()) {
+                while (s1Seq != null && s1Seq.next()) {
                     // 2:
                     final U u = s1Seq.getCurrent();
-                    final Seq<R> s2Seq = engine.eval(s2, ctx, u);
+                    final @Nullable Seq<R> s2Seq = engine.eval(s2, ctx, u);
                     // 3:
-                    while (s2Seq.next()) {
+                    while (s2Seq != null && s2Seq.next()) {
                         // 4:
                         final R r = s2Seq.getCurrent();
                         this.yield(r);
@@ -55,8 +56,8 @@ public final class SeqStrategy<CTX, T, U, R> extends NamedStrategy2<CTX, Strateg
             // STATE MACHINE
             private int state = 0;
             // LOCAL VARIABLES
-            private Seq<U> s1Seq;
-            private Seq<R> s2Seq;
+            private @Nullable Seq<U> s1Seq;
+            private @Nullable Seq<R> s2Seq;
 
             @Override
             protected void computeNext() throws InterruptedException {
@@ -67,25 +68,27 @@ public final class SeqStrategy<CTX, T, U, R> extends NamedStrategy2<CTX, Strateg
                             this.state = 1;
                             continue;
                         case 1:
-                            if (!s1Seq.next()) {
+                            if (s1Seq == null || !s1Seq.next()) {
                                 this.state = 7;
                                 continue;
                             }
                             this.state = 2;
                             continue;
                         case 2:
+                            //noinspection ConstantConditions
                             final U u = s1Seq.getCurrent();
                             s2Seq = engine.eval(s2, ctx, u);
                             this.state = 3;
                             continue;
                         case 3:
-                            if (!s2Seq.next()) {
+                            if (s2Seq == null || !s2Seq.next()) {
                                 this.state = 6;
                                 continue;
                             }
                             this.state = 4;
                             continue;
                         case 4:
+                            //noinspection ConstantConditions
                             final R r = s2Seq.getCurrent();
                             this.yield(r);
                             this.state = 5;
@@ -109,7 +112,7 @@ public final class SeqStrategy<CTX, T, U, R> extends NamedStrategy2<CTX, Strateg
     }
 
     @Override
-    public Seq<R> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, U> s1, Strategy<CTX, U, R> s2, T input) {
+    public Seq<R> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, Seq<U>> s1, Strategy<CTX, U, Seq<R>> s2, T input) {
         return eval(engine, ctx, s1, s2, input);
     }
 

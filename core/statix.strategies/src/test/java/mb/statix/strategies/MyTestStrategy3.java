@@ -5,7 +5,7 @@ import mb.statix.strategies.runtime.TegoEngine;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class MyTestStrategy3 extends NamedStrategy3<Object, String, String, String, String, String> {
+public class MyTestStrategy3 extends NamedStrategy3<Object, String, String, String, String, Seq<String>> {
     public final AtomicInteger doEvalCalls = new AtomicInteger();
 
     @Override

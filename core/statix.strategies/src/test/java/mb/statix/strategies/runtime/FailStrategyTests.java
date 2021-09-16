@@ -19,10 +19,10 @@ public final class FailStrategyTests {
         final FailStrategy<Object, String, Integer> strategy = FailStrategy.getInstance();
 
         // Act
-        final Seq<Integer> result = strategy.evalInternal(engine, new Object(), "My input");
+        final Integer result = strategy.evalInternal(engine, new Object(), "My input");
 
         // Assert
-        assertFalse(result.next());
+        assertNull(result);
     }
 
 }

@@ -2,6 +2,7 @@ package mb.statix.strategies;
 
 import mb.statix.sequences.Seq;
 import mb.statix.strategies.runtime.TegoEngine;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Abstract class for a named strategy.
@@ -17,7 +18,7 @@ import mb.statix.strategies.runtime.TegoEngine;
  */
 public abstract class NamedStrategy2<CTX, A1, A2, T, R> implements Strategy2<CTX, A1, A2, T, R> {
 
-    @Override public abstract Seq<R> evalInternal(TegoEngine engine, CTX ctx, A1 arg1, A2 arg2, T input);
+    @Override public abstract @Nullable R evalInternal(TegoEngine engine, CTX ctx, A1 arg1, A2 arg2, T input);
 
     @Override public abstract String getName();
 

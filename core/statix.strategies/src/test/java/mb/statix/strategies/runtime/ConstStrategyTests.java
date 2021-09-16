@@ -18,12 +18,10 @@ public final class ConstStrategyTests {
         final String arg1 = "My arg";
 
         // Act
-        final Seq<String> result = strategy.evalInternal(engine, new Object(), arg1, 42);
+        final String result = strategy.evalInternal(engine, new Object(), arg1, 42);
 
         // Assert
-        assertTrue(result.next());
-        assertEquals(arg1, result.getCurrent());
-        assertFalse(result.next());
+        assertEquals(arg1, result);
     }
 
 }

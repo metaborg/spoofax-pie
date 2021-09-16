@@ -3,6 +3,7 @@ package mb.statix.strategies;
 import mb.statix.functions.Function3;
 import mb.statix.sequences.Seq;
 import mb.statix.strategies.runtime.TegoEngine;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -44,7 +45,7 @@ public final class StrategyExt {
         // Wraps a strategy, and gives it a name.
         return new NamedStrategy<CTX, I, O>() {
             @Override
-            public Seq<O> evalInternal(TegoEngine engine, CTX ctx, I input) {
+            public @Nullable O evalInternal(TegoEngine engine, CTX ctx, I input) {
                 return strategy.evalInternal(engine, ctx, input);
             }
 
@@ -90,7 +91,7 @@ public final class StrategyExt {
             }
 
             @Override
-            public Seq<O> evalInternal(TegoEngine engine, CTX ctx, A1 arg1, I input) {
+            public @Nullable O evalInternal(TegoEngine engine, CTX ctx, A1 arg1, I input) {
                 return apply(arg1).evalInternal(engine, ctx, input);
             }
         };
@@ -124,7 +125,7 @@ public final class StrategyExt {
             }
 
             @Override
-            public Seq<O> evalInternal(TegoEngine engine, CTX ctx, A1 arg1, I input) {
+            public @Nullable O evalInternal(TegoEngine engine, CTX ctx, A1 arg1, I input) {
                 return strategy.evalInternal(engine, ctx, arg1, input);
             }
         };
@@ -167,7 +168,7 @@ public final class StrategyExt {
             }
 
             @Override
-            public Seq<O> evalInternal(TegoEngine engine, CTX ctx, A1 arg1, A2 arg2, I input) {
+            public @Nullable O evalInternal(TegoEngine engine, CTX ctx, A1 arg1, A2 arg2, I input) {
                 return apply(arg1, arg2).evalInternal(engine, ctx, input);
             }
         };
@@ -203,7 +204,7 @@ public final class StrategyExt {
             }
 
             @Override
-            public Seq<O> evalInternal(TegoEngine engine, CTX ctx, A1 arg1, A2 arg2, I input) {
+            public @Nullable O evalInternal(TegoEngine engine, CTX ctx, A1 arg1, A2 arg2, I input) {
                 return strategy.evalInternal(engine, ctx, arg1, arg2, input);
             }
         };
@@ -248,7 +249,7 @@ public final class StrategyExt {
             }
 
             @Override
-            public Seq<O> evalInternal(TegoEngine engine, CTX ctx, A1 arg1, A2 arg2, A3 arg3, I input) {
+            public @Nullable O evalInternal(TegoEngine engine, CTX ctx, A1 arg1, A2 arg2, A3 arg3, I input) {
                 return apply(arg1, arg2, arg3).evalInternal(engine, ctx, input);
             }
         };
@@ -286,7 +287,7 @@ public final class StrategyExt {
             }
 
             @Override
-            public Seq<O> evalInternal(TegoEngine engine, CTX ctx, A1 arg1, A2 arg2, A3 arg3, I input) {
+            public @Nullable O evalInternal(TegoEngine engine, CTX ctx, A1 arg1, A2 arg2, A3 arg3, I input) {
                 return strategy.evalInternal(engine, ctx, arg1, arg2, arg3, input);
             }
         };

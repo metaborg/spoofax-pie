@@ -15,7 +15,7 @@ import org.metaborg.util.task.NullProgress;
 /**
  * Delays stuck queries.
  */
-public final class InferStrategy extends NamedStrategy<SolverContext, SolverState, SolverState> {
+public final class InferStrategy extends NamedStrategy<SolverContext, SolverState, Seq<SolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final InferStrategy instance = new InferStrategy();

@@ -3,6 +3,7 @@ package mb.statix.strategies;
 import mb.statix.sequences.Seq;
 import mb.statix.strategies.runtime.TegoEngine;
 import mb.statix.strategies.runtime.TegoRuntime;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * A strategy.
@@ -33,13 +34,13 @@ public interface Strategy<CTX, T, R> extends StrategyDecl, PrintableStrategy {
      * @param engine the Tego engine
      * @param ctx the context
      * @param input the input argument
-     * @return the lazy sequence of results; or an empty sequence if the strategy failed
+     * @return the result; or {@code null} if the strategy failed
      */
-    Seq<R> evalInternal(TegoEngine engine, CTX ctx, T input);
+    @Nullable R evalInternal(TegoEngine engine, CTX ctx, T input);
 
     @SuppressWarnings("unchecked")
     @Override
-    default Seq<?> evalInternal(TegoEngine engine, Object ctx, Object[] args, Object input) {
+    default @Nullable Object evalInternal(TegoEngine engine, Object ctx, Object[] args, Object input) {
         assert args.length == 0 : "Expected 0 arguments, got " + args.length + ".";
         return evalInternal(engine, (CTX)ctx, (T)input);
     }

@@ -2,6 +2,7 @@ package mb.statix.strategies;
 
 import mb.statix.sequences.Seq;
 import mb.statix.strategies.runtime.TegoEngine;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * An adapter strategy that can be used to adapt a function call with three arguments as a strategy.
@@ -15,9 +16,9 @@ import mb.statix.strategies.runtime.TegoEngine;
 @FunctionalInterface
 public interface AdapterStrategy2<CTX, A1, A2, T, R> extends Strategy2<CTX, A1, A2, T, R> {
     @Override
-    default Seq<R> evalInternal(TegoEngine engine, CTX ctx, A1 arg1, A2 arg2, T input) {
+    default @Nullable R evalInternal(TegoEngine engine, CTX ctx, A1 arg1, A2 arg2, T input) {
         return call(arg1, arg2, input);
     }
 
-    Seq<R> call(A1 arg1, A2 arg2, T input);
+    @Nullable R call(A1 arg1, A2 arg2, T input);
 }

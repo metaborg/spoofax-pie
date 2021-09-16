@@ -20,12 +20,10 @@ public final class IdStrategyTests {
         final String input = "My input";
 
         // Act
-        final Seq<String> result = strategy.evalInternal(engine, new Object(), input);
+        final String result = strategy.evalInternal(engine, new Object(), input);
 
         // Assert
-        assertTrue(result.next());
-        assertEquals(input, result.getCurrent());
-        assertFalse(result.next());
+        assertEquals(input, result);
     }
 
 }

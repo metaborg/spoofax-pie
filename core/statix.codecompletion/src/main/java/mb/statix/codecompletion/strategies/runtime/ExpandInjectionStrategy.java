@@ -16,7 +16,7 @@ import java.util.Deque;
 import java.util.HashSet;
 import java.util.Set;
 
-public final class ExpandInjectionStrategy extends NamedStrategy2<SolverContext, ITermVar, Set<String>, SolverState, SolverState> {
+public final class ExpandInjectionStrategy extends NamedStrategy2<SolverContext, ITermVar, Set<String>, SolverState, Seq<SolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final ExpandInjectionStrategy instance = new ExpandInjectionStrategy();

@@ -17,7 +17,7 @@ import java.util.HashSet;
  * @param <T> the type of input (contravariant)
  * @param <R> the type of output (covariant)
  */
-public final class MatchStrategy<CTX, T, R> extends NamedStrategy1<CTX, Pattern<CTX, T, R>, T, R> {
+public final class MatchStrategy<CTX, T, R> extends NamedStrategy1<CTX, Pattern<CTX, T, R>, T, Seq<R>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final MatchStrategy instance = new MatchStrategy();
