@@ -298,6 +298,7 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
             javaSourceFiles.add(baseShowAnalyzedAstTaskDef().file(generatedJavaSourcesDirectory));
             if(languageProjectInput().enableStatix()) {
                 javaSourceFiles.add(baseShowAnalyzedAstTaskDef().file(generatedJavaSourcesDirectory));
+                javaSourceFiles.add(baseShowScopeGraphTaskDef().file(generatedJavaSourcesDirectory));
             }
             return ListView.of(javaSourceFiles);
         }
