@@ -75,6 +75,14 @@ public final class ExpandQueryStrategy extends NamedStrategy<SolverContext, Sele
         return "expandQuery";
     }
 
+    @SuppressWarnings("SwitchStatementWithTooFewBranches")
+    @Override
+    public String getParamName(int index) {
+        switch (index) {
+            default: return super.getParamName(index);
+        }
+    }
+
     @Override
     public Seq<SolverState> evalInternal(TegoEngine engine, SolverContext ctx, SelectedConstraintSolverState<CResolveQuery> input) {
         final CResolveQuery query = input.getSelected();

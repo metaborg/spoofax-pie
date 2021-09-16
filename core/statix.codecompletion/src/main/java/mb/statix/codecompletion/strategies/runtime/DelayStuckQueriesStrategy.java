@@ -51,6 +51,14 @@ public final class DelayStuckQueriesStrategy extends NamedStrategy<SolverContext
         return "delayStuckQueries";
     }
 
+    @SuppressWarnings("SwitchStatementWithTooFewBranches")
+    @Override
+    public String getParamName(int index) {
+        switch (index) {
+            default: return super.getParamName(index);
+        }
+    }
+
     @Override
     public Seq<SolverState> evalInternal(TegoEngine engine, SolverContext ctx, SolverState input) {
         final IState.Immutable state = input.getState();

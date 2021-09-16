@@ -42,6 +42,7 @@ public final class SelectStrategy<C extends IConstraint> extends NamedStrategy2<
         TegoEngine engine,
         SolverContext ctx,
         Class<C> constraintClass,
+        // TODO: This should probably be a strategy:
         BiPredicate<C, SolverState> predicate,
         SolverState input
     ) {
