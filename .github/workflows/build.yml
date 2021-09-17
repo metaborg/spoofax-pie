@@ -49,7 +49,3 @@ jobs:
         with:
           gradle-version: ${{ matrix.gradle }}
           arguments: buildAll --parallel --stacktrace "-Dorg.gradle.jvmargs=-Xms4G -Xmx4G -Xss8M"
-      - id: print-jvm-crash-logs
-        if: ${{ failure() }}
-        run: cat hs_err_pid*.log; cat **/hs_err_pid*.log; cat replay_pid*.log; cat **/replay_pid*.log; true
-        shell: bash
