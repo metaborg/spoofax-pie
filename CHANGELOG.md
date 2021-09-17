@@ -2,13 +2,16 @@
 All notable changes to this project are documented in this file, based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
-## [Unreleased]
+## [0.11.11]
 ### Fixed
 - Stratego backend tasks triggering overlapping provided files, hidden dependencies, and visited multiple times errors in bottom-up builds when dynamic rules were added or removed.
 - Unremovable directories on Windows due to Stratego leaking directory streams.
 - Compile failures due to SDF3 module name not matching the relative file name. This now produces an error in the SDF3 file.
 - Compile failures due to duplicate constructors in SDF3. Constructors with the same name were allowed if they were defined on a different sort, but Statix does not support this at the moment. Duplicate constructor names now result in an error.
 - Compile failures due to constructor names starting with lowercase characters. This now produces an error in the SDF3 file.
+
+### Changed
+- releng (devenv-release) to version 0.1.12.
 
 
 ## [0.11.10] - 2021-09-15
@@ -124,7 +127,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.10...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.11...HEAD
+[0.11.11]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.10...release-0.11.11
 [0.11.10]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.9...release-0.11.10
 [0.11.9]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.8...release-0.11.9
 [0.11.8]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.7...release-0.11.8
