@@ -9,6 +9,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 - Compile failures due to SDF3 module name not matching the relative file name. This now produces an error in the SDF3 file.
 - Compile failures due to duplicate constructors in SDF3. Constructors with the same name were allowed if they were defined on a different sort, but Statix does not support this at the moment. Duplicate constructor names now result in an error.
 - Compile failures due to constructor names starting with lowercase characters. This now produces an error in the SDF3 file.
+- Module name does not agree with relative file path error in SDF3 always given on Windows due to difference in file separator characters.
+
 
 ### Changed
 - releng (devenv-release) to version 0.1.12.
