@@ -1,4 +1,4 @@
-package mb.cfg.convert;
+package mb.aterm.common;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 

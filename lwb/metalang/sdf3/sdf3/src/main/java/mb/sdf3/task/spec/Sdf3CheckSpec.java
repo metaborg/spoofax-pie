@@ -4,9 +4,14 @@ import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Messages;
 import mb.common.message.Severity;
+import mb.common.region.Region;
 import mb.common.result.Result;
+import mb.jsglr.common.JsglrParseException;
+import mb.jsglr.common.JsglrParseOutput;
+import mb.jsglr.common.TermTracer;
 import mb.jsglr.pie.JsglrParseTaskInput;
 import mb.pie.api.ExecContext;
+import mb.pie.api.None;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.hierarchical.HierarchicalResource;
@@ -16,8 +21,16 @@ import mb.resource.hierarchical.walk.ResourceWalker;
 import mb.sdf3.Sdf3ClassLoaderResources;
 import mb.sdf3.Sdf3Scope;
 import mb.sdf3.task.Sdf3AnalyzeMulti;
+import mb.sdf3.task.Sdf3GetStrategoRuntimeProvider;
 import mb.sdf3.task.Sdf3Parse;
 import mb.sdf3.task.util.Sdf3Util;
+import mb.aterm.common.InvalidAstShapeException;
+import mb.stratego.common.StrategoException;
+import mb.stratego.common.StrategoRuntime;
+import mb.stratego.common.StrategoTermMessageCollector;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.terms.util.TermUtils;
 
 import javax.inject.Inject;
 import java.util.stream.Stream;
@@ -26,12 +39,19 @@ import java.util.stream.Stream;
 public class Sdf3CheckSpec implements TaskDef<Sdf3SpecConfig, KeyedMessages> {
     private final Sdf3ClassLoaderResources classLoaderResources;
     private final Sdf3Parse parse;
+    private final Sdf3GetStrategoRuntimeProvider getStrategoRuntimeProvider;
     private final Sdf3AnalyzeMulti analyze;
 
     @Inject
-    public Sdf3CheckSpec(Sdf3ClassLoaderResources classLoaderResources, Sdf3Parse parse, Sdf3AnalyzeMulti analyze) {
+    public Sdf3CheckSpec(
+        Sdf3ClassLoaderResources classLoaderResources,
+        Sdf3Parse parse,
+        Sdf3GetStrategoRuntimeProvider getStrategoRuntimeProvider,
+        Sdf3AnalyzeMulti analyze
+    ) {
         this.classLoaderResources = classLoaderResources;
         this.parse = parse;
+        this.getStrategoRuntimeProvider = getStrategoRuntimeProvider;
         this.analyze = analyze;
     }
 
@@ -43,6 +63,8 @@ public class Sdf3CheckSpec implements TaskDef<Sdf3SpecConfig, KeyedMessages> {
         context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
 
+        final StrategoRuntime strategoRuntime = context.require(getStrategoRuntimeProvider, None.instance).getValue().get();
+
         final ResourceWalker walker = Sdf3Util.createResourceWalker();
         final ResourceMatcher matcher = Sdf3Util.createResourceMatcher();
         final HierarchicalResource mainSourceDirectory = context.require(input.mainSourceDirectory, ResourceStampers.modifiedDirRec(walker, matcher));
@@ -50,8 +72,12 @@ public class Sdf3CheckSpec implements TaskDef<Sdf3SpecConfig, KeyedMessages> {
             final JsglrParseTaskInput.Builder parseInputBuilder = parse.inputBuilder().rootDirectoryHint(input.rootDirectory);
             stream.forEach(file -> {
                 final ResourcePath filePath = file.getPath();
-                final Messages messages = context.require(parseInputBuilder.withFile(filePath).buildMessagesSupplier());
-                messagesBuilder.addMessages(filePath, messages);
+                final Result<JsglrParseOutput, JsglrParseException> result = context.require(parseInputBuilder.withFile(filePath).buildSupplier());
+                messagesBuilder.addMessages(filePath, result.mapOrElse(v -> v.messages.asMessages(), e -> e.getOptionalMessages().map(KeyedMessages::asMessages).orElseGet(Messages::of)));
+                result.ifOk(output -> {
+                    checkModuleName(filePath, output.ast, input, messagesBuilder);
+                    collectMessagesFromStrategoStrategy(filePath, output.ast, strategoRuntime, messagesBuilder);
+                });
             });
         }
 
@@ -64,5 +90,36 @@ public class Sdf3CheckSpec implements TaskDef<Sdf3SpecConfig, KeyedMessages> {
             })
             .ifErr(e -> messagesBuilder.addMessage("SDF3 analysis failed", e, Severity.Error, input.mainSourceDirectory));
         return messagesBuilder.build();
+    }
+
+    private void checkModuleName(
+        ResourcePath file,
+        IStrategoTerm ast,
+        Sdf3SpecConfig input,
+        KeyedMessagesBuilder messagesBuilder
+    ) {
+        final IStrategoTerm moduleNameTerm = TermUtils.asApplAt(ast, 0)
+            .orElseThrow(() -> new InvalidAstShapeException("constructor application as first subterm", ast));
+        final String moduleName = TermUtils.asJavaStringAt(moduleNameTerm, 0)
+            .orElseThrow(() -> new InvalidAstShapeException("module name string as first subterm", moduleNameTerm));
+        final String relativePath = input.mainSourceDirectory.relativize(file.removeLeafExtension());
+        if(!moduleName.equals(relativePath)) {
+            messagesBuilder.addMessage("Module name '" + moduleName + "' does not agree with relative file path '" +
+                relativePath + "'. Either change the module name or move/rename the file", Severity.Error, file, TermTracer.getRegion(moduleNameTerm));
+        }
+    }
+
+    private void collectMessagesFromStrategoStrategy(
+        ResourcePath file,
+        IStrategoTerm ast,
+        StrategoRuntime strategoRuntime,
+        KeyedMessagesBuilder messagesBuilder
+    ) {
+        try {
+            final IStrategoTerm messagesTerm = strategoRuntime.invoke("spoofax3-check", ast);
+            StrategoTermMessageCollector.addTermMessages(messagesTerm, file, messagesBuilder);
+        } catch(StrategoException e) {
+            messagesBuilder.addMessage("Failed to run Stratego-based checks on SDF3 file", e, Severity.Error, file);
+        }
     }
 }
