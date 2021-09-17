@@ -276,7 +276,8 @@ open class LanguagePlugin : Plugin<Project> {
 
             val compileResult = session.require(compile.createTask(rootDirectory))
             compileResult.ifOk {
-              project.logMessages(it.messages(), rootDirectory)
+              // HACK: do not log messages for now, as Stratego 2 generates a lot of warnings.
+              //project.logMessages(it.messages(), rootDirectory)
             }.ifErr {
               val exceptionPrinter = ExceptionPrinter()
               exceptionPrinter.addCurrentDirectoryContext(rootDirectory)
