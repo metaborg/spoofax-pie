@@ -18,6 +18,7 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.walk.ResourceWalker;
+import mb.resource.util.SeparatorUtil;
 import mb.sdf3.Sdf3ClassLoaderResources;
 import mb.sdf3.Sdf3Scope;
 import mb.sdf3.task.Sdf3AnalyzeMulti;
@@ -100,9 +101,9 @@ public class Sdf3CheckSpec implements TaskDef<Sdf3SpecConfig, KeyedMessages> {
     ) {
         final IStrategoTerm moduleNameTerm = TermUtils.asApplAt(ast, 0)
             .orElseThrow(() -> new InvalidAstShapeException("constructor application as first subterm", ast));
-        final String moduleName = TermUtils.asJavaStringAt(moduleNameTerm, 0)
-            .orElseThrow(() -> new InvalidAstShapeException("module name string as first subterm", moduleNameTerm));
-        final String relativePath = input.mainSourceDirectory.relativize(file.removeLeafExtension());
+        final String moduleName = SeparatorUtil.convertCurrentToUnixSeparator(TermUtils.asJavaStringAt(moduleNameTerm, 0)
+            .orElseThrow(() -> new InvalidAstShapeException("module name string as first subterm", moduleNameTerm)));
+        final String relativePath = SeparatorUtil.convertCurrentToUnixSeparator(input.mainSourceDirectory.relativize(file.removeLeafExtension()));
         if(!moduleName.equals(relativePath)) {
             messagesBuilder.addMessage("Module name '" + moduleName + "' does not agree with relative file path '" +
                 relativePath + "'. Either change the module name or move/rename the file", Severity.Error, file, TermTracer.getRegion(moduleNameTerm));
