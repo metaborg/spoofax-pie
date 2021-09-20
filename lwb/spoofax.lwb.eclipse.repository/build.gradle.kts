@@ -24,7 +24,7 @@ tasks {
     jvmArgs("-Xss16M") // Set required stack size, mainly for serialization.
   }
   withType<mb.coronium.task.EclipseCreateInstallation> {
-    repositories.set(listOf(
+    baseRepositories.set(listOf(
       "https://artifacts.metaborg.org/content/groups/eclipse-2021-09/"
     ))
   }
