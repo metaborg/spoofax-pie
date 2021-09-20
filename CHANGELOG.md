@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project are documented in this file, based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Changed
+- Eclipse to 2021-09.
+- Colors are inverted in dark mode themes using the same hack as https://github.com/metaborg/spoofax-eclipse/pull/19/.
+
 
 ## [Unreleased]
 
