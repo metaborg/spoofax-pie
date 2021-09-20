@@ -5,6 +5,10 @@ plugins {
   id("net.ltgt.apt-idea")
 }
 
+mavenize {
+  majorVersion.set("2021-09")
+}
+
 dependencies {
   api(platform(project(":spoofax.depconstraints")))
   annotationProcessor(platform(project(":spoofax.depconstraints")))
