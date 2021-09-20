@@ -27,7 +27,11 @@ public class SpoofaxHyperlinkDetector implements IHyperlinkDetector {
     private final LanguageComponent languageComponent;
     private final PieComponent pieComponent;
 
-    public SpoofaxHyperlinkDetector(SpoofaxEditorBase editorBase, LanguageComponent languageComponent, PieComponent pieComponent) {
+    public SpoofaxHyperlinkDetector(
+        SpoofaxEditorBase editorBase,
+        LanguageComponent languageComponent,
+        PieComponent pieComponent
+    ) {
         this.editorBase = editorBase;
         this.languageComponent = languageComponent;
         this.pieComponent = pieComponent;
@@ -35,33 +39,37 @@ public class SpoofaxHyperlinkDetector implements IHyperlinkDetector {
 
     @Override
     public @Nullable IHyperlink[] detectHyperlinks(ITextViewer textViewer, IRegion region, boolean canShowMultipleHyperlinks) {
+        if(editorBase.file == null) {
+            // noinspection ConstantConditions (null is really a valid return value)
+            return null;
+        }
+
         final ResourceKey file = new EclipseResourcePath(editorBase.file);
         final @Nullable ResourcePath rootDirectory = editorBase.project != null ? new EclipseResourcePath(editorBase.project) : null;
         final Region targetRegion = Region.fromOffsetLength(region.getOffset(), region.getLength());
 
         // We cannot do reference resolution if we're not in a project.
         if(rootDirectory == null) {
+            // noinspection ConstantConditions (null is really a valid return value)
             return null;
         }
 
-        try(final MixedSession mixedSession = pieComponent.newSession()) {
-            final TopDownSession topDownSession = mixedSession.updateAffectedBy(Collections.emptySet(), Collections.singleton(Interactivity.Interactive));
-
-            final Option<ReferenceResolutionResult> resolveResult = topDownSession.requireWithoutObserving(
-                languageComponent.getLanguageInstance().createResolveTask(rootDirectory, file, targetRegion)
-            );
-
-            if(!resolveResult.isSome()) {
+        // noinspection ConstantConditions (null is really a valid return value)
+        return pieComponent.getPie().tryNewSession().map(trySession -> { // Skip reference resolution if another session exists.
+            try(final MixedSession session = trySession) {
+                final TopDownSession topDownSession = session.updateAffectedBy(Collections.emptySet(), Collections.singleton(Interactivity.Interactive));
+                final Option<ReferenceResolutionResult> resolveResult = topDownSession.requireWithoutObserving(
+                    languageComponent.getLanguageInstance().createResolveTask(rootDirectory, file, targetRegion)
+                );
+                // noinspection ConstantConditions (null is really a valid return value)
+                return resolveResult.mapOr(this::referenceResolutionResultToHyperlinks, null);
+            } catch(ExecException e) {
+                // bubble error up to eclipse, which will handle it and show a dialog
+                throw new UncheckedExecException("Resolving references failed unexpectedly", e);
+            } catch(InterruptedException e) {
                 return null;
             }
-
-            return referenceResolutionResultToHyperlinks(resolveResult.get());
-        } catch(ExecException e) {
-            // bubble error up to eclipse, which will handle it and show a dialog
-            throw new UncheckedExecException("Resolving references failed unexpectedly", e);
-        } catch(InterruptedException e) {
-            return null;
-        }
+        }).orElse(null);
     }
 
     private @Nullable IHyperlink[] referenceResolutionResultToHyperlinks(ReferenceResolutionResult result) {
