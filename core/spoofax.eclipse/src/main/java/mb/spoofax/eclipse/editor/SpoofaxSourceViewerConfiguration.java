@@ -22,7 +22,12 @@ public class SpoofaxSourceViewerConfiguration extends TextSourceViewerConfigurat
     private final @Nullable PieComponent pieComponent;
 
 
-    public SpoofaxSourceViewerConfiguration(SpoofaxEditorBase editorBase, @Nullable LanguageComponent languageComponent, @Nullable PieComponent pieComponent) {
+    public SpoofaxSourceViewerConfiguration(
+        SpoofaxEditorBase editorBase,
+        @Nullable LanguageComponent languageComponent,
+        @Nullable PieComponent pieComponent
+    )
+    {
         this.editorBase = editorBase;
         this.languageComponent = languageComponent;
         this.pieComponent = pieComponent;

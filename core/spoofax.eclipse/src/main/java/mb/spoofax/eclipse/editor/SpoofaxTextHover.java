@@ -27,9 +27,13 @@ public class SpoofaxTextHover extends DefaultTextHover {
     private final @Nullable LanguageComponent languageComponent;
     private final @Nullable PieComponent pieComponent;
 
-    public SpoofaxTextHover(ISourceViewer sourceViewer, SpoofaxEditorBase editorBase, @Nullable LanguageComponent languageComponent, @Nullable PieComponent pieComponent) {
+    public SpoofaxTextHover(
+        ISourceViewer sourceViewer,
+        SpoofaxEditorBase editorBase,
+        @Nullable LanguageComponent languageComponent,
+        @Nullable PieComponent pieComponent
+    ) {
         super(sourceViewer);
-
         this.editorBase = editorBase;
         this.languageComponent = languageComponent;
         this.pieComponent = pieComponent;
@@ -65,7 +69,7 @@ public class SpoofaxTextHover extends DefaultTextHover {
     }
 
     private Option<HoverResult> resolveHover(IRegion region) {
-        if(languageComponent == null || pieComponent == null) {
+        if(languageComponent == null || pieComponent == null || editorBase.file == null) {
             return Option.ofNone();
         }
 
@@ -78,17 +82,18 @@ public class SpoofaxTextHover extends DefaultTextHover {
             return Option.ofNone();
         }
 
-        try(final MixedSession mixedSession = pieComponent.newSession()) {
-            final TopDownSession topDownSession = mixedSession.updateAffectedBy(Collections.emptySet(), Collections.singleton(Interactivity.Interactive));
-
-            return topDownSession.requireWithoutObserving(
-                languageComponent.getLanguageInstance().createHoverTask(rootDirectory, file, targetRegion)
-            );
-        } catch(ExecException e) {
-            // bubble error up to eclipse, which will handle it and show a dialog
-            throw new UncheckedExecException("Retrieving hover text failed unexpectedly", e);
-        } catch(InterruptedException e) {
-            return Option.ofNone();
-        }
+        return Option.ofOptional(pieComponent.getPie().tryNewSession()).flatMap(trySession -> { // Skip hover if another session exists.
+            try(final MixedSession session = trySession) {
+                final TopDownSession topDownSession = session.updateAffectedBy(Collections.emptySet(), Collections.singleton(Interactivity.Interactive));
+                return topDownSession.requireWithoutObserving(
+                    languageComponent.getLanguageInstance().createHoverTask(rootDirectory, file, targetRegion)
+                );
+            } catch(ExecException e) {
+                // bubble error up to eclipse, which will handle it and show a dialog
+                throw new UncheckedExecException("Retrieving hover text failed unexpectedly", e);
+            } catch(InterruptedException e) {
+                return Option.ofNone();
+            }
+        });
     }
 }
