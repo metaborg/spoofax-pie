@@ -6,7 +6,7 @@ plugins {
 fun compositeBuild(name: String) = "$group:$name:$version"
 
 mavenize {
-  majorVersion.set("2021-03")
+  majorVersion.set("2021-09")
 }
 
 repository {
