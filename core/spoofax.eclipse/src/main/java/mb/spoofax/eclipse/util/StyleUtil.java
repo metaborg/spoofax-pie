@@ -16,7 +16,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -25,13 +24,11 @@ import java.util.Iterator;
  */
 @PlatformScope
 public final class StyleUtil {
-    private final ColorShare colorShare;
     private final ScopeManager scopeManager;
     private final Logger logger;
 
 
-    @Inject public StyleUtil(ColorShare colorShare, ScopeManager scopeManager, LoggerFactory loggerFactory) {
-        this.colorShare = colorShare;
+    @Inject public StyleUtil(ScopeManager scopeManager, LoggerFactory loggerFactory) {
         this.scopeManager = scopeManager;
         this.logger = loggerFactory.create(getClass());
     }
@@ -99,7 +96,7 @@ public final class StyleUtil {
      * @param token         the token
      * @return the {@link StyleRange} with the token's styling
      */
-    public StyleRange createStyleRange(TextAttribute textAttribute, Token token) {
+    public StyleRange createStyleRange(TextAttribute textAttribute, Token<?> token) {
         final mb.common.region.Region region = token.getRegion();
         return createStyleRange(textAttribute, region.getStartOffset(), region.getLength());
     }
