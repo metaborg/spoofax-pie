@@ -5,7 +5,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 ## [Unreleased]
 
 
-## [0.11.12]
+## [0.11.12] - 2021-09-20
 ### Fixed
 - Deadlock when invoking hover/reference resolution in the Eclipse LWB (https://github.com/metaborg/spoofax-pie/issues/58).
 
@@ -17,7 +17,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 - Common to 0.9.5.
 
 
-## [0.11.11]
+## [0.11.11] - 2021-09-17
 ### Fixed
 - Stratego backend tasks triggering overlapping provided files, hidden dependencies, and visited multiple times errors in bottom-up builds when dynamic rules were added or removed.
 - Unremovable directories on Windows due to Stratego leaking directory streams.
