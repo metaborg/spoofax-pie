@@ -1,28 +1,31 @@
 package mb.statix.strategies.runtime;
 
 import mb.statix.sequences.Seq;
+import mb.statix.strategies.Strategy;
 import mb.statix.strategies.TestListStrategy;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import static mb.statix.strategies.runtime.Strategies.flatMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Tests the {@link FlatMapStrategy} class.
+ * Tests the {@link SeqStrategy} class.
  */
-@SuppressWarnings({"PointlessArithmeticExpression", "ArraysAsListWithZeroOrOneArgument"}) public final class FlatMapStrategyTests {
+@SuppressWarnings({"PointlessArithmeticExpression", "ArraysAsListWithZeroOrOneArgument", "ConstantConditions"})
+public final class SeqStrategyTests {
 
     @Test
     public void shouldApplySecondStrategyToFirstResults() throws InterruptedException {
         // Arrange
         final TegoEngine engine = new TegoRuntimeImpl(null);
-        final FlatMapStrategy<Object, Integer, Integer, Integer> strategy = FlatMapStrategy.getInstance();
+        final SeqStrategy<Object, Integer, Seq<Integer>, Seq<Integer>> strategy = SeqStrategy.getInstance();
         final TestListStrategy<Integer, Integer> s1 = new TestListStrategy<>(it -> Arrays.asList(it + 1, it + 2, it + 3));
-        final TestListStrategy<Integer, Integer> s2 = new TestListStrategy<>(it -> Arrays.asList(it * 1, it * 2, it * 3));
+        final Strategy<Object, Seq<Integer>, Seq<Integer>> s2 = flatMap(new TestListStrategy<>(it -> Arrays.asList(it * 1, it * 2, it * 3)));
 
         // Act
         final Seq<Integer> result = strategy.evalInternal(engine, new Object(), s1, s2, 0);
@@ -35,9 +38,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
     public void shouldEvaluateToEmptySequence_whenSecondSequenceIsEmpty() throws InterruptedException {
         // Arrange
         final TegoEngine engine = new TegoRuntimeImpl(null);
-        final FlatMapStrategy<Object, Integer, Integer, Integer> strategy = FlatMapStrategy.getInstance();
+        final SeqStrategy<Object, Integer, Seq<Integer>, Seq<Integer>> strategy = SeqStrategy.getInstance();
         final TestListStrategy<Integer, Integer> s1 = new TestListStrategy<>(it -> Arrays.asList(it + 1, it + 2, it + 3));
-        final TestListStrategy<Integer, Integer> s2 = new TestListStrategy<>(it -> Arrays.asList());
+        final Strategy<Object, Seq<Integer>, Seq<Integer>> s2 = flatMap(new TestListStrategy<>(it -> Arrays.asList()));
 
         // Act
         final Seq<Integer> result = strategy.evalInternal(engine, new Object(), s1, s2, 0);
@@ -50,9 +53,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
     public void shouldEvaluateToEmptySequence_whenFirstSequenceIsEmpty() throws InterruptedException {
         // Arrange
         final TegoEngine engine = new TegoRuntimeImpl(null);
-        final FlatMapStrategy<Object, Integer, Integer, Integer> strategy = FlatMapStrategy.getInstance();
+        final SeqStrategy<Object, Integer, Seq<Integer>, Seq<Integer>> strategy = SeqStrategy.getInstance();
         final TestListStrategy<Integer, Integer> s1 = new TestListStrategy<>(it -> Arrays.asList());
-        final TestListStrategy<Integer, Integer> s2 = new TestListStrategy<>(it -> Arrays.asList(it * 1, it * 2, it * 3));
+        final Strategy<Object, Seq<Integer>, Seq<Integer>> s2 = flatMap(new TestListStrategy<>(it -> Arrays.asList(it * 1, it * 2, it * 3)));
 
         // Act
         final Seq<Integer> result = strategy.evalInternal(engine, new Object(), s1, s2, 0);
@@ -65,9 +68,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
     public void shouldEvaluateToEmptySequence_whenBothSequencesAreEmpty() throws InterruptedException {
         // Arrange
         final TegoEngine engine = new TegoRuntimeImpl(null);
-        final FlatMapStrategy<Object, Integer, Integer, Integer> strategy = FlatMapStrategy.getInstance();
+        final SeqStrategy<Object, Integer, Seq<Integer>, Seq<Integer>> strategy = SeqStrategy.getInstance();
         final TestListStrategy<Integer, Integer> s1 = new TestListStrategy<>(it -> Arrays.asList());
-        final TestListStrategy<Integer, Integer> s2 = new TestListStrategy<>(it -> Arrays.asList());
+        final Strategy<Object, Seq<Integer>, Seq<Integer>> s2 = flatMap(new TestListStrategy<>(it -> Arrays.asList()));
 
         // Act
         final Seq<Integer> result = strategy.evalInternal(engine, new Object(), s1, s2, 0);
@@ -80,12 +83,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
     public void shouldEvaluateSequenceLazy() throws InterruptedException {
         // Arrange
         final TegoEngine engine = new TegoRuntimeImpl(null);
-        final FlatMapStrategy<Object, Integer, Integer, Integer> strategy = FlatMapStrategy.getInstance();
+        final SeqStrategy<Object, Integer, Seq<Integer>, Seq<Integer>> strategy = SeqStrategy.getInstance();
         final TestListStrategy<Integer, Integer> s1 = new TestListStrategy<>(it -> Arrays.asList(it + 1, it + 2, it + 3));
         final TestListStrategy<Integer, Integer> s2 = new TestListStrategy<>(it -> Arrays.asList(it * 1, it * 2, it * 3));
+        final Strategy<Object, Seq<Integer>, Seq<Integer>> f2 = flatMap(s2);
 
         // Act/Assert
-        final Seq<Integer> result = strategy.evalInternal(engine, new Object(), s1, s2, 0);
+        final Seq<Integer> result = strategy.evalInternal(engine, new Object(), s1, f2, 0);
 
         assertTrue(result.next());
         assertEquals(1, s1.nextCalls.get());    // first element of s1
