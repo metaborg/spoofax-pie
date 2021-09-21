@@ -17,6 +17,57 @@ public final class StrategyExt {
     private StrategyExt() { /* Cannot be instantiated. */ }
 
     /**
+     * Creates a lambda strategy.
+     *
+     * This is a convenience method for using a {@link LambdaStrategy1} in place of a {@link Strategy1}.
+     *
+     * @param s the lambda strategy definition
+     * @param <CTX> the context
+     * @param <A1> the type of the first argument (contravariant)
+     * @param <I> the type of input (contravariant)
+     * @param <O> the type of output (covariant)
+     * @return the strategy
+     */
+    public static <CTX, A1, I, O> LambdaStrategy1<CTX, A1, I, O> lambda(LambdaStrategy1<CTX, A1, I, O> s) {
+        return s;
+    }
+
+    /**
+     * Creates a lambda strategy.
+     *
+     * This is a convenience method for using a {@link LambdaStrategy2} in place of a {@link Strategy2}.
+     *
+     * @param s the lambda strategy definition
+     * @param <CTX> the context
+     * @param <A1> the type of the first argument (contravariant)
+     * @param <A2> the type of the second argument (contravariant)
+     * @param <I> the type of input (contravariant)
+     * @param <O> the type of output (covariant)
+     * @return the strategy
+     */
+    public static <CTX, A1, A2, I, O> LambdaStrategy2<CTX, A1, A2, I, O> lambda(LambdaStrategy2<CTX, A1, A2, I, O> s) {
+        return s;
+    }
+
+    /**
+     * Creates a lambda strategy.
+     *
+     * This is a convenience method for using a {@link LambdaStrategy3} in place of a {@link Strategy3}.
+     *
+     * @param s the lambda strategy definition
+     * @param <CTX> the context
+     * @param <A1> the type of the first argument (contravariant)
+     * @param <A2> the type of the second argument (contravariant)
+     * @param <A3> the type of the third argument (contravariant)
+     * @param <I> the type of input (contravariant)
+     * @param <O> the type of output (covariant)
+     * @return the strategy
+     */
+    public static <CTX, A1, A2, A3, I, O> LambdaStrategy3<CTX, A1, A2, A3, I, O> lambda(LambdaStrategy3<CTX, A1, A2, A3, I, O> s) {
+        return s;
+    }
+
+    /**
      * Defines a named strategy with no arguments.
      *
      * @param name the name of the strategy
