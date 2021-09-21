@@ -12,15 +12,15 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Tests the {@link SeqStrategy} class.
+ * Tests the {@link FlatMapStrategy} class.
  */
-@SuppressWarnings({"PointlessArithmeticExpression", "ArraysAsListWithZeroOrOneArgument"}) public final class SeqStrategyTests {
+@SuppressWarnings({"PointlessArithmeticExpression", "ArraysAsListWithZeroOrOneArgument"}) public final class FlatMapStrategyTests {
 
     @Test
     public void shouldApplySecondStrategyToFirstResults() throws InterruptedException {
         // Arrange
         final TegoEngine engine = new TegoRuntimeImpl(null);
-        final SeqStrategy<Object, Integer, Integer, Integer> strategy = SeqStrategy.getInstance();
+        final FlatMapStrategy<Object, Integer, Integer, Integer> strategy = FlatMapStrategy.getInstance();
         final TestListStrategy<Integer, Integer> s1 = new TestListStrategy<>(it -> Arrays.asList(it + 1, it + 2, it + 3));
         final TestListStrategy<Integer, Integer> s2 = new TestListStrategy<>(it -> Arrays.asList(it * 1, it * 2, it * 3));
 
@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
     public void shouldEvaluateToEmptySequence_whenSecondSequenceIsEmpty() throws InterruptedException {
         // Arrange
         final TegoEngine engine = new TegoRuntimeImpl(null);
-        final SeqStrategy<Object, Integer, Integer, Integer> strategy = SeqStrategy.getInstance();
+        final FlatMapStrategy<Object, Integer, Integer, Integer> strategy = FlatMapStrategy.getInstance();
         final TestListStrategy<Integer, Integer> s1 = new TestListStrategy<>(it -> Arrays.asList(it + 1, it + 2, it + 3));
         final TestListStrategy<Integer, Integer> s2 = new TestListStrategy<>(it -> Arrays.asList());
 
@@ -50,7 +50,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
     public void shouldEvaluateToEmptySequence_whenFirstSequenceIsEmpty() throws InterruptedException {
         // Arrange
         final TegoEngine engine = new TegoRuntimeImpl(null);
-        final SeqStrategy<Object, Integer, Integer, Integer> strategy = SeqStrategy.getInstance();
+        final FlatMapStrategy<Object, Integer, Integer, Integer> strategy = FlatMapStrategy.getInstance();
         final TestListStrategy<Integer, Integer> s1 = new TestListStrategy<>(it -> Arrays.asList());
         final TestListStrategy<Integer, Integer> s2 = new TestListStrategy<>(it -> Arrays.asList(it * 1, it * 2, it * 3));
 
@@ -65,7 +65,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
     public void shouldEvaluateToEmptySequence_whenBothSequencesAreEmpty() throws InterruptedException {
         // Arrange
         final TegoEngine engine = new TegoRuntimeImpl(null);
-        final SeqStrategy<Object, Integer, Integer, Integer> strategy = SeqStrategy.getInstance();
+        final FlatMapStrategy<Object, Integer, Integer, Integer> strategy = FlatMapStrategy.getInstance();
         final TestListStrategy<Integer, Integer> s1 = new TestListStrategy<>(it -> Arrays.asList());
         final TestListStrategy<Integer, Integer> s2 = new TestListStrategy<>(it -> Arrays.asList());
 
@@ -80,7 +80,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
     public void shouldEvaluateSequenceLazy() throws InterruptedException {
         // Arrange
         final TegoEngine engine = new TegoRuntimeImpl(null);
-        final SeqStrategy<Object, Integer, Integer, Integer> strategy = SeqStrategy.getInstance();
+        final FlatMapStrategy<Object, Integer, Integer, Integer> strategy = FlatMapStrategy.getInstance();
         final TestListStrategy<Integer, Integer> s1 = new TestListStrategy<>(it -> Arrays.asList(it + 1, it + 2, it + 3));
         final TestListStrategy<Integer, Integer> s2 = new TestListStrategy<>(it -> Arrays.asList(it * 1, it * 2, it * 3));
 

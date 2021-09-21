@@ -15,7 +15,7 @@ import org.metaborg.util.task.NullProgress;
 /**
  * Delays stuck queries.
  */
-public final class InferStrategy extends NamedStrategy<SolverContext, SolverState, Seq<SolverState>> {
+public final class InferStrategy extends NamedStrategy<SolverContext, SolverState, SolverState> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final InferStrategy instance = new InferStrategy();
@@ -38,11 +38,11 @@ public final class InferStrategy extends NamedStrategy<SolverContext, SolverStat
     }
 
     @Override
-    public Seq<SolverState> evalInternal(TegoEngine engine, SolverContext ctx, SolverState input) {
+    public SolverState evalInternal(TegoEngine engine, SolverContext ctx, SolverState input) {
         return eval(engine, ctx, input);
     }
 
-    public static Seq<SolverState> eval(TegoEngine engine, SolverContext ctx, SolverState input) {
+    public static SolverState eval(TegoEngine engine, SolverContext ctx, SolverState input) {
         try {
             final SolverResult result = Solver.solve(
                 ctx.getSpec(),
@@ -59,7 +59,7 @@ public final class InferStrategy extends NamedStrategy<SolverContext, SolverStat
 
             // NOTE: Call the isSuccessful() strategy on this result to ensure it has no errors.
 
-            return Seq.of(SolverState.fromSolverResult(result, input.getExistentials(), input.getExpanded(), input.getMeta()));
+            return SolverState.fromSolverResult(result, input.getExistentials(), input.getExpanded(), input.getMeta());
         } catch(InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);

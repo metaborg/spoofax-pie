@@ -6,15 +6,14 @@ import mb.statix.SolverState;
 import mb.statix.sequences.Seq;
 import mb.statix.solver.IConstraint;
 import mb.statix.strategies.NamedStrategy2;
+import mb.statix.strategies.Strategy1;
 import mb.statix.strategies.runtime.TegoEngine;
-
-import java.util.function.BiPredicate;
-
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * Selects constraints that match the given predicate.
+ * Selects constraints for which the given predicate does not fail.
  */
-public final class SelectStrategy<C extends IConstraint> extends NamedStrategy2<SolverContext, Class<C>, BiPredicate<C, SolverState>, SolverState, Seq<SelectedConstraintSolverState<C>>> {
+public final class SelectStrategy<C extends IConstraint> extends NamedStrategy2<SolverContext, Class<C>, Strategy1<SolverContext, C, SolverState, @Nullable SolverState>, SolverState, Seq<SelectedConstraintSolverState<C>>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final SelectStrategy instance = new SelectStrategy();
@@ -42,8 +41,7 @@ public final class SelectStrategy<C extends IConstraint> extends NamedStrategy2<
         TegoEngine engine,
         SolverContext ctx,
         Class<C> constraintClass,
-        // TODO: This should probably be a strategy:
-        BiPredicate<C, SolverState> predicate,
+        Strategy1<SolverContext, C, SolverState, @Nullable SolverState> predicate,
         SolverState input
     ) {
         return eval(engine, ctx, constraintClass, predicate, input);
@@ -53,13 +51,12 @@ public final class SelectStrategy<C extends IConstraint> extends NamedStrategy2<
         TegoEngine engine,
         SolverContext ctx,
         Class<C> constraintClass,
-        // TODO: This should probably be a strategy:
-        BiPredicate<C, SolverState> predicate,
+        Strategy1<SolverContext, C, SolverState, @Nullable SolverState> predicate,
         SolverState input
     ) {
         return Seq.from(input.getConstraints())
             .filterIsInstance(constraintClass)
-            .filter(c -> predicate.test(c, input))
+            .filter(c -> engine.eval(predicate, ctx, c, input) != null)
             .map(c -> SelectedConstraintSolverState.of(c, input));
     }
 

@@ -10,14 +10,14 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 /**
  * Sequence strategy.
  *
- * This evaluates one strategies on the input, and another on the results of the first.
+ * This evaluates one strategy on the input, and another on the results of the first.
  *
  * @param <CTX> the type of context (invariant)
  * @param <T> the type of input (contravariant)
  * @param <U> the type of intermediate (invariant)
  * @param <R> the type of output (covariant)
  */
-public final class SeqStrategy<CTX, T, U, R> extends NamedStrategy2<CTX, Strategy<CTX, T, Seq<U>>, Strategy<CTX, U, Seq<R>>, T, Seq<R>> {
+public final class SeqStrategy<CTX, T, U, R> extends NamedStrategy2<CTX, Strategy<CTX, T, @Nullable U>, Strategy<CTX, U, @Nullable R>, T, @Nullable R> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final SeqStrategy instance = new SeqStrategy();
@@ -26,93 +26,17 @@ public final class SeqStrategy<CTX, T, U, R> extends NamedStrategy2<CTX, Strateg
 
     private SeqStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    public static <CTX, T, U, R> Seq<R> eval(TegoEngine engine, CTX ctx, Strategy<CTX, T, Seq<U>> s1, Strategy<CTX, U, Seq<R>> s2, T input) {
-        return new SeqBase<R>() {
-
-            // Implementation if `yield` and `yieldBreak` could actually suspend computation
-            @SuppressWarnings("unused")
-            @ExcludeFromJacocoGeneratedReport
-            private void computeNextCoroutine() throws InterruptedException {
-                // 0:
-                final @Nullable Seq<U> s1Seq = engine.eval(s1, ctx, input);
-                // 1:
-                while (s1Seq != null && s1Seq.next()) {
-                    // 2:
-                    final U u = s1Seq.getCurrent();
-                    final @Nullable Seq<R> s2Seq = engine.eval(s2, ctx, u);
-                    // 3:
-                    while (s2Seq != null && s2Seq.next()) {
-                        // 4:
-                        final R r = s2Seq.getCurrent();
-                        this.yield(r);
-                        // 5:
-                    }
-                    // 6:
-                }
-                // 7:
-                yieldBreak();
-            }
-
-            // STATE MACHINE
-            private int state = 0;
-            // LOCAL VARIABLES
-            private @Nullable Seq<U> s1Seq;
-            private @Nullable Seq<R> s2Seq;
-
-            @Override
-            protected void computeNext() throws InterruptedException {
-                while (true) {
-                    switch (state) {
-                        case 0:
-                            s1Seq = engine.eval(s1, ctx, input);
-                            this.state = 1;
-                            continue;
-                        case 1:
-                            if (s1Seq == null || !s1Seq.next()) {
-                                this.state = 7;
-                                continue;
-                            }
-                            this.state = 2;
-                            continue;
-                        case 2:
-                            //noinspection ConstantConditions
-                            final U u = s1Seq.getCurrent();
-                            s2Seq = engine.eval(s2, ctx, u);
-                            this.state = 3;
-                            continue;
-                        case 3:
-                            if (s2Seq == null || !s2Seq.next()) {
-                                this.state = 6;
-                                continue;
-                            }
-                            this.state = 4;
-                            continue;
-                        case 4:
-                            //noinspection ConstantConditions
-                            final R r = s2Seq.getCurrent();
-                            this.yield(r);
-                            this.state = 5;
-                            return;
-                        case 5:
-                            this.state = 3;
-                            continue;
-                        case 6:
-                            this.state = 1;
-                            continue;
-                        case 7:
-                            yieldBreak();
-                            this.state = -1;
-                            return;
-                        default:
-                            throw new IllegalStateException("Illegal state: " + state);
-                    }
-                }
-            }
-        };
+    @SuppressWarnings("RedundantIfStatement")
+    public static <CTX, T, U, R> @Nullable R eval(TegoEngine engine, CTX ctx, Strategy<CTX, T, @Nullable U> s1, Strategy<CTX, U, @Nullable R> s2, T input) {
+        final @Nullable U r1 = engine.eval(s1, ctx, input);
+        if (r1 == null) return null;
+        final @Nullable R r2 = engine.eval(s2, ctx, r1);
+        if (r2 == null) return null;
+        return r2;
     }
 
     @Override
-    public Seq<R> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, Seq<U>> s1, Strategy<CTX, U, Seq<R>> s2, T input) {
+    public @Nullable R evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, @Nullable U> s1, Strategy<CTX, U, @Nullable R> s2, T input) {
         return eval(engine, ctx, s1, s2, input);
     }
 
@@ -129,4 +53,30 @@ public final class SeqStrategy<CTX, T, U, R> extends NamedStrategy2<CTX, Strateg
             default: return super.getParamName(index);
         }
     }
+
+    /**
+     * A builder for flat maps of strategies.
+     *
+     * @param <I> the input type
+     * @param <M> the output type
+     */
+    @SuppressWarnings("unused")
+    public static class Builder<CTX, I, M> {
+
+        private final Strategy<CTX, I, @Nullable M> s;
+
+        public Builder(Strategy<CTX, I, @Nullable M> s) {
+            this.s = s;
+        }
+
+        public <O> Builder<CTX, I, @Nullable O> $(Strategy<CTX, M, @Nullable O> s) {
+            return new Builder<>(SeqStrategy.<CTX, I, M, O>getInstance().apply(this.s, s));
+        }
+
+        public Strategy<CTX, I, @Nullable M> $() {
+            return s;
+        }
+
+    }
+
 }

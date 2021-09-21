@@ -1,14 +1,20 @@
 package mb.statix.codecompletion.strategies.runtime;
 
+import io.usethesource.capsule.Set;
 import mb.nabl2.terms.ITermVar;
 import mb.statix.SolverContext;
 import mb.statix.SolverState;
+import mb.statix.constraints.CUser;
 import mb.statix.sequences.Seq;
 import mb.statix.strategies.NamedStrategy1;
-import mb.statix.strategies.NamedStrategy2;
+import mb.statix.strategies.Strategy;
+import mb.statix.strategies.Strategy1;
 import mb.statix.strategies.runtime.TegoEngine;
 
-import java.util.Set;
+import static mb.statix.codecompletion.strategies.runtime.SearchStrategies.*;
+import static mb.statix.strategies.StrategyExt.define;
+import static mb.statix.strategies.StrategyExt.lambda;
+import static mb.statix.strategies.runtime.Strategies.*;
 
 public final class ExpandAllPredicatesStrategy extends NamedStrategy1<SolverContext, ITermVar, SolverState, Seq<SolverState>> {
 
@@ -22,16 +28,16 @@ public final class ExpandAllPredicatesStrategy extends NamedStrategy1<SolverCont
     @Override
     public Seq<SolverState> evalInternal(
         TegoEngine engine,
-        SolverContext solverContext,
+        SolverContext ctx,
         ITermVar v,
         SolverState input
     ) {
-        return eval(engine, solverContext, v, input);
+        return eval(engine, ctx, v, input);
     }
 
     public static Seq<SolverState> eval(
         TegoEngine engine,
-        SolverContext solverContext,
+        SolverContext ctx,
         ITermVar v,
         SolverState input
     ) {
@@ -39,46 +45,39 @@ public final class ExpandAllPredicatesStrategy extends NamedStrategy1<SolverCont
         // import io/usethesource/capsule::Set.Immutable
         //
         // def expandAllPredicates(v: ITermVar): SolverState -> [SolverState] =
-        //     SolverState#withExpanded(Set.Immutable#of) |>
+        //     SolverState#withExpanded(Set.Immutable#of) ;
         //     repeat(
-        //       limit(1, select(CUser::class, \(constraint: IConstraint) SolverState -> SolverState? :- state ->
-        //           <containsVar(v, constraint) ; checkNotYetExpanded(constraint)> state
+        //       limit(1, select(CUser::class, \(constraint: IConstraint) SolverState -> SolverState?
+        //           = containsVar(v, constraint) ; checkNotYetExpanded(constraint)
         //       \)) |>
         //       expandPredicate(v) |>
         //       assertValid(v)
         //     )
 
-        // IR: (ANF)
-        // import io/usethesource/capsule::Set.Immutable
-        //
-        // def expandAllPredicates(v: ITermVar): SolverState -> [SolverState] :- input ->
-        //     let f1: Set.Immutable<String> = Set.Immutable#of in
-        //     let s1: SolverState -> SolverState = SolverState#withExpanded(f1) in
-        //     let r1: SolverState = __eval(s1, input) in
-        //
-        //     let c2: Class = CUser::class in
-        //     let l2: (IConstraint) SolverState -> SolverState? = \(constraint: IConstraint) SolverState -> SolverState? :- state ->
-        //         let s1_1: SolverState -> SolverState? = containsVar(v, constraint) in
-        //         let s1_1': SolverState? -> SolverState? = __maybe(s1_1) in
-        //         let r1_1: SolverState? = __eval(s1_1', state) in
-        //         let s1_2: SolverState -> SolverState? = checkNotYetExpanded(constraint) in
-        //         let s1_2': SolverState? -> SolverState? = __maybe(s1_2) in
-        //         let r1_2: SolverState? = __eval(s1_2', state) in
-        //         r1_2
-        //     \ in
-        //     let s2: SolverState -> [SolverState] = select(c2, l2) in
-        //     let s3: SolverState -> [SolverState] = limit(1, s2) in
-        //     let s4: SolverState -> [SolverState] = expandPredicate(v) in
-        //     let s4': [SolverState] -> [SolverState] = __flatMap(s4) in
-        //     let s4'': SolverState -> [SolverState] = __seq(s3, s4') in     // NOTE: __seq
-        //     let s5: SolverState -> [SolverState] = assertValid(v) in
-        //     let s5': [SolverState] -> [SolverState] = __flatMap(s5) in
-        //     let s5'': SolverState -> [SolverState] = __seq(s4'', s5') in   // NOTE: __seq
-        //     let s6: SolverState -> [SolverState] = repeat(s5'') in
-        //     let s6': [SolverState] -> [SolverState] = __flatMap(s6) in
-        //     let r6: [SolverState] = __eval(s6', r1) in
-        //     r6
-        throw new UnsupportedOperationException("Not yet implemented");
+        // We need to repeat this, because there might be more than one constraint that limit(1, select..) might select.
+        // For example, (and this happened), the first selected constraint may be subtypeOf(), which when completed
+        // doesn't result in any additional syntax. We first need to expand the next constraint, typeOfType()
+        // to get actually a useful result.
+        // An example where this happens is in this program, on the $Type placeholder:
+        //   let function $ID(): $Type = $Exp in 3 end
+        //   debugState(v,
+        final Strategy1<SolverContext, Set.Immutable<String>, SolverState, SolverState> solverState$WithExpanded
+            = define("SolverState#withExpanded", "x", (eng, ct, x, i) -> i.withExpanded(x));
+        // @formatter:off
+        final Strategy<SolverContext, SolverState, Seq<SolverState>> s =
+            // Empty the set of expanded things
+            seq(solverState$WithExpanded.apply(Set.Immutable.of()))
+            .$(repeat(
+                seq(limit(1, select(CUser.class, lambda((constraint) -> seq(containsVar(v, constraint)).$(notYetExpanded(constraint)).$()))))
+                // Expand the focussed rule
+                .$(flatMap(expandPredicate(v)))
+                // Perform inference and remove states that have errors
+                .$(flatMap(assertValid(v)))
+                .$()
+            ))
+            .$();
+        // @formatter:on
+        return nn(engine.eval(s, ctx, input));
     }
 
     @Override
