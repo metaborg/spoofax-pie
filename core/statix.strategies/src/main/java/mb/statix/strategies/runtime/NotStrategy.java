@@ -3,35 +3,49 @@ package mb.statix.strategies.runtime;
 import mb.statix.sequences.Seq;
 import mb.statix.sequences.SeqBase;
 import mb.statix.strategies.NamedStrategy;
+import mb.statix.strategies.NamedStrategy1;
 import mb.statix.strategies.NamedStrategy2;
 import mb.statix.strategies.Strategy;
 import mb.statix.utils.ExcludeFromJacocoGeneratedReport;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * Boolean 'not' strategy.
+ * When the strategy succeeds, this strategy fails.
+ * When the strategy fails, this strategy returns the original input.
  *
  * @param <CTX> the type of context (invariant)
  */
-public final class NotStrategy<CTX> extends NamedStrategy<CTX, Boolean, Boolean> {
+public final class NotStrategy<CTX, T, R> extends NamedStrategy1<CTX, Strategy<CTX, T, @Nullable R>, T, @Nullable T> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final NotStrategy instance = new NotStrategy();
     @SuppressWarnings({"unchecked", "unused", "RedundantCast", "RedundantSuppression"})
-    public static <CTX> NotStrategy<CTX> getInstance() { return (NotStrategy<CTX>)instance; }
+    public static <CTX, T, R> NotStrategy<CTX, T, R> getInstance() { return (NotStrategy<CTX, T, R>)instance; }
 
     private NotStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    public static <CTX> Boolean eval(TegoEngine engine, CTX ctx, Boolean input) {
-        return !input;
+    public static <CTX, T, R> @Nullable T eval(TegoEngine engine, CTX ctx, Strategy<CTX, T, @Nullable R> s, T input) {
+        final @Nullable R r = engine.eval(s, ctx, input);
+        if (r == null) return input;
+        else return null;
     }
 
     @Override
-    public Boolean evalInternal(TegoEngine engine, CTX ctx, Boolean input) {
-        return eval(engine, ctx, input);
+    public @Nullable T evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, @Nullable R> s, T input) {
+        return eval(engine, ctx, s, input);
     }
 
     @Override
     public String getName() {
         return "not";
+    }
+
+    @SuppressWarnings("SwitchStatementWithTooFewBranches")
+    @Override
+    public String getParamName(int index) {
+        switch (index) {
+            case 0: return "s";
+            default: return super.getParamName(index);
+        }
     }
 }

@@ -8,32 +8,34 @@ import mb.statix.constraints.CResolveQuery;
 import mb.statix.constraints.CUser;
 import mb.statix.sequences.Seq;
 import mb.statix.solver.IConstraint;
-import mb.statix.strategies.AdapterStrategy1;
-import mb.statix.strategies.LambdaStrategy1;
-import mb.statix.strategies.NamedStrategy2;
 import mb.statix.strategies.Strategy;
 import mb.statix.strategies.Strategy1;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
-import java.util.function.BiPredicate;
 
 public final class SearchStrategies {
     private SearchStrategies() { /* Cannot be instantiated. */ }
 
-    public static Strategy<SolverContext, SolverState, Seq<SolverState>> assertValid(ITermVar v) {
+    public static Strategy<SolverContext, SolverState, @Nullable SolverState> assertValid(ITermVar v) {
         return AssertValidStrategy.getInstance().apply(v);
     }
 
     public static Strategy<SolverContext, SolverState, @Nullable SolverState> containsVar(ITermVar v, IConstraint constraint) {
-        return ContainsVarStrategy.getInstance().apply(v, constraint);
+        return ContainsAnyVarStrategy.getInstance().apply(Collections.singletonList(v), constraint);
+    }
+
+    public static Strategy<SolverContext, SolverState, @Nullable SolverState> containsAnyVar(Collection<ITermVar> vars, IConstraint constraint) {
+        return ContainsAnyVarStrategy.getInstance().apply(vars, constraint);
     }
 
     public static Strategy<SolverContext, SolverState, @Nullable SolverState> notYetExpanded(CUser constraint) {
         return NotYetExpandedStrategy.getInstance().apply(constraint);
     }
 
-    public static Strategy<SolverContext, SolverState, Seq<SolverState>> delayStuckQueries() {
+    public static Strategy<SolverContext, SolverState, SolverState> delayStuckQueries() {
         return DelayStuckQueriesStrategy.getInstance();
     }
 

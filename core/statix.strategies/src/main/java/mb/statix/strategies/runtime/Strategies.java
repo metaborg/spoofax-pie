@@ -94,6 +94,18 @@ public final class Strategies {
         return FixSetStrategy.<CTX, T>getInstance().apply(s);
     }
 
+    public static <CTX, T, R> Strategy<CTX, T, Seq<R>> ntl(
+        Strategy<CTX, T, @Nullable R> s
+    ) {
+        return NullableToListStrategy.<CTX, T, R>getInstance().apply(s);
+    }
+
+    public static <CTX, T, R> Strategy<CTX, T, @Nullable T> not(
+        Strategy<CTX, T, @Nullable R> s
+    ) {
+        return NotStrategy.<CTX, T, R>getInstance().apply(s);
+    }
+
     public static <CTX, I, O> Strategy<CTX, I, O> fail() {
         return FailStrategy.getInstance();
     }
