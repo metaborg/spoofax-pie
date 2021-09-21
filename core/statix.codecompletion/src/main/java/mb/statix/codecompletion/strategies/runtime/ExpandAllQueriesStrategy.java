@@ -21,7 +21,7 @@ import static mb.statix.codecompletion.strategies.runtime.SearchStrategies.*;
 import static mb.statix.strategies.StrategyExt.*;
 import static mb.statix.strategies.runtime.Strategies.*;
 
-public final class ExpandAllQueriesStrategy extends NamedStrategy1<SolverContext, ITermVar, SolverState, Seq<SolverState>> {
+public final class ExpandAllQueriesStrategy extends NamedStrategy2<SolverContext, SolverContext, ITermVar, SolverState, Seq<SolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final ExpandAllQueriesStrategy instance = new ExpandAllQueriesStrategy();
@@ -33,15 +33,17 @@ public final class ExpandAllQueriesStrategy extends NamedStrategy1<SolverContext
     @Override
     public Seq<SolverState> evalInternal(
         TegoEngine engine,
+        SolverContext x,
         SolverContext ctx,
         ITermVar v,
         SolverState input
     ) {
-        return eval(engine, ctx, v, input);
+        return eval(engine, x, ctx, v, input);
     }
 
     public static Seq<SolverState> eval(
         TegoEngine engine,
+        SolverContext x,
         SolverContext ctx,
         ITermVar v,
         SolverState input
@@ -66,31 +68,12 @@ public final class ExpandAllQueriesStrategy extends NamedStrategy1<SolverContext
 //                        containsAnyVar(vars, constraint)
 //                    ))
 //                ))),
-//                seq(expandQuery()).$(flatMap(ntl(assertValid(v)))).$(),
+//                seq(expandQuery(ctx)).$(flatMap(ntl(assertValid(ctx, v)))).$(),
 //                id()
 //            )
 //        )));
-//        return nn(engine.eval(s, ctx, input));
+//        return nn(engine.eval(s, x, input));
 
-
-//        distinct(or(id(), fixSet(
-//            if_(
-//                limit(1, //debugSelectCResolveQuery(v,
-//                    selectConstraints(CResolveQuery.class, (constraint, state) -> {
-//                            final io.usethesource.capsule.Set.Immutable<ITermVar> innerVars = state.project(v).getVars();
-//                            return containsAnyVar(innerVars, constraint, state);
-//                        }
-//                        //)
-//                    )),
-//                seq(debugCResolveQuery(v,
-//                        expandQueryConstraint()
-//                    )
-//                )
-//                    .$(assertValid(v))
-//                    .$(),
-//                id()
-//            )
-//        )))
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
@@ -103,7 +86,8 @@ public final class ExpandAllQueriesStrategy extends NamedStrategy1<SolverContext
     @Override
     public String getParamName(int index) {
         switch (index) {
-            case 0: return "v";
+            case 0: return "ctx";
+            case 1: return "v";
             default: return super.getParamName(index);
         }
     }

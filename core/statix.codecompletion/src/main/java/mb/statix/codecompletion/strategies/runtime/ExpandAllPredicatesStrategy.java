@@ -7,6 +7,7 @@ import mb.statix.SolverState;
 import mb.statix.constraints.CUser;
 import mb.statix.sequences.Seq;
 import mb.statix.strategies.NamedStrategy1;
+import mb.statix.strategies.NamedStrategy2;
 import mb.statix.strategies.Strategy;
 import mb.statix.strategies.Strategy1;
 import mb.statix.strategies.StrategyExt;
@@ -16,7 +17,7 @@ import static mb.statix.codecompletion.strategies.runtime.SearchStrategies.*;
 import static mb.statix.strategies.StrategyExt.*;
 import static mb.statix.strategies.runtime.Strategies.*;
 
-public final class ExpandAllPredicatesStrategy extends NamedStrategy1<SolverContext, ITermVar, SolverState, Seq<SolverState>> {
+public final class ExpandAllPredicatesStrategy extends NamedStrategy2<SolverContext, SolverContext, ITermVar, SolverState, Seq<SolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final ExpandAllPredicatesStrategy instance = new ExpandAllPredicatesStrategy();
@@ -28,15 +29,17 @@ public final class ExpandAllPredicatesStrategy extends NamedStrategy1<SolverCont
     @Override
     public Seq<SolverState> evalInternal(
         TegoEngine engine,
+        SolverContext x,
         SolverContext ctx,
         ITermVar v,
         SolverState input
     ) {
-        return eval(engine, ctx, v, input);
+        return eval(engine, x, ctx, v, input);
     }
 
     public static Seq<SolverState> eval(
         TegoEngine engine,
+        SolverContext x,
         SolverContext ctx,
         ITermVar v,
         SolverState input
@@ -73,12 +76,12 @@ public final class ExpandAllPredicatesStrategy extends NamedStrategy1<SolverCont
                 // Expand the focussed rule
                 .$(flatMap(expandPredicate(v)))
                 // Perform inference and remove states that have errors
-                .$(flatMap(ntl(assertValid(v))))
+                .$(flatMap(ntl(assertValid(ctx, v))))
                 .$()
             ))
             .$();
         // @formatter:on
-        return nn(engine.eval(s, ctx, input));
+        return nn(engine.eval(s, x, input));
     }
 
     @Override

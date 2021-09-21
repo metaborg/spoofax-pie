@@ -8,6 +8,7 @@ import mb.statix.solver.log.NullDebugContext;
 import mb.statix.solver.persistent.Solver;
 import mb.statix.solver.persistent.SolverResult;
 import mb.statix.strategies.NamedStrategy;
+import mb.statix.strategies.NamedStrategy1;
 import mb.statix.strategies.runtime.TegoEngine;
 import org.metaborg.util.task.NullCancel;
 import org.metaborg.util.task.NullProgress;
@@ -38,14 +39,14 @@ public final class InferStrategy extends NamedStrategy<SolverContext, SolverStat
     }
 
     @Override
-    public SolverState evalInternal(TegoEngine engine, SolverContext ctx, SolverState input) {
-        return eval(engine, ctx, input);
+    public SolverState evalInternal(TegoEngine engine, SolverContext x, SolverState input) {
+        return eval(engine, x, input);
     }
 
-    public static SolverState eval(TegoEngine engine, SolverContext ctx, SolverState input) {
+    public static SolverState eval(TegoEngine engine, SolverContext x, SolverState input) {
         try {
             final SolverResult result = Solver.solve(
-                ctx.getSpec(),
+                input.getSpec(),
                 input.getState(),
                 input.getConstraints(),
                 input.getDelays(),

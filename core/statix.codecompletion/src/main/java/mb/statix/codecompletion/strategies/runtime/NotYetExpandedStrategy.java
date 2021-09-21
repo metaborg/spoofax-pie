@@ -30,17 +30,17 @@ public final class NotYetExpandedStrategy extends NamedStrategy1<SolverContext, 
     @Override
     public @Nullable SolverState evalInternal(
         TegoEngine engine,
-        SolverContext ctx,
+        SolverContext x,
         CUser constraint,
         SolverState input
     ) {
-        return eval(engine, ctx, constraint, input);
+        return eval(engine, x, constraint, input);
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
     public static @Nullable SolverState eval(
         TegoEngine engine,
-        SolverContext ctx,
+        SolverContext x,
         CUser constraint,
         SolverState input
     ) {

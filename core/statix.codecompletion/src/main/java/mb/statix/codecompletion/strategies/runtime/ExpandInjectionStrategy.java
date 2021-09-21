@@ -8,6 +8,7 @@ import mb.statix.SolverState;
 import mb.statix.sequences.Seq;
 import mb.statix.strategies.NamedStrategy1;
 import mb.statix.strategies.NamedStrategy2;
+import mb.statix.strategies.NamedStrategy3;
 import mb.statix.strategies.runtime.TegoEngine;
 
 import java.util.ArrayDeque;
@@ -16,7 +17,7 @@ import java.util.Deque;
 import java.util.HashSet;
 import java.util.Set;
 
-public final class ExpandInjectionStrategy extends NamedStrategy2<SolverContext, ITermVar, Set<String>, SolverState, Seq<SolverState>> {
+public final class ExpandInjectionStrategy extends NamedStrategy3<SolverContext, SolverContext, ITermVar, Set<String>, SolverState, Seq<SolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final ExpandInjectionStrategy instance = new ExpandInjectionStrategy();
@@ -28,16 +29,18 @@ public final class ExpandInjectionStrategy extends NamedStrategy2<SolverContext,
     @Override
     public Seq<SolverState> evalInternal(
         TegoEngine engine,
+        SolverContext x,
         SolverContext ctx,
         ITermVar v,
         Set<String> visitedInjections,
         SolverState input
     ) {
-        return eval(engine, ctx, v, visitedInjections, input);
+        return eval(engine, x, ctx, v, visitedInjections, input);
     }
 
     public static Seq<SolverState> eval(
         TegoEngine engine,
+        SolverContext x,
         SolverContext ctx,
         ITermVar v,
         Set<String> visitedInjections,
@@ -70,7 +73,7 @@ public final class ExpandInjectionStrategy extends NamedStrategy2<SolverContext,
                         final Set<String> newVisitedInjections = setWithElement(visitedInjections, injName);
 
                         // Complete the injection
-                        return engine.eval(complete, ctx, injArgVar, newVisitedInjections, input);
+                        return engine.eval(complete, x, ctx, injArgVar, newVisitedInjections, input);
 
                         // TODO: Get the set of visited injections back and use it
                     }
@@ -95,8 +98,9 @@ public final class ExpandInjectionStrategy extends NamedStrategy2<SolverContext,
     @Override
     public String getParamName(int index) {
         switch (index) {
-            case 0: return "v";
-            case 1: return "visitedInjections";
+            case 0: return "ctx";
+            case 1: return "v";
+            case 2: return "visitedInjections";
             default: return super.getParamName(index);
         }
     }

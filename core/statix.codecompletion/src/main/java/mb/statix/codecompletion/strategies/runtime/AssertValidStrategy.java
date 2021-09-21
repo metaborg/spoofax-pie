@@ -10,6 +10,7 @@ import mb.statix.solver.IConstraint;
 import mb.statix.strategies.FunctionStrategy;
 import mb.statix.strategies.FunctionStrategy1;
 import mb.statix.strategies.NamedStrategy1;
+import mb.statix.strategies.NamedStrategy2;
 import mb.statix.strategies.Strategy;
 import mb.statix.strategies.StrategyExt;
 import mb.statix.strategies.runtime.NotStrategy;
@@ -22,7 +23,7 @@ import java.util.Map;
 import static mb.statix.strategies.StrategyExt.*;
 
 @SuppressWarnings("RedundantSuppression")
-public final class AssertValidStrategy extends NamedStrategy1<SolverContext, ITermVar, SolverState, @Nullable SolverState> {
+public final class AssertValidStrategy extends NamedStrategy2<SolverContext, SolverContext, ITermVar, SolverState, @Nullable SolverState> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final AssertValidStrategy instance = new AssertValidStrategy();
@@ -35,16 +36,18 @@ public final class AssertValidStrategy extends NamedStrategy1<SolverContext, ITe
     @Override
     public @Nullable SolverState evalInternal(
         TegoEngine engine,
+        SolverContext x,
         SolverContext ctx,
         ITermVar v,
         SolverState input
     ) {
-        return eval(engine, ctx, v, input);
+        return eval(engine, x, ctx, v, input);
     }
 
     @SuppressWarnings({"UnnecessaryLocalVariable", "RedundantIfStatement"})
     public static @Nullable SolverState eval(
         TegoEngine engine,
+        SolverContext x,
         SolverContext ctx,
         ITermVar v,
         SolverState input
@@ -59,7 +62,7 @@ public final class AssertValidStrategy extends NamedStrategy1<SolverContext, ITe
         final DelayStuckQueriesStrategy delayStuckQueries = DelayStuckQueriesStrategy.getInstance();
         final NotStrategy<SolverContext, SolverState, SolverState> not = NotStrategy.getInstance();
 
-        final @Nullable SolverState r1 = engine.eval(infer, ctx, input);
+        final @Nullable SolverState r1 = engine.eval(infer, x, input);
         if (r1 == null) return null;
 
         @Nullable final Collection<Map.Entry<IConstraint, IMessage>> allowedErrors = engine.eval(fun(SolverContext::getAllowedErrors), ctx, ctx);
@@ -70,7 +73,7 @@ public final class AssertValidStrategy extends NamedStrategy1<SolverContext, ITe
         final @Nullable SolverState r3 = engine.eval(s3, ctx, r1);
         if (r3 == null) return null;
 
-        final @Nullable SolverState r4 = engine.eval(delayStuckQueries, ctx, r3);
+        final @Nullable SolverState r4 = engine.eval(delayStuckQueries, x, r3);
         if (r4 == null) return null;
 
         return r4;
@@ -85,7 +88,8 @@ public final class AssertValidStrategy extends NamedStrategy1<SolverContext, ITe
     @Override
     public String getParamName(int index) {
         switch (index) {
-            case 0: return "v";
+            case 0: return "ctx";
+            case 1: return "v";
             default: return super.getParamName(index);
         }
     }

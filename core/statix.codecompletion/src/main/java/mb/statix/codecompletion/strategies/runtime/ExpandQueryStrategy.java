@@ -35,6 +35,7 @@ import mb.scopegraph.oopsla20.reference.RelationLabelOrder;
 import mb.statix.spec.Spec;
 import mb.statix.spoofax.StatixTerms;
 import mb.statix.strategies.NamedStrategy;
+import mb.statix.strategies.NamedStrategy1;
 import mb.statix.strategies.runtime.TegoEngine;
 import mb.statix.utils.StreamUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -61,7 +62,7 @@ import static mb.nabl2.terms.matching.TermMatch.M;
  * Expands the selected query.
  */
 @SuppressWarnings("UnstableApiUsage")
-public final class ExpandQueryStrategy extends NamedStrategy<SolverContext, SelectedConstraintSolverState<CResolveQuery>, Seq<SolverState>> {
+public final class ExpandQueryStrategy extends NamedStrategy1<SolverContext, SolverContext, SelectedConstraintSolverState<CResolveQuery>, Seq<SolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final ExpandQueryStrategy instance = new ExpandQueryStrategy();
@@ -79,16 +80,17 @@ public final class ExpandQueryStrategy extends NamedStrategy<SolverContext, Sele
     @Override
     public String getParamName(int index) {
         switch (index) {
+            case 0: return "ctx";
             default: return super.getParamName(index);
         }
     }
 
     @Override
-    public Seq<SolverState> evalInternal(TegoEngine engine, SolverContext ctx, SelectedConstraintSolverState<CResolveQuery> input) {
-        return eval(engine, ctx, input);
+    public Seq<SolverState> evalInternal(TegoEngine engine, SolverContext x, SolverContext ctx, SelectedConstraintSolverState<CResolveQuery> input) {
+        return eval(engine, x, ctx, input);
     }
 
-    public static Seq<SolverState> eval(TegoEngine engine, SolverContext ctx, SelectedConstraintSolverState<CResolveQuery> input) {
+    public static Seq<SolverState> eval(TegoEngine engine, SolverContext x, SolverContext ctx, SelectedConstraintSolverState<CResolveQuery> input) {
         final CResolveQuery query = input.getSelected();
 
         engine.log(instance, "Expand query: {}", query);
@@ -120,9 +122,9 @@ public final class ExpandQueryStrategy extends NamedStrategy<SolverContext, Sele
 
         // @formatter:off
         final NameResolution<Scope, ITerm, ITerm, CEqual> nameResolution = new NameResolution<>(
-            ctx.getSpec(),
+            input.getSpec(),
             state.scopeGraph(),
-            ctx.getSpec().allLabels(),
+            input.getSpec().allLabels(),
             labelWF, labelOrd,
             dataWF, isAlways, isComplete);
         // @formatter:on
@@ -136,7 +138,7 @@ public final class ExpandQueryStrategy extends NamedStrategy<SolverContext, Sele
         // For each declaration:
         final ArrayList<SolverState> output = new ArrayList<>();
         for (int i = 0; i < declarationCount; i++) {
-            final List<SolverState> newStates = expandResolution(engine, ctx.getSpec(), query, input,
+            final List<SolverState> newStates = expandResolution(engine, input.getSpec(), query, input,
                 unifier, nameResolution, scope, i);
             engine.log(instance, "  ▶ added {} possible states", newStates.size());
             output.addAll(newStates);

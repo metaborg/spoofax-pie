@@ -19,16 +19,16 @@ public final class ExpandDeterministicStrategy extends NamedStrategy1<SolverCont
     @Override
     public Seq<SolverState> evalInternal(
         TegoEngine engine,
-        SolverContext ctx,
+        SolverContext x,
         ITermVar v,
         SolverState input
     ) {
-        return eval(engine, ctx, v, input);
+        return eval(engine, x, v, input);
     }
 
     public static Seq<SolverState> eval(
         TegoEngine engine,
-        SolverContext ctx,
+        SolverContext x,
         ITermVar v,
         SolverState input
     ) {

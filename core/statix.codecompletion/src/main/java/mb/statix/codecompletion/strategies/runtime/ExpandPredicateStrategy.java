@@ -14,6 +14,7 @@ import mb.statix.spec.ApplyResult;
 import mb.statix.spec.Rule;
 import mb.statix.spec.RuleUtil;
 import mb.statix.strategies.NamedStrategy1;
+import mb.statix.strategies.NamedStrategy2;
 import mb.statix.strategies.runtime.TegoEngine;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -46,39 +47,23 @@ public final class ExpandPredicateStrategy extends NamedStrategy1<SolverContext,
         }
     }
 
-    /**
-     * Executes the strategy.
-     *
-     * @param ctx the context
-     * @param focus the focus, used for debugging; or {@code null}
-     * @param state the solver state with a selected constraint
-     * @return the sequence of new solver states
-     */
     @Override
-    public Seq<SolverState> evalInternal(TegoEngine engine, SolverContext ctx, @Nullable ITermVar focus, SelectedConstraintSolverState<CUser> state) {
-        return eval(engine, ctx, focus, state);
+    public Seq<SolverState> evalInternal(TegoEngine engine, SolverContext x, @Nullable ITermVar focus, SelectedConstraintSolverState<CUser> input) {
+        return eval(engine, x, focus, input);
     }
 
-    /**
-     * Executes the strategy.
-     *
-     * @param ctx the context
-     * @param focus the focus, used for debugging; or {@code null}
-     * @param state the solver state with a selected constraint
-     * @return the sequence of new solver states
-     */
-    public static Seq<SolverState> eval(TegoEngine engine, SolverContext ctx, @Nullable ITermVar focus, SelectedConstraintSolverState<CUser> state) {
-        final CUser selected = state.getSelected();
+    public static Seq<SolverState> eval(TegoEngine engine, SolverContext x, @Nullable ITermVar focus, SelectedConstraintSolverState<CUser> input) {
+        final CUser selected = input.getSelected();
         // Get the rules for the given predicate constraint
-        final ImmutableList<Rule> rules = ctx.getSpec().rules().getOrderIndependentRules(selected.name()).asList();
+        final ImmutableList<Rule> rules = input.getSpec().rules().getOrderIndependentRules(selected.name()).asList();
         // Prepare the new state for each of the expansions:
         // - Remove the selected constraint
         // - Add the constraint's name to the set of expanded constraints
         // - Increment the number of expanded rules
-        final SolverState newState = state
+        final SolverState newState = input
             .withoutSelected()
-            .withExpanded(addToSet(state.getExpanded(), selected.name()))
-            .withMeta(state.getMeta().withExpandedRulesIncremented());
+            .withExpanded(addToSet(input.getExpanded(), selected.name()))
+            .withMeta(input.getMeta().withExpandedRulesIncremented());
 
         return applyAllLazy(rules, selected, newState);
     }

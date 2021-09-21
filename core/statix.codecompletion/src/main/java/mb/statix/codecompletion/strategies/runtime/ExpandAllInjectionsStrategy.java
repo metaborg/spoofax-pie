@@ -5,6 +5,7 @@ import mb.statix.SolverContext;
 import mb.statix.SolverState;
 import mb.statix.sequences.Seq;
 import mb.statix.strategies.NamedStrategy2;
+import mb.statix.strategies.NamedStrategy3;
 import mb.statix.strategies.Strategy;
 import mb.statix.strategies.runtime.FixSetStrategy;
 import mb.statix.strategies.runtime.FlatMapStrategy;
@@ -16,7 +17,7 @@ import java.util.Set;
 
 import static mb.statix.strategies.runtime.Strategies.ntl;
 
-public final class ExpandAllInjectionsStrategy extends NamedStrategy2<SolverContext, ITermVar, Set<String>, SolverState, Seq<SolverState>> {
+public final class ExpandAllInjectionsStrategy extends NamedStrategy3<SolverContext, SolverContext, ITermVar, Set<String>, SolverState, Seq<SolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final ExpandAllInjectionsStrategy instance = new ExpandAllInjectionsStrategy();
@@ -29,17 +30,19 @@ public final class ExpandAllInjectionsStrategy extends NamedStrategy2<SolverCont
     @Override
     public Seq<SolverState> evalInternal(
         TegoEngine engine,
+        SolverContext x,
         SolverContext ctx,
         ITermVar v,
         Set<String> visitedInjections,
         SolverState input
     ) {
-        return eval(engine, ctx, v, visitedInjections, input);
+        return eval(engine, x, ctx, v, visitedInjections, input);
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
     public static Seq<SolverState> eval(
         TegoEngine engine,
+        SolverContext x,
         SolverContext ctx,
         ITermVar v,
         Set<String> visitedInjections,
@@ -88,13 +91,13 @@ public final class ExpandAllInjectionsStrategy extends NamedStrategy2<SolverCont
         final AssertValidStrategy assertValid = AssertValidStrategy.getInstance();
         final FlatMapStrategy<SolverContext, SolverState, SolverState> flatMap = FlatMapStrategy.getInstance();
 
-        final Strategy<SolverContext, SolverState, Seq<SolverState>> s1 = expandInjection.apply(v, visitedInjections);
+        final Strategy<SolverContext, SolverState, Seq<SolverState>> s1 = expandInjection.apply(ctx, v, visitedInjections);
         final Strategy<SolverContext, SolverState, Seq<SolverState>> s2 = try_.apply(s1);
-        final @Nullable Seq<SolverState> r3 = engine.eval(fixSet, ctx, s2, input);
+        final @Nullable Seq<SolverState> r3 = engine.eval(fixSet, x, s2, input);
         if (r3 == null) return Seq.of();
 
-        final Strategy<SolverContext, SolverState, Seq<SolverState>> s4 = ntl(assertValid.apply(v));
-        final @Nullable Seq<SolverState> r4 = engine.eval(flatMap, ctx, s4, r3);
+        final Strategy<SolverContext, SolverState, Seq<SolverState>> s4 = ntl(assertValid.apply(ctx, v));
+        final @Nullable Seq<SolverState> r4 = engine.eval(flatMap, x, s4, r3);
         if (r4 == null) return Seq.of();
 
         return r4;
@@ -109,8 +112,9 @@ public final class ExpandAllInjectionsStrategy extends NamedStrategy2<SolverCont
     @Override
     public String getParamName(int index) {
         switch (index) {
-            case 0: return "v";
-            case 1: return "visitedInjections";
+            case 0: return "ctx";
+            case 1: return "v";
+            case 2: return "visitedInjections";
             default: return super.getParamName(index);
         }
     }

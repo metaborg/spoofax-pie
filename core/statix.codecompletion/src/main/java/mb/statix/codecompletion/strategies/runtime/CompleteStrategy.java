@@ -6,6 +6,7 @@ import mb.statix.SolverState;
 import mb.statix.sequences.Seq;
 import mb.statix.strategies.NamedStrategy;
 import mb.statix.strategies.NamedStrategy2;
+import mb.statix.strategies.NamedStrategy3;
 import mb.statix.strategies.Strategy;
 import mb.statix.strategies.runtime.FlatMapStrategy;
 import mb.statix.strategies.runtime.TegoEngine;
@@ -17,7 +18,7 @@ import java.util.Set;
 /**
  * The main entry point strategy for code completion.
  */
-public final class CompleteStrategy extends NamedStrategy2<SolverContext, ITermVar, Set<String>, SolverState, Seq<SolverState>> {
+public final class CompleteStrategy extends NamedStrategy3<SolverContext, SolverContext, ITermVar, Set<String>, SolverState, Seq<SolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final CompleteStrategy instance = new CompleteStrategy();
@@ -30,17 +31,19 @@ public final class CompleteStrategy extends NamedStrategy2<SolverContext, ITermV
     @Override
     public Seq<SolverState> evalInternal(
         TegoEngine engine,
+        SolverContext x,
         SolverContext ctx,
         ITermVar v,
         Set<String> visitedInjections,
         SolverState input
     ) {
-        return eval(engine, ctx, v, visitedInjections, input);
+        return eval(engine, x, ctx, v, visitedInjections, input);
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
     public static Seq<SolverState> eval(
         TegoEngine engine,
+        SolverContext x,
         SolverContext ctx,
         ITermVar v,
         Set<String> visitedInjections,
@@ -107,14 +110,14 @@ public final class CompleteStrategy extends NamedStrategy2<SolverContext, ITermV
 
         // NOTE: Here we optimize by merging the application and the evaluation.
         // It saves a method call and an object creation by combining the application and the evaluation in one call.
-        final @Nullable Seq<SolverState> r1 = engine.eval(expandAllPredicates, ctx, v, input);
+        final @Nullable Seq<SolverState> r1 = engine.eval(expandAllPredicates, ctx, ctx, v, input);
         if (r1 == null) return Seq.of();
 
-        final Strategy<SolverContext, SolverState, Seq<SolverState>> s2 = expandAllInjections.apply(v, visitedInjections);
+        final Strategy<SolverContext, SolverState, Seq<SolverState>> s2 = expandAllInjections.apply(ctx, v, visitedInjections);
         final @Nullable Seq<SolverState> r2 = engine.eval(flatMap, ctx, s2, r1);
         if (r2 == null) return Seq.of();
 
-        final Strategy<SolverContext, SolverState, Seq<SolverState>> s3 = expandAllQueries.apply(v);
+        final Strategy<SolverContext, SolverState, Seq<SolverState>> s3 = expandAllQueries.apply(ctx, v);
         final @Nullable Seq<SolverState> r3 = engine.eval(flatMap, ctx, s3, r2);
         if (r3 == null) return Seq.of();
 

@@ -28,18 +28,18 @@ public final class ContainsAnyVarStrategy extends NamedStrategy2<SolverContext, 
     @Override
     public @Nullable SolverState evalInternal(
         TegoEngine engine,
-        SolverContext ctx,
+        SolverContext x,
         Collection<ITermVar> vars,
         IConstraint constraint,
         SolverState input
     ) {
-        return eval(engine, ctx, vars, constraint, input);
+        return eval(engine, x, vars, constraint, input);
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
     public static @Nullable SolverState eval(
         TegoEngine engine,
-        SolverContext ctx,
+        SolverContext x,
         Collection<ITermVar> vars,
         IConstraint constraint,
         SolverState input

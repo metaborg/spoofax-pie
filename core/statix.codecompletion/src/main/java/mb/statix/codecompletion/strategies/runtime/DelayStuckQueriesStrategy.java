@@ -25,6 +25,7 @@ import mb.statix.solver.IState;
 import mb.statix.solver.completeness.ICompleteness;
 import mb.statix.spec.Spec;
 import mb.statix.strategies.NamedStrategy;
+import mb.statix.strategies.NamedStrategy1;
 import mb.statix.strategies.runtime.TegoEngine;
 import mb.statix.tuples.Pair;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -60,11 +61,11 @@ public final class DelayStuckQueriesStrategy extends NamedStrategy<SolverContext
     }
 
     @Override
-    public SolverState evalInternal(TegoEngine engine, SolverContext ctx, SolverState input) {
-        return eval(engine, ctx, input);
+    public SolverState evalInternal(TegoEngine engine, SolverContext x, SolverState input) {
+        return eval(engine, x, input);
     }
 
-    public static SolverState eval(TegoEngine engine, SolverContext ctx, SolverState input) {
+    public static SolverState eval(TegoEngine engine, SolverContext x, SolverState input) {
         final IState.Immutable state = input.getState();
         final ICompleteness.Immutable completeness = input.getCompleteness();
 
@@ -78,7 +79,7 @@ public final class DelayStuckQueriesStrategy extends NamedStrategy<SolverContext
         try {
             delays = Seq.from(input.getConstraints())
                 .filterIsInstance(CResolveQuery.class)
-                .mapPresent(q -> checkDelay(ctx.getSpec(), q, state, completeness).map(d -> Pair.of(q, d)))
+                .mapPresent(q -> checkDelay(input.getSpec(), q, state, completeness).map(d -> Pair.of(q, d)))
                 .collect(Collectors.toMap(Pair::component1, Pair::component2));
         } catch(InterruptedException e) {
             throw new RuntimeException(e);
