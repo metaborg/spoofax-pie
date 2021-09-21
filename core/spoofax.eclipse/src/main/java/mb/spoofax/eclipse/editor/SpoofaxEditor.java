@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.jobs.MultiRule;
 public abstract class SpoofaxEditor extends SpoofaxEditorBase {
     private final EclipseLanguageComponent languageComponent;
     private final EditorUpdateJob.Factory editorUpdateJobFactory;
+    private final EditorCloseJob.Factory editorCloseJobFactory;
     private final PieComponent pieComponent;
 
     /*
@@ -30,6 +31,7 @@ public abstract class SpoofaxEditor extends SpoofaxEditorBase {
         super();
         this.languageComponent = languageComponent;
         this.editorUpdateJobFactory = languageComponent.editorUpdateJobFactory();
+        this.editorCloseJobFactory = languageComponent.editorCloseJobFactory();
         this.pieComponent = pieComponent;
     }
 
@@ -45,7 +47,28 @@ public abstract class SpoofaxEditor extends SpoofaxEditorBase {
         cancelJobs();
 
         final EditorUpdateJob job = editorUpdateJobFactory.create(languageComponent, pieComponent, project, file, document, input, this);
+        job.setRule(getJobSchedulingRule());
+        job.schedule(initialUpdate ? 0 : 300);
+    }
 
+    @Override protected void initializeEditor() {
+        super.initializeEditor();
+
+        final EclipsePlatformComponent platformComponent = SpoofaxPlugin.getPlatformComponent();
+        this.pieRunner = platformComponent.getPieRunner();
+    }
+
+    @Override public void dispose() {
+        if(file != null) {
+            final EditorCloseJob job = editorCloseJobFactory.create(languageComponent, pieComponent, project, file);
+            job.setRule(getJobSchedulingRule());
+            job.schedule();
+        }
+        super.dispose();
+    }
+
+
+    private ISchedulingRule getJobSchedulingRule() {
         // HACK: try to pass the build directory as a scheduling rule, because sometimes an editor update may require
         //       unarchiving files into the build directory (usually for meta-languages). This is fine, but the build
         //       directory should not be hard coded! Also add refresh scheduling rule because listing/walking a resource
@@ -64,28 +87,11 @@ public abstract class SpoofaxEditor extends SpoofaxEditorBase {
             buildDirectorySchedulingRule = null;
             refreshSchedulingRule = null;
         }
-
-        // noinspection ConstantConditions (scheduling rules may be null)
-        job.setRule(MultiRule.combine(new ISchedulingRule[]{
+        return MultiRule.combine(new ISchedulingRule[]{
             refreshSchedulingRule,
             buildDirectorySchedulingRule,
             file,
             languageComponent.startupReadLockRule()
-        }));
-        job.schedule(initialUpdate ? 0 : 300);
-    }
-
-    @Override protected void initializeEditor() {
-        super.initializeEditor();
-
-        final EclipsePlatformComponent platformComponent = SpoofaxPlugin.getPlatformComponent();
-        this.pieRunner = platformComponent.getPieRunner();
-    }
-
-    @Override public void dispose() {
-        if(file != null) {
-            pieRunner.removeEditor(languageComponent, pieComponent, project, file);
-        }
-        super.dispose();
+        });
     }
 }
