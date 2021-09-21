@@ -168,15 +168,15 @@ public class PieRunner {
         IFile eclipseFile
     ) {
         logger.trace("Removing editor for '{}'", eclipseFile);
+        final EclipseResourcePath file = new EclipseResourcePath(eclipseFile);
+        final @Nullable ResourcePath rootDirectoryHint = eclipseProject != null ? new EclipseResourcePath(eclipseProject) : null;
+        final Task<KeyedMessages> checkOneTask = createCheckOneTask(languageInstance, file, rootDirectoryHint);
         try(final MixedSession session = pie.newSession()) {
-            final ResourceKey file = new EclipseResourcePath(eclipseFile);
-            final @Nullable ResourcePath rootDirectoryHint = eclipseProject != null ? new EclipseResourcePath(eclipseProject) : null;
             unobserve(createStyleTask(languageInstance, file, rootDirectoryHint), session, null);
-            final Task<KeyedMessages> checkOneTask = createCheckOneTask(languageInstance, file, rootDirectoryHint);
             unobserve(checkOneTask, session, null);
-            pie.removeCallback(checkOneTask);
         }
-        resourceRegistry.removeDocumentOverride(new EclipseResourcePath(eclipseFile));
+        pie.removeCallback(checkOneTask);
+        resourceRegistry.removeDocumentOverride(file);
     }
 
     private static Task<Option<Styling>> createStyleTask(LanguageInstance instance, ResourceKey file, @Nullable ResourcePath rootDirectoryHint) {
