@@ -52,10 +52,8 @@ public final class DistinctStrategyTests {
 
         // Assert
         assertEquals(Arrays.asList(
-            "aaa",
-            "aab", "abb", "bbb",
-            "aac", "acc", "ccc",
-            "bbc", "bcc"
+            "aaa", "aab", "aac", "abb", "abc",
+            "acc", "bbb", "bbc", "bcc", "ccc"
         ), result.collect(Collectors.toList()));
     }
 
