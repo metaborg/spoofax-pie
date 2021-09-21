@@ -13,7 +13,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @param <R> the type of output (covariant)
  */
 @SuppressWarnings("Convert2Diamond") @FunctionalInterface
-public interface Strategy1<CTX, A1, T, R> extends StrategyDecl, PrintableStrategy {
+public interface Strategy1</* in */ CTX, /* in */ A1, /* in */ T, /* out */ R> extends StrategyDecl, PrintableStrategy {
 
     @Override
     default int getArity() { return 1; }

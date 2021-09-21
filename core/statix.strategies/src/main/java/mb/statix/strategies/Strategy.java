@@ -18,7 +18,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @param <R> the type of output (covariant)
  */
 @FunctionalInterface
-public interface Strategy<CTX, T, R> extends StrategyDecl, PrintableStrategy {
+public interface Strategy</* in */ CTX, /* in */ T, /* out */ R> extends StrategyDecl, PrintableStrategy {
 
     @Override
     default int getArity() { return 0; }

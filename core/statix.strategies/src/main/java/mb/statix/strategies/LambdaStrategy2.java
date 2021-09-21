@@ -6,6 +6,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 /**
  * A lambda strategy that can be used to adapt a strategy with two arguments.
  *
+ * Use {@link StrategyExt#lam}.
+ *
  * @param <CTX> the type of context (invariant)
  * @param <A1> the type of the first argument (contravariant)
  * @param <A2> the type of the second argument (contravariant)

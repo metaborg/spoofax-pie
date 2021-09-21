@@ -5,7 +5,9 @@ import mb.statix.strategies.runtime.TegoEngine;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * An adapter strategy that can be used to adapt a function call with four arguments as a strategy.
+ * A function strategy that can be used to adapt a function call with four arguments as a strategy.
+ *
+ * Use {@link StrategyExt#fun}.
  *
  * @param <CTX> the type of context (invariant)
  * @param <A1> the type of the first argument (contravariant)
@@ -15,11 +17,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @param <R> the type of output (covariant)
  */
 @FunctionalInterface
-public interface AdapterStrategy3<CTX, A1, A2, A3, T, R> extends Strategy3<CTX, A1, A2, A3, T, R> {
+public interface FunctionStrategy3<CTX, A1, A2, A3, T, R> extends Strategy3<CTX, A1, A2, A3, T, R> {
     @Override
     default @Nullable R evalInternal(TegoEngine engine, CTX ctx, A1 arg1, A2 arg2, A3 arg3, T input) {
-        return call(arg1, arg2, arg3, input);
+        return call(input, arg1, arg2, arg3);
     }
 
-    @Nullable R call(A1 arg1, A2 arg2, A3 arg3, T input);
+    @Nullable R call(T input, A1 arg1, A2 arg2, A3 arg3);
 }

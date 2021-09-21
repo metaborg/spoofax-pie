@@ -10,6 +10,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * If the strategy is named, create a class extending {@link NamedStrategy}.
  * If the strategy is anonymous, create a lambda implementing {@link Strategy}.
  *
+ * Use {@link StrategyExt#def}.
+ *
  * @param <CTX> the type of context (invariant)
  * @param <T> the type of input (contravariant)
  * @param <R> the type of output (covariant)
