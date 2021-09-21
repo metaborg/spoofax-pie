@@ -8,10 +8,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * Note: due to Java type erasure, this cannot deal with generics.
  * Therefore, {@code List<Integer>} and {@code List<String>} are considered the same.
  *
- * @param <CTX> the type of context (invariant)
  * @param <R> the type of result (covariant)
  */
-public final class TypeOfPattern<CTX, R> implements Pattern<CTX, Object, R> {
+public final class TypeOfPattern<R> implements Pattern<Object, R> {
 
     private final Class<? extends R> cls;
 
@@ -25,7 +24,7 @@ public final class TypeOfPattern<CTX, R> implements Pattern<CTX, Object, R> {
     }
 
     @Override
-    public boolean match(CTX ctx, @Nullable Object input) {
+    public boolean match(@Nullable Object input) {
         return input != null && cls.isAssignableFrom(input.getClass());
     }
 

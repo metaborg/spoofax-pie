@@ -15,19 +15,18 @@ import java.util.ArrayDeque;
  *
  * This repeats applying the strategy, until the strategy fails.
  *
- * @param <CTX> the type of context (invariant)
  * @param <T> the type of input and output (invariant)
  */
-public final class RepeatStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<CTX, T, Seq<T>>, T, Seq<T>> {
+public final class RepeatStrategy<T> extends NamedStrategy1<Strategy<T, Seq<T>>, T, Seq<T>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final RepeatStrategy instance = new RepeatStrategy();
     @SuppressWarnings({"unchecked", "unused", "RedundantCast", "RedundantSuppression"})
-    public static <CTX, T> RepeatStrategy<CTX, T> getInstance() { return (RepeatStrategy<CTX, T>)instance; }
+    public static <T> RepeatStrategy<T> getInstance() { return (RepeatStrategy<T>)instance; }
 
     private RepeatStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    public static <CTX, T> Seq<T> eval(TegoEngine engine, CTX ctx, Strategy<CTX, T, Seq<T>> s, T input) {
+    public static <T> Seq<T> eval(TegoEngine engine, Strategy<T, Seq<T>> s, T input) {
         return new SeqBase<T>() {
             // Implementation if `yield` and `yieldBreak` could actually suspend computation
             @SuppressWarnings("unused")
@@ -51,7 +50,7 @@ public final class RepeatStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<C
                         continue;
                     }
                     final T element = seq.getCurrent();
-                    final @Nullable Seq<T> resultSeq = engine.eval(s, ctx, element);
+                    final @Nullable Seq<T> resultSeq = engine.eval(s, element);
                     final @Nullable PeekableSeq<T> result = resultSeq != null ? resultSeq.peekable() : null;
                     if (result == null || !result.peek()) {
                         // The strategy failed. Yield the element itself.
@@ -97,7 +96,7 @@ public final class RepeatStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<C
                                 continue;
                             }
                             final T element = seq.getCurrent();
-                            final @Nullable Seq<T> resultSeq = engine.eval(s, ctx, element);
+                            final @Nullable Seq<T> resultSeq = engine.eval(s, element);
                             final @Nullable PeekableSeq<T> result = resultSeq != null ? resultSeq.peekable() : null;
                             if (result == null || !result.peek()) {
                                 // The strategy failed. Yield the element itself.
@@ -128,8 +127,8 @@ public final class RepeatStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<C
     }
 
     @Override
-    public Seq<T> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, Seq<T>> s, T input) {
-        return eval(engine, ctx, s, input);
+    public Seq<T> evalInternal(TegoEngine engine, Strategy<T, Seq<T>> s, T input) {
+        return eval(engine, s, input);
     }
 
     @Override

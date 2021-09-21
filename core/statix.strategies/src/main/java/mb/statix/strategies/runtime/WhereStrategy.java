@@ -9,26 +9,25 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  *
  * This returns the original input if the inner strategy succeeds; or {@code null} if the inner strategy failed.
  *
- * @param <CTX> the type of context (invariant)
  * @param <T> the type of input and output (invariant)
  */
-public final class WhereStrategy<CTX, T, R> extends NamedStrategy1<CTX, Strategy<CTX, T, @Nullable R>, T, @Nullable T> {
+public final class WhereStrategy<T, R> extends NamedStrategy1<Strategy<T, @Nullable R>, T, @Nullable T> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final WhereStrategy instance = new WhereStrategy();
     @SuppressWarnings({"unchecked", "unused", "RedundantCast", "RedundantSuppression"})
-    public static <CTX, T, R> WhereStrategy<CTX, T, R> getInstance() { return (WhereStrategy<CTX, T, R>)instance; }
+    public static <T, R> WhereStrategy<T, R> getInstance() { return (WhereStrategy<T, R>)instance; }
 
     private WhereStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    public static <CTX, T, R> @Nullable T eval(TegoEngine engine, CTX ctx, Strategy<CTX, T, @Nullable R> s, T input) {
-        final @Nullable R r = engine.eval(s, ctx, input);
+    public static <T, R> @Nullable T eval(TegoEngine engine, Strategy<T, @Nullable R> s, T input) {
+        final @Nullable R r = engine.eval(s, input);
         return r != null ? input : null;
     }
 
     @Override
-    public @Nullable T evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, @Nullable R> s, T input) {
-        return eval(engine, ctx, s, input);
+    public @Nullable T evalInternal(TegoEngine engine, Strategy<T, @Nullable R> s, T input) {
+        return eval(engine, s, input);
     }
 
     @Override

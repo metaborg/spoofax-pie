@@ -17,7 +17,7 @@ import java.util.Set;
 
 import static mb.statix.strategies.runtime.Strategies.ntl;
 
-public final class ExpandAllInjectionsStrategy extends NamedStrategy3<SolverContext, SolverContext, ITermVar, Set<String>, SolverState, Seq<SolverState>> {
+public final class ExpandAllInjectionsStrategy extends NamedStrategy3<SolverContext, ITermVar, Set<String>, SolverState, Seq<SolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final ExpandAllInjectionsStrategy instance = new ExpandAllInjectionsStrategy();
@@ -30,19 +30,17 @@ public final class ExpandAllInjectionsStrategy extends NamedStrategy3<SolverCont
     @Override
     public Seq<SolverState> evalInternal(
         TegoEngine engine,
-        SolverContext x,
         SolverContext ctx,
         ITermVar v,
         Set<String> visitedInjections,
         SolverState input
     ) {
-        return eval(engine, x, ctx, v, visitedInjections, input);
+        return eval(engine, ctx, v, visitedInjections, input);
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
     public static Seq<SolverState> eval(
         TegoEngine engine,
-        SolverContext x,
         SolverContext ctx,
         ITermVar v,
         Set<String> visitedInjections,
@@ -86,18 +84,18 @@ public final class ExpandAllInjectionsStrategy extends NamedStrategy3<SolverCont
 
         // NOTE: Here we optimize getting the strategies to the start of the method.
         final ExpandInjectionStrategy expandInjection = ExpandInjectionStrategy.getInstance();
-        final TryStrategy<SolverContext, SolverState> try_ = TryStrategy.getInstance();
-        final FixSetStrategy<SolverContext, SolverState> fixSet = FixSetStrategy.getInstance();
+        final TryStrategy<SolverState> try_ = TryStrategy.getInstance();
+        final FixSetStrategy<SolverState> fixSet = FixSetStrategy.getInstance();
         final AssertValidStrategy assertValid = AssertValidStrategy.getInstance();
-        final FlatMapStrategy<SolverContext, SolverState, SolverState> flatMap = FlatMapStrategy.getInstance();
+        final FlatMapStrategy<SolverState, SolverState> flatMap = FlatMapStrategy.getInstance();
 
-        final Strategy<SolverContext, SolverState, Seq<SolverState>> s1 = expandInjection.apply(ctx, v, visitedInjections);
-        final Strategy<SolverContext, SolverState, Seq<SolverState>> s2 = try_.apply(s1);
-        final @Nullable Seq<SolverState> r3 = engine.eval(fixSet, x, s2, input);
+        final Strategy<SolverState, Seq<SolverState>> s1 = expandInjection.apply(ctx, v, visitedInjections);
+        final Strategy<SolverState, Seq<SolverState>> s2 = try_.apply(s1);
+        final @Nullable Seq<SolverState> r3 = engine.eval(fixSet, s2, input);
         if (r3 == null) return Seq.of();
 
-        final Strategy<SolverContext, SolverState, Seq<SolverState>> s4 = ntl(assertValid.apply(ctx, v));
-        final @Nullable Seq<SolverState> r4 = engine.eval(flatMap, x, s4, r3);
+        final Strategy<SolverState, Seq<SolverState>> s4 = ntl(assertValid.apply(ctx, v));
+        final @Nullable Seq<SolverState> r4 = engine.eval(flatMap, s4, r3);
         if (r4 == null) return Seq.of();
 
         return r4;

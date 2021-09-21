@@ -9,13 +9,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  *
  * Use {@link StrategyExt#pred}.
  *
- * @param <CTX> the type of context (invariant)
  * @param <T> the type of input/output (invariant)
  */
 @FunctionalInterface
-public interface PredicateStrategy<CTX, T> extends Strategy<CTX, T, @Nullable T> {
+public interface PredicateStrategy<T> extends Strategy<T, @Nullable T> {
     @Override
-    default @Nullable T evalInternal(TegoEngine engine, CTX ctx, T input) {
+    default @Nullable T evalInternal(TegoEngine engine, T input) {
         return test(input) ? input : null;
     }
 

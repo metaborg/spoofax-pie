@@ -17,7 +17,7 @@ import java.util.Deque;
 import java.util.HashSet;
 import java.util.Set;
 
-public final class ExpandInjectionStrategy extends NamedStrategy3<SolverContext, SolverContext, ITermVar, Set<String>, SolverState, Seq<SolverState>> {
+public final class ExpandInjectionStrategy extends NamedStrategy3<SolverContext, ITermVar, Set<String>, SolverState, Seq<SolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final ExpandInjectionStrategy instance = new ExpandInjectionStrategy();
@@ -29,18 +29,16 @@ public final class ExpandInjectionStrategy extends NamedStrategy3<SolverContext,
     @Override
     public Seq<SolverState> evalInternal(
         TegoEngine engine,
-        SolverContext x,
         SolverContext ctx,
         ITermVar v,
         Set<String> visitedInjections,
         SolverState input
     ) {
-        return eval(engine, x, ctx, v, visitedInjections, input);
+        return eval(engine, ctx, v, visitedInjections, input);
     }
 
     public static Seq<SolverState> eval(
         TegoEngine engine,
-        SolverContext x,
         SolverContext ctx,
         ITermVar v,
         Set<String> visitedInjections,
@@ -73,7 +71,7 @@ public final class ExpandInjectionStrategy extends NamedStrategy3<SolverContext,
                         final Set<String> newVisitedInjections = setWithElement(visitedInjections, injName);
 
                         // Complete the injection
-                        return engine.eval(complete, x, ctx, injArgVar, newVisitedInjections, input);
+                        return engine.eval(complete, ctx, injArgVar, newVisitedInjections, input);
 
                         // TODO: Get the set of visited injections back and use it
                     }

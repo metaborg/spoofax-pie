@@ -6,24 +6,23 @@ import mb.statix.strategies.NamedStrategy;
 /**
  * Identity strategy.
  *
- * @param <CTX> the type of context (invariant)
  * @param <T> the type of input (contravariant)
  */
-public final class IdStrategy<CTX, T> extends NamedStrategy<CTX, T, T> {
+public final class IdStrategy<T> extends NamedStrategy<T, T> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final IdStrategy instance = new IdStrategy();
     @SuppressWarnings({"unchecked", "unused", "RedundantCast", "RedundantSuppression"})
-    public static <CTX, T> IdStrategy<CTX, T> getInstance() { return (IdStrategy<CTX, T>)instance; }
+    public static <T> IdStrategy<T> getInstance() { return (IdStrategy<T>)instance; }
 
     private IdStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    public static <CTX, T> T eval(TegoEngine engine, CTX ctx, T input) {
+    public static <T> T eval(TegoEngine engine, T input) {
         return input;
     }
 
-    @Override public T evalInternal(TegoEngine engine, CTX ctx, T input) {
-        return eval(engine, ctx, input);
+    @Override public T evalInternal(TegoEngine engine, T input) {
+        return eval(engine, input);
     }
 
     @Override

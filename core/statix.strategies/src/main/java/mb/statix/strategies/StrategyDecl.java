@@ -28,7 +28,6 @@ public interface StrategyDecl {
      * when a more specific and type-safe method cannot be found.
      *
      * @param engine the Tego engine
-     * @param ctx the context
      * @param args the arguments
      * @param input the input argument
      * @return the result; or {@code null} if the strategy failed
@@ -36,6 +35,6 @@ public interface StrategyDecl {
      * if any of the arguments is {@code null}, if {@code args} has a number of elements
      * different from the strategy's arity
      */
-    @Nullable Object evalInternal(TegoEngine engine, Object ctx, Object[] args, Object input);
+    @Nullable Object evalInternal(TegoEngine engine, Object[] args, Object input);
 
 }

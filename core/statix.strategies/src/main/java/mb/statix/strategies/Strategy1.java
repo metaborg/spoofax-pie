@@ -7,13 +7,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 /**
  * A strategy.
  *
- * @param <CTX> the type of context (invariant)
  * @param <A1> the type of the first argument (contravariant)
  * @param <T> the type of input (contravariant)
  * @param <R> the type of output (covariant)
  */
 @SuppressWarnings("Convert2Diamond") @FunctionalInterface
-public interface Strategy1</* in */ CTX, /* in */ A1, /* in */ T, /* out */ R> extends StrategyDecl, PrintableStrategy {
+public interface Strategy1<A1, T, R> extends StrategyDecl, PrintableStrategy {
 
     @Override
     default int getArity() { return 1; }
@@ -22,18 +21,17 @@ public interface Strategy1</* in */ CTX, /* in */ A1, /* in */ T, /* out */ R> e
      * Evaluates the strategy.
      *
      * @param engine the Tego engine
-     * @param ctx the context
      * @param arg1 the first argument
      * @param input the input argument
      * @return the result; or {@code null} if the strategy failed
      */
-    @Nullable R evalInternal(TegoEngine engine, CTX ctx, A1 arg1, T input);
+    @Nullable R evalInternal(TegoEngine engine, A1 arg1, T input);
 
     @SuppressWarnings("unchecked")
     @Override
-    default @Nullable Object evalInternal(TegoEngine engine, Object ctx, Object[] args, Object input) {
+    default @Nullable Object evalInternal(TegoEngine engine, Object[] args, Object input) {
         assert args.length == 1 : "Expected 1 arguments, got " + args.length + ".";
-        return evalInternal(engine, (CTX)ctx, (A1)args[0], (T)input);
+        return evalInternal(engine, (A1)args[0], (T)input);
     }
 
     /**
@@ -42,7 +40,7 @@ public interface Strategy1</* in */ CTX, /* in */ A1, /* in */ T, /* out */ R> e
      * @param arg1 the first argument
      * @return the partially applied strategy
      */
-    default Strategy<CTX, T, R> apply(A1 arg1) { return new NamedStrategy<CTX, T, R>() {
+    default Strategy<T, R> apply(A1 arg1) { return new NamedStrategy<T, R>() {
         @Override
         public String getName() {
             return Strategy1.this.getName();
@@ -79,8 +77,8 @@ public interface Strategy1</* in */ CTX, /* in */ A1, /* in */ T, /* out */ R> e
         }
 
         @Override
-        public @Nullable R evalInternal(TegoEngine engine, CTX ctx, T input) {
-            return Strategy1.this.evalInternal(engine, ctx, arg1, input);
+        public @Nullable R evalInternal(TegoEngine engine, T input) {
+            return Strategy1.this.evalInternal(engine, arg1, input);
         }
 
         @Override

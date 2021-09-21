@@ -12,13 +12,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  *
  * Use {@link StrategyExt#def}.
  *
- * @param <CTX> the type of context (invariant)
  * @param <T> the type of input (contravariant)
  * @param <R> the type of output (covariant)
  */
-public abstract class NamedStrategy<CTX, T, R> implements Strategy<CTX, T, R> {
+public abstract class NamedStrategy<T, R> implements Strategy<T, R> {
 
-    @Override public abstract @Nullable R evalInternal(TegoEngine engine, CTX ctx, T input);
+    @Override public abstract @Nullable R evalInternal(TegoEngine engine, T input);
 
     @Override public abstract String getName();
 

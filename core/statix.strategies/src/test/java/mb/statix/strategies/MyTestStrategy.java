@@ -5,11 +5,11 @@ import mb.statix.strategies.runtime.TegoEngine;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class MyTestStrategy extends NamedStrategy<Object, String, Seq<String>> {
+public class MyTestStrategy extends NamedStrategy<String, Seq<String>> {
     public final AtomicInteger doEvalCalls = new AtomicInteger();
 
     @Override
-    public Seq<String> evalInternal(TegoEngine engine, Object ctx, String input) {
+    public Seq<String> evalInternal(TegoEngine engine, String input) {
         doEvalCalls.incrementAndGet();
         return Seq.fromOnce(() -> input);
     }

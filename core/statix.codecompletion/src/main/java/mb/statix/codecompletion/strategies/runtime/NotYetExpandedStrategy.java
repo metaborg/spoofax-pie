@@ -17,7 +17,7 @@ import java.util.Collections;
 
 import static mb.statix.utils.CollectionUtils.containsAny;
 
-public final class NotYetExpandedStrategy extends NamedStrategy1<SolverContext, CUser, SolverState, @Nullable SolverState> {
+public final class NotYetExpandedStrategy extends NamedStrategy1<CUser, SolverState, @Nullable SolverState> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final NotYetExpandedStrategy instance = new NotYetExpandedStrategy();
@@ -30,17 +30,15 @@ public final class NotYetExpandedStrategy extends NamedStrategy1<SolverContext, 
     @Override
     public @Nullable SolverState evalInternal(
         TegoEngine engine,
-        SolverContext x,
         CUser constraint,
         SolverState input
     ) {
-        return eval(engine, x, constraint, input);
+        return eval(engine, constraint, input);
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
     public static @Nullable SolverState eval(
         TegoEngine engine,
-        SolverContext x,
         CUser constraint,
         SolverState input
     ) {

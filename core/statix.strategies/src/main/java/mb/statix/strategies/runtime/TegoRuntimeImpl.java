@@ -22,7 +22,6 @@ public final class TegoRuntimeImpl implements TegoRuntime, TegoEngine {
 
     @Nullable private final LoggerFactory loggerFactory;
     private final Logger log;
-    private final Map<StrategyDecl, Logger> loggers = new HashMap<>();
     private final Level strategyLogLevel = Level.Trace;
 
     /**
@@ -38,37 +37,37 @@ public final class TegoRuntimeImpl implements TegoRuntime, TegoEngine {
     }
 
     @Override
-    public @Nullable Object eval(StrategyDecl strategy, Object ctx, Object[] args, Object input) {
+    public @Nullable Object eval(StrategyDecl strategy, Object[] args, Object input) {
         enterStrategy(strategy);
-        final @Nullable Object result = strategy.evalInternal(this, ctx, args, input);
+        final @Nullable Object result = strategy.evalInternal(this, args, input);
         return exitStrategy(strategy, result);
     }
 
     @Override
-    public <CTX, T, R> @Nullable R eval(Strategy<CTX, T, R> strategy, CTX ctx, T input) {
+    public <T, R> @Nullable R eval(Strategy<T, R> strategy, T input) {
         enterStrategy(strategy);
-        final @Nullable R result = strategy.evalInternal(this, ctx, input);
+        final @Nullable R result = strategy.evalInternal(this, input);
         return exitStrategy(strategy, result);
     }
 
     @Override
-    public <CTX, A1, T, R> @Nullable R eval(Strategy1<CTX, A1, T, R> strategy, CTX ctx, A1 arg1, T input) {
+    public <A1, T, R> @Nullable R eval(Strategy1<A1, T, R> strategy, A1 arg1, T input) {
         enterStrategy(strategy);
-        final @Nullable R result = strategy.evalInternal(this, ctx, arg1, input);
+        final @Nullable R result = strategy.evalInternal(this, arg1, input);
         return exitStrategy(strategy, result);
     }
 
     @Override
-    public <CTX, A1, A2, T, R> @Nullable R eval(Strategy2<CTX, A1, A2, T, R> strategy, CTX ctx, A1 arg1, A2 arg2, T input) {
+    public <A1, A2, T, R> @Nullable R eval(Strategy2<A1, A2, T, R> strategy, A1 arg1, A2 arg2, T input) {
         enterStrategy(strategy);
-        final @Nullable R result = strategy.evalInternal(this, ctx, arg1, arg2, input);
+        final @Nullable R result = strategy.evalInternal(this, arg1, arg2, input);
         return exitStrategy(strategy, result);
     }
 
     @Override
-    public <CTX, A1, A2, A3, T, R> @Nullable R eval(Strategy3<CTX, A1, A2, A3, T, R> strategy, CTX ctx, A1 arg1, A2 arg2, A3 arg3, T input) {
+    public <A1, A2, A3, T, R> @Nullable R eval(Strategy3<A1, A2, A3, T, R> strategy, A1 arg1, A2 arg2, A3 arg3, T input) {
         enterStrategy(strategy);
-        final @Nullable R result = strategy.evalInternal(this, ctx, arg1, arg2, arg3, input);
+        final @Nullable R result = strategy.evalInternal(this, arg1, arg2, arg3, input);
         return exitStrategy(strategy, result);
     }
 

@@ -6,11 +6,11 @@ import mb.statix.strategies.runtime.TegoEngine;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @SuppressWarnings("SwitchStatementWithTooFewBranches")
-public class MyTestStrategy1 extends NamedStrategy1<Object, String, String, Seq<String>> {
+public class MyTestStrategy1 extends NamedStrategy1<String, String, Seq<String>> {
     public final AtomicInteger doEvalCalls = new AtomicInteger();
 
     @Override
-    public Seq<String> evalInternal(TegoEngine engine, Object ctx, String part1, String input) {
+    public Seq<String> evalInternal(TegoEngine engine, String part1, String input) {
         doEvalCalls.incrementAndGet();
         return Seq.fromOnce(() -> part1 + input);
     }

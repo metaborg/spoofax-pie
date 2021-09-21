@@ -12,7 +12,7 @@ public final class StrategyTests {
     @Test
     public void getArity_shouldReturn0() {
         // Arrange
-        final Strategy<Object, String, Seq<Integer>> strategy = (e, o, input) -> Seq.of(input.length());
+        final Strategy<String, Seq<Integer>> strategy = (o, input) -> Seq.of(input.length());
 
         // Act
         final int arity = strategy.getArity();

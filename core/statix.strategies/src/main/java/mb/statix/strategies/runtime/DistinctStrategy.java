@@ -14,21 +14,20 @@ import java.util.HashSet;
  *
  * This strategy returns a lazy sequence that skips any elements it returned previously.
  *
- * @param <CTX> the type of context (invariant)
  * @param <T> the type of input (contravariant)
  * @param <R> the type of output (covariant)
  */
-public final class DistinctStrategy<CTX, T, R> extends NamedStrategy1<CTX, Strategy<CTX, T, Seq<R>>, T, @Nullable Seq<R>> {
+public final class DistinctStrategy<T, R> extends NamedStrategy1<Strategy<T, Seq<R>>, T, @Nullable Seq<R>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final DistinctStrategy instance = new DistinctStrategy();
     @SuppressWarnings({"unchecked", "unused", "RedundantCast", "RedundantSuppression"})
-    public static <CTX, T, R> DistinctStrategy<CTX, T, R> getInstance() { return (DistinctStrategy<CTX, T, R>)instance; }
+    public static <T, R> DistinctStrategy<T, R> getInstance() { return (DistinctStrategy<T, R>)instance; }
 
     private DistinctStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    public static <CTX, T, R> @Nullable Seq<R> eval(TegoEngine engine, CTX ctx, Strategy<CTX, T, Seq<R>> s, T input) {
-        @Nullable final Seq<R> rs = engine.eval(s, ctx, input);
+    public static <T, R> @Nullable Seq<R> eval(TegoEngine engine, Strategy<T, Seq<R>> s, T input) {
+        @Nullable final Seq<R> rs = engine.eval(s, input);
         if (rs == null) return null;
         return new SeqBase<R>() {
             // Implementation if `yield` and `yieldBreak` could actually suspend computation
@@ -106,8 +105,8 @@ public final class DistinctStrategy<CTX, T, R> extends NamedStrategy1<CTX, Strat
     }
 
     @Override
-    public @Nullable Seq<R> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, Seq<R>> s, T input) {
-        return eval(engine, ctx, s, input);
+    public @Nullable Seq<R> evalInternal(TegoEngine engine, Strategy<T, Seq<R>> s, T input) {
+        return eval(engine, s, input);
     }
 
     @Override

@@ -15,7 +15,7 @@ public final class Strategy2Tests {
     @Test
     public void getArity_shouldReturn2() {
         // Arrange
-        final Strategy2<Object, String, String, String, Seq<String>> strategy = new MyTestStrategy2();
+        final Strategy2<String, String, String, Seq<String>> strategy = new MyTestStrategy2();
 
         // Act
         final int arity = strategy.getArity();
@@ -27,10 +27,10 @@ public final class Strategy2Tests {
     @Test
     public void apply1_getName_shouldReturnNameOfOriginalStrategy() {
         // Arrange
-        final Strategy2<Object, String, String, String, Seq<String>> strategy = new MyTestStrategy2();
+        final Strategy2<String, String, String, Seq<String>> strategy = new MyTestStrategy2();
 
         // Act
-        final Strategy1<Object, String, String, Seq<String>> appliedStrategy = strategy.apply("Hello, ");
+        final Strategy1<String, String, Seq<String>> appliedStrategy = strategy.apply("Hello, ");
         final String name = appliedStrategy.getName();
 
         // Assert
@@ -40,10 +40,10 @@ public final class Strategy2Tests {
     @Test
     public void apply1_getParamName_shouldCallGetParamNameOfOriginalStrategy() {
         // Arrange
-        final Strategy2<Object, String, String, String, Seq<String>> strategy = new MyTestStrategy2();
+        final Strategy2<String, String, String, Seq<String>> strategy = new MyTestStrategy2();
 
         // Act/Assert
-        final Strategy1<Object, String, String, Seq<String>> appliedStrategy = strategy.apply("Hello, ");
+        final Strategy1<String, String, Seq<String>> appliedStrategy = strategy.apply("Hello, ");
         final String param0 = appliedStrategy.getParamName(0);
         assertThrows(IndexOutOfBoundsException.class, () -> {
             appliedStrategy.getParamName(1);
@@ -56,11 +56,11 @@ public final class Strategy2Tests {
     @Test
     public void apply1_writeArg_shouldCallWriteArgOfOriginalStrategy() {
         // Arrange
-        final Strategy2<Object, String, String, String, Seq<String>> strategy = new MyTestStrategy2();
+        final Strategy2<String, String, String, Seq<String>> strategy = new MyTestStrategy2();
         final StringBuilder sb = new StringBuilder();
 
         // Act
-        final Strategy1<Object, String, String, Seq<String>> appliedStrategy = strategy.apply("Hello, ");
+        final Strategy1<String, String, Seq<String>> appliedStrategy = strategy.apply("Hello, ");
         appliedStrategy.writeArg(sb, 0, "xyz");
 
         // Assert
@@ -70,10 +70,10 @@ public final class Strategy2Tests {
     @Test
     public void apply1_isAnonymous_shouldReturnIsAnonymousOfOriginalStrategy() {
         // Arrange
-        final Strategy2<Object, String, String, String, Seq<String>> strategy = new MyTestStrategy2();
+        final Strategy2<String, String, String, Seq<String>> strategy = new MyTestStrategy2();
 
         // Act
-        final Strategy1<Object, String, String, Seq<String>> appliedStrategy = strategy.apply("Hello, ");
+        final Strategy1<String, String, Seq<String>> appliedStrategy = strategy.apply("Hello, ");
         final boolean anonymous = appliedStrategy.isAnonymous();
 
         // Assert
@@ -83,10 +83,10 @@ public final class Strategy2Tests {
     @Test
     public void apply1_isAtom_shouldReturnTrue() {
         // Arrange
-        final Strategy2<Object, String, String, String, Seq<String>> strategy = new MyTestStrategy2();
+        final Strategy2<String, String, String, Seq<String>> strategy = new MyTestStrategy2();
 
         // Act
-        final Strategy1<Object, String, String, Seq<String>> appliedStrategy = strategy.apply("Hello, ");
+        final Strategy1<String, String, Seq<String>> appliedStrategy = strategy.apply("Hello, ");
         final boolean atom = appliedStrategy.isAtom();
 
         // Assert
@@ -96,10 +96,10 @@ public final class Strategy2Tests {
     @Test
     public void apply1_getPrecedence_shouldCallGetPrecedenceOfOriginalStrategy() {
         // Arrange
-        final Strategy2<Object, String, String, String, Seq<String>> strategy = new MyTestStrategy2();
+        final Strategy2<String, String, String, Seq<String>> strategy = new MyTestStrategy2();
 
         // Act
-        final Strategy1<Object, String, String, Seq<String>> appliedStrategy = strategy.apply("Hello, ");
+        final Strategy1<String, String, Seq<String>> appliedStrategy = strategy.apply("Hello, ");
         final int precedence = appliedStrategy.getPrecedence();
 
         // Assert
@@ -110,12 +110,12 @@ public final class Strategy2Tests {
     public void apply1_apply1_shouldBeEquivalentToApply2() throws InterruptedException {
         // Arrange
         final TegoEngine engine = new TegoRuntimeImpl(null);
-        final Strategy2<Object, String, String, String, Seq<String>> strategy = new MyTestStrategy2();
+        final Strategy2<String, String, String, Seq<String>> strategy = new MyTestStrategy2();
 
         // Act
-        final Strategy1<Object, String, String, Seq<String>> applied1Strategy = strategy.apply("Hello, ");
-        final Strategy<Object, String, Seq<String>> applied2Strategy = applied1Strategy.apply("corona ");
-        final String result = applied2Strategy.evalInternal(engine, new Object(), "World").single();
+        final Strategy1<String, String, Seq<String>> applied1Strategy = strategy.apply("Hello, ");
+        final Strategy<String, Seq<String>> applied2Strategy = applied1Strategy.apply("corona ");
+        final String result = applied2Strategy.evalInternal(engine, "World").single();
 
         // Assert
         assertEquals("Hello, corona World", result);
@@ -124,10 +124,10 @@ public final class Strategy2Tests {
     @Test
     public void apply1_writeTo_shouldWriteStrategyNameAndArguments() {
         // Arrange
-        final Strategy2<Object, String, String, String, Seq<String>> strategy = new MyTestStrategy2();
+        final Strategy2<String, String, String, Seq<String>> strategy = new MyTestStrategy2();
 
         // Act
-        final Strategy1<Object, String, String, Seq<String>> appliedStrategy = strategy.apply("Hello, ");
+        final Strategy1<String, String, Seq<String>> appliedStrategy = strategy.apply("Hello, ");
         final String str = appliedStrategy.writeTo(new StringBuilder()).toString();
 
         // Assert
@@ -138,11 +138,11 @@ public final class Strategy2Tests {
     public void apply1_eval_shouldImplicitlyApplyArguments() throws InterruptedException {
         // Arrange
         final TegoEngine engine = new TegoRuntimeImpl(null);
-        final Strategy2<Object, String, String, String, Seq<String>> strategy = new MyTestStrategy2();
+        final Strategy2<String, String, String, Seq<String>> strategy = new MyTestStrategy2();
 
         // Act
-        final Strategy1<Object, String, String, Seq<String>> appliedStrategy = strategy.apply("Hello, ");
-        final String result = appliedStrategy.evalInternal(engine, new Object(), "cruel ", "World").single();
+        final Strategy1<String, String, Seq<String>> appliedStrategy = strategy.apply("Hello, ");
+        final String result = appliedStrategy.evalInternal(engine, "cruel ", "World").single();
 
         // Assert
         assertEquals("Hello, cruel World", result);
@@ -153,10 +153,10 @@ public final class Strategy2Tests {
     @Test
     public void apply2_getName_shouldReturnNameOfOriginalStrategy() {
         // Arrange
-        final Strategy2<Object, String, String, String, Seq<String>> strategy = new MyTestStrategy2();
+        final Strategy2<String, String, String, Seq<String>> strategy = new MyTestStrategy2();
 
         // Act
-        final Strategy<Object, String, Seq<String>> appliedStrategy = strategy.apply("Hello, ", "beautiful ");
+        final Strategy<String, Seq<String>> appliedStrategy = strategy.apply("Hello, ", "beautiful ");
         final String name = appliedStrategy.getName();
 
         // Assert
@@ -166,10 +166,10 @@ public final class Strategy2Tests {
     @Test
     public void apply2_getParamName_shouldCallGetParamNameOfOriginalStrategy() {
         // Arrange
-        final Strategy2<Object, String, String, String, Seq<String>> strategy = new MyTestStrategy2();
+        final Strategy2<String, String, String, Seq<String>> strategy = new MyTestStrategy2();
 
         // Act/Assert
-        final Strategy<Object, String, Seq<String>> appliedStrategy = strategy.apply("Hello, ", "beautiful ");
+        final Strategy<String, Seq<String>> appliedStrategy = strategy.apply("Hello, ", "beautiful ");
         assertThrows(IndexOutOfBoundsException.class, () -> {
             appliedStrategy.getParamName(0);
         });
@@ -178,11 +178,11 @@ public final class Strategy2Tests {
     @Test
     public void apply2_writeArg_shouldCallWriteArgOfOriginalStrategy() {
         // Arrange
-        final Strategy2<Object, String, String, String, Seq<String>> strategy = new MyTestStrategy2();
+        final Strategy2<String, String, String, Seq<String>> strategy = new MyTestStrategy2();
         final StringBuilder sb = new StringBuilder();
 
         // Act
-        final Strategy<Object, String, Seq<String>> appliedStrategy = strategy.apply("Hello, ", "beautiful ");
+        final Strategy<String, Seq<String>> appliedStrategy = strategy.apply("Hello, ", "beautiful ");
         appliedStrategy.writeArg(sb, 0, "xyz");
 
         // Assert
@@ -192,10 +192,10 @@ public final class Strategy2Tests {
     @Test
     public void apply2_isAnonymous_shouldReturnIsAnonymousOfOriginalStrategy() {
         // Arrange
-        final Strategy2<Object, String, String, String, Seq<String>> strategy = new MyTestStrategy2();
+        final Strategy2<String, String, String, Seq<String>> strategy = new MyTestStrategy2();
 
         // Act
-        final Strategy<Object, String, Seq<String>> appliedStrategy = strategy.apply("Hello, ", "beautiful ");
+        final Strategy<String, Seq<String>> appliedStrategy = strategy.apply("Hello, ", "beautiful ");
         final boolean anonymous = appliedStrategy.isAnonymous();
 
         // Assert
@@ -205,10 +205,10 @@ public final class Strategy2Tests {
     @Test
     public void apply2_isAtom_shouldReturnTrue() {
         // Arrange
-        final Strategy2<Object, String, String, String, Seq<String>> strategy = new MyTestStrategy2();
+        final Strategy2<String, String, String, Seq<String>> strategy = new MyTestStrategy2();
 
         // Act
-        final Strategy<Object, String, Seq<String>> appliedStrategy = strategy.apply("Hello, ", "beautiful ");
+        final Strategy<String, Seq<String>> appliedStrategy = strategy.apply("Hello, ", "beautiful ");
         final boolean atom = appliedStrategy.isAtom();
 
         // Assert
@@ -218,10 +218,10 @@ public final class Strategy2Tests {
     @Test
     public void apply2_getPrecedence_shouldCallGetPrecedenceOfOriginalStrategy() {
         // Arrange
-        final Strategy2<Object, String, String, String, Seq<String>> strategy = new MyTestStrategy2();
+        final Strategy2<String, String, String, Seq<String>> strategy = new MyTestStrategy2();
 
         // Act
-        final Strategy<Object, String, Seq<String>> appliedStrategy = strategy.apply("Hello, ", "beautiful ");
+        final Strategy<String, Seq<String>> appliedStrategy = strategy.apply("Hello, ", "beautiful ");
         final int precedence = appliedStrategy.getPrecedence();
 
         // Assert
@@ -231,10 +231,10 @@ public final class Strategy2Tests {
     @Test
     public void apply2_writeTo_shouldWriteStrategyNameAndArguments() {
         // Arrange
-        final Strategy2<Object, String, String, String, Seq<String>> strategy = new MyTestStrategy2();
+        final Strategy2<String, String, String, Seq<String>> strategy = new MyTestStrategy2();
 
         // Act
-        final Strategy<Object, String, Seq<String>> appliedStrategy = strategy.apply("Hello, ", "beautiful ");
+        final Strategy<String, Seq<String>> appliedStrategy = strategy.apply("Hello, ", "beautiful ");
         final String str = appliedStrategy.writeTo(new StringBuilder()).toString();
 
         // Assert
@@ -245,11 +245,11 @@ public final class Strategy2Tests {
     public void apply2_eval_shouldImplicitlyApplyArguments() throws InterruptedException {
         // Arrange
         final TegoEngine engine = new TegoRuntimeImpl(null);
-        final Strategy2<Object, String, String, String, Seq<String>> strategy = new MyTestStrategy2();
+        final Strategy2<String, String, String, Seq<String>> strategy = new MyTestStrategy2();
 
         // Act
-        final Strategy<Object, String, Seq<String>> appliedStrategy = strategy.apply("Hello, ", "beautiful ");
-        final String result = appliedStrategy.evalInternal(engine, new Object(), "World").single();
+        final Strategy<String, Seq<String>> appliedStrategy = strategy.apply("Hello, ", "beautiful ");
+        final String result = appliedStrategy.evalInternal(engine, "World").single();
 
         // Assert
         assertEquals("Hello, beautiful World", result);

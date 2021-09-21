@@ -62,7 +62,7 @@ import static mb.nabl2.terms.matching.TermMatch.M;
  * Expands the selected query.
  */
 @SuppressWarnings("UnstableApiUsage")
-public final class ExpandQueryStrategy extends NamedStrategy1<SolverContext, SolverContext, SelectedConstraintSolverState<CResolveQuery>, Seq<SolverState>> {
+public final class ExpandQueryStrategy extends NamedStrategy1<SolverContext, SelectedConstraintSolverState<CResolveQuery>, Seq<SolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final ExpandQueryStrategy instance = new ExpandQueryStrategy();
@@ -86,11 +86,11 @@ public final class ExpandQueryStrategy extends NamedStrategy1<SolverContext, Sol
     }
 
     @Override
-    public Seq<SolverState> evalInternal(TegoEngine engine, SolverContext x, SolverContext ctx, SelectedConstraintSolverState<CResolveQuery> input) {
-        return eval(engine, x, ctx, input);
+    public Seq<SolverState> evalInternal(TegoEngine engine, SolverContext ctx, SelectedConstraintSolverState<CResolveQuery> input) {
+        return eval(engine, ctx, input);
     }
 
-    public static Seq<SolverState> eval(TegoEngine engine, SolverContext x, SolverContext ctx, SelectedConstraintSolverState<CResolveQuery> input) {
+    public static Seq<SolverState> eval(TegoEngine engine, SolverContext ctx, SelectedConstraintSolverState<CResolveQuery> input) {
         final CResolveQuery query = input.getSelected();
 
         engine.log(instance, "Expand query: {}", query);

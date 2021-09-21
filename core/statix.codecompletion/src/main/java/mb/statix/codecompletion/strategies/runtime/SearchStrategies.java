@@ -19,68 +19,68 @@ import java.util.Set;
 public final class SearchStrategies {
     private SearchStrategies() { /* Cannot be instantiated. */ }
 
-    public static Strategy<SolverContext, SolverState, @Nullable SolverState> assertValid(SolverContext ctx, ITermVar v) {
+    public static Strategy<SolverState, @Nullable SolverState> assertValid(SolverContext ctx, ITermVar v) {
         return AssertValidStrategy.getInstance().apply(ctx, v);
     }
 
-    public static Strategy<SolverContext, SolverState, @Nullable SolverState> containsVar(ITermVar v, IConstraint constraint) {
+    public static Strategy<SolverState, @Nullable SolverState> containsVar(ITermVar v, IConstraint constraint) {
         return ContainsAnyVarStrategy.getInstance().apply(Collections.singletonList(v), constraint);
     }
 
-    public static Strategy<SolverContext, SolverState, @Nullable SolverState> containsAnyVar(Collection<ITermVar> vars, IConstraint constraint) {
+    public static Strategy<SolverState, @Nullable SolverState> containsAnyVar(Collection<ITermVar> vars, IConstraint constraint) {
         return ContainsAnyVarStrategy.getInstance().apply(vars, constraint);
     }
 
-    public static Strategy<SolverContext, SolverState, @Nullable SolverState> notYetExpanded(CUser constraint) {
+    public static Strategy<SolverState, @Nullable SolverState> notYetExpanded(CUser constraint) {
         return NotYetExpandedStrategy.getInstance().apply(constraint);
     }
 
-    public static Strategy<SolverContext, SolverState, SolverState> delayStuckQueries() {
+    public static Strategy<SolverState, SolverState> delayStuckQueries() {
         return DelayStuckQueriesStrategy.getInstance();
     }
 
-    public static Strategy<SolverContext, SolverState, Seq<SolverState>> expandAllInjections(SolverContext ctx, ITermVar v, Set<String> visitedInjections) {
+    public static Strategy<SolverState, Seq<SolverState>> expandAllInjections(SolverContext ctx, ITermVar v, Set<String> visitedInjections) {
         return ExpandAllInjectionsStrategy.getInstance().apply(ctx, v, visitedInjections);
     }
 
-    public static Strategy<SolverContext, SolverState, Seq<SolverState>> expandAllInjections(SolverContext ctx, ITermVar v) {
+    public static Strategy<SolverState, Seq<SolverState>> expandAllInjections(SolverContext ctx, ITermVar v) {
         return ExpandAllPredicatesStrategy.getInstance().apply(ctx, v);
     }
 
-    public static Strategy<SolverContext, SolverState, Seq<SolverState>> expandAllQueries(SolverContext ctx, ITermVar v) {
+    public static Strategy<SolverState, Seq<SolverState>> expandAllQueries(SolverContext ctx, ITermVar v) {
         return ExpandAllQueriesStrategy.getInstance().apply(ctx, v);
     }
 
-    public static Strategy<SolverContext, SolverState, Seq<SolverState>> expandDeterministic(ITermVar v) {
+    public static Strategy<SolverState, Seq<SolverState>> expandDeterministic(ITermVar v) {
         return ExpandDeterministicStrategy.getInstance().apply(v);
     }
 
-    public static Strategy<SolverContext, SolverState, Seq<SolverState>> expandInjection(SolverContext ctx, ITermVar v, Set<String> visitedInjections) {
+    public static Strategy<SolverState, Seq<SolverState>> expandInjection(SolverContext ctx, ITermVar v, Set<String> visitedInjections) {
         return ExpandInjectionStrategy.getInstance().apply(ctx, v, visitedInjections);
     }
 
-    public static Strategy<SolverContext, SelectedConstraintSolverState<CUser>, Seq<SolverState>> expandPredicate(ITermVar v) {
+    public static Strategy<SelectedConstraintSolverState<CUser>, Seq<SolverState>> expandPredicate(ITermVar v) {
         return ExpandPredicateStrategy.getInstance().apply(v);
     }
 
-    public static Strategy<SolverContext, SelectedConstraintSolverState<CResolveQuery>, Seq<SolverState>> expandQuery(SolverContext ctx) {
+    public static Strategy<SelectedConstraintSolverState<CResolveQuery>, Seq<SolverState>> expandQuery(SolverContext ctx) {
         return ExpandQueryStrategy.getInstance().apply(ctx);
     }
 
-    public static Strategy<SolverContext, SolverState, SolverState> infer() {
+    public static Strategy<SolverState, SolverState> infer() {
         return InferStrategy.getInstance();
     }
 
-//    public static <C extends IConstraint> Strategy<SolverContext, SolverState, Seq<SelectedConstraintSolverState<C>>> select(Class<C> constraintClass, LambdaStrategy1<SolverContext, C, SolverState, @Nullable SolverState> predicate) {
+//    public static <C extends IConstraint> Strategy<SolverState, Seq<SelectedConstraintSolverState<C>>> select(Class<C> constraintClass, LambdaStrategy1<C, SolverState, @Nullable SolverState> predicate) {
 //        return SelectStrategy.<C>getInstance().apply(constraintClass, predicate);
 //    }
 
-    public static <C extends IConstraint> Strategy<SolverContext, SolverState, Seq<SelectedConstraintSolverState<C>>> select(Class<C> constraintClass, Strategy1<SolverContext, C, SolverState, @Nullable SolverState> predicate) {
+    public static <C extends IConstraint> Strategy<SolverState, Seq<SelectedConstraintSolverState<C>>> select(Class<C> constraintClass, Strategy1<C, SolverState, @Nullable SolverState> predicate) {
         return SelectStrategy.<C>getInstance().apply(constraintClass, predicate);
     }
 
-    public static <C extends IConstraint> Strategy<SolverContext, SolverState, Seq<SelectedConstraintSolverState<C>>> select(Class<C> constraintClass) {
-        return select(constraintClass, (eng, ctx, c, i) -> i);
+    public static <C extends IConstraint> Strategy<SolverState, Seq<SelectedConstraintSolverState<C>>> select(Class<C> constraintClass) {
+        return select(constraintClass, (eng, c, i) -> i);
     }
 
 }

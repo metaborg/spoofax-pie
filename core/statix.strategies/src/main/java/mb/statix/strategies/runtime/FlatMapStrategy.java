@@ -14,20 +14,19 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * This wraps a strategy such that it can accept a sequence of values,
  * and flat-maps the results.
  *
- * @param <CTX> the type of context (invariant)
  * @param <T> the type of input (contravariant)
  * @param <R> the type of output (covariant)
  */
-public final class FlatMapStrategy<CTX, T, R> extends NamedStrategy1<CTX, Strategy<CTX, T, Seq<R>>, Seq<T>, Seq<R>> {
+public final class FlatMapStrategy<T, R> extends NamedStrategy1<Strategy<T, Seq<R>>, Seq<T>, Seq<R>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final FlatMapStrategy instance = new FlatMapStrategy();
     @SuppressWarnings({"unchecked", "unused", "RedundantCast", "RedundantSuppression"})
-    public static <CTX, T, R> FlatMapStrategy<CTX, T, R> getInstance() { return (FlatMapStrategy<CTX, T, R>)instance; }
+    public static <T, R> FlatMapStrategy<T, R> getInstance() { return (FlatMapStrategy<T, R>)instance; }
 
     private FlatMapStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    public static <CTX, T, U, R> Seq<R> eval(TegoEngine engine, CTX ctx, Strategy<CTX, T, Seq<R>> s, Seq<T> input) {
+    public static <T, U, R> Seq<R> eval(TegoEngine engine, Strategy<T, Seq<R>> s, Seq<T> input) {
         return new SeqBase<R>() {
 
             // Implementation if `yield` and `yieldBreak` could actually suspend computation
@@ -39,7 +38,7 @@ public final class FlatMapStrategy<CTX, T, R> extends NamedStrategy1<CTX, Strate
                 while (input.next()) {
                     // 2:
                     final T t = input.getCurrent();
-                    final @Nullable Seq<R> rs = engine.eval(s, ctx, t);
+                    final @Nullable Seq<R> rs = engine.eval(s, t);
                     // 3:
                     while (rs != null && rs.next()) {
                         // 4:
@@ -74,7 +73,7 @@ public final class FlatMapStrategy<CTX, T, R> extends NamedStrategy1<CTX, Strate
                             continue;
                         case 2:
                             final T t = input.getCurrent();
-                            rs = engine.eval(s, ctx, t);
+                            rs = engine.eval(s, t);
                             this.state = 3;
                             continue;
                         case 3:
@@ -109,8 +108,8 @@ public final class FlatMapStrategy<CTX, T, R> extends NamedStrategy1<CTX, Strate
     }
 
     @Override
-    public Seq<R> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, Seq<R>> s, Seq<T> input) {
-        return eval(engine, ctx, s, input);
+    public Seq<R> evalInternal(TegoEngine engine, Strategy<T, Seq<R>> s, Seq<T> input) {
+        return eval(engine, s, input);
     }
 
     @Override

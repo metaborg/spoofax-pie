@@ -7,25 +7,24 @@ import mb.statix.strategies.NamedStrategy1;
 /**
  * Constant strategy that discards the input and always returns the same value.
  *
- * @param <CTX> the type of context (invariant)
  * @param <T> the type of input (contravariant)
  * @param <R> the type of output (covariant)
  */
-public final class ConstStrategy<CTX, T, R> extends NamedStrategy1<CTX, R, T, R> {
+public final class ConstStrategy<T, R> extends NamedStrategy1<R, T, R> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final ConstStrategy instance = new ConstStrategy();
     @SuppressWarnings({"unchecked", "unused", "RedundantCast", "RedundantSuppression"})
-    public static <CTX, T, R> ConstStrategy<CTX, T, R> getInstance() { return (ConstStrategy<CTX, T, R>)instance; }
+    public static <T, R> ConstStrategy<T, R> getInstance() { return (ConstStrategy<T, R>)instance; }
 
     private ConstStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    public static <CTX, T, R> R eval(TegoEngine engine, CTX ctx, R v, T input) {
+    public static <T, R> R eval(TegoEngine engine, R v, T input) {
         return v;
     }
 
-    @Override public R evalInternal(TegoEngine engine, CTX ctx, R v, T input) {
-        return eval(engine, ctx, v, input);
+    @Override public R evalInternal(TegoEngine engine, R v, T input) {
+        return eval(engine, v, input);
     }
 
     @Override

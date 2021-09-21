@@ -16,7 +16,7 @@ import org.metaborg.util.task.NullProgress;
 /**
  * Delays stuck queries.
  */
-public final class InferStrategy extends NamedStrategy<SolverContext, SolverState, SolverState> {
+public final class InferStrategy extends NamedStrategy<SolverState, SolverState> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final InferStrategy instance = new InferStrategy();
@@ -39,11 +39,11 @@ public final class InferStrategy extends NamedStrategy<SolverContext, SolverStat
     }
 
     @Override
-    public SolverState evalInternal(TegoEngine engine, SolverContext x, SolverState input) {
-        return eval(engine, x, input);
+    public SolverState evalInternal(TegoEngine engine, SolverState input) {
+        return eval(engine, input);
     }
 
-    public static SolverState eval(TegoEngine engine, SolverContext x, SolverState input) {
+    public static SolverState eval(TegoEngine engine, SolverState input) {
         try {
             final SolverResult result = Solver.solve(
                 input.getSpec(),

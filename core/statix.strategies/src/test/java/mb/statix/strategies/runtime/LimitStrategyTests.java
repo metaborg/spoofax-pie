@@ -20,11 +20,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
     public void shouldEvaluateNElementsOfSequence() throws InterruptedException {
         // Arrange
         final TegoEngine engine = new TegoRuntimeImpl(null);
-        final LimitStrategy<Object, Integer, Integer> strategy = LimitStrategy.getInstance();
+        final LimitStrategy<Integer, Integer> strategy = LimitStrategy.getInstance();
         final TestListStrategy<Integer, Integer> s = new TestListStrategy<>(it -> Arrays.asList(it + 1, it + 2, it + 3, it + 4, it + 5));
 
         // Act
-        final Seq<Integer> result = strategy.evalInternal(engine, new Object(), s, 3, 42);
+        final Seq<Integer> result = strategy.evalInternal(engine, s, 3, 42);
 
         // Assert
         assertEquals(Arrays.asList(43, 44, 45), result.collect(Collectors.toList()));
@@ -34,11 +34,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
     public void shouldEvaluateUntilEmpty_whenNIsHigherThanSequence() throws InterruptedException {
         // Arrange
         final TegoEngine engine = new TegoRuntimeImpl(null);
-        final LimitStrategy<Object, Integer, Integer> strategy = LimitStrategy.getInstance();
+        final LimitStrategy<Integer, Integer> strategy = LimitStrategy.getInstance();
         final TestListStrategy<Integer, Integer> s = new TestListStrategy<>(it -> Arrays.asList(it + 1, it + 2, it + 3));
 
         // Act
-        final Seq<Integer> result = strategy.evalInternal(engine, new Object(), s, 5, 42);
+        final Seq<Integer> result = strategy.evalInternal(engine, s, 5, 42);
 
         // Assert
         assertEquals(Arrays.asList(43, 44, 45), result.collect(Collectors.toList()));
@@ -48,11 +48,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
     public void shouldEvaluateToEmptySequence_whenSequencesIsEmpty() throws InterruptedException {
         // Arrange
         final TegoEngine engine = new TegoRuntimeImpl(null);
-        final LimitStrategy<Object, Integer, Integer> strategy = LimitStrategy.getInstance();
+        final LimitStrategy<Integer, Integer> strategy = LimitStrategy.getInstance();
         final TestListStrategy<Integer, Integer> s = new TestListStrategy<>(it -> Arrays.asList());
 
         // Act
-        final Seq<Integer> result = strategy.evalInternal(engine, new Object(), s, 5, 42);
+        final Seq<Integer> result = strategy.evalInternal(engine, s, 5, 42);
 
         // Assert
         assertEquals(Arrays.asList(), result.collect(Collectors.toList()));
@@ -62,11 +62,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
     public void shouldEvaluateToEmptySequence_whenLimitIsZero() throws InterruptedException {
         // Arrange
         final TegoEngine engine = new TegoRuntimeImpl(null);
-        final LimitStrategy<Object, Integer, Integer> strategy = LimitStrategy.getInstance();
+        final LimitStrategy<Integer, Integer> strategy = LimitStrategy.getInstance();
         final TestListStrategy<Integer, Integer> s = new TestListStrategy<>(it -> Arrays.asList(it + 1, it + 2, it + 3, it + 4, it + 5));
 
         // Act
-        final Seq<Integer> result = strategy.evalInternal(engine, new Object(), s, 0, 42);
+        final Seq<Integer> result = strategy.evalInternal(engine, s, 0, 42);
 
         // Assert
         assertEquals(Arrays.asList(), result.collect(Collectors.toList()));
@@ -76,11 +76,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
     public void shouldEvaluateSequenceLazyUntilLimit() throws InterruptedException {
         // Arrange
         final TegoEngine engine = new TegoRuntimeImpl(null);
-        final LimitStrategy<Object, Integer, Integer> strategy = LimitStrategy.getInstance();
+        final LimitStrategy<Integer, Integer> strategy = LimitStrategy.getInstance();
         final TestListStrategy<Integer, Integer> s = new TestListStrategy<>(it -> Arrays.asList(it + 1, it + 2, it + 3, it + 4, it + 5));
 
         // Act
-        final Seq<Integer> result = strategy.evalInternal(engine, new Object(), s, 3, 42);
+        final Seq<Integer> result = strategy.evalInternal(engine, s, 3, 42);
 
         assertTrue(result.next());
         assertEquals(1, s.nextCalls.get());        // called to get the first element
@@ -104,11 +104,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
     public void shouldEvaluateSequenceLazyUntilEnd() throws InterruptedException {
         // Arrange
         final TegoEngine engine = new TegoRuntimeImpl(null);
-        final LimitStrategy<Object, Integer, Integer> strategy = LimitStrategy.getInstance();
+        final LimitStrategy<Integer, Integer> strategy = LimitStrategy.getInstance();
         final TestListStrategy<Integer, Integer> s = new TestListStrategy<>(it -> Arrays.asList(it + 1, it + 2, it + 3));
 
         // Act
-        final Seq<Integer> result = strategy.evalInternal(engine, new Object(), s, 5, 42);
+        final Seq<Integer> result = strategy.evalInternal(engine, s, 5, 42);
 
         assertTrue(result.next());
         assertEquals(1, s.nextCalls.get());        // called to get the first element

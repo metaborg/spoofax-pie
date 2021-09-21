@@ -18,7 +18,6 @@ import java.util.function.Predicate;
  */
 public final class SolverContext {
 
-    private final Spec spec;
     private final StrategoTerms strategoTerms;
     @Nullable private final ITermVar focusVar;
     private final Collection<Map.Entry<IConstraint, IMessage>> allowedErrors;
@@ -26,31 +25,19 @@ public final class SolverContext {
 
     /**
      * Initializes a new instance of the {@link SolverContext} class.
-     * @param spec the specification
      * @param focusVar the focus variable; or {@code null}
      * @param strategoTerms the stratego terms
      */
     public SolverContext(
-        Spec spec,
         StrategoTerms strategoTerms,
         @Nullable ITermVar focusVar,
         Collection<Map.Entry<IConstraint, IMessage>> allowedErrors,
         Predicate<ITerm> isInjPredicate
     ) {
-        this.spec = spec;
         this.strategoTerms = strategoTerms;
         this.focusVar = focusVar;
         this.allowedErrors = allowedErrors;
         this.isInjPredicate = isInjPredicate;
-    }
-
-    /**
-     * The specification.
-     *
-     * @return the specification
-     */
-    public Spec getSpec() {
-        return this.spec;
     }
 
     /**
@@ -78,7 +65,7 @@ public final class SolverContext {
      * @return the modified copy of the {@link SolverContext}
      */
     public SolverContext withFocusVar(@Nullable ITermVar focusVar) {
-        return new SolverContext(spec, strategoTerms, focusVar, allowedErrors, isInjPredicate);
+        return new SolverContext(strategoTerms, focusVar, allowedErrors, isInjPredicate);
     }
 
     /**
@@ -99,7 +86,7 @@ public final class SolverContext {
      * @return the modified copy of the {@link SolverContext}
      */
     public SolverContext withAllowedErrors(Collection<Map.Entry<IConstraint, IMessage>> allowedErrors) {
-        return new SolverContext(spec, strategoTerms, focusVar, allowedErrors, isInjPredicate);
+        return new SolverContext( strategoTerms, focusVar, allowedErrors, isInjPredicate);
     }
 
     /**

@@ -13,27 +13,26 @@ import java.util.HashSet;
 /**
  * Strategy that matches the input against a pattern.
  *
- * @param <CTX> the type of context (invariant)
  * @param <T> the type of input (contravariant)
  * @param <R> the type of output (covariant)
  */
-public final class MatchStrategy<CTX, T, R> extends NamedStrategy1<CTX, Pattern<CTX, T, R>, T, Seq<R>> {
+public final class MatchStrategy<T, R> extends NamedStrategy1<Pattern<T, R>, T, Seq<R>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final MatchStrategy instance = new MatchStrategy();
     @SuppressWarnings({"unchecked", "unused", "RedundantCast", "RedundantSuppression"})
-    public static <CTX, T, R> MatchStrategy<CTX, T, R> getInstance() { return (MatchStrategy<CTX, T, R>)instance; }
+    public static <T, R> MatchStrategy<T, R> getInstance() { return (MatchStrategy<T, R>)instance; }
 
     private MatchStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    public static <CTX, T, R> Seq<R> eval(TegoEngine engine, CTX ctx, Pattern<CTX, T, R> pattern, T input) {
+    public static <T, R> Seq<R> eval(TegoEngine engine, Pattern<T, R> pattern, T input) {
         return new SeqBase<R>() {
             // Implementation if `yield` and `yieldBreak` could actually suspend computation
             @SuppressWarnings("unused")
             @ExcludeFromJacocoGeneratedReport
             private void computeNextCoroutine() {
                 // 0:
-                final boolean matches = pattern.match(ctx, input);
+                final boolean matches = pattern.match(input);
                 if (matches) {
                     //noinspection unchecked
                     this.yield((R)input);
@@ -52,7 +51,7 @@ public final class MatchStrategy<CTX, T, R> extends NamedStrategy1<CTX, Pattern<
                 while (true) {
                     switch(state) {
                         case 0:
-                            final boolean matches = pattern.match(ctx, input);
+                            final boolean matches = pattern.match(input);
                             if (matches) {
                                 //noinspection unchecked
                                 this.yield((R)input);
@@ -73,8 +72,8 @@ public final class MatchStrategy<CTX, T, R> extends NamedStrategy1<CTX, Pattern<
         };
     }
 
-    @Override public Seq<R> evalInternal(TegoEngine engine, CTX ctx, Pattern<CTX, T, R> pattern, T input) {
-        return eval(engine, ctx, pattern, input);
+    @Override public Seq<R> evalInternal(TegoEngine engine, Pattern<T, R> pattern, T input) {
+        return eval(engine, pattern, input);
     }
 
     @Override

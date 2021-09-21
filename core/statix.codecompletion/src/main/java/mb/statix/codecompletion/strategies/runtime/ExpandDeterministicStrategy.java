@@ -7,7 +7,7 @@ import mb.statix.sequences.Seq;
 import mb.statix.strategies.NamedStrategy1;
 import mb.statix.strategies.runtime.TegoEngine;
 
-public final class ExpandDeterministicStrategy extends NamedStrategy1<SolverContext, ITermVar, SolverState, Seq<SolverState>> {
+public final class ExpandDeterministicStrategy extends NamedStrategy1<ITermVar, SolverState, Seq<SolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final ExpandDeterministicStrategy instance = new ExpandDeterministicStrategy();
@@ -19,16 +19,14 @@ public final class ExpandDeterministicStrategy extends NamedStrategy1<SolverCont
     @Override
     public Seq<SolverState> evalInternal(
         TegoEngine engine,
-        SolverContext x,
         ITermVar v,
         SolverState input
     ) {
-        return eval(engine, x, v, input);
+        return eval(engine, v, input);
     }
 
     public static Seq<SolverState> eval(
         TegoEngine engine,
-        SolverContext x,
         ITermVar v,
         SolverState input
     ) {

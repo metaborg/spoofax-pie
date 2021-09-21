@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 /**
  * Delays stuck queries.
  */
-public final class DelayStuckQueriesStrategy extends NamedStrategy<SolverContext, SolverState, SolverState> {
+public final class DelayStuckQueriesStrategy extends NamedStrategy<SolverState, SolverState> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final DelayStuckQueriesStrategy instance = new DelayStuckQueriesStrategy();
@@ -61,11 +61,11 @@ public final class DelayStuckQueriesStrategy extends NamedStrategy<SolverContext
     }
 
     @Override
-    public SolverState evalInternal(TegoEngine engine, SolverContext x, SolverState input) {
-        return eval(engine, x, input);
+    public SolverState evalInternal(TegoEngine engine, SolverState input) {
+        return eval(engine, input);
     }
 
-    public static SolverState eval(TegoEngine engine, SolverContext x, SolverState input) {
+    public static SolverState eval(TegoEngine engine, SolverState input) {
         final IState.Immutable state = input.getState();
         final ICompleteness.Immutable completeness = input.getCompleteness();
 

@@ -12,27 +12,26 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  *
  * This returns at most the number of elements specified in the limit.
  *
- * @param <CTX> the type of context (invariant)
  * @param <T> the type of input (contravariant)
  * @param <R> the type of output (covariant)
  */
-public final class LimitStrategy<CTX, T, R> extends NamedStrategy2<CTX, Strategy<CTX, T, Seq<R>>, Integer, T, Seq<R>> {
+public final class LimitStrategy<T, R> extends NamedStrategy2<Strategy<T, Seq<R>>, Integer, T, Seq<R>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final LimitStrategy instance = new LimitStrategy();
     @SuppressWarnings({"unchecked", "unused", "RedundantCast", "RedundantSuppression"})
-    public static <CTX, T, R> LimitStrategy<CTX, T, R> getInstance() { return (LimitStrategy<CTX, T, R>)instance; }
+    public static <T, R> LimitStrategy<T, R> getInstance() { return (LimitStrategy<T, R>)instance; }
 
     private LimitStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    public static <CTX, T, R> Seq<R> eval(TegoEngine engine, CTX ctx, Strategy<CTX, T, Seq<R>> s, Integer n, T input) {
+    public static <T, R> Seq<R> eval(TegoEngine engine, Strategy<T, Seq<R>> s, Integer n, T input) {
         return new SeqBase<R>() {
             // Implementation if `yield` and `yieldBreak` could actually suspend computation
             @SuppressWarnings("unused")
             @ExcludeFromJacocoGeneratedReport
             private void computeNextCoroutine() throws InterruptedException {
                 // 0:
-                final @Nullable Seq<R> s1Seq = engine.eval(s, ctx, input);
+                final @Nullable Seq<R> s1Seq = engine.eval(s, input);
                 // 1:
                 while (remaining > 0 && s1Seq != null && s1Seq.next()) {
                     this.remaining -= 1;
@@ -54,7 +53,7 @@ public final class LimitStrategy<CTX, T, R> extends NamedStrategy2<CTX, Strategy
                 while (true) {
                     switch (state) {
                         case 0:
-                            s1Seq = engine.eval(s, ctx, input);
+                            s1Seq = engine.eval(s, input);
                             this.state = 1;
                             continue;
                         case 1:
@@ -82,8 +81,8 @@ public final class LimitStrategy<CTX, T, R> extends NamedStrategy2<CTX, Strategy
     }
 
     @Override
-    public Seq<R> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, Seq<R>> s, Integer n, T input) {
-        return eval(engine, ctx, s, n, input);
+    public Seq<R> evalInternal(TegoEngine engine, Strategy<T, Seq<R>> s, Integer n, T input) {
+        return eval(engine, s, n, input);
     }
 
     @Override

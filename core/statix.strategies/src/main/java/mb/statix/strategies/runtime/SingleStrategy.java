@@ -12,27 +12,26 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  *
  * This returns the results of the strategy if it returns exactly one result, otherwise the strategy fails.
  *
- * @param <CTX> the type of context (invariant)
  * @param <T> the type of input (contravariant)
  * @param <R> the type of output (covariant)
  */
-public final class SingleStrategy<CTX, T, R> extends NamedStrategy1<CTX, Strategy<CTX, T, Seq<R>>, T, Seq<R>> {
+public final class SingleStrategy<T, R> extends NamedStrategy1<Strategy<T, Seq<R>>, T, Seq<R>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final SingleStrategy instance = new SingleStrategy();
     @SuppressWarnings({"unchecked", "unused", "RedundantCast", "RedundantSuppression"})
-    public static <CTX, T, R> SingleStrategy<CTX, T, R> getInstance() { return (SingleStrategy<CTX, T, R>)instance; }
+    public static <T, R> SingleStrategy<T, R> getInstance() { return (SingleStrategy<T, R>)instance; }
 
     private SingleStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    public static <CTX, T, R> Seq<R> eval(TegoEngine engine, CTX ctx, Strategy<CTX, T, Seq<R>> s, T input) {
+    public static <T, R> Seq<R> eval(TegoEngine engine, Strategy<T, Seq<R>> s, T input) {
         return new SeqBase<R>() {
             // Implementation if `yield` and `yieldBreak` could actually suspend computation
             @SuppressWarnings("unused")
             @ExcludeFromJacocoGeneratedReport
             private void computeNextCoroutine() throws InterruptedException {
                 // 0:
-                final @Nullable Seq<R> sSeq = engine.eval(s, ctx, input);
+                final @Nullable Seq<R> sSeq = engine.eval(s, input);
                 if (sSeq != null && sSeq.next()) {
                     final R element = sSeq.getCurrent();
                     if(!sSeq.next()) {
@@ -56,7 +55,7 @@ public final class SingleStrategy<CTX, T, R> extends NamedStrategy1<CTX, Strateg
                 while (true) {
                     switch (state) {
                         case 0:
-                            final @Nullable Seq<R> sSeq = engine.eval(s, ctx, input);
+                            final @Nullable Seq<R> sSeq = engine.eval(s, input);
                             if (sSeq != null && sSeq.next()) {
                                 final R element = sSeq.getCurrent();
                                 if(!sSeq.next()) {
@@ -83,8 +82,8 @@ public final class SingleStrategy<CTX, T, R> extends NamedStrategy1<CTX, Strateg
     }
 
     @Override
-    public Seq<R> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, Seq<R>> s, T input) {
-        return eval(engine, ctx, s, input);
+    public Seq<R> evalInternal(TegoEngine engine, Strategy<T, Seq<R>> s, T input) {
+        return eval(engine, s, input);
     }
 
     @Override

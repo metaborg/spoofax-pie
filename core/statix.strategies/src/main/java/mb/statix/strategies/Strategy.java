@@ -13,12 +13,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * compute its results. Multiple iterations will cause multiple computations, but all implementations
  * of strategies should instantiate only one iterable for each sequence, therefore only iterate once.
  *
- * @param <CTX> the type of context (invariant)
  * @param <T> the type of input (contravariant)
  * @param <R> the type of output (covariant)
  */
 @FunctionalInterface
-public interface Strategy</* in */ CTX, /* in */ T, /* out */ R> extends StrategyDecl, PrintableStrategy {
+public interface Strategy<T, R> extends StrategyDecl, PrintableStrategy {
 
     @Override
     default int getArity() { return 0; }
@@ -32,16 +31,15 @@ public interface Strategy</* in */ CTX, /* in */ T, /* out */ R> extends Strateg
      * appropriate {@link TegoRuntime#eval} method.
      *
      * @param engine the Tego engine
-     * @param ctx the context
      * @param input the input argument
      * @return the result; or {@code null} if the strategy failed
      */
-    @Nullable R evalInternal(TegoEngine engine, CTX ctx, T input);
+    @Nullable R evalInternal(TegoEngine engine, T input);
 
     @SuppressWarnings("unchecked")
     @Override
-    default @Nullable Object evalInternal(TegoEngine engine, Object ctx, Object[] args, Object input) {
+    default @Nullable Object evalInternal(TegoEngine engine, Object[] args, Object input) {
         assert args.length == 0 : "Expected 0 arguments, got " + args.length + ".";
-        return evalInternal(engine, (CTX)ctx, (T)input);
+        return evalInternal(engine, (T)input);
     }
 }

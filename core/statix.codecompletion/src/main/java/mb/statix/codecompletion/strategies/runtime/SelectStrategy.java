@@ -13,7 +13,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 /**
  * Selects constraints for which the given predicate does not fail.
  */
-public final class SelectStrategy<C extends IConstraint> extends NamedStrategy2<SolverContext, Class<C>, Strategy1<SolverContext, C, SolverState, @Nullable SolverState>, SolverState, Seq<SelectedConstraintSolverState<C>>> {
+public final class SelectStrategy<C extends IConstraint> extends NamedStrategy2<Class<C>, Strategy1<C, SolverState, @Nullable SolverState>, SolverState, Seq<SelectedConstraintSolverState<C>>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final SelectStrategy instance = new SelectStrategy();
@@ -39,24 +39,22 @@ public final class SelectStrategy<C extends IConstraint> extends NamedStrategy2<
     @Override
     public Seq<SelectedConstraintSolverState<C>> evalInternal(
         TegoEngine engine,
-        SolverContext ctx,
         Class<C> constraintClass,
-        Strategy1<SolverContext, C, SolverState, @Nullable SolverState> predicate,
+        Strategy1<C, SolverState, @Nullable SolverState> predicate,
         SolverState input
     ) {
-        return eval(engine, ctx, constraintClass, predicate, input);
+        return eval(engine, constraintClass, predicate, input);
     }
 
     public static <C extends IConstraint> Seq<SelectedConstraintSolverState<C>> eval(
         TegoEngine engine,
-        SolverContext ctx,
         Class<C> constraintClass,
-        Strategy1<SolverContext, C, SolverState, @Nullable SolverState> predicate,
+        Strategy1<C, SolverState, @Nullable SolverState> predicate,
         SolverState input
     ) {
         return Seq.from(input.getConstraints())
             .filterIsInstance(constraintClass)
-            .filter(c -> engine.eval(predicate, ctx, c, input) != null)
+            .filter(c -> engine.eval(predicate, c, input) != null)
             .map(c -> SelectedConstraintSolverState.of(c, input));
     }
 

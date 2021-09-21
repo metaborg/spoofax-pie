@@ -33,8 +33,8 @@ public final class DistinctStrategyTests {
     public void shouldApplyStrategy_untilStrategyFails() throws InterruptedException {
         // Arrange
         final TegoEngine engine = new TegoRuntimeImpl(null);
-        final DistinctStrategy<Object, Integer, String> strategy = DistinctStrategy.getInstance();
-        final Strategy<Object, Integer, Seq<String>> s = fun(i -> Seq.of(
+        final DistinctStrategy<Integer, String> strategy = DistinctStrategy.getInstance();
+        final Strategy<Integer, Seq<String>> s = fun(i -> Seq.of(
             "aaa", "aab", "aac",
             "aba", "abb", "abc",
             "aca", "acb", "acc",
@@ -47,7 +47,7 @@ public final class DistinctStrategyTests {
         ).map(v -> v.chars().sorted().mapToObj(i1 -> String.valueOf((char)i1)).collect(Collectors.joining())));
 
         // Act
-        final @Nullable Seq<String> result = strategy.evalInternal(engine, new Object(), s, 42);
+        final @Nullable Seq<String> result = strategy.evalInternal(engine, s, 42);
         assertNotNull(result);
 
         // Assert

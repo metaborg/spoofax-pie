@@ -9,27 +9,26 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * Returns a nullable as a list: either a singleton list if the value is non-null,
  * or an empty list if the value is null.
  *
- * @param <CTX> the type of context (invariant)
  * @param <T> the type of input/output (invariant)
  */
-public final class NullableToListStrategy<CTX, T, R> extends NamedStrategy1<CTX, Strategy<CTX, T, @Nullable R>, T, Seq<R>> {
+public final class NullableToListStrategy<T, R> extends NamedStrategy1<Strategy<T, @Nullable R>, T, Seq<R>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final NullableToListStrategy instance = new NullableToListStrategy();
     @SuppressWarnings({"unchecked", "unused", "RedundantCast", "RedundantSuppression"})
-    public static <CTX, T, R> NullableToListStrategy<CTX, T, R> getInstance() { return (NullableToListStrategy<CTX, T, R>)instance; }
+    public static <T, R> NullableToListStrategy<T, R> getInstance() { return (NullableToListStrategy<T, R>)instance; }
 
     private NullableToListStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    public static <CTX, T, R> Seq<R> eval(TegoEngine engine, CTX ctx, Strategy<CTX, T, @Nullable R> s, T input) {
-        final @Nullable R r = engine.eval(s, ctx, input);
+    public static <T, R> Seq<R> eval(TegoEngine engine, Strategy<T, @Nullable R> s, T input) {
+        final @Nullable R r = engine.eval(s, input);
         if (r == null) return Seq.of();
         return Seq.of(r);
     }
 
     @Override
-    public Seq<R> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, @Nullable R> s, T input) {
-        return eval(engine, ctx, s, input);
+    public Seq<R> evalInternal(TegoEngine engine, Strategy<T, @Nullable R> s, T input) {
+        return eval(engine, s, input);
     }
 
     @Override

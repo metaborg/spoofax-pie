@@ -11,20 +11,19 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 /**
  * Startegy that assert that a boolean holds.
  *
- * @param <CTX> the type of context (invariant)
  * @param <T> the type of input (contravariant)
  */
-public final class AssertThatStrategy<CTX, T> extends NamedStrategy1<CTX, Strategy<CTX, T, Boolean>, T, Seq<T>> {
+public final class AssertThatStrategy<T> extends NamedStrategy1<Strategy<T, Boolean>, T, Seq<T>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final AssertThatStrategy instance = new AssertThatStrategy();
     @SuppressWarnings({"unchecked", "unused", "RedundantCast", "RedundantSuppression"})
-    public static <CTX, T> AssertThatStrategy<CTX, T> getInstance() { return (AssertThatStrategy<CTX, T>)instance; }
+    public static <T> AssertThatStrategy<T> getInstance() { return (AssertThatStrategy<T>)instance; }
 
     private AssertThatStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    public static <CTX, T> Seq<T> eval(TegoEngine engine, CTX ctx, Strategy<CTX, T, Boolean> predicate, T input) {
-        final @Nullable Boolean success = engine.eval(predicate, ctx, input);
+    public static <T> Seq<T> eval(TegoEngine engine, Strategy<T, Boolean> predicate, T input) {
+        final @Nullable Boolean success = engine.eval(predicate, input);
         if (success != null && success) {
             return Seq.of(input);
         } else {
@@ -33,8 +32,8 @@ public final class AssertThatStrategy<CTX, T> extends NamedStrategy1<CTX, Strate
     }
 
     @Override
-    public Seq<T> evalInternal(TegoEngine engine, CTX ctx, Strategy<CTX, T, Boolean> predicate, T input) {
-        return eval(engine, ctx, predicate, input);
+    public Seq<T> evalInternal(TegoEngine engine, Strategy<T, Boolean> predicate, T input) {
+        return eval(engine, predicate, input);
     }
 
     @Override

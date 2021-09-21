@@ -21,7 +21,7 @@ import static mb.statix.codecompletion.strategies.runtime.SearchStrategies.*;
 import static mb.statix.strategies.StrategyExt.*;
 import static mb.statix.strategies.runtime.Strategies.*;
 
-public final class ExpandAllQueriesStrategy extends NamedStrategy2<SolverContext, SolverContext, ITermVar, SolverState, Seq<SolverState>> {
+public final class ExpandAllQueriesStrategy extends NamedStrategy2<SolverContext, ITermVar, SolverState, Seq<SolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final ExpandAllQueriesStrategy instance = new ExpandAllQueriesStrategy();
@@ -33,17 +33,15 @@ public final class ExpandAllQueriesStrategy extends NamedStrategy2<SolverContext
     @Override
     public Seq<SolverState> evalInternal(
         TegoEngine engine,
-        SolverContext x,
         SolverContext ctx,
         ITermVar v,
         SolverState input
     ) {
-        return eval(engine, x, ctx, v, input);
+        return eval(engine, ctx, v, input);
     }
 
     public static Seq<SolverState> eval(
         TegoEngine engine,
-        SolverContext x,
         SolverContext ctx,
         ITermVar v,
         SolverState input

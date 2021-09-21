@@ -16,10 +16,10 @@ public final class FailStrategyTests {
     public void shouldAlwaysFail() throws InterruptedException {
         // Arrange
         final TegoEngine engine = new TegoRuntimeImpl(null);
-        final FailStrategy<Object, String, Integer> strategy = FailStrategy.getInstance();
+        final FailStrategy<String, Integer> strategy = FailStrategy.getInstance();
 
         // Act
-        final Integer result = strategy.evalInternal(engine, new Object(), "My input");
+        final Integer result = strategy.evalInternal(engine, "My input");
 
         // Assert
         assertNull(result);

@@ -14,94 +14,94 @@ import java.util.function.Function;
 public final class Strategies {
     private Strategies() { /* Prevent instantiation. */ }
 
-    public static <CTX, T, R> Strategy<CTX, T, Seq<R>> distinct(
-        Strategy<CTX, T, Seq<R>> s
+    public static <T, R> Strategy<T, Seq<R>> distinct(
+        Strategy<T, Seq<R>> s
     ) {
-        return DistinctStrategy.<CTX, T, R>getInstance().apply(s);
+        return DistinctStrategy.<T, R>getInstance().apply(s);
     }
 
-    public static <CTX, I, O> SeqStrategy.Builder<CTX, I, O> seq(
-        Strategy<CTX, I, O> s
+    public static <I, O> SeqStrategy.Builder<I, O> seq(
+        Strategy<I, O> s
     ) {
         return new SeqStrategy.Builder<>(s);
     }
 
-    public static <CTX, I, O> Strategy<CTX, I, @Nullable I> where(
-        Strategy<CTX, I, O> s
+    public static <I, O> Strategy<I, @Nullable I> where(
+        Strategy<I, O> s
     ) {
-        return WhereStrategy.<CTX, I, O>getInstance().apply(s);
+        return WhereStrategy.<I, O>getInstance().apply(s);
     }
 
-    public static <CTX, I, O> Strategy<CTX, Seq<I>, Seq<O>> flatMap(
-        Strategy<CTX, I, Seq<O>> s
+    public static <I, O> Strategy<Seq<I>, Seq<O>> flatMap(
+        Strategy<I, Seq<O>> s
     ) {
-        return FlatMapStrategy.<CTX, I, O>getInstance().apply(s);
+        return FlatMapStrategy.<I, O>getInstance().apply(s);
     }
 
-    public static <CTX, I, O> Strategy<CTX, I, Seq<O>> single(
-        Strategy<CTX, I, Seq<O>> s
+    public static <I, O> Strategy<I, Seq<O>> single(
+        Strategy<I, Seq<O>> s
     ) {
-        return SingleStrategy.<CTX, I, O>getInstance().apply(s);
+        return SingleStrategy.<I, O>getInstance().apply(s);
     }
 
-    public static <CTX, T> Strategy<CTX, T, Seq<T>> try_(
-        Strategy<CTX, T, Seq<T>> s
+    public static <T> Strategy<T, Seq<T>> try_(
+        Strategy<T, Seq<T>> s
     ) {
-        return TryStrategy.<CTX, T>getInstance().apply(s);
+        return TryStrategy.<T>getInstance().apply(s);
     }
 
-    public static <CTX, T> Strategy<CTX, T, Seq<T>> repeat(
-        Strategy<CTX, T, Seq<T>> s
+    public static <T> Strategy<T, Seq<T>> repeat(
+        Strategy<T, Seq<T>> s
     ) {
-        return RepeatStrategy.<CTX, T>getInstance().apply(s);
+        return RepeatStrategy.<T>getInstance().apply(s);
     }
 
-    public static <CTX, I, O> Strategy<CTX, I, Seq<O>> limit(
+    public static <I, O> Strategy<I, Seq<O>> limit(
         int limit,
-        Strategy<CTX, I, Seq<O>> s
+        Strategy<I, Seq<O>> s
     ) {
-        return LimitStrategy.<CTX, I, O>getInstance().apply(s, limit);
+        return LimitStrategy.<I, O>getInstance().apply(s, limit);
     }
 
-    public static <CTX, I, O> Strategy<CTX, I, Seq<O>> or(
-        Strategy<CTX, I, Seq<O>> s1,
-        Strategy<CTX, I, Seq<O>> s2
+    public static <I, O> Strategy<I, Seq<O>> or(
+        Strategy<I, Seq<O>> s1,
+        Strategy<I, Seq<O>> s2
     ) {
-        return OrStrategy.<CTX, I, O>getInstance().apply(s1, s2);
+        return OrStrategy.<I, O>getInstance().apply(s1, s2);
     }
 
-    public static <CTX, T> Strategy<CTX, T, Seq<T>> fixSet(
-        Strategy<CTX, T, Seq<T>> s
+    public static <T> Strategy<T, Seq<T>> fixSet(
+        Strategy<T, Seq<T>> s
     ) {
-        return FixSetStrategy.<CTX, T>getInstance().apply(s);
+        return FixSetStrategy.<T>getInstance().apply(s);
     }
 
-    public static <CTX, T, R> Strategy<CTX, T, Seq<R>> ntl(
-        Strategy<CTX, T, @Nullable R> s
+    public static <T, R> Strategy<T, Seq<R>> ntl(
+        Strategy<T, @Nullable R> s
     ) {
-        return NullableToListStrategy.<CTX, T, R>getInstance().apply(s);
+        return NullableToListStrategy.<T, R>getInstance().apply(s);
     }
 
-    public static <CTX, T, R> Strategy<CTX, T, @Nullable T> not(
-        Strategy<CTX, T, @Nullable R> s
+    public static <T, R> Strategy<T, @Nullable T> not(
+        Strategy<T, @Nullable R> s
     ) {
-        return NotStrategy.<CTX, T, R>getInstance().apply(s);
+        return NotStrategy.<T, R>getInstance().apply(s);
     }
 
-    public static <CTX, I, O> Strategy<CTX, I, O> fail() {
+    public static <I, O> Strategy<I, O> fail() {
         return FailStrategy.getInstance();
     }
 
-    public static <CTX, T> Strategy<CTX, T, T> id() {
+    public static <T> Strategy<T, T> id() {
         return IdStrategy.getInstance();
     }
 
-    public static <CTX, I, M, O> Strategy<CTX, I, Seq<O>> if_(
-        Strategy<CTX, I, Seq<M>> condition,
-        Strategy<CTX, M, Seq<O>> onSuccess,
-        Strategy<CTX, I, Seq<O>> onFailure
+    public static <I, M, O> Strategy<I, Seq<O>> if_(
+        Strategy<I, Seq<M>> condition,
+        Strategy<M, Seq<O>> onSuccess,
+        Strategy<I, Seq<O>> onFailure
     ) {
-        return GlcStrategy.<CTX, I, M, O>getInstance().apply(condition, onSuccess, onFailure);
+        return GlcStrategy.<I, M, O>getInstance().apply(condition, onSuccess, onFailure);
     }
 
 }

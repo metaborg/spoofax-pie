@@ -21,11 +21,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
     public void shouldEvaluateToInput_whenStrategyFails() throws InterruptedException {
         // Arrange
         final TegoEngine engine = new TegoRuntimeImpl(null);
-        final TryStrategy<Object, Integer> strategy = TryStrategy.getInstance();
+        final TryStrategy<Integer> strategy = TryStrategy.getInstance();
         final TestListStrategy<Integer, Integer> s = new TestListStrategy<>(it -> Arrays.asList());
 
         // Act
-        final Seq<Integer> result = strategy.evalInternal(engine, new Object(), s, 42);
+        final Seq<Integer> result = strategy.evalInternal(engine, s, 42);
 
         // Assert
         assertEquals(Arrays.asList(42), result.collect(Collectors.toList()));
@@ -35,11 +35,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
     public void shouldEvaluateToResults_whenStrategySucceeds() throws InterruptedException {
         // Arrange
         final TegoEngine engine = new TegoRuntimeImpl(null);
-        final TryStrategy<Object, Integer> strategy = TryStrategy.getInstance();
+        final TryStrategy<Integer> strategy = TryStrategy.getInstance();
         final TestListStrategy<Integer, Integer> s = new TestListStrategy<>(it -> Arrays.asList(it + 1, it + 2, it + 3));
 
         // Act
-        final Seq<Integer> result = strategy.evalInternal(engine, new Object(), s, 42);
+        final Seq<Integer> result = strategy.evalInternal(engine, s, 42);
 
         // Assert
         assertEquals(Arrays.asList(43, 44, 45), result.collect(Collectors.toList()));
@@ -49,11 +49,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
     public void shouldEvaluateSequenceLazy() throws InterruptedException {
         // Arrange
         final TegoEngine engine = new TegoRuntimeImpl(null);
-        final TryStrategy<Object, Integer> strategy = TryStrategy.getInstance();
+        final TryStrategy<Integer> strategy = TryStrategy.getInstance();
         final TestListStrategy<Integer, Integer> s = new TestListStrategy<>(it -> Arrays.asList(it + 1, it + 2, it + 3));
 
         // Act
-        final Seq<Integer> result = strategy.evalInternal(engine, new Object(), s, 42);
+        final Seq<Integer> result = strategy.evalInternal(engine, s, 42);
 
         assertTrue(result.next());
         assertEquals(1, s.nextCalls.get());        // called to get the first element

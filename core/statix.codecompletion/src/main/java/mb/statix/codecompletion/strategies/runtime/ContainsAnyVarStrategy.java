@@ -15,7 +15,7 @@ import java.util.Collections;
 
 import static mb.statix.utils.CollectionUtils.containsAny;
 
-public final class ContainsAnyVarStrategy extends NamedStrategy2<SolverContext, Collection<ITermVar>, IConstraint, SolverState, @Nullable SolverState> {
+public final class ContainsAnyVarStrategy extends NamedStrategy2<Collection<ITermVar>, IConstraint, SolverState, @Nullable SolverState> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final ContainsAnyVarStrategy instance = new ContainsAnyVarStrategy();
@@ -28,18 +28,16 @@ public final class ContainsAnyVarStrategy extends NamedStrategy2<SolverContext, 
     @Override
     public @Nullable SolverState evalInternal(
         TegoEngine engine,
-        SolverContext x,
         Collection<ITermVar> vars,
         IConstraint constraint,
         SolverState input
     ) {
-        return eval(engine, x, vars, constraint, input);
+        return eval(engine, vars, constraint, input);
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
     public static @Nullable SolverState eval(
         TegoEngine engine,
-        SolverContext x,
         Collection<ITermVar> vars,
         IConstraint constraint,
         SolverState input

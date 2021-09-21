@@ -9,14 +9,13 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  *
  * Use {@link StrategyExt#fun}.
  *
- * @param <CTX> the type of context (invariant)
  * @param <T> the type of input (contravariant)
  * @param <R> the type of output (covariant)
  */
 @FunctionalInterface
-public interface FunctionStrategy<CTX, T, R> extends Strategy<CTX, T, R> {
+public interface FunctionStrategy<T, R> extends Strategy<T, R> {
     @Override
-    default @Nullable R evalInternal(TegoEngine engine, CTX ctx, T input) {
+    default @Nullable R evalInternal(TegoEngine engine, T input) {
         return call(input);
     }
 
