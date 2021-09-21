@@ -1,5 +1,6 @@
 package mb.statix.codecompletion.strategies.runtime;
 
+import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
 import mb.statix.SolverContext;
 import mb.statix.SolverState;
@@ -35,6 +36,38 @@ public final class ExpandAllQueriesStrategy extends NamedStrategy1<SolverContext
         ITermVar v,
         SolverState input
     ) {
+        // Tego:
+        // def expandAllQueries(v: ITermVar) =
+        //     distinct(or(id, fixSet(
+        //       if(
+        //         limit(1, select(CResolveQuery::class, \(constraint: IConstraint) SolverState -> SolverState?
+        //           = where(let vars = project(v) ; ITerm#getVars in containsAnyVar(vars, constraint))
+        //         \)),
+        //         expandQueryConstraint |> assertValid(v),
+        //         id
+        //       )
+        //     )))
+
+
+
+//        distinct(or(id(), fixSet(
+//            if_(
+//                limit(1, //debugSelectCResolveQuery(v,
+//                    selectConstraints(CResolveQuery.class, (constraint, state) -> {
+//                            final io.usethesource.capsule.Set.Immutable<ITermVar> innerVars = state.project(v).getVars();
+//                            return containsAnyVar(innerVars, constraint, state);
+//                        }
+//                        //)
+//                    )),
+//                seq(debugCResolveQuery(v,
+//                        expandQueryConstraint()
+//                    )
+//                )
+//                    .$(assertValid(v))
+//                    .$(),
+//                id()
+//            )
+//        )))
         throw new UnsupportedOperationException("Not yet implemented");
     }
 

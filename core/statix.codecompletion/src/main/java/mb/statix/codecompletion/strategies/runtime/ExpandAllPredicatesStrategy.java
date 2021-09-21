@@ -9,11 +9,11 @@ import mb.statix.sequences.Seq;
 import mb.statix.strategies.NamedStrategy1;
 import mb.statix.strategies.Strategy;
 import mb.statix.strategies.Strategy1;
+import mb.statix.strategies.StrategyExt;
 import mb.statix.strategies.runtime.TegoEngine;
 
 import static mb.statix.codecompletion.strategies.runtime.SearchStrategies.*;
-import static mb.statix.strategies.StrategyExt.define;
-import static mb.statix.strategies.StrategyExt.lambda;
+import static mb.statix.strategies.StrategyExt.*;
 import static mb.statix.strategies.runtime.Strategies.*;
 
 public final class ExpandAllPredicatesStrategy extends NamedStrategy1<SolverContext, ITermVar, SolverState, Seq<SolverState>> {
@@ -61,18 +61,19 @@ public final class ExpandAllPredicatesStrategy extends NamedStrategy1<SolverCont
         // An example where this happens is in this program, on the $Type placeholder:
         //   let function $ID(): $Type = $Exp in 3 end
         //   debugState(v,
-        final Strategy1<SolverContext, Set.Immutable<String>, SolverState, SolverState> solverState$WithExpanded
-            = define("SolverState#withExpanded", "x", (eng, ct, x, i) -> i.withExpanded(x));
+        final Strategy1<SolverContext, Set.Immutable<String>, SolverState, SolverState> SolverState$withExpanded
+            = StrategyExt.def("SolverState#withExpanded", "x", fun(SolverState::withExpanded));
+
         // @formatter:off
         final Strategy<SolverContext, SolverState, Seq<SolverState>> s =
             // Empty the set of expanded things
-            seq(solverState$WithExpanded.apply(Set.Immutable.of()))
+            seq(SolverState$withExpanded.apply(Set.Immutable.of()))
             .$(repeat(
-                seq(limit(1, select(CUser.class, lambda((constraint) -> seq(containsVar(v, constraint)).$(notYetExpanded(constraint)).$()))))
+                seq(limit(1, select(CUser.class, lam((constraint) -> seq(containsVar(v, constraint)).$(notYetExpanded(constraint)).$()))))
                 // Expand the focussed rule
                 .$(flatMap(expandPredicate(v)))
                 // Perform inference and remove states that have errors
-                .$(flatMap(assertValid(v)))
+                .$(flatMap(ntl(assertValid(v))))
                 .$()
             ))
             .$();

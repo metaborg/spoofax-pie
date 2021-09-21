@@ -4,56 +4,47 @@ import com.google.common.collect.ImmutableMap;
 import mb.nabl2.terms.ITermVar;
 import mb.statix.SolverContext;
 import mb.statix.SolverState;
-import mb.statix.constraints.messages.IMessage;
-import mb.statix.sequences.Seq;
 import mb.statix.solver.IConstraint;
-import mb.statix.strategies.NamedStrategy1;
 import mb.statix.strategies.NamedStrategy2;
-import mb.statix.strategies.Strategy;
-import mb.statix.strategies.Strategy1;
-import mb.statix.strategies.runtime.AssertThatStrategy;
-import mb.statix.strategies.runtime.FlatMapStrategy;
-import mb.statix.strategies.runtime.NotStrategy;
 import mb.statix.strategies.runtime.TegoEngine;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 
 import static mb.statix.utils.CollectionUtils.containsAny;
 
-public final class ContainsVarStrategy extends NamedStrategy2<SolverContext, ITermVar, IConstraint, SolverState, @Nullable SolverState> {
+public final class ContainsAnyVarStrategy extends NamedStrategy2<SolverContext, Collection<ITermVar>, IConstraint, SolverState, @Nullable SolverState> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
-    private static final ContainsVarStrategy instance = new ContainsVarStrategy();
+    private static final ContainsAnyVarStrategy instance = new ContainsAnyVarStrategy();
     @SuppressWarnings({"unchecked", "unused", "RedundantCast", "RedundantSuppression"})
-    public static ContainsVarStrategy getInstance() { return (ContainsVarStrategy)instance; }
+    public static ContainsAnyVarStrategy getInstance() { return (ContainsAnyVarStrategy)instance; }
 
-    private ContainsVarStrategy() { /* Prevent instantiation. Use getInstance(). */ }
+    private ContainsAnyVarStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
     @Override
     public @Nullable SolverState evalInternal(
         TegoEngine engine,
         SolverContext ctx,
-        ITermVar v,
+        Collection<ITermVar> vars,
         IConstraint constraint,
         SolverState input
     ) {
-        return eval(engine, ctx, v, constraint, input);
+        return eval(engine, ctx, vars, constraint, input);
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
     public static @Nullable SolverState eval(
         TegoEngine engine,
         SolverContext ctx,
-        ITermVar v,
+        Collection<ITermVar> vars,
         IConstraint constraint,
         SolverState input
     ) {
-        return containsAnyVar(Collections.singletonList(v), constraint, input) ? input : null;
+        return containsAnyVar(vars, constraint, input) ? input : null;
     }
 
     private static boolean containsAnyVar(Collection<ITermVar> vars, IConstraint constraint, SolverState state) {
@@ -82,20 +73,16 @@ public final class ContainsVarStrategy extends NamedStrategy2<SolverContext, ITe
         return false;
     }
 
-    private static boolean containsVar(ITermVar var, IConstraint constraint, SolverState state) {
-        return containsAnyVar(Collections.singletonList(var), constraint, state);
-    }
-
     @Override
     public String getName() {
-        return "containsVar";
+        return "containsAnyVar";
     }
 
     @SuppressWarnings("SwitchStatementWithTooFewBranches")
     @Override
     public String getParamName(int index) {
         switch (index) {
-            case 0: return "v";
+            case 0: return "vars";
             case 1: return "constraint";
             default: return super.getParamName(index);
         }

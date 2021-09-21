@@ -14,6 +14,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Set;
 
+import static mb.statix.strategies.runtime.Strategies.ntl;
+
 public final class ExpandAllInjectionsStrategy extends NamedStrategy2<SolverContext, ITermVar, Set<String>, SolverState, Seq<SolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
@@ -91,7 +93,7 @@ public final class ExpandAllInjectionsStrategy extends NamedStrategy2<SolverCont
         final @Nullable Seq<SolverState> r3 = engine.eval(fixSet, ctx, s2, input);
         if (r3 == null) return Seq.of();
 
-        final Strategy<SolverContext, SolverState, Seq<SolverState>> s4 = assertValid.apply(v);
+        final Strategy<SolverContext, SolverState, Seq<SolverState>> s4 = ntl(assertValid.apply(v));
         final @Nullable Seq<SolverState> r4 = engine.eval(flatMap, ctx, s4, r3);
         if (r4 == null) return Seq.of();
 
