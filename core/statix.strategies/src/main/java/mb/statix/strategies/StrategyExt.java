@@ -2,6 +2,7 @@ package mb.statix.strategies;
 
 import mb.statix.functions.Function3;
 import mb.statix.strategies.runtime.TegoEngine;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.BiFunction;
@@ -14,6 +15,26 @@ import java.util.function.Supplier;
 @SuppressWarnings("unused")
 public final class StrategyExt {
     private StrategyExt() { /* Cannot be instantiated. */ }
+
+    /**
+     * Defines a variable with the result of a strategy in the scope of another strategy.
+     *
+     * @param vs the strategy providing the value
+     * @param f the function accepting the value and providing the strategy
+     * @param <CTX> the context
+     * @param <A> the type of the value (contravariant)
+     * @param <I> the type of input (contravariant)
+     * @param <O> the type of output (covariant)
+     * @return the resulting strategy
+     */
+    public static <CTX, A, I, O> Strategy<CTX, I, @Nullable O> let(Strategy<CTX, I, @Nullable A> vs, Function<@NonNull A, Strategy<CTX, I, @Nullable O>> f) {
+        return (engine, ctx, input) -> {
+            final @Nullable A a = engine.eval(vs, ctx, input);
+            if (a == null) return null;
+            final Strategy<CTX, I, O> s = f.apply(a);
+            return engine.eval(s, ctx, input);
+        };
+    }
 
     /**
      * Creates a lambda strategy.
@@ -467,5 +488,35 @@ public final class StrategyExt {
                 return strategy.evalInternal(engine, ctx, arg1, arg2, arg3, input);
             }
         };
+    }
+
+    /**
+     * Builds a recursive strategy.
+     *
+     * @param f the strategy builder function, which takes a reference to the built strategy itself
+     * @param <CTX> the type of context (invariant)
+     * @param <T> the type of input (contravariant)
+     * @param <R> the type of output (covariant)
+     * @return the resulting strategy
+     */
+    public static <CTX, T, R> Strategy<CTX, T, R> rec(Function<Strategy<CTX, T, R>, Strategy<CTX, T, R>> f) {
+        return new Strategy<CTX, T, R>() {
+            @Override
+            public @Nullable R evalInternal(TegoEngine engine, CTX ctx, T input) {
+                return engine.eval(f.apply(this), ctx, input);
+            }
+        };
+    }
+
+    /**
+     * Asserts that the value is not null.
+     *
+     * @param r the return value
+     * @param <R> the type of return value
+     * @return the return value
+     */
+    public static <R> R nn(@Nullable R r) {
+        assert r != null : "Value is not supposed to be null";
+        return r;
     }
 }

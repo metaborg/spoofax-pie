@@ -14,40 +14,22 @@ import java.util.function.Function;
 public final class Strategies {
     private Strategies() { /* Prevent instantiation. */ }
 
-    /**
-     * Builds a recursive strategy.
-     *
-     * @param f the strategy builder function, which takes a reference to the built strategy itself
-     * @param <CTX> the type of context (invariant)
-     * @param <T> the type of input (contravariant)
-     * @param <R> the type of output (covariant)
-     * @return the resulting strategy
-     */
-    public static <CTX, T, R> Strategy<CTX, T, R> rec(Function<Strategy<CTX, T, R>, Strategy<CTX, T, R>> f) {
-        return new Strategy<CTX, T, R>() {
-            @Override
-            public @Nullable R evalInternal(TegoEngine engine, CTX ctx, T input) {
-                return engine.eval(f.apply(this), ctx, input);
-            }
-        };
-    }
-
-    /**
-     * Asserts that the value is not null.
-     *
-     * @param r the return value
-     * @param <R> the type of return value
-     * @return the return value
-     */
-    public static <R> R nn(@Nullable R r) {
-        assert r != null : "Value is not supposed to be null";
-        return r;
+    public static <CTX, T, R> Strategy<CTX, T, Seq<R>> distinct(
+        Strategy<CTX, T, Seq<R>> s
+    ) {
+        return DistinctStrategy.<CTX, T, R>getInstance().apply(s);
     }
 
     public static <CTX, I, O> SeqStrategy.Builder<CTX, I, O> seq(
         Strategy<CTX, I, O> s
     ) {
         return new SeqStrategy.Builder<>(s);
+    }
+
+    public static <CTX, I, O> Strategy<CTX, I, @Nullable I> where(
+        Strategy<CTX, I, O> s
+    ) {
+        return WhereStrategy.<CTX, I, O>getInstance().apply(s);
     }
 
     public static <CTX, I, O> Strategy<CTX, Seq<I>, Seq<O>> flatMap(

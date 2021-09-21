@@ -4,12 +4,22 @@ import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
 import mb.statix.SolverContext;
 import mb.statix.SolverState;
+import mb.statix.constraints.CResolveQuery;
 import mb.statix.sequences.Seq;
+import mb.statix.solver.IConstraint;
 import mb.statix.strategies.NamedStrategy1;
 import mb.statix.strategies.NamedStrategy2;
+import mb.statix.strategies.Strategy;
+import mb.statix.strategies.StrategyExt;
+import mb.statix.strategies.runtime.Strategies;
 import mb.statix.strategies.runtime.TegoEngine;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Set;
+
+import static mb.statix.codecompletion.strategies.runtime.SearchStrategies.*;
+import static mb.statix.strategies.StrategyExt.*;
+import static mb.statix.strategies.runtime.Strategies.*;
 
 public final class ExpandAllQueriesStrategy extends NamedStrategy1<SolverContext, ITermVar, SolverState, Seq<SolverState>> {
 
@@ -41,13 +51,26 @@ public final class ExpandAllQueriesStrategy extends NamedStrategy1<SolverContext
         //     distinct(or(id, fixSet(
         //       if(
         //         limit(1, select(CResolveQuery::class, \(constraint: IConstraint) SolverState -> SolverState?
-        //           = where(let vars = project(v) ; ITerm#getVars in containsAnyVar(vars, constraint))
+        //           = where(let vars = project(v) ; ITerm#getVars in
+        //               containsAnyVar(vars, constraint)
+        //             )
         //         \)),
         //         expandQueryConstraint |> assertValid(v),
         //         id
         //       )
         //     )))
-
+//        final Strategy<SolverContext, SolverState, Seq<SolverState>> s = distinct(or(id(), fixSet(
+//            if_(
+//                limit(1, select(CResolveQuery.class, StrategyExt.<SolverContext, IConstraint, SolverState, SolverState>lam((IConstraint constraint)
+//                    -> where(let(seq(fun(SolverState::project).apply(v)).$(fun(ITerm::getVars)).$(), vars ->
+//                        containsAnyVar(vars, constraint)
+//                    ))
+//                ))),
+//                seq(expandQuery()).$(flatMap(ntl(assertValid(v)))).$(),
+//                id()
+//            )
+//        )));
+//        return nn(engine.eval(s, ctx, input));
 
 
 //        distinct(or(id(), fixSet(
