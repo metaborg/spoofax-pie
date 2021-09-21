@@ -96,12 +96,12 @@ public final class Strategies {
         return IdStrategy.getInstance();
     }
 
-    public static <I, M, O> Strategy<I, Seq<O>> if_(
-        Strategy<I, Seq<M>> condition,
-        Strategy<M, Seq<O>> onSuccess,
-        Strategy<I, Seq<O>> onFailure
+    public static <I, M, O> Strategy<I, O> if_(
+        Strategy<I, @Nullable M> condition,
+        Strategy<M, @Nullable O> onSuccess,
+        Strategy<I, @Nullable O> onFailure
     ) {
-        return GlcStrategy.<I, M, O>getInstance().apply(condition, onSuccess, onFailure);
+        return IfStrategy.<I, M, O>getInstance().apply(condition, onSuccess, onFailure);
     }
 
 }

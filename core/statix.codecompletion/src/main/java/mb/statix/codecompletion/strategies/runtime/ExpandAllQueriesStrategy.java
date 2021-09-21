@@ -2,6 +2,7 @@ package mb.statix.codecompletion.strategies.runtime;
 
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
+import mb.statix.SelectedConstraintSolverState;
 import mb.statix.SolverContext;
 import mb.statix.SolverState;
 import mb.statix.constraints.CResolveQuery;
@@ -59,20 +60,18 @@ public final class ExpandAllQueriesStrategy extends NamedStrategy2<SolverContext
         //         id
         //       )
         //     )))
-//        final Strategy<SolverContext, SolverState, Seq<SolverState>> s = distinct(or(id(), fixSet(
-//            if_(
-//                limit(1, select(CResolveQuery.class, StrategyExt.<SolverContext, IConstraint, SolverState, SolverState>lam((IConstraint constraint)
-//                    -> where(let(seq(fun(SolverState::project).apply(v)).$(fun(ITerm::getVars)).$(), vars ->
-//                        containsAnyVar(vars, constraint)
-//                    ))
-//                ))),
-//                seq(expandQuery(ctx)).$(flatMap(ntl(assertValid(ctx, v)))).$(),
-//                id()
-//            )
-//        )));
-//        return nn(engine.eval(s, x, input));
-
-        throw new UnsupportedOperationException("Not yet implemented");
+        final Strategy<SolverState, Seq<SolverState>> s = distinct(or(ntl(id()), fixSet(
+            if_(
+                limit(1, SearchStrategies.select(CResolveQuery.class, lam((CResolveQuery constraint)
+                    -> where(let(seq(fun(SolverState::project).apply(v)).$(fun(ITerm::getVars)).$(), vars ->
+                        containsAnyVar(vars, constraint)
+                    ))
+                ))),
+                flatMap(seq(expandQuery(ctx)).$(flatMap(ntl(assertValid(ctx, v)))).$()),
+                ntl(id())
+            )
+        )));
+        return nn(engine.eval(s, input));
     }
 
     @Override
