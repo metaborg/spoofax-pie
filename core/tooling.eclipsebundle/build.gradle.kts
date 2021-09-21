@@ -6,7 +6,7 @@ plugins {
 }
 
 mavenize {
-  majorVersion.set("2021-09")
+  majorVersion.set("2021-03")
 }
 
 dependencies {
