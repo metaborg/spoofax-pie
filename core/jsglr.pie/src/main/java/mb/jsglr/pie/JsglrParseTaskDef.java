@@ -13,8 +13,6 @@ import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
-import mb.resource.hierarchical.match.ResourceMatcher;
-import mb.resource.hierarchical.walk.ResourceWalker;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -55,21 +53,15 @@ public abstract class JsglrParseTaskDef implements TaskDef<JsglrParseTaskInput, 
         return recoverableAstFunction;
     }
 
-    public WalkingMultiAstSupplierFunction createMultiAstSupplierFunction(ResourceWalker walker, ResourceMatcher matcher) {
-        return new WalkingMultiAstSupplierFunction(astFunction, walker, matcher);
-    }
 
-    public WalkingMultiAstSupplierFunction createRecoverableMultiAstSupplierFunction(ResourceWalker walker, ResourceMatcher matcher) {
-        return new WalkingMultiAstSupplierFunction(recoverableAstFunction, walker, matcher);
-    }
-
-    public MultiAstSupplierFunction createMultiAstSupplierFunction(Function<ResourcePath, ListView<ResourceKey>> sourceFilesFunction) {
+    public MultiAstSupplierFunction createMultiAstSupplierFunction(Function<ResourcePath, ? extends ListView<? extends ResourceKey>> sourceFilesFunction) {
         return new MultiAstSupplierFunction(sourceFilesFunction, astFunction);
     }
 
-    public MultiAstSupplierFunction createRecoverableMultiAstSupplierFunction(Function<ResourcePath, ListView<ResourceKey>> sourceFilesFunction) {
+    public MultiAstSupplierFunction createRecoverableMultiAstSupplierFunction(Function<ResourcePath, ? extends ListView<? extends ResourceKey>> sourceFilesFunction) {
         return new MultiAstSupplierFunction(sourceFilesFunction, recoverableAstFunction);
     }
+
 
     public Function<JsglrParseTaskInput, Result<JSGLRTokens, JsglrParseException>> createTokensFunction() {
         return tokensFunction;
@@ -83,6 +75,7 @@ public abstract class JsglrParseTaskDef implements TaskDef<JsglrParseTaskInput, 
         return messagesFunction;
     }
 
+    
     private final Function<JsglrParseTaskInput, Result<IStrategoTerm, JsglrParseException>> astFunction = createFunction().mapOutput(AstFunction.instance);
     private final Function<JsglrParseTaskInput, Result<IStrategoTerm, JsglrParseException>> recoverableAstFunction = createFunction().mapOutput(RecoverableAstFunction.instance);
     private final Function<JsglrParseTaskInput, Result<JSGLRTokens, JsglrParseException>> tokensFunction = createFunction().mapOutput(TokensFunction.instance);

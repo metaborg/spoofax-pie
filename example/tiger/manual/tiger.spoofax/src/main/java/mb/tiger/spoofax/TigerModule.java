@@ -33,6 +33,7 @@ import mb.tiger.spoofax.task.TigerCompileDirectory;
 import mb.tiger.spoofax.task.TigerCompileFile;
 import mb.tiger.spoofax.task.TigerCompileFileAlt;
 import mb.tiger.spoofax.task.TigerCheck;
+import mb.tiger.spoofax.task.TigerGetSourceFiles;
 import mb.tiger.spoofax.task.TigerIdeTokenize;
 import mb.tiger.spoofax.task.TigerShowAnalyzedAst;
 import mb.tiger.spoofax.task.TigerShowDesugaredAst;
@@ -119,6 +120,7 @@ public class TigerModule {
         TigerListDefNames listDefNames,
 
         TigerIdeTokenize tokenize,
+        TigerGetSourceFiles getSourceFiles,
         TigerCheck check,
         TigerCheckAggregator checkAggregate,
 
@@ -143,6 +145,7 @@ public class TigerModule {
         taskDefs.add(listDefNames);
 
         taskDefs.add(tokenize);
+        taskDefs.add(getSourceFiles);
         taskDefs.add(check);
         taskDefs.add(checkAggregate);
 

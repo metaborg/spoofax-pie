@@ -20,13 +20,16 @@ import java.io.IOException;
 @{{scope.qualifiedId}}
 public class {{baseCheckAggregatorTaskDef.id}} implements TaskDef<ResourcePath, KeyedMessages> {
     private final {{classLoaderResources.classLoaderResources.qualifiedId}} classLoaderResources;
+    private final {{getSourceFiles.getSourceFilesTaskDef.qualifiedId}} getSourceFiles;
     private final {{checkTaskDef.qualifiedId}} check;
 
     @Inject public {{baseCheckAggregatorTaskDef.id}}(
         {{classLoaderResources.classLoaderResources.qualifiedId}} classLoaderResources,
+        {{getSourceFiles.getSourceFilesTaskDef.qualifiedId}} getSourceFiles,
         {{checkTaskDef.qualifiedId}} check
     ){
         this.classLoaderResources = classLoaderResources;
+        this.getSourceFiles = getSourceFiles;
         this.check = check;
     }
 
@@ -36,17 +39,12 @@ public class {{baseCheckAggregatorTaskDef.id}} implements TaskDef<ResourcePath, 
 
     @Override public @Nullable KeyedMessages exec(ExecContext context, ResourcePath input) throws IOException {
         context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
-        final ResourceWalker walker = ResourceWalker.ofPath(PathMatcher.ofNoHidden());
-        final HierarchicalResource rootDirectory = context.getHierarchicalResource(input);
-        // Require directories recursively, so we re-execute whenever a file is added/removed from a directory.
-        rootDirectory.walkForEach(walker, ResourceMatcher.ofDirectory(), context::require);
-        final ResourceMatcher matcher = ResourceMatcher.ofFile().and(ResourceMatcher.ofPath(PathMatcher.ofExtensions({{#shared.fileExtensions}}"{{this}}"{{^-last}}, {{/-last}}{{/shared.fileExtensions}})));
-        rootDirectory.walkForEach(walker, matcher, file -> {
-            final ResourceKey fileKey = file.getKey();
-            final KeyedMessages messages = context.require(check, new {{checkTaskDef.qualifiedId}}.Input(fileKey, input));
+        for(ResourceKey file : context.require(getSourceFiles, input)) {
+            final KeyedMessages messages = context.require(check, new {{checkTaskDef.qualifiedId}}.Input(file, input));
             messagesBuilder.addMessages(messages);
-        });
+        }
         return messagesBuilder.build();
     }
 }

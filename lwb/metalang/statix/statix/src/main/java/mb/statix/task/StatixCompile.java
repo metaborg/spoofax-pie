@@ -10,7 +10,6 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.statix.StatixScope;
 import mb.statix.task.spoofax.StatixAnalyzeMultiWrapper;
 import mb.statix.task.spoofax.StatixParseWrapper;
-import mb.statix.util.StatixUtil;
 import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoUtil;
@@ -86,15 +85,18 @@ public class StatixCompile implements TaskDef<StatixCompile.Input, Result<Statix
     }
 
     private final StatixParseWrapper parse;
+    private final StatixGetSourceFiles getSourceFiles;
     private final StatixAnalyzeMultiWrapper analyze;
     private final Provider<StrategoRuntime> strategoRuntimeProvider;
 
     @Inject public StatixCompile(
         StatixParseWrapper parse,
+        StatixGetSourceFiles getSourceFiles,
         StatixAnalyzeMultiWrapper analyze,
         Provider<StrategoRuntime> strategoRuntimeProvider
     ) {
         this.parse = parse;
+        this.getSourceFiles = getSourceFiles;
         this.analyze = analyze;
         this.strategoRuntimeProvider = strategoRuntimeProvider;
     }
@@ -110,7 +112,7 @@ public class StatixCompile implements TaskDef<StatixCompile.Input, Result<Statix
 
         // TODO: this does not analyze all source and include directories
         return context.require(analyze.createSingleFileOutputSupplier(
-            new ConstraintAnalyzeMultiTaskDef.Input(input.config.rootDirectory, parse.createMultiAstSupplierFunction(StatixUtil.createResourceWalker(), StatixUtil.createResourceMatcher())),
+            new ConstraintAnalyzeMultiTaskDef.Input(input.config.rootDirectory, parse.createMultiAstSupplierFunction(getSourceFiles.createFunction())),
             input.file
         )).flatMapOrElse(mainFileOutput -> {
             if(mainFileOutput.result.messages.containsError()) {
