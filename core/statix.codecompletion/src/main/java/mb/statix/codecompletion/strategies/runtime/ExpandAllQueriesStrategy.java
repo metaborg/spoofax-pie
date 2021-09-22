@@ -51,7 +51,7 @@ public final class ExpandAllQueriesStrategy extends NamedStrategy2<SolverContext
         // def expandAllQueries(v: ITermVar) =
         //     distinct(or(id, fixSet(
         //       if(
-        //         limit(1, select(CResolveQuery::class, \(constraint: IConstraint) SolverState -> SolverState?
+        //         limit(1, select(CResolveQuery::class, \(constraint: CResolveQuery) SolverState -> SolverState?
         //           = where(let vars = project(v) ; ITerm#getVars in
         //               containsAnyVar(vars, constraint)
         //             )
@@ -62,7 +62,7 @@ public final class ExpandAllQueriesStrategy extends NamedStrategy2<SolverContext
         //     )))
         final Strategy<SolverState, Seq<SolverState>> s = distinct(or(ntl(id()), fixSet(
             if_(
-                limit(1, SearchStrategies.select(CResolveQuery.class, lam((CResolveQuery constraint)
+                limit(1, select(CResolveQuery.class, lam((CResolveQuery constraint)
                     -> where(let(seq(fun(SolverState::project).apply(v)).$(fun(ITerm::getVars)).$(), vars ->
                         containsAnyVar(vars, constraint)
                     ))

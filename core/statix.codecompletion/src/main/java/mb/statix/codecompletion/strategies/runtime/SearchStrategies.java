@@ -51,8 +51,8 @@ public final class SearchStrategies {
         return ExpandAllQueriesStrategy.getInstance().apply(ctx, v);
     }
 
-    public static Strategy<SolverState, Seq<SolverState>> expandDeterministic(ITermVar v) {
-        return ExpandDeterministicStrategy.getInstance().apply(v);
+    public static Strategy<SolverState, Seq<SolverState>> expandDeterministic(SolverContext ctx, ITermVar v) {
+        return ExpandDeterministicStrategy.getInstance().apply(ctx, v);
     }
 
     public static Strategy<SolverState, Seq<SolverState>> expandInjection(SolverContext ctx, ITermVar v, Set<String> visitedInjections) {
@@ -66,6 +66,11 @@ public final class SearchStrategies {
     public static Strategy<SelectedConstraintSolverState<CResolveQuery>, Seq<SolverState>> expandQuery(SolverContext ctx) {
         return ExpandQueryStrategy.getInstance().apply(ctx);
     }
+
+    public static Strategy<SolverState, @Nullable SolverState> filterPlaceholder(SolverContext ctx, ITermVar v) {
+        return FilterPlaceholderStrategy.getInstance().apply(ctx, v);
+    }
+
 
     public static Strategy<SolverState, SolverState> infer() {
         return InferStrategy.getInstance();

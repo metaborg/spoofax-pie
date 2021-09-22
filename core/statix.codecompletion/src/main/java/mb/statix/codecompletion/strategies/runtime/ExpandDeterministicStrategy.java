@@ -1,13 +1,22 @@
 package mb.statix.codecompletion.strategies.runtime;
 
+import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
 import mb.statix.SolverContext;
 import mb.statix.SolverState;
+import mb.statix.constraints.CResolveQuery;
+import mb.statix.constraints.CUser;
 import mb.statix.sequences.Seq;
 import mb.statix.strategies.NamedStrategy1;
+import mb.statix.strategies.NamedStrategy2;
+import mb.statix.strategies.Strategy;
 import mb.statix.strategies.runtime.TegoEngine;
 
-public final class ExpandDeterministicStrategy extends NamedStrategy1<ITermVar, SolverState, Seq<SolverState>> {
+import static mb.statix.codecompletion.strategies.runtime.SearchStrategies.*;
+import static mb.statix.strategies.StrategyExt.*;
+import static mb.statix.strategies.runtime.Strategies.*;
+
+public final class ExpandDeterministicStrategy extends NamedStrategy2<SolverContext, ITermVar, SolverState, Seq<SolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final ExpandDeterministicStrategy instance = new ExpandDeterministicStrategy();
@@ -19,18 +28,48 @@ public final class ExpandDeterministicStrategy extends NamedStrategy1<ITermVar, 
     @Override
     public Seq<SolverState> evalInternal(
         TegoEngine engine,
+        SolverContext ctx,
         ITermVar v,
         SolverState input
     ) {
-        return eval(engine, v, input);
+        return eval(engine, ctx, v, input);
     }
 
     public static Seq<SolverState> eval(
         TegoEngine engine,
+        SolverContext ctx,
         ITermVar v,
         SolverState input
     ) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        // Tego:
+        // def expandDeterministic(v: ITermVar) =
+        //   fixSet(distinct(try(
+        //     select(CUser::class, \(constraint: CUser) SolverState -> SolverState?
+        //       = where(let vars = project(v) ; ITerm#getVars in
+        //           containsAnyVar(vars, constraint)
+        //         )
+        //     \) |>
+        //     single(
+        //       expandPredicate(v) |>
+        //       assertValid(v) |>
+        //       filterPlaceholder(v)
+        //     )
+        //   ))
+        final Strategy<SolverState, Seq<SolverState>> s = fixSet(distinct(try_(
+            seq(select(CUser.class, lam((CUser constraint)
+                    -> where(let(seq(fun(SolverState::project).apply(v)).$(fun(ITerm::getVars)).$(), vars ->
+                    containsAnyVar(vars, constraint)
+                ))
+            )))
+            .$(flatMap(single(
+                seq(expandPredicate(v))
+                .$(flatMap(ntl(assertValid(ctx, v))))
+                .$(flatMap(ntl(filterPlaceholder(ctx, v))))
+                .$()
+            )))
+            .$()
+        )));
+        return nn(engine.eval(s, input));
     }
 
     @Override
@@ -42,7 +81,8 @@ public final class ExpandDeterministicStrategy extends NamedStrategy1<ITermVar, 
     @Override
     public String getParamName(int index) {
         switch (index) {
-            case 0: return "v";
+            case 0: return "ctx";
+            case 1: return "v";
             default: return super.getParamName(index);
         }
     }

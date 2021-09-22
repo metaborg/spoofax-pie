@@ -26,6 +26,12 @@ public final class Strategies {
         return new SeqStrategy.Builder<>(s);
     }
 
+    public static <I, O> Strategy<I, @Nullable O> is(
+        Class<O> cls
+    ) {
+        return IsStrategy.<I, O>getInstance().apply(cls);
+    }
+
     public static <I, O> Strategy<I, @Nullable I> where(
         Strategy<I, O> s
     ) {
