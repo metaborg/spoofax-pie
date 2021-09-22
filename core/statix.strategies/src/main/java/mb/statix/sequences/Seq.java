@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 /**
  * A lazy sequence is a lazy computation of multiple values.
@@ -188,6 +189,20 @@ public interface Seq<T> extends AutoCloseable {
             // Unwrap interruptible iterator
             return new SeqIterator<>(seq);
         }
+    }
+
+    /**
+     * Collects the remaining elements of the sequence into a list.
+     *
+     * This is a terminal operation.
+     *
+     * Note that if this sequence has been (partially) iterated,
+     * the resulting list starts at that point in this sequence.
+     *
+     * @return the list
+     */
+    default List<T> toList() throws InterruptedException {
+        return this.collect(Collectors.toList());
     }
 
     /**
