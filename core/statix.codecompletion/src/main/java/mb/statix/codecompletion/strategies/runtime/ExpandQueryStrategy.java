@@ -36,6 +36,7 @@ import mb.statix.spec.Spec;
 import mb.statix.spoofax.StatixTerms;
 import mb.statix.strategies.NamedStrategy;
 import mb.statix.strategies.NamedStrategy1;
+import mb.statix.strategies.NamedStrategy2;
 import mb.statix.strategies.runtime.TegoEngine;
 import mb.statix.utils.StreamUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -62,7 +63,7 @@ import static mb.nabl2.terms.matching.TermMatch.M;
  * Expands the selected query.
  */
 @SuppressWarnings("UnstableApiUsage")
-public final class ExpandQueryStrategy extends NamedStrategy1<SolverContext, SelectedConstraintSolverState<CResolveQuery>, Seq<SolverState>> {
+public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITermVar, SelectedConstraintSolverState<CResolveQuery>, Seq<SolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final ExpandQueryStrategy instance = new ExpandQueryStrategy();
@@ -81,16 +82,27 @@ public final class ExpandQueryStrategy extends NamedStrategy1<SolverContext, Sel
     public String getParamName(int index) {
         switch (index) {
             case 0: return "ctx";
+            case 1: return "v";
             default: return super.getParamName(index);
         }
     }
 
     @Override
-    public Seq<SolverState> evalInternal(TegoEngine engine, SolverContext ctx, SelectedConstraintSolverState<CResolveQuery> input) {
-        return eval(engine, ctx, input);
+    public Seq<SolverState> evalInternal(
+        TegoEngine engine,
+        SolverContext ctx,
+        ITermVar v,
+        SelectedConstraintSolverState<CResolveQuery> input
+    ) {
+        return eval(engine, ctx, v, input);
     }
 
-    public static Seq<SolverState> eval(TegoEngine engine, SolverContext ctx, SelectedConstraintSolverState<CResolveQuery> input) {
+    public static Seq<SolverState> eval(
+        TegoEngine engine,
+        SolverContext ctx,
+        ITermVar v,
+        SelectedConstraintSolverState<CResolveQuery> input
+    ) {
         final CResolveQuery query = input.getSelected();
 
         engine.log(instance, "Expand query: {}", query);

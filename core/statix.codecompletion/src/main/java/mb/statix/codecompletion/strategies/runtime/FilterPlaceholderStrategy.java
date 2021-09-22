@@ -5,6 +5,7 @@ import mb.nabl2.terms.ITermVar;
 import mb.nabl2.terms.stratego.StrategoPlaceholders;
 import mb.statix.SolverContext;
 import mb.statix.SolverState;
+import mb.statix.strategies.NamedStrategy1;
 import mb.statix.strategies.NamedStrategy2;
 import mb.statix.strategies.Strategy;
 import mb.statix.strategies.runtime.Strategies;
@@ -15,7 +16,7 @@ import static mb.statix.strategies.StrategyExt.*;
 import static mb.statix.strategies.runtime.Strategies.*;
 
 @SuppressWarnings("RedundantSuppression")
-public final class FilterPlaceholderStrategy extends NamedStrategy2<SolverContext, ITermVar, SolverState, @Nullable SolverState> {
+public final class FilterPlaceholderStrategy extends NamedStrategy1<ITermVar, SolverState, @Nullable SolverState> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final FilterPlaceholderStrategy instance = new FilterPlaceholderStrategy();
@@ -28,17 +29,15 @@ public final class FilterPlaceholderStrategy extends NamedStrategy2<SolverContex
     @Override
     public @Nullable SolverState evalInternal(
         TegoEngine engine,
-        SolverContext ctx,
         ITermVar v,
         SolverState input
     ) {
-        return eval(engine, ctx, v, input);
+        return eval(engine, v, input);
     }
 
     @SuppressWarnings({"UnnecessaryLocalVariable", "RedundantIfStatement"})
     public static @Nullable SolverState eval(
         TegoEngine engine,
-        SolverContext ctx,
         ITermVar v,
         SolverState input
     ) {
@@ -62,8 +61,7 @@ public final class FilterPlaceholderStrategy extends NamedStrategy2<SolverContex
     @Override
     public String getParamName(int index) {
         switch (index) {
-            case 0: return "ctx";
-            case 1: return "v";
+            case 0: return "v";
             default: return super.getParamName(index);
         }
     }

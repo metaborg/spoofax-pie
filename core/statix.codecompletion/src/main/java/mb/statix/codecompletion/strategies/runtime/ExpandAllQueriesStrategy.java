@@ -6,6 +6,7 @@ import mb.statix.SelectedConstraintSolverState;
 import mb.statix.SolverContext;
 import mb.statix.SolverState;
 import mb.statix.constraints.CResolveQuery;
+import mb.statix.constraints.messages.IMessage;
 import mb.statix.sequences.Seq;
 import mb.statix.solver.IConstraint;
 import mb.statix.strategies.NamedStrategy1;
@@ -16,6 +17,8 @@ import mb.statix.strategies.runtime.Strategies;
 import mb.statix.strategies.runtime.TegoEngine;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
 import static mb.statix.codecompletion.strategies.runtime.SearchStrategies.*;
@@ -67,7 +70,7 @@ public final class ExpandAllQueriesStrategy extends NamedStrategy2<SolverContext
                         containsAnyVar(vars, constraint)
                     ))
                 ))),
-                flatMap(seq(expandQuery(ctx)).$(flatMap(ntl(assertValid(ctx, v)))).$()),
+                flatMap(seq(expandQuery(ctx, v)).$(flatMap(ntl(assertValid(ctx, v)))).$()),
                 ntl(id())
             )
         )));
@@ -83,7 +86,7 @@ public final class ExpandAllQueriesStrategy extends NamedStrategy2<SolverContext
     @Override
     public String getParamName(int index) {
         switch (index) {
-            case 0: return "ctx";
+            case 0: return "allowedErrors";
             case 1: return "v";
             default: return super.getParamName(index);
         }

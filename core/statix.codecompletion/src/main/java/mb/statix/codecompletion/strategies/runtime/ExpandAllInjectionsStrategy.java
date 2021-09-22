@@ -1,9 +1,12 @@
 package mb.statix.codecompletion.strategies.runtime;
 
+import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
 import mb.statix.SolverContext;
 import mb.statix.SolverState;
+import mb.statix.constraints.messages.IMessage;
 import mb.statix.sequences.Seq;
+import mb.statix.solver.IConstraint;
 import mb.statix.strategies.NamedStrategy2;
 import mb.statix.strategies.NamedStrategy3;
 import mb.statix.strategies.Strategy;
@@ -13,6 +16,8 @@ import mb.statix.strategies.runtime.TegoEngine;
 import mb.statix.strategies.runtime.TryStrategy;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
 import static mb.statix.strategies.runtime.Strategies.ntl;

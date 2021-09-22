@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
  * Given a state with a selected predicate constraint {@link CUser},
  * this strategy expands the initial state into as many states as there are rules defined for the predicate.
  */
-public final class ExpandPredicateStrategy extends NamedStrategy1<ITermVar, SelectedConstraintSolverState<CUser>, Seq<SolverState>> {
+public final class ExpandPredicateStrategy extends NamedStrategy2<SolverContext, ITermVar, SelectedConstraintSolverState<CUser>, Seq<SolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final ExpandPredicateStrategy instance = new ExpandPredicateStrategy();
@@ -42,17 +42,18 @@ public final class ExpandPredicateStrategy extends NamedStrategy1<ITermVar, Sele
     @SuppressWarnings("SwitchStatementWithTooFewBranches") @Override
     public String getParamName(int index) {
         switch (index) {
-            case 0: return "focus";
+            case 0: return "ctx";
+            case 1: return "focus";
             default: return super.getParamName(index);
         }
     }
 
     @Override
-    public Seq<SolverState> evalInternal(TegoEngine engine, @Nullable ITermVar focus, SelectedConstraintSolverState<CUser> input) {
-        return eval(engine, focus, input);
+    public Seq<SolverState> evalInternal(TegoEngine engine, SolverContext ctx, @Nullable ITermVar focus, SelectedConstraintSolverState<CUser> input) {
+        return eval(engine, ctx, focus, input);
     }
 
-    public static Seq<SolverState> eval(TegoEngine engine, @Nullable ITermVar focus, SelectedConstraintSolverState<CUser> input) {
+    public static Seq<SolverState> eval(TegoEngine engine, SolverContext ctx, @Nullable ITermVar focus, SelectedConstraintSolverState<CUser> input) {
         final CUser selected = input.getSelected();
         // Get the rules for the given predicate constraint
         final ImmutableList<Rule> rules = input.getSpec().rules().getOrderIndependentRules(selected.name()).asList();

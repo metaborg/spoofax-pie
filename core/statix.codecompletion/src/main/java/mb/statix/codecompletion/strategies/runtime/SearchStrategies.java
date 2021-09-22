@@ -1,11 +1,13 @@
 package mb.statix.codecompletion.strategies.runtime;
 
+import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
 import mb.statix.SelectedConstraintSolverState;
 import mb.statix.SolverContext;
 import mb.statix.SolverState;
 import mb.statix.constraints.CResolveQuery;
 import mb.statix.constraints.CUser;
+import mb.statix.constraints.messages.IMessage;
 import mb.statix.sequences.Seq;
 import mb.statix.solver.IConstraint;
 import mb.statix.strategies.Strategy;
@@ -14,6 +16,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 
 public final class SearchStrategies {
@@ -35,8 +38,8 @@ public final class SearchStrategies {
         return NotYetExpandedStrategy.getInstance().apply(constraint);
     }
 
-    public static Strategy<SolverState, SolverState> delayStuckQueries() {
-        return DelayStuckQueriesStrategy.getInstance();
+    public static Strategy<SolverState, SolverState> delayStuckQueries(SolverContext ctx) {
+        return DelayStuckQueriesStrategy.getInstance().apply(ctx);
     }
 
     public static Strategy<SolverState, Seq<SolverState>> expandAllInjections(SolverContext ctx, ITermVar v, Set<String> visitedInjections) {
@@ -59,16 +62,16 @@ public final class SearchStrategies {
         return ExpandInjectionStrategy.getInstance().apply(ctx, v, visitedInjections);
     }
 
-    public static Strategy<SelectedConstraintSolverState<CUser>, Seq<SolverState>> expandPredicate(ITermVar v) {
-        return ExpandPredicateStrategy.getInstance().apply(v);
+    public static Strategy<SelectedConstraintSolverState<CUser>, Seq<SolverState>> expandPredicate(SolverContext ctx, ITermVar v) {
+        return ExpandPredicateStrategy.getInstance().apply(ctx, v);
     }
 
-    public static Strategy<SelectedConstraintSolverState<CResolveQuery>, Seq<SolverState>> expandQuery(SolverContext ctx) {
-        return ExpandQueryStrategy.getInstance().apply(ctx);
+    public static Strategy<SelectedConstraintSolverState<CResolveQuery>, Seq<SolverState>> expandQuery(SolverContext ctx, ITermVar v) {
+        return ExpandQueryStrategy.getInstance().apply(ctx, v);
     }
 
-    public static Strategy<SolverState, @Nullable SolverState> filterPlaceholder(SolverContext ctx, ITermVar v) {
-        return FilterPlaceholderStrategy.getInstance().apply(ctx, v);
+    public static Strategy<SolverState, @Nullable SolverState> filterPlaceholder(ITermVar v) {
+        return FilterPlaceholderStrategy.getInstance().apply(v);
     }
 
 

@@ -6,11 +6,16 @@ import mb.statix.SolverContext;
 import mb.statix.SolverState;
 import mb.statix.constraints.CResolveQuery;
 import mb.statix.constraints.CUser;
+import mb.statix.constraints.messages.IMessage;
 import mb.statix.sequences.Seq;
+import mb.statix.solver.IConstraint;
 import mb.statix.strategies.NamedStrategy1;
 import mb.statix.strategies.NamedStrategy2;
 import mb.statix.strategies.Strategy;
 import mb.statix.strategies.runtime.TegoEngine;
+
+import java.util.Collection;
+import java.util.Map;
 
 import static mb.statix.codecompletion.strategies.runtime.SearchStrategies.*;
 import static mb.statix.strategies.StrategyExt.*;
@@ -62,9 +67,9 @@ public final class ExpandDeterministicStrategy extends NamedStrategy2<SolverCont
                 ))
             )))
             .$(flatMap(single(
-                seq(expandPredicate(v))
+                seq(expandPredicate(ctx, v))
                 .$(flatMap(ntl(assertValid(ctx, v))))
-                .$(flatMap(ntl(filterPlaceholder(ctx, v))))
+                .$(flatMap(ntl(filterPlaceholder(v))))
                 .$()
             )))
             .$()

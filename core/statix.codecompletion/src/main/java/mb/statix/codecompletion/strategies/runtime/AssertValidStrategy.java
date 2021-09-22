@@ -51,9 +51,9 @@ public final class AssertValidStrategy extends NamedStrategy2<SolverContext, ITe
         SolverState input
     ) {
         // Tego:
-        // def assertValid(v: ITermVar): SolverState -> SolverState =
+        // def assertValid(allowedErrors: Collection<Map.Entry<IConstraint, IMessage>>, v: ITermVar): SolverState -> SolverState =
         //    infer ;
-        //    not(SolverState#hasSeriousErrors(<SolverContext#allowedErrors> ctx)) ;
+        //    not(SolverState#hasSeriousErrors(allowedErrors)) ;
         //    delayStuckQueries
 
         final InferStrategy infer = InferStrategy.getInstance();
@@ -63,15 +63,12 @@ public final class AssertValidStrategy extends NamedStrategy2<SolverContext, ITe
         final @Nullable SolverState r1 = engine.eval(infer, input);
         if (r1 == null) return null;
 
-        @Nullable final Collection<Map.Entry<IConstraint, IMessage>> allowedErrors = engine.eval(fun(SolverContext::getAllowedErrors), ctx);
-        if (allowedErrors == null) return null;
-
-        final Strategy<SolverState, @Nullable SolverState> s2 = StrategyExt.pred(SolverState::hasSeriousErrors).apply(allowedErrors);
+        final Strategy<SolverState, @Nullable SolverState> s2 = StrategyExt.pred(SolverState::hasSeriousErrors).apply(ctx.getAllowedErrors());
         final Strategy<SolverState, @Nullable SolverState> s3 = not.apply(s2);
         final @Nullable SolverState r3 = engine.eval(s3, r1);
         if (r3 == null) return null;
 
-        final @Nullable SolverState r4 = engine.eval(delayStuckQueries, r3);
+        final @Nullable SolverState r4 = engine.eval(delayStuckQueries, ctx, r3);
         if (r4 == null) return null;
 
         return r4;

@@ -5,13 +5,18 @@ import mb.nabl2.terms.ITermVar;
 import mb.statix.SolverContext;
 import mb.statix.SolverState;
 import mb.statix.constraints.CUser;
+import mb.statix.constraints.messages.IMessage;
 import mb.statix.sequences.Seq;
+import mb.statix.solver.IConstraint;
 import mb.statix.strategies.NamedStrategy1;
 import mb.statix.strategies.NamedStrategy2;
 import mb.statix.strategies.Strategy;
 import mb.statix.strategies.Strategy1;
 import mb.statix.strategies.StrategyExt;
 import mb.statix.strategies.runtime.TegoEngine;
+
+import java.util.Collection;
+import java.util.Map;
 
 import static mb.statix.codecompletion.strategies.runtime.SearchStrategies.*;
 import static mb.statix.strategies.StrategyExt.*;
@@ -72,7 +77,7 @@ public final class ExpandAllPredicatesStrategy extends NamedStrategy2<SolverCont
             .$(repeat(
                 seq(limit(1, select(CUser.class, lam((constraint) -> seq(containsVar(v, constraint)).$(notYetExpanded(constraint)).$()))))
                 // Expand the focussed rule
-                .$(flatMap(expandPredicate(v)))
+                .$(flatMap(expandPredicate(ctx, v)))
                 // Perform inference and remove states that have errors
                 .$(flatMap(ntl(assertValid(ctx, v))))
                 .$()
@@ -91,7 +96,8 @@ public final class ExpandAllPredicatesStrategy extends NamedStrategy2<SolverCont
     @Override
     public String getParamName(int index) {
         switch (index) {
-            case 0: return "v";
+            case 0: return "allowedErrors";
+            case 1: return "v";
             default: return super.getParamName(index);
         }
     }
