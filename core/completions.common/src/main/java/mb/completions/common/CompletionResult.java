@@ -8,6 +8,7 @@ import java.io.Serializable;
 /**
  * The result of invoking completions.
  */
+@Deprecated
 public final class CompletionResult implements Serializable {
 
     private final ListView<CompletionProposal> proposals;

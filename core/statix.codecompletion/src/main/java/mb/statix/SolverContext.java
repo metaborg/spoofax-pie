@@ -7,6 +7,7 @@ import mb.statix.constraints.messages.IMessage;
 import mb.statix.sequences.InterruptiblePredicate;
 import mb.statix.solver.IConstraint;
 import mb.statix.spec.Spec;
+import mb.statix.strategies.Strategy;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
@@ -18,34 +19,22 @@ import java.util.function.Predicate;
  */
 public final class SolverContext {
 
-    private final StrategoTerms strategoTerms;
-    @Nullable private final ITermVar focusVar;
+    private final @Nullable ITermVar focusVar;
     private final Collection<Map.Entry<IConstraint, IMessage>> allowedErrors;
-    private final Predicate<ITerm> isInjPredicate;
+    private final Strategy<ITerm, @Nullable ITerm> isInjPredicate;
 
     /**
      * Initializes a new instance of the {@link SolverContext} class.
-     * @param focusVar the focus variable; or {@code null}
-     * @param strategoTerms the stratego terms
      */
     public SolverContext(
-        StrategoTerms strategoTerms,
         @Nullable ITermVar focusVar,
         Collection<Map.Entry<IConstraint, IMessage>> allowedErrors,
-        Predicate<ITerm> isInjPredicate
+        Strategy<ITerm, @Nullable ITerm> isInjPredicate
     ) {
-        this.strategoTerms = strategoTerms;
         this.focusVar = focusVar;
         this.allowedErrors = allowedErrors;
         this.isInjPredicate = isInjPredicate;
     }
-
-    /**
-     * The {@link StrategoTerms} object.
-     *
-     * @return the {@link StrategoTerms} object
-     */
-    public StrategoTerms getStrategoTerms() { return this.strategoTerms; }
 
     /**
      * The focus variable.
@@ -54,7 +43,7 @@ public final class SolverContext {
      *
      * @return the focus variable; or {@code null}
      */
-    @Nullable public ITermVar getFocusVar() {
+    public @Nullable ITermVar getFocusVar() {
         return this.focusVar;
     }
 
@@ -65,7 +54,7 @@ public final class SolverContext {
      * @return the modified copy of the {@link SolverContext}
      */
     public SolverContext withFocusVar(@Nullable ITermVar focusVar) {
-        return new SolverContext(strategoTerms, focusVar, allowedErrors, isInjPredicate);
+        return new SolverContext(focusVar, allowedErrors, isInjPredicate);
     }
 
     /**
@@ -86,7 +75,7 @@ public final class SolverContext {
      * @return the modified copy of the {@link SolverContext}
      */
     public SolverContext withAllowedErrors(Collection<Map.Entry<IConstraint, IMessage>> allowedErrors) {
-        return new SolverContext( strategoTerms, focusVar, allowedErrors, isInjPredicate);
+        return new SolverContext(focusVar, allowedErrors, isInjPredicate);
     }
 
     /**
@@ -94,7 +83,7 @@ public final class SolverContext {
      *
      * @return the predicate
      */
-    public Predicate<ITerm> getIsInjPredicate() {
+    public Strategy<ITerm, @Nullable ITerm> getIsInjPredicate() {
         return isInjPredicate;
     }
 }

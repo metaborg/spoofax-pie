@@ -10,6 +10,7 @@ import java.io.Serializable;
 /**
  * A completion proposal.
  */
+@Deprecated
 public final class CompletionProposal implements Serializable {
 
     private final String label;

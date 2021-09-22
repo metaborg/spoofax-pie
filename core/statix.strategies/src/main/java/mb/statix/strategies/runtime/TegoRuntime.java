@@ -1,6 +1,6 @@
 package mb.statix.strategies.runtime;
 
-import mb.statix.sequences.Seq;
+import mb.log.api.LoggerFactory;
 import mb.statix.strategies.Strategy;
 import mb.statix.strategies.Strategy1;
 import mb.statix.strategies.Strategy2;
@@ -14,6 +14,16 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * The methods in this interface enable the evaluation of strategies.
  */
 public interface TegoRuntime {
+
+    /**
+     * Creates a Tego runtime.
+     *
+     * @param loggerFactory the logger factory
+     * @return the Tego runtime
+     */
+    static TegoRuntime createRuntime(LoggerFactory loggerFactory) {
+        return new TegoRuntimeImpl(loggerFactory);
+    }
 
     /**
      * Evaluates the strategy.

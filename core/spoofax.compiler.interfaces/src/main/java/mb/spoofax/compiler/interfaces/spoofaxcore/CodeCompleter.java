@@ -1,5 +1,6 @@
 package mb.spoofax.compiler.interfaces.spoofaxcore;
 
+import mb.common.codecompletion.CodeCompletionResult;
 import mb.common.region.Region;
 import mb.completions.common.CompletionResult;
 import mb.resource.ResourceKey;
@@ -9,15 +10,15 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 /**
  * Code completion interface.
  */
-public interface Completer {
+public interface CodeCompleter {
     /**
      * Produces completion results for the specified location in the specified text.
      *
      * @param ast the source code AST
      * @param primarySelection the primary selection
-     * @param resource the resource key; or {@code null}
-     * @return a completion result
+     * @param resource the resource key
+     * @return a completion result; or {@code null}
      * @throws InterruptedException The operation was interrupted.
      */
-    CompletionResult complete(IStrategoTerm ast, IStrategoTerm analysisResult, Region primarySelection, @Nullable ResourceKey resource) throws InterruptedException;
+    @Nullable CodeCompletionResult complete(IStrategoTerm ast, IStrategoTerm analysisResult, Region primarySelection, ResourceKey resource) throws InterruptedException;
 }
