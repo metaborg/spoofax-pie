@@ -10,6 +10,6 @@ public class StatixUtil {
     }
 
     public static ResourceMatcher createResourceMatcher() {
-        return ResourceMatcher.ofPath(PathMatcher.ofExtensions("stx")).and(ResourceMatcher.ofFile());
+        return ResourceMatcher.ofPath(PathMatcher.ofExtensions("stx", "stxtest")).and(ResourceMatcher.ofFile());
     }
 }

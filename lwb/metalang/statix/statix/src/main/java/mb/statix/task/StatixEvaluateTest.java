@@ -11,6 +11,7 @@ import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
 import mb.spoofax2.common.primitive.generic.Spoofax2ProjectContext;
 import mb.statix.StatixClassLoaderResources;
+import mb.statix.StatixScope;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -19,6 +20,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import javax.inject.Inject;
 import java.io.Serializable;
 
+@StatixScope
 public class StatixEvaluateTest implements TaskDef<StatixEvaluateTest.Args, CommandFeedback> {
     public static class Args implements Serializable {
         public final ResourcePath rootDirectory;

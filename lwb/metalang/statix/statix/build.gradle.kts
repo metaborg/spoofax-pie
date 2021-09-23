@@ -69,6 +69,10 @@ val taskPackageId = "$packageId.task"
 val spoofaxTaskPackageId = "$taskPackageId.spoofax"
 languageAdapterProject {
   compilerInput {
+    withGetSourceFiles().run {
+      extendGetSourceFilesTaskDef(spoofaxTaskPackageId, "StatixGetSourceFiles")
+      baseGetSourceFilesTaskDef(spoofaxTaskPackageId, "BaseStatixGetSourceFiles")
+    }
     withParser().run {
       // Wrap Parse task
       extendParseTaskDef(spoofaxTaskPackageId, "StatixParseWrapper")

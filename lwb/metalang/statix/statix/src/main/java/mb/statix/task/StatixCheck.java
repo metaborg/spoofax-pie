@@ -15,6 +15,7 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.statix.StatixClassLoaderResources;
 import mb.statix.StatixScope;
 import mb.statix.task.spoofax.StatixAnalyzeMultiWrapper;
+import mb.statix.task.spoofax.StatixGetSourceFiles;
 import mb.statix.task.spoofax.StatixParseWrapper;
 
 import javax.inject.Inject;
@@ -54,7 +55,6 @@ public class StatixCheck implements TaskDef<StatixConfig, KeyedMessages> {
             messagesBuilder.addMessages(file, result.mapOrElse(v -> v.messages.asMessages(), e -> e.getOptionalMessages().map(KeyedMessages::asMessages).orElseGet(Messages::of)));
         }
 
-        // TODO: this does not analyze all source and include directories
         final StatixAnalyzeMultiWrapper.Input analyzeInput = new StatixAnalyzeMultiWrapper.Input(input.rootDirectory, parse.createRecoverableMultiAstSupplierFunction(getSourceFiles.createFunction()));
         final Result<StatixAnalyzeMultiWrapper.Output, ?> analysisResult = context.require(analyze, analyzeInput);
         analysisResult
