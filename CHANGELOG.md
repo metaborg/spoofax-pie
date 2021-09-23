@@ -3,6 +3,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+### Fixed
+- SDF3 files in subdirectories cause the parenthesizer file to not import the correct signatures (https://github.com/metaborg/spoofax-pie/issues/61).
 
 
 ## [0.12.0] - 2021-09-22

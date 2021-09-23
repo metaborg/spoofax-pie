@@ -85,6 +85,11 @@ public interface CommandActionRepr extends Serializable {
         }
 
 
+        public Builder readableResourceRequired() {
+            addRequiredEditorFileTypes(EditorFileType.ReadableResource);
+            return this;
+        }
+
         public Builder fileRequired() {
             addRequiredEditorFileTypes(EditorFileType.HierarchicalResource);
             addRequiredResourceTypes(HierarchicalResourceType.File);

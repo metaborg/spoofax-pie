@@ -20,7 +20,8 @@ public class StatixConfig implements Serializable {
         ResourcePath mainFile,
         ListView<ResourcePath> sourcePaths,
         ListView<ResourcePath> includePaths,
-        ListView<STask<?>> sourceFileOrigins) {
+        ListView<STask<?>> sourceFileOrigins
+    ) {
         this.rootDirectory = rootDirectory;
         this.mainFile = mainFile;
         this.sourcePaths = sourcePaths;

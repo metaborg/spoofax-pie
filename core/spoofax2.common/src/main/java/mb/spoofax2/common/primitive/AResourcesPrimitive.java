@@ -12,6 +12,8 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax2.common.primitive.generic.ASpoofaxPrimitive;
 import mb.spoofax2.common.primitive.generic.Spoofax2LanguageContext;
+import mb.spoofax2.common.primitive.generic.Spoofax2ProjectContext;
+import mb.stratego.common.AdaptException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.core.InterpreterException;
@@ -89,13 +91,21 @@ public abstract class AResourcesPrimitive extends ASpoofaxPrimitive implements A
         final Strategy importStr = svars[1];
         final TermReader termReader = new TermReader(termFactory);
 
+        final Spoofax2LanguageContext languageContext = getSpoofax2LanguageContext(context);
+        @Nullable Spoofax2ProjectContext projectContext;
+        try {
+            projectContext = getSpoofax2ProjectContext(context);
+        } catch(AdaptException e) {
+            projectContext = null;
+        }
+
         final Deque<IStrategoTerm> names = Lists.newLinkedList(parseNames(current));
         final Map<IStrategoTerm, IStrategoTerm> resources = Maps.newHashMap();
         while(!names.isEmpty()) {
             final IStrategoTerm name = names.pop();
             if(!resources.containsKey(name)) {
                 final String path = resourcePath(context, nameToPathStr, name);
-                final @Nullable IStrategoTerm resource = loadResource(locations(getSpoofax2LanguageContext(context)), path, termReader).orElse(null);
+                final @Nullable IStrategoTerm resource = loadResource(locations(languageContext, projectContext), path, termReader).orElse(null);
                 if(resource == null) {
                     return null;
                 }
@@ -109,7 +119,7 @@ public abstract class AResourcesPrimitive extends ASpoofaxPrimitive implements A
             .collect(Collectors.toList()));
     }
 
-    protected abstract List<HierarchicalResource> locations(Spoofax2LanguageContext context);
+    protected abstract List<HierarchicalResource> locations(Spoofax2LanguageContext languageContext, @Nullable Spoofax2ProjectContext projectContext);
 
     private Optional<IStrategoTerm> loadResource(List<HierarchicalResource> locations, String path, TermReader termReader) {
         for(HierarchicalResource location : locations) {
@@ -155,8 +165,11 @@ public abstract class AResourcesPrimitive extends ASpoofaxPrimitive implements A
 
     }
 
-    private List<IStrategoTerm> resourceImports(org.spoofax.interpreter.core.IContext strategoContext, Strategy s,
-        IStrategoTerm resource) throws InterpreterException {
+    private List<IStrategoTerm> resourceImports(
+        org.spoofax.interpreter.core.IContext strategoContext,
+        Strategy s,
+        IStrategoTerm resource
+    ) throws InterpreterException {
         strategoContext.setCurrent(resource);
         if(!s.evaluate(strategoContext)) {
             return Collections.emptyList();
