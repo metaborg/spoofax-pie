@@ -6,7 +6,7 @@ import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.LinkedHashSet;
 
 public class StatixConfig implements Serializable {
     public final ResourcePath rootDirectory;
@@ -20,7 +20,8 @@ public class StatixConfig implements Serializable {
         ResourcePath mainFile,
         ListView<ResourcePath> sourcePaths,
         ListView<ResourcePath> includePaths,
-        ListView<STask<?>> sourceFileOrigins) {
+        ListView<STask<?>> sourceFileOrigins
+    ) {
         this.rootDirectory = rootDirectory;
         this.mainFile = mainFile;
         this.sourcePaths = sourcePaths;
@@ -33,8 +34,8 @@ public class StatixConfig implements Serializable {
         return new StatixConfig(rootDirectory, sourceDirectory.appendRelativePath("main.stx"), ListView.of(sourceDirectory), ListView.of(), ListView.of());
     }
 
-    public ArrayList<ResourcePath> sourceAndIncludePaths() {
-        final ArrayList<ResourcePath> sourceAndIncludePaths = new ArrayList<>();
+    public LinkedHashSet<ResourcePath> sourceAndIncludePaths() {
+        final LinkedHashSet<ResourcePath> sourceAndIncludePaths = new LinkedHashSet<>();
         sourcePaths.addAllTo(sourceAndIncludePaths);
         includePaths.addAllTo(sourceAndIncludePaths);
         return sourceAndIncludePaths;

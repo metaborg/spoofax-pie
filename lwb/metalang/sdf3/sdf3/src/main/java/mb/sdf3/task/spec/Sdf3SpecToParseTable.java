@@ -154,6 +154,11 @@ public class Sdf3SpecToParseTable implements TaskDef<Sdf3SpecToParseTable.Input,
                 }
             }
 
+            // HACK: remove the "permissive-water" module from the modules read of the normalized grammar, such that
+            //       the parenthesizer does not generate an import to its signatures, as it does not have a
+            //       corresponding signatures file.
+            normalizedGrammar.getModulesRead().remove("normalized/permissive-water-norm");
+
             return Result.ofOk(new ParseTable(normalizedGrammar, input.config.parseTableConfig));
         } catch(ExpectException e) {
             return Result.ofErr(e);

@@ -9,9 +9,9 @@ import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.sdf3.task.Sdf3AnalyzeMulti;
+import mb.sdf3.task.Sdf3GetSourceFiles;
 import mb.sdf3.task.Sdf3GetStrategoRuntimeProvider;
 import mb.sdf3.task.Sdf3Parse;
-import mb.sdf3.task.util.Sdf3Util;
 import mb.spoofax.core.language.command.CommandFeedback;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -50,11 +50,13 @@ public abstract class ShowAnalyzedTaskDef extends ProvideOutputShared implements
 
     private final Sdf3Parse parse;
     private final Function<Supplier<? extends Result<IStrategoTerm, ?>>, Result<IStrategoTerm, ?>> desugar;
+    private final Sdf3GetSourceFiles getSourceFiles;
     private final Sdf3AnalyzeMulti analyze;
     private final Function<Supplier<? extends Result<ConstraintAnalyzeMultiTaskDef.SingleFileOutput, ?>>, Result<IStrategoTerm, ?>> operation;
 
     public ShowAnalyzedTaskDef(
         Sdf3Parse parse,
+        Sdf3GetSourceFiles getSourceFiles,
         Function<Supplier<? extends Result<IStrategoTerm, ?>>, Result<IStrategoTerm, ?>> desugar,
         Sdf3AnalyzeMulti analyze,
         Function<Supplier<? extends Result<ConstraintAnalyzeMultiTaskDef.SingleFileOutput, ?>>, Result<IStrategoTerm, ?>> operation,
@@ -64,6 +66,7 @@ public abstract class ShowAnalyzedTaskDef extends ProvideOutputShared implements
     ) {
         super(getStrategoRuntimeProvider, prettyPrintStrategy, resultName);
         this.parse = parse;
+        this.getSourceFiles = getSourceFiles;
         this.desugar = desugar;
         this.analyze = analyze;
         this.operation = operation;
@@ -71,7 +74,7 @@ public abstract class ShowAnalyzedTaskDef extends ProvideOutputShared implements
 
     @Override public CommandFeedback exec(ExecContext context, Args args) {
         return context
-            .require(operation, analyze.createSingleFileOutputSupplier(new Sdf3AnalyzeMulti.Input(args.project, parse.createRecoverableMultiAstSupplierFunction(Sdf3Util.createResourceWalker(), Sdf3Util.createResourceMatcher()).mapOutput(new MultiAstDesugarFunction(desugar))), args.file))
+            .require(operation, analyze.createSingleFileOutputSupplier(new Sdf3AnalyzeMulti.Input(args.project, parse.createRecoverableMultiAstSupplierFunction(getSourceFiles.createFunction()).mapOutput(new MultiAstDesugarFunction(desugar))), args.file))
             .mapOrElse(ast -> provideOutput(context, args.concrete, ast, args.file), e -> CommandFeedback.ofTryExtractMessagesFrom(e, args.file));
     }
 

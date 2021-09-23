@@ -5,13 +5,12 @@ import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Messages;
 import mb.common.message.Severity;
 import mb.common.result.Result;
+import mb.jsglr.common.JsglrParseException;
+import mb.jsglr.common.JsglrParseOutput;
+import mb.jsglr.pie.JsglrParseTaskInput;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
-import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
-import mb.resource.hierarchical.match.ResourceMatcher;
-import mb.resource.hierarchical.match.path.PathMatcher;
-import mb.resource.hierarchical.walk.ResourceWalker;
 import mb.tiger.spoofax.TigerScope;
 import mb.tiger.spoofax.task.reusable.TigerAnalyzeMulti;
 import mb.tiger.spoofax.task.reusable.TigerParse;
@@ -26,10 +25,13 @@ import java.io.IOException;
 @TigerScope
 public class TigerCheckMulti implements TaskDef<ResourcePath, KeyedMessages> {
     private final TigerParse parse;
+    private final TigerGetSourceFiles getSourceFiles;
     private final TigerAnalyzeMulti analyze;
 
-    @Inject public TigerCheckMulti(TigerParse parse, TigerAnalyzeMulti analyze) {
+    @Inject
+    public TigerCheckMulti(TigerParse parse, TigerGetSourceFiles getSourceFiles, TigerAnalyzeMulti analyze) {
         this.parse = parse;
+        this.getSourceFiles = getSourceFiles;
         this.analyze = analyze;
     }
 
@@ -40,17 +42,12 @@ public class TigerCheckMulti implements TaskDef<ResourcePath, KeyedMessages> {
     @Override
     public KeyedMessages exec(ExecContext context, ResourcePath input) throws IOException {
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
-        final ResourceWalker walker = ResourceWalker.ofPath(PathMatcher.ofNoHidden());
-        final HierarchicalResource rootDirectory = context.getHierarchicalResource(input);
-        // Require directories recursively, so we re-execute whenever a file is added/removed from a directory.
-        rootDirectory.walkForEach(walker, ResourceMatcher.ofDirectory(), context::require);
-        final ResourceMatcher matcher = ResourceMatcher.ofFile().and(ResourceMatcher.ofPath(PathMatcher.ofExtensions("tig")));
-        rootDirectory.walkForEach(walker, matcher, file -> {
-            final ResourcePath filePath = file.getPath();
-            final Messages messages = context.require(parse.inputBuilder().withFile(filePath).rootDirectoryHint(input).buildMessagesSupplier());
-            messagesBuilder.addMessages(filePath, messages);
-        });
-        final TigerAnalyzeMulti.Input analyzeInput = new TigerAnalyzeMulti.Input(input, parse.createRecoverableMultiAstSupplierFunction(walker, matcher));
+        final JsglrParseTaskInput.Builder parseInputBuilder = parse.inputBuilder().rootDirectoryHint(input);
+        for(ResourcePath file : context.require(getSourceFiles, input)) {
+            final Result<JsglrParseOutput, JsglrParseException> result = context.require(parseInputBuilder.withFile(file).buildSupplier());
+            messagesBuilder.addMessages(file, result.mapOrElse(v -> v.messages.asMessages(), e -> e.getOptionalMessages().map(KeyedMessages::asMessages).orElseGet(Messages::of)));
+        }
+        final TigerAnalyzeMulti.Input analyzeInput = new TigerAnalyzeMulti.Input(input, parse.createRecoverableMultiAstSupplierFunction(getSourceFiles.createFunction()));
         final Result<TigerAnalyzeMulti.Output, ?> analysisResult = context.require(analyze, analyzeInput);
         analysisResult
             .ifOk(output -> {

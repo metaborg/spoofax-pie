@@ -1,5 +1,9 @@
 import mb.spoofax.compiler.adapter.*
+import mb.spoofax.compiler.adapter.data.*
 import mb.spoofax.compiler.util.*
+import mb.spoofax.core.language.command.CommandContextType
+import mb.spoofax.core.language.command.CommandExecutionType
+import mb.spoofax.core.language.command.EnclosingCommandContextType
 
 plugins {
   id("org.metaborg.gradle.config.java-library")
@@ -65,6 +69,10 @@ val taskPackageId = "$packageId.task"
 val spoofaxTaskPackageId = "$taskPackageId.spoofax"
 languageAdapterProject {
   compilerInput {
+    withGetSourceFiles().run {
+      extendGetSourceFilesTaskDef(spoofaxTaskPackageId, "StatixGetSourceFiles")
+      baseGetSourceFilesTaskDef(spoofaxTaskPackageId, "BaseStatixGetSourceFiles")
+    }
     withParser().run {
       // Wrap Parse task
       extendParseTaskDef(spoofaxTaskPackageId, "StatixParseWrapper")
@@ -86,6 +94,8 @@ languageAdapterProject {
   }
 }
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
+  val commandPackageId = "$packageId.command"
+
   // Extend component
   baseComponent(packageId, "BaseStatixComponent")
   extendComponent(packageId, "StatixComponent")
@@ -100,4 +110,33 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
 
   addTaskDefs(taskPackageId, "StatixCheck")
   addTaskDefs(taskPackageId, "StatixCompile")
+
+  // Evaluate test
+  val evaluateTest = TypeInfo.of(taskPackageId, "StatixEvaluateTest")
+  addTaskDefs(evaluateTest)
+  val evaluateTestCommand = CommandDefRepr.builder()
+    .type(commandPackageId, evaluateTest.id() + "Command")
+    .taskDefType(evaluateTest)
+    .argType(evaluateTest.appendToId(".Args"))
+    .displayName("Evaluate test")
+    .description("Evaluates a .stxtest file and shows the test result")
+    .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous)
+    .addAllParams(listOf(
+      ParamRepr.of("rootDirectory", TypeInfo.of("mb.resource.hierarchical", "ResourcePath"), true, ArgProviderRepr.enclosingContext(EnclosingCommandContextType.Project)),
+      ParamRepr.of("file", TypeInfo.of("mb.resource", "ResourceKey"), true, ArgProviderRepr.context(CommandContextType.ReadableResource))
+    ))
+    .build()
+  addCommandDefs(evaluateTestCommand)
+
+  // Menu bindings
+  val mainAndEditorMenu = listOf(
+    MenuItemRepr.commandAction(CommandActionRepr.builder().manualOnce(evaluateTestCommand).readableResourceRequired().enclosingProjectRequired().build()),
+    MenuItemRepr.commandAction(CommandActionRepr.builder().manualContinuous(evaluateTestCommand).readableResourceRequired().enclosingProjectRequired().build())
+  )
+  addAllMainMenuItems(mainAndEditorMenu)
+  addAllEditorContextMenuItems(mainAndEditorMenu)
+  addResourceContextMenuItems(
+    MenuItemRepr.commandAction(CommandActionRepr.builder().manualOnce(evaluateTestCommand).fileRequired().enclosingProjectRequired().build()),
+    MenuItemRepr.commandAction(CommandActionRepr.builder().manualContinuous(evaluateTestCommand).fileRequired().enclosingProjectRequired().build())
+  )
 }

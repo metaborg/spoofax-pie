@@ -46,6 +46,10 @@ public class AdapterProjectCompilerInputBuilder {
         return classLoaderResources;
     }
 
+    public GetSourceFilesAdapterCompiler.Input.Builder withGetSourceFiles() {
+        return getSourceFiles;
+    }
+
     public ParserAdapterCompiler.Input.Builder withParser() {
         parserEnabled = true;
         return parser;

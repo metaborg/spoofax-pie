@@ -1,16 +1,13 @@
 package mb.statix.task;
 
 import mb.common.result.Result;
-import mb.constraint.pie.ConstraintAnalyzeMultiTaskDef;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Interactivity;
+import mb.pie.api.None;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.output.OutputStampers;
 import mb.resource.hierarchical.ResourcePath;
 import mb.statix.StatixScope;
-import mb.statix.task.spoofax.StatixAnalyzeMultiWrapper;
-import mb.statix.task.spoofax.StatixParseWrapper;
-import mb.statix.util.StatixUtil;
 import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoUtil;
@@ -19,7 +16,6 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.util.TermUtils;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.Set;
@@ -85,18 +81,15 @@ public class StatixCompile implements TaskDef<StatixCompile.Input, Result<Statix
         }
     }
 
-    private final StatixParseWrapper parse;
-    private final StatixAnalyzeMultiWrapper analyze;
-    private final Provider<StrategoRuntime> strategoRuntimeProvider;
+    private final StatixAnalyzeFile analyzeFile;
+    private final StatixGetStrategoRuntimeProvider getStrategoRuntimeProvider;
 
     @Inject public StatixCompile(
-        StatixParseWrapper parse,
-        StatixAnalyzeMultiWrapper analyze,
-        Provider<StrategoRuntime> strategoRuntimeProvider
+        StatixAnalyzeFile analyzeFile,
+        StatixGetStrategoRuntimeProvider getStrategoRuntimeProvider
     ) {
-        this.parse = parse;
-        this.analyze = analyze;
-        this.strategoRuntimeProvider = strategoRuntimeProvider;
+        this.analyzeFile = analyzeFile;
+        this.getStrategoRuntimeProvider = getStrategoRuntimeProvider;
     }
 
 
@@ -105,26 +98,17 @@ public class StatixCompile implements TaskDef<StatixCompile.Input, Result<Statix
     }
 
     @Override public Result<Output, ?> exec(ExecContext context, StatixCompile.Input input) throws Exception {
-        // Require source file origin tasks.
         input.config.sourceFileOrigins.forEach(origin -> context.require(origin, OutputStampers.inconsequential()));
-
-        // TODO: this does not analyze all source and include directories
-        return context.require(analyze.createSingleFileOutputSupplier(
-            new ConstraintAnalyzeMultiTaskDef.Input(input.config.rootDirectory, parse.createMultiAstSupplierFunction(StatixUtil.createResourceWalker(), StatixUtil.createResourceMatcher())),
-            input.file
-        )).flatMapOrElse(mainFileOutput -> {
-            if(mainFileOutput.result.messages.containsError()) {
-                return Result.ofErr(new Exception("Cannot compile Statix specification; analysis resulted in errors")); // TODO: better error/exception
-            }
+        final StrategoRuntime strategoRuntime = context.require(getStrategoRuntimeProvider, None.instance).getValue().get();
+        return context.require(analyzeFile, new StatixAnalyzeFile.Input(input.config.rootDirectory, input.file)).flatMapOrElse(output -> {
             try {
-                final StrategoRuntime strategoRuntime = strategoRuntimeProvider.get().addContextObject(mainFileOutput.context);
-                final IStrategoTerm term = StrategoUtil.createLegacyBuilderInputTerm(strategoRuntime.getTermFactory(), mainFileOutput.result.ast, input.file, input.config.rootDirectory);
-                final IStrategoTerm outputTerm = strategoRuntime.invoke("generate-aterm", term);
+                final IStrategoTerm term = StrategoUtil.createLegacyBuilderInputTerm(strategoRuntime.getTermFactory(), output.ast, input.file, input.config.rootDirectory);
+                final IStrategoTerm outputTerm = strategoRuntime.addContextObject(output.context).invoke("generate-aterm", term);
                 return Result.ofOk(new Output(TermUtils.toJavaStringAt(outputTerm, 0), outputTerm.getSubterm(1)));
             } catch(StrategoException e) {
-                return Result.ofErr(e); // TODO: better error/exception
+                return Result.ofErr(e); // TODO: better error/exception?
             }
-        }, Result::ofErr); // TODO: better error/exception
+        }, Result::ofErr); // TODO: better error/exception?
     }
 
     @Override public boolean shouldExecWhenAffected(Input input, Set<?> tags) {

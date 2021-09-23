@@ -39,15 +39,12 @@ public class {{baseCheckMultiTaskDef.id}} implements TaskDef<ResourcePath, Keyed
         context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
 
-        final ListView<ResourceKey> sourceFiles = context.require(getSourceFiles, input);
-
         {{#parser}}
-        for(final ResourceKey file : sourceFiles) {
+        for(final ResourceKey file : context.require(getSourceFiles, input)) {
             final Messages messages = context.require(parse.inputBuilder().withFile(file).rootDirectoryHint(input).buildMessagesSupplier());
             messagesBuilder.addMessages(file, messages);
         }
         {{/parser}}
-
         {{#constraintAnalyzer}}
         final {{this.analyzeMultiTaskDef.qualifiedId}}.Input analyzeInput = new {{this.analyzeMultiTaskDef.qualifiedId}}.Input(input, parse.createRecoverableMultiAstSupplierFunction(getSourceFiles.createFunction()));
         final Result<{{this.analyzeMultiTaskDef.qualifiedId}}.Output, ?> analysisResult = context.require(analyze, analyzeInput);
@@ -58,7 +55,6 @@ public class {{baseCheckMultiTaskDef.id}} implements TaskDef<ResourcePath, Keyed
             })
             .ifErr(e -> messagesBuilder.addMessage("Project-wide analysis failed", e, Severity.Error, input));
         {{/constraintAnalyzer}}
-
         return messagesBuilder.build();
     }
 }

@@ -3,6 +3,21 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+### Fixed
+- SDF3 files in subdirectories cause the parenthesizer file to not import the correct signatures (https://github.com/metaborg/spoofax-pie/issues/61).
+
+
+## [0.12.0] - 2021-09-22
+### Fixed
+- UI hang when invoking hover/reference resolution for the first time after a change in the Eclipse LWB (https://github.com/metaborg/spoofax-pie/issues/56). This was fixed by consistently using the `JsglrParseTaskDef#create(Recoverable)MultiAstSupplierFunction` override that takes a `sourceFilesFunction`, increasing incrementality due to the task identity being stable.
+- Fix SDF3 issuing multiple kinds of parse tasks due to passing the main source directory as the root directory hint, instead of passing in the actual root directory.
+
+### Changed
+- The `JsglrParseTaskDef#create(Recoverable)MultiAstSupplierFunction` methods to accept a function that produces `? extends ListView<? extends ResourceKey>` instead of `ListView<ResourceKey>`, allowing functions that produce `ListView<ResourcePath>`.
+
+### Removed
+- The `JsglrParseTaskDef#create(Recoverable)MultiAstSupplierFunction` methods that take a `ResourceWalker` and `ResourceMatcher`.
+
 
 
 ## [0.11.13] - 2021-09-22

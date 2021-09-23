@@ -13,10 +13,10 @@ import mb.sdf3.Sdf3Component;
 import mb.sdf3.Sdf3ResourcesComponent;
 import mb.sdf3.task.Sdf3AnalyzeMulti;
 import mb.sdf3.task.Sdf3Desugar;
+import mb.sdf3.task.Sdf3GetSourceFiles;
 import mb.sdf3.task.Sdf3Parse;
 import mb.sdf3.task.debug.MultiAstDesugarFunction;
 import mb.sdf3.task.spec.Sdf3SpecConfig;
-import mb.sdf3.task.util.Sdf3Util;
 import mb.spoofax.test.SingleLanguageTestBase;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -35,6 +35,7 @@ class TestBase extends SingleLanguageTestBase<Sdf3ResourcesComponent, Sdf3Compon
     }
 
     final Sdf3Parse parse = component.getSdf3Parse();
+    final Sdf3GetSourceFiles getSourceFiles = component.getSdf3GetSourceFiles();
     final Sdf3Desugar desugar = component.getSdf3Desugar();
     final Sdf3AnalyzeMulti analyze = component.getSdf3AnalyzeMulti();
 
@@ -58,7 +59,7 @@ class TestBase extends SingleLanguageTestBase<Sdf3ResourcesComponent, Sdf3Compon
 
 
     Supplier<? extends Result<Sdf3AnalyzeMulti.SingleFileOutput, ?>> singleFileAnalysisResultSupplier(ResourcePath project, ResourceKey file) {
-        return analyze.createSingleFileOutputSupplier(new Sdf3AnalyzeMulti.Input(project, parse.createRecoverableMultiAstSupplierFunction(Sdf3Util.createResourceWalker(), Sdf3Util.createResourceMatcher()).mapOutput(new MultiAstDesugarFunction(desugar.createFunction()))), file);
+        return analyze.createSingleFileOutputSupplier(new Sdf3AnalyzeMulti.Input(project, parse.createRecoverableMultiAstSupplierFunction(getSourceFiles.createFunction()).mapOutput(new MultiAstDesugarFunction(desugar.createFunction()))), file);
     }
 
     Supplier<? extends Result<Sdf3AnalyzeMulti.SingleFileOutput, ?>> singleFileAnalysisResultSupplier(Resource file) {

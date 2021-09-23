@@ -6,7 +6,11 @@ import mb.pie.api.None;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.language.ClassLoaderResourcesCompiler;
-import mb.spoofax.compiler.util.*;
+import mb.spoofax.compiler.util.ClassKind;
+import mb.spoofax.compiler.util.Shared;
+import mb.spoofax.compiler.util.TemplateCompiler;
+import mb.spoofax.compiler.util.TemplateWriter;
+import mb.spoofax.compiler.util.TypeInfo;
 import org.immutables.value.Value;
 
 import javax.inject.Inject;
@@ -32,7 +36,7 @@ public class GetSourceFilesAdapterCompiler implements TaskDef<GetSourceFilesAdap
         if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
 
-        getSourceFilesTaskDefTemplate.write(context, input.getSourceFilesTaskDef().file(generatedJavaSourcesDirectory), input);
+        getSourceFilesTaskDefTemplate.write(context, input.baseGetSourceFilesTaskDef().file(generatedJavaSourcesDirectory), input);
 
         return None.instance;
     }

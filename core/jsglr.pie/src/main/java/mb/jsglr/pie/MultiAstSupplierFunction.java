@@ -7,22 +7,19 @@ import mb.jsglr.common.JsglrParseException;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Function;
 import mb.pie.api.Supplier;
-import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.HashMap;
 
 public class MultiAstSupplierFunction implements Function<ResourcePath, MapView<ResourceKey, Supplier<Result<IStrategoTerm, JsglrParseException>>>> {
-    private final Function<ResourcePath, ListView<ResourceKey>> sourceFilesFunction;
+    private final Function<ResourcePath, ? extends ListView<? extends ResourceKey>> sourceFilesFunction;
     private final Function<JsglrParseTaskInput, Result<IStrategoTerm, JsglrParseException>> parseToAstFunction;
 
     public MultiAstSupplierFunction(
-        Function<ResourcePath, ListView<ResourceKey>> sourceFilesFunction,
+        Function<ResourcePath, ? extends ListView<? extends ResourceKey>> sourceFilesFunction,
         Function<JsglrParseTaskInput, Result<IStrategoTerm, JsglrParseException>> parseToAstFunction
     ) {
         this.sourceFilesFunction = sourceFilesFunction;
