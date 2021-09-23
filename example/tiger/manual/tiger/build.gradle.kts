@@ -23,6 +23,7 @@ dependencies {
   api(compositeBuild("jsglr1.common"))
   api(compositeBuild("esv.common"))
   api(compositeBuild("stratego.common"))
+  api(compositeBuild("stratego.pie"))
   api(compositeBuild("constraint.common"))
 
   api("org.metaborg.devenv:nabl2.terms")

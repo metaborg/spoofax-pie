@@ -12,6 +12,7 @@ import mb.statix.strategies.Strategy3;
 import mb.statix.strategies.StrategyDecl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,6 +30,7 @@ public final class TegoRuntimeImpl implements TegoRuntime, TegoEngine {
      *
      * @param loggerFactory the logger factory
      */
+    @Inject
     public TegoRuntimeImpl(
         @Nullable LoggerFactory loggerFactory
     ) {

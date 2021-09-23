@@ -6,6 +6,7 @@ import mb.pie.api.TaskDef;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.platform.PlatformComponent;
+import mb.statix.strategies.TegoComponent;
 import mb.tiger.spoofax.command.TigerShowScopeGraphCommand;
 import mb.tiger.spoofax.task.TigerShowScopeGraph;
 
@@ -23,7 +24,8 @@ import java.util.Set;
         LoggerComponent.class,
         TigerResourcesComponent.class,
         ResourceServiceComponent.class,
-        PlatformComponent.class
+        PlatformComponent.class,
+        TegoComponent.class,
     }
 )
 public interface TigerComponent extends LanguageComponent {

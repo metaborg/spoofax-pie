@@ -2,6 +2,7 @@ package mb.tiger.spoofax.task;
 
 import mb.common.codecompletion.CodeCompletionResult;
 import mb.common.region.Region;
+import mb.common.result.Result;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecContext;
@@ -18,8 +19,9 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import javax.inject.Inject;
 import java.io.Serializable;
 
+// TODO: Make this a template
 @TigerScope
-public class TigerComplete implements TaskDef<TigerComplete.Input, @Nullable CodeCompletionResult> {
+public class TigerCodeComplete implements TaskDef<TigerCodeComplete.Input, @Nullable CodeCompletionResult> {
 
     public static class Input implements Serializable {
         public final ResourceKey resourceKey;
@@ -31,12 +33,12 @@ public class TigerComplete implements TaskDef<TigerComplete.Input, @Nullable Cod
         public final Function<IStrategoTerm, @Nullable IStrategoTerm> upgradePlaceholdersFunction;
         public final Function<IStrategoTerm, @Nullable IStrategoTerm> downgradePlaceholdersFunction;
         public final Function<IStrategoTerm, @Nullable IStrategoTerm> isInjectionFunction;     // Should be a predicate
-        public final Function<IStrategoTerm, @Nullable String> prettyPrintFunction;
+//        public final Function<IStrategoTerm, @Nullable String> prettyPrintFunction;
 
         public Input(Supplier<IStrategoTerm> supplier) {
             // This constructor is only here to satisfy the compiler
             // because of the generated createCompletionTask() method
-            // in GeneratedMinicsInstance
+            // in GeneratedTigerInstance
             throw new UnsupportedOperationException();
         }
 
@@ -49,8 +51,8 @@ public class TigerComplete implements TaskDef<TigerComplete.Input, @Nullable Cod
             Function<IStrategoTerm, @Nullable IStrategoTerm> postAnalyzeFunction,
             Function<IStrategoTerm, @Nullable IStrategoTerm> upgradePlaceholdersFunction,
             Function<IStrategoTerm, @Nullable IStrategoTerm> downgradePlaceholdersFunction,
-            Function<IStrategoTerm, @Nullable IStrategoTerm> isInjectionFunction,     // Should be a predicate
-            Function<IStrategoTerm, @Nullable String> prettyPrintFunction
+            Function<IStrategoTerm, @Nullable IStrategoTerm> isInjectionFunction     // Should be a predicate
+//            Function<IStrategoTerm, @Nullable String> prettyPrintFunction
         ) {
             this.resourceKey = resourceKey;
             this.caretLocation = caretLocation;
@@ -61,18 +63,18 @@ public class TigerComplete implements TaskDef<TigerComplete.Input, @Nullable Cod
             this.upgradePlaceholdersFunction = upgradePlaceholdersFunction;
             this.downgradePlaceholdersFunction = downgradePlaceholdersFunction;
             this.isInjectionFunction = isInjectionFunction;
-            this.prettyPrintFunction = prettyPrintFunction;
+//            this.prettyPrintFunction = prettyPrintFunction;
         }
     }
 
     private final Logger log;
     private final TigerCodeCompleterFactory codeCompleterFactory;
 
-    @Inject public TigerComplete(
+    @Inject public TigerCodeComplete(
         LoggerFactory loggerFactory,
         TigerCodeCompleterFactory codeCompleterFactory
     ) {
-        this.log = loggerFactory.create(TigerComplete.class);
+        this.log = loggerFactory.create(TigerCodeComplete.class);
         this.codeCompleterFactory = codeCompleterFactory;
     }
 

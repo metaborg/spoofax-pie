@@ -1,5 +1,6 @@
 package mb.tiger.spoofax;
 
+import mb.common.codecompletion.CodeCompletionResult;
 import mb.common.editor.HoverResult;
 import mb.common.editor.ReferenceResolutionResult;
 import mb.common.message.KeyedMessages;
@@ -16,8 +17,11 @@ import mb.jsglr.common.JSGLRTokens;
 import mb.jsglr.common.JsglrParseException;
 import mb.jsglr.common.JsglrParseOutput;
 import mb.jsglr.pie.JsglrParseTaskInput;
+import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
+import mb.pie.api.Function;
 import mb.pie.api.Session;
+import mb.pie.api.Supplier;
 import mb.pie.api.Task;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
@@ -42,7 +46,14 @@ import mb.tiger.spoofax.command.TigerShowParsedAstCommand;
 import mb.tiger.spoofax.command.TigerShowPrettyPrintedTextCommand;
 import mb.tiger.spoofax.task.TigerCheck;
 import mb.tiger.spoofax.task.TigerCheckAggregator;
+import mb.tiger.spoofax.task.TigerCodeComplete;
+import mb.tiger.spoofax.task.TigerDowngradePlaceholders;
 import mb.tiger.spoofax.task.TigerIdeTokenize;
+import mb.tiger.spoofax.task.TigerIsInjection;
+import mb.tiger.spoofax.task.TigerPartialPrettyPrint;
+import mb.tiger.spoofax.task.TigerPostStatix;
+import mb.tiger.spoofax.task.TigerPreStatix;
+import mb.tiger.spoofax.task.TigerUpgradePlaceholders;
 import mb.tiger.spoofax.task.reusable.TigerCompleteTaskDef;
 import mb.tiger.spoofax.task.reusable.TigerParse;
 import mb.tiger.spoofax.task.reusable.TigerStyle;
@@ -62,8 +73,16 @@ public class TigerInstance implements LanguageInstance, TestableParse {
     private final TigerStyle style;
     private final TigerIdeTokenize tokenize;
     private final TigerCompleteTaskDef complete;
+    private final TigerCodeComplete codeComplete;
     private final NoneResolveTaskDef resolve;
     private final NoneHoverTaskDef hover;
+
+    private final TigerPreStatix preStatix;
+    private final TigerPostStatix postStatix;
+    private final TigerUpgradePlaceholders upgradePlaceholders;
+    private final TigerDowngradePlaceholders downgradePlaceholders;
+    private final TigerPartialPrettyPrint partialPrettyPrint;
+    private final TigerIsInjection isInjection;
 
     private final TigerShowParsedAstCommand showParsedAstCommand;
     private final TigerShowPrettyPrintedTextCommand showPrettyPrintedTextCommand;
@@ -84,8 +103,16 @@ public class TigerInstance implements LanguageInstance, TestableParse {
         TigerStyle style,
         TigerIdeTokenize tokenize,
         TigerCompleteTaskDef complete,
+        TigerCodeComplete codeComplete,
         NoneResolveTaskDef resolve,
         NoneHoverTaskDef hover,
+
+        TigerPreStatix preStatix,
+        TigerPostStatix postStatix,
+        TigerUpgradePlaceholders upgradePlaceholders,
+        TigerDowngradePlaceholders downgradePlaceholders,
+        TigerPartialPrettyPrint partialPrettyPrint,
+        TigerIsInjection isInjection,
 
         TigerShowParsedAstCommand showParsedAstCommand,
         TigerShowPrettyPrintedTextCommand showPrettyPrintedTextCommand,
@@ -104,8 +131,16 @@ public class TigerInstance implements LanguageInstance, TestableParse {
         this.style = style;
         this.tokenize = tokenize;
         this.complete = complete;
+        this.codeComplete = codeComplete;
         this.resolve = resolve;
         this.hover = hover;
+
+        this.preStatix = preStatix;
+        this.postStatix = postStatix;
+        this.upgradePlaceholders = upgradePlaceholders;
+        this.downgradePlaceholders = downgradePlaceholders;
+        this.partialPrettyPrint = partialPrettyPrint;
+        this.isInjection = isInjection;
 
         this.showParsedAstCommand = showParsedAstCommand;
         this.showPrettyPrintedTextCommand = showPrettyPrintedTextCommand;
@@ -143,6 +178,21 @@ public class TigerInstance implements LanguageInstance, TestableParse {
     @Override
     public Task<@Nullable CompletionResult> createCompletionTask(ResourceKey resourceKey, Region primarySelection) {
         return complete.createTask(new TigerCompleteTaskDef.Input(parse.inputBuilder().withFile(resourceKey).buildRecoverableAstSupplier().map(Result::get))); // TODO: use Result.
+    }
+
+    @Override
+    public Task<@Nullable CodeCompletionResult> createCodeCompletionTask(ResourceKey resourceKey, Region primarySelection) {
+        return codeComplete.createTask(new TigerCodeComplete.Input(
+            resourceKey,
+            primarySelection.getStartOffset(),
+            parse.inputBuilder().withFile(resourceKey).buildRecoverableAstSupplier().map(Result::get),
+            (context, input) -> partialPrettyPrint.createFunction().apply(context, context1 -> Result.ofOk(input)).get().toString() /* FIXME: toString() is probably wrong! */,
+            (context, input) -> preStatix.createFunction().apply(context, context1 -> Result.ofOk(input)).get(),
+            (context, input) -> postStatix.createFunction().apply(context, context1 -> Result.ofOk(input)).get(),
+            (context, input) -> upgradePlaceholders.createFunction().apply(context, context1 -> Result.ofOk(input)).get(),
+            (context, input) -> downgradePlaceholders.createFunction().apply(context, context1 -> Result.ofOk(input)).get(),
+            (context, input) -> isInjection.createFunction().apply(context, context1 -> Result.ofOk(input)).get()
+        ));
     }
 
     @Override

@@ -1,16 +1,20 @@
 package mb.spoofax.core.language;
 
+import mb.common.codecompletion.CodeCompletionResult;
 import mb.common.editor.HoverResult;
 import mb.common.editor.ReferenceResolutionResult;
 import mb.common.message.KeyedMessages;
 import mb.common.option.Option;
 import mb.common.region.Region;
+import mb.common.result.Result;
 import mb.common.style.Styling;
 import mb.common.token.Tokens;
 import mb.common.util.CollectionView;
 import mb.common.util.ListView;
 import mb.common.util.SetView;
 import mb.completions.common.CompletionResult;
+import mb.pie.api.Function;
+import mb.pie.api.Supplier;
 import mb.pie.api.Task;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
@@ -18,6 +22,7 @@ import mb.spoofax.core.language.cli.CliCommand;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.menu.MenuItem;
+import mb.spoofax.core.language.taskdef.NullCodeCompleteTaskDef;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface LanguageInstance {
@@ -45,6 +50,12 @@ public interface LanguageInstance {
      * @return a {@link CompletionResult}; or {@code null} when no completions could be generated
      */
     Task<@Nullable CompletionResult> createCompletionTask(ResourceKey resourceKey, Region primarySelection);
+
+    default Task<@Nullable CodeCompletionResult> createCodeCompletionTask(ResourceKey resourceKey, Region primarySelection) {
+        // FIXME: This is a temporary default method,
+        // until this method is implemented by all language instances.
+        return null;
+    }
 
 
     Task<KeyedMessages> createCheckOneTask(ResourceKey file, @Nullable ResourcePath rootDirectoryHint);

@@ -16,6 +16,10 @@ dependencies {
   api("org.metaborg:common")
   api("org.metaborg:log.api")
 
+  api("org.metaborg:log.dagger")
+  api("com.google.dagger:dagger")
+  annotationProcessor("com.google.dagger:dagger-compiler")
+
   compileOnly("org.checkerframework:checker-qual-android")
   api("org.yaml:snakeyaml")
 
