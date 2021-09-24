@@ -5,6 +5,7 @@ import mb.cfg.task.CfgRootDirectoryToObject;
 import mb.common.message.KeyedMessages;
 import mb.common.option.Option;
 import mb.common.result.Result;
+import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Interactivity;
 import mb.pie.api.TaskDef;
@@ -69,18 +70,18 @@ public class CompileStatix implements TaskDef<ResourcePath, Result<KeyedMessages
             return Result.ofErr(StatixCompileException.checkFail(messages));
         }
 
-        return context.require(compileProject, new StatixCompileProject.Input(input.rootDirectory(), config.sourceFileOrigins))
+        return context.require(compileProject, input.rootDirectory())
             .mapThrowing(o -> {
                 writeOutput(context, o, input.outputDirectory());
                 return messages;
             }).mapErr(StatixCompileException::compileFail);
     }
 
-    private void writeOutput(ExecContext context, StatixCompileProject.Output output, ResourcePath outputPath) throws IOException {
+    private void writeOutput(ExecContext context, ListView<StatixCompileModule.Output> compileModuleOutputs, ResourcePath outputPath) throws IOException {
         final HierarchicalResource outputDirectory = context.getHierarchicalResource(outputPath).ensureDirectoryExists();
-        for(StatixCompileModule.Output out : output.compileModuleOutputs) {
-            final HierarchicalResource outputFile = outputDirectory.appendAsRelativePath(out.relativeOutputPath).ensureFileExists();
-            outputFile.writeString(out.spec.toString());
+        for(StatixCompileModule.Output output : compileModuleOutputs) {
+            final HierarchicalResource outputFile = outputDirectory.appendAsRelativePath(output.relativeOutputPath).ensureFileExists();
+            outputFile.writeString(output.spec.toString());
             context.provide(outputFile);
         }
     }
