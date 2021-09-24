@@ -44,6 +44,7 @@ def fill_env_with_release(env, env_version: str, version: str, download_version:
 
 
 release_versions = {
+    "0.12.1": "24-09-2021",
     "0.12.0": "22-09-2021",
     "0.11.13": "22-09-2021",
     "0.11.12": "20-09-2021",
