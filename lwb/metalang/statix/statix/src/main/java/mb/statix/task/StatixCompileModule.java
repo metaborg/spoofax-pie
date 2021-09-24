@@ -3,11 +3,9 @@ package mb.statix.task;
 import mb.aterm.common.InvalidAstShapeException;
 import mb.common.option.Option;
 import mb.common.result.Result;
-import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Interactivity;
 import mb.pie.api.None;
-import mb.pie.api.STask;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.output.OutputStampers;
 import mb.pie.api.stamp.resource.ResourceStampers;
@@ -32,12 +30,10 @@ public class StatixCompileModule implements TaskDef<StatixCompileModule.Input, R
     public static class Input implements Serializable {
         public final ResourcePath rootDirectory;
         public final ResourcePath file;
-        public final ListView<STask<?>> sourceFileOrigins;
 
-        public Input(ResourcePath rootDirectory, ResourcePath file, ListView<STask<?>> sourceFileOrigins) {
+        public Input(ResourcePath rootDirectory, ResourcePath file) {
             this.rootDirectory = rootDirectory;
             this.file = file;
-            this.sourceFileOrigins = sourceFileOrigins;
         }
 
         @Override public boolean equals(@Nullable Object o) {
@@ -45,14 +41,12 @@ public class StatixCompileModule implements TaskDef<StatixCompileModule.Input, R
             if(o == null || getClass() != o.getClass()) return false;
             final Input input = (Input)o;
             if(!rootDirectory.equals(input.rootDirectory)) return false;
-            if(!file.equals(input.file)) return false;
-            return sourceFileOrigins.equals(input.sourceFileOrigins);
+            return file.equals(input.file);
         }
 
         @Override public int hashCode() {
             int result = rootDirectory.hashCode();
             result = 31 * result + file.hashCode();
-            result = 31 * result + sourceFileOrigins.hashCode();
             return result;
         }
 
@@ -60,7 +54,6 @@ public class StatixCompileModule implements TaskDef<StatixCompileModule.Input, R
             return "StatixCompileModule.Input{" +
                 "rootDirectory=" + rootDirectory +
                 ", file=" + file +
-                ", sourceFileOrigins=" + sourceFileOrigins +
                 '}';
         }
     }
@@ -94,15 +87,18 @@ public class StatixCompileModule implements TaskDef<StatixCompileModule.Input, R
     }
 
     private final StatixClassLoaderResources classLoaderResources;
+    private final StatixConfigFunctionWrapper configFunctionWrapper;
     private final StatixAnalyzeFile analyzeFile;
     private final StatixGetStrategoRuntimeProvider getStrategoRuntimeProvider;
 
     @Inject public StatixCompileModule(
         StatixClassLoaderResources classLoaderResources,
+        StatixConfigFunctionWrapper configFunctionWrapper,
         StatixAnalyzeFile analyzeFile,
         StatixGetStrategoRuntimeProvider getStrategoRuntimeProvider
     ) {
         this.classLoaderResources = classLoaderResources;
+        this.configFunctionWrapper = configFunctionWrapper;
         this.analyzeFile = analyzeFile;
         this.getStrategoRuntimeProvider = getStrategoRuntimeProvider;
     }
@@ -115,15 +111,17 @@ public class StatixCompileModule implements TaskDef<StatixCompileModule.Input, R
     @Override
     public Result<Option<Output>, ?> exec(ExecContext context, StatixCompileModule.Input input) throws Exception {
         context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
-        context.require(classLoaderResources.tryGetAsLocalResource(StatixCompileProject.Input.class), ResourceStampers.hashFile());
-        context.require(classLoaderResources.tryGetAsLocalResource(StatixCompileProject.Output.class), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsLocalResource(Input.class), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsLocalResource(Output.class), ResourceStampers.hashFile());
 
-        // TODO: only require the origin that is needed to compile this module?
-        input.sourceFileOrigins.forEach(origin -> context.require(origin, OutputStampers.inconsequential()));
-
-        final StrategoRuntime strategoRuntime = context.require(getStrategoRuntimeProvider, None.instance).getValue().get();
         final ResourcePath rootDirectory = input.rootDirectory;
         final ResourcePath file = input.file;
+        final StrategoRuntime strategoRuntime = context.require(getStrategoRuntimeProvider, None.instance).getValue().get();
+
+        context.require(configFunctionWrapper.get(), rootDirectory).ifOk(o -> o.ifSome(config -> {
+            // TODO: only require the origin that is needed to compile this module?
+            config.sourceFileOrigins.forEach(origin -> context.require(origin, OutputStampers.inconsequential()));
+        }));
 
         return context.require(analyzeFile, new StatixAnalyzeFile.Input(rootDirectory, file)).flatMapOrElse(output -> {
             try {

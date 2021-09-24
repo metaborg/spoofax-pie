@@ -5,7 +5,6 @@ import mb.common.result.Result;
 import mb.pie.api.MixedSession;
 import mb.resource.fs.FSResource;
 import mb.statix.task.StatixCompileModule;
-import mb.statix.task.StatixConfig;
 import org.junit.jupiter.api.Test;
 import org.spoofax.terms.util.TermUtils;
 
@@ -36,7 +35,7 @@ class CompileTest extends TestBase {
         );
 
         try(final MixedSession session = newSession()) {
-            final Result<Option<StatixCompileModule.Output>, ?> mainResult = session.require(compileModule.createTask(new StatixCompileModule.Input(config.rootDirectory, mainFile.getPath(), config.sourceFileOrigins)));
+            final Result<Option<StatixCompileModule.Output>, ?> mainResult = session.require(compileModule.createTask(new StatixCompileModule.Input(rootDirectory.getPath(), mainFile.getPath())));
             assertTrue(mainResult.isOk());
             final Option<StatixCompileModule.Output> mainOutputOpt = mainResult.unwrap();
             assertTrue(mainOutputOpt.isSome());
@@ -44,7 +43,7 @@ class CompileTest extends TestBase {
             assertEquals("src-gen/statix/main.spec.aterm", mainOutput.relativeOutputPath);
             assertTrue(TermUtils.isAppl(mainOutput.spec, "FileSpec", 6));
 
-            final Result<Option<StatixCompileModule.Output>, ?> programResult = session.require(compileModule.createTask(new StatixCompileModule.Input(config.rootDirectory, programFile.getPath(), config.sourceFileOrigins)));
+            final Result<Option<StatixCompileModule.Output>, ?> programResult = session.require(compileModule.createTask(new StatixCompileModule.Input(rootDirectory.getPath(), programFile.getPath())));
             assertTrue(programResult.isOk());
             final Option<StatixCompileModule.Output> programOutputOpt = programResult.unwrap();
             assertTrue(programOutputOpt.isSome());

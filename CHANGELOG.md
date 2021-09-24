@@ -3,19 +3,12 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
-
-
-## [0.12.1] - 2021-09-24
 ### Added
 - Evaluate test command for Statix `.stxtest` files.
 
 ### Fixed
 - SDF3 files in subdirectories cause the parenthesizer file to not import the correct signatures (https://github.com/metaborg/spoofax-pie/issues/61).
 - Deadlocks in SPT *ToFragment expectations due to not closing PIE sessions (https://github.com/metaborg/spoofax-pie/pull/64).
-
-### Changed
-- `common` requirement to 0.9.6.
-- `releng` (devenv-release) requirement to 0.1.13.
 
 
 ## [0.12.0] - 2021-09-22
@@ -44,9 +37,9 @@ All notable changes to this project are documented in this file, based on [Keep 
 ### Changed
 - Eclipse to 2021-09.
 - Colors in Eclipse are inverted in dark mode themes using the same hack as https://github.com/metaborg/spoofax-eclipse/pull/19/.
-- `coronium` requirement to 0.3.11.
-- `pie` requirement to 0.16.8.
-- `common` requirement to 0.9.5.
+- Coronium to 0.3.11.
+- Pie to 0.16.8.
+- Common to 0.9.5.
 
 
 ## [0.11.11] - 2021-09-17
@@ -58,8 +51,9 @@ All notable changes to this project are documented in this file, based on [Keep 
 - Compile failures due to constructor names starting with lowercase characters. This now produces an error in the SDF3 file.
 - Module name does not agree with relative file path error in SDF3 always given on Windows due to difference in file separator characters.
 
+
 ### Changed
-- `releng` (devenv-release) requirement to 0.1.12.
+- releng (devenv-release) to version 0.1.12.
 
 
 ## [0.11.10] - 2021-09-15
@@ -68,7 +62,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 ### Changed
 - Missing imports in SDF3 now no longer give errors on everything due to improved cascaded error handling in the Statix constraint solver.
-- `releng` (devenv-release) requirement to 0.1.11.
+- releng (devenv-release) to version 0.1.11.
 
 
 ## [0.11.9] - 2021-09-13
@@ -80,7 +74,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 ### Changed
 - Lexical productions with constructors show a warning to remove the constructor.
-- `releng` (devenv-release) requirement to 0.1.10.
+- releng (devenv-release) to version 0.1.10.
 
 
 ## [0.11.8] - 2021-09-13
@@ -88,8 +82,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 - Hidden dependency in MultiAstSupplierFunction.
 
 ### Changed
-- PIE requirement to 0.16.7.
-- `releng` (devenv-release) requirement to 0.1.9.
+- PIE to version 0.16.7.
+- releng (devenv-release) to version 0.1.9.
 
 ### Removed
 - CFG, SDF3, and Statix hover tooltips, as they do not provide useful information at the moment.
@@ -110,7 +104,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 - Check for incompatible sort kinds in SDF3.
 
 ### Changed
-- `releng` (devenv-release) requirement to 0.1.8.
+- Spoofax 2 devenv version to `0.1.8`.
 
 
 ## [0.11.5] - 2021-09-06
@@ -149,9 +143,9 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 ### Changed
 - Restructure troubleshooting documentation.
-- `resource` requirement to 0.11.5.
-- `common` requirement to 0.9.3.
-- `pie` requirement to 0.16.6.
+- Update resource dependency to 0.11.5.
+- Update common dependency to 0.9.3.
+- Update pie dependency to 0.16.6.
 - Menus with the same display name are merged into one.
 
 ### Fixed
@@ -175,8 +169,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.12.1...HEAD
-[0.12.1]: https://github.com/metaborg/spoofax-pie/compare/release-0.12.0...release-0.12.1
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.12.0...HEAD
 [0.12.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.13...release-0.12.0
 [0.11.13]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.12...release-0.11.13
 [0.11.12]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.11...release-0.11.12
