@@ -8,6 +8,7 @@ import mb.common.region.Region;
 import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
+import mb.pie.api.MixedSession;
 import mb.pie.api.Session;
 import mb.resource.ResourceKey;
 import mb.spoofax.core.language.LanguageInstance;
@@ -71,18 +72,24 @@ public class RunStrategoToFragmentExpectation extends RunStrategoExpectation {
         }
 
         final Result<IStrategoTerm, ?> result;
-        if(fragmentInstance instanceof TestableAnalysis) {
-            result = ((TestableAnalysis)fragmentInstance).testAnalyze(session, fragmentResource, testCase.rootDirectoryHint);
-        } else if (fragmentInstance instanceof TestableParse) {
-            result = ((TestableParse)fragmentInstance).testParseToAterm(session, fragmentResource, testCase.rootDirectoryHint);
-        } else {
-            messagesBuilder.addMessage(
-                "Cannot evaluate run to fragment expectation because language instance '" + fragmentInstance + "' does not implement TestableAnalysis nor TestableParse",
-                Severity.Error,
-                file,
-                sourceRegion
-            );
-            return;
+        try {
+            if(fragmentInstance instanceof TestableAnalysis) {
+                result = ((TestableAnalysis)fragmentInstance).testAnalyze(session, fragmentResource, testCase.rootDirectoryHint);
+            } else if(fragmentInstance instanceof TestableParse) {
+                result = ((TestableParse)fragmentInstance).testParseToAterm(session, fragmentResource, testCase.rootDirectoryHint);
+            } else {
+                messagesBuilder.addMessage(
+                    "Cannot evaluate run to fragment expectation because language instance '" + fragmentInstance + "' does not implement TestableAnalysis nor TestableParse",
+                    Severity.Error,
+                    file,
+                    sourceRegion
+                );
+                return;
+            }
+        } finally {
+            if (session != languageUnderTestSession) {
+                ((MixedSession)session).close();
+            }
         }
 
         result

@@ -7,6 +7,7 @@ import mb.common.message.Severity;
 import mb.common.region.Region;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
+import mb.pie.api.MixedSession;
 import mb.pie.api.Session;
 import mb.pie.api.exec.CancelToken;
 import mb.resource.ResourceKey;
@@ -63,11 +64,14 @@ public class ParseToFragmentExpectation implements TestExpectation {
         final TestableParse fragmentTestableParse = (TestableParse)fragmentLanguageInstance;
 
         final Result<IStrategoTerm, ?> result = testableParse.testParseToAterm(languageUnderTestSession, testCase.resource, testCase.rootDirectoryHint);
-        final Result<IStrategoTerm, ?> fragmentResult = fragmentTestableParse.testParseToAterm(
-            fragmentLanguageUnderTest.getPieComponent().newSession(), // OPTO: share a single session for one test suite run.
-            fragmentResource,
-            testCase.rootDirectoryHint
-        );
+        final Result<IStrategoTerm, ?> fragmentResult;
+        try (final MixedSession session = fragmentLanguageUnderTest.getPieComponent().newSession()) { // OPTO: share a single session for one test suite run.
+            fragmentResult = fragmentTestableParse.testParseToAterm(
+                session,
+                fragmentResource,
+                testCase.rootDirectoryHint
+            );
+        }
         result.ifElse(r -> {
             fragmentResult.ifElse(f -> {
                 if(!r.equals(f)) {

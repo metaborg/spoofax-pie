@@ -5,6 +5,7 @@ import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Severity;
 import mb.common.region.Region;
 import mb.pie.api.ExecContext;
+import mb.pie.api.MixedSession;
 import mb.pie.api.Session;
 import mb.pie.api.exec.CancelToken;
 import mb.resource.ResourceKey;
@@ -60,7 +61,10 @@ public class TransformToFragmentExpectation implements TestExpectation {
         if(fragmentCommandDef == null) {
             return messagesBuilder.build(file);
         }
-        final @Nullable CommandFeedback fragmentFeedback = TransformExpectationUtil.runCommand(fragmentResource, commandDef, fragmentLanguageUnderTest, fragmentLanguageUnderTest.getPieComponent().newSession() /* OPTO: share a single session for one test suite run. */, messagesBuilder, file, sourceRegion);
+        final @Nullable CommandFeedback fragmentFeedback;
+        try (final MixedSession session = fragmentLanguageUnderTest.getPieComponent().newSession() /* OPTO: share a single session for one test suite run. */) {
+            fragmentFeedback = TransformExpectationUtil.runCommand(fragmentResource, commandDef, fragmentLanguageUnderTest, session, messagesBuilder, file, sourceRegion);
+        }
         if(fragmentFeedback == null) {
             return messagesBuilder.build(file);
         }
