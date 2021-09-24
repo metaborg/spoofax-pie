@@ -2,6 +2,7 @@ package mb.tiger;
 
 import mb.common.codecompletion.CodeCompletionResult;
 import mb.common.region.Region;
+import mb.common.result.Result;
 import mb.log.api.LoggerFactory;
 import mb.nabl2.terms.stratego.StrategoTerms;
 import mb.resource.ResourceKey;
@@ -27,12 +28,12 @@ public class TigerCodeCompleter implements CodeCompleter {
         ITermFactory termFactory,
         TegoRuntime tegoRuntime,
         LoggerFactory loggerFactory,
-        Function<IStrategoTerm, @Nullable IStrategoTerm> explicateFunction,
-        Function<IStrategoTerm, @Nullable IStrategoTerm> implicateFunction,
-        Function<IStrategoTerm, @Nullable IStrategoTerm> upgradeFunction,
-        Function<IStrategoTerm, @Nullable IStrategoTerm> downgradeFunction,
-        Function<IStrategoTerm, @Nullable IStrategoTerm> isInjectionFunction,
-        Function<IStrategoTerm, @Nullable String> prettyPrintFunction
+        Function<IStrategoTerm, Result<IStrategoTerm, ?>> explicateFunction,
+        Function<IStrategoTerm, Result<IStrategoTerm, ?>> implicateFunction,
+        Function<IStrategoTerm, Result<IStrategoTerm, ?>> upgradeFunction,
+        Function<IStrategoTerm, Result<IStrategoTerm, ?>> downgradeFunction,
+        Function<IStrategoTerm, Result< IStrategoTerm, ?>> isInjectionFunction,
+        Function<IStrategoTerm, Result<String, ?>> prettyPrintFunction
     ) {
         this.spec = spec;
         this.implementation = new StatixCodeCompleter(
@@ -43,33 +44,33 @@ public class TigerCodeCompleter implements CodeCompleter {
         ) {
 
             @Override
-            protected @Nullable String prettyPrint(IStrategoTerm term) {
-                return prettyPrintFunction.apply(term);
-            }
-
-            @Override
-            protected @Nullable IStrategoTerm explicate(IStrategoTerm term) {
+            protected Result<IStrategoTerm, ?> explicate(IStrategoTerm term) {
                 return explicateFunction.apply(term);
             }
 
             @Override
-            protected @Nullable IStrategoTerm implicate(IStrategoTerm term) {
+            protected Result<IStrategoTerm, ?> implicate(IStrategoTerm term) {
                 return implicateFunction.apply(term);
             }
 
             @Override
-            protected @Nullable IStrategoTerm upgrade(IStrategoTerm term) {
+            protected Result<IStrategoTerm, ?> upgrade(IStrategoTerm term) {
                 return upgradeFunction.apply(term);
             }
 
             @Override
-            protected @Nullable IStrategoTerm downgrade(IStrategoTerm term) {
+            protected Result<IStrategoTerm, ?> downgrade(IStrategoTerm term) {
                 return downgradeFunction.apply(term);
             }
 
             @Override
-            protected @Nullable IStrategoTerm isInj(IStrategoTerm term) {
+            protected Result<IStrategoTerm, ?> isInj(IStrategoTerm term) {
                 return isInjectionFunction.apply(term);
+            }
+
+            @Override
+            protected Result<String, ?> prettyPrint(IStrategoTerm term) {
+                return prettyPrintFunction.apply(term);
             }
         };
     }

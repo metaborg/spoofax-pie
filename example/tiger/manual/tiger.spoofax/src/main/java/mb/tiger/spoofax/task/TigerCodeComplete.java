@@ -27,12 +27,12 @@ public class TigerCodeComplete implements TaskDef<TigerCodeComplete.Input, @Null
         public final ResourceKey resourceKey;
         public final int caretLocation;
         public final Supplier<@Nullable IStrategoTerm> astSupplier;
-        public final Function<IStrategoTerm, @Nullable String> prettyPrinterFunction;
-        public final Function<IStrategoTerm, @Nullable IStrategoTerm> preAnalyzeFunction;
-        public final Function<IStrategoTerm, @Nullable IStrategoTerm> postAnalyzeFunction;
-        public final Function<IStrategoTerm, @Nullable IStrategoTerm> upgradePlaceholdersFunction;
-        public final Function<IStrategoTerm, @Nullable IStrategoTerm> downgradePlaceholdersFunction;
-        public final Function<IStrategoTerm, @Nullable IStrategoTerm> isInjectionFunction;     // Should be a predicate
+        public final Function<IStrategoTerm, Result<IStrategoTerm, ?>> preAnalyzeFunction;
+        public final Function<IStrategoTerm, Result<IStrategoTerm, ?>> postAnalyzeFunction;
+        public final Function<IStrategoTerm, Result<IStrategoTerm, ?>> upgradePlaceholdersFunction;
+        public final Function<IStrategoTerm, Result<IStrategoTerm, ?>> downgradePlaceholdersFunction;
+        public final Function<IStrategoTerm, Result<IStrategoTerm, ?>> isInjectionFunction;     // Should be a predicate
+        public final Function<IStrategoTerm, Result<String, ?>> prettyPrinterFunction;
 //        public final Function<IStrategoTerm, @Nullable String> prettyPrintFunction;
 
         public Input(Supplier<IStrategoTerm> supplier) {
@@ -46,23 +46,23 @@ public class TigerCodeComplete implements TaskDef<TigerCodeComplete.Input, @Null
             ResourceKey resourceKey,
             int caretLocation,
             Supplier<IStrategoTerm> astSupplier,
-            Function<IStrategoTerm, @Nullable String> prettyPrinterFunction,
-            Function<IStrategoTerm, @Nullable IStrategoTerm> preAnalyzeFunction,
-            Function<IStrategoTerm, @Nullable IStrategoTerm> postAnalyzeFunction,
-            Function<IStrategoTerm, @Nullable IStrategoTerm> upgradePlaceholdersFunction,
-            Function<IStrategoTerm, @Nullable IStrategoTerm> downgradePlaceholdersFunction,
-            Function<IStrategoTerm, @Nullable IStrategoTerm> isInjectionFunction     // Should be a predicate
+            Function<IStrategoTerm, Result<IStrategoTerm, ?>> preAnalyzeFunction,
+            Function<IStrategoTerm, Result<IStrategoTerm, ?>> postAnalyzeFunction,
+            Function<IStrategoTerm, Result<IStrategoTerm, ?>> upgradePlaceholdersFunction,
+            Function<IStrategoTerm, Result<IStrategoTerm, ?>> downgradePlaceholdersFunction,
+            Function<IStrategoTerm, Result<IStrategoTerm, ?>> isInjectionFunction,     // Should be a predicate
+            Function<IStrategoTerm, Result<String, ?>> prettyPrinterFunction
 //            Function<IStrategoTerm, @Nullable String> prettyPrintFunction
         ) {
             this.resourceKey = resourceKey;
             this.caretLocation = caretLocation;
             this.astSupplier = astSupplier;
-            this.prettyPrinterFunction = prettyPrinterFunction;
             this.preAnalyzeFunction = preAnalyzeFunction;
             this.postAnalyzeFunction = postAnalyzeFunction;
             this.upgradePlaceholdersFunction = upgradePlaceholdersFunction;
             this.downgradePlaceholdersFunction = downgradePlaceholdersFunction;
             this.isInjectionFunction = isInjectionFunction;
+            this.prettyPrinterFunction = prettyPrinterFunction;
 //            this.prettyPrintFunction = prettyPrintFunction;
         }
     }
@@ -107,27 +107,27 @@ public class TigerCodeComplete implements TaskDef<TigerCodeComplete.Input, @Null
         return this.getClass().getName();
     }
 
-    private @Nullable IStrategoTerm explicate(ExecContext context, Input input, IStrategoTerm term) {
+    private Result<IStrategoTerm, ?> explicate(ExecContext context, Input input, IStrategoTerm term) {
         return input.preAnalyzeFunction.apply(context, term);
     }
 
-    private @Nullable IStrategoTerm implicate(ExecContext context, Input input, IStrategoTerm term) {
+    private Result<IStrategoTerm, ?> implicate(ExecContext context, Input input, IStrategoTerm term) {
         return input.postAnalyzeFunction.apply(context, term);
     }
 
-    private @Nullable IStrategoTerm upgrade(ExecContext context, Input input, IStrategoTerm term) {
+    private Result<IStrategoTerm, ?> upgrade(ExecContext context, Input input, IStrategoTerm term) {
         return input.upgradePlaceholdersFunction.apply(context, term);
     }
 
-    private @Nullable IStrategoTerm downgrade(ExecContext context, Input input, IStrategoTerm term) {
+    private Result<IStrategoTerm, ?> downgrade(ExecContext context, Input input, IStrategoTerm term) {
         return input.downgradePlaceholdersFunction.apply(context, term);
     }
 
-    private @Nullable IStrategoTerm isInjection(ExecContext context, Input input, IStrategoTerm term) {
+    private Result<IStrategoTerm, ?> isInjection(ExecContext context, Input input, IStrategoTerm term) {
         return input.isInjectionFunction.apply(context, term);
     }
 
-    private @Nullable String prettyPrint(ExecContext context, Input input, IStrategoTerm term) {
+    private Result<String, ?> prettyPrint(ExecContext context, Input input, IStrategoTerm term) {
         return input.prettyPrinterFunction.apply(context, term);
     }
 

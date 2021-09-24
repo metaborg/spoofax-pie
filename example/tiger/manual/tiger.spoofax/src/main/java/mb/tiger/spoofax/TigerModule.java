@@ -32,12 +32,14 @@ import mb.tiger.spoofax.command.TigerShowParsedAstCommand;
 import mb.tiger.spoofax.command.TigerShowPrettyPrintedTextCommand;
 import mb.tiger.spoofax.command.TigerShowScopeGraphCommand;
 import mb.tiger.spoofax.task.TigerCheckAggregator;
+import mb.tiger.spoofax.task.TigerCodeComplete;
 import mb.tiger.spoofax.task.TigerCompileDirectory;
 import mb.tiger.spoofax.task.TigerCompileFile;
 import mb.tiger.spoofax.task.TigerCompileFileAlt;
 import mb.tiger.spoofax.task.TigerCheck;
 import mb.tiger.spoofax.task.TigerDowngradePlaceholders;
 import mb.tiger.spoofax.task.TigerGetSourceFiles;
+import mb.tiger.spoofax.task.TigerGetStrategoRuntimeProvider;
 import mb.tiger.spoofax.task.TigerIdeTokenize;
 import mb.tiger.spoofax.task.TigerIsInjection;
 import mb.tiger.spoofax.task.TigerPartialPrettyPrint;
@@ -155,6 +157,8 @@ public class TigerModule {
         TigerStyle style,
         TigerAnalyze analyze,
         TigerCompleteTaskDef complete,
+        TigerCodeComplete codeComplete,
+        TigerGetStrategoRuntimeProvider getStrategoRuntimeProvider,
 
         TigerListLiteralVals listLiteralVals,
         TigerListDefNames listDefNames,
@@ -187,6 +191,8 @@ public class TigerModule {
         taskDefs.add(style);
         taskDefs.add(analyze);
         taskDefs.add(complete);
+        taskDefs.add(codeComplete);
+        taskDefs.add(getStrategoRuntimeProvider);
 
         taskDefs.add(listLiteralVals);
         taskDefs.add(listDefNames);

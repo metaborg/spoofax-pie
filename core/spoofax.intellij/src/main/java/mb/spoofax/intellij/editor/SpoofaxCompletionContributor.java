@@ -3,18 +3,23 @@ package mb.spoofax.intellij.editor;
 import com.intellij.codeInsight.completion.CompletionContributor;
 import com.intellij.codeInsight.completion.CompletionParameters;
 import com.intellij.codeInsight.completion.CompletionResultSet;
+import com.intellij.codeInsight.completion.InsertionContext;
+import com.intellij.codeInsight.completion.PrioritizedLookupElement;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.editor.Editor;
 import com.intellij.ui.LayeredIcon;
 import com.intellij.ui.RowIcon;
 import com.intellij.util.PlatformIcons;
 import com.intellij.util.SmartList;
 import com.intellij.util.ui.EmptyIcon;
+import mb.common.codecompletion.CodeCompletionItem;
+import mb.common.codecompletion.CodeCompletionResult;
+import mb.common.editing.TextEdit;
 import mb.common.region.Region;
 import mb.common.style.StyleNames;
-import mb.completions.common.CompletionProposal;
-import mb.completions.common.CompletionResult;
 import mb.pie.api.ExecException;
 import mb.pie.api.MixedSession;
 import mb.pie.api.Task;
@@ -35,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static mb.common.style.StyleNameConstants.*;
 
@@ -60,26 +66,30 @@ public abstract class SpoofaxCompletionContributor extends CompletionContributor
         final Resource resource = resourceRegistry.getResource(parameters.getOriginalFile());
         final ResourceKey resourceKey = resource.getKey();
         final Region selection = Region.atOffset(parameters.getOffset());
-        final @Nullable CompletionResult completionResult;
+        final @Nullable CodeCompletionResult codeCompletionResult;
         try(final MixedSession session = this.pieSessionProvider.get()) {
-            Task<@Nullable CompletionResult> completionTask = this.languageInstance.createCompletionTask(resourceKey, selection);
-            completionResult = session.require(completionTask);
+            Task<@Nullable CodeCompletionResult> codeCompletionTask = this.languageInstance.createCodeCompletionTask(resourceKey, selection);
+            if(codeCompletionTask == null) return;
+            codeCompletionResult = session.require(codeCompletionTask);
         } catch(ExecException e) {
             throw new RuntimeException("Code completion on resource '" + resourceKey + "' failed unexpectedly.", e);
         } catch(InterruptedException e) {
             return;
         }
 
-        if(completionResult == null) return;
-        result.addAllElements(completionResult.getProposals().stream().map(this::proposalToElement).collect(Collectors.toList()));
+        if(codeCompletionResult == null) return;
+        List<LookupElement> elements = IntStream.range(0, codeCompletionResult.getProposals().size()).mapToObj(i -> proposalToElement(codeCompletionResult.getProposals().get(i), i)).collect(Collectors.toList());
+        result.addAllElements(elements);
     }
 
-    private LookupElement proposalToElement(CompletionProposal proposal) {
-        return LookupElementBuilder
+    private LookupElement proposalToElement(CodeCompletionItem proposal, int priority) {
+        LookupElementBuilder element = LookupElementBuilder
             .create(proposal.getLabel())
             .withTailText(proposal.getParameters() + (proposal.getLocation().isEmpty() ? "" : " " + proposal.getLocation()))
             .withTypeText(proposal.getType().isEmpty() ? proposal.getDescription() : proposal.getType(), true)
+            .withInsertHandler((ctx, item) -> insertHandler(ctx, item, proposal))
             .withIcon(getIcon(StyleNames.of(proposal.getKind())));
+        return PrioritizedLookupElement.withPriority(element, priority);
     }
 
     private @Nullable Icon getIcon(StyleNames styles) {
@@ -174,6 +184,23 @@ public abstract class SpoofaxCompletionContributor extends CompletionContributor
         } else {
             return kindIcon;
         }
+    }
+
+    private void insertHandler(InsertionContext context, LookupElement item, CodeCompletionItem proposal) {
+        final Editor editor = context.getEditor();
+        final Document document = editor.getDocument();
+        final int startOffset = context.getStartOffset();
+        final int tailOffset = context.getTailOffset();
+        // First, we replace the automatically inserted text with an empty string
+        document.replaceString(startOffset, tailOffset, "");
+        // Then we apply our text edits, which includes edits that replace the placeholder, if any
+        // Note that we apply them back to front, such that an earlier text editor will not influence
+        // the offset of the later text edits
+        for (int i = (proposal.getEdits().size() - 1); i >= 0; i--) {
+            final TextEdit edit = proposal.getEdits().get(i);
+            document.replaceString(edit.getRegion().getStartOffset(), edit.getRegion().getEndOffset(), edit.getNewText());
+        }
+        assert Boolean.TRUE;
     }
 
 }

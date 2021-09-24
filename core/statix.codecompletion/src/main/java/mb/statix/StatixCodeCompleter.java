@@ -6,6 +6,7 @@ import mb.common.codecompletion.CodeCompletionItem;
 import mb.common.codecompletion.CodeCompletionResult;
 import mb.common.editing.TextEdit;
 import mb.common.region.Region;
+import mb.common.result.Result;
 import mb.common.style.StyleName;
 import mb.common.util.ListView;
 import mb.log.api.Logger;
@@ -90,11 +91,10 @@ public abstract class StatixCodeCompleter {
     public @Nullable CodeCompletionResult complete(Spec spec, IStrategoTerm ast, Region primarySelection, ResourceKey resource) {
         final int caretLocation = primarySelection.getStartOffset();
 
-        final @Nullable IStrategoTerm explicatedAst = explicate(ast);
-        if (explicatedAst == null) {
-            log.error("Completion failed: we did not get an explicated AST.");
-            return null;    // Cannot complete when we don't get an explicated AST.
-        }
+        @Nullable final IStrategoTerm explicatedAst = explicate(ast).ifErr(ex ->
+            log.error("Completion failed: we did not get an explicated AST.", ex)
+        ).get();
+        if (explicatedAst == null) return null; // Cannot complete when we don't get an explicated AST.
 
         // Convert to Statix AST
         IStrategoTerm annotatedAst = StrategoTermIndices.index(explicatedAst, resource.toString(), termFactory);
@@ -139,21 +139,22 @@ public abstract class StatixCodeCompleter {
         List<String> completionStrings = completionTerms.stream().map(proposal -> {
             // TODO: We should call the correct downgrade-placeholders-Lang-Sort based on the
             //  sort of the placeholder.
-            @Nullable IStrategoTerm downgradedTerm = downgrade(proposal);
-            if (downgradedTerm == null) {
-                log.warn("Downgrading failed on proposal: " + proposal);
-                return proposal.toString();  // Return the term when downgrading failed
-            }
-            @Nullable IStrategoTerm implicatedTerm = implicate(downgradedTerm);
-            if (implicatedTerm == null) {
-                log.warn("Implication failed on downgraded: " + downgradedTerm + "\nFrom proposal: " + proposal);
-                return downgradedTerm.toString();  // Return the term when implication failed
-            }
-            @Nullable String prettyPrinted = prettyPrint(implicatedTerm);
-            if (prettyPrinted == null) {
-                log.warn("Pretty-printing failed on implicated: " + implicatedTerm + "\nFrom downgraded: " + downgradedTerm + "\nFrom proposal: " + proposal);
-                return implicatedTerm.toString();  // Return the term when pretty-printing failed
-            }
+
+            @Nullable final IStrategoTerm downgradedTerm = downgrade(proposal).ifErr(ex ->
+                log.error("Downgrading failed on proposal: " + proposal, ex)
+            ).get();
+            if (downgradedTerm == null) return proposal.toString(); // Return the term when downgrading failed
+
+            @Nullable final IStrategoTerm implicatedTerm = implicate(downgradedTerm).ifErr(ex ->
+                log.error("Implication failed on downgraded: " + downgradedTerm + "\nFrom proposal: " + proposal, ex)
+            ).get();
+            if (implicatedTerm == null) return downgradedTerm.toString(); // Return the term when implication failed
+
+            @Nullable final String prettyPrinted = prettyPrint(implicatedTerm).ifErr(ex ->
+                log.warn("Pretty-printing failed on implicated: " + implicatedTerm + "\nFrom downgraded: " + downgradedTerm + "\nFrom proposal: " + proposal, ex)
+            ).get();
+            if (implicatedTerm == null) return implicatedTerm.toString(); // Return the term when pretty-printing failed
+
             return prettyPrinted;
         }).collect(Collectors.toList());
 
@@ -254,7 +255,10 @@ public abstract class StatixCodeCompleter {
     ) {
         final Strategy<ITerm, @Nullable ITerm> isInjPredicate = pred(t -> {
             final IStrategoTerm st = strategoTerms.toStratego(t, true);
-            final @Nullable IStrategoTerm result = isInj(st);
+
+            @Nullable final IStrategoTerm result = isInj(st).ifErr(ex ->
+                log.error("Could not determine if term is an injection: " + st, ex)
+            ).get();
             return result != null;
         });
 
@@ -441,16 +445,17 @@ public abstract class StatixCodeCompleter {
         );
     }
 
-    protected abstract @Nullable String prettyPrint(IStrategoTerm term);
+    protected abstract Result<IStrategoTerm, ?> explicate(IStrategoTerm term);
 
-    protected abstract @Nullable IStrategoTerm explicate(IStrategoTerm term);
+    protected abstract Result<IStrategoTerm, ?> implicate(IStrategoTerm term);
 
-    protected abstract @Nullable IStrategoTerm implicate(IStrategoTerm term);
+    protected abstract Result<IStrategoTerm, ?> upgrade(IStrategoTerm term);
 
-    protected abstract @Nullable IStrategoTerm upgrade(IStrategoTerm term);
+    protected abstract Result<IStrategoTerm, ?> downgrade(IStrategoTerm term);
 
-    protected abstract @Nullable IStrategoTerm downgrade(IStrategoTerm term);
+    protected abstract Result<IStrategoTerm, ?> isInj(IStrategoTerm term);
 
-    protected abstract @Nullable IStrategoTerm isInj(IStrategoTerm term);
+    protected abstract Result<String, ?> prettyPrint(IStrategoTerm term);
+
 
 }

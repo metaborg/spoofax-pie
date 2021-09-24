@@ -48,6 +48,7 @@ import mb.tiger.spoofax.task.TigerCheck;
 import mb.tiger.spoofax.task.TigerCheckAggregator;
 import mb.tiger.spoofax.task.TigerCodeComplete;
 import mb.tiger.spoofax.task.TigerDowngradePlaceholders;
+import mb.tiger.spoofax.task.TigerGetStrategoRuntimeProvider;
 import mb.tiger.spoofax.task.TigerIdeTokenize;
 import mb.tiger.spoofax.task.TigerIsInjection;
 import mb.tiger.spoofax.task.TigerPartialPrettyPrint;
@@ -76,6 +77,7 @@ public class TigerInstance implements LanguageInstance, TestableParse {
     private final TigerCodeComplete codeComplete;
     private final NoneResolveTaskDef resolve;
     private final NoneHoverTaskDef hover;
+    private final TigerGetStrategoRuntimeProvider getStrategoRuntimeProvider;
 
     private final TigerPreStatix preStatix;
     private final TigerPostStatix postStatix;
@@ -106,6 +108,7 @@ public class TigerInstance implements LanguageInstance, TestableParse {
         TigerCodeComplete codeComplete,
         NoneResolveTaskDef resolve,
         NoneHoverTaskDef hover,
+        TigerGetStrategoRuntimeProvider getStrategoRuntimeProvider,
 
         TigerPreStatix preStatix,
         TigerPostStatix postStatix,
@@ -134,6 +137,7 @@ public class TigerInstance implements LanguageInstance, TestableParse {
         this.codeComplete = codeComplete;
         this.resolve = resolve;
         this.hover = hover;
+        this.getStrategoRuntimeProvider = getStrategoRuntimeProvider;
 
         this.preStatix = preStatix;
         this.postStatix = postStatix;
@@ -186,12 +190,12 @@ public class TigerInstance implements LanguageInstance, TestableParse {
             resourceKey,
             primarySelection.getStartOffset(),
             parse.inputBuilder().withFile(resourceKey).buildRecoverableAstSupplier().map(Result::get),
-            (context, input) -> partialPrettyPrint.createFunction().apply(context, context1 -> Result.ofOk(input)).get().toString() /* FIXME: toString() is probably wrong! */,
-            (context, input) -> preStatix.createFunction().apply(context, context1 -> Result.ofOk(input)).get(),
-            (context, input) -> postStatix.createFunction().apply(context, context1 -> Result.ofOk(input)).get(),
-            (context, input) -> upgradePlaceholders.createFunction().apply(context, context1 -> Result.ofOk(input)).get(),
-            (context, input) -> downgradePlaceholders.createFunction().apply(context, context1 -> Result.ofOk(input)).get(),
-            (context, input) -> isInjection.createFunction().apply(context, context1 -> Result.ofOk(input)).get()
+            (context, input) -> preStatix.createFunction().apply(context, context1 -> Result.ofOk(input)),
+            (context, input) -> postStatix.createFunction().apply(context, context1 -> Result.ofOk(input)),
+            (context, input) -> upgradePlaceholders.createFunction().apply(context, context1 -> Result.ofOk(input)),
+            (context, input) -> downgradePlaceholders.createFunction().apply(context, context1 -> Result.ofOk(input)),
+            (context, input) -> isInjection.createFunction().apply(context, context1 -> Result.ofOk(input)),
+            (context, input) -> partialPrettyPrint.createFunction().apply(context, context1 -> Result.ofOk(input)).map(Object::toString) /* FIXME: toString() is probably wrong! */
         ));
     }
 
