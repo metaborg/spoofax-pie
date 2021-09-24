@@ -1,9 +1,10 @@
 package mb.statix;
 
+import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.pie.api.MixedSession;
 import mb.resource.fs.FSResource;
-import mb.statix.task.StatixCompile;
+import mb.statix.task.StatixCompileModule;
 import mb.statix.task.StatixConfig;
 import org.junit.jupiter.api.Test;
 import org.spoofax.terms.util.TermUtils;
@@ -36,15 +37,19 @@ class CompileTest extends TestBase {
         final StatixConfig config = StatixConfig.createDefault(rootDirectory.getPath());
 
         try(final MixedSession session = newSession()) {
-            final Result<StatixCompile.Output, ?> mainResult = session.require(compile.createTask(new StatixCompile.Input(mainFile.getPath(), config)));
+            final Result<Option<StatixCompileModule.Output>, ?> mainResult = session.require(compileModule.createTask(new StatixCompileModule.Input(config.rootDirectory, mainFile.getPath(), config.sourceFileOrigins)));
             assertTrue(mainResult.isOk());
-            final StatixCompile.Output mainOutput = mainResult.unwrap();
+            final Option<StatixCompileModule.Output> mainOutputOpt = mainResult.unwrap();
+            assertTrue(mainOutputOpt.isSome());
+            final StatixCompileModule.Output mainOutput = mainOutputOpt.unwrap();
             assertEquals("src-gen/statix/main.spec.aterm", mainOutput.relativeOutputPath);
             assertTrue(TermUtils.isAppl(mainOutput.spec, "FileSpec", 6));
 
-            final Result<StatixCompile.Output, ?> programResult = session.require(compile.createTask(new StatixCompile.Input(programFile.getPath(), config)));
+            final Result<Option<StatixCompileModule.Output>, ?> programResult = session.require(compileModule.createTask(new StatixCompileModule.Input(config.rootDirectory, programFile.getPath(), config.sourceFileOrigins)));
             assertTrue(programResult.isOk());
-            final StatixCompile.Output programOutput = programResult.unwrap();
+            final Option<StatixCompileModule.Output> programOutputOpt = programResult.unwrap();
+            assertTrue(programOutputOpt.isSome());
+            final StatixCompileModule.Output programOutput = programOutputOpt.unwrap();
             assertEquals("src-gen/statix/program.spec.aterm", programOutput.relativeOutputPath);
             assertTrue(TermUtils.isAppl(programOutput.spec, "FileSpec", 6));
         }

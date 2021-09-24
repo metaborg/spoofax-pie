@@ -10,10 +10,10 @@ import mb.pie.api.Interactivity;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
-import mb.statix.task.StatixCheck;
-import mb.statix.task.StatixCompile;
+import mb.statix.task.StatixCheckMulti;
+import mb.statix.task.StatixCompileModule;
+import mb.statix.task.StatixCompileProject;
 import mb.statix.task.StatixConfig;
-import mb.statix.task.spoofax.StatixGetSourceFiles;
 
 import javax.inject.Inject;
 import java.io.IOException;
@@ -24,22 +24,19 @@ public class CompileStatix implements TaskDef<ResourcePath, Result<KeyedMessages
 
     private final ConfigureStatix configure;
 
-    private final StatixCheck check;
-    private final StatixGetSourceFiles getSourceFiles;
-    private final StatixCompile compile;
+    private final StatixCheckMulti check;
+    private final StatixCompileProject compileProject;
 
     @Inject public CompileStatix(
         CfgRootDirectoryToObject cfgRootDirectoryToObject,
         ConfigureStatix configure,
-        StatixCheck check,
-        StatixGetSourceFiles getSourceFiles,
-        StatixCompile compile
+        StatixCheckMulti check,
+        StatixCompileProject compileProject
     ) {
         this.cfgRootDirectoryToObject = cfgRootDirectoryToObject;
         this.configure = configure;
         this.check = check;
-        this.getSourceFiles = getSourceFiles;
-        this.compile = compile;
+        this.compileProject = compileProject;
     }
 
 
@@ -67,23 +64,24 @@ public class CompileStatix implements TaskDef<ResourcePath, Result<KeyedMessages
     }
 
     public Result<KeyedMessages, StatixCompileException> checkAndCompile(ExecContext context, StatixConfig config, CompileStatixInput input) throws IOException {
-        final KeyedMessages messages = context.require(check, config);
+        final KeyedMessages messages = context.require(check, input.rootDirectory());
         if(messages.containsError()) {
             return Result.ofErr(StatixCompileException.checkFail(messages));
         }
 
-        final HierarchicalResource outputDirectory = context.getHierarchicalResource(input.outputDirectory()).ensureDirectoryExists();
-        for(ResourcePath sourceFile : context.require(getSourceFiles, input.rootDirectory())) {
-            final Result<StatixCompile.Output, ?> result = context.require(compile, new StatixCompile.Input(sourceFile, config));
-            if(result.isErr()) {
-                return Result.ofErr(StatixCompileException.compileFail(result.unwrapErr()));
-            }
-            final StatixCompile.Output output = result.unwrapUnchecked();
-            final HierarchicalResource outputFile = outputDirectory.appendAsRelativePath(output.relativeOutputPath).ensureFileExists();
-            outputFile.writeString(output.spec.toString());
+        return context.require(compileProject, new StatixCompileProject.Input(input.rootDirectory(), config.sourceFileOrigins))
+            .mapThrowing(o -> {
+                writeOutput(context, o, input.outputDirectory());
+                return messages;
+            }).mapErr(StatixCompileException::compileFail);
+    }
+
+    private void writeOutput(ExecContext context, StatixCompileProject.Output output, ResourcePath outputPath) throws IOException {
+        final HierarchicalResource outputDirectory = context.getHierarchicalResource(outputPath).ensureDirectoryExists();
+        for(StatixCompileModule.Output out : output.compileModuleOutputs) {
+            final HierarchicalResource outputFile = outputDirectory.appendAsRelativePath(out.relativeOutputPath).ensureFileExists();
+            outputFile.writeString(out.spec.toString());
             context.provide(outputFile);
         }
-
-        return Result.ofOk(messages);
     }
 }

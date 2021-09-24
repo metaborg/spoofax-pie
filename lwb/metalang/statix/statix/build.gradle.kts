@@ -103,13 +103,11 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   // Wrap CheckMulti and rename base tasks
   isMultiFile(true)
   baseCheckTaskDef(spoofaxTaskPackageId, "BaseStatixCheck")
-  baseCheckMultiTaskDef(spoofaxTaskPackageId, "BaseStatixCheckMulti")
-  extendCheckMultiTaskDef(spoofaxTaskPackageId, "StatixCheckMultiWrapper")
 
   addTaskDefs(taskPackageId, "StatixPrettyPrint")
 
-  addTaskDefs(taskPackageId, "StatixCheck")
-  addTaskDefs(taskPackageId, "StatixCompile")
+  addTaskDefs(taskPackageId, "StatixCompileModule")
+  addTaskDefs(taskPackageId, "StatixCompileProject")
 
   // Evaluate test
   val evaluateTest = TypeInfo.of(taskPackageId, "StatixEvaluateTest")
