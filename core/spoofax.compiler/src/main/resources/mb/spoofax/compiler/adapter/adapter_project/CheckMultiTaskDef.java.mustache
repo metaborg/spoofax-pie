@@ -40,8 +40,9 @@ public class {{baseCheckMultiTaskDef.id}} implements TaskDef<ResourcePath, Keyed
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
 
         {{#parser}}
+        final mb.jsglr.pie.JsglrParseTaskInput.Builder parseInputBuilder = parse.inputBuilder().rootDirectoryHint(input);
         for(final ResourceKey file : context.require(getSourceFiles, input)) {
-            final Messages messages = context.require(parse.inputBuilder().withFile(file).rootDirectoryHint(input).buildMessagesSupplier());
+            final Messages messages = context.require(parseInputBuilder.withFile(file).buildMessagesSupplier());
             messagesBuilder.addMessages(file, messages);
         }
         {{/parser}}

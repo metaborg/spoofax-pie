@@ -7,7 +7,7 @@ import mb.pie.api.Supplier;
 import mb.resource.Resource;
 import mb.resource.ResourceKey;
 import mb.spoofax.test.SingleLanguageTestBase;
-import mb.statix.task.StatixCompile;
+import mb.statix.task.StatixCompileModule;
 import mb.statix.task.spoofax.StatixParseWrapper;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -27,7 +27,7 @@ class TestBase extends SingleLanguageTestBase<StatixResourcesComponent, StatixCo
 
 
     final StatixParseWrapper parse = component.getStatixParseWrapper();
-    final StatixCompile compile = component.getStatixCompile();
+    final StatixCompileModule compileModule = component.getStatixCompileModule();
 
 
     Supplier<? extends Result<IStrategoTerm, ?>> parsedAstSupplier(ResourceKey resourceKey) {
