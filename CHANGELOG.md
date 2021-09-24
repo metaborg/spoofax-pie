@@ -3,8 +3,12 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+### Added
+- Evaluate test command for Statix `.stxtest` files.
+
 ### Fixed
 - SDF3 files in subdirectories cause the parenthesizer file to not import the correct signatures (https://github.com/metaborg/spoofax-pie/issues/61).
+- Deadlocks in SPT *ToFragment expectations due to not closing PIE sessions (https://github.com/metaborg/spoofax-pie/pull/64).
 
 
 ## [0.12.0] - 2021-09-22
@@ -165,7 +169,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.13...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.12.0...HEAD
+[0.12.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.13...release-0.12.0
 [0.11.13]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.12...release-0.11.13
 [0.11.12]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.11...release-0.11.12
 [0.11.11]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.10...release-0.11.11

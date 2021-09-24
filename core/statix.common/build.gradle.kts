@@ -10,6 +10,7 @@ dependencies {
   api("org.metaborg.devenv:statix.solver")
 
   implementation(project(":stratego.common"))
+  implementation(project(":jsglr.common"))
 
   compileOnly("org.checkerframework:checker-qual-android")
 }
