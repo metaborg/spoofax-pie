@@ -34,8 +34,9 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
   project(":$id").projectDir = file(path)
 }
 
-"tiger/spoofaxcore".run {
-  includeProject("tiger.spoofaxcore")
+"tiger/spoofax2".run {
+  includeProject("org.metaborg.lang.tiger")
+//  includeProject("org.metaborg.lang.tiger.statix")
 }
 "tiger/manual".run {
   includeProject("tiger", "tiger/manual/tiger")

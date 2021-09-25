@@ -1,9 +1,0 @@
-let 
-  type foo = int
-  var x : int 
-  function f(y : int) : foo = 3 + x + y
-  var y : int := 1 
- in
-   for x := x to y + 1 do 
-     x := f(x + 1)
-end  

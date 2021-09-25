@@ -1,8 +1,0 @@
-let
-  type foo = int
-  function foo(x : int) : int = 3 
-  var foo : foo := foo(4)
- in foo(56)  + foo  // both refer to the variable foo
- 
- 
-end 

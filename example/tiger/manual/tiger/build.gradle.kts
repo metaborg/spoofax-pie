@@ -91,7 +91,7 @@ fun copySpoofaxLanguageResources(
   tasks.getByName(JavaPlugin.TEST_CLASSES_TASK_NAME).dependsOn(copyTestTask)
 }
 copySpoofaxLanguageResources(
-  dependencies.create(compositeBuild("tiger.spoofaxcore")),
+  dependencies.create(compositeBuild("org.metaborg.lang.tiger")),
   "mb/tiger",
   true,
   "target/metaborg/editor.esv.af", "target/metaborg/sdf.tbl"

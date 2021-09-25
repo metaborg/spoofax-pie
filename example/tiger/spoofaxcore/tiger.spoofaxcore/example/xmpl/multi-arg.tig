@@ -1,7 +1,0 @@
-/* function with many (more than four) arguments */
-
-let function multi(arg1 : int, arg2 : int, arg3 : int, arg4 : int, arg5 : int) : int =
-      arg1 + arg2 + arg3 + arg4 + arg5
- in
-    multi(1,2,3,4,5)
-end

@@ -1,9 +1,0 @@
-let
-  var x : int := 5
-  var f : int := 1
-in
-  for y := 1 to x do (
-    f := f * y
-  );
-  print(chr(y)) // y not in scope
-end

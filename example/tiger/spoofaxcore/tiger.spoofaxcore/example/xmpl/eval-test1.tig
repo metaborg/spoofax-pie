@@ -1,3 +1,0 @@
-let var x : int := 1
- in x + 2
-end
