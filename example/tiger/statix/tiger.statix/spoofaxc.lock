@@ -1,0 +1,5 @@
+shared.defaultArtifactId=tiger
+shared.defaultClassPrefix=Tiger
+shared.defaultGroupId=org.metaborg
+shared.defaultPackageId=mb.tiger.statix
+shared.defaultVersion=0.1.0
