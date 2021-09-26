@@ -157,6 +157,7 @@ public class CodeCompleteTaskDef implements TaskDef<CodeCompleteTaskDef.Args, @N
         ConstraintAnalyzeFile analyzeFileTask,
         GetStrategoRuntimeProvider getStrategoRuntimeProviderTask,
         GetTegoRuntimeProviderTaskDef getTegoRuntimeProviderTask,
+        //StatixCompileSpec compileSpec,
         StrategoTerms strategoTerms,
         LoggerFactory loggerFactory
     ) {
@@ -181,7 +182,7 @@ public class CodeCompleteTaskDef implements TaskDef<CodeCompleteTaskDef.Args, @N
 
         final StrategoRuntime strategoRuntime = context.require(getStrategoRuntimeProviderTask, None.instance).getValue().get();
         final TegoRuntime tegoRuntime = context.require(getTegoRuntimeProviderTask, None.instance).getValue().get();
-        final Spec spec = null; // TODO: Get spec from task. This is the merged spec AST, converted to a Spec object
+        final Spec spec = null; // TODO: Get spec from StatixCompileSpec. This is the merged spec AST, converted to a Spec object
 
         return new Execution(
             context, input, strategoRuntime, tegoRuntime, spec
