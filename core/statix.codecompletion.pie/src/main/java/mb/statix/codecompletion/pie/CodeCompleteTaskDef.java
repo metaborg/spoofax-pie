@@ -144,8 +144,12 @@ public class CodeCompleteTaskDef implements TaskDef<CodeCompleteTaskDef.Args, @N
     /**
      * Initializes a new instance of the {@link CodeCompleteTaskDef} class.
      *
-     * @param analyzeFileTask
-     * @param getStrategoRuntimeProviderTask the Stratego runtime provider
+     * @param parseTask the parser task
+     * @param analyzeFileTask the analysis task
+     * @param getStrategoRuntimeProviderTask the Stratego runtime provider task
+     * @param getTegoRuntimeProviderTask the Tego runtime provider task
+     * @param strategoTerms the Stratego to NaBL terms utility class
+     * @param loggerFactory the logger factory
      */
     public CodeCompleteTaskDef(
         JsglrParseTaskDef parseTask,
