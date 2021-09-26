@@ -3,20 +3,15 @@ package mb.statix.codecompletion.strategies.runtime;
 import mb.nabl2.terms.ITermVar;
 import mb.statix.SolverContext;
 import mb.statix.SolverState;
-import mb.statix.constraints.messages.IMessage;
-import mb.statix.sequences.Seq;
-import mb.statix.solver.IConstraint;
-import mb.statix.strategies.NamedStrategy;
-import mb.statix.strategies.NamedStrategy2;
-import mb.statix.strategies.NamedStrategy3;
-import mb.statix.strategies.Strategy;
-import mb.statix.strategies.runtime.FlatMapStrategy;
-import mb.statix.strategies.runtime.TegoEngine;
+import mb.tego.sequences.Seq;
+import mb.tego.strategies.NamedStrategy;
+import mb.tego.strategies.NamedStrategy2;
+import mb.tego.strategies.NamedStrategy3;
+import mb.tego.strategies.Strategy;
+import mb.tego.strategies.runtime.FlatMapStrategy;
+import mb.tego.strategies.runtime.TegoEngine;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spoofax.interpreter.terms.IStrategoTerm;
 
-import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 
 /**

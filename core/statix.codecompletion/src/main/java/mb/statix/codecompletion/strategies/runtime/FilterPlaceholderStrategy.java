@@ -1,19 +1,16 @@
 package mb.statix.codecompletion.strategies.runtime;
 
-import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
 import mb.nabl2.terms.stratego.StrategoPlaceholders;
-import mb.statix.SolverContext;
 import mb.statix.SolverState;
-import mb.statix.strategies.NamedStrategy1;
-import mb.statix.strategies.NamedStrategy2;
-import mb.statix.strategies.Strategy;
-import mb.statix.strategies.runtime.Strategies;
-import mb.statix.strategies.runtime.TegoEngine;
+import mb.tego.strategies.NamedStrategy1;
+import mb.tego.strategies.NamedStrategy2;
+import mb.tego.strategies.Strategy;
+import mb.tego.strategies.runtime.TegoEngine;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import static mb.statix.strategies.StrategyExt.*;
-import static mb.statix.strategies.runtime.Strategies.*;
+import static mb.tego.strategies.StrategyExt.*;
+import static mb.tego.strategies.runtime.Strategies.*;
 
 @SuppressWarnings("RedundantSuppression")
 public final class FilterPlaceholderStrategy extends NamedStrategy1<ITermVar, SolverState, @Nullable SolverState> {

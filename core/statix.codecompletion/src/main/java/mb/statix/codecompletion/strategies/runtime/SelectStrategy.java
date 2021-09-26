@@ -1,13 +1,12 @@
 package mb.statix.codecompletion.strategies.runtime;
 
 import mb.statix.SelectedConstraintSolverState;
-import mb.statix.SolverContext;
 import mb.statix.SolverState;
-import mb.statix.sequences.Seq;
+import mb.tego.sequences.Seq;
 import mb.statix.solver.IConstraint;
-import mb.statix.strategies.NamedStrategy2;
-import mb.statix.strategies.Strategy1;
-import mb.statix.strategies.runtime.TegoEngine;
+import mb.tego.strategies.NamedStrategy2;
+import mb.tego.strategies.Strategy1;
+import mb.tego.strategies.runtime.TegoEngine;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**

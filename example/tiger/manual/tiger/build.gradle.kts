@@ -27,7 +27,7 @@ dependencies {
   api(compositeBuild("constraint.common"))
 
   api("org.metaborg.devenv:nabl2.terms")
-  api(compositeBuild("statix.strategies"))
+  api(compositeBuild("tego"))
   api(compositeBuild("statix.codecompletion"))
 
   implementation(compositeBuild("nabl2.common"))

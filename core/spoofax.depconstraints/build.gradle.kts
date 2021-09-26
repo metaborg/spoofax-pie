@@ -38,9 +38,10 @@ dependencies {
     api(project(":statix.codecompletion"))
     api(project(":statix.common"))
     api(project(":statix.pie"))
-    api(project(":statix.strategies"))
     api(project(":statix.multilang"))
     api(project(":spoofax2.common"))
+    api(project(":tego"))
+    api(project(":tego.pie"))
     api(project(":tooling.eclipsebundle"))  // TODO: bundle versions are not picked up when consuming this platform?
 
     api(project(":spoofax.core"))

@@ -1,15 +1,14 @@
 package mb.statix.codecompletion.strategies.runtime;
 
-import mb.statix.SolverContext;
 import mb.statix.SolverState;
-import mb.statix.sequences.Seq;
+import mb.tego.sequences.Seq;
 import mb.statix.solver.completeness.IsComplete;
 import mb.statix.solver.log.NullDebugContext;
 import mb.statix.solver.persistent.Solver;
 import mb.statix.solver.persistent.SolverResult;
-import mb.statix.strategies.NamedStrategy;
-import mb.statix.strategies.NamedStrategy1;
-import mb.statix.strategies.runtime.TegoEngine;
+import mb.tego.strategies.NamedStrategy;
+import mb.tego.strategies.NamedStrategy1;
+import mb.tego.strategies.runtime.TegoEngine;
 import org.metaborg.util.task.NullCancel;
 import org.metaborg.util.task.NullProgress;
 

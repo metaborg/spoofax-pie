@@ -1,22 +1,19 @@
 package mb.statix.codecompletion.strategies.runtime;
 
-import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
 import mb.statix.SelectedConstraintSolverState;
 import mb.statix.SolverContext;
 import mb.statix.SolverState;
 import mb.statix.constraints.CResolveQuery;
 import mb.statix.constraints.CUser;
-import mb.statix.constraints.messages.IMessage;
-import mb.statix.sequences.Seq;
+import mb.tego.sequences.Seq;
 import mb.statix.solver.IConstraint;
-import mb.statix.strategies.Strategy;
-import mb.statix.strategies.Strategy1;
+import mb.tego.strategies.Strategy;
+import mb.tego.strategies.Strategy1;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Set;
 
 public final class SearchStrategies {

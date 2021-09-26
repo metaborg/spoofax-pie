@@ -1,32 +1,22 @@
 package mb.statix;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
 import io.usethesource.capsule.Map;
 import io.usethesource.capsule.Set;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
 import mb.nabl2.terms.unification.ud.IUniDisunifier;
-import mb.statix.constraints.CConj;
-import mb.statix.constraints.CExists;
 import mb.statix.constraints.messages.IMessage;
-import mb.statix.solver.CriticalEdge;
 import mb.statix.solver.Delay;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.IState;
-import mb.statix.solver.completeness.Completeness;
-import mb.statix.solver.completeness.CompletenessUtil;
 import mb.statix.solver.completeness.ICompleteness;
 import mb.statix.spec.ApplyResult;
 import mb.statix.spec.Spec;
-import mb.statix.utils.TextStringBuilder;
+import mb.tego.utils.TextStringBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.metaborg.util.collection.CapsuleUtil;
 import org.metaborg.util.functions.Function2;
-import org.metaborg.util.tuple.Tuple2;
 
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.Objects;
 
 /**

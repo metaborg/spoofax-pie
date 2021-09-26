@@ -25,7 +25,7 @@ import mb.statix.solver.completeness.ICompleteness;
 import mb.statix.solver.persistent.SolverResult;
 import mb.statix.spec.ApplyResult;
 import mb.statix.spec.Spec;
-import mb.statix.utils.TextStringBuilder;
+import mb.tego.utils.TextStringBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.collection.CapsuleUtil;
 import org.metaborg.util.functions.Function0;
@@ -409,6 +409,17 @@ public class SolverState implements ISolverState {
         final TextStringBuilder sb = new TextStringBuilder();
         sb.append(this.getClass().getSimpleName()).appendln(":");
         write(sb, "| ", (t, u) -> new UnifierFormatter(u, /* Increased from 2 */ Integer.MAX_VALUE).format(t));
+        return sb.toString();
+    }
+
+    /**
+     * Returns the messages as a string.
+     *
+     * @return the messages
+     */
+    public String messagesToString() {
+        final TextStringBuilder sb = new TextStringBuilder();
+        writeMessages(sb, "", (t, u) -> new UnifierFormatter(u, /* Increased from 2 */ Integer.MAX_VALUE).format(t));
         return sb.toString();
     }
 

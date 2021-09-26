@@ -1,16 +1,14 @@
 package mb.tiger.intellij;
 
-import mb.pie.dagger.DaggerPieComponent;
 import mb.pie.dagger.DaggerRootPieComponent;
 import mb.pie.dagger.PieComponent;
-import mb.pie.dagger.PieModule;
 import mb.pie.dagger.RootPieModule;
 import mb.pie.runtime.PieBuilderImpl;
 import mb.resource.dagger.DaggerResourceServiceComponent;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.intellij.SpoofaxPlugin;
-import mb.statix.strategies.DaggerTegoComponent;
-import mb.statix.strategies.TegoComponent;
+import mb.tego.strategies.DaggerTegoComponent;
+import mb.tego.strategies.TegoComponent;
 import mb.tiger.spoofax.DaggerTigerResourcesComponent;
 import mb.tiger.spoofax.TigerResourcesComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;

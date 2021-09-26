@@ -12,7 +12,7 @@ import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.HierarchicalResourceType;
-import mb.statix.strategies.runtime.TegoRuntime;
+import mb.tego.strategies.runtime.TegoRuntime;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
 import mb.tiger.TigerCodeCompleterFactory;

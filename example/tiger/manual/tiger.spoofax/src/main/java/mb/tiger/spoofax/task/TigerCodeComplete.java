@@ -99,7 +99,7 @@ public class TigerCodeComplete implements TaskDef<TigerCodeComplete.Input, @Null
             return null;   // Cannot complete when we don't get an AST.
         }
 
-        return codeCompleter.complete(ast, null, Region.atOffset(input.caretLocation), input.resourceKey);
+        return codeCompleter.complete(ast, Region.atOffset(input.caretLocation), input.resourceKey);
     }
 
     @Override

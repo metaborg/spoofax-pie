@@ -2,18 +2,16 @@ package mb.statix.codecompletion.strategies.runtime;
 
 import com.google.common.collect.ImmutableMap;
 import mb.nabl2.terms.ITermVar;
-import mb.statix.SolverContext;
 import mb.statix.SolverState;
 import mb.statix.solver.IConstraint;
-import mb.statix.strategies.NamedStrategy2;
-import mb.statix.strategies.runtime.TegoEngine;
+import mb.tego.strategies.NamedStrategy2;
+import mb.tego.strategies.runtime.TegoEngine;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 
-import static mb.statix.utils.CollectionUtils.containsAny;
+import static mb.tego.utils.CollectionUtils.containsAny;
 
 public final class ContainsAnyVarStrategy extends NamedStrategy2<Collection<ITermVar>, IConstraint, SolverState, @Nullable SolverState> {
 

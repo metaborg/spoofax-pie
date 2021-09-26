@@ -20,5 +20,5 @@ public interface CodeCompleter {
      * @return a completion result; or {@code null}
      * @throws InterruptedException The operation was interrupted.
      */
-    @Nullable CodeCompletionResult complete(IStrategoTerm ast, IStrategoTerm analysisResult, Region primarySelection, ResourceKey resource) throws InterruptedException;
+    @Nullable CodeCompletionResult complete(IStrategoTerm ast, Region primarySelection, ResourceKey resource) throws InterruptedException;
 }

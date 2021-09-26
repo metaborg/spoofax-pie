@@ -3,7 +3,7 @@ package mb.tiger.spoofax;
 import mb.log.dagger.DaggerLoggerComponent;
 import mb.log.dagger.LoggerModule;
 import mb.spoofax.test.SingleLanguageTestBase;
-import mb.statix.strategies.DaggerTegoComponent;
+import mb.tego.strategies.DaggerTegoComponent;
 
 class TestBase extends SingleLanguageTestBase<TigerResourcesComponent, TigerComponent> {
     protected TestBase() {

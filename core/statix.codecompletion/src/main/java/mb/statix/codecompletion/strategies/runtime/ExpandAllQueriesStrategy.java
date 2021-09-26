@@ -2,28 +2,19 @@ package mb.statix.codecompletion.strategies.runtime;
 
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
-import mb.statix.SelectedConstraintSolverState;
 import mb.statix.SolverContext;
 import mb.statix.SolverState;
 import mb.statix.constraints.CResolveQuery;
-import mb.statix.constraints.messages.IMessage;
-import mb.statix.sequences.Seq;
-import mb.statix.solver.IConstraint;
-import mb.statix.strategies.NamedStrategy1;
-import mb.statix.strategies.NamedStrategy2;
-import mb.statix.strategies.Strategy;
-import mb.statix.strategies.StrategyExt;
-import mb.statix.strategies.runtime.Strategies;
-import mb.statix.strategies.runtime.TegoEngine;
-import org.checkerframework.checker.nullness.qual.Nullable;
-
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
+import mb.tego.sequences.Seq;
+import mb.tego.strategies.NamedStrategy1;
+import mb.tego.strategies.NamedStrategy2;
+import mb.tego.strategies.Strategy;
+import mb.tego.strategies.StrategyExt;
+import mb.tego.strategies.runtime.TegoEngine;
 
 import static mb.statix.codecompletion.strategies.runtime.SearchStrategies.*;
-import static mb.statix.strategies.StrategyExt.*;
-import static mb.statix.strategies.runtime.Strategies.*;
+import static mb.tego.strategies.StrategyExt.*;
+import static mb.tego.strategies.runtime.Strategies.*;
 
 public final class ExpandAllQueriesStrategy extends NamedStrategy2<SolverContext, ITermVar, SolverState, Seq<SolverState>> {
 

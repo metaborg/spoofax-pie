@@ -16,7 +16,7 @@ import mb.statix.solver.IState;
 import mb.statix.solver.completeness.ICompleteness;
 import mb.statix.spec.ApplyResult;
 import mb.statix.spec.Spec;
-import mb.statix.utils.TextStringBuilder;
+import mb.tego.utils.TextStringBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.functions.Function2;
 

@@ -5,22 +5,17 @@ import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
 import mb.statix.SolverContext;
 import mb.statix.SolverState;
-import mb.statix.constraints.messages.IMessage;
-import mb.statix.sequences.Seq;
-import mb.statix.solver.IConstraint;
-import mb.statix.strategies.NamedStrategy1;
-import mb.statix.strategies.NamedStrategy2;
-import mb.statix.strategies.NamedStrategy3;
-import mb.statix.strategies.Strategy;
-import mb.statix.strategies.runtime.TegoEngine;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import mb.tego.sequences.Seq;
+import mb.tego.strategies.NamedStrategy1;
+import mb.tego.strategies.NamedStrategy2;
+import mb.tego.strategies.NamedStrategy3;
+import mb.tego.strategies.Strategy;
+import mb.tego.strategies.runtime.TegoEngine;
 
 import java.util.ArrayDeque;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public final class ExpandInjectionStrategy extends NamedStrategy3<SolverContext, ITermVar, Set<String>, SolverState, Seq<SolverState>> {

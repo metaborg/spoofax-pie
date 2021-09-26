@@ -2,17 +2,14 @@ package mb.statix;
 
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
-import mb.nabl2.terms.stratego.StrategoTerms;
 import mb.statix.constraints.messages.IMessage;
-import mb.statix.sequences.InterruptiblePredicate;
+import mb.tego.sequences.InterruptiblePredicate;
 import mb.statix.solver.IConstraint;
-import mb.statix.spec.Spec;
-import mb.statix.strategies.Strategy;
+import mb.tego.strategies.Strategy;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.function.Predicate;
 
 /**
  * The context in which the search is performed.
