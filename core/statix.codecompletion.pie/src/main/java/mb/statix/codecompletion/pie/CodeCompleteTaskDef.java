@@ -27,6 +27,7 @@ import mb.nabl2.terms.stratego.TermPlaceholder;
 import mb.pie.api.ExecContext;
 import mb.pie.api.None;
 import mb.pie.api.TaskDef;
+import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.statix.CodeCompletionProposal;
@@ -174,6 +175,10 @@ public class CodeCompleteTaskDef implements TaskDef<CodeCompleteTaskDef.Args, @N
 
     @Override
     public @Nullable CodeCompletionResult exec(ExecContext context, Args input) throws Exception {
+        // FIXME: Do we need this?
+//        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+//        context.require(classLoaderResources.tryGetAsLocalResource(StatixEvaluateTest.Args.class), ResourceStampers.hashFile());
+
         final StrategoRuntime strategoRuntime = context.require(getStrategoRuntimeProviderTask, None.instance).getValue().get();
         final TegoRuntime tegoRuntime = context.require(getTegoRuntimeProviderTask, None.instance).getValue().get();
         final Spec spec = null; // TODO: Get spec from task. This is the merged spec AST, converted to a Spec object
