@@ -2,14 +2,18 @@ package mb.statix.codecompletion.pie;
 
 import com.google.common.collect.ImmutableList;
 import io.usethesource.capsule.Set;
+import mb.common.codecompletion.CodeCompletionItem;
 import mb.common.codecompletion.CodeCompletionResult;
+import mb.common.editing.TextEdit;
 import mb.common.region.Region;
+import mb.common.style.StyleName;
 import mb.common.util.ListView;
 import mb.constraint.pie.ConstraintAnalyzeFile;
 import mb.jsglr.common.JsglrParseException;
 import mb.jsglr.pie.JsglrParseTaskDef;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
+import mb.nabl2.terms.IApplTerm;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
 import mb.nabl2.terms.ListTerms;
@@ -25,32 +29,46 @@ import mb.pie.api.None;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
+import mb.statix.CodeCompletionProposal;
 import mb.statix.SolutionMeta;
+import mb.statix.SolverContext;
 import mb.statix.SolverState;
+import mb.statix.codecompletion.strategies.runtime.CompleteStrategy;
 import mb.statix.codecompletion.strategies.runtime.InferStrategy;
 import mb.statix.constraints.CUser;
+import mb.statix.constraints.messages.IMessage;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.persistent.State;
 import mb.statix.spec.Spec;
-import mb.tego.strategies.runtime.TegoRuntime;
 import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoExceptions;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoUtil;
 import mb.stratego.pie.GetStrategoRuntimeProvider;
 import mb.tego.pie.GetTegoRuntimeProviderTaskDef;
+import mb.tego.sequences.Seq;
+import mb.tego.strategies.Strategy;
+import mb.tego.strategies.runtime.TegoRuntime;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.jsglr.client.imploder.ImploderAttachment;
+import org.spoofax.terms.util.TermUtils;
 
 import java.io.Serializable;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
+
+import static mb.tego.strategies.StrategyExt.pred;
 
 /**
  * Code completion task definition.
@@ -161,7 +179,10 @@ public class CodeCompleteTaskDef implements TaskDef<CodeCompleteTaskDef.Args, @N
         ).complete();
     }
 
-    private class Execution {
+    /**
+     * Keeps objects used by the code completion algorithm in a more accessible place.
+     */
+    private final class Execution {
         private final ExecContext context;
         private final StrategoRuntime strategoRuntime;
         private final TegoRuntime tegoRuntime;
@@ -175,6 +196,15 @@ public class CodeCompleteTaskDef implements TaskDef<CodeCompleteTaskDef.Args, @N
         /** The Statix specification. */
         private final Spec spec;
 
+        /**
+         * Initializes a new instance of the {@link Execution} class.
+         *
+         * @param context the execution context
+         * @param args the task arguments
+         * @param strategoRuntime the Stratego runtime
+         * @param tegoRuntime the Tego runtime
+         * @param spec the Statix specification
+         */
         public Execution(
             ExecContext context,
             Args args,
@@ -192,7 +222,14 @@ public class CodeCompleteTaskDef implements TaskDef<CodeCompleteTaskDef.Args, @N
             this.primarySelection = args.primarySelection;
         }
 
+        /**
+         * Performs code completion.
+         *
+         * @return the code completion result
+         * @throws Exception if an exception occurred
+         */
         public @Nullable CodeCompletionResult complete() throws Exception {
+            // Get, prepare, and analyze the incoming AST
             final IStrategoTerm parsedAst = parse();
             final IStrategoTerm explicatedAst = explicate(parsedAst);
             final IStrategoTerm indexedAst = addTermIndices(explicatedAst);
@@ -203,13 +240,25 @@ public class CodeCompleteTaskDef implements TaskDef<CodeCompleteTaskDef.Args, @N
             // TODO: Specify spec name and root rule name somewhere
             final SolverState initialState = createInitialSolverState(upgradedAst, "statics", "programOk", placeholderVarMap);
             final SolverState analyzedState = analyze(initialState);
-            // 7. invoke complete() strategy on the resulting state
-            //   - requires isInjection
-            // 8. for each proposal:
-            //   - replace term variables with placeholders (downgrading)
-            //   - implicate the term
-            //   - pretty-print the term
-            throw new IllegalStateException("Not implemented");
+
+            // Execute the code completion Tego strategy
+            final Seq<CodeCompletionProposal> completionProposals = complete(analyzedState, placeholder, Collections.emptyList() /* TODO: Get the set of analysis errors */);
+            final Seq<CodeCompletionProposal> filteredProposals = filterProposals(completionProposals);
+
+            // Get, convert, and prepare the proposals
+            final List<CodeCompletionProposal> instantiatedProposals = filteredProposals.toList(); // NOTE: This is where we actually coerce the lazy list find the completions.
+            final List<CodeCompletionProposal> orderedProposals = orderProposals(instantiatedProposals);
+            final List<CodeCompletionItem> finalProposals = proposalsToCodeCompletionItems(orderedProposals);
+
+            if (finalProposals.isEmpty()) {
+                log.warn("Completion returned no completion proposals.");
+            }
+
+            return new CodeCompletionResult(
+                ListView.copyOf(finalProposals),
+                Objects.requireNonNull(getRegion(placeholder)),
+                true
+            );
         }
 
         /**
@@ -223,16 +272,43 @@ public class CodeCompleteTaskDef implements TaskDef<CodeCompleteTaskDef.Args, @N
         }
 
         /**
+         * Pretty-prints the given term.
+         * @param term the term to pretty-print
+         * @return the pretty-printed term
+         * @throws StrategoException if an error occurred while invoking the Stratego strategy
+         */
+        private @Nullable String prettyPrint(IStrategoTerm term) throws StrategoException {
+            // TODO: Make this strategy name not language specific
+            @Nullable final IStrategoTerm prettyPrintedTerm = invokeStrategy("pp-partial-Tiger-string", term);
+            return prettyPrintedTerm != null ? TermUtils.asJavaString(prettyPrintedTerm).get() : null;
+        }
+
+        /**
          * Explicates the given AST.
          *
          * @param ast     the AST to explicate
          * @return the explicated AST
+         * @throws StrategoException if an error occurred while invoking the Stratego strategy
          */
         private IStrategoTerm explicate(IStrategoTerm ast) throws StrategoException {
+            // TODO: Make this strategy name not language specific
             @Nullable final IStrategoTerm explicatedAst = invokeStrategy("explicate", ast);
             if(explicatedAst == null)
                 throw new IllegalStateException("Completion failed: we did not get an explicated AST.");
             return explicatedAst;
+        }
+
+        /**
+         * Implicates the given term.
+         *
+         * @param term     the term to implicate
+         * @return the implicated AST; or {@code null} when implication failed
+         * @throws StrategoException if an error occurred while invoking the Stratego strategy
+         */
+        private @Nullable IStrategoTerm implicate(IStrategoTerm term) throws StrategoException {
+            // TODO: Make this strategy name not language specific
+            @Nullable final IStrategoTerm implicatedAst = invokeStrategy("implicate", term);
+            return implicatedAst;
         }
 
         /**
@@ -267,6 +343,19 @@ public class CodeCompleteTaskDef implements TaskDef<CodeCompleteTaskDef.Args, @N
             //  so we can use that sort to call the correct downgrade-placeholders-Lang-Sort strategy
             // FIXME: We can generate: downgrade-placeholders-Lang(|sort) = where(<?"Exp"> sort); downgrade-placeholders-Lang-Exp
             return StrategoPlaceholders.replacePlaceholdersByVariables(ast, placeholderVarMap);
+        }
+
+        /**
+         * Downgrades the placeholder term variables to actual placeholders.
+         *
+         * @param term the term to downgrade
+         * @return the downgraded term; or {@code null when downgrading failed}
+         * @throws StrategoException if an error occurred while invoking the Stratego strategy
+         */
+        private @Nullable IStrategoTerm downgradePlaceholders(IStrategoTerm term) throws StrategoException {
+            // TODO: Make this strategy name not language specific
+            @Nullable final IStrategoTerm downgradedTerm = invokeStrategy("downgrade-placeholders-Tiger", term);
+            return downgradedTerm;
         }
 
         /**
@@ -318,11 +407,174 @@ public class CodeCompleteTaskDef implements TaskDef<CodeCompleteTaskDef.Args, @N
             if (analyzedState == null) {
                 throw new IllegalStateException("Completion failed: got no result from Tego strategy.");
             } else if(analyzedState.hasErrors()) {
+                // TODO: We can add these errors to the set of allowed errors
                 throw new IllegalStateException("Completion failed: input program validation failed:\n" + analyzedState.messagesToString());
             } else if(analyzedState.getConstraints().isEmpty()) {
                 throw new IllegalStateException("Completion failed: no constraints left, nothing to complete.\n" + analyzedState);
             }
             return analyzedState;
+        }
+
+        /**
+         * Completes the given placeholder in the given state to a list of terms.
+         *
+         * @param state the analyzed solver state
+         * @param placeholder the placeholder being completed
+         * @param allowedErrors the collection of allowed errors
+         * @return a lazy sequence of code completion proposals
+         */
+        private Seq<CodeCompletionProposal> complete(SolverState state, ITermVar placeholder, Collection<Map.Entry<IConstraint, IMessage>> allowedErrors) {
+            // Create a strategy that fails if the term is not an injection
+            final Strategy<ITerm, @Nullable ITerm> isInjPredicate = pred(this::isInjection);
+
+            final SolverContext ctx = new SolverContext(placeholder, allowedErrors, isInjPredicate);
+
+            final ITerm termInUnifier = state.getState().unifier().findRecursive(placeholder);
+            if (!termInUnifier.equals(placeholder)) {
+                // The variable we're looking for is already in the unifier
+                return Seq.of(new CodeCompletionProposal(state, termInUnifier));
+            }
+
+            // The variable we're looking for is not in the unifier
+            final @Nullable Seq<SolverState> results = tegoRuntime.eval(CompleteStrategy.getInstance(), ctx, placeholder, Collections.emptySet(), state);
+            if (results == null) throw new IllegalStateException("This cannot be happening.");
+            // NOTE: This is the point at which the built sequence gets evaluated.
+            return results.map(s -> new CodeCompletionProposal(s, s.project(placeholder)));
+        }
+
+        /**
+         * Filters some proposals from the list of proposals.
+         *
+         * @param proposals the list of proposals
+         * @return the filtered list of completion proposals
+         */
+        private Seq<CodeCompletionProposal> filterProposals(Seq<CodeCompletionProposal> proposals) {
+            return proposals.filter(p -> //!StrategoPlaceholders.containsLiteralVar(p.getTerm())      // Don't show proposals that require a literal to be filled out, such as an ID, string literal, int literal
+                !StrategoPlaceholders.isPlaceholder(p.getTerm())           // Don't show proposals of naked placeholder constructors (e.g., Exp-Plhdr())
+                && !(p.getTerm() instanceof ITermVar)
+            );
+        }
+
+        /**
+         * Orders the list of proposals.
+         *
+         * @param proposals the list of proposals
+         * @return the ordered list of completion proposals
+         */
+        private List<CodeCompletionProposal> orderProposals(List<CodeCompletionProposal> proposals) {
+            return proposals.stream().sorted(Comparator
+                // Sort expanded queries after expanded rules before leftovers
+                .<CodeCompletionProposal, Integer>comparing(it -> it.getState().getMeta().getExpandedQueries() > 0 ? 2 : (it.getState().getMeta().getExpandedRules() > 0 ? 1 : 0))
+                // Sort more expanded queries after less expanded queries
+                .<Integer>thenComparing(it -> it.getState().getMeta().getExpandedQueries())
+                // Sort more expanded rules after less expanded rules
+                .<Integer>thenComparing(it -> it.getState().getMeta().getExpandedRules())
+                // Sort solutions with higher rank after solutions with lower rank
+                .<Integer>thenComparing(it -> rankTerm(it.getTerm()))
+                // Reverse the whole thing
+                .reversed()
+            ).collect(Collectors.toList());
+        }
+
+        /**
+         * Ranks the term. A higher value means a better result.
+         *
+         * Terms are ranked by how many concrete (non-placeholder) terms they have.
+         * The deeper the term, the higher the rank.
+         *
+         * @param root the term to rank
+         * @return the rank
+         */
+        private int rankTerm(ITerm root) {
+            int sum = 0;
+            int level = -1;
+            Deque<ITerm> currWorklist = new ArrayDeque<>();
+            Deque<ITerm> nextWorklist = new ArrayDeque<>();
+            nextWorklist.add(root);
+            while (!nextWorklist.isEmpty()) {
+                Deque<ITerm> tmp = currWorklist;
+                currWorklist = nextWorklist;
+                nextWorklist = tmp;
+                level += 1;
+                while(!currWorklist.isEmpty()) {
+                    final ITerm term = currWorklist.remove();
+                    final int addition =  (term instanceof ITermVar ? 0 : 1 << level);
+                    if (Integer.MAX_VALUE - addition < sum) return Integer.MAX_VALUE;
+                    sum += addition;
+                    if(term instanceof IApplTerm) {
+                        nextWorklist.addAll(((IApplTerm)term).getArgs());
+                    }
+                }
+            }
+            return sum;
+        }
+
+        /**
+         * Converts a list of proposals to a list of strings.
+         *
+         * @param proposals the list of proposals
+         * @return the list of completion proposals terms
+         */
+        private List<CodeCompletionItem> proposalsToCodeCompletionItems(List<CodeCompletionProposal> proposals) {
+            return proposals.stream().map(p -> proposalToCodeCompletionItem(p)).collect(Collectors.toList());
+        }
+
+        /**
+         * Converts a proposal to a code completion item.
+         *
+         * @param proposal the proposal
+         * @return the code completion item
+         */
+        private CodeCompletionItem proposalToCodeCompletionItem(CodeCompletionProposal proposal) {
+            final String text = proposalToString(proposal);
+            ListView<TextEdit> textEdits = ListView.of(new TextEdit(Region.atOffset(primarySelection.getStartOffset() /* TODO: Support the whole selection? */), text));
+            String label = normalizeText(text);
+            // TODO: Determine the style of the completion
+            //  (basically, what kind of entity it represents)
+            StyleName style = Objects.requireNonNull(StyleName.fromString("meta.template"));
+            // TODO: Fill out the other useful fields too
+            //  (basically depends on what entity it represents)
+            //  This is an opportunity for rich metadata to be unerstood by Spoofax
+            return new CodeCompletionItem(label, "", "", "", "", style, textEdits, false);
+        }
+
+        /**
+         * Converts a proposal to its string representation.
+         *
+         * @param proposal the proposal
+         * @return the string representation
+         */
+        private String proposalToString(CodeCompletionProposal proposal) {
+            try {
+                final IStrategoTerm proposalTerm = strategoTerms.toStratego(proposal.getTerm(), true);
+                @Nullable final IStrategoTerm downgradedTerm = downgradePlaceholders(proposalTerm);
+                if (downgradedTerm == null) return proposal.toString(); // Return the term when downgrading failed
+                @Nullable final IStrategoTerm implicatedTerm = implicate(downgradedTerm);
+                if (implicatedTerm == null) return downgradedTerm.toString(); // Return the term when implication failed
+                @Nullable final String prettyPrintedTerm = prettyPrint(implicatedTerm);
+                if (prettyPrintedTerm == null) return implicatedTerm.toString(); // Return the term when pretty-printing failed
+                return prettyPrintedTerm;
+            } catch (StrategoException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+
+        /**
+         * Determines if the given term is an injection.
+         *
+         * @param term the term to check
+         * @return {@code true} when the term is an injection; otherwise, {@code false}
+         * @throws RuntimeException if a {@link StrategoException} occurred
+         */
+        private boolean isInjection(ITerm term) {
+            final IStrategoTerm strategoTerm = strategoTerms.toStratego(term, true);
+            try {
+                // TODO: Make this strategy name not language specific
+                @Nullable final IStrategoTerm result = invokeStrategy("is-Tiger-inj-cons", strategoTerm);
+                return result != null;
+            } catch(StrategoException ex) {
+                throw new RuntimeException(ex);
+            }
         }
 
         /**
@@ -399,6 +651,17 @@ public class CodeCompleteTaskDef implements TaskDef<CodeCompleteTaskDef.Args, @N
                 throw ex;
             }
         }
+    }
+
+    /**
+     * Replaces all strings of layout (newlines, spaces) with a single space.
+     *
+     * @param text the text to normalize
+     * @return the normalized text
+     */
+    private static String normalizeText(String text) {
+        // TODO: We should probably support using the template's whitespace
+        return text.replaceAll("\\s+", " ");
     }
 
     /**

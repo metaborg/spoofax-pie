@@ -49,6 +49,7 @@ import mb.tiger.spoofax.task.TigerCheckAggregator;
 import mb.tiger.spoofax.task.TigerCodeComplete;
 import mb.tiger.spoofax.task.TigerDowngradePlaceholders;
 import mb.tiger.spoofax.task.TigerGetStrategoRuntimeProvider;
+import mb.tiger.spoofax.task.TigerGetTegoRuntimeProvider;
 import mb.tiger.spoofax.task.TigerIdeTokenize;
 import mb.tiger.spoofax.task.TigerIsInjection;
 import mb.tiger.spoofax.task.TigerPartialPrettyPrint;
@@ -78,6 +79,7 @@ public class TigerInstance implements LanguageInstance, TestableParse {
     private final NoneResolveTaskDef resolve;
     private final NoneHoverTaskDef hover;
     private final TigerGetStrategoRuntimeProvider getStrategoRuntimeProvider;
+    private final TigerGetTegoRuntimeProvider getTegoRuntimeProvider;
 
     private final TigerPreStatix preStatix;
     private final TigerPostStatix postStatix;
@@ -97,7 +99,6 @@ public class TigerInstance implements LanguageInstance, TestableParse {
     private final CollectionView<CommandDef<?>> commandDefs;
     private final CollectionView<AutoCommandRequest<?>> autoCommandDefs;
 
-
     @Inject public TigerInstance(
         TigerParse parse,
         TigerCheck check,
@@ -109,6 +110,7 @@ public class TigerInstance implements LanguageInstance, TestableParse {
         NoneResolveTaskDef resolve,
         NoneHoverTaskDef hover,
         TigerGetStrategoRuntimeProvider getStrategoRuntimeProvider,
+        TigerGetTegoRuntimeProvider getTegoRuntimeProvider,
 
         TigerPreStatix preStatix,
         TigerPostStatix postStatix,
@@ -138,6 +140,7 @@ public class TigerInstance implements LanguageInstance, TestableParse {
         this.resolve = resolve;
         this.hover = hover;
         this.getStrategoRuntimeProvider = getStrategoRuntimeProvider;
+        this.getTegoRuntimeProvider = getTegoRuntimeProvider;
 
         this.preStatix = preStatix;
         this.postStatix = postStatix;

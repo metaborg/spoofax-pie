@@ -182,7 +182,7 @@ public abstract class StatixCodeCompleterBase {
             @Nullable final String prettyPrinted = prettyPrint(implicatedTerm).ifErr(ex ->
                 log.warn("Pretty-printing failed on implicated: " + implicatedTerm + "\nFrom downgraded: " + downgradedTerm + "\nFrom proposal: " + proposal, ex)
             ).get();
-            if (implicatedTerm == null) return implicatedTerm.toString(); // Return the term when pretty-printing failed
+            if (prettyPrinted == null) return implicatedTerm.toString(); // Return the term when pretty-printing failed
 
             return prettyPrinted;
         }).collect(Collectors.toList());

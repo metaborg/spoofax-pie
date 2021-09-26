@@ -40,6 +40,7 @@ import mb.tiger.spoofax.task.TigerCheck;
 import mb.tiger.spoofax.task.TigerDowngradePlaceholders;
 import mb.tiger.spoofax.task.TigerGetSourceFiles;
 import mb.tiger.spoofax.task.TigerGetStrategoRuntimeProvider;
+import mb.tiger.spoofax.task.TigerGetTegoRuntimeProvider;
 import mb.tiger.spoofax.task.TigerIdeTokenize;
 import mb.tiger.spoofax.task.TigerIsInjection;
 import mb.tiger.spoofax.task.TigerPartialPrettyPrint;
@@ -159,6 +160,7 @@ public class TigerModule {
         TigerCompleteTaskDef complete,
         TigerCodeComplete codeComplete,
         TigerGetStrategoRuntimeProvider getStrategoRuntimeProvider,
+        TigerGetTegoRuntimeProvider getTegoRuntimeProvider,
 
         TigerListLiteralVals listLiteralVals,
         TigerListDefNames listDefNames,
@@ -193,6 +195,7 @@ public class TigerModule {
         taskDefs.add(complete);
         taskDefs.add(codeComplete);
         taskDefs.add(getStrategoRuntimeProvider);
+        taskDefs.add(getTegoRuntimeProvider);
 
         taskDefs.add(listLiteralVals);
         taskDefs.add(listDefNames);

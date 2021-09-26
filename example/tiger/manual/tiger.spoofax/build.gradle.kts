@@ -22,6 +22,7 @@ dependencies {
   api("org.metaborg:pie.dagger")
   api("com.google.dagger:dagger")
   api(compositeBuild("tego"))
+  api(compositeBuild("tego.pie"))
   api(compositeBuild("statix.codecompletion"))
 
   compileOnly("org.checkerframework:checker-qual-android")
