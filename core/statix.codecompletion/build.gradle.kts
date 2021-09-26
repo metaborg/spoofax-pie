@@ -37,6 +37,10 @@ dependencies {
   testCompileOnly("javax.annotation:javax.annotation-api")
 
   testImplementation("com.opencsv:opencsv:4.1")
+
+  // Immutables
+  testCompileOnly("org.immutables:value")
+  testAnnotationProcessor("org.immutables:value")
 }
 
 tasks.test {

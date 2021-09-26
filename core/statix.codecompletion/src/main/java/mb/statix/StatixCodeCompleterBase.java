@@ -27,12 +27,12 @@ import mb.statix.codecompletion.strategies.runtime.CompleteStrategy;
 import mb.statix.codecompletion.strategies.runtime.InferStrategy;
 import mb.statix.constraints.CUser;
 import mb.statix.constraints.messages.IMessage;
-import mb.statix.sequences.Seq;
+import mb.tego.sequences.Seq;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.persistent.State;
 import mb.statix.spec.Spec;
-import mb.statix.strategies.Strategy;
-import mb.statix.strategies.runtime.TegoRuntime;
+import mb.tego.strategies.Strategy;
+import mb.tego.strategies.runtime.TegoRuntime;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
@@ -51,12 +51,12 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static mb.statix.strategies.StrategyExt.pred;
+import static mb.tego.strategies.StrategyExt.pred;
 
 /**
  * Performs code completion using Statix.
  */
-public abstract class StatixCodeCompleter {
+public abstract class StatixCodeCompleterBase {
 
     private final Logger log;
 
@@ -66,20 +66,48 @@ public abstract class StatixCodeCompleter {
     private final TegoRuntime tegoRuntime;
 
     /**
-     * Initializes a new instance of the {@link StatixCodeCompleter} class.
+     * Initializes a new instance of the {@link StatixCodeCompleterBase} class.
      *
      * @param loggerFactory the logger factory
      */
-    public StatixCodeCompleter(
+    public StatixCodeCompleterBase(
+        Spec spec,
         StrategoTerms strategoTerms,
         ITermFactory termFactory,
         TegoRuntime tegoRuntime,
         LoggerFactory loggerFactory
     ) {
+        this.spec = spec;
         this.strategoTerms = strategoTerms;
         this.termFactory = termFactory;
         this.tegoRuntime = tegoRuntime;
         this.log = loggerFactory.create(getClass());
+    }
+
+    /**
+     * Performs code completion.
+     *
+     * @param ast the parsed AST of the resource being completed
+     * @param primarySelection the selection in the AST being completed
+     * @param resource the resource being completed
+     * @return the code completion result
+     */
+    public CodeCompletionResult codeComplete(IStrategoTerm ast, Region primarySelection, ResourceKey resource) {
+        // 1. parse the term
+        // 2. explicate the term
+        // 3. convert to Statix ast
+        //   - annotate the terms with indices
+        //   - replace placeholders with term variables (upgrading)
+        // 4. find the term variable (placeholder) being completed
+        // 5. create the solver state for the program
+        // 6. analyze the initial state (some constraints will be left over on the placeholder)
+        // 7. invoke complete() strategy on the resulting state
+        //   - requires isInjection
+        // 8. for each proposal:
+        //   - replace term variables with placeholders (downgrading)
+        //   - implicate the term
+        //   - pretty-print the term
+        throw new IllegalStateException("Not implemented");
     }
 
     /**
@@ -89,7 +117,7 @@ public abstract class StatixCodeCompleter {
      * @param resource
      * @return
      */
-    public @Nullable CodeCompletionResult complete(Spec spec, IStrategoTerm ast, Region primarySelection, ResourceKey resource) {
+    public @Nullable CodeCompletionResult complete(IStrategoTerm ast, Region primarySelection, ResourceKey resource) {
         final int caretLocation = primarySelection.getStartOffset();
 
         @Nullable final IStrategoTerm explicatedAst = explicate(ast).ifErr(ex ->

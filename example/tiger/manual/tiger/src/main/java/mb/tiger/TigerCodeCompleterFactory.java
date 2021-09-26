@@ -3,13 +3,9 @@ package mb.tiger;
 import mb.common.result.Result;
 import mb.log.api.LoggerFactory;
 import mb.nabl2.terms.stratego.StrategoTerms;
-import mb.resource.ResourceService;
-import mb.spoofax.compiler.interfaces.spoofaxcore.CodeCompleter;
 import mb.spoofax.compiler.interfaces.spoofaxcore.CodeCompleterFactory;
-import mb.spoofax.compiler.interfaces.spoofaxcore.ConstraintAnalyzerFactory;
 import mb.statix.spec.Spec;
-import mb.statix.strategies.runtime.TegoRuntime;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import mb.tego.strategies.runtime.TegoRuntime;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 

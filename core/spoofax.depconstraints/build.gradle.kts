@@ -36,6 +36,7 @@ dependencies {
     api(project(":constraint.common"))
     api(project(":nabl2.common"))
     api(project(":statix.codecompletion"))
+    api(project(":statix.codecompletion.pie"))
     api(project(":statix.common"))
     api(project(":statix.pie"))
     api(project(":statix.multilang"))
