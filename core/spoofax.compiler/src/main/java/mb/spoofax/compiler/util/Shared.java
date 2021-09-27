@@ -310,6 +310,14 @@ public interface Shared extends Serializable {
         return GradleDependency.module(Coordinate.of("org.metaborg", "spt.api", spoofax3Version()));
     }
 
+    @Value.Default default GradleDependency tegoDep() {
+        return GradleDependency.module(Coordinate.of("org.metaborg", "tego", spoofax3Version()));
+    }
+
+    @Value.Default default GradleDependency tegoPieDep() {
+        return GradleDependency.module(Coordinate.of("org.metaborg", "tego.pie", spoofax3Version()));
+    }
+
 
     default void savePersistentProperties(Properties properties) {
         properties.setProperty(Builder.defaultClassPrefix, defaultClassPrefix());

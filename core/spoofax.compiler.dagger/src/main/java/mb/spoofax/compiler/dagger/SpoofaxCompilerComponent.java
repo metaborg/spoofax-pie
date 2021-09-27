@@ -15,6 +15,7 @@ import mb.spoofax.compiler.adapter.ParserAdapterCompiler;
 import mb.spoofax.compiler.adapter.ReferenceResolutionAdapterCompiler;
 import mb.spoofax.compiler.adapter.StrategoRuntimeAdapterCompiler;
 import mb.spoofax.compiler.adapter.StylerAdapterCompiler;
+import mb.spoofax.compiler.adapter.TegoRuntimeAdapterCompiler;
 import mb.spoofax.compiler.language.ClassLoaderResourcesCompiler;
 import mb.spoofax.compiler.language.CompleterLanguageCompiler;
 import mb.spoofax.compiler.language.ConstraintAnalyzerLanguageCompiler;
@@ -23,6 +24,7 @@ import mb.spoofax.compiler.language.MultilangAnalyzerLanguageCompiler;
 import mb.spoofax.compiler.language.ParserLanguageCompiler;
 import mb.spoofax.compiler.language.StrategoRuntimeLanguageCompiler;
 import mb.spoofax.compiler.language.StylerLanguageCompiler;
+import mb.spoofax.compiler.language.TegoRuntimeLanguageCompiler;
 import mb.spoofax.compiler.platform.CliProjectCompiler;
 import mb.spoofax.compiler.platform.EclipseProjectCompiler;
 import mb.spoofax.compiler.platform.IntellijProjectCompiler;
@@ -57,6 +59,8 @@ public interface SpoofaxCompilerComponent extends TaskDefsProvider {
 
     MultilangAnalyzerLanguageCompiler getMultilangAnalyzerLanguageCompiler();
 
+    TegoRuntimeLanguageCompiler getTegoRuntimeLanguageCompiler();
+
 
     AdapterProjectCompiler getAdapterProjectCompiler();
 
@@ -71,6 +75,8 @@ public interface SpoofaxCompilerComponent extends TaskDefsProvider {
     ConstraintAnalyzerAdapterCompiler getConstraintAnalyzerAdapterCompiler();
 
     MultilangAnalyzerAdapterCompiler getMultilangAnalyzerAdapterCompiler();
+
+    TegoRuntimeAdapterCompiler getTegoRuntimeAdapterCompiler();
 
     ReferenceResolutionAdapterCompiler getReferenceResolutionAdapterCompiler();
 

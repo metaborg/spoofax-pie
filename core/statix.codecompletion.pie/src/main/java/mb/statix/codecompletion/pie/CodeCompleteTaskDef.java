@@ -27,7 +27,6 @@ import mb.nabl2.terms.stratego.TermPlaceholder;
 import mb.pie.api.ExecContext;
 import mb.pie.api.None;
 import mb.pie.api.TaskDef;
-import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.statix.CodeCompletionProposal;
@@ -46,7 +45,7 @@ import mb.stratego.common.StrategoExceptions;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoUtil;
 import mb.stratego.pie.GetStrategoRuntimeProvider;
-import mb.tego.pie.GetTegoRuntimeProviderTaskDef;
+import mb.tego.pie.GetTegoRuntimeProvider;
 import mb.tego.sequences.Seq;
 import mb.tego.strategies.Strategy;
 import mb.tego.strategies.runtime.TegoRuntime;
@@ -140,7 +139,7 @@ public class CodeCompleteTaskDef implements TaskDef<CodeCompleteTaskDef.Args, @N
     private final ConstraintAnalyzeFile analyzeFileTask;
     private final StrategoTerms strategoTerms;
     private final GetStrategoRuntimeProvider getStrategoRuntimeProviderTask;
-    private final GetTegoRuntimeProviderTaskDef getTegoRuntimeProviderTask;
+    private final GetTegoRuntimeProvider getTegoRuntimeProviderTask;
 
     /**
      * Initializes a new instance of the {@link CodeCompleteTaskDef} class.
@@ -156,7 +155,7 @@ public class CodeCompleteTaskDef implements TaskDef<CodeCompleteTaskDef.Args, @N
         JsglrParseTaskDef parseTask,
         ConstraintAnalyzeFile analyzeFileTask,
         GetStrategoRuntimeProvider getStrategoRuntimeProviderTask,
-        GetTegoRuntimeProviderTaskDef getTegoRuntimeProviderTask,
+        GetTegoRuntimeProvider getTegoRuntimeProviderTask,
         //StatixCompileSpec compileSpec,
         StrategoTerms strategoTerms,
         LoggerFactory loggerFactory

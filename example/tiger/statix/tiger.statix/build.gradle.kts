@@ -35,6 +35,7 @@ languageProject {
       multiFile(false)
     }
     withStrategoRuntime()
+    withTegoRuntime()
   }
 }
 
@@ -60,6 +61,7 @@ languageAdapterProject {
     withStyler()
     withConstraintAnalyzer()
     withStrategoRuntime()
+    withTegoRuntime()
 //    withReferenceResolution().run {
 //      resolveStrategy("editor-resolve")
 //    }

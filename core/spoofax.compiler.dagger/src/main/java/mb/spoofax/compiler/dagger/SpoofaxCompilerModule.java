@@ -14,6 +14,7 @@ import mb.spoofax.compiler.adapter.ParserAdapterCompiler;
 import mb.spoofax.compiler.adapter.ReferenceResolutionAdapterCompiler;
 import mb.spoofax.compiler.adapter.StrategoRuntimeAdapterCompiler;
 import mb.spoofax.compiler.adapter.StylerAdapterCompiler;
+import mb.spoofax.compiler.adapter.TegoRuntimeAdapterCompiler;
 import mb.spoofax.compiler.language.ClassLoaderResourcesCompiler;
 import mb.spoofax.compiler.language.CompleterLanguageCompiler;
 import mb.spoofax.compiler.language.ConstraintAnalyzerLanguageCompiler;
@@ -23,6 +24,7 @@ import mb.spoofax.compiler.language.MultilangAnalyzerLanguageCompiler;
 import mb.spoofax.compiler.language.ParserLanguageCompiler;
 import mb.spoofax.compiler.language.StrategoRuntimeLanguageCompiler;
 import mb.spoofax.compiler.language.StylerLanguageCompiler;
+import mb.spoofax.compiler.language.TegoRuntimeLanguageCompiler;
 import mb.spoofax.compiler.platform.CliProjectCompiler;
 import mb.spoofax.compiler.platform.EclipseProjectCompiler;
 import mb.spoofax.compiler.platform.IntellijProjectCompiler;
@@ -54,6 +56,7 @@ public class SpoofaxCompilerModule {
         MultilangAnalyzerLanguageCompiler multilangAnalyzerLanguageCompiler,
         StrategoRuntimeLanguageCompiler strategoRuntimeLanguageCompiler,
         CompleterLanguageCompiler completerLanguageCompiler,
+        TegoRuntimeLanguageCompiler tegoRuntimeLanguageCompiler,
         ExportsLanguageCompiler exportsLanguageCompiler,
 
         AdapterProjectCompiler adapterProjectCompiler,
@@ -64,6 +67,7 @@ public class SpoofaxCompilerModule {
         CompleterAdapterCompiler completerAdapterCompiler,
         StrategoRuntimeAdapterCompiler strategoRuntimeAdapterCompiler,
         ReferenceResolutionAdapterCompiler referenceResolutionAdapterCompiler,
+        TegoRuntimeAdapterCompiler tegoRuntimeAdapterCompiler,
         HoverAdapterCompiler hoverAdapterCompiler,
         GetSourceFilesAdapterCompiler getSourceFilesAdapterCompiler,
 
@@ -80,6 +84,7 @@ public class SpoofaxCompilerModule {
         taskDefs.add(multilangAnalyzerLanguageCompiler);
         taskDefs.add(strategoRuntimeLanguageCompiler);
         taskDefs.add(completerLanguageCompiler);
+        taskDefs.add(tegoRuntimeLanguageCompiler);
         taskDefs.add(exportsLanguageCompiler);
 
         taskDefs.add(adapterProjectCompiler);
@@ -90,6 +95,7 @@ public class SpoofaxCompilerModule {
         taskDefs.add(strategoRuntimeAdapterCompiler);
         taskDefs.add(completerAdapterCompiler);
         taskDefs.add(referenceResolutionAdapterCompiler);
+        taskDefs.add(tegoRuntimeAdapterCompiler);
         taskDefs.add(hoverAdapterCompiler);
         taskDefs.add(getSourceFilesAdapterCompiler);
 

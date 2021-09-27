@@ -33,11 +33,15 @@ public class AdapterProjectCompilerInputBuilder {
     private boolean completerEnabled = false;
     public final CompleterAdapterCompiler.Input.Builder completer = CompleterAdapterCompiler.Input.builder();
 
+    private boolean tegoRuntimeEnabled = false;
+    public final TegoRuntimeAdapterCompiler.Input.Builder tegoRuntime = TegoRuntimeAdapterCompiler.Input.builder();
+
     private boolean referenceResolutionEnabled = false;
     public final ReferenceResolutionAdapterCompiler.Input.Builder referenceResolution = ReferenceResolutionAdapterCompiler.Input.builder();
 
     private boolean hoverEnabled = false;
     public final HoverAdapterCompiler.Input.Builder hover = HoverAdapterCompiler.Input.builder();
+
 
     public AdapterProjectCompiler.Input.Builder project = AdapterProjectCompiler.Input.builder();
 
@@ -80,6 +84,11 @@ public class AdapterProjectCompilerInputBuilder {
         return completer;
     }
 
+    public TegoRuntimeAdapterCompiler.Input.Builder withTegoRuntime() {
+        tegoRuntimeEnabled = true;
+        return tegoRuntime;
+    }
+
     public ReferenceResolutionAdapterCompiler.Input.Builder withReferenceResolution() {
         referenceResolutionEnabled = true;
         return referenceResolution;
@@ -115,15 +124,18 @@ public class AdapterProjectCompilerInputBuilder {
         final MultilangAnalyzerAdapterCompiler.@Nullable Input multilangAnalyzer = buildMultilangAnalyzer(shared, adapterProject, languageProjectInput, strategoRuntime);
         if(multilangAnalyzer != null) project.multilangAnalyzer(multilangAnalyzer);
 
+        final CompleterAdapterCompiler.@Nullable Input completer = buildCompleter(shared, adapterProject, languageProjectInput);
+        if(completer != null) project.completer(completer);
+
+        final TegoRuntimeAdapterCompiler.@Nullable Input tegoRuntime = buildTegoRuntime(shared, adapterProject, languageProjectInput, classLoaderResources);
+        if(tegoRuntime != null) project.tegoRuntime(tegoRuntime);
+
         final ReferenceResolutionAdapterCompiler.@Nullable Input referenceResolution = buildReferenceResolution(shared, adapterProject, strategoRuntime, constraintAnalyzer, classLoaderResources);
         if(referenceResolution != null) project.referenceResolution(referenceResolution);
 
         final HoverAdapterCompiler.@Nullable Input hover = buildHover(shared, adapterProject, strategoRuntime, constraintAnalyzer, classLoaderResources);
         if(hover != null) project.hover(hover);
 
-        final CompleterAdapterCompiler.@Nullable Input completer = buildCompleter(shared, adapterProject, languageProjectInput);
-
-        if(completer != null) project.completer(completer);
         project.languageProjectDependency(languageProjectDependency);
 
         return project
@@ -252,6 +264,21 @@ public class AdapterProjectCompilerInputBuilder {
             .shared(shared)
             .adapterProject(adapterProject)
             .languageProjectInput(languageProjectInput.completer().orElseThrow(() -> new RuntimeException("Mismatch between presence of completer input between language project and adapter project")))
+            .build();
+    }
+
+    private TegoRuntimeAdapterCompiler.@Nullable Input buildTegoRuntime(
+        Shared shared,
+        AdapterProject adapterProject,
+        LanguageProjectCompiler.Input languageProjectInput,
+        ClassLoaderResourcesCompiler.Input classloaderResources
+    ) {
+        if(!tegoRuntimeEnabled) return null;
+        return tegoRuntime
+            .shared(shared)
+            .adapterProject(adapterProject)
+            .languageProjectInput(languageProjectInput.tegoRuntime().orElseThrow(() -> new RuntimeException("Mismatch between presence of Tego runtime input between language project and adapter project")))
+            .classLoaderResourcesInput(classloaderResources)
             .build();
     }
 
