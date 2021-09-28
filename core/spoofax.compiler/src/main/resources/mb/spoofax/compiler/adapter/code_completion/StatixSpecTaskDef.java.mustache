@@ -1,0 +1,41 @@
+package {{baseStatixSpecTaskDef.packageId}};
+
+import mb.common.result.Result;
+import mb.pie.api.ExecContext;
+import mb.pie.api.None;
+import mb.pie.api.stamp.resource.ResourceStampers;
+import mb.resource.ReadableResource;
+import mb.statix.spec.Spec;
+import org.spoofax.interpreter.terms.ITermFactory;
+import mb.statix.codecompletion.pie.StatixSpecTaskDef;
+
+import javax.inject.Inject;
+
+@{{adapterProject.scope.qualifiedId}}
+public class {{baseStatixSpecTaskDef.id}} extends StatixSpecTaskDef {
+
+    private final {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources;
+
+    @Inject public {{baseStatixSpecTaskDef.id}}(
+        {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources,
+        ITermFactory termFactory
+    ) {
+        super(termFactory);
+
+        this.classLoaderResources = classLoaderResources;
+    }
+
+    @Override
+    public String getId() {
+        return "{{baseCodeCompletionTaskDef.id}}";
+    }
+
+    @Override
+    public Result<Spec, ?> exec(ExecContext context, None input) throws Exception {
+        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+
+        final ReadableResource resource = classLoaderResources.tryGetAsLocalDefinitionResource("src-gen/statix/statix.merged.aterm");
+        context.require(resource);
+        return readToSpec(resource);
+    }
+}

@@ -28,6 +28,7 @@ import java.util.Set;
 @Value.Enclosing
 public class CodeCompletionAdapterCompiler implements TaskDef<CodeCompletionAdapterCompiler.Input, None> {
     private final TemplateWriter codeCompletionTaskDefTemplate;
+    private final TemplateWriter statixSpecTaskDefTemplate;
 
     private final TemplateWriter upgradePlaceholdersStatixTaskDefTemplate;
     private final TemplateWriter downgradePlaceholdersStatixTaskDefTemplate;
@@ -41,6 +42,7 @@ public class CodeCompletionAdapterCompiler implements TaskDef<CodeCompletionAdap
     @Inject public CodeCompletionAdapterCompiler(TemplateCompiler templateCompiler) {
         templateCompiler = templateCompiler.loadingFromClass(getClass());
         this.codeCompletionTaskDefTemplate = templateCompiler.getOrCompileToWriter("code_completion/CodeCompletionTaskDef.java.mustache");
+        this.statixSpecTaskDefTemplate = templateCompiler.getOrCompileToWriter("code_completion/StatixSpecTaskDef.java.mustache");
 
         this.upgradePlaceholdersStatixTaskDefTemplate = templateCompiler.getOrCompileToWriter("code_completion/UpgradePlaceholdersStatixTaskDef.java.mustache");
         this.downgradePlaceholdersStatixTaskDefTemplate = templateCompiler.getOrCompileToWriter("code_completion/DowngradePlaceholdersStatixTaskDef.java.mustache");
@@ -56,6 +58,7 @@ public class CodeCompletionAdapterCompiler implements TaskDef<CodeCompletionAdap
         if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         codeCompletionTaskDefTemplate.write(context, input.baseCodeCompletionTaskDef().file(generatedJavaSourcesDirectory), input);
+        statixSpecTaskDefTemplate.write(context, input.baseStatixSpecTaskDef().file(generatedJavaSourcesDirectory), input);
 
         upgradePlaceholdersStatixTaskDefTemplate.write(context, input.baseUpgradePlaceholdersStatixTaskDef().file(generatedJavaSourcesDirectory), input);
         downgradePlaceholdersStatixTaskDefTemplate.write(context, input.baseDowngradePlaceholdersStatixTaskDef().file(generatedJavaSourcesDirectory), input);
@@ -111,6 +114,18 @@ public class CodeCompletionAdapterCompiler implements TaskDef<CodeCompletionAdap
             return extendCompleteTaskDef().orElseGet(this::baseCodeCompletionTaskDef);
         }
 
+        // Statix Spec task definition
+
+        @Value.Default default TypeInfo baseStatixSpecTaskDef() {
+            return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "StatixSpecTaskDef");
+        }
+
+        Optional<TypeInfo> extendStatixSpecTaskDef();
+
+        default TypeInfo statixSpecTaskDef() {
+            return extendStatixSpecTaskDef().orElseGet(this::baseStatixSpecTaskDef);
+        }
+
         // Transformation tasks
 
         @Value.Default default TypeInfo baseUpgradePlaceholdersStatixTaskDef() {
@@ -160,6 +175,7 @@ public class CodeCompletionAdapterCompiler implements TaskDef<CodeCompletionAdap
             final ResourcePath generatedJavaSourcesDirectory = generatedJavaSourcesDirectory();
             return ListView.of(
                 baseCodeCompletionTaskDef().file(generatedJavaSourcesDirectory),
+                baseStatixSpecTaskDef().file(generatedJavaSourcesDirectory),
                 baseUpgradePlaceholdersStatixTaskDef().file(generatedJavaSourcesDirectory),
                 baseDowngradePlaceholdersStatixTaskDef().file(generatedJavaSourcesDirectory),
                 baseIsInjectionStatixTaskDef().file(generatedJavaSourcesDirectory)

@@ -424,6 +424,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             if(codeCompletion().isPresent()) {
                 final CodeCompletionAdapterCompiler.Input i = codeCompletion().get();
                 taskDefs.add(i.codeCompletionTaskDef(), i.baseCodeCompletionTaskDef());
+                taskDefs.add(i.statixSpecTaskDef(), i.baseStatixSpecTaskDef());
             } else {
                 taskDefs.add(TypeInfo.of(NoneCodeCompletionTaskDef.class));
             }
@@ -446,6 +447,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             });
             codeCompletion().ifPresent((i) -> {
                 taskDefs.add(i.codeCompletionTaskDef(), i.baseCodeCompletionTaskDef());
+                taskDefs.add(i.statixSpecTaskDef(), i.baseStatixSpecTaskDef());
                 taskDefs.add(i.upgradePlaceholdersStatixTaskDef(), i.baseUpgradePlaceholdersStatixTaskDef());
                 taskDefs.add(i.downgradePlaceholdersStatixTaskDef(), i.baseDowngradePlaceholdersStatixTaskDef());
                 taskDefs.add(i.isInjectionStatixTaskDef(), i.isInjectionStatixTaskDef());
