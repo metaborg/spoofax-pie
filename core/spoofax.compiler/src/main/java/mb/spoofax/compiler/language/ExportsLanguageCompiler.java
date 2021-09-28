@@ -68,7 +68,7 @@ public class ExportsLanguageCompiler implements TaskDef<ExportsLanguageCompiler.
 
     public ListView<GradleConfiguredDependency> getDependencies(Input input) {
         return ListView.of(
-            GradleConfiguredDependency.api(input.shared().completionsCommonDep())
+            GradleConfiguredDependency.api(input.shared().statixCodeCompletionDep())
         );
     }
 

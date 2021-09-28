@@ -25,11 +25,11 @@ import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
 import mb.spoofax.compiler.util.TypeInfoCollection;
 import mb.spoofax.compiler.util.UniqueNamer;
+import mb.spoofax.core.language.taskdef.NoneCodeCompletionTaskDef;
 import mb.spoofax.core.language.taskdef.NoneHoverTaskDef;
 import mb.spoofax.core.language.taskdef.NoneResolveTaskDef;
 import mb.spoofax.core.language.taskdef.NoneStyler;
 import mb.spoofax.core.language.taskdef.NoneTokenizer;
-import mb.spoofax.core.language.taskdef.NullCompleteTaskDef;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
 
@@ -67,7 +67,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
     private final StrategoRuntimeAdapterCompiler strategoRuntimeCompiler;
     private final ConstraintAnalyzerAdapterCompiler constraintAnalyzerCompiler;
     private final MultilangAnalyzerAdapterCompiler multilangAnalyzerCompiler;
-    private final CompleterAdapterCompiler completerCompiler;
+    private final CodeCompletionAdapterCompiler completerCompiler;
     private final TegoRuntimeAdapterCompiler tegoRuntimeCompiler;
     private final ReferenceResolutionAdapterCompiler referenceResolutionAdapterCompiler;
     private final HoverAdapterCompiler hoverAdapterCompiler;
@@ -80,7 +80,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         StrategoRuntimeAdapterCompiler strategoRuntimeCompiler,
         ConstraintAnalyzerAdapterCompiler constraintAnalyzerCompiler,
         MultilangAnalyzerAdapterCompiler multilangAnalyzerCompiler,
-        CompleterAdapterCompiler completerCompiler,
+        CodeCompletionAdapterCompiler completerCompiler,
         TegoRuntimeAdapterCompiler tegoRuntimeCompiler,
         ReferenceResolutionAdapterCompiler referenceResolutionAdapterCompiler,
         HoverAdapterCompiler hoverAdapterCompiler,
@@ -256,14 +256,14 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             }
             map.put("styleInjection", styleInjection);
             injected.add(styleInjection);
-            final NamedTypeInfo completeInjection;
+            final NamedTypeInfo codeCompletionInjection;
             if(input.completer().isPresent() && input.parser().isPresent()) {
-                completeInjection = uniqueNamer.makeUnique(input.completer().get().completeTaskDef());
+                codeCompletionInjection = uniqueNamer.makeUnique(input.completer().get().codeCompletionTaskDef());
             } else {
-                completeInjection = uniqueNamer.makeUnique(TypeInfo.of(NullCompleteTaskDef.class));
+                codeCompletionInjection = uniqueNamer.makeUnique(TypeInfo.of(NoneCodeCompletionTaskDef.class));
             }
-            map.put("completeInjection", completeInjection);
-            injected.add(completeInjection);
+            map.put("codeCompletionInjection", codeCompletionInjection);
+            injected.add(codeCompletionInjection);
             final NamedTypeInfo resolveInjection;
             if(input.referenceResolution().isPresent()) {
                 resolveInjection = uniqueNamer.makeUnique(input.referenceResolution().get().resolveTaskDef());
@@ -383,7 +383,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
 
         Optional<MultilangAnalyzerAdapterCompiler.Input> multilangAnalyzer();
 
-        Optional<CompleterAdapterCompiler.Input> completer();
+        Optional<CodeCompletionAdapterCompiler.Input> completer();
 
         Optional<TegoRuntimeAdapterCompiler.Input> tegoRuntime();
 
@@ -421,10 +421,10 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
                 taskDefs.add(TypeInfo.of(NoneStyler.class));
             }
             if(completer().isPresent()) {
-                final CompleterAdapterCompiler.Input i = completer().get();
-                taskDefs.add(i.completeTaskDef(), i.baseCompleteTaskDef());
+                final CodeCompletionAdapterCompiler.Input i = completer().get();
+                taskDefs.add(i.codeCompletionTaskDef(), i.baseCodeCompletionTaskDef());
             } else {
-                taskDefs.add(TypeInfo.of(NullCompleteTaskDef.class));
+                taskDefs.add(TypeInfo.of(NoneCodeCompletionTaskDef.class));
             }
             strategoRuntime().ifPresent((i) -> {
                 taskDefs.add(i.getStrategoRuntimeProviderTaskDef(), i.baseGetStrategoRuntimeProviderTaskDef());

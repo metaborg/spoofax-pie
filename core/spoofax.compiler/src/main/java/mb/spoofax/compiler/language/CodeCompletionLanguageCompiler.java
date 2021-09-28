@@ -3,6 +3,7 @@ package mb.spoofax.compiler.language;
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Interactivity;
+import mb.pie.api.None;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
@@ -18,19 +19,19 @@ import java.util.Optional;
 import java.util.Set;
 
 @Value.Enclosing
-public class CompleterLanguageCompiler implements TaskDef<CompleterLanguageCompiler.Input, CompleterLanguageCompiler.Output> {
-    @Inject public CompleterLanguageCompiler() {}
+public class CodeCompletionLanguageCompiler implements TaskDef<CodeCompletionLanguageCompiler.Input, None> {
+    @Inject public CodeCompletionLanguageCompiler() {}
 
 
     @Override public String getId() {
         return getClass().getName();
     }
 
-    @Override public Output exec(ExecContext context, Input input) throws IOException {
-        final Output.Builder outputBuilder = Output.builder();
-        if(input.classKind().isManual()) return outputBuilder.build(); // Nothing to generate: return.
+    @Override public None exec(ExecContext context, Input input) throws IOException {
+        if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
-        return outputBuilder.build();
+        // No templates specified (yet)
+        return None.instance;
     }
 
     @Override public boolean shouldExecWhenAffected(Input input, Set<?> tags) {
@@ -44,7 +45,7 @@ public class CompleterLanguageCompiler implements TaskDef<CompleterLanguageCompi
 
     public ListView<GradleConfiguredDependency> getDependencies(Input input) {
         return ListView.of(
-            GradleConfiguredDependency.api(input.shared().completionsCommonDep())
+            GradleConfiguredDependency.api(input.shared().statixCodeCompletionDep())
         );
     }
 
@@ -54,7 +55,7 @@ public class CompleterLanguageCompiler implements TaskDef<CompleterLanguageCompi
 
 
     @Value.Immutable public interface Input extends Serializable {
-        class Builder extends CompleterLanguageCompilerData.Input.Builder {}
+        class Builder extends CodeCompletionLanguageCompilerData.Input.Builder {}
 
         static Builder builder() { return new Builder(); }
 
@@ -72,14 +73,14 @@ public class CompleterLanguageCompiler implements TaskDef<CompleterLanguageCompi
 
         // Completer
 
-        @Value.Default default TypeInfo baseCompleter() {
-            return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "Completer");
+        @Value.Default default TypeInfo baseCodeCompletion() {
+            return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "CodeCompletion");
         }
 
-        Optional<TypeInfo> extendCompleter();
+        Optional<TypeInfo> extendCodeCompletion();
 
-        default TypeInfo completer() {
-            return extendCompleter().orElseGet(this::baseCompleter);
+        default TypeInfo codeCompletion() {
+            return extendCodeCompletion().orElseGet(this::baseCodeCompletion);
         }
 
 
@@ -91,7 +92,7 @@ public class CompleterLanguageCompiler implements TaskDef<CompleterLanguageCompi
             }
             final ResourcePath generatedJavaSourcesDirectory = generatedJavaSourcesDirectory();
             return ListView.of(
-                baseCompleter().file(generatedJavaSourcesDirectory)
+                baseCodeCompletion().file(generatedJavaSourcesDirectory)
             );
         }
 
@@ -109,7 +110,7 @@ public class CompleterLanguageCompiler implements TaskDef<CompleterLanguageCompi
     }
 
     @Value.Immutable public interface Output extends Serializable {
-        class Builder extends CompleterLanguageCompilerData.Output.Builder {}
+        class Builder extends CodeCompletionLanguageCompilerData.Output.Builder {}
 
         static Builder builder() { return new Builder(); }
     }

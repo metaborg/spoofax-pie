@@ -18,6 +18,7 @@ import com.intellij.util.ui.EmptyIcon;
 import mb.common.codecompletion.CodeCompletionItem;
 import mb.common.codecompletion.CodeCompletionResult;
 import mb.common.editing.TextEdit;
+import mb.common.option.Option;
 import mb.common.region.Region;
 import mb.common.style.StyleNames;
 import mb.pie.api.ExecException;
@@ -66,18 +67,16 @@ public abstract class SpoofaxCompletionContributor extends CompletionContributor
         final Resource resource = resourceRegistry.getResource(parameters.getOriginalFile());
         final ResourceKey resourceKey = resource.getKey();
         final Region selection = Region.atOffset(parameters.getOffset());
-        final @Nullable CodeCompletionResult codeCompletionResult;
+        final CodeCompletionResult codeCompletionResult;
         try(final MixedSession session = this.pieSessionProvider.get()) {
-            Task<@Nullable CodeCompletionResult> codeCompletionTask = this.languageInstance.createCodeCompletionTask(resourceKey, selection);
-            if(codeCompletionTask == null) return;
-            codeCompletionResult = session.require(codeCompletionTask);
+            Task<Option<CodeCompletionResult>> codeCompletionTask = this.languageInstance.createCodeCompletionTask(resourceKey, selection);
+            codeCompletionResult = session.require(codeCompletionTask).unwrap();
         } catch(ExecException e) {
             throw new RuntimeException("Code completion on resource '" + resourceKey + "' failed unexpectedly.", e);
         } catch(InterruptedException e) {
             return;
         }
 
-        if(codeCompletionResult == null) return;
         List<LookupElement> elements = IntStream.range(0, codeCompletionResult.getProposals().size()).mapToObj(i -> proposalToElement(codeCompletionResult.getProposals().get(i), i)).collect(Collectors.toList());
         result.addAllElements(elements);
     }

@@ -14,7 +14,7 @@ import mb.common.util.EntryView;
 import mb.common.util.ListView;
 import mb.common.util.MapView;
 import mb.common.util.SetView;
-import mb.completions.common.CompletionResult;
+import mb.common.codecompletion.CodeCompletionResult;
 import mb.jsglr.common.JSGLRTokens;
 import mb.jsglr.common.JsglrParseException;
 import mb.jsglr.common.JsglrParseOutput;
@@ -108,12 +108,12 @@ public class {{baseInstance.id}} implements LanguageInstance
     }
 
     @Override
-    public Task<@Nullable CompletionResult> createCompletionTask(ResourceKey resourceKey, Region primarySelection) {
+    public Task<Option<CodeCompletionResult>> createCodeCompletionTask(ResourceKey resourceKey, Region primarySelection) {
 {{#parseInjection}}
-        return {{completeInjection.name}}.createTask(new {{completeInjection.type.qualifiedId}}.Input({{this.name}}.inputBuilder().withFile(resourceKey).buildRecoverableAstSupplier().map(Result::get))); // TODO: use Result
+        return {{codeCompletionInjection.name}}.createTask(new {{codeCompletionInjection.type.qualifiedId}}.Input({{this.name}}.inputBuilder().withFile(resourceKey).buildRecoverableAstSupplier().map(Result::get))); // TODO: use Result
 {{/parseInjection}}
 {{^parseInjection}}
-        return {{completeInjection.name}}.createTask(new {{completeInjection.type.qualifiedId}}.Input((ctx) -> mb.pie.api.None.instance)); // TODO: use Result
+        return {{codeCompletionInjection.name}}.createTask(new {{codeCompletionInjection.type.qualifiedId}}.Input((ctx) -> mb.pie.api.None.instance)); // TODO: use Result
 {{/parseInjection}}
     }
 

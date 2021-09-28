@@ -30,14 +30,14 @@ public class AdapterProjectCompilerInputBuilder {
     private boolean multilangAnalyzerEnabled = false;
     public final MultilangAnalyzerAdapterCompiler.Input.Builder multilangAnalyzer = MultilangAnalyzerAdapterCompiler.Input.builder();
 
-    private boolean completerEnabled = false;
-    public final CompleterAdapterCompiler.Input.Builder completer = CompleterAdapterCompiler.Input.builder();
-
     private boolean tegoRuntimeEnabled = false;
     public final TegoRuntimeAdapterCompiler.Input.Builder tegoRuntime = TegoRuntimeAdapterCompiler.Input.builder();
 
     private boolean referenceResolutionEnabled = false;
     public final ReferenceResolutionAdapterCompiler.Input.Builder referenceResolution = ReferenceResolutionAdapterCompiler.Input.builder();
+
+    private boolean codeCompletionEnabled = false;
+    public final CodeCompletionAdapterCompiler.Input.Builder codeCompletion = CodeCompletionAdapterCompiler.Input.builder();
 
     private boolean hoverEnabled = false;
     public final HoverAdapterCompiler.Input.Builder hover = HoverAdapterCompiler.Input.builder();
@@ -79,14 +79,14 @@ public class AdapterProjectCompilerInputBuilder {
         return multilangAnalyzer;
     }
 
-    public CompleterAdapterCompiler.Input.Builder withCompleter() {
-        completerEnabled = true;
-        return completer;
-    }
-
     public TegoRuntimeAdapterCompiler.Input.Builder withTegoRuntime() {
         tegoRuntimeEnabled = true;
         return tegoRuntime;
+    }
+
+    public CodeCompletionAdapterCompiler.Input.Builder withCodeCompletion() {
+        codeCompletionEnabled = true;
+        return codeCompletion;
     }
 
     public ReferenceResolutionAdapterCompiler.Input.Builder withReferenceResolution() {
@@ -124,11 +124,11 @@ public class AdapterProjectCompilerInputBuilder {
         final MultilangAnalyzerAdapterCompiler.@Nullable Input multilangAnalyzer = buildMultilangAnalyzer(shared, adapterProject, languageProjectInput, strategoRuntime);
         if(multilangAnalyzer != null) project.multilangAnalyzer(multilangAnalyzer);
 
-        final CompleterAdapterCompiler.@Nullable Input completer = buildCompleter(shared, adapterProject, languageProjectInput);
-        if(completer != null) project.completer(completer);
-
         final TegoRuntimeAdapterCompiler.@Nullable Input tegoRuntime = buildTegoRuntime(shared, adapterProject, languageProjectInput, classLoaderResources);
         if(tegoRuntime != null) project.tegoRuntime(tegoRuntime);
+
+        final CodeCompletionAdapterCompiler.@Nullable Input completer = buildCodeCompletion(shared, adapterProject, languageProjectInput, parser, constraintAnalyzer, strategoRuntime, tegoRuntime, classLoaderResources);
+        if(completer != null) project.completer(completer);
 
         final ReferenceResolutionAdapterCompiler.@Nullable Input referenceResolution = buildReferenceResolution(shared, adapterProject, strategoRuntime, constraintAnalyzer, classLoaderResources);
         if(referenceResolution != null) project.referenceResolution(referenceResolution);
@@ -254,19 +254,6 @@ public class AdapterProjectCompilerInputBuilder {
             .build();
     }
 
-    private CompleterAdapterCompiler.@Nullable Input buildCompleter(
-        Shared shared,
-        AdapterProject adapterProject,
-        LanguageProjectCompiler.Input languageProjectInput
-    ) {
-        if(!completerEnabled) return null;
-        return completer
-            .shared(shared)
-            .adapterProject(adapterProject)
-            .languageProjectInput(languageProjectInput.completer().orElseThrow(() -> new RuntimeException("Mismatch between presence of completer input between language project and adapter project")))
-            .build();
-    }
-
     private TegoRuntimeAdapterCompiler.@Nullable Input buildTegoRuntime(
         Shared shared,
         AdapterProject adapterProject,
@@ -278,6 +265,41 @@ public class AdapterProjectCompilerInputBuilder {
             .shared(shared)
             .adapterProject(adapterProject)
             .languageProjectInput(languageProjectInput.tegoRuntime().orElseThrow(() -> new RuntimeException("Mismatch between presence of Tego runtime input between language project and adapter project")))
+            .classLoaderResourcesInput(classloaderResources)
+            .build();
+    }
+
+    private CodeCompletionAdapterCompiler.@Nullable Input buildCodeCompletion(
+        Shared shared,
+        AdapterProject adapterProject,
+        LanguageProjectCompiler.Input languageProjectInput,
+        ParserAdapterCompiler.@Nullable Input parseInput,
+        ConstraintAnalyzerAdapterCompiler.@Nullable Input constraintAnalyzerInput,
+        StrategoRuntimeAdapterCompiler.@Nullable Input strategoRuntimeInput,
+        TegoRuntimeAdapterCompiler.@Nullable Input tegoRuntimeInput,
+        ClassLoaderResourcesCompiler.Input classloaderResources
+    ) {
+        if(!codeCompletionEnabled) return null;
+        if(parseInput == null) {
+            throw new RuntimeException("Code completion input requires a parser, but the parser has not been set");
+        }
+        if(constraintAnalyzerInput == null) {
+            throw new RuntimeException("Code completion input requires a constraint analyzer, but the constraint analyzer has not been set");
+        }
+        if(strategoRuntimeInput == null) {
+            throw new RuntimeException("Code completion input requires a Stratego runtime, but the Stratego runtime has not been set");
+        }
+        if(tegoRuntimeInput == null) {
+            throw new RuntimeException("Code completion input requires a Tego runtime, but the Tego runtime has not been set");
+        }
+        return codeCompletion
+            .shared(shared)
+            .adapterProject(adapterProject)
+            .languageProjectInput(languageProjectInput.codeCompletion().orElseThrow(() -> new RuntimeException("Mismatch between presence of completer input between language project and adapter project")))
+            .parserInput(parseInput)
+            .constraintAnalyzerInput(constraintAnalyzerInput)
+            .strategoRuntimeInput(strategoRuntimeInput)
+            .tegoRuntimeInput(tegoRuntimeInput)
             .classLoaderResourcesInput(classloaderResources)
             .build();
     }

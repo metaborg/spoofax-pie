@@ -1,0 +1,63 @@
+package {{baseCodeCompletionTaskDef.packageId}};
+
+import mb.common.codecompletion.CodeCompletionResult;
+import mb.constraint.pie.ConstraintAnalyzeFile;
+import mb.jsglr.pie.JsglrParseTaskDef;
+import mb.log.api.LoggerFactory;
+import mb.nabl2.terms.stratego.StrategoTerms;
+import mb.pie.api.stamp.resource.ResourceStampers;
+import mb.stratego.pie.GetStrategoRuntimeProvider;
+import mb.tego.pie.GetTegoRuntimeProvider;
+
+import mb.completions.common.CompletionProposal;
+import mb.completions.common.CompletionResult;
+
+import mb.pie.api.ExecContext;
+import mb.pie.api.Supplier;
+import mb.pie.api.TaskDef;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import javax.inject.Inject;
+import java.io.Serializable;
+import java.util.Objects;
+
+@{{adapterProject.scope.qualifiedId}}
+public class {{baseCodeCompletionTaskDef.id}} extends CodeCompleteTaskDef {
+
+    private final {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources;
+
+    @Inject
+    public {{baseCodeCompletionTaskDef.id}}(
+        {{parserInput.parseTaskDef.qualifiedId}} parseTask,
+        {{constraintAnalyzerInput.analyzeFileTaskDef.qualifiedId}} analyzeFileTask,
+        {{strategoRuntimeInput.getStrategoRuntimeProviderTaskDef.qualifiedId}} getStrategoRuntimeProviderTask,
+        {{tegoRuntimeInput.getTegoRuntimeProviderTaskDef.qualifiedId}} getTegoRuntimeProviderTask,
+        StrategoTerms strategoTerms,
+        LoggerFactory loggerFactory,
+        {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources
+    ) {
+        super(
+            parseTask,
+            analyzeFileTask,
+            getStrategoRuntimeProviderTask,
+            getTegoRuntimeProviderTask,
+            strategoTerms,
+            loggerFactory
+        );
+
+        this.classLoaderResources = classLoaderResources;
+    }
+
+    @Override
+    public String getId() {
+        return "{{baseCodeCompletionTaskDef.id}}";
+    }
+
+    @Override
+    public @Nullable CodeCompletionResult exec(ExecContext context, Args input) throws Exception {
+        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsLocalResource(CodeCompleteTaskDef.Args.class), ResourceStampers.hashFile());
+
+        return super.exec(context, input);
+    }
+
+}

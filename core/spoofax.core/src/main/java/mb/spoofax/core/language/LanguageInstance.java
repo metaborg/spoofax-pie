@@ -22,7 +22,6 @@ import mb.spoofax.core.language.cli.CliCommand;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.menu.MenuItem;
-import mb.spoofax.core.language.taskdef.NullCodeCompleteTaskDef;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface LanguageInstance {
@@ -47,15 +46,9 @@ public interface LanguageInstance {
      *
      * @param resourceKey      the key of the resource in which completion is invoked
      * @param primarySelection the primary selection at which completion is invoked
-     * @return a {@link CompletionResult}; or {@code null} when no completions could be generated
+     * @return some {@link CodeCompletionResult}; or {@link Option#ofNone} when no completions could be generated
      */
-    Task<@Nullable CompletionResult> createCompletionTask(ResourceKey resourceKey, Region primarySelection);
-
-    default Task<@Nullable CodeCompletionResult> createCodeCompletionTask(ResourceKey resourceKey, Region primarySelection) {
-        // FIXME: This is a temporary default method,
-        // until this method is implemented by all language instances.
-        return null;
-    }
+    Task<Option<CodeCompletionResult>> createCodeCompletionTask(ResourceKey resourceKey, Region primarySelection);
 
 
     Task<KeyedMessages> createCheckOneTask(ResourceKey file, @Nullable ResourcePath rootDirectoryHint);

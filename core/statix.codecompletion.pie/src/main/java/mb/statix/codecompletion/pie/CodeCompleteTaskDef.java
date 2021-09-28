@@ -5,6 +5,7 @@ import io.usethesource.capsule.Set;
 import mb.common.codecompletion.CodeCompletionItem;
 import mb.common.codecompletion.CodeCompletionResult;
 import mb.common.editing.TextEdit;
+import mb.common.option.Option;
 import mb.common.region.Region;
 import mb.common.style.StyleName;
 import mb.common.util.ListView;
@@ -27,6 +28,7 @@ import mb.nabl2.terms.stratego.TermPlaceholder;
 import mb.pie.api.ExecContext;
 import mb.pie.api.None;
 import mb.pie.api.TaskDef;
+import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.statix.CodeCompletionProposal;
@@ -73,7 +75,7 @@ import static mb.tego.strategies.StrategyExt.pred;
 /**
  * Code completion task definition.
  */
-public class CodeCompleteTaskDef implements TaskDef<CodeCompleteTaskDef.Args, @Nullable CodeCompletionResult> {
+public class CodeCompleteTaskDef implements TaskDef<CodeCompleteTaskDef.Args, Option<CodeCompletionResult>> {
 
     public static class Args implements Serializable {
         /** The root directory of the project. */
@@ -174,14 +176,15 @@ public class CodeCompleteTaskDef implements TaskDef<CodeCompleteTaskDef.Args, @N
     }
 
     @Override
-    public @Nullable CodeCompletionResult exec(ExecContext context, Args input) throws Exception {
-        // FIXME: Do we need this?
+    public Option<CodeCompletionResult> exec(ExecContext context, Args input) throws Exception {
+        // TODO: Do we need this?
 //        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
-//        context.require(classLoaderResources.tryGetAsLocalResource(StatixEvaluateTest.Args.class), ResourceStampers.hashFile());
+//        context.require(classLoaderResources.tryGetAsLocalResource(CodeCompleteTaskDef.Args.class), ResourceStampers.hashFile());
 
         final StrategoRuntime strategoRuntime = context.require(getStrategoRuntimeProviderTask, None.instance).getValue().get();
         final TegoRuntime tegoRuntime = context.require(getTegoRuntimeProviderTask, None.instance).getValue().get();
         final Spec spec = null; // TODO: Get spec from StatixCompileSpec. This is the merged spec AST, converted to a Spec object
+        if (spec == null) throw new IllegalStateException("No Spec!");
 
         return new Execution(
             context, input, strategoRuntime, tegoRuntime, spec
@@ -237,7 +240,7 @@ public class CodeCompleteTaskDef implements TaskDef<CodeCompleteTaskDef.Args, @N
          * @return the code completion result
          * @throws Exception if an exception occurred
          */
-        public @Nullable CodeCompletionResult complete() throws Exception {
+        public Option<CodeCompletionResult> complete() throws Exception {
             // Get, prepare, and analyze the incoming AST
             final IStrategoTerm parsedAst = parse();
             final IStrategoTerm explicatedAst = explicate(parsedAst);
@@ -263,11 +266,11 @@ public class CodeCompleteTaskDef implements TaskDef<CodeCompleteTaskDef.Args, @N
                 log.warn("Completion returned no completion proposals.");
             }
 
-            return new CodeCompletionResult(
+            return Option.ofSome(new CodeCompletionResult(
                 ListView.copyOf(finalProposals),
                 Objects.requireNonNull(getRegion(placeholder)),
                 true
-            );
+            ));
         }
 
         /**
