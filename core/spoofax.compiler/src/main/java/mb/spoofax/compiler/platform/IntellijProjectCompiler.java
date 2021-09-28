@@ -37,6 +37,7 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
     private final TemplateWriter lexerFactoryTemplate;
     private final TemplateWriter syntaxHighlighterFactoryTemplate;
     private final TemplateWriter parserDefinitionTemplate;
+    private final TemplateWriter completionContributorTemplate;
 
     @Inject public IntellijProjectCompiler(TemplateCompiler templateCompiler) {
         templateCompiler = templateCompiler.loadingFromClass(getClass());
@@ -53,6 +54,7 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
         this.lexerFactoryTemplate = templateCompiler.getOrCompileToWriter("intellij_project/LexerFactory.java.mustache");
         this.syntaxHighlighterFactoryTemplate = templateCompiler.getOrCompileToWriter("intellij_project/SyntaxHighlighterFactory.java.mustache");
         this.parserDefinitionTemplate = templateCompiler.getOrCompileToWriter("intellij_project/ParserDefinition.java.mustache");
+        this.completionContributorTemplate = templateCompiler.getOrCompileToWriter("intellij_project/CompletionContributor.java.mustache");
     }
 
 
@@ -83,6 +85,7 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
         lexerFactoryTemplate.write(context, input.baseLexerFactory().file(classesGenDirectory), input);
         syntaxHighlighterFactoryTemplate.write(context, input.syntaxHighlighterFactory().file(classesGenDirectory), input);
         parserDefinitionTemplate.write(context, input.parserDefinition().file(classesGenDirectory), input);
+        completionContributorTemplate.write(context, input.completionContributor().file(classesGenDirectory), input);
 
         return outputBuilder.build();
     }
@@ -336,6 +339,18 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
             return extendParserDefinition().orElseGet(this::baseParserDefinition);
         }
 
+        // Completion contributor
+
+        @Value.Default default TypeInfo baseCompletionContributor() {
+            return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "CompletionContributor");
+        }
+
+        Optional<TypeInfo> extendCompletionContributor();
+
+        default TypeInfo completionContributor() {
+            return extendCompletionContributor().orElseGet(this::baseCompletionContributor);
+        }
+
 
         /// Provided files
 
@@ -354,6 +369,7 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
                 generatedFiles.add(baseLexerFactory().file(generatedJavaSourcesDirectory()));
                 generatedFiles.add(baseSyntaxHighlighterFactory().file(generatedJavaSourcesDirectory()));
                 generatedFiles.add(baseParserDefinition().file(generatedJavaSourcesDirectory()));
+                generatedFiles.add(baseCompletionContributor().file(generatedJavaSourcesDirectory()));
             }
             return generatedFiles;
         }

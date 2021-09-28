@@ -441,6 +441,12 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
                 taskDefs.add(i.checkTaskDef(), i.baseCheckTaskDef());
                 taskDefs.addAll(i.libraryTaskDefs());
             });
+            tegoRuntime().ifPresent((i) -> {
+                taskDefs.add(i.getTegoRuntimeProviderTaskDef(), i.baseGetTegoRuntimeProviderTaskDef());
+            });
+            codeCompletion().ifPresent((i) -> {
+                taskDefs.add(i.codeCompletionTaskDef(), i.baseCodeCompletionTaskDef());
+            });
             referenceResolution().ifPresent((i) -> {
                 taskDefs.add(i.resolveTaskDef(), i.baseResolveTaskDef());
             });
@@ -463,9 +469,6 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             if(strategoRuntime().isPresent() && parser().isPresent()) {
                 taskDefs.add(testStrategoTaskDef(), baseTestStrategoTaskDef());
             }
-//            if(tegoRuntime().isPresent()) {
-//                taskDefs.add(testTegoTaskDef(), baseTestTegoTaskDef());
-//            }
             return taskDefs;
         }
 

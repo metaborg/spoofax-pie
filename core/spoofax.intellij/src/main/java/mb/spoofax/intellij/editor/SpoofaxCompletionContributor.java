@@ -49,14 +49,14 @@ import static mb.common.style.StyleNameConstants.*;
 /**
  * Completion contributor for IntelliJ.
  */
-public abstract class SpoofaxCodeCompletionContributor extends CompletionContributor {
+public abstract class SpoofaxCompletionContributor extends CompletionContributor {
 
 
     private final IntellijResourceRegistry resourceRegistry;
     private final LanguageInstance languageInstance;
     private final Provider<MixedSession> pieSessionProvider;
 
-    protected SpoofaxCodeCompletionContributor(IntellijLanguageComponent languageComponent, PieComponent pieComponent) {
+    protected SpoofaxCompletionContributor(IntellijLanguageComponent languageComponent, PieComponent pieComponent) {
         this.resourceRegistry = SpoofaxPlugin.getResourceServiceComponent().getResourceRegistry();
         this.languageInstance = languageComponent.getLanguageInstance();
         this.pieSessionProvider = () -> pieComponent.getPie().newSession();

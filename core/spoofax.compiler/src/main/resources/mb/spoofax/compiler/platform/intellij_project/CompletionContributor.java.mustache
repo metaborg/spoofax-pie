@@ -1,0 +1,10 @@
+package {{completionContributor.packageId}};
+
+import mb.spoofax.intellij.editor.SpoofaxCompletionContributor;
+
+public class {{completionContributor.id}} extends SpoofaxCompletionContributor {
+    // Instantiated by IntelliJ.
+    protected {{completionContributor.id}}() {
+        super({{plugin.qualifiedId}}.getComponent(), {{plugin.qualifiedId}}.getPieComponent());
+    }
+}
