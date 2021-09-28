@@ -27,6 +27,7 @@ import mb.pie.api.Task;
 import mb.pie.dagger.PieComponent;
 import mb.resource.Resource;
 import mb.resource.ResourceKey;
+import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.intellij.IntellijLanguageComponent;
 import mb.spoofax.intellij.SpoofaxPlugin;
@@ -48,14 +49,14 @@ import static mb.common.style.StyleNameConstants.*;
 /**
  * Completion contributor for IntelliJ.
  */
-public abstract class SpoofaxCompletionContributor extends CompletionContributor {
+public abstract class SpoofaxCodeCompletionContributor extends CompletionContributor {
 
 
     private final IntellijResourceRegistry resourceRegistry;
     private final LanguageInstance languageInstance;
     private final Provider<MixedSession> pieSessionProvider;
 
-    protected SpoofaxCompletionContributor(IntellijLanguageComponent languageComponent, PieComponent pieComponent) {
+    protected SpoofaxCodeCompletionContributor(IntellijLanguageComponent languageComponent, PieComponent pieComponent) {
         this.resourceRegistry = SpoofaxPlugin.getResourceServiceComponent().getResourceRegistry();
         this.languageInstance = languageComponent.getLanguageInstance();
         this.pieSessionProvider = () -> pieComponent.getPie().newSession();
@@ -64,15 +65,18 @@ public abstract class SpoofaxCompletionContributor extends CompletionContributor
 
     @Override
     public void fillCompletionVariants(CompletionParameters parameters, CompletionResultSet result) {
-        final Resource resource = resourceRegistry.getResource(parameters.getOriginalFile());
-        final ResourceKey resourceKey = resource.getKey();
+        final Resource file = resourceRegistry.getResource(parameters.getOriginalFile());
+        final ResourceKey fileKey = file.getKey();
+        final @Nullable ResourcePath projectRoot = null;// TODO: Get the project root
         final Region selection = Region.atOffset(parameters.getOffset());
         final CodeCompletionResult codeCompletionResult;
         try(final MixedSession session = this.pieSessionProvider.get()) {
-            Task<Option<CodeCompletionResult>> codeCompletionTask = this.languageInstance.createCodeCompletionTask(resourceKey, selection);
-            codeCompletionResult = session.require(codeCompletionTask).unwrap();
+            Task<Option<CodeCompletionResult>> codeCompletionTask = this.languageInstance.createCodeCompletionTask(selection, fileKey, projectRoot);
+            final Option<CodeCompletionResult> maybeCodeCompletionResult = session.require(codeCompletionTask);
+            if (maybeCodeCompletionResult.isNone()) return;  // No completions.
+            codeCompletionResult = maybeCodeCompletionResult.unwrap();
         } catch(ExecException e) {
-            throw new RuntimeException("Code completion on resource '" + resourceKey + "' failed unexpectedly.", e);
+            throw new RuntimeException("Code completion on resource '" + fileKey + "' failed unexpectedly.", e);
         } catch(InterruptedException e) {
             return;
         }

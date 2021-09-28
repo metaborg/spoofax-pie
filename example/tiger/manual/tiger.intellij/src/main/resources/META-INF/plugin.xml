@@ -19,7 +19,7 @@
     />
     <completion.contributor
       language="Tiger"
-      implementationClass="mb.tiger.intellij.editor.TigerCompletionContributor"
+      implementationClass="mb.tiger.intellij.editor.TigerCodeCompletionContributor"
     />
   </extensions>
 </idea-plugin>

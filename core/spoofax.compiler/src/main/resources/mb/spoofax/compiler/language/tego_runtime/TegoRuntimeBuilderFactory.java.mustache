@@ -1,14 +1,20 @@
 package {{baseTegoRuntimeBuilderFactory.packageId}};
 
 import mb.log.api.LoggerFactory;
+import mb.resource.ResourceService;
+import mb.resource.hierarchical.HierarchicalResource;
 import mb.spoofax.compiler.interfaces.spoofaxcore.TegoRuntimeBuilderFactory;
 import mb.tego.strategies.runtime.TegoRuntimeBuilder;
 
 public class {{baseTegoRuntimeBuilderFactory.id}} implements TegoRuntimeBuilderFactory {
     private final LoggerFactory loggerFactory;
+    private final ResourceService resourceService;
+    private final HierarchicalResource definitionDir;
 
-    public {{baseTegoRuntimeBuilderFactory.id}}(LoggerFactory loggerFactory) {
+    public {{baseTegoRuntimeBuilderFactory.id}}(LoggerFactory loggerFactory, ResourceService resourceService, HierarchicalResource definitionDir) {
         this.loggerFactory = loggerFactory;
+        this.resourceService = resourceService;
+        this.definitionDir = definitionDir;
     }
 
     @Override public TegoRuntimeBuilder create() {

@@ -108,15 +108,13 @@ public class {{baseInstance.id}} implements LanguageInstance
     }
 
     @Override
-    public Task<Option<CodeCompletionResult>> createCodeCompletionTask(ResourceKey resourceKey, Region primarySelection) {
-{{#parseInjection}}
-        return {{codeCompletionInjection.name}}.createTask(new {{codeCompletionInjection.type.qualifiedId}}.Input({{this.name}}.inputBuilder().withFile(resourceKey).buildRecoverableAstSupplier().map(Result::get))); // TODO: use Result
-{{/parseInjection}}
-{{^parseInjection}}
-        return {{codeCompletionInjection.name}}.createTask(new {{codeCompletionInjection.type.qualifiedId}}.Input((ctx) -> mb.pie.api.None.instance)); // TODO: use Result
-{{/parseInjection}}
+    public Task<Option<CodeCompletionResult>> createCodeCompletionTask(Region primarySelection, ResourceKey resourceKey, @Nullable ResourcePath rootDirectoryHint) {
+        return {{codeCompletionInjection.name}}.createTask(new {{codeCompletionInjection.type.qualifiedId}}.Args(
+            primarySelection,
+            resourceKey,
+            rootDirectoryHint
+        ));
     }
-
 
     @Override public Task<KeyedMessages> createCheckOneTask(ResourceKey file, @Nullable ResourcePath rootDirectoryHint) {
         return {{checkOneInjection.name}}.createTask(new {{checkOneInjection.type.qualifiedId}}.Input(file, rootDirectoryHint));

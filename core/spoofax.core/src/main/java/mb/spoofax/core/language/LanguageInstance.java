@@ -44,11 +44,12 @@ public interface LanguageInstance {
     /**
      * Creates a task that produces completions.
      *
-     * @param resourceKey      the key of the resource in which completion is invoked
      * @param primarySelection the primary selection at which completion is invoked
+     * @param file      the key of the resource in which completion is invoked
+     * @param rootDirectoryHint the root directory of the project; or {@code null} when not specified
      * @return some {@link CodeCompletionResult}; or {@link Option#ofNone} when no completions could be generated
      */
-    Task<Option<CodeCompletionResult>> createCodeCompletionTask(ResourceKey resourceKey, Region primarySelection);
+    Task<Option<CodeCompletionResult>> createCodeCompletionTask(Region primarySelection, ResourceKey file, @Nullable ResourcePath rootDirectoryHint);
 
 
     Task<KeyedMessages> createCheckOneTask(ResourceKey file, @Nullable ResourcePath rootDirectoryHint);

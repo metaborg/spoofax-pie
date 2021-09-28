@@ -127,8 +127,8 @@ public class AdapterProjectCompilerInputBuilder {
         final TegoRuntimeAdapterCompiler.@Nullable Input tegoRuntime = buildTegoRuntime(shared, adapterProject, languageProjectInput, classLoaderResources);
         if(tegoRuntime != null) project.tegoRuntime(tegoRuntime);
 
-        final CodeCompletionAdapterCompiler.@Nullable Input completer = buildCodeCompletion(shared, adapterProject, languageProjectInput, parser, constraintAnalyzer, strategoRuntime, tegoRuntime, classLoaderResources);
-        if(completer != null) project.completer(completer);
+        final CodeCompletionAdapterCompiler.@Nullable Input codeCompletion = buildCodeCompletion(shared, adapterProject, languageProjectInput, parser, constraintAnalyzer, strategoRuntime, tegoRuntime, classLoaderResources);
+        if(codeCompletion != null) project.codeCompletion(codeCompletion);
 
         final ReferenceResolutionAdapterCompiler.@Nullable Input referenceResolution = buildReferenceResolution(shared, adapterProject, strategoRuntime, constraintAnalyzer, classLoaderResources);
         if(referenceResolution != null) project.referenceResolution(referenceResolution);

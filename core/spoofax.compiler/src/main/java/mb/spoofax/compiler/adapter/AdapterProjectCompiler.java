@@ -67,7 +67,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
     private final StrategoRuntimeAdapterCompiler strategoRuntimeCompiler;
     private final ConstraintAnalyzerAdapterCompiler constraintAnalyzerCompiler;
     private final MultilangAnalyzerAdapterCompiler multilangAnalyzerCompiler;
-    private final CodeCompletionAdapterCompiler completerCompiler;
+    private final CodeCompletionAdapterCompiler codeCompletionCompiler;
     private final TegoRuntimeAdapterCompiler tegoRuntimeCompiler;
     private final ReferenceResolutionAdapterCompiler referenceResolutionAdapterCompiler;
     private final HoverAdapterCompiler hoverAdapterCompiler;
@@ -80,7 +80,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         StrategoRuntimeAdapterCompiler strategoRuntimeCompiler,
         ConstraintAnalyzerAdapterCompiler constraintAnalyzerCompiler,
         MultilangAnalyzerAdapterCompiler multilangAnalyzerCompiler,
-        CodeCompletionAdapterCompiler completerCompiler,
+        CodeCompletionAdapterCompiler codeCompletionCompiler,
         TegoRuntimeAdapterCompiler tegoRuntimeCompiler,
         ReferenceResolutionAdapterCompiler referenceResolutionAdapterCompiler,
         HoverAdapterCompiler hoverAdapterCompiler,
@@ -108,7 +108,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         this.strategoRuntimeCompiler = strategoRuntimeCompiler;
         this.constraintAnalyzerCompiler = constraintAnalyzerCompiler;
         this.multilangAnalyzerCompiler = multilangAnalyzerCompiler;
-        this.completerCompiler = completerCompiler;
+        this.codeCompletionCompiler = codeCompletionCompiler;
         this.tegoRuntimeCompiler = tegoRuntimeCompiler;
         this.referenceResolutionAdapterCompiler = referenceResolutionAdapterCompiler;
         this.hoverAdapterCompiler = hoverAdapterCompiler;
@@ -136,7 +136,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         input.strategoRuntime().ifPresent((i) -> context.require(strategoRuntimeCompiler, i));
         input.constraintAnalyzer().ifPresent((i) -> context.require(constraintAnalyzerCompiler, i));
         input.multilangAnalyzer().ifPresent((i) -> context.require(multilangAnalyzerCompiler, i));
-        input.completer().ifPresent((i) -> context.require(completerCompiler, i));
+        input.codeCompletion().ifPresent((i) -> context.require(codeCompletionCompiler, i));
         input.tegoRuntime().ifPresent((i) -> context.require(tegoRuntimeCompiler, i));
         input.referenceResolution().ifPresent((i) -> context.require(referenceResolutionAdapterCompiler, i));
         input.hover().ifPresent((i) -> context.require(hoverAdapterCompiler, i));
@@ -257,8 +257,8 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             map.put("styleInjection", styleInjection);
             injected.add(styleInjection);
             final NamedTypeInfo codeCompletionInjection;
-            if(input.completer().isPresent() && input.parser().isPresent()) {
-                codeCompletionInjection = uniqueNamer.makeUnique(input.completer().get().codeCompletionTaskDef());
+            if(input.codeCompletion().isPresent() && input.parser().isPresent()) {
+                codeCompletionInjection = uniqueNamer.makeUnique(input.codeCompletion().get().codeCompletionTaskDef());
             } else {
                 codeCompletionInjection = uniqueNamer.makeUnique(TypeInfo.of(NoneCodeCompletionTaskDef.class));
             }
@@ -353,6 +353,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         input.constraintAnalyzer().ifPresent((i) -> constraintAnalyzerCompiler.getDependencies(i).addAllTo(dependencies));
         input.strategoRuntime().ifPresent((i) -> strategoRuntimeCompiler.getDependencies(i).addAllTo(dependencies));
         input.tegoRuntime().ifPresent((i) -> tegoRuntimeCompiler.getDependencies(i).addAllTo(dependencies));
+        input.codeCompletion().ifPresent((i) -> codeCompletionCompiler.getDependencies(i).addAllTo(dependencies));
         dependencies.add(GradleConfiguredDependency.api(shared.sptApiDep()));
         return dependencies;
     }
@@ -383,7 +384,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
 
         Optional<MultilangAnalyzerAdapterCompiler.Input> multilangAnalyzer();
 
-        Optional<CodeCompletionAdapterCompiler.Input> completer();
+        Optional<CodeCompletionAdapterCompiler.Input> codeCompletion();
 
         Optional<TegoRuntimeAdapterCompiler.Input> tegoRuntime();
 
@@ -420,8 +421,8 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             } else {
                 taskDefs.add(TypeInfo.of(NoneStyler.class));
             }
-            if(completer().isPresent()) {
-                final CodeCompletionAdapterCompiler.Input i = completer().get();
+            if(codeCompletion().isPresent()) {
+                final CodeCompletionAdapterCompiler.Input i = codeCompletion().get();
                 taskDefs.add(i.codeCompletionTaskDef(), i.baseCodeCompletionTaskDef());
             } else {
                 taskDefs.add(TypeInfo.of(NoneCodeCompletionTaskDef.class));
@@ -753,7 +754,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             constraintAnalyzer().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             referenceResolution().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             multilangAnalyzer().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
-            completer().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
+            codeCompletion().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             tegoRuntime().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             hover().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             getSourceFiles().javaSourceFiles().addAllTo(javaSourceFiles);

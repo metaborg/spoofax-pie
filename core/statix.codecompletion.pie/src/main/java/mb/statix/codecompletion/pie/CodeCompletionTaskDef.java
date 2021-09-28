@@ -28,7 +28,6 @@ import mb.nabl2.terms.stratego.TermPlaceholder;
 import mb.pie.api.ExecContext;
 import mb.pie.api.None;
 import mb.pie.api.TaskDef;
-import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.statix.CodeCompletionProposal;
@@ -75,32 +74,33 @@ import static mb.tego.strategies.StrategyExt.pred;
 /**
  * Code completion task definition.
  */
-public class CodeCompleteTaskDef implements TaskDef<CodeCompleteTaskDef.Args, Option<CodeCompletionResult>> {
+public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Args, Option<CodeCompletionResult>> {
 
     public static class Args implements Serializable {
-        /** The root directory of the project. */
-        public final ResourcePath rootDirectory;
-        /** The file being completed. */
-        public final ResourceKey file;
         /** The primary selection at which to complete. */
         public final Region primarySelection;
+        /** The file being completed. */
+        public final ResourceKey file;
+        /** The root directory of the project; or {@code null} when not specified. */
+        public final @Nullable ResourcePath rootDirectoryHint;
 
         /**
-         * Initializes a new instance of the {@link CodeCompleteTaskDef.Args} class.
-         * @param rootDirectory the root directory of the project
-         * @param file the file being completed
-         * @param primarySelection the primary selection at which to complete
+         * Initializes a new instance of the {@link CodeCompletionTaskDef.Args} class.
+         *
+         * @param primarySelection the primary selection at which completion is invoked
+         * @param file      the key of the resource in which completion is invoked
+         * @param rootDirectoryHint the root directory of the project; or {@code null} when not specified
          */
-        public Args(ResourcePath rootDirectory, ResourceKey file, Region primarySelection) {
-            this.rootDirectory = rootDirectory;
-            this.file = file;
+        public Args(Region primarySelection, ResourceKey file, @Nullable ResourcePath rootDirectoryHint) {
             this.primarySelection = primarySelection;
+            this.file = file;
+            this.rootDirectoryHint = rootDirectoryHint;
         }
 
         @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
-            return equals((CodeCompleteTaskDef.Args)o);
+            return equals((CodeCompletionTaskDef.Args)o);
         }
 
         /**
@@ -112,26 +112,26 @@ public class CodeCompleteTaskDef implements TaskDef<CodeCompleteTaskDef.Args, Op
          * @return {@code true} when this object is equal to the specified object;
          * otherwise, {@code false}
          */
-        protected boolean equals(CodeCompleteTaskDef.Args that) {
+        protected boolean equals(CodeCompletionTaskDef.Args that) {
             if (this == that) return true;
-            return this.rootDirectory.equals(that.rootDirectory)
+            return this.primarySelection.equals(that.primarySelection)
                 && this.file.equals(that.file)
-                && this.primarySelection.equals(that.primarySelection);
+                && Objects.equals(this.rootDirectoryHint, that.rootDirectoryHint);
         }
 
         @Override public int hashCode() {
             return Objects.hash(
-                this.rootDirectory,
+                this.rootDirectoryHint,
                 this.file,
                 this.primarySelection
             );
         }
 
         @Override public String toString() {
-            return "CodeCompleteTaskDef.Args{" +
-                "rootDirectory=" + rootDirectory + ", " +
-                "file=" + file + ", " +
-                "primarySelection=" + primarySelection +
+            return "CodeCompletionTaskDef.Args{" +
+                "primarySelection=" + primarySelection + ", " +
+                "rootDirectoryHint=" + rootDirectoryHint + ", " +
+                "file=" + file +
                 "}";
         }
     }
@@ -144,7 +144,7 @@ public class CodeCompleteTaskDef implements TaskDef<CodeCompleteTaskDef.Args, Op
     private final GetTegoRuntimeProvider getTegoRuntimeProviderTask;
 
     /**
-     * Initializes a new instance of the {@link CodeCompleteTaskDef} class.
+     * Initializes a new instance of the {@link CodeCompletionTaskDef} class.
      *
      * @param parseTask the parser task
      * @param analyzeFileTask the analysis task
@@ -153,7 +153,7 @@ public class CodeCompleteTaskDef implements TaskDef<CodeCompleteTaskDef.Args, Op
      * @param strategoTerms the Stratego to NaBL terms utility class
      * @param loggerFactory the logger factory
      */
-    public CodeCompleteTaskDef(
+    public CodeCompletionTaskDef(
         JsglrParseTaskDef parseTask,
         ConstraintAnalyzeFile analyzeFileTask,
         GetStrategoRuntimeProvider getStrategoRuntimeProviderTask,
@@ -177,10 +177,6 @@ public class CodeCompleteTaskDef implements TaskDef<CodeCompleteTaskDef.Args, Op
 
     @Override
     public Option<CodeCompletionResult> exec(ExecContext context, Args input) throws Exception {
-        // TODO: Do we need this?
-//        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
-//        context.require(classLoaderResources.tryGetAsLocalResource(CodeCompleteTaskDef.Args.class), ResourceStampers.hashFile());
-
         final StrategoRuntime strategoRuntime = context.require(getStrategoRuntimeProviderTask, None.instance).getValue().get();
         final TegoRuntime tegoRuntime = context.require(getTegoRuntimeProviderTask, None.instance).getValue().get();
         final Spec spec = null; // TODO: Get spec from StatixCompileSpec. This is the merged spec AST, converted to a Spec object
@@ -199,8 +195,8 @@ public class CodeCompleteTaskDef implements TaskDef<CodeCompleteTaskDef.Args, Op
         private final StrategoRuntime strategoRuntime;
         private final TegoRuntime tegoRuntime;
         private final ITermFactory termFactory;
-        /** The root directory of the project. */
-        public final ResourcePath rootDirectory;
+        /** The root directory of the project; or {@code null} when not specified. */
+        public final @Nullable ResourcePath rootDirectoryHint;
         /** The file being completed. */
         public final ResourceKey file;
         /** The primary selection at which to complete. */
@@ -229,7 +225,7 @@ public class CodeCompleteTaskDef implements TaskDef<CodeCompleteTaskDef.Args, Op
             this.tegoRuntime = tegoRuntime;
             this.spec = spec;
             this.termFactory = strategoRuntime.getTermFactory();
-            this.rootDirectory = args.rootDirectory;
+            this.rootDirectoryHint = args.rootDirectoryHint;
             this.file = args.file;
             this.primarySelection = args.primarySelection;
         }
@@ -638,7 +634,7 @@ public class CodeCompleteTaskDef implements TaskDef<CodeCompleteTaskDef.Args, Op
          * @throws StrategoException if the strategy invocation failed
          */
         private @Nullable IStrategoTerm invokeBuilder(String builderName, IStrategoTerm input) throws StrategoException {
-            final IStrategoTerm builderInputTerm = StrategoUtil.createLegacyBuilderInputTerm(strategoRuntime.getTermFactory(), input, file.asString(), rootDirectory.asString());
+            final IStrategoTerm builderInputTerm = StrategoUtil.createLegacyBuilderInputTerm(strategoRuntime.getTermFactory(), input, file.asString(), rootDirectoryHint != null ? rootDirectoryHint.asString() : "");
             return invokeStrategy(builderName, builderInputTerm);
         }
 

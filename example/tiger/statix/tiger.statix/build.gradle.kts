@@ -36,6 +36,7 @@ languageProject {
     }
     withStrategoRuntime()
     withTegoRuntime()
+    withCodeCompletion()
   }
 }
 
@@ -62,6 +63,7 @@ languageAdapterProject {
     withConstraintAnalyzer()
     withStrategoRuntime()
     withTegoRuntime()
+    withCodeCompletion()
 //    withReferenceResolution().run {
 //      resolveStrategy("editor-resolve")
 //    }

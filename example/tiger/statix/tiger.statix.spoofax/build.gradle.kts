@@ -13,6 +13,7 @@ languageAdapterProject {
     withStrategoRuntime()
     withConstraintAnalyzer()
     withTegoRuntime()
+    withCodeCompletion()
     project.configureCompilerInput()
   }
 }

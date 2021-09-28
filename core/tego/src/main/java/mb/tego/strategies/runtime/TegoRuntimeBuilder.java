@@ -5,7 +5,7 @@ import mb.log.api.LoggerFactory;
 /**
  * Builds the Tego runtime.
  */
-public class TegoRuntimeBuilder {
+public final class TegoRuntimeBuilder {
 
     private final LoggerFactory loggerFactory;
 

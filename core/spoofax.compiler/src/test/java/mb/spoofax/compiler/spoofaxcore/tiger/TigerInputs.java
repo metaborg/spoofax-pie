@@ -150,7 +150,7 @@ public class TigerInputs {
 
     public CodeCompletionAdapterCompiler.Input completerAdapterCompilerInput() {
         //noinspection OptionalGetWithoutIsPresent
-        return adapterProjectCompilerInput().completer().get();
+        return adapterProjectCompilerInput().codeCompletion().get();
     }
 
 

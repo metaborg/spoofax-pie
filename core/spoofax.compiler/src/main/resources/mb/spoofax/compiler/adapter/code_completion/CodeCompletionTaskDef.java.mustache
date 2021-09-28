@@ -8,10 +8,12 @@ import mb.nabl2.terms.stratego.StrategoTerms;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.stratego.pie.GetStrategoRuntimeProvider;
 import mb.tego.pie.GetTegoRuntimeProvider;
+import mb.statix.codecompletion.pie.CodeCompletionTaskDef;
 
 import mb.completions.common.CompletionProposal;
 import mb.completions.common.CompletionResult;
 
+import mb.common.option.Option;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
@@ -21,7 +23,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @{{adapterProject.scope.qualifiedId}}
-public class {{baseCodeCompletionTaskDef.id}} extends CodeCompleteTaskDef {
+public class {{baseCodeCompletionTaskDef.id}} extends CodeCompletionTaskDef {
 
     private final {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources;
 
@@ -53,9 +55,9 @@ public class {{baseCodeCompletionTaskDef.id}} extends CodeCompleteTaskDef {
     }
 
     @Override
-    public @Nullable CodeCompletionResult exec(ExecContext context, Args input) throws Exception {
+    public @Nullable Option<CodeCompletionResult> exec(ExecContext context, CodeCompletionTaskDef.Args input) throws Exception {
         context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
-        context.require(classLoaderResources.tryGetAsLocalResource(CodeCompleteTaskDef.Args.class), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsLocalResource(CodeCompletionTaskDef.Args.class), ResourceStampers.hashFile());
 
         return super.exec(context, input);
     }

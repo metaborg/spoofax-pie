@@ -60,12 +60,13 @@ public class CodeCompletionAdapterCompiler implements TaskDef<CodeCompletionAdap
     }
 
 
-    public ListView<GradleConfiguredDependency> getDependencies(ParserAdapterCompiler.Input input) {
+    public ListView<GradleConfiguredDependency> getDependencies(CodeCompletionAdapterCompiler.Input input) {
         return ListView.of(
             GradleConfiguredDependency.api(input.shared().atermCommonDep()),
             GradleConfiguredDependency.api(input.shared().jsglrPieDep()),
             GradleConfiguredDependency.api(input.shared().constraintPieDep()),
-            GradleConfiguredDependency.api(input.shared().statixPieDep())
+            GradleConfiguredDependency.api(input.shared().statixPieDep()),
+            GradleConfiguredDependency.api(input.shared().statixCodeCompletionPieDep())
         );
     }
 
