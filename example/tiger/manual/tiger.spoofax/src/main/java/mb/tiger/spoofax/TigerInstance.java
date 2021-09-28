@@ -33,6 +33,7 @@ import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.spoofax.core.language.menu.CommandAction;
 import mb.spoofax.core.language.menu.MenuItem;
+import mb.spoofax.core.language.taskdef.NoneCodeCompletionTaskDef;
 import mb.spoofax.core.language.taskdef.NoneHoverTaskDef;
 import mb.spoofax.core.language.taskdef.NoneResolveTaskDef;
 import mb.spt.api.parse.ParseResult;
@@ -74,7 +75,7 @@ public class TigerInstance implements LanguageInstance, TestableParse {
     private final TigerCheckAggregator checkAggregate;
     private final TigerStyle style;
     private final TigerIdeTokenize tokenize;
-    private final TigerCompleteTaskDef complete;
+    private final NoneCodeCompletionTaskDef codeCompletion;
     private final TigerCodeComplete codeComplete;
     private final NoneResolveTaskDef resolve;
     private final NoneHoverTaskDef hover;
@@ -105,7 +106,7 @@ public class TigerInstance implements LanguageInstance, TestableParse {
         TigerCheckAggregator checkAggregate,
         TigerStyle style,
         TigerIdeTokenize tokenize,
-        TigerCompleteTaskDef complete,
+        NoneCodeCompletionTaskDef codeCompletion,
         TigerCodeComplete codeComplete,
         NoneResolveTaskDef resolve,
         NoneHoverTaskDef hover,
@@ -135,7 +136,7 @@ public class TigerInstance implements LanguageInstance, TestableParse {
         this.checkAggregate = checkAggregate;
         this.style = style;
         this.tokenize = tokenize;
-        this.complete = complete;
+        this.codeCompletion = codeCompletion;
         this.codeComplete = codeComplete;
         this.resolve = resolve;
         this.hover = hover;
@@ -183,23 +184,21 @@ public class TigerInstance implements LanguageInstance, TestableParse {
     }
 
     @Override
-    public Task<@Nullable CompletionResult> createCompletionTask(ResourceKey resourceKey, Region primarySelection) {
-        return complete.createTask(new TigerCompleteTaskDef.Input(parse.inputBuilder().withFile(resourceKey).buildRecoverableAstSupplier().map(Result::get))); // TODO: use Result.
-    }
-
-    @Override
-    public Task<@Nullable CodeCompletionResult> createCodeCompletionTask(ResourceKey resourceKey, Region primarySelection) {
-        return codeComplete.createTask(new TigerCodeComplete.Input(
-            resourceKey,
-            primarySelection.getStartOffset(),
-            parse.inputBuilder().withFile(resourceKey).buildRecoverableAstSupplier().map(Result::get),
-            (context, input) -> preStatix.createFunction().apply(context, context1 -> Result.ofOk(input)),
-            (context, input) -> postStatix.createFunction().apply(context, context1 -> Result.ofOk(input)),
-            (context, input) -> upgradePlaceholders.createFunction().apply(context, context1 -> Result.ofOk(input)),
-            (context, input) -> downgradePlaceholders.createFunction().apply(context, context1 -> Result.ofOk(input)),
-            (context, input) -> isInjection.createFunction().apply(context, context1 -> Result.ofOk(input)),
-            (context, input) -> partialPrettyPrint.createFunction().apply(context, context1 -> Result.ofOk(input)).map(Object::toString) /* FIXME: toString() is probably wrong! */
+    public Task<Option<CodeCompletionResult>> createCodeCompletionTask(ResourceKey resourceKey, Region primarySelection) {
+        return codeCompletion.createTask(new NoneCodeCompletionTaskDef.Input(
+            parse.inputBuilder().withFile(resourceKey).buildRecoverableAstSupplier().map(Result::get)
         ));
+//        return codeComplete.createTask(new TigerCodeComplete.Input(
+//            resourceKey,
+//            primarySelection.getStartOffset(),
+//            parse.inputBuilder().withFile(resourceKey).buildRecoverableAstSupplier().map(Result::get),
+//            (context, input) -> preStatix.createFunction().apply(context, context1 -> Result.ofOk(input)),
+//            (context, input) -> postStatix.createFunction().apply(context, context1 -> Result.ofOk(input)), o
+//            (context, input) -> upgradePlaceholders.createFunction().apply(context, context1 -> Result.ofOk(input)),
+//            (context, input) -> downgradePlaceholders.createFunction().apply(context, context1 -> Result.ofOk(input)),
+//            (context, input) -> isInjection.createFunction().apply(context, context1 -> Result.ofOk(input)),
+//            (context, input) -> partialPrettyPrint.createFunction().apply(context, context1 -> Result.ofOk(input)).map(Object::toString) /* FIXME: toString() is probably wrong! */
+//        ));
     }
 
     @Override

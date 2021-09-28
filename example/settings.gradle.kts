@@ -38,13 +38,13 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
   includeProject("org.metaborg.lang.tiger")
   includeProject("org.metaborg.lang.tiger.statix")
 }
-"tiger/manual".run {
-  includeProject("tiger", "tiger/manual/tiger")
-  includeProject("tiger.cli", "tiger/manual/tiger.cli")
-  includeProject("tiger.eclipse", "tiger/manual/tiger.eclipse")
-  includeProject("tiger.intellij", "tiger/manual/tiger.intellij")
-  includeProject("tiger.spoofax", "tiger/manual/tiger.spoofax")
-}
+//"tiger/manual".run {
+//  includeProject("tiger", "tiger/manual/tiger")
+//  includeProject("tiger.cli", "tiger/manual/tiger.cli")
+//  includeProject("tiger.eclipse", "tiger/manual/tiger.eclipse")
+//  includeProject("tiger.intellij", "tiger/manual/tiger.intellij")
+//  includeProject("tiger.spoofax", "tiger/manual/tiger.spoofax")
+//}
 "tiger/statix".run {
   includeProject("tiger.statix", "tiger/statix/tiger.statix")
   includeProject("tiger.statix.cli", "tiger/statix/tiger.statix.cli")
