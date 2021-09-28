@@ -44,6 +44,9 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
     private final TemplateWriter showAnalyzedAstTaskDef;
     private final TemplateWriter showScopeGraphTaskDef;
 
+    private final TemplateWriter preAnalyzeStatixTaskDefTemplate;
+    private final TemplateWriter postAnalyzeStatixTaskDefTemplate;
+
     @Inject public ConstraintAnalyzerAdapterCompiler(TemplateCompiler templateCompiler) {
         templateCompiler = templateCompiler.loadingFromClass(getClass());
         this.analyzeTaskDefTemplate = templateCompiler.getOrCompileToWriter("constraint_analyzer/AnalyzeTaskDef.java.mustache");
@@ -52,6 +55,9 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
         this.showPreAnalyzeAstTaskDef = templateCompiler.getOrCompileToWriter("constraint_analyzer/ShowPreAnalyzeAstTaskDef.java.mustache");
         this.showAnalyzedAstTaskDef = templateCompiler.getOrCompileToWriter("constraint_analyzer/ShowAnalyzedAstTaskDef.java.mustache");
         this.showScopeGraphTaskDef = templateCompiler.getOrCompileToWriter("constraint_analyzer/ShowScopeGraphTaskDef.java.mustache");
+
+        this.preAnalyzeStatixTaskDefTemplate = templateCompiler.getOrCompileToWriter("constraint_analyzer/PreAnalyzeStatixTaskDef.java.mustache");
+        this.postAnalyzeStatixTaskDefTemplate = templateCompiler.getOrCompileToWriter("constraint_analyzer/PostAnalyzeStatixTaskDef.java.mustache");
     }
 
 
@@ -71,6 +77,10 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
         showAnalyzedAstTaskDef.write(context, input.baseShowAnalyzedAstTaskDef().file(generatedJavaSourcesDirectory), input);
         if(input.languageProjectInput().enableStatix()) {
             showScopeGraphTaskDef.write(context, input.baseShowScopeGraphTaskDef().file(generatedJavaSourcesDirectory), input);
+        }
+        if(input.languageProjectInput().enableStatix()) {
+            preAnalyzeStatixTaskDefTemplate.write(context, input.basePreAnalyzeStatixTaskDef().file(generatedJavaSourcesDirectory), input);
+            postAnalyzeStatixTaskDefTemplate.write(context, input.basePostAnalyzeStatixTaskDef().file(generatedJavaSourcesDirectory), input);
         }
         return None.instance;
     }
@@ -146,6 +156,34 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
         default TypeInfo analyzeFileTaskDef() {
             return extendAnalyzeFileTaskDef().orElseGet(this::baseAnalyzeFileTaskDef);
         }
+
+        // Transformation tasks
+
+        @Value.Default default TypeInfo basePreAnalyzeStatixTaskDef() {
+            return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "PreAnalyzeStatix");
+        }
+
+        Optional<TypeInfo> extendPreAnalyzeStatixTaskDef();
+
+        default TypeInfo preAnalyzeStatixTaskDef() {
+            return extendPreAnalyzeStatixTaskDef().orElseGet(this::basePreAnalyzeStatixTaskDef);
+        }
+
+        @Value.Default default TypeInfo basePostAnalyzeStatixTaskDef() {
+            return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "PostAnalyzeStatix");
+        }
+
+        Optional<TypeInfo> extendPostAnalyzeStatixTaskDef();
+
+        default TypeInfo postAnalyzeStatixTaskDef() {
+            return extendPostAnalyzeStatixTaskDef().orElseGet(this::basePostAnalyzeStatixTaskDef);
+        }
+
+        // Transformation settings
+
+        @Value.Default default String preAnalysisStrategy() { return "pre-analyze"; }
+
+        @Value.Default default String postAnalysisStrategy() { return "post-analyze"; }
 
         // Show pre-analyze AST task definition and command
 
@@ -264,6 +302,10 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
                 taskDefs.add(showScopeGraphTaskDef(), baseShowScopeGraphTaskDef());
             }
             taskDefs.add(showAnalyzedAstTaskDef(), baseShowAnalyzedAstTaskDef());
+            if(languageProjectInput().enableStatix()) {
+                taskDefs.add(preAnalyzeStatixTaskDef(), basePreAnalyzeStatixTaskDef());
+                taskDefs.add(postAnalyzeStatixTaskDef(), basePostAnalyzeStatixTaskDef());
+            }
         }
 
         default void collectCommands(Collection<CommandDefRepr> commands) {
@@ -299,6 +341,10 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
             if(languageProjectInput().enableStatix()) {
                 javaSourceFiles.add(baseShowAnalyzedAstTaskDef().file(generatedJavaSourcesDirectory));
                 javaSourceFiles.add(baseShowScopeGraphTaskDef().file(generatedJavaSourcesDirectory));
+            }
+            if(languageProjectInput().enableStatix()) {
+                javaSourceFiles.add(basePreAnalyzeStatixTaskDef().file(generatedJavaSourcesDirectory));
+                javaSourceFiles.add(basePostAnalyzeStatixTaskDef().file(generatedJavaSourcesDirectory));
             }
             return ListView.of(javaSourceFiles);
         }

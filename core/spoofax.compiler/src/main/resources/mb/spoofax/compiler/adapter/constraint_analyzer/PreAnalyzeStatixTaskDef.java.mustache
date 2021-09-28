@@ -1,0 +1,24 @@
+package {{basePreAnalyzeStatixTaskDef.packageId}};
+
+import mb.common.result.Result;
+import mb.pie.api.ExecContext;
+import mb.pie.api.Supplier;
+import mb.stratego.common.StrategoRuntime;
+import mb.stratego.pie.AstStrategoTransformTaskDef;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+
+import javax.inject.Inject;
+import javax.inject.Provider;
+import java.io.IOException;
+
+@{{adapterProject.scope.qualifiedId}}
+public class {{basePreAnalyzeStatixTaskDef.id}} extends AstStrategoTransformTaskDef {
+    @Inject public {{basePreAnalyzeStatixTaskDef.id}}({{strategoRuntimeInput.getStrategoRuntimeProviderTaskDef.qualifiedId}} getStrategoRuntimeProvider) {
+        super(getStrategoRuntimeProvider, "{{preAnalysisStrategy}}");
+    }
+
+    @Override public String getId() {
+        return "{{basePreAnalyzeStatixTaskDef.qualifiedId}}";
+    }
+
+}
