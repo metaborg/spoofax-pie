@@ -32,7 +32,6 @@ public class LanguageProjectCompiler implements TaskDef<Supplier<Result<Language
     private final ConstraintAnalyzerLanguageCompiler constraintAnalyzerCompiler;
     private final MultilangAnalyzerLanguageCompiler multilangAnalyzerCompiler;
     private final StrategoRuntimeLanguageCompiler strategoRuntimeCompiler;
-    private final CodeCompletionLanguageCompiler completerCompiler;
     private final TegoRuntimeLanguageCompiler tegoRuntimeCompiler;
     private final ExportsLanguageCompiler exportsCompiler;
 
@@ -45,7 +44,6 @@ public class LanguageProjectCompiler implements TaskDef<Supplier<Result<Language
         ConstraintAnalyzerLanguageCompiler constraintAnalyzerCompiler,
         MultilangAnalyzerLanguageCompiler multilangAnalyzerCompiler,
         StrategoRuntimeLanguageCompiler strategoRuntimeCompiler,
-        CodeCompletionLanguageCompiler completerCompiler,
         TegoRuntimeLanguageCompiler tegoRuntimeCompiler,
         ExportsLanguageCompiler exportsCompiler
     ) {
@@ -57,7 +55,6 @@ public class LanguageProjectCompiler implements TaskDef<Supplier<Result<Language
         this.constraintAnalyzerCompiler = constraintAnalyzerCompiler;
         this.multilangAnalyzerCompiler = multilangAnalyzerCompiler;
         this.strategoRuntimeCompiler = strategoRuntimeCompiler;
-        this.completerCompiler = completerCompiler;
         this.tegoRuntimeCompiler = tegoRuntimeCompiler;
         this.exportsCompiler = exportsCompiler;
     }
@@ -88,7 +85,6 @@ public class LanguageProjectCompiler implements TaskDef<Supplier<Result<Language
         input.constraintAnalyzer().ifPresent((i) -> context.require(constraintAnalyzerCompiler, i));
         input.multilangAnalyzer().ifPresent((i) -> context.require(multilangAnalyzerCompiler, i));
         input.strategoRuntime().ifPresent((i) -> context.require(strategoRuntimeCompiler, i));
-        input.codeCompletion().ifPresent((i) -> context.require(completerCompiler, i));
         input.tegoRuntime().ifPresent((i) -> context.require(tegoRuntimeCompiler, i));
         input.exports().ifPresent((i) -> context.require(exportsCompiler, i));
 
@@ -112,7 +108,6 @@ public class LanguageProjectCompiler implements TaskDef<Supplier<Result<Language
         input.constraintAnalyzer().ifPresent((i) -> constraintAnalyzerCompiler.getDependencies(i).addAllTo(dependencies));
         input.multilangAnalyzer().ifPresent((i) -> multilangAnalyzerCompiler.getDependencies(i).addAllTo(dependencies));
         input.strategoRuntime().ifPresent((i) -> strategoRuntimeCompiler.getDependencies(i).addAllTo(dependencies));
-        input.codeCompletion().ifPresent((i) -> completerCompiler.getDependencies(i).addAllTo(dependencies));
         input.tegoRuntime().ifPresent((i) -> tegoRuntimeCompiler.getDependencies(i).addAllTo(dependencies));
         input.exports().ifPresent((i) -> exportsCompiler.getDependencies(i).addAllTo(dependencies));
         return dependencies;
@@ -143,8 +138,6 @@ public class LanguageProjectCompiler implements TaskDef<Supplier<Result<Language
         Optional<MultilangAnalyzerLanguageCompiler.Input> multilangAnalyzer();
 
         Optional<StrategoRuntimeLanguageCompiler.Input> strategoRuntime();
-
-        Optional<CodeCompletionLanguageCompiler.Input> codeCompletion();
 
         Optional<TegoRuntimeLanguageCompiler.Input> tegoRuntime();
 
@@ -204,7 +197,6 @@ public class LanguageProjectCompiler implements TaskDef<Supplier<Result<Language
             constraintAnalyzer().ifPresent((i) -> i.javaSourceFiles().addAllTo(providedFiles));
             multilangAnalyzer().ifPresent((i) -> i.javaSourceFiles().addAllTo(providedFiles));
             strategoRuntime().ifPresent((i) -> i.javaSourceFiles().addAllTo(providedFiles));
-            codeCompletion().ifPresent((i) -> i.javaSourceFiles().addAllTo(providedFiles));
             tegoRuntime().ifPresent((i) -> i.javaSourceFiles().addAllTo(providedFiles));
             exports().ifPresent((i) -> i.javaSourceFiles().addAllTo(providedFiles));
             return providedFiles;

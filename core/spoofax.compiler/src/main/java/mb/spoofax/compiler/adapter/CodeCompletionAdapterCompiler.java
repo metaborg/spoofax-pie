@@ -7,7 +7,6 @@ import mb.pie.api.None;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.language.ClassLoaderResourcesCompiler;
-import mb.spoofax.compiler.language.CodeCompletionLanguageCompiler;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.Shared;
@@ -188,8 +187,6 @@ public class CodeCompletionAdapterCompiler implements TaskDef<CodeCompletionAdap
         Shared shared();
 
         AdapterProject adapterProject();
-
-        CodeCompletionLanguageCompiler.Input languageProjectInput();
 
         ParserAdapterCompiler.Input parserInput();
 

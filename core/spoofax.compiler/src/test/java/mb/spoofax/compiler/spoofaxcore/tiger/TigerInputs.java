@@ -17,7 +17,6 @@ import mb.spoofax.compiler.adapter.data.CliCommandRepr;
 import mb.spoofax.compiler.adapter.data.CliParamRepr;
 import mb.spoofax.compiler.adapter.data.CommandActionRepr;
 import mb.spoofax.compiler.adapter.data.CommandDefRepr;
-import mb.spoofax.compiler.language.CodeCompletionLanguageCompiler;
 import mb.spoofax.compiler.language.ConstraintAnalyzerLanguageCompiler;
 import mb.spoofax.compiler.language.LanguageProject;
 import mb.spoofax.compiler.language.LanguageProjectCompiler;
@@ -107,11 +106,6 @@ public class TigerInputs {
         return languageProjectCompilerInput().strategoRuntime().get();
     }
 
-    public CodeCompletionLanguageCompiler.Input completerLanguageCompilerInput() {
-        //noinspection OptionalGetWithoutIsPresent
-        return languageProjectCompilerInput().codeCompletion().get();
-    }
-
 
     public AdapterProjectCompiler.Input adapterProjectCompilerInput() {
         if(adapterProjectCompilerInput == null) {
@@ -148,7 +142,7 @@ public class TigerInputs {
         return adapterProjectCompilerInput().strategoRuntime().get();
     }
 
-    public CodeCompletionAdapterCompiler.Input completerAdapterCompilerInput() {
+    public CodeCompletionAdapterCompiler.Input codeCompletionAdapterCompilerInput() {
         //noinspection OptionalGetWithoutIsPresent
         return adapterProjectCompilerInput().codeCompletion().get();
     }
@@ -202,7 +196,6 @@ public class TigerInputs {
                 "org.metaborg.lang.tiger.strategies.InteropRegisterer"
             );
         languageProjectCompilerInputBuilder.withTegoRuntime();
-        languageProjectCompilerInputBuilder.withCodeCompletion();
     }
 
     private void setAdapterProjectCompilerInput(ResourcePath rootDirectory, Shared shared, AdapterProjectCompilerInputBuilder adapterProjectCompilerInputBuilder) {

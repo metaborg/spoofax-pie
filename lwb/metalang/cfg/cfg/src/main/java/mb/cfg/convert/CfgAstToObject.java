@@ -33,7 +33,6 @@ import mb.spoofax.compiler.adapter.data.CommandDefRepr;
 import mb.spoofax.compiler.adapter.data.CommandRequestRepr;
 import mb.spoofax.compiler.adapter.data.MenuItemRepr;
 import mb.spoofax.compiler.adapter.data.ParamRepr;
-import mb.spoofax.compiler.language.CodeCompletionLanguageCompiler;
 import mb.spoofax.compiler.language.ConstraintAnalyzerLanguageCompiler;
 import mb.spoofax.compiler.language.ExportsLanguageCompiler;
 import mb.spoofax.compiler.language.LanguageProject;
@@ -272,7 +271,6 @@ public class CfgAstToObject {
             final TegoRuntimeAdapterCompiler.Input.Builder adapter = adapterBuilder.withTegoRuntime();
         });
         parts.getAllSubTermsInListAsParts("CodeCompletionSection").ifSome(subParts -> {
-            final CodeCompletionLanguageCompiler.Input.Builder base = baseBuilder.withCodeCompletion();
             final CodeCompletionAdapterCompiler.Input.Builder adapter = adapterBuilder.withCodeCompletion();
         });
         parts.getAllSubTermsInListAsParts("ExportsSection").ifSome(subParts -> {

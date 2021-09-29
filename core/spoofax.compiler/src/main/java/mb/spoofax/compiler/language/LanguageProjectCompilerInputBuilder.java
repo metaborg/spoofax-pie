@@ -24,9 +24,6 @@ public class LanguageProjectCompilerInputBuilder {
     private boolean strategoRuntimeEnabled = false;
     public final StrategoRuntimeLanguageCompiler.Input.Builder strategoRuntime = StrategoRuntimeLanguageCompiler.Input.builder();
 
-    private boolean codeCompletionEnabled = false;
-    public final CodeCompletionLanguageCompiler.Input.Builder codeCompletion = CodeCompletionLanguageCompiler.Input.builder();
-
     private boolean tegoRuntimeEnabled = false;
     public final TegoRuntimeLanguageCompiler.Input.Builder tegoRuntime = TegoRuntimeLanguageCompiler.Input.builder();
 
@@ -64,11 +61,6 @@ public class LanguageProjectCompilerInputBuilder {
         return strategoRuntime;
     }
 
-    public CodeCompletionLanguageCompiler.Input.Builder withCodeCompletion() {
-        codeCompletionEnabled = true;
-        return codeCompletion;
-    }
-
     public TegoRuntimeLanguageCompiler.Input.Builder withTegoRuntime() {
         tegoRuntimeEnabled = true;
         return tegoRuntime;
@@ -98,9 +90,6 @@ public class LanguageProjectCompilerInputBuilder {
 
         final StrategoRuntimeLanguageCompiler.@Nullable Input strategoRuntime = buildStrategoRuntime(shared, languageProject, constraintAnalyzer);
         if(strategoRuntime != null) project.strategoRuntime(strategoRuntime);
-
-        final CodeCompletionLanguageCompiler.@Nullable Input codeCompletion = buildCodeCompletion(shared, languageProject);
-        if(codeCompletion != null) project.codeCompletion(codeCompletion);
 
         final TegoRuntimeLanguageCompiler.@Nullable Input tegoRuntime = buildTegoRuntime(shared, languageProject);
         if(tegoRuntime != null) project.tegoRuntime(tegoRuntime);
@@ -177,14 +166,6 @@ public class LanguageProjectCompilerInputBuilder {
         }
 
         return builder.build();
-    }
-
-    private CodeCompletionLanguageCompiler.@Nullable Input buildCodeCompletion(Shared shared, LanguageProject languageProject) {
-        if(!codeCompletionEnabled) return null;
-        return codeCompletion
-            .shared(shared)
-            .languageProject(languageProject)
-            .build();
     }
 
     private TegoRuntimeLanguageCompiler.@Nullable Input buildTegoRuntime(Shared shared, LanguageProject languageProject) {

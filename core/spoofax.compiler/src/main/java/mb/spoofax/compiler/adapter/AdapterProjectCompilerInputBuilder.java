@@ -295,7 +295,6 @@ public class AdapterProjectCompilerInputBuilder {
         return codeCompletion
             .shared(shared)
             .adapterProject(adapterProject)
-            .languageProjectInput(languageProjectInput.codeCompletion().orElseThrow(() -> new RuntimeException("Mismatch between presence of completer input between language project and adapter project")))
             .parserInput(parseInput)
             .constraintAnalyzerInput(constraintAnalyzerInput)
             .strategoRuntimeInput(strategoRuntimeInput)

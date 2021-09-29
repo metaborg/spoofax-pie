@@ -17,7 +17,6 @@ import mb.spoofax.compiler.adapter.StrategoRuntimeAdapterCompiler;
 import mb.spoofax.compiler.adapter.StylerAdapterCompiler;
 import mb.spoofax.compiler.adapter.TegoRuntimeAdapterCompiler;
 import mb.spoofax.compiler.language.ClassLoaderResourcesCompiler;
-import mb.spoofax.compiler.language.CodeCompletionLanguageCompiler;
 import mb.spoofax.compiler.language.ConstraintAnalyzerLanguageCompiler;
 import mb.spoofax.compiler.language.LanguageProjectCompiler;
 import mb.spoofax.compiler.language.MultilangAnalyzerLanguageCompiler;
@@ -50,8 +49,6 @@ public interface SpoofaxCompilerComponent extends TaskDefsProvider {
     ParserLanguageCompiler getParserLanguageCompiler();
 
     StylerLanguageCompiler getStylerLanguageCompiler();
-
-    CodeCompletionLanguageCompiler getCompleterLanguageCompiler();
 
     StrategoRuntimeLanguageCompiler getStrategoRuntimeLanguageCompiler();
 
