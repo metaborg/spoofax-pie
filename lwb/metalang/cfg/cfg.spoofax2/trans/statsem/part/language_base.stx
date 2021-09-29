@@ -93,14 +93,22 @@ rules // Stratego runtime section and options
     typeOfExpr(s, e) == BOOL() | error $[Expected boolean].
   strategoRuntimeOptionOk(s, StrategoRuntimeAddStatixPrimitives(e)) :-
     typeOfExpr(s, e) == BOOL() | error $[Expected boolean].
-
-rules // Completer section and options
-
-  partOk(s, CompleterSection(options)) :-
-    completerOptionsOk(s, options).
     
-  completerOptionOk : scope * CompleterOption
-  completerOptionsOk maps completerOptionOk(*, list(*))
+rules // Tego runtime section and options
+
+  partOk(s, TegoRuntimeSection(options)) :-
+    tegoRuntimeOptionsOk(s, options).
+    
+  tegoRuntimeOptionOk : scope * TegoRuntimeOption
+  tegoRuntimeOptionsOk maps tegoRuntimeOptionOk(*, list(*))
+  
+rules // Code completion section and options
+
+  partOk(s, CodeCompletionSection(options)) :-
+    codeCompletionOptionsOk(s, options).
+    
+  codeCompletionOptionOk : scope * CodeCompletionOption
+  codeCompletionOptionsOk maps codeCompletionOptionOk(*, list(*))
 
 rules // Exports section and options
 

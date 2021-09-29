@@ -18,6 +18,7 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.adapter.AdapterProject;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
 import mb.spoofax.compiler.adapter.AdapterProjectCompilerInputBuilder;
+import mb.spoofax.compiler.adapter.CodeCompletionAdapterCompiler;
 import mb.spoofax.compiler.adapter.ConstraintAnalyzerAdapterCompiler;
 import mb.spoofax.compiler.adapter.HoverAdapterCompiler;
 import mb.spoofax.compiler.adapter.MultilangAnalyzerAdapterCompiler;
@@ -25,12 +26,14 @@ import mb.spoofax.compiler.adapter.ParserAdapterCompiler;
 import mb.spoofax.compiler.adapter.ReferenceResolutionAdapterCompiler;
 import mb.spoofax.compiler.adapter.StrategoRuntimeAdapterCompiler;
 import mb.spoofax.compiler.adapter.StylerAdapterCompiler;
+import mb.spoofax.compiler.adapter.TegoRuntimeAdapterCompiler;
 import mb.spoofax.compiler.adapter.data.ArgProviderRepr;
 import mb.spoofax.compiler.adapter.data.CommandActionRepr;
 import mb.spoofax.compiler.adapter.data.CommandDefRepr;
 import mb.spoofax.compiler.adapter.data.CommandRequestRepr;
 import mb.spoofax.compiler.adapter.data.MenuItemRepr;
 import mb.spoofax.compiler.adapter.data.ParamRepr;
+import mb.spoofax.compiler.language.CodeCompletionLanguageCompiler;
 import mb.spoofax.compiler.language.ConstraintAnalyzerLanguageCompiler;
 import mb.spoofax.compiler.language.ExportsLanguageCompiler;
 import mb.spoofax.compiler.language.LanguageProject;
@@ -41,6 +44,7 @@ import mb.spoofax.compiler.language.ParserLanguageCompiler;
 import mb.spoofax.compiler.language.ParserVariant;
 import mb.spoofax.compiler.language.StrategoRuntimeLanguageCompiler;
 import mb.spoofax.compiler.language.StylerLanguageCompiler;
+import mb.spoofax.compiler.language.TegoRuntimeLanguageCompiler;
 import mb.spoofax.compiler.platform.EclipseProjectCompiler;
 import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.TypeInfo;
@@ -263,7 +267,14 @@ public class CfgAstToObject {
             final StrategoRuntimeAdapterCompiler.Input.Builder adapter = adapterBuilder.withStrategoRuntime();
             // TODO: strategoRuntime adapter properties
         });
-        // TODO: completion
+        parts.getAllSubTermsInListAsParts("TegoRuntimeSection").ifSome(subParts -> {
+            final TegoRuntimeLanguageCompiler.Input.Builder base = baseBuilder.withTegoRuntime();
+            final TegoRuntimeAdapterCompiler.Input.Builder adapter = adapterBuilder.withTegoRuntime();
+        });
+        parts.getAllSubTermsInListAsParts("CodeCompletionSection").ifSome(subParts -> {
+            final CodeCompletionLanguageCompiler.Input.Builder base = baseBuilder.withCodeCompletion();
+            final CodeCompletionAdapterCompiler.Input.Builder adapter = adapterBuilder.withCodeCompletion();
+        });
         parts.getAllSubTermsInListAsParts("ExportsSection").ifSome(subParts -> {
             final ExportsLanguageCompiler.Input.Builder builder = baseBuilder.withExports();
             // TODO: exports language properties
