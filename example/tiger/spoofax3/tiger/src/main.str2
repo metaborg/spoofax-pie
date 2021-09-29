@@ -11,8 +11,8 @@ imports
 
 rules // Analysis
 
-  pre-analyze  = explicate-injections-tiger-Start
-  post-analyze = implicate-injections-tiger-Start
+  pre-analyze  = explicate-injections-tiger-Module
+  post-analyze = implicate-injections-tiger-Module
 
   editor-analyze = stx-editor-analyze(pre-analyze, post-analyze|"main", "programOk")
   editor-resolve = stx-editor-resolve
