@@ -1,0 +1,22 @@
+module syntax/Functions
+
+imports syntax/Base
+
+sorts FunDec FArg
+context-free syntax
+
+  Dec.FunDecs = <<{FunDec "\n"}+>> {longest-match}
+
+  FunDec.ProcDec = <
+    function <ID>(<{FArg ", "}*>) =
+      <Exp>
+  >
+
+  FunDec.FunDec = <
+    function <ID>(<{FArg ", "}*>) : <Type> =
+      <Exp>
+  >
+
+  FArg.FArg = <<ID> : <Type>>
+
+  Exp.Call = <<ID>(<{Exp ", "}*>)>

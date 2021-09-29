@@ -1,0 +1,10 @@
+module main
+
+imports
+
+  signatures/start-sig
+
+rules
+
+  programOk : Start
+  programOk(_).

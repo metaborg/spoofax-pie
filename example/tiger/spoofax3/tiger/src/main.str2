@@ -1,0 +1,19 @@
+module main
+
+imports
+
+  statixruntime
+  statix/api
+  injections/-
+  signatures/-
+  pp
+  completion
+
+rules // Analysis
+
+  pre-analyze  = explicate-injections-tiger-Start
+  post-analyze = implicate-injections-tiger-Start
+
+  editor-analyze = stx-editor-analyze(pre-analyze, post-analyze|"main", "programOk")
+  editor-resolve = stx-editor-resolve
+  editor-hover   = stx-editor-hover
