@@ -7,6 +7,7 @@ import mb.common.codecompletion.CodeCompletionResult;
 import mb.common.editing.TextEdit;
 import mb.common.option.Option;
 import mb.common.region.Region;
+import mb.common.result.Result;
 import mb.common.style.StyleName;
 import mb.common.util.ListView;
 import mb.constraint.pie.ConstraintAnalyzeFile;
@@ -45,6 +46,7 @@ import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoExceptions;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoUtil;
+import mb.stratego.pie.AstStrategoTransformTaskDef;
 import mb.stratego.pie.GetStrategoRuntimeProvider;
 import mb.tego.pie.GetTegoRuntimeProvider;
 import mb.tego.sequences.Seq;
@@ -141,6 +143,12 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Args
     private final ConstraintAnalyzeFile analyzeFileTask;
     private final GetStrategoRuntimeProvider getStrategoRuntimeProviderTask;
     private final GetTegoRuntimeProvider getTegoRuntimeProviderTask;
+    private final AstStrategoTransformTaskDef preAnalyzeStatixTask;
+    private final AstStrategoTransformTaskDef postAnalyzeStatixTask;
+    private final AstStrategoTransformTaskDef upgradePlaceholdersTask;
+    private final AstStrategoTransformTaskDef downgradePlaceholdersTask;
+    private final AstStrategoTransformTaskDef isInjPlaceholdersTask;
+    private final AstStrategoTransformTaskDef ppPartialTask;
     private final StrategoTerms strategoTerms;
     private final StatixSpecTaskDef statixSpec;
 
@@ -151,6 +159,12 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Args
      * @param analyzeFileTask the analysis task
      * @param getStrategoRuntimeProviderTask the Stratego runtime provider task
      * @param getTegoRuntimeProviderTask the Tego runtime provider task
+     * @param preAnalyzeStatixTask the {@code pre-analyze} Stratego strategy
+     * @param postAnalyzeStatixTask the {@code post-analyze} Stratego strategy
+     * @param upgradePlaceholdersTask the {@code upgrade-placeholders} Stratego strategy
+     * @param downgradePlaceholdersTask the {@code downgrade-placeholders} Stratego strategy
+     * @param isInjPlaceholdersTask the {@code is-inj} Stratego strategy
+     * @param ppPartialTask the {@code pp-partial} Stratego strategy
      * @param statixSpec the Statix spec task
      * @param strategoTerms the Stratego to NaBL terms utility class
      * @param loggerFactory the logger factory
@@ -160,6 +174,12 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Args
         ConstraintAnalyzeFile analyzeFileTask,
         GetStrategoRuntimeProvider getStrategoRuntimeProviderTask,
         GetTegoRuntimeProvider getTegoRuntimeProviderTask,
+        AstStrategoTransformTaskDef preAnalyzeStatixTask,
+        AstStrategoTransformTaskDef postAnalyzeStatixTask,
+        AstStrategoTransformTaskDef upgradePlaceholdersTask,
+        AstStrategoTransformTaskDef downgradePlaceholdersTask,
+        AstStrategoTransformTaskDef isInjPlaceholdersTask,
+        AstStrategoTransformTaskDef ppPartialTask,
         StatixSpecTaskDef statixSpec,
         StrategoTerms strategoTerms,
         LoggerFactory loggerFactory
@@ -168,6 +188,12 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Args
         this.analyzeFileTask = analyzeFileTask;
         this.getStrategoRuntimeProviderTask = getStrategoRuntimeProviderTask;
         this.getTegoRuntimeProviderTask = getTegoRuntimeProviderTask;
+        this.preAnalyzeStatixTask = preAnalyzeStatixTask;
+        this.postAnalyzeStatixTask = postAnalyzeStatixTask;
+        this.upgradePlaceholdersTask = upgradePlaceholdersTask;
+        this.downgradePlaceholdersTask = downgradePlaceholdersTask;
+        this.isInjPlaceholdersTask = isInjPlaceholdersTask;
+        this.ppPartialTask = ppPartialTask;
         this.statixSpec = statixSpec;
         this.strategoTerms = strategoTerms;
         this.log = loggerFactory.create(getClass());
@@ -241,7 +267,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Args
         public Option<CodeCompletionResult> complete() throws Exception {
             // Get, prepare, and analyze the incoming AST
             final IStrategoTerm parsedAst = parse();
-            final IStrategoTerm explicatedAst = explicate(parsedAst);
+            final IStrategoTerm explicatedAst = preAnalyze(parsedAst);
             final IStrategoTerm indexedAst = addTermIndices(explicatedAst);
             final ITerm statixAst = toStatix(indexedAst);
             final PlaceholderVarMap placeholderVarMap = new PlaceholderVarMap(file.toString());
@@ -287,38 +313,36 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Args
          * @return the pretty-printed term
          * @throws StrategoException if an error occurred while invoking the Stratego strategy
          */
-        private @Nullable String prettyPrint(IStrategoTerm term) throws StrategoException {
-            // TODO: Make this strategy name not language specific
-            @Nullable final IStrategoTerm prettyPrintedTerm = invokeStrategy("pp-partial-Tiger-string", term);
-            return prettyPrintedTerm != null ? TermUtils.asJavaString(prettyPrintedTerm).get() : null;
+        private @Nullable String prettyPrint(IStrategoTerm term) throws Exception {
+            // Can it fail now? Or will it always throw?
+            return context.require(ppPartialTask, ctx -> Result.ofOk(term)).map(t ->
+                TermUtils.asJavaString(t).get()
+                // FIXME: Can't get this to work
+                //Result.ofOptionalOrExpect(TermUtils.asJavaString(t), "Expected string.")
+            ).unwrap();
         }
 
         /**
-         * Explicates the given AST.
+         * Performs pre-analysis on the given AST.
          *
          * @param ast     the AST to explicate
          * @return the explicated AST
          * @throws StrategoException if an error occurred while invoking the Stratego strategy
          */
-        private IStrategoTerm explicate(IStrategoTerm ast) throws StrategoException {
-            // TODO: Make this strategy name not language specific
-            @Nullable final IStrategoTerm explicatedAst = invokeStrategy("explicate", ast);
-            if(explicatedAst == null)
-                throw new IllegalStateException("Completion failed: we did not get an explicated AST.");
-            return explicatedAst;
+        private IStrategoTerm preAnalyze(IStrategoTerm ast) throws Exception {
+            return context.require(preAnalyzeStatixTask, ctx -> Result.ofOk(ast)).unwrap();
         }
 
         /**
-         * Implicates the given term.
+         * Performs post-analysis on the given term.
          *
          * @param term     the term to implicate
          * @return the implicated AST; or {@code null} when implication failed
          * @throws StrategoException if an error occurred while invoking the Stratego strategy
          */
-        private @Nullable IStrategoTerm implicate(IStrategoTerm term) throws StrategoException {
-            // TODO: Make this strategy name not language specific
-            @Nullable final IStrategoTerm implicatedAst = invokeStrategy("implicate", term);
-            return implicatedAst;
+        private @Nullable IStrategoTerm postAnalyze(IStrategoTerm term) throws Exception {
+            // Can it fail now? Or will it always throw?
+            return context.require(postAnalyzeStatixTask, ctx -> Result.ofOk(term)).unwrap();
         }
 
         /**
@@ -362,10 +386,9 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Args
          * @return the downgraded term; or {@code null when downgrading failed}
          * @throws StrategoException if an error occurred while invoking the Stratego strategy
          */
-        private @Nullable IStrategoTerm downgradePlaceholders(IStrategoTerm term) throws StrategoException {
-            // TODO: Make this strategy name not language specific
-            @Nullable final IStrategoTerm downgradedTerm = invokeStrategy("downgrade-placeholders-Tiger", term);
-            return downgradedTerm;
+        private @Nullable IStrategoTerm downgradePlaceholders(IStrategoTerm term) throws Exception {
+            // Can it fail now? Or will it always throw?
+            return context.require(downgradePlaceholdersTask, ctx -> Result.ofOk(term)).unwrap();
         }
 
         /**
@@ -559,12 +582,12 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Args
                 final IStrategoTerm proposalTerm = strategoTerms.toStratego(proposal.getTerm(), true);
                 @Nullable final IStrategoTerm downgradedTerm = downgradePlaceholders(proposalTerm);
                 if (downgradedTerm == null) return proposal.toString(); // Return the term when downgrading failed
-                @Nullable final IStrategoTerm implicatedTerm = implicate(downgradedTerm);
+                @Nullable final IStrategoTerm implicatedTerm = postAnalyze(downgradedTerm);
                 if (implicatedTerm == null) return downgradedTerm.toString(); // Return the term when implication failed
                 @Nullable final String prettyPrintedTerm = prettyPrint(implicatedTerm);
                 if (prettyPrintedTerm == null) return implicatedTerm.toString(); // Return the term when pretty-printing failed
                 return prettyPrintedTerm;
-            } catch (StrategoException ex) {
+            } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
         }
