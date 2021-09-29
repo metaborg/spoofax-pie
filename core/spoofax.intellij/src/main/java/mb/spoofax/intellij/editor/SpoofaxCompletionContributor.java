@@ -69,6 +69,7 @@ public abstract class SpoofaxCompletionContributor extends CompletionContributor
         final ResourceKey fileKey = file.getKey();
         final @Nullable ResourcePath projectRoot = null;// TODO: Get the project root
         final Region selection = Region.atOffset(parameters.getOffset());
+
         final CodeCompletionResult codeCompletionResult;
         try(final MixedSession session = this.pieSessionProvider.get()) {
             Task<Option<CodeCompletionResult>> codeCompletionTask = this.languageInstance.createCodeCompletionTask(selection, fileKey, projectRoot);
@@ -78,7 +79,7 @@ public abstract class SpoofaxCompletionContributor extends CompletionContributor
         } catch(ExecException e) {
             throw new RuntimeException("Code completion on resource '" + fileKey + "' failed unexpectedly.", e);
         } catch(InterruptedException e) {
-            return;
+            return; // No completions.
         }
 
         List<LookupElement> elements = IntStream.range(0, codeCompletionResult.getProposals().size()).mapToObj(i -> proposalToElement(codeCompletionResult.getProposals().get(i), i)).collect(Collectors.toList());

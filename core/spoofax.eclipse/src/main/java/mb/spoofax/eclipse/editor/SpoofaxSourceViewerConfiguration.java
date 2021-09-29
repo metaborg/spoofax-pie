@@ -6,12 +6,17 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.jface.internal.text.html.HTMLTextPresenter;
 import org.eclipse.jface.text.DefaultInformationControl;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.ITextHover;
+import org.eclipse.jface.text.contentassist.ContentAssistant;
+import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.quickassist.IQuickAssistAssistant;
 import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
 
 import java.util.Arrays;
@@ -64,5 +69,16 @@ public class SpoofaxSourceViewerConfiguration extends TextSourceViewerConfigurat
     @Override public @Nullable IQuickAssistAssistant getQuickAssistAssistant(ISourceViewer sourceViewer) {
         // Return null to disable TextSourceViewerConfiguration quick assist which does spell checking.
         return null;
+    }
+
+    @Override public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
+        final ContentAssistant assistant = new ContentAssistant();
+        final SpoofaxContentAssistProcessor processor = new SpoofaxContentAssistProcessor(
+            editorBase, languageComponent, pieComponent, editorBase.loggerFactory
+        );
+        assistant.setContentAssistProcessor(processor, IDocument.DEFAULT_CONTENT_TYPE);
+        assistant.setRepeatedInvocationMode(true);
+//        assistant.setInformationControlCreator(informationControlCreator);
+        return assistant;
     }
 }
