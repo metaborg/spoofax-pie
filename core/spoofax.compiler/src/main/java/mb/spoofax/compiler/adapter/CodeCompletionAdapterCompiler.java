@@ -32,6 +32,7 @@ public class CodeCompletionAdapterCompiler implements TaskDef<CodeCompletionAdap
     private final TemplateWriter upgradePlaceholdersStatixTaskDefTemplate;
     private final TemplateWriter downgradePlaceholdersStatixTaskDefTemplate;
     private final TemplateWriter isInjectionStatixTaskDefTemplate;
+    private final TemplateWriter ppPartialTaskDefTemplate;
 
     /**
      * Initializes a new instance of the {@link CodeCompletionAdapterCompiler} class.
@@ -46,6 +47,7 @@ public class CodeCompletionAdapterCompiler implements TaskDef<CodeCompletionAdap
         this.upgradePlaceholdersStatixTaskDefTemplate = templateCompiler.getOrCompileToWriter("code_completion/UpgradePlaceholdersStatixTaskDef.java.mustache");
         this.downgradePlaceholdersStatixTaskDefTemplate = templateCompiler.getOrCompileToWriter("code_completion/DowngradePlaceholdersStatixTaskDef.java.mustache");
         this.isInjectionStatixTaskDefTemplate = templateCompiler.getOrCompileToWriter("code_completion/IsInjectionStatixTaskDef.java.mustache");
+        this.ppPartialTaskDefTemplate = templateCompiler.getOrCompileToWriter("code_completion/PPPartialTaskDef.java.mustache");
     }
 
 
@@ -62,6 +64,7 @@ public class CodeCompletionAdapterCompiler implements TaskDef<CodeCompletionAdap
         upgradePlaceholdersStatixTaskDefTemplate.write(context, input.baseUpgradePlaceholdersStatixTaskDef().file(generatedJavaSourcesDirectory), input);
         downgradePlaceholdersStatixTaskDefTemplate.write(context, input.baseDowngradePlaceholdersStatixTaskDef().file(generatedJavaSourcesDirectory), input);
         isInjectionStatixTaskDefTemplate.write(context, input.baseIsInjectionStatixTaskDef().file(generatedJavaSourcesDirectory), input);
+        ppPartialTaskDefTemplate.write(context, input.basePPPartialTaskDef().file(generatedJavaSourcesDirectory), input);
         return None.instance;
     }
 
@@ -157,13 +160,24 @@ public class CodeCompletionAdapterCompiler implements TaskDef<CodeCompletionAdap
             return extendIsInjectionStatixTaskDef().orElseGet(this::baseIsInjectionStatixTaskDef);
         }
 
+        @Value.Default default TypeInfo basePPPartialTaskDef() {
+            return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "PPPartial");
+        }
+
+        Optional<TypeInfo> extendPPPartialTaskDef();
+
+        default TypeInfo ppPartialTaskDef() {
+            return extendPPPartialTaskDef().orElseGet(this::basePPPartialTaskDef);
+        }
         // Transformation settings
 
-        @Value.Default default String upgradePlaceholdersStrategy() { return "upgrade-placeholders"; } // upgrade-placeholders-Tiger
+        @Value.Default default String upgradePlaceholdersStrategy() { return "upgrade-placeholders"; }
 
-        @Value.Default default String downgradePlaceholdersStrategy() { return "downgrade-placeholders"; } // downgrade-placeholders-Tiger
+        @Value.Default default String downgradePlaceholdersStrategy() { return "downgrade-placeholders"; }
 
-        @Value.Default default String isInjectionStrategy() { return "is-inj"; } // is-Tiger-inj-cons
+        @Value.Default default String isInjectionStrategy() { return "is-inj"; }
+
+        @Value.Default default String ppPartialStrategy() { return "pp-partial"; }
 
         /// Files information, known up-front for build systems with static dependencies such as Gradle.
 
@@ -177,7 +191,8 @@ public class CodeCompletionAdapterCompiler implements TaskDef<CodeCompletionAdap
                 baseStatixSpecTaskDef().file(generatedJavaSourcesDirectory),
                 baseUpgradePlaceholdersStatixTaskDef().file(generatedJavaSourcesDirectory),
                 baseDowngradePlaceholdersStatixTaskDef().file(generatedJavaSourcesDirectory),
-                baseIsInjectionStatixTaskDef().file(generatedJavaSourcesDirectory)
+                baseIsInjectionStatixTaskDef().file(generatedJavaSourcesDirectory),
+                basePPPartialTaskDef().file(generatedJavaSourcesDirectory)
             );
         }
 
