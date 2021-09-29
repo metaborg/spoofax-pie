@@ -5,7 +5,6 @@ import mb.pie.dagger.RootPieModule;
 import mb.pie.dagger.TaskDefsProvider;
 import mb.resource.dagger.ResourceRegistriesProvider;
 import mb.resource.dagger.ResourceServiceComponent;
-import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

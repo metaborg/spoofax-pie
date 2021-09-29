@@ -2,10 +2,6 @@ package mb.spoofax.eclipse.editor;
 
 import mb.pie.dagger.PieComponent;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
-import mb.spoofax.eclipse.EclipsePlatformComponent;
-import mb.spoofax.eclipse.SpoofaxPlugin;
-import mb.spoofax.eclipse.pie.PieRunner;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -19,12 +15,9 @@ public abstract class SpoofaxEditor extends SpoofaxEditorBase {
     private final PieComponent pieComponent;
 
     /*
-    Do NOT initialize any of the following fields to null, as TextEditor's constructor will call 'initializeEditor' to
-    initialize several fields, which will then be set back to null when initialized here.
+    Do NOT initialize any of the following fields (none at the moment) to null, as TextEditor's constructor will call
+    'initializeEditor' to initialize several fields, which will then be set back to null when initialized here.
     */
-
-    // Set in initializeEditor, never null after that.
-    private @MonotonicNonNull PieRunner pieRunner;
 
 
     protected SpoofaxEditor(EclipseLanguageComponent languageComponent, PieComponent pieComponent) {
@@ -49,13 +42,6 @@ public abstract class SpoofaxEditor extends SpoofaxEditorBase {
         final EditorUpdateJob job = editorUpdateJobFactory.create(languageComponent, pieComponent, project, file, document, input, this);
         job.setRule(getJobSchedulingRule());
         job.schedule(initialUpdate ? 0 : 300);
-    }
-
-    @Override protected void initializeEditor() {
-        super.initializeEditor();
-
-        final EclipsePlatformComponent platformComponent = SpoofaxPlugin.getPlatformComponent();
-        this.pieRunner = platformComponent.getPieRunner();
     }
 
     @Override public void dispose() {

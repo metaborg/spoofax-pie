@@ -106,6 +106,9 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         final ResourcePath rootDirectory = getResourcePath(eclipseProject);
         cleanCheckMessages(eclipseProject, rootDirectory, monitor);
 
+        // TODO: clean dynamically loaded language
+
+
         forgetLastBuiltState();
     }
 
@@ -159,7 +162,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         handleCompileResult(rootDirectory, result, monitor);
 
         final OutTransient<Result<DynamicLanguage, ?>> dynamicLanguage = session.require(createDynamicLoadTask(rootDirectory), cancelToken);
-        handleDynamicLoadResult(dynamicLanguage);
+        handleDynamicLoadResult(dynamicLanguage, session);
 
         logger.debug("Deleting unobserved tasks");
         session.deleteUnobservedTasks(t -> true, (t, r) -> false);
@@ -200,7 +203,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         handleCompileResult(rootDirectory, result, monitor);
 
         final OutTransient<Result<DynamicLanguage, ?>> dynamicLanguage = topDownSession.getOutputOrRequireAndEnsureExplicitlyObserved(createDynamicLoadTask(rootDirectory), cancelToken);
-        handleDynamicLoadResult(dynamicLanguage);
+        handleDynamicLoadResult(dynamicLanguage, topDownSession);
 
         logger.debug("Deleting unobserved tasks");
         session.deleteUnobservedTasks(t -> true, (t, r) -> false);
@@ -296,10 +299,19 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         }
     }
 
-    private void handleDynamicLoadResult(OutTransient<Result<DynamicLanguage, ?>> dynamicLanguage) {
+    private void handleDynamicLoadResult(OutTransient<Result<DynamicLanguage, ?>> dynamicLanguage, Session session) throws ExecException {
         if(dynamicLanguage.isConsistent()) {
-            dynamicLanguage.getValue().ifElse(
-                l -> logger.debug("Possibly dynamically loaded language '{}'", l),
+            dynamicLanguage.getValue().ifThrowingElse(
+                l -> {
+                    logger.debug("Possibly dynamically loaded language '{}'", l);
+                    // Run a bottom-up build in the dynamically loaded language, using the resources that were provided
+                    // during the build of the language, to make the tasks of the language up-to-date.
+                    try(final MixedSession languageSession = l.getPieComponent().newSession()) {
+                        languageSession.updateAffectedBy(session.getProvidedResources());
+                    } catch(InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                },
                 e -> logger.debug("Dynamic load task failed", e)
             );
         } else {

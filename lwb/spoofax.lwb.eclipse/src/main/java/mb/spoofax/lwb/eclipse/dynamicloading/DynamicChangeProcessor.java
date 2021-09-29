@@ -8,8 +8,6 @@ import mb.spoofax.lwb.dynamicloading.DynamicLanguageRegistry;
 import mb.spoofax.lwb.dynamicloading.DynamicLanguageRegistryListener;
 import mb.spoofax.lwb.eclipse.SpoofaxLwbScope;
 import mb.spoofax.lwb.eclipse.util.EditorMappingUtils;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorRegistry;
 import org.eclipse.ui.PlatformUI;
@@ -22,7 +20,6 @@ public class DynamicChangeProcessor implements DynamicLanguageRegistryListener, 
     private final DynamicLanguageRegistry dynamicLanguageRegistry;
     private final DynamicEditorTracker editorTracker;
 
-    private final IWorkspace workspace;
     private final IEditorRegistry eclipseEditorRegistry;
 
 
@@ -36,7 +33,6 @@ public class DynamicChangeProcessor implements DynamicLanguageRegistryListener, 
         this.dynamicLanguageRegistry = dynamicLanguageRegistry;
         this.editorTracker = editorTracker;
 
-        this.workspace = ResourcesPlugin.getWorkspace();
         this.eclipseEditorRegistry = PlatformUI.getWorkbench().getEditorRegistry();
     }
 

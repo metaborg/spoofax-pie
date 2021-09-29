@@ -75,7 +75,7 @@ public class DefaultDynamicLanguageLoader implements DynamicLanguageLoader {
             .resourceServiceComponent(resourceServiceComponent)
             .rootPieModule(rootPieModuleProvider.get()
                 .addTaskDefsFrom(languageComponent)
-                .withSerdeFactory(__ -> JavaSerde.createWithClassLoaderOverride(classLoader))
+                .withSerdeFactory(__ -> new JavaSerde(classLoader))
             )
             .build();
 

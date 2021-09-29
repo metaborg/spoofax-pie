@@ -11,8 +11,7 @@ import mb.pie.api.MixedSession;
 import mb.pie.dagger.PieComponent;
 import mb.pie.dagger.PieModule;
 import mb.pie.runtime.PieBuilderImpl;
-import mb.pie.runtime.store.InMemoryStore;
-import mb.pie.runtime.store.SerializingStore;
+import mb.pie.runtime.store.SerializingStoreBuilder;
 import mb.pie.serde.fst.FstSerde;
 import mb.pie.task.archive.UnarchiveCommon;
 import mb.resource.ResourceService;
@@ -118,14 +117,10 @@ class TestBase {
             rootResourceServiceComponent.createChildModule(classLoaderResourceRegistry),
             new PieModule(PieBuilderImpl::new)
                 .withSerdeFactory((loggerFactory -> new FstSerde()))
-                .withStoreFactory(((serde, resourceService, loggerFactory) -> new SerializingStore<>(
-                    serde,
-                    pieStoreFile,
-                    InMemoryStore::new,
-                    InMemoryStore.class,
-                    e -> { throw new RuntimeException("Serializing store failed", e); },
-                    e -> { throw new RuntimeException("Deserializing store failed", e); }
-                )))
+                .withStoreFactory(((serde, resourceService, loggerFactory) -> SerializingStoreBuilder.ofInMemoryStore(serde)
+                    .withResourceStorage(pieStoreFile)
+                    .build()
+                ))
         );
         resourceService = compiler.compiler.resourceServiceComponent.getResourceService();
         pieComponent = compiler.pieComponent;

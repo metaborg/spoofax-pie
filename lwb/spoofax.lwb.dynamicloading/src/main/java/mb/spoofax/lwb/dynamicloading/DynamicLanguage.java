@@ -16,12 +16,16 @@ import java.time.Instant;
 public class DynamicLanguage implements AutoCloseable {
     protected final ResourcePath rootDirectory;
     protected final CompileLanguageInput compileInput;
-    protected final URLClassLoader classLoader;
-    protected final ResourceRegistriesProvider resourceRegistriesProvider;
-    protected final ResourceServiceComponent resourceServiceComponent;
-    protected final LanguageComponent languageComponent;
-    protected final PieComponent pieComponent;
+    protected final String id;
+    protected final String displayName;
+    protected final SetView<String> fileExtensions;
     protected final Instant created;
+
+    protected URLClassLoader classLoader;
+    protected ResourceRegistriesProvider resourceRegistriesProvider;
+    protected ResourceServiceComponent resourceServiceComponent;
+    protected LanguageComponent languageComponent;
+    protected PieComponent pieComponent;
     protected boolean closed = false;
 
     public DynamicLanguage(
@@ -35,19 +39,26 @@ public class DynamicLanguage implements AutoCloseable {
     ) {
         this.rootDirectory = rootDirectory;
         this.compileInput = compileInput;
+        this.id = languageComponent.getLanguageInstance().getId();
+        this.displayName = languageComponent.getLanguageInstance().getDisplayName();
+        this.fileExtensions = languageComponent.getLanguageInstance().getFileExtensions();
+        this.created = Instant.now();
+
         this.classLoader = classLoader;
         this.resourceRegistriesProvider = resourceRegistriesProvider;
         this.resourceServiceComponent = resourceServiceComponent;
         this.languageComponent = languageComponent;
         this.pieComponent = pieComponent;
-        this.created = Instant.now();
     }
 
 
     /**
      * Closes the dynamically loaded language, closing the {@link URLClassLoader classloader} and {@link
-     * LanguageComponent language component}, freeing any resources they hold. This dynamically loaded language cannot
-     * be used any more after closing it.
+     * LanguageComponent language component}, freeing any resources they hold.
+     *
+     * This dynamically loaded language cannot be used any more after closing it, with the exception of the {@link
+     * #getRootDirectory}, {@link #getId()}, {@link #getDisplayName()}, {@link #getFileExtensions()}, and {@link
+     * #getCompileInput()} methods.
      *
      * @throws IOException when {@link URLClassLoader#close() closing the classloader} fails.
      */
@@ -55,9 +66,14 @@ public class DynamicLanguage implements AutoCloseable {
         if(closed) return;
         try {
             pieComponent.close();
+            pieComponent = null;
             languageComponent.close();
+            languageComponent = null;
             resourceServiceComponent.close();
+            resourceServiceComponent = null;
+            resourceRegistriesProvider = null;
             classLoader.close();
+            classLoader = null;
         } finally {
             closed = true;
         }
@@ -75,21 +91,21 @@ public class DynamicLanguage implements AutoCloseable {
      * Gets the identifier of this dynamically loaded language.
      */
     public String getId() {
-        return languageComponent.getLanguageInstance().getId();
+        return id;
     }
 
     /**
      * Gets the display name of this dynamically loaded language.
      */
     public String getDisplayName() {
-        return languageComponent.getLanguageInstance().getDisplayName();
+        return displayName;
     }
 
     /**
      * Gets the file extensions of this dynamically loaded language.
      */
     public SetView<String> getFileExtensions() {
-        return languageComponent.getLanguageInstance().getFileExtensions();
+        return fileExtensions;
     }
 
 
