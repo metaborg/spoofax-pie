@@ -15,8 +15,7 @@ import mb.pie.dagger.PieComponent;
 import mb.pie.dagger.RootPieModule;
 import mb.pie.dagger.TaskDefsProvider;
 import mb.pie.runtime.PieBuilderImpl;
-import mb.pie.runtime.store.InMemoryStore;
-import mb.pie.runtime.store.SerializingStore;
+import mb.pie.runtime.store.SerializingStoreBuilder;
 import mb.pie.runtime.tracer.LoggingTracer;
 import mb.pie.serde.fst.FstSerde;
 import mb.resource.dagger.EmptyResourceRegistriesProvider;
@@ -252,13 +251,20 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
 
     @Override public void customizePieModule(RootPieModule pieModule) {
         pieModule
+            // Use Fst Serde implementation for better serialization performance.
             .withSerdeFactory((loggerFactory) -> new FstSerde())
+            // Use logging tracer to create build logs.
+            .withTracerFactory(LoggingTracer::new)
+            // Override store factory for statically loaded Spoofax LWB languages, so their store gets serialized to
+            // the `pieStore` file.
             .withStoreFactory((serde, resourceService, loggerFactory) -> {
                 final IPath statePath = SpoofaxLwbPlugin.getPlugin().getStateLocation();
                 final FSResource stateDir = ResourceUtil.toFsResource(statePath);
-                return new SerializingStore<>(serde, loggerFactory, stateDir.appendRelativePath("pieStore"), InMemoryStore::new, InMemoryStore.class);
-            })
-            .withTracerFactory(LoggingTracer::new);
+                return SerializingStoreBuilder.ofInMemoryStore(serde)
+                    .withResourceStorage(stateDir.appendRelativePath("pieStore"))
+                    .withLoggingDeserializeFailHandler(loggerFactory)
+                    .build();
+            });
     }
 
     @Override

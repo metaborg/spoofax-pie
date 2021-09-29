@@ -17,15 +17,14 @@ import mb.pie.dagger.PieComponent;
 import mb.pie.dagger.PieModule;
 import mb.pie.dagger.RootPieModule;
 import mb.pie.runtime.PieBuilderImpl;
-import mb.pie.runtime.store.InMemoryStore;
-import mb.pie.runtime.store.SerializingStore;
+import mb.pie.runtime.store.SerializingStoreBuilder;
+import mb.pie.runtime.store.SerializingStoreInMemoryBuffer;
 import mb.pie.runtime.tracer.CompositeTracer;
 import mb.pie.runtime.tracer.LoggingTracer;
 import mb.pie.runtime.tracer.MetricsTracer;
 import mb.pie.serde.fst.FstSerde;
 import mb.pie.task.archive.UnarchiveCommon;
 import mb.resource.ResourceService;
-import mb.resource.WritableResource;
 import mb.resource.classloader.ClassLoaderResource;
 import mb.resource.classloader.ClassLoaderResourceLocations;
 import mb.resource.classloader.ClassLoaderResourceRegistry;
@@ -57,10 +56,12 @@ class TestBase {
     LoggerComponent loggerComponent;
     SptResourcesComponent sptResourcesComponent;
     RootResourceServiceComponent rootResourceServiceComponent;
+    SerializingStoreInMemoryBuffer spoofax3CompilerStoreBuffer;
     StandaloneSpoofax3Compiler standaloneSpoofax3Compiler;
     SptComponent sptComponent;
     ResourceService resourceService;
     MetricsTracer languageMetricsTracer;
+    SerializingStoreInMemoryBuffer dynamicLoadingStoreBuffer;
     DynamicLoadingComponent dynamicLoadingComponent;
     DynamicLoad dynamicLoad;
     DynamicLanguageRegistry dynamicLanguageRegistry;
@@ -80,19 +81,17 @@ class TestBase {
             .rootResourceServiceModule(new RootResourceServiceModule(classLoaderResourceRegistry).addRegistriesFrom(sptResourcesComponent))
             .loggerComponent(loggerComponent)
             .build();
-        final WritableResource compilerPieStoreFile = temporaryDirectory.appendRelativePath(".build/compiler.piestore").createParents();
+        spoofax3CompilerStoreBuffer = new SerializingStoreInMemoryBuffer();
         standaloneSpoofax3Compiler = new StandaloneSpoofax3Compiler(
             loggerComponent,
             rootResourceServiceComponent.createChildModule(classLoaderResourceRegistry),
             new PieModule(PieBuilderImpl::new)
                 .withSerdeFactory(loggerFactory -> new FstSerde())
-                .withStoreFactory((serde, resourceService, loggerFactory) -> new SerializingStore<>(
-                    serde,
-                    loggerFactory,
-                    compilerPieStoreFile,
-                    InMemoryStore::new,
-                    InMemoryStore.class
-                ))
+                .withStoreFactory((serde, resourceService, loggerFactory) -> SerializingStoreBuilder.ofInMemoryStore(serde)
+                    .withInMemoryBuffer(spoofax3CompilerStoreBuffer)
+                    .withLoggingDeserializeFailHandler(loggerFactory)
+                    .build()
+                )
         );
         sptComponent = DaggerSptComponent.builder()
             .loggerComponent(loggerComponent)
@@ -102,18 +101,16 @@ class TestBase {
             .build();
         resourceService = standaloneSpoofax3Compiler.compiler.resourceServiceComponent.getResourceService();
 
-        final WritableResource languagePieStoreFile = temporaryDirectory.appendRelativePath(".build/language.piestore").createParents();
         languageMetricsTracer = new MetricsTracer();
+        dynamicLoadingStoreBuffer = new SerializingStoreInMemoryBuffer();
         dynamicLoadingComponent = DaggerDynamicLoadingComponent.builder()
             .dynamicLoadingPieModule(new DynamicLoadingPieModule(() -> new RootPieModule(PieBuilderImpl::new)
                 .withSerdeFactory(loggerFactory -> new FstSerde())
-                .withStoreFactory((serde, resourceService, loggerFactory) -> new SerializingStore<>(
-                    serde,
-                    loggerFactory,
-                    languagePieStoreFile,
-                    InMemoryStore::new,
-                    InMemoryStore.class
-                ))
+                .withStoreFactory((serde, resourceService, loggerFactory) -> SerializingStoreBuilder.ofInMemoryStore(serde)
+                    .withInMemoryBuffer(dynamicLoadingStoreBuffer)
+                    .withLoggingDeserializeFailHandler(loggerFactory)
+                    .build()
+                )
                 .withTracerFactory(loggerFactory -> new CompositeTracer(new LoggingTracer(loggerFactory), languageMetricsTracer)))
             )
             .loggerComponent(loggerComponent)
@@ -144,12 +141,16 @@ class TestBase {
         pieComponent = null;
         dynamicLanguageRegistry = null;
         dynamicLoad = null;
+        dynamicLoadingStoreBuffer.close();
+        dynamicLoadingStoreBuffer = null;
         dynamicLoadingComponent.close();
         dynamicLoadingComponent = null;
         languageMetricsTracer = null;
         resourceService = null;
         sptComponent.close();
         sptComponent = null;
+        spoofax3CompilerStoreBuffer.close();
+        spoofax3CompilerStoreBuffer = null;
         standaloneSpoofax3Compiler.close();
         standaloneSpoofax3Compiler = null;
         rootResourceServiceComponent.close();

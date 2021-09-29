@@ -319,8 +319,7 @@ public class PieRunner {
                     final CommandFeedback feedback = require(task, session, monitor);
                     contextsAndFeedbacks.add(new CommandContextAndFeedback(context, feedback));
                     processShowFeedbacks(feedback, true, (p) -> {
-                        // POTI: this opens a new PIE session, which may be used concurrently with other sessions, which
-                        // may not be (thread-)safe.
+                        // TODO: this should be moved into a job to prevent deadlocks
                         try(final MixedSession newSession = pie.newSession()) {
                             unobserve(task, newSession, monitor);
                         }
