@@ -139,9 +139,10 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Args
     private final Logger log;
     private final JsglrParseTaskDef parseTask;
     private final ConstraintAnalyzeFile analyzeFileTask;
-    private final StrategoTerms strategoTerms;
     private final GetStrategoRuntimeProvider getStrategoRuntimeProviderTask;
     private final GetTegoRuntimeProvider getTegoRuntimeProviderTask;
+    private final StrategoTerms strategoTerms;
+    private final StatixSpecTaskDef statixSpec;
 
     /**
      * Initializes a new instance of the {@link CodeCompletionTaskDef} class.
@@ -150,6 +151,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Args
      * @param analyzeFileTask the analysis task
      * @param getStrategoRuntimeProviderTask the Stratego runtime provider task
      * @param getTegoRuntimeProviderTask the Tego runtime provider task
+     * @param statixSpec the Statix spec task
      * @param strategoTerms the Stratego to NaBL terms utility class
      * @param loggerFactory the logger factory
      */
@@ -158,7 +160,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Args
         ConstraintAnalyzeFile analyzeFileTask,
         GetStrategoRuntimeProvider getStrategoRuntimeProviderTask,
         GetTegoRuntimeProvider getTegoRuntimeProviderTask,
-        //StatixCompileSpec compileSpec,
+        StatixSpecTaskDef statixSpec,
         StrategoTerms strategoTerms,
         LoggerFactory loggerFactory
     ) {
@@ -166,6 +168,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Args
         this.analyzeFileTask = analyzeFileTask;
         this.getStrategoRuntimeProviderTask = getStrategoRuntimeProviderTask;
         this.getTegoRuntimeProviderTask = getTegoRuntimeProviderTask;
+        this.statixSpec = statixSpec;
         this.strategoTerms = strategoTerms;
         this.log = loggerFactory.create(getClass());
     }
@@ -179,8 +182,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Args
     public Option<CodeCompletionResult> exec(ExecContext context, Args input) throws Exception {
         final StrategoRuntime strategoRuntime = context.require(getStrategoRuntimeProviderTask, None.instance).getValue().get();
         final TegoRuntime tegoRuntime = context.require(getTegoRuntimeProviderTask, None.instance).getValue().get();
-        final Spec spec = null; // TODO: Get spec from StatixCompileSpec. This is the merged spec AST, converted to a Spec object
-        if (spec == null) throw new IllegalStateException("No Spec!");
+        final Spec spec = context.require(statixSpec, None.instance).unwrap();
 
         return new Execution(
             context, input, strategoRuntime, tegoRuntime, spec

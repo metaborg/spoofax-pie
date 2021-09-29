@@ -33,6 +33,7 @@ public class {{baseCodeCompletionTaskDef.id}} extends CodeCompletionTaskDef {
         {{constraintAnalyzerInput.analyzeFileTaskDef.qualifiedId}} analyzeFileTask,
         {{strategoRuntimeInput.getStrategoRuntimeProviderTaskDef.qualifiedId}} getStrategoRuntimeProviderTask,
         {{tegoRuntimeInput.getTegoRuntimeProviderTaskDef.qualifiedId}} getTegoRuntimeProviderTask,
+        {{statixSpecTaskDef.qualifiedId}} statixSpec,
         StrategoTerms strategoTerms,
         LoggerFactory loggerFactory,
         {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources
@@ -42,6 +43,7 @@ public class {{baseCodeCompletionTaskDef.id}} extends CodeCompletionTaskDef {
             analyzeFileTask,
             getStrategoRuntimeProviderTask,
             getTegoRuntimeProviderTask,
+            statixSpec,
             strategoTerms,
             loggerFactory
         );

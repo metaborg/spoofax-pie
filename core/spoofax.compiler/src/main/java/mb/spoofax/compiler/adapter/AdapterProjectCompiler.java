@@ -421,13 +421,6 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             } else {
                 taskDefs.add(TypeInfo.of(NoneStyler.class));
             }
-            if(codeCompletion().isPresent()) {
-                final CodeCompletionAdapterCompiler.Input i = codeCompletion().get();
-                taskDefs.add(i.codeCompletionTaskDef(), i.baseCodeCompletionTaskDef());
-                taskDefs.add(i.statixSpecTaskDef(), i.baseStatixSpecTaskDef());
-            } else {
-                taskDefs.add(TypeInfo.of(NoneCodeCompletionTaskDef.class));
-            }
             strategoRuntime().ifPresent((i) -> {
                 taskDefs.add(i.getStrategoRuntimeProviderTaskDef(), i.baseGetStrategoRuntimeProviderTaskDef());
             });
@@ -452,6 +445,9 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
                 taskDefs.add(i.downgradePlaceholdersStatixTaskDef(), i.baseDowngradePlaceholdersStatixTaskDef());
                 taskDefs.add(i.isInjectionStatixTaskDef(), i.isInjectionStatixTaskDef());
             });
+            if(!codeCompletion().isPresent()) {
+                taskDefs.add(TypeInfo.of(NoneCodeCompletionTaskDef.class));
+            }
             referenceResolution().ifPresent((i) -> {
                 taskDefs.add(i.resolveTaskDef(), i.baseResolveTaskDef());
             });
