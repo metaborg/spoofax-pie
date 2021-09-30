@@ -4,6 +4,7 @@ import mb.log.api.Level;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.log.noop.NoopLogger;
+import mb.tego.sequences.DebugSeq;
 import mb.tego.sequences.Seq;
 import mb.tego.strategies.Strategy;
 import mb.tego.strategies.Strategy1;
@@ -22,6 +23,7 @@ public final class TegoRuntimeImpl implements TegoRuntime, TegoEngine {
     @Nullable private final LoggerFactory loggerFactory;
     private final Logger log;
     private final Level strategyLogLevel = Level.Trace;
+    private int level = 0;
 
     /**
      * Initializes a new instance of the {@link TegoRuntimeImpl} class.
@@ -77,17 +79,66 @@ public final class TegoRuntimeImpl implements TegoRuntime, TegoEngine {
      * @param strategy the strategy that will be evaluated
      */
     private void enterStrategy(StrategyDecl strategy) {
-        log.trace("Enter: " + strategy);
+        level += 1;
+        log.trace(prefixString("→", level, " " + strategy.toString()));
     }
 
     /**
      * Called just after a strategy is evaluated.
      *
      * @param strategy the strategy that was evaluated
+     * @param result the result of evaluating the strategy
+     * @return the (possibly modified) result of evaluating the strategy
      */
-    private <R> @Nullable R exitStrategy(StrategyDecl strategy, @Nullable R seq) {
-        log.trace("Exit: " + strategy);
-        return seq;
+    private <R> @Nullable R exitStrategy(StrategyDecl strategy, @Nullable R result) {
+        if (result instanceof Seq) {
+            // Print when a sequence is evaluated, and its results
+            log.trace(prefixString("-", level, " " + strategy.toString()));
+            @SuppressWarnings("unchecked")
+            final DebugSeq<?> debugSeq = new DebugSeq((Seq<?>)result) {
+                @Override
+                protected void onBeforeNext(int index) {
+                }
+
+                @Override
+                protected Object onAfterNext(int index, Object result) {
+                    log.trace(prefixString("◀", index, "[" + index + "] " + result.toString()));
+                    return result;
+                }
+
+                @Override
+                protected void onEnd(int index) {
+                    log.trace(prefixString("⏹", index,"[" + index + "]"));
+                }
+            };
+            // Force evaluation of the sequence
+            try {
+                //noinspection unchecked
+                return (R)Seq.from(debugSeq.toList());
+            } catch (InterruptedException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+        log.trace(prefixString("←", level, " " + strategy.toString()));
+        level -= 1;
+        return result;
+    }
+
+    /**
+     * Prefixes a string with a prefix, repeated the specified number of times.
+     *
+     * @param prefix the prefix
+     * @param prefixCount the number of prefix repetitions
+     * @param s the string
+     * @return the resulting string
+     */
+    private String prefixString(String prefix, int prefixCount, String s) {
+        final StringBuilder sb = new StringBuilder(prefix.length() * prefixCount + s.length());
+        for (int i = 0; i < prefixCount; i++) {
+            sb.append(prefix);
+        }
+        sb.append(s);
+        return sb.toString();
     }
 
     @Override
