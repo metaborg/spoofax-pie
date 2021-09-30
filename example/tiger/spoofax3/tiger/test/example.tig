@@ -12,7 +12,7 @@ let
            in c
           end
     end  
-    var r := fact(10)
+    var r := fact([[Exp]])
  in r
 end
 
