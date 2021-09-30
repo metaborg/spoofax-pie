@@ -4,8 +4,6 @@ import java.util.*
 plugins {
   id("org.metaborg.gradle.config.java-library")
   id("org.metaborg.gradle.config.junit-testing")
-  id("net.ltgt.apt")
-  id("net.ltgt.apt-idea")
 }
 
 repositories {

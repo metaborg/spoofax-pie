@@ -17,11 +17,14 @@ if(gradle.parent == null) {
   // which we want to test. Gradle plugins are not directly available in a multi-project build, therefore a separate
   // composite build is required. Included builds listed below can use the Gradle plugins built in 'core'.
   includeBuildWithName("core", "spoofax3.core.root")
-  // The 'lwb' (language workbench) composite build includes the meta-languages which in turn depend on Gradle plugins
-  // from the 'core' composite build. Additionally, 'lwb' also contains Gradle plugins for building languages.
+  // The 'metalib' composite build includes meta-libraries which are required in the runtime of languages. It depend on
+  // Gradle plugins from the 'core' composite build.
+  includeBuildWithName("metalib", "spoofax3.lwb.root")
+  // The 'lwb' (language workbench) composite build includes the meta-languages which depend on Gradle plugins from the
+  // 'core' composite build. Additionally, 'lwb' also contains Gradle plugins for building languages.
   includeBuildWithName("lwb", "spoofax3.lwb.root")
   // The 'example' composite build has example languages, some based on Gradle plugins from 'core', and some based on
-  // Gradle plugins from 'lwb'.
+  // Gradle plugins from 'lwb'. It also uses 'metalib'.
   includeBuildWithName("example", "spoofax3.example.root")
 }
 

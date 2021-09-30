@@ -70,6 +70,9 @@ public class CliProjectCompiler implements TaskDef<CliProjectCompiler.Input, Cli
         dependencies.add(GradleConfiguredDependency.implementation(shared.logBackendSLF4JDep()));
         dependencies.add(GradleConfiguredDependency.implementation(shared.slf4jSimpleDep()));
         dependencies.add(GradleConfiguredDependency.implementation(shared.pieRuntimeDep()));
+        if(input.adapterProjectCompilerInput().strategoRuntime().isPresent()) {
+            dependencies.add(GradleConfiguredDependency.implementation(shared.strategolibDep()));
+        }
         dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
         return dependencies;
     }

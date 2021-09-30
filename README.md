@@ -21,3 +21,27 @@ Copyright © 2018-2021 Delft University of Technology
 
 The code and files in this project are licensed under the [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
 You may use the files in this project in compliance with the license.
+
+## Directory structure
+
+```
+.
+├── build.gradle.kts        # Gradle build configuration
+├── settings.gradle.kts     # Gradle build settings (multi-project and composite build)
+├── core                    # Spoofax 3 core libraries
+├── metalib                 # Spoofax 3 meta libraries, in a separate composite build because it
+│                             uses a Gradle plugin from core.
+├── lwb                     # Spoofax 3 language workbench, in a separate composite build because
+│                             it uses a Gradle plugin from core.
+├── example                 # Spoofax 3 examples, in a separate composite build because
+│                             it uses Gradle plugins from core and lwb.
+├── gradle.properties       # Properties f
+├── mkdocs.yml              # Documentation configuration file (MkDocs)
+├── mkdocs_requirements.txt # Documentation Python requirements file
+├── docs                    # Documentation root
+├── .github                 # GitHub issue template and action workflows
+├── LICENSE                 # License file
+├── NOTICE                  # License NOTICE file
+├── CHANGELOG.md            # Changelog
+└── README.md
+```

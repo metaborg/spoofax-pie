@@ -1,8 +1,6 @@
 plugins {
   id("org.metaborg.gradle.config.java-library")
   id("org.metaborg.coronium.bundle")
-  id("net.ltgt.apt")
-  id("net.ltgt.apt-idea")
 }
 
 mavenize {

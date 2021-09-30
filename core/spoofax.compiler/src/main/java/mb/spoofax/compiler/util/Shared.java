@@ -190,13 +190,13 @@ public interface Shared extends Serializable {
         return GradleDependency.module(Coordinate.of("org.metaborg", "resource"));
     }
 
-    /// Spoofax 2.x
+    /// Spoofax 2
 
     @Value.Default default GradleDependency strategoXTMinJarDep() {
         return GradleDependency.module(Coordinate.of("org.metaborg", "strategoxt-min-jar"));
     }
 
-    /// Spoofax 2.x with devenv override
+    /// Spoofax 2 with devenv override
 
     @Value.Default default GradleDependency orgStrategoXTStrjDep() {
         return GradleDependency.module(Coordinate.of("org.metaborg.devenv", "org.strategoxt.strj"));
@@ -212,7 +212,7 @@ public interface Shared extends Serializable {
         return GradleDependency.module(Coordinate.of("org.metaborg", "pie.runtime"));
     }
 
-    /// Spoofax 3.x
+    /// Spoofax 3 core
 
     @Value.Default default GradleDependency atermCommonDep() {
         return GradleDependency.module(Coordinate.of("org.metaborg", "aterm.common", spoofax3Version()));
@@ -308,6 +308,17 @@ public interface Shared extends Serializable {
 
     @Value.Default default GradleDependency sptApiDep() {
         return GradleDependency.module(Coordinate.of("org.metaborg", "spt.api", spoofax3Version()));
+    }
+
+
+    /// Spoofax 3 metalib
+
+    @Value.Default default GradleDependency strategolibDep() {
+        return GradleDependency.module(Coordinate.of("org.metaborg", "strategolib", spoofax3Version()));
+    }
+
+    @Value.Default default GradleDependency strategolibEclipseDep() {
+        return GradleDependency.module(Coordinate.of("org.metaborg", "strategolib.eclipse", spoofax3Version()));
     }
 
 

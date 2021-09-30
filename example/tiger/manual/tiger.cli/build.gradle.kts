@@ -4,7 +4,7 @@ plugins {
 }
 
 application {
-  mainClassName = "mb.tiger.cli.Main"
+  mainClass.set("mb.tiger.cli.Main")
 }
 
 graal {

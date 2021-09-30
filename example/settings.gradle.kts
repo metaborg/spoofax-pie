@@ -14,6 +14,7 @@ if(org.gradle.util.VersionNumber.parse(gradle.gradleVersion).major < 6) {
 // from the command-line. Otherwise, the parent project (spoofax.root) will include these composite builds.
 if(gradle.parent == null) {
   includeBuildWithName("../core", "spoofax3.core.root")
+  includeBuildWithName("../metalib", "spoofax3.metalib.root")
   includeBuildWithName("../lwb", "spoofax3.lwb.root")
 }
 
