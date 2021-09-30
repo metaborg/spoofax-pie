@@ -6,3 +6,6 @@ plugins {
 languageEclipseProject {
   adapterProject.set(project(":tiger"))
 }
+mavenize {
+  majorVersion.set("2021-03")
+}
