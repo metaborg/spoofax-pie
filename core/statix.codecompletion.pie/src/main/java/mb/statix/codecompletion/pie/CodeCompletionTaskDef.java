@@ -274,7 +274,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Args
             final ITerm upgradedAst = upgradePlaceholders(statixAst, placeholderVarMap);
             final ITermVar placeholder = getCompletionPlaceholder(upgradedAst);
             // TODO: Specify spec name and root rule name somewhere
-            final SolverState initialState = createInitialSolverState(upgradedAst, "statics", "programOk", placeholderVarMap);
+            final SolverState initialState = createInitialSolverState(upgradedAst, "main", "programOk", placeholderVarMap);
             final SolverState analyzedState = analyze(initialState);
 
             // Execute the code completion Tego strategy
