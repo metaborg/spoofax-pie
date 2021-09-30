@@ -1,6 +1,6 @@
 package mb.spoofax.compiler.spoofaxcore;
 
-import mb.pie.api.MixedSession;
+import mb.pie.api.MockExecContext;
 import mb.spoofax.compiler.language.ClassLoaderResourcesCompiler;
 import mb.spoofax.compiler.spoofaxcore.tiger.TigerInputs;
 import org.junit.jupiter.api.Test;
@@ -10,11 +10,9 @@ class ClassLoaderResourcesCompilerTest extends TestBase {
         final TigerInputs inputs = defaultInputs();
 
         final ClassLoaderResourcesCompiler.Input input = inputs.languageProjectCompilerInput().classLoaderResources();
-        try(MixedSession session = pie.newSession()) {
-            session.require(component.getClassloaderResourcesCompiler().createTask(input));
-            fileAssertions.scopedExists(input.generatedJavaSourcesDirectory(), (s) -> {
-                s.assertPublicJavaClass(input.classLoaderResources(), "TigerClassLoaderResources");
-            });
-        }
+        component.getClassloaderResourcesCompiler().compile(new MockExecContext(), input);
+        fileAssertions.scopedExists(input.generatedJavaSourcesDirectory(), (s) -> {
+            s.assertPublicJavaClass(input.classLoaderResources(), "TigerClassLoaderResources");
+        });
     }
 }

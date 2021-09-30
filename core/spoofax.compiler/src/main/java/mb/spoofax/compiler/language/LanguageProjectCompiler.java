@@ -1,5 +1,6 @@
 package mb.spoofax.compiler.language;
 
+import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Interactivity;
@@ -79,14 +80,14 @@ public class LanguageProjectCompiler implements TaskDef<Supplier<Result<Language
         packageInfoTemplate.write(context, input.basePackageInfo().file(generatedJavaSourcesDirectory), input);
 
         // Files from other compilers.
-        context.require(classLoaderResourcesCompiler, input.classLoaderResources());
-        input.parser().ifPresent((i) -> context.require(parserCompiler, i));
-        input.styler().ifPresent((i) -> context.require(stylerCompiler, i));
-        input.constraintAnalyzer().ifPresent((i) -> context.require(constraintAnalyzerCompiler, i));
-        input.multilangAnalyzer().ifPresent((i) -> context.require(multilangAnalyzerCompiler, i));
-        input.strategoRuntime().ifPresent((i) -> context.require(strategoRuntimeCompiler, i));
-        input.tegoRuntime().ifPresent((i) -> context.require(tegoRuntimeCompiler, i));
-        input.exports().ifPresent((i) -> context.require(exportsCompiler, i));
+        classLoaderResourcesCompiler.compile(context, input.classLoaderResources());
+        Option.ofOptional(input.parser()).ifSomeThrowing((i) -> parserCompiler.compile(context, i));
+        Option.ofOptional(input.styler()).ifSomeThrowing((i) -> stylerCompiler.compile(context, i));
+        Option.ofOptional(input.constraintAnalyzer()).ifSomeThrowing((i) -> constraintAnalyzerCompiler.compile(context, i));
+        Option.ofOptional(input.multilangAnalyzer()).ifSomeThrowing((i) -> multilangAnalyzerCompiler.compile(context, i));
+        Option.ofOptional(input.strategoRuntime()).ifSomeThrowing((i) -> strategoRuntimeCompiler.compile(context, i));
+        Option.ofOptional(input.tegoRuntime()).ifSomeThrowing((i) -> tegoRuntimeCompiler.compile(context, i));
+        Option.ofOptional(input.exports()).ifSomeThrowing((i) -> exportsCompiler.compile(context, i));
 
         return None.instance;
     }

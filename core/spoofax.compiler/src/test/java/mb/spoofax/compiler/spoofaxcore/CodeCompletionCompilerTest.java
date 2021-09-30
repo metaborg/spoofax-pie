@@ -1,6 +1,6 @@
 package mb.spoofax.compiler.spoofaxcore;
 
-import mb.pie.api.MixedSession;
+import mb.pie.api.MockExecContext;
 import mb.spoofax.compiler.adapter.CodeCompletionAdapterCompiler;
 import mb.spoofax.compiler.spoofaxcore.tiger.TigerInputs;
 import org.junit.jupiter.api.Disabled;
@@ -11,12 +11,10 @@ class CodeCompletionCompilerTest extends TestBase {
     @Test void testCompilerDefaults() throws Exception {
         final TigerInputs inputs = defaultInputs();
 
-        try(MixedSession session = pie.newSession()) {
-            final CodeCompletionAdapterCompiler.Input adapterProjectInput = inputs.codeCompletionAdapterCompilerInput();
-            session.require(component.getCompleterAdapterCompiler().createTask(adapterProjectInput));
-            fileAssertions.scopedExists(adapterProjectInput.generatedJavaSourcesDirectory(), (s) -> {
-                s.assertPublicJavaClass(adapterProjectInput.baseCodeCompletionTaskDef(), "TigerCompleteTaskDef");
-            });
-        }
+        final CodeCompletionAdapterCompiler.Input adapterProjectInput = inputs.codeCompletionAdapterCompilerInput();
+        component.getCodeCompletionAdapterCompiler().compile(new MockExecContext(), adapterProjectInput);
+        fileAssertions.scopedExists(adapterProjectInput.generatedJavaSourcesDirectory(), (s) -> {
+            s.assertPublicJavaClass(adapterProjectInput.baseCompleteTaskDef(), "TigerCodeCompletionTaskDef");
+        });
     }
 }

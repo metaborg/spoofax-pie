@@ -21,13 +21,12 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * Tego runtime adapter compiler.
  */
 @Value.Enclosing
-public class TegoRuntimeAdapterCompiler implements TaskDef<TegoRuntimeAdapterCompiler.Input, None> {
+public class TegoRuntimeAdapterCompiler {
     private final TemplateWriter getTegoRuntimeTaskDefTemplate;
 
     @Inject public TegoRuntimeAdapterCompiler(TemplateCompiler templateCompiler) {
@@ -36,23 +35,11 @@ public class TegoRuntimeAdapterCompiler implements TaskDef<TegoRuntimeAdapterCom
     }
 
 
-    @Override public String getId() {
-        return getClass().getName();
-    }
-
-    @Override public None exec(ExecContext context, Input input) throws IOException {
+    public None compile(ExecContext context, Input input) throws IOException {
         if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         getTegoRuntimeTaskDefTemplate.write(context, input.baseGetTegoRuntimeProviderTaskDef().file(generatedJavaSourcesDirectory), input);
         return None.instance;
-    }
-
-    @Override public boolean shouldExecWhenAffected(Input input, Set<?> tags) {
-        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
-    }
-
-    @Override public Serializable key(Input input) {
-        return input.adapterProject().project().baseDirectory();
     }
 
 

@@ -65,7 +65,7 @@ public interface SpoofaxCompilerComponent extends TaskDefsProvider {
 
     StylerAdapterCompiler getStylerAdapterCompiler();
 
-    CodeCompletionAdapterCompiler getCompleterAdapterCompiler();
+    CodeCompletionAdapterCompiler getCodeCompletionAdapterCompiler();
 
     StrategoRuntimeAdapterCompiler getStrategoRuntimeAdapterCompiler();
 

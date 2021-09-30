@@ -131,16 +131,16 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
 
     public None compile(ExecContext context, Input input) throws IOException {
         // Files from other compilers.
-        input.parser().ifPresent((i) -> context.require(parserCompiler, i));
-        input.styler().ifPresent((i) -> context.require(stylerCompiler, i));
-        input.strategoRuntime().ifPresent((i) -> context.require(strategoRuntimeCompiler, i));
-        input.constraintAnalyzer().ifPresent((i) -> context.require(constraintAnalyzerCompiler, i));
-        input.multilangAnalyzer().ifPresent((i) -> context.require(multilangAnalyzerCompiler, i));
-        input.codeCompletion().ifPresent((i) -> context.require(codeCompletionCompiler, i));
-        input.tegoRuntime().ifPresent((i) -> context.require(tegoRuntimeCompiler, i));
-        input.referenceResolution().ifPresent((i) -> context.require(referenceResolutionAdapterCompiler, i));
-        input.hover().ifPresent((i) -> context.require(hoverAdapterCompiler, i));
-        context.require(getSourceFilesAdapterCompiler, input.getSourceFiles());
+        Option.ofOptional(input.parser()).ifSomeThrowing((i) -> parserCompiler.compile(context, i));
+        Option.ofOptional(input.styler()).ifSomeThrowing((i) -> stylerCompiler.compile(context, i));
+        Option.ofOptional(input.strategoRuntime()).ifSomeThrowing((i) -> strategoRuntimeCompiler.compile(context, i));
+        Option.ofOptional(input.constraintAnalyzer()).ifSomeThrowing((i) -> constraintAnalyzerCompiler.compile(context, i));
+        Option.ofOptional(input.multilangAnalyzer()).ifSomeThrowing((i) -> multilangAnalyzerCompiler.compile(context, i));
+        Option.ofOptional(input.codeCompletion()).ifSomeThrowing((i) -> codeCompletionCompiler.compile(context, i));
+        Option.ofOptional(input.tegoRuntime()).ifSomeThrowing((i) -> tegoRuntimeCompiler.compile(context, i));
+        Option.ofOptional(input.referenceResolution()).ifSomeThrowing((i) -> referenceResolutionAdapterCompiler.compile(context, i));
+        Option.ofOptional(input.hover()).ifSomeThrowing((i) -> hoverAdapterCompiler.compile(context, i));
+        getSourceFilesAdapterCompiler.compile(context, input.getSourceFiles());
 
         if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
 

@@ -2,8 +2,6 @@ package mb.spoofax.compiler.language;
 
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
-import mb.pie.api.Interactivity;
-import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
@@ -19,10 +17,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Value.Enclosing
-public class MultilangAnalyzerLanguageCompiler implements TaskDef<MultilangAnalyzerLanguageCompiler.Input, MultilangAnalyzerLanguageCompiler.Output> {
+public class MultilangAnalyzerLanguageCompiler {
     private final TemplateWriter specConfigFactoryTemplate;
 
     @Inject public MultilangAnalyzerLanguageCompiler(TemplateCompiler templateCompiler) {
@@ -31,24 +28,12 @@ public class MultilangAnalyzerLanguageCompiler implements TaskDef<MultilangAnaly
     }
 
 
-    @Override public String getId() {
-        return getClass().getName();
-    }
-
-    @Override public Output exec(ExecContext context, Input input) throws IOException {
+    public Output compile(ExecContext context, Input input) throws IOException {
         final Output.Builder outputBuilder = Output.builder();
         if(input.classKind().isManual()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         specConfigFactoryTemplate.write(context, input.baseSpecConfigFactory().file(generatedJavaSourcesDirectory), input);
         return outputBuilder.build();
-    }
-
-    @Override public boolean shouldExecWhenAffected(Input input, Set<?> tags) {
-        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
-    }
-
-    @Override public Serializable key(Input input) {
-        return input.languageProject().project().baseDirectory();
     }
 
 

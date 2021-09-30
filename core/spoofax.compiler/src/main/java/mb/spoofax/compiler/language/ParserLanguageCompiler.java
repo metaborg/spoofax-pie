@@ -2,9 +2,7 @@ package mb.spoofax.compiler.language;
 
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
-import mb.pie.api.Interactivity;
 import mb.pie.api.None;
-import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
@@ -18,10 +16,9 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Optional;
-import java.util.Set;
 
 @Value.Enclosing
-public class ParserLanguageCompiler implements TaskDef<ParserLanguageCompiler.Input, None> {
+public class ParserLanguageCompiler {
     private final TemplateWriter tableTemplate;
     private final TemplateWriter parserTemplate;
     private final TemplateWriter factoryTemplate;
@@ -34,25 +31,13 @@ public class ParserLanguageCompiler implements TaskDef<ParserLanguageCompiler.In
     }
 
 
-    @Override public String getId() {
-        return getClass().getName();
-    }
-
-    @Override public None exec(ExecContext context, Input input) throws IOException {
+    public None compile(ExecContext context, Input input) throws IOException {
         if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         tableTemplate.write(context, input.baseParseTable().file(generatedJavaSourcesDirectory), input);
         parserTemplate.write(context, input.baseParser().file(generatedJavaSourcesDirectory), input);
         factoryTemplate.write(context, input.baseParserFactory().file(generatedJavaSourcesDirectory), input);
         return None.instance;
-    }
-
-    @Override public boolean shouldExecWhenAffected(Input input, Set<?> tags) {
-        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
-    }
-
-    @Override public Serializable key(Input input) {
-        return input.languageProject().project().baseDirectory();
     }
 
 

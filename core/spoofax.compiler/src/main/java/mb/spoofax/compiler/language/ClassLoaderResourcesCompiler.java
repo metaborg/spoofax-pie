@@ -2,8 +2,6 @@ package mb.spoofax.compiler.language;
 
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
-import mb.pie.api.Interactivity;
-import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.Shared;
@@ -16,10 +14,9 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Optional;
-import java.util.Set;
 
 @Value.Enclosing
-public class ClassLoaderResourcesCompiler implements TaskDef<ClassLoaderResourcesCompiler.Input, ClassLoaderResourcesCompiler.Output> {
+public class ClassLoaderResourcesCompiler {
     private final TemplateWriter classloaderResourcesTemplate;
 
     @Inject public ClassLoaderResourcesCompiler(TemplateCompiler templateCompiler) {
@@ -28,24 +25,12 @@ public class ClassLoaderResourcesCompiler implements TaskDef<ClassLoaderResource
     }
 
 
-    @Override public String getId() {
-        return getClass().getName();
-    }
-
-    @Override public Output exec(ExecContext context, Input input) throws IOException {
+    public Output compile(ExecContext context, Input input) throws IOException {
         final Output.Builder outputBuilder = Output.builder();
         if(input.classKind().isManual()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         classloaderResourcesTemplate.write(context, input.baseClassLoaderResources().file(generatedJavaSourcesDirectory), input);
         return outputBuilder.build();
-    }
-
-    @Override public boolean shouldExecWhenAffected(Input input, Set<?> tags) {
-        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
-    }
-
-    @Override public Serializable key(Input input) {
-        return input.languageProject().project().baseDirectory();
     }
 
 

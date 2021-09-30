@@ -48,58 +48,17 @@ public class SpoofaxCompilerModule {
     @Provides @SpoofaxCompilerQualifier @SpoofaxCompilerScope @ElementsIntoSet
     static Set<TaskDef<?, ?>> provideTaskDefsSet(
         LanguageProjectCompiler languageProjectCompiler,
-        ClassLoaderResourcesCompiler classloaderResourcesCompiler,
-        ParserLanguageCompiler parserLanguageCompiler,
-        StylerLanguageCompiler stylerLanguageCompiler,
-        ConstraintAnalyzerLanguageCompiler constraintAnalyzerLanguageCompiler,
-        MultilangAnalyzerLanguageCompiler multilangAnalyzerLanguageCompiler,
-        StrategoRuntimeLanguageCompiler strategoRuntimeLanguageCompiler,
-        TegoRuntimeLanguageCompiler tegoRuntimeLanguageCompiler,
-        ExportsLanguageCompiler exportsLanguageCompiler,
-
         AdapterProjectCompiler adapterProjectCompiler,
-        ParserAdapterCompiler parserAdapterCompiler,
-        StylerAdapterCompiler stylerAdapterCompiler,
-        ConstraintAnalyzerAdapterCompiler constraintAnalyzerAdapterCompiler,
-        MultilangAnalyzerAdapterCompiler multilangAnalyzerAdapterCompiler,
-        CodeCompletionAdapterCompiler codeCompletionAdapterCompiler,
-        StrategoRuntimeAdapterCompiler strategoRuntimeAdapterCompiler,
-        ReferenceResolutionAdapterCompiler referenceResolutionAdapterCompiler,
-        TegoRuntimeAdapterCompiler tegoRuntimeAdapterCompiler,
-        HoverAdapterCompiler hoverAdapterCompiler,
-        GetSourceFilesAdapterCompiler getSourceFilesAdapterCompiler,
-
         CliProjectCompiler cliProjectCompiler,
         EclipseProjectCompiler eclipseProjectCompiler,
         IntellijProjectCompiler intellijProjectCompiler
     ) {
         final HashSet<TaskDef<?, ?>> taskDefs = new HashSet<>();
         taskDefs.add(languageProjectCompiler);
-        taskDefs.add(classloaderResourcesCompiler);
-        taskDefs.add(parserLanguageCompiler);
-        taskDefs.add(stylerLanguageCompiler);
-        taskDefs.add(constraintAnalyzerLanguageCompiler);
-        taskDefs.add(multilangAnalyzerLanguageCompiler);
-        taskDefs.add(strategoRuntimeLanguageCompiler);
-        taskDefs.add(tegoRuntimeLanguageCompiler);
-        taskDefs.add(exportsLanguageCompiler);
-
         taskDefs.add(adapterProjectCompiler);
-        taskDefs.add(parserAdapterCompiler);
-        taskDefs.add(stylerAdapterCompiler);
-        taskDefs.add(constraintAnalyzerAdapterCompiler);
-        taskDefs.add(multilangAnalyzerAdapterCompiler);
-        taskDefs.add(strategoRuntimeAdapterCompiler);
-        taskDefs.add(codeCompletionAdapterCompiler);
-        taskDefs.add(referenceResolutionAdapterCompiler);
-        taskDefs.add(tegoRuntimeAdapterCompiler);
-        taskDefs.add(hoverAdapterCompiler);
-        taskDefs.add(getSourceFilesAdapterCompiler);
-
         taskDefs.add(cliProjectCompiler);
         taskDefs.add(eclipseProjectCompiler);
         taskDefs.add(intellijProjectCompiler);
-
         return taskDefs;
     }
 }

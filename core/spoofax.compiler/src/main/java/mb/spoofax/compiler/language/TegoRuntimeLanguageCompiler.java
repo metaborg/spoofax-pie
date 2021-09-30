@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  * Tego runtime compiler.
  */
 @Value.Enclosing
-public class TegoRuntimeLanguageCompiler implements TaskDef<TegoRuntimeLanguageCompiler.Input, None> {
+public class TegoRuntimeLanguageCompiler {
     private final TemplateWriter factoryTemplate;
 
     @Inject public TegoRuntimeLanguageCompiler(TemplateCompiler templateCompiler) {
@@ -36,24 +36,12 @@ public class TegoRuntimeLanguageCompiler implements TaskDef<TegoRuntimeLanguageC
         this.factoryTemplate = templateCompiler.getOrCompileToWriter("tego_runtime/TegoRuntimeBuilderFactory.java.mustache");
     }
 
-
-    @Override public String getId() {
-        return getClass().getName();
-    }
-
-    @Override public None exec(ExecContext context, Input input) throws IOException {
+    
+    public None compile(ExecContext context, Input input) throws IOException {
         if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         factoryTemplate.write(context, input.baseTegoRuntimeBuilderFactory().file(generatedJavaSourcesDirectory), input);
         return None.instance;
-    }
-
-    @Override public boolean shouldExecWhenAffected(Input input, Set<?> tags) {
-        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
-    }
-
-    @Override public Serializable key(Input input) {
-        return input.languageProject().project().baseDirectory();
     }
 
 

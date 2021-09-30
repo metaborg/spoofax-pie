@@ -3,10 +3,13 @@ package mb.spoofax.compiler.adapter;
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.None;
-import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.language.ClassLoaderResourcesCompiler;
-import mb.spoofax.compiler.util.*;
+import mb.spoofax.compiler.util.ClassKind;
+import mb.spoofax.compiler.util.Shared;
+import mb.spoofax.compiler.util.TemplateCompiler;
+import mb.spoofax.compiler.util.TemplateWriter;
+import mb.spoofax.compiler.util.TypeInfo;
 import org.immutables.value.Value;
 
 import javax.inject.Inject;
@@ -15,7 +18,7 @@ import java.io.Serializable;
 import java.util.Optional;
 
 @Value.Enclosing
-public class HoverAdapterCompiler implements TaskDef<HoverAdapterCompiler.Input, None> {
+public class HoverAdapterCompiler {
     private final TemplateWriter hoverTaskDefTemplate;
 
     @Inject public HoverAdapterCompiler(TemplateCompiler templateCompiler) {
@@ -24,11 +27,8 @@ public class HoverAdapterCompiler implements TaskDef<HoverAdapterCompiler.Input,
         this.hoverTaskDefTemplate = templateCompiler.getOrCompileToWriter("editor_services/HoverTaskDef.java.mustache");
     }
 
-    @Override public String getId() {
-        return getClass().getName();
-    }
 
-    @Override public None exec(ExecContext context, Input input) throws IOException {
+    public None compile(ExecContext context, Input input) throws IOException {
         if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
 
@@ -37,15 +37,10 @@ public class HoverAdapterCompiler implements TaskDef<HoverAdapterCompiler.Input,
         return None.instance;
     }
 
-    @Override public Serializable key(Input input) {
-        return input.adapterProject().project().baseDirectory();
-    }
-
 
     @Value.Immutable
     public interface Input extends Serializable {
-        class Builder extends HoverAdapterCompilerData.Input.Builder {
-        }
+        class Builder extends HoverAdapterCompilerData.Input.Builder {}
 
         static Builder builder() {
             return new Builder();
