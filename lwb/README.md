@@ -8,22 +8,28 @@ included build, as Gradle plugins are only available through included builds.
 
 ```
 .
-├── metalang                     # Meta-languages
-│   ├── cfg                        # Compiler configuration meta-DSL
-│   ├── esv                        # Wrapper around Spoofax 2's ESV
-│   ├── sdf3                       # Wrapper around Spoofax 2's SDF3
-│   ├── statix                     # Wrapper around Spoofax 2's Statix
-│   ├── stratego                   # Wrapper around Spoofax 2's Stratego and incremental compiler
-├── metalib                      # Meta-libraries (mimicking source dependencies)
-│   ├── libspoofax2                # Wrapper around Spoofax 2's meta.lib.spoofax
-│   ├── libstatix                  # Wrapper around Spoofax 2's statix.runtime
-├── spoofax.lwb.compiler         # Incremental compilation from language specification to Java library
-├── spoofax.lwb.compiler.dagger  # Compiler Dagger integration. Separate project to resolve ordering
-│                                  problems between annotation processors.
-├── spoofax.lwb.compiler.gradle  # Compiler Gradle plugin
-├── spoofax.lwb.dynamicloading   # Dynamic loading for interactive language development
-├── spoofax.lwb.eclipse          # Eclipse language workbench plugin
-├── build.gradle.kts             # Gradle build configuration
-├── settings.gradle.kts          # Gradle build settings (multi-project)
+├── metalang                      # Meta-languages
+│   ├── cfg                          # Compiler configuration meta-DSL
+│   ├── esv                          # Wrapper around Spoofax 2's ESV
+│   ├── sdf3                         # Wrapper around Spoofax 2's SDF3
+│   ├── sdf3_ext_statix              # Wrapper around Spoofax 2's sdf3.ext.statix, implementing Statix
+│                                      signature and injection implication/explication generation
+│   ├── spt                          # Wrapper around Spoofax 2's SPT
+│   ├── statix                       # Wrapper around Spoofax 2's Statix
+│   ├── stratego                     # Wrapper around Spoofax 2's Stratego 2 and incremental compiler
+├── metalib                        # Meta-libraries (mimicking source dependencies)
+│   ├── libspoofax2                  # Wrapper around Spoofax 2's meta.lib.spoofax
+│   ├── libstatix                    # Wrapper around Spoofax 2's statix.runtime
+│   ├── strategolib                  # Wrapper around Spoofax 2's strategolib (Stratego 2 standard library)
+├── spoofax.lwb.compiler           # Incremental compilation from language specification to Java library
+├── spoofax.lwb.compiler.dagger    # Compiler Dagger integration. Separate project to resolve ordering
+│                                    problems between annotation processors.
+├── spoofax.lwb.compiler.gradle    # Compiler Gradle plugin
+├── spoofax.lwb.dynamicloading     # Dynamic loading for interactive language development
+├── spoofax.lwb.eclipse            # Eclipse language workbench plugin
+├── spoofax.lwb.eclipse.feature    # Eclipse language workbench feature
+├── spoofax.lwb.eclipse.repository # Eclipse language workbench repository
+├── build.gradle.kts               # Gradle build configuration
+├── settings.gradle.kts            # Gradle build settings (multi-project)
 └── README.md
 ```
