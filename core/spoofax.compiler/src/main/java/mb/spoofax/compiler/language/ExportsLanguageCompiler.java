@@ -2,9 +2,7 @@ package mb.spoofax.compiler.language;
 
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
-import mb.pie.api.Interactivity;
 import mb.pie.api.None;
-import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.adapter.data.Export;
 import mb.spoofax.compiler.util.ClassKind;
@@ -24,10 +22,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Value.Enclosing
-public class ExportsLanguageCompiler implements TaskDef<ExportsLanguageCompiler.Input, None> {
+public class ExportsLanguageCompiler {
     private final TemplateWriter exportsTemplate;
 
     @Inject public ExportsLanguageCompiler(TemplateCompiler templateCompiler) {
@@ -36,11 +33,7 @@ public class ExportsLanguageCompiler implements TaskDef<ExportsLanguageCompiler.
     }
 
 
-    @Override public String getId() {
-        return getClass().getName();
-    }
-
-    @Override public None exec(ExecContext context, Input input) throws IOException {
+    public None compile(ExecContext context, Input input) throws IOException {
         if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         { // Exports
@@ -55,14 +48,6 @@ public class ExportsLanguageCompiler implements TaskDef<ExportsLanguageCompiler.
             exportsTemplate.write(context, input.baseExports().file(generatedJavaSourcesDirectory), input, map);
         }
         return None.instance;
-    }
-
-    @Override public boolean shouldExecWhenAffected(Input input, Set<?> tags) {
-        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
-    }
-
-    @Override public Serializable key(Input input) {
-        return input.languageProject().project().baseDirectory();
     }
 
 

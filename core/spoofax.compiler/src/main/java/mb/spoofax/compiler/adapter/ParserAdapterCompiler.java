@@ -2,9 +2,7 @@ package mb.spoofax.compiler.adapter;
 
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
-import mb.pie.api.Interactivity;
 import mb.pie.api.None;
-import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.adapter.data.ArgProviderRepr;
@@ -31,12 +29,10 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Value.Enclosing
-public class ParserAdapterCompiler implements TaskDef<ParserAdapterCompiler.Input, None> {
+public class ParserAdapterCompiler {
     private final TemplateWriter parseTaskDefTemplate;
     private final TemplateWriter tokenizeTaskDefTemplate;
     private final TemplateWriter showParsedAstTaskDefTemplate;
@@ -51,11 +47,7 @@ public class ParserAdapterCompiler implements TaskDef<ParserAdapterCompiler.Inpu
     }
 
 
-    @Override public String getId() {
-        return getClass().getName();
-    }
-
-    @Override public None exec(ExecContext context, Input input) throws IOException {
+    public None compile(ExecContext context, Input input) throws IOException {
         if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         parseTaskDefTemplate.write(context, input.baseParseTaskDef().file(generatedJavaSourcesDirectory), input);
@@ -63,14 +55,6 @@ public class ParserAdapterCompiler implements TaskDef<ParserAdapterCompiler.Inpu
         showParsedAstTaskDefTemplate.write(context, input.baseShowParsedAstTaskDef().file(generatedJavaSourcesDirectory), input);
         showParsedTokensTaskDefTemplate.write(context, input.baseShowParsedTokensTaskDef().file(generatedJavaSourcesDirectory), input);
         return None.instance;
-    }
-
-    @Override public boolean shouldExecWhenAffected(Input input, Set<?> tags) {
-        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
-    }
-
-    @Override public Serializable key(Input input) {
-        return input.adapterProject().project().baseDirectory();
     }
 
 

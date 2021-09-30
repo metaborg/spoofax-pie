@@ -2,8 +2,6 @@ package mb.spoofax.compiler.language;
 
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
-import mb.pie.api.Interactivity;
-import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
@@ -14,12 +12,12 @@ import mb.spoofax.compiler.util.TypeInfo;
 import org.immutables.value.Value;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Optional;
-import java.util.Set;
 
 @Value.Enclosing
-public class ConstraintAnalyzerLanguageCompiler implements TaskDef<ConstraintAnalyzerLanguageCompiler.Input, ConstraintAnalyzerLanguageCompiler.Output> {
+public class ConstraintAnalyzerLanguageCompiler {
     private final TemplateWriter constraintAnalyzerTemplate;
     private final TemplateWriter factoryTemplate;
 
@@ -30,25 +28,13 @@ public class ConstraintAnalyzerLanguageCompiler implements TaskDef<ConstraintAna
     }
 
 
-    @Override public String getId() {
-        return getClass().getName();
-    }
-
-    @Override public Output exec(ExecContext context, Input input) throws Exception {
+    public Output compile(ExecContext context, Input input) throws IOException {
         final Output.Builder outputBuilder = Output.builder();
         if(input.classKind().isManual()) return outputBuilder.build(); // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         constraintAnalyzerTemplate.write(context, input.baseConstraintAnalyzer().file(generatedJavaSourcesDirectory), input);
         factoryTemplate.write(context, input.baseConstraintAnalyzerFactory().file(generatedJavaSourcesDirectory), input);
         return outputBuilder.build();
-    }
-
-    @Override public boolean shouldExecWhenAffected(Input input, Set<?> tags) {
-        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
-    }
-
-    @Override public Serializable key(Input input) {
-        return input.languageProject().project().baseDirectory();
     }
 
 

@@ -1,6 +1,6 @@
 package mb.spoofax.compiler.spoofaxcore;
 
-import mb.pie.api.MixedSession;
+import mb.pie.api.MockExecContext;
 import mb.spoofax.compiler.adapter.CompleterAdapterCompiler;
 import mb.spoofax.compiler.language.CompleterLanguageCompiler;
 import mb.spoofax.compiler.spoofaxcore.tiger.TigerInputs;
@@ -12,17 +12,15 @@ class CompleterCompilerTest extends TestBase {
     @Test void testCompilerDefaults() throws Exception {
         final TigerInputs inputs = defaultInputs();
 
-        try(MixedSession session = pie.newSession()) {
-            final CompleterLanguageCompiler.Input languageProjectInput = inputs.completerLanguageCompilerInput();
-            session.require(component.getCompleterLanguageCompiler().createTask(languageProjectInput));
-            fileAssertions.scopedExists(languageProjectInput.generatedJavaSourcesDirectory(), (s) -> {
-            });
+        final CompleterLanguageCompiler.Input languageProjectInput = inputs.completerLanguageCompilerInput();
+        component.getCompleterLanguageCompiler().compile(new MockExecContext(), languageProjectInput);
+        fileAssertions.scopedExists(languageProjectInput.generatedJavaSourcesDirectory(), (s) -> {
+        });
 
-            final CompleterAdapterCompiler.Input adapterProjectInput = inputs.completerAdapterCompilerInput();
-            session.require(component.getCompleterAdapterCompiler().createTask(adapterProjectInput));
-            fileAssertions.scopedExists(adapterProjectInput.generatedJavaSourcesDirectory(), (s) -> {
-                s.assertPublicJavaClass(adapterProjectInput.baseCompleteTaskDef(), "TigerCompleteTaskDef");
-            });
-        }
+        final CompleterAdapterCompiler.Input adapterProjectInput = inputs.completerAdapterCompilerInput();
+        component.getCompleterAdapterCompiler().compile(new MockExecContext(), adapterProjectInput);
+        fileAssertions.scopedExists(adapterProjectInput.generatedJavaSourcesDirectory(), (s) -> {
+            s.assertPublicJavaClass(adapterProjectInput.baseCompleteTaskDef(), "TigerCompleteTaskDef");
+        });
     }
 }

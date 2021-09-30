@@ -2,9 +2,7 @@ package mb.spoofax.compiler.adapter;
 
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
-import mb.pie.api.Interactivity;
 import mb.pie.api.None;
-import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.adapter.data.ArgProviderRepr;
@@ -28,15 +26,15 @@ import mb.spoofax.core.language.command.HierarchicalResourceType;
 import org.immutables.value.Value;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.Set;
 
 @Value.Enclosing
-public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnalyzerAdapterCompiler.Input, None> {
+public class ConstraintAnalyzerAdapterCompiler {
     private final TemplateWriter analyzeTaskDefTemplate;
     private final TemplateWriter analyzeMultiTaskDefTemplate;
     private final TemplateWriter analyzeFileTaskDefTemplate;
@@ -55,11 +53,7 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
     }
 
 
-    @Override public String getId() {
-        return getClass().getName();
-    }
-
-    @Override public None exec(ExecContext context, Input input) throws Exception {
+    public None compile(ExecContext context, Input input) throws IOException {
         if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         analyzeTaskDefTemplate.write(context, input.baseAnalyzeTaskDef().file(generatedJavaSourcesDirectory), input);
@@ -73,14 +67,6 @@ public class ConstraintAnalyzerAdapterCompiler implements TaskDef<ConstraintAnal
             showScopeGraphTaskDef.write(context, input.baseShowScopeGraphTaskDef().file(generatedJavaSourcesDirectory), input);
         }
         return None.instance;
-    }
-
-    @Override public boolean shouldExecWhenAffected(Input input, Set<?> tags) {
-        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
-    }
-
-    @Override public Serializable key(Input input) {
-        return input.adapterProject().project().baseDirectory();
     }
 
 

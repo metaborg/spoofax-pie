@@ -2,9 +2,7 @@ package mb.spoofax.compiler.adapter;
 
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
-import mb.pie.api.Interactivity;
 import mb.pie.api.None;
-import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.language.MultilangAnalyzerLanguageCompiler;
 import mb.spoofax.compiler.util.ClassKind;
@@ -20,10 +18,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
 
 @Value.Enclosing
-public class MultilangAnalyzerAdapterCompiler implements TaskDef<MultilangAnalyzerAdapterCompiler.Input, None> {
+public class MultilangAnalyzerAdapterCompiler {
     private final TemplateWriter analyzeProjectTemplate;
     private final TemplateWriter indexAstTaskDefTemplate;
     private final TemplateWriter preStatixTaskDefTemplate;
@@ -40,11 +37,7 @@ public class MultilangAnalyzerAdapterCompiler implements TaskDef<MultilangAnalyz
     }
 
 
-    @Override public String getId() {
-        return getClass().getName();
-    }
-
-    @Override public None exec(ExecContext context, Input input) throws IOException {
+    public None compile(ExecContext context, Input input) throws IOException {
         if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         analyzeProjectTemplate.write(context, input.baseAnalyzeTaskDef().file(generatedJavaSourcesDirectory), input);
@@ -53,14 +46,6 @@ public class MultilangAnalyzerAdapterCompiler implements TaskDef<MultilangAnalyz
         postStatixTaskDefTemplate.write(context, input.basePostStatixTaskDef().file(generatedJavaSourcesDirectory), input);
         checkTaskDefTemplate.write(context, input.baseCheckTaskDef().file(generatedJavaSourcesDirectory), input);
         return None.instance;
-    }
-
-    @Override public boolean shouldExecWhenAffected(Input input, Set<?> tags) {
-        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
-    }
-
-    @Override public Serializable key(Input input) {
-        return input.adapterProject().project().baseDirectory();
     }
 
 

@@ -3,7 +3,6 @@ package mb.spoofax.compiler.adapter;
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.None;
-import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.language.ClassLoaderResourcesCompiler;
 import mb.spoofax.compiler.util.ClassKind;
@@ -19,7 +18,7 @@ import java.io.Serializable;
 import java.util.Optional;
 
 @Value.Enclosing
-public class ReferenceResolutionAdapterCompiler implements TaskDef<ReferenceResolutionAdapterCompiler.Input, None> {
+public class ReferenceResolutionAdapterCompiler {
     private final TemplateWriter resolveTaskDefTemplate;
 
     @Inject public ReferenceResolutionAdapterCompiler(TemplateCompiler templateCompiler) {
@@ -28,11 +27,8 @@ public class ReferenceResolutionAdapterCompiler implements TaskDef<ReferenceReso
         this.resolveTaskDefTemplate = templateCompiler.getOrCompileToWriter("editor_services/ResolveTaskDef.java.mustache");
     }
 
-    @Override public String getId() {
-        return getClass().getName();
-    }
 
-    @Override public None exec(ExecContext context, Input input) throws IOException {
+    public None compile(ExecContext context, Input input) throws IOException {
         if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
 
@@ -41,15 +37,10 @@ public class ReferenceResolutionAdapterCompiler implements TaskDef<ReferenceReso
         return None.instance;
     }
 
-    @Override public Serializable key(Input input) {
-        return input.adapterProject().project().baseDirectory();
-    }
-
 
     @Value.Immutable
     public interface Input extends Serializable {
-        class Builder extends ReferenceResolutionAdapterCompilerData.Input.Builder {
-        }
+        class Builder extends ReferenceResolutionAdapterCompilerData.Input.Builder {}
 
         static Builder builder() {
             return new Builder();
