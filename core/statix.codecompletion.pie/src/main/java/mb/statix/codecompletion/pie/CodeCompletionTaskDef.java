@@ -304,7 +304,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Args
          * @throws JsglrParseException if parsing failed
          */
         private IStrategoTerm parse() throws JsglrParseException {
-            return context.require(parseTask.inputBuilder().withFile(file).buildAstSupplier()).unwrap();
+            return context.require(parseTask.inputBuilder().withFile(file).buildRecoverableAstSupplier()).unwrap();
         }
 
         /**
