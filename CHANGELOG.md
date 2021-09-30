@@ -3,6 +3,13 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+### Fixed
+- ValidationException on configuration change (https://github.com/metaborg/spoofax-pie/issues/70).
+- CLI and Eclipse/IntelliJ plugins of languages not working due to missing `strategolib` dependency.
+- Eclipse plugins of languages not starting due to out-of-date Eclipse version.
+
+### Changed
+- Drop support for Gradle 5.6.4, the minimum supported Gradle version is 6.8.
 
 
 ## [0.13.0] - 2021-10-01
