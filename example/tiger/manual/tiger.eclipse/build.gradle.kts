@@ -3,6 +3,10 @@ plugins {
   id("org.metaborg.coronium.bundle")
 }
 
+mavenize {
+  majorVersion.set("2021-03")
+}
+
 fun compositeBuild(name: String) = "$group:$name:$version"
 
 dependencies {

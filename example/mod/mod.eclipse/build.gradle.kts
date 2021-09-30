@@ -3,6 +3,10 @@ plugins {
   id("org.metaborg.spoofax.compiler.gradle.eclipse")
 }
 
+mavenize {
+  majorVersion.set("2021-03")
+}
+
 languageEclipseProject {
   adapterProject.set(project(":mod.spoofax"))
 }

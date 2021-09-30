@@ -102,8 +102,7 @@ open class CliPlugin : Plugin<Project> {
       it.addToDependencies(project)
     }
     project.configure<JavaApplication> {
-      @Suppress("DEPRECATION") // Use deprecated property to stay compatible with Gradle 5.6.4
-      mainClassName = input.main().qualifiedId()
+      mainClass.set(input.main().qualifiedId())
     }
   }
 

@@ -109,6 +109,9 @@ public class IntellijProjectCompiler implements TaskDef<IntellijProjectCompiler.
         //dependencies.add(GradleConfiguredDependency.implementation(input.adapterProjectDependency()));
         dependencies.add(GradleConfiguredDependency.implementation(shared.spoofaxIntellijDep()));
         dependencies.add(GradleConfiguredDependency.implementation(shared.daggerDep()));
+        if(input.adapterProjectCompilerInput().strategoRuntime().isPresent()) {
+            dependencies.add(GradleConfiguredDependency.implementation(shared.strategolibDep()));
+        }
         dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
         dependencies.add(GradleConfiguredDependency.annotationProcessor(shared.daggerCompilerDep()));
         return dependencies;

@@ -161,6 +161,9 @@ public class EclipseProjectCompiler implements TaskDef<Supplier<Result<Option<Ec
         if(input.adapterProjectCompilerInput().multilangAnalyzer().isPresent()) {
             bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.multilangEclipseDep()));
         }
+        if(input.adapterProjectCompilerInput().strategoRuntime().isPresent()) {
+            bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.strategolibEclipseDep()));
+        }
         input.languageProjectDependency().ifSome(d -> bundleDependencies.add(GradleConfiguredBundleDependency.bundleEmbedApi(d)));
         input.adapterProjectDependency().ifSome(d -> bundleDependencies.add(GradleConfiguredBundleDependency.bundleEmbedApi(d)));
         return bundleDependencies;
