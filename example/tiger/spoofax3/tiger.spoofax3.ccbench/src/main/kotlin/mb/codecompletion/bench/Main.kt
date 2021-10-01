@@ -70,7 +70,7 @@ fun main(args: Array<String>) {
       )
     ))
 //    val result = session.requireWithoutObserving(languageComponent.testTask.createTask(None.instance))
-    println("Result: $result")
+    println("Result: ${result.get()!!.proposals}")
   }
   println("Done!")
 }

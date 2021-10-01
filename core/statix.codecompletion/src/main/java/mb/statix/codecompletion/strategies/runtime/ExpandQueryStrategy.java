@@ -150,7 +150,7 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
         // For each declaration:
         final ArrayList<SolverState> output = new ArrayList<>();
         for (int i = 0; i < declarationCount; i++) {
-            final List<SolverState> newStates = expandResolution(engine, input.getSpec(), query, input,
+            final List<SolverState> newStates = expandResolution(engine, input.getSpec(), query, input.withoutSelected(),
                 unifier, nameResolution, scope, i);
             engine.log(instance, "  ▶ added {} possible states", newStates.size());
             output.addAll(newStates);

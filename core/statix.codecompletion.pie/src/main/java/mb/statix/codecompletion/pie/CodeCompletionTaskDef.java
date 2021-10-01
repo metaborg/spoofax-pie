@@ -603,7 +603,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Args
             final IStrategoTerm strategoTerm = strategoTerms.toStratego(term, true);
             try {
                 // TODO: Make this strategy name not language specific
-                @Nullable final IStrategoTerm result = invokeStrategy("is-Tiger-inj-cons", strategoTerm);
+                @Nullable final IStrategoTerm result = invokeStrategy("is-tiger-inj-cons", strategoTerm);
                 return result != null;
             } catch(StrategoException ex) {
                 throw new RuntimeException(ex);

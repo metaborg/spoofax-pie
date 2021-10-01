@@ -202,10 +202,14 @@ public class SolverState implements ISolverState {
             return this;
         }
         final IConstraint constraint = this.constraints.iterator().next();
-        final IConstraint newConstraint = new CExists(existentials, constraint);
+        final Tuple2<IConstraint, ICompleteness.Immutable> result =
+            CompletenessUtil.precomputeCriticalEdges(new CExists(existentials, constraint), spec.scopeExtensions());
+        final IConstraint newConstraint = result._1();
+        ICompleteness.Transient completeness = this.completeness.melt();
+        completeness.addAll(result._2(), state.unifier());
         return copy(this.spec, this.state, this.messages, Set.Immutable.of(newConstraint), this.delays,
             // NOTE: we discard any previous existentials
-            null, this.completeness, this.expanded, meta);
+            null, completeness.freeze(), this.expanded, meta);
     }
 
     @Override public SolverState withSingleConstraint() {
