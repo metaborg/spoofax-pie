@@ -91,37 +91,45 @@ public final class TegoRuntimeImpl implements TegoRuntime, TegoEngine {
      * @return the (possibly modified) result of evaluating the strategy
      */
     private <R> @Nullable R exitStrategy(StrategyDecl strategy, @Nullable R result) {
-        if (result instanceof Seq) {
+        R finalResult = result;
+        log.trace(prefixString("-", level, " " + strategy.toString()));
+        if (finalResult instanceof Seq) {
             // Print when a sequence is evaluated, and its results
-            log.trace(prefixString("-", level, " " + strategy.toString()));
-            @SuppressWarnings("unchecked")
-            final DebugSeq<?> debugSeq = new DebugSeq((Seq<?>)result) {
-                @Override
-                protected void onBeforeNext(int index) {
-                }
-
-                @Override
-                protected Object onAfterNext(int index, Object result) {
-                    log.trace(prefixString("◀", index, "[" + index + "] " + result.toString()));
-                    return result;
-                }
-
-                @Override
-                protected void onEnd(int index) {
-                    log.trace(prefixString("⏹", index,"[" + index + "]"));
-                }
-            };
-            // Force evaluation of the sequence
-            try {
+            Seq<?> newResult = (Seq<?>)finalResult;
+            if(!(newResult instanceof DebugSeq)) {
                 //noinspection unchecked
-                return (R)Seq.from(debugSeq.toList());
-            } catch (InterruptedException ex) {
-                throw new RuntimeException(ex);
+                newResult = new DebugSeq(newResult) {
+                    @Override
+                    protected void onBeforeNext(int index) {
+                    }
+
+                    @Override
+                    protected Object onAfterNext(int index, Object result) {
+                        log.trace(prefixString(" ", level, "◀[" + index + "] " + result.toString()));
+                        return result;
+                    }
+
+                    @Override
+                    protected void onEnd(int index) {
+                        log.trace(prefixString(" ", level, "⨯[" + index + "]"));
+                    }
+                };
+                // Force evaluation of the sequence
+                try {
+                    //noinspection unchecked
+                    finalResult = (R)Seq.from(newResult.toList());
+                } catch(InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
+        } else if (result != null) {
+            log.trace(prefixString(" ", level, "◀" + result.toString()));
+        } else {
+            log.trace(prefixString(" ", level, "⨯ FAIL"));
         }
         log.trace(prefixString("←", level, " " + strategy.toString()));
         level -= 1;
-        return result;
+        return finalResult;
     }
 
     /**
