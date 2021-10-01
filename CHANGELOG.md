@@ -3,6 +3,9 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+
+
+## [0.13.0] - 2021-10-01
 ### Fixed
 - ValidationException on configuration change (https://github.com/metaborg/spoofax-pie/issues/70).
 - CLI and Eclipse/IntelliJ plugins of languages not working due to missing `strategolib` dependency.
@@ -14,6 +17,9 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 ### Changed
 - Drop support for Gradle 5.6.4, the minimum supported Gradle version is 6.8.
+- `common` requirement to 0.9.7.
+- `pie` requirement to 0.17.0.
+- `releng` (devenv-release) requirement to 0.1.14.
 
 
 ## [0.12.1] - 2021-09-24
@@ -186,7 +192,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.12.1...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.13.0...HEAD
+[0.13.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.12.1...release-0.13.0
 [0.12.1]: https://github.com/metaborg/spoofax-pie/compare/release-0.12.0...release-0.12.1
 [0.12.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.13...release-0.12.0
 [0.11.13]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.12...release-0.11.13

@@ -19,7 +19,7 @@ if(gradle.parent == null) {
   includeBuildWithName("core", "spoofax3.core.root")
   // The 'metalib' composite build includes meta-libraries which are required in the runtime of languages. It depend on
   // Gradle plugins from the 'core' composite build.
-  includeBuildWithName("metalib", "spoofax3.lwb.root")
+  includeBuildWithName("metalib", "spoofax3.metalib.root")
   // The 'lwb' (language workbench) composite build includes the meta-languages which depend on Gradle plugins from the
   // 'core' composite build. Additionally, 'lwb' also contains Gradle plugins for building languages.
   includeBuildWithName("lwb", "spoofax3.lwb.root")
