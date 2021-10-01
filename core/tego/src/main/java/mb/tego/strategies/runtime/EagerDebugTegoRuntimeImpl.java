@@ -18,7 +18,7 @@ import javax.inject.Inject;
 /**
  * Implements the {@link TegoRuntime}.
  */
-public final class TegoRuntimeImpl implements TegoRuntime, TegoEngine {
+public final class EagerDebugTegoRuntimeImpl implements TegoRuntime, TegoEngine {
 
     @Nullable private final LoggerFactory loggerFactory;
     private final Logger log;
@@ -26,16 +26,16 @@ public final class TegoRuntimeImpl implements TegoRuntime, TegoEngine {
     private int level = 0;
 
     /**
-     * Initializes a new instance of the {@link TegoRuntimeImpl} class.
+     * Initializes a new instance of the {@link EagerDebugTegoRuntimeImpl} class.
      *
      * @param loggerFactory the logger factory
      */
     @Inject
-    public TegoRuntimeImpl(
+    public EagerDebugTegoRuntimeImpl(
         @Nullable LoggerFactory loggerFactory
     ) {
         this.loggerFactory = loggerFactory;
-        this.log = loggerFactory != null ? loggerFactory.create(TegoRuntimeImpl.class) : NoopLogger.instance;
+        this.log = loggerFactory != null ? loggerFactory.create(EagerDebugTegoRuntimeImpl.class) : NoopLogger.instance;
     }
 
     @Override
@@ -91,14 +91,45 @@ public final class TegoRuntimeImpl implements TegoRuntime, TegoEngine {
      * @return the (possibly modified) result of evaluating the strategy
      */
     private <R> @Nullable R exitStrategy(StrategyDecl strategy, @Nullable R result) {
-        log.trace(prefixString(" ", level - 1, " " + strategy));
-        if (result != null) {
-            log.trace(prefixString(" ", level - 1, "← " + strategy.toString()));
+        R finalResult = result;
+        log.trace(prefixString("-", level, " " + strategy.toString()));
+        if (finalResult instanceof Seq) {
+            // Print when a sequence is evaluated, and its results
+            Seq<?> newResult = (Seq<?>)finalResult;
+            if(!(newResult instanceof DebugSeq)) {
+                //noinspection unchecked
+                newResult = new DebugSeq(newResult) {
+                    @Override
+                    protected void onBeforeNext(int index) {
+                    }
+
+                    @Override
+                    protected Object onAfterNext(int index, Object result) {
+                        log.trace(prefixString(" ", level, "◀[" + index + "] " + result.toString()));
+                        return result;
+                    }
+
+                    @Override
+                    protected void onEnd(int index) {
+                        log.trace(prefixString(" ", level, "⨯[" + index + "]"));
+                    }
+                };
+                // Force evaluation of the sequence
+                try {
+                    //noinspection unchecked
+                    finalResult = (R)Seq.from(newResult.toList());
+                } catch(InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        } else if (result != null) {
+            log.trace(prefixString(" ", level, "◀" + result.toString()));
         } else {
-            log.trace(prefixString(" ", level - 1, "⨯ " + strategy.toString()));
+            log.trace(prefixString(" ", level, "⨯ FAIL"));
         }
+        log.trace(prefixString("←", level, " " + strategy.toString()));
         level -= 1;
-        return result;
+        return finalResult;
     }
 
     /**
