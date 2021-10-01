@@ -72,7 +72,7 @@ public final class SpoofaxContentAssistProcessor implements IContentAssistProces
         final CodeCompletionResult codeCompletionResult;
         try(final MixedSession session = this.pieComponent.newSession()) {
             Task<Option<CodeCompletionResult>> codeCompletionTask = this.languageComponent.getLanguageInstance().createCodeCompletionTask(selection, fileKey, projectRoot);
-            final Option<CodeCompletionResult> maybeCodeCompletionResult = session.require(codeCompletionTask);
+            final Option<CodeCompletionResult> maybeCodeCompletionResult = session.requireWithoutObserving(codeCompletionTask);
             if (maybeCodeCompletionResult.isNone()) return null;  // No completions.
             codeCompletionResult = maybeCodeCompletionResult.unwrap();
         } catch(ExecException e) {
