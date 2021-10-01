@@ -41,6 +41,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static mb.statix.solver.persistent.Solver.INCREMENTAL_CRITICAL_EDGES;
+
 
 /**
  * The state of the solver.
@@ -237,6 +239,10 @@ public class SolverState implements ISolverState {
 
     @Override public SolverState withApplyResult(ApplyResult result, @Nullable IConstraint focus) {
         final IConstraint applyConstraint = result.body();
+        if (INCREMENTAL_CRITICAL_EDGES && applyConstraint instanceof CExists && !applyConstraint.bodyCriticalEdges().isPresent()) {
+            throw new IllegalArgumentException(
+                "Exists-constraint has no pre-computed critical edges: " + applyConstraint);
+        }
         final IState.Immutable applyState = this.state;
         final IUniDisunifier.Immutable applyUnifier = applyState.unifier();
 
