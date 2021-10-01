@@ -10,6 +10,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 - Bracket production with constructor causing build errors (https://github.com/metaborg/spoofax-pie/issues/65).
 - SDF Legacy constructs (optional, alteration, sequence) in context-free syntax not being exhaustively checked.
 - Bracket production in lexical-free syntax being allowed.
+- SPT parse to ATerm constructor names don't support underscores (https://github.com/metaborg/spoofax-pie/issues/67)
 
 ### Changed
 - Drop support for Gradle 5.6.4, the minimum supported Gradle version is 6.8.
