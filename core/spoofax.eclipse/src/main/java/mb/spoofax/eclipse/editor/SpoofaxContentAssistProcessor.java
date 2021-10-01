@@ -82,7 +82,7 @@ public final class SpoofaxContentAssistProcessor implements IContentAssistProces
         }
 
         List<ICompletionProposal> eclipseProposals = IntStream.range(0, codeCompletionResult.getProposals().size()).mapToObj(
-            i -> proposalToEclipseProposal(codeCompletionResult.getProposals().get(i), i)).collect(Collectors.toList());
+            i -> proposalToEclipseProposal(codeCompletionResult.getProposals().get(i), codeCompletionResult, i)).collect(Collectors.toList());
         return eclipseProposals.toArray(new ICompletionProposal[0]);
     }
 
@@ -90,10 +90,11 @@ public final class SpoofaxContentAssistProcessor implements IContentAssistProces
      * Converts a Spoofax code completion proposal into an Eclipse code completion proposal.
      *
      * @param proposal the Spoofax code completion proposal to convert
+     * @param result the code completion result
      * @param priority the priority of the element
      * @return the Eclipse code completion proposal
      */
-    private ICompletionProposal proposalToEclipseProposal(CodeCompletionItem proposal, int priority) {
+    private ICompletionProposal proposalToEclipseProposal(CodeCompletionItem proposal, CodeCompletionResult result, int priority) {
         // We assume there is exactly one edit. FIXME: Be able to deal with no edits, or multiple edits.
         final TextEdit textEdit = proposal.getEdits().get(0);
         final String replacementString = textEdit.getNewText();

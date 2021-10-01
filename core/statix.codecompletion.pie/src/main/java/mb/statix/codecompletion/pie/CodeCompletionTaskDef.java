@@ -282,9 +282,10 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Args
             final Seq<CodeCompletionProposal> filteredProposals = filterProposals(completionProposals);
 
             // Get, convert, and prepare the proposals
+            final Region placeholderRegion = getRegion(placeholder, Region.atOffset(primarySelection.getStartOffset() /* TODO: Support the whole selection? */));
             final List<CodeCompletionProposal> instantiatedProposals = filteredProposals.toList(); // NOTE: This is where we actually coerce the lazy list find the completions.
             final List<CodeCompletionProposal> orderedProposals = orderProposals(instantiatedProposals);
-            final List<CodeCompletionItem> finalProposals = proposalsToCodeCompletionItems(orderedProposals);
+            final List<CodeCompletionItem> finalProposals = proposalsToCodeCompletionItems(orderedProposals, placeholderRegion);
 
             if (finalProposals.isEmpty()) {
                 log.warn("Completion returned no completion proposals.");
@@ -292,7 +293,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Args
 
             return Option.ofSome(new CodeCompletionResult(
                 ListView.copyOf(finalProposals),
-                Objects.requireNonNull(getRegion(placeholder)),
+                Objects.requireNonNull(tryGetRegion(placeholder)),
                 true
             ));
         }
@@ -546,21 +547,23 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Args
          * Converts a list of proposals to a list of strings.
          *
          * @param proposals the list of proposals
+         * @param placeholderRegion the placeholder region to be replaced
          * @return the list of completion proposals terms
          */
-        private List<CodeCompletionItem> proposalsToCodeCompletionItems(List<CodeCompletionProposal> proposals) {
-            return proposals.stream().map(p -> proposalToCodeCompletionItem(p)).collect(Collectors.toList());
+        private List<CodeCompletionItem> proposalsToCodeCompletionItems(List<CodeCompletionProposal> proposals, Region placeholderRegion) {
+            return proposals.stream().map(p -> proposalToCodeCompletionItem(p, placeholderRegion)).collect(Collectors.toList());
         }
 
         /**
          * Converts a proposal to a code completion item.
          *
          * @param proposal the proposal
+         * @param placeholderRegion the placeholder region to be replaced
          * @return the code completion item
          */
-        private CodeCompletionItem proposalToCodeCompletionItem(CodeCompletionProposal proposal) {
+        private CodeCompletionItem proposalToCodeCompletionItem(CodeCompletionProposal proposal, Region placeholderRegion) {
             final String text = proposalToString(proposal);
-            ListView<TextEdit> textEdits = ListView.of(new TextEdit(Region.atOffset(primarySelection.getStartOffset() /* TODO: Support the whole selection? */), text));
+            ListView<TextEdit> textEdits = ListView.of(new TextEdit(placeholderRegion, text));
             String label = normalizeText(text);
             // TODO: Determine the style of the completion
             //  (basically, what kind of entity it represents)
@@ -771,7 +774,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Args
      * otherwise, {@code false}.
      */
     private static boolean termContainsCaret(ITerm term, int caretOffset) {
-        @Nullable Region region = getRegion(term);
+        @Nullable Region region = tryGetRegion(term);
         if (region == null) {
             // One of the children must contain the caret
             return term.match(Terms.cases(
@@ -795,12 +798,12 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Args
     }
 
     /**
-     * Gets the region occupied by the specified term.
+     * Attempts to get the region occupied by the specified term.
      *
      * @param term the term
      * @return the term's region; or {@code null} when it could not be determined
      */
-    private static @Nullable Region getRegion(ITerm term) {
+    private static @Nullable Region tryGetRegion(ITerm term) {
         @Nullable final TermOrigin origin = TermOrigin.get(term).orElse(null);
         if (origin == null) return null;
         final ImploderAttachment imploderAttachment = origin.getImploderAttachment();
@@ -815,6 +818,19 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Args
             startOffset,
             endOffset
         );
+    }
+
+    /**
+     * Attempts to get the region occupied by the specified term.
+     *
+     * @param term the term
+     * @param defaultRegion the region to use if it could not be determined from the term
+     * @return the term's region; or the specified default region when it could not be determined
+     */
+    private static Region getRegion(ITerm term, Region defaultRegion) {
+        @Nullable final Region region = tryGetRegion(term);
+        if (region != null) return region;
+        return defaultRegion;
     }
 
     /**
