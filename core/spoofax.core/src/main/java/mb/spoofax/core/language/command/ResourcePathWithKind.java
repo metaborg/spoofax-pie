@@ -39,6 +39,13 @@ public abstract class ResourcePathWithKind implements Serializable {
         return ResourcePathWithKinds.caseOf(this);
     }
 
+    public String toDisplayString() {
+        return caseOf()
+            .project(p -> "project '" + p + "'")
+            .directory(d -> "directory '" + d + "'")
+            .file(f -> "file '" + f + "");
+    }
+
 
     @Override public abstract int hashCode();
 

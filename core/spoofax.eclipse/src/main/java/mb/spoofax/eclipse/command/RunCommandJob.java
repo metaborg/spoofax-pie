@@ -1,5 +1,7 @@
 package mb.spoofax.eclipse.command;
 
+import mb.common.util.ExceptionPrinter;
+import mb.common.util.StringBuilderOutputStream;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecException;
@@ -9,6 +11,7 @@ import mb.resource.ResourceKey;
 import mb.spoofax.core.language.command.CommandContext;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.CommandRequest;
+import mb.spoofax.core.language.command.EnclosingCommandContextType;
 import mb.spoofax.core.language.command.ResourcePathWithKind;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.pie.CommandContextAndFeedback;
@@ -20,6 +23,7 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 
 public class RunCommandJob extends Job {
@@ -49,25 +53,33 @@ public class RunCommandJob extends Job {
         try(final MixedSession session = pie.newSession()) {
             final ArrayList<CommandContextAndFeedback> contextsAndFeedbacks = pieRunner.requireCommand(request, data.contexts, pie, session, monitor);
             final ArrayList<Throwable> exceptions = new ArrayList<>();
-            final StringBuilder sb = new StringBuilder();
+            final StringBuilder errorSB = new StringBuilder();
+            final StringBuilder messagesSB = new StringBuilder();
             for(CommandContextAndFeedback contextAndFeedback : contextsAndFeedbacks) {
                 final CommandContext context = contextAndFeedback.context;
                 final CommandFeedback feedback = contextAndFeedback.feedback;
                 if(feedback.hasErrorMessagesOrException()) {
                     final @Nullable String resourceStr = context.getResourcePathWithKind()
-                        .map(ResourcePathWithKind::toString)
+                        .map(ResourcePathWithKind::toDisplayString)
                         .orElseGet(() -> context.getResourceKey().map(ResourceKey::toString).orElse(null));
-                    sb.append("Running command '");
-                    sb.append(request.def().getDisplayName());
+                    errorSB.append("Running command '");
+                    errorSB.append(request.def().getDisplayName());
                     if(resourceStr != null) {
-                        sb.append("' on '");
-                        sb.append(resourceStr);
+                        errorSB.append("' on '");
+                        errorSB.append(resourceStr);
                     }
-                    sb.append("' failed.\n");
+                    errorSB.append("' failed.\n");
                 }
                 if(feedback.hasErrorMessages()) {
-                    sb.append("\nThe following messages were produced:\n");
-                    feedback.getMessages().addToStringBuilder(sb);
+                    final ExceptionPrinter exceptionPrinter = new ExceptionPrinter();
+                    @Nullable CommandContext enclosingContext = context.getEnclosing(EnclosingCommandContextType.Project);
+                    if(enclosingContext == null) {
+                        enclosingContext = context.getEnclosing(EnclosingCommandContextType.Directory);
+                    }
+                    if(enclosingContext != null) {
+                        enclosingContext.getResourcePathWithKind().ifPresent(p -> exceptionPrinter.addCurrentDirectoryContext(p.getPath()));
+                    }
+                    exceptionPrinter.printMessages(feedback.getMessages(), new PrintStream(new StringBuilderOutputStream(messagesSB)));
                 }
                 final @Nullable Throwable exception = feedback.getException();
                 if(exception != null) {
@@ -75,10 +87,13 @@ public class RunCommandJob extends Job {
                 }
             }
 
-            if(exceptions.isEmpty()) {
-                return new Status(IStatus.OK, pluginId, sb.toString());
+            if(errorSB.length() == 0) {
+                return new Status(IStatus.OK, pluginId, errorSB.toString());
             } else {
-                final MultiStatus multiStatus = new MultiStatus(pluginId, IStatus.ERROR, sb.toString(), null);
+                final MultiStatus multiStatus = new MultiStatus(pluginId, IStatus.ERROR, errorSB.toString(), null);
+                if(messagesSB.length() != 0) {
+                    multiStatus.add(new Status(IStatus.ERROR, pluginId, messagesSB.toString()));
+                }
                 for(Throwable e : exceptions) {
                     multiStatus.add(exceptionToStatus(e, pluginId));
                 }
