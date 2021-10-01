@@ -1,4 +1,4 @@
-package mb.codecompletion.bench
+package mb.codecompletion.bench.di
 
 import java.lang.annotation.Retention
 import java.lang.annotation.RetentionPolicy
