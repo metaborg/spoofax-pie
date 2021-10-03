@@ -88,6 +88,8 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
         public final ResourceKey file;
         /** The root directory of the project; or {@code null} when not specified. */
         public final @Nullable ResourcePath rootDirectoryHint;
+        /** The event handler for code completion; or {@link CodeCompletionEventHandlerBase} when not specified. */
+        private final CodeCompletionEventHandler eventHandler;
 
         /**
          * Initializes a new instance of the {@link Input} class.
@@ -96,10 +98,23 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * @param file      the key of the resource in which completion is invoked
          * @param rootDirectoryHint the root directory of the project; or {@code null} when not specified
          */
-        public Args(Region primarySelection, ResourceKey file, @Nullable ResourcePath rootDirectoryHint) {
+        public Input(Region primarySelection, ResourceKey file, @Nullable ResourcePath rootDirectoryHint) {
+            this(primarySelection, file, rootDirectoryHint, new CodeCompletionEventHandlerBase());
+        }
+
+        /**
+         * Initializes a new instance of the {@link Input} class.
+         *
+         * @param primarySelection the primary selection at which completion is invoked
+         * @param file      the key of the resource in which completion is invoked
+         * @param rootDirectoryHint the root directory of the project; or {@code null} when not specified
+         * @param eventHandler the event handler for code completion; or {@link CodeCompletionEventHandlerBase} when not specified
+         */
+        public Input(Region primarySelection, ResourceKey file, @Nullable ResourcePath rootDirectoryHint, CodeCompletionEventHandler eventHandler) {
             this.primarySelection = primarySelection;
             this.file = file;
             this.rootDirectoryHint = rootDirectoryHint;
+            this.eventHandler = eventHandler;
         }
 
         @Override public boolean equals(@Nullable Object o) {
@@ -226,6 +241,8 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
         private final StrategoRuntime strategoRuntime;
         private final TegoRuntime tegoRuntime;
         private final ITermFactory termFactory;
+        /** The event handler. */
+        private final CodeCompletionEventHandler eventHandler;
         /** The root directory of the project; or {@code null} when not specified. */
         public final @Nullable ResourcePath rootDirectoryHint;
         /** The file being completed. */
@@ -256,9 +273,10 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
             this.tegoRuntime = tegoRuntime;
             this.spec = spec;
             this.termFactory = strategoRuntime.getTermFactory();
-            this.rootDirectoryHint = args.rootDirectoryHint;
-            this.file = args.file;
-            this.primarySelection = args.primarySelection;
+            this.eventHandler = input.eventHandler;
+            this.rootDirectoryHint = input.rootDirectoryHint;
+            this.file = input.file;
+            this.primarySelection = input.primarySelection;
         }
 
         /**
@@ -269,7 +287,11 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          */
         public Option<CodeCompletionResult> complete() throws Exception {
             // Get, prepare, and analyze the incoming AST
+            eventHandler.begin();
+            eventHandler.beginParse();
             final IStrategoTerm parsedAst = parse();
+            eventHandler.endParse();
+            eventHandler.beginPreparation();
             final IStrategoTerm explicatedAst = preAnalyze(parsedAst);
             final IStrategoTerm indexedAst = addTermIndices(explicatedAst);
             final ITerm statixAst = toStatix(indexedAst);
@@ -278,17 +300,24 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
             final ITermVar placeholder = getCompletionPlaceholder(upgradedAst);
             // TODO: Specify spec name and root rule name somewhere
             final SolverState initialState = createInitialSolverState(upgradedAst, "main", "programOk", placeholderVarMap);
+            eventHandler.endPreparation();
+            eventHandler.beginAnalysis();
             final SolverState analyzedState = analyze(initialState);
+            eventHandler.endAnalysis();
 
             // Execute the code completion Tego strategy
+            eventHandler.beginCodeCompletion();
             final Seq<CodeCompletionProposal> completionProposals = complete(analyzedState, placeholder, Collections.emptyList() /* TODO: Get the set of analysis errors */);
             final Seq<CodeCompletionProposal> filteredProposals = filterProposals(completionProposals);
+            eventHandler.endCodeCompletion();
 
             // Get, convert, and prepare the proposals
+            eventHandler.beginFinishing();
             final Region placeholderRegion = getRegion(placeholder, Region.atOffset(primarySelection.getStartOffset() /* TODO: Support the whole selection? */));
             final List<CodeCompletionProposal> instantiatedProposals = filteredProposals.toList(); // NOTE: This is where we actually coerce the lazy list find the completions.
             final List<CodeCompletionProposal> orderedProposals = orderProposals(instantiatedProposals);
             final List<CodeCompletionItem> finalProposals = proposalsToCodeCompletionItems(orderedProposals, placeholderRegion);
+            eventHandler.endFinishing();
 
             if (finalProposals.isEmpty()) {
                 log.warn("Completion returned no completion proposals.");
