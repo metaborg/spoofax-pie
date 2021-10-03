@@ -76,9 +76,12 @@ import static mb.tego.strategies.StrategyExt.pred;
 /**
  * Code completion task definition.
  */
-public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Args, Option<CodeCompletionResult>> {
+public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Input, Option<CodeCompletionResult>> {
 
-    public static class Args implements Serializable {
+    /**
+     * Input arguments for the {@link CodeCompletionTaskDef}.
+     */
+    public static class Input implements Serializable {
         /** The primary selection at which to complete. */
         public final Region primarySelection;
         /** The file being completed. */
@@ -87,7 +90,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Args
         public final @Nullable ResourcePath rootDirectoryHint;
 
         /**
-         * Initializes a new instance of the {@link CodeCompletionTaskDef.Args} class.
+         * Initializes a new instance of the {@link Input} class.
          *
          * @param primarySelection the primary selection at which completion is invoked
          * @param file      the key of the resource in which completion is invoked
@@ -102,7 +105,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Args
         @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
-            return equals((CodeCompletionTaskDef.Args)o);
+            return equals((Input)o);
         }
 
         /**
@@ -114,7 +117,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Args
          * @return {@code true} when this object is equal to the specified object;
          * otherwise, {@code false}
          */
-        protected boolean equals(CodeCompletionTaskDef.Args that) {
+        protected boolean equals(Input that) {
             if (this == that) return true;
             return this.primarySelection.equals(that.primarySelection)
                 && this.file.equals(that.file)
@@ -205,7 +208,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Args
     }
 
     @Override
-    public Option<CodeCompletionResult> exec(ExecContext context, Args input) throws Exception {
+    public Option<CodeCompletionResult> exec(ExecContext context, Input input) throws Exception {
         final StrategoRuntime strategoRuntime = context.require(getStrategoRuntimeProviderTask, None.instance).getValue().get();
         final TegoRuntime tegoRuntime = context.require(getTegoRuntimeProviderTask, None.instance).getValue().get();
         final Spec spec = context.require(statixSpec, None.instance).unwrap();
@@ -236,14 +239,14 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Args
          * Initializes a new instance of the {@link Execution} class.
          *
          * @param context the execution context
-         * @param args the task arguments
+         * @param input the task arguments
          * @param strategoRuntime the Stratego runtime
          * @param tegoRuntime the Tego runtime
          * @param spec the Statix specification
          */
         public Execution(
             ExecContext context,
-            Args args,
+            Input input,
             StrategoRuntime strategoRuntime,
             TegoRuntime tegoRuntime,
             Spec spec

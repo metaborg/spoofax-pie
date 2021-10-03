@@ -2,7 +2,6 @@ package mb.spoofax.core.language.taskdef;
 
 import mb.common.codecompletion.CodeCompletionResult;
 import mb.common.region.Region;
-import mb.pie.api.Supplier;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -12,8 +11,8 @@ import javax.inject.Named;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class NoneCodeCompletionTaskDef extends NoneTaskDef<NoneCodeCompletionTaskDef.Args, CodeCompletionResult> {
-    public static class Args implements Serializable {
+public class NoneCodeCompletionTaskDef extends NoneTaskDef<NoneCodeCompletionTaskDef.Input, CodeCompletionResult> {
+    public static class Input implements Serializable {
         /** The primary selection at which to complete. */
         public final Region primarySelection;
         /** The file being completed. */
@@ -22,13 +21,13 @@ public class NoneCodeCompletionTaskDef extends NoneTaskDef<NoneCodeCompletionTas
         public final @Nullable ResourcePath rootDirectoryHint;
 
         /**
-         * Initializes a new instance of the {@link NoneCodeCompletionTaskDef.Args} class.
+         * Initializes a new instance of the {@link Input} class.
          *
          * @param primarySelection the primary selection at which completion is invoked
          * @param file      the key of the resource in which completion is invoked
          * @param rootDirectoryHint the root directory of the project; or {@code null} when not specified
          */
-        public Args(Region primarySelection, ResourceKey file, @Nullable ResourcePath rootDirectoryHint) {
+        public Input(Region primarySelection, ResourceKey file, @Nullable ResourcePath rootDirectoryHint) {
             this.primarySelection = primarySelection;
             this.file = file;
             this.rootDirectoryHint = rootDirectoryHint;
@@ -37,7 +36,7 @@ public class NoneCodeCompletionTaskDef extends NoneTaskDef<NoneCodeCompletionTas
         @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
-            return equals((NoneCodeCompletionTaskDef.Args)o);
+            return equals((Input)o);
         }
 
         /**
@@ -49,7 +48,7 @@ public class NoneCodeCompletionTaskDef extends NoneTaskDef<NoneCodeCompletionTas
          * @return {@code true} when this object is equal to the specified object;
          * otherwise, {@code false}
          */
-        protected boolean equals(NoneCodeCompletionTaskDef.Args that) {
+        protected boolean equals(Input that) {
             if (this == that) return true;
             return this.primarySelection.equals(that.primarySelection)
                 && this.file.equals(that.file)

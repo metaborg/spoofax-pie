@@ -109,7 +109,7 @@ public class {{baseInstance.id}} implements LanguageInstance
 
     @Override
     public Task<Option<CodeCompletionResult>> createCodeCompletionTask(Region primarySelection, ResourceKey resourceKey, @Nullable ResourcePath rootDirectoryHint) {
-        return {{codeCompletionInjection.name}}.createTask(new {{codeCompletionInjection.type.qualifiedId}}.Args(
+        return {{codeCompletionInjection.name}}.createTask(new {{codeCompletionInjection.type.qualifiedId}}.Input(
             primarySelection,
             resourceKey,
             rootDirectoryHint
