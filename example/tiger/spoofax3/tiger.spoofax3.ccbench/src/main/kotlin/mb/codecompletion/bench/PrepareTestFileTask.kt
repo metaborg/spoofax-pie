@@ -9,6 +9,9 @@ import mb.pie.api.None
 import mb.pie.api.Supplier
 import mb.pie.api.TaskDef
 import mb.stratego.pie.AstStrategoTransformTaskDef
+import mb.tiger.task.TigerDowngradePlaceholdersStatix
+import mb.tiger.task.TigerPPPartial
+import mb.tiger.task.TigerParse
 import org.spoofax.interpreter.terms.IStrategoAppl
 import org.spoofax.interpreter.terms.IStrategoList
 import org.spoofax.interpreter.terms.IStrategoPlaceholder
@@ -19,20 +22,23 @@ import org.spoofax.terms.util.TermUtils
 import java.io.Serializable
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
+import javax.inject.Inject
 import kotlin.streams.asSequence
 
 /**
  * Takes a file and produces n files, each with a placeholder at a different spot.
  * The comments at the top of the file indicate test information.
  */
-class PrepareTestFileTask(
-  val parseTask: JsglrParseTaskDef,
-  val downgradePlaceholdersTask: AstStrategoTransformTaskDef,
-  val prettyPrintTask: AstStrategoTransformTaskDef,
+class PrepareTestFileTask @Inject constructor(
+  val parseTask: TigerParse,
+  val downgradePlaceholdersTask: TigerDowngradePlaceholdersStatix,
+  val prettyPrintTask: TigerPPPartial,
   val termFactory: ITermFactory,
 ) : TaskDef<PrepareTestFileTask.Input, None> {
 
   data class Input(
+    val projectDir: Path,
     val inputFile: Path,
     val outputDir: Path,
   ) : Serializable
@@ -46,7 +52,7 @@ class PrepareTestFileTask(
         .withFile(inputResource.key)
         .build()
     ).unwrap()
-    check(jsglrResult.ambiguous) { "${input.inputFile}: Parse result is ambiguous."}
+    check(!jsglrResult.ambiguous) { "${input.inputFile}: Parse result is ambiguous."}
     check(!jsglrResult.messages.containsErrorOrHigher()) { "${input.inputFile}: Parse result has errors: ${jsglrResult.messages.stream().asSequence().joinToString { "${it.region}: ${it.text}" }}"}
     val ast = jsglrResult.ast
 
@@ -57,7 +63,11 @@ class PrepareTestFileTask(
     val prettyPrintedAsts = incompleteAsts.map { (ast, offset) -> WithOffset(prettyPrint(ctx, downgrade(ctx, ast)), offset) }
 
     // Prepend comments to the start
-    val commentedAsts = prettyPrintedAsts.map { (astString, offset) ->
+    val relativePath = input.projectDir.relativize(input.inputFile)
+    val relativeDir = relativePath.parent ?: Paths.get("./")
+    val filename = Filename.parse(relativePath.fileName.toString())
+    val commentedAstStrings = prettyPrintedAsts.map { (astString, offset) ->
+      "// FILENAME: $relativePath\n" +
       "// OFFSET: $offset\n" +
       "// ---\n" +
       astString
@@ -66,17 +76,12 @@ class PrepareTestFileTask(
     // Write each pretty-printed AST to file
     ctx.provide(input.outputDir)
     Files.createDirectories(input.outputDir)
-    for
-
-    //prettyPrintedAsts =
-
-//    parseTask.createAstSupplier()
-    // Parse the time to AST
-    // Replace each node of the AST with a placeholder
-    // Downgrade the placeholders to placeholder terms
-    // Pretty-print each AST to file
-    // Append comments at the start
-    TODO("Not yet implemented")
+    for((i, commentedAstString) in commentedAstStrings.withIndex()) {
+      val filePath = input.outputDir.resolve(relativeDir).resolve(filename.copy(name = "${filename.name}-$i").toString())
+      ctx.provide(filePath)
+      Files.writeString(filePath, commentedAstString)
+    }
+    return None.instance
   }
 
   /**
@@ -215,4 +220,25 @@ class PrepareTestFileTask(
     val value: T,
     val offset: Int
   )
+
+  /**
+   * A filename.
+   */
+  data class Filename(
+    val name: String,
+    val extension: String,
+  ) {
+    companion object {
+      fun parse(filename: String): Filename {
+        val dotIndex = filename.indexOf('.')
+        return if (dotIndex >= 0) {
+          Filename(filename.substring(0, dotIndex), filename.substring(dotIndex))
+        } else {
+          Filename(filename, "")
+        }
+      }
+    }
+
+    override fun toString(): String = "$name$extension"
+  }
 }

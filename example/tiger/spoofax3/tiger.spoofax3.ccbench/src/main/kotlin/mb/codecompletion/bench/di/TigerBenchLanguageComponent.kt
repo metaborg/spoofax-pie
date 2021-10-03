@@ -2,6 +2,7 @@ package mb.codecompletion.bench.di
 
 import dagger.Component
 import mb.codecompletion.bench.CompletenessTest
+import mb.codecompletion.bench.PrepareTestFileTask
 import mb.resource.dagger.ResourceServiceComponent
 import mb.tiger.TigerComponent
 import mb.tiger.TigerModule
@@ -22,5 +23,6 @@ import mb.tiger.TigerScope
   ]
 )
 interface TigerBenchLanguageComponent: BenchLanguageComponent, TigerComponent {
-  val testTask: CompletenessTest.TestTask
+//  val testTask: CompletenessTest.TestTask
+  val prepareTestFileTask: PrepareTestFileTask
 }
