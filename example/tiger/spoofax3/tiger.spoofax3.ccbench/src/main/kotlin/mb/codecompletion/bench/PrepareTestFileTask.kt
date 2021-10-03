@@ -1,14 +1,15 @@
 package mb.codecompletion.bench
 
+import mb.aterm.common.TermToString
 import mb.common.result.Result
-import mb.jsglr.pie.JsglrParseTaskDef
 import mb.jsglr.pie.JsglrParseTaskInput
 import mb.nabl2.terms.stratego.TermOrigin
 import mb.pie.api.ExecContext
 import mb.pie.api.None
 import mb.pie.api.Supplier
 import mb.pie.api.TaskDef
-import mb.stratego.pie.AstStrategoTransformTaskDef
+import mb.resource.Resource
+import mb.resource.text.TextResourceRegistry
 import mb.tiger.task.TigerDowngradePlaceholdersStatix
 import mb.tiger.task.TigerPPPartial
 import mb.tiger.task.TigerParse
@@ -41,47 +42,61 @@ class PrepareTestFileTask @Inject constructor(
     val projectDir: Path,
     val inputFile: Path,
     val outputDir: Path,
+    val textResourceRegistry: TextResourceRegistry,
   ) : Serializable
 
-  override fun getId(): String = CompletenessTest.TestTask::class.java.name
+  override fun getId(): String = PrepareTestFileTask::class.java.name
 
   override fun exec(ctx: ExecContext, input: Input): None {
     // Get the AST of the file
-    val inputResource = ctx.require(input.inputFile)
-    val jsglrResult = ctx.require(parseTask, JsglrParseTaskInput.builder()
-        .withFile(inputResource.key)
-        .build()
-    ).unwrap()
-    check(!jsglrResult.ambiguous) { "${input.inputFile}: Parse result is ambiguous."}
-    check(!jsglrResult.messages.containsErrorOrHigher()) { "${input.inputFile}: Parse result has errors: ${jsglrResult.messages.stream().asSequence().joinToString { "${it.region}: ${it.text}" }}"}
-    val ast = jsglrResult.ast
+    val ast = parse(ctx, ctx.require(input.inputFile))
+    val pp = prettyPrint(ctx, ast)
+    val ppResource = input.textResourceRegistry.createResource(pp)
+    val ppAst = parse(ctx, ppResource)
 
     // Get all possible incomplete ASTs
-    val incompleteAsts = buildIncompleteAsts(ast)
+    val incompleteAsts = buildIncompleteAsts(ppAst)
 
     // Downgrade the placeholders in the incomplete ASTs, and pretty-print them
-    val prettyPrintedAsts = incompleteAsts.map { (ast, offset) -> WithOffset(prettyPrint(ctx, downgrade(ctx, ast)), offset) }
+    val prettyPrintedAsts = incompleteAsts.map { it.map { term -> prettyPrint(ctx, downgrade(ctx, term)) } }
 
-    // Prepend comments to the start
+    // Append comments to the end
     val relativePath = input.projectDir.relativize(input.inputFile)
     val relativeDir = relativePath.parent ?: Paths.get("./")
     val filename = Filename.parse(relativePath.fileName.toString())
-    val commentedAstStrings = prettyPrintedAsts.map { (astString, offset) ->
-      "// FILENAME: $relativePath\n" +
-      "// OFFSET: $offset\n" +
-      "// ---\n" +
-      astString
-    }
+    val commentedTestCases = prettyPrintedAsts.map { case -> case.map {
+      it + "\n${
+        CodeCompleteTestTask.TestHeaders(
+          fileName = relativePath,
+          offset = case.offset,
+        )
+      }"
+    } }
 
-    // Write each pretty-printed AST to file
     ctx.provide(input.outputDir)
     Files.createDirectories(input.outputDir)
-    for((i, commentedAstString) in commentedAstStrings.withIndex()) {
+    for((i, commentedTestCase) in commentedTestCases.withIndex()) {
+      // Write the pretty-printed AST to file
       val filePath = input.outputDir.resolve(relativeDir).resolve(filename.copy(name = "${filename.name}-$i").toString())
       ctx.provide(filePath)
-      Files.writeString(filePath, commentedAstString)
+      Files.writeString(filePath, commentedTestCase.value)
+
+      // Write the expected AST to file
+      val expectedFilePath = input.outputDir.resolve(relativeDir).resolve(filename.copy(name = "${filename.name}-$i-expected", extension = filename.extension + ".aterm").toString())
+      ctx.provide(expectedFilePath)
+      Files.writeString(expectedFilePath, TermToString.toString(commentedTestCase.expectedAst))
     }
     return None.instance
+  }
+
+  private fun parse(ctx: ExecContext, inputResource: Resource): IStrategoTerm {
+    val jsglrResult = ctx.require(parseTask, JsglrParseTaskInput.builder()
+      .withFile(inputResource.key)
+      .build()
+    ).unwrap()
+    check(!jsglrResult.ambiguous) { "${inputResource}: Parse result is ambiguous."}
+    check(!jsglrResult.messages.containsErrorOrHigher()) { "${inputResource}: Parse result has errors: ${jsglrResult.messages.stream().asSequence().joinToString { "${it.region}: ${it.text}" }}"}
+    return jsglrResult.ast
   }
 
   /**
@@ -90,12 +105,12 @@ class PrepareTestFileTask @Inject constructor(
    * @param term the term
    * @return a sequence of all possible variants of this term with a placeholder
    */
-  private fun buildIncompleteAsts(term: IStrategoTerm): List<WithOffset<IStrategoTerm>> {
+  private fun buildIncompleteAsts(term: IStrategoTerm): List<TestCase<IStrategoTerm>> {
     // Replaced the term with a placeholder
-    return listOf(WithOffset(makePlaceholder("x"), getStartOffset(term))) +
+    return listOf(TestCase(makePlaceholder("x"), getStartOffset(term), term)) +
     // or replaced a subterm with all possible sub-asts with a placeholder
     term.subterms.flatMapIndexed { i, subTerm ->
-      buildIncompleteAsts(subTerm).map { (newSubTerm, offset) -> WithOffset(term.withSubterm(i, newSubTerm), offset) }
+      buildIncompleteAsts(subTerm).map { (newSubTerm, offset, expectedAst) -> TestCase(term.withSubterm(i, newSubTerm), offset, expectedAst) }
     }
   }
 
@@ -215,11 +230,17 @@ class PrepareTestFileTask @Inject constructor(
    *
    * @property value the value
    * @property offset the placeholder offset
+   * @property expectedAst the expected AST
    */
-  data class WithOffset<out T>(
+  data class TestCase<out T>(
     val value: T,
-    val offset: Int
-  )
+    val offset: Int,
+    val expectedAst: IStrategoTerm,
+  ) {
+    fun <R> map(f: (T) -> R): TestCase<R> {
+      return TestCase(f(value), offset, expectedAst)
+    }
+  }
 
   /**
    * A filename.

@@ -35,6 +35,9 @@ import mb.statix.CodeCompletionProposal;
 import mb.statix.SolutionMeta;
 import mb.statix.SolverContext;
 import mb.statix.SolverState;
+import mb.statix.StrategoTermCodeCompletionItem;
+import mb.statix.TermCodeCompletionItem;
+import mb.statix.TermCodeCompletionResult;
 import mb.statix.codecompletion.strategies.runtime.CompleteStrategy;
 import mb.statix.codecompletion.strategies.runtime.InferStrategy;
 import mb.statix.constraints.CUser;
@@ -323,7 +326,9 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
                 log.warn("Completion returned no completion proposals.");
             }
 
-            return Option.ofSome(new CodeCompletionResult(
+            eventHandler.end();
+            return Option.ofSome(new TermCodeCompletionResult(
+                placeholder,
                 ListView.copyOf(finalProposals),
                 Objects.requireNonNull(tryGetRegion(placeholder)),
                 true
@@ -594,7 +599,8 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * @return the code completion item
          */
         private CodeCompletionItem proposalToCodeCompletionItem(CodeCompletionProposal proposal, Region placeholderRegion) {
-            final String text = proposalToString(proposal);
+            final IStrategoTerm strategoTerm = proposalToStrategoTerm(proposal);
+            final String text = strategoTermToString(strategoTerm);
             ListView<TextEdit> textEdits = ListView.of(new TextEdit(placeholderRegion, text));
             String label = normalizeText(text);
             // TODO: Determine the style of the completion
@@ -603,22 +609,36 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
             // TODO: Fill out the other useful fields too
             //  (basically depends on what entity it represents)
             //  This is an opportunity for rich metadata to be unerstood by Spoofax
-            return new CodeCompletionItem(label, "", "", "", "", style, textEdits, false);
+            return new TermCodeCompletionItem(proposal.getTerm(), strategoTerm, label, "", "", "", "", style, textEdits, false);
         }
 
         /**
-         * Converts a proposal to its string representation.
+         * Converts a proposal to its term representation.
          *
          * @param proposal the proposal
-         * @return the string representation
+         * @return the proposal term
          */
-        private String proposalToString(CodeCompletionProposal proposal) {
+        private IStrategoTerm proposalToStrategoTerm(CodeCompletionProposal proposal) {
             try {
                 final IStrategoTerm proposalTerm = strategoTerms.toStratego(proposal.getTerm(), true);
                 @Nullable final IStrategoTerm downgradedTerm = downgradePlaceholders(proposalTerm);
-                if (downgradedTerm == null) return proposal.toString(); // Return the term when downgrading failed
+                if (downgradedTerm == null) return proposalTerm; // Return the term when downgrading failed
                 @Nullable final IStrategoTerm implicatedTerm = postAnalyze(downgradedTerm);
-                if (implicatedTerm == null) return downgradedTerm.toString(); // Return the term when implication failed
+                if (implicatedTerm == null) return downgradedTerm; // Return the term when implication failed
+                return implicatedTerm;
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+
+        /**
+         * Converts an implicated proposal term to its string representation.
+         *
+         * @param implicatedTerm the implicated term of the proposal
+         * @return the string representation
+         */
+        private String strategoTermToString(IStrategoTerm implicatedTerm) {
+            try {
                 @Nullable final String prettyPrintedTerm = prettyPrint(implicatedTerm);
                 if (prettyPrintedTerm == null) return implicatedTerm.toString(); // Return the term when pretty-printing failed
                 return prettyPrintedTerm;
