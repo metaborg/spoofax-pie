@@ -30,7 +30,7 @@ fun tryMatchExpectation(
     // did not replace the variable by a term.
     if (placeholder == actualTerm) return false
     // If the variable can never be replaced by the actual term, we reject this proposal.
-    val substitution = trySubtitute(actualTerm, expectedTerm) ?: return false
+    val substitution = trySubtitute(expectedTerm, actualTerm) ?: return false
 //    // If the expectations cannot unify with the current unifier, we reject this proposal.
 //    val expectedUnifier = tryUnifyPairs(proposal.state.state.unifier(), expectedTerms) ?: return false
 //    // If the substitution cannot unify with the current unifier, we reject this proposal.
