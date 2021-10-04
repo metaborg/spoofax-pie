@@ -1,0 +1,16 @@
+module syntax/Variables
+
+imports syntax/Base
+
+
+context-free syntax
+
+  Dec.VarDec = <var <ID> : <Type> := <Exp>>
+
+  Dec.VarDecNoType = <var <ID> := <Exp>>
+
+  Var.Var = ID
+
+  LValue = Var
+
+  Exp = LValue

@@ -1,0 +1,48 @@
+module syntax/Control-Flow
+
+imports syntax/Base
+
+context-free syntax
+
+  Exp.Seq = <
+    (
+      <{Exp ";\n"}*>
+    )
+  >
+
+  Exp.If = <
+    if <Exp> then
+      <Exp>
+    else
+      <Exp>
+  >
+
+  Exp.IfThen = <
+    if <Exp> then
+      <Exp>
+  >
+
+  Exp.While = <
+    while <Exp> do
+      <Exp>
+  >
+
+  Exp.For = <
+    for <Var> := <Exp> to <Exp> do
+      <Exp>
+  >
+
+  Exp.Break = <break>
+
+  Exp.Assign = <<LValue> := <Exp>>
+
+context-free priorities
+
+  {
+    Exp.Assign
+  } > { right:
+    Exp.If
+    Exp.IfThen
+    Exp.While
+    Exp.For
+  }

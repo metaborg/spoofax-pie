@@ -1,0 +1,40 @@
+module start
+
+imports syntax/Base
+imports syntax/Whitespace
+imports syntax/Types
+imports syntax/Identifiers
+imports syntax/Bindings
+imports syntax/Variables
+imports syntax/Functions
+imports syntax/Numbers
+imports syntax/Strings
+imports syntax/Records
+imports syntax/Arrays
+imports syntax/Control-Flow
+
+context-free start-symbols Module
+
+sorts Module
+context-free syntax
+
+  Module.Mod = Exp
+
+context-free priorities
+
+  {
+    Exp.Or
+  } > {
+    Exp.Array
+  } > {
+    Exp.Assign
+  },
+
+  {
+    Exp.Uminus
+    LValue.FieldVar
+    LValue.Subscript
+  } > {left:
+    Exp.Times
+    Exp.Divide
+  }
