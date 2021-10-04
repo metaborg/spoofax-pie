@@ -2,9 +2,7 @@ package mb.spoofax.compiler.adapter;
 
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
-import mb.pie.api.Interactivity;
 import mb.pie.api.None;
-import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.language.ClassLoaderResourcesCompiler;
 import mb.spoofax.compiler.util.ClassKind;
@@ -19,13 +17,12 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * Compiles the code completion task.
  */
 @Value.Enclosing
-public class CodeCompletionAdapterCompiler implements TaskDef<CodeCompletionAdapterCompiler.Input, None> {
+public class CodeCompletionAdapterCompiler {
     private final TemplateWriter codeCompletionTaskDefTemplate;
     private final TemplateWriter statixSpecTaskDefTemplate;
 
@@ -50,12 +47,7 @@ public class CodeCompletionAdapterCompiler implements TaskDef<CodeCompletionAdap
         this.ppPartialTaskDefTemplate = templateCompiler.getOrCompileToWriter("code_completion/PPPartialTaskDef.java.mustache");
     }
 
-
-    @Override public String getId() {
-        return getClass().getName();
-    }
-
-    @Override public None exec(ExecContext context, Input input) throws IOException {
+    public None compile(ExecContext context, Input input) throws IOException {
         if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         codeCompletionTaskDefTemplate.write(context, input.baseCodeCompletionTaskDef().file(generatedJavaSourcesDirectory), input);
@@ -67,15 +59,6 @@ public class CodeCompletionAdapterCompiler implements TaskDef<CodeCompletionAdap
         ppPartialTaskDefTemplate.write(context, input.basePPPartialTaskDef().file(generatedJavaSourcesDirectory), input);
         return None.instance;
     }
-
-    @Override public boolean shouldExecWhenAffected(Input input, Set<?> tags) {
-        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
-    }
-
-    @Override public Serializable key(Input input) {
-        return input.adapterProject().project().baseDirectory();
-    }
-
 
     public ListView<GradleConfiguredDependency> getDependencies(CodeCompletionAdapterCompiler.Input input) {
         return ListView.of(
