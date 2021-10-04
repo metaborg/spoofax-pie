@@ -25,6 +25,7 @@ import mb.spoofax.compiler.adapter.ParserAdapterCompiler;
 import mb.spoofax.compiler.adapter.ReferenceResolutionAdapterCompiler;
 import mb.spoofax.compiler.adapter.StrategoRuntimeAdapterCompiler;
 import mb.spoofax.compiler.adapter.StylerAdapterCompiler;
+import mb.spoofax.compiler.adapter.TegoRuntimeAdapterCompiler;
 import mb.spoofax.compiler.adapter.data.ArgProviderRepr;
 import mb.spoofax.compiler.adapter.data.CommandActionRepr;
 import mb.spoofax.compiler.adapter.data.CommandDefRepr;
@@ -41,6 +42,7 @@ import mb.spoofax.compiler.language.ParserLanguageCompiler;
 import mb.spoofax.compiler.language.ParserVariant;
 import mb.spoofax.compiler.language.StrategoRuntimeLanguageCompiler;
 import mb.spoofax.compiler.language.StylerLanguageCompiler;
+import mb.spoofax.compiler.language.TegoRuntimeLanguageCompiler;
 import mb.spoofax.compiler.platform.EclipseProjectCompiler;
 import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.TypeInfo;
@@ -266,6 +268,10 @@ public class CfgAstToObject {
             // TODO: more strategoRuntime language properties
             final StrategoRuntimeAdapterCompiler.Input.Builder adapter = adapterBuilder.withStrategoRuntime();
             // TODO: strategoRuntime adapter properties
+        });
+        parts.getAllSubTermsInListAsParts("TegoRuntimeSection").ifSome(subParts -> {
+            final TegoRuntimeLanguageCompiler.Input.Builder base = baseBuilder.withTegoRuntime();
+            final TegoRuntimeAdapterCompiler.Input.Builder adapter = adapterBuilder.withTegoRuntime();
         });
         // TODO: completion
         parts.getAllSubTermsInListAsParts("ExportsSection").ifSome(subParts -> {
