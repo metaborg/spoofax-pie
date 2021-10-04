@@ -12,7 +12,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 - Eclipse plugins of languages not starting due to out-of-date Eclipse version.
 - Bracket production with constructor causing build errors (https://github.com/metaborg/spoofax-pie/issues/65).
 - SDF Legacy constructs (optional, alteration, sequence) in context-free syntax not being exhaustively checked.
-- Bracket production in lexical-free syntax being allowed.
+- Bracket production in lexical syntax being allowed.
 - SPT parse to ATerm constructor names don't support underscores (https://github.com/metaborg/spoofax-pie/issues/67)
 - Commands that fail give no feedback in the Eclipse LWB (https://github.com/metaborg/spoofax-pie/issues/68)
 
