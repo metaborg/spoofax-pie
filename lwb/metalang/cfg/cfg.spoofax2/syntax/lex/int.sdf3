@@ -1,0 +1,15 @@
+module lex/int
+
+lexical sorts
+
+  IntLit UIntLit
+
+lexical syntax
+
+  IntLit = "-" [0-9]+
+  UIntLit = [0-9]+
+
+lexical restrictions
+
+  IntLit -/- [0-9]
+  UIntLit -/- [0-9]

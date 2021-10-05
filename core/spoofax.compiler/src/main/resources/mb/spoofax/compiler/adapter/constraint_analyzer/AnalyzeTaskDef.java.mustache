@@ -76,6 +76,18 @@ public class {{baseAnalyzeTaskDef.id}} extends ConstraintAnalyzeTaskDef {
         context.require(classLoaderResources.tryGetAsLocalResource({{languageProjectInput.constraintAnalyzer.qualifiedId}}.class), ResourceStampers.hashFile());
         context.require(classLoaderResources.tryGetAsLocalResource({{languageProjectInput.constraintAnalyzerFactory.qualifiedId}}.class), ResourceStampers.hashFile());
         final StrategoRuntime strategoRuntime = context.require(getStrategoRuntimeProvider, None.instance).getValue().get();
-        return constraintAnalyzer.analyze(resource, ast, constraintAnalyzerContext, strategoRuntime, resourceService);
+        return constraintAnalyzer.analyze(resource, ast, constraintAnalyzerContext, strategoRuntime{{#languageProjectInput.enableStatix}}.addContextObject(mb.statix.spoofax.IStatixProjectConfig.class, createStatixProjectConfig()){{/languageProjectInput.enableStatix}}, resourceService);
     }
+
+    {{#languageProjectInput.enableStatix}}
+    protected mb.statix.spoofax.IStatixProjectConfig createStatixProjectConfig() {
+        return new mb.statix.spoofax.StatixProjectConfig(
+            null,
+            {{#defaultStatixMessageStacktraceLength}}{{this}}{{/defaultStatixMessageStacktraceLength}}{{^defaultStatixMessageStacktraceLength}}null{{/defaultStatixMessageStacktraceLength}},
+            {{#defaultStatixMessageTermDepth}}{{this}}{{/defaultStatixMessageTermDepth}}{{^defaultStatixMessageTermDepth}}null{{/defaultStatixMessageTermDepth}},
+            {{#defaultStatixTestLogLevel}}"{{this}}"{{/defaultStatixTestLogLevel}}{{^defaultStatixTestLogLevel}}null{{/defaultStatixTestLogLevel}},
+            {{#defaultStatixSuppressCascadingErrors}}{{this}}{{/defaultStatixSuppressCascadingErrors}}{{^defaultStatixSuppressCascadingErrors}}null{{/defaultStatixSuppressCascadingErrors}}
+        );
+    }
+    {{/languageProjectInput.enableStatix}}
 }

@@ -67,6 +67,15 @@ rules // Constraint analyzer section and options
   constraintAnalyzerOptionOk(s, ConstraintAnalyzerStrategoStrategy(e)) :-
     typeOfExpr(s, e) == STRATEGY() | error $[Expected Stratego strategy identifier].
 
+  constraintAnalyzerOptionOk(s, ConstraintAnalyzerDefaultStatixMessageStacktraceLength(e)) :-
+    typeOfExpr(s, e) == UINT() | error $[Expected unsigned integer].
+  constraintAnalyzerOptionOk(s, ConstraintAnalyzerDefaultStatixMessageTermDepth(e)) :-
+    typeOfExpr(s, e) == UINT() | error $[Expected unsigned integer].
+  constraintAnalyzerOptionOk(s, ConstraintAnalyzerDefaultStatixTestLogLevel(e)) :-
+    typeOfExpr(s, e) == STRING() | error $[Expected string].
+  constraintAnalyzerOptionOk(s, ConstraintAnalyzerDefaultStatixSuppressCascadingErrors(e)) :-
+    typeOfExpr(s, e) == BOOL() | error $[Expected boolean].
+
 rules // Multilang analyzer section and options
 
   partOk(s, MultilangAnalyzerSection(options)) :-

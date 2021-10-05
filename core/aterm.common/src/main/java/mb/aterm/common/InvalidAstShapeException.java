@@ -12,6 +12,12 @@ public class InvalidAstShapeException extends RuntimeException {
         this.ast = ast;
     }
 
+    public InvalidAstShapeException(String expected, IStrategoTerm ast, Exception cause) {
+        super(cause);
+        this.expected = expected;
+        this.ast = ast;
+    }
+
     @Override public String getMessage() {
         return "BUG: invalid AST shape, expected " + expected + " in AST: " + ast;
     }

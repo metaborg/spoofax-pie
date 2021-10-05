@@ -86,6 +86,17 @@ public class ConstraintAnalyzerAdapterCompiler {
         static Builder builder() { return new Builder(); }
 
 
+        /// Configuration
+
+        Optional<Integer> defaultStatixMessageStacktraceLength();
+
+        Optional<Integer> defaultStatixMessageTermDepth();
+
+        Optional<String> defaultStatixTestLogLevel();
+
+        Optional<Boolean> defaultStatixSuppressCascadingErrors();
+
+
         /// Kinds of classes (generated/extended/manual)
 
         @Value.Default default ClassKind classKind() { return ClassKind.Generated; }
