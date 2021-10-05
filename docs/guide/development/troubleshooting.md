@@ -119,3 +119,21 @@ Caused by: java.lang.ArrayIndexOutOfBoundsException: 195
 ```
 
 Determine the version of Java using `java -version`. Java 8 and 9 can exhibit this problem. The solution is to update your Java to version 11 or later. You can use a tool such as [SDKMAN!](https://sdkman.io/) to easily manage the (default) versions of Java on your system.
+
+
+### Could not generate a decorated class for type EclipseCompilerPlugin
+```
+FAILURE: Build failed with an exception.
+
+* Where:
+Build file 'esv/org.metaborg.meta.lang.esv/build.gradle.kts' line: 1
+
+* What went wrong:
+An exception occurred applying plugin request [id: 'de.set.ecj']
+> Failed to apply plugin 'de.set.ecj'.
+   > Could not create plugin of type 'EclipseCompilerPlugin'.
+      > Could not generate a decorated class for type EclipseCompilerPlugin.
+         > org/gradle/jvm/toolchain/JavaToolChain
+```
+
+The above error is caused by using Gradle 7 or newer, for which the ECJ plugin is not yet compatible. See [TwoStone/gradle-eclipse-compiler-plugin#13](https://github.com/TwoStone/gradle-eclipse-compiler-plugin/issues/13). If this error occurs while importing the project into IntelliJ, then your version of Gradle is not set correctly. Select Gradle version 6.8.
