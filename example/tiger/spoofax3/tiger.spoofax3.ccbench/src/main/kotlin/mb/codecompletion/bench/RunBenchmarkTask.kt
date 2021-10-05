@@ -18,6 +18,7 @@ import mb.tiger.task.TigerParse
 import org.spoofax.interpreter.terms.ITermFactory
 import org.spoofax.terms.io.TAFTermReader
 import java.io.Serializable
+import java.lang.IllegalStateException
 import java.nio.file.Files
 import java.nio.file.Path
 import javax.inject.Inject
@@ -93,28 +94,39 @@ class RunBenchmarkTask @Inject constructor(
         parseTask.runParse(ctx, dstInputResource.key)
 
         // Execute code completion
+        var kind: BenchmarkResultKind
         val eventHandler = MeasuringCodeCompletionEventHandler()
-        val results = ctx.require(
-            codeCompletionTask, CodeCompletionTaskDef.Input(
-                Region.atOffset(input.testCase.placeholderOffset),
-                dstInputResource.key,
-                ctx.require(input.targetProjectDir).path,
-                eventHandler,
-            )
-        ).unwrap() as TermCodeCompletionResult
+        var results: TermCodeCompletionResult? = null
+        try {
+            results = ctx.require(
+                codeCompletionTask, CodeCompletionTaskDef.Input(
+                    Region.atOffset(input.testCase.placeholderOffset),
+                    dstInputResource.key,
+                    ctx.require(input.targetProjectDir).path,
+                    eventHandler,
+                )
+            ).unwrap() as TermCodeCompletionResult
 
-        val success = results.proposals.filterIsInstance<TermCodeCompletionItem>().filter { tryMatchExpectation(results.placeholder, input.expectedTerm, it.term) }.isNotEmpty()
+            val success = results.proposals.filterIsInstance<TermCodeCompletionItem>().filter { tryMatchExpectation(results.placeholder, input.expectedTerm, it.term) }.isNotEmpty()
+            kind = if (success) BenchmarkResultKind.Success else BenchmarkResultKind.Failed
+        } catch (ex: IllegalStateException) {
+            kind = if (ex.message?.contains("input program validation failed") == true) {
+                BenchmarkResultKind.AnalysisFailed
+            } else {
+                BenchmarkResultKind.Error
+            }
+        }
 
         return BenchmarkResult(
-            success,
-            results.proposals.toList(),
+            kind,
+            results?.proposals?.toList() ?: emptyList(),
 
-            eventHandler.parseTime,
-            eventHandler.preparationTime,
-            eventHandler.analysisTime,
-            eventHandler.codeCompletionTime,
-            eventHandler.finishingTime,
-            eventHandler.totalTime,
+            eventHandler.parseTime ?: -1,
+            eventHandler.preparationTime ?: -1,
+            eventHandler.analysisTime ?: -1,
+            eventHandler.codeCompletionTime ?: -1,
+            eventHandler.finishingTime ?: -1,
+            eventHandler.totalTime ?: -1,
 
             0, // TODO
             0, // TODO

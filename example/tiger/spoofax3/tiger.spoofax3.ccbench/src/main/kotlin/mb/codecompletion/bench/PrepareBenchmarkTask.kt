@@ -66,7 +66,7 @@ class PrepareBenchmarkTask @Inject constructor(
 
     override fun getId(): String = PrepareBenchmarkTask::class.java.name
 
-    override fun exec(ctx: ExecContext, input: PrepareBenchmarkTask.Input): ListView<TestCase> {
+    override fun exec(ctx: ExecContext, input: Input): ListView<TestCase> {
         // Get the AST of the file
         // We parse and pretty-print the input resource here, such that are sure
         // that the offset of the term is the same in the incomplete pretty-printed AST
@@ -81,12 +81,17 @@ class PrepareBenchmarkTask @Inject constructor(
         val incompleteAsts = buildIncompleteAsts(ppAst)
 
         // Downgrade the placeholders in the incomplete ASTs, and pretty-print them
-        val prettyPrintedAsts = incompleteAsts.map { it.map { term -> prettyPrint(ctx, downgrade(ctx, term)) } }
+        val prettyPrintedAsts = incompleteAsts.mapNotNull { it.map { term ->
+            prettyPrint(ctx, downgrade(ctx, term))
+        } }
 
         // Construct test cases and write the files to the test cases directory
         val testCases = mutableListOf<TestCase>()
         Files.createDirectories(input.testCaseDir.resolve(input.inputFile).parent)
         for((i, case) in prettyPrintedAsts.withIndex()) {
+            val name = input.inputFile.withName { "$it-$i" }.withExtension("").toString()
+
+            println("Writing $name...")
             // Write the pretty-printed AST to file
             val outputFile = input.testCaseDir.resolve(input.inputFile.withName { "$it-$i" })
             ctx.provide(outputFile)
@@ -97,17 +102,32 @@ class PrepareBenchmarkTask @Inject constructor(
             ctx.provide(expectedFile)
             Files.writeString(expectedFile, TermToString.toString(case.expectedAst))
 
+            if (!hasPlaceholder(case.value)) {
+                println("Skipped $name.")
+                continue
+            }
+
             // Add the test case
-            testCases.add(TestCase(
-                input.inputFile.withName { "$it-$i" }.withExtension("").toString(),
-                input.inputFile,
-                input.testCaseDir.relativize(outputFile),
-                case.offset,
-                input.testCaseDir.relativize(expectedFile),
-            ))
+            testCases.add(
+                TestCase(
+                    name,
+                    input.inputFile,
+                    input.testCaseDir.relativize(outputFile),
+                    case.offset,
+                    input.testCaseDir.relativize(expectedFile),
+                )
+            )
+            println("Wrote $name.")
         }
 
         return ListView.of(testCases)
+    }
+
+    /**
+     * Determines whether the given string contains a placeholder.
+     */
+    private fun hasPlaceholder(text: String): Boolean {
+        return text.contains(Regex("\\[\\[[^\\]]+\\]\\]"))
     }
 
 
@@ -210,8 +230,9 @@ class PrepareBenchmarkTask @Inject constructor(
         val offset: Int,
         val expectedAst: IStrategoTerm,
     ) {
-        fun <R> map(f: (T) -> R): TestCaseInfo<R> {
-            return TestCaseInfo(f(value), offset, expectedAst)
+        fun <R> map(f: (T) -> R?): TestCaseInfo<R>? {
+            val newValue = f(value) ?: return null
+            return TestCaseInfo(newValue, offset, expectedAst)
         }
     }
 

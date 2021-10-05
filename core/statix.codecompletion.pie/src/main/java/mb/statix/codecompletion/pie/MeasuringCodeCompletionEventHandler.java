@@ -1,29 +1,43 @@
 package mb.statix.codecompletion.pie;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * Measures the time between code completion events.
  */
 public final class MeasuringCodeCompletionEventHandler extends CodeCompletionEventHandlerBase {
 
-    private Long parseStartTime = Long.MIN_VALUE;
-    private Long parseEndTime = Long.MIN_VALUE;
-    private Long preparationStartTime = Long.MIN_VALUE;
-    private Long preparationEndTime = Long.MIN_VALUE;
-    private Long analysisStartTime = Long.MIN_VALUE;
-    private Long analysisEndTime = Long.MIN_VALUE;
-    private Long codeCompletionStartTime = Long.MIN_VALUE;
-    private Long codeCompletionEndTime = Long.MIN_VALUE;
+    private long parseStartTime = Long.MIN_VALUE;
+    private long parseEndTime = Long.MIN_VALUE;
+    private long preparationStartTime = Long.MIN_VALUE;
+    private long preparationEndTime = Long.MIN_VALUE;
+    private long analysisStartTime = Long.MIN_VALUE;
+    private long analysisEndTime = Long.MIN_VALUE;
+    private long codeCompletionStartTime = Long.MIN_VALUE;
+    private long codeCompletionEndTime = Long.MIN_VALUE;
     private Long finishingStartTime = Long.MIN_VALUE;
-    private Long finishingEndTime = Long.MIN_VALUE;
-    private Long startTime = Long.MIN_VALUE;
-    private Long endTime = Long.MIN_VALUE;
+    private long finishingEndTime = Long.MIN_VALUE;
+    private long startTime = Long.MIN_VALUE;
+    private long endTime = Long.MIN_VALUE;
 
-    public Long getParseTime() { return this.parseEndTime - this.parseStartTime; }
-    public Long getPreparationTime() { return this.preparationEndTime - this.preparationStartTime; }
-    public Long getAnalysisTime() { return this.analysisEndTime - this.analysisStartTime; }
-    public Long getCodeCompletionTime() { return this.codeCompletionEndTime - this.codeCompletionStartTime; }
-    public Long getFinishingTime() { return this.finishingEndTime - this.finishingStartTime; }
-    public Long getTotalTime() { return this.endTime - this.startTime; }
+    public @Nullable Long getParseTime() {
+        if (this.parseEndTime != Long.MIN_VALUE && this.parseStartTime != Long.MIN_VALUE) return this.parseEndTime - this.parseStartTime; else return null;
+    }
+    public @Nullable Long getPreparationTime() {
+        if (this.preparationEndTime != Long.MIN_VALUE && this.preparationStartTime != Long.MIN_VALUE) return this.preparationEndTime - this.preparationStartTime; else return null;
+    }
+    public @Nullable Long getAnalysisTime() {
+        if (this.analysisEndTime != Long.MIN_VALUE && this.analysisStartTime != Long.MIN_VALUE) return this.analysisEndTime - this.analysisStartTime; else return null;
+    }
+    public @Nullable Long getCodeCompletionTime() {
+        if (this.codeCompletionEndTime != Long.MIN_VALUE && this.codeCompletionStartTime != Long.MIN_VALUE) return this.codeCompletionEndTime - this.codeCompletionStartTime; else return null;
+    }
+    public @Nullable Long getFinishingTime() {
+        if (this.finishingEndTime != Long.MIN_VALUE && this.finishingStartTime != Long.MIN_VALUE) return this.finishingEndTime - this.finishingStartTime; else return null;
+    }
+    public @Nullable Long getTotalTime() {
+        if (this.endTime != Long.MIN_VALUE && this.startTime != Long.MIN_VALUE) return this.endTime - this.startTime; else return null;
+    }
 
     @Override
     public void begin() {

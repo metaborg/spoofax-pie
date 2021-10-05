@@ -67,20 +67,21 @@ class CodeCompleteBenchTask @Inject constructor(
       throw IllegalStateException("Test failed, nothing matched expected AST: $expectedTerm\nGot: " + results.proposals.joinToString())
     }
 
-    return CodeCompleteBenchResult(
-      eventHandler.parseTime,
-      eventHandler.preparationTime,
-      eventHandler.analysisTime,
-      eventHandler.codeCompletionTime,
-      eventHandler.finishingTime,
-      eventHandler.totalTime,
-      0,
-      0,
-      0,
-      0,
-        true,
-      results.proposals.toList()
-    )
+      TODO()
+//    return CodeCompleteBenchResult(
+//      eventHandler.parseTime,
+//      eventHandler.preparationTime,
+//      eventHandler.analysisTime,
+//      eventHandler.codeCompletionTime,
+//      eventHandler.finishingTime,
+//      eventHandler.totalTime,
+//      0,
+//      0,
+//      0,
+//      0,
+//        true,
+//      results.proposals.toList()
+//    )
   }
 
   private fun parse(ctx: ExecContext, inputFile: Path): IStrategoTerm {

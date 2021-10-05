@@ -22,7 +22,7 @@ import java.io.Serializable
  * @property expandDeterministicTime Time spent on expanding deterministically; in ms.
  */
 data class BenchmarkResult(
-    val success: Boolean,
+    val kind: BenchmarkResultKind,
     val results: List<CodeCompletionItem>,
 
     val parseTime: Long,
@@ -37,12 +37,15 @@ data class BenchmarkResult(
     val expandQueriesTime: Long,
     val expandDeterministicTime: Long,
 ): Serializable {
+
+    val success: Boolean get() = kind == BenchmarkResultKind.Success
+
     companion object {
         /**
          * The headers for the CSV.
          */
         val csvHeaders = arrayOf(
-            "Success",
+            "Kind",
             "NumberOfResults",
 
             "ParseTime",
@@ -63,7 +66,7 @@ data class BenchmarkResult(
      * Returns this benchmark result as an array of values for the CSV.
      */
     fun toCsvArray(): Array<Any?> = arrayOf(
-        this.success,
+        this.kind,
         this.results.size,
 
         this.parseTime,               // ms
