@@ -67,30 +67,48 @@ fun main(args: Array<String>) {
         .build()
 
     pieModule.addTaskDefs(
-        languageComponent.prepareTestFileTask,
         languageComponent.runBenchmarkTask,
+        languageComponent.prepareBenchmarkTask,
     )
 
-    val basePath =
-        Paths.get("/Users/daniel/repos/spoofax3/devenv-cc-sept-21/spoofax.pie/example/tiger/spoofax3/tiger.spoofax3.ccbench/testfiles/")
-    prepareBenchmark(pieComponent.pie, languageComponent.benchmarker, basePath, basePath.resolve("test2.tig"))
-//    runBenchmark(pieComponent.pie, languageComponent.benchmarker, basePath)
+    val baseDir = Path.of("/Users/daniel/repos/spoofax3/devenv-cc-sept-21-2/spoofax.pie/example/tiger/spoofax3/")
+    val projectDir = Path.of("tiger/")
+    val outputDir = Path.of("")
+    val testCaseDir = Path.of("tiger-tests/")
 
-//  prepareTestFile(pieComponent, resourcesComponent, textResourceRegistry, languageComponent)
-//    testCodeCompletion(pieComponent, resourcesComponent, textResourceRegistry, languageComponent)
+//    // Preparation
+//    val benchmark = BenchmarkBuilder(pieComponent.pie, languageComponent.prepareBenchmarkTask).build(
+//        "Tiger",
+//        baseDir,
+//        projectDir,
+//        ".tig",
+//        outputDir,
+//        testCaseDir,
+//    )
+
+    // Running
+    val benchmark = Benchmark.read(baseDir.resolve(outputDir).resolve("Tiger.yml"))
+    val results = BenchmarkRunner(pieComponent.pie, languageComponent.runBenchmarkTask, languageComponent.termFactory).run(
+        benchmark, baseDir
+    )
+
+    val resultsFile = baseDir.resolve(outputDir).resolve("Tiger.csv")
+    results.writeAsCsv(resultsFile)
+
     println("Done!")
 }
 
-private fun runBenchmark(pie: Pie, benchmarker: Benchmarker, basePath: Path) {
-    val benchmarks = benchmarker.loadAll(basePath)
-    val results = benchmarker.runAll(pie, benchmarks)
-    results.writeAsCsv(basePath.resolve("results.csv"))
-}
 
-private fun prepareBenchmark(pie: Pie, benchmarker: Benchmarker, basePath: Path, inputPath: Path) {
-    val benchmarks = benchmarker.prepareAll(pie, inputPath)
-    benchmarker.saveAll(benchmarks, basePath)
-}
+//private fun runBenchmark(pie: Pie, benchmarker: Benchmarker, basePath: Path, inputYamlPath: Path) {
+//    val benchmarks = benchmarker.loadAll(basePath)
+//    val results = benchmarker.runAll(pie, benchmarks)
+//    results.writeAsCsv(basePath.resolve("results.csv"))
+//}
+
+//private fun prepareBenchmark(pie: Pie, benchmarker: Benchmarker, basePath: Path, inputPath: Path) {
+//    val benchmarks = benchmarker.prepareAll(pie, inputPath)
+//    benchmarker.saveAll(benchmarks, basePath)
+//}
 
 //fun testCodeCompletion(
 //    pieComponent: PieComponent,
@@ -118,27 +136,27 @@ private fun prepareBenchmark(pie: Pie, benchmarker: Benchmarker, basePath: Path,
 //}
 
 
-fun prepareTestFile(
-    pieComponent: PieComponent,
-    resourcesComponent: TigerResourcesComponent,
-    textResourceRegistry: TextResourceRegistry,
-    languageComponent: TigerBenchLanguageComponent
-) {
-    val basePath =
-        Paths.get("/Users/daniel/repos/spoofax3/devenv-cc-sept-21/spoofax.pie/example/tiger/spoofax3/tiger.spoofax3.ccbench/")
-    pieComponent.newSession().use { session ->
-        session.requireWithoutObserving(
-            languageComponent.prepareTestFileTask.createTask(
-                PrepareTestFileTask.Input(
-                    basePath.resolve("testfiles"),
-                    basePath.resolve("testfiles/test2.tig"),
-                    basePath.resolve("testfiles/results/"),
-                    textResourceRegistry,
-                )
-            )
-        )
-    }
-}
+//fun prepareTestFile(
+//    pieComponent: PieComponent,
+//    resourcesComponent: TigerResourcesComponent,
+//    textResourceRegistry: TextResourceRegistry,
+//    languageComponent: TigerBenchLanguageComponent
+//) {
+//    val basePath =
+//        Paths.get("/Users/daniel/repos/spoofax3/devenv-cc-sept-21/spoofax.pie/example/tiger/spoofax3/tiger.spoofax3.ccbench/")
+//    pieComponent.newSession().use { session ->
+//        session.requireWithoutObserving(
+//            languageComponent.prepareTestFileTask.createTask(
+//                PrepareTestFileTask.Input(
+//                    basePath.resolve("testfiles"),
+//                    basePath.resolve("testfiles/test2.tig"),
+//                    basePath.resolve("testfiles/results/"),
+//                    textResourceRegistry,
+//                )
+//            )
+//        )
+//    }
+//}
 
 fun codeCompletion(
     pieComponent: PieComponent,

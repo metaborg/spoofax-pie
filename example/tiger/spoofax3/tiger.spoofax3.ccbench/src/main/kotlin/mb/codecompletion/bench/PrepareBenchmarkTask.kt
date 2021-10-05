@@ -2,11 +2,12 @@ package mb.codecompletion.bench
 
 import mb.aterm.common.TermToString
 import mb.codecompletion.bench.utils.runParse
+import mb.codecompletion.bench.utils.withExtension
+import mb.codecompletion.bench.utils.withName
 import mb.common.result.Result
 import mb.common.util.ListView
 import mb.nabl2.terms.stratego.TermOrigin
 import mb.pie.api.ExecContext
-import mb.pie.api.None
 import mb.pie.api.Pie
 import mb.pie.api.Supplier
 import mb.pie.api.TaskDef
@@ -24,7 +25,6 @@ import org.spoofax.terms.util.TermUtils
 import java.io.Serializable
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.Paths
 import javax.inject.Inject
 
 /**
@@ -36,7 +36,20 @@ class PrepareBenchmarkTask @Inject constructor(
     private val prettyPrintTask: TigerPPPartial,
     private val textResourceRegistry: TextResourceRegistry,
     private val termFactory: ITermFactory,
-) : TaskDef<String, ListView<Benchmark>> {
+) : TaskDef<PrepareBenchmarkTask.Input, ListView<TestCase>> {
+
+    /**
+     * The input arguments for the task.
+     *
+     * @property projectDir the project directory
+     * @property inputFile the input language file, relative to the project directory
+     * @property testCaseDir the test case directory
+     */
+    data class Input(
+        val projectDir: Path,
+        val inputFile: Path,
+        val testCaseDir: Path,
+    ): Serializable
 
     /**
      * Runs this task.
@@ -44,20 +57,21 @@ class PrepareBenchmarkTask @Inject constructor(
      * @param inputFile the task input file
      * @return the benchmark
      */
-    fun run(pie: Pie, inputFile: Path): List<Benchmark> {
+    fun run(pie: Pie, projectDir: Path, inputFile: Path, testCaseDir: Path): List<TestCase> {
         pie.newSession().use { session ->
             val topDownSession = session.updateAffectedBy(emptySet())
-            return topDownSession.require(this.createTask(inputFile.toString())).toList()
+            return topDownSession.require(this.createTask(Input(projectDir, inputFile, testCaseDir))).toList()
         }
     }
 
     override fun getId(): String = PrepareBenchmarkTask::class.java.name
 
-    override fun exec(ctx: ExecContext, inputFile: String): ListView<Benchmark> {
-        val inputFilePath = Path.of(inputFile)
+    override fun exec(ctx: ExecContext, input: PrepareBenchmarkTask.Input): ListView<TestCase> {
         // Get the AST of the file
-        // We parse the input resource here, such that we don't measure the overhead of parsing the input resource again
-        val inputResource = ctx.require(inputFilePath)
+        // We parse and pretty-print the input resource here, such that are sure
+        // that the offset of the term is the same in the incomplete pretty-printed AST
+        val resInputFile = input.projectDir.resolve(input.inputFile)
+        val inputResource = ctx.require(resInputFile)
         val ast = parseTask.runParse(ctx, inputResource.key)
         val pp = prettyPrint(ctx, ast)
         val ppResource = textResourceRegistry.createResource(pp)
@@ -69,44 +83,31 @@ class PrepareBenchmarkTask @Inject constructor(
         // Downgrade the placeholders in the incomplete ASTs, and pretty-print them
         val prettyPrintedAsts = incompleteAsts.map { it.map { term -> prettyPrint(ctx, downgrade(ctx, term)) } }
 
-        // Append comments to the end
-//        val relativePath = input.projectDir.relativize(input.inputFile)
-//        val relativeDir = relativePath.parent ?: Paths.get("./")
-//        val filename = PrepareTestFileTask.Filename.parse(relativePath.fileName.toString())
-//        val commentedTestCases = prettyPrintedAsts.map { case -> case.map {
-//            it + "\n${
-//                CodeCompleteBenchTask.TestHeaders(
-//                    fileName = relativePath,
-//                    offset = case.offset,
-//                )
-//            }"
-//        } }
+        // Construct test cases and write the files to the test cases directory
+        val testCases = mutableListOf<TestCase>()
+        Files.createDirectories(input.testCaseDir.resolve(input.inputFile).parent)
+        for((i, case) in prettyPrintedAsts.withIndex()) {
+            // Write the pretty-printed AST to file
+            val outputFile = input.testCaseDir.resolve(input.inputFile.withName { "$it-$i" })
+            ctx.provide(outputFile)
+            Files.writeString(outputFile, case.value)
 
-        return ListView.of(prettyPrintedAsts.map {
-            Benchmark(
-                inputFilePath.fileName.toString(),
-                it.value, it.offset, it.expectedAst
-            )
-        })
+            // Write the expected AST to file
+            val expectedFile = outputFile.withName { "$it-expected" }.withExtension { "$it.aterm" }
+            ctx.provide(expectedFile)
+            Files.writeString(expectedFile, TermToString.toString(case.expectedAst))
 
-//        ctx.provide(input.outputDir)
-//        Files.createDirectories(input.outputDir)
-//        for((i, commentedTestCase) in prettyPrintedAsts.withIndex()) {
-//            // Write the pretty-printed AST to file
-//            val filePath = input.outputDir.resolve(relativeDir).resolve(filename.copy(name = "${filename.name}-$i").toString())
-//            ctx.provide(filePath)
-//            Files.writeString(filePath, commentedTestCase.value)
-//
-//            // Write the expected AST to file
-//            val expectedFilePath = input.outputDir.resolve(relativeDir).resolve(filename.copy(name = "${filename.name}-$i-expected", extension = filename.extension + ".aterm").toString())
-//            ctx.provide(expectedFilePath)
-//            Files.writeString(expectedFilePath, TermToString.toString(commentedTestCase.expectedAst))
-//        }
-//        return Benchmark(
-//            input.inputFile.fileName.toString(),
-//
-//        )
-//        TODO()
+            // Add the test case
+            testCases.add(TestCase(
+                input.inputFile.withName { "$it-$i" }.withExtension("").toString(),
+                input.inputFile,
+                input.testCaseDir.relativize(outputFile),
+                case.offset,
+                input.testCaseDir.relativize(expectedFile),
+            ))
+        }
+
+        return ListView.of(testCases)
     }
 
 
@@ -116,12 +117,12 @@ class PrepareBenchmarkTask @Inject constructor(
      * @param term the term
      * @return a sequence of all possible variants of this term with a placeholder
      */
-    private fun buildIncompleteAsts(term: IStrategoTerm): List<TestCase<IStrategoTerm>> {
+    private fun buildIncompleteAsts(term: IStrategoTerm): List<TestCaseInfo<IStrategoTerm>> {
         // Replaced the term with a placeholder
-        return listOf(TestCase(makePlaceholder("x"), getStartOffset(term), term)) +
+        return listOf(TestCaseInfo(makePlaceholder("x"), getStartOffset(term), term)) +
           // or replaced a subterm with all possible sub-asts with a placeholder
           term.subterms.flatMapIndexed { i, subTerm ->
-              buildIncompleteAsts(subTerm).map { (newSubTerm, offset, expectedAst) -> TestCase(term.withSubterm(i, newSubTerm), offset, expectedAst) }
+              buildIncompleteAsts(subTerm).map { (newSubTerm, offset, expectedAst) -> TestCaseInfo(term.withSubterm(i, newSubTerm), offset, expectedAst) }
           }
     }
 
@@ -204,13 +205,13 @@ class PrepareBenchmarkTask @Inject constructor(
      * @property offset the placeholder offset
      * @property expectedAst the expected AST
      */
-    data class TestCase<out T>(
+    data class TestCaseInfo<out T>(
         val value: T,
         val offset: Int,
         val expectedAst: IStrategoTerm,
     ) {
-        fun <R> map(f: (T) -> R): TestCase<R> {
-            return TestCase(f(value), offset, expectedAst)
+        fun <R> map(f: (T) -> R): TestCaseInfo<R> {
+            return TestCaseInfo(f(value), offset, expectedAst)
         }
     }
 

@@ -31,6 +31,7 @@ import kotlin.streams.asSequence
  * Takes a file and produces n files, each with a placeholder at a different spot.
  * The comments at the top of the file indicate test information.
  */
+@Deprecated("")
 class PrepareTestFileTask @Inject constructor(
   val parseTask: TigerParse,
   val downgradePlaceholdersTask: TigerDowngradePlaceholdersStatix,

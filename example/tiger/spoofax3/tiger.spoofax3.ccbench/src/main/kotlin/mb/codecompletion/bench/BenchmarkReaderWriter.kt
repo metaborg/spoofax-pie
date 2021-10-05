@@ -18,8 +18,9 @@ import kotlin.io.path.readText
 import kotlin.io.path.writeText
 
 /**
- * The [Benchmark] reader/writer.
+ * The [Benchmark] and [TestCase] reader/writer.
  */
+@Deprecated("")
 class BenchmarkReaderWriter(
     private val termReader: TermReader,
     private val termWriter: TermWriter,
@@ -32,17 +33,17 @@ class BenchmarkReaderWriter(
      * @param filename the filename of the test, such as {@code test.tig}
      * @param directory the directory where to write extra files for the benchmark
      */
-    fun write(benchmark: Benchmark, writer: Writer, filename: String, directory: Path) {
+    fun write(benchmark: BenchmarkCase, writer: Writer, filename: String, directory: Path) {
         val inputFile = directory.resolve(filename)
         inputFile.writeText(benchmark.inputText)
         val expectedTermFile = directory.resolve(filename).withName { "$it-expected" }.withExtension { "$it.aterm" }
         termWriter.writeToPath(benchmark.expectedTerm, expectedTermFile)
 
         val mapper = createObjectMapper()
-        mapper.writeValue(writer, BenchmarkData(
-            inputFile.toString(),
+        mapper.writeValue(writer, BenchmarkCase.Data(
+            directory.relativize(inputFile).toString(),
             benchmark.placeholderOffset,
-            expectedTermFile.toString()
+            directory.relativize(expectedTermFile).toString()
         ))
     }
 
@@ -54,7 +55,7 @@ class BenchmarkReaderWriter(
      * @param filename the filename of the test, such as {@code test.tig}
      * @param directory the directory where to write extra files for the benchmark
      */
-    fun write(benchmark: Benchmark, stream: OutputStream, filename: String, directory: Path) =
+    fun write(benchmark: BenchmarkCase, stream: OutputStream, filename: String, directory: Path) =
         stream.bufferedWriter().use { writer -> write(benchmark, writer, filename, directory) }
 
     /**
@@ -65,7 +66,7 @@ class BenchmarkReaderWriter(
      * @param filename the filename of the test, such as {@code test.tig}
      * @param directory the directory where to write extra files for the benchmark
      */
-    fun write(benchmark: Benchmark, file: Path, filename: String, directory: Path) =
+    fun write(benchmark: BenchmarkCase, file: Path, filename: String, directory: Path) =
         file.bufferedWriter().use { writer -> write(benchmark, writer, filename, directory) }
 
     /**
@@ -76,14 +77,14 @@ class BenchmarkReaderWriter(
      * @param directory the directory where to read extra files for the benchmark
      * @return the read benchmark
      */
-    fun read(reader: Reader, filename: String, directory: Path): Benchmark {
+    fun read(reader: Reader, filename: String, directory: Path): BenchmarkCase {
         val mapper = createObjectMapper()
-        val data = mapper.readValue(reader, BenchmarkData::class.java)
+        val data = mapper.readValue(reader, BenchmarkCase.Data::class.java)
 
         val inputText = directory.resolve(data.inputFile).readText()
         val expectedTerm = termReader.readFromPath(directory.resolve(data.expectedTermFile))
 
-        return Benchmark(
+        return BenchmarkCase(
             filename,
             inputText,
             data.placeholderOffset,
@@ -99,7 +100,7 @@ class BenchmarkReaderWriter(
      * @param directory the directory where to read extra files for the benchmark
      * @return the read benchmark
      */
-    fun read(stream: InputStream, filename: String, directory: Path): Benchmark =
+    fun read(stream: InputStream, filename: String, directory: Path): BenchmarkCase =
         stream.bufferedReader().use { reader -> read(reader, filename, directory) }
 
     /**
@@ -110,7 +111,7 @@ class BenchmarkReaderWriter(
      * @param directory the directory where to read extra files for the benchmark
      * @return the read benchmark
      */
-    fun read(file: Path, filename: String, directory: Path): Benchmark =
+    fun read(file: Path, filename: String, directory: Path): BenchmarkCase =
         file.bufferedReader().use { reader -> read(reader, filename, directory) }
 
     /**

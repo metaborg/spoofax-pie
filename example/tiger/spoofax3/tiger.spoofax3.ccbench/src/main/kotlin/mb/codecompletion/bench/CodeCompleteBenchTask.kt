@@ -28,6 +28,7 @@ import kotlin.streams.asSequence
 /**
  * Benchmarks a single code completion invocation.
  */
+@Deprecated("")
 class CodeCompleteBenchTask @Inject constructor(
   val parseTask: TigerParse,
   val codeCompletionTask: TigerCodeCompletionTaskDef,
