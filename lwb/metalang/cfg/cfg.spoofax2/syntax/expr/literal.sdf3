@@ -3,6 +3,7 @@ module expr/literal
 imports
 
   expr
+  lex/int
   lex/string
   lex/path
   lex/java_id
@@ -18,6 +19,9 @@ context-free syntax
   BoolLit.True  = "true"
   BoolLit.False = "false"
   Expr.Bool = <<BoolLit>>
+
+  Expr.Int = <<IntLit>>
+  Expr.UInt = <<UIntLit>>
 
   Expr.String = <<StringLit>>
   

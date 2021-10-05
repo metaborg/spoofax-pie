@@ -290,7 +290,11 @@ The following `ConstraintAnalyzerOption`s are supported:
 | Syntax | Required? | Description | Type |
 | - | - | - | - |
 | `multi-file = $Expression` | no | Whether multi-file analysis is enabled. Defaults to `false`. | Boolean |
-| `stratego-strategy = Expression` | no | The stratego strategy entry-point that handles communication with the constraint-solver. Defaults to `editor-analyze`. | Stratego strategy identifier |
+| `stratego-strategy = $Expression` | no | The stratego strategy entry-point that handles communication with the constraint-solver. Defaults to `editor-analyze`. | Stratego strategy identifier |
+| `default-statix-message-stacktrace-length = $Expression` | no | The default Statix message stacktrace length to use. Default is implementation-defined. Does nothing if Statix is not enabled. | Unsigned integer |
+| `default-statix-message-term-depth = $Expression` | no | The default Statix message term depth to use. Default is implementation-defined. Does nothing if Statix is not enabled. | Unsigned integer |
+| `default-statix-test-log-level = $Expression` | no | The default Statix test log level to use. Default is implementation-defined. Does nothing if Statix is not enabled. | String |
+| `default-statix-supress-cascading-errors = $Expression` | no | Whether to suppress cascading errors by default. Default is implementation-defined. Does nothing if Statix is not enabled. | Boolean |
 
 ### Multi-language analyzer
 

@@ -247,6 +247,10 @@ public class CfgAstToObject {
             subParts.forOneSubtermAsString("ConstraintAnalyzerStrategoStrategy", base::strategoStrategy);
             // TODO: more constraintAnalyzer language properties
             final ConstraintAnalyzerAdapterCompiler.Input.Builder adapter = adapterBuilder.withConstraintAnalyzer();
+            subParts.forOneSubtermAsInt("ConstraintAnalyzerDefaultStatixMessageStacktraceLength", adapter::defaultStatixMessageStacktraceLength);
+            subParts.forOneSubtermAsInt("ConstraintAnalyzerDefaultStatixMessageTermDepth", adapter::defaultStatixMessageTermDepth);
+            subParts.forOneSubtermAsString("ConstraintAnalyzerDefaultStatixTestLogLevel", adapter::defaultStatixTestLogLevel);
+            subParts.forOneSubtermAsBool("ConstraintAnalyzerDefaultStatixSuppressCascadingErrors", adapter::defaultStatixSuppressCascadingErrors);
             // TODO: constraintAnalyzer adapter properties
         });
         parts.getAllSubTermsInListAsParts("MultilangAnalyzerSection").ifSome(subParts -> {

@@ -1,5 +1,6 @@
 package mb.cfg.convert;
 
+import mb.aterm.common.InvalidAstShapeException;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Severity;
 import mb.common.option.Option;
@@ -10,7 +11,6 @@ import mb.jsglr.common.TermTracer;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.TypeInfo;
-import mb.aterm.common.InvalidAstShapeException;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -106,6 +106,24 @@ class Parts {
         getOneSubterm(name).ifSome(consumer);
     }
 
+    Option<Boolean> getOneSubtermAsBool(String name) {
+        return getOneSubterm(name)
+            .flatMap(t -> Option.ofOptional(TermUtils.asApplAt(t, 0)))
+            .map(a -> a.getConstructor().getName().equals("True"));
+    }
+
+    void forOneSubtermAsBool(String name, Consumer<Boolean> consumer) {
+        getOneSubtermAsBool(name).ifSome(consumer);
+    }
+
+    Option<Integer> getOneSubtermAsInt(String name) {
+        return getOneSubterm(name).map(Parts::toJavaInt);
+    }
+
+    void forOneSubtermAsInt(String name, Consumer<Integer> consumer) {
+        getOneSubtermAsInt(name).ifSome(consumer);
+    }
+
     Option<String> getOneSubtermAsString(String name) {
         return getOneSubterm(name).map(Parts::toJavaString);
     }
@@ -128,16 +146,6 @@ class Parts {
 
     void forOneSubtermAsTypeInfo(String name, Consumer<TypeInfo> consumer) {
         getOneSubtermAsTypeInfo(name).ifSome(consumer);
-    }
-
-    Option<Boolean> getOneSubtermAsBool(String name) {
-        return getOneSubterm(name)
-            .flatMap(t -> Option.ofOptional(TermUtils.asApplAt(t, 0)))
-            .map(a -> a.getConstructor().getName().equals("True"));
-    }
-
-    void forOneSubtermAsBool(String name, Consumer<Boolean> consumer) {
-        getOneSubtermAsBool(name).ifSome(consumer);
     }
 
 
@@ -251,6 +259,31 @@ class Parts {
         return TermTracer.getRegion(term);
     }
 
+
+    public static Integer toJavaInt(IStrategoTerm term) {
+        if(TermUtils.isAppl(term, "Int", 1) || TermUtils.isAppl(term, "UInt", 1)) {
+            final String intString = TermUtils.asJavaStringAt(term, 0)
+                .orElseThrow(() -> new InvalidAstShapeException("string term representing an integer as first subterm", term));
+            return parseStringToInt(intString, term.getSubterm(0));
+        } else if(TermUtils.isString(term)) {
+            final String intString = TermUtils.asJavaStringAt(term, 0)
+                .orElseThrow(() -> new InvalidAstShapeException("string term representing an integer", term));
+            return parseStringToInt(intString, term);
+        } else if(TermUtils.isInt(term)) {
+            return TermUtils.asJavaInt(term)
+                .orElseThrow(() -> new InvalidAstShapeException("integer term", term));
+        } else {
+            throw new InvalidAstShapeException("integer or Int/UInt application", term);
+        }
+    }
+
+    private static Integer parseStringToInt(String intString, IStrategoTerm term) {
+        try {
+            return Integer.parseInt(intString);
+        } catch(NumberFormatException e) {
+            throw new InvalidAstShapeException("string term representing an integer", term, e);
+        }
+    }
 
     public static String toJavaString(IStrategoTerm term) {
         if(TermUtils.isAppl(term, "String", 1)) {

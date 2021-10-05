@@ -62,6 +62,11 @@ context-free syntax
   ConstraintAnalyzerOption.ConstraintAnalyzerEnableStatix     = <enable-statix = <Expr>>
   ConstraintAnalyzerOption.ConstraintAnalyzerMultiFile        = <multi-file = <Expr>>
   ConstraintAnalyzerOption.ConstraintAnalyzerStrategoStrategy = <stratego-strategy = <Expr>>
+  
+  ConstraintAnalyzerOption.ConstraintAnalyzerDefaultStatixMessageStacktraceLength = <default-statix-message-stacktrace-length = <Expr>>
+  ConstraintAnalyzerOption.ConstraintAnalyzerDefaultStatixMessageTermDepth        = <default-statix-message-term-depth = <Expr>>
+  ConstraintAnalyzerOption.ConstraintAnalyzerDefaultStatixTestLogLevel            = <default-statix-test-log-level = <Expr>>
+  ConstraintAnalyzerOption.ConstraintAnalyzerDefaultStatixSuppressCascadingErrors = <default-statix-supress-cascading-errors = <Expr>>
 
 context-free syntax
 

@@ -13,6 +13,8 @@ signature
 
   sorts TYPE constructors
     BOOL        : TYPE
+    INT         : TYPE
+    UINT        : TYPE
     STRING      : TYPE
     PATH        : TYPE
     JAVA_ID     : TYPE

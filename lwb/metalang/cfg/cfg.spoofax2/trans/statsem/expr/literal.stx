@@ -10,6 +10,8 @@ imports
 rules
 
   typeOfExpr(_, Bool(_))       = BOOL().
+  typeOfExpr(_, Int(_))        = INT().
+  typeOfExpr(_, UInt(_))       = UINT().
   typeOfExpr(_, String(_))     = STRING().
   typeOfExpr(_, Path(_))       = PATH().
   typeOfExpr(_, JavaId(_))     = JAVA_ID().

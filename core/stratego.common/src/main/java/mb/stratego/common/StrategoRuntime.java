@@ -214,6 +214,12 @@ public class StrategoRuntime {
         return new StrategoRuntime(this, newContextObject);
     }
 
+    public <T> StrategoRuntime addContextObject(Class<T> clazz, T contextObject) {
+        final AdaptableContext newContextObject = new AdaptableContext(this.contextObject);
+        newContextObject.put(clazz, contextObject);
+        return new StrategoRuntime(this, newContextObject);
+    }
+
     public StrategoRuntime addContextObjects(Object... contextObjects) {
         final AdaptableContext newContextObject = new AdaptableContext(this.contextObject);
         for(Object contextObject : contextObjects) {

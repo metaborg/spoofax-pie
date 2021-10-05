@@ -22,6 +22,10 @@ public class AdaptableContext {
         map.put(value);
     }
 
+    public <T> void put(Class<T> clazz, T value) {
+        map.put(clazz, value);
+    }
+
     public void putAll(AdaptableContext context) {
         map.putAll(context.map);
     }
