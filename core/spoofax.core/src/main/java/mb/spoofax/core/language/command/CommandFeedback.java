@@ -91,4 +91,13 @@ public class CommandFeedback implements Serializable {
     public boolean hasErrorMessagesOrException() {
         return hasErrorMessages() || hasException();
     }
+
+
+    @Override public String toString() {
+        return "CommandFeedback{" +
+            "messages=" + messages +
+            ", exception=" + exception +
+            ", showFeedbacks=" + showFeedbacks +
+            '}';
+    }
 }

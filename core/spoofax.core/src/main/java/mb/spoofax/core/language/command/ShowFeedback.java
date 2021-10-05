@@ -39,13 +39,13 @@ public abstract class ShowFeedback implements Serializable {
         return ShowFeedbacks.showText(text, name, null);
     }
 
-    public static ShowFeedback showTestResults(TestResults testResults) { return ShowFeedbacks.showTestResults(testResults, null); }
+    @SuppressWarnings("ConstantConditions")
+    public static ShowFeedback showTestResults(TestResults testResults) {
+        return ShowFeedbacks.showTestResults(testResults, null);
+    }
+
 
     public abstract <R> R match(Cases<R> cases);
-
-    public ShowFeedbacks.CaseOfMatchers.TotalMatcher_ShowFile caseOf() {
-        return ShowFeedbacks.caseOf(this);
-    }
 
     public Optional<ResourceKey> getFile() {
         return ShowFeedbacks.getFile(this);
@@ -59,7 +59,7 @@ public abstract class ShowFeedback implements Serializable {
         return ShowFeedbacks.getText(this);
     }
 
-    public Optional<Region> getRegion() {
+    @SuppressWarnings("ConstantConditions") public Optional<Region> getRegion() {
         final @Nullable Region region = ShowFeedbacks.getRegion(this);
         return Optional.ofNullable(region);
     }
@@ -68,9 +68,24 @@ public abstract class ShowFeedback implements Serializable {
         return ShowFeedbacks.getTestResults(this);
     }
 
+    public static ShowFeedbacks.CasesMatchers.TotalMatcher_ShowFile cases() {
+        return ShowFeedbacks.cases();
+    }
+
+    public ShowFeedbacks.CaseOfMatchers.TotalMatcher_ShowFile caseOf() {
+        return ShowFeedbacks.caseOf(this);
+    }
+
+
     @Override public abstract int hashCode();
 
     @Override public abstract boolean equals(@Nullable Object obj);
 
-    @Override public abstract String toString();
+    @Override @SuppressWarnings("ConstantConditions") public String toString() {
+        return cases()
+            .showFile((file, region) -> "show file '" + file + "'" + (region != null ? " @" + region : ""))
+            .showText((text, name, region) -> "show text (" + text.length() + " chars) with name '" + name + "'" + (region != null ? " @" + region : ""))
+            .showTestResults((testResults, region) -> "show test results (" + testResults.numPassed + " passed, " + testResults.numFailed + " failed)" + (region != null ? " @" + region : ""))
+            .apply(this);
+    }
 }
