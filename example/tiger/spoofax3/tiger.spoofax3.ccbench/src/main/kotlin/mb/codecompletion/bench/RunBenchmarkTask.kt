@@ -29,8 +29,6 @@ import javax.inject.Inject
 class RunBenchmarkTask @Inject constructor(
     private val parseTask: TigerParse,
     private val codeCompletionTask: TigerCodeCompletionTaskDef,
-    private val textResourceRegistry: TextResourceRegistry,
-    private val termFactory: ITermFactory,
 ) : TaskDef<RunBenchmarkTask.Input, BenchmarkResult> {
 
     data class Input(
@@ -76,20 +74,9 @@ class RunBenchmarkTask @Inject constructor(
     override fun getId(): String = RunBenchmarkTask::class.java.name
 
     override fun exec(ctx: ExecContext, input: Input): BenchmarkResult {
-//        // Copy the input file into the target project
-//        val srcInputFile = input.testCaseDir.resolve(input.testCase.inputFile)
         val dstInputFile = input.targetProjectDir.resolve(input.testCase.file)
-//        ctx.require(srcInputFile)
-//        ctx.provide(dstInputFile)
-//        Files.createDirectories(dstInputFile.parent)
-//        Files.copy(srcInputFile, dstInputFile)
-//
-//        // Read the expected term
-//        val resExpectedFile = input.testCaseDir.resolve(input.testCase.expectedFile)
-//        ctx.require(resExpectedFile)
-//        val expectedTerm = StrategoTerms(termFactory).fromStratego(TAFTermReader(termFactory).readFromPath(resExpectedFile))
 
-//        // We parse the input resource here, such that we don't measure the overhead of parsing the input resource again
+        // We parse the input resource here, such that we don't measure the overhead of parsing the input resource again
         val dstInputResource = ctx.require(dstInputFile)
         parseTask.runParse(ctx, dstInputResource.key)
 

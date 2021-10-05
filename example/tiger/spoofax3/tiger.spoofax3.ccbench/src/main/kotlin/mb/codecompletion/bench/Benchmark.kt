@@ -101,7 +101,6 @@ data class Benchmark(
             mapper.registerModule(kotlinModule)
             val customModule = SimpleModule()
                 .addSerializer(Path::class.java, PathSerializer())
-//                .addDeserializer(Path::class.java, PathDeserializer())
             mapper.registerModule(customModule)
             return mapper
         }
