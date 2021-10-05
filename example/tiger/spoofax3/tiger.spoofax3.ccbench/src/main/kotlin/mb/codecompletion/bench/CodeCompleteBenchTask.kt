@@ -25,20 +25,23 @@ import kotlin.io.path.extension
 import kotlin.io.path.nameWithoutExtension
 import kotlin.streams.asSequence
 
-class CodeCompleteTestTask @Inject constructor(
+/**
+ * Benchmarks a single code completion invocation.
+ */
+class CodeCompleteBenchTask @Inject constructor(
   val parseTask: TigerParse,
   val codeCompletionTask: TigerCodeCompletionTaskDef,
   val termFactory: ITermFactory,
-) : TaskDef<CodeCompleteTestTask.Input, CompletenessTestResult> {
+) : TaskDef<CodeCompleteBenchTask.Input, CodeCompleteBenchResult> {
 
   data class Input(
     val projectDir: Path,
     val inputFile: Path,
   ) : Serializable
 
-  override fun getId(): String = CodeCompleteTestTask::class.java.name
+  override fun getId(): String = CodeCompleteBenchTask::class.java.name
 
-  override fun exec(ctx: ExecContext, input: Input): CompletenessTestResult {
+  override fun exec(ctx: ExecContext, input: Input): CodeCompleteBenchResult {
     val inputFile = input.inputFile
     val expectedAstFile = input.inputFile.resolveSibling(input.inputFile.nameWithoutExtension + "-expected." + input.inputFile.extension + ".aterm")
     val ast = parse(ctx, inputFile)
@@ -63,7 +66,7 @@ class CodeCompleteTestTask @Inject constructor(
       throw IllegalStateException("Test failed, nothing matched expected AST: $expectedTerm\nGot: " + results.proposals.joinToString())
     }
 
-    return CompletenessTestResult(
+    return CodeCompleteBenchResult(
       eventHandler.parseTime,
       eventHandler.preparationTime,
       eventHandler.analysisTime,
@@ -74,7 +77,8 @@ class CodeCompleteTestTask @Inject constructor(
       0,
       0,
       0,
-      results.proposals.size()
+        true,
+      results.proposals.toList()
     )
   }
 

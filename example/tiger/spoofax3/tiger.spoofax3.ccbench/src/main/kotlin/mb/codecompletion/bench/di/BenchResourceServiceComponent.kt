@@ -7,13 +7,13 @@ import mb.resource.dagger.RootResourceServiceModule
 
 @ResourceServiceScope
 @Component(
-  modules = [
-    RootResourceServiceModule::class
-  ],
-  dependencies = [
-    BenchLoggerComponent::class
-  ]
+    modules = [
+        RootResourceServiceModule::class,
+    ],
+    dependencies = [
+        BenchLoggerComponent::class
+    ]
 )
-interface BenchResourceServiceComponent: RootResourceServiceComponent {
+interface BenchResourceServiceComponent : RootResourceServiceComponent {
 
 }

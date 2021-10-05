@@ -1,11 +1,13 @@
 package mb.codecompletion.bench
 
+import mb.common.codecompletion.CodeCompletionItem
 import java.io.Serializable
 
 /**
  * Completeness test results.
  */
-data class CompletenessTestResult(
+@Deprecated("Use BenchmarkResult")
+data class CodeCompleteBenchResult(
   val parseTime: Long,
   val preparationTime: Long,
   val analyzeTime: Long,
@@ -18,5 +20,6 @@ data class CompletenessTestResult(
   val expandQueriesTime: Long,
   val expandDeterministicTime: Long,
 
-  val numberOfResults: Int,
+  val success: Boolean,
+  val results: List<CodeCompletionItem>,
 ) : Serializable

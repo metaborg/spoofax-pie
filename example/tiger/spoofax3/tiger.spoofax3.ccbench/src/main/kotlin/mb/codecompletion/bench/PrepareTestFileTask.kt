@@ -66,7 +66,7 @@ class PrepareTestFileTask @Inject constructor(
     val filename = Filename.parse(relativePath.fileName.toString())
     val commentedTestCases = prettyPrintedAsts.map { case -> case.map {
       it + "\n${
-        CodeCompleteTestTask.TestHeaders(
+        CodeCompleteBenchTask.TestHeaders(
           fileName = relativePath,
           offset = case.offset,
         )
