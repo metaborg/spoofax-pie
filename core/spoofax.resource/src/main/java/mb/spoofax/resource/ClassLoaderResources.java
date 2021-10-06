@@ -1,4 +1,4 @@
-package mb.resource.common;
+package mb.spoofax.resource;
 
 import mb.common.result.ThrowingConsumer;
 import mb.resource.ReadableResource;

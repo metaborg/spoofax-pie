@@ -2,7 +2,7 @@ package mb.tiger;
 
 import mb.resource.classloader.ClassLoaderToNativeResolver;
 import mb.resource.classloader.ClassLoaderUrlResolver;
-import mb.resource.common.ClassLoaderResources;
+import mb.spoofax.resource.ClassLoaderResources;
 
 public class TigerClassloaderResources extends ClassLoaderResources {
     public TigerClassloaderResources(ClassLoaderUrlResolver urlResolver, ClassLoaderToNativeResolver toNativeResolver) {

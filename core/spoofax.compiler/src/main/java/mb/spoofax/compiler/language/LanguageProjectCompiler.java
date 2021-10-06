@@ -103,7 +103,7 @@ public class LanguageProjectCompiler implements TaskDef<Supplier<Result<Language
         dependencies.add(GradleConfiguredDependency.api(shared.resourceDep()));
         dependencies.add(GradleConfiguredDependency.api(shared.spoofaxCompilerInterfacesDep()));
         dependencies.add(GradleConfiguredDependency.api(shared.commonDep()));
-        dependencies.add(GradleConfiguredDependency.api(shared.resourceCommonDep()));
+        dependencies.add(GradleConfiguredDependency.api(shared.spoofaxResourceDep()));
         dependencies.add(GradleConfiguredDependency.compileOnly(shared.checkerFrameworkQualifiersDep()));
         input.parser().ifPresent((i) -> parserCompiler.getDependencies(i).addAllTo(dependencies));
         input.styler().ifPresent((i) -> stylerCompiler.getDependencies(i).addAllTo(dependencies));

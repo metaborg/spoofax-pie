@@ -31,6 +31,7 @@ dependencies {
 
   bundleEmbedApi("org.metaborg:common")
   bundleEmbedApi(project(":spoofax.core"))
+  bundleEmbedApi(project(":spoofax.resource"))
   bundleEmbedApi("org.metaborg:log.api")
   bundleEmbedApi("org.metaborg:resource")
   bundleEmbedApi("org.metaborg:pie.api")

@@ -12,7 +12,6 @@ if(org.gradle.util.VersionNumber.parse(gradle.gradleVersion).major < 6) {
 
 include("spoofax.depconstraints")
 
-include("resource.common")
 include("aterm.common")
 include("completions.common")
 include("jsglr.common")
@@ -34,6 +33,7 @@ include("spoofax2.common")
 include("tooling.eclipsebundle")
 
 include("spoofax.core")
+include("spoofax.resource")
 include("spoofax.test")
 
 include("spoofax.cli")

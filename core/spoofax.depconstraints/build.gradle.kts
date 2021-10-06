@@ -26,7 +26,6 @@ val yamlVersion = "1.26"
 dependencies {
   constraints {
     // Own projects
-    api(project(":resource.common"))
     api(project(":completions.common"))
     api(project(":jsglr.common"))
     api(project(":jsglr1.common"))
@@ -42,12 +41,13 @@ dependencies {
     api(project(":spoofax2.common"))
     api(project(":tooling.eclipsebundle"))  // TODO: bundle versions are not picked up when consuming this platform?
 
+    api(project(":spoofax.compiler.interfaces"))
+    api(project(":spoofax.resource"))
     api(project(":spoofax.core"))
     api(project(":spoofax.cli"))
     api(project(":spoofax.intellij"))
     api(project(":spoofax.eclipse")) // TODO: bundle versions are not picked up when consuming this platform?
     api(project(":spoofax.compiler"))
-    api(project(":spoofax.compiler.interfaces"))
     api(project(":spoofax.compiler.gradle"))
     api(project(":spoofax.compiler.eclipsebundle"))  // TODO: bundle versions are not picked up when consuming this platform?
 
