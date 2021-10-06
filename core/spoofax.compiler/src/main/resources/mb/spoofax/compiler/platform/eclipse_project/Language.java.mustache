@@ -8,6 +8,7 @@ import mb.spoofax.eclipse.EclipseLifecycleParticipant;
 import mb.spoofax.eclipse.EclipsePlatformComponent;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 import mb.spoofax.eclipse.resource.EclipseClassLoaderUrlResolver;
+import mb.spoofax.eclipse.resource.EclipseClassLoaderToNativeResolver;
 import mb.spoofax.eclipse.util.StatusUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -60,7 +61,7 @@ public class {{baseLanguage.id}} implements EclipseLifecycleParticipant {
     ) {
         if(resourcesComponent == null) {
             final {{adapterProjectCompilerInput.daggerResourcesComponent.qualifiedId}}.Builder builder = {{adapterProjectCompilerInput.daggerResourcesComponent.qualifiedId}}.builder()
-                .{{adapterProjectCompilerInput.resourcesModule.idAsCamelCase}}(new {{adapterProjectCompilerInput.resourcesModule.qualifiedId}}(new EclipseClassLoaderUrlResolver()))
+                .{{adapterProjectCompilerInput.resourcesModule.idAsCamelCase}}(new {{adapterProjectCompilerInput.resourcesModule.qualifiedId}}(new EclipseClassLoaderUrlResolver(), new EclipseClassLoaderToNativeResolver()))
                 ;
             getCustomizers(loggerComponent).forEach(c -> c.customize(builder));
             resourcesComponent = builder.build();

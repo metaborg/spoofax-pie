@@ -38,7 +38,7 @@ public class {{baseCheckAggregatorTaskDef.id}} implements TaskDef<ResourcePath, 
     }
 
     @Override public @Nullable KeyedMessages exec(ExecContext context, ResourcePath input) throws IOException {
-        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
 
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
         for(ResourceKey file : context.require(getSourceFiles, input)) {

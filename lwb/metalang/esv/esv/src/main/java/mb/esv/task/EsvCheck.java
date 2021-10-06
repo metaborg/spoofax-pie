@@ -35,7 +35,7 @@ public class EsvCheck implements TaskDef<EsvConfig, KeyedMessages> {
     }
 
     @Override public KeyedMessages exec(ExecContext context, EsvConfig config) throws Exception {
-        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
         final EsvVisitor visitor = new EsvVisitor(parse, config.includeDirectorySuppliers, config.includeAstSuppliers) {
             @Override

@@ -110,9 +110,9 @@ public class StatixCompileModule implements TaskDef<StatixCompileModule.Input, R
 
     @Override
     public Result<Option<Output>, ?> exec(ExecContext context, StatixCompileModule.Input input) throws Exception {
-        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
-        context.require(classLoaderResources.tryGetAsLocalResource(Input.class), ResourceStampers.hashFile());
-        context.require(classLoaderResources.tryGetAsLocalResource(Output.class), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(Input.class), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(Output.class), ResourceStampers.hashFile());
 
         final ResourcePath rootDirectory = input.rootDirectory;
         final ResourcePath file = input.file;

@@ -35,7 +35,7 @@ public class {{baseGetSourceFilesTaskDef.id}} implements TaskDef<ResourcePath, L
     }
 
     @Override public ListView<ResourcePath> exec(ExecContext context, ResourcePath input) throws Exception {
-        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
 
         final HierarchicalResource rootDirectory = context.getHierarchicalResource(input);
         // Require directories recursively, so we re-execute whenever a file is added/removed from a directory.

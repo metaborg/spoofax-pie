@@ -45,7 +45,7 @@ public class StatixCompileProject implements TaskDef<ResourcePath, Result<ListVi
 
     @Override
     public Result<ListView<StatixCompileModule.Output>, ?> exec(ExecContext context, ResourcePath input) throws Exception {
-        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
 
         final KeyedMessages messages = context.require(check, input);
         if(messages.containsError()) {

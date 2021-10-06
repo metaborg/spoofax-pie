@@ -24,7 +24,7 @@ public class {{baseShowAnalyzedAstTaskDef.id}} extends ShowAnalyzedAstTaskDef {
     }
 
     @Override public CommandFeedback exec(ExecContext context, Args args) throws Exception {
-        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
         return super.exec(context, args);
     }
 }

@@ -39,14 +39,14 @@ public class {{baseParseTaskDef.id}} extends JsglrParseTaskDef {
         @Nullable ResourceKey fileHint,
         @Nullable ResourcePath rootDirectoryHint
     ) throws Exception {
-        context.require(classLoaderResources.tryGetAsLocalDefinitionResource("{{languageProjectInput.parseTableAtermFileRelativePath}}"));
+        context.require(classLoaderResources.tryGetAsNativeDefinitionResource("{{languageProjectInput.parseTableAtermFileRelativePath}}"));
 {{#languageProjectInput.isJsglr2}}
-        context.require(classLoaderResources.tryGetAsLocalDefinitionResource("{{languageProjectInput.parseTablePersistedFileRelativePath}}"));
+        context.require(classLoaderResources.tryGetAsNativeDefinitionResource("{{languageProjectInput.parseTablePersistedFileRelativePath}}"));
 {{/languageProjectInput.isJsglr2}}
-        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
-        context.require(classLoaderResources.tryGetAsLocalResource({{languageProjectInput.parser.qualifiedId}}.class), ResourceStampers.hashFile());
-        context.require(classLoaderResources.tryGetAsLocalResource({{languageProjectInput.parserFactory.qualifiedId}}.class), ResourceStampers.hashFile());
-        context.require(classLoaderResources.tryGetAsLocalResource({{languageProjectInput.parseTable.qualifiedId}}.class), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource({{languageProjectInput.parser.qualifiedId}}.class), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource({{languageProjectInput.parserFactory.qualifiedId}}.class), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource({{languageProjectInput.parseTable.qualifiedId}}.class), ResourceStampers.hashFile());
         final {{languageProjectInput.parser.qualifiedId}} parser = parserProvider.get();
         try {
             return Result.ofOk(parser.parse(new JsglrParseInput(text, startSymbol != null ? startSymbol : "{{languageProjectInput.startSymbol}}", fileHint, rootDirectoryHint)));

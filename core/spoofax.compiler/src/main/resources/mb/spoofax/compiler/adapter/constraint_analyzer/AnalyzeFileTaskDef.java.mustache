@@ -44,7 +44,7 @@ public class {{baseAnalyzeFileTaskDef.id}} extends ConstraintAnalyzeFile {
     }
 
     @Override public Result<ConstraintAnalyzeFile.Output, ?> exec(ExecContext context, ConstraintAnalyzeFile.Input input) throws Exception {
-        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
 {{#isMultiFile}}
         final Result<ConstraintAnalyzeMultiTaskDef.SingleFileOutput, ?> analysis = context.require(
             analyze.createSingleFileOutputSupplier(

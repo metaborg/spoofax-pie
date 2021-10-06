@@ -102,7 +102,7 @@ public class SptCheck implements TaskDef<SptCheck.Input, KeyedMessages> {
     }
 
     @Override public KeyedMessages exec(ExecContext context, Input input) throws IOException, InterruptedException {
-        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
         final mb.jsglr.pie.JsglrParseTaskInput.Builder parseInputBuilder = parse.inputBuilder().withFile(input.file).rootDirectoryHint(Optional.ofNullable(input.rootDirectoryHint));
         final Result<JsglrParseOutput, JsglrParseException> parseResult = context.require(parse, parseInputBuilder.build());

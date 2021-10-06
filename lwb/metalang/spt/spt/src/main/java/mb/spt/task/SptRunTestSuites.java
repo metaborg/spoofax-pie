@@ -69,7 +69,7 @@ public class SptRunTestSuites implements TaskDef<SptRunTestSuites.Input, TestRes
     }
 
     @Override public TestResults exec(ExecContext context, SptRunTestSuites.Input input) throws IOException {
-        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
         final ResourceWalker walker = ResourceWalker.ofPath(PathMatcher.ofNoHidden());
         final HierarchicalResource rootDirectory = context.getHierarchicalResource(input.rootDirectory);
         final HierarchicalResource selectedDirectory = context.getHierarchicalResource(input.directory);

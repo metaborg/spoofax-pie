@@ -7,6 +7,7 @@ import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.EclipseLifecycleParticipant;
 import mb.spoofax.eclipse.EclipsePlatformComponent;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
+import mb.spoofax.eclipse.resource.EclipseClassLoaderToNativeResolver;
 import mb.spoofax.eclipse.resource.EclipseClassLoaderUrlResolver;
 import mb.spoofax.eclipse.util.StatusUtil;
 import mb.tiger.spoofax.DaggerTigerResourcesComponent;
@@ -62,7 +63,7 @@ public class TigerLanguage implements EclipseLifecycleParticipant {
     @Override public TigerResourcesComponent getResourceRegistriesProvider(EclipseLoggerComponent loggerComponent) {
         if(resourcesComponent == null) {
             resourcesComponent = DaggerTigerResourcesComponent.builder()
-                .tigerResourcesModule(new TigerResourcesModule(new EclipseClassLoaderUrlResolver()))
+                .tigerResourcesModule(new TigerResourcesModule(new EclipseClassLoaderUrlResolver(), new EclipseClassLoaderToNativeResolver()))
                 .build();
         }
         return resourcesComponent;

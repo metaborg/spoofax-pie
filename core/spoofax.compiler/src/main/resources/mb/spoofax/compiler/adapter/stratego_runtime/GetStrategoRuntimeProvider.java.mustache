@@ -35,7 +35,7 @@ public class {{baseGetStrategoRuntimeProviderTaskDef.id}} extends GetStrategoRun
     }
 
     @Override protected Provider<StrategoRuntime> getStrategoRuntimeProvider(ExecContext context) throws Exception {
-        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
 {{#languageProjectInput.strategyPackagePaths}}
         try {
             classLoaderResources.performWithResourceLocations(
@@ -60,7 +60,7 @@ public class {{baseGetStrategoRuntimeProviderTaskDef.id}} extends GetStrategoRun
         }
 {{/languageProjectInput.strategyPackagePaths}}
 {{#languageProjectInput.ctreeRelativePaths}}
-        context.require(classLoaderResources.tryGetAsLocalDefinitionResource("{{this}}"));
+        context.require(classLoaderResources.tryGetAsNativeDefinitionResource("{{this}}"));
 {{/languageProjectInput.ctreeRelativePaths}}
         return strategoRuntimeProvider;
     }

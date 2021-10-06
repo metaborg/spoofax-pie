@@ -7,26 +7,28 @@ import mb.resource.ResourceRegistry;
 import mb.resource.classloader.ClassLoaderResourceRegistry;
 import mb.resource.classloader.ClassLoaderResource;
 import mb.resource.classloader.ClassLoaderUrlResolver;
-import mb.resource.classloader.NoopClassLoaderUrlResolver;
+import mb.resource.classloader.ClassLoaderToNativeResolver;
 import mb.resource.hierarchical.HierarchicalResource;
 
 @Module
 public class {{baseResourcesModule.id}} {
-    private final ClassLoaderUrlResolver classLoaderUrlResolver;
+    private final ClassLoaderUrlResolver urlResolver;
+    private final ClassLoaderToNativeResolver toNativeResolver;
 
 
-    public {{baseResourcesModule.id}}(ClassLoaderUrlResolver classLoaderUrlResolver) {
-        this.classLoaderUrlResolver = classLoaderUrlResolver;
+    public {{baseResourcesModule.id}}(ClassLoaderUrlResolver urlResolver, ClassLoaderToNativeResolver toNativeResolver) {
+        this.urlResolver = urlResolver;
+        this.toNativeResolver = toNativeResolver;
     }
 
     public {{baseResourcesModule.id}}() {
-        this(new NoopClassLoaderUrlResolver());
+        this(ClassLoaderResourceRegistry.defaultUrlResolver, ClassLoaderResourceRegistry.defaultToNativeResolver);
     }
 
 
     @Provides @{{resourcesScope.qualifiedId}}
     {{classLoaderResources.classLoaderResources.qualifiedId}} provideClassLoaderResources() {
-        return new {{classLoaderResources.classLoaderResources.qualifiedId}}(classLoaderUrlResolver);
+        return new {{classLoaderResources.classLoaderResources.qualifiedId}}(urlResolver, toNativeResolver);
     }
 
     @Provides @{{resourcesScope.qualifiedId}} @{{qualifier.qualifiedId}}

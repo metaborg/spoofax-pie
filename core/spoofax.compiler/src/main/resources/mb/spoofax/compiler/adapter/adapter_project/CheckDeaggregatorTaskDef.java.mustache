@@ -66,7 +66,7 @@ public class {{baseCheckDeaggregatorTaskDef.id}} implements TaskDef<{{baseCheckD
     }
 
     @Override public @Nullable KeyedMessages exec(ExecContext context, Input input) throws Exception {
-        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
         if(input.rootDirectoryHint != null) {
             return context.require(checkMulti, input.rootDirectoryHint);
         } else {

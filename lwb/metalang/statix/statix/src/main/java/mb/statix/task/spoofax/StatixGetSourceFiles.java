@@ -38,7 +38,7 @@ public class StatixGetSourceFiles implements TaskDef<ResourcePath, ListView<Reso
     }
 
     @Override public ListView<ResourcePath> exec(ExecContext context, ResourcePath input) throws IOException {
-        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
         return configFunctionWrapper.get().apply(context, input).mapThrowingOrElse(
             o -> o.mapThrowingOrElse(
                 config -> {

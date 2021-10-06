@@ -105,8 +105,8 @@ public class StatixEvaluateTest implements TaskDef<StatixEvaluateTest.Args, Comm
     }
 
     @Override public CommandFeedback exec(ExecContext context, Args input) throws Exception {
-        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
-        context.require(classLoaderResources.tryGetAsLocalResource(Args.class), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(Args.class), ResourceStampers.hashFile());
 
         final ResourcePath rootDirectory = input.rootDirectory;
         final ResourceKey file = input.file;
