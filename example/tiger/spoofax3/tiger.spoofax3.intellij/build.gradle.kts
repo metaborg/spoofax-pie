@@ -4,5 +4,5 @@ plugins {
 }
 
 languageIntellijProject {
-  adapterProject.set(project(":tiger"))
+  adapterProject.set(project(":tiger.spoofax3"))
 }

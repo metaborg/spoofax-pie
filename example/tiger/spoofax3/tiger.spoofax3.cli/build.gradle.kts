@@ -4,7 +4,7 @@ plugins {
 }
 
 languageCliProject {
-  adapterProject.set(project(":tiger"))
+  adapterProject.set(project(":tiger.spoofax3"))
 }
 
 tasks {

@@ -4,7 +4,7 @@ plugins {
 }
 
 languageEclipseProject {
-  adapterProject.set(project(":tiger"))
+  adapterProject.set(project(":tiger.spoofax3"))
 }
 mavenize {
   majorVersion.set("2021-03")
