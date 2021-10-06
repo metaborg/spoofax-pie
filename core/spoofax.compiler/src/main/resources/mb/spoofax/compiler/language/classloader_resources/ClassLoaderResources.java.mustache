@@ -1,88 +1,11 @@
 package {{baseClassLoaderResources.packageId}};
 
-import mb.common.result.ThrowingConsumer;
-import mb.resource.ReadableResource;
-import mb.resource.classloader.ClassLoaderResource;
-import mb.resource.classloader.ClassLoaderResourceLocations;
-import mb.resource.classloader.ClassLoaderResourceRegistry;
+import mb.resource.common.ClassLoaderResources;
 import mb.resource.classloader.ClassLoaderUrlResolver;
-import mb.resource.classloader.JarFileWithPath;
-import mb.resource.fs.FSResource;
-import mb.resource.hierarchical.SegmentsPath;
+import mb.resource.classloader.ClassLoaderToNativeResolver;
 
-import java.io.IOException;
-
-public class {{baseClassLoaderResources.id}} {
-    public final ClassLoaderResourceRegistry resourceRegistry;
-    public final ClassLoaderResource definitionDirectory;
-
-
-    public {{baseClassLoaderResources.id}}(ClassLoaderUrlResolver classLoaderUrlResolver) {
-        this.resourceRegistry = new ClassLoaderResourceRegistry("{{qualifier}}", {{baseClassLoaderResources.id}}.class.getClassLoader(), classLoaderUrlResolver);
-        this.definitionDirectory = resourceRegistry.getResource("{{languageProject.packagePath}}");
-    }
-
-
-    public ClassLoaderResource getResource(String path) {
-        return resourceRegistry.getResource(path);
-    }
-
-    public ClassLoaderResource getResource(Class<?> clazz) {
-        return resourceRegistry.getResource(clazz);
-    }
-
-    public ClassLoaderResource getResource(SegmentsPath path) {
-        return resourceRegistry.getResource(path);
-    }
-
-    public ReadableResource tryGetAsLocalResource(String path) {
-        return getResource(path).tryAsLocalResource();
-    }
-
-    public ReadableResource tryGetAsLocalResource(Class<?> clazz) {
-        return getResource(clazz).tryAsLocalResource();
-    }
-
-    public ReadableResource tryGetAsLocalResource(SegmentsPath path) {
-        return getResource(path).tryAsLocalResource();
-    }
-
-    public void performWithResourceLocations(
-        String path,
-        ThrowingConsumer<FSResource, IOException> directoriesConsumer,
-        ThrowingConsumer<JarFileWithPath, IOException> jarFileWithPathConsumer
-    ) throws IOException {
-        final ClassLoaderResource classLoaderResource = resourceRegistry.getResource(path);
-        final ClassLoaderResourceLocations locations = classLoaderResource.getLocations();
-        for(FSResource directory : locations.directories) {
-            directoriesConsumer.accept(directory);
-        }
-        for(JarFileWithPath jarFileWithPath : locations.jarFiles) {
-            jarFileWithPathConsumer.accept(jarFileWithPath);
-        }
-    }
-
-
-    public ClassLoaderResource getDefinitionResource(String path) {
-        return definitionDirectory.appendAsRelativePath(path);
-    }
-
-    public ReadableResource tryGetAsLocalDefinitionResource(String path) {
-        return getDefinitionResource(path).tryAsLocalResource();
-    }
-
-    public void performWithDefinitionResourceLocations(
-        String path,
-        ThrowingConsumer<FSResource, IOException> directoriesConsumer,
-        ThrowingConsumer<JarFileWithPath, IOException> jarFileWithPathConsumer
-    ) throws IOException {
-        final ClassLoaderResource classLoaderResource = definitionDirectory.appendAsRelativePath(path);
-        final ClassLoaderResourceLocations locations = classLoaderResource.getLocations();
-        for(FSResource directory : locations.directories) {
-            directoriesConsumer.accept(directory);
-        }
-        for(JarFileWithPath jarFileWithPath : locations.jarFiles) {
-            jarFileWithPathConsumer.accept(jarFileWithPath);
-        }
+public class {{baseClassLoaderResources.id}} extends ClassLoaderResources {
+    public {{baseClassLoaderResources.id}}(ClassLoaderUrlResolver urlResolver, ClassLoaderToNativeResolver toNativeResolver) {
+        super("{{qualifier}}", {{baseClassLoaderResources.id}}.class.getClassLoader(), urlResolver, toNativeResolver, "{{languageProject.packagePath}}");
     }
 }

@@ -25,6 +25,6 @@ public class CharsRemoveA extends AstStrategoTransformTaskDef {
     }
 
     @Override protected void createDependencies(ExecContext context) throws IOException {
-        context.require(classloaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+        context.require(classloaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
     }
 }

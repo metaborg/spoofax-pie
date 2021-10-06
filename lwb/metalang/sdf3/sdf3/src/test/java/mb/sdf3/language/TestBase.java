@@ -2,6 +2,7 @@ package mb.sdf3.language;
 
 import mb.log.dagger.DaggerLoggerComponent;
 import mb.log.dagger.LoggerModule;
+import mb.resource.classloader.ClassLoaderResourceRegistry;
 import mb.resource.classloader.NoopClassLoaderUrlResolver;
 import mb.sdf3.Sdf3ClassLoaderResources;
 import mb.sdf3.Sdf3ConstraintAnalyzerFactory;
@@ -11,7 +12,7 @@ import mb.sdf3.Sdf3StylerFactory;
 import mb.spoofax.test.SingleBaseLanguageTestBase;
 
 class TestBase extends SingleBaseLanguageTestBase {
-    public static final Sdf3ClassLoaderResources classloaderResources = new Sdf3ClassLoaderResources(new NoopClassLoaderUrlResolver());
+    public static final Sdf3ClassLoaderResources classloaderResources = new Sdf3ClassLoaderResources(ClassLoaderResourceRegistry.defaultUrlResolver, ClassLoaderResourceRegistry.defaultToNativeResolver);
 
     public TestBase() {
         super(

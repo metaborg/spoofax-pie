@@ -81,7 +81,7 @@ public class {{baseHoverTaskDef.id}} implements TaskDef<{{baseHoverTaskDef.id}}.
     }
 
     @Override public Option<HoverResult> exec(ExecContext context, Args args) throws Exception {
-        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
         final Result<{{constraintAnalyzerInput.analyzeFileTaskDef.qualifiedId}}.Output, ?> analysis = context.require(
             analyzeFile,
             new {{constraintAnalyzerInput.analyzeFileTaskDef.qualifiedId}}.Input(args.rootDirectory, args.file)

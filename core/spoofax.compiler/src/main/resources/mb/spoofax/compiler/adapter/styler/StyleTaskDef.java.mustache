@@ -31,11 +31,11 @@ public class {{baseStyleTaskDef.id}} implements TaskDef<Supplier<Option<JSGLRTok
 
     @Override
     public Option<Styling> exec(ExecContext context, Supplier<Option<JSGLRTokens>> tokensSupplier) throws ExecException, IOException, InterruptedException {
-        context.require(classLoaderResources.tryGetAsLocalDefinitionResource("{{languageProjectInput.packedEsvRelativePath}}"));
-        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
-        context.require(classLoaderResources.tryGetAsLocalResource({{languageProjectInput.styler.qualifiedId}}.class), ResourceStampers.hashFile());
-        context.require(classLoaderResources.tryGetAsLocalResource({{languageProjectInput.stylerFactory.qualifiedId}}.class), ResourceStampers.hashFile());
-        context.require(classLoaderResources.tryGetAsLocalResource({{languageProjectInput.stylingRules.qualifiedId}}.class), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeDefinitionResource("{{languageProjectInput.packedEsvRelativePath}}"));
+        context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource({{languageProjectInput.styler.qualifiedId}}.class), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource({{languageProjectInput.stylerFactory.qualifiedId}}.class), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource({{languageProjectInput.stylingRules.qualifiedId}}.class), ResourceStampers.hashFile());
         return context.require(tokensSupplier).map(t -> styler.style(t.tokens));
     }
 }

@@ -41,7 +41,7 @@ public class Sdf3CheckMultiWrapper implements TaskDef<ResourcePath, KeyedMessage
     }
 
     @Override public KeyedMessages exec(ExecContext context, ResourcePath rootDirectory) throws IOException {
-        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
         return configFunctionWrapper.get().apply(context, rootDirectory).mapOrElse(
             o -> o.mapOrElse(
                 c -> checkWithConfig(context, c),

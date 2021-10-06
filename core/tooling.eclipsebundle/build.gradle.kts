@@ -15,6 +15,7 @@ dependencies {
 
   bundleApi(project(":spoofax.eclipse"))
 
+  bundleEmbedApi(project(":resource.common"))
   bundleEmbedApi(project(":aterm.common"))
   bundleEmbedApi(project(":constraint.common"))
   bundleEmbedApi(project(":constraint.pie"))

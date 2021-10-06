@@ -6,28 +6,30 @@ import dagger.multibindings.IntoSet;
 import mb.resource.ResourceRegistry;
 import mb.resource.classloader.ClassLoaderResource;
 import mb.resource.classloader.ClassLoaderResourceRegistry;
+import mb.resource.classloader.ClassLoaderToNativeResolver;
 import mb.resource.classloader.ClassLoaderUrlResolver;
-import mb.resource.classloader.NoopClassLoaderUrlResolver;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.tiger.TigerClassloaderResources;
 
 @Module
 public class TigerResourcesModule {
-    private final ClassLoaderUrlResolver classLoaderUrlResolver;
+    private final ClassLoaderUrlResolver urlResolver;
+    private final ClassLoaderToNativeResolver toNativeResolver;
 
 
-    public TigerResourcesModule(ClassLoaderUrlResolver classLoaderUrlResolver) {
-        this.classLoaderUrlResolver = classLoaderUrlResolver;
+    public TigerResourcesModule(ClassLoaderUrlResolver urlResolver, ClassLoaderToNativeResolver toNativeResolver) {
+        this.urlResolver = urlResolver;
+        this.toNativeResolver = toNativeResolver;
     }
 
     public TigerResourcesModule() {
-        this(new NoopClassLoaderUrlResolver());
+        this(ClassLoaderResourceRegistry.defaultUrlResolver, ClassLoaderResourceRegistry.defaultToNativeResolver);
     }
 
 
     @Provides @TigerResourcesScope
     TigerClassloaderResources provideClassLoaderResources() {
-        return new TigerClassloaderResources(classLoaderUrlResolver);
+        return new TigerClassloaderResources(urlResolver, toNativeResolver);
     }
 
     @Provides @TigerResourcesScope @TigerQualifier

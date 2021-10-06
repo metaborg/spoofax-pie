@@ -62,7 +62,7 @@ public class CharsDebugRemoveA implements TaskDef<CharsDebugRemoveA.Args, Comman
     }
 
     @Override public CommandFeedback exec(ExecContext context, Args args) throws Exception {
-        context.require(classloaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+        context.require(classloaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
         final ResourceKey file = args.file;
         return context
             .require(removeA, parse.inputBuilder().withFile(file).buildAstSupplier())

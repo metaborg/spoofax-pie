@@ -58,7 +58,7 @@ public class Sdf3CheckSpec implements TaskDef<Sdf3SpecConfig, KeyedMessages> {
     }
 
     @Override public KeyedMessages exec(ExecContext context, Sdf3SpecConfig input) throws Exception {
-        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
 
         final StrategoRuntime strategoRuntime = context.require(getStrategoRuntimeProvider, None.instance).getValue().get();

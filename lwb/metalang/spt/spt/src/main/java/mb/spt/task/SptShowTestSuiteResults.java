@@ -57,7 +57,7 @@ public class SptShowTestSuiteResults implements TaskDef<SptShowTestSuiteResults.
 
     @Override
     public CommandFeedback exec(ExecContext context, Args input) throws Exception {
-        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
         TestSuiteResult result = context.require(checkForOutput, new SptRunTestSuite.Input(input.file, input.rootDir));
         return CommandFeedback.of(ShowFeedback.showTestResults(new TestResults(ListView.of(result))));
     }
