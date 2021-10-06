@@ -1,0 +1,11 @@
+module static-semantics/actions/emails
+
+imports
+  static-semantics/types/built-ins
+
+  static-semantics/webdsl
+
+rules
+
+  typeOfExp(s, SendEmailFunctionCall(e)) = bool(s) :- /* TO-DO: implement validation of email call */
+    try { false } | warning $[Static analysis of email call not yet implemented] .

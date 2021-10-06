@@ -1,0 +1,146 @@
+module WebDSL-DataModel
+
+imports
+  WebDSL-Action
+  WebDSL-Core
+  WebDSL-Lexical
+
+context-free sorts
+
+  EntityBodyDeclaration
+
+context-free syntax
+
+  Definition.Entity = <
+    entity <Id> : <Id> {
+      <EntityBodyDeclaration*>
+    }
+  >
+  Definition.EntityNoSuper = <
+    entity <Id> {
+      <EntityBodyDeclaration*>
+    }
+  >
+  Definition.SessionEntity = <
+    session <Id> {
+      <EntityBodyDeclaration*>
+    }
+  >
+
+  Definition.ExtendEntity = <
+    extend entity <Id> {
+      <EntityBodyDeclaration*>
+    }
+  >
+  Definition.ExtendSessionEntity = <
+    extend session <Id> {
+      <EntityBodyDeclaration*>
+    }
+  >
+
+context-free restrictions
+
+  "cache" -/- [a-zA-Z0-9\_]
+
+context-free syntax
+
+  Definition.GlobalVarDecl = <
+    var <VarId> : <Sort>
+  >
+  Definition.GlobalVarDeclDepr = <
+    var <VarId> : <Sort> ;
+  > {deprecated("remove ;")}
+  Definition.GlobalVarDeclInit = <
+    var <VarId> : <Sort> := <Exp>
+  >
+  Definition.GlobalVarDeclInitDepr = <
+    var <VarId> : <Sort> := <Exp> ;
+  > {deprecated("remove ;")}
+  Definition.GlobalVarDeclInitInferred = <
+    var <VarId> := <Exp>
+  >
+  Definition.GlobalVarDeclInitInferredDepr = <
+    var <VarId> := <Exp> ;
+  > {deprecated("remove ;")}
+  Definition.RequestVarDecl = <
+    request var <VarId> : <Sort>
+  >
+  Definition.RequestVarDeclDepr = <
+    request var <VarId> : <Sort> ;
+  > {deprecated("remove ;")}
+  Definition.RequestVarDeclInit = <
+    request var <VarId> : <Sort> := <Exp>
+  >
+  Definition.RequestVarDeclInitDepr = <
+    request var <VarId> : <Sort> := <Exp> ;
+  > {deprecated("remove ;")}
+  Definition.RequestVarDeclInitInferred = <
+    request var <VarId> := <Exp>
+  >
+  Definition.RequestVarDeclInitInferredDepr = <
+    request var <VarId> := <Exp> ;
+  > {deprecated("remove ;")}
+
+context-free sorts
+
+  OptPropAnnos PropKind
+
+context-free syntax
+
+  EntityBodyDeclaration.Property = <
+    <PropertyId> <PropKind> <Sort> <OptPropAnnos>
+  >
+  EntityBodyDeclaration.DerivedProperty = <
+    <PropertyId> <PropKind> <Sort> <OptPropAnnos> := <Exp>
+  >
+  EntityBodyDeclaration.CachedEntity = <
+    cache
+  >
+  OptPropAnnos.PropAnnos = <( <{Annotation ","}*> )>
+  OptPropAnnos.OptPropAnnosNone = <>
+  PropKind.Simple = <::>
+  PropKind.Ref = <-\>>
+  PropKind.Comp = <\<\>>
+  PropKind.AnyProp = <:>
+
+context-free sorts
+
+  Annotation
+
+context-free syntax
+
+  Annotation.SimpleAnno = AnnotationId
+  Annotation.TransientAnno = <transient>
+  Annotation.IdAnno = <id>
+  Annotation.NameAnno = <name>
+  Annotation.CacheAnno = <cache>
+  Annotation.InverseAnno = <inverse = <Id> . <Id>>
+  Annotation.IncompleteInverseAnno = <inverse = <Id>>
+  Annotation.InverseSlaveAnno = <inverseSlave = <Id> . <Id>>
+  Annotation.InverseReferenceOnlyAnno = <inverse-reference-only>
+  Annotation.InlineAnno = <inline ( <{Id ","}*> )>
+  Annotation.SelectAnno = <select = <Id>>
+  Annotation.NotNullAnno = <not null>
+  Annotation.NotEmptyAnno = <not empty>
+  Annotation.AllowedAnno = <allowed = <Exp>>
+  Annotation.DefaultAnno = <default = <Exp>>
+  Annotation.LengthAnno = <length = <Int>>
+  Annotation.FormatAnno = <format = <String>>
+  Annotation.IndexEmptyAnno = <index ( )>
+  Annotation.IndexAnno = <index ( <Int> )>
+  Annotation.CollationAnno = <collation ( <Id> )>
+  Annotation.IdErrorAnno = <iderror = <String>>
+  Annotation.IdEmptyErrorAnno = <idemptyerror = <String>>
+
+lexical sorts
+
+  AnnotationId
+
+lexical syntax
+
+  AnnotationId = Id
+  AnnotationId = "searchable" {reject}
+  AnnotationId = "transient" {reject}
+  AnnotationId = "id" {reject}
+  AnnotationId = "name" {reject}
+  AnnotationId = "cache" {reject}

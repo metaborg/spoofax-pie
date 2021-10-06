@@ -1,0 +1,16 @@
+module main
+
+imports
+
+  signatures/start-sig
+  static-semantics/webdsl
+
+rules
+
+  projectOk : scope
+  projectOk(s_global) :-
+    declareBuiltIns(s_global).
+
+  fileOk : scope * Unit
+  fileOk(s_global, u) :-
+    unitOk(s_global, u).

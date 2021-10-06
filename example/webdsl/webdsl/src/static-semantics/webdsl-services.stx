@@ -1,0 +1,22 @@
+module static-semantics/webdsl-services
+
+imports
+  static-semantics/actions/functions
+
+  static-semantics/types/built-ins
+
+  static-semantics/webdsl
+
+rules
+
+  defOk(s, ServiceFunction(mods, p, args, Block(stmts))) :- { s_webservice s_body ts}
+    new s_webservice, s_webservice -F-> s,
+    ts == typesOfArgs(s, args),
+    declareParameters(s_webservice, zipArgTypes(args, ts)),
+    new s_body, s_body -P-> s_webservice,
+    stmtsOk(s_body, stmts, object(s)),
+    declarePage(s, p, ts).
+
+  serviceModsOk maps serviceModOk(*, list(*))
+  serviceModOk : scope * Modifier
+  serviceModOk(_, m) :- false | error $[Modifier [m] not allowed in a service definition].

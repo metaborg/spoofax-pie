@@ -1,0 +1,53 @@
+module WebDSL-Dispatch
+
+imports
+  WebDSL-Action
+  WebDSL-Core
+  WebDSL-Lexical
+  WebDSL-UI
+
+context-free sorts
+
+  DispatchEntry DispatchDefault DispatchNavigateCall DispatchNavigate DispatchNavigateButton
+
+context-free syntax
+
+  TemplateElement.Dispatch = <
+    dispatch {
+      <DispatchEntry*>
+      <DispatchDefault>
+    }
+  >
+  TemplateCall = <dispatch { <TemplateElement*> }> {reject}
+
+  DispatchEntry.DispatchEntry = <
+    <Id> <OptFormalArgs> { <TemplateElement*> }
+  >
+  DispatchEntry.DispatchEntity = <
+    <Id> : <Sort> { <TemplateElement*> }
+  >
+  DispatchDefault.DispatchDefault = <
+    default { <TemplateElement*> }
+  >
+  DispatchDefault.DispatchDefaultNone = <>
+  DispatchEntry = <default ( <{FormalArg ","}*> ) { <TemplateElement*> }> {reject}
+  DispatchEntry = <default { <TemplateElement*> }> {reject}
+
+  TemplateElement = DispatchNavigate
+  TemplateElement = DispatchNavigateButton
+  DispatchNavigate.DispatchNavigate = <
+    navigate ( <{DispatchNavigateCall "/"}+> ) {
+      <TemplateElement*>
+    }
+  >
+  DispatchNavigateButton.DispatchNavigateButton = <
+    navigate ( <Exp> , <{DispatchNavigateCall "/"}+> )
+  >
+  DispatchNavigateCall.DispatchNavigateCall = <<Id> ( <{Exp ","}*> )>
+  DispatchNavigateCall.DispatchNavigateCallNoArg = Id
+
+  DispatchNavigate = <navigate ( <DispatchNavigateCall> ) { <TemplateElement*> }> {reject}
+
+lexical syntax
+
+  TemplateId = "navigate" {reject}

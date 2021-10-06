@@ -1,0 +1,279 @@
+module WebDSL-Regex
+
+imports
+  WebDSL-Action
+  WebDSL-Lexical
+  WebDSL-DataModel
+
+context-free sorts
+
+  Pattern RegexExp
+
+context-free syntax
+
+  Exp.RegexCall = <<RegexExp> . <Id> ( <{Exp ","}*> )>
+  RegexExp.RegexPattern = </ <Pattern> />
+  Pattern.SingleBranch = Branche
+  Pattern.TupleBranch = <<Pattern> | <Pattern>> {right}
+
+context-free sorts
+
+  Branche Piece
+
+context-free syntax
+
+  Branche.Pieces = <<Piece+>>
+  Piece.SingleAtom = Atom
+  Piece.QuantifiedAtom = <<Atom> <Quantifier>>
+
+context-free sorts
+
+  Quantifier
+
+context-free syntax
+
+  Quantifier.GreedyExactBound = <{ <Integer> }>
+  Quantifier.GreedyLowerBound = <{ <Integer> , }>
+  Quantifier.GreedyLowerUpperBound = <{ <Integer> , <Integer> }>
+  Quantifier.GreedyOnceOrNot = <?>
+  Quantifier.GreedyZeroOrMore = <*>
+  Quantifier.GreedyOneOrMore = <+>
+  Quantifier.ReluctantExactBound = <{ <Integer> }?>
+  Quantifier.ReluctantLowerBound = <{ <Integer> , }?>
+  Quantifier.ReluctantLowerUpperBound = <{ <Integer> , <Integer> }?>
+  Quantifier.ReluctantOnceOrNot = <??>
+  Quantifier.ReluctantZeroOrMore = <*?>
+  Quantifier.ReluctantOneOrMore = <+?>
+  Quantifier.PossessiveExactBound = <{ <Integer> }+>
+  Quantifier.PossessiveLowerBound = <{ <Integer> , }+>
+  Quantifier.PossessiveLowerUpperBound = <{ <Integer> , <Integer> }+>
+  Quantifier.PossessiveOnceOrNot = <?+>
+  Quantifier.PossessiveZeroOrMore = <*+>
+  Quantifier.PossessiveOneOrMore = <++>
+
+context-free sorts
+
+  Atom
+
+context-free syntax
+
+  Atom.Capture = <( <Pattern> )>
+  Atom.NonCapture = <(?: <Pattern> )>
+  Atom.PositiveLookahead = <(?= <Pattern> )>
+  Atom.NegativeLookahead = <(?! <Pattern> )>
+  Atom.PositiveLookbehind = <(?\<= <Pattern> )>
+  Atom.NegativeLookbehind = <(?\<! <Pattern> )>
+  Atom.PythonCapture = <(?P\< <RegexId> \> <Pattern> )>
+  Atom.RegexCapture = <( <Pattern> )@{ <RegexId> }>
+  Atom.Empty = <()>
+  Atom.SingleCharacter = <.>
+  Atom.LineStart = <^>
+  Atom.LineEnd = <$>
+  Atom.CharacterClass = CharacterClass
+  Atom.AtomLiteral = AtomLiteral
+  Atom.AtomCharacter = AtomCharacter
+  Atom.QuotedAtom = <\\Q <AllChars> \\E>
+
+context-free sorts
+
+  CharacterClass BracketItem BracketLiteralOrBracketCharacter
+
+context-free syntax
+
+  CharacterClass.BracketList = <[ <BracketItem+> ]>
+  CharacterClass.NegatedBracketList = <[^ <BracketItem+> ]>
+  BracketItem.Range = <<BracketLiteralOrBracketCharacter> - <BracketLiteralOrBracketCharacter>>
+  BracketLiteralOrBracketCharacter = BracketLiteral
+  BracketLiteralOrBracketCharacter = BracketCharacter
+  BracketItem.Union = CharacterClass
+  BracketItem.BracketLiteral = BracketLiteral
+  BracketItem.BracketCharacter = BracketCharacter
+
+context-free sorts
+
+  ClassKeyword
+
+context-free syntax
+
+  ClassKeyword.LowerClass = <Lower>
+  ClassKeyword.UpperClass = <Upper>
+  ClassKeyword.ASCIIClass = <ASCII>
+  ClassKeyword.AlphaClass = <Alpha>
+  ClassKeyword.DigitClass = <Digit>
+  ClassKeyword.AlnumClass = <Alnum>
+  ClassKeyword.PunctClass = <Punct>
+  ClassKeyword.GraphClass = <Graph>
+  ClassKeyword.PrintClass = <Print>
+  ClassKeyword.BlankClass = <Blank>
+  ClassKeyword.CntrlClass = <Cntrl>
+  ClassKeyword.XDigitClass = <XDigit>
+  ClassKeyword.WhiteSpace = <Space>
+  ClassKeyword.JavaIsLowerCase = <javaLowerCase>
+  ClassKeyword.JavaIsUpperCase = <javaUpperCase>
+  ClassKeyword.JavaIsWhitespace = <javaWhitespace>
+  ClassKeyword.JavaIsMirrored = <javaMirrored>
+  ClassKeyword.GreekBlock = <InGreek>
+  ClassKeyword.UppercaseLetter = <Lu>
+  ClassKeyword.CurrencySymbol = <Sc>
+
+lexical sorts
+
+  BracketLiteral AtomLiteral AllChars
+
+lexical syntax
+
+  BracketLiteral = [a-zA-Z0-9\!\#\%\'\,\:\;\<\=\>\@\_\`\~\$\*\+\?\.\}\|]
+  BracketLiteral = "/"
+  BracketLiteral = [\&\]\-] {reject}
+  AtomLiteral = [a-zA-Z0-9\!\#\%\'\,\:\;\<\=\>\@\_\`\~\&\]\-]
+  AtomLiteral = "/"
+  AtomLiteral = [\}\)\|\[] {reject}
+  AllChars = [\\\|\$\*\+\?\.\{\}\(\)\&\]\-\[\^\!\#\%\'\,\:\;\<\=\>\@\_\`\~a-zA-Z0-9\t\n\r]*
+  AllChars = "/"
+  AllChars = DoubleQuote
+
+context-free sorts
+
+  BracketCharacter AtomCharacter DoubleQuote OctalChar HexHexChar DecHexChar Tab Newline ReturnAtom Formfeed Alarm Escape
+  WordChar NonWordChar WhiteSpaceChar DigitChar NonDigitChar ControlCharacter WordBoundry NonWordBoundry InputBeginBoundry
+  PrevMatchEndBoundry EndInputBoundry EndInputFinalBoundry Space NonWhiteSpaceChar BackReference
+
+context-free syntax
+
+  DoubleQuote.DoubleQuote = <">
+  OctalChar.OctalChar = <\\0 <OctalValue>>
+  HexHexChar.HexHexChar = <\\x <TwoHexValue>>
+  DecHexChar.DecHexChar = <\\u <FourHexValue>>
+  Tab.Tab = <\\t>
+  Newline.Newline = <\\n>
+  ReturnAtom.ReturnAtom = <\\r>
+  Formfeed.Formfeed = <\\f>
+  Alarm.Alarm = <\\a>
+  Escape.Escape = <\\e>
+  WordChar.WordChar = <\\w>
+  NonWordChar.NonWordChar = <\\W>
+  WhiteSpaceChar.WhiteSpaceChar = <\\s>
+  NonWhiteSpaceChar.NonWhiteSpaceChar = <\\S>
+  DigitChar.DigitChar = <\\d>
+  NonDigitChar.NonDigitChar = <\\D>
+  ControlCharacter.ControlCharacter = <\\c <ControlValue>>
+  WordBoundry.WordBoundry = <\\b>
+  NonWordBoundry.NonWordBoundry = <\\B>
+  InputBeginBoundry.InputBeginBoundry = <\\A>
+  PrevMatchEndBoundry.PrevMatchEndBoundry = <\\G>
+  EndInputBoundry.EndInputBoundry = <\\Z>
+  EndInputFinalBoundry.EndInputFinalBoundry = <\\z>
+  BackReference.BackReference = <\\ <BackReferenceLex>>
+  Space.Space = "\\ "
+  BracketCharacter = DoubleQuote
+  BracketCharacter = OctalChar
+  BracketCharacter = HexHexChar
+  BracketCharacter = DecHexChar
+  BracketCharacter = Tab
+  BracketCharacter = Newline
+  BracketCharacter = ReturnAtom
+  BracketCharacter = Formfeed
+  BracketCharacter = Alarm
+  BracketCharacter = Escape
+  BracketCharacter = WordChar
+  BracketCharacter = NonWordChar
+  BracketCharacter = WhiteSpaceChar
+  BracketCharacter = NonWhiteSpaceChar
+  BracketCharacter = DigitChar
+  BracketCharacter = NonDigitChar
+  BracketCharacter = ControlCharacter
+  BracketCharacter = WordBoundry
+  BracketCharacter = NonWordBoundry
+  BracketCharacter = InputBeginBoundry
+  BracketCharacter = PrevMatchEndBoundry
+  BracketCharacter = EndInputBoundry
+  BracketCharacter = EndInputFinalBoundry
+  BracketCharacter = BackReference
+  BracketCharacter = Space
+  AtomCharacter = DoubleQuote
+  AtomCharacter = OctalChar
+  AtomCharacter = HexHexChar
+  AtomCharacter = DecHexChar
+  AtomCharacter = Tab
+  AtomCharacter = Newline
+  AtomCharacter = ReturnAtom
+  AtomCharacter = Formfeed
+  AtomCharacter = Alarm
+  AtomCharacter = Escape
+  AtomCharacter = WordChar
+  AtomCharacter = NonWordChar
+  AtomCharacter = WhiteSpaceChar
+  AtomCharacter = NonWhiteSpaceChar
+  AtomCharacter = DigitChar
+  AtomCharacter = NonDigitChar
+  AtomCharacter = ControlCharacter
+  AtomCharacter = WordBoundry
+  AtomCharacter = NonWordBoundry
+  AtomCharacter = InputBeginBoundry
+  AtomCharacter = PrevMatchEndBoundry
+  AtomCharacter = EndInputBoundry
+  AtomCharacter = EndInputFinalBoundry
+  AtomCharacter = BackReference
+  AtomCharacter = Space
+
+context-free sorts
+
+  QuotablePatternSymbol Quoted
+
+context-free syntax
+
+  Quoted.Quoted = <\\ <QuotablePatternSymbol>>
+  AtomCharacter = Quoted
+  BracketCharacter = Quoted
+
+lexical sorts
+
+  QuotablePatternSymbolLex
+
+lexical syntax
+
+  QuotablePatternSymbolLex = [\|\$\*\+\?\.\{\}\(\)\&\]\[\-\^\\\!\#\%\'\,\:\;\<\=\>\@\_\`\~\/]
+
+context-free syntax
+
+  QuotablePatternSymbol.QuotablePatternSymbol = QuotablePatternSymbolLex
+  QuotablePatternSymbol = DoubleQuote
+
+lexical sorts
+
+  Integer OctalValue TwoHexValue FourHexValue BackReferenceLex ControlValue
+
+lexical syntax
+
+  Integer = [0-9]+
+  BackReferenceLex = [1-9] [0-9]*
+  OctalValue = [0-7]
+  OctalValue = [0-7] [0-7]
+  OctalValue = [0-3] [0-7] [0-7]
+  TwoHexValue = [0-9A-Fa-f] [0-9A-Fa-f]
+  FourHexValue = [0-9A-Fa-f] [0-9A-Fa-f] [0-9A-Fa-f] [0-9A-Fa-f]
+  ControlValue = [0-9]
+  ControlValue = [0-9] [0-9]
+
+context-free sorts
+
+  RegexId
+
+context-free syntax
+
+  RegexId.RegexId = RegexID
+
+lexical sorts
+
+  RegexID
+
+lexical syntax
+
+  RegexID = [A-Za-z\_\$] [A-Za-z0-9\_\$]*
+  RegexID = "true" {reject}
+  RegexID = "false" {reject}
+  RegexID = "null" {reject}
+
+lexical restrictions
+
+  RegexID -/- [a-zA-Z0-9\_\$]

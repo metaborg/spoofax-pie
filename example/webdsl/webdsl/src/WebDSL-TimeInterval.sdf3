@@ -1,0 +1,25 @@
+module WebDSL-TimeInterval
+
+imports
+  WebDSL-Action
+  WebDSL-Core
+
+context-free sorts
+
+  TimeIntervalPart TimeInterval
+
+context-free syntax
+
+  TimeIntervalPart.Weeks = <<Exp> weeks>
+  TimeIntervalPart.Days = <<Exp> days>
+  TimeIntervalPart.Hours = <<Exp> hours>
+  TimeIntervalPart.Minutes = <<Exp> minutes>
+  TimeIntervalPart.Seconds = <<Exp> seconds>
+  TimeIntervalPart.Milliseconds = <<Exp> milliseconds>
+  TimeInterval.TimeInterval = <<TimeIntervalPart*>>
+
+context-free syntax
+
+  Definition.InvokeEvery = <
+    invoke <Exp> every <TimeInterval>
+  >

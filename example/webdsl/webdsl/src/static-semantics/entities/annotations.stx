@@ -1,0 +1,216 @@
+module static-semantics/entities/annotations
+
+imports
+  static-semantics/types/built-ins
+
+  static-semantics/webdsl-actions
+  static-semantics/webdsl-entities
+  static-semantics/webdsl-types
+  static-semantics/webdsl
+
+signature
+
+  sorts
+    ANNOTATION
+
+  constructors
+    // annotations on a property level
+    ID          : ANNOTATION
+    OVERRIDABLE : ANNOTATION
+    NAME        : ANNOTATION
+    TRANSIENT   : ANNOTATION
+    DERIVED     : ANNOTATION
+    INVERSE     : ANNOTATION
+
+    // annotations on entity level
+    SESSIONENTITY : ANNOTATION
+    SUBENTITY     : ANNOTATION
+
+  relations
+    annotation : string * ANNOTATION
+
+rules // annotation declaration and resolving
+
+  // property level
+  declareAnnotations maps declareAnnotation(*, *, list(*))
+  declareAnnotation : scope * string * ANNOTATION
+  declareAnnotation(s, p, a) :-
+    !annotation[p, a] in s.
+
+  resolveAnnotation : scope * string -> list((path * (string * ANNOTATION)))
+  resolveAnnotation(s, x) = ps :-
+    query annotation filter P* F* EXTEND?
+                     and { x' :- x' == (x, _) }
+                     min $ < P, $ < F, $ < EXTEND, P < F, P < EXTEND, F < EXTEND
+                     in s |-> ps.
+
+  // entity level
+  declareEntityAnnotation : scope * ANNOTATION
+  declareEntityAnnotation(s, a) :-
+    declareAnnotation(s, "_ENTITY", a).
+
+  resolveEntityAnnotation : scope -> list((path * (string * ANNOTATION)))
+  resolveEntityAnnotation(s) = resolveAnnotation(s, "_ENTITY").
+
+rules
+
+  annotationsOk maps annotationOk(*, *, *, list(*))
+  annotationOk : scope * string * TYPE * Annotation
+  annotationOk(_, _, _, a) :-
+    try { false } | warning $[Static analysis not implemented for this annotation] @a.
+
+  annotationOk(s, p, _, TransientAnno()) :-
+    declareAnnotation(s, p, TRANSIENT()).
+
+  annotationOk(s, p, t, a@IdAnno()) :-
+    declareAnnotation(s, p, ID()),
+    noDuplicateIdAnnotations(s) | error $[Only one id annotatation allowed in an entity] @a,
+    equalType(t, string(s))     | error $[Id property must be of type String] @a,
+    isTopLevelEntity(s)         | error $[Id annotation not allowed in sub-entities] @a,
+    isNoSessionEntity(s)        | error $[Id annotation not allowed in session entities] @a.
+
+  annotationOk(s, p, _, NameAnno()) :-
+    declareAnnotation(s, p, NAME()),
+    noMultipleNameAnnotations(s).
+
+  annotationOk(s, p, _, a@CacheAnno()) :-
+    hasAnnotation(resolveAnnotation(s, p), DERIVED()) | error $[cached annotation can only be set on derived properties] @a.
+
+  // inverse property on List<t>
+  annotationOk(s, p, LIST(t), InverseAnno(sort, prop)) :- {sortType s_sort}
+    sortType == typeOfInverseSort(s, sort, t),
+    declareAnnotation(s, p, INVERSE()),
+    noDoubleInverse(sortType, prop),
+    typeOfProperty(s, sortType, prop) == typeOfThis(s)
+      | error $[Inverse property must be the same type as this entity] @prop.
+
+  // inverse property on Set<t>
+  annotationOk(s, p, SET(t), InverseAnno(sort, prop)) :- {sortType}
+    sortType == typeOfInverseSort(s, sort, t),
+    declareAnnotation(s, p, INVERSE()),
+    noDoubleInverse(sortType, prop),
+    typeOfProperty(s, sortType, prop) == typeOfThis(s)
+      | error $[Inverse property must be the same type as this entity] @prop.
+
+  // inverse property non-collection
+  annotationOk(s, p, t, InverseAnno(sort, prop)) :- {sortType propType thisType}
+    sortType == typeOfInverseSort(s, sort, t),
+    declareAnnotation(s, p, INVERSE()),
+    noDoubleInverse(sortType, prop),
+    propType == typeOfProperty(s, sortType, prop),
+    thisType == typeOfThis(s),
+    or(orB(
+      equalTypeB(propType, thisType),
+      equalTypeB(propType, LIST(thisType))),
+      equalTypeB(propType, SET(thisType))
+    ) | error $[Inverse property must have (a collection of) the same type as this entity] @prop.
+
+  annotationOk(s, p, _, a@InverseReferenceOnlyAnno()) :-
+    hasAnnotation(resolveAnnotation(s, p), INVERSE())
+      | error $[inverse-reference-only annotation is only allowed on properties that have an inverse specified] @a.
+
+  annotationOk(_, _, _, NotNullAnno()).
+  annotationOk(_, _, _, NotEmptyAnno()).
+  annotationOk(s, _, propType, a@AllowedAnno(exp)) :- { t t' }
+    t == stripOptionalSetOrListType(propType),
+    t' == typeOfExp(s, exp),
+    or(
+      typeCompatibleB(t', LIST(t)),
+      typeCompatibleB(t', SET(t))
+    ) | error $[Allowed expression must be a list of set of type [t], [t'] given] @a.
+
+  annotationOk(s, _, t, a@DefaultAnno(exp)) :- {t'}
+    t' == typeOfExp(s, exp),
+    typeCompatible(t', t) | error $[Default value must be of type [t], [t'] given] @a.
+
+  annotationOk(_, _, _, LengthAnno(_)).
+  annotationOk(s, _, _, FormatAnno(str)) :- stringOk(s, str).
+
+  typeOfInverseSort : scope * string * TYPE -> TYPE
+  typeOfInverseSort(s, sort, t) = sortType :-
+    t == ENTITY(_) | error $[Inverse annotation only allowed on (collections of) entity types],
+    resolveType(s, sort) == [(_, (_, sortType))] | error $[Cannot resolve sort [sort] to an entity],
+    sortType == ENTITY(_) | error $[Cannot resolve sort [sort] to an entity],
+    sortType == t | error $[Inverse entity must be the same as property type [t]].
+
+rules // validation
+
+  annotationOk(s, _, _, ValidateCreateAnno(validateExp, messageExp)) :- validateOk(s, validateExp, messageExp).
+  annotationOk(s, _, _, ValidateUpdateAnno(validateExp, messageExp)) :- validateOk(s, validateExp, messageExp).
+  annotationOk(s, _, _, ValidateDeleteAnno(validateExp, messageExp)) :- validateOk(s, validateExp, messageExp).
+  annotationOk(s, _, _, ValidateAnno(validateExp, messageExp)) :- validateOk(s, validateExp, messageExp).
+  annotationOk(s, _, _, NamedValidateAnno(_, validateExp, messageExp)) :- validateOk(s, validateExp, messageExp).
+
+  validateOk : scope * Exp * Exp
+  validateOk(s, validateExp, messageExp) :- { validateType messageType }
+    validateType == typeOfExp(s, validateExp),
+    messageType == typeOfExp(s, messageExp),
+    typeCompatible(validateType, bool(s)) | error $[The expression to be validated should be compatible with type Bool, [validateType] given],
+    typeCompatible(messageType, string(s)) | error $[The error message should be compatible with type String, [messageType] given].
+
+rules // predicates
+
+  isTopLevelEntity : scope
+  isTopLevelEntity(s) :- doesNotHaveAnnotation(resolveEntityAnnotation(s), SUBENTITY()).
+
+  isNoSessionEntity : scope
+  isNoSessionEntity(s) :- doesNotHaveAnnotation(resolveEntityAnnotation(s), SESSIONENTITY()).
+
+  noDuplicateIdAnnotations : scope
+  noDuplicateIdAnnotations(s) :-
+    query annotation filter EXTEND?
+                     and { x' :- x' == (_, ID()) }
+                     in s |-> [_].
+
+  noMultipleNameAnnotations : scope
+  noMultipleNameAnnotations(s) :-
+    query annotation filter EXTEND?
+                     and { x' :- x' == (_, NAME()) }
+                     in s |-> [_] | error $[Found multiple properties called "name" or with a name annotation].
+
+  noDoubleInverse : TYPE * string
+  noDoubleInverse(ENTITY(s_ent), x) :-
+    doesNotHaveAnnotation(resolveAnnotation(s_ent, x), INVERSE())
+      | error $[Inverse annotations cannot be declared on both sides].
+
+  isMutableB : scope * string -> BOOL
+  isMutableB(s, x) = notB(hasAnnotationB(resolveAnnotation(s, x), DERIVED())).
+
+  isMutableProperty : TYPE * string
+  isMutableProperty(_, _) :- false | error $[Can only check mutability of native class and entity properties].
+  isMutableProperty(NATIVECLASS(_), _). // all native class properties are mutable
+  isMutableProperty(ENTITY(s_entity), x) :- {annotations}
+    annotations == resolveAnnotation(s_entity, x),
+    doesNotHaveAnnotation(annotations, DERIVED()) | error $[Derived property [x] is not mutable].
+
+rules // utils
+
+  hasAnnotationB : list((path * (string * ANNOTATION))) * ANNOTATION -> BOOL
+  hasAnnotationB([], _) = FALSE().
+  hasAnnotationB([(_, (_, a)) | tl], a) = TRUE().
+  hasAnnotationB([(_, (_, _)) | tl], a) = hasAnnotationB(tl, a).
+
+  hasAnnotation : list((path * (string * ANNOTATION))) * ANNOTATION
+  hasAnnotation(ps, a) :- hasAnnotationB(ps, a) == TRUE().
+
+  doesNotHaveAnnotation : list((path * (string * ANNOTATION))) * ANNOTATION
+  doesNotHaveAnnotation(ps, a) :- hasAnnotationB(ps, a) == FALSE().
+
+  withAnnotation : list((path * (string * TYPE))) * ANNOTATION -> list((path * (string * TYPE)))
+  withAnnotation(xs, a) = filterResultsWithBool(zipResultsWithHasAnnoBool(xs, a)).
+
+  withoutAnnotation : list((path * (string * TYPE))) * ANNOTATION -> list((path * (string * TYPE)))
+  withoutAnnotation(xs, a) = filterResultsWithBool(zipResultsWithNotHasAnnoBool(xs, a)).
+
+  zipResultsWithHasAnnoBool maps zipResultWithHasAnnoBool(list(*), *) = list(*)
+  zipResultWithHasAnnoBool : (path * (string * TYPE)) * ANNOTATION -> ((path * (string * TYPE)) * BOOL)
+  zipResultWithHasAnnoBool(r@(p, (x, _)), a) = (r, hasAnnotationB(resolveAnnotation(scopeFromPath(p), x), a)).
+
+  zipResultsWithNotHasAnnoBool maps zipResultWithNotHasAnnoBool(list(*), *) = list(*)
+  zipResultWithNotHasAnnoBool : (path * (string * TYPE)) * ANNOTATION -> ((path * (string * TYPE)) * BOOL)
+  zipResultWithNotHasAnnoBool(r@(p, (x, _)), a) = (r, notB(hasAnnotationB(resolveAnnotation(scopeFromPath(p), x), a))).
+
+  filterResultsWithBool : list(((path * (string * TYPE)) * BOOL)) -> list((path * (string * TYPE)))
+  filterResultsWithBool([]) = [].
+  filterResultsWithBool([(x, TRUE()) | xs]) = [x | filterResultsWithBool(xs)].
+  filterResultsWithBool([(_, FALSE()) | xs]) = filterResultsWithBool(xs).

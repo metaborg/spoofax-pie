@@ -1,0 +1,37 @@
+module WebDSL-DataValidation
+
+imports
+  WebDSL-Action
+  WebDSL-Lexical
+  WebDSL-UI
+  WebDSL-DataModel
+  WebDSL-Core
+
+context-free syntax
+
+  Annotation.ValidateCreateAnno = <validatecreate ( <Exp> , <Exp> )>
+  Annotation.ValidateUpdateAnno = <validateupdate ( <Exp> , <Exp> )>
+  Annotation.ValidateDeleteAnno = <validatedelete ( <Exp> , <Exp> )>
+  Annotation.ValidateAnno = <validate ( <Exp> , <Exp> )>
+  Annotation.NamedValidateAnno = <<Id> : validate ( <Exp> , <Exp> )>
+
+  EntityBodyDeclaration.ValidateEntity = <
+    validate ( <Exp> , <Exp> )
+  >
+
+  Statement.ValidateStatement = <
+    validate ( <Exp> , <Exp> ) ;
+  >
+
+  Statement.NamedValidateStatement = <
+    <Id> : validate ( <Exp> , <Exp> ) ;
+  >
+
+  ThisCall = <validate ( <Exp> , <Exp> )> {reject}
+
+  TemplateCall.ValidationErrors = <validationErrors ( <Id> )>
+  TemplateCall.ValidationErrorsEmpty = <validationErrors ( )>
+
+lexical syntax
+
+  TemplateId = "validationErrors" {reject}

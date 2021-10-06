@@ -61,6 +61,14 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
   includeProject("tiger.spoofax3.ccbench", "tiger/spoofax3/tiger.spoofax3.ccbench")
 }
 
+"webdsl".run {
+    includeProject("webdsl", "webdsl/webdsl")
+    includeProject("webdsl.cli", "webdsl/webdsl.cli")
+    includeProject("webdsl.eclipse", "webdsl/webdsl.eclipse")
+    includeProject("webdsl.intellij", "webdsl/webdsl.intellij")
+//    includeProject("webdsl.ccbench", "tiger/webdsl.ccbench")
+}
+
 "mod".run {
   includeProject("mod.spoofaxcore")
   includeProject("mod")

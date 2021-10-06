@@ -1,0 +1,127 @@
+module static-semantics/ui/template-calls
+
+imports
+  static-semantics/actions/functions
+
+  static-semantics/entities/annotations
+
+  static-semantics/types/built-ins
+
+  static-semantics/ui/actions
+  static-semantics/ui/attributes
+
+  static-semantics/webdsl-actions
+  static-semantics/webdsl-types
+  static-semantics/webdsl-ui
+  static-semantics/webdsl
+
+rules // template calls
+
+  templateElementOk(s, _, s_pha, TemplateCall2TemplateElement(tc)) :-
+    templateCallOk(s, s_pha, tc).
+
+  ajaxTemplateCallOk : scope * scope * TemplateCall
+  ajaxTemplateCallOk(s, s_pha, tc) :- templateCallOk_internal(s, s_pha, tc, TRUE()).
+
+  templateCallOk : scope * scope * TemplateCall
+  templateCallOk(s, s_pha, tc) :- templateCallOk_internal(s, s_pha, tc, FALSE()).
+
+  // BOOL denotes if template must be ajax enabled
+  templateCallOk_internal : scope * scope * TemplateCall * BOOL
+  templateCallOk_internal(s, s_pha, TemplateCall(TemplateCallId(t), TCallArgs(targs), TCallPropAssigns(propAssigns), TemplateBody(body)), ajax) :-
+    templatePropAssignmentsOk(s, propAssigns),
+    templateElementsOk(s, s_pha, body),
+    templateCallMatchesSig(s, t, targs, ajax).
+
+  // BOOL denotes if template must be ajax enabled
+  templateCallMatchesSig : scope * string * list(TemplateArgExp) * BOOL
+  templateCallMatchesSig(s, t, targs, ajax) :- {argTypes nameCompatibleSigs mostSpecificSigs t'}
+    argTypes == typesOfTemplateArgExps(s, targs),
+    inputTemplateCallOk(s, t, targs, argTypes),
+    nameCompatibleSigs == resolveTemplate_internal(s, t, ajax),
+    mostSpecificSigs == mostSpecificSigs(argTypes, typeCompatibleSigs(nameCompatibleSigs, argTypes)),
+    mostSpecificSigs == [(t', TEMPLATE(_, _)) | _] | error $[Cannot resolve template [t] with compatible argument types] @t,
+    singleSignature(mostSpecificSigs, "template", t) | error $[Cannot resolve template [t] with compatible argument types] @t,
+    @t.ref := t'.
+
+  typesOfTemplateArgExps maps typeOfTemplateArgExp(*, list(*)) = list(*)
+  typeOfTemplateArgExp : scope * TemplateArgExp -> TYPE
+  typeOfTemplateArgExp(s, Exp(exp))                      = typeOfExp(s, exp).
+  typeOfTemplateArgExp(s, TemplateElementsArgument(exp)) = TEMPLATEELEMENTS().
+  typeOfTemplateArgExp(s, ExpEntityDerive(_, _))         = UNTYPED() :- // TO-DO
+    try { false } | warning $[Derive expressions not implemented yet].
+
+rules // pre-defined template calls
+
+  // elements
+  templateCallOk(_, _, TemplateCall(TemplateCallId("elements"), TCallArgs(targs), TCallPropAssigns(propAssigns), TemplateBody(body))) :-
+    targs == [] | error $[Cannot pass arguments to passed template elements],
+    body == []  | error $[Cannot pass template elements to passed template elements].
+
+  // validation
+  templateCallOk(s, _, ValidationErrors(_)).
+  templateCallOk(s, _, ValidationErrorsEmpty()).
+
+rules // navigate calls
+
+  templateElementOk(s, _, s_pha, NavigateCall(pc, props, elems)) :-
+    pageCallOk(s, pc),
+    templatePropAssignmentsOk(s, props),
+    templateElementsOk(s, s_pha, elems).
+
+  pageCallOk : scope * PageCall
+  pageCallOk(s, PageCall(p, args)) :-
+    pageCallOk_internal(s, p, args).
+
+  pageCallOk_internal : scope * string * list(Exp)
+  pageCallOk_internal(s, p, args) :- {argTypes ts}
+    pageType(s, p) == PAGE(ts) | error $[Unable to resolve page [p]] @p,
+    argTypes == typesOfExps(s, args),
+    typesCompatible(argTypes, ts) == TRUE() | error $[Given argument types not compatible with page definition. Got [argTypes] but expected [ts]] @args.
+
+rules // property assignments
+
+  templatePropAssignmentsOk : scope * list(PropertyAssignment)
+  templatePropAssignmentsOk(s, pas) :- templatePropAssignmentsOkNoDuplicates(s, pas, []).
+
+  templatePropAssignmentsOkNoDuplicates : scope * list(PropertyAssignment) * list(string)
+  templatePropAssignmentsOkNoDuplicates(_, [], _).
+  templatePropAssignmentsOkNoDuplicates(s, [pa | pas], xs) :- {x}
+    x == templatePropAssignmentOk(s, pa),
+    noDuplicatesString(x, xs) | error $[Property [x] is defined multiple times] @x,
+    templatePropAssignmentsOkNoDuplicates(s, pas, [x | xs]).
+
+  templatePropAssignmentOk : scope * PropertyAssignment -> string // return name of property for duplicate check
+  templatePropAssignmentOk(s, _) = "_IGNORE" :- // TO-DO
+    try { false } | warning $[This template property assignment is not implemented yet].
+
+  templatePropAssignmentOk(s, PropertyAssignment(x, e)) = x :-
+    typeCompatible(typeOfExp(s, e), string(s)) | error $[Property [x] requires a String value] @e.
+
+  templatePropAssignmentOk(s, PropertySubmit(x, a)) = x :-
+    actionCallOrInlineOrExpOk(s, a).
+
+  templatePropAssignmentOk(s, AttributeSelection2PropertyAssignment(AttributeIgnoreDefault(c@"class"))) = "_IGNORE".
+  templatePropAssignmentOk(s, AttributeSelection2PropertyAssignment(AttributeIgnoreDefault(c@"style"))) = "_IGNORE".
+  templatePropAssignmentOk(s, AttributeSelection2PropertyAssignment(AttributeIgnoreDefault(_))) = "_IGNORE" :-
+    false | error $[Only "class" and "style" are implicitly combined with defaults].
+
+  templatePropAssignmentOk(s, CommonAttribute2PropertyAssignment(ca)) = "_IGNORE" :-
+    commonAttributeOk(s, ca).
+
+  templatePropAssignmentOk(s, AttributeSelection2PropertyAssignment(AttributeSelection(a))) = "_IGNORE" :- { a' }
+    resolveAttributeCollection(s, a) == [(_, a') | _] | error $[Attribute collection [a] is not defined],
+    @a.ref := a'.
+
+rules // mutability check for input templates
+
+  inputTemplateCallOk : scope * string * list(TemplateArgExp) * list(TYPE)
+  inputTemplateCallOk(s, _, _, _). // all other template calls are ok
+  inputTemplateCallOk(s, "input", [Exp(e) | _], [t | _]) :- isMutableExp(s, e, t).
+
+  isMutableExp : scope * Exp * TYPE
+  isMutableExp(_, e, t) :- false | error $[Cannot verify mutability of expression [e]] @e.
+  isMutableExp(s, Var(x), t) :- isMutableOrRef(s, x, t).
+  isMutableExp(s, FieldAccess(FAVar(var), x), t) :- {varType}
+    varType == variableType(s, var),
+    isMutableProperty(varType, x).

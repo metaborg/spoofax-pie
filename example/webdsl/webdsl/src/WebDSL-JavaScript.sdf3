@@ -1,0 +1,55 @@
+module WebDSL-JavaScript
+
+imports
+  WebDSL-Action
+  WebDSL-Attributes
+  WebDSL-UI
+  WebDSL-XML
+
+context-free syntax
+
+  TemplateElement.JSElement = <
+    \< script <Attribute*> \>
+      <JSPart*>
+    \</ script \>
+  >
+  TemplateElement.StyleElement = <
+    \< style <Attribute*> \>
+      <JSPart*>
+    \</ style \>
+  >
+
+context-free sorts
+
+  JSPart
+
+context-free syntax
+
+  JSPart-CF.JSExp = "~" Exp-CF
+  JSPart-CF.JSString = JSString-LEX
+
+lexical sorts
+
+  JSChar JSString JSSmallerThan JSTilde
+
+lexical syntax
+
+  JSString = JSChar+
+  JSString = JSChar* "\\" {reject}
+
+  JSChar = ~[\<\~]
+
+  JSChar = JSSmallerThan
+  JSSmallerThan = [\<]
+
+  JSChar = JSTilde
+  JSTilde = "\\~"
+
+  XMLTagName = "script" {reject}
+  XMLTagName = "style" {reject}
+
+lexical restrictions
+
+  JSSmallerThan -/- [\/]
+  JSString -/- ~[\<\~]
+  JSString -/- [\<] . ~[\/]

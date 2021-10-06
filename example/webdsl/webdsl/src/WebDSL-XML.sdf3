@@ -1,0 +1,91 @@
+module WebDSL-XML
+
+imports
+  WebDSL-Action
+  WebDSL-UI
+  WebDSL-Attributes
+
+lexical sorts
+
+  HTML5VoidElement XMLComment XMLCommentChar OneDash TwoDashes QualName Qualifier NCName
+  XMLTagName
+
+context-free syntax
+
+  TemplateElement.XMLEmptyElement = <
+    \< <XMLTagName> <Attribute*> /\>
+  >
+  TemplateElement.XMLElement = <
+    \< <XMLTagName> <Attribute*> \>
+      <TemplateElement*>
+    \</ <XMLTagName> \>
+  >
+
+context-free syntax
+
+  TemplateElement.XMLEmptyElementUnclosed = <\< <HTML5VoidElement> <Attribute*> \>>
+
+lexical syntax
+
+  HTML5VoidElement = "area"
+  HTML5VoidElement = "base"
+  HTML5VoidElement = "br"
+  HTML5VoidElement = "col"
+  HTML5VoidElement = "embed"
+  HTML5VoidElement = "hr"
+  HTML5VoidElement = "img"
+  HTML5VoidElement = "input"
+  HTML5VoidElement = "keygen"
+  HTML5VoidElement = "link"
+  HTML5VoidElement = "menuitem"
+  HTML5VoidElement = "meta"
+  HTML5VoidElement = "param"
+  HTML5VoidElement = "source"
+  HTML5VoidElement = "track"
+  HTML5VoidElement = "wbr"
+
+context-free syntax
+
+  TemplateElement.XMLComment = XMLComment
+
+lexical syntax
+
+  XMLComment = "<!--" XMLCommentChar* "-->"
+  XMLCommentChar = ~[\-]
+  XMLCommentChar = OneDash
+  XMLCommentChar = TwoDashes
+  OneDash = [\-]
+  TwoDashes = [\-] [\-]
+
+lexical restrictions
+
+  OneDash -/- [\-]
+  TwoDashes -/- [\>]
+
+context-free syntax
+
+  Attribute.XMLAttributesIf = <if ( <Exp> ) { <Attribute*> }>
+  Attribute.XMLAttributesIfElse = <if ( <Exp> ) { <Attribute*> } else { <Attribute*> }>
+
+context-free sorts
+
+  CommonAttribute
+
+context-free syntax
+
+  Attribute.Attribute = <<QualName> = <Exp>>
+  Attribute = CommonAttribute
+  CommonAttribute.AllAttributes = <all attributes>
+  CommonAttribute.AllAttributesExceptExp = <all attributes except <Exp>>
+  CommonAttribute.AttributesExp = <attributes <Exp>>
+
+lexical syntax
+
+  XMLTagName = QualName
+  QualName = Qualifier? NCName
+  Qualifier = NCName ":"
+  NCName = [A-Za-z\_] [A-Za-z0-9\.\-\_]*
+
+lexical restrictions
+
+  NCName -/- [A-Za-z0-9\.\-\_]

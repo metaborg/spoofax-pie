@@ -1,0 +1,298 @@
+module static-semantics/webdsl-actions
+
+imports
+  static-semantics/actions/binops
+  static-semantics/actions/built-ins
+  static-semantics/actions/emails
+  static-semantics/actions/functions
+
+  static-semantics/entities/annotations
+
+  static-semantics/types/built-ins
+
+  static-semantics/webdsl-entities
+  static-semantics/webdsl-types
+  static-semantics/webdsl
+
+rules // definitions
+
+  defOk(s, GlobalInit(Block(stmts))) :- {s_init}
+    new s_init, s_init -DEF-> s,
+    stmtsOk(s_init, stmts, VOID()).
+
+rules // variable declaration and assignment
+
+  stmtOk(s, _, Stat(exp), _) :-
+    expOk(s, exp).
+
+  stmtOk(s, s_decl, VarDecl(x, sort), _) :- {t}
+    t == typeOfSort(s, sort),
+    inequalType(t, UNTYPED()) | error $[Unknown type [sort]] @sort,
+    declareVar(s_decl, x, t),
+    @x.type := t.
+
+  stmtOk(s, s_decl, VarDeclInit(x, sort, exp), _) :- {t}
+    t == typeOfSort(s, sort),
+    typeCompatible(typeOfExp(s, exp), t) | error $[Expression [exp] is not of type [sort]] @exp,
+    declareVar(s_decl, x, t),
+    @x.type := t.
+
+  stmtOk(s, s_decl, VarDeclInitInferred(x, exp), _) :- {t}
+    t == typeOfExp(s, exp),
+    inequalType(t, UNTYPED()) | error $[Unable to infer type of [exp]] @exp,
+    declareVar(s_decl, x, t),
+    @x.type := t.
+
+  defOk(s, GlobalVarDecl(x, sort)) :- {t}
+    t == typeOfSort(s, sort),
+    declareVar(s, x, t),
+    declareAnnotation(s, x, DERIVED()).
+
+  defOk(s, GlobalVarDeclInit(x, sort, exp)) :- {t}
+    t == typeOfSort(s, sort),
+    typeCompatible(typeOfExp(s, exp), t) | error $[Expression [exp] is not of type [sort]] @exp,
+    declareVar(s, x, t),
+    declareAnnotation(s, x, DERIVED()).
+
+  defOk(s, GlobalVarDeclInitInferred(x, exp)) :- {t}
+    t == typeOfExp(s, exp),
+    inequalType(t, UNTYPED()) | error $[Cannot resolve type of expression [exp]],
+    declareVar(s, x, t),
+    declareAnnotation(s, x, DERIVED()).
+
+  noDuplicateVarDefs : scope * string
+  noDuplicateVarDefs(s, x) :-
+    query var filter P*
+              and { x' :- x' == (x, _) }
+              in s |-> [_].
+
+  noDuplicateVarDefsInSuper : scope * string
+  noDuplicateVarDefsInSuper(_, "this"). // allow "this" var to be redefined in sub
+  noDuplicateVarDefsInSuper(s_sub, x) :- {xs}
+    resolveProperty(s_sub, x) == xs,
+    withoutAnnotation(xs, OVERRIDABLE()) == [_].
+
+  stmtOk(s, _, Assignment(_, exp), _) :- false | error $[Left-hand side of assignment should be a mutable variable].
+  stmtOk(s, _, Assignment(v@Var(x), exp), _) :- {t}
+    variableType(s, x) == t,
+    isMutableOrRef(s, x, t),
+    typeCompatible(typeOfExp(s, exp), t) | error $[Expression [exp] is not of type [t]],
+    @v.type := t.
+
+  isMutableOrRef : scope * string * TYPE
+  isMutableOrRef(s, x, t) :-
+    or(
+      isMutableB(s, x),
+      isRef(t)
+    ) | error $[Variable [x] is not mutable] @x.
+
+  isRef : TYPE -> BOOL
+  isRef(REF(_)) = TRUE().
+  isRef(_) = FALSE().
+
+  stmtOk(s, _, Assignment(FieldAccess(v@FAVar(var), x), exp), _) :- {varType t}
+    varType == variableType(s, var),
+    @v.type := varType,
+    t == typeOfProperty(s, varType, x),
+    @x.type := t,
+    isMutableProperty(varType, x),
+    typeCompatible(typeOfExp(s, exp), t) | error $[Expression [exp] is not of type [t]].
+
+  stmtOk(s, _, Assignment(FieldAccess(FAExp(lhexp), x), rhexp), _) :- {expType t}
+    expType == typeOfExp(s, lhexp),
+    t == typeOfProperty(s, expType, x),
+    @x.type := t,
+    isMutableProperty(expType, x),
+    typeCompatible(typeOfExp(s, rhexp), t) | error $[Expression [rhexp] is not of type [t]].
+
+  stmtOk(s, _, Assignment(ci@CollectionIndex(_, _), exp), _) :-
+    typeCompatible(typeOfExp(s, exp), typeOfExp(s, ci)).
+
+  stmtOk(s, _, Assignment(c@Cast(_, _), exp), _) :-
+    typeCompatible(typeOfExp(s, exp), typeOfExp(s, c)).
+
+rules // if statements and expressions
+
+  stmtOk(s, _, If(c, Block(then), Block(else)), rt) :- {s_then s_else}
+    equalType(typeOfExp(s, c), bool(s)) | error $[Condition should be of type bool] @c,
+    new s_then, s_then -P-> s,
+    stmtsOk(s_then, then, rt),
+    new s_else, s_else -P-> s,
+    stmtsOk(s_else, else, rt).
+
+  typeOfExp(s, IfExp(ce, ie, ee)) = it :- {et ct}
+    ct == typeOfExp(s, ce),
+    equalType(ct, bool(s)) | error $[Condition should be of type bool, [ct] given],
+    it == typeOfExp(s, ie),
+    et == typeOfExp(s, ee),
+    typeCompatible(et, it) | error $[Type of else-expression ([et]) should be compatible with type of if-expression ([it])].
+
+rules // loops
+
+  stmtOk(s, _, ForStmt(x, srt, exp, OptFilterSome(f), Block(stmts)), rt) :- {s_for typeOfSort typeOfExp}
+    typeOfSort == typeOfSort(s, srt),
+    typeOfExp == typeOfExp(s, exp),
+    or(
+      equalTypeB(LIST(typeOfSort), typeOfExp),
+      equalTypeB(SET(typeOfSort), typeOfExp)
+    ) | error $[Must be a list or set of type [typeOfSort], [typeOfExp] given] @exp,
+    new s_for, s_for -P-> s,
+    forLoopFilterOk(s_for, f),
+    forLoopStmtsOk(s_for, x, typeOfSort, stmts, rt),
+    @x.type := typeOfSort.
+
+  stmtOk(s, _, ForStmtInferred(x, exp, OptFilterSome(f), Block(stmts)), rt) :- {s_for typeOfExp t}
+    typeOfExp == typeOfExp(s, exp),
+    t == stripGenericType(typeOfExp),
+    new s_for, s_for -P-> s,
+    forLoopFilterOk(s_for, f),
+    forLoopStmtsOk(s_for, x, t, stmts, rt),
+    @x.type := t.
+
+  stmtOk(s, _, ForAllStmt(x, srt, OptFilterSome(f), Block(stmts)), rt) :- {s_for typeOfSort}
+    typeOfSort == typeOfSort(s, srt),
+    new s_for, s_for -P-> s,
+    forLoopFilterOk(s_for, f),
+    forLoopStmtsOk(s_for, x, typeOfSort, stmts, rt),
+    @x.type := typeOfSort.
+
+  stmtOk(s, _, ForCountStmt(x, fromExp, toExp, Block(stmts)), rt) :- {s_for intType}
+    intType == int(s),
+    equalType(typeOfExp(s, fromExp), intType) | error $[From expression should have type Int],
+    equalType(typeOfExp(s, toExp)  , intType) | error $[To expression should have type Int],
+    new s_for, s_for -P-> s,
+    forLoopStmtsOk(s_for, x, intType, stmts, rt),
+    @x.type := intType.
+
+  forLoopStmtsOk : scope * string * TYPE * list(Statement) * TYPE
+  forLoopStmtsOk(s_for, x, t, stmts, rt) :-
+    declareVar(s_for, x, t),
+    declareAnnotation(s_for, x, DERIVED()), // abuse derived annotation to declare immutability of x
+    stmtsOk(s_for, stmts, rt).
+
+  forLoopFilterOk : scope * Filter
+  forLoopFilterOk(s, f). // TO-DO
+
+  stmtOk(s, _, WhileStmt(exp, Block(stmts)), rt) :- {s_while}
+    equalType(typeOfExp(s, exp), bool(s)) | error $[Condition should be of type bool] @exp,
+    new s_while, s_while -P-> s,
+    stmtsOk(s_while, stmts, rt).
+
+rules // return statements
+
+  stmtOk(s, _, r@Return(exp), returnType) :- {returnExpType}
+    inequalType(returnType, UNTYPED()) | error $[Return statement not allowed here] @r,
+    inequalType(returnType, VOID()) | error $[No return type specified in this context] @exp,
+    returnExpType == typeOfExp(s, exp),
+    typeCompatible(returnExpType, returnType) | error $[Must return an expression of type [returnType], [returnExpType] given] @exp.
+
+  stmtOk(s, _, r@ReturnEmpty(), returnType) :-
+    inequalType(returnType, UNTYPED()) | error $[Return statement not allowed here] @r,
+    equalType(returnType, VOID()) | error $[Must return an expression of type [returnType]] @r.
+
+rules // variable references
+
+  typeOfExp(s, exp@Var(x)) = t :-
+    variableType(s, x) == t,
+    @exp.type := t.
+
+  typeOfSimpleExp(s, exp@SimpleVar(x)) = t :-
+    variableType(s, x) == t,
+    @exp.type := t.
+
+  typeOfExp(s, FieldAccess(exp@FAVar(var), x)) = propertyType :- {varType}
+    variableType(s, var) == varType,
+    @exp.type := varType,
+    typeOfProperty(s, varType, x) == propertyType,
+    @x.type := propertyType.
+
+  typeOfExp(s, FieldAccess(FAExp(exp), x)) = propertyType :- {t}
+    typeOfExp(s, exp) == t,
+    typeOfProperty(s, t, x) == propertyType,
+    @x.type := propertyType.
+
+  typeOfSimpleExp(s, SimpleFieldAccess(exp, x)) = propertyType :- {t}
+    typeOfSimpleExp(s, exp) == t,
+    typeOfProperty(s, t, x) == propertyType,
+    @x.type := propertyType.
+
+  typeOfPlaceholderExp(s, PHFieldAccess(exp, x)) = propertyType :- {t}
+    typeOfExp(s, exp) == t,
+    typeOfProperty(s, t, x) == propertyType,
+    @x.type := propertyType.
+
+  typeOfProperty : scope * TYPE * string -> TYPE
+  typeOfProperty(_, t, _) = UNTYPED() :- false | error $[Field access is only allowed on native classes and entities, [t] given].
+  typeOfProperty(s, REF(t), x) = typeOfProperty(s, t, x).
+  typeOfProperty(_, ENTITY(s), x) = t :-
+    propertyType(s, x) == t.
+  typeOfProperty(_, NATIVECLASS(s), x) = t :-
+    propertyType(s, x) == t.
+
+rules // lists and sets
+
+  typeOfExp(s, ListCreation([])) = UNTYPED() :- false | error $[Type cannot be determined for empty untyped list creation].
+  typeOfExp(s, lc@ListCreation([hd | tl])) = LIST(t) :-
+    t == typeOfExp(s, hd), // first element of the untyped list creation determines the type
+    typesCompatibleWith(typesOfExps(s, tl), t) | error $[Not all elements are compatible with type [t]] @tl,
+    @lc.type := LIST(t).
+
+  typeOfExp(s, tlc@TypedListCreation(sort, exps)) = LIST(t) :-
+    typeOfSort(s, sort) == t,
+    typesCompatibleWith(typesOfExps(s, exps), t) | error $[Not all elements are compatible with type [t]] @exps,
+    @tlc.type := LIST(t).
+
+  typeOfExp(s, SetCreation([])) = UNTYPED() :- false | error $[Type cannot be determined for empty untyped set creation].
+  typeOfExp(s, sc@SetCreation([hd | tl])) = SET(t) :-
+    t == typeOfExp(s, hd), // first element of the untyped set creation determines the type
+    typesCompatibleWith(typesOfExps(s, tl), t) | error $[Not all elements are compatible with type [t]] @tl,
+    @sc.type := SET(t).
+
+  typeOfExp(s, tsc@TypedSetCreation(sort, exps)) = SET(t) :-
+    typeOfSort(s, sort) == t,
+    typesCompatibleWith(typesOfExps(s, exps), t) | error $[Not all elements are compatible with type [t]] @exps,
+    @tsc.type := SET(t).
+
+  typeOfExp(s, ci@CollectionIndex(c, x)) = t :-
+    t == typeOfCollectionIndex(s, c, x),
+    @ci.type := t.
+
+  typeOfPlaceholderExp(s, ci@PHCollectionIndex(c, x)) = t :-
+    t == typeOfCollectionIndex(s, c, x),
+    @ci.type := t.
+
+  typeOfCollectionIndex : scope * Exp * Exp -> TYPE
+  typeOfCollectionIndex(s, c, x) = t :- {ct xt}
+    ct == typeOfExp(s, c),
+    xt == typeOfExp(s, x),
+    typeCompatible(xt, int(s)) | error $[Index expression must be of type Int, [xt] given],
+    t == stripGenericType(ct).
+
+  typeOfExp(s, ForExp2Exp(ForExp(e1, x, OptSortNone(), e2, _, _))) = LIST(t) :- {s_e1 collectionType varType}
+    new s_e1, s_e1 -P-> s,
+    collectionType == typeOfExp(s, e2),
+    varType == stripGenericType(collectionType),
+    declareVar(s_e1, x, varType),
+    t == typeOfExp(s_e1, e1),
+    @x.type := varType, false | error $[Collection type: [collectionType], varType: [varType], final type: list of [t]].
+    // TO-DO: implement filter and group by typechecking
+
+  typeOfExp(s, ForExp2Exp(ForExp(e1, x, OptSortSome(sort), e2, _, _))) = LIST(t) :- {s_e1 collectionType varType}
+    new s_e1, s_e1 -P-> s,
+    collectionType == typeOfExp(s, e2),
+    varType == stripGenericType(collectionType),
+    stripGenericType(collectionType) == typeOfSort(s, sort) | error $["type of [e2] is not a collection of type [sort]"],
+    declareVar(s_e1, x, varType),
+    t == typeOfExp(s_e1, e1).
+    // TO-DO: implement filter and group by typechecking
+
+rules // test
+
+  defOk(s, Test(_, Block(stmts))) :- {s_test}
+    new s_test, s_test -F-> s,
+    stmtsOk(s_test, stmts, UNTYPED()).
+
+rules // misc
+
+  stmtOk(s, _, ValidateStatement(validateExp, messageExp), _) :- validateOk(s, validateExp, messageExp).
+  stmtOk(s, _, NamedValidateStatement(_, validateExp, messageExp), _) :- validateOk(s, validateExp, messageExp).

@@ -1,0 +1,15 @@
+module WebDSL-Test
+
+imports
+  WebDSL-Action
+  WebDSL-Lexical
+  WebDSL-Core
+
+context-free syntax
+
+  Definition.Test = <
+    test <Id> <Block>
+  >
+  Definition.UnnamedTest = <
+    test <Block>
+  >

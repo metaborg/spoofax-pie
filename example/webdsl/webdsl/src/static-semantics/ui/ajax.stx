@@ -1,0 +1,96 @@
+module static-semantics/ui/ajax
+
+imports
+  static-semantics/types/built-ins
+
+  static-semantics/ui/template-calls
+
+  static-semantics/webdsl-ui
+  static-semantics/webdsl
+
+rules // placeholders and ajax
+
+  templateElementOk(s, _, s_pha, TEPlaceholder(PlaceholderHtml(_, ph, elems))) :-
+    declarePlaceholder(s_pha, ph),
+    templateElementsOk(s, s_pha, elems).
+
+  templateElementOk(s, _, s_pha, TEPlaceholder(PlaceholderHtmlExp(_, e, elems))) :-
+    typeCompatible(typeOfExp(s, e), string(s)) | error $[Expression should be compatible with String],
+    templateElementsOk(s, s_pha, elems).
+
+  templateElementOk(s, _, s_pha, TEPlaceholder(Placeholder(ph, elems))) :-
+    declarePlaceholder(s_pha, ph),
+    templateElementsOk(s, s_pha, elems).
+
+  templateElementOk(s, _, s_pha, TEPlaceholder(PlaceholderExp(e, elems))) :-
+    typeCompatible(typeOfExp(s, e), string(s)) | error $[Expression should be compatible with String],
+    templateElementsOk(s, s_pha, elems).
+
+  templateElementOk(s, _, s_pha, TEPlaceholderWithAjaxCall(PlaceholderAjaxHtml(_, ph, tc))) :-
+    declarePlaceholder(s_pha, ph),
+    templateCallOk(s, s_pha, tc).
+
+  templateElementOk(s, _, s_pha, TEPlaceholderWithAjaxCall(PlaceholderAjaxHtmlExp(_, e, tc))) :-
+    typeCompatible(typeOfPlaceholderExp(s, e), string(s)) | error $[Expression should be compatible with String],
+    templateCallOk(s, s_pha, tc).
+
+  templateElementOk(s, _, s_pha, TEPlaceholderWithAjaxCall(PlaceholderAjax(ph, tc))) :-
+    declarePlaceholder(s_pha, ph),
+    templateCallOk(s, s_pha, tc).
+
+  templateElementOk(s, _, s_pha, TEPlaceholderWithAjaxCall(PlaceholderAjaxExp(e, tc))) :-
+    typeCompatible(typeOfPlaceholderExp(s, e), string(s)) | error $[Expression should be compatible with String],
+    templateCallOk(s, s_pha, tc).
+
+rules // ajax statements
+
+  stmtOk(s, _, AjaxStatement(stmt), _) :- ajaxStmtOk(s, stmt).
+
+  ajaxStmtOk : scope * AjaxStatement
+  ajaxStmtOk(_, _) :-
+    try { false } | warning $[This ajax statement is not yet implemented].
+
+  ajaxStmtOk(s, AjaxReplace(ph, tc)) :-
+    ajaxPlaceholderExpressionOk(s, ph),
+    ajaxTemplateCallOk(s, s, tc)
+      | error $[Unable to find an ajax enabled template with a compatible signature] @tc.
+
+  ajaxStmtOk(s, AjaxAppend(ph, tc)) :-
+    ajaxPlaceholderExpressionOk(s, ph),
+    ajaxTemplateCallOk(s, s, tc)
+      | error $[Unable to find an ajax enabled template with a compatible signature] @tc.
+
+  ajaxStmtOk(s, AjaxVisibility(ph, _)) :-
+    ajaxPlaceholderExpressionOk(s, ph).
+
+  ajaxStmtOk(s, AjaxRelocate(pc)) :-
+    pageCallOk(s, pc).
+
+  ajaxStmtOk(s, AjaxRestyle(ph, e)) :-
+    ajaxPlaceholderExpressionOk(s, ph),
+    typeCompatible(typeOfExp(s, e), string(s)) | error $[CSS classname must be compatible with type String] @e.
+
+  ajaxStmtOk(s, AjaxClear(ph)) :-
+    ajaxPlaceholderExpressionOk(s, ph).
+
+  ajaxStmtOk(s, AjaxRefresh()).
+
+  ajaxStmtOk(s, AjaxRunScript(e)) :-
+    typeCompatible(typeOfExp(s, e), string(s)) | error $[Javascript code must be compatible with type String] @e.
+
+  ajaxPlaceholderExpressionOk : scope * Exp
+  ajaxPlaceholderExpressionOk(s, e) :-
+    typeCompatible(typeOfExp(s, e), string(s))
+      | error $[Expression should be compatible with type string or a placeholder variable] @e.
+
+  ajaxPlaceholderExpressionOk(s, e@Var(ph)) :- { s_next r }
+    resolvePlaceholder(s, ph) == r,
+    new s_next, s_next -P-> s,
+    ajaxPlaceholderExpressionResultOk(s_next, r, e).
+
+  ajaxPlaceholderExpressionResultOk : scope * list((path * (string * TYPE))) * Exp
+  ajaxPlaceholderExpressionResultOk(s, r, e) :- false | error $[Unexpected input? r: [r], e: [e]].
+  ajaxPlaceholderExpressionResultOk(s, [_ | _], _).
+
+  ajaxPlaceholderExpressionResultOk(s, [], e) :-
+    typeCompatible(typeOfExp(s, e), string(s)) | error $[Type of expression [e] is not compatible with String or Placeholder] @e.

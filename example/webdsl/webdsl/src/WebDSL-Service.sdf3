@@ -1,0 +1,30 @@
+module WebDSL-Service
+
+imports
+  WebDSL-Action
+  WebDSL-Core
+  WebDSL-Lexical
+  WebDSL-UI
+  WebDSL-DataModel
+
+context-free sorts
+
+  SyncConfigEmbedded SyncOption
+
+context-free syntax
+
+  Definition.ServiceFunction = <
+    service <Modifier*> <Id> ( <{FormalArg ","}*> ) <Block>
+  >
+  Definition.DeriveWebServices = <
+    derive webservices for <Id> , with nameproperty <Id>
+  >
+  EntityBodyDeclaration = SyncConfigEmbedded
+  SyncConfigEmbedded.SyncConfigEmbedded = <
+    synchronization configuration { <SyncOption*> }
+  >
+  SyncOption.SyncTopLevelNameProperty = <toplevel name property : <Id>>
+  SyncOption.SyncRestrictedProperties = <restricted properties : <{Id ","}*>>
+  SyncOption.SyncACRead = <access read : <Exp>>
+  SyncOption.SyncACWrite = <access write : <Exp>>
+  SyncOption.SyncACCreate = <access create : <Exp>>

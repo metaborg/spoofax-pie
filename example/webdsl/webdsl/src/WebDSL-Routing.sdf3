@@ -1,0 +1,23 @@
+module WebDSL-Routing
+
+imports
+  WebDSL-Core
+  WebDSL-Action
+
+context-free sorts
+
+  RoutingElement
+
+context-free syntax
+
+  Definition.Routing = <
+    routing {
+      <RoutingElement*>
+    }
+  >
+  RoutingElement.RoutingReceive = <
+    receive <OptFormalArgs> <Block>
+  >
+  RoutingElement.RoutingConstruct = <
+    construct <OptFormalArgs> <Block>
+  >

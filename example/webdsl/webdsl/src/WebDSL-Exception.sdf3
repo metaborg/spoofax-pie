@@ -1,0 +1,34 @@
+module WebDSL-Exception
+
+imports
+  WebDSL-Action
+  WebDSL-Core
+  WebDSL-Lexical
+  WebDSL-UI
+
+context-free sorts
+
+  Catch
+
+context-free syntax
+
+  Statement.ThrowStatement = <
+    throw <{Exp ","}+> ;
+  >
+  TemplateCall.ThrowTemplate = <
+    throw <{Exp ","}+>
+  >
+
+  Statement.TryStatement = <
+    try <Block> <Catch+>
+  >
+  TemplateCall.TryTemplate = <
+    try <Block> <Catch+>
+  >
+
+  Catch.Catch = <catch ( <VarId> : <Sort> ) <Block>>
+
+lexical syntax
+
+  TemplateId = "try" {reject}
+  TemplateId = "throw" {reject}

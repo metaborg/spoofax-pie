@@ -1,0 +1,354 @@
+module WebDSL-Search
+
+imports
+  WebDSL-Action
+  WebDSL-Core
+  WebDSL-Lexical
+  WebDSL-DataModel
+
+lexical sorts
+
+  SA-Value SearcherKW SearchFieldId SEARCHERREF
+
+context-free sorts
+
+  FullTextAnalyzerBody FullTextAnalyzerBodyDef CharFilter Tokenizer
+  TokenFilter AnalyzerArgument OptDefaultAnalyzer OptAnalyzerArguments
+
+context-free syntax
+
+  Definition.FullTextAnalyzer = <
+    <OptDefaultAnalyzer> analyzer <Id> {
+      <FullTextAnalyzerBody>
+    }
+  >
+
+  OptDefaultAnalyzer.NonDefaultAnalyzer     = <>
+  OptDefaultAnalyzer.DefaultAnalyzer        = <default>
+  OptDefaultAnalyzer.DefaultBuiltInAnalyzer = <default_builtin_analyzer>
+
+  FullTextAnalyzerBody.FullTextAnalyzerBody = <
+    <FullTextAnalyzerBodyDef>
+  >
+  FullTextAnalyzerBody.DualFullTextAnalyzerBody = <
+    index {
+      <FullTextAnalyzerBodyDef>
+    }
+    query {
+      <FullTextAnalyzerBodyDef>
+    }>
+
+  FullTextAnalyzerBodyDef.FullTextAnalyzerBodyDef = <
+    <CharFilter*>
+    <Tokenizer>
+    <TokenFilter*>
+  >
+
+  CharFilter.CharFilter = <
+    char filter = <Id> <OptAnalyzerArguments>
+  >
+  Tokenizer.Tokenizer = <
+    tokenizer = <Id> <OptAnalyzerArguments>
+  >
+  TokenFilter.TokenFilter = <
+    token filter = <Id> <OptAnalyzerArguments>
+  >
+
+  OptAnalyzerArguments.OptAnalyzerArgumentsNone = <>
+  OptAnalyzerArguments.AnalyzerArguments = <( <{AnalyzerArgument ","}*> )>
+
+  AnalyzerArgument.AnalyzerArgument = <<Id> = <String>>
+
+context-free sorts
+
+  SearchableAnno SearchNamespaceAnno SA-Argument OptSAArguments SA-Key
+
+context-free syntax
+
+  SearchableAnno.SearchableAnno = <searchable <OptSAArguments>>
+  SearchNamespaceAnno.SearchNamespaceAnno = <search namespace>
+  Annotation.SearchableAnnoBoost = <<SearchableAnno> ^ <Float>>
+  Annotation = SearchableAnno
+  Annotation = SearchNamespaceAnno
+
+  OptSAArguments.OptSAArgumentsNone = <>
+  OptSAArguments.OptSAArguments = <( <{SA-Argument ","}*> )>
+
+  SA-Argument.SA-Argument           = <<SA-Key> = <SA-Value>>
+  SA-Argument.Autocomplete-Argument = <autocomplete>
+  SA-Argument.Spellcheck-Argument   = <spellcheck>
+  SA-Argument.Numeric-Argument      = <numeric>
+  SA-Argument.DefaultSF-Argument    = <default>
+
+  SA-Key.SAKeyAnalyzer  = <analyzer>
+  SA-Key.SAKeyName      = <name>
+  SA-Key.SAKeyBoost     = <boost>
+  SA-Key.SAKeySubclass  = <subclass>
+  SA-Key.SAKeyDepth     = <depth>
+
+context-free sorts
+
+  SearchMappingContent MappingPart OptDefaultSearchField SearchMappingAnnoPart
+
+context-free syntax
+
+  Definition.SearchMapping = <
+    search mapping <Id> {
+      <SearchMappingContent*>
+    }
+  >
+
+  EntityBodyDeclaration.SearchMappingEmbedded = <
+    search mapping {
+      <SearchMappingContent*>
+    }
+  >
+
+  SearchMappingContent.SearchNamespaceMapping = <
+    namespace by <Id>
+  >
+  SearchMappingContent.SearchNamespaceMappingAlt = <
+    namespace by <Id> ;
+  >
+  SearchMappingContent.SearchFieldMapping = <
+    <OptDefaultSearchField> <SearchMappingId> <MappingPart*>
+  >
+  SearchMappingContent.SearchFieldMappingAlt = <
+    <OptDefaultSearchField> <SearchMappingId> <MappingPart*> ;
+  >
+  SearchMappingContent.SearchFieldMappingIndex = <
+    <OptDefaultSearchField> index <Id> <MappingPart*>
+  >
+  SearchMappingContent.SearchFieldMappingIndexAlt = <
+    <OptDefaultSearchField> index <Id> <MappingPart*> ;
+  >
+
+  MappingPart.FieldName         = <as <Id>>
+  MappingPart.AnalyzerName      = <using <Id>>
+  MappingPart.BoostAlt          = <boosted to <Float>>
+  MappingPart.TargetEntity      = <for subclass <Id>>
+  MappingPart.SearchMappingAnno = <( <{SearchMappingAnnoPart ","}*> )>
+  MappingPart.EmbeddedDepth     = <depth <Int>>
+  MappingPart.EmbeddedDepthAlt  = <with depth <Int>>
+  MappingPart.Boost             = <^ <Float>>
+
+  SearchMappingAnnoPart.SearchMappingAnnoSpellCheck   = <spellcheck>
+  SearchMappingAnnoPart.SearchMappingAnnoAutoComplete = <autocomplete>
+
+  OptDefaultSearchField.OptDefaultSearchFieldNone = <>
+  OptDefaultSearchField.DefaultSearchField        = <+>
+
+lexical sorts
+
+  SearchMappingId
+
+lexical syntax
+
+  SearchMappingId = Id
+  SearchMappingId = "as" {reject}
+  SearchMappingId = "using" {reject}
+  SearchMappingId = "boosted" {reject}
+  SearchMappingId = "by" {reject}
+  SearchMappingId = "with" {reject}
+  SearchMappingId = "index" {reject}
+  SearchMappingId = "depth" {reject}
+  SearchMappingId = "for" {reject}
+
+  SA-Value = Id
+  SA-Value = Float
+  SA-Value = Int
+
+context-free sorts
+
+  SearcherDef SearcherPart QueryDef Offset MaxResults SortBy ConstraintFilter FacetDef SearchAttributes
+  NamespaceConstraint SearchAttribute FacetExp FilterConstraint FieldsConstraint QuerySearchField QueryConstraint
+  QueryBoost MatchGroup QueryExp Slop Range ExpOrWildCard RangeOpen RangeClose BoolOp QueryTerm SortExp Direction
+  Highlight RetrievalExp SuggestType SearchField PlainField SuggestionPart OptQueryBoost OptBoolOp
+  OptFieldsConstraint OptSlop OptDirection GroupDef
+
+context-free syntax
+
+  Exp.SearcherDef = SearcherDef
+  SearcherDef.SearcherInit = <search <SimpleSortLex> <SearcherPart*>>
+  SearcherDef.SearcherRefMod = <~ <Exp> <SearcherPart+>>
+  SearcherPart = ConstraintFilter
+  SearcherPart = QueryDef
+  SearcherPart = Offset
+  SearcherPart = MaxResults
+  SearcherPart = SortBy
+  SearcherPart = FacetDef
+  SearcherPart = SearchAttributes
+  SearcherPart = NamespaceConstraint
+  QueryDef.QueryDef = <matching <MatchGroup+>>
+  Offset.Start = <offset <Exp>>
+  MaxResults.MaxResults = <limit <Exp>>
+  SortBy.SortBy = <order by <{SortExp ","}+>>
+  ConstraintFilter.ConstraintFilter = <with filter <{FilterConstraint ","}+>>
+  ConstraintFilter.ConstraintFilterAlt = <with filters <{FilterConstraint ","}+>>
+  FacetDef.FacetDef = <with facet <{FacetExp ","}+>>
+  FacetDef.FacetDefAlt = <with facets <{FacetExp ","}+>>
+  SearchAttributes.SearchAttributes = <[ <{SearchAttribute ","}+> ]>
+  NamespaceConstraint.NamespaceConstraint = <in namespace <Exp>>
+  SearchAttribute.NoLucene = <no lucene>
+  SearchAttribute.Lucene = <lucene>
+  SearchAttribute.DefaultAnd = <strict matching>
+  SearchAttribute.DefaultOr = <loose matching>
+
+lexical syntax
+
+  VarId = "nolucene" {reject}
+  VarId = "lucene" {reject}
+  VarId = "strictmatching" {reject}
+  VarId = "loosematching" {reject}
+
+context-free syntax
+
+  FacetExp.DiscreteFacetDef = <<SearchField> ( <Exp> )>
+  FacetExp.RangeFacetDef = <<SearchField> ( <{Range ","}+> )>
+  FilterConstraint.FieldFilterConstraint = <<SearchField> : <Exp>>
+  FieldsConstraint.FieldsConstraint = <<{QuerySearchField ","}+> :>
+  QuerySearchField.QuerySearchField = <<SearchField> <OptQueryBoost>>
+  QueryConstraint.QueryConstraint = <<{QueryExp ","}+>>
+  QueryBoost.QueryBoost = <^ <Exp>>
+  MatchGroup.Clause = <<OptBoolOp> ( <MatchGroup+> )>
+  MatchGroup.Query = <<OptFieldsConstraint> <QueryConstraint>>
+  MatchGroup.MatchAllQuery = <* : *>
+  QueryExp.TermDef = <<OptBoolOp> <QueryTerm> <OptSlop>>
+  QueryExp.RangeDef = <<OptBoolOp> <Range>>
+  QueryExp.QueryExpGroupDef = GroupDef
+  GroupDef.GroupDef = <<OptBoolOp> ( <QueryExp+> ) <OptSlop>>
+  GroupDef = <<OptBoolOp> ( <Exp> ) <OptSlop>> {reject}
+  Slop.Slop = <~ <Exp>>
+  Range.Range = <<RangeOpen> <ExpOrWildCard> to <ExpOrWildCard> <RangeClose>>
+  Range.RangeAlt = <<RangeOpen> <ExpOrWildCard> TO <ExpOrWildCard> <RangeClose>>
+  ExpOrWildCard = Exp
+  ExpOrWildCard.WildCard = <*>
+  RangeOpen.ExcludingOpen = <{>
+  RangeClose.ExcludingClose = <}>
+  RangeOpen.IncludingOpen = <[>
+  RangeClose.IncludingClose = <]>
+  BoolOp.Must = <+>
+  BoolOp.MustNot = <->
+  QueryTerm.QueryTermExp = <<Exp>>
+  QueryTerm = SearcherDef {reject}
+
+  SortExp.SortDef = <<SearchField> <OptDirection>>
+  Direction.AscendingAbbr = <asc>
+  Direction.Ascending = <ascending>
+  Direction.DescendingAbbr = <desc>
+  Direction.Descending = <descending>
+  Highlight.NormalHighlight = <highlight>
+  Highlight.HTMLHighlight = <highlightHTML>
+  RetrievalExp.Highlight = <<Highlight> <SearchField> : <Exp> from <Exp>>
+  RetrievalExp.HighlightTags = <<Highlight> <SearchField> : <Exp> from <Exp> with tags ( <Exp> , <Exp> )>
+  RetrievalExp.SearchResults = <results from <Exp>>
+  RetrievalExp.FacetResults = <<SearchField> facets from <Exp>>
+  RetrievalExp.SearchResultsSize = <count from <Exp>>
+  RetrievalExp.SearchTimeString = <searchtime from <Exp>>
+  RetrievalExp.Suggest = <<SimpleSortLex> <SuggestType> <SuggestionPart+>>
+  SuggestType.AutoComplete = <completions>
+  SuggestType.SpellCheck = <corrections>
+  Exp.RetrievalExp = RetrievalExp
+  SearchField.SearchFieldExp = <~ <Exp>>
+  SearchField = PlainField
+  PlainField.SearchFieldPlainBase = SearchFieldId
+  PlainField.SearchFieldPlain = <<SearchFieldId> . <PlainField>>
+  SuggestionPart.Similarity = <similarity <Exp>>
+  SuggestionPart.SuggestTerm = <matching <FieldsConstraint> <Exp>>
+  SuggestionPart = NamespaceConstraint
+  SuggestionPart = MaxResults
+
+  QueryTerm = SearcherKW {reject}
+  QueryTerm = <<SearcherKW> ( <Exp> )> {reject}
+  QueryTerm = <[ <{Exp ","}*> ]> {reject}
+
+  OptQueryBoost.OptQueryBoostNone = <>
+  OptQueryBoost = QueryBoost
+  OptBoolOp.OptBoolOpNone = <>
+  OptBoolOp = BoolOp
+  OptFieldsConstraint.OptFieldsConstraintNone = <>
+  OptFieldsConstraint = FieldsConstraint
+  OptSlop.OptSlopNone = <>
+  OptSlop = Slop
+  OptDirection.OptDirectionNone = <>
+  OptDirection = Direction
+
+context-free priorities
+
+  QueryTerm.QueryTermExp <0> .> Exp.Sub,
+  QueryTerm.QueryTermExp <0> .> Exp.Add
+
+context-free restrictions
+
+  BoolOp -/- [0-9]
+  QueryTerm -/- [\(]
+
+lexical syntax
+
+  SearchFieldId = Id
+  SearchFieldId = "_id"
+  SEARCHERREF = Id
+  SearcherKW = "limit"
+  SearcherKW = "offset"
+  SearcherKW = "with"
+  SearcherKW = "order"
+  SearcherKW = "in"
+  SearcherKW = "matching"
+
+lexical restrictions
+
+  "as"
+  "asc"
+  "ascending"
+  "analyzer"
+  "autocomplete"
+  "boost"
+  "boosted"
+  "by" -/- [a-zA-Z0-9]
+  "desc"
+  "descending"
+  "default"
+  "default_builtin_analyzer"
+  "depth"
+  "extend"
+  "for" -/- [a-zA-Z0-9]
+  "facet"
+  "facets"
+  "from"
+  "get"
+  "highlight"
+  "index"
+  "limit" -/- [a-zA-Z0-9]
+  "matching"
+  "name"
+  "namespace"
+  "nolucene"
+  "on"
+  "query" -/- [a-zA-Z0-9]
+  "results"
+  "search"
+  "sort"
+  "spellcheck"
+  "start"
+  "subclass" -/- [a-zA-Z0-9]
+  "using"
+  "with"
+  "where" -/- [a-zA-Z0-9]
+
+context-free syntax
+
+  EntityBodyDeclaration.SearchMappingEmbeddedDepr = <
+    searchmapping {
+      <SearchMappingContent*>
+    }
+  > {deprecated("keyword `searchmapping` is replaced with `search mapping`")}
+  Definition.SearchMappingDepr = <
+    searchmapping <Id> {
+      <SearchMappingContent*>
+    }
+  > {deprecated("keyword `searchmapping` is replaced with `search mapping`")}
+  CharFilter.CharFilterDepr = <charfilter = <Id> <OptAnalyzerArguments>> {deprecated("keyword `charfilter` is replaced with `char filter`")}
+  TokenFilter.TokenFilterDepr = <tokenfilter = <Id> <OptAnalyzerArguments>> {deprecated("keyword `tokenfilter` is replaced with `token filter`")}
+  RetrievalExp.AllFacetResults = <all <SearchField> facets from <Exp>> {deprecated("the `all` keyword has been deprecated and has no effect on facet retrieval anymore")}
+  FacetExp.DiscreteFacetDefDepr = <( <SearchField> , <Exp> )> {deprecated("the notation: (field,topN) has been replaced with field(topN) ")}
+  FacetExp.RangeFacetDefDepr = <( <SearchField> : <{Range ","}+> )> {deprecated("the notation: (field:[min to max], ...) has been replaced with field([min to max], ...) ")}

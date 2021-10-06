@@ -1,0 +1,65 @@
+module WebDSL-Native
+
+imports
+  WebDSL-Core
+  WebDSL-Lexical
+
+context-free sorts
+
+  NCAlias NCSuper
+
+context-free syntax
+
+  Definition.NativeClass = <
+    native class <QId> <NCAlias> <NCSuper> {
+      <NCElement*>
+    }
+  >
+  NCAlias.NCAlias = <as <Id>>
+  NCAlias.NCAliasNone = <>
+  NCSuper.NCSuper = <: <Id>>
+  NCSuper.NCSuperNone = <>
+
+context-free sorts
+
+  NCElement NativeType NCFunction NCFunctionReturn
+  NCFunctionStatic NCFunctionFromStatic
+
+context-free syntax
+
+  NCElement.NCProperty = <
+    <Id> : <NativeType>
+  >
+  NCElement.NCFunctionElement = NCFunction
+  NCFunction.NCFunction = <
+    <NCFunctionStatic> <NativeFunId> ( <{NativeType ","}*> ) <NCFunctionReturn>
+  >
+  NCFunctionReturn.NCFunctionReturn = <: <NativeType>>
+  NCFunctionReturn.NCFunctionReturnNone = <>
+  NCFunctionStatic.NCFunctionStatic = <static>
+  NCFunctionStatic.NCFunctionStaticNone = <>
+  NCFunctionFromStatic.NCFunctionFromStatic = <
+    <QId> as <NCFunction>
+  >
+  NCElement.NCFunctionFromStaticElement = NCFunctionFromStatic
+  NCElement.NCConstructor = <
+    constructor ( <{NativeType ","}*> )
+  >
+  NCElement.NCConstructorFromStatic = <
+    <QId> as constructor ( <{NativeType ","}*> )
+  >
+  NativeType.NativeGenericType = <<Id> \< <{NativeType ","}*> \>>
+  NativeType.NativeGenericTypeList = <[ <{NativeType ","}*> ]>
+  NativeType.NativeGenericTypeSet = <{ <{NativeType ","}*> }>
+  NativeType.NativeSimpleType = Id
+
+  NCElement = <constructor ( <{NativeType ","}*> ) <NCFunctionReturn>> {reject}
+
+lexical sorts
+
+  NativeFunId
+
+lexical syntax
+
+  NativeFunId = Id
+  NativeFunId = "constructor" {reject}

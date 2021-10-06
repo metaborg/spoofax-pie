@@ -1,0 +1,142 @@
+module WebDSL-Expand
+
+imports
+  WebDSL-Action
+  WebDSL-Lexical
+  WebDSL-Core
+  WebDSL-UI
+  WebDSL-DataModel
+  WebDSL-Attributes
+
+context-free sorts
+
+  DeriveProperty DeriveBody DeriveBodyElement
+
+context-free syntax
+
+  TemplateElement.DeriveNoBody = <
+    derive <Id> from <Exp> for ( <{DeriveProperty ","}*> )
+  >
+  TemplateElement.DeriveNoForNoBody = <
+    derive <Id> from <Exp>
+  >
+  TemplateElement.Derive = <
+    derive <Id> from <Exp> for ( <{DeriveProperty ","}*> ) <DeriveBody>
+  >
+  TemplateElement.DeriveNoFor = <
+    derive <Id> from <Exp> <DeriveBody>
+  >
+  TemplateElement.DeriveNoFromNoFor = <
+    derive <Id> <DeriveBody>
+  >
+
+  DeriveProperty.DeriveDefault = Id
+  DeriveProperty.DeriveMode = <<Id> ( <Id> )>
+  DeriveBody.DeriveBody = <{
+    <DeriveBodyElement*>
+  }>
+  DeriveBodyElement.DeriveBodyElement = <
+    <Id> { <TemplateElement*> }
+  >
+
+  Definition.DeriveCrud = <derive crud <Id>> {case-insensitive}
+
+context-free syntax
+
+  TemplateCall = <from> {reject}
+
+lexical syntax
+
+  TemplateId = "derive" {reject}
+  TemplateId = "for" {reject}
+
+context-free priorities
+
+  TemplateElement.DeriveNoForNoBody <3> .> Exp.ObjectCreation
+
+context-free syntax
+
+  Definition.ExpandTemplateCall = <
+    expand <ExpandId+> to <Id>
+  >
+  Definition.ExpandTemplateDefinition = <
+    expandtemplate <Id> to <ExpandArgId+> {
+      <Definition*>
+    }
+  >
+  TemplateElement.TemplateElementExpandLocal = <
+    expand <ExpandId+> to <ExpandArgId+> {
+      <TemplateElement*>
+    }
+  >
+  EntityBodyDeclaration.EntityBodyDeclarationExpandLocal = <
+    expand <ExpandId+> to <ExpandArgId+> {
+      <EntityBodyDeclaration*>
+    }
+  >
+  Statement.StatementExpandLocal = <
+    expand <ExpandId+> to <ExpandArgId+> {
+      <Statement*>
+    }
+  >
+  ObjectPropertyAssignment.ObjectPropertyAssignmentExpandLocal = <
+    expand <ExpandId+> to <ExpandArgId+> {
+      <ObjectPropertyAssignment*>
+    }
+  >
+  Definition.DefinitionExpandLocal = <
+    expand <ExpandId+> to <ExpandArgId+> {
+      <Definition*>
+    }
+  >
+  Exp.ExpExpandLocal = <expand <ExpandId+> to <ExpandArgId+> { <Exp> }>
+  Attribute.AttributeExpandLocal = <expand <ExpandId+> to <ExpandArgId+> { <Attribute> }>
+  PropertyAssignment.PropertyAssignmentExpandLocal = <expand <ExpandId+> to <ExpandArgId+> { <PropertyAssignment> }>
+  FormalArg.FormalArgExpandLocal = <expand <ExpandId+> to <ExpandArgId+> { <FormalArg> }>
+  Case.CaseAltExpandLocal = <
+    expand <ExpandId+> to <ExpandArgId+> {
+      <Case>
+    }
+  >
+  TemplateCaseAlt.TemplateCaseAltExpandLocal = <
+    expand <ExpandId+> to <ExpandArgId+> {
+      <TemplateCaseAlt>
+    }
+  >
+  TypeCaseAlt.TypeCaseAltExpandLocal = <
+    expand <ExpandId+> to <ExpandArgId+> {
+      <ExpandArgId> <Block>
+    }
+  >
+  TemplateTypeCaseAlt.TemplateTypeCaseAltExpandLocal = <
+    expand <ExpandId+> to <ExpandArgId+> {
+      <ExpandArgId> { <TemplateElement*> }
+    }
+  >
+
+
+
+lexical sorts
+
+  ExpandId ExpandArgId
+
+lexical syntax
+
+  ExpandId = [a-zA-Z0-9\_\-]+
+  ExpandArgId = Id
+
+  ExpandId = "expandtemplate" {reject}
+  ExpandId = "template" {reject}
+  ExpandId = "expand" {reject}
+  ExpandId = "to" {reject}
+
+  ExpandArgId = "expandtemplate" {reject}
+  ExpandArgId = "template" {reject}
+  ExpandArgId = "expand" {reject}
+  ExpandArgId = "to" {reject}
+
+  TemplateId = "expand" {reject}
+
+lexical restrictions
+
+  ExpandId -/- [a-zA-Z0-9\_\-]

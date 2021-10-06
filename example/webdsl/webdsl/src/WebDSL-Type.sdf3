@@ -1,0 +1,24 @@
+module WebDSL-Type
+
+imports
+  WebDSL-Action
+  WebDSL-DataModel
+  WebDSL-Lexical
+  WebDSL-Native
+  WebDSL-Core
+
+context-free sorts
+
+  TypeElement
+
+context-free syntax
+
+  Definition.TypeDef = <
+    type <Id> {
+      <TypeElement*>
+    }
+  >
+  TypeElement.TypeAnno = Annotation
+  TypeElement.TypeFunction = NCFunction
+  TypeElement = <static> {reject}
+  TypeElement.TypeFunctionFromStatic = NCFunctionFromStatic

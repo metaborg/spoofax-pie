@@ -1,0 +1,127 @@
+module WebDSL-AccessControl
+
+imports
+  WebDSL-Action
+  WebDSL-Core
+  WebDSL-DataModel
+  WebDSL-Lexical
+  WebDSL-UI
+
+context-free sorts
+
+  // Optional sorts
+  OptMatchArgs OptId OptWildCardArg
+
+  // Access control sorts
+  AccessControlDefinition AccessControlRule AccessControlPointcutElement
+  AccessControlImportRulesArg PolicyExp MatchName
+
+context-free syntax
+
+  MatchName-CF.MatchNameWildCard = "*"
+  MatchName-CF.MatchName = PageId-LEX OptWildCardArg-CF
+
+context-free syntax
+
+  Section.AccessControlDefinition = <
+    access control rules <OptId>
+      <AccessControlDefinition*>
+  >
+  Section.AccessControlDefinitionAlt = <
+    access control rules { <OptId>
+      <AccessControlDefinition*>
+    }
+  >
+
+  Definition.Predicate = <
+    predicate <Id> <OptFormalArgs> {
+      <Exp>
+    }
+  >
+  Definition.AccessControlPrincipalDef = <
+    principal is <Id> with credentials <{Id ","}+>
+  >
+
+  AccessControlDefinition.PredicateAc = <
+    predicate <Id> <OptFormalArgs> {
+      <Exp>
+    }
+  >
+  AccessControlDefinition.AccessControlPrincipalAcDef = <
+    principal is <Id> with credentials <{Id ","}+>
+  >
+  AccessControlDefinition.AccessControlPointcut = <
+    pointcut <Id> ( <{FormalArg ","}*> ) {
+      <{AccessControlPointcutElement ","}*>
+    }
+  >
+  AccessControlDefinition.Rule = AccessControlRule
+
+  AccessControlRule.AccessControlRule = <
+    rule <AccessControlType> <MatchName> <OptMatchArgs> {
+      <Exp> <AccessControlRule*>
+    }
+  >
+  AccessControlRule.SpecialAccessControlRule = <
+    rule logsql {
+      <Exp>
+    }
+  >
+
+  AccessControlPointcutElement.AccessControlPointcutElement = <
+    <AccessControlType> <MatchName> ( <{Id ","}*> <OptWildCardArg> )
+  >
+
+  Section.ACPolicy = <
+    access control policy <PolicyExp>
+  >
+  PolicyExp.Name = Id
+  PolicyExp = <( <PolicyExp> )> {bracket}
+  PolicyExp.PolicyAnd = <<PolicyExp> AND <PolicyExp>>
+  PolicyExp.PolicyOr = <<PolicyExp> OR <PolicyExp>>
+
+  EntityBodyDeclaration.PredicateInEntity = <
+    predicate <Id> <OptFormalArgs> {
+      <Exp>
+    }
+  >
+
+  Modifier.IgnoreAccessControl = <ignore-access-control>
+
+  TemplateElement.AccessControlImportRules = <
+    apply ac rules <Id> ( <{AccessControlImportRulesArg ","}*> )
+  >
+
+lexical syntax
+
+  TemplateId = "rules" {reject}
+
+context-free syntax
+
+  AccessControlImportRulesArg.ACVar = Id
+
+  OptMatchArgs.MatchArgs = <( <{FormalArg ","}*> <OptWildCardArg> )>
+  OptMatchArgs.OptMatchArgsNone = <>
+
+  OptId.Id = Id
+  OptId.OptIdNone = <>
+
+  OptWildCardArg.WildCardArg = <*>
+  OptWildCardArg.OptWildCardArgNone = <>
+
+context-free sorts
+
+  AccessControlType
+
+context-free syntax
+
+  AccessControlType.ACTypePage          = <page>
+  AccessControlType.ACTypeAction        = <action>
+  AccessControlType.ACTypeTemplate      = <template>
+  AccessControlType.ACTypeAjaxTemplate  = <ajaxtemplate>
+  AccessControlType.ACTypePointcut      = <pointcut>
+
+context-free priorities
+
+  {left: PolicyExp.PolicyAnd} >
+  {left: PolicyExp.PolicyOr}

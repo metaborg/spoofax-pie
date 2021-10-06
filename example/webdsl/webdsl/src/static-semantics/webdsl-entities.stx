@@ -1,0 +1,213 @@
+module static-semantics/webdsl-entities
+
+imports
+  static-semantics/actions/functions
+
+  static-semantics/entities/annotations
+  static-semantics/entities/built-ins
+
+  static-semantics/types/built-ins
+
+  static-semantics/webdsl-actions
+  static-semantics/webdsl-types
+  static-semantics/webdsl
+
+rules // entity declaration
+
+  // entity x : super { ... }
+  defOk(s, e@Entity(x, super, bodydecs)) :- {s_entity super' s_super}
+    resolveType(s, super) == [(_, (super', ENTITY(s_super)))] | error $[Entity [super] is not defined] @super,
+    new s_entity, s_entity -INHERIT-> s_super, s_entity -DEF-> s,
+    noCircularInheritance(s_entity) | error $[Circular inhertitance detected] @e,
+    declEntity(s, s_entity, x, bodydecs),
+    declareVar(s, x, STATICENTITY(s_entity)), // declare entity_name as global variable that refers to the static scope
+    declareEntityAnnotation(s_entity, SUBENTITY()),
+    @super.ref := super'.
+
+  // entity x { ... }
+  defOk(s, EntityNoSuper(x, bodydecs)) :- {s_entity s_super}
+    entity(s) == ENTITY(s_super),
+    new s_entity, s_entity -INHERIT-> s_super, s_entity -DEF-> s,
+    declEntity(s, s_entity, x, bodydecs),
+    declareVar(s, x, STATICENTITY(s_entity)). // declare entity_name as global variable that refers to the static scope
+
+  // session x { ... }
+  defOk(s, SessionEntity(x, bodydecs)) :- {s_entity}
+    new s_entity, s_entity -DEF-> s,
+    declEntity(s, s_entity, x, bodydecs),
+    declareVar(s, x, ENTITY(s_entity)), // session entities only have one instance and don't have a static scope
+    declareEntityAnnotation(s_entity, SESSIONENTITY()).
+
+  declEntity : scope * scope * string * list(EntityBodyDeclaration)
+  declEntity(s, s_entity, entity_name, bodydecs) :-
+    declareExtendEntity(s, entity_name, s_entity), // declare entity_scope to be linked to entity_name
+    extendEntityScopes(resolveExtendEntity(s, entity_name), s_entity),
+    declareType(s, entity_name, ENTITY(s_entity)),
+    declThisVar(s_entity),
+    declEntityBody(s_entity, bodydecs).
+
+  extendEntityScopes maps extendEntityScope(list(*), *)
+  extendEntityScope : (path * (string * scope)) * scope
+  extendEntityScope((_, (_, s)), s). // Do not inherit own scope
+  extendEntityScope((_, (_, s')), s) :-
+    s -EXTEND-> s'.
+
+  // extend entity x { ... }
+  defOk(s_global, ExtendEntity(x, bodydecs)) :- declExtendEntity(s_global, x, bodydecs).
+
+  // extend session { ... }
+  defOk(s_global, ExtendSessionEntity(x, bodydecs)) :- declExtendEntity(s_global, x, bodydecs).
+
+  declExtendEntity : scope * string * list(EntityBodyDeclaration)
+  declExtendEntity(s, entity_name, bodydecs) :- {s_extend_entity entity_scopes}
+    resolveType(s, entity_name) == [(_, (_, ENTITY(_)))] | error $[Entity [entity_name] is not defined],
+    new s_extend_entity, s_extend_entity -DEF-> s,
+    declareExtendEntityIfDefined(s, entity_name, s_extend_entity, entityDeclaredB(resolveType(s, entity_name))),
+    declEntityBody(s_extend_entity, bodydecs).
+
+  declareExtendEntityIfDefined : scope * string * scope * BOOL
+  declareExtendEntityIfDefined(_, _, _, FALSE()).
+  declareExtendEntityIfDefined(s, entity_name, s_extend_entity, TRUE()) :-
+    declareExtendEntity(s, entity_name, s_extend_entity), // declare entity_scope to be linked to entity_name
+    extendEntityScopes(resolveExtendEntity(s, entity_name), s_extend_entity).
+
+  entityDeclaredB : list((path * (string * TYPE))) -> BOOL
+  entityDeclaredB(_) = FALSE().
+  entityDeclaredB([(_, (_, ENTITY(_)))]) = TRUE().
+
+  noCircularInheritance : scope
+  noCircularInheritance(s_ent) :- {res}
+    query () filter INHERIT+ and { s :- s == s_ent }
+             min $ < INHERIT
+             in s_ent |-> res,
+    res == [].
+
+  declThisVar : scope
+  declThisVar(s_ent) :-
+    declareVar(s_ent, "this", ENTITY(s_ent)),
+    declareAnnotation(s_ent, "this", DERIVED()). // prevent mutability of this var
+
+  defOk(s, Enum(e, values)) :- { s_entity t }
+    new s_entity, s_entity -DEF-> s,
+    declareVar(s_entity, "name", string(s)),
+    t == ENTITY(s_entity),
+    declareType(s, e, t),
+    declareEnumValues(s, values, t).
+
+  declareEnumValues maps declareEnumValue(*, list(*), *)
+  declareEnumValue : scope * EnumValue * TYPE
+  declareEnumValue(s, EnumValue(v, _), t) :- declareVar(s, v, t).
+
+rules // entity body declaration
+
+  declEntityBodyDeclaration : scope * EntityBodyDeclaration
+  declEntityBodyDeclaration(_, _) :- try { false } | warning $[This entity body declaration is not yet implemented].
+  declEntityBody maps declEntityBodyDeclaration(*, list(*))
+
+  // entity function
+  declEntityBodyDeclaration(s, EntityFunction(f)) :- entityFunctionOk(s, f, FALSE()).
+  declEntityBodyDeclaration(s, StaticEntityFunction(f)) :- entityFunctionOk(s, f, TRUE()).
+  declEntityBodyDeclaration(s, CachedFunction(f)) :-
+    canBeCached(s, f),
+    entityFunctionOk(s, f, FALSE()).
+
+  // entity property
+  declEntityBodyDeclaration(s, Property(x, propkind, sort, PropAnnos(annos))) :- {sortType}
+    sortType == typeOfSort(s, sort),
+    inequalType(sortType, UNTYPED()) | error $[Cannot resolve type [sort]] @sort,
+    inequalType(sortType, VOID()) | error $[Property type 'Void' not allowed] @sort,
+    inequalType(sortType, REF(_)) | error $[Reference type is not allowed in property] @sort,
+    isValidTypeForPropKind(propkind, sort, sortType),
+    declProperty(s, x, sortType),
+    annotationsOk(s, x, sortType, annos).
+
+  // derived entity property
+  declEntityBodyDeclaration(s, DerivedProperty(x, propkind, sort, PropAnnos(annos), exp)) :- {sortType expType}
+    sortType == typeOfSort(s, sort),
+    expType == typeOfExp(s, exp),
+    typeCompatible(expType, sortType) | error $[Expression [exp] must be compatible with type [sortType], [expType] given] @exp,
+    declProperty(s, x, sortType),
+    declareAnnotation(s, x, DERIVED()),
+    annotationsOk(s, x, sortType, annos).
+
+  declProperties maps declProperty(*, list(*), list(*))
+  declProperty : scope * string * TYPE
+  declProperty(s, x, sortType) :-
+    validPropertyName(x),
+    declareVar(s, x, sortType),
+    noDuplicateVarDefsInSuper(s, x) | error $[Cannot override existing entity property [x]] @x.
+
+  validPropertyName : string
+  validPropertyName(x) :-
+    x != "class" | error $[Cannot use the reserved property name [x]] @x.
+
+  isValidTypeForPropKind : PropKind * Sort * TYPE
+  isValidTypeForPropKind(Simple(), sort, sortType) :-
+    isBuiltInType(sortType) | error $[Expected simple type] @sort.
+
+  isValidTypeForPropKind(Ref(), _, ENTITY(_)).
+  isValidTypeForPropKind(Ref(), _, LIST(ENTITY(_))).
+  isValidTypeForPropKind(Ref(), _, SET(ENTITY(_))).
+  isValidTypeForPropKind(Ref(), sort, _) :-
+    false | error $[Expected entity type or collection of an entity type] @sort.
+
+  isValidTypeForPropKind(Comp(), _, ENTITY(_)).
+  isValidTypeForPropKind(Comp(), _, LIST(ENTITY(_))).
+  isValidTypeForPropKind(Comp(), _, SET(ENTITY(_))).
+  isValidTypeForPropKind(Comp(), sort, _) :-
+    false | error $[Expected entity type or collection of an entity type] @sort.
+
+  isValidTypeForPropKind(AnyProp(), _, ENTITY(_)).
+  isValidTypeForPropKind(AnyProp(), _, LIST(ENTITY(_))).
+  isValidTypeForPropKind(AnyProp(), _, SET(ENTITY(_))).
+  isValidTypeForPropKind(AnyProp(), sort, sortType) :-
+    isBuiltInType(sortType) | error $[Expected simple type or entity type or a collection of an entity type] @sort.
+
+  // validation
+  declEntityBodyDeclaration(s, ValidateEntity(validateExp, messageExp)) :- validateOk(s, validateExp, messageExp).
+
+rules // entity resolving
+
+  typeOfExp(s, exp@ObjectCreation(x, prop_assignments)) = ENTITY(s_entity) :-
+    definedType(s, x) == ENTITY(s_entity),
+    @exp.type := ENTITY(s_entity).
+    // TO-DO: check prop assignments
+
+  typeOfThis : scope -> TYPE
+  typeOfThis(s_ent) = t :-
+    resolveVar(s_ent, "this") == [(_, (_, t))] | error $["this" is not defined in this context].
+
+  typeOfExp(s, This(_)) = typeOfThis(s).
+
+  typeOfProperty(_, _, "this") = UNTYPED() :-
+    false | error $[This is only accessible from within the entity].
+
+rules // subtyping
+
+  typeCompatibleB(ENTITY(s_sub), ENTITY(s_super)) = inherits(s_sub, s_super).
+
+  inherits : scope * scope -> BOOL
+  inherits(s_sub, s_super) = nonEmptyPathScopeList(ps) :-
+    query () filter INHERIT*
+             and { s :- s == s_super }
+             min $ < INHERIT
+             in s_sub |-> ps.
+
+  nonEmptyPathScopeList : list((path * scope)) -> BOOL
+  nonEmptyPathScopeList(_)       = FALSE().
+  nonEmptyPathScopeList([(_,_)]) = TRUE().
+
+  inheritEdgesAmount : scope * scope -> int
+  inheritEdgesAmount(s_sub, s_super) = pathLength(p) :-
+    query () filter INHERIT* and { s :- s == s_super }
+             min $ < INHERIT
+             in s_sub |-> [(p, _)].
+
+rules // extension
+
+  extends : scope * scope -> BOOL
+  extends(s_extending, s) = nonEmptyPathScopeList(ps) :-
+    query () filter EXTEND? (INHERIT EXTEND?)*
+             and { s' :- s' == s }
+             min $ < EXTEND, $ < INHERIT, EXTEND < INHERIT
+             in s_extending |-> ps.

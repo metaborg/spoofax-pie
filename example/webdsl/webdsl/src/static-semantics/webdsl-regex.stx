@@ -1,0 +1,33 @@
+module static-semantics/webdsl-regex
+
+imports
+  static-semantics/types/built-ins
+
+  static-semantics/webdsl
+
+rules
+
+  typeOfExp(s, RegexCall(_, "find", args)) = bool(s) :- {argTypes ts}
+    ts == [string(s)],
+    argTypes == typesOfExps(s, args),
+    typesCompatible(argTypes, ts) == TRUE() | error $[Given argument types not compatible with page definition. Got [argTypes] but expected [ts]].
+
+  typeOfExp(s, RegexCall(_, "match", args)) = bool(s) :- {argTypes ts}
+    ts == [string(s)],
+    argTypes == typesOfExps(s, args),
+    typesCompatible(argTypes, ts) == TRUE() | error $[Given argument types not compatible with page definition. Got [argTypes] but expected [ts]].
+
+  typeOfExp(s, RegexCall(_, "split", args)) = LIST(string(s)) :- {argTypes ts}
+    ts == [string(s)],
+    argTypes == typesOfExps(s, args),
+    typesCompatible(argTypes, ts) == TRUE() | error $[Given argument types not compatible with page definition. Got [argTypes] but expected [ts]].
+
+  typeOfExp(s, RegexCall(_, "replaceAll", args)) = string(s) :- {argTypes ts}
+    ts == [string(s), string(s)],
+    argTypes == typesOfExps(s, args),
+    typesCompatible(argTypes, ts) == TRUE() | error $[Given argument types not compatible with page definition. Got [argTypes] but expected [ts]].
+
+  typeOfExp(s, RegexCall(_, "replaceFirst", args)) = string(s) :- {argTypes ts}
+    ts == [string(s), string(s)],
+    argTypes == typesOfExps(s, args),
+    typesCompatible(argTypes, ts) == TRUE() | error $[Given argument types not compatible with page definition. Got [argTypes] but expected [ts]].

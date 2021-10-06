@@ -1,0 +1,61 @@
+module static-semantics/actions/built-ins
+
+imports
+  static-semantics/types/built-ins
+  static-semantics/webdsl-types
+  static-semantics/webdsl
+
+rules
+
+  declareFunctionIns : scope
+  declareFunctionIns(s) :- { datetime date string time int float uuid void bool object url}
+    datetime  == datetime(s),
+    date      == date(s),
+    string    == string(s),
+    time      == time(s),
+    int       == int(s),
+    float     == float(s),
+    uuid      == uuid(s),
+    void      == VOID(),
+    bool      == bool(s),
+    object    == object(s),
+    url       == url(s),
+
+    declareFunction(s, "now"     , []               , datetime),
+    declareFunction(s, "today"   , []               , date),
+    declareFunction(s, "Date"    , [string, string] , date),
+    declareFunction(s, "Date"    , [string]         , date),
+    declareFunction(s, "Time"    , [string, string] , time),
+    declareFunction(s, "Time"    , [string]         , time),
+    declareFunction(s, "DateTime", [string, string] , datetime),
+    declareFunction(s, "DateTime", [string]         , datetime),
+    declareFunction(s, "random"  , [int, int]       , int),
+    declareFunction(s, "random"  , [int]            , int),
+    declareFunction(s, "random"  , []               , float),
+    declareFunction(s, "url"     , [string]         , url),
+
+    declareFunction(s, "randomUUID"     , []      , uuid),
+    declareFunction(s, "UUIDFromString" , [string], uuid),
+
+    declareFunction(s, "getSessionManager", [], definedTypeNoRef(s, "SessionManager")),
+
+    declareFunction(s, "cancel"  , [], void),
+    declareFunction(s, "rollback", [], void),
+    declareFunction(s, "flush"   , [], void),
+
+    declareFunction(s, "getValidationErrorsByName", [string], LIST(string)),
+
+    declareFunction(s, "getHttpMethod"          , []      , string),
+    declareFunction(s, "getRequestParameter"    , [string], string),
+    declareFunction(s, "getRequestParameterList", [string], LIST(string)),
+    declareFunction(s, "readRequestBody"        , []      , string),
+
+    declareFunction(s, "attribute"          , [string]        , string),
+    declareFunction(s, "attribute"          , [string, string], string),
+    declareFunction(s, "hasNotNullAttribute", []              , bool),
+
+    declareFunction(s, "message", [string], void),
+    declareFunction(s, "log"    , [object], void),
+
+    declareFunction(s, "assert", [bool], void),
+    declareFunction(s, "assert", [bool, string], void).

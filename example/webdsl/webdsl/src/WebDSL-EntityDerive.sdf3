@@ -1,0 +1,44 @@
+module WebDSL-EntityDerive
+
+imports
+  WebDSL-Action
+  WebDSL-Core
+  WebDSL-Lexical
+  WebDSL-UI
+
+context-free sorts
+
+  ExpEntityDeriveProp
+
+context-free syntax
+
+  TemplateArgExp.ExpEntityDerive = <<Exp> with <ExpEntityDeriveProp*>>
+  ExpEntityDeriveProp.ExpEntityDeriveProp = <<DeriveArgPropId> <OptCallArgs>>
+
+  Sort.ArgEntityDerive = <<Id> with <DeriveArgPropId> <OptFormalArgs>>
+
+  TemplateElement.ForeachElementEntityDerive = <
+    foreach <Id> {
+      <TemplateElement*>
+    }
+  >
+  Statement.ForeachStatementEntityDerive = <
+    foreach <Id> {
+      <Statement*>
+    }
+  >
+
+lexical sorts
+
+  DeriveArgPropId
+
+lexical syntax
+
+  DeriveArgPropId = Id
+  DeriveArgPropId = "filter" {reject}
+  DeriveArgPropId = "filters" {reject}
+  DeriveArgPropId = "facet" {reject}
+  DeriveArgPropId = "facets" {reject}
+  DeriveArgPropId = "tags" {reject}
+
+  TemplateId = "foreach" {reject}

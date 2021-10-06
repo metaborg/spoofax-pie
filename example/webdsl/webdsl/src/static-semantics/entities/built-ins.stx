@@ -1,0 +1,41 @@
+module static-semantics/entities/built-ins
+
+imports
+  static-semantics/types/built-ins
+
+  static-semantics/entities/annotations
+
+  static-semantics/webdsl-entities
+  static-semantics/webdsl
+
+rules
+
+  declareEntityBuiltIns : scope
+  declareEntityBuiltIns(s) :- {s_object s_ent s_sessionmessage s_sessionmanager}
+    new s_object, s_object -DEF-> s,
+    new s_ent, s_ent -INHERIT-> s_object,
+    declareType(s, "Object", BUILTINTYPE("Object", s_object)),
+    declareType(s, "Entity", ENTITY(s_ent)),
+    declareVar(s_ent, "id"       , uuid(s)),
+    declareVar(s_ent, "naturalId", string(s)),
+    declareVar(s_ent, "version"  , int(s)),
+    declareVar(s_ent, "name"     , string(s)), declareAnnotations(s_ent, "name", [OVERRIDABLE(), NAME(), DERIVED()]),
+    declareVar(s_ent, "created"  , datetime(s)),
+    declareVar(s_ent, "modified" , datetime(s)),
+    declareFunction(s_ent, "save"  , [], VOID()),
+    declareFunction(s_ent, "delete", [], VOID()), // TO-DO: not allowed on session entities and global vars
+    declareFunction(s_object, "toString", [], string(s)),
+
+    new s_sessionmessage, s_sessionmessage -INHERIT-> s_ent,
+    declareType(s, "SessionMessage", ENTITY(s_sessionmessage)),
+    declareVar(s_sessionmessage, "text", text(s)),
+
+    new s_sessionmanager, s_sessionmanager -INHERIT-> s_ent,
+    declareType(s, "SessionManager", ENTITY(s_sessionmanager)),
+    declareVar(s_sessionmanager, "messages"         , ENTITY(s_sessionmessage)),
+    declareVar(s_sessionmanager, "lastUse"          , datetime(s)),
+    declareVar(s_sessionmanager, "logsqlMessage"    , text(s)),
+    declareVar(s_sessionmanager, "stayLoggedIn"     , bool(s)),
+    declareVar(s_sessionmanager, "sessionHasChanges", bool(s)),
+    declareVar(s_sessionmanager, "domain"           , string(s)),
+    declareVar(s_sessionmanager, "cookieValue"      , uuid(s)).
