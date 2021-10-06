@@ -29,24 +29,6 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `releng` (devenv-release) requirement to 0.1.14.
 
 
-## [0.13.0] - 2021-10-01
-### Fixed
-- ValidationException on configuration change (https://github.com/metaborg/spoofax-pie/issues/70).
-- CLI and Eclipse/IntelliJ plugins of languages not working due to missing `strategolib` dependency.
-- Eclipse plugins of languages not starting due to out-of-date Eclipse version.
-- Bracket production with constructor causing build errors (https://github.com/metaborg/spoofax-pie/issues/65).
-- SDF Legacy constructs (optional, alteration, sequence) in context-free syntax not being exhaustively checked.
-- Bracket production in lexical-free syntax being allowed.
-- SPT parse to ATerm constructor names don't support underscores (https://github.com/metaborg/spoofax-pie/issues/67)
-- Commands that fail give no feedback in the Eclipse LWB (https://github.com/metaborg/spoofax-pie/issues/68)
-
-### Changed
-- Drop support for Gradle 5.6.4, the minimum supported Gradle version is 6.8.
-- `common` requirement to 0.9.7.
-- `pie` requirement to 0.17.0.
-- `releng` (devenv-release) requirement to 0.1.14.
-
-
 ## [0.12.1] - 2021-09-24
 ### Added
 - Evaluate test command for Statix `.stxtest` files.
