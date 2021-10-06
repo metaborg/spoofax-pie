@@ -30,7 +30,7 @@ public class TigerGetTegoRuntimeProvider extends GetTegoRuntimeProvider {
     }
 
     @Override protected Provider<TegoRuntime> getTegoRuntimeProvider(ExecContext context) throws Exception {
-        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
         return tegoRuntimeProvider;
     }
 }

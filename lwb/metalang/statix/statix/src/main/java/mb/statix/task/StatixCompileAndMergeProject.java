@@ -44,8 +44,8 @@ public class StatixCompileAndMergeProject implements TaskDef<ResourcePath, Resul
 
     @Override
     public Result<IStrategoTerm, ?> exec(ExecContext context, ResourcePath rootDirectory) throws Exception {
-        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
-        context.require(classLoaderResources.tryGetAsLocalResource(StatixEvaluateTest.Args.class), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(StatixEvaluateTest.Args.class), ResourceStampers.hashFile());
 
         final StrategoRuntime strategoRuntime = context.require(getStrategoRuntimeProvider, None.instance).getValue().get();
         final ITermFactory termFactory = strategoRuntime.getTermFactory();

@@ -32,9 +32,9 @@ public class {{baseStatixSpecTaskDef.id}} extends StatixSpecTaskDef {
 
     @Override
     public Result<Spec, ?> exec(ExecContext context, None input) throws Exception {
-        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
 
-        final ReadableResource resource = classLoaderResources.tryGetAsLocalDefinitionResource("src-gen/statix/statix.merged.aterm");
+        final ReadableResource resource = classLoaderResources.tryGetAsNativeDefinitionResource("src-gen/statix/statix.merged.aterm");
         context.require(resource);
         return readToSpec(resource);
     }

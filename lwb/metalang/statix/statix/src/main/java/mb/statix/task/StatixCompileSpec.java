@@ -51,8 +51,8 @@ public class StatixCompileSpec implements TaskDef<ResourcePath, Result<Spec, ?>>
 
     @Override
     public Result<Spec, ?> exec(ExecContext context, ResourcePath rootDirectory) throws Exception {
-        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
-        context.require(classLoaderResources.tryGetAsLocalResource(StatixEvaluateTest.Args.class), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(StatixEvaluateTest.Args.class), ResourceStampers.hashFile());
 
         final StrategoRuntime strategoRuntime = context.require(getStrategoRuntimeProvider, None.instance).getValue().get();
         return context.require(compileMergedProject, rootDirectory).mapThrowing(specAst -> {

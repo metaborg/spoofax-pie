@@ -83,7 +83,7 @@ public class HelloWorldReplaceWorlds extends AstStrategoTransformTaskDef {
   }
 
   @Override protected void createDependencies(ExecContext context) throws IOException { // 4
-    context.require(classloaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+    context.require(classloaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
   }
 }
 
@@ -163,7 +163,7 @@ public class HelloWorldShowReplaceWorlds implements TaskDef<HelloWorldShowReplac
 
     @Override
     public CommandFeedback exec(ExecContext context, Args args) throws Exception {
-        context.require(classloaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+        context.require(classloaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
         final ResourceKey file = args.file;
         return context.require(replaceWorlds, parse.inputBuilder().withFile(file).buildAstSupplier()).mapOrElse(
             ast -> CommandFeedback.of(ShowFeedback.showText(TermToString.toString(ast), "Replaced World()s with Hello()s for '" + file + "'")),
@@ -356,7 +356,7 @@ Test the command similarly to testing the "Show parsed AST" command.
 
 [comment]: <> (    public CommandFeedback exec&#40;ExecContext context, Args args&#41; throws Exception { // &#40;3&#41;)
 
-[comment]: <> (        context.require&#40;classloaderResources.tryGetAsLocalResource&#40;getClass&#40;&#41;&#41;, ResourceStampers.hashFile&#40;&#41;&#41;; // &#40;4&#41;)
+[comment]: <> (        context.require&#40;classloaderResources.tryGetAsNativeResource&#40;getClass&#40;&#41;&#41;, ResourceStampers.hashFile&#40;&#41;&#41;; // &#40;4&#41;)
 
 [comment]: <> (        final ResourceKey file = args.file;)
 

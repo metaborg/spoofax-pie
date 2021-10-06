@@ -70,8 +70,8 @@ public class {{baseCodeCompletionTaskDef.id}} extends CodeCompletionTaskDef {
 
     @Override
     public @Nullable Option<CodeCompletionResult> exec(ExecContext context, CodeCompletionTaskDef.Input input) throws Exception {
-        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
-        context.require(classLoaderResources.tryGetAsLocalResource(CodeCompletionTaskDef.Input.class), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(CodeCompletionTaskDef.Input.class), ResourceStampers.hashFile());
 
         return super.exec(context, input);
     }

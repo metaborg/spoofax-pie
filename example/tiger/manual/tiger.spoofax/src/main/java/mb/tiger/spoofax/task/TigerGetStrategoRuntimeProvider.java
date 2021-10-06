@@ -40,13 +40,13 @@ public class TigerGetStrategoRuntimeProvider extends GetStrategoRuntimeProvider 
     // FIXME: Which of these two implementations to use?
 
     @Override protected Provider<StrategoRuntime> getStrategoRuntimeProvider(ExecContext context) throws Exception {
-        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
-        context.require(classLoaderResources.tryGetAsLocalDefinitionResource("target/metaborg/stratego.ctree"));
+        context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeDefinitionResource("target/metaborg/stratego.ctree"));
         return strategoRuntimeProvider;
     }
 
 //    @Override protected Provider<StrategoRuntime> getStrategoRuntimeProvider(ExecContext context) throws Exception {
-//        context.require(classLoaderResources.tryGetAsLocalResource(getClass()), ResourceStampers.hashFile());
+//        context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
 //        try {
 //            classLoaderResources.performWithResourceLocations(
 //            "org/metaborg/meta/lang/template/strategies",
@@ -68,7 +68,7 @@ public class TigerGetStrategoRuntimeProvider extends GetStrategoRuntimeProvider 
 //        } catch(UncheckedIOException e) {
 //            throw e.getCause();
 //        }
-//        context.require(classLoaderResources.tryGetAsLocalDefinitionResource("target/metaborg/stratego.ctree"));
+//        context.require(classLoaderResources.tryGetAsNativeDefinitionResource("target/metaborg/stratego.ctree"));
 //        return strategoRuntimeProvider;
 //    }
 }
