@@ -9,11 +9,12 @@ import org.spoofax.terms.io.TAFTermReader
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
+import javax.inject.Inject
 
 /**
  * Runs a benchmark.
  */
-class BenchmarkRunner(
+class BenchmarkRunner @Inject constructor(
     private val pie: Pie,
     private val runBenchmarkTask: RunBenchmarkTask,
     private val termFactory: ITermFactory,

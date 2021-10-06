@@ -15,6 +15,7 @@ val commonsCsvVersion = "1.9.0"
 val commonsIoVersion = "2.8.0"
 val commonsMathVersion = "3.6.1"
 val jacksonVersion = "2.13.0"
+val cliktVersion = "3.2.0"
 
 dependencies {
     implementation(project(":tiger"))
@@ -33,6 +34,8 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion")
+    implementation("com.github.ajalt.clikt:clikt:$cliktVersion")
+
 }
 
 application {

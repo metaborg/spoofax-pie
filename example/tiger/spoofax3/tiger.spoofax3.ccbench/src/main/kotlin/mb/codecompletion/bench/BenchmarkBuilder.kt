@@ -3,13 +3,14 @@ package mb.codecompletion.bench
 import mb.pie.api.Pie
 import java.nio.file.Files
 import java.nio.file.Path
+import javax.inject.Inject
 import kotlin.io.path.extension
 import kotlin.streams.toList
 
 /**
  * Builds a benchmark.
  */
-class BenchmarkBuilder(
+class BenchmarkBuilder @Inject constructor(
     private val pie: Pie,
     private val prepareBenchmarkTask: PrepareBenchmarkTask,
 ) {

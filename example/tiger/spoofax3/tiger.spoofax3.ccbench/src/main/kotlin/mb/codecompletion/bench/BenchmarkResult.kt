@@ -120,7 +120,7 @@ data class BenchmarkSummary(
             arr[0] = "Name"
             arr[1] = ""
             arr[2] = "TestCount"
-            resultArr.copyInto(arr, addHeaderCount, remHeaderCount, arr.size - remHeaderCount)
+            resultArr.copyInto(arr, addHeaderCount, remHeaderCount, arr.size)
             return arr
         }
     }
@@ -136,7 +136,7 @@ data class BenchmarkSummary(
         arr[0] = this.name
         arr[1] = ""
         arr[2] = this.count
-        resultArr.copyInto(arr, addHeaderCount, remHeaderCount, arr.size - remHeaderCount)
+        resultArr.copyInto(arr, addHeaderCount, remHeaderCount, arr.size)
         return arr
     }
 }
