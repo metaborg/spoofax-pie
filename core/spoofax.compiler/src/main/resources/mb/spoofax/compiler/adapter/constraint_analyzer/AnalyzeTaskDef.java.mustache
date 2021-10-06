@@ -86,7 +86,7 @@ public class {{baseAnalyzeTaskDef.id}} extends ConstraintAnalyzeTaskDef {
             {{#defaultStatixMessageStacktraceLength}}{{this}}{{/defaultStatixMessageStacktraceLength}}{{^defaultStatixMessageStacktraceLength}}null{{/defaultStatixMessageStacktraceLength}},
             {{#defaultStatixMessageTermDepth}}{{this}}{{/defaultStatixMessageTermDepth}}{{^defaultStatixMessageTermDepth}}null{{/defaultStatixMessageTermDepth}},
             {{#defaultStatixTestLogLevel}}"{{this}}"{{/defaultStatixTestLogLevel}}{{^defaultStatixTestLogLevel}}null{{/defaultStatixTestLogLevel}},
-            {{#defaultStatixSuppressCascadingErrors}}{{this}}{{/defaultStatixSuppressCascadingErrors}}{{^defaultStatixSuppressCascadingErrors}}null{{/defaultStatixSuppressCascadingErrors}}
+            {{#defaultStatixSuppressCascadingErrors}}{{this}}{{/defaultStatixSuppressCascadingErrors}}{{^defaultStatixSuppressCascadingErrors}}true{{/defaultStatixSuppressCascadingErrors}}
         );
     }
     {{/languageProjectInput.enableStatix}}
