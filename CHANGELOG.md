@@ -6,6 +6,10 @@ All notable changes to this project are documented in this file, based on [Keep 
 ### Added
 - `default-statix-message-stacktrace-length`, `default-statix-message-term-depth`, `default-statix-test-log-level`, `default-statix-supress-cascading-errors` options to the `constraint-analyzer` section in `spoofaxc.cfg`.
 
+### Changed
+- `ClassLoaderResources` implementations to be factored into `mb.spoofax.resource.ClassLoaderResources` in `spoofax.resource`, and make generated implementations extend it.
+- Use `EclipseClassLoaderToNativeResolver` in Eclipse to attempt to resolve class loader resources into Eclipse resources.
+
 
 ## [0.13.0] - 2021-10-01
 ### Fixed
