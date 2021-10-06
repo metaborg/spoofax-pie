@@ -71,6 +71,11 @@ class RunBenchmarkTask @Inject constructor(
         }
     }
 
+    companion object {
+        /** Number of ns per ms. */
+        private val NS_PER_MS: Double = 1000_000.0
+    }
+
     override fun getId(): String = RunBenchmarkTask::class.java.name
 
     override fun exec(ctx: ExecContext, input: Input): BenchmarkResult {
@@ -122,17 +127,17 @@ class RunBenchmarkTask @Inject constructor(
             kind,
             results?.proposals?.toList() ?: emptyList(),
 
-            (eventHandler.parseTime ?: -1).toDouble() / 1000.0,
-            (eventHandler.preparationTime ?: -1).toDouble() / 1000.0,
-            (eventHandler.analysisTime ?: -1).toDouble() / 1000.0,
-            (eventHandler.codeCompletionTime ?: -1).toDouble() / 1000.0,
-            (eventHandler.finishingTime ?: -1).toDouble() / 1000.0,
-            (eventHandler.totalTime ?: -1).toDouble() / 1000.0,
+            (eventHandler.parseTime ?: -1).toDouble() / NS_PER_MS,
+            (eventHandler.preparationTime ?: -1).toDouble() / NS_PER_MS,
+            (eventHandler.analysisTime ?: -1).toDouble() / NS_PER_MS,
+            (eventHandler.codeCompletionTime ?: -1).toDouble() / NS_PER_MS,
+            (eventHandler.finishingTime ?: -1).toDouble() / NS_PER_MS,
+            (eventHandler.totalTime ?: -1).toDouble() / NS_PER_MS,
 
-            (0).toDouble() / 1000.0, // TODO
-            (0).toDouble() / 1000.0, // TODO
-            (0).toDouble() / 1000.0, // TODO
-            (0).toDouble() / 1000.0, // TODO
+            (0).toDouble() / NS_PER_MS, // TODO
+            (0).toDouble() / NS_PER_MS, // TODO
+            (0).toDouble() / NS_PER_MS, // TODO
+            (0).toDouble() / NS_PER_MS, // TODO
         )
     }
 }

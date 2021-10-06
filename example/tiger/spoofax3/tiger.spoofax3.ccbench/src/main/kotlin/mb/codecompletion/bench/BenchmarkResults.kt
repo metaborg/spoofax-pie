@@ -17,10 +17,10 @@ import kotlin.io.path.bufferedWriter
  * @param results the individual benchmark results
  */
 data class BenchmarkResults(
-    val mean: BenchmarkResult,
-    val p10: BenchmarkResult,
-    val median: BenchmarkResult,
-    val p90: BenchmarkResult,
+    val mean: BenchmarkSummary,
+    val p10: BenchmarkSummary,
+    val median: BenchmarkSummary,
+    val p90: BenchmarkSummary,
     val results: List<BenchmarkResult>
 ) {
 
@@ -60,8 +60,8 @@ data class BenchmarkResults(
                 expandDeterministicTimeStats.addValue(result.expandDeterministicTime)
             }
 
-            fun getBenchmarkResult(name: String, f: (DescriptiveStatistics) -> Double): BenchmarkResult
-              = BenchmarkResult(
+            fun getBenchmarkSummary(name: String, f: (DescriptiveStatistics) -> Double): BenchmarkSummary
+              = BenchmarkSummary(name, successResults.size, BenchmarkResult(
                 name, BenchmarkResultKind.Success, emptyList(),
                 f(parseTimeStats),
                 f(preparationTimeStats),
@@ -74,12 +74,12 @@ data class BenchmarkResults(
                 f(expandInjectionsTimeStats),
                 f(expandQueriesTimeStats),
                 f(expandDeterministicTimeStats),
-            )
+            ))
 
-            val mean = getBenchmarkResult("Mean") { s -> s.mean }                       // MEAN(data)
-            val p10 = getBenchmarkResult("Percentile10") { s -> s.getPercentile(10.0) } // PERCENTILE.EXC(data, 0.1)
-            val median = getBenchmarkResult("Median") { s -> s.getPercentile(50.0) }    // MEDIAN(data)
-            val p90 = getBenchmarkResult("Percentile90") { s -> s.getPercentile(90.0) } // PERCENTILE.EXC(data, 0.9)
+            val mean = getBenchmarkSummary("Mean") { s -> s.mean }                       // MEAN(data)
+            val p10 = getBenchmarkSummary("Percentile10") { s -> s.getPercentile(10.0) } // PERCENTILE.EXC(data, 0.1)
+            val median = getBenchmarkSummary("Median") { s -> s.getPercentile(50.0) }    // MEDIAN(data)
+            val p90 = getBenchmarkSummary("Percentile90") { s -> s.getPercentile(90.0) } // PERCENTILE.EXC(data, 0.9)
 
             return BenchmarkResults(
                 mean, p10, median, p90, results
@@ -93,20 +93,26 @@ data class BenchmarkResults(
      * @param writer the writer
      */
     fun writeAsCsv(writer: Writer) {
+        writer.write("sep=;\n")
         val format = CSVFormat.Builder.create(CSVFormat.EXCEL)
             .setDelimiter(';')
-            .setHeader(*BenchmarkResult.csvHeaders)
             .setAutoFlush(true)
             .build()
-        writer.write("sep=;\n")
-        CSVPrinter(NonClosingWriter(writer), format).use { printer ->
+        val format1 = CSVFormat.Builder.create(format)
+            .setHeader(*BenchmarkSummary.csvHeaders)
+            .build()
+        CSVPrinter(NonClosingWriter(writer), format1).use { printer ->
             printer.printRecord(*this.mean.toCsvArray())
             printer.printRecord(*this.p10.toCsvArray())
             printer.printRecord(*this.median.toCsvArray())
             printer.printRecord(*this.p90.toCsvArray())
         }
+
         writer.write("\n")
-        CSVPrinter(NonClosingWriter(writer), format).use { printer ->
+        val format2 = CSVFormat.Builder.create(format)
+            .setHeader(*BenchmarkSummary.csvHeaders)
+            .build()
+        CSVPrinter(NonClosingWriter(writer), format2).use { printer ->
             for (result in results) {
                 printer.printRecord(*result.toCsvArray())
             }

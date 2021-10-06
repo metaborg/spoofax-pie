@@ -100,3 +100,43 @@ data class BenchmarkResult(
         )
     }
 }
+
+data class BenchmarkSummary(
+    val name: String,
+    val count: Int,
+    val result: BenchmarkResult
+) {
+    companion object {
+        /**
+         * The headers for the CSV.
+         */
+        val csvHeaders = getCsvHeadersInternal()
+
+        private fun getCsvHeadersInternal(): Array<String> {
+            val addHeaderCount = 3
+            val remHeaderCount = 3
+            val resultArr = BenchmarkResult.csvHeaders
+            val arr = Array(addHeaderCount + (resultArr.size - remHeaderCount)) { "" }
+            arr[0] = "Name"
+            arr[1] = ""
+            arr[2] = "TestCount"
+            resultArr.copyInto(arr, addHeaderCount, remHeaderCount, arr.size - remHeaderCount)
+            return arr
+        }
+    }
+
+    /**
+     * Returns this benchmark result as an array of values for the CSV.
+     */
+    fun toCsvArray(): Array<Any?> {
+        val addHeaderCount = 3
+        val remHeaderCount = 3
+        val resultArr = result.toCsvArray()
+        val arr = arrayOfNulls<Any>(addHeaderCount + (resultArr.size - remHeaderCount))
+        arr[0] = this.name
+        arr[1] = ""
+        arr[2] = this.count
+        resultArr.copyInto(arr, addHeaderCount, remHeaderCount, arr.size - remHeaderCount)
+        return arr
+    }
+}

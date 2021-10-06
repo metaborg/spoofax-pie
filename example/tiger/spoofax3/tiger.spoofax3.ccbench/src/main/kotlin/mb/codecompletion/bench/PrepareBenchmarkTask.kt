@@ -3,6 +3,7 @@ package mb.codecompletion.bench
 import mb.codecompletion.bench.utils.runParse
 import mb.codecompletion.bench.utils.withExtension
 import mb.codecompletion.bench.utils.withName
+import mb.common.region.Region
 import mb.common.result.Result
 import mb.common.util.ListView
 import mb.nabl2.terms.stratego.TermOrigin
@@ -14,6 +15,9 @@ import mb.resource.text.TextResourceRegistry
 import mb.tiger.task.TigerDowngradePlaceholdersStatix
 import mb.tiger.task.TigerPPPartial
 import mb.tiger.task.TigerParse
+import mb.tiger.task.TigerPostAnalyzeStatix
+import mb.tiger.task.TigerPreAnalyzeStatix
+import mb.tiger.task.TigerUpgradePlaceholdersStatix
 import org.spoofax.interpreter.terms.IStrategoAppl
 import org.spoofax.interpreter.terms.IStrategoList
 import org.spoofax.interpreter.terms.IStrategoPlaceholder
@@ -33,6 +37,9 @@ import javax.inject.Inject
  */
 class PrepareBenchmarkTask @Inject constructor(
     private val parseTask: TigerParse,
+    private val explicateTask: TigerPreAnalyzeStatix,
+    private val implicateTask: TigerPostAnalyzeStatix,
+    private val upgradePlaceholdersTask: TigerUpgradePlaceholdersStatix,
     private val downgradePlaceholdersTask: TigerDowngradePlaceholdersStatix,
     private val prettyPrintTask: TigerPPPartial,
     private val textResourceRegistry: TextResourceRegistry,
@@ -78,13 +85,14 @@ class PrepareBenchmarkTask @Inject constructor(
         val pp = prettyPrint(ctx, ast)
         val ppResource = textResourceRegistry.createResource(pp)
         val ppAst = parseTask.runParse(ctx, ppResource.key)
+        val explicatedAst = explicate(ctx, ppAst)
 
         // Get all possible incomplete ASTs
-        val incompleteAsts = buildIncompleteAsts(ppAst)
+        val incompleteAsts = buildIncompleteAsts(explicatedAst)
 
         // Downgrade the placeholders in the incomplete ASTs, and pretty-print them
         val prettyPrintedAsts = incompleteAsts.mapNotNull { it.map { term ->
-            prettyPrint(ctx, downgrade(ctx, term))
+            prettyPrint(ctx, implicate(ctx, downgrade(ctx, term)))
         } }
 
         // Construct test cases and write the files to the test cases directory
@@ -116,7 +124,7 @@ class PrepareBenchmarkTask @Inject constructor(
                     name,
                     input.inputFile,
                     input.testCaseDir.relativize(outputFile),
-                    case.offset,
+                    getPlaceholderRegion(case.value).startOffset,
                     input.testCaseDir.relativize(expectedFile),
                 )
             )
@@ -127,14 +135,6 @@ class PrepareBenchmarkTask @Inject constructor(
     }
 
     /**
-     * Determines whether the given string contains a placeholder.
-     */
-    private fun hasPlaceholder(text: String): Boolean {
-        return text.contains(Regex("\\[\\[[^\\]]+\\]\\]"))
-    }
-
-
-    /**
      * Takes a term and produces all possible combinations of this term with a placeholder.
      *
      * @param term the term
@@ -142,7 +142,7 @@ class PrepareBenchmarkTask @Inject constructor(
      */
     private fun buildIncompleteAsts(term: IStrategoTerm): List<TestCaseInfo<IStrategoTerm>> {
         // Replaced the term with a placeholder
-        return listOf(TestCaseInfo(makePlaceholder("x"), getStartOffset(term), term)) +
+        return listOf(TestCaseInfo(makePlaceholder("x"), 0 /* getStartOffset(term)*/, term)) +
           // or replaced a subterm with all possible sub-asts with a placeholder
           term.subterms.flatMapIndexed { i, subTerm ->
               buildIncompleteAsts(subTerm).map { (newSubTerm, offset, expectedAst) -> TestCaseInfo(term.withSubterm(i, newSubTerm), offset, expectedAst) }
@@ -164,8 +164,19 @@ class PrepareBenchmarkTask @Inject constructor(
             is IStrategoAppl -> termFactory.makeAppl(this.constructor, newSubterms, this.annotations) as T
             is IStrategoList -> termFactory.makeList(newSubterms, this.annotations) as T
             is IStrategoTuple -> termFactory.makeTuple(newSubterms, this.annotations) as T
-            else -> TODO("This should not happen.")
+            else -> throw IllegalStateException("This should not happen.")
         }
+    }
+
+    // TODO: Don't use a heuristic
+    private val placeholderRegex = Regex("\\[\\[[^\\]]+\\]\\]")
+
+    /**
+     * Determines whether the given string contains a placeholder.
+     */
+    private fun hasPlaceholder(text: String): Boolean {
+        // TODO: Don't use a heuristic
+        return text.contains(placeholderRegex)
     }
 
     /**
@@ -176,6 +187,50 @@ class PrepareBenchmarkTask @Inject constructor(
      */
     private fun makePlaceholder(name: String): IStrategoPlaceholder {
         return termFactory.makePlaceholder(termFactory.makeString(name))
+    }
+
+    /**
+     * Determines the region of a placeholder.
+     *
+     * @return the region of the placeholder
+     */
+    private fun getPlaceholderRegion(text: String): Region {
+        // TODO: Don't use a heuristic
+        val range = placeholderRegex.find(text)?.range!!
+        return Region.fromOffsets(range.first, range.last + 1)
+    }
+
+    /**
+     * Explicates the term.
+     *
+     * @param ctx the execution context
+     * @param term the term
+     * @return the downgraded term
+     */
+    private fun explicate(ctx: ExecContext, term: IStrategoTerm): IStrategoTerm {
+        return ctx.require(explicateTask, Supplier { Result.ofOk<IStrategoTerm, Exception>(term) }).unwrap()
+    }
+
+    /**
+     * Implicates the term.
+     *
+     * @param ctx the execution context
+     * @param term the term
+     * @return the downgraded term
+     */
+    private fun implicate(ctx: ExecContext, term: IStrategoTerm): IStrategoTerm {
+        return ctx.require(implicateTask, Supplier { Result.ofOk<IStrategoTerm, Exception>(term) }).unwrap()
+    }
+
+    /**
+     * Upgrades the placeholders in the term.
+     *
+     * @param ctx the execution context
+     * @param term the term
+     * @return the downgraded term
+     */
+    private fun upgrade(ctx: ExecContext, term: IStrategoTerm): IStrategoTerm {
+        return ctx.require(upgradePlaceholdersTask, Supplier { Result.ofOk<IStrategoTerm, Exception>(term) }).unwrap()
     }
 
     /**
