@@ -38,9 +38,7 @@ class BenchmarkRunner(
             val result = runTest(benchmark, resTestCaseDir, srcProjectDir, dstProjectDir, testCase)
             results.add(result)
         }
-        return BenchmarkResults(
-            results
-        )
+        return BenchmarkResults.fromResults(results)
     }
 
     fun runTest(

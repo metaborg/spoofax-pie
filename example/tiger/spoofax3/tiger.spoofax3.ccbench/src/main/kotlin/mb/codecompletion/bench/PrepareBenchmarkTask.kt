@@ -1,6 +1,5 @@
 package mb.codecompletion.bench
 
-import mb.aterm.common.TermToString
 import mb.codecompletion.bench.utils.runParse
 import mb.codecompletion.bench.utils.withExtension
 import mb.codecompletion.bench.utils.withName
@@ -21,6 +20,8 @@ import org.spoofax.interpreter.terms.IStrategoPlaceholder
 import org.spoofax.interpreter.terms.IStrategoTerm
 import org.spoofax.interpreter.terms.IStrategoTuple
 import org.spoofax.interpreter.terms.ITermFactory
+import org.spoofax.terms.io.PrettyTextTermWriter
+import org.spoofax.terms.io.SimpleTextTermWriter
 import org.spoofax.terms.util.TermUtils
 import java.io.Serializable
 import java.nio.file.Files
@@ -36,6 +37,7 @@ class PrepareBenchmarkTask @Inject constructor(
     private val prettyPrintTask: TigerPPPartial,
     private val textResourceRegistry: TextResourceRegistry,
     private val termFactory: ITermFactory,
+    private val termWriter: SimpleTextTermWriter,
 ) : TaskDef<PrepareBenchmarkTask.Input, ListView<TestCase>> {
 
     /**
@@ -100,7 +102,8 @@ class PrepareBenchmarkTask @Inject constructor(
             // Write the expected AST to file
             val expectedFile = outputFile.withName { "$it-expected" }.withExtension { "$it.aterm" }
             ctx.provide(expectedFile)
-            Files.writeString(expectedFile, TermToString.toString(case.expectedAst))
+            termWriter.writeToPath(case.expectedAst, expectedFile)
+//            Files.writeString(expectedFile, TermToString.toString(case.expectedAst))
 
             if (!hasPlaceholder(case.value)) {
                 println("Skipped $name.")

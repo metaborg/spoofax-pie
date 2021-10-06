@@ -94,8 +94,21 @@ class RunBenchmarkTask @Inject constructor(
                 )
             ).unwrap() as TermCodeCompletionResult
 
-            val success = results.proposals.filterIsInstance<TermCodeCompletionItem>().filter { tryMatchExpectation(results.placeholder, input.expectedTerm, it.term) }.isNotEmpty()
-            kind = if (success) BenchmarkResultKind.Success else BenchmarkResultKind.Failed
+            kind = if (!results.proposals.isEmpty) {
+                val extProposals = results.proposals.filterIsInstance<TermCodeCompletionItem>()
+                val success = extProposals.filter { tryMatchExpectation(results.placeholder, input.expectedTerm, it.term) }.isNotEmpty()
+                if (success) {
+                    BenchmarkResultKind.Success
+                } else {
+                    println("Expected: ${input.expectedTerm}")
+                    println("Got: ${extProposals.joinToString { "${it.label} (${it.term})" }}")
+                    BenchmarkResultKind.Failed
+                }
+            } else {
+                println("Expected: ${input.expectedTerm}")
+                println("Got: <nothing>")
+                BenchmarkResultKind.NoResults
+            }
         } catch (ex: IllegalStateException) {
             kind = if (ex.message?.contains("input program validation failed") == true) {
                 BenchmarkResultKind.AnalysisFailed
@@ -105,6 +118,7 @@ class RunBenchmarkTask @Inject constructor(
         }
 
         return BenchmarkResult(
+            input.testCase.name,
             kind,
             results?.proposals?.toList() ?: emptyList(),
 

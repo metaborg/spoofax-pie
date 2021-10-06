@@ -13,6 +13,7 @@ val pieVersion = "0.9.0"
 val daggerVersion = "2.36"
 val commonsCsvVersion = "1.9.0"
 val commonsIoVersion = "2.8.0"
+val commonsMathVersion = "3.6.1"
 val jacksonVersion = "2.13.0"
 
 dependencies {
@@ -28,6 +29,7 @@ dependencies {
 
     implementation("org.apache.commons:commons-csv:$commonsCsvVersion")
     implementation("commons-io:commons-io:$commonsIoVersion")
+    implementation("org.apache.commons:commons-math3:$commonsMathVersion")
     implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion")

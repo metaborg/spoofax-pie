@@ -12,7 +12,6 @@ let
            in c
           end
     end
-    var r := fact(n)
+    var r := fact(10)
  in r
 end
-

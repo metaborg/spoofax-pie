@@ -91,7 +91,6 @@ fun main(args: Array<String>) {
     val results = BenchmarkRunner(pieComponent.pie, languageComponent.runBenchmarkTask, languageComponent.termFactory).run(
         benchmark, baseDir
     )
-
     val resultsFile = baseDir.resolve(outputDir).resolve("Tiger.csv")
     results.writeAsCsv(resultsFile)
 

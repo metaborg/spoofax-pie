@@ -6,7 +6,8 @@ import java.io.Serializable
 /**
  * A single benchmark result.
  *
- * @property success Whether the benchmark succeeded.
+ * @property name The name of the benchmark test.
+ * @property kind The result of the benchmark.
  * @property results The code completion proposals resulting from the benchmark.
  *
  * @property parseTime Time spent on parsing the input file with the placeholder; in ms.
@@ -22,6 +23,7 @@ import java.io.Serializable
  * @property expandDeterministicTime Time spent on expanding deterministically; in ms.
  */
 data class BenchmarkResult(
+    val name: String,
     val kind: BenchmarkResultKind,
     val results: List<CodeCompletionItem>,
 
@@ -45,6 +47,7 @@ data class BenchmarkResult(
          * The headers for the CSV.
          */
         val csvHeaders = arrayOf(
+            "Name",
             "Kind",
             "NumberOfResults",
 
@@ -66,6 +69,7 @@ data class BenchmarkResult(
      * Returns this benchmark result as an array of values for the CSV.
      */
     fun toCsvArray(): Array<Any?> = arrayOf(
+        this.name,
         this.kind,
         this.results.size,
 
