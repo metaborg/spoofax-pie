@@ -7,7 +7,8 @@ class NonClosingWriter(
 ) : Writer() {
 
     override fun close() {
-        // Nothing to do
+        flush()
+        // Non-closing.
     }
 
     override fun flush() {

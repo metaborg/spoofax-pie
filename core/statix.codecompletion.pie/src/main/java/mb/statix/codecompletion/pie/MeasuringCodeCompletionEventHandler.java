@@ -15,26 +15,32 @@ public final class MeasuringCodeCompletionEventHandler extends CodeCompletionEve
     private long analysisEndTime = Long.MIN_VALUE;
     private long codeCompletionStartTime = Long.MIN_VALUE;
     private long codeCompletionEndTime = Long.MIN_VALUE;
-    private Long finishingStartTime = Long.MIN_VALUE;
+    private long finishingStartTime = Long.MIN_VALUE;
     private long finishingEndTime = Long.MIN_VALUE;
     private long startTime = Long.MIN_VALUE;
     private long endTime = Long.MIN_VALUE;
 
+    /** The parsing time, in nanoseconds. */
     public @Nullable Long getParseTime() {
         if (this.parseEndTime != Long.MIN_VALUE && this.parseStartTime != Long.MIN_VALUE) return this.parseEndTime - this.parseStartTime; else return null;
     }
+    /** The preparation time, in nanoseconds. */
     public @Nullable Long getPreparationTime() {
         if (this.preparationEndTime != Long.MIN_VALUE && this.preparationStartTime != Long.MIN_VALUE) return this.preparationEndTime - this.preparationStartTime; else return null;
     }
+    /** The analysis time, in nanoseconds. */
     public @Nullable Long getAnalysisTime() {
         if (this.analysisEndTime != Long.MIN_VALUE && this.analysisStartTime != Long.MIN_VALUE) return this.analysisEndTime - this.analysisStartTime; else return null;
     }
+    /** The completion time, in nanoseconds. */
     public @Nullable Long getCodeCompletionTime() {
         if (this.codeCompletionEndTime != Long.MIN_VALUE && this.codeCompletionStartTime != Long.MIN_VALUE) return this.codeCompletionEndTime - this.codeCompletionStartTime; else return null;
     }
+    /** The finishing time, in nanoseconds. */
     public @Nullable Long getFinishingTime() {
         if (this.finishingEndTime != Long.MIN_VALUE && this.finishingStartTime != Long.MIN_VALUE) return this.finishingEndTime - this.finishingStartTime; else return null;
     }
+    /** The total time, in nanoseconds. */
     public @Nullable Long getTotalTime() {
         if (this.endTime != Long.MIN_VALUE && this.startTime != Long.MIN_VALUE) return this.endTime - this.startTime; else return null;
     }

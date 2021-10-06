@@ -122,17 +122,17 @@ class RunBenchmarkTask @Inject constructor(
             kind,
             results?.proposals?.toList() ?: emptyList(),
 
-            eventHandler.parseTime ?: -1,
-            eventHandler.preparationTime ?: -1,
-            eventHandler.analysisTime ?: -1,
-            eventHandler.codeCompletionTime ?: -1,
-            eventHandler.finishingTime ?: -1,
-            eventHandler.totalTime ?: -1,
+            (eventHandler.parseTime ?: -1).toDouble() / 1000.0,
+            (eventHandler.preparationTime ?: -1).toDouble() / 1000.0,
+            (eventHandler.analysisTime ?: -1).toDouble() / 1000.0,
+            (eventHandler.codeCompletionTime ?: -1).toDouble() / 1000.0,
+            (eventHandler.finishingTime ?: -1).toDouble() / 1000.0,
+            (eventHandler.totalTime ?: -1).toDouble() / 1000.0,
 
-            0, // TODO
-            0, // TODO
-            0, // TODO
-            0, // TODO
+            (0).toDouble() / 1000.0, // TODO
+            (0).toDouble() / 1000.0, // TODO
+            (0).toDouble() / 1000.0, // TODO
+            (0).toDouble() / 1000.0, // TODO
         )
     }
 }

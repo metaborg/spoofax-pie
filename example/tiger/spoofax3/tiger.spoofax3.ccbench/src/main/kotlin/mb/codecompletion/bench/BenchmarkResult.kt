@@ -2,6 +2,9 @@ package mb.codecompletion.bench
 
 import mb.common.codecompletion.CodeCompletionItem
 import java.io.Serializable
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.util.*
 
 /**
  * A single benchmark result.
@@ -27,17 +30,17 @@ data class BenchmarkResult(
     val kind: BenchmarkResultKind,
     val results: List<CodeCompletionItem>,
 
-    val parseTime: Long,
-    val preparationTime: Long,
-    val analyzeTime: Long,
-    val codeCompletionTime: Long,
-    val finishingTime: Long,
-    val totalTime: Long,
+    val parseTime: Double,
+    val preparationTime: Double,
+    val analyzeTime: Double,
+    val codeCompletionTime: Double,
+    val finishingTime: Double,
+    val totalTime: Double,
 
-    val expandRulesTime: Long,
-    val expandInjectionsTime: Long,
-    val expandQueriesTime: Long,
-    val expandDeterministicTime: Long,
+    val expandRulesTime: Double,
+    val expandInjectionsTime: Double,
+    val expandQueriesTime: Double,
+    val expandDeterministicTime: Double,
 ): Serializable {
 
     val success: Boolean get() = kind == BenchmarkResultKind.Success
@@ -63,26 +66,37 @@ data class BenchmarkResult(
             "ExpandQueriesTime",
             "ExpandDeterministicTime",
         )
+
+        val decimalFormatter: DecimalFormat = createDecimalFormatter()
+
+        private fun createDecimalFormatter(): DecimalFormat {
+            val otherSymbols = DecimalFormatSymbols(Locale.ROOT)
+            otherSymbols.decimalSeparator = ','
+            otherSymbols.groupingSeparator = '.'
+            return DecimalFormat("#0.00", otherSymbols)
+        }
     }
 
     /**
      * Returns this benchmark result as an array of values for the CSV.
      */
-    fun toCsvArray(): Array<Any?> = arrayOf(
-        this.name,
-        this.kind,
-        this.results.size,
+    fun toCsvArray(): Array<Any?> {
+        return arrayOf(
+            this.name,
+            this.kind,
+            this.results.size,
 
-        this.parseTime,               // ms
-        this.preparationTime,         // ms
-        this.analyzeTime,             // ms
-        this.codeCompletionTime,      // ms
-        this.finishingTime,           // ms
-        this.totalTime,               // ms
+            decimalFormatter.format(this.parseTime),               // ms
+            decimalFormatter.format(this.preparationTime),         // ms
+            decimalFormatter.format(this.analyzeTime),             // ms
+            decimalFormatter.format(this.codeCompletionTime),      // ms
+            decimalFormatter.format(this.finishingTime),           // ms
+            decimalFormatter.format(this.totalTime),               // ms
 
-        this.expandRulesTime,         // ms
-        this.expandInjectionsTime,    // ms
-        this.expandQueriesTime,       // ms
-        this.expandDeterministicTime, // ms
-    )
+            decimalFormatter.format(this.expandRulesTime),         // ms
+            decimalFormatter.format(this.expandInjectionsTime),    // ms
+            decimalFormatter.format(this.expandQueriesTime),       // ms
+            decimalFormatter.format(this.expandDeterministicTime), // ms
+        )
+    }
 }

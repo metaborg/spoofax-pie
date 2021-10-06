@@ -47,39 +47,39 @@ data class BenchmarkResults(
             val expandDeterministicTimeStats = DescriptiveStatistics()
 
             for (result in successResults) {
-                parseTimeStats.addValue(result.parseTime.toDouble())
-                preparationTimeStats.addValue(result.preparationTime.toDouble())
-                analyzeTimeStats.addValue(result.analyzeTime.toDouble())
-                codeCompletionTimeStats.addValue(result.codeCompletionTime.toDouble())
-                finishingTimeStats.addValue(result.finishingTime.toDouble())
-                totalTimeStats.addValue(result.totalTime.toDouble())
+                parseTimeStats.addValue(result.parseTime)
+                preparationTimeStats.addValue(result.preparationTime)
+                analyzeTimeStats.addValue(result.analyzeTime)
+                codeCompletionTimeStats.addValue(result.codeCompletionTime)
+                finishingTimeStats.addValue(result.finishingTime)
+                totalTimeStats.addValue(result.totalTime)
 
-                expandRulesTimeStats.addValue(result.expandRulesTime.toDouble())
-                expandInjectionsTimeStats.addValue(result.expandInjectionsTime.toDouble())
-                expandQueriesTimeStats.addValue(result.expandQueriesTime.toDouble())
-                expandDeterministicTimeStats.addValue(result.expandDeterministicTime.toDouble())
+                expandRulesTimeStats.addValue(result.expandRulesTime)
+                expandInjectionsTimeStats.addValue(result.expandInjectionsTime)
+                expandQueriesTimeStats.addValue(result.expandQueriesTime)
+                expandDeterministicTimeStats.addValue(result.expandDeterministicTime)
             }
 
             fun getBenchmarkResult(name: String, f: (DescriptiveStatistics) -> Double): BenchmarkResult
               = BenchmarkResult(
                 name, BenchmarkResultKind.Success, emptyList(),
-                f(parseTimeStats).toLong(),
-                f(preparationTimeStats).toLong(),
-                f(analyzeTimeStats).toLong(),
-                f(codeCompletionTimeStats).toLong(),
-                f(finishingTimeStats).toLong(),
-                f(totalTimeStats).toLong(),
+                f(parseTimeStats),
+                f(preparationTimeStats),
+                f(analyzeTimeStats),
+                f(codeCompletionTimeStats),
+                f(finishingTimeStats),
+                f(totalTimeStats),
 
-                f(expandRulesTimeStats).toLong(),
-                f(expandInjectionsTimeStats).toLong(),
-                f(expandQueriesTimeStats).toLong(),
-                f(expandDeterministicTimeStats).toLong(),
+                f(expandRulesTimeStats),
+                f(expandInjectionsTimeStats),
+                f(expandQueriesTimeStats),
+                f(expandDeterministicTimeStats),
             )
 
-            val mean = getBenchmarkResult("Mean") { s -> s.mean }
-            val p10 = getBenchmarkResult("Percentile10") { s -> s.getPercentile(10.0) }
-            val median = getBenchmarkResult("Median") { s -> s.getPercentile(50.0) }
-            val p90 = getBenchmarkResult("Percentile90") { s -> s.getPercentile(90.0) }
+            val mean = getBenchmarkResult("Mean") { s -> s.mean }                       // MEAN(data)
+            val p10 = getBenchmarkResult("Percentile10") { s -> s.getPercentile(10.0) } // PERCENTILE.EXC(data, 0.1)
+            val median = getBenchmarkResult("Median") { s -> s.getPercentile(50.0) }    // MEDIAN(data)
+            val p90 = getBenchmarkResult("Percentile90") { s -> s.getPercentile(90.0) } // PERCENTILE.EXC(data, 0.9)
 
             return BenchmarkResults(
                 mean, p10, median, p90, results
@@ -94,18 +94,19 @@ data class BenchmarkResults(
      */
     fun writeAsCsv(writer: Writer) {
         val format = CSVFormat.Builder.create(CSVFormat.EXCEL)
+            .setDelimiter(';')
             .setHeader(*BenchmarkResult.csvHeaders)
             .setAutoFlush(true)
             .build()
-        writer.write("sep=,\n")
+        writer.write("sep=;\n")
         CSVPrinter(NonClosingWriter(writer), format).use { printer ->
             printer.printRecord(*this.mean.toCsvArray())
             printer.printRecord(*this.p10.toCsvArray())
             printer.printRecord(*this.median.toCsvArray())
             printer.printRecord(*this.p90.toCsvArray())
         }
+        writer.write("\n")
         CSVPrinter(NonClosingWriter(writer), format).use { printer ->
-            writer.write("\n")
             for (result in results) {
                 printer.printRecord(*result.toCsvArray())
             }
