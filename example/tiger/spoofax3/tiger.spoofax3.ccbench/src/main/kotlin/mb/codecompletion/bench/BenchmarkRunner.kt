@@ -22,21 +22,21 @@ class BenchmarkRunner @Inject constructor(
 
     fun run(
         benchmark: Benchmark,
-        baseDir: Path
+        benchmarkFile: Path,
+        projectDir: Path,
+        tmpProjectDir: Path,
     ): BenchmarkResults {
-        val srcProjectDir = baseDir.resolve(benchmark.projectDirectory)
-        val dstProjectDir = baseDir.resolve("project-tmp")
-        val resTestCaseDir = baseDir.resolve(benchmark.testCaseDirectory)
+        val testCaseDir = benchmarkFile.parent.resolve(benchmark.testCaseDirectory)
 
         // Copy the project
-        FileUtils.deleteDirectory(dstProjectDir.toFile())
-        Files.createDirectories(dstProjectDir.parent)
-        Files.copy(srcProjectDir, dstProjectDir)
+        FileUtils.deleteDirectory(tmpProjectDir.toFile())
+        Files.createDirectories(tmpProjectDir.parent)
+        Files.copy(projectDir, tmpProjectDir)
 
         // Run the tests
         val results = mutableListOf<BenchmarkResult>()
         for (testCase in benchmark.testCases) {
-            val result = runTest(benchmark, resTestCaseDir, srcProjectDir, dstProjectDir, testCase)
+            val result = runTest(benchmark, testCaseDir, projectDir, tmpProjectDir, testCase)
             results.add(result)
         }
         return BenchmarkResults.fromResults(results)

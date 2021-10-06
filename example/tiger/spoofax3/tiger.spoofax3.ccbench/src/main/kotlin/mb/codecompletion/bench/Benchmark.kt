@@ -20,13 +20,11 @@ import kotlin.io.path.bufferedWriter
  * A benchmark test suite.
  *
  * @property name the name of the benchmark
- * @property projectDirectory the project directory of the benchmark, containing the full project
- * @property testCaseDirectory the directory where the test case files are found
+ * @property testCaseDirectory the directory where the test case files are found, relative to the benchmark data file
  * @property testCases the test cases
  */
 data class Benchmark(
     val name: String,
-    val projectDirectory: Path,
     val testCaseDirectory: Path,
     val testCases: List<TestCase>,
 ): Serializable {

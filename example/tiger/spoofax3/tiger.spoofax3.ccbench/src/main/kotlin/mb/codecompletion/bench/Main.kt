@@ -30,6 +30,7 @@ import mb.statix.codecompletion.pie.CodeCompletionTaskDef
 import mb.tiger.DaggerTigerResourcesComponent
 import mb.tiger.TigerModule
 import mb.tiger.TigerResourcesComponent
+import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import javax.inject.Inject
@@ -119,8 +120,8 @@ fun main(args: Array<String>) {
 }
 
 class MainCommand @Inject constructor(
-    private val prepareBenchmarkCommand: PrepareBenchmarkCommand,
-    private val runBenchmarkCommand: RunBenchmarkCommand,
+    prepareBenchmarkCommand: PrepareBenchmarkCommand,
+    runBenchmarkCommand: RunBenchmarkCommand,
 ): CliktCommand() {
     init {
         subcommands(
@@ -141,19 +142,19 @@ class PrepareBenchmarkCommand @Inject constructor(
     val name: String by argument(help = "Name of the benchmark")
     val ext: String by option("-e", "--ext", help = "File extension").required()
 
-    val baseDir: Path? by option("-d", "--baseDir", help = "Base directory").path(mustExist = true, canBeFile = false, canBeDir = true)
     val projectDir: Path by option("-p", "--project", help = "Project directory").path(mustExist = true, canBeFile = false, canBeDir = true).required()
-    val outputDir: Path? by option("-o", "--output", help = "Output directory").path(mustExist = true, canBeFile = false, canBeDir = true)
-    val testCaseDir: Path? by option("-t", "--testcaseDir", help = "Test case directory").path(mustExist = true, canBeFile = false, canBeDir = true)
+    val outputDir: Path? by option("-o", "--output", help = "Output directory").path(mustExist = false, canBeFile = false, canBeDir = true)
+    val testCaseDir: Path? by option("-t", "--testcaseDir", help = "Test case directory").path(mustExist = false, canBeFile = false, canBeDir = true)
 
     override fun run() {
-        val actualBaseDir = baseDir ?: Path.of("")
-        val actualProjectDir = projectDir
-        val actualOutputDir = outputDir ?: Path.of("output/")
-        val actualTestCaseDir = testCaseDir ?: actualOutputDir.resolve("testcases/")
+        val actualProjectDir = projectDir.toAbsolutePath()
+        val actualOutputDir = (outputDir ?: Path.of("output/")).toAbsolutePath()
+        val actualTestCaseDir = (testCaseDir ?: actualOutputDir).toAbsolutePath()
+        println("Project: $actualProjectDir")
+        println("Output: $actualOutputDir")
+        println("Testcases: $actualTestCaseDir")
         benchmarkBuilder.build(
             name,
-            actualBaseDir,
             actualProjectDir,
             ".$ext",
             actualOutputDir,
@@ -171,20 +172,30 @@ class RunBenchmarkCommand @Inject constructor(
 ) : CliktCommand(name = "run") {
     val name: String by argument(help = "Name of the benchmark")
 
-    val baseDir: Path? by option("-d", "--baseDir", help = "Base directory").path(mustExist = true, canBeFile = false, canBeDir = true)
+    val projectDir: Path by option("-p", "--project", help = "Project directory").path(mustExist = true, canBeFile = false, canBeDir = true).required()
     val inputFile: Path? by option("-i", "--input", help = "Benchmark YAML file").path(mustExist = true, canBeFile = true, canBeDir = false)
-    val outputDir: Path? by option("-o", "--output", help = "Output directory").path(mustExist = true, canBeFile = false, canBeDir = true)
+    val outputDir: Path? by option("-o", "--output", help = "Output directory").path(mustExist = false, canBeFile = false, canBeDir = true)
 
     override fun run() {
-        val actualBaseDir = baseDir ?: Path.of("")
-        val actualInputFile = inputFile ?: Path.of("$name.yaml")
-        val actualOutputDir = outputDir ?: Path.of("output/")
-        val actualOutputFile = actualBaseDir.resolve(actualOutputDir).resolve(actualInputFile.withExtension(".csv").fileName)
+        val actualProjectDir = projectDir.toAbsolutePath()
+        val actualInputFile = (inputFile ?: Path.of("$name.yml")).toAbsolutePath()
+        val actualOutputDir = (outputDir ?: Path.of("output/")).toAbsolutePath()
+        val actualOutputFile = actualOutputDir.resolve(actualInputFile.withExtension(".csv").fileName).toAbsolutePath()
+        val tmpProjectDir = Path.of("tmp-project/").toAbsolutePath()
+        println("Project: $actualProjectDir")
+        println("Input file: $actualInputFile")
+        println("Output: $actualOutputDir")
+        println("Output file: $actualOutputFile")
+        println("Temp project dir: $tmpProjectDir")
 
         val benchmark = Benchmark.read(actualInputFile)
         val results = benchmarkRunner.run(
-            benchmark, actualBaseDir
+            benchmark,
+            actualInputFile,
+            actualProjectDir,
+            tmpProjectDir,
         )
+        Files.createDirectories(actualOutputFile.parent)
         results.writeAsCsv(actualOutputFile)
         println("Done!")
     }
