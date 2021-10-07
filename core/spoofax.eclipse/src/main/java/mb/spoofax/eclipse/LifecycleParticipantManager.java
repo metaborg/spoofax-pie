@@ -7,9 +7,7 @@ import mb.pie.dagger.RootPieComponent;
 import mb.pie.dagger.RootPieModule;
 import mb.pie.dagger.TaskDefsProvider;
 import mb.pie.runtime.PieBuilderImpl;
-import mb.pie.runtime.store.SerializingStoreBuilder;
 import mb.pie.runtime.store.SerializingStoreInMemoryBuffer;
-import mb.pie.runtime.tracer.LoggingTracer;
 import mb.resource.ResourceRegistry;
 import mb.resource.dagger.DaggerResourceServiceComponent;
 import mb.resource.dagger.ResourceRegistriesProvider;
@@ -17,7 +15,6 @@ import mb.resource.dagger.ResourceServiceComponent;
 import mb.resource.dagger.ResourceServiceModule;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.LanguageComponent;
-import mb.spoofax.eclipse.classloading.ParentsClassLoader;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -26,7 +23,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class LifecycleParticipantManager implements AutoCloseable {
     private static class StaticGroup implements AutoCloseable {
@@ -146,7 +142,7 @@ public class LifecycleParticipantManager implements AutoCloseable {
             serializingStoreInMemoryBuffer = new SerializingStoreInMemoryBuffer();
         }
         final List<EclipseLifecycleParticipant> participants = Collections.singletonList(participant);
-        final ResourceRegistriesProvider resourceRegistriesProvider = participant.getResourceRegistriesProvider(loggerComponent);
+        final ResourceRegistriesProvider resourceRegistriesProvider = participant.getResourceRegistriesProvider(loggerComponent, baseResourceServiceComponent, platformComponent);
         final ResourceServiceComponent resourceServiceComponent = createResourceComponent(participants, additionalResourceRegistries);
         final RootPieComponent rootPieComponent = createPieComponent(participants, resourceServiceComponent, serializingStoreInMemoryBuffer);
         final @Nullable EclipseLanguageComponent languageComponent = participant.getLanguageComponent(loggerComponent, resourceServiceComponent, platformComponent);
@@ -166,7 +162,7 @@ public class LifecycleParticipantManager implements AutoCloseable {
     ) {
         final ResourceServiceModule resourceServiceModule = baseResourceServiceComponent.createChildModule(additionalResourceRegistries);
         for(EclipseLifecycleParticipant participant : participants) {
-            resourceServiceModule.addRegistriesFrom(participant.getResourceRegistriesProvider(loggerComponent));
+            resourceServiceModule.addRegistriesFrom(participant.getResourceRegistriesProvider(loggerComponent, baseResourceServiceComponent, platformComponent));
         }
         return DaggerResourceServiceComponent.builder()
             .loggerComponent(loggerComponent)

@@ -3,9 +3,9 @@ package mb.tiger.eclipse;
 import mb.pie.api.ExecException;
 import mb.pie.dagger.PieComponent;
 import mb.resource.dagger.ResourceServiceComponent;
-import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.EclipseLifecycleParticipant;
 import mb.spoofax.eclipse.EclipsePlatformComponent;
+import mb.spoofax.eclipse.EclipseResourceServiceComponent;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 import mb.spoofax.eclipse.resource.EclipseClassLoaderToNativeResolver;
 import mb.spoofax.eclipse.resource.EclipseClassLoaderUrlResolver;
@@ -60,10 +60,17 @@ public class TigerLanguage implements EclipseLifecycleParticipant {
     }
 
 
-    @Override public TigerResourcesComponent getResourceRegistriesProvider(EclipseLoggerComponent loggerComponent) {
+    @Override public TigerResourcesComponent getResourceRegistriesProvider(
+        EclipseLoggerComponent loggerComponent,
+        EclipseResourceServiceComponent baseResourceServiceComponent,
+        EclipsePlatformComponent platformComponent
+    ) {
         if(resourcesComponent == null) {
             resourcesComponent = DaggerTigerResourcesComponent.builder()
-                .tigerResourcesModule(new TigerResourcesModule(new EclipseClassLoaderUrlResolver(), new EclipseClassLoaderToNativeResolver()))
+                .tigerResourcesModule(new TigerResourcesModule(
+                    new EclipseClassLoaderUrlResolver(),
+                    new EclipseClassLoaderToNativeResolver(baseResourceServiceComponent.getEclipseResourceRegistry()))
+                )
                 .build();
         }
         return resourcesComponent;
@@ -85,7 +92,7 @@ public class TigerLanguage implements EclipseLifecycleParticipant {
         if(component == null) {
             component = DaggerTigerEclipseComponent.builder()
                 .eclipseLoggerComponent(loggerComponent)
-                .tigerResourcesComponent(getResourceRegistriesProvider(loggerComponent))
+                .tigerResourcesComponent(getResourcesComponent())
                 .resourceServiceComponent(resourceServiceComponent)
                 .eclipsePlatformComponent(platformComponent)
                 .build();

@@ -6,6 +6,7 @@ import mb.pie.dagger.PieComponent;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.eclipse.EclipseLifecycleParticipant;
 import mb.spoofax.eclipse.EclipsePlatformComponent;
+import mb.spoofax.eclipse.EclipseResourceServiceComponent;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 import mb.spoofax.eclipse.resource.EclipseClassLoaderUrlResolver;
 import mb.spoofax.eclipse.resource.EclipseClassLoaderToNativeResolver;
@@ -57,12 +58,16 @@ public class {{baseLanguage.id}} implements EclipseLifecycleParticipant {
 
 
     @Override public {{adapterProjectCompilerInput.resourcesComponent.qualifiedId}} getResourceRegistriesProvider(
-        EclipseLoggerComponent loggerComponent
+        EclipseLoggerComponent loggerComponent,
+        EclipseResourceServiceComponent baseResourceServiceComponent,
+        EclipsePlatformComponent platformComponent
     ) {
         if(resourcesComponent == null) {
             final {{adapterProjectCompilerInput.daggerResourcesComponent.qualifiedId}}.Builder builder = {{adapterProjectCompilerInput.daggerResourcesComponent.qualifiedId}}.builder()
-                .{{adapterProjectCompilerInput.resourcesModule.idAsCamelCase}}(new {{adapterProjectCompilerInput.resourcesModule.qualifiedId}}(new EclipseClassLoaderUrlResolver(), new EclipseClassLoaderToNativeResolver()))
-                ;
+                .{{adapterProjectCompilerInput.resourcesModule.idAsCamelCase}}(new {{adapterProjectCompilerInput.resourcesModule.qualifiedId}}(
+                    new EclipseClassLoaderUrlResolver(),
+                    new EclipseClassLoaderToNativeResolver(baseResourceServiceComponent.getEclipseResourceRegistry()))
+                );
             getCustomizers(loggerComponent).forEach(c -> c.customize(builder));
             resourcesComponent = builder.build();
         }

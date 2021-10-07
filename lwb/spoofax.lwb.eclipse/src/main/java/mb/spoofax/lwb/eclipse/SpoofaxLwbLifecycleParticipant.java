@@ -33,6 +33,7 @@ import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.EclipseLifecycleParticipant;
 import mb.spoofax.eclipse.EclipsePlatformComponent;
+import mb.spoofax.eclipse.EclipseResourceServiceComponent;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 import mb.spoofax.eclipse.util.ResourceUtil;
 import mb.spoofax.lwb.compiler.CompileLanguage;
@@ -123,7 +124,9 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
 
 
     @Override public ResourceRegistriesProvider getResourceRegistriesProvider(
-        EclipseLoggerComponent loggerComponent
+        EclipseLoggerComponent loggerComponent,
+        EclipseResourceServiceComponent baseResourceServiceComponent,
+        EclipsePlatformComponent platformComponent
     ) {
         return new EmptyResourceRegistriesProvider();
     }

@@ -10,7 +10,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface EclipseLifecycleParticipant extends AutoCloseable {
     ResourceRegistriesProvider getResourceRegistriesProvider(
-        EclipseLoggerComponent loggerComponent
+        EclipseLoggerComponent loggerComponent,
+        EclipseResourceServiceComponent baseResourceServiceComponent,
+        EclipsePlatformComponent platformComponent
     );
 
     TaskDefsProvider getTaskDefsProvider(
