@@ -16,6 +16,7 @@ import mb.pie.api.Supplier
 import mb.pie.api.TaskDef
 import mb.resource.text.TextResourceRegistry
 import mb.stratego.pie.AstStrategoTransformTaskDef
+import me.tongfei.progressbar.ProgressBar
 import mu.KotlinLogging
 import org.spoofax.interpreter.terms.IStrategoAppl
 import org.spoofax.interpreter.terms.IStrategoList
@@ -133,7 +134,7 @@ abstract class PrepareBenchmarkTask(
         Files.createDirectories(input.testCaseDir.resolve(input.inputFile).parent)
         val indexedAsts = prettyPrintedAsts.withIndex()
         val sampledAsts = input.sample?.let { indexedAsts.sample(it, input.rnd) } ?: indexedAsts
-        for((i, case) in sampledAsts) {
+        for((i, case) in ProgressBar.wrap(sampledAsts, "Input files")) {
             val name = input.inputFile.withName { "$it-$i" }.withExtension("").toString()
 
             log.trace { "Writing $name..." }
