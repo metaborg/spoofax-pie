@@ -62,7 +62,7 @@ public class Sdf3GenerationUtil {
             // noinspection ConstantConditions (value is present)
             final Sdf3SpecConfig config = configureOption.get();
             final JsglrParseTaskInput.Builder parseInputBuilder = parse.inputBuilder().rootDirectoryHint(rootDirectory);
-            final Sdf3AnalyzeMulti.Input analyzeInput = new Sdf3AnalyzeMulti.Input(config.mainSourceDirectory, parse.createRecoverableMultiAstSupplierFunction(getSourceFiles.createFunction()));
+            final Sdf3AnalyzeMulti.Input analyzeInput = new Sdf3AnalyzeMulti.Input(config.rootDirectory, parse.createRecoverableMultiAstSupplierFunction(getSourceFiles.createFunction()));
             for(ResourcePath file : context.require(getSourceFiles, rootDirectory)) {
                 final Supplier<Result<ConstraintAnalyzeMultiTaskDef.SingleFileOutput, ?>> singleFileAnalysisOutputSupplier = analyze.createSingleFileOutputSupplier(analyzeInput, file);
                 callbacks.generateFromAnalyzed(context, singleFileAnalysisOutputSupplier);
