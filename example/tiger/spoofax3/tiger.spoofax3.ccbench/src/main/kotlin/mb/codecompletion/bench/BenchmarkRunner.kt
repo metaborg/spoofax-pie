@@ -4,6 +4,7 @@ import mb.codecompletion.bench.utils.sample
 import mb.nabl2.terms.stratego.StrategoTerms
 import mb.pie.api.Pie
 import mb.resource.fs.FSResource
+import me.tongfei.progressbar.ProgressBar
 import mu.KotlinLogging
 import org.apache.commons.io.FileUtils
 import org.spoofax.interpreter.terms.ITermFactory
@@ -45,7 +46,7 @@ abstract class BenchmarkRunner(
 
         // Pick a random sample of test cases, or randomize the order
         val selectedTestCases = benchmark.testCases.sample(sample ?: benchmark.testCases.size, rnd)
-        for (testCase in selectedTestCases) {
+        for (testCase in ProgressBar.wrap(selectedTestCases, "Tests")) {
             val result = runTest(benchmark, testCaseDir, projectDir, tmpProjectDir, testCase)
             results.add(result)
         }
@@ -84,6 +85,9 @@ abstract class BenchmarkRunner(
             FSResource(dstInputFile).key
         )
         log.info { "${testCase.name}: ${result.kind} (${result.totalTime} ms)"}
+        // Restore the file
+        val origInputFile = srcProjectDir.resolve(testCase.inputFile)
+        Files.copy(origInputFile, dstInputFile, StandardCopyOption.REPLACE_EXISTING)
         return result
     }
 }

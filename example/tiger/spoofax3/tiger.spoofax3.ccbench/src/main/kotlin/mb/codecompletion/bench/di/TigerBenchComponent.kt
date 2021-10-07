@@ -1,12 +1,9 @@
 package mb.codecompletion.bench.di
 
 import dagger.Component
-import mb.codecompletion.bench.cli.MainCommand
 import mb.codecompletion.bench.cli.TigerMainCommand
 import mb.pie.dagger.RootPieComponent
-import mb.tiger.TigerModule
 import mb.tiger.TigerResourcesComponent
-import mb.tiger.TigerScope
 
 @BenchScope
 @Component(dependencies = [

@@ -18,6 +18,7 @@ val jacksonVersion = "2.13.0"
 val cliktVersion = "3.2.0"
 val logbackVersion = "1.2.6"
 val microutilsLoggingVersion = "2.0.11"
+val progressbarVersion = "0.9.2"
 
 dependencies {
     implementation(project(":tiger"))
@@ -25,13 +26,13 @@ dependencies {
     implementation("org.metaborg:pie.runtime:$pieVersion")
     implementation("org.metaborg:pie.dagger:$pieVersion")
     implementation("org.metaborg:log.backend.slf4j:$logVersion")
-//    implementation("org.slf4j:slf4j-simple:$slf4jVersion")
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("ch.qos.logback:logback-core:$logbackVersion")
     implementation("io.github.microutils:kotlin-logging-jvm:$microutilsLoggingVersion")
     implementation("com.google.dagger:dagger:$daggerVersion")
     implementation("com.google.dagger:dagger-compiler:$daggerVersion")
     kapt("com.google.dagger:dagger-compiler:$daggerVersion")
+    implementation("me.tongfei:progressbar:$progressbarVersion")
 
     implementation("org.apache.commons:commons-csv:$commonsCsvVersion")
     implementation("commons-io:commons-io:$commonsIoVersion")
