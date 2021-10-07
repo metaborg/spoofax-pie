@@ -46,7 +46,9 @@ context-free sorts
 
 syntax
 
-  Section-CF.Section = "section" SectionName-CF LAYOUT?-CF Definition*-CF
+//  Section-CF.Section = "section" SectionName-CF LAYOUT?-CF Definition*-CF
+context-free syntax
+  Section.Section = <section <SectionName> <Definition*>>
 
 context-free syntax
 
