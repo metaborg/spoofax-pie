@@ -44,7 +44,8 @@ class BenchmarkRunner @Inject constructor(
         // Run the tests
         val results = mutableListOf<BenchmarkResult>()
 
-        val selectedTestCases = sample?.let { benchmark.testCases.sample(it, rnd) } ?: benchmark.testCases
+        // Pick a random sample of test cases, or randomize the order
+        val selectedTestCases = benchmark.testCases.sample(sample ?: benchmark.testCases.size, rnd)
         for (testCase in selectedTestCases) {
             val result = runTest(benchmark, testCaseDir, projectDir, tmpProjectDir, testCase)
             results.add(result)
