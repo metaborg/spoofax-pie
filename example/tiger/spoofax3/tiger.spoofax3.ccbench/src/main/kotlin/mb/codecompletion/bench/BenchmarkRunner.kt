@@ -12,12 +12,11 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import java.util.*
-import javax.inject.Inject
 
 /**
  * Runs a benchmark.
  */
-class BenchmarkRunner @Inject constructor(
+abstract class BenchmarkRunner(
     private val pie: Pie,
     private val runBenchmarkTask: RunBenchmarkTask,
     private val termFactory: ITermFactory,

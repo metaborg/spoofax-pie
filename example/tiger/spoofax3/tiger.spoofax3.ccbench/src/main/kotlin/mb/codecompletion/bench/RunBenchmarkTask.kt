@@ -2,34 +2,26 @@ package mb.codecompletion.bench
 
 import mb.codecompletion.bench.utils.runParse
 import mb.common.region.Region
+import mb.jsglr.pie.JsglrParseTaskDef
 import mb.nabl2.terms.ITerm
-import mb.nabl2.terms.stratego.StrategoTerms
 import mb.pie.api.ExecContext
 import mb.pie.api.Pie
 import mb.pie.api.TaskDef
 import mb.resource.ResourceKey
-import mb.resource.text.TextResourceRegistry
 import mb.statix.TermCodeCompletionItem
 import mb.statix.TermCodeCompletionResult
 import mb.statix.codecompletion.pie.CodeCompletionTaskDef
 import mb.statix.codecompletion.pie.MeasuringCodeCompletionEventHandler
-import mb.tiger.task.TigerCodeCompletionTaskDef
-import mb.tiger.task.TigerParse
 import mu.KotlinLogging
-import org.spoofax.interpreter.terms.ITermFactory
-import org.spoofax.terms.io.TAFTermReader
 import java.io.Serializable
-import java.lang.IllegalStateException
-import java.nio.file.Files
 import java.nio.file.Path
-import javax.inject.Inject
 
 /**
  * Runs a single benchmark.
  */
-class RunBenchmarkTask @Inject constructor(
-    private val parseTask: TigerParse,
-    private val codeCompletionTask: TigerCodeCompletionTaskDef,
+abstract class RunBenchmarkTask(
+    private val parseTask: JsglrParseTaskDef,
+    private val codeCompletionTask: CodeCompletionTaskDef,
 ) : TaskDef<RunBenchmarkTask.Input, BenchmarkResult> {
 
     data class Input(

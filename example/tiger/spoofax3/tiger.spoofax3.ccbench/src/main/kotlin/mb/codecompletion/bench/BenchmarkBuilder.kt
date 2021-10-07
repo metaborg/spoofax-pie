@@ -12,7 +12,7 @@ import kotlin.streams.toList
 /**
  * Builds a benchmark.
  */
-class BenchmarkBuilder @Inject constructor(
+abstract class BenchmarkBuilder(
     private val pie: Pie,
     private val prepareBenchmarkTask: PrepareBenchmarkTask,
 ) {

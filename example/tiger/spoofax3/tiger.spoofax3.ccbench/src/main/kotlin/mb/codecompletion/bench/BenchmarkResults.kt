@@ -18,9 +18,13 @@ import kotlin.io.path.bufferedWriter
  */
 data class BenchmarkResults(
     val mean: BenchmarkSummary,
+    val p01: BenchmarkSummary,
+    val p05: BenchmarkSummary,
     val p10: BenchmarkSummary,
     val median: BenchmarkSummary,
     val p90: BenchmarkSummary,
+    val p95: BenchmarkSummary,
+    val p99: BenchmarkSummary,
     val results: List<BenchmarkResult>
 ) {
 
@@ -77,12 +81,16 @@ data class BenchmarkResults(
             ))
 
             val mean = getBenchmarkSummary("Mean") { s -> s.mean }                       // MEAN(data)
-            val p10 = getBenchmarkSummary("Percentile10") { s -> s.getPercentile(10.0) } // PERCENTILE.EXC(data, 0.1)
+            val p01 = getBenchmarkSummary("Percentile01") { s -> s.getPercentile(01.0) } // PERCENTILE.EXC(data, 0.01)
+            val p05 = getBenchmarkSummary("Percentile05") { s -> s.getPercentile(05.0) } // PERCENTILE.EXC(data, 0.05)
+            val p10 = getBenchmarkSummary("Percentile10") { s -> s.getPercentile(10.0) } // PERCENTILE.EXC(data, 0.10)
             val median = getBenchmarkSummary("Median") { s -> s.getPercentile(50.0) }    // MEDIAN(data)
-            val p90 = getBenchmarkSummary("Percentile90") { s -> s.getPercentile(90.0) } // PERCENTILE.EXC(data, 0.9)
+            val p90 = getBenchmarkSummary("Percentile90") { s -> s.getPercentile(90.0) } // PERCENTILE.EXC(data, 0.90)
+            val p95 = getBenchmarkSummary("Percentile95") { s -> s.getPercentile(95.0) } // PERCENTILE.EXC(data, 0.95)
+            val p99 = getBenchmarkSummary("Percentile99") { s -> s.getPercentile(99.0) } // PERCENTILE.EXC(data, 0.99)
 
             return BenchmarkResults(
-                mean, p10, median, p90, results
+                mean, p01, p05, p10, median, p90, p95, p99, results
             )
         }
     }
@@ -103,9 +111,13 @@ data class BenchmarkResults(
             .build()
         CSVPrinter(NonClosingWriter(writer), format1).use { printer ->
             printer.printRecord(*this.mean.toCsvArray())
+            printer.printRecord(*this.p01.toCsvArray())
+            printer.printRecord(*this.p05.toCsvArray())
             printer.printRecord(*this.p10.toCsvArray())
             printer.printRecord(*this.median.toCsvArray())
             printer.printRecord(*this.p90.toCsvArray())
+            printer.printRecord(*this.p95.toCsvArray())
+            printer.printRecord(*this.p99.toCsvArray())
         }
 
         writer.write("\n")
@@ -113,8 +125,19 @@ data class BenchmarkResults(
             .setHeader(*BenchmarkSummary.csvHeaders)
             .build()
         CSVPrinter(NonClosingWriter(writer), format2).use { printer ->
-            for (result in results) {
+            // Start with the successful results
+            for (result in results.filter { it.kind == BenchmarkResultKind.Success }) {
                 printer.printRecord(*result.toCsvArray())
+            }
+            // Other kinds of results
+            for (kind in BenchmarkResultKind.values().filter { it != BenchmarkResultKind.Success }) {
+                val resultsOfKind = results.filter { it.kind == kind }
+                if (resultsOfKind.isNotEmpty()) {
+                    writer.write("\n")
+                    for (result in resultsOfKind) {
+                        printer.printRecord(*result.toCsvArray())
+                    }
+                }
             }
         }
     }

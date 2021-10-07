@@ -8,19 +8,14 @@ import mb.common.region.Region
 import mb.common.result.Result
 import mb.common.util.ListView
 import mb.constraint.pie.ConstraintAnalyzeTaskDef
+import mb.jsglr.pie.JsglrParseTaskDef
 import mb.nabl2.terms.stratego.TermOrigin
 import mb.pie.api.ExecContext
 import mb.pie.api.Pie
 import mb.pie.api.Supplier
 import mb.pie.api.TaskDef
 import mb.resource.text.TextResourceRegistry
-import mb.tiger.task.TigerAnalyze
-import mb.tiger.task.TigerDowngradePlaceholdersStatix
-import mb.tiger.task.TigerPPPartial
-import mb.tiger.task.TigerParse
-import mb.tiger.task.TigerPostAnalyzeStatix
-import mb.tiger.task.TigerPreAnalyzeStatix
-import mb.tiger.task.TigerUpgradePlaceholdersStatix
+import mb.stratego.pie.AstStrategoTransformTaskDef
 import mu.KotlinLogging
 import org.spoofax.interpreter.terms.IStrategoAppl
 import org.spoofax.interpreter.terms.IStrategoList
@@ -28,26 +23,24 @@ import org.spoofax.interpreter.terms.IStrategoPlaceholder
 import org.spoofax.interpreter.terms.IStrategoTerm
 import org.spoofax.interpreter.terms.IStrategoTuple
 import org.spoofax.interpreter.terms.ITermFactory
-import org.spoofax.terms.io.PrettyTextTermWriter
 import org.spoofax.terms.io.SimpleTextTermWriter
 import org.spoofax.terms.util.TermUtils
 import java.io.Serializable
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
-import javax.inject.Inject
 
 /**
  * Runs a single benchmark.
  */
-class PrepareBenchmarkTask @Inject constructor(
-    private val parseTask: TigerParse,
-    private val analyzeTask: TigerAnalyze,
-    private val explicateTask: TigerPreAnalyzeStatix,
-    private val implicateTask: TigerPostAnalyzeStatix,
-    private val upgradePlaceholdersTask: TigerUpgradePlaceholdersStatix,
-    private val downgradePlaceholdersTask: TigerDowngradePlaceholdersStatix,
-    private val prettyPrintTask: TigerPPPartial,
+abstract class PrepareBenchmarkTask(
+    private val parseTask: JsglrParseTaskDef,
+    private val analyzeTask: ConstraintAnalyzeTaskDef,
+    private val explicateTask: AstStrategoTransformTaskDef,
+    private val implicateTask: AstStrategoTransformTaskDef,
+    private val upgradePlaceholdersTask: AstStrategoTransformTaskDef,
+    private val downgradePlaceholdersTask: AstStrategoTransformTaskDef,
+    private val prettyPrintTask: AstStrategoTransformTaskDef,
     private val textResourceRegistry: TextResourceRegistry,
     private val termFactory: ITermFactory,
     private val termWriter: SimpleTextTermWriter,
