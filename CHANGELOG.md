@@ -10,6 +10,9 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `ClassLoaderResources` implementations to be factored into `mb.spoofax.resource.ClassLoaderResources` in `spoofax.resource`, and make generated implementations extend it.
 - Use `EclipseClassLoaderToNativeResolver` in Eclipse to attempt to resolve class loader resources into Eclipse resources.
 
+### Fixed
+- `LAYOUT?-CF` not accepted in SDF3 (https://github.com/metaborg/spoofax-pie/issues/78). Fixed by marking `-CF`, `-LEX`, and `-VAR` sorts as kernel, allowing them to be used in kernel syntax context.
+
 
 ## [0.13.0] - 2021-10-01
 ### Fixed
