@@ -1,0 +1,11 @@
+module main
+
+colorer
+
+  keyword    : 127 0 85 bold
+  identifier : 0 0 150 bold
+  string     : 0 0 255
+  number     : 0 127 0
+  operator   : 0 0 128
+  layout     : 63 127 95 italic
+  unknown    : 0 0 0
