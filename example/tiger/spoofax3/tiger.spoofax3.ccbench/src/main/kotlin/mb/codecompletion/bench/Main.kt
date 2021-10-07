@@ -6,6 +6,8 @@ import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
+import com.github.ajalt.clikt.parameters.types.int
+import com.github.ajalt.clikt.parameters.types.long
 import com.github.ajalt.clikt.parameters.types.path
 import mb.codecompletion.bench.di.BenchLoggerModule
 import mb.codecompletion.bench.di.BenchResourceServiceModule
@@ -145,6 +147,8 @@ class PrepareBenchmarkCommand @Inject constructor(
     val projectDir: Path by option("-p", "--project", help = "Project directory").path(mustExist = true, canBeFile = false, canBeDir = true).required()
     val outputDir: Path? by option("-o", "--output", help = "Output directory").path(mustExist = false, canBeFile = false, canBeDir = true)
     val testCaseDir: Path? by option("-t", "--testcaseDir", help = "Test case directory").path(mustExist = false, canBeFile = false, canBeDir = true)
+    val samples: Int? by option("-s", "--sample", help = "How many to sample per file").int()
+    val seed: Long? by option("--seed", help = "The seed").long()
 
     override fun run() {
         val actualProjectDir = projectDir.toAbsolutePath()
@@ -159,6 +163,8 @@ class PrepareBenchmarkCommand @Inject constructor(
             ".$ext",
             actualOutputDir,
             actualTestCaseDir,
+            samples,
+            seed,
         )
         println("Done!")
     }
@@ -175,13 +181,15 @@ class RunBenchmarkCommand @Inject constructor(
     val projectDir: Path by option("-p", "--project", help = "Project directory").path(mustExist = true, canBeFile = false, canBeDir = true).required()
     val inputFile: Path? by option("-i", "--input", help = "Benchmark YAML file").path(mustExist = true, canBeFile = true, canBeDir = false)
     val outputDir: Path? by option("-o", "--output", help = "Output directory").path(mustExist = false, canBeFile = false, canBeDir = true)
+    val samples: Int? by option("-s", "--sample", help = "How many samples in total").int()
+    val seed: Long? by option("--seed", help = "The seed").long()
 
     override fun run() {
         val actualProjectDir = projectDir.toAbsolutePath()
         val actualInputFile = (inputFile ?: Path.of("$name.yml")).toAbsolutePath()
         val actualOutputDir = (outputDir ?: Path.of("output/")).toAbsolutePath()
         val actualOutputFile = actualOutputDir.resolve(actualInputFile.withExtension(".csv").fileName).toAbsolutePath()
-        val tmpProjectDir = Path.of("tmp-project/").toAbsolutePath()
+        val tmpProjectDir = actualOutputDir.resolve("tmp-project/").toAbsolutePath()
         println("Project: $actualProjectDir")
         println("Input file: $actualInputFile")
         println("Output: $actualOutputDir")
@@ -194,6 +202,8 @@ class RunBenchmarkCommand @Inject constructor(
             actualInputFile,
             actualProjectDir,
             tmpProjectDir,
+            samples,
+            seed,
         )
         Files.createDirectories(actualOutputFile.parent)
         results.writeAsCsv(actualOutputFile)

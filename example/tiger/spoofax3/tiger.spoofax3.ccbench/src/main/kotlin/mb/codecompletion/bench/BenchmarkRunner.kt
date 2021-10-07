@@ -1,5 +1,6 @@
 package mb.codecompletion.bench
 
+import mb.codecompletion.bench.utils.sample
 import mb.nabl2.terms.stratego.StrategoTerms
 import mb.pie.api.Pie
 import mb.resource.fs.FSResource
@@ -9,6 +10,7 @@ import org.spoofax.terms.io.TAFTermReader
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
+import java.util.*
 import javax.inject.Inject
 
 /**
@@ -25,6 +27,8 @@ class BenchmarkRunner @Inject constructor(
         benchmarkFile: Path,
         projectDir: Path,
         tmpProjectDir: Path,
+        sample: Int?,
+        seed: Long?
     ): BenchmarkResults {
         val testCaseDir = benchmarkFile.parent.resolve(benchmark.testCaseDirectory)
 
@@ -33,9 +37,13 @@ class BenchmarkRunner @Inject constructor(
         Files.createDirectories(tmpProjectDir.parent)
         Files.copy(projectDir, tmpProjectDir)
 
+        val rnd = Random(seed ?: System.nanoTime())
+
         // Run the tests
         val results = mutableListOf<BenchmarkResult>()
-        for (testCase in benchmark.testCases) {
+
+        val selectedTestCases = sample?.let { benchmark.testCases.sample(it, rnd) } ?: benchmark.testCases
+        for (testCase in selectedTestCases) {
             val result = runTest(benchmark, testCaseDir, projectDir, tmpProjectDir, testCase)
             results.add(result)
         }

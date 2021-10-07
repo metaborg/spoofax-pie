@@ -3,6 +3,7 @@ package mb.codecompletion.bench
 import mb.pie.api.Pie
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.*
 import javax.inject.Inject
 import kotlin.io.path.extension
 import kotlin.streams.toList
@@ -23,6 +24,8 @@ class BenchmarkBuilder @Inject constructor(
      * @param extension the language file extension, including the leading dot, (e.g., `*.tig`).
      * @param outputDir the output directory
      * @param testCaseDir the test case directory
+     * @param sample how many tests to sample for each file
+     * @param seed the sampling seed
      */
     fun build(
         name: String,
@@ -30,6 +33,8 @@ class BenchmarkBuilder @Inject constructor(
         extension: String,
         outputDir: Path,
         testCaseDir: Path,
+        sample: Int?,
+        seed: Long?
     ): Benchmark {
         // Gather all relevant files in the project directory,
         // and make their paths relative to the project directory
@@ -38,10 +43,12 @@ class BenchmarkBuilder @Inject constructor(
             .map { projectDir.relativize(it) }
             .toList()
 
+        val rnd = Random(seed ?: System.nanoTime())
+
         // Create and write the test cases
         val testCases = inputFiles.flatMap {
             println("Preparing $it...")
-            val result = prepareBenchmarkTask.run(pie, projectDir, it, testCaseDir)
+            val result = prepareBenchmarkTask.run(pie, projectDir, it, testCaseDir, sample, rnd)
             println("Prepared $it.")
             result
         }

@@ -1,6 +1,7 @@
 package mb.codecompletion.bench
 
 import mb.codecompletion.bench.utils.runParse
+import mb.codecompletion.bench.utils.sample
 import mb.codecompletion.bench.utils.withExtension
 import mb.codecompletion.bench.utils.withName
 import mb.common.region.Region
@@ -30,6 +31,7 @@ import org.spoofax.terms.util.TermUtils
 import java.io.Serializable
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.*
 import javax.inject.Inject
 
 /**
@@ -58,6 +60,8 @@ class PrepareBenchmarkTask @Inject constructor(
         val projectDir: Path,
         val inputFile: Path,
         val testCaseDir: Path,
+        val sample: Int?,
+        val rnd: Random,
     ): Serializable
 
     /**
@@ -66,10 +70,15 @@ class PrepareBenchmarkTask @Inject constructor(
      * @param inputFile the task input file
      * @return the benchmark
      */
-    fun run(pie: Pie, projectDir: Path, inputFile: Path, testCaseDir: Path): List<TestCase> {
+    fun run(pie: Pie, projectDir: Path, inputFile: Path, testCaseDir: Path, sample: Int?, rnd: Random): List<TestCase> {
         pie.newSession().use { session ->
             val topDownSession = session.updateAffectedBy(emptySet())
-            return topDownSession.require(this.createTask(Input(projectDir, inputFile, testCaseDir))).toList()
+            return try {
+                topDownSession.require(this.createTask(Input(projectDir, inputFile, testCaseDir, sample, rnd))).toList()
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+                emptyList()
+            }
         }
     }
 
@@ -98,7 +107,9 @@ class PrepareBenchmarkTask @Inject constructor(
         // Construct test cases and write the files to the test cases directory
         val testCases = mutableListOf<TestCase>()
         Files.createDirectories(input.testCaseDir.resolve(input.inputFile).parent)
-        for((i, case) in prettyPrintedAsts.withIndex()) {
+        val indexedAsts = prettyPrintedAsts.withIndex()
+        val sampledAsts = input.sample?.let { indexedAsts.sample(it, input.rnd) } ?: indexedAsts
+        for((i, case) in sampledAsts) {
             val name = input.inputFile.withName { "$it-$i" }.withExtension("").toString()
 
             println("Writing $name...")
