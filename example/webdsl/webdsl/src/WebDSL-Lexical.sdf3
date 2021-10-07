@@ -28,7 +28,7 @@ context-free syntax
   OptWildcardImport.WildcardImport = "/-"
   OptWildcardImport.NoWildcardImport = <>
 
-context-free syntax
+syntax
 
   ModuleName-CF.ModuleName = { ModulePart-CF "/"}+
   ImportName-CF.ImportName = ModuleName-CF OptWildcardImport-CF
@@ -70,7 +70,7 @@ context-free sorts
 
 %% Kernel syntax is required here since we do not want LAYOUT to be parsed between
 %% the first QMLex and StringLex
-context-free syntax
+syntax
 
   String-CF.String = "\"" StringPart-CF* "\""
 

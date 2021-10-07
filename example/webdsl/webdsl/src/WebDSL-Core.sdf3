@@ -44,11 +44,9 @@ context-free sorts
 
   Unit Section Definition EnumValue
 
-context-free syntax
+syntax
 
-  // Should be LAYOUT?-CF
-  //Section-CF.Section = "section" SectionName-CF LAYOUT?-CF Definition*-CF
-  Section.Section = <section <SectionName> <Definition*>>
+  Section-CF.Section = "section" SectionName-CF LAYOUT?-CF Definition*-CF
 
 context-free syntax
 

@@ -16,7 +16,7 @@ context-free sorts
   AccessControlDefinition AccessControlRule AccessControlPointcutElement
   AccessControlImportRulesArg PolicyExp MatchName
 
-context-free syntax
+syntax
 
   MatchName-CF.MatchNameWildCard = "*"
   MatchName-CF.MatchName = PageId-LEX OptWildCardArg-CF

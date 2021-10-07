@@ -92,8 +92,8 @@ context-free syntax
   HQLPropertyFetchOpt.PropertyFetch     = <fetch all properties>
   HQLPropertyFetchOpt.PropertyFetchNone = <>
 
-  HQLGroupByClauseOpt.HLGroupBy     = <group by <{HQLExpression ","}+> <HQLHavingClauseOpt>>
-  HQLGroupByClauseOpt.GroupByNone = <>
+  HQLGroupByClauseOpt.HQLGroupBy     = <group by <{HQLExpression ","}+> <HQLHavingClauseOpt>>
+  HQLGroupByClauseOpt.HQLGroupByNone = <>
 
   HQLOrderByClauseOpt.OrderByClause = <order by <{HQLOrderElement ","}+>>
   HQLOrderByClauseOpt.OrderByClauseNone = <>
