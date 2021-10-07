@@ -1,0 +1,21 @@
+module syntax/ATerms
+
+lexical sorts Cons Int String StringChar
+
+lexical syntax
+
+   Cons       = [a-zA-Z][a-zA-Z0-9]*
+   Cons       = String
+   Int        = [0-9]+
+   String     = "\"" StringChar* "\""
+   StringChar = ~[\"\\]
+   StringChar = "\\" [\"\\]
+
+context-free sorts Term
+context-free syntax
+
+   Term.Str   = <<String>>
+   Term.Int   = <<Int>>
+   Term.App   = <<Cons>(<{Term ","}*>)>
+   Term.List  = <[<{Term ","}*>]>
+   Term.Tuple = <(<{Term ","}*>)>

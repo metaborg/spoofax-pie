@@ -1,0 +1,6 @@
+shared.defaultArtifactId=tiger.spoofax3
+shared.defaultClassPrefix=Tiger
+shared.defaultGroupId=org.metaborg
+shared.defaultPackageId=mb.tiger
+shared.defaultVersion=0.1.0
+stratego.languageStrategyAffix=tiger
