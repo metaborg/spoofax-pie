@@ -56,7 +56,7 @@ open class Spoofax3AdapterExtension(project: Project, input: CompileLanguageInpu
     internal const val id = "spoofax3LanguageAdapterProject"
   }
 
-  override val languageProjectFinalized: Project? = null
+  override val languageProjectFinalized: Project? = project
   override val compilerInputFinalized: AdapterProjectCompiler.Input = input.adapterProjectInput()
 }
 
