@@ -34,7 +34,7 @@ abstract class BenchmarkRunner(
     ): BenchmarkResults {
         val testCaseDir = benchmarkFile.parent.resolve(benchmark.testCaseDirectory)
 
-        // Copy the project
+        // Ensure the tmp project directory is empty, and copy the project
         FileUtils.deleteDirectory(tmpProjectDir.toFile())
         Files.createDirectories(tmpProjectDir.parent)
         Files.copy(projectDir, tmpProjectDir)
@@ -51,7 +51,6 @@ abstract class BenchmarkRunner(
             results.add(result)
         }
 
-        FileUtils.deleteDirectory(tmpProjectDir.toFile())
         return BenchmarkResults.fromResults(results)
     }
 

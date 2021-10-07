@@ -2,6 +2,7 @@ package mb.codecompletion.bench
 
 import mb.pie.api.Pie
 import mu.KotlinLogging
+import org.apache.commons.io.FileUtils
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
@@ -39,6 +40,10 @@ abstract class BenchmarkBuilder(
         sample: Int?,
         seed: Long?
     ): Benchmark {
+        // Ensure the output directory is empty
+        FileUtils.deleteDirectory(outputDir.toFile())
+        Files.createDirectories(outputDir)
+
         // Gather all relevant files in the project directory,
         // and make their paths relative to the project directory
         val inputFiles = Files.walk(projectDir)
