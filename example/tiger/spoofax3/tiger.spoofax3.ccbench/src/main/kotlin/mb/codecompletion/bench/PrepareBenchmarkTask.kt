@@ -7,18 +7,21 @@ import mb.codecompletion.bench.utils.withName
 import mb.common.region.Region
 import mb.common.result.Result
 import mb.common.util.ListView
+import mb.constraint.pie.ConstraintAnalyzeTaskDef
 import mb.nabl2.terms.stratego.TermOrigin
 import mb.pie.api.ExecContext
 import mb.pie.api.Pie
 import mb.pie.api.Supplier
 import mb.pie.api.TaskDef
 import mb.resource.text.TextResourceRegistry
+import mb.tiger.task.TigerAnalyze
 import mb.tiger.task.TigerDowngradePlaceholdersStatix
 import mb.tiger.task.TigerPPPartial
 import mb.tiger.task.TigerParse
 import mb.tiger.task.TigerPostAnalyzeStatix
 import mb.tiger.task.TigerPreAnalyzeStatix
 import mb.tiger.task.TigerUpgradePlaceholdersStatix
+import mu.KotlinLogging
 import org.spoofax.interpreter.terms.IStrategoAppl
 import org.spoofax.interpreter.terms.IStrategoList
 import org.spoofax.interpreter.terms.IStrategoPlaceholder
@@ -39,6 +42,7 @@ import javax.inject.Inject
  */
 class PrepareBenchmarkTask @Inject constructor(
     private val parseTask: TigerParse,
+    private val analyzeTask: TigerAnalyze,
     private val explicateTask: TigerPreAnalyzeStatix,
     private val implicateTask: TigerPostAnalyzeStatix,
     private val upgradePlaceholdersTask: TigerUpgradePlaceholdersStatix,
@@ -64,6 +68,8 @@ class PrepareBenchmarkTask @Inject constructor(
         val rnd: Random,
     ): Serializable
 
+    private val log = KotlinLogging.logger {}
+
     /**
      * Runs this task.
      *
@@ -85,12 +91,37 @@ class PrepareBenchmarkTask @Inject constructor(
     override fun getId(): String = PrepareBenchmarkTask::class.java.name
 
     override fun exec(ctx: ExecContext, input: Input): ListView<TestCase> {
-        // Get the AST of the file
-        // We parse and pretty-print the input resource here, such that are sure
-        // that the offset of the term is the same in the incomplete pretty-printed AST
+        val originalName = input.inputFile.withExtension("").toString()
         val resInputFile = input.projectDir.resolve(input.inputFile)
         val inputResource = ctx.require(resInputFile)
-        val ast = parseTask.runParse(ctx, inputResource.key)
+
+        val ast: IStrategoTerm
+        try {
+            // Parse the input
+            ast = parseTask.runParse(ctx, inputResource.key)
+        } catch (ex: Exception) {
+            log.warn { "Failed to parse $originalName" }
+            ex.printStackTrace()
+            return ListView.of()
+        }
+
+        try {
+            // Analyze the file
+            val result = ctx.require(analyzeTask, ConstraintAnalyzeTaskDef.Input(
+                inputResource.key
+            ) { Result.ofOk<IStrategoTerm, Exception>(ast) }).unwrap()
+            if (result.result.messages.containsError()) {
+                log.warn { "Failed to analyze $originalName: " + result.result.messages.filter { it.isErrorOrHigher }.joinToString()}
+                return ListView.of()
+            }
+        } catch (ex: Exception) {
+            log.warn(ex) { "Failed to analyze $originalName" }
+            ex.printStackTrace()
+            return ListView.of()
+        }
+
+        // We pretty-print and parse the input resource again here, such that are sure
+        // that the offset of the term is the same in the incomplete pretty-printed AST
         val pp = prettyPrint(ctx, ast)
         val ppResource = textResourceRegistry.createResource(pp)
         val ppAst = parseTask.runParse(ctx, ppResource.key)
@@ -112,7 +143,7 @@ class PrepareBenchmarkTask @Inject constructor(
         for((i, case) in sampledAsts) {
             val name = input.inputFile.withName { "$it-$i" }.withExtension("").toString()
 
-            println("Writing $name...")
+            log.trace { "Writing $name..." }
             // Write the pretty-printed AST to file
             val outputFile = input.testCaseDir.resolve(input.inputFile.withName { "$it-$i" })
             ctx.provide(outputFile)
@@ -124,8 +155,9 @@ class PrepareBenchmarkTask @Inject constructor(
             termWriter.writeToPath(case.expectedAst, expectedFile)
 //            Files.writeString(expectedFile, TermToString.toString(case.expectedAst))
 
-            if (!hasPlaceholder(case.value)) {
-                println("Skipped $name.")
+            val placeholderRegion = getPlaceholderRegion(case.value)
+            if (placeholderRegion == null) {
+                log.warn { "Placeholder not found. Skipped $name." }
                 continue
             }
 
@@ -135,11 +167,11 @@ class PrepareBenchmarkTask @Inject constructor(
                     name,
                     input.inputFile,
                     input.testCaseDir.relativize(outputFile),
-                    getPlaceholderRegion(case.value).startOffset,
+                    placeholderRegion.startOffset,
                     input.testCaseDir.relativize(expectedFile),
                 )
             )
-            println("Wrote $name.")
+            log.debug { "Wrote $name." }
         }
 
         return ListView.of(testCases)
@@ -180,7 +212,7 @@ class PrepareBenchmarkTask @Inject constructor(
     }
 
     // TODO: Don't use a heuristic
-    private val placeholderRegex = Regex("\\[\\[[^\\]]+\\]\\]")
+    private val placeholderRegex = Regex("\\[\\[\\w+\\]\\]")
 
     /**
      * Determines whether the given string contains a placeholder.
@@ -203,11 +235,11 @@ class PrepareBenchmarkTask @Inject constructor(
     /**
      * Determines the region of a placeholder.
      *
-     * @return the region of the placeholder
+     * @return the region of the placeholder; or `null` if not found
      */
-    private fun getPlaceholderRegion(text: String): Region {
+    private fun getPlaceholderRegion(text: String): Region? {
         // TODO: Don't use a heuristic
-        val range = placeholderRegex.find(text)?.range!!
+        val range = placeholderRegex.find(text)?.range ?: return null
         return Region.fromOffsets(range.first, range.last + 1)
     }
 

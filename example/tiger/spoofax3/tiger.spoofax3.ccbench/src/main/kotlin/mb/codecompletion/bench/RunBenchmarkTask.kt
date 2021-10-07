@@ -15,6 +15,7 @@ import mb.statix.codecompletion.pie.CodeCompletionTaskDef
 import mb.statix.codecompletion.pie.MeasuringCodeCompletionEventHandler
 import mb.tiger.task.TigerCodeCompletionTaskDef
 import mb.tiger.task.TigerParse
+import mu.KotlinLogging
 import org.spoofax.interpreter.terms.ITermFactory
 import org.spoofax.terms.io.TAFTermReader
 import java.io.Serializable
@@ -76,6 +77,8 @@ class RunBenchmarkTask @Inject constructor(
         private val NS_PER_MS: Double = 1000_000.0
     }
 
+    private val log = KotlinLogging.logger {}
+
     override fun getId(): String = RunBenchmarkTask::class.java.name
 
     override fun exec(ctx: ExecContext, input: Input): BenchmarkResult {
@@ -105,19 +108,19 @@ class RunBenchmarkTask @Inject constructor(
                 if (success) {
                     BenchmarkResultKind.Success
                 } else {
-                    println("Expected: ${input.expectedTerm}")
-                    println("Got: ${extProposals.joinToString { "${it.label} (${it.term})" }}")
+                    log.warn { "Expected: ${input.expectedTerm}, got: ${extProposals.joinToString { "${it.label} (${it.term})" }}" }
                     BenchmarkResultKind.Failed
                 }
             } else {
-                println("Expected: ${input.expectedTerm}")
-                println("Got: <nothing>")
+                log.warn { "Expected: ${input.expectedTerm}, got: <nothing>" }
                 BenchmarkResultKind.NoResults
             }
         } catch (ex: IllegalStateException) {
             kind = if (ex.message?.contains("input program validation failed") == true) {
+                log.warn { "Analysis failed: ${ex.message}" }
                 BenchmarkResultKind.AnalysisFailed
             } else {
+                log.warn(ex) { "Error running test." }
                 BenchmarkResultKind.Error
             }
         }

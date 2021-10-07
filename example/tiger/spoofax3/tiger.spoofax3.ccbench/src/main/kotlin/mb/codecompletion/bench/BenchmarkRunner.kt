@@ -4,6 +4,7 @@ import mb.codecompletion.bench.utils.sample
 import mb.nabl2.terms.stratego.StrategoTerms
 import mb.pie.api.Pie
 import mb.resource.fs.FSResource
+import mu.KotlinLogging
 import org.apache.commons.io.FileUtils
 import org.spoofax.interpreter.terms.ITermFactory
 import org.spoofax.terms.io.TAFTermReader
@@ -21,6 +22,7 @@ class BenchmarkRunner @Inject constructor(
     private val runBenchmarkTask: RunBenchmarkTask,
     private val termFactory: ITermFactory,
 ) {
+    private val log = KotlinLogging.logger {}
 
     fun run(
         benchmark: Benchmark,
@@ -47,6 +49,8 @@ class BenchmarkRunner @Inject constructor(
             val result = runTest(benchmark, testCaseDir, projectDir, tmpProjectDir, testCase)
             results.add(result)
         }
+
+        FileUtils.deleteDirectory(tmpProjectDir.toFile())
         return BenchmarkResults.fromResults(results)
     }
 
@@ -57,7 +61,7 @@ class BenchmarkRunner @Inject constructor(
         dstProjectDir: Path,
         testCase: TestCase
     ): BenchmarkResult {
-        println("Preparing ${testCase.name}...")
+        log.trace { "Preparing ${testCase.name}..." }
         // Copy the file to the temporary directory
         val srcInputFile = testCaseDir.resolve(testCase.inputFile)
         val dstInputFile = dstProjectDir.resolve(testCase.file)
@@ -68,7 +72,7 @@ class BenchmarkRunner @Inject constructor(
         val resExpectedFile = testCaseDir.resolve(testCase.expectedFile)
         val expectedTerm = StrategoTerms(termFactory).fromStratego(TAFTermReader(termFactory).readFromPath(resExpectedFile))
 
-        println("Running ${testCase.name}...")
+        log.trace { "Running ${testCase.name}..." }
         val result = runBenchmarkTask.run(
             pie,
             benchmark,
@@ -79,7 +83,7 @@ class BenchmarkRunner @Inject constructor(
             expectedTerm,
             FSResource(dstInputFile).key
         )
-        println("Finished ${testCase.name}: $result")
+        log.info { "${testCase.name}: ${result.kind} (${result.totalTime} ms)"}
         return result
     }
 }

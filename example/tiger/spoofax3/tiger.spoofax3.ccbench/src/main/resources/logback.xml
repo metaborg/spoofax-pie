@@ -1,0 +1,19 @@
+<configuration scan="false" scanPeriod="15 seconds" debug="false">
+
+  <!-- Prints minimal (colored) output to console. -->
+  <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+    <withJansi>true</withJansi>
+    <encoder>
+      <pattern>[%highlight(%-5level)] %yellow(%date{HH:mm:ss}){} - %highlight(%msg){}%n</pattern>
+<!--      <pattern>[%highlight(%-5level)] %yellow(%date{yyyy-MM-dd HH:mm:ss}){} [%cyan(%thread)] %green(%logger){} - %highlight(%msg){}%n</pattern>-->
+    </encoder>
+  </appender>
+
+  <logger name="mb.pie.runtime.tracer.LoggingTracer" level="WARN"/>
+  <logger name="mb.tego.strategies.runtime.TegoRuntimeImpl" level="WARN"/>
+  <logger name="tego::" level="WARN"/>
+
+  <root level="TRACE">
+    <appender-ref ref="console" />
+  </root>
+</configuration>

@@ -164,6 +164,8 @@ public final class TegoRuntimeImpl implements TegoRuntime, TegoEngine {
         // Most logger implementations (e.g., Log4J) perform some logger caching
         // using a hashtable lookup on the name. Therefore, we are not going to
         // do any effort here to reuse loggers on every log call.
-        return loggerFactory.create(strategy.toString());
+        // We prefix the logger with something ending with `$` (or `.`)
+        // such that the logger implementation allows filtering on it.
+        return loggerFactory.create("tego::$" + strategy.toString());
     }
 }

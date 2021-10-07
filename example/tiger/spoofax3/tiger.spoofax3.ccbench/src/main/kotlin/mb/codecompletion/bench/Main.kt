@@ -72,7 +72,7 @@ fun main(args: Array<String>) {
 
     // PIE
     val pieModule = RootPieModule({ PieBuilderImpl() }, languageComponent)
-        .withTracerFactory(::LoggingTracer) // Only for debugging, performance overhead
+        //.withTracerFactory(::LoggingTracer) // Only for debugging, performance overhead
     val pieComponent = DaggerRootPieComponent.builder()
         .rootPieModule(pieModule)
         .loggerComponent(loggerComponent)

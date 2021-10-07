@@ -1,6 +1,7 @@
 package mb.codecompletion.bench
 
 import mb.pie.api.Pie
+import mu.KotlinLogging
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
@@ -15,6 +16,8 @@ class BenchmarkBuilder @Inject constructor(
     private val pie: Pie,
     private val prepareBenchmarkTask: PrepareBenchmarkTask,
 ) {
+
+    private val log = KotlinLogging.logger {}
 
     /**
      * Builds a benchmark and saves it.
@@ -47,14 +50,14 @@ class BenchmarkBuilder @Inject constructor(
 
         // Create and write the test cases
         val testCases = inputFiles.flatMap {
-            println("Preparing $it...")
+            log.trace { "Preparing $it..." }
             val result = prepareBenchmarkTask.run(pie, projectDir, it, testCaseDir, sample, rnd)
-            println("Prepared $it.")
+            log.info { "Prepared $it." }
             result
         }
 
         // Create and write the Benchmark object
-        println("Writing benchmark file...")
+        log.trace { "Writing benchmark file..." }
         val benchmarkFile = outputDir.resolve("$name.yml")
         val benchmark = Benchmark(
             name,
@@ -63,7 +66,7 @@ class BenchmarkBuilder @Inject constructor(
         )
         Files.createDirectories(benchmarkFile.parent)
         Benchmark.write(benchmark, benchmarkFile)
-        println("Wrote benchmark file to $benchmarkFile")
+        log.info { "Wrote benchmark file to $benchmarkFile" }
         return benchmark
     }
 
