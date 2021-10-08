@@ -21,7 +21,7 @@ val microutilsLoggingVersion = "2.0.11"
 val progressbarVersion = "0.9.2"
 
 dependencies {
-    implementation(project(":tiger"))
+    implementation(project(":tiger.spoofax3"))
     implementation("org.metaborg:pie.api:$pieVersion")
     implementation("org.metaborg:pie.runtime:$pieVersion")
     implementation("org.metaborg:pie.dagger:$pieVersion")
