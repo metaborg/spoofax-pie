@@ -23,7 +23,7 @@ class ModAnalyzerTest extends ModTestBase {
         final ReadableResource file = textFile("a.mod", "let a = mod {}; dbg a.b;");
         final JsglrParseOutput parsed = parse(file);
         final SingleFileResult result = analyze(file.getKey(), parsed.ast);
-        assertNotNull(result.ast);
+        assertNotNull(result.analyzedAst);
         assertNotNull(result.analysis);
         assertTrue(result.messages.containsError());
     }
@@ -32,7 +32,7 @@ class ModAnalyzerTest extends ModTestBase {
         final ReadableResource file = textFile("a.mod", "let a = mod { let b = 1; }; dbg a.b;");
         final JsglrParseOutput parsed = parse(file);
         final SingleFileResult result = analyze(file, parsed.ast);
-        assertNotNull(result.ast);
+        assertNotNull(result.analyzedAst);
         assertNotNull(result.analysis);
         assertTrue(result.messages.isEmpty());
     }
@@ -51,15 +51,15 @@ class ModAnalyzerTest extends ModTestBase {
         final MultiFileResult result = analyze(MapView.of(asts));
         final ConstraintAnalyzer.@Nullable Result result1 = result.getResult(file1.getKey());
         assertNotNull(result1);
-        assertNotNull(result1.ast);
+        assertNotNull(result1.analyzedAst);
         assertNotNull(result1.analysis);
         final ConstraintAnalyzer.@Nullable Result result2 = result.getResult(file2.getKey());
         assertNotNull(result2);
-        assertNotNull(result2.ast);
+        assertNotNull(result2.analyzedAst);
         assertNotNull(result2.analysis);
         final ConstraintAnalyzer.@Nullable Result result3 = result.getResult(file3.getKey());
         assertNotNull(result3);
-        assertNotNull(result3.ast);
+        assertNotNull(result3.analyzedAst);
         assertNotNull(result3.analysis);
         assertEquals(1, result.messages.size());
         assertTrue(result.messages.containsError());
@@ -84,15 +84,15 @@ class ModAnalyzerTest extends ModTestBase {
         final MultiFileResult result = analyze(MapView.of(asts));
         final ConstraintAnalyzer.@Nullable Result result1 = result.getResult(file1.getKey());
         assertNotNull(result1);
-        assertNotNull(result1.ast);
+        assertNotNull(result1.analyzedAst);
         assertNotNull(result1.analysis);
         final ConstraintAnalyzer.@Nullable Result result2 = result.getResult(file2.getKey());
         assertNotNull(result2);
-        assertNotNull(result2.ast);
+        assertNotNull(result2.analyzedAst);
         assertNotNull(result2.analysis);
         final ConstraintAnalyzer.@Nullable Result result3 = result.getResult(file3.getKey());
         assertNotNull(result3);
-        assertNotNull(result3.ast);
+        assertNotNull(result3.analyzedAst);
         assertNotNull(result3.analysis);
         assertTrue(result.messages.isEmpty());
     }
@@ -102,10 +102,10 @@ class ModAnalyzerTest extends ModTestBase {
         final JsglrParseOutput parsed = parse(file);
         final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext(true, rootPath);
         final SingleFileResult result = analyze(rootPath, file, parsed.ast, constraintAnalyzerContext);
-        assertNotNull(result.ast);
+        assertNotNull(result.analyzedAst);
         assertNotNull(result.analysis);
         assertTrue(result.messages.isEmpty());
-        final IStrategoTerm input = StrategoUtil.createLegacyBuilderInputTerm(strategoRuntime.getTermFactory(), result.ast, file.toString(), rootPath.toString());
+        final IStrategoTerm input = StrategoUtil.createLegacyBuilderInputTerm(strategoRuntime.getTermFactory(), result.analyzedAst, file.toString(), rootPath.toString());
         final @Nullable IStrategoTerm output = strategoRuntime.addContextObject(constraintAnalyzerContext).invoke("stx--show-scopegraph", input);
         assertNotNull(output);
     }

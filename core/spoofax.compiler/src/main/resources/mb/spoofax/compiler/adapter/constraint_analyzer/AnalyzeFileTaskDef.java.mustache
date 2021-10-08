@@ -68,6 +68,6 @@ public class {{baseAnalyzeFileTaskDef.id}} extends ConstraintAnalyzeFile {
             new ConstraintAnalyzeTaskDef.Input(input.file, astSupplier)
         );
 {{/isMultiFile}}
-        return analysis.map(output -> new ConstraintAnalyzeFile.Output(output.context, output.result.ast, output.result.analysis));
+        return analysis.map(output -> new ConstraintAnalyzeFile.Output(output.context, output.result.analyzedAst, output.result.analysis));
     }
 }

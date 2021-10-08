@@ -81,6 +81,14 @@ public class EditorUpdateJob extends Job {
         }
     }
 
+    @Override protected void canceling() {
+        final Thread thread = getThread();
+        if(thread == null) {
+            return;
+        }
+        thread.interrupt();
+    }
+
     @Override public boolean belongsTo(Object family) {
         return input.equals(family) || editor.equals(family);
     }

@@ -137,12 +137,21 @@ public abstract class ConstraintAnalyzeMultiTaskDef implements TaskDef<Constrain
             );
         });
         try {
-            final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext(true, input.root);
+            final ConstraintAnalyzerContext constraintAnalyzerContext = getConstraintAnalyzerContext(context, input.root);
             final ConstraintAnalyzer.MultiFileResult result = analyze(context, input.root, MapView.of(asts), constraintAnalyzerContext);
+            context.setInternalObject(constraintAnalyzerContext);
             return Result.ofOk(new Output(messagesBuilder.build(), constraintAnalyzerContext, result));
         } catch(ConstraintAnalyzerException e) {
             return Result.ofErr(e);
         }
+    }
+
+    private ConstraintAnalyzerContext getConstraintAnalyzerContext(ExecContext context, ResourcePath rootDirectory) {
+        final @Nullable Serializable obj = context.getInternalObject();
+        if(obj instanceof ConstraintAnalyzerContext) {
+            return (ConstraintAnalyzerContext)obj;
+        }
+        return new ConstraintAnalyzerContext(true, rootDirectory);
     }
 
 
@@ -165,7 +174,14 @@ class SingleFileMapper implements SerializableFunction<Result<ConstraintAnalyzeM
             final ConstraintAnalyzer.@Nullable Result result = output.result.getResult(resource);
             if(result != null) {
                 final Messages messages = new Messages(output.result.messages.getMessagesOfKey(resource));
-                return Result.ofOk(new ConstraintAnalyzeMultiTaskDef.SingleFileOutput(output.context, new ConstraintAnalyzer.SingleFileResult(output.result.projectResult, result.resource, result.ast, result.analysis, messages)));
+                return Result.ofOk(new ConstraintAnalyzeMultiTaskDef.SingleFileOutput(output.context, new ConstraintAnalyzer.SingleFileResult(
+                    output.result.projectResult,
+                    result.resource,
+                    result.parsedAst,
+                    result.analyzedAst,
+                    result.analysis,
+                    messages
+                )));
             } else {
                 return Result.ofErr(new MessagesException(output.result.messages, "Multi file constraint analyzer result is missing a result for resource '" + resource + "' that was part of the input"));
             }

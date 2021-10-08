@@ -155,6 +155,13 @@ public class LifecycleParticipantManager implements AutoCloseable {
         return group;
     }
 
+    public @Nullable DynamicGroup unregisterDynamic(ResourcePath rootDirectory) {
+        final @Nullable DynamicGroup previousGroup = dynamicGroups.remove(rootDirectory);
+        if(previousGroup == null) return null;
+        previousGroup.close();
+        return previousGroup;
+    }
+
 
     private ResourceServiceComponent createResourceComponent(
         Iterable<EclipseLifecycleParticipant> participants,

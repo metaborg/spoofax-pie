@@ -9,9 +9,15 @@ All notable changes to this project are documented in this file, based on [Keep 
 ### Changed
 - `ClassLoaderResources` implementations to be factored into `mb.spoofax.resource.ClassLoaderResources` in `spoofax.resource`, and make generated implementations extend it.
 - Use `EclipseClassLoaderToNativeResolver` in Eclipse to attempt to resolve class loader resources into Eclipse resources.
+- ConstraintAnalyzer to pass unchanged inputs; determined by AST hashCode and equality, and recursive region equality; as cached to the constraint analyzer, allowing it to reuse some cached results. The analysis tasks of languages keep this cache by storing the `ConstraintAnalyzerContext` as an internal object. This internal object is cleared when the Statix specification of a (dynamically loaded) language is changed.
+- `ConstraintAnalyzer.Result.ast` to `analyzedAst`.
+- `ConstraintAnalyzer.SingleFileResult.ast` to `analyzedAst`.
+- Clearing a language project to unload the dynamically loaded language associated with that language project.
 
 ### Fixed
 - `LAYOUT?-CF` not accepted in SDF3 (https://github.com/metaborg/spoofax-pie/issues/78). Fixed by marking `-CF`, `-LEX`, and `-VAR` sorts as kernel, allowing them to be used in kernel syntax context.
+- `LAYOUT?-CF` in kernel production causing build errors due to a bug in the SDF3->Stratego signature generator.
+- Constraint analysis not being cancellable. Cancelling an editor update or run command job in the Eclipse plugin now interrupts the thread, and the thread interrupt in turn cancels the constraint solver.
 
 
 ## [0.13.0] - 2021-10-01

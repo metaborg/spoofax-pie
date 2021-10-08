@@ -32,6 +32,7 @@ import mb.spoofax.lwb.compiler.CompileLanguage;
 import mb.spoofax.lwb.compiler.CompileLanguageException;
 import mb.spoofax.lwb.compiler.dagger.Spoofax3CompilerComponent;
 import mb.spoofax.lwb.dynamicloading.DynamicLanguage;
+import mb.spoofax.lwb.dynamicloading.DynamicLanguageRegistry;
 import mb.spoofax.lwb.eclipse.util.ClassPathUtil;
 import mb.spoofax.lwb.eclipse.util.JavaProjectUtil;
 import mb.statix.eclipse.StatixLanguageFactory;
@@ -59,12 +60,14 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
     public static final String id = SpoofaxLwbPlugin.id + ".builder";
 
     private final Logger logger;
-    private final Set<Interactivity> compileTags;
     private final WorkspaceUpdate.Factory workspaceUpdateFactory;
+    private final DynamicLanguageRegistry dynamicLanguageRegistry;
+    private final Set<Interactivity> compileTags;
 
     public SpoofaxLwbBuilder() {
         this.logger = SpoofaxPlugin.getLoggerComponent().getLoggerFactory().create(getClass());
         this.workspaceUpdateFactory = SpoofaxPlugin.getPlatformComponent().getWorkspaceUpdateFactory();
+        this.dynamicLanguageRegistry = SpoofaxLwbLifecycleParticipant.getInstance().getDynamicLoadingComponent().getDynamicLanguageRegistry();
         this.compileTags = Interactivity.NonInteractive.asSingletonSet();
     }
 
@@ -106,8 +109,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         final ResourcePath rootDirectory = getResourcePath(eclipseProject);
         cleanCheckMessages(eclipseProject, rootDirectory, monitor);
 
-        // TODO: clean dynamically loaded language
-
+        dynamicLanguageRegistry.unload(rootDirectory);
 
         forgetLastBuiltState();
     }

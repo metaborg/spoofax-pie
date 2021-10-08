@@ -35,6 +35,6 @@ public class CfgNormalize extends StrategoTransformTaskDef<CfgAnalyze.Output> {
 
     @Override
     protected IStrategoTerm getAst(ExecContext context, ConstraintAnalyzeTaskDef.Output input) {
-        return input.result.ast;
+        return input.result.analyzedAst;
     }
 }

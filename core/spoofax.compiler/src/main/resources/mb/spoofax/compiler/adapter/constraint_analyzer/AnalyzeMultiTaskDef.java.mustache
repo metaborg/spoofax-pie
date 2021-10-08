@@ -9,12 +9,9 @@ import mb.pie.api.None;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceService;
-import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
-import mb.resource.hierarchical.match.AllResourceMatcher;
-import mb.resource.hierarchical.match.FileResourceMatcher;
-import mb.resource.hierarchical.match.PathResourceMatcher;
-import mb.resource.hierarchical.match.path.ExtensionPathMatcher;
+import mb.resource.hierarchical.match.ResourceMatcher;
+import mb.resource.hierarchical.match.path.PathMatcher;
 import mb.stratego.common.StrategoRuntime;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -54,19 +51,16 @@ public class {{baseAnalyzeMultiTaskDef.id}} extends ConstraintAnalyzeMultiTaskDe
         try {
             classLoaderResources.performWithDefinitionResourceLocations(
                 "src-gen/statix",
-                directory -> {
-                    try(final Stream<? extends HierarchicalResource> stream = directory.walk(
-                        new AllResourceMatcher(new FileResourceMatcher(), new PathResourceMatcher(new ExtensionPathMatcher("aterm")))
-                    )) {
-                        stream.forEach(statixSpecResource -> {
-                            try {
-                                context.require(statixSpecResource, ResourceStampers.hashFile());
-                            } catch(IOException e) {
-                                throw new UncheckedIOException(e);
-                            }
-                        });
+                directory -> directory.walkForEach(ResourceMatcher.ofFile().and(ResourceMatcher.ofPath(PathMatcher.ofExtension("aterm"))), file -> {
+                    try {
+                        if(context.require(file, ResourceStampers.hashFile())) {
+                            // If a Statix spec file is new or has changed, clear the context. TODO: clear when spec file is removed.
+                            constraintAnalyzerContext.clear();
+                        }
+                    } catch(IOException e) {
+                        throw new UncheckedIOException(e);
                     }
-                },
+                }),
                 jarFileWithPath -> context.require(jarFileWithPath.file)
             );
         } catch(UncheckedIOException e) {

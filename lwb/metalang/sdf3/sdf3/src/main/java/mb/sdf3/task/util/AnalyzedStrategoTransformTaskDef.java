@@ -28,6 +28,6 @@ public abstract class AnalyzedStrategoTransformTaskDef extends StrategoTransform
 
     @Override
     protected IStrategoTerm getAst(ExecContext context, ConstraintAnalyzeMultiTaskDef.SingleFileOutput input) {
-        return input.result.ast;
+        return input.result.analyzedAst;
     }
 }

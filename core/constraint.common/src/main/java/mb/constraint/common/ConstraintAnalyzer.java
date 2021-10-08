@@ -1,11 +1,15 @@
 package mb.constraint.common;
 
+import mb.aterm.common.TermToString;
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Messages;
 import mb.common.message.Severity;
+import mb.common.region.Region;
 import mb.common.util.MapView;
 import mb.jsglr.common.ResourceKeyAttachment;
+import mb.jsglr.common.TermTracer;
+import mb.nabl2.terms.stratego.StrategoBlob;
 import mb.nabl2.terms.stratego.StrategoTermIndices;
 import mb.nabl2.terms.stratego.TermIndex;
 import mb.nabl2.terms.stratego.TermOrigin;
@@ -17,6 +21,7 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.metaborg.util.task.ThreadCancel;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.terms.util.TermUtils;
@@ -26,34 +31,45 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 
 public class ConstraintAnalyzer {
     public static class Result implements Serializable {
         public final ResourceKey resource;
-        public final IStrategoTerm ast;
+        public final IStrategoTerm parsedAst;
+        public final IStrategoTerm analyzedAst;
         public final IStrategoTerm analysis;
 
-        public Result(ResourceKey resource, IStrategoTerm ast, IStrategoTerm analysis) {
+        public Result(
+            ResourceKey resource,
+            IStrategoTerm parsedAst,
+            IStrategoTerm analyzedAst,
+            IStrategoTerm analysis
+        ) {
             this.resource = resource;
-            this.ast = ast;
+            this.parsedAst = parsedAst;
+            this.analyzedAst = analyzedAst;
             this.analysis = analysis;
         }
 
-        @Override public boolean equals(Object o) {
+        @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             final Result result = (Result)o;
             if(!resource.equals(result.resource)) return false;
-            if(!ast.equals(result.ast)) return false;
+            if(!parsedAst.equals(result.parsedAst)) return false;
+            if(!analyzedAst.equals(result.analyzedAst)) return false;
             return analysis.equals(result.analysis);
         }
 
         @Override public int hashCode() {
             int result = resource.hashCode();
-            result = 31 * result + ast.hashCode();
+            result = 31 * result + parsedAst.hashCode();
+            result = 31 * result + analyzedAst.hashCode();
             result = 31 * result + analysis.hashCode();
             return result;
         }
@@ -61,8 +77,9 @@ public class ConstraintAnalyzer {
         @Override public String toString() {
             return "Result{" +
                 "resource=" + resource +
-                ", ast=" + ast +
-                ", analysis=" + analysis +
+                ", parsedAst=" + TermToString.toShortString(parsedAst) +
+                ", analyzedAst=" + TermToString.toShortString(analyzedAst) +
+                ", analysis=" + TermToString.toShortString(analysis) +
                 '}';
         }
     }
@@ -76,7 +93,7 @@ public class ConstraintAnalyzer {
             this.analysis = analysis;
         }
 
-        @Override public boolean equals(Object o) {
+        @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             final ProjectResult that = (ProjectResult)o;
@@ -93,7 +110,7 @@ public class ConstraintAnalyzer {
         @Override public String toString() {
             return "ProjectResult{" +
                 "resource=" + resource +
-                ", analysis=" + analysis +
+                ", analysis=" + TermToString.toShortString(analysis) +
                 '}';
         }
     }
@@ -102,26 +119,36 @@ public class ConstraintAnalyzer {
     public static class SingleFileResult implements Serializable {
         public final @Nullable ProjectResult projectResult;
         public final ResourceKey resource;
-        public final IStrategoTerm ast;
+        public final IStrategoTerm parsedAst;
+        public final IStrategoTerm analyzedAst;
         public final IStrategoTerm analysis;
         public final Messages messages;
 
-        public SingleFileResult(@Nullable ProjectResult projectResult, ResourceKey resource, IStrategoTerm ast, IStrategoTerm analysis, Messages messages) {
+        public SingleFileResult(
+            @Nullable ProjectResult projectResult,
+            ResourceKey resource,
+            IStrategoTerm parsedAst,
+            IStrategoTerm analyzedAst,
+            IStrategoTerm analysis,
+            Messages messages
+        ) {
             this.projectResult = projectResult;
             this.resource = resource;
-            this.ast = ast;
+            this.parsedAst = parsedAst;
+            this.analyzedAst = analyzedAst;
             this.analysis = analysis;
             this.messages = messages;
         }
 
-        @Override public boolean equals(Object o) {
+        @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             final SingleFileResult that = (SingleFileResult)o;
             if(projectResult != null ? !projectResult.equals(that.projectResult) : that.projectResult != null)
                 return false;
             if(!resource.equals(that.resource)) return false;
-            if(!ast.equals(that.ast)) return false;
+            if(!parsedAst.equals(that.parsedAst)) return false;
+            if(!analyzedAst.equals(that.analyzedAst)) return false;
             if(!analysis.equals(that.analysis)) return false;
             return messages.equals(that.messages);
         }
@@ -129,7 +156,8 @@ public class ConstraintAnalyzer {
         @Override public int hashCode() {
             int result = projectResult != null ? projectResult.hashCode() : 0;
             result = 31 * result + resource.hashCode();
-            result = 31 * result + ast.hashCode();
+            result = 31 * result + parsedAst.hashCode();
+            result = 31 * result + analyzedAst.hashCode();
             result = 31 * result + analysis.hashCode();
             result = 31 * result + messages.hashCode();
             return result;
@@ -139,8 +167,9 @@ public class ConstraintAnalyzer {
             return "SingleFileResult{" +
                 "projectResult=" + projectResult +
                 ", resource=" + resource +
-                ", ast=" + ast +
-                ", analysis=" + analysis +
+                ", parsedAst=" + TermToString.toShortString(parsedAst) +
+                ", analyzedAst=" + TermToString.toShortString(analyzedAst) +
+                ", analysis=" + TermToString.toShortString(analysis) +
                 ", messages=" + messages +
                 '}';
         }
@@ -174,7 +203,7 @@ public class ConstraintAnalyzer {
             return results.stream().filter((r) -> r.resource.equals(resource)).findFirst().orElse(null);
         }
 
-        @Override public boolean equals(Object o) {
+        @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             final MultiFileResult that = (MultiFileResult)o;
@@ -243,7 +272,7 @@ public class ConstraintAnalyzer {
         } catch(IndexOutOfBoundsException e) {
             throw new RuntimeException("BUG: no analysis result was found for resource '" + resource + "'", e);
         }
-        return new SingleFileResult(multiFileResult.projectResult, result.resource, result.ast, result.analysis, multiFileResult.messages.asMessages());
+        return new SingleFileResult(multiFileResult.projectResult, result.resource, ast, result.analyzedAst, result.analysis, multiFileResult.messages.asMessages());
     }
 
     public MultiFileResult analyze(
@@ -289,11 +318,11 @@ public class ConstraintAnalyzer {
             final IStrategoTerm ast = mkProjectTerm(termFactory, root);
             final IStrategoTerm change;
             final Expect expect;
-            final @Nullable Result cachedResult = context.getResult(root);
+            final @Nullable ProjectResult cachedResult = context.getProjectResult(root);
             if(cachedResult != null) {
                 change = termFactory.makeAppl("Cached", cachedResult.analysis);
                 expect = new ProjectUpdate(root);
-                context.removeProjectResult(root);
+                context.removeProjectResult(root); // TODO: is it needed to remove this?
             } else {
                 change = termFactory.makeAppl("Added", ast);
                 expect = new ProjectFull(root);
@@ -320,12 +349,18 @@ public class ConstraintAnalyzer {
             final IStrategoTerm change;
             final @Nullable Result cachedResult = context.getResult(resource);
             if(cachedResult != null) {
-                change = termFactory.makeAppl("Changed", ast, cachedResult.analysis);
-                context.removeResult(resource);
+                if(cachedResult.parsedAst.hashCode() != ast.hashCode() || !cachedResult.parsedAst.equals(ast) || !regionsEqual(cachedResult.parsedAst, ast)) {
+                    change = termFactory.makeAppl("Changed", ast, cachedResult.analysis);
+                    context.removeResult(resource); // TODO: is it needed to remove this?
+                    expects.put(resource, new Full(resource, ast));
+                } else {
+                    change = termFactory.makeAppl("Cached", cachedResult.analysis);
+                    expects.put(resource, new Update(resource));
+                }
             } else {
                 change = termFactory.makeAppl("Added", ast);
+                expects.put(resource, new Full(resource, ast));
             }
-            expects.put(resource, new Full(resource));
             changeTerms.add(termFactory.makeTuple(termFactory.makeString(resource.toString()), change));
         }
 
@@ -343,8 +378,8 @@ public class ConstraintAnalyzer {
         }
 
         // Progress and cancel terms
-        final IStrategoTerm progressTerm = termFactory.makeTuple();   // ()
-        final IStrategoTerm cancelTerm = termFactory.makeTuple();     // ()
+        final IStrategoTerm progressTerm = termFactory.makeTuple();
+        final IStrategoTerm cancelTerm = new StrategoBlob(new ThreadCancel());
 
         /// 3. Call analysis, and list results.
 
@@ -414,9 +449,10 @@ public class ConstraintAnalyzer {
                 expects.get(root).addFailMessage("Missing project result", messagesBuilder);
             }
         }
-        for(Map.Entry<ResourceKey, IStrategoTerm> entry : addedOrChangedAsts.entrySet()) {
+        for(Entry<ResourceKey, Expect> entry : expects.entrySet()) {
             final ResourceKey resource = entry.getKey();
-            if(!resultTerms.containsKey(resource)) {
+            final Expect expect = entry.getValue();
+            if(expect.requireResult() && !resultTerms.containsKey(resource)) {
                 expects.get(resource).addFailMessage("Missing analysis result", messagesBuilder);
             }
         }
@@ -446,6 +482,18 @@ public class ConstraintAnalyzer {
         return new MultiFileResult(projectResult, results, messagesBuilder.build());
     }
 
+    private boolean regionsEqual(IStrategoTerm ast1, IStrategoTerm ast2) {
+        final @Nullable Region region1 = TermTracer.getRegion(ast1);
+        final @Nullable Region region2 = TermTracer.getRegion(ast2);
+        if(!Objects.equals(region1, region2)) return false;
+        if(ast1.getSubtermCount() != ast2.getSubtermCount()) return false;
+        final Iterator<IStrategoTerm> iterator1 = ast1.iterator();
+        final Iterator<IStrategoTerm> iterator2 = ast2.iterator();
+        while(iterator1.hasNext() && iterator2.hasNext()) {
+            if(!regionsEqual(iterator1.next(), iterator2.next())) return false;
+        }
+        return true;
+    }
 
     abstract class Expect {
         final ResourceKey resource;
@@ -479,11 +527,16 @@ public class ConstraintAnalyzer {
             ResourceService resourceService,
             @Nullable ResourcePath rootDirectory
         );
+
+        abstract boolean requireResult();
     }
 
     class Full extends Expect {
-        Full(ResourceKey resourceKey) {
+        final IStrategoTerm parsedAst;
+
+        Full(ResourceKey resourceKey, IStrategoTerm parsedAst) {
             super(resourceKey);
+            this.parsedAst = parsedAst;
         }
 
         @Override
@@ -496,16 +549,20 @@ public class ConstraintAnalyzer {
         ) {
             final @Nullable List<IStrategoTerm> results;
             if((results = match(resultTerm, "Full", 5)) != null) {
-                final IStrategoTerm ast = results.get(0);
+                final IStrategoTerm analyzedAst = results.get(0);
                 final IStrategoTerm analysis = results.get(1);
                 addResultMessages(results.get(2), results.get(3), results.get(4), messagesBuilder, resourceService, rootDirectory);
-                context.updateResult(resource, ast, analysis);
+                context.updateResult(resource, parsedAst, analyzedAst, analysis);
             } else if(match(resultTerm, "Failed", 0) != null) {
                 addFailMessage("Analysis failed", messagesBuilder);
                 context.removeResult(resource);
             } else {
                 addFailMessage("Analysis returned incorrect result", messagesBuilder);
             }
+        }
+
+        @Override boolean requireResult() {
+            return true;
         }
     }
 
@@ -534,32 +591,9 @@ public class ConstraintAnalyzer {
                 addFailMessage("Analysis returned incorrect result", messagesBuilder);
             }
         }
-    }
 
-    class ProjectUpdate extends Expect {
-        ProjectUpdate(ResourceKey resourceKey) {
-            super(resourceKey);
-        }
-
-        @Override
-        public void processResultTerm(
-            IStrategoTerm resultTerm,
-            ConstraintAnalyzerContext context,
-            KeyedMessagesBuilder messagesBuilder,
-            ResourceService resourceService,
-            @Nullable ResourcePath rootDirectory
-        ) {
-            final @Nullable List<IStrategoTerm> results;
-            if((results = match(resultTerm, "Update", 4)) != null) {
-                final IStrategoTerm analysis = results.get(0);
-                addResultMessages(results.get(1), results.get(2), results.get(3), messagesBuilder, resourceService, rootDirectory);
-                context.updateProjectResult(resource, analysis);
-            } else if(match(resultTerm, "Failed", 0) != null) {
-                addFailMessage("Analysis failed", messagesBuilder);
-                context.removeProjectResult(resource);
-            } else {
-                addFailMessage("Analysis returned incorrect result", messagesBuilder);
-            }
+        @Override boolean requireResult() {
+            return false;
         }
     }
 
@@ -587,6 +621,41 @@ public class ConstraintAnalyzer {
             } else {
                 addFailMessage("Analysis returned incorrect result", messagesBuilder);
             }
+        }
+
+        @Override boolean requireResult() {
+            return true;
+        }
+    }
+
+    class ProjectUpdate extends Expect {
+        ProjectUpdate(ResourceKey resourceKey) {
+            super(resourceKey);
+        }
+
+        @Override
+        public void processResultTerm(
+            IStrategoTerm resultTerm,
+            ConstraintAnalyzerContext context,
+            KeyedMessagesBuilder messagesBuilder,
+            ResourceService resourceService,
+            @Nullable ResourcePath rootDirectory
+        ) {
+            final @Nullable List<IStrategoTerm> results;
+            if((results = match(resultTerm, "Update", 4)) != null) {
+                final IStrategoTerm analysis = results.get(0);
+                addResultMessages(results.get(1), results.get(2), results.get(3), messagesBuilder, resourceService, rootDirectory);
+                context.updateProjectResult(resource, analysis);
+            } else if(match(resultTerm, "Failed", 0) != null) {
+                addFailMessage("Analysis failed", messagesBuilder);
+                context.removeProjectResult(resource);
+            } else {
+                addFailMessage("Analysis returned incorrect result", messagesBuilder);
+            }
+        }
+
+        @Override boolean requireResult() {
+            return false;
         }
     }
 

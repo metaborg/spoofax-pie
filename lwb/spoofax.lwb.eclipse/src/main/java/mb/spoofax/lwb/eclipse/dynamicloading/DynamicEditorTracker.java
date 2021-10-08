@@ -74,6 +74,13 @@ public class DynamicEditorTracker extends WindowAndPartListener {
         });
     }
 
+    @Override public void unregister() {
+        deactivateContext();
+        super.unregister();
+        this.editors.clear();
+        this.contextService = null;
+    }
+
 
     // IWindowListener implementation
 

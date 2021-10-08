@@ -283,7 +283,7 @@ public class {{baseInstance.id}} implements LanguageInstance
                         .buildAstSupplier()
                     )
                 )
-            ).map((output) -> output.result.ast);
+            ).map((output) -> output.result.analyzedAst);
         } catch(ExecException e) {
             return Result.ofErr(e);
         }

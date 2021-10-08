@@ -3,6 +3,7 @@ package mb.spoofax.lwb.eclipse.dynamicloading;
 import mb.common.util.SetView;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
+import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.lwb.dynamicloading.DynamicLanguage;
 import mb.spoofax.lwb.dynamicloading.DynamicLanguageRegistry;
 import mb.spoofax.lwb.dynamicloading.DynamicLanguageRegistryListener;
@@ -95,5 +96,7 @@ public class DynamicChangeProcessor implements DynamicLanguageRegistryListener, 
             }
         }
         // TODO: remove markers for files with removed file extension.
+
+        SpoofaxPlugin.getLifecycleParticipantManager().unregisterDynamic(language.getRootDirectory());
     }
 }

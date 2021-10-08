@@ -163,7 +163,7 @@ public class CfgToObject implements TaskDef<CfgToObject.Input, Result<CfgToObjec
         final Provider<StrategoRuntime> strategoRuntimeProvider = context.require(getStrategoRuntimeProvider, None.instance).getValue();
         final IStrategoTerm ast;
         try {
-            ast = strategoRuntimeProvider.get().addContextObject(analysisOutput.context).invoke("normalize", analysisOutput.result.ast);
+            ast = strategoRuntimeProvider.get().addContextObject(analysisOutput.context).invoke("normalize", analysisOutput.result.analyzedAst);
         } catch(StrategoException e) {
             return Result.ofErr(CfgToObjectException.normalizationFail(e));
         }

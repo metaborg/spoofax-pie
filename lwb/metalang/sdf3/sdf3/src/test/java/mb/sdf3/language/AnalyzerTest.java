@@ -23,7 +23,7 @@ class AnalyzerTest extends TestBase {
         final ReadableResource file = textFile("a.sdf3", "module a context-free sorts A context-free syntax A = B");
         final JsglrParseOutput parsed = parse(file);
         final SingleFileResult result = analyze(file, parsed.ast);
-        assertNotNull(result.ast);
+        assertNotNull(result.analyzedAst);
         assertNotNull(result.analysis);
         assertTrue(result.messages.containsError());
     }
@@ -33,7 +33,7 @@ class AnalyzerTest extends TestBase {
         final JsglrParseOutput parsed = parse(file);
         final SingleFileResult result =
             analyze(file, parsed.ast);
-        assertNotNull(result.ast);
+        assertNotNull(result.analyzedAst);
         assertNotNull(result.analysis);
         assertTrue(result.messages.isEmpty());
     }
@@ -52,15 +52,15 @@ class AnalyzerTest extends TestBase {
         final MultiFileResult result = analyze(MapView.of(asts));
         final ConstraintAnalyzer.@Nullable Result result1 = result.getResult(file1.getKey());
         assertNotNull(result1);
-        assertNotNull(result1.ast);
+        assertNotNull(result1.analyzedAst);
         assertNotNull(result1.analysis);
         final ConstraintAnalyzer.@Nullable Result result2 = result.getResult(file2.getKey());
         assertNotNull(result2);
-        assertNotNull(result2.ast);
+        assertNotNull(result2.analyzedAst);
         assertNotNull(result2.analysis);
         final ConstraintAnalyzer.@Nullable Result result3 = result.getResult(file3.getKey());
         assertNotNull(result3);
-        assertNotNull(result3.ast);
+        assertNotNull(result3.analyzedAst);
         assertNotNull(result3.analysis);
 
         assertNumErrorsEqualsOrMore(result.messages, 2);
@@ -86,15 +86,15 @@ class AnalyzerTest extends TestBase {
         final MultiFileResult result = analyze(MapView.of(asts));
         final ConstraintAnalyzer.@Nullable Result result1 = result.getResult(file1.getKey());
         assertNotNull(result1);
-        assertNotNull(result1.ast);
+        assertNotNull(result1.analyzedAst);
         assertNotNull(result1.analysis);
         final ConstraintAnalyzer.@Nullable Result result2 = result.getResult(file2.getKey());
         assertNotNull(result2);
-        assertNotNull(result2.ast);
+        assertNotNull(result2.analyzedAst);
         assertNotNull(result2.analysis);
         final ConstraintAnalyzer.@Nullable Result result3 = result.getResult(file3.getKey());
         assertNotNull(result3);
-        assertNotNull(result3.ast);
+        assertNotNull(result3.analyzedAst);
         assertNotNull(result3.analysis);
 
         assertFalse(result.messages.containsError());
@@ -105,10 +105,10 @@ class AnalyzerTest extends TestBase {
         final JsglrParseOutput parsed = parse(file);
         final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext(true, rootPath);
         final SingleFileResult result = analyze(rootPath, file, parsed.ast, constraintAnalyzerContext);
-        assertNotNull(result.ast);
+        assertNotNull(result.analyzedAst);
         assertNotNull(result.analysis);
         assertTrue(result.messages.isEmpty());
-        final IStrategoTerm input = StrategoUtil.createLegacyBuilderInputTerm(strategoRuntime.getTermFactory(), result.ast, file.toString(), rootPath.toString());
+        final IStrategoTerm input = StrategoUtil.createLegacyBuilderInputTerm(strategoRuntime.getTermFactory(), result.analyzedAst, file.toString(), rootPath.toString());
         final @Nullable IStrategoTerm output = strategoRuntime.addContextObject(constraintAnalyzerContext).invoke("stx--show-scopegraph", input);
         assertNotNull(output);
     }

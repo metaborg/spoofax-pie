@@ -16,6 +16,7 @@ import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
+import java.io.IOException;
 import java.io.UncheckedIOException;
 
 public abstract class JsglrParseTaskDef implements TaskDef<JsglrParseTaskInput, Result<JsglrParseOutput, JsglrParseException>> {
@@ -75,7 +76,7 @@ public abstract class JsglrParseTaskDef implements TaskDef<JsglrParseTaskInput, 
         return messagesFunction;
     }
 
-    
+
     private final Function<JsglrParseTaskInput, Result<IStrategoTerm, JsglrParseException>> astFunction = createFunction().mapOutput(AstFunction.instance);
     private final Function<JsglrParseTaskInput, Result<IStrategoTerm, JsglrParseException>> recoverableAstFunction = createFunction().mapOutput(RecoverableAstFunction.instance);
     private final Function<JsglrParseTaskInput, Result<JSGLRTokens, JsglrParseException>> tokensFunction = createFunction().mapOutput(TokensFunction.instance);
@@ -89,7 +90,7 @@ public abstract class JsglrParseTaskDef implements TaskDef<JsglrParseTaskInput, 
         @Nullable String startSymbol,
         @Nullable ResourceKey fileHint,
         @Nullable ResourcePath rootDirectoryHint
-    ) throws Exception;
+    ) throws IOException, InterruptedException;
 
 
     @Override

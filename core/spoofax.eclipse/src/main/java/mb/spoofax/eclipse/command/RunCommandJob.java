@@ -107,6 +107,14 @@ public class RunCommandJob extends Job {
         }
     }
 
+    @Override protected void canceling() {
+        final Thread thread = getThread();
+        if(thread == null) {
+            return;
+        }
+        thread.interrupt();
+    }
+
     private IStatus exceptionToStatus(Throwable e, String pluginId) {
         final @Nullable Throwable cause = e.getCause();
         if(cause == null) {

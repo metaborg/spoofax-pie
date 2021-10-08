@@ -171,7 +171,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             final HashMap<String, Object> map = new HashMap<>();
             if(input.constraintAnalyzer().isPresent()) {
                 map.put("taskInput", TypeInfo.of("mb.constraint.pie", "ConstraintAnalyzeTaskDef.Output"));
-                map.put("astMember", ".result.ast");
+                map.put("astMember", ".result.analyzedAst");
             } else {
                 map.put("taskInput", TypeInfo.of("org.spoofax.interpreter.terms", "IStrategoTerm"));
                 map.put("astMember", "");
