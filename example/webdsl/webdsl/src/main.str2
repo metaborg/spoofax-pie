@@ -18,6 +18,7 @@ rules // Analysis
   is-inj                 = is-webdsl-inj-cons
   pp-partial             = pp-partial-webdsl-string
 
-  editor-analyze = stx-editor-analyze(pre-analyze, post-analyze|"main", "projectOk", "fileOk")
+  editor-analyze = stx-editor-analyze(pre-analyze, post-analyze|"main", "programOk")
+  //editor-analyze = stx-editor-analyze(pre-analyze, post-analyze|"main", "projectOk", "fileOk")
   editor-resolve = stx-editor-resolve
   editor-hover   = stx-editor-hover

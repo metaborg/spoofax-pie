@@ -14,3 +14,9 @@ rules
   fileOk : scope * Unit
   fileOk(s_global, u) :-
     unitOk(s_global, u).
+
+  programOk : Unit
+  programOk(u) :- {s_global}
+    new s_global,
+    projectOk(s_global),
+    fileOk(s_global, u).
