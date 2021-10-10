@@ -655,13 +655,12 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * @throws RuntimeException if a {@link StrategoException} occurred
          */
         private boolean isInjection(ITerm term) {
-            final IStrategoTerm strategoTerm = strategoTerms.toStratego(term, true);
             try {
-                // TODO: Make this strategy name not language specific
-                @Nullable final IStrategoTerm result = invokeStrategy("is-tiger-inj-cons", strategoTerm);
-                return result != null;
-            } catch(StrategoException ex) {
-                throw new RuntimeException(ex);
+                final IStrategoTerm strategoTerm = strategoTerms.toStratego(term, true);
+                //noinspection ConstantConditions
+                return context.require(isInjPlaceholdersTask, ctx -> Result.ofOk(strategoTerm)).unwrap() != null;
+            } catch (Exception ex) {
+                return false;
             }
         }
 
