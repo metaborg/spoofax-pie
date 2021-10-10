@@ -93,6 +93,8 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
         public final @Nullable ResourcePath rootDirectoryHint;
         /** The event handler for code completion; or {@link CodeCompletionEventHandlerBase} when not specified. */
         private final CodeCompletionEventHandler eventHandler;
+        /** Whether to perform deterministic completion. */
+        private final boolean completeDeterministic;
 
         /**
          * Initializes a new instance of the {@link Input} class.
@@ -102,7 +104,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * @param rootDirectoryHint the root directory of the project; or {@code null} when not specified
          */
         public Input(Region primarySelection, ResourceKey file, @Nullable ResourcePath rootDirectoryHint) {
-            this(primarySelection, file, rootDirectoryHint, new CodeCompletionEventHandlerBase());
+            this(primarySelection, file, rootDirectoryHint, new CodeCompletionEventHandlerBase(), false);
         }
 
         /**
@@ -112,12 +114,14 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * @param file      the key of the resource in which completion is invoked
          * @param rootDirectoryHint the root directory of the project; or {@code null} when not specified
          * @param eventHandler the event handler for code completion; or {@link CodeCompletionEventHandlerBase} when not specified
+         * @param completeDeterministic whether to perform deterministic completion
          */
-        public Input(Region primarySelection, ResourceKey file, @Nullable ResourcePath rootDirectoryHint, CodeCompletionEventHandler eventHandler) {
+        public Input(Region primarySelection, ResourceKey file, @Nullable ResourcePath rootDirectoryHint, CodeCompletionEventHandler eventHandler, boolean completeDeterministic) {
             this.primarySelection = primarySelection;
             this.file = file;
             this.rootDirectoryHint = rootDirectoryHint;
             this.eventHandler = eventHandler;
+            this.completeDeterministic = completeDeterministic;
         }
 
         @Override public boolean equals(@Nullable Object o) {
@@ -254,6 +258,8 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
         public final Region primarySelection;
         /** The Statix specification. */
         private final Spec spec;
+        /** Whether to perform deterministic completion. */
+        private final boolean completeDeterministic;
 
         /**
          * Initializes a new instance of the {@link Execution} class.
@@ -280,6 +286,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
             this.rootDirectoryHint = input.rootDirectoryHint;
             this.file = input.file;
             this.primarySelection = input.primarySelection;
+            this.completeDeterministic = input.completeDeterministic;
         }
 
         /**
@@ -289,11 +296,14 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * @throws Exception if an exception occurred
          */
         public Option<CodeCompletionResult> complete() throws Exception {
-            // Get, prepare, and analyze the incoming AST
             eventHandler.begin();
+
+            // Parse the AST
             eventHandler.beginParse();
             final IStrategoTerm parsedAst = parse();
             eventHandler.endParse();
+
+            // Prepare the AST (explicate, add term indices, upgrade placeholders)
             eventHandler.beginPreparation();
             final IStrategoTerm explicatedAst = preAnalyze(parsedAst);
             final IStrategoTerm indexedAst = addTermIndices(explicatedAst);
@@ -304,6 +314,8 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
             // TODO: Specify spec name and root rule name somewhere
             final SolverState initialState = createInitialSolverState(upgradedAst, "main", "programOk", placeholderVarMap);
             eventHandler.endPreparation();
+
+            // Analyze the AST
             eventHandler.beginAnalysis();
             final SolverState analyzedState = analyze(initialState);
             eventHandler.endAnalysis();
@@ -312,13 +324,13 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
             eventHandler.beginCodeCompletion();
             final Seq<CodeCompletionProposal> completionProposals = complete(analyzedState, placeholder, Collections.emptyList() /* TODO: Get the set of analysis errors */);
             final Seq<CodeCompletionProposal> filteredProposals = filterProposals(completionProposals);
+            final List<CodeCompletionProposal> instantiatedProposals = filteredProposals.toList(); // NOTE: This is where we actually coerce the lazy list find the completions.
             eventHandler.endCodeCompletion();
 
             // Get, convert, and prepare the proposals
             eventHandler.beginFinishing();
-            final Region placeholderRegion = getRegion(placeholder, Region.atOffset(primarySelection.getStartOffset() /* TODO: Support the whole selection? */));
-            final List<CodeCompletionProposal> instantiatedProposals = filteredProposals.toList(); // NOTE: This is where we actually coerce the lazy list find the completions.
             final List<CodeCompletionProposal> orderedProposals = orderProposals(instantiatedProposals);
+            final Region placeholderRegion = getRegion(placeholder, Region.atOffset(primarySelection.getStartOffset() /* TODO: Support the whole selection? */));
             final List<CodeCompletionItem> finalProposals = proposalsToCodeCompletionItems(orderedProposals, placeholderRegion);
             eventHandler.endFinishing();
 
@@ -498,7 +510,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
             // Create a strategy that fails if the term is not an injection
             final Strategy<ITerm, @Nullable ITerm> isInjPredicate = pred(this::isInjection);
 
-            final SolverContext ctx = new SolverContext(placeholder, allowedErrors, isInjPredicate);
+            final SolverContext ctx = new SolverContext(placeholder, allowedErrors, isInjPredicate, completeDeterministic, null /* TODO */);
 
             final ITerm termInUnifier = state.getState().unifier().findRecursive(placeholder);
             if (!termInUnifier.equals(placeholder)) {

@@ -3,7 +3,6 @@ package mb.statix;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
 import mb.statix.constraints.messages.IMessage;
-import mb.tego.sequences.InterruptiblePredicate;
 import mb.statix.solver.IConstraint;
 import mb.tego.strategies.Strategy;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -19,6 +18,8 @@ public final class SolverContext {
     private final @Nullable ITermVar focusVar;
     private final Collection<Map.Entry<IConstraint, IMessage>> allowedErrors;
     private final Strategy<ITerm, @Nullable ITerm> isInjPredicate;
+    private final boolean completeDeterministic;
+    private final @Nullable CodeCompletionStageEventHandler stageEventHandler;
 
     /**
      * Initializes a new instance of the {@link SolverContext} class.
@@ -26,11 +27,15 @@ public final class SolverContext {
     public SolverContext(
         @Nullable ITermVar focusVar,
         Collection<Map.Entry<IConstraint, IMessage>> allowedErrors,
-        Strategy<ITerm, @Nullable ITerm> isInjPredicate
+        Strategy<ITerm, @Nullable ITerm> isInjPredicate,
+        boolean completeDeterministic,
+        @Nullable CodeCompletionStageEventHandler stageEventHandler
     ) {
         this.focusVar = focusVar;
         this.allowedErrors = allowedErrors;
         this.isInjPredicate = isInjPredicate;
+        this.completeDeterministic = completeDeterministic;
+        this.stageEventHandler = stageEventHandler;
     }
 
     /**
@@ -51,7 +56,7 @@ public final class SolverContext {
      * @return the modified copy of the {@link SolverContext}
      */
     public SolverContext withFocusVar(@Nullable ITermVar focusVar) {
-        return new SolverContext(focusVar, allowedErrors, isInjPredicate);
+        return new SolverContext(focusVar, allowedErrors, isInjPredicate, completeDeterministic, stageEventHandler);
     }
 
     /**
@@ -72,7 +77,7 @@ public final class SolverContext {
      * @return the modified copy of the {@link SolverContext}
      */
     public SolverContext withAllowedErrors(Collection<Map.Entry<IConstraint, IMessage>> allowedErrors) {
-        return new SolverContext(focusVar, allowedErrors, isInjPredicate);
+        return new SolverContext(focusVar, allowedErrors, isInjPredicate, completeDeterministic, stageEventHandler);
     }
 
     /**
@@ -82,5 +87,23 @@ public final class SolverContext {
      */
     public Strategy<ITerm, @Nullable ITerm> getIsInjPredicate() {
         return isInjPredicate;
+    }
+
+    /**
+     * Whether to perform deterministic completion.
+     *
+     * @return {@code true} to perform deterministic completion; otherwise, {@code false}
+     */
+    public boolean isCompleteDeterministic() {
+        return completeDeterministic;
+    }
+
+    /**
+     * Gets the stage event handler.
+     *
+     * @return the stage event handler; or {@code null}
+     */
+    public @Nullable CodeCompletionStageEventHandler getStageEventHandler() {
+        return stageEventHandler;
     }
 }

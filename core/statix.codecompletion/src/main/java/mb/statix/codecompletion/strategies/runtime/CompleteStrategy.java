@@ -1,6 +1,7 @@
 package mb.statix.codecompletion.strategies.runtime;
 
 import mb.nabl2.terms.ITermVar;
+import mb.statix.CodeCompletionStageEventHandler;
 import mb.statix.SolverContext;
 import mb.statix.SolverState;
 import mb.tego.sequences.Seq;
@@ -118,9 +119,14 @@ public final class CompleteStrategy extends NamedStrategy3<SolverContext, ITermV
         final @Nullable Seq<SolverState> r3 = engine.eval(flatMap, s3, r2);
         if (r3 == null) return Seq.of();
 
-        final Strategy<SolverState, Seq<SolverState>> s4 = expandDeterministic.apply(ctx, v);
-        final @Nullable Seq<SolverState> r4 = engine.eval(flatMap, s4, r3);
-        if (r4 == null) return Seq.of();
+        final @Nullable Seq<SolverState> r4;
+        if (ctx.isCompleteDeterministic()) {
+            final Strategy<SolverState, Seq<SolverState>> s4 = expandDeterministic.apply(ctx, v);
+            r4 = engine.eval(flatMap, s4, r3);
+            if(r4 == null) return Seq.of();
+        } else {
+            r4 = r3;
+        }
 
         return r4;
     }
