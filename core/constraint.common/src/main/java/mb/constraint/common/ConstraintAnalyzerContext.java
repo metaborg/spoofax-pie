@@ -7,7 +7,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -48,8 +47,8 @@ public class ConstraintAnalyzerContext implements Serializable {
         return results.keySet();
     }
 
-    void updateResult(ResourceKey resource, IStrategoTerm ast, IStrategoTerm analysis) {
-        results.put(resource, new Result(resource, ast, analysis));
+    void updateResult(ResourceKey resource, IStrategoTerm parsedAst, IStrategoTerm analyzedAst, IStrategoTerm analysis) {
+        results.put(resource, new Result(resource, parsedAst, analyzedAst, analysis));
     }
 
     void updateResult(ResourceKey resource, IStrategoTerm analysis) {
@@ -57,7 +56,7 @@ public class ConstraintAnalyzerContext implements Serializable {
         if(result == null) {
             throw new RuntimeException("BUG: attempting to update analysis result for '" + resource + "' to '" + analysis + "', but no existing result was found for it");
         } else {
-            results.put(resource, new Result(resource, result.ast, analysis));
+            results.put(resource, new Result(resource, result.parsedAst, result.analyzedAst, analysis));
         }
     }
 
@@ -87,7 +86,13 @@ public class ConstraintAnalyzerContext implements Serializable {
     }
 
 
-    @Override public boolean equals(Object o) {
+    public void clear() {
+        results.clear();
+        projectResults.clear();
+    }
+
+
+    @Override public boolean equals(@Nullable Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
         final ConstraintAnalyzerContext that = (ConstraintAnalyzerContext)o;

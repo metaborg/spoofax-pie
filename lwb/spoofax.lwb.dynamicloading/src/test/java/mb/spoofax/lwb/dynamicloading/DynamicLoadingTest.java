@@ -232,7 +232,7 @@ class DynamicLoadingTest extends CharsTestBase {
                 assertTrue(hasRemoveATaskDefExecuted(report));
                 assertTrue(hasDebugRemoveATaskDefExecuted(report));
                 assertTrue(hasConstraintAnalysisTaskExecuted(report, dynamicLanguage)); // Unfortunately this is re-executed, because the Stratego runtime has changed. We cannot know if this affects the constraint analysis or not.
-                assertTrue(hasCheckTaskExecuted(report, dynamicLanguage)); // TODO: this is executed because the result of constraint analysis changes, but we are only interested in the messages, which do not change.
+                assertFalse(hasCheckTaskExecuted(report, dynamicLanguage));
             } catch(Exception e) {
                 printThrowable(e);
                 throw e;

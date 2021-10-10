@@ -16,7 +16,7 @@ import org.eclipse.ui.contexts.IContextService;
 
 public class EditorTracker extends WindowAndPartListener {
     private final EclipseIdentifiers eclipseIdentifiers;
-    private final Class<? extends SpoofaxEditor> editorClass;
+    private final String editorClassName;
 
     private @MonotonicNonNull IContextService contextService;
     private @Nullable IContextActivation contextActivation = null;
@@ -24,7 +24,7 @@ public class EditorTracker extends WindowAndPartListener {
 
     public EditorTracker(EclipseIdentifiers eclipseIdentifiers, Class<? extends SpoofaxEditor> editorClass) {
         this.eclipseIdentifiers = eclipseIdentifiers;
-        this.editorClass = editorClass;
+        this.editorClassName = editorClass.getName();
     }
 
     public void register() {
@@ -52,6 +52,11 @@ public class EditorTracker extends WindowAndPartListener {
         });
     }
 
+    @Override public void unregister() {
+        deactivateContext();
+        super.unregister();
+        this.contextService = null;
+    }
 
     // IWindowListener implementation
 
@@ -113,6 +118,6 @@ public class EditorTracker extends WindowAndPartListener {
 
     private boolean isRelevantEditor(@Nullable IWorkbenchPart part) {
         if(part == null) return false;
-        return editorClass.equals(part.getClass());
+        return editorClassName.equals(part.getClass().getName());
     }
 }

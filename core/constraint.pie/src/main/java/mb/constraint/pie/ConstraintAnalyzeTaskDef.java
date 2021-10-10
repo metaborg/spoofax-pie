@@ -11,7 +11,6 @@ import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -72,9 +71,18 @@ public abstract class ConstraintAnalyzeTaskDef implements TaskDef<ConstraintAnal
     public Result<Output, ?> exec(ExecContext context, Input input) throws Exception {
         return context.require(input.astSupplier)
             .mapCatchingOrRethrow((ast) -> {
-                final ConstraintAnalyzerContext constraintAnalyzerContext = new ConstraintAnalyzerContext(false, input.resource);
+                final ConstraintAnalyzerContext constraintAnalyzerContext = getConstraintAnalyzerContext(context, input.resource);
                 final SingleFileResult result = analyze(context, input.resource, ast, constraintAnalyzerContext);
+                context.setInternalObject(constraintAnalyzerContext);
                 return new Output(constraintAnalyzerContext, result);
             }, ConstraintAnalyzerException.class);
+    }
+
+    private ConstraintAnalyzerContext getConstraintAnalyzerContext(ExecContext context, ResourceKey resource) {
+        final @Nullable Serializable obj = context.getInternalObject();
+        if(obj instanceof ConstraintAnalyzerContext) {
+            return (ConstraintAnalyzerContext)obj;
+        }
+        return new ConstraintAnalyzerContext(false, resource);
     }
 }

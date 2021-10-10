@@ -36,9 +36,9 @@ public class TigerShowAnalyzedAst implements TaskDef<TigerShowArgs, CommandFeedb
         return context.require(analyze, new TigerAnalyze.Input(key, parse.inputBuilder().withFile(key).buildAstSupplier()))
             .map(output -> {
                 if(region != null) {
-                    return TermTracer.getSmallestTermEncompassingRegion(output.result.ast, region);
+                    return TermTracer.getSmallestTermEncompassingRegion(output.result.analyzedAst, region);
                 } else {
-                    return output.result.ast;
+                    return output.result.analyzedAst;
                 }
             })
             .map(TermToString::toString)

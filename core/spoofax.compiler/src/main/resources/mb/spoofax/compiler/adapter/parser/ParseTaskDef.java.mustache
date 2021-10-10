@@ -1,7 +1,7 @@
 package {{baseParseTaskDef.packageId}};
 
-import mb.common.text.Text;
 import mb.common.result.Result;
+import mb.common.text.Text;
 import mb.jsglr.common.JsglrParseException;
 import mb.jsglr.common.JsglrParseInput;
 import mb.jsglr.common.JsglrParseOutput;
@@ -14,6 +14,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import java.io.IOException;
 
 @{{adapterProject.scope.qualifiedId}}
 public class {{baseParseTaskDef.id}} extends JsglrParseTaskDef {
@@ -38,7 +39,7 @@ public class {{baseParseTaskDef.id}} extends JsglrParseTaskDef {
         @Nullable String startSymbol,
         @Nullable ResourceKey fileHint,
         @Nullable ResourcePath rootDirectoryHint
-    ) throws Exception {
+    ) throws IOException, InterruptedException {
         context.require(classLoaderResources.tryGetAsNativeDefinitionResource("{{languageProjectInput.parseTableAtermFileRelativePath}}"));
 {{#languageProjectInput.isJsglr2}}
         context.require(classLoaderResources.tryGetAsNativeDefinitionResource("{{languageProjectInput.parseTablePersistedFileRelativePath}}"));

@@ -1,9 +1,9 @@
 package mb.aterm.common;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.interpreter.terms.ITermFactory;
 import org.strategoxt.lang.Context;
 import org.strategoxt.stratego_aterm.aterm_escape_strings_0_0;
 import org.strategoxt.stratego_aterm.pp_aterm_box_0_0;
@@ -43,6 +43,20 @@ public class TermToString {
             return null;
         } else {
             return (IStrategoString)transformedTerm;
+        }
+    }
+
+
+    public static String toShortString(IStrategoTerm term) {
+        switch(term.getType()) {
+            case APPL:
+                return ((IStrategoAppl)term).getConstructor().toString();
+            case LIST:
+                return "[" + term.getSubtermCount() + " subterms]";
+            case TUPLE:
+                return "(" + term.getSubtermCount() + " subterms)";
+            default:
+                return term.toString();
         }
     }
 }
