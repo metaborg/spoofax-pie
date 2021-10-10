@@ -159,27 +159,36 @@ rules
 
 rules
 
-  typeOfExp(s_outer, Let(ds, es)) = T :- {s_body}
+  typeOfExp(s_outer, Let(ds, es)) = T :- {s_body s_dec}
     new s_body,
-    decsOk(s_outer, s_body, ds),
+    new s_dec,
+    s_dec -P-> s_outer,
+    decsOk(s_body, s_dec, ds),
     typeOfSeq(s_body, es) == T.
 
 
   decsOk     : scope * scope * list(Dec)
   decOk      : scope * scope * Dec
 
-  decsOk(s_outer, s_body, []) :-
-    s_body -P-> s_outer.
 
-  decsOk(s_outer, s_body, [dec]) :-
-    s_body -P-> s_outer,
-    decOk(s_body, s_outer, dec).
-
-  decsOk(s_outer, s_body, [dec | decs@[_|_]]) :- {s_dec}
+  decsOk(s_body, s_outer, [dec@VarDec(_, _, _) | decs]) :- {s_dec}
     new s_dec,
     s_dec -P-> s_outer,
     decOk(s_dec, s_outer, dec),
-    decsOk(s_dec, s_body, decs).
+    decsOk(s_body, s_dec, decs).
+
+  decsOk(s_body, s_outer, [dec@VarDecNoType(_, _) | decs]) :- {s_dec}
+    new s_dec,
+    s_dec -P-> s_outer,
+    decOk(s_dec, s_outer, dec),
+    decsOk(s_body, s_dec, decs).
+
+  decsOk(s_body, s_outer, [dec | decs]) :- {s_dec}
+    decOk(s_outer, s_outer, dec),
+    decsOk(s_body, s_outer, decs).
+
+  decsOk(s_body, s_outer, []) :-
+    s_body -P-> s_outer.
 
 rules // type declarations
 
@@ -195,13 +204,7 @@ rules // type declarations
   // variables and functions of the same name cannot both be in
   // scope simultaneously (one will hide the other).
 
-  decOk(s, s_outer, TypeDecs(tdecs)) :-
-    tdecsOk(s, s, tdecs).
-
-  tdecOk  : scope * scope * TypeDec
-  tdecsOk   maps tdecOk(*, *, list(*))
-
-  tdecOk(s, s_outer, TypeDec(x, t)) :- {T}
+  decOk(s, s_outer, TypeDec(x, t)) :- {T}
     typeOfType(s_outer, t) == T,
     declareType(s, x, T).
 
@@ -222,19 +225,13 @@ rules // function declarations
   // scope of the parameter id1 lasts throughout the function
   // body exp
 
-  decOk(s, s_outer, FunDecs(fdecs)) :-
-    fdecsOk(s, s_outer, fdecs).
-
-  fdecsOk      maps fdecOk(*, *, list(*))
-  fdecOk     : scope * scope * FunDec
-
-  fdecOk(s, s_outer, d@ProcDec(f, args, e)) :- {s_fun Ts}
+  decOk(s, s_outer, d@ProcDec(f, args, e)) :- {s_fun Ts}
     new s_fun, s_fun -P-> s,
     typesOfArgs(s_fun, s_outer, args) == Ts,
     declareVar(s, f, FUN(Ts, UNIT())),
     typeOfExp(s_fun, e) == UNIT().
 
-  fdecOk(s, s_outer, d@FunDec(f, args, t, e)) :- {s_fun Ts T S}
+  decOk(s, s_outer, d@FunDec(f, args, t, e)) :- {s_fun Ts T S}
     new s_fun, s_fun -P-> s,
     typesOfArgs(s_fun, s_outer, args) == Ts,
     typeOfType(s_outer, t) == T,
@@ -283,10 +280,10 @@ rules // arrays
 rules // array creation
 
   typeOfExp(s, Array(x, e1, e2)) = ARRAY(T, s_arr) :- {S}
-    typeOfType(s, Tid(x)) == ARRAY(S, s_arr),
+    typeOfType(s, Tid(x)) == ARRAY(T, s_arr),
     typeOfExp(s, e1) == INT(),
-    typeOfExp(s, e2) == T,
-    subtype(T, S).
+    typeOfExp(s, e2) == S,
+    subtype(S, T).
 
 rules // array indexing
 
@@ -494,7 +491,11 @@ rules
     declareVarRaw(s,  "exit",      FUN([INT()], UNIT())),
     declareVarRaw(s,  "getchar",   FUN([], STRING())),
     declareVarRaw(s,  "flush",     FUN([], UNIT())),
-    declareVarRaw(s,  "printi",    FUN([INT()], UNIT())).
+    declareVarRaw(s,  "printi",    FUN([INT()], UNIT())),
+
+    // For benchmarks
+    declareVarRaw(s,  "timeGo",    FUN([], UNIT())),
+    declareVarRaw(s,  "timeStop",  FUN([], UNIT())).
 
 
 
@@ -510,11 +511,7 @@ rules // placeholders
 
   decOk(_, _, Dec-Plhdr()).
 
-  tdecOk(_, _, TypeDec-Plhdr()).
-
   typeOfType(_, Type-Plhdr()) = T.
-
-  fdecOk(_, _, FunDec-Plhdr()).
 
   typeOfArg(_, _, FArg-Plhdr()) = T.
 
