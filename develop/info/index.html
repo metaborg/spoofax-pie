@@ -759,7 +759,7 @@
 
             <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><i>dict</i></td>
 
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">status = True, <b>date</b> [<i>datetime</i>], short_commit = 'e6f11c8', commit = 'e6f11c88176fa852cc69cfc704dff17d2094809d', author = 'Gabriel Konat', tag = '', date_ISO = '2021-10-08 15:50:22 +0200', message = 'Performance improvements.\n\n- Make the ConstraintAnalyzer pass unchanged inputs; determined by AST\n  hashCode, equality, and recursive region equality; as cached to the\n  constraint analyzer, allowing it to reuse some cached results.\n- Store the parsed AST in `ConstraintAnalyzer#Result` and\n  `ConstraintAnalyzer#SingleFileResult`.\n- Rename `ConstraintAnalyzer.Result.ast` to `analyzedAst`.\n- Rename `ConstraintAnalyzer.SingleFileResult.ast` to `analyzedAst`.\n- Cache the `ConstraintAnalyzerContext` as part of the constraint\n  analysis tasks, enabling some reuse of analysis results. Clear this\n  cache when a Statix spec ATerm file is added or changed.\n- Pass `ThreadCancel` to the constraint analyzer, allowing the\n  constraint solver to be cancelled with a thread interrupt.\n- Cancelling editor update and run command jobs in Eclipse plugins\n  performs a thread interrupt.\n- Add `TermToString#toShortString` to print a term to a short string\n  only describing its type and how many subterms it has, to improve\n  `toString` performance on objects that have very large terms.\n- Print constraint analyzer terms with `toShortString`.\n- Unload dynamically loaded language when language project is cleared in\n  the Eclipse LWB.\n- Remove a dynamically registered group when language is unloaded.\n- Only store editor class name instead of editor class in\n  `EditorTracker` to ensure class is not leaked in case the\n  `EditorTracker` object leaks.', raw = 'commit e6f11c88176fa852cc69cfc704dff17d2094809d\nAuthor: Gabriel Konat <gabrielkonat@gmail.com>\nDate:   Fri Oct 8 15:50:22 2021 +0200\n\n    Performance improvements.\n    \n    - Make the ConstraintAnalyzer pass unchanged inputs; determined by AST\n      hashCode, equality, and recursive region equality; as cached to the\n      constraint analyzer, allowing it to reuse some cached results.\n    - Store the parsed AST in `ConstraintAnalyzer#Result` and\n      `ConstraintAnalyzer#SingleFileResult`.\n    - Rename `ConstraintAnalyzer.Result.ast` to `analyzedAst`.\n    - Rename `ConstraintAnalyzer.SingleFileResult.ast` to `analyzedAst`.\n    - Cache the `ConstraintAnalyzerContext` as part of the constraint\n      analysis tasks, enabling some reuse of analysis results. Clear this\n      cache when a Statix spec ATerm file is added or changed.\n    - Pass `ThreadCancel` to the constraint analyzer, allowing the\n      constraint solver to be cancelled with a thread interrupt.\n    - Cancelling editor update and run command jobs in Eclipse plugins\n      performs a thread interrupt.\n    - Add `TermToString#toShortString` to print a term to a short string\n      only describing its type and how many subterms it has, to improve\n      `toString` performance on objects that have very large terms.\n    - Print constraint analyzer terms with `toShortString`.\n    - Unload dynamically loaded language when language project is cleared in\n      the Eclipse LWB.\n    - Remove a dynamically registered group when language is unloaded.\n    - Only store editor class name instead of editor class in\n      `EditorTracker` to ensure class is not leaked in case the\n      `EditorTracker` object leaks.', root_dir = '/home/runner/work/spoofax-pie/spoofax-pie'</td>
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">status = True, <b>date</b> [<i>datetime</i>], short_commit = '190c212', commit = '190c2124bf7025e957d1d4a6c0054157945995cc', author = 'Gabriel Konat', tag = '', date_ISO = '2021-10-11 11:55:14 +0200', message = 'Update requirements.', raw = 'commit 190c2124bf7025e957d1d4a6c0054157945995cc\nAuthor: Gabriel Konat <gabrielkonat@gmail.com>\nDate:   Mon Oct 11 11:55:14 2021 +0200\n\n    Update requirements.', root_dir = '/home/runner/work/spoofax-pie/spoofax-pie'</td>
 
         </tr>
 
@@ -1179,7 +1179,7 @@ documentation project:</p>
 
             <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><i>datetime</i></td>
 
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">datetime.datetime(2021, 10, 8, 15, 50, 22, tzinfo=tzoffset(None, 7200))</td>
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">datetime.datetime(2021, 10, 11, 11, 55, 14, tzinfo=tzoffset(None, 7200))</td>
 
         </tr>
 
@@ -1189,7 +1189,7 @@ documentation project:</p>
 
             <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><i>str</i></td>
 
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">'e6f11c8'</td>
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">'190c212'</td>
 
         </tr>
 
@@ -1199,7 +1199,7 @@ documentation project:</p>
 
             <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><i>str</i></td>
 
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">'e6f11c88176fa852cc69cfc704dff17d2094809d'</td>
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">'190c2124bf7025e957d1d4a6c0054157945995cc'</td>
 
         </tr>
 
@@ -1229,7 +1229,7 @@ documentation project:</p>
 
             <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><i>str</i></td>
 
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">'2021-10-08 15:50:22 +0200'</td>
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">'2021-10-11 11:55:14 +0200'</td>
 
         </tr>
 
@@ -1239,7 +1239,7 @@ documentation project:</p>
 
             <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><i>str</i></td>
 
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">'Performance improvements.\n\n- Make the ConstraintAnalyzer pass unchanged inputs; determined by AST\n  hashCode, equality, and recursive region equality; as cached to the\n  constraint analyzer, allowing it to reuse some cached results.\n- Store the parsed AST in `ConstraintAnalyzer#Result` and\n  `ConstraintAnalyzer#SingleFileResult`.\n- Rename `ConstraintAnalyzer.Result.ast` to `analyzedAst`.\n- Rename `ConstraintAnalyzer.SingleFileResult.ast` to `analyzedAst`.\n- Cache the `ConstraintAnalyzerContext` as part of the constraint\n  analysis tasks, enabling some reuse of analysis results. Clear this\n  cache when a Statix spec ATerm file is added or changed.\n- Pass `ThreadCancel` to the constraint analyzer, allowing the\n  constraint solver to be cancelled with a thread interrupt.\n- Cancelling editor update and run command jobs in Eclipse plugins\n  performs a thread interrupt.\n- Add `TermToString#toShortString` to print a term to a short string\n  only describing its type and how many subterms it has, to improve\n  `toString` performance on objects that have very large terms.\n- Print constraint analyzer terms with `toShortString`.\n- Unload dynamically loaded language when language project is cleared in\n  the Eclipse LWB.\n- Remove a dynamically registered group when language is unloaded.\n- Only store editor class name instead of editor class in\n  `EditorTracker` to ensure class is not leaked in case the\n  `EditorTracker` object leaks.'</td>
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">'Update requirements.'</td>
 
         </tr>
 
@@ -1249,7 +1249,7 @@ documentation project:</p>
 
             <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><i>str</i></td>
 
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">'commit e6f11c88176fa852cc69cfc704dff17d2094809d\nAuthor: Gabriel Konat <gabrielkonat@gmail.com>\nDate:   Fri Oct 8 15:50:22 2021 +0200\n\n    Performance improvements.\n    \n    - Make the ConstraintAnalyzer pass unchanged inputs; determined by AST\n      hashCode, equality, and recursive region equality; as cached to the\n      constraint analyzer, allowing it to reuse some cached results.\n    - Store the parsed AST in `ConstraintAnalyzer#Result` and\n      `ConstraintAnalyzer#SingleFileResult`.\n    - Rename `ConstraintAnalyzer.Result.ast` to `analyzedAst`.\n    - Rename `ConstraintAnalyzer.SingleFileResult.ast` to `analyzedAst`.\n    - Cache the `ConstraintAnalyzerContext` as part of the constraint\n      analysis tasks, enabling some reuse of analysis results. Clear this\n      cache when a Statix spec ATerm file is added or changed.\n    - Pass `ThreadCancel` to the constraint analyzer, allowing the\n      constraint solver to be cancelled with a thread interrupt.\n    - Cancelling editor update and run command jobs in Eclipse plugins\n      performs a thread interrupt.\n    - Add `TermToString#toShortString` to print a term to a short string\n      only describing its type and how many subterms it has, to improve\n      `toString` performance on objects that have very large terms.\n    - Print constraint analyzer terms with `toShortString`.\n    - Unload dynamically loaded language when language project is cleared in\n      the Eclipse LWB.\n    - Remove a dynamically registered group when language is unloaded.\n    - Only store editor class name instead of editor class in\n      `EditorTracker` to ensure class is not leaked in case the\n      `EditorTracker` object leaks.'</td>
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">'commit 190c2124bf7025e957d1d4a6c0054157945995cc\nAuthor: Gabriel Konat <gabrielkonat@gmail.com>\nDate:   Mon Oct 11 11:55:14 2021 +0200\n\n    Update requirements.'</td>
 
         </tr>
 
@@ -1385,7 +1385,7 @@ documentation project:</p>
 
             <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><i>str</i></td>
 
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">'2021-10-08'</td>
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">'2021-10-11'</td>
 
         </tr>
 
