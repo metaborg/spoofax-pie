@@ -91,6 +91,7 @@ abstract class RunBenchmarkTask(
                     dstInputResource.key,
                     ctx.require(input.targetProjectDir).path,
                     eventHandler,
+                    false,
                 )
             ).unwrap() as TermCodeCompletionResult
 
