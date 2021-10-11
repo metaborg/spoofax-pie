@@ -61,13 +61,14 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
   includeProject("tiger.spoofax3.ccbench", "tiger/spoofax3/tiger.spoofax3.ccbench")
 }
 
-"webdsl".run {
-    includeProject("webdsl", "webdsl/webdsl")
-    includeProject("webdsl.cli", "webdsl/webdsl.cli")
-    includeProject("webdsl.eclipse", "webdsl/webdsl.eclipse")
-    includeProject("webdsl.intellij", "webdsl/webdsl.intellij")
-    includeProject("webdsl.ccbench", "webdsl/webdsl.ccbench")
-}
+// Takes too long:
+//"webdsl".run {
+//    includeProject("webdsl", "webdsl/webdsl")
+//    includeProject("webdsl.cli", "webdsl/webdsl.cli")
+//    includeProject("webdsl.eclipse", "webdsl/webdsl.eclipse")
+//    includeProject("webdsl.intellij", "webdsl/webdsl.intellij")
+//    includeProject("webdsl.ccbench", "webdsl/webdsl.ccbench")
+//}
 "tiger/spoofax3".run {
   includeProject("tiger.spoofax3", "tiger/spoofax3/tiger.spoofax3")
   includeProject("tiger.spoofax3.cli", "tiger/spoofax3/tiger.spoofax3.cli")
