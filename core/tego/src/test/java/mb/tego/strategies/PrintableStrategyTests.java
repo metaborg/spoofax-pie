@@ -7,6 +7,8 @@ import mb.tego.sequences.InterruptibleConsumer;
 import mb.tego.sequences.InterruptibleFunction;
 import mb.tego.sequences.InterruptiblePredicate;
 import mb.tego.sequences.InterruptibleSupplier;
+import mb.tego.strategies.runtime.TegoEngine;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -271,6 +273,7 @@ public final class PrintableStrategyTests {
             @Override public int getArity() { return 0; }
             @Override public int getPrecedence() { return -1; } // Lower precedence
             @Override public StringBuilder writeTo(StringBuilder sb) { sb.append("x + y"); return sb; }
+            @Override public @Nullable Object evalInternal(TegoEngine engine, Object[] args, Object input) { return null; }
         };
 
         // Act
@@ -291,6 +294,7 @@ public final class PrintableStrategyTests {
             @Override public int getArity() { return 0; }
             @Override public int getPrecedence() { return 0; } // Equal precedence
             @Override public StringBuilder writeTo(StringBuilder sb) { sb.append("x ?: y"); return sb; }
+            @Override public @Nullable Object evalInternal(TegoEngine engine, Object[] args, Object input) { return null; }
         };
 
         // Act
@@ -311,6 +315,7 @@ public final class PrintableStrategyTests {
             @Override public int getArity() { return 0; }
             @Override public int getPrecedence() { return 1; } // Higher precedence
             @Override public StringBuilder writeTo(StringBuilder sb) { sb.append("x * y"); return sb; }
+            @Override public @Nullable Object evalInternal(TegoEngine engine, Object[] args, Object input) { return null; }
         };
 
         // Act
@@ -331,6 +336,7 @@ public final class PrintableStrategyTests {
             @Override public int getArity() { return 0; }
             @Override public int getPrecedence() { return 0; } // Equal precedence
             @Override public StringBuilder writeTo(StringBuilder sb) { sb.append("x + y"); return sb; }
+            @Override public @Nullable Object evalInternal(TegoEngine engine, Object[] args, Object input) { return null; }
         };
 
         // Act
@@ -350,6 +356,7 @@ public final class PrintableStrategyTests {
             @Override public boolean isAtom() { return true; }
             @Override public int getArity() { return 0; }
             @Override public StringBuilder writeTo(StringBuilder sb) { sb.append("x"); return sb; }
+            @Override public @Nullable Object evalInternal(TegoEngine engine, Object[] args, Object input) { return null; }
         };
 
         // Act
@@ -371,6 +378,7 @@ public final class PrintableStrategyTests {
             @Override public int getArity() { return 0; }
             @Override public int getPrecedence() { return -1; } // Lower precedence
             @Override public StringBuilder writeTo(StringBuilder sb) { sb.append("y + z"); return sb; }
+            @Override public @Nullable Object evalInternal(TegoEngine engine, Object[] args, Object input) { return null; }
         };
 
         // Act
@@ -391,6 +399,7 @@ public final class PrintableStrategyTests {
             @Override public int getArity() { return 0; }
             @Override public int getPrecedence() { return 0; } // Equal precedence
             @Override public StringBuilder writeTo(StringBuilder sb) { sb.append("y ?: z"); return sb; }
+            @Override public @Nullable Object evalInternal(TegoEngine engine, Object[] args, Object input) { return null; }
         };
 
         // Act
@@ -412,6 +421,7 @@ public final class PrintableStrategyTests {
             @Override public int getArity() { return 0; }
             @Override public int getPrecedence() { return 1; } // Higher precedence
             @Override public StringBuilder writeTo(StringBuilder sb) { sb.append("y * z"); return sb; }
+            @Override public @Nullable Object evalInternal(TegoEngine engine, Object[] args, Object input) { return null; }
         };
 
         // Act
@@ -432,6 +442,7 @@ public final class PrintableStrategyTests {
             @Override public int getArity() { return 0; }
             @Override public int getPrecedence() { return 0; } // Equal precedence
             @Override public StringBuilder writeTo(StringBuilder sb) { sb.append("y + z"); return sb; }
+            @Override public @Nullable Object evalInternal(TegoEngine engine, Object[] args, Object input) { return null; }
         };
 
         // Act
@@ -451,6 +462,7 @@ public final class PrintableStrategyTests {
             @Override public boolean isAtom() { return true; }
             @Override public int getArity() { return 0; }
             @Override public StringBuilder writeTo(StringBuilder sb) { sb.append("z"); return sb; }
+            @Override public @Nullable Object evalInternal(TegoEngine engine, Object[] args, Object input) { return null; }
         };
 
         // Act
@@ -472,6 +484,7 @@ public final class PrintableStrategyTests {
             @Override public int getArity() { return 0; }
             @Override public int getPrecedence() { return -1; } // Lower precedence
             @Override public StringBuilder writeTo(StringBuilder sb) { sb.append("a < b + c"); return sb; }
+            @Override public @Nullable Object evalInternal(TegoEngine engine, Object[] args, Object input) { return null; }
         };
 
         // Act
@@ -493,6 +506,7 @@ public final class PrintableStrategyTests {
             @Override public int getArity() { return 0; }
             @Override public int getPrecedence() { return 1; } // Higher precedence
             @Override public StringBuilder writeTo(StringBuilder sb) { sb.append("a ? b : c"); return sb; }
+            @Override public @Nullable Object evalInternal(TegoEngine engine, Object[] args, Object input) { return null; }
         };
 
         // Act
@@ -514,6 +528,7 @@ public final class PrintableStrategyTests {
             @Override public int getArity() { return 0; }
             @Override public int getPrecedence() { return 1; } // Higher precedence
             @Override public StringBuilder writeTo(StringBuilder sb) { sb.append("a * b"); return sb; }
+            @Override public @Nullable Object evalInternal(TegoEngine engine, Object[] args, Object input) { return null; }
         };
 
         // Act
@@ -534,6 +549,7 @@ public final class PrintableStrategyTests {
             @Override public boolean isAtom() { return true; }
             @Override public int getArity() { return 0; }
             @Override public StringBuilder writeTo(StringBuilder sb) { sb.append("y"); return sb; }
+            @Override public @Nullable Object evalInternal(TegoEngine engine, Object[] args, Object input) { return null; }
         };
 
         // Act
@@ -548,9 +564,11 @@ public final class PrintableStrategyTests {
 
     private static class MyTestStrategy implements PrintableStrategy {
         @Override public int getArity() { return 3; }
+        @Override public @Nullable Object evalInternal(TegoEngine engine, Object[] args, Object input) { return null; }
     }
     private static class MyTest2 implements PrintableStrategy {
         @Override public int getArity() { return 3; }
+        @Override public @Nullable Object evalInternal(TegoEngine engine, Object[] args, Object input) { return null; }
     }
 
 }
