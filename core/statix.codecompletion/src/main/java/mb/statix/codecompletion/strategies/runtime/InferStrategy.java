@@ -12,6 +12,8 @@ import mb.tego.strategies.runtime.TegoEngine;
 import org.metaborg.util.task.NullCancel;
 import org.metaborg.util.task.NullProgress;
 
+import static mb.statix.solver.persistent.Solver.RETURN_ON_FIRST_ERROR;
+
 /**
  * Delays stuck queries.
  */
@@ -54,7 +56,7 @@ public final class InferStrategy extends NamedStrategy<SolverState, SolverState>
                 new NullDebugContext(),
                 new NullProgress(),
                 new NullCancel(),
-                0
+                RETURN_ON_FIRST_ERROR
             );
 
             // NOTE: Call the isSuccessful() strategy on this result to ensure it has no errors.
