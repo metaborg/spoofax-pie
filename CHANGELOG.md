@@ -3,6 +3,9 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+
+
+## [0.14.0] - 2021-10-11
 ### Added
 - `default-statix-message-stacktrace-length`, `default-statix-message-term-depth`, `default-statix-test-log-level`, `default-statix-supress-cascading-errors` options to the `constraint-analyzer` section in `spoofaxc.cfg`.
 
@@ -13,6 +16,10 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `ConstraintAnalyzer.Result.ast` to `analyzedAst`.
 - `ConstraintAnalyzer.SingleFileResult.ast` to `analyzedAst`.
 - Clearing a language project to unload the dynamically loaded language associated with that language project.
+- `resource` requirement to `0.12.0`.
+- `common` requirement to `0.9.8`.
+- `pie` requirement to `0.18.0`.
+- `releng` (devenv-release) requirement to 0.1.15.
 
 ### Fixed
 - `LAYOUT?-CF` not accepted in SDF3 (https://github.com/metaborg/spoofax-pie/issues/78). Fixed by marking `-CF`, `-LEX`, and `-VAR` sorts as kernel, allowing them to be used in kernel syntax context.
@@ -208,7 +215,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.13.0...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.14.0...HEAD
+[0.14.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.13.0...release-0.14.0
 [0.13.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.12.1...release-0.13.0
 [0.12.1]: https://github.com/metaborg/spoofax-pie/compare/release-0.12.0...release-0.12.1
 [0.12.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.13...release-0.12.0
