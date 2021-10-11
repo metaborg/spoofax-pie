@@ -1,0 +1,31 @@
+package {{baseShowScopeGraphAstTaskDef.packageId}};
+
+import mb.statix.pie.ShowScopeGraphAstTaskDef;
+import mb.pie.api.ExecContext;
+import mb.pie.api.stamp.resource.ResourceStampers;
+import mb.spoofax.core.language.command.CommandFeedback;
+
+import javax.inject.Inject;
+
+@{{adapterProject.scope.qualifiedId}}
+public class {{baseShowScopeGraphAstTaskDef.id}} extends ShowScopeGraphAstTaskDef {
+    private final {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources;
+
+    @Inject public {{baseShowScopeGraphAstTaskDef.id}}(
+        {{analyzeFileTaskDef.qualifiedId}} analyzeFile,
+        {{strategoRuntimeInput.getStrategoRuntimeProviderTaskDef.qualifiedId}} getStrategoRuntimeProvider,
+        {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources
+    ) {
+        super(analyzeFile, getStrategoRuntimeProvider);
+        this.classLoaderResources = classLoaderResources;
+    }
+
+    @Override public String getId() {
+        return "{{baseShowScopeGraphAstTaskDef.qualifiedId}}";
+    }
+
+    @Override public CommandFeedback exec(ExecContext context, Args args) throws Exception {
+        context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
+        return super.exec(context, args);
+    }
+}
