@@ -1526,10 +1526,34 @@ The following <code>ConstraintAnalyzerOption</code>s are supported:</p>
 <td>Boolean</td>
 </tr>
 <tr>
-<td><code>stratego-strategy = Expression</code></td>
+<td><code>stratego-strategy = $Expression</code></td>
 <td>no</td>
 <td>The stratego strategy entry-point that handles communication with the constraint-solver. Defaults to <code>editor-analyze</code>.</td>
 <td>Stratego strategy identifier</td>
+</tr>
+<tr>
+<td><code>default-statix-message-stacktrace-length = $Expression</code></td>
+<td>no</td>
+<td>The default Statix message stacktrace length to use. Default is implementation-defined. Does nothing if Statix is not enabled.</td>
+<td>Unsigned integer</td>
+</tr>
+<tr>
+<td><code>default-statix-message-term-depth = $Expression</code></td>
+<td>no</td>
+<td>The default Statix message term depth to use. Default is implementation-defined. Does nothing if Statix is not enabled.</td>
+<td>Unsigned integer</td>
+</tr>
+<tr>
+<td><code>default-statix-test-log-level = $Expression</code></td>
+<td>no</td>
+<td>The default Statix test log level to use. Default is implementation-defined. Does nothing if Statix is not enabled.</td>
+<td>String</td>
+</tr>
+<tr>
+<td><code>default-statix-supress-cascading-errors = $Expression</code></td>
+<td>no</td>
+<td>Whether to suppress cascading errors by default. Default is implementation-defined. Does nothing if Statix is not enabled.</td>
+<td>Boolean</td>
 </tr>
 </tbody>
 </table>
