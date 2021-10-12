@@ -235,9 +235,10 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
         final TegoRuntime tegoRuntime = context.require(getTegoRuntimeProviderTask, None.instance).getValue().get();
         final Spec spec = context.require(statixSpec, None.instance).unwrap();
 
-        return new Execution(
+        final Option<CodeCompletionResult> results = new Execution(
             context, input, strategoRuntime, tegoRuntime, spec
         ).complete();
+        return results;
     }
 
     /**
@@ -336,6 +337,8 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
 
             if (finalProposals.isEmpty()) {
                 log.warn("Completion returned no completion proposals.");
+            } else {
+                log.trace("Completion returned the following proposals:\n - " + finalProposals.stream().map(i -> i.getLabel()).collect(Collectors.joining("\n - ")));
             }
 
             eventHandler.end();
