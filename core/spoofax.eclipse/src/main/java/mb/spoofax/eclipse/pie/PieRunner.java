@@ -444,12 +444,8 @@ public class PieRunner {
     }
 
     public <T extends Serializable> T getOrRequire(Task<T> task, TopDownSession session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {
-        if(session.hasBeenExecuted(task) && session.isObserved(task)) {
-            logger.trace("Get '{}'", task);
-            return session.getOutput(task);
-        } else {
-            return require(task, session, monitor);
-        }
+        logger.trace("Get or require '{}'", task);
+        return session.getOutputOrRequireAndEnsureExplicitlyObserved(task, monitorCancelled(monitor));
     }
 
     public TopDownSession updateAffectedBy(Set<? extends ResourceKey> changedResources, Set<?> tags, MixedSession session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException {

@@ -10,6 +10,10 @@ import org.spoofax.interpreter.core.UndefinedStrategyException;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.Set;
+
 @ADT
 public abstract class StrategoException extends Exception {
     public interface Cases<R> {
@@ -52,7 +56,12 @@ public abstract class StrategoException extends Exception {
         return e;
     }
 
-    public static StrategoException fromInterpreterException(String strategyName, IStrategoTerm input, String[] trace, InterpreterException interpreterException) {
+    public static StrategoException fromInterpreterException(
+        String strategyName,
+        IStrategoTerm input,
+        String[] trace,
+        InterpreterException interpreterException
+    ) {
         try {
             throw interpreterException;
         } catch(InterpreterErrorExit e) {
@@ -78,8 +87,33 @@ public abstract class StrategoException extends Exception {
         } catch(UndefinedStrategyException e) {
             return strategyUndefined(strategyName, input, trace, e.getStrategyName());
         } catch(InterpreterException e) {
+            throwIfCauseChainHasInterruptedException(e);
             return exceptionalFail(strategyName, input, trace, e);
         }
+    }
+
+    private static void throwIfCauseChainHasInterruptedException(Throwable e) {
+        final Set<Throwable> seen = Collections.newSetFromMap(new IdentityHashMap<>());
+        throwIfCauseChainHasInterruptedException(e.getCause(), seen);
+    }
+
+    private static void throwIfCauseChainHasInterruptedException(@Nullable Throwable e, Set<Throwable> seen) {
+        if(e instanceof InterruptedException) {
+            // TODO: add InterruptedException to checked exceptions. HACK: sneakily throw InterruptedException for now.
+            sneakyThrow((InterruptedException)e);
+        }
+        if(e != null && !seen.contains(e)) {
+            seen.add(e);
+            throwIfCauseChainHasInterruptedException(e.getCause(), seen);
+            for(Throwable suppressed : e.getSuppressed()) {
+                throwIfCauseChainHasInterruptedException(suppressed, seen);
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T extends Throwable> void sneakyThrow(InterruptedException t) throws T {
+        throw (T)t;
     }
 
 

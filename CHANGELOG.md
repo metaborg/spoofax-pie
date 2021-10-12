@@ -5,6 +5,18 @@ All notable changes to this project are documented in this file, based on [Keep 
 ## [Unreleased]
 
 
+## [0.14.1] - 2021-10-12
+### Fixed
+- Editors in the Eclipse LWB not updating after making changes to the editor that causes the underlying computation to interrupt.
+
+### Added
+- Command for showing the Statix scope graph AST of a file (https://github.com/metaborg/spoofax-pie/pull/80).
+
+### Changed
+- Stratego invocation to check for `InterruptedException` in the cause/suppressed chain of `InterpreterException` and rethrow that. For now, this is sneakily thrown so that `InterruptedException` does not have to be added to the  method signature of `StrategoRuntime.invoke` methods, but this should be added in the future. This sneakily thrown exception is catched and handled by PIE.
+- `pie` requirement to `0.18.1`.
+
+
 ## [0.14.0] - 2021-10-11
 ### Added
 - `default-statix-message-stacktrace-length`, `default-statix-message-term-depth`, `default-statix-test-log-level`, `default-statix-supress-cascading-errors` options to the `constraint-analyzer` section in `spoofaxc.cfg`.
@@ -215,7 +227,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.14.0...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.14.1...HEAD
+[0.14.1]: https://github.com/metaborg/spoofax-pie/compare/release-0.14.0...release-0.14.1
 [0.14.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.13.0...release-0.14.0
 [0.13.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.12.1...release-0.13.0
 [0.12.1]: https://github.com/metaborg/spoofax-pie/compare/release-0.12.0...release-0.12.1
