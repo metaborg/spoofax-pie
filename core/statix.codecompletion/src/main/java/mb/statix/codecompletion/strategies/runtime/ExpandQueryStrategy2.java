@@ -13,7 +13,6 @@ import mb.nabl2.terms.build.TermBuild;
 import mb.nabl2.terms.unification.OccursException;
 import mb.nabl2.terms.unification.RigidException;
 import mb.nabl2.terms.unification.u.IUnifier;
-import mb.nabl2.terms.unification.ud.Diseq;
 import mb.nabl2.terms.unification.ud.IUniDisunifier;
 import mb.scopegraph.oopsla20.reference.DataLeq;
 import mb.scopegraph.oopsla20.reference.EdgeOrData;
@@ -76,14 +75,14 @@ import static mb.nabl2.terms.matching.TermMatch.M;
  * Expands the selected query.
  */
 @SuppressWarnings("UnstableApiUsage")
-public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITermVar, SelectedConstraintSolverState<CResolveQuery>, Seq<SolverState>> {
+public final class ExpandQueryStrategy2 extends NamedStrategy2<SolverContext, ITermVar, SelectedConstraintSolverState<CResolveQuery>, Seq<SolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
-    private static final ExpandQueryStrategy instance = new ExpandQueryStrategy();
+    private static final ExpandQueryStrategy2 instance = new ExpandQueryStrategy2();
     @SuppressWarnings({"unchecked", "unused", "RedundantCast", "RedundantSuppression"})
-    public static ExpandQueryStrategy getInstance() { return (ExpandQueryStrategy)instance; }
+    public static ExpandQueryStrategy2 getInstance() { return (ExpandQueryStrategy2)instance; }
 
-    private ExpandQueryStrategy() { /* Prevent instantiation. Use getInstance(). */ }
+    private ExpandQueryStrategy2() { /* Prevent instantiation. Use getInstance(). */ }
 
     @Override
     public String getName() {
