@@ -11,8 +11,8 @@ import mb.tego.strategies.runtime.TegoRuntimeImpl;
 @Module
 public abstract class TegoModule {
 
-    @Binds @TegoScope public abstract TegoRuntime bindTegoRuntime(TegoEngine engine);
-//    @Binds @TegoScope public abstract TegoEngine bindTegoEngine(TegoRuntimeImpl runtimeImplementation);
-    @Binds @TegoScope public abstract TegoEngine bindTegoEngine(MeasuringTegoRuntime runtimeImplementation);
-//    @Binds @TegoScope public abstract TegoEngine bindTegoEngine(EagerDebugTegoRuntimeImpl runtimeImplementation);
+//    @Binds @TegoScope public abstract TegoRuntime bindTegoRuntime(MeasuringTegoRuntime runtime);
+    @Binds @TegoScope public abstract TegoRuntime bindTegoRuntime(TegoRuntimeImpl runtimeImplementation);
+//    @Binds @TegoScope public abstract TegoEngine bindTegoEngine(MeasuringTegoRuntime runtime);
+    @Binds @TegoScope public abstract TegoEngine bindTegoEngine(TegoRuntimeImpl runtimeImplementation);
 }
