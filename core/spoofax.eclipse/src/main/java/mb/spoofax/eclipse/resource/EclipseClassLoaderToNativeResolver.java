@@ -30,15 +30,25 @@ public class EclipseClassLoaderToNativeResolver implements ClassLoaderToNativeRe
     @Override public @Nullable ReadableResource toNativeResource(URL url) {
         try {
             final URI uri = url.toURI();
+            final @Nullable String scheme = uri.getScheme();
+            if(scheme == null) return null; // No scheme: cannot determine native resource.
+            try {
+                EFS.getFileSystem(scheme);
+            } catch(CoreException e) {
+                return null; // No file system for scheme: cannot determine native resource.
+            }
+
             final IFile[] files = workspaceRoot.findFilesForLocationURI(uri);
-            if(files.length == 1) {
+            if(files.length == 1) { // Found one file in the Eclipse workspace.
                 return resourceRegistry.getResource(files[0]);
             }
+
             final IContainer[] containers = workspaceRoot.findContainersForLocationURI(uri);
-            if(containers.length == 1) {
+            if(containers.length == 1) { // Found one container in the Eclipse workspace.
                 return resourceRegistry.getResource(containers[0]);
             }
-            return null;
+
+            return null; // Not found in the Eclipse workspace.
         } catch(URISyntaxException e) {
             throw new ResourceRuntimeException("Could not convert URL '" + url + "' to an URI", e);
         }
