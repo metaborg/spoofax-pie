@@ -4,27 +4,12 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Range;
-import io.usethesource.capsule.Map;
-import io.usethesource.capsule.Set;
 import mb.nabl2.terms.IListTerm;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
 import mb.nabl2.terms.ListTerms;
-import mb.nabl2.terms.build.TermBuild;
-import mb.nabl2.terms.unification.OccursException;
-import mb.nabl2.terms.unification.RigidException;
-import mb.nabl2.terms.unification.u.IUnifier;
 import mb.nabl2.terms.unification.ud.IUniDisunifier;
-import mb.scopegraph.oopsla20.reference.DataLeq;
-import mb.scopegraph.oopsla20.reference.EdgeOrData;
-import mb.scopegraph.oopsla20.reference.Env;
-import mb.scopegraph.oopsla20.reference.FastNameResolution;
-import mb.scopegraph.oopsla20.reference.LabelOrder;
-import mb.scopegraph.oopsla20.reference.LabelWF;
-import mb.scopegraph.oopsla20.reference.RegExpLabelWF;
-import mb.scopegraph.oopsla20.reference.RelationLabelOrder;
-import mb.scopegraph.oopsla20.reference.ResolutionException;
-import mb.scopegraph.oopsla20.terms.newPath.ResolutionPath;
+import mb.tego.sequences.Seq;
 import mb.statix.SelectedConstraintSolverState;
 import mb.statix.SolverContext;
 import mb.statix.SolverState;
@@ -33,25 +18,22 @@ import mb.statix.constraints.CEqual;
 import mb.statix.constraints.CInequal;
 import mb.statix.constraints.CResolveQuery;
 import mb.statix.generator.scopegraph.DataWF;
+import mb.statix.generator.scopegraph.Env;
 import mb.statix.generator.scopegraph.Match;
 import mb.statix.generator.scopegraph.NameResolution;
 import mb.statix.generator.strategy.ResolveDataWF;
+import mb.scopegraph.oopsla20.reference.EdgeOrData;
+import mb.scopegraph.oopsla20.reference.LabelOrder;
+import mb.scopegraph.oopsla20.reference.LabelWF;
+import mb.scopegraph.oopsla20.reference.ResolutionException;
 import mb.statix.scopegraph.Scope;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.IState;
 import mb.statix.solver.completeness.ICompleteness;
-import mb.statix.solver.completeness.IsComplete;
-import mb.statix.solver.log.NullDebugContext;
-import mb.statix.solver.persistent.Solver;
-import mb.statix.solver.persistent.SolverResult;
-import mb.statix.solver.persistent.query.ConstraintQueries;
-import mb.statix.spec.ApplyMode;
-import mb.statix.spec.ApplyResult;
-import mb.statix.spec.Rule;
-import mb.statix.spec.RuleUtil;
+import mb.scopegraph.oopsla20.reference.RegExpLabelWF;
+import mb.scopegraph.oopsla20.reference.RelationLabelOrder;
 import mb.statix.spec.Spec;
 import mb.statix.spoofax.StatixTerms;
-import mb.tego.sequences.Seq;
 import mb.tego.strategies.NamedStrategy2;
 import mb.tego.strategies.runtime.TegoEngine;
 import mb.tego.utils.StreamUtils;
@@ -59,45 +41,34 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.functions.Predicate2;
 import org.metaborg.util.iterators.Iterables2;
 import org.metaborg.util.optionals.Optionals;
-import org.metaborg.util.task.NullCancel;
-import org.metaborg.util.task.NullProgress;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import static mb.nabl2.terms.build.TermBuild.B;
 import static mb.nabl2.terms.matching.TermMatch.M;
-
-//import mb.statix.generator.scopegraph.DataWF;
-//import mb.statix.generator.scopegraph.Env;
-//import mb.statix.generator.scopegraph.Match;
-//import mb.statix.generator.scopegraph.NameResolution;
-//import mb.statix.generator.strategy.ResolveDataWF;
 
 
 /**
  * Expands the selected query.
  */
 @SuppressWarnings("UnstableApiUsage")
-public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITermVar, SelectedConstraintSolverState<CResolveQuery>, Seq<SolverState>> {
+public final class ExpandQueryStrategyOld extends NamedStrategy2<SolverContext, ITermVar, SelectedConstraintSolverState<CResolveQuery>, Seq<SolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
-    private static final ExpandQueryStrategy instance = new ExpandQueryStrategy();
+    private static final ExpandQueryStrategyOld instance = new ExpandQueryStrategyOld();
     @SuppressWarnings({"unchecked", "unused", "RedundantCast", "RedundantSuppression"})
-    public static ExpandQueryStrategy getInstance() { return (ExpandQueryStrategy)instance; }
+    public static ExpandQueryStrategyOld getInstance() { return (ExpandQueryStrategyOld)instance; }
 
-    private ExpandQueryStrategy() { /* Prevent instantiation. Use getInstance(). */ }
+    private ExpandQueryStrategyOld() { /* Prevent instantiation. Use getInstance(). */ }
 
     @Override
     public String getName() {
@@ -135,7 +106,7 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
         engine.log(instance, "Expand query: {}", query);
 
         final IState.Immutable state = input.getState();
-        final IUniDisunifier.Immutable unifier = state.unifier();
+        final IUniDisunifier unifier = state.unifier();
 
         // Find the scope
         @Nullable final Scope scope = Scope.matcher().match(query.scopeTerm(), unifier).orElse(null);
@@ -151,36 +122,6 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
         if(isAlways == null) {
             throw new IllegalArgumentException("cannot resolve query: cannot decide data equivalence");
         }
-
-        final List<SolverState> oldOutput = expandQuerySlow(query, unifier, state, isAlways, scope, engine, input);
-        final List<SolverState> output = expandQueryFast(query, unifier, state, isAlways, scope, engine, input);
-
-        id(oldOutput);
-
-        @Nullable final ITermVar focusVar = ctx.getFocusVar();
-        if (focusVar != null && engine.isLogEnabled(instance)) {
-            for(SolverState s : output) {
-                engine.log(instance, "- {}", s.project(focusVar));
-            }
-        }
-
-        return Seq.from(output);
-    }
-
-    private static <T> T id(T t) {
-        return t;
-    }
-
-    // Old algorithm
-    private static List<SolverState> expandQuerySlow(
-        CResolveQuery query,
-        IUniDisunifier.Immutable unifier,
-        IState.Immutable state,
-        @Nullable Boolean isAlways,
-        Scope scope,
-        TegoEngine engine,
-        SelectedConstraintSolverState<CResolveQuery> input
-    ) {
 
         final ICompleteness.Immutable completeness = input.getCompleteness();
         final LabelWF<ITerm> labelWF = RegExpLabelWF.of(query.filter().getLabelWF());
@@ -213,231 +154,16 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
             output.addAll(newStates);
         }
         engine.log(instance, "▶ expanded {} declarations into {} possible states", declarationCount, output.size());
-        return output;
+
+        @Nullable final ITermVar focusVar = ctx.getFocusVar();
+        if (focusVar != null && engine.isLogEnabled(instance)) {
+            for(SolverState s : output) {
+                engine.log(instance, "- {}", s.project(focusVar));
+            }
+        }
+
+        return Seq.from(output);
     }
-
-    // New algorithm
-    private static List<SolverState> expandQueryFast(
-        CResolveQuery query,
-        IUniDisunifier.Immutable unifier,
-        IState.Immutable state,
-        @Nullable Boolean isAlways,
-        Scope scope,
-        TegoEngine engine,
-        SelectedConstraintSolverState<CResolveQuery> input
-    ) {
-
-        final ICompleteness.Immutable completeness = input.getCompleteness();
-        final LabelWF<ITerm> labelWF = RegExpLabelWF.of(query.filter().getLabelWF());
-        final LabelOrder<ITerm> labelOrd = new RelationLabelOrder<>(query.min().getLabelOrder());
-        final Predicate2<Scope, EdgeOrData<ITerm>> isComplete2 =
-            (s, l) -> completeness.isComplete(s, l, state.unifier());
-        final IsComplete isComplete3 =
-            (s, l, st) -> isComplete2.test(s, l);
-        final ConstraintQueries constraintQueries = new ConstraintQueries(input.getSpec(), state, isComplete3);
-//        final DataWF<ITerm> dataWF = constraintQueries.getDataWF(query.filter().getDataWF());
-
-        final FastNameResolution<Scope, ITerm, ITerm> nameResolution = FastNameResolution.<Scope, ITerm, ITerm>builder()
-            .withLabelWF(labelWF)
-            .withLabelOrder(labelOrd)
-            .withDataWF(t ->
-                // Assert that we can apply the dataWF to the input
-                applyDataWF(query.filter().getDataWF(), t, state, unifier, completeness, input.getSpec() ).isPresent()
-            )
-            .withDataEquiv(new DataLeq<ITerm>() {
-                @Override public boolean leq(ITerm d1, ITerm d2)throws ResolutionException, InterruptedException {
-                    // Apply the dataWF to each of the inputs. This should result in two solver results
-                    // If this is not the case, this would already have failed the lambda in withDataWF().
-                    final SolverResult result1 = applyDataWF(query.filter().getDataWF(), d1, state, unifier,  completeness, input.getSpec() ).get();
-                    final SolverResult result2 = applyDataWF(query.filter().getDataWF(), d2, state, unifier,  completeness, input.getSpec() ).get();
-
-                    // For each free variable in the query body...
-                    final Set.Immutable<ITermVar> varsToCompare = query.filter().getDataWF().body().freeVars();
-                    boolean maybeShadowing = true;
-                    for (ITermVar v : varsToCompare) {
-                        // Compare the values given to them in the respective dataWF applications
-                        final ITerm v1 = result1.state().unifier().findRecursive(v);
-                        final ITerm v2 = result2.state().unifier().findRecursive(v);
-                        try {
-                            // Attempt to unify the two terms, given the current unifier
-                            final Optional<IUniDisunifier.Result<IUnifier.Immutable>> unify = unifier.unify(v1, v2, rv -> state.vars().contains(rv));
-                            if (unify.isPresent()) {
-                                // The two unifiers unify, meaning that they have the same values for their variables
-                                // This means that they could normally have shadowed each other.
-                                // So we might apply shadowing.
-                                maybeShadowing = true;
-                            } else {
-                                // The two unifiers don't unify, meaning that they have different values for their variables
-                                // This means that they would normally not have shadowed each other.
-                                // So we apply definitely no shadowing.
-                                maybeShadowing = false;
-                                break;
-                            }
-                        } catch (OccursException | RigidException e) {
-                            // We might apply shadowing?
-                            maybeShadowing = true;
-                            // FIXME: is this correct?
-                            engine.log(instance, "Rigid!! " + e.getMessage());
-                            engine.log(instance, "When expanding: " + query);
-                            //engine.log(instance, "state.vars() = " + state.vars().stream().map(Object::toString).collect(Collectors.joining(", ")));
-                            //throw new RuntimeException("Unexpected Exception: " + e.getMessage(), e);
-                        }
-                    }
-
-                    if (maybeShadowing) {
-                        // We apply shadowing by checking the dataEquiv:
-                        final DataLeq<ITerm> leq = constraintQueries.getDataEquiv(query.min().getDataEquiv());
-                        return leq.leq(d1, d2);
-                    } else {
-                        // No shadowing.
-                        return false;
-                    }
-                }
-
-                @Override public boolean alwaysTrue() throws InterruptedException {
-                    // Definitely not always true.
-                    return false;
-                }
-            })
-            .withIsComplete(isComplete2)
-            .build(state.scopeGraph(),input.getSpec().allLabels() );
-
-        // Now, if we apply this name resolution,
-        // we will end up with an environment with _all_ possible resolution paths.
-        final Env<Scope, ITerm, ITerm> env;
-        try {
-            env = nameResolution.resolve(scope, new NullCancel());
-        } catch(ResolutionException e) {
-            throw new RuntimeException("Unexpected ResolutionException: " + e.getMessage(), e);
-        } catch(InterruptedException e) {
-            throw new RuntimeException("Unexpected InterruptedException: " + e.getMessage(), e);
-        }
-
-        // TODO: Group by:
-        // env contains all possible resolution paths
-        // To get the paths that would be in the same query together,
-        // we should group-by when the unifiers are equal modulo alpha-renaming
-        // of existentials in the body of the data wellformedness.
-
-        engine.log(instance, "Expanding:");
-
-        //nameResolution.
-
-//        // Find all possible declarations the resolution could resolve to.
-//        final int declarationCount = countDeclarations(nameResolution, scope);
-        final int declarationCount = env.size();
-        engine.log(instance, "  ▶ found {} declarations", declarationCount);
-
-        // For each declaration:
-        final ArrayList<SolverState> output = new ArrayList<>();
-        for(ResolutionPath<Scope, ITerm, ITerm> path : env) {
-            final SolverState newState = updateSolverState(Collections.singletonList(path), input.getSpec(), query, input.withoutSelected(), unifier, completeness);
-            output.add(newState);
-        }
-        engine.log(instance, "▶ expanded {} declarations into {} possible states", declarationCount, output.size());
-        return output;
-    }
-
-
-    /**
-     * Applies the dataWF to the specified datum.
-     *
-     * applyDataWF :: DataWF * Data -> Unifier?
-     *
-     * @param dataWF       the data WF predicate
-     * @param d            the datum
-     * @param state        the current state
-     * @param unifier      the unifier of the context
-     * @param completeness the completeness of the context
-     * @param spec         the Statix specification
-     * @return either a {@link SolverResult} with the result of applying the {@code dataWF} to the given datum;
-     * otherwise, nothing if the {@code dataWF} could not be applied
-     */
-    public static Optional<SolverResult> applyDataWF(Rule dataWF, ITerm d, IState.Immutable state, IUniDisunifier.Immutable unifier, ICompleteness.Immutable completeness, Spec spec) {
-        // Apply the 'dataWF' to the specified 'd'
-        final ApplyResult applyResult;
-        if ((applyResult = RuleUtil.apply(
-            unifier,
-            dataWF,
-            Collections.singletonList(d),
-            null,
-            ApplyMode.RELAXED,
-            ApplyMode.Safety.SAFE /* ? FIXME: not sure, ResolveDataWF uses UNSAFE */
-        ).orElse(null)) == null) {
-            return Optional.empty();
-        }
-        final IState.Immutable applyState = state;
-        final IConstraint applyConstraint = applyResult.body();
-
-        // Update completeness for new state and constraint
-        final ICompleteness.Transient _completeness = completeness.melt();
-        _completeness.add(applyConstraint, spec, applyState.unifier());
-//        final Optional<? extends IUnifier.Result<? extends IUnifier.Immutable>> unifyResult;
-//
-//        // Apply the constraints from the body to the completeness
-
-//        // Apply the disequalities from the guard to the completeness, if any
-//        final Optional<Diseq> guard = applyResult.guard();
-//        if (guard.isPresent()) {
-//            try {
-//                unifyResult = unifier.unify(guard.get().disequalities());
-//                if(!unifyResult.isPresent()) {
-//                    return Optional.empty();
-//                }
-//                final IUnifier.Immutable diff = unifyResult.get().result();
-//                _completeness.add(applyResult.body(), spec, diff);
-//            } catch(OccursException e) {
-//                return Optional.empty();
-//            }
-//        }
-
-        // NOTE This part is almost a duplicate of Solver::entails and should be kept in sync
-        final SolverResult result;
-        try {
-            result = Solver.solve(
-                spec,
-                state,
-                Iterables2.singleton(applyResult.body()),
-                Map.Immutable.of(),
-                _completeness.freeze(),
-                IsComplete.ALWAYS,
-                new NullDebugContext(),
-                new NullProgress(),
-                new NullCancel(),
-                Solver.RETURN_ON_FIRST_ERROR
-            );
-        } catch(InterruptedException e) {
-            // Interrupted
-            return Optional.empty();
-        }
-        // If the solver state contains errors, applying dataWF failed.
-        if (result.hasErrors()) return Optional.empty();
-
-        final IState.Immutable newState = result.state();
-
-        // If the solver state contains delays, applying dataWF failed?
-        // TODO: Delayed variables (those that are not in the unifier but may have constraints applied to them)
-        //  indicate that we cannot really know if we can apply this. What do we do?
-        // FIXME: For now, we accept this.
-        //if(!result.delays().isEmpty()) return Optional.empty();
-
-        // NOTE: The retain operation is important because it may change
-        //  representatives, which can be local to newUnifier.
-        final IUniDisunifier.Immutable newUnifier = newState.unifier().retainAll(state.vars()).unifier();
-
-        // Check that all (remaining) disequalities are implied (i.e., not unifiable) in the original unifier
-        // @formatter:off
-        final List<ITermVar> disunifiedVars = newUnifier.disequalities().stream()
-            .filter(diseq -> diseq.toTuple().apply(unifier::disunify).map(r -> r.result().isPresent()).orElse(true))
-            .flatMap(diseq -> diseq.domainSet().stream())
-            .collect(Collectors.toList());
-        // @formatter:on
-        if(!disunifiedVars.isEmpty()) return Optional.empty();
-
-        // Applying dataWF succeeded.
-        return Optional.of(result);
-    }
-
 
     /**
      * Performs name resolution.
@@ -461,7 +187,7 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
         Scope scope,
         int index
     ) {
-        final mb.statix.generator.scopegraph.Env<Scope, ITerm, ITerm, CEqual> env = resolveByIndex(nameResolution, scope, index);
+        final Env<Scope, ITerm, ITerm, CEqual> env = resolveByIndex(nameResolution, scope, index);
 
         engine.log(instance, "  ▶ ▶ declaration #{}: {} matches", index, env.matches.size());
 
@@ -572,7 +298,7 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
         return count.get();
     }
 
-    private static mb.statix.generator.scopegraph.Env<Scope, ITerm, ITerm, CEqual> resolveByIndex(
+    private static Env<Scope, ITerm, ITerm, CEqual> resolveByIndex(
         NameResolution<Scope, ITerm, ITerm, CEqual> nameResolution,
         Scope scope,
         int index
@@ -618,7 +344,7 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
             final List<Collection<Match<Scope, ITerm, ITerm, CEqual>>> subsetsList = subsets.collect(Collectors.toList());
             engine.log(instance, "  ▶ ▶ ▶ for size {}: {}", size, subsetsList);
             return subsetsList.stream().map(matches ->
-                updateSolverStateOld(
+                updateSolverState(
                     spec, query, state,
                     // The selected matches are accepted
                     matches,
@@ -634,44 +360,6 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
     }
 
     /**
-     * Creates a new solver state for the given resolution path.
-     *
-     * @param paths the resolution paths
-     * @param spec the spec
-     * @param query the query
-     * @param state the input state
-     * @param unifier
-     * @param completeness
-     * @return the new solver state
-     */
-    private static SolverState updateSolverState(
-        Iterable<ResolutionPath<Scope, ITerm, ITerm>> paths,
-        Spec spec,
-        CResolveQuery query,
-        SolverState state,
-        IUniDisunifier.Immutable unifier, ICompleteness.Immutable completeness) {
-        final ArrayList<ITerm> pathTerms = new ArrayList<>();
-        final ArrayList<CEqual> eqs = new ArrayList<>();
-        for (ResolutionPath<Scope, ITerm, ITerm> path : paths) {
-            pathTerms.add(StatixTerms.pathToTerm(path, spec.dataLabels()));
-            final SolverResult solverResult = applyDataWF(query.filter().getDataWF(), path.getDatum(), state.getState(), unifier, completeness, spec).get();
-            for (ITermVar v : solverResult.updatedVars()) {
-                eqs.add(new CEqual(v, solverResult.state().unifier().findRecursive(v)));
-            }
-        }
-
-        final List<IConstraint> addConstraints = new ArrayList<>();
-        addConstraints.add(new CEqual(TermBuild.B.newList(pathTerms), query.resultTerm(), query));
-        addConstraints.addAll(eqs);
-        final Iterable<IConstraint> remConstraints = Iterables2.singleton(query);
-
-        // Update the given state with the added and removed constraints
-        return state.withUpdatedConstraints(addConstraints, remConstraints)
-            .withMeta(state.getMeta().withExpandedQueriesIncremented());
-    }
-
-
-    /**
      * Creates a new solver state for the given matches.
      *
      * @param spec the spec
@@ -683,7 +371,7 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
      * @param reqRejects the required rejects
      * @return the new solver state
      */
-    private static SolverState updateSolverStateOld(
+    private static SolverState updateSolverState(
         Spec spec,
         CResolveQuery query,
         SolverState state,
@@ -693,12 +381,12 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
         Collection<Match<Scope, ITerm, ITerm, CEqual>> reqRejects
     ) {
         // Build a new environment with all the matches and rejects.
-        final mb.statix.generator.scopegraph.Env.Builder<Scope, ITerm, ITerm, CEqual> subEnvBuilder = mb.statix.generator.scopegraph.Env.builder();
+        final Env.Builder<Scope, ITerm, ITerm, CEqual> subEnvBuilder = Env.builder();
         optMatches.forEach(subEnvBuilder::match);
         reqMatches.forEach(subEnvBuilder::match);
         optRejects.forEach(subEnvBuilder::reject);
         reqRejects.forEach(subEnvBuilder::reject);
-        final mb.statix.generator.scopegraph.Env<Scope, ITerm, ITerm, CEqual> subEnv = subEnvBuilder.build();
+        final Env<Scope, ITerm, ITerm, CEqual> subEnv = subEnvBuilder.build();
 
         // Build the list of constraints to add
         final ImmutableList.Builder<IConstraint> addConstraints = ImmutableList.builder();
@@ -709,8 +397,8 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
         addConstraints.add(new CEqual(B.newList(pathTerms), query.resultTerm(), query));
         subEnv.matches.stream().flatMap(m -> Optionals.stream(m.condition)).forEach(addConstraints::add);
         subEnv.rejects.stream().flatMap(m -> Optionals.stream(m.condition)).forEach(condition -> addConstraints.add(
-                new CInequal(ImmutableSet.of(), condition.term1(), condition.term2(),
-                    condition.cause().orElse(null), condition.message().orElse(null))
+            new CInequal(ImmutableSet.of(), condition.term1(), condition.term2(),
+                condition.cause().orElse(null), condition.message().orElse(null))
             )
         );
 
@@ -758,9 +446,9 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
      * For example, if the result term is a list [a, b, c] then we return a singleton range [3].
      * If the result term is a list that has a variable for a tail, [a, b | xs] then we return a range [2, max].
      *
-     * @param result           the result term of the query,
-     *                         from which we try to deduce if the query expects a singleton set or not
-     * @param unifier          the unifier
+     * @param result the result term of the query,
+     *               from which we try to deduce if the query expects a singleton set or not
+     * @param unifier the unifier
      * @param declarationCount the number of declarations found
      * @return the range of possible query result set sizes
      */
