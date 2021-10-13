@@ -152,10 +152,10 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
             throw new IllegalArgumentException("cannot resolve query: cannot decide data equivalence");
         }
 
-        final List<SolverState> oldOutput = expandQuerySlow(query, unifier, state, isAlways, scope, engine, input);
+        //final List<SolverState> oldOutput = expandQuerySlow(query, unifier, state, isAlways, scope, engine, input);
         final List<SolverState> output = expandQueryFast(query, unifier, state, isAlways, scope, engine, input);
 
-        id(oldOutput);
+        //id(oldOutput);
 
         @Nullable final ITermVar focusVar = ctx.getFocusVar();
         if (focusVar != null && engine.isLogEnabled(instance)) {
