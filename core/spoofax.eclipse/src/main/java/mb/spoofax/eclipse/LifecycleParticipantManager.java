@@ -7,7 +7,9 @@ import mb.pie.dagger.RootPieComponent;
 import mb.pie.dagger.RootPieModule;
 import mb.pie.dagger.TaskDefsProvider;
 import mb.pie.runtime.PieBuilderImpl;
+import mb.pie.runtime.store.SerializingStoreBuilder;
 import mb.pie.runtime.store.SerializingStoreInMemoryBuffer;
+import mb.pie.runtime.tracer.LoggingTracer;
 import mb.resource.ResourceRegistry;
 import mb.resource.dagger.DaggerResourceServiceComponent;
 import mb.resource.dagger.ResourceRegistriesProvider;
@@ -15,6 +17,7 @@ import mb.resource.dagger.ResourceServiceComponent;
 import mb.resource.dagger.ResourceServiceModule;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.LanguageComponent;
+import mb.spoofax.eclipse.classloading.ParentsClassLoader;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -23,6 +26,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class LifecycleParticipantManager implements AutoCloseable {
     private static class StaticGroup implements AutoCloseable {
@@ -194,24 +198,22 @@ public class LifecycleParticipantManager implements AutoCloseable {
         for(TaskDefsProvider taskDefsProvider : taskDefsProviders) {
             pieModule.addTaskDefsFrom(taskDefsProvider);
         }
-        // TODO: enable serialize-deserialize through in-memory buffer when callbacks and definition dependency problems
-        //       for dynamically loaded languages are solved.
-//        if(serializingStoreInMemoryBuffer != null) {
-//            final @Nullable ClassLoader deserializeClassLoader;
-//            if(participants.size() == 1) {
-//                deserializeClassLoader = participants.get(0).getClass().getClassLoader();
-//            } else if(participants.size() != 0) {
-//                deserializeClassLoader = new ParentsClassLoader(participants.stream().map(p -> p.getClass().getClassLoader()).collect(Collectors.toList()));
-//            } else {
-//                deserializeClassLoader = null;
-//            }
-//            pieModule.withStoreFactory((serde, resourceService, loggerFactory) -> SerializingStoreBuilder.ofInMemoryStore(serde)
-//                .withDeserializeClassLoader(deserializeClassLoader)
-//                .withInMemoryBuffer(serializingStoreInMemoryBuffer)
-//                //.withLoggingDeserializeFailHandler(loggerFactory) // TODO: uncomment when deserialization works.
-//                .build()
-//            );
-//        }
+        if(serializingStoreInMemoryBuffer != null) {
+            final @Nullable ClassLoader deserializeClassLoader;
+            if(participants.size() == 1) {
+                deserializeClassLoader = participants.get(0).getClass().getClassLoader();
+            } else if(participants.size() != 0) {
+                deserializeClassLoader = new ParentsClassLoader(participants.stream().map(p -> p.getClass().getClassLoader()).collect(Collectors.toList()));
+            } else {
+                deserializeClassLoader = null;
+            }
+            pieModule.withStoreFactory((serde, resourceService, loggerFactory) -> SerializingStoreBuilder.ofInMemoryStore(serde)
+                .withDeserializeClassLoader(deserializeClassLoader)
+                .withInMemoryBuffer(serializingStoreInMemoryBuffer)
+                .withLoggingDeserializeFailHandler(loggerFactory)
+                .build()
+            );
+        }
         participants.forEach(p -> p.customizePieModule(pieModule));
 //        // HACK: enable logging for all dynamic PIE instances
 //        pieModule.withTracerFactory(LoggingTracer::new);
