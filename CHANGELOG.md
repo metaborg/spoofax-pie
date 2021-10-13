@@ -5,6 +5,11 @@ All notable changes to this project are documented in this file, based on [Keep 
 ## [Unreleased]
 
 
+## [0.14.2] - 2021-10-13
+### Fixed
+- Laggy typing in Statix editors by downgrading the Eclipse LWB to Eclipse 2021-03.
+
+
 ## [0.14.1] - 2021-10-12
 ### Fixed
 - Editors in the Eclipse LWB not updating after making changes to the editor that causes the underlying computation to interrupt.
@@ -227,7 +232,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.14.1...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.14.2...HEAD
+[0.14.2]: https://github.com/metaborg/spoofax-pie/compare/release-0.14.1...release-0.14.2
 [0.14.1]: https://github.com/metaborg/spoofax-pie/compare/release-0.14.0...release-0.14.1
 [0.14.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.13.0...release-0.14.0
 [0.13.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.12.1...release-0.13.0
