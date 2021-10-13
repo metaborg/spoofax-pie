@@ -66,6 +66,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -74,7 +75,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import static mb.nabl2.terms.build.TermBuild.B;
 import static mb.nabl2.terms.matching.TermMatch.M;
@@ -171,6 +171,9 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
         return t;
     }
 
+    private static int cached = 0;
+    private static int uncached = 0;
+
     // Old algorithm
     private static List<SolverState> expandQuerySlow(
         CResolveQuery query,
@@ -237,19 +240,21 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
         final ConstraintQueries constraintQueries = new ConstraintQueries(input.getSpec(), state, isComplete3);
 //        final DataWF<ITerm> dataWF = constraintQueries.getDataWF(query.filter().getDataWF());
 
+        final HashMap<ITerm, Optional<SolverResult>> cache = new HashMap<>();
+
         final FastNameResolution<Scope, ITerm, ITerm> nameResolution = FastNameResolution.<Scope, ITerm, ITerm>builder()
             .withLabelWF(labelWF)
             .withLabelOrder(labelOrd)
             .withDataWF(t ->
                 // Assert that we can apply the dataWF to the input
-                applyDataWF(query.filter().getDataWF(), t, state, unifier, completeness, input.getSpec() ).isPresent()
+                applyDataWFCached(cache, query.filter().getDataWF(), t, state, unifier, completeness, input.getSpec()).isPresent()
             )
             .withDataEquiv(new DataLeq<ITerm>() {
                 @Override public boolean leq(ITerm d1, ITerm d2)throws ResolutionException, InterruptedException {
                     // Apply the dataWF to each of the inputs. This should result in two solver results
                     // If this is not the case, this would already have failed the lambda in withDataWF().
-                    final SolverResult result1 = applyDataWF(query.filter().getDataWF(), d1, state, unifier,  completeness, input.getSpec() ).get();
-                    final SolverResult result2 = applyDataWF(query.filter().getDataWF(), d2, state, unifier,  completeness, input.getSpec() ).get();
+                    final SolverResult result1 = applyDataWFCached(cache, query.filter().getDataWF(), d1, state, unifier,  completeness, input.getSpec() ).get();
+                    final SolverResult result2 = applyDataWFCached(cache, query.filter().getDataWF(), d2, state, unifier,  completeness, input.getSpec() ).get();
 
                     // For each free variable in the query body...
                     final Set.Immutable<ITermVar> varsToCompare = query.filter().getDataWF().body().freeVars();
@@ -331,11 +336,35 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
         // For each declaration:
         final ArrayList<SolverState> output = new ArrayList<>();
         for(ResolutionPath<Scope, ITerm, ITerm> path : env) {
-            final SolverState newState = updateSolverState(Collections.singletonList(path), input.getSpec(), query, input.withoutSelected(), unifier, completeness);
+            final SolverState newState = updateSolverState(
+                Collections.singletonList(path),
+                input.getSpec(),
+                query,
+                input.withoutSelected(),
+                unifier,
+                completeness,
+                cache
+            );
             output.add(newState);
         }
         engine.log(instance, "▶ expanded {} declarations into {} possible states", declarationCount, output.size());
+        engine.log(instance, "Applied dataWF {} times + cached {} times", uncached, cached);
+        uncached = 0;
+        cached = 0;
         return output;
+    }
+
+    private static Optional<SolverResult> applyDataWFCached(HashMap<ITerm, Optional<SolverResult>> cache, Rule dataWF, ITerm d, IState.Immutable state, IUniDisunifier.Immutable unifier, ICompleteness.Immutable completeness, Spec spec) {
+        return cache.compute(d, (k, term) -> {
+            if (term == null) {
+                // Assert that we can apply the dataWF to the input
+                uncached += 1;
+                return applyDataWF(dataWF, d, state, unifier, completeness, spec);
+            } else {
+                cached += 1;
+                return term;
+            }
+        });
     }
 
 
@@ -353,7 +382,7 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
      * @return either a {@link SolverResult} with the result of applying the {@code dataWF} to the given datum;
      * otherwise, nothing if the {@code dataWF} could not be applied
      */
-    public static Optional<SolverResult> applyDataWF(Rule dataWF, ITerm d, IState.Immutable state, IUniDisunifier.Immutable unifier, ICompleteness.Immutable completeness, Spec spec) {
+    private static Optional<SolverResult> applyDataWF(Rule dataWF, ITerm d, IState.Immutable state, IUniDisunifier.Immutable unifier, ICompleteness.Immutable completeness, Spec spec) {
         // Apply the 'dataWF' to the specified 'd'
         final ApplyResult applyResult;
         if ((applyResult = RuleUtil.apply(
@@ -642,6 +671,7 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
      * @param state the input state
      * @param unifier
      * @param completeness
+     * @param cache
      * @return the new solver state
      */
     private static SolverState updateSolverState(
@@ -649,12 +679,14 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
         Spec spec,
         CResolveQuery query,
         SolverState state,
-        IUniDisunifier.Immutable unifier, ICompleteness.Immutable completeness) {
+        IUniDisunifier.Immutable unifier, ICompleteness.Immutable completeness,
+        HashMap<ITerm, Optional<SolverResult>> cache
+    ) {
         final ArrayList<ITerm> pathTerms = new ArrayList<>();
         final ArrayList<CEqual> eqs = new ArrayList<>();
         for (ResolutionPath<Scope, ITerm, ITerm> path : paths) {
             pathTerms.add(StatixTerms.pathToTerm(path, spec.dataLabels()));
-            final SolverResult solverResult = applyDataWF(query.filter().getDataWF(), path.getDatum(), state.getState(), unifier, completeness, spec).get();
+            final SolverResult solverResult = applyDataWFCached(cache, query.filter().getDataWF(), path.getDatum(), state.getState(), unifier, completeness, spec).get();
             for (ITermVar v : solverResult.updatedVars()) {
                 eqs.add(new CEqual(v, solverResult.state().unifier().findRecursive(v)));
             }
