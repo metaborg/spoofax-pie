@@ -1,9 +1,9 @@
 package mb.spoofax.eclipse.resource;
 
-import mb.resource.ReadableResource;
 import mb.resource.ResourceRuntimeException;
 import mb.resource.classloader.ClassLoaderToNativeResolver;
 import mb.resource.dagger.ResourceServiceScope;
+import mb.resource.hierarchical.HierarchicalResource;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.resources.IContainer;
@@ -27,30 +27,48 @@ public class EclipseClassLoaderToNativeResolver implements ClassLoaderToNativeRe
         this.workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
     }
 
-    @Override public @Nullable ReadableResource toNativeResource(URL url) {
+    @Override public @Nullable HierarchicalResource toNativeFile(URL url) {
+        final URI uri = toUri(url);
+        if(!isSchemeCompatible(uri)) {
+            return null;
+        }
+        final IFile[] files = workspaceRoot.findFilesForLocationURI(uri);
+        if(files.length == 1) { // Found one file in the Eclipse workspace.
+            return resourceRegistry.getResource(files[0]);
+        }
+        return null; // Not found in the Eclipse workspace.
+    }
+
+    @Override public @Nullable HierarchicalResource toNativeDirectory(URL url) {
+        final URI uri = toUri(url);
+        if(!isSchemeCompatible(uri)) {
+            return null;
+        }
+        final IContainer[] containers = workspaceRoot.findContainersForLocationURI(uri);
+        if(containers.length == 1) { // Found one container in the Eclipse workspace.
+            return resourceRegistry.getResource(containers[0]);
+        }
+        return null; // Not found in the Eclipse workspace.
+    }
+
+    private boolean isSchemeCompatible(URI uri) {
+        final @Nullable String scheme = uri.getScheme();
+        if(scheme == null) { // No scheme: cannot determine native resource.
+            return false;
+        }
         try {
-            final URI uri = url.toURI();
-            final @Nullable String scheme = uri.getScheme();
-            if(scheme == null) return null; // No scheme: cannot determine native resource.
-            try {
-                EFS.getFileSystem(scheme);
-            } catch(CoreException e) {
-                return null; // No file system for scheme: cannot determine native resource.
-            }
+            EFS.getFileSystem(scheme);
+        } catch(CoreException e) { // No file system for scheme: cannot determine native resource.
+            return false;
+        }
+        return true;
+    }
 
-            final IFile[] files = workspaceRoot.findFilesForLocationURI(uri);
-            if(files.length == 1) { // Found one file in the Eclipse workspace.
-                return resourceRegistry.getResource(files[0]);
-            }
-
-            final IContainer[] containers = workspaceRoot.findContainersForLocationURI(uri);
-            if(containers.length == 1) { // Found one container in the Eclipse workspace.
-                return resourceRegistry.getResource(containers[0]);
-            }
-
-            return null; // Not found in the Eclipse workspace.
+    private URI toUri(URL url) {
+        try {
+            return url.toURI();
         } catch(URISyntaxException e) {
-            throw new ResourceRuntimeException("Could not convert URL '" + url + "' to an URI", e);
+            throw new ResourceRuntimeException("Cannot convert URL to native resource; could not convert URL '" + url + "' to an URI", e);
         }
     }
 }

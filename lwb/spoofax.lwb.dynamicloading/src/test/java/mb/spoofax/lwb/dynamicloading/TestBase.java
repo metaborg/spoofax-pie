@@ -201,11 +201,11 @@ class TestBase {
 
     void copyResourcesToTemporaryDirectory(String sourceFilesPath) throws IOException {
         final ClassLoaderResource sourceFilesDirectory = classLoaderResourceRegistry.getResource(sourceFilesPath);
-        final ClassLoaderResourceLocations locations = sourceFilesDirectory.getLocations();
+        final ClassLoaderResourceLocations<FSResource> locations = sourceFilesDirectory.getLocations();
         for(FSResource directory : locations.directories) {
             directory.copyRecursivelyTo(rootDirectory);
         }
-        for(JarFileWithPath jarFileWithPath : locations.jarFiles) {
+        for(JarFileWithPath<FSResource> jarFileWithPath : locations.jarFiles) {
             UnarchiveCommon.unarchiveJar(jarFileWithPath.file, rootDirectory, false, false);
         }
     }

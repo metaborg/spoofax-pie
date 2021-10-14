@@ -48,7 +48,7 @@ public class {{baseAnalyzeTaskDef.id}} extends ConstraintAnalyzeTaskDef {
     protected SingleFileResult analyze(ExecContext context, ResourceKey resource, IStrategoTerm ast, ConstraintAnalyzerContext constraintAnalyzerContext) throws Exception {
         {{#languageProjectInput.enableStatix}}
         try {
-            classLoaderResources.performWithDefinitionResourceLocations(
+            classLoaderResources.performWithDefinitionResourceLocationsTryAsNative(
                 "src-gen/statix",
                 directory -> directory.walkForEach(ResourceMatcher.ofFile().and(ResourceMatcher.ofPath(PathMatcher.ofExtension("aterm"))), file -> {
                     try {

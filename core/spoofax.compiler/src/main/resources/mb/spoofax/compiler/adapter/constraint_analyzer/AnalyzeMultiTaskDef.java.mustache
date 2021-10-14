@@ -49,7 +49,7 @@ public class {{baseAnalyzeMultiTaskDef.id}} extends ConstraintAnalyzeMultiTaskDe
     protected MultiFileResult analyze(ExecContext context, ResourcePath root, MapView<ResourceKey, IStrategoTerm> asts, ConstraintAnalyzerContext constraintAnalyzerContext) throws Exception {
         {{#languageProjectInput.enableStatix}}
         try {
-            classLoaderResources.performWithDefinitionResourceLocations(
+            classLoaderResources.performWithDefinitionResourceLocationsTryAsNative(
                 "src-gen/statix",
                 directory -> directory.walkForEach(ResourceMatcher.ofFile().and(ResourceMatcher.ofPath(PathMatcher.ofExtension("aterm"))), file -> {
                     try {

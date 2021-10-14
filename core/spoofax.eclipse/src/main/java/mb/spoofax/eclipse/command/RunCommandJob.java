@@ -36,7 +36,14 @@ public class RunCommandJob extends Job {
     private final CommandRequest<?> request;
 
 
-    public RunCommandJob(LoggerFactory loggerFactory, EclipseLanguageComponent languageComponent, Pie pie, PieRunner pieRunner, CommandData data, CommandRequest<?> request) {
+    public RunCommandJob(
+        LoggerFactory loggerFactory,
+        EclipseLanguageComponent languageComponent,
+        Pie pie,
+        PieRunner pieRunner,
+        CommandData data,
+        CommandRequest<?> request
+    ) {
         super(request.def().getDisplayName());
         this.logger = loggerFactory.create(getClass());
         this.languageComponent = languageComponent;

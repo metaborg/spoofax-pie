@@ -215,8 +215,8 @@ public class LifecycleParticipantManager implements AutoCloseable {
             );
         }
         participants.forEach(p -> p.customizePieModule(pieModule));
-//        // HACK: enable logging for all dynamic PIE instances
-//        pieModule.withTracerFactory(LoggingTracer::new);
+        // HACK: enable logging for all dynamic PIE instances
+        pieModule.withTracerFactory(LoggingTracer::new);
         return DaggerRootPieComponent.builder()
             .rootPieModule(pieModule)
             .loggerComponent(loggerComponent)
