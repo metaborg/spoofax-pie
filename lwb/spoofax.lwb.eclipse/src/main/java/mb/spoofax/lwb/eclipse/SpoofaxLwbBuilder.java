@@ -102,8 +102,10 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
 
     @Override protected void clean(@Nullable IProgressMonitor monitor) throws CoreException {
         final Pie pie = SpoofaxLwbLifecycleParticipant.getInstance().getPieComponent().getPie();
-        pie.dropCallbacks();
-        pie.dropStore();
+        try(MixedSession session = pie.newSession()) {
+            session.dropCallbacks();
+            session.dropStore();
+        }
 
         final IProject eclipseProject = getProject();
         final ResourcePath rootDirectory = getResourcePath(eclipseProject);

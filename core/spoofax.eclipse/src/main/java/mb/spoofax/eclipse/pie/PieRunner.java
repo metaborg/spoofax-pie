@@ -121,11 +121,12 @@ public class PieRunner {
 
         final LanguageInstance languageInstance = languageComponent.getLanguageInstance();
         final Task<KeyedMessages> checkOneTask = createCheckOneTask(languageInstance, file, rootDirectoryHint);
-        // Remove check callback before running PIE build, as this method updates the messages already.
-        pie.removeCallback(checkOneTask);
 
         final WorkspaceUpdate workspaceUpdate = workspaceUpdateFactory.create(languageComponent.getEclipseIdentifiers());
         try(final MixedSession session = pie.newSession()) {
+            // Remove check callback before running PIE build, as this method updates the messages already.
+            session.removeCallback(checkOneTask);
+
             // First run a bottom-up build, to ensure that tasks affected by changed file are brought up-to-date.
             final HashSet<ResourceKey> changedResources = new HashSet<>();
             changedResources.add(file);
@@ -141,15 +142,18 @@ public class PieRunner {
 
             final KeyedMessages messages = getOrRequire(checkOneTask, topDownSession, monitor);
             workspaceUpdate.replaceMessages(messages, file);
-        }
-        workspaceUpdate.update(eclipseFile, monitor);
 
-        // Add callback (back again) that updates messages for when the check task is re-executed for other reasons.
-        pie.setCallback(checkOneTask, messages -> {
-            final WorkspaceUpdate callbackWorkspaceUpdate = workspaceUpdateFactory.create(languageComponent.getEclipseIdentifiers());
-            callbackWorkspaceUpdate.replaceMessages(messages, file);
-            callbackWorkspaceUpdate.update(eclipseFile, monitor);
-        });
+            // Run update
+            workspaceUpdate.update(eclipseFile, monitor);
+
+            // Add callback (back again) that updates messages for when the check task is re-executed for other reasons.
+            // TODO: make callback serializable
+            session.setCallback(checkOneTask, callbackMessages -> {
+                final WorkspaceUpdate callbackWorkspaceUpdate = workspaceUpdateFactory.create(languageComponent.getEclipseIdentifiers());
+                callbackWorkspaceUpdate.replaceMessages(callbackMessages, file);
+                callbackWorkspaceUpdate.update(eclipseFile, monitor);
+            });
+        }
     }
 
     public void removeEditor(
@@ -174,8 +178,8 @@ public class PieRunner {
         try(final MixedSession session = pie.newSession()) {
             unobserve(createStyleTask(languageInstance, file, rootDirectoryHint), session, null);
             unobserve(checkOneTask, session, null);
+            session.removeCallback(checkOneTask);
         }
-        pie.removeCallback(checkOneTask);
         resourceRegistry.removeDocumentOverride(file);
     }
 
@@ -323,7 +327,7 @@ public class PieRunner {
                         try(final MixedSession newSession = pie.newSession()) {
                             unobserve(task, newSession, monitor);
                         }
-                        pie.removeCallback(task);
+                        session.removeCallback(task);
                     });
                     if(feedback.hasErrorMessagesOrException()) {
                         // Command feedback indicates failure, unobserve to cancel continuous execution.
@@ -332,7 +336,8 @@ public class PieRunner {
                         }
                     } else {
                         // Command feedback indicates success, set a callback to process feedback when task is required.
-                        pie.setCallback(task, (o) -> processShowFeedbacks(o, false, null));
+                        // TODO: make callback serializable
+                        session.setCallback(task, (o) -> processShowFeedbacks(o, false, null));
                     }
                 }
                 break;
@@ -668,7 +673,7 @@ public class PieRunner {
         try {
             resourceChanges.newProjects.forEach(newProject -> {
                 final Task<KeyedMessages> task = languageInstance.createCheckTask(newProject);
-                pie.setCallback(task, messages -> {
+                session.setCallback(task, messages -> {
                     if(bottomUpWorkspaceUpdate != null) {
                         bottomUpWorkspaceUpdate.replaceMessages(messages, newProject);
                     } else {
@@ -678,7 +683,7 @@ public class PieRunner {
                         localUpdate.update(null, monitor);
                     }
                 });
-                if(!pie.isObserved(task)) {
+                if(!session.isObserved(task)) {
                     try {
                         final KeyedMessages messages = require(task, session, monitor);
                         workspaceUpdate.replaceMessages(messages, newProject);
