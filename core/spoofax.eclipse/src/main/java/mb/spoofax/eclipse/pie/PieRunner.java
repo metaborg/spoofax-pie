@@ -15,6 +15,7 @@ import mb.pie.api.MixedSession;
 import mb.pie.api.Pie;
 import mb.pie.api.Session;
 import mb.pie.api.Task;
+import mb.pie.api.TaskKey;
 import mb.pie.api.TopDownSession;
 import mb.pie.api.exec.CancelToken;
 import mb.pie.api.exec.NullCancelableToken;
@@ -31,10 +32,14 @@ import mb.spoofax.core.language.command.ShowFeedback;
 import mb.spoofax.core.language.command.arg.ArgConverters;
 import mb.spoofax.core.platform.PlatformScope;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
+import mb.spoofax.eclipse.EclipsePlatformComponent;
+import mb.spoofax.eclipse.SpoofaxPlugin;
+import mb.spoofax.eclipse.command.CommandFeedbackClosedJob;
 import mb.spoofax.eclipse.command.CommandUtil;
 import mb.spoofax.eclipse.editor.NamedEditorInput;
 import mb.spoofax.eclipse.editor.PartClosedCallback;
 import mb.spoofax.eclipse.editor.SpoofaxEditorBase;
+import mb.spoofax.eclipse.job.LockRule;
 import mb.spoofax.eclipse.resource.EclipseResource;
 import mb.spoofax.eclipse.resource.EclipseResourcePath;
 import mb.spoofax.eclipse.resource.EclipseResourceRegistry;
@@ -61,6 +66,7 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -78,6 +84,7 @@ public class PieRunner {
     private final WorkspaceUpdate.Factory workspaceUpdateFactory;
     private final ResourceUtil resourceUtil;
     private final PartClosedCallback partClosedCallback;
+    private final LockRule lifecycleParticipantManagerLock;
     private final Set<Interactivity> editorUpdateTags;
 
     private @Nullable WorkspaceUpdate bottomUpWorkspaceUpdate = null;
@@ -90,6 +97,7 @@ public class PieRunner {
         EclipseResourceRegistry resourceRegistry,
         WorkspaceUpdate.Factory workspaceUpdateFactory,
         ResourceUtil resourceUtil,
+        @Named("LifecycleParticipantManager") LockRule lifecycleParticipantManagerLock,
         PartClosedCallback partClosedCallback
     ) {
         this.logger = loggerFactory.create(getClass());
@@ -98,6 +106,7 @@ public class PieRunner {
         this.resourceRegistry = resourceRegistry;
         this.workspaceUpdateFactory = workspaceUpdateFactory;
         this.partClosedCallback = partClosedCallback;
+        this.lifecycleParticipantManagerLock = lifecycleParticipantManagerLock;
         this.editorUpdateTags = Interactivity.Interactive.asSingletonSet();
     }
 
@@ -147,12 +156,7 @@ public class PieRunner {
             workspaceUpdate.update(eclipseFile, monitor);
 
             // Add callback (back again) that updates messages for when the check task is re-executed for other reasons.
-            // TODO: make callback serializable
-            session.setCallback(checkOneTask, callbackMessages -> {
-                final WorkspaceUpdate callbackWorkspaceUpdate = workspaceUpdateFactory.create(languageComponent.getEclipseIdentifiers());
-                callbackWorkspaceUpdate.replaceMessages(callbackMessages, file);
-                callbackWorkspaceUpdate.update(eclipseFile, monitor);
-            });
+            session.setSerializableCallback(checkOneTask, languageComponent.getCheckCallbackFactory().create(file));
         }
     }
 
@@ -301,6 +305,7 @@ public class PieRunner {
     // Requiring commands
 
     public ArrayList<CommandContextAndFeedback> requireCommand(
+        String languageId,
         CommandRequest<?> request,
         ListView<? extends CommandContext> contexts,
         Pie pie,
@@ -313,22 +318,17 @@ public class PieRunner {
                 for(CommandContext context : contexts) {
                     final Task<CommandFeedback> task = request.createTask(context, argConverters);
                     final CommandFeedback feedback = requireWithoutObserving(task, session, monitor);
-                    processShowFeedbacks(feedback, true, null);
+                    processShowFeedbacks(logger, resourceUtil, partClosedCallback, feedback, true, null);
                     contextsAndFeedbacks.add(new CommandContextAndFeedback(context, feedback));
                 }
                 break;
             case ManualContinuous:
                 for(CommandContext context : contexts) {
                     final Task<CommandFeedback> task = request.createTask(context, argConverters);
+                    final TaskKey key = task.key();
                     final CommandFeedback feedback = require(task, session, monitor);
                     contextsAndFeedbacks.add(new CommandContextAndFeedback(context, feedback));
-                    processShowFeedbacks(feedback, true, (p) -> {
-                        // TODO: this should be moved into a job to prevent deadlocks
-                        try(final MixedSession newSession = pie.newSession()) {
-                            unobserve(task, newSession, monitor);
-                        }
-                        session.removeCallback(task);
-                    });
+                    processShowFeedbacks(logger, resourceUtil, partClosedCallback, feedback, true, getClosedCallback(logger, lifecycleParticipantManagerLock, languageId, key));
                     if(feedback.hasErrorMessagesOrException()) {
                         // Command feedback indicates failure, unobserve to cancel continuous execution.
                         try(final MixedSession newSession = pie.newSession()) {
@@ -336,8 +336,18 @@ public class PieRunner {
                         }
                     } else {
                         // Command feedback indicates success, set a callback to process feedback when task is required.
-                        // TODO: make callback serializable
-                        session.setCallback(task, (o) -> processShowFeedbacks(o, false, null));
+                        session.setSerializableCallback(task, (callbackFeedback) -> {
+                            final Logger logger = SpoofaxPlugin.getLoggerComponent().getLoggerFactory().create(PieRunner.class);
+                            final EclipsePlatformComponent platformComponent = SpoofaxPlugin.getPlatformComponent();
+                            processShowFeedbacks(
+                                logger,
+                                platformComponent.getResourceUtil(),
+                                platformComponent.getPartClosedCallback(),
+                                callbackFeedback,
+                                false,
+                                getClosedCallback(logger, platformComponent.lifecycleParticipantManagerWriteLockRule(), languageId, key)
+                            );
+                        });
                     }
                 }
                 break;
@@ -352,13 +362,45 @@ public class PieRunner {
         return contextsAndFeedbacks;
     }
 
-    private void processShowFeedbacks(CommandFeedback feedback, boolean activate, @Nullable Consumer<IWorkbenchPart> closedCallback) {
+    private static Consumer<IWorkbenchPart> getClosedCallback(
+        Logger logger,
+        LockRule lifecycleParticipantManagerLock,
+        String languageId,
+        TaskKey key
+    ) {
+        return (p) -> {
+            final @Nullable PieComponent pieComponent = SpoofaxPlugin.getLifecycleParticipantManager().getPieComponent(languageId);
+            if(pieComponent == null) {
+                logger.error("Cannot unobserve and remove callback for continuous command '" + key + "'; no language with ID '" + languageId + "' is registered");
+                return;
+            }
+            final CommandFeedbackClosedJob job = new CommandFeedbackClosedJob(pieComponent, key);
+            job.setRule(lifecycleParticipantManagerLock.createReadLock());
+            job.schedule();
+        };
+    }
+
+    private static void processShowFeedbacks(
+        Logger logger,
+        ResourceUtil resourceUtil,
+        PartClosedCallback partClosedCallback,
+        CommandFeedback feedback,
+        boolean activate,
+        @Nullable Consumer<IWorkbenchPart> closedCallback
+    ) {
         for(ShowFeedback showFeedback : feedback.getShowFeedbacks()) {
-            processShowFeedback(showFeedback, activate, closedCallback);
+            processShowFeedback(logger, resourceUtil, partClosedCallback, showFeedback, activate, closedCallback);
         }
     }
 
-    private void processShowFeedback(ShowFeedback showFeedback, boolean activate, @Nullable Consumer<IWorkbenchPart> closedCallback) {
+    private static void processShowFeedback(
+        Logger logger,
+        ResourceUtil resourceUtil,
+        PartClosedCallback partClosedCallback,
+        ShowFeedback showFeedback,
+        boolean activate,
+        @Nullable Consumer<IWorkbenchPart> closedCallback
+    ) {
         showFeedback.caseOf()
             .showFile((file, region) -> {
                 final IFile eclipseFile = resourceUtil.getEclipseFile(file);
@@ -467,6 +509,12 @@ public class PieRunner {
         if(!session.isObserved(task)) return;
         logger.trace("Unobserving '{}'", task);
         session.unobserve(task);
+    }
+
+    public void unobserve(TaskKey key, Session session, @Nullable IProgressMonitor _monitor) {
+        if(!session.isObserved(key)) return;
+        logger.trace("Unobserving '{}'", key);
+        session.unobserve(key);
     }
 
     public void deleteUnobservedTasks(Session session, @Nullable IProgressMonitor _monitor) throws IOException {
@@ -625,11 +673,12 @@ public class PieRunner {
         Session session,
         @Nullable IProgressMonitor monitor
     ) throws ExecException, InterruptedException, IOException {
+        final String languageId = languageComponent.getLanguageInstance().getId();
         final AutoCommandRequests autoCommandRequests = new AutoCommandRequests(languageComponent); // OPTO: calculate once per language component
         for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.project) {
             final CommandRequest<?> request = autoCommandRequest.toCommandRequest();
             for(ResourcePath newProject : resourceChanges.newProjects) {
-                requireCommand(request, CommandUtil.context(CommandContext.ofProject(newProject)), pie, session, monitor);
+                requireCommand(languageId, request, CommandUtil.context(CommandContext.ofProject(newProject)), pie, session, monitor);
             }
             for(ResourcePath removedProject : resourceChanges.removedProjects) {
                 final Task<CommandFeedback> task = request.createTask(CommandContext.ofProject(removedProject), argConverters);
@@ -639,7 +688,7 @@ public class PieRunner {
         for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.directory) {
             final CommandRequest<?> request = autoCommandRequest.toCommandRequest();
             for(ResourcePath newDirectory : resourceChanges.newDirectories) {
-                requireCommand(request, CommandUtil.context(CommandContext.ofDirectory(newDirectory)), pie, session, monitor);
+                requireCommand(languageId, request, CommandUtil.context(CommandContext.ofDirectory(newDirectory)), pie, session, monitor);
             }
             for(ResourcePath removedDirectory : resourceChanges.removedDirectories) {
                 final Task<CommandFeedback> task = request.createTask(CommandContext.ofDirectory(removedDirectory), argConverters);
@@ -649,7 +698,7 @@ public class PieRunner {
         for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.file) {
             final CommandRequest<?> request = autoCommandRequest.toCommandRequest();
             for(ResourcePath newFile : resourceChanges.newFiles) {
-                requireCommand(request, CommandUtil.context(CommandContext.ofFile(newFile)), pie, session, monitor);
+                requireCommand(languageId, request, CommandUtil.context(CommandContext.ofFile(newFile)), pie, session, monitor);
             }
             for(ResourcePath removedFile : resourceChanges.removedFiles) {
                 final Task<CommandFeedback> task = request.createTask(CommandContext.ofFile(removedFile), argConverters);

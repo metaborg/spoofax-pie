@@ -122,6 +122,41 @@ public class LifecycleParticipantManager implements AutoCloseable {
     }
 
 
+    public @Nullable LanguageComponent getLanguageComponent(String languageId) {
+        for(StaticGroup group : staticGroups.values()) {
+            for(EclipseLifecycleParticipant participant : group.participants) {
+                final @Nullable LanguageComponent languageComponent = participant.getLanguageComponent(loggerComponent, baseResourceServiceComponent, platformComponent);
+                if(languageComponent != null && languageComponent.getLanguageInstance().getId().equals(languageId)) {
+                    return languageComponent;
+                }
+            }
+        }
+        for(DynamicGroup group : dynamicGroups.values()) {
+            if(group.languageComponent.getLanguageInstance().getId().equals(languageId)) {
+                return group.languageComponent;
+            }
+        }
+        return null;
+    }
+
+    public @Nullable PieComponent getPieComponent(String languageId) {
+        for(StaticGroup group : staticGroups.values()) {
+            for(EclipseLifecycleParticipant participant : group.participants) {
+                final @Nullable LanguageComponent languageComponent = participant.getLanguageComponent(loggerComponent, baseResourceServiceComponent, platformComponent);
+                if(languageComponent != null && languageComponent.getLanguageInstance().getId().equals(languageId)) {
+                    return group.pieComponent;
+                }
+            }
+        }
+        for(DynamicGroup group : dynamicGroups.values()) {
+            if(group.languageComponent.getLanguageInstance().getId().equals(languageId)) {
+                return group.pieComponent;
+            }
+        }
+        return null;
+    }
+
+
     void registerStatic(MultiMap<String, EclipseLifecycleParticipant> participantsPerGroup) {
         participantsPerGroup.forEach((groupName, participants) -> {
             final ResourceServiceComponent resourceServiceComponent = createResourceComponent(participants);

@@ -24,4 +24,6 @@ import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 )
 public interface {{baseEclipseComponent.id}} extends EclipseLanguageComponent, {{adapterProjectCompilerInput.component.qualifiedId}} {
     {{editorTracker.qualifiedId}} getEditorTracker();
+
+    @Override {{checkCallback.qualifiedId}}.Factory getCheckCallbackFactory();
 }

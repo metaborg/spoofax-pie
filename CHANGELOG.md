@@ -3,6 +3,11 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+### Fixed
+- Continuous commands not updating after a language was rebuilt in Eclipse.
+- Not unobserving continuous command feedback while a language is being rebuilt in Eclipse, which would cause the feedback to always reappear after every change.
+- Possible deadlock when closing Eclipse continuous command feedback editors.
+- Read lock rules in Eclipse not being able to be acquired concurrently.
 
 
 ## [0.14.2] - 2021-10-13

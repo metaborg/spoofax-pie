@@ -49,6 +49,8 @@ import org.eclipse.core.runtime.ICoreRunnable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.MultiRule;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -116,6 +118,9 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         forgetLastBuiltState();
     }
 
+    @Override public ISchedulingRule getRule(int kind, Map<String, String> args) {
+        return MultiRule.combine(getProject(), SpoofaxPlugin.getPlatformComponent().lifecycleParticipantManagerWriteLockRule());
+    }
 
     private void fullBuild(IProject eclipseProject, @Nullable IProgressMonitor monitor) throws CoreException, InterruptedException {
         JavaProjectUtil.configureProject(eclipseProject, monitor);

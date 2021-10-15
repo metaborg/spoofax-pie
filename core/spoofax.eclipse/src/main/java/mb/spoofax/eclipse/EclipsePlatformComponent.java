@@ -6,6 +6,8 @@ import mb.spoofax.core.platform.PlatformScope;
 import mb.spoofax.eclipse.command.EnclosingCommandContextProvider;
 import mb.spoofax.eclipse.editor.PartClosedCallback;
 import mb.spoofax.eclipse.editor.ScopeManager;
+import mb.spoofax.eclipse.job.LockRule;
+import mb.spoofax.eclipse.job.ReadLockRule;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 import mb.spoofax.eclipse.pie.PieRunner;
 import mb.spoofax.eclipse.pie.WorkspaceUpdate;
@@ -13,10 +15,12 @@ import mb.spoofax.eclipse.util.ColorShare;
 import mb.spoofax.eclipse.util.ResourceUtil;
 import mb.spoofax.eclipse.util.StyleUtil;
 
+import javax.inject.Named;
+
 @PlatformScope
 @Component(
     modules = {
-
+        EclipsePlatformModule.class
     },
     dependencies = {
         EclipseLoggerComponent.class,
@@ -39,6 +43,10 @@ public interface EclipsePlatformComponent extends PlatformComponent {
     EnclosingCommandContextProvider getEnclosingCommandContextProvider();
 
     WorkspaceUpdate.Factory getWorkspaceUpdateFactory();
+
+    @Named("LifecycleParticipantManager") LockRule lifecycleParticipantManagerWriteLockRule();
+
+    @Named("LifecycleParticipantManager") ReadLockRule lifecycleParticipantManagerReadLockRule();
 
 
     default void init() {
