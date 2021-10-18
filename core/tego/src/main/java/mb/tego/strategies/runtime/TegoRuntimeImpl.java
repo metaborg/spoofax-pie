@@ -4,14 +4,11 @@ import mb.log.api.Level;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.log.noop.NoopLogger;
-import mb.tego.sequences.DebugSeq;
-import mb.tego.sequences.Seq;
 import mb.tego.strategies.Strategy;
 import mb.tego.strategies.Strategy1;
 import mb.tego.strategies.Strategy2;
 import mb.tego.strategies.Strategy3;
 import mb.tego.strategies.StrategyDecl;
-import mb.tego.strategies.TegoScope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
@@ -19,7 +16,6 @@ import javax.inject.Inject;
 /**
  * Implements the {@link TegoRuntime}.
  */
-@TegoScope
 public /* open */ class TegoRuntimeImpl implements TegoRuntime, TegoEngine {
 
     @Nullable private final LoggerFactory loggerFactory;

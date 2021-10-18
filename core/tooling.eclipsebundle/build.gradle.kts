@@ -33,7 +33,6 @@ dependencies {
   bundleEmbedApi(project(":stratego.pie"))
   bundleEmbedApi(project(":spt.api"))
   bundleEmbedApi(project(":tego"))
-  bundleEmbedApi(project(":tego.pie"))
 
   bundleEmbedApi(project(":spoofax.compiler.interfaces"))
 }

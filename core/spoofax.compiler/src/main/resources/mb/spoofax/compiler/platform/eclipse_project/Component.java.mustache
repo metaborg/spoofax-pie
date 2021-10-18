@@ -5,9 +5,6 @@ import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.EclipsePlatformComponent;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
-{{#adapterProjectCompilerInput.tegoRuntime}}
-import mb.tego.strategies.TegoComponent;
-{{/adapterProjectCompilerInput.tegoRuntime}}
 
 @{{adapterProjectCompilerInput.scope.qualifiedId}}
 @Component(
@@ -22,8 +19,7 @@ import mb.tego.strategies.TegoComponent;
         {{adapterProjectCompilerInput.resourcesComponent.qualifiedId}}.class,
         ResourceServiceComponent.class,
         EclipsePlatformComponent.class{{#adapterProjectCompilerInput.isMultiLang}},
-        mb.statix.multilang.eclipse.MultiLangEclipseComponent.class{{/adapterProjectCompilerInput.isMultiLang}}{{#adapterProjectCompilerInput.tegoRuntime}},
-        TegoComponent.class{{/adapterProjectCompilerInput.tegoRuntime}}
+        mb.statix.multilang.eclipse.MultiLangEclipseComponent.class{{/adapterProjectCompilerInput.isMultiLang}}
     }
 )
 public interface {{baseEclipseComponent.id}} extends EclipseLanguageComponent, {{adapterProjectCompilerInput.component.qualifiedId}} {

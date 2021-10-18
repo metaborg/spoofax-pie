@@ -51,7 +51,6 @@ import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoUtil;
 import mb.stratego.pie.AstStrategoTransformTaskDef;
 import mb.stratego.pie.GetStrategoRuntimeProvider;
-import mb.tego.pie.GetTegoRuntimeProvider;
 import mb.tego.sequences.Seq;
 import mb.tego.strategies.Strategy;
 import mb.tego.strategies.runtime.TegoRuntime;
@@ -167,7 +166,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
     private final JsglrParseTaskDef parseTask;
     private final ConstraintAnalyzeFile analyzeFileTask;
     private final GetStrategoRuntimeProvider getStrategoRuntimeProviderTask;
-    private final GetTegoRuntimeProvider getTegoRuntimeProviderTask;
+    private final TegoRuntime tegoRuntime;
     private final AstStrategoTransformTaskDef preAnalyzeStatixTask;
     private final AstStrategoTransformTaskDef postAnalyzeStatixTask;
     private final AstStrategoTransformTaskDef upgradePlaceholdersTask;
@@ -198,13 +197,13 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
         JsglrParseTaskDef parseTask,
         ConstraintAnalyzeFile analyzeFileTask,
         GetStrategoRuntimeProvider getStrategoRuntimeProviderTask,
-        GetTegoRuntimeProvider getTegoRuntimeProviderTask,
         AstStrategoTransformTaskDef preAnalyzeStatixTask,
         AstStrategoTransformTaskDef postAnalyzeStatixTask,
         AstStrategoTransformTaskDef upgradePlaceholdersTask,
         AstStrategoTransformTaskDef downgradePlaceholdersTask,
         AstStrategoTransformTaskDef isInjPlaceholdersTask,
         AstStrategoTransformTaskDef ppPartialTask,
+        TegoRuntime tegoRuntime,
         StatixSpecTaskDef statixSpec,
         StrategoTerms strategoTerms,
         LoggerFactory loggerFactory
@@ -212,7 +211,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
         this.parseTask = parseTask;
         this.analyzeFileTask = analyzeFileTask;
         this.getStrategoRuntimeProviderTask = getStrategoRuntimeProviderTask;
-        this.getTegoRuntimeProviderTask = getTegoRuntimeProviderTask;
+        this.tegoRuntime = tegoRuntime;
         this.preAnalyzeStatixTask = preAnalyzeStatixTask;
         this.postAnalyzeStatixTask = postAnalyzeStatixTask;
         this.upgradePlaceholdersTask = upgradePlaceholdersTask;
@@ -232,11 +231,10 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
     @Override
     public Option<CodeCompletionResult> exec(ExecContext context, Input input) throws Exception {
         final StrategoRuntime strategoRuntime = context.require(getStrategoRuntimeProviderTask, None.instance).getValue().get();
-        final TegoRuntime tegoRuntime = context.require(getTegoRuntimeProviderTask, None.instance).getValue().get();
         final Spec spec = context.require(statixSpec, None.instance).unwrap();
 
         final Option<CodeCompletionResult> results = new Execution(
-            context, input, strategoRuntime, tegoRuntime, spec
+            context, input, strategoRuntime, spec
         ).complete();
         return results;
     }
@@ -247,7 +245,6 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
     private final class Execution {
         private final ExecContext context;
         private final StrategoRuntime strategoRuntime;
-        private final TegoRuntime tegoRuntime;
         private final ITermFactory termFactory;
         /** The event handler. */
         private final CodeCompletionEventHandler eventHandler;
@@ -268,19 +265,16 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * @param context the execution context
          * @param input the task arguments
          * @param strategoRuntime the Stratego runtime
-         * @param tegoRuntime the Tego runtime
          * @param spec the Statix specification
          */
         public Execution(
             ExecContext context,
             Input input,
             StrategoRuntime strategoRuntime,
-            TegoRuntime tegoRuntime,
             Spec spec
         ) {
             this.context = context;
             this.strategoRuntime = strategoRuntime;
-            this.tegoRuntime = tegoRuntime;
             this.spec = spec;
             this.termFactory = strategoRuntime.getTermFactory();
             this.eventHandler = input.eventHandler;

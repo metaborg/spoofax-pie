@@ -148,21 +148,16 @@ public class {{baseModule.id}} {
 {{/strategoRuntime}}
 {{#tegoRuntime}}
 
-    //@Provides @{{scope.id}}
-    //static {{this.languageProjectInput.tegoRuntimeBuilderFactory.qualifiedId}} provideTegoRuntimeBuilderFactory(LoggerFactory loggerFactory, ResourceService resourceService, @{{qualifier.id}}("definition-directory") HierarchicalResource definitionDir) {
-    //    return new {{this.languageProjectInput.tegoRuntimeBuilderFactory.qualifiedId}}(loggerFactory, resourceService, definitionDir);
-    //}
 
-    //@Provides @{{scope.id}}
-    //static mb.tego.strategies.runtime.TegoRuntimeBuilder provideTegoRuntimeBuilder({{this.languageProjectInput.tegoRuntimeBuilderFactory.qualifiedId}} tegoRuntimeBuilderFactory) {
-    //    return tegoRuntimeBuilderFactory.create();
-    //}
+    @Provides @{{scope.id}}
+    static mb.tego.strategies.runtime.TegoRuntime provideTegoRuntime(mb.tego.strategies.runtime.TegoRuntimeImpl tegoImplementation) {
+        return tegoImplementation;
+    }
 
-    //@Provides /* Unscoped: new Tego runtime every call. */
-    //static mb.tego.strategies.runtime.TegoRuntime provideTegoRuntime(mb.tego.strategies.runtime.TegoRuntimeBuilder builder) {
-    //    return builder.build();
-    //}
-
+    @Provides @{{scope.id}}
+    static mb.tego.strategies.runtime.TegoEngine provideTegoEngine(mb.tego.strategies.runtime.TegoRuntimeImpl tegoImplementation) {
+        return tegoImplementation;
+    }
 {{/tegoRuntime}}
 
     @Provides @{{scope.id}} @{{qualifier.id}} @ElementsIntoSet

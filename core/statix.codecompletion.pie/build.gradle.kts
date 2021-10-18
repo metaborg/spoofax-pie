@@ -12,7 +12,6 @@ dependencies {
   api(project(":constraint.pie"))
   api(project(":jsglr.pie"))
   api(project(":stratego.pie"))
-  api(project(":tego.pie"))
   api("org.metaborg:pie.api")
 
   api(project(":statix.codecompletion"))

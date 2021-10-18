@@ -7,8 +7,8 @@ import mb.log.api.LoggerFactory;
 import mb.nabl2.terms.stratego.StrategoTerms;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.stratego.pie.GetStrategoRuntimeProvider;
-import mb.tego.pie.GetTegoRuntimeProvider;
 import mb.statix.codecompletion.pie.CodeCompletionTaskDef;
+import mb.tego.strategies.runtime.TegoRuntime;
 
 import mb.completions.common.CompletionProposal;
 import mb.completions.common.CompletionResult;
@@ -32,13 +32,13 @@ public class {{baseCodeCompletionTaskDef.id}} extends CodeCompletionTaskDef {
         {{parserInput.parseTaskDef.qualifiedId}} parseTask,
         {{constraintAnalyzerInput.analyzeFileTaskDef.qualifiedId}} analyzeFileTask,
         {{strategoRuntimeInput.getStrategoRuntimeProviderTaskDef.qualifiedId}} getStrategoRuntimeProviderTask,
-        {{tegoRuntimeInput.getTegoRuntimeProviderTaskDef.qualifiedId}} getTegoRuntimeProviderTask,
         {{constraintAnalyzerInput.preAnalyzeStatixTaskDef.qualifiedId}} preAnalyzeStatixTask,
         {{constraintAnalyzerInput.postAnalyzeStatixTaskDef.qualifiedId}} postAnalyzeStatixTask,
         {{upgradePlaceholdersStatixTaskDef.qualifiedId}} upgradePlaceholdersTask,
         {{downgradePlaceholdersStatixTaskDef.qualifiedId}} downgradePlaceholdersTask,
         {{isInjectionStatixTaskDef.qualifiedId}} isInjPlaceholdersTask,
         {{ppPartialTaskDef.qualifiedId}} ppPartialTask,
+        TegoRuntime tegoRuntime,
         {{statixSpecTaskDef.qualifiedId}} statixSpec,
         StrategoTerms strategoTerms,
         LoggerFactory loggerFactory,
@@ -48,13 +48,13 @@ public class {{baseCodeCompletionTaskDef.id}} extends CodeCompletionTaskDef {
             parseTask,
             analyzeFileTask,
             getStrategoRuntimeProviderTask,
-            getTegoRuntimeProviderTask,
             preAnalyzeStatixTask,
             postAnalyzeStatixTask,
             upgradePlaceholdersTask,
             downgradePlaceholdersTask,
             isInjPlaceholdersTask,
             ppPartialTask,
+            tegoRuntime,
             statixSpec,
             strategoTerms,
             loggerFactory

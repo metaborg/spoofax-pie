@@ -5,9 +5,6 @@ import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.intellij.IntellijLanguageComponent;
 import mb.spoofax.intellij.IntellijPlatformComponent;
 import mb.spoofax.intellij.log.IntellijLoggerComponent;
-{{#adapterProjectCompilerInput.tegoRuntime}}
-import mb.tego.strategies.TegoComponent;
-{{/adapterProjectCompilerInput.tegoRuntime}}
 
 @{{adapterProjectCompilerInput.scope.qualifiedId}}
 @Component(
@@ -21,8 +18,7 @@ import mb.tego.strategies.TegoComponent;
         IntellijLoggerComponent.class,
         {{adapterProjectCompilerInput.resourcesComponent.qualifiedId}}.class,
         ResourceServiceComponent.class,
-        IntellijPlatformComponent.class{{#adapterProjectCompilerInput.tegoRuntime}},
-        TegoComponent.class{{/adapterProjectCompilerInput.tegoRuntime}}
+        IntellijPlatformComponent.class
     }
 )
 public interface {{baseComponent.id}} extends IntellijLanguageComponent, {{adapterProjectCompilerInput.component.qualifiedId}} {

@@ -4,7 +4,6 @@ import mb.log.api.LoggerFactory;
 import mb.tego.sequences.MeasuringSeq;
 import mb.tego.sequences.Seq;
 import mb.tego.strategies.StrategyDecl;
-import mb.tego.strategies.TegoScope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
@@ -15,7 +14,6 @@ import java.util.Map;
 /**
  * A measuring Tego runtime.
  */
-@TegoScope
 public final class MeasuringTegoRuntime extends TegoRuntimeImpl {
 
     /**

@@ -25,9 +25,6 @@ import org.eclipse.core.runtime.InvalidRegistryObjectException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.MultiRule;
-{{#adapterProjectCompilerInput.tegoRuntime}}
-import mb.tego.strategies.DaggerTegoComponent;
-{{/adapterProjectCompilerInput.tegoRuntime}}
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -99,9 +96,6 @@ public class {{baseLanguage.id}} implements EclipseLifecycleParticipant {
                 {{/adapterProjectCompilerInput.multilangAnalyzer}}
                 .resourceServiceComponent(resourceServiceComponent)
                 .eclipsePlatformComponent(platformComponent)
-                {{#adapterProjectCompilerInput.tegoRuntime}}
-                .tegoComponent(DaggerTegoComponent.builder().loggerComponent(loggerComponent).build())
-                {{/adapterProjectCompilerInput.tegoRuntime}}
                 ;
             getCustomizers(loggerComponent).forEach(c -> c.customize(builder));
             component = builder.build();
