@@ -29,7 +29,7 @@ include("statix.pie")
 include("statix.multilang")
 include("statix.multilang.eclipse")
 include("spt.api")
-include("tego")
+include("tego.runtime")
 include("spoofax2.common")
 include("tooling.eclipsebundle")
 

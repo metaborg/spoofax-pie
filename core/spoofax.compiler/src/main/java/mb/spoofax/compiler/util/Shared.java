@@ -315,7 +315,7 @@ public interface Shared extends Serializable {
     }
 
     @Value.Default default GradleDependency tegoDep() {
-        return GradleDependency.module(Coordinate.of("org.metaborg", "tego", spoofax3Version()));
+        return GradleDependency.module(Coordinate.of("org.metaborg", "tego.runtime", spoofax3Version()));
     }
 
 
