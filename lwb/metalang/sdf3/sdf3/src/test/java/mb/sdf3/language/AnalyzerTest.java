@@ -73,7 +73,7 @@ class AnalyzerTest extends TestBase {
     }
 
     @Test void analyzeMultipleSuccess() throws Exception {
-        final ReadableResource file1 = textFile("a.sdf3", "module a context-free sorts A context-free syntax A = \"\"");
+        final ReadableResource file1 = textFile("a.sdf3", "module a context-free sorts A context-free syntax A.A = \"A\"");
         final JsglrParseOutput parsed1 = parse(file1);
         final ReadableResource file2 = textFile("b.sdf3", "module b imports a context-free sorts B context-free syntax B = A");
         final JsglrParseOutput parsed2 = parse(file2);
