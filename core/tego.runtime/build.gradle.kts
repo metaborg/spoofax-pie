@@ -6,11 +6,7 @@ plugins {
 
 dependencies {
   api(platform(project(":spoofax.depconstraints")))
-  implementation(platform(project(":spoofax.depconstraints")))
-  compileOnly(platform(project(":spoofax.depconstraints")))
   annotationProcessor(platform(project(":spoofax.depconstraints")))
-  testImplementation(platform(project(":spoofax.depconstraints")))
-  testCompileOnly(platform(project(":spoofax.depconstraints")))
   testAnnotationProcessor(platform(project(":spoofax.depconstraints")))
 
   api("org.metaborg:common")
@@ -31,10 +27,7 @@ dependencies {
 tasks.test {
   finalizedBy(tasks.jacocoTestReport)
 }
+
 tasks.jacocoTestReport {
   dependsOn(tasks.test)
 }
-
-//tasks { withType<Test> {
-//  debug = true
-//} }
