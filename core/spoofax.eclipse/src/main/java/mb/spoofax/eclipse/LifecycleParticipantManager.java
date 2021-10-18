@@ -1,6 +1,7 @@
 package mb.spoofax.eclipse;
 
 import mb.common.util.MultiMap;
+import mb.log.api.Level;
 import mb.pie.dagger.DaggerRootPieComponent;
 import mb.pie.dagger.PieComponent;
 import mb.pie.dagger.RootPieComponent;
@@ -251,7 +252,7 @@ public class LifecycleParticipantManager implements AutoCloseable {
         }
         participants.forEach(p -> p.customizePieModule(pieModule));
         // HACK: enable logging for all dynamic PIE instances
-        pieModule.withTracerFactory(LoggingTracer::new);
+        pieModule.withTracerFactory(tf -> new LoggingTracer(tf, Level.Debug, Level.None, Level.None, Level.None, 1024));
         return DaggerRootPieComponent.builder()
             .rootPieModule(pieModule)
             .loggerComponent(loggerComponent)

@@ -349,7 +349,7 @@ public class ConstraintAnalyzer {
             final IStrategoTerm change;
             final @Nullable Result cachedResult = context.getResult(resource);
             if(cachedResult != null) {
-                if(cachedResult.parsedAst.hashCode() != ast.hashCode() || !cachedResult.parsedAst.equals(ast) || !regionsEqual(cachedResult.parsedAst, ast)) {
+                if(!multiFile || cachedResult.parsedAst.hashCode() != ast.hashCode() || !cachedResult.parsedAst.equals(ast) || !regionsEqual(cachedResult.parsedAst, ast)) {
                     change = termFactory.makeAppl("Changed", ast, cachedResult.analysis);
                     context.removeResult(resource); // TODO: is it needed to remove this?
                     expects.put(resource, new Full(resource, ast));
@@ -362,19 +362,6 @@ public class ConstraintAnalyzer {
                 expects.put(resource, new Full(resource, ast));
             }
             changeTerms.add(termFactory.makeTuple(termFactory.makeString(resource.toString()), change));
-        }
-
-        // Cached resources.
-        if(multiFile) {
-            for(Map.Entry<ResourceKey, Result> entry : context.getResultEntries()) {
-                final ResourceKey resource = entry.getKey();
-                final Result cachedResult = entry.getValue();
-                if(!addedOrChangedAsts.containsKey(resource)) {
-                    final IStrategoTerm change = termFactory.makeAppl("Cached", cachedResult.analysis);
-                    expects.put(resource, new Update(resource));
-                    changeTerms.add(termFactory.makeTuple(termFactory.makeString(resource.toString()), change));
-                }
-            }
         }
 
         // Progress and cancel terms
