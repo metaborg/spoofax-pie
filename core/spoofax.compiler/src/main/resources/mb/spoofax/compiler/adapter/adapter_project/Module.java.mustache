@@ -157,7 +157,7 @@ public class {{baseModule.id}} {
 
     @Provides @{{scope.id}}
     static mb.tego.strategies.runtime.TegoEngine provideTegoEngine(mb.tego.strategies.runtime.TegoRuntimeImpl tegoImplementation) {
-        return tegoRuntime;
+        return tegoImplementation;
     }
 {{/tegoRuntime}}
 
