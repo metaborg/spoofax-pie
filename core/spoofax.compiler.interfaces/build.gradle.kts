@@ -10,7 +10,7 @@ dependencies {
   api(project(":stratego.common"))
   api(project(":constraint.common"))
   api(project(":completions.common"))
-  api(project(":tego"))
+  api(project(":tego.runtime"))
 
   compileOnly("org.checkerframework:checker-qual-android")
 }
