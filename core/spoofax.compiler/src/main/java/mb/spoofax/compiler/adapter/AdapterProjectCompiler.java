@@ -440,9 +440,6 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
                 taskDefs.add(i.checkTaskDef(), i.baseCheckTaskDef());
                 taskDefs.addAll(i.libraryTaskDefs());
             });
-            tegoRuntime().ifPresent((i) -> {
-                taskDefs.add(i.getTegoRuntimeProviderTaskDef(), i.baseGetTegoRuntimeProviderTaskDef());
-            });
             referenceResolution().ifPresent((i) -> {
                 taskDefs.add(i.resolveTaskDef(), i.baseResolveTaskDef());
             });

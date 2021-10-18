@@ -93,6 +93,7 @@ public class {{baseModule.id}} {
 {{/styler}}
 {{#constraintAnalyzer}}
 
+
     @Provides @{{scope.id}}
     static mb.nabl2.terms.stratego.StrategoTerms provideStrategoTerms(ITermFactory termFactory) {
         return new mb.nabl2.terms.stratego.StrategoTerms(termFactory);
@@ -148,21 +149,16 @@ public class {{baseModule.id}} {
 {{/strategoRuntime}}
 {{#tegoRuntime}}
 
-    @Provides @{{scope.id}}
-    static {{this.languageProjectInput.tegoRuntimeBuilderFactory.qualifiedId}} provideTegoRuntimeBuilderFactory(LoggerFactory loggerFactory, ResourceService resourceService, @{{qualifier.id}}("definition-directory") HierarchicalResource definitionDir) {
-        return new {{this.languageProjectInput.tegoRuntimeBuilderFactory.qualifiedId}}(loggerFactory, resourceService, definitionDir);
-    }
 
     @Provides @{{scope.id}}
-    static mb.tego.strategies.runtime.TegoRuntimeBuilder provideTegoRuntimeBuilder({{this.languageProjectInput.tegoRuntimeBuilderFactory.qualifiedId}} tegoRuntimeBuilderFactory) {
-        return tegoRuntimeBuilderFactory.create();
+    static mb.tego.strategies.runtime.TegoRuntime provideTegoRuntime(mb.tego.strategies.runtime.TegoRuntimeImpl tegoImplementation) {
+        return tegoImplementation;
     }
 
-    @Provides /* Unscoped: new Tego runtime every call. */
-    static mb.tego.strategies.runtime.TegoRuntime provideTegoRuntime(mb.tego.strategies.runtime.TegoRuntimeBuilder builder) {
-        return builder.build();
+    @Provides @{{scope.id}}
+    static mb.tego.strategies.runtime.TegoEngine provideTegoRuntime(mb.tego.strategies.runtime.TegoRuntime tegoRuntime) {
+        return tegoRuntime;
     }
-
 {{/tegoRuntime}}
 
     @Provides @{{scope.id}} @{{qualifier.id}} @ElementsIntoSet

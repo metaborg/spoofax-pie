@@ -29,19 +29,12 @@ import java.util.stream.Collectors;
  */
 @Value.Enclosing
 public class TegoRuntimeLanguageCompiler {
-    private final TemplateWriter factoryTemplate;
 
-    @Inject public TegoRuntimeLanguageCompiler(TemplateCompiler templateCompiler) {
-        templateCompiler = templateCompiler.loadingFromClass(getClass());
-        this.factoryTemplate = templateCompiler.getOrCompileToWriter("tego_runtime/TegoRuntimeBuilderFactory.java.mustache");
-    }
+    @Inject public TegoRuntimeLanguageCompiler() { }
 
-    
+
     public None compile(ExecContext context, Input input) throws IOException {
-        if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
-        final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
-        factoryTemplate.write(context, input.baseTegoRuntimeBuilderFactory().file(generatedJavaSourcesDirectory), input);
-        return None.instance;
+        return None.instance; // Nothing to generate: return.
     }
 
 
@@ -69,29 +62,11 @@ public class TegoRuntimeLanguageCompiler {
             return languageProject().generatedJavaSourcesDirectory();
         }
 
-        // Tego runtime builder factory
-
-        @Value.Default default TypeInfo baseTegoRuntimeBuilderFactory() {
-            return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "TegoRuntimeBuilderFactory");
-        }
-
-        Optional<TypeInfo> extendTegoRuntimeBuilderFactory();
-
-        default TypeInfo tegoRuntimeBuilderFactory() {
-            return extendTegoRuntimeBuilderFactory().orElseGet(this::baseTegoRuntimeBuilderFactory);
-        }
-
 
         /// Files information, known up-front for build systems with static dependencies such as Gradle.
 
         default ListView<ResourcePath> javaSourceFiles() {
-            if(classKind().isManual()) {
-                return ListView.of();
-            }
-            final ResourcePath generatedJavaSourcesDirectory = generatedJavaSourcesDirectory();
-            return ListView.of(
-                baseTegoRuntimeBuilderFactory().file(generatedJavaSourcesDirectory)
-            );
+            return ListView.of();
         }
 
 

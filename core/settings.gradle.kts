@@ -30,7 +30,6 @@ include("statix.multilang")
 include("statix.multilang.eclipse")
 include("spt.api")
 include("tego")
-include("tego.pie")
 include("spoofax2.common")
 include("tooling.eclipsebundle")
 
