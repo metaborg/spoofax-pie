@@ -15,7 +15,7 @@ dependencies {
 
   api("org.metaborg:common")
   api("org.metaborg:statix.common")
-  api("org.metaborg:tego")
+  api("org.metaborg:tego.runtime")
   api("org.metaborg:log.api")
 
   api("org.metaborg.devenv:statix.solver")
