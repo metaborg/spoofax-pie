@@ -17,9 +17,9 @@ import mb.spt.model.LanguageUnderTest;
 import mb.spt.model.SelectionReference;
 import mb.spt.model.TestCase;
 import mb.spt.model.TestExpectation;
+import mb.spt.util.SptSelectionUtil;
 
 public class ResolveExpectation implements TestExpectation {
-
     public final SelectionReference fromTerm;
     public final Region sourceRegion;
 
@@ -28,38 +28,49 @@ public class ResolveExpectation implements TestExpectation {
         this.sourceRegion = sourceRegion;
     }
 
-    protected void checkResults(ReferenceResolutionResult result, TestCase testCase, LanguageUnderTest languageUnderTest, Session languageUnderTestSession, KeyedMessagesBuilder messagesBuilder) throws InterruptedException {
+    protected void checkResults(
+        ReferenceResolutionResult result,
+        TestCase testCase,
+        LanguageUnderTest languageUnderTest,
+        Session languageUnderTestSession,
+        KeyedMessagesBuilder messagesBuilder
+    ) throws InterruptedException {
 
     }
 
     @Override
-    public KeyedMessages evaluate(TestCase testCase, LanguageUnderTest languageUnderTest, Session languageUnderTestSession, LanguageUnderTestProvider languageUnderTestProvider, ExecContext context, CancelToken cancel) throws InterruptedException {
-        KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
-        ResourceKey file = testCase.testSuiteFile;
-        Region fromRegion = testCase.testFragment.getInFragmentSelections().get(fromTerm.selection - 1);
-        LanguageInstance languageInstance = languageUnderTest.getLanguageComponent().getLanguageInstance();
+    public KeyedMessages evaluate(
+        TestCase testCase,
+        LanguageUnderTest languageUnderTest,
+        Session languageUnderTestSession,
+        LanguageUnderTestProvider languageUnderTestProvider,
+        ExecContext context,
+        CancelToken cancel
+    ) throws InterruptedException {
+        final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
+        final ResourceKey file = testCase.testSuiteFile;
 
-        if (!(languageInstance instanceof TestableResolve)) {
+        final LanguageInstance languageInstance = languageUnderTest.getLanguageComponent().getLanguageInstance();
+        if(!(languageInstance instanceof TestableResolve)) {
             messagesBuilder.addMessage("Cannot evaluate resolve expectation because language instance '" + languageInstance + "' does not implement TestableResolve", Severity.Error, file, sourceRegion);
             return messagesBuilder.build(file);
         }
 
+        if(!SptSelectionUtil.checkSelectionReference(fromTerm, messagesBuilder, testCase)) {
+            return messagesBuilder.build(file);
+        }
+        final Region fromRegion = testCase.testFragment.getInFragmentSelections().get(fromTerm.selection - 1);
+
         final Result<ReferenceResolutionResult, ?> result = ((TestableResolve)languageInstance).testResolve(languageUnderTestSession, testCase.resource, fromRegion, testCase.rootDirectoryHint);
-
         result
-            .ifOkThrowing((resolution) -> {
-                checkResults(resolution, testCase, languageUnderTest, languageUnderTestSession, messagesBuilder);
-            })
-            .ifErr((e) -> {
-                messagesBuilder.addMessage(
-                    e.getMessage(),
-                    e,
-                    Severity.Error,
-                    file,
-                    sourceRegion
-                );
-            });
-
-        return messagesBuilder.build(testCase.testSuiteFile);
+            .ifOkThrowing((resolution) -> checkResults(resolution, testCase, languageUnderTest, languageUnderTestSession, messagesBuilder))
+            .ifErr((e) -> messagesBuilder.addMessage(
+                e.getMessage(),
+                e,
+                Severity.Error,
+                file,
+                sourceRegion
+            ));
+        return messagesBuilder.build(file);
     }
 }
