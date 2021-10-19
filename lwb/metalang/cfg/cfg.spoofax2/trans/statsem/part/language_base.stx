@@ -5,7 +5,7 @@ imports
   statsem/part
   statsem/expr
   statsem/util
-  
+
   signatures/part/language_base-sig
 
 rules // Parser section and options
@@ -17,7 +17,7 @@ rules // Parser section and options
 
   parserOptionOk : scope * ParserOption
   parserOptionsOk maps parserOptionOk(*, list(*))
-  
+
   parserOptionOk(s, DefaultStartSymbol(e)) :-
     typeOfExpr(s, e) == SORT() | error $[Expected sort].
   parserOptionOk(s, ParserVariant(variant)) :-
@@ -25,7 +25,7 @@ rules // Parser section and options
 
 
   parserVariantOk : scope * ParserVariant
-  
+
   parserVariantOk(s, Jsglr1()).
   parserVariantOk(s, Jsglr2(options)) :-
     jsglr2OptionsOk(s, options).
@@ -33,7 +33,7 @@ rules // Parser section and options
 
   jsglr2OptionOk : scope * Jsglr2Option
   jsglr2OptionsOk maps jsglr2OptionOk(*, list(*))
-  
+
   jsglr2OptionOk(s, Jsglr2Preset(_)).
 
 
@@ -41,23 +41,23 @@ rules // Parser section and options
   hasDefaultStartSymbol([DefaultStartSymbol(_)|_]) = TRUE().
   hasDefaultStartSymbol([_|s]) = hasDefaultStartSymbol(s).
   hasDefaultStartSymbol([]) = FALSE().
-    
+
 rules // Styler section and options
 
   partOk(s, StylerSection(options)) :-
     stylerOptionsOk(s, options).
-    
+
   stylerOptionOk : scope * StylerOption
   stylerOptionsOk maps stylerOptionOk(*, list(*))
-  
+
 rules // Constraint analyzer section and options
 
   partOk(s, ConstraintAnalyzerSection(options)) :-
     constraintAnalyzerOptionsOk(s, options).
-    
+
   constraintAnalyzerOptionOk : scope * ConstraintAnalyzerOption
   constraintAnalyzerOptionsOk maps constraintAnalyzerOptionOk(*, list(*))
-  
+
   constraintAnalyzerOptionOk(s, ConstraintAnalyzerEnableNaBL2(e)) :-
     typeOfExpr(s, e) == BOOL() | error $[Expected boolean].
   constraintAnalyzerOptionOk(s, ConstraintAnalyzerEnableStatix(e)) :-
@@ -80,7 +80,7 @@ rules // Multilang analyzer section and options
 
   partOk(s, MultilangAnalyzerSection(options)) :-
     multilangAnalyzerOptionsOk(s, options).
-    
+
   multilangAnalyzerOptionOk : scope * MultilangAnalyzerOption
   multilangAnalyzerOptionsOk maps multilangAnalyzerOptionOk(*, list(*))
 
@@ -88,7 +88,7 @@ rules // Stratego runtime section and options
 
   partOk(s, StrategoRuntimeSection(options)) :-
     strategoRuntimeOptionsOk(s, options).
-    
+
   strategoRuntimeOptionOk : scope * StrategoRuntimeOption
   strategoRuntimeOptionsOk maps strategoRuntimeOptionOk(*, list(*))
 
@@ -102,15 +102,15 @@ rules // Stratego runtime section and options
     typeOfExpr(s, e) == BOOL() | error $[Expected boolean].
   strategoRuntimeOptionOk(s, StrategoRuntimeAddStatixPrimitives(e)) :-
     typeOfExpr(s, e) == BOOL() | error $[Expected boolean].
-    
+
 rules // Tego runtime section and options
 
   partOk(s, TegoRuntimeSection(options)) :-
     tegoRuntimeOptionsOk(s, options).
-    
+
   tegoRuntimeOptionOk : scope * TegoRuntimeOption
   tegoRuntimeOptionsOk maps tegoRuntimeOptionOk(*, list(*))
-  
+
 rules // Code completion section and options
 
   partOk(s, CodeCompletionSection(options)) :-
@@ -123,6 +123,6 @@ rules // Exports section and options
 
   partOk(s, ExportsSection(options)) :-
     exportsOptionsOk(s, options).
-    
+
   exportsOptionOk : scope * ExportsOption
   exportsOptionsOk maps exportsOptionOk(*, list(*))

@@ -390,6 +390,8 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
 
         Optional<ReferenceResolutionAdapterCompiler.Input> referenceResolution();
 
+        Optional<TegoRuntimeAdapterCompiler.Input> tegoRuntime();
+
         Optional<HoverAdapterCompiler.Input> hover();
 
         GetSourceFilesAdapterCompiler.Input getSourceFiles();

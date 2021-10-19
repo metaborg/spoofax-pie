@@ -99,6 +99,11 @@ public class {{baseModule.id}} {
     }
 
     @Provides @{{scope.id}}
+    static mb.nabl2.terms.stratego.StrategoTerms provideStrategoTerms(ITermFactory termFactory) {
+        return new mb.nabl2.terms.stratego.StrategoTerms(termFactory);
+    }
+
+    @Provides @{{scope.id}}
     static {{this.languageProjectInput.constraintAnalyzerFactory.qualifiedId}} provideConstraintAnalyzerFactory(ResourceService resourceService) {
         return new {{this.languageProjectInput.constraintAnalyzerFactory.qualifiedId}}(resourceService);
     }

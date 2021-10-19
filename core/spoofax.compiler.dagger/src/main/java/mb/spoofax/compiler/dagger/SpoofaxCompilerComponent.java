@@ -15,8 +15,9 @@ import mb.spoofax.compiler.adapter.ParserAdapterCompiler;
 import mb.spoofax.compiler.adapter.ReferenceResolutionAdapterCompiler;
 import mb.spoofax.compiler.adapter.StrategoRuntimeAdapterCompiler;
 import mb.spoofax.compiler.adapter.StylerAdapterCompiler;
-import mb.spoofax.compiler.adapter.TegoRuntimeAdapterCompiler;
 import mb.spoofax.compiler.language.ClassLoaderResourcesCompiler;
+import mb.spoofax.compiler.adapter.TegoRuntimeAdapterCompiler;
+import mb.spoofax.compiler.language.TegoRuntimeLanguageCompiler;
 import mb.spoofax.compiler.language.ConstraintAnalyzerLanguageCompiler;
 import mb.spoofax.compiler.language.LanguageProjectCompiler;
 import mb.spoofax.compiler.language.MultilangAnalyzerLanguageCompiler;
@@ -80,6 +81,8 @@ public interface SpoofaxCompilerComponent extends TaskDefsProvider {
     HoverAdapterCompiler getHoverAdapterCompiler();
 
     GetSourceFilesAdapterCompiler getGetSourceFilesAdapterCompiler();
+
+    TegoRuntimeAdapterCompiler getTegoRuntimeAdapterCompiler();
 
 
     CliProjectCompiler getCliProjectCompiler();
