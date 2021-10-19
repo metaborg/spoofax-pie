@@ -3,11 +3,19 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+
+
+## [0.15.0] - 2021-10-18
 ### Fixed
 - Continuous commands not updating after a language was rebuilt in Eclipse.
 - Not unobserving continuous command feedback while a language is being rebuilt in Eclipse, which would cause the feedback to always reappear after every change.
 - Possible deadlock when closing Eclipse continuous command feedback editors.
 - Read lock rules in Eclipse not being able to be acquired concurrently.
+- Some changes to programs of languages with single-file analysis losing their messages.
+
+### Changed
+- `resource` requirement to `0.13.0`.
+- `pie` requirement to `0.19.0`.
 
 
 ## [0.14.2] - 2021-10-13
@@ -237,7 +245,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.14.2...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.15.0...HEAD
+[0.15.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.14.2...release-0.15.0
 [0.14.2]: https://github.com/metaborg/spoofax-pie/compare/release-0.14.1...release-0.14.2
 [0.14.1]: https://github.com/metaborg/spoofax-pie/compare/release-0.14.0...release-0.14.1
 [0.14.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.13.0...release-0.14.0
