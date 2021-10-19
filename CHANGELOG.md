@@ -4,6 +4,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 ## [Unreleased]
 ### Fixed
+- No errors for certain kinds of SDF3 context-free productions that do require a constructor. All context-free productions except those of the form `A = B` and `A = {B ","}*`, excluding productions that have a `{reject}` or `{bracket}` annotation, now require a constructor or produce an error.
+- No error for ill-formed SDF3 bracket productions. Bracket productions must be of the form `A = "(" B ")"` or produce an error.
 - `IndexOutOfBoundsException` in SPT tests with `resolve` and `resolve to` expectations where there was no valid target for a selection.
 
 
