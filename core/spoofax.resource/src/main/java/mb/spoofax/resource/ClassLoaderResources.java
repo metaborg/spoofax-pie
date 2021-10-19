@@ -9,6 +9,7 @@ import mb.resource.classloader.ClassLoaderToNativeResolver;
 import mb.resource.classloader.ClassLoaderUrlResolver;
 import mb.resource.classloader.JarFileWithPath;
 import mb.resource.fs.FSResource;
+import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.SegmentsPath;
 
 import java.io.IOException;
@@ -42,29 +43,46 @@ public class ClassLoaderResources {
         return resourceRegistry.getResource(path);
     }
 
+
     public ReadableResource tryGetAsNativeResource(String path) {
-        return getResource(path).tryAsNativeResource();
+        return getResource(path).tryAsNativeFile();
     }
 
     public ReadableResource tryGetAsNativeResource(Class<?> clazz) {
-        return getResource(clazz).tryAsNativeResource();
+        return getResource(clazz).tryAsNativeFile();
     }
 
     public ReadableResource tryGetAsNativeResource(SegmentsPath path) {
-        return getResource(path).tryAsNativeResource();
+        return getResource(path).tryAsNativeFile();
     }
+
 
     public void performWithResourceLocations(
         String path,
         ThrowingConsumer<FSResource, IOException> directoriesConsumer,
-        ThrowingConsumer<JarFileWithPath, IOException> jarFileWithPathConsumer
+        ThrowingConsumer<JarFileWithPath<FSResource>, IOException> jarFileWithPathConsumer
     ) throws IOException {
         final ClassLoaderResource classLoaderResource = resourceRegistry.getResource(path);
-        final ClassLoaderResourceLocations locations = classLoaderResource.getLocations();
+        final ClassLoaderResourceLocations<FSResource> locations = classLoaderResource.getLocations();
         for(FSResource directory : locations.directories) {
             directoriesConsumer.accept(directory);
         }
-        for(JarFileWithPath jarFileWithPath : locations.jarFiles) {
+        for(JarFileWithPath<FSResource> jarFileWithPath : locations.jarFiles) {
+            jarFileWithPathConsumer.accept(jarFileWithPath);
+        }
+    }
+
+    public void performWithResourceLocationsTryAsNative(
+        String path,
+        ThrowingConsumer<HierarchicalResource, IOException> directoriesConsumer,
+        ThrowingConsumer<JarFileWithPath<HierarchicalResource>, IOException> jarFileWithPathConsumer
+    ) throws IOException {
+        final ClassLoaderResource classLoaderResource = resourceRegistry.getResource(path);
+        final ClassLoaderResourceLocations<HierarchicalResource> locations = classLoaderResource.getLocationsTryAsNative();
+        for(HierarchicalResource directory : locations.directories) {
+            directoriesConsumer.accept(directory);
+        }
+        for(JarFileWithPath<HierarchicalResource> jarFileWithPath : locations.jarFiles) {
             jarFileWithPathConsumer.accept(jarFileWithPath);
         }
     }
@@ -75,20 +93,35 @@ public class ClassLoaderResources {
     }
 
     public ReadableResource tryGetAsNativeDefinitionResource(String path) {
-        return getDefinitionResource(path).tryAsNativeResource();
+        return getDefinitionResource(path).tryAsNativeFile();
     }
 
     public void performWithDefinitionResourceLocations(
         String path,
         ThrowingConsumer<FSResource, IOException> directoriesConsumer,
-        ThrowingConsumer<JarFileWithPath, IOException> jarFileWithPathConsumer
+        ThrowingConsumer<JarFileWithPath<FSResource>, IOException> jarFileWithPathConsumer
     ) throws IOException {
         final ClassLoaderResource classLoaderResource = definitionDirectory.appendAsRelativePath(path);
-        final ClassLoaderResourceLocations locations = classLoaderResource.getLocations();
+        final ClassLoaderResourceLocations<FSResource> locations = classLoaderResource.getLocations();
         for(FSResource directory : locations.directories) {
             directoriesConsumer.accept(directory);
         }
-        for(JarFileWithPath jarFileWithPath : locations.jarFiles) {
+        for(JarFileWithPath<FSResource> jarFileWithPath : locations.jarFiles) {
+            jarFileWithPathConsumer.accept(jarFileWithPath);
+        }
+    }
+
+    public void performWithDefinitionResourceLocationsTryAsNative(
+        String path,
+        ThrowingConsumer<HierarchicalResource, IOException> directoriesConsumer,
+        ThrowingConsumer<JarFileWithPath<HierarchicalResource>, IOException> jarFileWithPathConsumer
+    ) throws IOException {
+        final ClassLoaderResource classLoaderResource = definitionDirectory.appendAsRelativePath(path);
+        final ClassLoaderResourceLocations<HierarchicalResource> locations = classLoaderResource.getLocationsTryAsNative();
+        for(HierarchicalResource directory : locations.directories) {
+            directoriesConsumer.accept(directory);
+        }
+        for(JarFileWithPath<HierarchicalResource> jarFileWithPath : locations.jarFiles) {
             jarFileWithPathConsumer.accept(jarFileWithPath);
         }
     }

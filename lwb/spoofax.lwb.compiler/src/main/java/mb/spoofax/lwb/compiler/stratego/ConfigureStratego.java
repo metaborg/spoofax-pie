@@ -22,6 +22,7 @@ import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.pie.task.archive.UnarchiveFromJar;
 import mb.resource.classloader.ClassLoaderResourceLocations;
 import mb.resource.classloader.JarFileWithPath;
+import mb.resource.fs.FSResource;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.path.string.PathStringMatcher;
@@ -172,10 +173,10 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
         // Determine libspoofax2 definition directories.
         final HashSet<HierarchicalResource> libSpoofax2DefinitionDirs = new LinkedHashSet<>(); // LinkedHashSet to remove duplicates while keeping insertion order.
         if(compileLanguageSpecificationShared.includeLibSpoofax2Exports()) {
-            final ClassLoaderResourceLocations locations = libSpoofax2ClassLoaderResources.definitionDirectory.getLocations();
+            final ClassLoaderResourceLocations<FSResource> locations = libSpoofax2ClassLoaderResources.definitionDirectory.getLocations();
             libSpoofax2DefinitionDirs.addAll(locations.directories);
             final ResourcePath unarchiveDirectoryBase = compileLanguageSpecificationShared.unarchiveDirectory().appendRelativePath("libspoofax2");
-            for(JarFileWithPath jarFileWithPath : locations.jarFiles) {
+            for(JarFileWithPath<FSResource> jarFileWithPath : locations.jarFiles) {
                 final ResourcePath jarFilePath = jarFileWithPath.file.getPath();
                 @SuppressWarnings("ConstantConditions") // JAR files always have leaves.
                 final ResourcePath unarchiveDirectory = unarchiveDirectoryBase.appendRelativePath(jarFilePath.getLeaf());
@@ -197,10 +198,10 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
         // Determine libstatix definition directories.
         final HashSet<HierarchicalResource> libStatixDefinitionDirs = new LinkedHashSet<>(); // LinkedHashSet to remove duplicates while keeping insertion order.
         if(compileLanguageSpecificationShared.includeLibStatixExports()) {
-            final ClassLoaderResourceLocations locations = libStatixClassLoaderResources.definitionDirectory.getLocations();
+            final ClassLoaderResourceLocations<FSResource> locations = libStatixClassLoaderResources.definitionDirectory.getLocations();
             libStatixDefinitionDirs.addAll(locations.directories);
             final ResourcePath unarchiveDirectoryBase = compileLanguageSpecificationShared.unarchiveDirectory().appendRelativePath("libstatix");
-            for(JarFileWithPath jarFileWithPath : locations.jarFiles) {
+            for(JarFileWithPath<FSResource> jarFileWithPath : locations.jarFiles) {
                 final ResourcePath jarFilePath = jarFileWithPath.file.getPath();
                 @SuppressWarnings("ConstantConditions") // JAR files always have leaves.
                 final ResourcePath unarchiveDirectory = unarchiveDirectoryBase.appendRelativePath(jarFilePath.getLeaf());

@@ -56,6 +56,7 @@ public class EclipseProjectCompiler implements TaskDef<Supplier<Result<Option<Ec
     private final TemplateWriter runCommandHandlerTemplate;
     private final TemplateWriter observeHandlerTemplate;
     private final TemplateWriter unobserveHandlerTemplate;
+    private final TemplateWriter checkCallbackTemplate;
     private final TemplateWriter metadataProviderTemplate;
 
     @Inject public EclipseProjectCompiler(TemplateCompiler templateCompiler) {
@@ -84,6 +85,7 @@ public class EclipseProjectCompiler implements TaskDef<Supplier<Result<Option<Ec
         this.runCommandHandlerTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/RunCommandHandler.java.mustache");
         this.observeHandlerTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/ObserveHandler.java.mustache");
         this.unobserveHandlerTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/UnobserveHandler.java.mustache");
+        this.checkCallbackTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/CheckCallback.java.mustache");
         this.metadataProviderTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/MetadataProvider.java.mustache");
     }
 
@@ -134,6 +136,7 @@ public class EclipseProjectCompiler implements TaskDef<Supplier<Result<Option<Ec
         runCommandHandlerTemplate.write(context, input.baseRunCommandHandler().file(generatedJavaSourcesDirectory), input);
         observeHandlerTemplate.write(context, input.baseObserveHandler().file(generatedJavaSourcesDirectory), input);
         unobserveHandlerTemplate.write(context, input.baseUnobserveHandler().file(generatedJavaSourcesDirectory), input);
+        checkCallbackTemplate.write(context, input.checkCallback().file(generatedJavaSourcesDirectory), input);
         if(input.adapterProjectCompilerInput().multilangAnalyzer().isPresent()) {
             metadataProviderTemplate.write(context, input.baseMetadataProvider().file(generatedJavaSourcesDirectory), input);
         }
@@ -614,6 +617,18 @@ public class EclipseProjectCompiler implements TaskDef<Supplier<Result<Option<Ec
             return extendUnobserveHandler().orElseGet(this::baseUnobserveHandler);
         }
 
+        // Check callback
+
+        @Value.Default default TypeInfo baseCheckCallback() {
+            return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "CheckCallback");
+        }
+
+        Optional<TypeInfo> extendCheckCallback();
+
+        default TypeInfo checkCallback() {
+            return extendCheckCallback().orElseGet(this::baseCheckCallback);
+        }
+
         // Language Metadata Provider
 
         @Value.Default default TypeInfo baseMetadataProvider() {
@@ -676,6 +691,7 @@ public class EclipseProjectCompiler implements TaskDef<Supplier<Result<Option<Ec
                 generatedFiles.add(baseRunCommandHandler().file(this.generatedJavaSourcesDirectory()));
                 generatedFiles.add(baseObserveHandler().file(this.generatedJavaSourcesDirectory()));
                 generatedFiles.add(baseUnobserveHandler().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(baseCheckCallback().file(this.generatedJavaSourcesDirectory()));
                 if(adapterProjectCompilerInput().multilangAnalyzer().isPresent()) {
                     generatedFiles.add(baseMetadataProvider().file(this.generatedJavaSourcesDirectory()));
                 }

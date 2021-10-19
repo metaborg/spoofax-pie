@@ -22,6 +22,7 @@ import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.pie.task.archive.UnarchiveFromJar;
 import mb.resource.classloader.ClassLoaderResourceLocations;
 import mb.resource.classloader.JarFileWithPath;
+import mb.resource.fs.FSResource;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.ResourceMatcher;
@@ -122,10 +123,10 @@ public class ConfigureEsv implements TaskDef<ResourcePath, Result<Option<EsvConf
         final LinkedHashSet<HierarchicalResource> libSpoofax2DefinitionDirs = new LinkedHashSet<>(); // LinkedHashSet to remove duplicates while keeping insertion order.
         final LinkedHashSet<Supplier<ResourcePath>> libSpoofax2UnarchiveDirSuppliers = new LinkedHashSet<>();
         if(compileLanguageSpecificationShared.includeLibSpoofax2Exports()) {
-            final ClassLoaderResourceLocations locations = libSpoofax2ClassLoaderResources.definitionDirectory.getLocations();
+            final ClassLoaderResourceLocations<FSResource> locations = libSpoofax2ClassLoaderResources.definitionDirectory.getLocations();
             libSpoofax2DefinitionDirs.addAll(locations.directories);
             final ResourcePath libSpoofax2UnarchiveDirectory = compileLanguageSpecificationShared.unarchiveDirectory().appendRelativePath("libspoofax2");
-            for(JarFileWithPath jarFileWithPath : locations.jarFiles) {
+            for(JarFileWithPath<FSResource> jarFileWithPath : locations.jarFiles) {
                 final ResourcePath jarFilePath = jarFileWithPath.file.getPath();
                 @SuppressWarnings("ConstantConditions") // JAR files always have leaves.
                 final ResourcePath unarchiveDirectory = libSpoofax2UnarchiveDirectory.appendRelativePath(jarFilePath.getLeaf());

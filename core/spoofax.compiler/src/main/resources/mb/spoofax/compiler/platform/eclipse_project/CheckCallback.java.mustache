@@ -1,0 +1,22 @@
+package {{baseCheckCallback.packageId}};
+
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedFactory;
+import dagger.assisted.AssistedInject;
+import mb.spoofax.eclipse.EclipseIdentifiers;
+import mb.spoofax.eclipse.editor.CheckCallback;
+import mb.spoofax.eclipse.resource.EclipseResourcePath;
+
+public class {{baseCheckCallback.id}} extends CheckCallback {
+    @AssistedFactory public interface Factory extends CheckCallback.Factory {
+        {{baseCheckCallback.id}} create(EclipseResourcePath file);
+    }
+
+    @AssistedInject public {{baseCheckCallback.id}}(@Assisted EclipseResourcePath file) {
+        super(file);
+    }
+
+    @Override protected EclipseIdentifiers getEclipseIdentifiers() {
+        return {{languageFactory.qualifiedId}}.getLanguage().getComponent().getEclipseIdentifiers();
+    }
+}

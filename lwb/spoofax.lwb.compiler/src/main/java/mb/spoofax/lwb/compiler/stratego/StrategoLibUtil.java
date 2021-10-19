@@ -38,11 +38,11 @@ public class StrategoLibUtil {
 
     public LinkedHashSet<File> getStrategoLibJavaClassPaths() throws IOException {
         final LinkedHashSet<File> javaClassPaths = new LinkedHashSet<>();
-        final ClassLoaderResourceLocations locations = strategoLibClassLoaderResources.definitionDirectory.getLocations();
+        final ClassLoaderResourceLocations<FSResource> locations = strategoLibClassLoaderResources.definitionDirectory.getLocations();
         for(FSResource directory : locations.directories) {
             javaClassPaths.add(directory.getJavaPath().toFile());
         }
-        for(JarFileWithPath jarFileWithPath : locations.jarFiles) {
+        for(JarFileWithPath<FSResource> jarFileWithPath : locations.jarFiles) {
             javaClassPaths.add(jarFileWithPath.file.getPath().getJavaPath().toFile());
         }
         return javaClassPaths;
@@ -52,7 +52,7 @@ public class StrategoLibUtil {
         CompileLanguageSpecificationShared compileLanguageSpecificationShared
     ) throws IOException {
         for(String export : StrategoLibExports.getStr2LibExports()) {
-            final ClassLoaderResourceLocations locations = strategoLibClassLoaderResources.definitionDirectory.getLocations();
+            final ClassLoaderResourceLocations<FSResource> locations = strategoLibClassLoaderResources.definitionDirectory.getLocations();
             for(FSResource directory : locations.directories) {
                 final FSResource exportFile = directory.appendAsRelativePath(export);
                 if(exportFile.exists()) {
@@ -60,7 +60,7 @@ public class StrategoLibUtil {
                 }
             }
             final ResourcePath unarchiveDirectoryBase = compileLanguageSpecificationShared.unarchiveDirectory().appendRelativePath("strategoLib");
-            for(JarFileWithPath jarFileWithPath : locations.jarFiles) {
+            for(JarFileWithPath<FSResource> jarFileWithPath : locations.jarFiles) {
                 final FSPath jarFilePath = jarFileWithPath.file.getPath();
                 @SuppressWarnings("ConstantConditions") // JAR files always have leaves.
                 final ResourcePath unarchiveDirectory = unarchiveDirectoryBase.appendRelativePath(jarFilePath.getLeaf());

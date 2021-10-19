@@ -36,7 +36,14 @@ public class RunCommandJob extends Job {
     private final CommandRequest<?> request;
 
 
-    public RunCommandJob(LoggerFactory loggerFactory, EclipseLanguageComponent languageComponent, Pie pie, PieRunner pieRunner, CommandData data, CommandRequest<?> request) {
+    public RunCommandJob(
+        LoggerFactory loggerFactory,
+        EclipseLanguageComponent languageComponent,
+        Pie pie,
+        PieRunner pieRunner,
+        CommandData data,
+        CommandRequest<?> request
+    ) {
         super(request.def().getDisplayName());
         this.logger = loggerFactory.create(getClass());
         this.languageComponent = languageComponent;
@@ -51,7 +58,7 @@ public class RunCommandJob extends Job {
         final String pluginId = languageComponent.getEclipseIdentifiers().getPlugin();
         logger.trace("Running command '{}' from language '{}'", request.def().getDisplayName(), languageComponent.getLanguageInstance().getDisplayName());
         try(final MixedSession session = pie.newSession()) {
-            final ArrayList<CommandContextAndFeedback> contextsAndFeedbacks = pieRunner.requireCommand(request, data.contexts, pie, session, monitor);
+            final ArrayList<CommandContextAndFeedback> contextsAndFeedbacks = pieRunner.requireCommand(languageComponent.getLanguageInstance().getId(), request, data.contexts, pie, session, monitor);
             final ArrayList<Throwable> exceptions = new ArrayList<>();
             final StringBuilder errorSB = new StringBuilder();
             final StringBuilder messagesSB = new StringBuilder();

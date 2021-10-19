@@ -27,4 +27,6 @@ import mb.tiger.spoofax.TigerScope;
 )
 public interface TigerEclipseComponent extends EclipseLanguageComponent, TigerComponent {
     TigerEditorTracker getEditorTracker();
+
+    @Override TigerCheckCallback.Factory getCheckCallbackFactory();
 }

@@ -3,6 +3,39 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+
+
+## [0.15.0] - 2021-10-18
+### Fixed
+- Continuous commands not updating after a language was rebuilt in Eclipse.
+- Not unobserving continuous command feedback while a language is being rebuilt in Eclipse, which would cause the feedback to always reappear after every change.
+- Possible deadlock when closing Eclipse continuous command feedback editors.
+- Read lock rules in Eclipse not being able to be acquired concurrently.
+- Some changes to programs of languages with single-file analysis losing their messages.
+
+### Changed
+- `resource` requirement to `0.13.0`.
+- `pie` requirement to `0.19.0`.
+
+
+## [0.14.2] - 2021-10-13
+### Fixed
+- Laggy typing in Statix editors by downgrading the Eclipse LWB to Eclipse 2021-03.
+
+
+## [0.14.1] - 2021-10-12
+### Fixed
+- Editors in the Eclipse LWB not updating after making changes to the editor that causes the underlying computation to interrupt.
+
+### Added
+- Command for showing the Statix scope graph AST of a file (https://github.com/metaborg/spoofax-pie/pull/80).
+
+### Changed
+- Stratego invocation to check for `InterruptedException` in the cause/suppressed chain of `InterpreterException` and rethrow that. For now, this is sneakily thrown so that `InterruptedException` does not have to be added to the  method signature of `StrategoRuntime.invoke` methods, but this should be added in the future. This sneakily thrown exception is catched and handled by PIE.
+- `pie` requirement to `0.18.1`.
+
+
+## [0.14.0] - 2021-10-11
 ### Added
 - `default-statix-message-stacktrace-length`, `default-statix-message-term-depth`, `default-statix-test-log-level`, `default-statix-supress-cascading-errors` options to the `constraint-analyzer` section in `spoofaxc.cfg`.
 
@@ -13,6 +46,10 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `ConstraintAnalyzer.Result.ast` to `analyzedAst`.
 - `ConstraintAnalyzer.SingleFileResult.ast` to `analyzedAst`.
 - Clearing a language project to unload the dynamically loaded language associated with that language project.
+- `resource` requirement to `0.12.0`.
+- `common` requirement to `0.9.8`.
+- `pie` requirement to `0.18.0`.
+- `releng` (devenv-release) requirement to 0.1.15.
 
 ### Fixed
 - `LAYOUT?-CF` not accepted in SDF3 (https://github.com/metaborg/spoofax-pie/issues/78). Fixed by marking `-CF`, `-LEX`, and `-VAR` sorts as kernel, allowing them to be used in kernel syntax context.
@@ -208,7 +245,11 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.13.0...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.15.0...HEAD
+[0.15.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.14.2...release-0.15.0
+[0.14.2]: https://github.com/metaborg/spoofax-pie/compare/release-0.14.1...release-0.14.2
+[0.14.1]: https://github.com/metaborg/spoofax-pie/compare/release-0.14.0...release-0.14.1
+[0.14.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.13.0...release-0.14.0
 [0.13.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.12.1...release-0.13.0
 [0.12.1]: https://github.com/metaborg/spoofax-pie/compare/release-0.12.0...release-0.12.1
 [0.12.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.11.13...release-0.12.0

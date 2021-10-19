@@ -1,6 +1,7 @@
 package mb.spoofax.eclipse;
 
 import mb.spoofax.core.language.LanguageComponent;
+import mb.spoofax.eclipse.editor.CheckCallback;
 import mb.spoofax.eclipse.editor.EditorCloseJob;
 import mb.spoofax.eclipse.editor.EditorUpdateJob;
 import mb.spoofax.eclipse.job.LockRule;
@@ -18,4 +19,6 @@ public interface EclipseLanguageComponent extends LanguageComponent {
     EditorUpdateJob.Factory editorUpdateJobFactory();
 
     EditorCloseJob.Factory editorCloseJobFactory();
+
+    CheckCallback.Factory getCheckCallbackFactory();
 }

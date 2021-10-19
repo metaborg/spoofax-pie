@@ -29,12 +29,12 @@ public class {{baseEclipseModule.id}} {
 {{^adapterProjectCompilerInput.multilangAnalyzer}}
     @Provides @Named("StartupWriteLock") @{{adapterProjectCompilerInput.scope.id}}
     static LockRule provideStartupWriteLockRule() {
-        return new LockRule("Startup write lock");
+        return new LockRule("Startup");
     }
 {{/adapterProjectCompilerInput.multilangAnalyzer}}
 
-    @Provides @{{adapterProjectCompilerInput.scope.id}}
+    @Provides /* Unscoped: creates a new read lock every time, which is intended. */
     static ReadLockRule provideStartupReadLockRule(@Named("StartupWriteLock") LockRule writeLock) {
-        return new ReadLockRule(writeLock, "Startup read lock");
+        return writeLock.createReadLock();
     }
 }
