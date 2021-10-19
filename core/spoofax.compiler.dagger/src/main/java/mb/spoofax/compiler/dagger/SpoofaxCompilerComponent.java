@@ -74,8 +74,6 @@ public interface SpoofaxCompilerComponent extends TaskDefsProvider {
 
     MultilangAnalyzerAdapterCompiler getMultilangAnalyzerAdapterCompiler();
 
-    TegoRuntimeAdapterCompiler getTegoRuntimeAdapterCompiler();
-
     ReferenceResolutionAdapterCompiler getReferenceResolutionAdapterCompiler();
 
     HoverAdapterCompiler getHoverAdapterCompiler();

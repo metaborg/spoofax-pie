@@ -386,8 +386,6 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
 
         Optional<CodeCompletionAdapterCompiler.Input> codeCompletion();
 
-        Optional<TegoRuntimeAdapterCompiler.Input> tegoRuntime();
-
         Optional<ReferenceResolutionAdapterCompiler.Input> referenceResolution();
 
         Optional<TegoRuntimeAdapterCompiler.Input> tegoRuntime();
