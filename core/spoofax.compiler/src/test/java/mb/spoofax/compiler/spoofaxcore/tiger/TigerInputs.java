@@ -195,7 +195,6 @@ public class TigerInputs {
                 "org.metaborg.lang.tiger.trans.InteropRegisterer",
                 "org.metaborg.lang.tiger.strategies.InteropRegisterer"
             );
-        languageProjectCompilerInputBuilder.withTegoRuntime();
     }
 
     private void setAdapterProjectCompilerInput(ResourcePath rootDirectory, Shared shared, AdapterProjectCompilerInputBuilder adapterProjectCompilerInputBuilder) {
