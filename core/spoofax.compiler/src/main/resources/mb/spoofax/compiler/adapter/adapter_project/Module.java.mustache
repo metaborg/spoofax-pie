@@ -153,11 +153,6 @@ public class {{baseModule.id}} {
     static mb.tego.strategies.runtime.TegoRuntime provideTegoRuntime(mb.tego.strategies.runtime.TegoRuntimeImpl tegoImplementation) {
         return tegoImplementation;
     }
-
-    @Provides @{{scope.id}}
-    static mb.tego.strategies.runtime.TegoEngine provideTegoEngine(mb.tego.strategies.runtime.TegoRuntimeImpl tegoImplementation) {
-        return tegoImplementation;
-    }
 {{/tegoRuntime}}
 
     @Provides @{{scope.id}} @{{qualifier.id}} @ElementsIntoSet

@@ -43,7 +43,6 @@ import mb.spoofax.compiler.language.ParserLanguageCompiler;
 import mb.spoofax.compiler.language.ParserVariant;
 import mb.spoofax.compiler.language.StrategoRuntimeLanguageCompiler;
 import mb.spoofax.compiler.language.StylerLanguageCompiler;
-import mb.spoofax.compiler.language.TegoRuntimeLanguageCompiler;
 import mb.spoofax.compiler.platform.EclipseProjectCompiler;
 import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.TypeInfo;
@@ -271,7 +270,6 @@ public class CfgAstToObject {
             // TODO: strategoRuntime adapter properties
         });
         parts.getAllSubTermsInListAsParts("TegoRuntimeSection").ifSome(subParts -> {
-            final TegoRuntimeLanguageCompiler.Input.Builder base = baseBuilder.withTegoRuntime();
             final TegoRuntimeAdapterCompiler.Input.Builder adapter = adapterBuilder.withTegoRuntime();
         });
         parts.getAllSubTermsInListAsParts("CodeCompletionSection").ifSome(subParts -> {

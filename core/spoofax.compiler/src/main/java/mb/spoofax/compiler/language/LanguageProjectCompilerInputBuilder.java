@@ -24,9 +24,6 @@ public class LanguageProjectCompilerInputBuilder {
     private boolean strategoRuntimeEnabled = false;
     public final StrategoRuntimeLanguageCompiler.Input.Builder strategoRuntime = StrategoRuntimeLanguageCompiler.Input.builder();
 
-    private boolean tegoRuntimeEnabled = false;
-    public final TegoRuntimeLanguageCompiler.Input.Builder tegoRuntime = TegoRuntimeLanguageCompiler.Input.builder();
-
     private boolean exportsEnabled = false;
     public final ExportsLanguageCompiler.Input.Builder exports = ExportsLanguageCompiler.Input.builder();
 
@@ -61,11 +58,6 @@ public class LanguageProjectCompilerInputBuilder {
         return strategoRuntime;
     }
 
-    public TegoRuntimeLanguageCompiler.Input.Builder withTegoRuntime() {
-        tegoRuntimeEnabled = true;
-        return tegoRuntime;
-    }
-
     public ExportsLanguageCompiler.Input.Builder withExports() {
         exportsEnabled = true;
         return exports;
@@ -90,9 +82,6 @@ public class LanguageProjectCompilerInputBuilder {
 
         final StrategoRuntimeLanguageCompiler.@Nullable Input strategoRuntime = buildStrategoRuntime(shared, languageProject, constraintAnalyzer);
         if(strategoRuntime != null) project.strategoRuntime(strategoRuntime);
-
-        final TegoRuntimeLanguageCompiler.@Nullable Input tegoRuntime = buildTegoRuntime(shared, languageProject);
-        if(tegoRuntime != null) project.tegoRuntime(tegoRuntime);
 
         final ExportsLanguageCompiler.@Nullable Input exports = buildExports(shared, languageProject);
         if(exports != null) project.exports(exports);
@@ -166,14 +155,6 @@ public class LanguageProjectCompilerInputBuilder {
         }
 
         return builder.build();
-    }
-
-    private TegoRuntimeLanguageCompiler.@Nullable Input buildTegoRuntime(Shared shared, LanguageProject languageProject) {
-        if(!tegoRuntimeEnabled) return null;
-        return tegoRuntime
-            .shared(shared)
-            .languageProject(languageProject)
-            .build();
     }
 
     private ExportsLanguageCompiler.@Nullable Input buildExports(Shared shared, LanguageProject languageProject) {
