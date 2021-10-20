@@ -40,7 +40,7 @@ public class TegoRuntimeLanguageCompiler {
 
     public ListView<GradleConfiguredDependency> getDependencies(Input input) {
         return ListView.of(
-            GradleConfiguredDependency.api(input.shared().tegoDep())
+            GradleConfiguredDependency.api(input.shared().tegoRuntimeDep())
         );
     }
 
