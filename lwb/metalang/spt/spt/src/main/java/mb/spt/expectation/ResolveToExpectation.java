@@ -10,9 +10,9 @@ import mb.resource.ResourceKey;
 import mb.spt.model.LanguageUnderTest;
 import mb.spt.model.SelectionReference;
 import mb.spt.model.TestCase;
+import mb.spt.util.SptSelectionUtil;
 
-public class ResolveToExpectation extends ResolveExpectation{
-
+public class ResolveToExpectation extends ResolveExpectation {
     public final SelectionReference toTerm;
 
     public ResolveToExpectation(SelectionReference fromTerm, SelectionReference toTerm, Region sourceRegion) {
@@ -22,10 +22,15 @@ public class ResolveToExpectation extends ResolveExpectation{
 
     @Override
     protected void checkResults(ReferenceResolutionResult result, TestCase testCase, LanguageUnderTest languageUnderTest, Session languageUnderTestSession, KeyedMessagesBuilder messagesBuilder) throws InterruptedException {
-        ResourceKey file = testCase.testSuiteFile;
-        Region toRegion = testCase.testFragment.getInFragmentSelections().get(toTerm.selection - 1);
-        ListView<ReferenceResolutionResult.ResolvedEntry> entries = result.getEntries();
-        if (entries.isEmpty()) {
+        final ResourceKey file = testCase.testSuiteFile;
+
+        if(!SptSelectionUtil.checkSelectionReference(toTerm, messagesBuilder, testCase)) {
+            return;
+        }
+        final Region toRegion = testCase.testFragment.getInFragmentSelections().get(toTerm.selection - 1);
+
+        final ListView<ReferenceResolutionResult.ResolvedEntry> entries = result.getEntries();
+        if(entries.isEmpty()) {
             messagesBuilder.addMessage("Term does not resolve to any other term", Severity.Error, file, sourceRegion);
         } else {
             boolean found = false;
@@ -39,7 +44,7 @@ public class ResolveToExpectation extends ResolveExpectation{
                     }
                 }
             }
-            if (!found) {
+            if(!found) {
                 ReferenceResolutionResult.ResolvedEntry entry = entries.get(0);
                 Region nodeRegion = entry.getRegion();
                 ResourceKey nodeResource = entry.getFile();
