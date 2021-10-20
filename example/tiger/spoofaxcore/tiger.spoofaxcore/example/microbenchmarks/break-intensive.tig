@@ -1,0 +1,24 @@
+
+for i := 0 to 30
+do
+  (
+  timeGo();
+  let
+    var counter := 0
+    var counter2 := 0
+  in
+    while counter < 100
+    do (
+      counter := counter + 1;
+      while counter2 < 1000
+      do (
+        counter2 := counter2 + 1;
+        if counter2 > 500
+        then
+          break
+      );
+      counter2 := 0
+    )
+  end;
+  timeStop()
+)

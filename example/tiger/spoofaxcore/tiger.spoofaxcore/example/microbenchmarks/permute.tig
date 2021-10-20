@@ -1,0 +1,50 @@
+//https://github.com/smarr/are-we-fast-yet/blob/master/benchmarks/Java/src/Permute.java
+for i := 0 to 30
+do
+  (
+  timeGo();
+  let
+    type vector = array of int
+  in
+    let
+      var count: int := 0
+      var v: vector := vector[6] of 0
+      
+      function swap(i: int, j: int) =
+        let
+          var tmp: int := v[i]
+        in
+          v[i] := v[j];
+          v[j] := tmp
+        end
+      
+      function permute(n: int) =
+        (
+          count := count + 1;
+          if n <> 0
+          then
+            let
+              var n1: int := n - 1
+            in
+              permute(n1);
+              let
+                var i:int := n1
+              in
+                while i >= 0
+                do (
+                  swap(n1, i);
+                  permute(n1);
+                  swap(n1, i);
+                  i := i - 1
+                )
+              end
+            end
+        )
+        
+        
+    in
+      permute(6);
+      count // 8660
+    end
+  end;
+  timeStop())

@@ -1,0 +1,14 @@
+
+for i := 0 to 30
+do
+  (
+  timeGo();
+  let
+    var counter := 0
+  in
+    while counter < 10000
+    do
+      counter := counter + 1
+  end;
+  timeStop()
+)

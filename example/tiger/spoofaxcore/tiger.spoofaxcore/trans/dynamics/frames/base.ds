@@ -1,0 +1,12 @@
+module dynamics/frames/base
+
+imports
+  ds-signatures/Tiger-sig
+  dynamics/frames/values
+  dynamics/frames/nabl2/nabl2-link
+
+signature
+  arrows
+    Exp --> V
+    LValue --> Addr
+  
