@@ -1,6 +1,0 @@
-shared.defaultArtifactId=webdsl
-shared.defaultClassPrefix=WebDSL
-shared.defaultGroupId=org.metaborg
-shared.defaultPackageId=mb.webdsl
-shared.defaultVersion=0.1.0
-stratego.languageStrategyAffix=webdsl
