@@ -1,3 +1,0 @@
-module test
-
-test parse empty [[]] parse succeeds
