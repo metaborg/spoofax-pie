@@ -263,7 +263,6 @@ public class AdapterProjectCompilerInputBuilder {
         return tegoRuntime
             .shared(shared)
             .adapterProject(adapterProject)
-            .languageProjectInput(languageProjectInput.tegoRuntime().orElseThrow(() -> new RuntimeException("Mismatch between presence of Tego runtime input between language project and adapter project")))
             .classLoaderResourcesInput(classloaderResources)
             .build();
     }
