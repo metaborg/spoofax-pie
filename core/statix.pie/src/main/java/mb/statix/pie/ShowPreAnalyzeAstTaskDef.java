@@ -63,7 +63,6 @@ public abstract class ShowPreAnalyzeAstTaskDef implements TaskDef<ShowPreAnalyze
             ast -> {
                 final StrategoRuntime strategoRuntime = context.require(getStrategoRuntimeProvider, None.instance).getValue().get();
                 try {
-                    // FIXME: Call the PreStatixTaskDef instead
                     final IStrategoTerm outputTerm = strategoRuntime.invoke("pre-analyze", ast);
                     return CommandFeedback.of(ShowFeedback.showText(TermToString.toString(outputTerm), "Pre-analyze AST for '" + file + "'"));
                 } catch(StrategoException e) {

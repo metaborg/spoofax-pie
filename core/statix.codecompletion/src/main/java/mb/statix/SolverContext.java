@@ -19,7 +19,6 @@ public final class SolverContext {
     private final Collection<Map.Entry<IConstraint, IMessage>> allowedErrors;
     private final Strategy<ITerm, @Nullable ITerm> isInjPredicate;
     private final boolean completeDeterministic;
-    private final @Nullable CodeCompletionStageEventHandler stageEventHandler;
 
     /**
      * Initializes a new instance of the {@link SolverContext} class.
@@ -28,14 +27,12 @@ public final class SolverContext {
         @Nullable ITermVar focusVar,
         Collection<Map.Entry<IConstraint, IMessage>> allowedErrors,
         Strategy<ITerm, @Nullable ITerm> isInjPredicate,
-        boolean completeDeterministic,
-        @Nullable CodeCompletionStageEventHandler stageEventHandler
+        boolean completeDeterministic
     ) {
         this.focusVar = focusVar;
         this.allowedErrors = allowedErrors;
         this.isInjPredicate = isInjPredicate;
         this.completeDeterministic = completeDeterministic;
-        this.stageEventHandler = stageEventHandler;
     }
 
     /**
@@ -56,7 +53,7 @@ public final class SolverContext {
      * @return the modified copy of the {@link SolverContext}
      */
     public SolverContext withFocusVar(@Nullable ITermVar focusVar) {
-        return new SolverContext(focusVar, allowedErrors, isInjPredicate, completeDeterministic, stageEventHandler);
+        return new SolverContext(focusVar, allowedErrors, isInjPredicate, completeDeterministic);
     }
 
     /**
@@ -77,7 +74,7 @@ public final class SolverContext {
      * @return the modified copy of the {@link SolverContext}
      */
     public SolverContext withAllowedErrors(Collection<Map.Entry<IConstraint, IMessage>> allowedErrors) {
-        return new SolverContext(focusVar, allowedErrors, isInjPredicate, completeDeterministic, stageEventHandler);
+        return new SolverContext(focusVar, allowedErrors, isInjPredicate, completeDeterministic);
     }
 
     /**
@@ -98,12 +95,4 @@ public final class SolverContext {
         return completeDeterministic;
     }
 
-    /**
-     * Gets the stage event handler.
-     *
-     * @return the stage event handler; or {@code null}
-     */
-    public @Nullable CodeCompletionStageEventHandler getStageEventHandler() {
-        return stageEventHandler;
-    }
 }

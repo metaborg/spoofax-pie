@@ -507,7 +507,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
             // Create a strategy that fails if the term is not an injection
             final Strategy<ITerm, @Nullable ITerm> isInjPredicate = pred(this::isInjection);
 
-            final SolverContext ctx = new SolverContext(placeholder, allowedErrors, isInjPredicate, completeDeterministic, null /* TODO */);
+            final SolverContext ctx = new SolverContext(placeholder, allowedErrors, isInjPredicate, completeDeterministic);
 
             final ITerm termInUnifier = state.getState().unifier().findRecursive(placeholder);
             if (!termInUnifier.equals(placeholder)) {
