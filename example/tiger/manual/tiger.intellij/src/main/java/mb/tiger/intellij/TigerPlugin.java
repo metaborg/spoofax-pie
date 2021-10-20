@@ -1,14 +1,14 @@
 package mb.tiger.intellij;
 
+import mb.pie.dagger.DaggerPieComponent;
 import mb.pie.dagger.DaggerRootPieComponent;
 import mb.pie.dagger.PieComponent;
+import mb.pie.dagger.PieModule;
 import mb.pie.dagger.RootPieModule;
 import mb.pie.runtime.PieBuilderImpl;
 import mb.resource.dagger.DaggerResourceServiceComponent;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.intellij.SpoofaxPlugin;
-import mb.tego.strategies.DaggerTegoComponent;
-import mb.tego.strategies.TegoComponent;
 import mb.tiger.spoofax.DaggerTigerResourcesComponent;
 import mb.tiger.spoofax.TigerResourcesComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -18,7 +18,6 @@ public class TigerPlugin {
     private static @Nullable ResourceServiceComponent resourceServiceComponent;
     private static @Nullable TigerIntellijComponent component;
     private static @Nullable PieComponent pieComponent;
-    private static @Nullable TegoComponent tegoComponent;
 
     public static TigerResourcesComponent getResourcesComponent() {
         if(resourcesComponent == null) {
@@ -48,20 +47,10 @@ public class TigerPlugin {
         return pieComponent;
     }
 
-    public static TegoComponent getTegoComponent() {
-        if(tegoComponent == null) {
-            throw new RuntimeException("Cannot access TegoComponent; TigerPlugin has not been started yet, or has been stopped");
-        }
-        return tegoComponent;
-    }
-
     public static void init() {
         resourcesComponent = DaggerTigerResourcesComponent.create();
         resourceServiceComponent = DaggerResourceServiceComponent.builder()
             .resourceServiceModule(SpoofaxPlugin.getResourceServiceComponent().createChildModule().addRegistriesFrom(resourcesComponent))
-            .loggerComponent(SpoofaxPlugin.getLoggerComponent())
-            .build();
-        tegoComponent = DaggerTegoComponent.builder()
             .loggerComponent(SpoofaxPlugin.getLoggerComponent())
             .build();
         component = DaggerTigerIntellijComponent.builder()
@@ -69,7 +58,6 @@ public class TigerPlugin {
             .tigerResourcesComponent(resourcesComponent)
             .resourceServiceComponent(resourceServiceComponent)
             .intellijPlatformComponent(SpoofaxPlugin.getPlatformComponent())
-            .tegoComponent(tegoComponent)
             .build();
         pieComponent = DaggerRootPieComponent.builder()
             .rootPieModule(new RootPieModule(PieBuilderImpl::new, component))

@@ -4,7 +4,6 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ElementsIntoSet;
 import mb.log.api.LoggerFactory;
-import mb.nabl2.terms.stratego.StrategoTerms;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
@@ -12,10 +11,8 @@ import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.HierarchicalResourceType;
-import mb.tego.strategies.runtime.TegoRuntime;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
-import mb.tiger.TigerCodeCompleterFactory;
 import mb.tiger.TigerConstraintAnalyzer;
 import mb.tiger.TigerConstraintAnalyzerFactory;
 import mb.tiger.TigerParser;
@@ -32,34 +29,23 @@ import mb.tiger.spoofax.command.TigerShowParsedAstCommand;
 import mb.tiger.spoofax.command.TigerShowPrettyPrintedTextCommand;
 import mb.tiger.spoofax.command.TigerShowScopeGraphCommand;
 import mb.tiger.spoofax.task.TigerCheckAggregator;
-import mb.tiger.spoofax.task.TigerCodeComplete;
 import mb.tiger.spoofax.task.TigerCompileDirectory;
 import mb.tiger.spoofax.task.TigerCompileFile;
 import mb.tiger.spoofax.task.TigerCompileFileAlt;
 import mb.tiger.spoofax.task.TigerCheck;
-import mb.tiger.spoofax.task.TigerDowngradePlaceholders;
 import mb.tiger.spoofax.task.TigerGetSourceFiles;
-import mb.tiger.spoofax.task.TigerGetStrategoRuntimeProvider;
-import mb.tiger.spoofax.task.TigerGetTegoRuntimeProvider;
 import mb.tiger.spoofax.task.TigerIdeTokenize;
-import mb.tiger.spoofax.task.TigerIsInjection;
-import mb.tiger.spoofax.task.TigerPartialPrettyPrint;
-import mb.tiger.spoofax.task.TigerPostStatix;
-import mb.tiger.spoofax.task.TigerPreStatix;
 import mb.tiger.spoofax.task.TigerShowAnalyzedAst;
 import mb.tiger.spoofax.task.TigerShowDesugaredAst;
 import mb.tiger.spoofax.task.TigerShowParsedAst;
 import mb.tiger.spoofax.task.TigerShowPrettyPrintedText;
 import mb.tiger.spoofax.task.TigerShowScopeGraph;
-import mb.tiger.spoofax.task.TigerUpgradePlaceholders;
 import mb.tiger.spoofax.task.reusable.TigerAnalyze;
 import mb.tiger.spoofax.task.reusable.TigerCompleteTaskDef;
 import mb.tiger.spoofax.task.reusable.TigerListDefNames;
 import mb.tiger.spoofax.task.reusable.TigerListLiteralVals;
 import mb.tiger.spoofax.task.reusable.TigerParse;
 import mb.tiger.spoofax.task.reusable.TigerStyle;
-import org.spoofax.interpreter.terms.ITermFactory;
-import org.spoofax.terms.TermFactory;
 
 import javax.inject.Named;
 import java.util.HashSet;
@@ -112,35 +98,6 @@ public class TigerModule {
     }
 
 
-    // TODO: Add this to the template
-    @Provides @TigerScope
-    static TigerCodeCompleterFactory provideCodeCompleterFactory(
-        StrategoTerms strategoTerms,
-        ITermFactory termFactory,
-        TegoRuntime tegoRuntime,
-        LoggerFactory loggerFactory
-    ) {
-        return new TigerCodeCompleterFactory(
-            null, /* TODO: Spec */
-            strategoTerms,
-            termFactory,
-            tegoRuntime,
-            loggerFactory
-        );
-    }
-
-    // TODO: Add this to the template
-    @Provides @TigerScope
-    static StrategoTerms provideStrategoTerms(ITermFactory termFactory) {
-        return new StrategoTerms(termFactory);
-    }
-
-    // TODO: Add this to the template?
-    @Provides @TigerScope
-    static ITermFactory provideTermFactory() {
-        return new TermFactory();
-    }
-
     @Provides @TigerScope
     static TigerConstraintAnalyzerFactory provideConstraintAnalyzerFactory(ResourceService resourceService) {
         return new TigerConstraintAnalyzerFactory(resourceService);
@@ -158,9 +115,6 @@ public class TigerModule {
         TigerStyle style,
         TigerAnalyze analyze,
         TigerCompleteTaskDef complete,
-        TigerCodeComplete codeComplete,
-        TigerGetStrategoRuntimeProvider getStrategoRuntimeProvider,
-        TigerGetTegoRuntimeProvider getTegoRuntimeProvider,
 
         TigerListLiteralVals listLiteralVals,
         TigerListDefNames listDefNames,
@@ -176,13 +130,6 @@ public class TigerModule {
         TigerShowScopeGraph showScopeGraph,
         TigerShowDesugaredAst showDesugaredAst,
 
-        TigerPreStatix preStatix,
-        TigerPostStatix postStatix,
-        TigerUpgradePlaceholders upgradePlaceholders,
-        TigerDowngradePlaceholders downgradePlaceholders,
-        TigerPartialPrettyPrint partialPrettyPrint,
-        TigerIsInjection isInjection,
-
         TigerCompileFile compileFile,
         TigerCompileFileAlt compileFileAlt,
         TigerCompileDirectory compileDirectory
@@ -193,9 +140,6 @@ public class TigerModule {
         taskDefs.add(style);
         taskDefs.add(analyze);
         taskDefs.add(complete);
-        taskDefs.add(codeComplete);
-        taskDefs.add(getStrategoRuntimeProvider);
-        taskDefs.add(getTegoRuntimeProvider);
 
         taskDefs.add(listLiteralVals);
         taskDefs.add(listDefNames);
@@ -210,13 +154,6 @@ public class TigerModule {
         taskDefs.add(showAnalyzedAst);
         taskDefs.add(showScopeGraph);
         taskDefs.add(showDesugaredAst);
-
-        taskDefs.add(preStatix);
-        taskDefs.add(postStatix);
-        taskDefs.add(upgradePlaceholders);
-        taskDefs.add(downgradePlaceholders);
-        taskDefs.add(partialPrettyPrint);
-        taskDefs.add(isInjection);
 
         taskDefs.add(compileFile);
         taskDefs.add(compileFileAlt);

@@ -21,7 +21,6 @@ import java.util.Objects;
 //import org.spoofax.terms.util.TermUtils;
 
 @TigerScope
-@Deprecated
 public class TigerCompleteTaskDef implements TaskDef<TigerCompleteTaskDef.Input, @Nullable CompletionResult> {
 
     public static class Input implements Serializable {

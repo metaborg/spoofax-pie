@@ -24,12 +24,7 @@ dependencies {
   api(compositeBuild("jsglr1.common"))
   api(compositeBuild("esv.common"))
   api(compositeBuild("stratego.common"))
-  api(compositeBuild("stratego.pie"))
   api(compositeBuild("constraint.common"))
-
-  api("org.metaborg.devenv:nabl2.terms")
-  api(compositeBuild("tego"))
-  api(compositeBuild("statix.codecompletion"))
 
   implementation(compositeBuild("nabl2.common"))
   implementation("org.metaborg:strategoxt-min-jar")
@@ -92,7 +87,7 @@ fun copySpoofaxLanguageResources(
   tasks.getByName(JavaPlugin.TEST_CLASSES_TASK_NAME).dependsOn(copyTestTask)
 }
 copySpoofaxLanguageResources(
-  dependencies.create(compositeBuild("org.metaborg.lang.tiger")),
+  dependencies.create(compositeBuild("tiger.spoofaxcore")),
   "mb/tiger",
   true,
   "target/metaborg/editor.esv.af", "target/metaborg/sdf.tbl"
