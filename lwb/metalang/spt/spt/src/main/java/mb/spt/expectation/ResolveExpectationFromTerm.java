@@ -30,35 +30,37 @@ public class ResolveExpectationFromTerm implements TestExpectationFromTerm {
 
     @Override
     public TestExpectation convert(IStrategoAppl term, Region fallbackRegion, String testSuiteDescription, ResourceKey testSuiteFile, SptTestCaseResourceRegistry testCaseResourceRegistry, HashSet<String> usedResourceNames) throws FromTermException {
-        final @Nullable Region expectationSourceRegion = TermTracer.getRegion(term);
-        final Region sourceRegion = expectationSourceRegion != null ? expectationSourceRegion : fallbackRegion;
-        final IStrategoConstructor constructor = term.getConstructor();
+        IStrategoConstructor constructor = term.getConstructor();
+        @Nullable Region termSourceRegion = TermTracer.getRegion(term);
+        Region sourceRegion = termSourceRegion != null ? termSourceRegion : fallbackRegion;
         switch(constructor.getName()) {
             case "Resolve":
-                return convertResolveExpectation(term, fallbackRegion, sourceRegion);
+                return convertResolveExpectation(term, fallbackRegion, testSuiteDescription, testSuiteFile, testCaseResourceRegistry, usedResourceNames, sourceRegion);
             case "ResolveTo":
-                return convertResolveToExpectation(term, fallbackRegion, sourceRegion);
+                return convertResolveToExpectation(term, fallbackRegion, testSuiteDescription, testSuiteFile, testCaseResourceRegistry, usedResourceNames, sourceRegion);
             default:
                 throw new FromTermException("Cannot convert term '" + term + "' to a resolve expectation;" +
                     " term is not a valid resolve expectation (no matching constructor)");
         }
     }
 
-    private TestExpectation convertResolveExpectation(IStrategoAppl term, Region fallbackRegion, Region sourceRegion) {
-        final SelectionReference fromRef = convertSelectionReference(term, fallbackRegion, 0, "int as first subterm");
+    private TestExpectation convertResolveExpectation(IStrategoAppl term, Region fallbackRegion, String testSuiteDescription, ResourceKey testSuiteFile, SptTestCaseResourceRegistry testCaseResourceRegistry, HashSet<String> usedResourceNames, Region sourceRegion) {
+        SelectionReference fromRef = convertSelectionReference(term, fallbackRegion, 0, "int as first subterm");
         return new ResolveExpectation(fromRef, sourceRegion);
     }
 
-    private TestExpectation convertResolveToExpectation(IStrategoAppl term, Region fallbackRegion, Region sourceRegion) {
-        final SelectionReference fromRef = convertSelectionReference(term, fallbackRegion, 0, "int as first subterm");
-        final SelectionReference toRef = convertSelectionReference(term, fallbackRegion, 1, "int as second subterm");
+    private TestExpectation convertResolveToExpectation(IStrategoAppl term, Region fallbackRegion, String testSuiteDescription, ResourceKey testSuiteFile, SptTestCaseResourceRegistry testCaseResourceRegistry, HashSet<String> usedResourceNames, Region sourceRegion) {
+        SelectionReference fromRef = convertSelectionReference(term, fallbackRegion, 0, "int as first subterm");
+
+        SelectionReference toRef = convertSelectionReference(term, fallbackRegion, 1, "int as second subterm");
+
         return new ResolveToExpectation(fromRef, toRef, sourceRegion);
     }
 
     private SelectionReference convertSelectionReference(IStrategoAppl term, Region fallbackRegion, int index, String expected) {
-        final IStrategoInt fromTerm = TermUtils.asIntAt(term, index)
+        IStrategoInt fromTerm = TermUtils.asIntAt(term, index)
             .orElseThrow(() -> new InvalidAstShapeException(expected, term));
-        final @Nullable Region fromRegion = TermTracer.getRegion(fromTerm);
+        @Nullable Region fromRegion = TermTracer.getRegion(fromTerm);
         return new SelectionReference(fromTerm.intValue(), fromRegion != null ? fromRegion : fallbackRegion);
     }
 }
