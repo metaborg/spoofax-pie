@@ -35,40 +35,16 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
   project(":$id").projectDir = file(path)
 }
 
-"tiger/spoofax2".run {
-  includeProject("org.metaborg.lang.tiger")
-  includeProject("org.metaborg.lang.tiger.statix")
+"tiger/spoofaxcore".run {
+  includeProject("tiger.spoofaxcore")
 }
-//"tiger/manual".run {
-//  includeProject("tiger", "tiger/manual/tiger")
-//  includeProject("tiger.cli", "tiger/manual/tiger.cli")
-//  includeProject("tiger.eclipse", "tiger/manual/tiger.eclipse")
-//  includeProject("tiger.intellij", "tiger/manual/tiger.intellij")
-//  includeProject("tiger.spoofax", "tiger/manual/tiger.spoofax")
-//}
-//"tiger/statix".run {
-//  includeProject("tiger.statix", "tiger/statix/tiger.statix")
-//  includeProject("tiger.statix.cli", "tiger/statix/tiger.statix.cli")
-//  includeProject("tiger.statix.eclipse", "tiger/statix/tiger.statix.eclipse")
-//  includeProject("tiger.statix.intellij", "tiger/statix/tiger.statix.intellij")
-//  includeProject("tiger.statix.spoofax", "tiger/statix/tiger.statix.spoofax")
-//}
-"tiger/spoofax3".run {
-  includeProject("tiger.spoofax3", "tiger/spoofax3/tiger.spoofax3")
-  includeProject("tiger.spoofax3.cli", "tiger/spoofax3/tiger.spoofax3.cli")
-  includeProject("tiger.spoofax3.eclipse", "tiger/spoofax3/tiger.spoofax3.eclipse")
-  includeProject("tiger.spoofax3.intellij", "tiger/spoofax3/tiger.spoofax3.intellij")
-  //includeProject("tiger.spoofax3.ccbench", "tiger/spoofax3/tiger.spoofax3.ccbench")
+"tiger/manual".run {
+  includeProject("tiger", "tiger/manual/tiger")
+  includeProject("tiger.spoofax", "tiger/manual/tiger.spoofax")
+  includeProject("tiger.cli", "tiger/manual/tiger.cli")
+  includeProject("tiger.eclipse", "tiger/manual/tiger.eclipse")
+  includeProject("tiger.intellij", "tiger/manual/tiger.intellij")
 }
-
-// Takes too long:
-//"webdsl".run {
-//    includeProject("webdsl", "webdsl/webdsl")
-//    includeProject("webdsl.cli", "webdsl/webdsl.cli")
-//    includeProject("webdsl.eclipse", "webdsl/webdsl.eclipse")
-//    includeProject("webdsl.intellij", "webdsl/webdsl.intellij")
-//    includeProject("webdsl.ccbench", "webdsl/webdsl.ccbench")
-//}
 "tiger/spoofax3".run {
   includeProject("tiger.spoofax3", "tiger/spoofax3/tiger.spoofax3")
   includeProject("tiger.spoofax3.cli", "tiger/spoofax3/tiger.spoofax3.cli")

@@ -9,7 +9,6 @@ dependencies {
   api(project(":jsglr1.common"))
   api(project(":stratego.common"))
   api(project(":constraint.common"))
-  api(project(":completions.common"))
   api(project(":tego.runtime"))
 
   compileOnly("org.checkerframework:checker-qual-android")

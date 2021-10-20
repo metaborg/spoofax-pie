@@ -1,5 +1,6 @@
 package mb.tiger.spoofax;
 
+import mb.common.codecompletion.CodeCompletionResult;
 import mb.common.editor.HoverResult;
 import mb.common.editor.ReferenceResolutionResult;
 import mb.common.message.KeyedMessages;
@@ -11,7 +12,6 @@ import mb.common.util.CollectionView;
 import mb.common.util.ListView;
 import mb.common.util.MapView;
 import mb.common.util.SetView;
-import mb.completions.common.CompletionResult;
 import mb.jsglr.common.JSGLRTokens;
 import mb.jsglr.common.JsglrParseException;
 import mb.jsglr.common.JsglrParseOutput;
@@ -29,6 +29,7 @@ import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.spoofax.core.language.menu.CommandAction;
 import mb.spoofax.core.language.menu.MenuItem;
+import mb.spoofax.core.language.taskdef.NoneCodeCompletionTaskDef;
 import mb.spoofax.core.language.taskdef.NoneHoverTaskDef;
 import mb.spoofax.core.language.taskdef.NoneResolveTaskDef;
 import mb.spt.api.parse.ParseResult;
@@ -43,7 +44,6 @@ import mb.tiger.spoofax.command.TigerShowPrettyPrintedTextCommand;
 import mb.tiger.spoofax.task.TigerCheck;
 import mb.tiger.spoofax.task.TigerCheckAggregator;
 import mb.tiger.spoofax.task.TigerIdeTokenize;
-import mb.tiger.spoofax.task.reusable.TigerCompleteTaskDef;
 import mb.tiger.spoofax.task.reusable.TigerParse;
 import mb.tiger.spoofax.task.reusable.TigerStyle;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -61,7 +61,7 @@ public class TigerInstance implements LanguageInstance, TestableParse {
     private final TigerCheckAggregator checkAggregate;
     private final TigerStyle style;
     private final TigerIdeTokenize tokenize;
-    private final TigerCompleteTaskDef complete;
+    private final NoneCodeCompletionTaskDef complete;
     private final NoneResolveTaskDef resolve;
     private final NoneHoverTaskDef hover;
 
@@ -83,7 +83,7 @@ public class TigerInstance implements LanguageInstance, TestableParse {
         TigerCheckAggregator checkAggregate,
         TigerStyle style,
         TigerIdeTokenize tokenize,
-        TigerCompleteTaskDef complete,
+        NoneCodeCompletionTaskDef complete,
         NoneResolveTaskDef resolve,
         NoneHoverTaskDef hover,
 
@@ -141,8 +141,12 @@ public class TigerInstance implements LanguageInstance, TestableParse {
     }
 
     @Override
-    public Task<@Nullable CompletionResult> createCompletionTask(ResourceKey resourceKey, Region primarySelection) {
-        return complete.createTask(new TigerCompleteTaskDef.Input(parse.inputBuilder().withFile(resourceKey).buildRecoverableAstSupplier().map(Result::get))); // TODO: use Result.
+    public Task<Option<CodeCompletionResult>> createCodeCompletionTask(Region primarySelection, ResourceKey resourceKey, @Nullable ResourcePath rootDirectoryHint) {
+        return complete.createTask(new NoneCodeCompletionTaskDef.Input(
+            primarySelection,
+            resourceKey,
+            rootDirectoryHint
+        ));
     }
 
     @Override

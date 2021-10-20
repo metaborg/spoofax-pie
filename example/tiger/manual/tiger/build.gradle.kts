@@ -20,7 +20,6 @@ dependencies {
   api("org.metaborg:common")
   api(compositeBuild("spoofax.compiler.interfaces"))
   api(compositeBuild("spoofax.resource"))
-  api(compositeBuild("completions.common"))
   api(compositeBuild("jsglr1.common"))
   api(compositeBuild("esv.common"))
   api(compositeBuild("stratego.common"))
