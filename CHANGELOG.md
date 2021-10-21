@@ -5,6 +5,26 @@ All notable changes to this project are documented in this file, based on [Keep 
 ## [Unreleased]
 
 
+## [0.15.2] - 2021-10-21
+### Added
+- Tego runtime, along with exposing this runtime to languages that require it, in preparation for semantic code completion based on Statix (https://github.com/metaborg/spoofax-pie/pull/73).
+
+### Fixed
+- Undo in the Eclipse LWB applying to the first opened editor when multiple editors of the same language were opened (https://github.com/metaborg/spoofax-pie/issues/55).
+
+
+## [0.15.1] - 2021-10-19
+### Fixed
+- No errors for certain kinds of SDF3 context-free productions that do require a constructor. All context-free productions except those of the form `A = B` and `A = {B ","}*`, excluding productions that have a `{reject}` or `{bracket}` annotation, now require a constructor or produce an error.
+- No error for ill-formed SDF3 bracket productions. Bracket productions must be of the form `A = "(" B ")"` or produce an error.
+- `IndexOutOfBoundsException` in SPT tests with `resolve` and `resolve to` expectations where there was no valid target for a selection.
+- Cancellation/interrupt during PIE execution leaving behind an inconsistent state in certain edge cases. Hopefully this solves "random" `NullPointerException`s, but more investigation is needed for that (https://github.com/metaborg/spoofax-pie/issues/81).
+
+### Changed
+- `pie` requirement to `0.19.1`
+- `releng` (devenv-release) requirement to 0.1.16.
+
+
 ## [0.15.0] - 2021-10-18
 ### Fixed
 - Continuous commands not updating after a language was rebuilt in Eclipse.
@@ -245,7 +265,9 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.15.0...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.15.2...HEAD
+[0.15.2]: https://github.com/metaborg/spoofax-pie/compare/release-0.15.1...release-0.15.2
+[0.15.1]: https://github.com/metaborg/spoofax-pie/compare/release-0.15.0...release-0.15.1
 [0.15.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.14.2...release-0.15.0
 [0.14.2]: https://github.com/metaborg/spoofax-pie/compare/release-0.14.1...release-0.14.2
 [0.14.1]: https://github.com/metaborg/spoofax-pie/compare/release-0.14.0...release-0.14.1

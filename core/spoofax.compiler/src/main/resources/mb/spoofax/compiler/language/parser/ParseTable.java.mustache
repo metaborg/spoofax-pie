@@ -22,7 +22,7 @@ public class {{baseParseTable.id}} implements Serializable {
             final {{parseTableType.qualifiedId}} parseTable = {{parseTableType.qualifiedId}}.fromStream(atermInputStream{{#isJsglr2}}, persistedInputStream{{/isJsglr2}});
             return new {{baseParseTable.id}}(parseTable);
         } catch({{parseTableExceptionType.qualifiedId}} | IOException e) {
-            throw new RuntimeException("Cannot create parse table; cannot read parse table from resource '" + atermFile + "'{{#isJsglr2}} or '" + persistedFile + "'{{/isJsglr2}} in classloader resources");
+            throw new RuntimeException("Cannot create parse table; cannot read parse table from resource '" + atermFile + "'{{#isJsglr2}} or '" + persistedFile + "'{{/isJsglr2}} in classloader resources", e);
         }
     }
 }
