@@ -110,6 +110,12 @@ public class CodeCompletionAdapterCompiler {
 
         @Value.Default default String ppPartialStrategy() { return "pp-partial"; }
 
+        // Statix settings
+
+        @Value.Default default String statixSpecName() { return "main"; }
+
+        @Value.Default default String statixRootPredicateName() { return "programOk"; }
+
         /// Files information, known up-front for build systems with static dependencies such as Gradle.
 
         default ListView<ResourcePath> javaSourceFiles() {

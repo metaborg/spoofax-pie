@@ -163,14 +163,18 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
     private final ConstraintAnalyzeFile analyzeFileTask;
     private final GetStrategoRuntimeProvider getStrategoRuntimeProviderTask;
     private final TegoRuntime tegoRuntime;
+    private final StatixSpecTaskDef statixSpec;
+    private final StrategoTerms strategoTerms;
+
     private final String preAnalyzeStrategyName;
     private final String postAnalyzeStrategyName;
     private final String upgradePlaceholdersStrategyName;
     private final String downgradePlaceholdersStrategyName;
     private final String isInjStrategyName;
     private final String ppPartialStrategyName;
-    private final StrategoTerms strategoTerms;
-    private final StatixSpecTaskDef statixSpec;
+
+    private final String statixSecName;
+    private final String statixRootPredicateName;
     private final CodeCompletionEventHandler eventHandler;
 
     /**
@@ -189,6 +193,9 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
      * @param downgradePlaceholdersStrategyName the {@code downgrade-placeholders} Stratego strategy name
      * @param isInjStrategyName the {@code is-inj} Stratego strategy name
      * @param ppPartialStrategyName the {@code pp-partial} Stratego strategy name
+     *
+     * @param statixSecName the name of the Statix spec
+     * @param statixRootPredicateName the name of the single-analysis root predicate in the Statix spec
      * @param eventHandler the code completion event handler
      */
     public CodeCompletionTaskDef(
@@ -206,6 +213,9 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
         String downgradePlaceholdersStrategyName,
         String isInjStrategyName,
         String ppPartialStrategyName,
+
+        String statixSecName,
+        String statixRootPredicateName,
         CodeCompletionEventHandler eventHandler
     ) {
         this.parseTask = parseTask;
@@ -222,6 +232,9 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
         this.downgradePlaceholdersStrategyName = downgradePlaceholdersStrategyName;
         this.isInjStrategyName = isInjStrategyName;
         this.ppPartialStrategyName = ppPartialStrategyName;
+
+        this.statixSecName = statixSecName;
+        this.statixRootPredicateName = statixRootPredicateName;
         this.eventHandler = eventHandler;
     }
 
@@ -307,8 +320,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
             final @Nullable ITerm upgradedAst = upgradePlaceholders(statixAst, placeholderVarMap);
             if (upgradedAst == null) return Option.ofNone();
             final ITermVar placeholder = getCompletionPlaceholder(upgradedAst);
-            // TODO: Specify spec name and root rule name somewhere
-            final SolverState initialState = createInitialSolverState(upgradedAst, "main", "programOk", placeholderVarMap);
+            final SolverState initialState = createInitialSolverState(upgradedAst, statixSecName, statixRootPredicateName, placeholderVarMap);
             eventHandler.endPreparation();
 
             // Analyze the AST
