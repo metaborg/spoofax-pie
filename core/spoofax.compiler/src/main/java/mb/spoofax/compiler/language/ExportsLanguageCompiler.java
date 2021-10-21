@@ -52,9 +52,7 @@ public class ExportsLanguageCompiler {
 
 
     public ListView<GradleConfiguredDependency> getDependencies(Input input) {
-        return ListView.of(
-            GradleConfiguredDependency.api(input.shared().statixCodeCompletionDep())
-        );
+        return ListView.of();
     }
 
     public ListView<String> getCopyResources(Input input) {
