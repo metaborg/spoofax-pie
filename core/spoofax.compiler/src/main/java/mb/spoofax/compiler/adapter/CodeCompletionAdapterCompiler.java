@@ -26,11 +26,6 @@ public class CodeCompletionAdapterCompiler {
     private final TemplateWriter codeCompletionTaskDefTemplate;
     private final TemplateWriter statixSpecTaskDefTemplate;
 
-    private final TemplateWriter upgradePlaceholdersStatixTaskDefTemplate;
-    private final TemplateWriter downgradePlaceholdersStatixTaskDefTemplate;
-    private final TemplateWriter isInjectionStatixTaskDefTemplate;
-    private final TemplateWriter ppPartialTaskDefTemplate;
-
     /**
      * Initializes a new instance of the {@link CodeCompletionAdapterCompiler} class.
      *
@@ -40,11 +35,6 @@ public class CodeCompletionAdapterCompiler {
         templateCompiler = templateCompiler.loadingFromClass(getClass());
         this.codeCompletionTaskDefTemplate = templateCompiler.getOrCompileToWriter("code_completion/CodeCompletionTaskDef.java.mustache");
         this.statixSpecTaskDefTemplate = templateCompiler.getOrCompileToWriter("code_completion/StatixSpecTaskDef.java.mustache");
-
-        this.upgradePlaceholdersStatixTaskDefTemplate = templateCompiler.getOrCompileToWriter("code_completion/UpgradePlaceholdersStatixTaskDef.java.mustache");
-        this.downgradePlaceholdersStatixTaskDefTemplate = templateCompiler.getOrCompileToWriter("code_completion/DowngradePlaceholdersStatixTaskDef.java.mustache");
-        this.isInjectionStatixTaskDefTemplate = templateCompiler.getOrCompileToWriter("code_completion/IsInjectionStatixTaskDef.java.mustache");
-        this.ppPartialTaskDefTemplate = templateCompiler.getOrCompileToWriter("code_completion/PPPartialTaskDef.java.mustache");
     }
 
     public None compile(ExecContext context, Input input) throws IOException {
@@ -52,11 +42,6 @@ public class CodeCompletionAdapterCompiler {
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         codeCompletionTaskDefTemplate.write(context, input.baseCodeCompletionTaskDef().file(generatedJavaSourcesDirectory), input);
         statixSpecTaskDefTemplate.write(context, input.baseStatixSpecTaskDef().file(generatedJavaSourcesDirectory), input);
-
-        upgradePlaceholdersStatixTaskDefTemplate.write(context, input.baseUpgradePlaceholdersStatixTaskDef().file(generatedJavaSourcesDirectory), input);
-        downgradePlaceholdersStatixTaskDefTemplate.write(context, input.baseDowngradePlaceholdersStatixTaskDef().file(generatedJavaSourcesDirectory), input);
-        isInjectionStatixTaskDefTemplate.write(context, input.baseIsInjectionStatixTaskDef().file(generatedJavaSourcesDirectory), input);
-        ppPartialTaskDefTemplate.write(context, input.basePPPartialTaskDef().file(generatedJavaSourcesDirectory), input);
         return None.instance;
     }
 
@@ -111,54 +96,17 @@ public class CodeCompletionAdapterCompiler {
             return extendStatixSpecTaskDef().orElseGet(this::baseStatixSpecTaskDef);
         }
 
-        // Transformation tasks
-
-        @Value.Default default TypeInfo baseUpgradePlaceholdersStatixTaskDef() {
-            return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "UpgradePlaceholdersStatix");
-        }
-
-        Optional<TypeInfo> extendUpgradePlaceholdersStatixTaskDef();
-
-        default TypeInfo upgradePlaceholdersStatixTaskDef() {
-            return extendUpgradePlaceholdersStatixTaskDef().orElseGet(this::baseUpgradePlaceholdersStatixTaskDef);
-        }
-
-        @Value.Default default TypeInfo baseDowngradePlaceholdersStatixTaskDef() {
-            return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "DowngradePlaceholdersStatix");
-        }
-
-        Optional<TypeInfo> extendDowngradePlaceholdersStatixTaskDef();
-
-        default TypeInfo downgradePlaceholdersStatixTaskDef() {
-            return extendDowngradePlaceholdersStatixTaskDef().orElseGet(this::baseDowngradePlaceholdersStatixTaskDef);
-        }
-
-        @Value.Default default TypeInfo baseIsInjectionStatixTaskDef() {
-            return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "IsInjectionStatix");
-        }
-
-        Optional<TypeInfo> extendIsInjectionStatixTaskDef();
-
-        default TypeInfo isInjectionStatixTaskDef() {
-            return extendIsInjectionStatixTaskDef().orElseGet(this::baseIsInjectionStatixTaskDef);
-        }
-
-        @Value.Default default TypeInfo basePPPartialTaskDef() {
-            return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "PPPartial");
-        }
-
-        Optional<TypeInfo> extendPPPartialTaskDef();
-
-        default TypeInfo ppPartialTaskDef() {
-            return extendPPPartialTaskDef().orElseGet(this::basePPPartialTaskDef);
-        }
         // Transformation settings
+
+        @Value.Default default String preAnalyzeStrategy() { return "pre-analyze"; }
+
+        @Value.Default default String postAnalyzeStrategy() { return "post-analyze"; }
 
         @Value.Default default String upgradePlaceholdersStrategy() { return "upgrade-placeholders"; }
 
         @Value.Default default String downgradePlaceholdersStrategy() { return "downgrade-placeholders"; }
 
-        @Value.Default default String isInjectionStrategy() { return "is-inj"; }
+        @Value.Default default String isInjStrategy() { return "is-inj"; }
 
         @Value.Default default String ppPartialStrategy() { return "pp-partial"; }
 
@@ -171,11 +119,7 @@ public class CodeCompletionAdapterCompiler {
             final ResourcePath generatedJavaSourcesDirectory = generatedJavaSourcesDirectory();
             return ListView.of(
                 baseCodeCompletionTaskDef().file(generatedJavaSourcesDirectory),
-                baseStatixSpecTaskDef().file(generatedJavaSourcesDirectory),
-                baseUpgradePlaceholdersStatixTaskDef().file(generatedJavaSourcesDirectory),
-                baseDowngradePlaceholdersStatixTaskDef().file(generatedJavaSourcesDirectory),
-                baseIsInjectionStatixTaskDef().file(generatedJavaSourcesDirectory),
-                basePPPartialTaskDef().file(generatedJavaSourcesDirectory)
+                baseStatixSpecTaskDef().file(generatedJavaSourcesDirectory)
             );
         }
 

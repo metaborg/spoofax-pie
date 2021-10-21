@@ -438,10 +438,6 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             codeCompletion().ifPresent((i) -> {
                 taskDefs.add(i.codeCompletionTaskDef(), i.baseCodeCompletionTaskDef());
                 taskDefs.add(i.statixSpecTaskDef(), i.baseStatixSpecTaskDef());
-                taskDefs.add(i.upgradePlaceholdersStatixTaskDef(), i.baseUpgradePlaceholdersStatixTaskDef());
-                taskDefs.add(i.downgradePlaceholdersStatixTaskDef(), i.baseDowngradePlaceholdersStatixTaskDef());
-                taskDefs.add(i.isInjectionStatixTaskDef(), i.baseIsInjectionStatixTaskDef());
-                taskDefs.add(i.ppPartialTaskDef(), i.basePPPartialTaskDef());
             });
             if(!codeCompletion().isPresent()) {
                 taskDefs.add(TypeInfo.of(NoneCodeCompletionTaskDef.class));
