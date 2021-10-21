@@ -2,7 +2,7 @@ package mb.statix.codecompletion.strategies.runtime;
 
 import com.google.common.collect.ImmutableMap;
 import mb.nabl2.terms.ITermVar;
-import mb.statix.SolverState;
+import mb.statix.codecompletion.SolverState;
 import mb.statix.solver.IConstraint;
 import mb.tego.strategies.NamedStrategy2;
 import mb.tego.strategies.runtime.TegoEngine;

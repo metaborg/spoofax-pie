@@ -1,4 +1,4 @@
-package mb.statix;
+package mb.statix.codecompletion;
 
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;

@@ -1,8 +1,7 @@
-package mb.statix;
+package mb.statix.codecompletion;
 
 import io.usethesource.capsule.Set;
 import mb.nabl2.terms.ITermVar;
-import mb.statix.constraints.CExists;
 import mb.statix.solver.Delay;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.IState;

@@ -1,4 +1,4 @@
-package mb.statix;
+package mb.statix.codecompletion;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;

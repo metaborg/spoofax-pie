@@ -1,10 +1,9 @@
 package mb.statix.codecompletion.strategies.runtime;
 
 import mb.nabl2.terms.ITermVar;
-import mb.statix.SolverContext;
-import mb.statix.SolverState;
+import mb.statix.codecompletion.SolverContext;
+import mb.statix.codecompletion.SolverState;
 import mb.tego.sequences.Seq;
-import mb.tego.strategies.NamedStrategy2;
 import mb.tego.strategies.NamedStrategy3;
 import mb.tego.strategies.Strategy;
 import mb.tego.strategies.runtime.FixSetStrategy;

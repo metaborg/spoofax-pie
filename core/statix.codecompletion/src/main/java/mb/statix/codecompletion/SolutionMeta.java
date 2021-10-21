@@ -1,4 +1,4 @@
-package mb.statix;
+package mb.statix.codecompletion;
 
 /**
  * Meta data for a solver state.

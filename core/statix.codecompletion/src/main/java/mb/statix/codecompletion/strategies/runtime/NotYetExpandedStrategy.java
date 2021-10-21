@@ -1,13 +1,10 @@
 package mb.statix.codecompletion.strategies.runtime;
 
-import mb.statix.SolverState;
+import mb.statix.codecompletion.SolverState;
 import mb.statix.constraints.CUser;
 import mb.tego.strategies.NamedStrategy1;
-import mb.tego.strategies.NamedStrategy2;
 import mb.tego.strategies.runtime.TegoEngine;
 import org.checkerframework.checker.nullness.qual.Nullable;
-
-import static mb.tego.utils.CollectionUtils.containsAny;
 
 public final class NotYetExpandedStrategy extends NamedStrategy1<CUser, SolverState, @Nullable SolverState> {
 

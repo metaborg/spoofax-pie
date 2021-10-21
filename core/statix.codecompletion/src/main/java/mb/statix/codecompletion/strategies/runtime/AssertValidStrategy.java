@@ -1,20 +1,14 @@
 package mb.statix.codecompletion.strategies.runtime;
 
 import mb.nabl2.terms.ITermVar;
-import mb.statix.SolverContext;
-import mb.statix.SolverState;
-import mb.tego.sequences.Seq;
-import mb.tego.strategies.FunctionStrategy;
-import mb.tego.strategies.FunctionStrategy1;
-import mb.tego.strategies.NamedStrategy1;
+import mb.statix.codecompletion.SolverContext;
+import mb.statix.codecompletion.SolverState;
 import mb.tego.strategies.NamedStrategy2;
 import mb.tego.strategies.Strategy;
 import mb.tego.strategies.StrategyExt;
 import mb.tego.strategies.runtime.NotStrategy;
 import mb.tego.strategies.runtime.TegoEngine;
 import org.checkerframework.checker.nullness.qual.Nullable;
-
-import static mb.tego.strategies.StrategyExt.*;
 
 @SuppressWarnings("RedundantSuppression")
 public final class AssertValidStrategy extends NamedStrategy2<SolverContext, ITermVar, SolverState, @Nullable SolverState> {

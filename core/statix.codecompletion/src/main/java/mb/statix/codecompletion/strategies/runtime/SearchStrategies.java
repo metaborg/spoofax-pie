@@ -1,9 +1,9 @@
 package mb.statix.codecompletion.strategies.runtime;
 
 import mb.nabl2.terms.ITermVar;
-import mb.statix.SelectedConstraintSolverState;
-import mb.statix.SolverContext;
-import mb.statix.SolverState;
+import mb.statix.codecompletion.SelectedConstraintSolverState;
+import mb.statix.codecompletion.SolverContext;
+import mb.statix.codecompletion.SolverState;
 import mb.statix.constraints.CResolveQuery;
 import mb.statix.constraints.CUser;
 import mb.tego.sequences.Seq;

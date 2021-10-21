@@ -1,13 +1,11 @@
 package mb.statix.codecompletion.strategies.runtime;
 
-import mb.statix.SolverState;
-import mb.tego.sequences.Seq;
+import mb.statix.codecompletion.SolverState;
 import mb.statix.solver.completeness.IsComplete;
 import mb.statix.solver.log.NullDebugContext;
 import mb.statix.solver.persistent.Solver;
 import mb.statix.solver.persistent.SolverResult;
 import mb.tego.strategies.NamedStrategy;
-import mb.tego.strategies.NamedStrategy1;
 import mb.tego.strategies.runtime.TegoEngine;
 import org.metaborg.util.task.NullCancel;
 import org.metaborg.util.task.NullProgress;

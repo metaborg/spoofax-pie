@@ -2,14 +2,12 @@ package mb.statix.codecompletion.strategies.runtime;
 
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
-import mb.statix.SolverContext;
-import mb.statix.SolverState;
+import mb.statix.codecompletion.SolverContext;
+import mb.statix.codecompletion.SolverState;
 import mb.statix.constraints.CResolveQuery;
 import mb.tego.sequences.Seq;
-import mb.tego.strategies.NamedStrategy1;
 import mb.tego.strategies.NamedStrategy2;
 import mb.tego.strategies.Strategy;
-import mb.tego.strategies.StrategyExt;
 import mb.tego.strategies.runtime.TegoEngine;
 
 import static mb.statix.codecompletion.strategies.runtime.SearchStrategies.*;

@@ -1,4 +1,4 @@
-package mb.statix;
+package mb.statix.codecompletion;
 
 import mb.common.codecompletion.CodeCompletionItem;
 import mb.common.codecompletion.CodeCompletionResult;

@@ -1,7 +1,7 @@
 package mb.statix.codecompletion.strategies.runtime;
 
-import mb.statix.SelectedConstraintSolverState;
-import mb.statix.SolverState;
+import mb.statix.codecompletion.SelectedConstraintSolverState;
+import mb.statix.codecompletion.SolverState;
 import mb.tego.sequences.Seq;
 import mb.statix.solver.IConstraint;
 import mb.tego.strategies.NamedStrategy2;
