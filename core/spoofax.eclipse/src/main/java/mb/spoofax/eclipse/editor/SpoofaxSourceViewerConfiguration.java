@@ -78,7 +78,6 @@ public class SpoofaxSourceViewerConfiguration extends TextSourceViewerConfigurat
         );
         assistant.setContentAssistProcessor(processor, IDocument.DEFAULT_CONTENT_TYPE);
         assistant.setRepeatedInvocationMode(true);
-//        assistant.setInformationControlCreator(informationControlCreator);
         return assistant;
     }
 }
