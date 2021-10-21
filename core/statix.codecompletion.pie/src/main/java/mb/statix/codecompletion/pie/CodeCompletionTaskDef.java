@@ -138,22 +138,25 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
             if (this == that) return true;
             return this.primarySelection.equals(that.primarySelection)
                 && this.file.equals(that.file)
-                && Objects.equals(this.rootDirectoryHint, that.rootDirectoryHint);
+                && Objects.equals(this.rootDirectoryHint, that.rootDirectoryHint)
+                && this.completeDeterministic == that.completeDeterministic;
         }
 
         @Override public int hashCode() {
             return Objects.hash(
                 this.rootDirectoryHint,
                 this.file,
-                this.primarySelection
+                this.primarySelection,
+                this.completeDeterministic
             );
         }
 
         @Override public String toString() {
-            return "CodeCompletionTaskDef.Args{" +
+            return "CodeCompletionTaskDef.Input{" +
                 "primarySelection=" + primarySelection + ", " +
                 "rootDirectoryHint=" + rootDirectoryHint + ", " +
-                "file=" + file +
+                "file=" + file + ", " +
+                "completeDeterministic=" + completeDeterministic +
                 "}";
         }
     }
