@@ -4,6 +4,7 @@ import mb.common.codecompletion.CodeCompletionItem;
 import mb.common.editing.TextEdit;
 import mb.common.style.StyleName;
 import mb.common.util.ListView;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import java.util.Objects;
@@ -41,12 +42,21 @@ public class StrategoTermCodeCompletionItem extends CodeCompletionItem {
         return strategoTerm;
     }
 
-    @Override public boolean equals(Object o) {
+    @Override public boolean equals(@Nullable Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
         return innerEquals((StrategoTermCodeCompletionItem)o);
     }
 
+    /**
+     * Determines whether this object is equal to the specified object.
+     *
+     * Note: this method does not check whether the type of the argument is exactly the same.
+     *
+     * @param that the object to compare to
+     * @return {@code true} when this object is equal to the specified object;
+     * otherwise, {@code false}
+     */
     protected boolean innerEquals(StrategoTermCodeCompletionItem that) {
         return this.strategoTerm == that.strategoTerm
             && super.innerEquals(that);

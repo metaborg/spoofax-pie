@@ -119,7 +119,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
         @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
-            return equals((Input)o);
+            return innerEquals((Input)o);
         }
 
         /**
@@ -131,8 +131,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * @return {@code true} when this object is equal to the specified object;
          * otherwise, {@code false}
          */
-        protected boolean equals(Input that) {
-            if (this == that) return true;
+        protected boolean innerEquals(Input that) {
             return this.primarySelection.equals(that.primarySelection)
                 && this.file.equals(that.file)
                 && Objects.equals(this.rootDirectoryHint, that.rootDirectoryHint)
