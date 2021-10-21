@@ -2,6 +2,7 @@ package mb.statix.task;
 
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
 import mb.pie.api.None;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
@@ -15,6 +16,7 @@ import org.spoofax.interpreter.terms.ITermFactory;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -40,6 +42,10 @@ public class StatixCompileAndMergeProject implements TaskDef<ResourcePath, Resul
     @Override
     public String getId() {
         return getClass().getName();
+    }
+
+    @Override public boolean shouldExecWhenAffected(ResourcePath input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 
     @Override

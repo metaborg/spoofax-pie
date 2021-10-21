@@ -5,6 +5,7 @@ import mb.common.result.Result;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.stratego.StrategoTerms;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
 import mb.pie.api.None;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
@@ -23,6 +24,7 @@ import org.spoofax.interpreter.terms.ITermFactory;
 import javax.inject.Inject;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Compiles a Statix project and returns the Statix spec.
@@ -55,6 +57,10 @@ public class StatixCompileSpec implements TaskDef<ResourcePath, Result<Spec, ?>>
 
         final StrategoRuntime strategoRuntime = context.require(getStrategoRuntimeProvider, None.instance).getValue().get();
         return context.require(compileMergedProject, rootDirectory).mapThrowing(specAst -> toSpec(specAst, strategoRuntime.getTermFactory()));
+    }
+
+    @Override public boolean shouldExecWhenAffected(ResourcePath input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 
     /**
