@@ -6,6 +6,8 @@ import mb.common.region.Region;
 import mb.common.util.ListView;
 import mb.nabl2.terms.ITermVar;
 
+import java.util.Objects;
+
 /**
  * A code completion result with the placeholder being completed.
  */
@@ -27,5 +29,32 @@ public class TermCodeCompletionResult extends CodeCompletionResult {
 
     public ITermVar getPlaceholder() {
         return placeholder;
+    }
+
+    @Override public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+        return internalEquals((TermCodeCompletionResult)o);
+    }
+
+    protected boolean internalEquals(TermCodeCompletionResult that) {
+        return this.placeholder.equals(that.placeholder)
+            && super.internalEquals(that);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+            placeholder
+        ) + super.hashCode();
+    }
+
+    @Override public String toString() {
+        return "CodeCompletionResult{" +
+            "proposals=" + getProposals() + ", " +
+            "replacementRegion=" + getReplacementRegion() + ", " +
+            "isComplete=" + isComplete() + ", " +
+            "placeholder=" + placeholder +
+            '}';
     }
 }

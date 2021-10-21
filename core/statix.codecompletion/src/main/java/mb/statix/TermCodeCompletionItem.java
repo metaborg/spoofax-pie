@@ -7,6 +7,8 @@ import mb.common.util.ListView;
 import mb.nabl2.terms.ITerm;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
+import java.util.Objects;
+
 /**
  * A completion proposal that includes the Stratego term.
  */
@@ -39,5 +41,23 @@ public class TermCodeCompletionItem extends StrategoTermCodeCompletionItem {
      */
     public ITerm getTerm() {
         return term;
+    }
+
+    @Override public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+        return innerEquals((TermCodeCompletionItem)o);
+    }
+
+    protected boolean innerEquals(TermCodeCompletionItem that) {
+        return this.term == that.term
+            && super.innerEquals(that);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+            term
+        ) + super.hashCode();
     }
 }
