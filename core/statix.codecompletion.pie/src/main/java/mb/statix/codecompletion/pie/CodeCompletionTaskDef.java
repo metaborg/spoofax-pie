@@ -71,6 +71,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static mb.tego.strategies.StrategyExt.pred;
@@ -350,7 +351,11 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * @throws JsglrParseException if parsing failed
          */
         private IStrategoTerm parse() throws JsglrParseException {
-            return context.require(parseTask.inputBuilder().withFile(file).buildRecoverableAstSupplier()).unwrap();
+            return context.require(parseTask.inputBuilder()
+                .withFile(file)
+                .rootDirectoryHint(Optional.ofNullable(rootDirectoryHint))
+                .buildRecoverableAstSupplier()
+            ).unwrap();
         }
 
         /**
