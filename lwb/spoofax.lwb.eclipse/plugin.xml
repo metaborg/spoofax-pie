@@ -108,6 +108,7 @@
   <extension point="org.eclipse.ui.editors">
     <editor
       name="Spoofax dynamic editor"
+      contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
       class="mb.spoofax.lwb.eclipse.dynamicloading.DynamicEditor"
       id="spoofax.lwb.eclipse.dynamicloading.editor"
     />
