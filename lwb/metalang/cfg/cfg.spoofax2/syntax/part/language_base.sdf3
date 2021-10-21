@@ -11,11 +11,12 @@ context-free sorts
   ParserVariant
   Jsglr2Option
   Jsglr2Preset
-  
-  StylerOption 
+
+  StylerOption
   ConstraintAnalyzerOption
   MultilangAnalyzerOption
   StrategoRuntimeOption
+  TegoRuntimeOption
   CompleterOption
   ExportsOption
 
@@ -27,14 +28,14 @@ context-free syntax
 
   ParserOption.DefaultStartSymbol = <default-start-symbol = <Expr>>
   ParserOption.ParserVariant = <variant = <ParserVariant>>
-  
+
   ParserVariant.Jsglr1 = <jsglr1>
   ParserVariant.Jsglr2 = <jsglr2 {
   <{Jsglr2Option "\n"}*>
 }>
 
   Jsglr2Option.Jsglr2Preset = <preset = <Jsglr2Preset>>
-  
+
   Jsglr2Preset.Jsglr2StandardPreset            = <Standard>
   Jsglr2Preset.Jsglr2ElkhoundPreset            = <Elkhound>
   Jsglr2Preset.Jsglr2RecoveryPreset            = <Recovery>
@@ -84,6 +85,12 @@ context-free syntax
   StrategoRuntimeOption.StrategoRuntimeAddSpoofax2Primitives         = <add-spoofax2-primitives = <Expr>>
   StrategoRuntimeOption.StrategoRuntimeAddNaBL2Primitives            = <add-nabl2-primitives = <Expr>>
   StrategoRuntimeOption.StrategoRuntimeAddStatixPrimitives           = <add-statix-primitives = <Expr>>
+
+context-free syntax
+
+  Part.TegoRuntimeSection = <tego-runtime {
+  <{TegoRuntimeOption "\n"}*>
+}>
 
 context-free syntax
 

@@ -209,6 +209,7 @@ public class TigerInputs {
         adapterProjectCompilerInputBuilder.withStyler();
         adapterProjectCompilerInputBuilder.withConstraintAnalyzer();
         adapterProjectCompilerInputBuilder.withStrategoRuntime();
+        adapterProjectCompilerInputBuilder.withTegoRuntime();
         adapterProjectCompilerInputBuilder.withCompleter();
 
         final TypeInfo showParsedAstTaskDef = TypeInfo.of(adapterProject.taskPackageId(), "TigerShowParsedAstTaskDef");

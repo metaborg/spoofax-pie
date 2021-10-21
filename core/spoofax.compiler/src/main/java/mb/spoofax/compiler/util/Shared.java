@@ -314,6 +314,11 @@ public interface Shared extends Serializable {
         return GradleDependency.module(Coordinate.of("org.metaborg", "spt.api", spoofax3Version()));
     }
 
+    @Value.Default default GradleDependency tegoRuntimeDep() {
+        return GradleDependency.module(Coordinate.of("org.metaborg", "tego.runtime", spoofax3Version()));
+    }
+
+
 
     /// Spoofax 3 metalib
 

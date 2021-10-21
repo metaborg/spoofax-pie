@@ -95,6 +95,11 @@ public class {{baseModule.id}} {
 
 
     @Provides @{{scope.id}}
+    static mb.nabl2.terms.stratego.StrategoTerms provideStrategoTerms(ITermFactory termFactory) {
+        return new mb.nabl2.terms.stratego.StrategoTerms(termFactory);
+    }
+
+    @Provides @{{scope.id}}
     static {{this.languageProjectInput.constraintAnalyzerFactory.qualifiedId}} provideConstraintAnalyzerFactory(ResourceService resourceService) {
         return new {{this.languageProjectInput.constraintAnalyzerFactory.qualifiedId}}(resourceService);
     }
@@ -142,6 +147,14 @@ public class {{baseModule.id}} {
         return strategoRuntime;
     }
 {{/strategoRuntime}}
+{{#tegoRuntime}}
+
+
+    @Provides @{{scope.id}}
+    static mb.tego.strategies.runtime.TegoRuntime provideTegoRuntime(mb.tego.strategies.runtime.TegoRuntimeImpl tegoImplementation) {
+        return tegoImplementation;
+    }
+{{/tegoRuntime}}
 
     @Provides @{{scope.id}} @{{qualifier.id}} @ElementsIntoSet
     static Set<TaskDef<?, ?>> provideTaskDefs(

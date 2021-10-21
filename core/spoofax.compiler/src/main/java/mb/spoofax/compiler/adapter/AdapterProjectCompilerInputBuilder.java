@@ -30,6 +30,9 @@ public class AdapterProjectCompilerInputBuilder {
     private boolean multilangAnalyzerEnabled = false;
     public final MultilangAnalyzerAdapterCompiler.Input.Builder multilangAnalyzer = MultilangAnalyzerAdapterCompiler.Input.builder();
 
+    private boolean tegoRuntimeEnabled = false;
+    public final TegoRuntimeAdapterCompiler.Input.Builder tegoRuntime = TegoRuntimeAdapterCompiler.Input.builder();
+
     private boolean completerEnabled = false;
     public final CompleterAdapterCompiler.Input.Builder completer = CompleterAdapterCompiler.Input.builder();
 
@@ -75,6 +78,11 @@ public class AdapterProjectCompilerInputBuilder {
         return multilangAnalyzer;
     }
 
+    public TegoRuntimeAdapterCompiler.Input.Builder withTegoRuntime() {
+        tegoRuntimeEnabled = true;
+        return tegoRuntime;
+    }
+
     public CompleterAdapterCompiler.Input.Builder withCompleter() {
         completerEnabled = true;
         return completer;
@@ -114,6 +122,9 @@ public class AdapterProjectCompilerInputBuilder {
 
         final MultilangAnalyzerAdapterCompiler.@Nullable Input multilangAnalyzer = buildMultilangAnalyzer(shared, adapterProject, languageProjectInput, strategoRuntime);
         if(multilangAnalyzer != null) project.multilangAnalyzer(multilangAnalyzer);
+
+        final TegoRuntimeAdapterCompiler.@Nullable Input tegoRuntime = buildTegoRuntime(shared, adapterProject, languageProjectInput, classLoaderResources);
+        if(tegoRuntime != null) project.tegoRuntime(tegoRuntime);
 
         final ReferenceResolutionAdapterCompiler.@Nullable Input referenceResolution = buildReferenceResolution(shared, adapterProject, strategoRuntime, constraintAnalyzer, classLoaderResources);
         if(referenceResolution != null) project.referenceResolution(referenceResolution);
@@ -239,6 +250,20 @@ public class AdapterProjectCompilerInputBuilder {
             .adapterProject(adapterProject)
             .languageProjectInput(languageProjectInput.multilangAnalyzer().orElseThrow(() -> new RuntimeException("Mismatch between presence of multi-language analyzer input between language project and adapter project")))
             .strategoRuntimeInput(strategoRuntimeInput)
+            .build();
+    }
+
+    private TegoRuntimeAdapterCompiler.@Nullable Input buildTegoRuntime(
+        Shared shared,
+        AdapterProject adapterProject,
+        LanguageProjectCompiler.Input languageProjectInput,
+        ClassLoaderResourcesCompiler.Input classloaderResources
+    ) {
+        if(!tegoRuntimeEnabled) return null;
+        return tegoRuntime
+            .shared(shared)
+            .adapterProject(adapterProject)
+            .classLoaderResourcesInput(classloaderResources)
             .build();
     }
 
