@@ -105,7 +105,7 @@ public final class SpoofaxLexer extends LexerBase {
                 @Nullable List<? extends mb.common.token.Token<?>> resourceTokens;
                 if (tokens.isNone()) {
                     resourceTokens = getDefaultTokens(this.resourceKey);
-                    logger.debug("Tokenizer task returned no tokens");
+                    logger.warn("Tokenizer task returned no tokens");
                 } else {
                     resourceTokens = tokens.get().getTokens();
                     logger.debug("Tokenizer task returned {} tokens", resourceTokens.size());
@@ -129,7 +129,7 @@ public final class SpoofaxLexer extends LexerBase {
     private List<mb.common.token.Token<?>> getDefaultTokens(ResourceKey resourceKey) {
         final ReadableResource resource = this.resourceService.getReadableResource(resourceKey);
         try {
-            int length = (int)resource.getSize();
+            int length = (int)resource.getSize() / 2; // Divide by two because we want the number of UTF-16 chars, not the number of bytes.
             return Lists.newArrayList(
                     new TokenImpl<>(TokenTypes.unknown(), Region.fromOffsetLength(0, length), null)
             );
