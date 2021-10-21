@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class CodeCompletionCompilerTest extends TestBase {
-    @Disabled("Unclear why this fails")
     @Test void testCompilerDefaults() throws Exception {
         final TigerInputs inputs = defaultInputs();
 
