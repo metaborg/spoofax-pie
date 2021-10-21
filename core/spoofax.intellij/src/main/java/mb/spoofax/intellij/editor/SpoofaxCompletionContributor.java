@@ -10,6 +10,7 @@ import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
+import com.intellij.psi.PsiFile;
 import com.intellij.ui.LayeredIcon;
 import com.intellij.ui.RowIcon;
 import com.intellij.util.PlatformIcons;
@@ -21,13 +22,19 @@ import mb.common.editing.TextEdit;
 import mb.common.option.Option;
 import mb.common.region.Region;
 import mb.common.style.StyleNames;
+import mb.log.api.Logger;
+import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecException;
+import mb.pie.api.Interactivity;
 import mb.pie.api.MixedSession;
 import mb.pie.api.Task;
+import mb.pie.api.TopDownSession;
+import mb.pie.api.UncheckedExecException;
 import mb.pie.dagger.PieComponent;
 import mb.resource.Resource;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.intellij.IntellijLanguageComponent;
 import mb.spoofax.intellij.SpoofaxPlugin;
@@ -38,6 +45,7 @@ import javax.inject.Provider;
 import javax.swing.*;
 import java.util.AbstractMap;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -47,43 +55,68 @@ import java.util.stream.IntStream;
 import static mb.common.style.StyleNameConstants.*;
 
 /**
- * Completion contributor for IntelliJ.
+ * Spoofax Intellij completion contributor (code completion) contributor.
  */
 public abstract class SpoofaxCompletionContributor extends CompletionContributor {
 
+    private final Logger log;
 
     private final IntellijResourceRegistry resourceRegistry;
-    private final LanguageInstance languageInstance;
-    private final Provider<MixedSession> pieSessionProvider;
+    private final @Nullable LanguageComponent languageComponent;
+    private final @Nullable PieComponent pieComponent;
 
-    protected SpoofaxCompletionContributor(IntellijLanguageComponent languageComponent, PieComponent pieComponent) {
+    protected SpoofaxCompletionContributor(
+        @Nullable IntellijLanguageComponent languageComponent,
+        @Nullable PieComponent pieComponent,
+        LoggerFactory loggerFactory
+    ) {
         this.resourceRegistry = SpoofaxPlugin.getResourceServiceComponent().getResourceRegistry();
-        this.languageInstance = languageComponent.getLanguageInstance();
-        this.pieSessionProvider = () -> pieComponent.getPie().newSession();
+        this.languageComponent = languageComponent;
+        this.pieComponent = pieComponent;
 
+        this.log = loggerFactory.create(getClass());
     }
 
     @Override
     public void fillCompletionVariants(CompletionParameters parameters, CompletionResultSet result) {
-        final Resource file = resourceRegistry.getResource(parameters.getOriginalFile());
-        final ResourceKey fileKey = file.getKey();
-        final @Nullable ResourcePath projectRoot = null;// TODO: Get the project root
-        final Region selection = Region.atOffset(parameters.getOffset());
-
-        final CodeCompletionResult codeCompletionResult;
-        try(final MixedSession session = this.pieSessionProvider.get()) {
-            Task<Option<CodeCompletionResult>> codeCompletionTask = this.languageInstance.createCodeCompletionTask(selection, fileKey, projectRoot);
-            final Option<CodeCompletionResult> maybeCodeCompletionResult = session.require(codeCompletionTask);
-            if (maybeCodeCompletionResult.isNone()) return;  // No completions.
-            codeCompletionResult = maybeCodeCompletionResult.unwrap();
-        } catch(ExecException e) {
-            throw new RuntimeException("Code completion on resource '" + fileKey + "' failed unexpectedly.", e);
-        } catch(InterruptedException e) {
-            return; // No completions.
+        final Option<CodeCompletionResult> optCodeCompletionResult = getCodeCompletionResult(parameters.getOriginalFile(), parameters.getOffset());
+        if (optCodeCompletionResult.isNone()) {
+            // No completions.
+            return;
         }
+        final CodeCompletionResult codeCompletionResult = optCodeCompletionResult.unwrap();
 
         List<LookupElement> elements = IntStream.range(0, codeCompletionResult.getProposals().size()).mapToObj(i -> proposalToElement(codeCompletionResult.getProposals().get(i), i)).collect(Collectors.toList());
         result.addAllElements(elements);
+    }
+
+    /**
+     * Invokes the code completion task and returns the code completion result.
+     *
+     * @param originalFile the editor's file
+     * @param offset the offset at which to invoke code completion
+     * @return an option of the code completion result; or none if it failed
+     */
+    private Option<CodeCompletionResult> getCodeCompletionResult(PsiFile originalFile, int offset) {
+        if(languageComponent == null || pieComponent == null) return Option.ofNone();
+
+        final ResourceKey fileKey = resourceRegistry.getResource(originalFile).getKey();
+        final @Nullable ResourcePath projectRoot = null;// TODO: Get the project root
+        final Region selection = Region.atOffset(offset);
+
+        return Option.ofOptional(pieComponent.getPie().tryNewSession()).flatMap(trySession -> { // Skip code completion if another session exists.
+            try(final MixedSession session = trySession) {
+                final TopDownSession topDownSession = session.updateAffectedBy(Collections.emptySet(), Collections.singleton(Interactivity.Interactive));
+                return topDownSession.requireWithoutObserving(
+                    languageComponent.getLanguageInstance().createCodeCompletionTask(selection, fileKey, projectRoot)
+                );
+            } catch(ExecException e) {
+                // Bubble error up to Eclipse, which will handle it and show a dialog.
+                throw new UncheckedExecException("Code completion on resource '" + fileKey + "' failed unexpectedly.", e);
+            } catch(InterruptedException e) {
+                return Option.ofNone();
+            }
+        });
     }
 
     private LookupElement proposalToElement(CodeCompletionItem proposal, int priority) {

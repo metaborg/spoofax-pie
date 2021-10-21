@@ -19,6 +19,8 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.eclipse.resource.EclipseResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.CompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -37,7 +39,7 @@ import java.util.stream.IntStream;
  */
 public final class SpoofaxContentAssistProcessor implements IContentAssistProcessor {
 
-    private final Logger logger;
+    private final Logger log;
 
     private final SpoofaxEditorBase editorBase;
     private final @Nullable LanguageComponent languageComponent;
@@ -61,12 +63,14 @@ public final class SpoofaxContentAssistProcessor implements IContentAssistProces
         this.languageComponent = languageComponent;
         this.pieComponent = pieComponent;
 
-        this.logger = loggerFactory.create(getClass());
+        this.log = loggerFactory.create(getClass());
     }
 
 
     @Override public @Nullable ICompletionProposal[] computeCompletionProposals(final ITextViewer viewer, final int offset) {
-        final Option<CodeCompletionResult> optCodeCompletionResult = getCodeCompletionResult(offset);
+        if(editorBase.file == null) return null;
+
+        final Option<CodeCompletionResult> optCodeCompletionResult = getCodeCompletionResult(editorBase.project, editorBase.file, offset);
         if (optCodeCompletionResult.isNone()) {
             // No completions.
             return null;
@@ -81,16 +85,16 @@ public final class SpoofaxContentAssistProcessor implements IContentAssistProces
     /**
      * Invokes the code completion task and returns the code completion result.
      *
+     * @param project the editor's file's project; or {@code null}
+     * @param originalFile the editor's file
      * @param offset the offset at which to invoke code completion
      * @return an option of the code completion result; or none if it failed
      */
-    private Option<CodeCompletionResult> getCodeCompletionResult(final int offset) {
-        if(languageComponent == null || pieComponent == null || editorBase.file == null) {
-            return Option.ofNone();
-        }
+    private Option<CodeCompletionResult> getCodeCompletionResult(@Nullable IProject project, IFile originalFile, final int offset) {
+        if(languageComponent == null || pieComponent == null) return Option.ofNone();
 
-        final ResourceKey fileKey = new EclipseResourcePath(editorBase.file);
-        final @Nullable ResourcePath projectRoot = editorBase.project != null ? new EclipseResourcePath(editorBase.project) : null;
+        final ResourceKey fileKey = new EclipseResourcePath(originalFile);
+        final @Nullable ResourcePath projectRoot = project != null ? new EclipseResourcePath(project) : null;
         final Region selection = Region.atOffset(offset);
 
         return Option.ofOptional(pieComponent.getPie().tryNewSession()).flatMap(trySession -> { // Skip code completion if another session exists.
@@ -101,7 +105,7 @@ public final class SpoofaxContentAssistProcessor implements IContentAssistProces
                 );
             } catch(ExecException e) {
                 // Bubble error up to Eclipse, which will handle it and show a dialog.
-                throw new UncheckedExecException("Code completion failed unexpectedly.", e);
+                throw new UncheckedExecException("Code completion on resource '" + fileKey + "' failed unexpectedly.", e);
             } catch(InterruptedException e) {
                 return Option.ofNone();
             }

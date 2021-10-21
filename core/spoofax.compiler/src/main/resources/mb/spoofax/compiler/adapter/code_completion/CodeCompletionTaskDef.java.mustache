@@ -1,23 +1,17 @@
 package {{baseCodeCompletionTaskDef.packageId}};
 
 import mb.common.codecompletion.CodeCompletionResult;
-import mb.constraint.pie.ConstraintAnalyzeFile;
-import mb.jsglr.pie.JsglrParseTaskDef;
+import mb.common.option.Option;
 import mb.log.api.LoggerFactory;
 import mb.nabl2.terms.stratego.StrategoTerms;
+import mb.pie.api.ExecContext;
 import mb.pie.api.stamp.resource.ResourceStampers;
-import mb.stratego.pie.GetStrategoRuntimeProvider;
+import mb.statix.codecompletion.pie.CodeCompletionEventHandlerBase;
 import mb.statix.codecompletion.pie.CodeCompletionTaskDef;
 import mb.tego.strategies.runtime.TegoRuntime;
-
-import mb.common.option.Option;
-import mb.pie.api.ExecContext;
-import mb.pie.api.Supplier;
-import mb.pie.api.TaskDef;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import javax.inject.Inject;
-import java.io.Serializable;
-import java.util.Objects;
 
 @{{adapterProject.scope.qualifiedId}}
 public class {{baseCodeCompletionTaskDef.id}} extends CodeCompletionTaskDef {
@@ -54,7 +48,8 @@ public class {{baseCodeCompletionTaskDef.id}} extends CodeCompletionTaskDef {
             tegoRuntime,
             statixSpec,
             strategoTerms,
-            loggerFactory
+            loggerFactory,
+            new CodeCompletionEventHandlerBase()
         );
 
         this.classLoaderResources = classLoaderResources;

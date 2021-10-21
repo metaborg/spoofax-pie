@@ -90,8 +90,6 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
         public final ResourceKey file;
         /** The root directory of the project; or {@code null} when not specified. */
         public final @Nullable ResourcePath rootDirectoryHint;
-        /** The event handler for code completion; or {@link CodeCompletionEventHandlerBase} when not specified. */
-        private final CodeCompletionEventHandler eventHandler;
         /** Whether to perform deterministic completion. */
         private final boolean completeDeterministic;
 
@@ -103,7 +101,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * @param rootDirectoryHint the root directory of the project; or {@code null} when not specified
          */
         public Input(Region primarySelection, ResourceKey file, @Nullable ResourcePath rootDirectoryHint) {
-            this(primarySelection, file, rootDirectoryHint, new CodeCompletionEventHandlerBase(), false);
+            this(primarySelection, file, rootDirectoryHint, false);
         }
 
         /**
@@ -112,14 +110,12 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * @param primarySelection the primary selection at which completion is invoked
          * @param file      the key of the resource in which completion is invoked
          * @param rootDirectoryHint the root directory of the project; or {@code null} when not specified
-         * @param eventHandler the event handler for code completion; or {@link CodeCompletionEventHandlerBase} when not specified
          * @param completeDeterministic whether to perform deterministic completion
          */
-        public Input(Region primarySelection, ResourceKey file, @Nullable ResourcePath rootDirectoryHint, CodeCompletionEventHandler eventHandler, boolean completeDeterministic) {
+        public Input(Region primarySelection, ResourceKey file, @Nullable ResourcePath rootDirectoryHint, boolean completeDeterministic) {
             this.primarySelection = primarySelection;
             this.file = file;
             this.rootDirectoryHint = rootDirectoryHint;
-            this.eventHandler = eventHandler;
             this.completeDeterministic = completeDeterministic;
         }
 
@@ -175,6 +171,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
     private final AstStrategoTransformTaskDef ppPartialTask;
     private final StrategoTerms strategoTerms;
     private final StatixSpecTaskDef statixSpec;
+    private final CodeCompletionEventHandler eventHandler;
 
     /**
      * Initializes a new instance of the {@link CodeCompletionTaskDef} class.
@@ -182,7 +179,6 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
      * @param parseTask the parser task
      * @param analyzeFileTask the analysis task
      * @param getStrategoRuntimeProviderTask the Stratego runtime provider task
-     * @param getTegoRuntimeProviderTask the Tego runtime provider task
      * @param preAnalyzeStatixTask the {@code pre-analyze} Stratego strategy
      * @param postAnalyzeStatixTask the {@code post-analyze} Stratego strategy
      * @param upgradePlaceholdersTask the {@code upgrade-placeholders} Stratego strategy
@@ -192,6 +188,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
      * @param statixSpec the Statix spec task
      * @param strategoTerms the Stratego to NaBL terms utility class
      * @param loggerFactory the logger factory
+     * @param eventHandler the code completion event handler
      */
     public CodeCompletionTaskDef(
         JsglrParseTaskDef parseTask,
@@ -206,7 +203,8 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
         TegoRuntime tegoRuntime,
         StatixSpecTaskDef statixSpec,
         StrategoTerms strategoTerms,
-        LoggerFactory loggerFactory
+        LoggerFactory loggerFactory,
+        CodeCompletionEventHandler eventHandler
     ) {
         this.parseTask = parseTask;
         this.analyzeFileTask = analyzeFileTask;
@@ -221,6 +219,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
         this.statixSpec = statixSpec;
         this.strategoTerms = strategoTerms;
         this.log = loggerFactory.create(getClass());
+        this.eventHandler = eventHandler;
     }
 
     @Override
@@ -246,8 +245,6 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
         private final ExecContext context;
         private final StrategoRuntime strategoRuntime;
         private final ITermFactory termFactory;
-        /** The event handler. */
-        private final CodeCompletionEventHandler eventHandler;
         /** The root directory of the project; or {@code null} when not specified. */
         public final @Nullable ResourcePath rootDirectoryHint;
         /** The file being completed. */
@@ -277,7 +274,6 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
             this.strategoRuntime = strategoRuntime;
             this.spec = spec;
             this.termFactory = strategoRuntime.getTermFactory();
-            this.eventHandler = input.eventHandler;
             this.rootDirectoryHint = input.rootDirectoryHint;
             this.file = input.file;
             this.primarySelection = input.primarySelection;
