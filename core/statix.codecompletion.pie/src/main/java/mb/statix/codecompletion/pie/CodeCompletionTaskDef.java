@@ -299,11 +299,13 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
 
             // Prepare the AST (explicate, add term indices, upgrade placeholders)
             eventHandler.beginPreparation();
-            final IStrategoTerm explicatedAst = preAnalyze(parsedAst);
+            final @Nullable IStrategoTerm explicatedAst = preAnalyze(parsedAst);
+            if (explicatedAst == null) return Option.ofNone();
             final IStrategoTerm indexedAst = addTermIndices(explicatedAst);
             final ITerm statixAst = toStatix(indexedAst);
             final PlaceholderVarMap placeholderVarMap = new PlaceholderVarMap(file.toString());
-            final ITerm upgradedAst = upgradePlaceholders(statixAst, placeholderVarMap);
+            final @Nullable ITerm upgradedAst = upgradePlaceholders(statixAst, placeholderVarMap);
+            if (upgradedAst == null) return Option.ofNone();
             final ITermVar placeholder = getCompletionPlaceholder(upgradedAst);
             // TODO: Specify spec name and root rule name somewhere
             final SolverState initialState = createInitialSolverState(upgradedAst, "main", "programOk", placeholderVarMap);
@@ -360,7 +362,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
         /**
          * Pretty-prints the given term.
          * @param term the term to pretty-print
-         * @return the pretty-printed term
+         * @return the pretty-printed term; or {@code null} when pretty-printing failed
          * @throws StrategoException if an error occurred while invoking the Stratego strategy
          */
         private @Nullable String prettyPrint(IStrategoTerm term) throws StrategoException {
@@ -372,13 +374,11 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * Performs pre-analysis on the given AST.
          *
          * @param ast     the AST to explicate
-         * @return the explicated AST
+         * @return the explicated AST; or {@code null} when explication failed
          * @throws StrategoException if an error occurred while invoking the Stratego strategy
          */
-        private IStrategoTerm preAnalyze(IStrategoTerm ast) throws StrategoException {
-            @Nullable final IStrategoTerm output = invokeStrategy(preAnalyzeStrategyName, ast);
-            if (output == null) throw new IllegalStateException("Unexpected failed strategy: " + preAnalyzeStrategyName);
-            return output;
+        private @Nullable IStrategoTerm preAnalyze(IStrategoTerm ast) throws StrategoException {
+            return invokeStrategy(preAnalyzeStrategyName, ast);
         }
 
         /**
@@ -389,8 +389,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * @throws StrategoException if an error occurred while invoking the Stratego strategy
          */
         private @Nullable IStrategoTerm postAnalyze(IStrategoTerm term) throws StrategoException {
-            @Nullable final IStrategoTerm output = invokeStrategy(postAnalyzeStrategyName, term);
-            return output;
+            return invokeStrategy(postAnalyzeStrategyName, term);
         }
 
         /**
@@ -398,10 +397,10 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          *
          * @param ast the AST to upgrade
          * @param placeholderVarMap the map to which mappings of placeholders to variables are added
-         * @return the upgraded AST
+         * @return the upgraded AST; or {@code null} when upgrading failed
          * @throws StrategoException if an error occurred while invoking the Stratego strategy
          */
-        private ITerm upgradePlaceholders(ITerm ast, PlaceholderVarMap placeholderVarMap) throws StrategoException {
+        private @Nullable ITerm upgradePlaceholders(ITerm ast, PlaceholderVarMap placeholderVarMap) throws StrategoException {
             // FIXME: Ideally we would know the sort of the placeholder
             //  so we can use that sort to call the correct downgrade-placeholders-Lang-Sort strategy
             // FIXME: We can generate: downgrade-placeholders-Lang(|sort) = where(<?"Exp"> sort); downgrade-placeholders-Lang-Exp
@@ -412,12 +411,11 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * Downgrades the placeholder term variables to actual placeholders.
          *
          * @param term the term to downgrade
-         * @return the downgraded term; or {@code null when downgrading failed}
+         * @return the downgraded term; or {@code null} when downgrading failed
          * @throws StrategoException if an error occurred while invoking the Stratego strategy
          */
         private @Nullable IStrategoTerm downgradePlaceholders(IStrategoTerm term) throws StrategoException {
-            @Nullable final IStrategoTerm output = invokeStrategy(downgradePlaceholdersStrategyName, term);
-            return output;
+            return invokeStrategy(downgradePlaceholdersStrategyName, term);
         }
 
         /**

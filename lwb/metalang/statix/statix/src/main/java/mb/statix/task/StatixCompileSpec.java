@@ -54,15 +54,7 @@ public class StatixCompileSpec implements TaskDef<ResourcePath, Result<Spec, ?>>
         context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
 
         final StrategoRuntime strategoRuntime = context.require(getStrategoRuntimeProvider, None.instance).getValue().get();
-        return context.require(compileMergedProject, rootDirectory).mapThrowing(specAst -> {
-            @Nullable final Spec spec = toSpec(specAst, strategoRuntime.getTermFactory());
-            @Nullable final String overlappingRulesMsg = checkNoOverlappingRules(spec);
-            if(overlappingRulesMsg != null) {
-                // Invalid specification
-                throw new IllegalStateException(overlappingRulesMsg);
-            }
-            return spec;
-        });
+        return context.require(compileMergedProject, rootDirectory).mapThrowing(specAst -> toSpec(specAst, strategoRuntime.getTermFactory()));
     }
 
     /**
@@ -75,28 +67,5 @@ public class StatixCompileSpec implements TaskDef<ResourcePath, Result<Spec, ?>>
     public static Spec toSpec(IStrategoTerm specAst, ITermFactory termFactory) throws InterpreterException {
         final ITerm specTerm = new StrategoTerms(termFactory).fromStratego(specAst);
         return StatixTerms.spec().match(specTerm).orElseThrow(() -> new InterpreterException("Expected spec, got " + specTerm));
-    }
-
-    /**
-     * Reports any overlapping rules in the specification.
-     *
-     * @param spec the specification to check
-     * @return a String message when the specification has no overlapping rules;
-     * otherwise, {@code null}.
-     */
-    private static @Nullable String checkNoOverlappingRules(Spec spec) {
-        final ListMultimap<String, Rule> rulesWithEquivalentPatterns = spec.rules().getAllEquivalentRules();
-        if(!rulesWithEquivalentPatterns.isEmpty()) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Found rules with equivalent patterns.\n");
-            for(Map.Entry<String, Collection<Rule>> entry : rulesWithEquivalentPatterns.asMap().entrySet()) {
-                sb.append("Overlapping rules for: ").append(entry.getKey()).append("\n");
-                for(Rule rule : entry.getValue()) {
-                    sb.append("* ").append(rule).append("\n");
-                }
-            }
-            return sb.toString();
-        }
-        return null;
     }
 }
