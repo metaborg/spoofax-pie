@@ -8,8 +8,11 @@ import mb.common.region.Region;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecException;
+import mb.pie.api.Interactivity;
 import mb.pie.api.MixedSession;
 import mb.pie.api.Task;
+import mb.pie.api.TopDownSession;
+import mb.pie.api.UncheckedExecException;
 import mb.pie.dagger.PieComponent;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
@@ -24,6 +27,7 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 import org.eclipse.swt.graphics.Image;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -35,9 +39,9 @@ public final class SpoofaxContentAssistProcessor implements IContentAssistProces
 
     private final Logger logger;
 
-    private SpoofaxEditorBase editorBase;
-    private @Nullable LanguageComponent languageComponent;
-    private @Nullable PieComponent pieComponent;
+    private final SpoofaxEditorBase editorBase;
+    private final @Nullable LanguageComponent languageComponent;
+    private final @Nullable PieComponent pieComponent;
 
     /**
      * Initializes a new instance of the {@link SpoofaxContentAssistProcessor} class.
@@ -62,28 +66,46 @@ public final class SpoofaxContentAssistProcessor implements IContentAssistProces
 
 
     @Override public @Nullable ICompletionProposal[] computeCompletionProposals(final ITextViewer viewer, final int offset) {
-        if(languageComponent == null || pieComponent == null || editorBase.file == null) return null;
+        final Option<CodeCompletionResult> optCodeCompletionResult = getCodeCompletionResult(offset);
+        if (optCodeCompletionResult.isNone()) {
+            // No completions.
+            return null;
+        }
+        final CodeCompletionResult codeCompletionResult = optCodeCompletionResult.unwrap();
+
+        List<ICompletionProposal> eclipseProposals = IntStream.range(0, codeCompletionResult.getProposals().size()).mapToObj(
+            i -> proposalToEclipseProposal(codeCompletionResult.getProposals().get(i), codeCompletionResult, i)).collect(Collectors.toList());
+        return eclipseProposals.toArray(new ICompletionProposal[0]);
+    }
+
+    /**
+     * Invokes the code completion task and returns the code completion result.
+     *
+     * @param offset the offset at which to invoke code completion
+     * @return an option of the code completion result; or none if it failed
+     */
+    private Option<CodeCompletionResult> getCodeCompletionResult(final int offset) {
+        if(languageComponent == null || pieComponent == null || editorBase.file == null) {
+            return Option.ofNone();
+        }
 
         final ResourceKey fileKey = new EclipseResourcePath(editorBase.file);
         final @Nullable ResourcePath projectRoot = editorBase.project != null ? new EclipseResourcePath(editorBase.project) : null;
         final Region selection = Region.atOffset(offset);
 
-
-        final CodeCompletionResult codeCompletionResult;
-        try(final MixedSession session = this.pieComponent.newSession()) {
-            Task<Option<CodeCompletionResult>> codeCompletionTask = this.languageComponent.getLanguageInstance().createCodeCompletionTask(selection, fileKey, projectRoot);
-            final Option<CodeCompletionResult> maybeCodeCompletionResult = session.requireWithoutObserving(codeCompletionTask);
-            if (maybeCodeCompletionResult.isNone()) return null;  // No completions.
-            codeCompletionResult = maybeCodeCompletionResult.unwrap();
-        } catch(ExecException e) {
-            throw new RuntimeException("Code completion on resource '" + fileKey + "' failed unexpectedly.", e);
-        } catch(InterruptedException e) {
-            return null; // No completions.
-        }
-
-        List<ICompletionProposal> eclipseProposals = IntStream.range(0, codeCompletionResult.getProposals().size()).mapToObj(
-            i -> proposalToEclipseProposal(codeCompletionResult.getProposals().get(i), codeCompletionResult, i)).collect(Collectors.toList());
-        return eclipseProposals.toArray(new ICompletionProposal[0]);
+        return Option.ofOptional(pieComponent.getPie().tryNewSession()).flatMap(trySession -> { // Skip code completion if another session exists.
+            try(final MixedSession session = trySession) {
+                final TopDownSession topDownSession = session.updateAffectedBy(Collections.emptySet(), Collections.singleton(Interactivity.Interactive));
+                return topDownSession.requireWithoutObserving(
+                    languageComponent.getLanguageInstance().createCodeCompletionTask(selection, fileKey, projectRoot)
+                );
+            } catch(ExecException e) {
+                // Bubble error up to Eclipse, which will handle it and show a dialog.
+                throw new UncheckedExecException("Code completion failed unexpectedly.", e);
+            } catch(InterruptedException e) {
+                return Option.ofNone();
+            }
+        });
     }
 
     /**
