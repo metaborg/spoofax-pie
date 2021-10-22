@@ -18,15 +18,15 @@ Other than that, nothing is required as everything is contained in the archive w
 
 To get started, we will download a premade Eclipse installation that comes bundled with the Spoofax 3 LWB plugin. We will download version {{release.rel.version}} released on {{release.rel.date}}. Download the latest version for your platform:
 
-* {{release.rel.lwb.eclipse.install.jvm.windows}}
-* {{release.rel.lwb.eclipse.install.jvm.macos}}
-* {{release.rel.lwb.eclipse.install.jvm.linux}}
+* {{release.rel.eclipse_lwb.install.jvm.link.windows}}
+* {{release.rel.eclipse_lwb.install.jvm.link.macos}}
+* {{release.rel.eclipse_lwb.install.jvm.link.linux}}
 
 These are bundled with an embedded JVM so that you do not need to have a JVM installed. If your system has a JVM of version 11 or higher installed, and would rather use that, use the following download links instead:
 
-* {{release.rel.lwb.eclipse.install.windows}}
-* {{release.rel.lwb.eclipse.install.macos}}
-* {{release.rel.lwb.eclipse.install.linux}}
+* {{release.rel.eclipse_lwb.install.link.windows}}
+* {{release.rel.eclipse_lwb.install.link.macos}}
+* {{release.rel.eclipse_lwb.install.link.linux}}
 
 ## Unpack
 

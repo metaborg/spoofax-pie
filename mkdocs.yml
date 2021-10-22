@@ -84,5 +84,6 @@ plugins:
   - search
   - macros:
       module_name: docs/macro
+      include_dir: docs/include
   - git-revision-date:
       enabled_if_env: CI

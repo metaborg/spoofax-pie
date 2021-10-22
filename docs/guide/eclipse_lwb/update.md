@@ -8,7 +8,7 @@ In this dialog, copy the update site of the version you want to install into the
 If you want to install the latest released version, use this update site:
 
 ```
-{{release.rel.lwb.eclipse.repository}}
+{{release.rel.eclipse_lwb.repository}}
 ```
 
 In the table below, check the checkbox next to <span class="guilabel">Uncategorized</span> and press <span class="guilabel">Next ></span>.

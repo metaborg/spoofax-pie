@@ -12,17 +12,17 @@ We recommend the use of releases because we make sure to make them available ind
 
 With embedded JVM:
 
-* {{release.rel.lwb.eclipse.install.jvm.windows}}
-* {{release.rel.lwb.eclipse.install.jvm.macos}}
-* {{release.rel.lwb.eclipse.install.jvm.linux}}
+* {{release.rel.eclipse_lwb.install.jvm.link.windows}}
+* {{release.rel.eclipse_lwb.install.jvm.link.macos}}
+* {{release.rel.eclipse_lwb.install.jvm.link.linux}}
 
 Without embedded JVM:
 
-* {{release.rel.lwb.eclipse.install.windows}}
-* {{release.rel.lwb.eclipse.install.macos}}
-* {{release.rel.lwb.eclipse.install.linux}}
+* {{release.rel.eclipse_lwb.install.link.windows}}
+* {{release.rel.eclipse_lwb.install.link.macos}}
+* {{release.rel.eclipse_lwb.install.link.linux}}
 
-Repository for installing into an existing Eclipse installation: `{{release.rel.lwb.eclipse.repository}}`
+Repository for installing into an existing Eclipse installation: `{{release.rel.eclipse_lwb.repository}}`
 
 ## Development version
 
@@ -34,12 +34,12 @@ Development versions of Spoofax use snapshot versioning, meaning that they alway
 
 With embedded JVM:
 
-* {{release.dev.lwb.eclipse.install.jvm.windows}}
-* {{release.dev.lwb.eclipse.install.jvm.macos}}
-* {{release.dev.lwb.eclipse.install.jvm.linux}}
+* {{release.dev.eclipse_lwb.install.jvm.link.windows}}
+* {{release.dev.eclipse_lwb.install.jvm.link.macos}}
+* {{release.dev.eclipse_lwb.install.jvm.link.linux}}
 
 Without embedded JVM:
 
-* {{release.dev.lwb.eclipse.install.windows}}
-* {{release.dev.lwb.eclipse.install.macos}}
-* {{release.dev.lwb.eclipse.install.linux}}
+* {{release.dev.eclipse_lwb.install.link.windows}}
+* {{release.dev.eclipse_lwb.install.link.macos}}
+* {{release.dev.eclipse_lwb.install.link.linux}}
