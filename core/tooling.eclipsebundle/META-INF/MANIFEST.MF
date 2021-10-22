@@ -1,5 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
+Bundle-Name: Spoofax 3 tooling bundle
 Bundle-Activator: mb.tooling.eclipsebundle.ToolingEclipseBundle
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
