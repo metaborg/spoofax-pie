@@ -8,7 +8,6 @@ All notable changes to this project are documented in this file, based on [Keep 
 ## [0.15.3] - 2021-10-22
 ### Fixed
 - Another instance of cancellation/interrupt during PIE execution leaving behind an inconsistent state in certain edge cases. This should resolve all instances of intermittent `NullPointerException`s. (https://github.com/metaborg/spoofax-pie/issues/81)
-- Eclipse plugins having no name, making them unintuitive to uninstall. (https://github.com/metaborg/spoofax-pie/issues/85)
 
 
 ## [0.15.2] - 2021-10-21
