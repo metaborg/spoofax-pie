@@ -20,6 +20,10 @@ If a <span class="guilabel">Security Warning</span> pops up, press <span class="
 Finally, a dialog will pop up asking you to restart Eclipse.
 Press <span class="guilabel">Restart Now</span> to restart Eclipse.
 
+After restarting Eclipse, all projects must be cleaned in order to prevent compatibility issues.
+In the main menu of Eclipse, select <span class="guilabel">Project ‣ Clean...</span>, check the <span class="guilabel">Clean all project</span> checkbox, and press <span class="guilabel">Clean</span>.
+Then, rebuild all projects with <span class="guilabel">Project ‣ Build All</span> from the main menu, or by pressing ++cmd+b++ on macOS or ++ctrl+b++ on others.
+
 ## Downgrading
 
 Eclipse does not support directly downgrading to a previous version.
