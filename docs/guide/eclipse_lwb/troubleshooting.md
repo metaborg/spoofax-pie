@@ -1,4 +1,4 @@
-# Eclipse LWB Troubleshooting
+# Troubleshooting
 
 This how-to guide explains how to troubleshoot issues when building and testing languages in the Spoofax Eclipse LWB plugin.
 
