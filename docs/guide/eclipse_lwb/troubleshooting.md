@@ -100,6 +100,9 @@ If after troubleshooting the issue is not resolved, [report this bug](../report_
 ### Checking for deadlocks (and making a thread dump)
 
 If Eclipse seems to be stuck, hanging, or not making any progress, check for deadlocks by making a thread dump.
+
+First, we need to figure out the process ID of the JVM that is running eclipse.
+Run the `jps` command in a terminal.
 It will print something like:
 
 ```
