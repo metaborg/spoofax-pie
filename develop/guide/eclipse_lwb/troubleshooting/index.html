@@ -1209,7 +1209,9 @@ If not, <a href="../../ask_for_help/">ask for help</a>.</p>
 <p>If after troubleshooting the issue is not resolved, <a href="../../report_a_bug/">report this bug</a> if you think this is a bug, or <a href="../../ask_for_help/">ask for help</a>.</p>
 <h2 id="advanced-troubleshooting">Advanced troubleshooting<a class="headerlink" href="#advanced-troubleshooting" title="Permanent link">&para;</a></h2>
 <h3 id="checking-for-deadlocks-and-making-a-thread-dump">Checking for deadlocks (and making a thread dump)<a class="headerlink" href="#checking-for-deadlocks-and-making-a-thread-dump" title="Permanent link">&para;</a></h3>
-<p>If Eclipse seems to be stuck, hanging, or not making any progress, check for deadlocks by making a thread dump.
+<p>If Eclipse seems to be stuck, hanging, or not making any progress, check for deadlocks by making a thread dump.</p>
+<p>First, we need to figure out the process ID of the JVM that is running eclipse.
+Run the <code>jps</code> command in a terminal.
 It will print something like:</p>
 <div class="highlight"><pre><span></span><code>80035 Jps
 94805
