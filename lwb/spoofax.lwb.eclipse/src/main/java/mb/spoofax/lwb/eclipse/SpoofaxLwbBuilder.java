@@ -161,11 +161,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
 
         final KeyedMessages messages = session.require(createCheckTask(rootDirectory), cancelToken);
         updateCheckMessages(eclipseProject, rootDirectory, session, monitor);
-        if(messages.containsError()) {
-            logger.debug("Checking language specification revealed errors; skipping compilation");
-            new ExceptionPrinter().addCurrentDirectoryContext(rootDirectory).printMessages(messages.filter(Message::isError), new PrintStream(new LoggingOutputStream(logger, Level.Debug)));
-            return;
-        }
+        handleCheckResult(rootDirectory, messages);
 
         final Result<CompileLanguage.Output, CompileLanguageException> result = session.require(createCompileTask(rootDirectory), cancelToken);
         handleCompileResult(rootDirectory, result, monitor);
@@ -202,11 +198,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
 
         final KeyedMessages messages = topDownSession.getOutputOrRequireAndEnsureExplicitlyObserved(createCheckTask(rootDirectory), cancelToken);
         updateCheckMessages(eclipseProject, rootDirectory, topDownSession, monitor);
-        if(messages.containsError()) {
-            logger.debug("Checking language specification revealed errors; skipping handling of compile and dynamic load result");
-            new ExceptionPrinter().addCurrentDirectoryContext(rootDirectory).printMessages(messages.filter(Message::isError), new PrintStream(new LoggingOutputStream(logger, Level.Debug)));
-            return;
-        }
+        handleCheckResult(rootDirectory, messages);
 
         final Result<CompileLanguage.Output, CompileLanguageException> result = topDownSession.getOutputOrRequireAndEnsureExplicitlyObserved(createCompileTask(rootDirectory), cancelToken);
         handleCompileResult(rootDirectory, result, monitor);
@@ -291,6 +283,19 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         final WorkspaceUpdate update = workspaceUpdateFactory.create(identifiers);
         update.clearMessages(rootDirectory, true);
         return update;
+    }
+
+    private void handleCheckResult(ResourcePath rootDirectory, KeyedMessages messages) throws CoreException {
+        if(!messages.containsError()) return;
+        rememberLastBuiltState(); // Ensure rebuild triggers the same error due to remembering previously changed files.
+        final ExceptionPrinter exceptionPrinter = new ExceptionPrinter();
+        exceptionPrinter.addCurrentDirectoryContext(rootDirectory);
+        final KeyedMessages errorMessages = messages.filter(Message::isError);
+        final String messagePrefix = "Checking language definition revealed errors. Fix the errors and build again";
+        logger.info(messagePrefix);
+        exceptionPrinter.printMessages(errorMessages, new PrintStream(new LoggingOutputStream(logger, Level.Info)));
+        final String message = messagePrefix + ". The following errors occurred:\r\n" + exceptionPrinter.printMessagesToString(errorMessages);
+        throw new CoreException(new Status(IStatus.ERROR, SpoofaxLwbPlugin.id, IStatus.ERROR, message, null));
     }
 
     private void handleCompileResult(ResourcePath rootDirectory, Result<CompileLanguage.Output, CompileLanguageException> result, @Nullable IProgressMonitor monitor) throws CoreException {

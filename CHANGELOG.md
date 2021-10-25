@@ -3,6 +3,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+### Changed
+- Show an error dialog when building a language definition fails due to errors in language definition files.
 
 
 ## [0.15.3] - 2021-10-22
