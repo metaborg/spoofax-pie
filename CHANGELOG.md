@@ -3,6 +3,9 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+### Fixed
+- Evaluating .stxtest files outside of the Statix source directory (src by default) silently failing.
+
 ### Changed
 - Show an error dialog when building a language definition fails due to errors in language definition files.
 
