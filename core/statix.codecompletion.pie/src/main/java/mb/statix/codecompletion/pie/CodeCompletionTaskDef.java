@@ -7,6 +7,7 @@ import mb.common.codecompletion.CodeCompletionResult;
 import mb.common.editing.TextEdit;
 import mb.common.option.Option;
 import mb.common.region.Region;
+import mb.common.result.Result;
 import mb.common.style.StyleName;
 import mb.common.util.ListView;
 import mb.constraint.pie.ConstraintAnalyzeFile;
@@ -74,7 +75,7 @@ import static mb.tego.strategies.StrategyExt.pred;
 /**
  * Code completion task definition.
  */
-public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Input, Option<CodeCompletionResult>> {
+public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Input, Result<CodeCompletionResult, ?>> {
 
     /**
      * Input arguments for the {@link CodeCompletionTaskDef}.
@@ -242,14 +243,15 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
     }
 
     @Override
-    public Option<CodeCompletionResult> exec(ExecContext context, Input input) throws Exception {
+    public Result<CodeCompletionResult, ?> exec(ExecContext context, Input input) throws Exception {
         final StrategoRuntime strategoRuntime = context.require(getStrategoRuntimeProviderTask, None.instance).getValue().get();
-        final Spec spec = context.require(statixSpec, None.instance).unwrap();
+        final Result<Spec, ?> specResult = context.require(statixSpec, None.instance);
+        if (specResult.isErr()) return specResult.ignoreValueIfErr();
+        final Spec spec = specResult.unwrap();
 
-        final Option<CodeCompletionResult> results = new Execution(
+        return new Execution(
             context, input, strategoRuntime, spec
         ).complete();
-        return results;
     }
 
     /**
@@ -300,23 +302,27 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * @return the code completion result
          * @throws Exception if an exception occurred
          */
-        public Option<CodeCompletionResult> complete() throws Exception {
+        public Result<CodeCompletionResult, ?> complete() throws Exception {
             eventHandler.begin();
 
             // Parse the AST
             eventHandler.beginParse();
-            final IStrategoTerm parsedAst = parse();
+            final Result<IStrategoTerm, ?> parsedAstResult = parse();
+            if (parsedAstResult.isErr()) return parsedAstResult.ignoreValueIfErr();
+            final IStrategoTerm parsedAst = parsedAstResult.unwrap();
             eventHandler.endParse();
 
             // Prepare the AST (explicate, add term indices, upgrade placeholders)
             eventHandler.beginPreparation();
-            final @Nullable IStrategoTerm explicatedAst = preAnalyze(parsedAst);
-            if (explicatedAst == null) return Option.ofNone();
+            final Result<IStrategoTerm, ?> explicatedAstResult = preAnalyze(parsedAst);
+            if (explicatedAstResult.isErr()) return explicatedAstResult.ignoreValueIfErr();
+            final IStrategoTerm explicatedAst = explicatedAstResult.unwrap();
             final IStrategoTerm indexedAst = addTermIndices(explicatedAst);
             final ITerm statixAst = toStatix(indexedAst);
             final PlaceholderVarMap placeholderVarMap = new PlaceholderVarMap(file.toString());
-            final @Nullable ITerm upgradedAst = upgradePlaceholders(statixAst, placeholderVarMap);
-            if (upgradedAst == null) return Option.ofNone();
+            final Result<ITerm, ?> upgradedAstResult = upgradePlaceholders(statixAst, placeholderVarMap);
+            if (upgradedAstResult.isErr()) return upgradedAstResult.ignoreValueIfErr();
+            final ITerm upgradedAst = upgradedAstResult.unwrap();
             final ITermVar placeholder = getCompletionPlaceholder(upgradedAst);
             final SolverState initialState = createInitialSolverState(upgradedAst, statixSecName, statixRootPredicateName, placeholderVarMap);
             eventHandler.endPreparation();
@@ -343,11 +349,12 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
             if (finalProposals.isEmpty()) {
                 log.warn("Completion returned no completion proposals.");
             } else {
-                log.trace("Completion returned the following proposals:\n - " + finalProposals.stream().map(i -> i.getLabel()).collect(Collectors.joining("\n - ")));
+                log.trace("Completion returned the following proposals:\n - " + finalProposals.stream()
+                    .map(i -> i.getLabel()).collect(Collectors.joining("\n - ")));
             }
 
             eventHandler.end();
-            return Option.ofSome(new TermCodeCompletionResult(
+            return Result.ofOk(new TermCodeCompletionResult(
                 placeholder,
                 ListView.copyOf(finalProposals),
                 Objects.requireNonNull(tryGetRegion(placeholder)),
@@ -359,24 +366,24 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * Parses the input file.
          *
          * @return the AST of the file
-         * @throws JsglrParseException if parsing failed
          */
-        private IStrategoTerm parse() throws JsglrParseException {
+        private Result<IStrategoTerm, ?> parse() {
             return context.require(parseTask.inputBuilder()
                 .withFile(file)
                 .rootDirectoryHint(Optional.ofNullable(rootDirectoryHint))
                 .buildRecoverableAstSupplier()
-            ).unwrap();
+            );
         }
 
         /**
          * Pretty-prints the given term.
+         *
          * @param term the term to pretty-print
          * @return the pretty-printed term; or {@code null} when pretty-printing failed
          * @throws StrategoException if an error occurred while invoking the Stratego strategy
          */
         private @Nullable String prettyPrint(IStrategoTerm term) throws StrategoException {
-            @Nullable final IStrategoTerm output = invokeStrategy(ppPartialStrategyName, term);
+            @Nullable final IStrategoTerm output = strategoRuntime.invokeOrNull(ppPartialStrategyName, term);
             return TermUtils.asJavaString(output).orElse(null);
         }
 
@@ -384,11 +391,15 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * Performs pre-analysis on the given AST.
          *
          * @param ast     the AST to explicate
-         * @return the explicated AST; or {@code null} when explication failed
+         * @return the explicated AST
          * @throws StrategoException if an error occurred while invoking the Stratego strategy
          */
-        private @Nullable IStrategoTerm preAnalyze(IStrategoTerm ast) throws StrategoException {
-            return invokeStrategy(preAnalyzeStrategyName, ast);
+        private Result<IStrategoTerm, ?> preAnalyze(IStrategoTerm ast) throws StrategoException {
+            try {
+                return Result.ofOk(strategoRuntime.invoke(preAnalyzeStrategyName, ast));
+            } catch (StrategoException ex) {
+                return Result.ofErr(ex);
+            }
         }
 
         /**
@@ -399,7 +410,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * @throws StrategoException if an error occurred while invoking the Stratego strategy
          */
         private @Nullable IStrategoTerm postAnalyze(IStrategoTerm term) throws StrategoException {
-            return invokeStrategy(postAnalyzeStrategyName, term);
+            return strategoRuntime.invokeOrNull(postAnalyzeStrategyName, term);
         }
 
         /**
@@ -410,11 +421,11 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * @return the upgraded AST; or {@code null} when upgrading failed
          * @throws StrategoException if an error occurred while invoking the Stratego strategy
          */
-        private @Nullable ITerm upgradePlaceholders(ITerm ast, PlaceholderVarMap placeholderVarMap) throws StrategoException {
+        private Result<ITerm, ?> upgradePlaceholders(ITerm ast, PlaceholderVarMap placeholderVarMap) throws StrategoException {
             // FIXME: Ideally we would know the sort of the placeholder
             //  so we can use that sort to call the correct downgrade-placeholders-Lang-Sort strategy
             // FIXME: We can generate: downgrade-placeholders-Lang(|sort) = where(<?"Exp"> sort); downgrade-placeholders-Lang-Exp
-            return StrategoPlaceholders.replacePlaceholdersByVariables(ast, placeholderVarMap);
+            return Result.ofOk(StrategoPlaceholders.replacePlaceholdersByVariables(ast, placeholderVarMap));
         }
 
         /**
@@ -425,7 +436,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * @throws StrategoException if an error occurred while invoking the Stratego strategy
          */
         private @Nullable IStrategoTerm downgradePlaceholders(IStrategoTerm term) throws StrategoException {
-            return invokeStrategy(downgradePlaceholdersStrategyName, term);
+            return strategoRuntime.invokeOrNull(downgradePlaceholdersStrategyName, term);
         }
 
         /**
@@ -438,7 +449,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
         private boolean isInjection(ITerm term) {
             try {
                 final IStrategoTerm strategoTerm = strategoTerms.toStratego(term, true);
-                @Nullable final IStrategoTerm output = invokeStrategy(isInjStrategyName, strategoTerm);
+                @Nullable final IStrategoTerm output = strategoRuntime.invokeOrNull(isInjStrategyName, strategoTerm);
                 return output != null;
             } catch (StrategoException ex) {
                 return false;
@@ -680,80 +691,6 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
                 return prettyPrintedTerm;
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
-            }
-        }
-
-        /**
-         * Invokes a Stratego strategy.
-         *
-         * @param strategyName    the name of the strategy to invoke
-         * @param input           the input term
-         * @return the resulting term; or {@code null} if the strategy failed
-         * @throws StrategoException if the strategy invocation failed
-         */
-        private @Nullable IStrategoTerm invokeStrategy(String strategyName, IStrategoTerm input) throws StrategoException {
-            return invokeStrategy(strategyName, input, ListView.of());
-        }
-
-        /**
-         * Invokes a Stratego strategy.
-         *
-         * @param strategyName    the name of the strategy to invoke
-         * @param input           the input term
-         * @param arguments       the term arguments
-         * @return the resulting term; or {@code null} if the strategy failed
-         * @throws StrategoException if the strategy invocation failed
-         */
-        private @Nullable IStrategoTerm invokeStrategy(String strategyName, IStrategoTerm input, IStrategoTerm... arguments) throws StrategoException {
-            return invokeStrategy(strategyName, input, ListView.of(arguments));
-        }
-
-        /**
-         * Invokes a Stratego strategy.
-         *
-         * @param strategyName    the name of the strategy to invoke
-         * @param input           the input term
-         * @param arguments       the term arguments
-         * @return the resulting term; or {@code null} if the strategy failed
-         * @throws StrategoException if the strategy invocation failed
-         */
-        private @Nullable IStrategoTerm invokeStrategy(String strategyName, IStrategoTerm input, Iterable<IStrategoTerm> arguments) throws StrategoException {
-            return invokeStrategy(strategyName, input, iterableToListView(arguments));
-        }
-
-        /**
-         * Invokes a Stratego builder.
-         *
-         * A builder strategy accepts a tuple of {@code (selection: Term, position: List, ast: Term, filePath: String, projectPath: String}.
-         *
-         * @param builderName     the name of the strategy to invoke
-         * @param input           the input term
-         * @return the resulting term; or {@code null} if the strategy failed
-         * @throws StrategoException if the strategy invocation failed
-         */
-        private @Nullable IStrategoTerm invokeBuilder(String builderName, IStrategoTerm input) throws StrategoException {
-            final IStrategoTerm builderInputTerm = StrategoUtil.createLegacyBuilderInputTerm(strategoRuntime.getTermFactory(), input, file.asString(), rootDirectoryHint != null ? rootDirectoryHint.asString() : "");
-            return invokeStrategy(builderName, builderInputTerm);
-        }
-
-        /**
-         * Invokes a Stratego strategy.
-         *
-         * @param strategyName    the name of the strategy to invoke
-         * @param input           the input term
-         * @param arguments       the term arguments
-         * @return the resulting term; or {@code null} if the strategy failed
-         * @throws StrategoException if the strategy invocation failed
-         */
-        private @Nullable IStrategoTerm invokeStrategy(String strategyName, IStrategoTerm input, ListView<IStrategoTerm> arguments) throws StrategoException {
-            try {
-                if(arguments.isEmpty()) {
-                    return strategoRuntime.invokeOrNull(strategyName, input);
-                } else {
-                    return strategoRuntime.invokeOrNull(strategyName, input, arguments);
-                }
-            } catch (StrategoException ex) {
-                throw ex;
             }
         }
     }

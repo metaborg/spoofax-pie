@@ -21,6 +21,7 @@ import mb.common.codecompletion.CodeCompletionResult;
 import mb.common.editing.TextEdit;
 import mb.common.option.Option;
 import mb.common.region.Region;
+import mb.common.result.Result;
 import mb.common.style.StyleNames;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
@@ -48,6 +49,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -104,19 +106,20 @@ public abstract class SpoofaxCompletionContributor extends CompletionContributor
         final @Nullable ResourcePath projectRoot = null;// TODO: Get the project root
         final Region selection = Region.atOffset(offset);
 
-        return Option.ofOptional(pieComponent.getPie().tryNewSession()).flatMap(trySession -> { // Skip code completion if another session exists.
-            try(final MixedSession session = trySession) {
-                final TopDownSession topDownSession = session.updateAffectedBy(Collections.emptySet(), Collections.singleton(Interactivity.Interactive));
-                return topDownSession.requireWithoutObserving(
-                    languageComponent.getLanguageInstance().createCodeCompletionTask(selection, fileKey, projectRoot)
-                );
-            } catch(ExecException e) {
-                // Bubble error up to Eclipse, which will handle it and show a dialog.
-                throw new UncheckedExecException("Code completion on resource '" + fileKey + "' failed unexpectedly.", e);
-            } catch(InterruptedException e) {
-                return Option.ofNone();
-            }
-        });
+        final Optional<MixedSession> sessionOpt = pieComponent.getPie().tryNewSession();
+        if (!sessionOpt.isPresent()) return Option.ofNone();
+        try (final MixedSession session = sessionOpt.get()) {
+            final TopDownSession topDownSession = session.updateAffectedBy(Collections.emptySet(), Collections.singleton(Interactivity.Interactive));
+            final Result<CodeCompletionResult, ?> codeCompletionResultResult = topDownSession.requireWithoutObserving(
+                languageComponent.getLanguageInstance().createCodeCompletionTask(selection, fileKey, projectRoot)
+            );
+            return Option.ofSome(codeCompletionResultResult.unwrap());
+        } catch(InterruptedException e) {
+            return Option.ofNone();
+        } catch(Exception e) {
+            // Bubble error up to Eclipse, which will handle it and show a dialog.
+            throw new UncheckedExecException("Code completion on resource '" + fileKey + "' failed unexpectedly.", e);
+        }
     }
 
     private LookupElement proposalToElement(CodeCompletionItem proposal, int priority) {

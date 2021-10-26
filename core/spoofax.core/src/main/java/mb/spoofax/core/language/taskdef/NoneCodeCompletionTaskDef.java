@@ -2,6 +2,9 @@ package mb.spoofax.core.language.taskdef;
 
 import mb.common.codecompletion.CodeCompletionResult;
 import mb.common.region.Region;
+import mb.common.result.Result;
+import mb.pie.api.ExecContext;
+import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -11,7 +14,8 @@ import javax.inject.Named;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class NoneCodeCompletionTaskDef extends NoneTaskDef<NoneCodeCompletionTaskDef.Input, CodeCompletionResult> {
+public class NoneCodeCompletionTaskDef implements TaskDef<NoneCodeCompletionTaskDef.Input, Result<CodeCompletionResult, ?>> {
+
     public static class Input implements Serializable {
         /** The primary selection at which to complete. */
         public final Region primarySelection;
@@ -71,6 +75,17 @@ public class NoneCodeCompletionTaskDef extends NoneTaskDef<NoneCodeCompletionTas
                 "}";
         }
     }
+    private final String idPrefix;
 
-    @Inject public NoneCodeCompletionTaskDef(@Named("packageId") String packageId) { super(packageId); }
+    @Inject public NoneCodeCompletionTaskDef(@Named("packageId") String packageId) { this.idPrefix = packageId; }
+
+    @Override
+    public String getId() {
+        return idPrefix + "-" + getClass().getName();
+    }
+
+    @Override
+    public Result<CodeCompletionResult, ?> exec(ExecContext context, Input input) throws Exception {
+        return Result.ofOk(CodeCompletionResult.getEmpty());
+    }
 }

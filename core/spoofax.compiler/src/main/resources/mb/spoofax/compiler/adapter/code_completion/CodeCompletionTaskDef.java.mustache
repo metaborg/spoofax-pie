@@ -1,7 +1,7 @@
 package {{baseCodeCompletionTaskDef.packageId}};
 
 import mb.common.codecompletion.CodeCompletionResult;
-import mb.common.option.Option;
+import mb.common.result.Result;
 import mb.log.api.LoggerFactory;
 import mb.nabl2.terms.stratego.StrategoTerms;
 import mb.pie.api.ExecContext;
@@ -59,7 +59,7 @@ public class {{baseCodeCompletionTaskDef.id}} extends CodeCompletionTaskDef {
     }
 
     @Override
-    public @Nullable Option<CodeCompletionResult> exec(ExecContext context, CodeCompletionTaskDef.Input input) throws Exception {
+    public @Nullable Result<CodeCompletionResult, ?> exec(ExecContext context, CodeCompletionTaskDef.Input input) throws Exception {
         context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
         context.require(classLoaderResources.tryGetAsNativeResource(CodeCompletionTaskDef.Input.class), ResourceStampers.hashFile());
 
