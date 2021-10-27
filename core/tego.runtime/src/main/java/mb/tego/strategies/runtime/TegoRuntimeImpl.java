@@ -18,7 +18,7 @@ import javax.inject.Inject;
 /**
  * Implements the {@link TegoRuntime}.
  */
-public final class TegoRuntimeImpl implements TegoRuntime, TegoEngine {
+public /* open */ class TegoRuntimeImpl implements TegoRuntime, TegoEngine {
 
     @Nullable private final LoggerFactory loggerFactory;
     private final Logger log;
@@ -78,7 +78,7 @@ public final class TegoRuntimeImpl implements TegoRuntime, TegoEngine {
      *
      * @param strategy the strategy that will be evaluated
      */
-    private void enterStrategy(StrategyDecl strategy) {
+    protected void enterStrategy(StrategyDecl strategy) {
         level += 1;
         log.trace(prefixString("→", level, " " + strategy.toString()));
     }
@@ -90,7 +90,7 @@ public final class TegoRuntimeImpl implements TegoRuntime, TegoEngine {
      * @param result the result of evaluating the strategy
      * @return the (possibly modified) result of evaluating the strategy
      */
-    private <R> @Nullable R exitStrategy(StrategyDecl strategy, @Nullable R result) {
+    protected <R> @Nullable R exitStrategy(StrategyDecl strategy, @Nullable R result) {
         log.trace(prefixString(" ", level - 1, " " + strategy));
         if (result != null) {
             log.trace(prefixString(" ", level - 1, "← " + strategy.toString()));

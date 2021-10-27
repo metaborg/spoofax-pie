@@ -79,13 +79,6 @@ import java.util.stream.Stream;
 import static mb.nabl2.terms.build.TermBuild.B;
 import static mb.nabl2.terms.matching.TermMatch.M;
 
-//import mb.statix.generator.scopegraph.DataWF;
-//import mb.statix.generator.scopegraph.Env;
-//import mb.statix.generator.scopegraph.Match;
-//import mb.statix.generator.scopegraph.NameResolution;
-//import mb.statix.generator.strategy.ResolveDataWF;
-
-
 /**
  * Expands the selected query.
  */
