@@ -61,7 +61,7 @@ public class TigerInstance implements LanguageInstance, TestableParse {
     private final TigerCheckAggregator checkAggregate;
     private final TigerStyle style;
     private final TigerIdeTokenize tokenize;
-    private final NoneCodeCompletionTaskDef complete;
+    private final NoneCodeCompletionTaskDef codeCompletion;
     private final NoneResolveTaskDef resolve;
     private final NoneHoverTaskDef hover;
 
@@ -83,7 +83,7 @@ public class TigerInstance implements LanguageInstance, TestableParse {
         TigerCheckAggregator checkAggregate,
         TigerStyle style,
         TigerIdeTokenize tokenize,
-        NoneCodeCompletionTaskDef complete,
+        NoneCodeCompletionTaskDef codeCompletion,
         NoneResolveTaskDef resolve,
         NoneHoverTaskDef hover,
 
@@ -103,7 +103,7 @@ public class TigerInstance implements LanguageInstance, TestableParse {
         this.checkAggregate = checkAggregate;
         this.style = style;
         this.tokenize = tokenize;
-        this.complete = complete;
+        this.codeCompletion = codeCompletion;
         this.resolve = resolve;
         this.hover = hover;
 
@@ -141,8 +141,8 @@ public class TigerInstance implements LanguageInstance, TestableParse {
     }
 
     @Override
-    public Task<Option<CodeCompletionResult>> createCodeCompletionTask(Region primarySelection, ResourceKey resourceKey, @Nullable ResourcePath rootDirectoryHint) {
-        return complete.createTask(new NoneCodeCompletionTaskDef.Input(
+    public Task<Result<CodeCompletionResult, ?>> createCodeCompletionTask(Region primarySelection, ResourceKey resourceKey, @Nullable ResourcePath rootDirectoryHint) {
+        return codeCompletion.createTask(new NoneCodeCompletionTaskDef.Input(
             primarySelection,
             resourceKey,
             rootDirectoryHint
