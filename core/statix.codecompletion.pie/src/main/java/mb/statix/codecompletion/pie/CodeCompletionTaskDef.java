@@ -62,6 +62,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static mb.statix.codecompletion.pie.CodeCompletionUtils.findPlaceholderAt;
@@ -174,7 +175,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
 
     private final String statixSecName;
     private final String statixRootPredicateName;
-    private final CodeCompletionEventHandler eventHandler;
+    private Supplier<@Nullable CodeCompletionEventHandler> eventHandlerProvider;
 
     /**
      * Initializes a new instance of the {@link CodeCompletionTaskDef} class.
@@ -185,6 +186,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
      * @param statixSpec the Statix spec task
      * @param strategoTerms the Stratego to NaBL terms utility class
      * @param loggerFactory the logger factory
+     * @param eventHandlerProvider the event handler provider
      *
      * @param preAnalyzeStrategyName the {@code pre-analyze} Stratego strategy name
      * @param postAnalyzeStrategyName the {@code post-analyze} Stratego strategy name
@@ -195,7 +197,6 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
      *
      * @param statixSecName the name of the Statix spec
      * @param statixRootPredicateName the name of the single-analysis root predicate in the Statix spec
-     * @param eventHandler the code completion event handler
      */
     public CodeCompletionTaskDef(
         JsglrParseTaskDef parseTask,
@@ -205,6 +206,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
         StatixSpecTaskDef statixSpec,
         StrategoTerms strategoTerms,
         LoggerFactory loggerFactory,
+        Supplier<@Nullable CodeCompletionEventHandler> eventHandlerProvider,
 
         String preAnalyzeStrategyName,
         String postAnalyzeStrategyName,
@@ -214,8 +216,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
         String ppPartialStrategyName,
 
         String statixSecName,
-        String statixRootPredicateName,
-        CodeCompletionEventHandler eventHandler
+        String statixRootPredicateName
     ) {
         this.parseTask = parseTask;
         this.analyzeFileTask = analyzeFileTask;
@@ -224,6 +225,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
         this.statixSpec = statixSpec;
         this.strategoTerms = strategoTerms;
         this.log = loggerFactory.create(getClass());
+        this.eventHandlerProvider = eventHandlerProvider;
 
         this.preAnalyzeStrategyName = preAnalyzeStrategyName;
         this.postAnalyzeStrategyName = postAnalyzeStrategyName;
@@ -234,7 +236,6 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
 
         this.statixSecName = statixSecName;
         this.statixRootPredicateName = statixRootPredicateName;
-        this.eventHandler = eventHandler;
     }
 
     @Override
@@ -252,6 +253,15 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
         return new Execution(
             context, input, strategoRuntime, spec
         ).complete();
+    }
+
+    /**
+     * Sets the event handler provider for this task.
+     *
+     * @param eventHandlerProvider the event handler provider
+     */
+    public void withEventHandlerProvider(Supplier<@Nullable CodeCompletionEventHandler> eventHandlerProvider) {
+        this.eventHandlerProvider = eventHandlerProvider;
     }
 
     /**
@@ -303,17 +313,18 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * @throws Exception if an exception occurred
          */
         public Result<CodeCompletionResult, ?> complete() throws Exception {
-            eventHandler.begin();
+            @Nullable final CodeCompletionEventHandler eventHandler = eventHandlerProvider.get();
+            if (eventHandler != null) eventHandler.begin();
 
             // Parse the AST
-            eventHandler.beginParse();
+            if (eventHandler != null) eventHandler.beginParse();
             final Result<IStrategoTerm, ?> parsedAstResult = parse();
             if (parsedAstResult.isErr()) return parsedAstResult.ignoreValueIfErr();
             final IStrategoTerm parsedAst = parsedAstResult.unwrap();
-            eventHandler.endParse();
+            if (eventHandler != null) eventHandler.endParse();
 
             // Prepare the AST (explicate, add term indices, upgrade placeholders)
-            eventHandler.beginPreparation();
+            if (eventHandler != null) eventHandler.beginPreparation();
             final Result<IStrategoTerm, ?> explicatedAstResult = preAnalyze(parsedAst);
             if (explicatedAstResult.isErr()) return explicatedAstResult.ignoreValueIfErr();
             final IStrategoTerm explicatedAst = explicatedAstResult.unwrap();
@@ -325,26 +336,26 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
             final ITerm upgradedAst = upgradedAstResult.unwrap();
             final ITermVar placeholder = getCompletionPlaceholder(upgradedAst);
             final SolverState initialState = createInitialSolverState(upgradedAst, statixSecName, statixRootPredicateName, placeholderVarMap);
-            eventHandler.endPreparation();
+            if (eventHandler != null) eventHandler.endPreparation();
 
             // Analyze the AST
-            eventHandler.beginAnalysis();
+            if (eventHandler != null) eventHandler.beginAnalysis();
             final SolverState analyzedState = analyze(initialState);
-            eventHandler.endAnalysis();
+            if (eventHandler != null) eventHandler.endAnalysis();
 
             // Execute the code completion Tego strategy
-            eventHandler.beginCodeCompletion();
+            if (eventHandler != null) eventHandler.beginCodeCompletion();
             final Seq<CodeCompletionProposal> completionProposals = complete(analyzedState, placeholder, Collections.emptyList() /* TODO: Get the set of analysis errors */);
             final Seq<CodeCompletionProposal> filteredProposals = filterProposals(completionProposals);
             final List<CodeCompletionProposal> instantiatedProposals = filteredProposals.toList(); // NOTE: This is where we actually coerce the lazy list find the completions.
-            eventHandler.endCodeCompletion();
+            if (eventHandler != null) eventHandler.endCodeCompletion();
 
             // Get, convert, and prepare the proposals
-            eventHandler.beginFinishing();
+            if (eventHandler != null) eventHandler.beginFinishing();
             final List<CodeCompletionProposal> orderedProposals = orderProposals(instantiatedProposals);
             final Region placeholderRegion = getRegion(placeholder, Region.atOffset(primarySelection.getStartOffset() /* TODO: Support the whole selection? */));
             final List<CodeCompletionItem> finalProposals = proposalsToCodeCompletionItems(orderedProposals, placeholderRegion);
-            eventHandler.endFinishing();
+            if (eventHandler != null) eventHandler.endFinishing();
 
             if (finalProposals.isEmpty()) {
                 log.warn("Completion returned no completion proposals.");
@@ -353,7 +364,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
                     .map(i -> i.getLabel()).collect(Collectors.joining("\n - ")));
             }
 
-            eventHandler.end();
+            if (eventHandler != null) eventHandler.end();
             return Result.ofOk(new TermCodeCompletionResult(
                 placeholder,
                 ListView.copyOf(finalProposals),

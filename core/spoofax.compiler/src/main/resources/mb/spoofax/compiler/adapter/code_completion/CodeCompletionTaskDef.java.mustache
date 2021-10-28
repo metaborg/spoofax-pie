@@ -37,6 +37,7 @@ public class {{baseCodeCompletionTaskDef.id}} extends CodeCompletionTaskDef {
             statixSpec,
             strategoTerms,
             loggerFactory,
+            () -> null,
 
             "{{preAnalyzeStrategy}}",
             "{{postAnalyzeStrategy}}",
@@ -46,8 +47,7 @@ public class {{baseCodeCompletionTaskDef.id}} extends CodeCompletionTaskDef {
             "{{ppPartialStrategy}}",
 
             "{{statixSpecName}}",
-            "{{statixRootPredicateName}}",
-            new CodeCompletionEventHandlerBase()
+            "{{statixRootPredicateName}}"
         );
 
         this.classLoaderResources = classLoaderResources;
