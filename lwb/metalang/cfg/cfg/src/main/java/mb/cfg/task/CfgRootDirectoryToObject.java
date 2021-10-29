@@ -74,10 +74,6 @@ public class CfgRootDirectoryToObject implements TaskDef<ResourcePath, Result<Cf
             });
     }
 
-    @Override public boolean shouldExecWhenAffected(ResourcePath input, Set<?> tags) {
-        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
-    }
-
     private static class PropertiesSupplier implements Supplier<Result<Properties, IOException>>, Serializable {
         private final ResourcePath lockFilePath;
 

@@ -1,19 +1,27 @@
 package mb.cfg.convert;
 
+import mb.aterm.common.InvalidAstShapeException;
 import mb.cfg.CompileLanguageInput;
 import mb.cfg.CompileLanguageInputCustomizer;
 import mb.cfg.CompileLanguageSpecificationInput;
 import mb.cfg.CompileLanguageSpecificationInputBuilder;
 import mb.cfg.CompileLanguageSpecificationShared;
-import mb.cfg.metalang.CompileEsvInput;
+import mb.cfg.metalang.CfgEsvConfig;
+import mb.cfg.metalang.CfgEsvSource;
 import mb.cfg.metalang.CompileSdf3Input;
 import mb.cfg.metalang.CompileStatixInput;
 import mb.cfg.metalang.CompileStrategoInput;
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
+import mb.common.message.Severity;
 import mb.common.option.Option;
+import mb.common.util.ListView;
 import mb.common.util.Properties;
+import mb.jsglr.common.TermTracer;
+import mb.pie.api.ExecContext;
+import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceKey;
+import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.adapter.AdapterProject;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
@@ -51,13 +59,14 @@ import mb.spoofax.core.language.command.EditorFileType;
 import mb.spoofax.core.language.command.EditorSelectionType;
 import mb.spoofax.core.language.command.EnclosingCommandContextType;
 import mb.spoofax.core.language.command.HierarchicalResourceType;
-import mb.aterm.common.InvalidAstShapeException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.util.TermUtils;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -79,6 +88,7 @@ public class CfgAstToObject {
     }
 
     public static Output convert(
+        ExecContext context,
         ResourcePath rootDirectory,
         @Nullable ResourceKey cfgFile,
         IStrategoTerm normalizedAst,
@@ -154,10 +164,42 @@ public class CfgAstToObject {
             });
         });
         parts.getAllSubTermsInListAsParts("EsvSection").ifSome(subParts -> {
-            final CompileEsvInput.Builder builder = languageCompilerInputBuilder.withEsv();
-            subParts.forOneSubtermAsPath("EsvMainSourceDirectory", rootDirectory, builder::mainSourceDirectory);
-            subParts.forOneSubtermAsPath("EsvMainFile", rootDirectory, builder::mainFile);
-            subParts.forAllSubtermsAsPaths("EsvIncludeDirectory", rootDirectory, builder::addIncludeDirectories);
+            final CfgEsvConfig.Builder builder = languageCompilerInputBuilder.withEsv();
+            subParts.getOneSubterm("EsvSource").ifSome(source -> {
+                if(TermUtils.isAppl(source, "EsvFiles", 1)) {
+                    final Parts filesParts = subParts.subParts(source.getSubterm(0));
+                    final ResourcePath mainSourceDirectory = filesParts.getOneSubtermAsPath("EsvFilesMainSourceDirectory", rootDirectory)
+                        .unwrapOrElse(() -> CfgEsvConfig.Builder.getDefaultMainSourceDirectory(rootDirectory));
+                    final ResourcePath mainFile = filesParts.getOneSubtermAsPath("EsvFilesMainFile", rootDirectory)
+                        .unwrapOrElse(() -> CfgEsvConfig.Builder.getDefaultMainFile(rootDirectory));
+                    final ArrayList<ResourcePath> includeDirectories = new ArrayList<>();
+                    filesParts.forAllSubtermsAsPaths("EsvFilesIncludeDirectory", rootDirectory, includeDirectories::add);
+                    final boolean includeLibSpoofax2Exports = filesParts.getOneSubtermAsBool("EsvFilesIncludeLibspoofax2Exports")
+                        .unwrapOrElse(() -> CfgEsvConfig.Builder.getDefaultIncludeLibSpoofax2Exports(languageShared));
+                    final ResourcePath libSpoofax2UnarchiveDirectory = CfgEsvConfig.Builder.getDefaultLibSpoofax2UnarchiveDirectory(languageShared);
+                    builder.source(CfgEsvSource.files(mainSourceDirectory, mainFile, ListView.of(includeDirectories), includeLibSpoofax2Exports, libSpoofax2UnarchiveDirectory));
+                } else if(TermUtils.isAppl(source, "EsvPrebuilt", 1)) {
+                    final Parts prebuiltParts = subParts.subParts(source.getSubterm(0));
+                    prebuiltParts.getOneSubterm("EsvPrebuiltFile").ifElse(
+                        pathTerm -> {
+                            final String relativePath = Parts.toJavaString(pathTerm);
+                            final ResourcePath path = rootDirectory.appendRelativePath(relativePath).getNormalized();
+                            try {
+                                final HierarchicalResource file = context.require(path, ResourceStampers.<HierarchicalResource>exists());
+                                if(!file.exists()) {
+                                    messagesBuilder.addMessage("ESV prebuilt file '" + path + "' does not exist", Severity.Error, cfgFile, TermTracer.getRegion(pathTerm));
+                                }
+                            } catch(IOException e) {
+                                messagesBuilder.addMessage("Failed to check if ESV prebuilt file '" + path + "' exists", Severity.Error, cfgFile, TermTracer.getRegion(pathTerm));
+                            }
+                            builder.source(CfgEsvSource.prebuilt(path));
+                        },
+                        () -> messagesBuilder.addMessage("file = $FilePath option is missing", Severity.Error, cfgFile, TermTracer.getRegion(source))
+                    );
+                } else {
+                    throw new InvalidAstShapeException("ESV source", source);
+                }
+            });
         });
         parts.getAllSubTermsInListAsParts("StatixSection").ifSome(subParts -> {
             final CompileStatixInput.Builder builder = languageCompilerInputBuilder.withStatix();
@@ -184,9 +226,7 @@ public class CfgAstToObject {
             subParts.getOneSubterm("ParserVariant").ifSome(variant -> {
                 if(TermUtils.isAppl(variant, "Jsglr1", 0)) {
                     base.variant(ParserVariant.jsglr1());
-                    return;
-                }
-                if(TermUtils.isAppl(variant, "Jsglr2", 1)) {
+                } else if(TermUtils.isAppl(variant, "Jsglr2", 1)) {
                     base.variant(ParserVariant.jsglr2());
                     final Parts variantParts = subParts.subParts(variant.getSubterm(0));
                     variantParts.getOneSubterm("Jsglr2Preset").ifSome(presetTerm -> {
@@ -225,6 +265,8 @@ public class CfgAstToObject {
                         }
                         base.variant(ParserVariant.jsglr2(preset));
                     });
+                } else {
+                    throw new InvalidAstShapeException("JSGLR parser variant", variant);
                 }
             });
             // TODO: parser language properties

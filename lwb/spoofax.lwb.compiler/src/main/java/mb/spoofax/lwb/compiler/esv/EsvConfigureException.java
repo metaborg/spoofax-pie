@@ -4,10 +4,12 @@ import mb.cfg.task.CfgRootDirectoryToObjectException;
 import mb.common.util.ADT;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.lwb.compiler.sdf3.ConfigureSdf3;
 import mb.spoofax.lwb.compiler.sdf3.Sdf3ConfigureException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * Error for ESV configuration task in the context of the Spoofax LWB compiler.
+ */
 @ADT
 public abstract class EsvConfigureException extends Exception {
     public interface Cases<R> {

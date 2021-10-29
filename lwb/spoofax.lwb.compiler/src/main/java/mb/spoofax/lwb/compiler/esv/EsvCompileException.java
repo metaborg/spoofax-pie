@@ -8,6 +8,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
 
+/**
+ * Error for ESV compile task in the context of the Spoofax LWB compiler.
+ */
 @ADT
 public abstract class EsvCompileException extends Exception implements HasOptionalMessages {
     public interface Cases<R> {

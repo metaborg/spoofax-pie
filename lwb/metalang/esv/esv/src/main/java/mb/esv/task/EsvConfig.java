@@ -11,6 +11,9 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import java.io.Serializable;
 
+/**
+ * Configuration for ESV in the context of ESV itself.
+ */
 public class EsvConfig implements Serializable {
     public final ResourcePath rootDirectory;
     public final ResourceKey mainFile;

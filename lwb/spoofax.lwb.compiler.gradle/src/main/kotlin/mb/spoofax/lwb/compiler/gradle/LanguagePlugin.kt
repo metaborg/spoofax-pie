@@ -10,24 +10,21 @@ import mb.common.message.Messages
 import mb.common.message.Severity
 import mb.common.result.Result
 import mb.common.util.ExceptionPrinter
-import mb.log.api.Level
 import mb.log.dagger.DaggerLoggerComponent
 import mb.log.dagger.LoggerModule
-import mb.log.stream.LoggingOutputStream
 import mb.pie.api.Pie
 import mb.pie.api.ValueSupplier
 import mb.pie.dagger.PieModule
 import mb.pie.runtime.PieBuilderImpl
 import mb.resource.ResourceKey
-import mb.resource.ResourceRuntimeException
 import mb.resource.ResourceService
 import mb.resource.dagger.DaggerRootResourceServiceComponent
+import mb.resource.dagger.ResourceServiceComponent
 import mb.resource.fs.FSPath
 import mb.resource.hierarchical.ResourcePath
 import mb.spoofax.compiler.adapter.*
 import mb.spoofax.compiler.gradle.*
-import mb.spoofax.compiler.gradle.plugin.AdapterProjectExtension
-import mb.spoofax.compiler.gradle.plugin.LanguageProjectExtension
+import mb.spoofax.compiler.gradle.plugin.*
 import mb.spoofax.compiler.language.*
 import mb.spoofax.compiler.util.*
 import mb.spoofax.lwb.compiler.CheckLanguageSpecification
@@ -37,12 +34,8 @@ import mb.spoofax.lwb.compiler.stratego.StrategoLibUtil
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.artifacts.Dependency
-import org.gradle.api.file.FileCollection
 import org.gradle.api.plugins.JavaPlugin
-import org.gradle.api.tasks.SourceSetContainer
-import org.gradle.kotlin.dsl.*
-import java.io.PrintStream
+import java.io.File
 import java.util.*
 
 open class LanguageExtension() {
@@ -91,75 +84,72 @@ open class LanguagePlugin : Plugin<Project> {
 
     val input = getInput(project, spoofax3Compiler)
 
-    project.extensions.add(Spoofax3AdapterExtension.id, Spoofax3AdapterExtension(project, input))
-    project.extensions.add(Spoofax3LanguageExtension.id, Spoofax3LanguageExtension(project, input))
-
-    project.afterEvaluate {
-      configure(project, spoofax3Compiler, input)
-    }
+    LanguagePluginInstance(project, resourceServiceComponent, spoofax3Compiler, input)
   }
 
-  private fun getInput(
-    project: Project,
-    spoofax3Compiler: StandaloneSpoofax3Compiler
-  ): CompileLanguageInput {
+  private fun getInput(project: Project, spoofax3Compiler: StandaloneSpoofax3Compiler): CompileLanguageInput {
     spoofax3Compiler.pieComponent.pie.newSession().use {
       return it.require(spoofax3Compiler.compiler.cfgComponent.cfgRootDirectoryToObject.createTask(FSPath(project.projectDir)))
         .unwrap().compileLanguageInput // TODO: proper error handling
     }
   }
+}
 
-  private fun configure(
-    project: Project,
-    spoofax3Compiler: StandaloneSpoofax3Compiler,
-    input: CompileLanguageInput
-  ) {
-    val resourceService = spoofax3Compiler.compiler.resourceServiceComponent.resourceService
+class LanguagePluginInstance(
+  val project: Project,
+  resourceServiceComponent: ResourceServiceComponent,
+  val spoofax3Compiler: StandaloneSpoofax3Compiler,
+  val compileLanguageInput: CompileLanguageInput
+) {
+  val resourceService: ResourceService = resourceServiceComponent.resourceService
+  val pie: Pie = spoofax3Compiler.pieComponent.pie
+
+  init {
+    project.extensions.add(Spoofax3AdapterExtension.id, Spoofax3AdapterExtension(project, compileLanguageInput))
+    project.extensions.add(Spoofax3LanguageExtension.id, Spoofax3LanguageExtension(project, compileLanguageInput))
+
+    project.afterEvaluate {
+      configure()
+    }
+  }
+
+
+  private fun configure() {
     val languageProjectCompiler = spoofax3Compiler.compiler.spoofaxCompilerComponent.languageProjectCompiler
+    val adapterProjectCompiler = spoofax3Compiler.compiler.spoofaxCompilerComponent.adapterProjectCompiler
+    configureProject(languageProjectCompiler, spoofax3Compiler.compiler.component.strategoLibUtil, adapterProjectCompiler)
+    configureCompileLanguageProjectTask(languageProjectCompiler, compileLanguageInput.languageProjectInput())
     val check = spoofax3Compiler.compiler.component.checkLanguageSpecification
     val compile = spoofax3Compiler.compiler.component.compileLanguageSpecification
-    val adapterProjectCompiler = spoofax3Compiler.compiler.spoofaxCompilerComponent.adapterProjectCompiler
-    val pie = spoofax3Compiler.pieComponent.pie
-    configureProject(project, resourceService, languageProjectCompiler, input, spoofax3Compiler.compiler.component.strategoLibUtil, adapterProjectCompiler)
-    configureCompileLanguageProjectTask(project, resourceService, pie, languageProjectCompiler, input.languageProjectInput())
-    configureCompileLanguageTask(project, resourceService, pie, check, compile, input.compileLanguageSpecificationInput())
-    configureCompileAdapterProjectTask(project, resourceService, pie, adapterProjectCompiler, input.adapterProjectInput())
+    configureCompileLanguageTask(check, compile, compileLanguageInput.compileLanguageSpecificationInput())
+    configureCompileAdapterProjectTask(adapterProjectCompiler, compileLanguageInput.adapterProjectInput())
   }
 
   private fun configureProject(
-    project: Project,
-    resourceService: ResourceService,
     languageProjectCompiler: LanguageProjectCompiler,
-    input: CompileLanguageInput,
     strategoLibUtil: StrategoLibUtil,
     adapterProjectCompiler: AdapterProjectCompiler
   ) {
     // Language project compiler
-    val languageProjectInput = input.languageProjectInput()
+    val languageProjectInput = compileLanguageInput.languageProjectInput()
     project.addMainJavaSourceDirectory(languageProjectInput.generatedJavaSourcesDirectory(), resourceService)
     languageProjectCompiler.getDependencies(languageProjectInput).forEach {
       it.addToDependencies(project)
     }
     // Language compiler
-    val languageSpecificationInput = input.compileLanguageSpecificationInput()
+    val languageSpecificationInput = compileLanguageInput.compileLanguageSpecificationInput()
     project.addMainResourceDirectory(languageSpecificationInput.compileLanguageShared().generatedResourcesDirectory(), resourceService)
     project.addMainJavaSourceDirectory(languageSpecificationInput.compileLanguageShared().generatedJavaSourcesDirectory(), resourceService)
     project.dependencies.add("implementation", project.files(strategoLibUtil.strategoLibJavaClassPaths))
     // Adapter project compiler
-    val adapterProjectInput = input.adapterProjectInput()
+    val adapterProjectInput = compileLanguageInput.adapterProjectInput()
     project.addMainJavaSourceDirectory(adapterProjectInput.adapterProject().generatedJavaSourcesDirectory(), resourceService)
     adapterProjectCompiler.getDependencies(adapterProjectInput).forEach {
       it.addToDependencies(project)
     }
   }
 
-  private fun configureCompileLanguageProjectTask(
-    project: Project,
-    resourceService: ResourceService,
-    pie: Pie,
-    compiler: LanguageProjectCompiler,
-    input: LanguageProjectCompiler.Input
-  ) {
+  private fun configureCompileLanguageProjectTask(compiler: LanguageProjectCompiler, input: LanguageProjectCompiler.Input) {
     val compileTask = project.tasks.register("compileLanguageProject") {
       group = "spoofax compiler"
       inputs.property("input", input)
@@ -180,9 +170,6 @@ open class LanguagePlugin : Plugin<Project> {
   }
 
   private fun configureCompileLanguageTask(
-    project: Project,
-    resourceService: ResourceService,
-    pie: Pie,
     check: CheckLanguageSpecification,
     compile: CompileLanguageSpecification,
     input: CompileLanguageSpecificationInput
@@ -209,21 +196,32 @@ open class LanguagePlugin : Plugin<Project> {
           logger.warn("Cannot set the SDF3 parse table as a task output, because ${it.parseTableAtermOutputFile()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
         }
       }
-      input.esv().ifPresent {
-        // Input: all ESV files
-        val rootDirectory = resourceService.toLocalFile(it.mainSourceDirectory())
-        if(rootDirectory != null) {
-          inputs.files(project.fileTree(rootDirectory) { include("**/*.esv") })
-        } else {
-          logger.warn("Cannot set ESV files as task inputs, because ${it.mainSourceDirectory()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
-        }
+      input.esv().ifPresent { esvConfig ->
+        esvConfig.source().caseOf()
+          .files { mainSourceDirectory, _, includeDirectories, includeLibSpoofax2Exports, libSpoofax2UnarchiveDirectory ->
+            // Input: all ESV files in the main source directory and include directories
+            mainSourceDirectory.tryAsLocal("ESV files in main source directory") { dir ->
+              inputs.files(project.fileTree(dir) { include("**/*.esv") })
+            }
+            includeDirectories.forEach { includeDirectory ->
+              includeDirectory.tryAsLocal("ESV files in include directory") { dir ->
+                inputs.files(project.fileTree(dir) { include("**/*.esv") })
+              }
+            }
+            if(includeLibSpoofax2Exports) { // Output: libspoofax2 unarchive directory
+              libSpoofax2UnarchiveDirectory.tryAsLocal("libspoofax2 unarchive directory") { dir ->
+                outputs.dir(dir)
+              }
+            }
+          }
+          .prebuilt { inputFile -> // Input: prebuilt input file
+            inputFile.tryAsLocal("ESV prebuilt file") { file ->
+              inputs.files(file)
+            }
+          }
 
-        // Output: ESV aterm format file
-        val outputFile = resourceService.toLocalFile(it.atermFormatOutputFile())
-        if(outputFile != null) {
-          outputs.file(outputFile)
-        } else {
-          logger.warn("Cannot set the ESV aterm format file as a task output, because ${it.atermFormatOutputFile()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
+        esvConfig.outputFile().tryAsLocal("ESV output file") { file -> // Output: output file
+          outputs.file(file)
         }
       }
       input.statix().ifPresent {
@@ -293,10 +291,16 @@ open class LanguagePlugin : Plugin<Project> {
     project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(compileTask)
   }
 
+  private fun ResourcePath.tryAsLocal(name: String, func: (file: File) -> Unit) {
+    val local = resourceService.toLocalFile(this)
+    if(local != null) {
+      func(local)
+    } else {
+      project.logger.warn("Cannot set the $name as a task dependency, because '${this}' cannot be converted into a local file. This disables incrementality for this Gradle task")
+    }
+  }
+
   private fun configureCompileAdapterProjectTask(
-    project: Project,
-    resourceService: ResourceService,
-    pie: Pie,
     compiler: AdapterProjectCompiler,
     input: AdapterProjectCompiler.Input
   ) {

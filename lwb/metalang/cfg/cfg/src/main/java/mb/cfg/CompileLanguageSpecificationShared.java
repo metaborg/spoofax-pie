@@ -40,16 +40,16 @@ public interface CompileLanguageSpecificationShared extends Serializable {
         return generatedSourcesDirectory().appendRelativePath("java");
     }
 
-    @Value.Default default ResourcePath generatedStatixSourcesDirectory() {
-        return generatedSourcesDirectory().appendRelativePath("statix");
-    }
-
-    @Value.Default default ResourcePath generatedStrategoSourcesDirectory() {
-        return generatedSourcesDirectory().appendRelativePath("stratego");
-    }
-
     @Value.Default default ResourcePath unarchiveDirectory() {
         return languageProject().project().buildDirectory().appendRelativePath("unarchive");
+    }
+
+    @Value.Default default ResourcePath libSpoofax2UnarchiveDirectory() {
+        return unarchiveDirectory().appendRelativePath("libspoofax2");
+    }
+
+    @Value.Default default ResourcePath libStatixUnarchiveDirectory() {
+        return unarchiveDirectory().appendRelativePath("libstatix");
     }
 
 

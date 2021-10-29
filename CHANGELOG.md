@@ -5,9 +5,12 @@ All notable changes to this project are documented in this file, based on [Keep 
 ## [Unreleased]
 ### Fixed
 - Evaluating .stxtest files outside of the Statix source directory (src by default) silently failing.
+- Errors in CFG not appearing, or just displaying a single error on the first line.
 
 ### Changed
-- Show an error dialog when building a language definition fails due to errors in language definition files.
+- Spoofax Eclipse LWB plugin to show an error dialog when building a language fails due to errors in language definition files.
+- LWB compiler to make it possible to supply a prebuilt ESV output file for a language instead of always having to compile that from ESV sources.
+- LWB compiler to be more incremental by adding output stampers to high-level tasks, ensuring they only get re-executed when a relevant part of the configuration changes.
 
 
 ## [0.15.3] - 2021-10-22

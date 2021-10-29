@@ -17,8 +17,8 @@ import mb.spoofax.lwb.compiler.CheckLanguageSpecification;
 import mb.spoofax.lwb.compiler.CompileLanguage;
 import mb.spoofax.lwb.compiler.CompileLanguageSpecification;
 import mb.spoofax.lwb.compiler.cfg.CheckCfg;
-import mb.spoofax.lwb.compiler.esv.CheckEsv;
-import mb.spoofax.lwb.compiler.esv.ConfigureEsv;
+import mb.spoofax.lwb.compiler.esv.SpoofaxEsvCheck;
+import mb.spoofax.lwb.compiler.esv.SpoofaxEsvConfigure;
 import mb.spoofax.lwb.compiler.generator.LanguageProjectGenerator;
 import mb.spoofax.lwb.compiler.sdf3.CheckSdf3;
 import mb.spoofax.lwb.compiler.sdf3.ConfigureSdf3;
@@ -69,9 +69,9 @@ public interface Spoofax3CompilerComponent extends TaskDefsProvider {
 
     CheckCfg getCfgCheck();
 
-    CheckEsv getCheckEsv();
+    SpoofaxEsvCheck getCheckEsv();
 
-    ConfigureEsv getConfigureEsv();
+    SpoofaxEsvConfigure getConfigureEsv();
 
     CheckSdf3 getCheckSdf3();
 

@@ -10,12 +10,15 @@ import mb.resource.hierarchical.ResourcePath;
 
 import javax.inject.Inject;
 
-public class CheckEsv implements TaskDef<ResourcePath, KeyedMessages> {
-    private final ConfigureEsv configure;
+/**
+ * Check task for ESV in the context of the Spoofax LWB compiler.
+ */
+public class SpoofaxEsvCheck implements TaskDef<ResourcePath, KeyedMessages> {
+    private final SpoofaxEsvConfigure configure;
     private final EsvCheck check;
 
-    @Inject public CheckEsv(
-        ConfigureEsv configure,
+    @Inject public SpoofaxEsvCheck(
+        SpoofaxEsvConfigure configure,
         EsvCheck check
     ) {
         this.configure = configure;
@@ -30,11 +33,18 @@ public class CheckEsv implements TaskDef<ResourcePath, KeyedMessages> {
     public KeyedMessages exec(ExecContext context, ResourcePath rootDirectory) {
         return context.require(configure, rootDirectory).mapOrElse(
             o -> o.mapOrElse(
-                c -> context.require(check, c),
+                c -> check(context, c),
                 KeyedMessages::of
             ),
             e -> KeyedMessages.ofTryExtractMessagesFrom(e, rootDirectory)
                 .orElse(KeyedMessages.of(ListView.of(new Message("Could not check ESV because it could not be configured", e)), rootDirectory))
         );
+    }
+
+    public KeyedMessages check(ExecContext context, SpoofaxEsvConfig config) {
+        return config.caseOf()
+            .files((esvConfig, outputFile) -> context.require(check, esvConfig))
+            .prebuilt((inputFile, outputFile) -> KeyedMessages.of())
+            ;
     }
 }

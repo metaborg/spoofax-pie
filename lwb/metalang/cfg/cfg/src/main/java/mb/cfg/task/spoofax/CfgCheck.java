@@ -103,16 +103,7 @@ public class CfgCheck implements TaskDef<CfgCheck.Input, KeyedMessages> {
         if(!analysisErrors.get() && input.rootDirectoryHint != null) {
             final Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result = context.require(rootDirectoryToObject, input.rootDirectoryHint);
             result.ifOk(o -> messagesBuilder.addMessages(o.messages));
-            result.ifErr(e -> {
-                final StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append(e.getMessage());
-                final @Nullable Throwable cause = e.getCause();
-                if(cause != null) {
-                    stringBuilder.append("; ");
-                    stringBuilder.append(cause.getMessage());
-                }
-                messagesBuilder.addMessage(stringBuilder.toString(), e, Severity.Error, e.getCfgFile());
-            });
+            result.ifErr(e -> messagesBuilder.extractMessagesRecursivelyWithFallbackKey(e, input.file));
         }
 
         return messagesBuilder.build();

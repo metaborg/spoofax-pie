@@ -6,7 +6,7 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.lwb.compiler.cfg.CheckCfg;
-import mb.spoofax.lwb.compiler.esv.CheckEsv;
+import mb.spoofax.lwb.compiler.esv.SpoofaxEsvCheck;
 import mb.spoofax.lwb.compiler.sdf3.CheckSdf3;
 import mb.spoofax.lwb.compiler.statix.CheckStatix;
 import mb.spoofax.lwb.compiler.stratego.CheckStratego;
@@ -25,20 +25,20 @@ import javax.inject.Inject;
 public class CheckLanguageSpecification implements TaskDef<ResourcePath, KeyedMessages> {
     private final CheckCfg checkCfg;
     private final CheckSdf3 checkSdf3;
-    private final CheckEsv checkEsv;
+    private final SpoofaxEsvCheck spoofaxEsvCheck;
     private final CheckStatix checkStatix;
     private final CheckStratego checkStratego;
 
     @Inject public CheckLanguageSpecification(
         CheckCfg checkCfg,
         CheckSdf3 checkSdf3,
-        CheckEsv checkEsv,
+        SpoofaxEsvCheck spoofaxEsvCheck,
         CheckStatix checkStatix,
         CheckStratego checkStratego
     ) {
         this.checkCfg = checkCfg;
         this.checkSdf3 = checkSdf3;
-        this.checkEsv = checkEsv;
+        this.spoofaxEsvCheck = spoofaxEsvCheck;
         this.checkStatix = checkStatix;
         this.checkStratego = checkStratego;
     }
@@ -52,7 +52,7 @@ public class CheckLanguageSpecification implements TaskDef<ResourcePath, KeyedMe
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
         messagesBuilder.addMessages(context.require(checkCfg, rootDirectory));
         messagesBuilder.addMessages(context.require(checkSdf3, rootDirectory));
-        messagesBuilder.addMessages(context.require(checkEsv, rootDirectory));
+        messagesBuilder.addMessages(context.require(spoofaxEsvCheck, rootDirectory));
         messagesBuilder.addMessages(context.require(checkStatix, rootDirectory));
         messagesBuilder.addMessages(context.require(checkStratego, rootDirectory));
         return messagesBuilder.build();

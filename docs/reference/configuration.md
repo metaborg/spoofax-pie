@@ -373,9 +373,26 @@ The following `EsvOption`s are supported:
 
 | Syntax | Required? | Description | Type |
 | - | - | - | - |
+| `source = $EsvSource` | no | The source of the ESV definition. Defaults to a `files` source with the top-level `source-directory` option as its main source directory, and `./main.esv` as its main file relative to the main source directory. | n/a |
+
+The following `$EsvSource`s are supported:
+
+* Files: `files { $EsvFilesOption* }`
+* Prebuilt: `prebuilt { $EsvPrebuiltOption }`
+
+The following `EsvFilesOption`s are supported:
+
+| Syntax | Required? | Description | Type |
+| - | - | - | - |
 | `main-source-directory = $Expression` | no | The directory relative to the root directory that contains the main ESV file. Defaults to the value of the top-level `source-directory` option. | Path |
 | `main-file = $Expression` | no | The main ESV file relative to the `main-source-directory`. Defaults to `./main.esv`. | Path |
 | `include-directory = $Expression` | no | Adds an include directory from which to resolve ESV imports. May be given multiple times. | Path |
+
+The following `$EsvPrebuiltOption`s are supported:
+
+| Syntax | Required? | Description | Type |
+| - | - | - | - |
+| `file = $Expression` | yes | The prebuilt ESV file to use relative to the root directory | Path |
 
 ### Statix
 

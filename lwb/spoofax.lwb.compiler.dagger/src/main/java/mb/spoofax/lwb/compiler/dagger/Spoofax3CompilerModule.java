@@ -11,9 +11,9 @@ import mb.spoofax.lwb.compiler.CheckLanguageSpecification;
 import mb.spoofax.lwb.compiler.CompileLanguage;
 import mb.spoofax.lwb.compiler.CompileLanguageSpecification;
 import mb.spoofax.lwb.compiler.cfg.CheckCfg;
-import mb.spoofax.lwb.compiler.esv.CheckEsv;
-import mb.spoofax.lwb.compiler.esv.CompileEsv;
-import mb.spoofax.lwb.compiler.esv.ConfigureEsv;
+import mb.spoofax.lwb.compiler.esv.SpoofaxEsvCheck;
+import mb.spoofax.lwb.compiler.esv.SpoofaxEsvCompile;
+import mb.spoofax.lwb.compiler.esv.SpoofaxEsvConfigure;
 import mb.spoofax.lwb.compiler.sdf3.CheckSdf3;
 import mb.spoofax.lwb.compiler.sdf3.CompileSdf3;
 import mb.spoofax.lwb.compiler.sdf3.ConfigureSdf3;
@@ -60,9 +60,9 @@ public class Spoofax3CompilerModule {
         CheckSdf3 checkSdf3,
         CompileSdf3 compileSdf3,
 
-        ConfigureEsv configureEsv,
-        CheckEsv checkEsv,
-        CompileEsv compileEsv,
+        SpoofaxEsvConfigure spoofaxEsvConfigure,
+        SpoofaxEsvCheck spoofaxEsvCheck,
+        SpoofaxEsvCompile spoofaxEsvCompile,
 
         ConfigureStatix configureStatix,
         CheckStatix checkStatix,
@@ -86,9 +86,9 @@ public class Spoofax3CompilerModule {
         taskDefs.add(checkSdf3);
         taskDefs.add(compileSdf3);
 
-        taskDefs.add(configureEsv);
-        taskDefs.add(checkEsv);
-        taskDefs.add(compileEsv);
+        taskDefs.add(spoofaxEsvConfigure);
+        taskDefs.add(spoofaxEsvCheck);
+        taskDefs.add(spoofaxEsvCompile);
 
         taskDefs.add(configureStatix);
         taskDefs.add(checkStatix);
