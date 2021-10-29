@@ -1907,6 +1907,30 @@ The following <code>EsvOption</code>s are supported:</p>
 </thead>
 <tbody>
 <tr>
+<td><code>source = $EsvSource</code></td>
+<td>no</td>
+<td>The source of the ESV definition. Defaults to a <code>files</code> source with the top-level <code>source-directory</code> option as its main source directory, and <code>./main.esv</code> as its main file relative to the main source directory.</td>
+<td>n/a</td>
+</tr>
+</tbody>
+</table>
+<p>The following <code>$EsvSource</code>s are supported:</p>
+<ul>
+<li>Files: <code>files { $EsvFilesOption* }</code></li>
+<li>Prebuilt: <code>prebuilt { $EsvPrebuiltOption }</code></li>
+</ul>
+<p>The following <code>EsvFilesOption</code>s are supported:</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Required?</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
 <td><code>main-source-directory = $Expression</code></td>
 <td>no</td>
 <td>The directory relative to the root directory that contains the main ESV file. Defaults to the value of the top-level <code>source-directory</code> option.</td>
@@ -1922,6 +1946,25 @@ The following <code>EsvOption</code>s are supported:</p>
 <td><code>include-directory = $Expression</code></td>
 <td>no</td>
 <td>Adds an include directory from which to resolve ESV imports. May be given multiple times.</td>
+<td>Path</td>
+</tr>
+</tbody>
+</table>
+<p>The following <code>$EsvPrebuiltOption</code>s are supported:</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Required?</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>file = $Expression</code></td>
+<td>yes</td>
+<td>The prebuilt ESV file to use relative to the root directory</td>
 <td>Path</td>
 </tr>
 </tbody>
