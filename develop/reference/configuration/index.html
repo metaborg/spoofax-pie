@@ -1824,6 +1824,36 @@ The following <code>Sdf3Option</code>s are supported:</p>
 </thead>
 <tbody>
 <tr>
+<td><code>source = $Sdf3Source</code></td>
+<td>no</td>
+<td>The source of the SDF3 definition. Defaults to a <code>files</code> source with the top-level <code>source-directory</code> option as its main source directory, and <code>./start.sdf3</code> as its main file relative to the main source directory.</td>
+<td>n/a</td>
+</tr>
+<tr>
+<td><code>parse-table-generator { $ParseTableGeneratorOption* }</code></td>
+<td>no</td>
+<td>Parse table generator options.</td>
+<td>n/a</td>
+</tr>
+</tbody>
+</table>
+<p>The following <code>$Sdf3Source</code>s are supported:</p>
+<ul>
+<li>Files: <code>files { $Sdf3FilesOption* }</code></li>
+<li>Prebuilt: <code>prebuilt { $Sdf3PrebuiltOption }</code></li>
+</ul>
+<p>The following <code>Sdf3FilesOption</code>s are supported:</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Required?</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
 <td><code>main-source-directory = $Expression</code></td>
 <td>no</td>
 <td>The directory relative to the root directory that contains the main SDF3 file. Defaults to the value of the top-level <code>source-directory</code> option.</td>
@@ -1835,11 +1865,30 @@ The following <code>Sdf3Option</code>s are supported:</p>
 <td>The main SDF3 file relative to the <code>main-source-directory</code>. Defaults to <code>./start.sdf3</code>.</td>
 <td>Path</td>
 </tr>
+</tbody>
+</table>
+<p>The following <code>$Sdf3PrebuiltOption</code>s are supported:</p>
+<table>
+<thead>
 <tr>
-<td><code>parse-table-generator { $ParseTableGeneratorOption* }</code></td>
-<td>no</td>
-<td>Parse table generator options.</td>
-<td>n/a</td>
+<th>Syntax</th>
+<th>Required?</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>parse-table-aterm-file = $Expression</code></td>
+<td>yes</td>
+<td>The prebuilt SDF3 parse table ATerm file to use (usually called <code>sdf.tbl</code>) relative to the root directory</td>
+<td>Path</td>
+</tr>
+<tr>
+<td><code>parse-table-persisted-file = $Expression</code></td>
+<td>yes</td>
+<td>The prebuilt SDF3 parse table persisted file to use (usually called <code>sdf.bin</code>) relative to the root directory</td>
+<td>Path</td>
 </tr>
 </tbody>
 </table>
