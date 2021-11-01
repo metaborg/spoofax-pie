@@ -8,7 +8,7 @@ import mb.pie.api.Interactivity;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.lwb.compiler.esv.SpoofaxEsvCompile;
-import mb.spoofax.lwb.compiler.sdf3.CompileSdf3;
+import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3Compile;
 import mb.spoofax.lwb.compiler.statix.CompileStatix;
 import mb.spoofax.lwb.compiler.stratego.CompileStratego;
 import org.immutables.value.Value;
@@ -44,18 +44,18 @@ public class CompileLanguageSpecification implements TaskDef<ResourcePath, Resul
     }
 
 
-    private final CompileSdf3 compileSdf3;
+    private final SpoofaxSdf3Compile spoofaxSdf3Compile;
     private final SpoofaxEsvCompile spoofaxEsvCompile;
     private final CompileStatix compileStatix;
     private final CompileStratego compileStratego;
 
     @Inject public CompileLanguageSpecification(
-        CompileSdf3 compileSdf3,
+        SpoofaxSdf3Compile spoofaxSdf3Compile,
         SpoofaxEsvCompile spoofaxEsvCompile,
         CompileStatix compileStatix,
         CompileStratego compileStratego
     ) {
-        this.compileSdf3 = compileSdf3;
+        this.spoofaxSdf3Compile = spoofaxSdf3Compile;
         this.spoofaxEsvCompile = spoofaxEsvCompile;
         this.compileStatix = compileStatix;
         this.compileStratego = compileStratego;
@@ -71,7 +71,7 @@ public class CompileLanguageSpecification implements TaskDef<ResourcePath, Resul
         final ArrayList<ResourcePath> providedJavaFiles = new ArrayList<>();
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
         final ArrayList<File> javaClassPaths = new ArrayList<>();
-        final Result<?, CompileLanguageSpecificationException> result = context.require(compileSdf3, rootDirectory)
+        final Result<?, CompileLanguageSpecificationException> result = context.require(spoofaxSdf3Compile, rootDirectory)
             .ifOk(messagesBuilder::addMessages)
             .mapErr(CompileLanguageSpecificationException::sdf3CompileFail)
             .and(

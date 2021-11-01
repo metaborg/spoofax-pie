@@ -1,7 +1,7 @@
 package mb.cfg;
 
 import mb.cfg.metalang.CfgEsvConfig;
-import mb.cfg.metalang.CompileSdf3Input;
+import mb.cfg.metalang.CfgSdf3Config;
 import mb.cfg.metalang.CompileStatixInput;
 import mb.cfg.metalang.CompileStrategoInput;
 import mb.resource.hierarchical.ResourcePath;
@@ -27,7 +27,7 @@ public interface CompileLanguageSpecificationInput extends Serializable {
 
     /// Sub-inputs
 
-    Optional<CompileSdf3Input> sdf3();
+    Optional<CfgSdf3Config> sdf3();
 
     Optional<CfgEsvConfig> esv();
 

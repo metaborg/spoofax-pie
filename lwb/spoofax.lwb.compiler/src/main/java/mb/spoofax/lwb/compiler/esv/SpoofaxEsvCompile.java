@@ -2,21 +2,18 @@ package mb.spoofax.lwb.compiler.esv;
 
 import mb.common.message.KeyedMessages;
 import mb.common.result.Result;
-import mb.common.util.IOUtil;
 import mb.esv.task.EsvCheck;
 import mb.esv.task.EsvCompile;
 import mb.esv.task.EsvConfig;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Interactivity;
 import mb.pie.api.TaskDef;
-import mb.resource.ReadableResource;
 import mb.resource.WritableResource;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.lwb.compiler.util.TaskCopyUtil;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.util.Set;
 
@@ -60,13 +57,12 @@ public class SpoofaxEsvCompile implements TaskDef<ResourcePath, Result<KeyedMess
 
     public Result<KeyedMessages, EsvCompileException> compile(ExecContext context, SpoofaxEsvConfig config) {
         return config.caseOf()
-            .files((esvConfig, outputFile) -> compileFromFiles(context, esvConfig, outputFile))
+            .files((esvConfig, outputFile) -> compileFromSourceFiles(context, esvConfig, outputFile))
             .prebuilt((inputFile, outputFile) -> copyPrebuilt(context, inputFile, outputFile))
             ;
     }
 
-
-    public Result<KeyedMessages, EsvCompileException> compileFromFiles(
+    public Result<KeyedMessages, EsvCompileException> compileFromSourceFiles(
         ExecContext context,
         EsvConfig config,
         ResourcePath atermFormatOutputFile
@@ -94,20 +90,11 @@ public class SpoofaxEsvCompile implements TaskDef<ResourcePath, Result<KeyedMess
 
     public Result<KeyedMessages, EsvCompileException> copyPrebuilt(
         ExecContext context,
-        ResourcePath inputFilePath,
-        ResourcePath outputFilePath
+        ResourcePath inputFile,
+        ResourcePath outputFile
     ) {
         try {
-            final ReadableResource inputFile = context.require(inputFilePath);
-            final WritableResource outputFile = context.getWritableResource(outputFilePath);
-            try(
-                final BufferedInputStream inputStream = inputFile.openReadBuffered();
-                final BufferedOutputStream outputStream = outputFile.openWriteBuffered()
-            ) {
-                IOUtil.copy(inputStream, outputStream);
-                outputStream.flush();
-            }
-            context.provide(outputFile);
+            TaskCopyUtil.copy(context, inputFile, outputFile);
         } catch(IOException e) {
             return Result.ofErr(EsvCompileException.compileFail(e));
         }

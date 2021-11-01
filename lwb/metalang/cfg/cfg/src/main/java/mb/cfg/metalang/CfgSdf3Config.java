@@ -7,9 +7,20 @@ import org.immutables.value.Value;
 
 import java.io.Serializable;
 
+/**
+ * Configuration for SDF3 in the context of CFG.
+ */
 @Value.Immutable
-public interface CompileSdf3Input extends Serializable {
-    class Builder extends ImmutableCompileSdf3Input.Builder {}
+public interface CfgSdf3Config extends Serializable {
+    class Builder extends ImmutableCfgSdf3Config.Builder {
+        public static ResourcePath getDefaultMainSourceDirectory(ResourcePath rootDirectory) {
+            return rootDirectory.appendRelativePath("src");
+        }
+
+        public static ResourcePath getDefaultMainFile(ResourcePath rootDirectory) {
+            return getDefaultMainSourceDirectory(rootDirectory).appendRelativePath("start.sdf3");
+        }
+    }
 
     static Builder builder() { return new Builder(); }
 
@@ -18,12 +29,11 @@ public interface CompileSdf3Input extends Serializable {
         return compileLanguageShared().languageProject().project().baseDirectory();
     }
 
-    @Value.Default default ResourcePath mainSourceDirectory() {
-        return rootDirectory().appendRelativePath("src");
-    }
-
-    @Value.Default default ResourcePath mainFile() {
-        return mainSourceDirectory().appendRelativePath("start.sdf3");
+    @Value.Default default CfgSdf3Source source() {
+        return CfgSdf3Source.files(
+            Builder.getDefaultMainSourceDirectory(rootDirectory()),
+            Builder.getDefaultMainFile(rootDirectory())
+        );
     }
 
 

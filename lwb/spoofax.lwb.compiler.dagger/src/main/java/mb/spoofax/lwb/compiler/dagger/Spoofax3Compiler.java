@@ -13,6 +13,7 @@ import mb.log.dagger.LoggerComponent;
 import mb.pie.api.StatelessSerializableFunction;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.sdf3.Sdf3Component;
+import mb.sdf3.task.spec.Sdf3SpecConfig;
 import mb.sdf3_ext_statix.Sdf3ExtStatixComponent;
 import mb.spoofax.compiler.dagger.DaggerSpoofaxCompilerComponent;
 import mb.spoofax.compiler.dagger.SpoofaxCompilerComponent;
@@ -21,6 +22,8 @@ import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.core.platform.PlatformComponent;
 import mb.spoofax.lwb.compiler.esv.EsvConfigureException;
 import mb.spoofax.lwb.compiler.esv.SpoofaxEsvConfig;
+import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3ConfigureException;
+import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3Config;
 import mb.spoofax.lwb.compiler.stratego.StrategoConfigureException;
 import mb.statix.StatixComponent;
 import mb.str.StrategoComponent;
@@ -100,8 +103,15 @@ public class Spoofax3Compiler implements AutoCloseable {
         this.spoofaxCompilerComponent = spoofaxCompilerComponent;
         this.component = component;
 
-        this.sdf3Component.getSdf3SpecConfigFunctionWrapper().set(this.component.getConfigureSdf3().createFunction());
-        this.esvComponent.getEsvConfigFunctionWrapper().set(this.component.getConfigureEsv().createFunction().mapOutput(
+        this.sdf3Component.getSdf3SpecConfigFunctionWrapper().set(this.component.getSpoofaxSdf3Configure().createFunction().mapOutput(
+            new StatelessSerializableFunction<Result<Option<SpoofaxSdf3Config>, SpoofaxSdf3ConfigureException>, Result<Option<Sdf3SpecConfig>, SpoofaxSdf3ConfigureException>>() {
+                @Override
+                public Result<Option<Sdf3SpecConfig>, SpoofaxSdf3ConfigureException> apply(Result<Option<SpoofaxSdf3Config>, SpoofaxSdf3ConfigureException> r) {
+                    return r.map(o -> o.flatMap(SpoofaxSdf3Config::getSdf3SpecConfig));
+                }
+            }
+        ));
+        this.esvComponent.getEsvConfigFunctionWrapper().set(this.component.getSpoofaxEsvConfigure().createFunction().mapOutput(
             new StatelessSerializableFunction<Result<Option<SpoofaxEsvConfig>, EsvConfigureException>, Result<Option<EsvConfig>, EsvConfigureException>>() {
                 @Override
                 public Result<Option<EsvConfig>, EsvConfigureException> apply(Result<Option<SpoofaxEsvConfig>, EsvConfigureException> r) {

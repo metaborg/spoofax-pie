@@ -241,9 +241,9 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
     private void updateCheckMessages(IProject eclipseProject, ResourcePath rootDirectory, Session session, @Nullable IProgressMonitor monitor) throws ExecException, InterruptedException, CoreException {
         final MonitorCancelableToken cancelToken = new MonitorCancelableToken(monitor);
         final Spoofax3CompilerComponent spoofax3CompilerComponent = SpoofaxLwbLifecycleParticipant.getInstance().getSpoofax3Compiler().component;
-        final WorkspaceUpdate cfgUpdate = createUpdate(session, rootDirectory, cancelToken, CfgLanguageFactory.getLanguage().getComponent().getEclipseIdentifiers(), spoofax3CompilerComponent.getCfgCheck());
-        final WorkspaceUpdate esvUpdate = createUpdate(session, rootDirectory, cancelToken, EsvLanguageFactory.getLanguage().getComponent().getEclipseIdentifiers(), spoofax3CompilerComponent.getCheckEsv());
-        final WorkspaceUpdate sdf3Update = createUpdate(session, rootDirectory, cancelToken, Sdf3LanguageFactory.getLanguage().getComponent().getEclipseIdentifiers(), spoofax3CompilerComponent.getCheckSdf3());
+        final WorkspaceUpdate cfgUpdate = createUpdate(session, rootDirectory, cancelToken, CfgLanguageFactory.getLanguage().getComponent().getEclipseIdentifiers(), spoofax3CompilerComponent.getSpoofaxCfgCheck());
+        final WorkspaceUpdate esvUpdate = createUpdate(session, rootDirectory, cancelToken, EsvLanguageFactory.getLanguage().getComponent().getEclipseIdentifiers(), spoofax3CompilerComponent.getSpoofaxEsvCheck());
+        final WorkspaceUpdate sdf3Update = createUpdate(session, rootDirectory, cancelToken, Sdf3LanguageFactory.getLanguage().getComponent().getEclipseIdentifiers(), spoofax3CompilerComponent.getSpoofaxSdf3Check());
         final WorkspaceUpdate statixUpdate = createUpdate(session, rootDirectory, cancelToken, StatixLanguageFactory.getLanguage().getComponent().getEclipseIdentifiers(), spoofax3CompilerComponent.getCheckStatix());
         final WorkspaceUpdate strategoUpdate = createUpdate(session, rootDirectory, cancelToken, StrategoLanguageFactory.getLanguage().getComponent().getEclipseIdentifiers(), spoofax3CompilerComponent.getCheckStratego());
         final ICoreRunnable runnable = runnableMonitor -> {

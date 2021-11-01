@@ -1,7 +1,7 @@
 package mb.cfg;
 
 import mb.cfg.metalang.CfgEsvConfig;
-import mb.cfg.metalang.CompileSdf3Input;
+import mb.cfg.metalang.CfgSdf3Config;
 import mb.cfg.metalang.CompileStatixInput;
 import mb.cfg.metalang.CompileStrategoInput;
 import mb.common.util.Properties;
@@ -13,7 +13,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public class CompileLanguageSpecificationInputBuilder {
     private boolean sdf3Enabled = false;
-    public CompileSdf3Input.Builder sdf3 = CompileSdf3Input.builder();
+    public CfgSdf3Config.Builder sdf3 = CfgSdf3Config.builder();
 
     private boolean esvEnabled = false;
     public CfgEsvConfig.Builder esv = CfgEsvConfig.builder();
@@ -27,7 +27,7 @@ public class CompileLanguageSpecificationInputBuilder {
     public CompileLanguageSpecificationInput.Builder compileLanguage = CompileLanguageSpecificationInput.builder();
 
 
-    public CompileSdf3Input.Builder withSdf3() {
+    public CfgSdf3Config.Builder withSdf3() {
         sdf3Enabled = true;
         return sdf3;
     }
@@ -49,7 +49,7 @@ public class CompileLanguageSpecificationInputBuilder {
 
 
     public CompileLanguageSpecificationInput build(Properties persistentProperties, Shared shared, CompileLanguageSpecificationShared compileLanguageSpecificationShared) {
-        final @Nullable CompileSdf3Input sdf3 = buildSdf3(compileLanguageSpecificationShared);
+        final @Nullable CfgSdf3Config sdf3 = buildSdf3(compileLanguageSpecificationShared);
         if(sdf3 != null) compileLanguage.sdf3(sdf3);
 
         final @Nullable CfgEsvConfig esv = buildEsv(compileLanguageSpecificationShared);
@@ -67,7 +67,7 @@ public class CompileLanguageSpecificationInputBuilder {
     }
 
 
-    private @Nullable CompileSdf3Input buildSdf3(
+    private @Nullable CfgSdf3Config buildSdf3(
         CompileLanguageSpecificationShared compileLanguageSpecificationShared
     ) {
         if(!sdf3Enabled) return null;

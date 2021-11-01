@@ -8,10 +8,13 @@ import mb.resource.hierarchical.ResourcePath;
 
 import javax.inject.Inject;
 
-public class CheckCfg implements TaskDef<ResourcePath, KeyedMessages> {
+/**
+ * Check task for CFG in the context of the Spoofax LWB compiler.
+ */
+public class SpoofaxCfgCheck implements TaskDef<ResourcePath, KeyedMessages> {
     private final CfgCheck check;
 
-    @Inject public CheckCfg(
+    @Inject public SpoofaxCfgCheck(
         CfgCheck check
     ) {
         this.check = check;

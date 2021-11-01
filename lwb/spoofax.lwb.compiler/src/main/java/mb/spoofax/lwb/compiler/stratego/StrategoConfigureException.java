@@ -4,7 +4,7 @@ import mb.cfg.task.CfgRootDirectoryToObjectException;
 import mb.common.util.ADT;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.lwb.compiler.sdf3.Sdf3ConfigureException;
+import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3ConfigureException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 @ADT
@@ -20,7 +20,7 @@ public abstract class StrategoConfigureException extends Exception {
 
         R builtinLibraryFail(String builtinLibraryName);
 
-        R sdf3ConfigureFail(Sdf3ConfigureException sdf3ConfigureException);
+        R sdf3ConfigureFail(SpoofaxSdf3ConfigureException spoofaxSdf3ConfigureException);
 
         R sdf3SignatureGenerateFail(Exception cause);
 
@@ -53,8 +53,8 @@ public abstract class StrategoConfigureException extends Exception {
         return StrategoConfigureExceptions.builtinLibraryFail(builtinLibraryName);
     }
 
-    public static StrategoConfigureException sdf3ConfigureFail(Sdf3ConfigureException sdf3ConfigureException) {
-        return withCause(StrategoConfigureExceptions.sdf3ConfigureFail(sdf3ConfigureException), sdf3ConfigureException);
+    public static StrategoConfigureException sdf3ConfigureFail(SpoofaxSdf3ConfigureException spoofaxSdf3ConfigureException) {
+        return withCause(StrategoConfigureExceptions.sdf3ConfigureFail(spoofaxSdf3ConfigureException), spoofaxSdf3ConfigureException);
     }
 
     public static StrategoConfigureException sdf3SignatureGenerateFail(Exception cause) {

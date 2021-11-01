@@ -6,8 +6,11 @@ import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * Configure exception for SDF3 in the context of the Spoofax LWB compiler.
+ */
 @ADT
-public abstract class Sdf3ConfigureException extends Exception {
+public abstract class SpoofaxSdf3ConfigureException extends Exception {
     public interface Cases<R> {
         R getLanguageCompilerConfigurationFail(CfgRootDirectoryToObjectException cfgRootDirectoryToObjectException);
 
@@ -16,19 +19,19 @@ public abstract class Sdf3ConfigureException extends Exception {
         R mainFileFail(ResourceKey mainFile);
     }
 
-    public static Sdf3ConfigureException getLanguageCompilerConfigurationFail(CfgRootDirectoryToObjectException cfgRootDirectoryToObjectException) {
-        return withCause(Sdf3ConfigureExceptions.getLanguageCompilerConfigurationFail(cfgRootDirectoryToObjectException), cfgRootDirectoryToObjectException);
+    public static SpoofaxSdf3ConfigureException getLanguageCompilerConfigurationFail(CfgRootDirectoryToObjectException cfgRootDirectoryToObjectException) {
+        return withCause(SpoofaxSdf3ConfigureExceptions.getLanguageCompilerConfigurationFail(cfgRootDirectoryToObjectException), cfgRootDirectoryToObjectException);
     }
 
-    public static Sdf3ConfigureException mainSourceDirectoryFail(ResourcePath sourceDirectory) {
-        return Sdf3ConfigureExceptions.mainSourceDirectoryFail(sourceDirectory);
+    public static SpoofaxSdf3ConfigureException mainSourceDirectoryFail(ResourcePath sourceDirectory) {
+        return SpoofaxSdf3ConfigureExceptions.mainSourceDirectoryFail(sourceDirectory);
     }
 
-    public static Sdf3ConfigureException mainFileFail(ResourceKey mainFile) {
-        return Sdf3ConfigureExceptions.mainFileFail(mainFile);
+    public static SpoofaxSdf3ConfigureException mainFileFail(ResourceKey mainFile) {
+        return SpoofaxSdf3ConfigureExceptions.mainFileFail(mainFile);
     }
 
-    private static Sdf3ConfigureException withCause(Sdf3ConfigureException e, Exception cause) {
+    private static SpoofaxSdf3ConfigureException withCause(SpoofaxSdf3ConfigureException e, Exception cause) {
         e.initCause(cause);
         return e;
     }
@@ -36,12 +39,12 @@ public abstract class Sdf3ConfigureException extends Exception {
 
     public abstract <R> R match(Cases<R> cases);
 
-    public static Sdf3ConfigureExceptions.CasesMatchers.TotalMatcher_GetLanguageCompilerConfigurationFail cases() {
-        return Sdf3ConfigureExceptions.cases();
+    public static SpoofaxSdf3ConfigureExceptions.CasesMatchers.TotalMatcher_GetLanguageCompilerConfigurationFail cases() {
+        return SpoofaxSdf3ConfigureExceptions.cases();
     }
 
-    public Sdf3ConfigureExceptions.CaseOfMatchers.TotalMatcher_GetLanguageCompilerConfigurationFail caseOf() {
-        return Sdf3ConfigureExceptions.caseOf(this);
+    public SpoofaxSdf3ConfigureExceptions.CaseOfMatchers.TotalMatcher_GetLanguageCompilerConfigurationFail caseOf() {
+        return SpoofaxSdf3ConfigureExceptions.caseOf(this);
     }
 
 

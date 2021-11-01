@@ -179,21 +179,29 @@ class LanguagePluginInstance(
       inputs.property("input", input)
 
       // Inputs and outputs
-      input.sdf3().ifPresent {
-        // Input: all SDF3 files
-        val rootDirectory = resourceService.toLocalFile(it.mainSourceDirectory())
-        if(rootDirectory != null) {
-          inputs.files(project.fileTree(rootDirectory) { include("**/*.sdf3") })
-        } else {
-          logger.warn("Cannot set SDF3 files as task inputs, because ${it.mainSourceDirectory()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
+      input.sdf3().ifPresent { sdf3Config ->
+        sdf3Config.source().caseOf()
+          .files { mainSourceDirectory, _ ->
+            // Input: all SDF3 files in the main source directory
+            mainSourceDirectory.tryAsLocal("SDF3 files in main source directory") { dir ->
+              inputs.files(project.fileTree(dir) { include("**/*.sdf3") })
+            }
+          }
+          .prebuilt { inputParseTableAtermFile, inputParseTablePersistedFile ->
+            // Input: prebuilt input files
+            inputParseTableAtermFile.tryAsLocal("SDF3 prebuilt parse table ATerm file") { file ->
+              inputs.file(file)
+            }
+            inputParseTablePersistedFile.tryAsLocal("SDF3 prebuilt parse table persisted file") { file ->
+              inputs.file(file)
+            }
+          }
+        // Output: output files
+        sdf3Config.parseTableAtermOutputFile().tryAsLocal("SDF3 parse table ATerm output file") { file ->
+          outputs.file(file)
         }
-
-        // Output: parse table file
-        val outputFile = resourceService.toLocalFile(it.parseTableAtermOutputFile())
-        if(outputFile != null) {
-          outputs.file(outputFile)
-        } else {
-          logger.warn("Cannot set the SDF3 parse table as a task output, because ${it.parseTableAtermOutputFile()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
+        sdf3Config.parseTablePersistedOutputFile().tryAsLocal("SDF3 parse table persisted output file") { file ->
+          outputs.file(file)
         }
       }
       input.esv().ifPresent { esvConfig ->
@@ -216,7 +224,7 @@ class LanguagePluginInstance(
           }
           .prebuilt { inputFile -> // Input: prebuilt input file
             inputFile.tryAsLocal("ESV prebuilt file") { file ->
-              inputs.files(file)
+              inputs.file(file)
             }
           }
 

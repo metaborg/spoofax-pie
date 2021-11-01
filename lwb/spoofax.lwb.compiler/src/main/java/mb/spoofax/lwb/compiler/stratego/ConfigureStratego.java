@@ -36,8 +36,8 @@ import mb.sdf3.task.spec.Sdf3SpecToParseTable;
 import mb.sdf3_ext_statix.task.Sdf3ExtStatixGenerateStratego;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
-import mb.spoofax.lwb.compiler.sdf3.Sdf3ConfigureException;
-import mb.spoofax.lwb.compiler.sdf3.Sdf3GenerationUtil;
+import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3ConfigureException;
+import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3GenerationUtil;
 import mb.str.config.StrategoCompileConfig;
 import mb.stratego.build.strincr.BuiltinLibraryIdentifier;
 import mb.stratego.build.strincr.ModuleIdentifier;
@@ -69,7 +69,7 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
     private final StrategoLibUtil strategoLibUtil;
     private final StrategoGenerationUtil strategoGenerationUtil;
 
-    private final Sdf3GenerationUtil sdf3GenerationUtil;
+    private final SpoofaxSdf3GenerationUtil spoofaxSdf3GenerationUtil;
     private final Sdf3SpecToParseTable sdf3ToParseTable;
     private final Sdf3ToSignature sdf3ToSignature;
     private final Sdf3ToPrettyPrinter sdf3ToPrettyPrinter;
@@ -90,7 +90,7 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
         StrategoLibUtil strategoLibUtil,
         StrategoGenerationUtil strategoGenerationUtil,
 
-        Sdf3GenerationUtil sdf3GenerationUtil,
+        SpoofaxSdf3GenerationUtil spoofaxSdf3GenerationUtil,
         Sdf3SpecToParseTable sdf3ToParseTable,
         Sdf3ToSignature sdf3ToSignature,
         Sdf3ToPrettyPrinter sdf3ToPrettyPrinter,
@@ -111,7 +111,7 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
         this.strategoLibUtil = strategoLibUtil;
         this.strategoGenerationUtil = strategoGenerationUtil;
 
-        this.sdf3GenerationUtil = sdf3GenerationUtil;
+        this.spoofaxSdf3GenerationUtil = spoofaxSdf3GenerationUtil;
         this.sdf3ToParseTable = sdf3ToParseTable;
         this.sdf3ToSignature = sdf3ToSignature;
         this.sdf3ToPrettyPrinter = sdf3ToPrettyPrinter;
@@ -223,7 +223,7 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
         final ResourcePath generatedSourcesDirectory = strategoInput.generatedSourcesDirectory();
         final String strategyAffix = strategoInput.languageStrategyAffix();
         try {
-            sdf3GenerationUtil.performSdf3GenerationIfEnabled(context, rootDirectory, new Sdf3GenerationUtil.Callbacks<StrategoConfigureException>() {
+            spoofaxSdf3GenerationUtil.performSdf3GenerationIfEnabled(context, rootDirectory, new SpoofaxSdf3GenerationUtil.Callbacks<StrategoConfigureException>() {
                 @Override
                 public void generateFromAst(ExecContext context, STask<Result<IStrategoTerm, ?>> astSupplier) throws StrategoConfigureException, InterruptedException {
                     try {
@@ -291,7 +291,7 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
             });
         } catch(StrategoConfigureException e) {
             return Result.ofErr(e);
-        } catch(Sdf3ConfigureException e) {
+        } catch(SpoofaxSdf3ConfigureException e) {
             return Result.ofErr(StrategoConfigureException.sdf3ConfigureFail(e));
         }
 

@@ -10,13 +10,13 @@ import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.lwb.compiler.CheckLanguageSpecification;
 import mb.spoofax.lwb.compiler.CompileLanguage;
 import mb.spoofax.lwb.compiler.CompileLanguageSpecification;
-import mb.spoofax.lwb.compiler.cfg.CheckCfg;
+import mb.spoofax.lwb.compiler.cfg.SpoofaxCfgCheck;
 import mb.spoofax.lwb.compiler.esv.SpoofaxEsvCheck;
 import mb.spoofax.lwb.compiler.esv.SpoofaxEsvCompile;
 import mb.spoofax.lwb.compiler.esv.SpoofaxEsvConfigure;
-import mb.spoofax.lwb.compiler.sdf3.CheckSdf3;
-import mb.spoofax.lwb.compiler.sdf3.CompileSdf3;
-import mb.spoofax.lwb.compiler.sdf3.ConfigureSdf3;
+import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3Check;
+import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3Compile;
+import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3Configure;
 import mb.spoofax.lwb.compiler.statix.CheckStatix;
 import mb.spoofax.lwb.compiler.statix.CompileStatix;
 import mb.spoofax.lwb.compiler.statix.ConfigureStatix;
@@ -54,11 +54,11 @@ public class Spoofax3CompilerModule {
         CheckLanguageSpecification checkLanguageSpecification,
         CompileLanguageSpecification compileLanguageSpecification,
 
-        CheckCfg checkCfg,
+        SpoofaxCfgCheck spoofaxCfgCheck,
 
-        ConfigureSdf3 configureSdf3,
-        CheckSdf3 checkSdf3,
-        CompileSdf3 compileSdf3,
+        SpoofaxSdf3Configure spoofaxSdf3Configure,
+        SpoofaxSdf3Check spoofaxSdf3Check,
+        SpoofaxSdf3Compile spoofaxSdf3Compile,
 
         SpoofaxEsvConfigure spoofaxEsvConfigure,
         SpoofaxEsvCheck spoofaxEsvCheck,
@@ -80,11 +80,11 @@ public class Spoofax3CompilerModule {
         taskDefs.add(checkLanguageSpecification);
         taskDefs.add(compileLanguageSpecification);
 
-        taskDefs.add(checkCfg);
+        taskDefs.add(spoofaxCfgCheck);
 
-        taskDefs.add(configureSdf3);
-        taskDefs.add(checkSdf3);
-        taskDefs.add(compileSdf3);
+        taskDefs.add(spoofaxSdf3Configure);
+        taskDefs.add(spoofaxSdf3Check);
+        taskDefs.add(spoofaxSdf3Compile);
 
         taskDefs.add(spoofaxEsvConfigure);
         taskDefs.add(spoofaxEsvCheck);

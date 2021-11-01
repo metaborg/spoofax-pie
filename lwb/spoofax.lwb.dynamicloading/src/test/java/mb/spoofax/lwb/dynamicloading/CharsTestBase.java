@@ -100,7 +100,7 @@ class CharsTestBase extends TestBase {
     }
 
     TopDownSession modifyParser(MixedSession session, CompileLanguageInput input) throws IOException, ExecException, InterruptedException {
-        final ResourcePath path = input.compileLanguageSpecificationInput().sdf3().get().mainFile();
+        final ResourcePath path = input.compileLanguageSpecificationInput().sdf3().get().source().getMainFile().orElseThrow(() -> new RuntimeException("Not using source files with SDF3"));
         final WritableResource file = resourceService.getWritableResource(path);
         final String text = file.readString().replace("\\ ", "\\ \\t");
         file.writeString(text);

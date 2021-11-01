@@ -8,7 +8,8 @@ import mb.cfg.CompileLanguageSpecificationInputBuilder;
 import mb.cfg.CompileLanguageSpecificationShared;
 import mb.cfg.metalang.CfgEsvConfig;
 import mb.cfg.metalang.CfgEsvSource;
-import mb.cfg.metalang.CompileSdf3Input;
+import mb.cfg.metalang.CfgSdf3Config;
+import mb.cfg.metalang.CfgSdf3Source;
 import mb.cfg.metalang.CompileStatixInput;
 import mb.cfg.metalang.CompileStrategoInput;
 import mb.common.message.KeyedMessages;
@@ -152,9 +153,12 @@ public class CfgAstToObject {
         // LanguageCompilerInput
         final CompileLanguageSpecificationInputBuilder languageCompilerInputBuilder = new CompileLanguageSpecificationInputBuilder();
         parts.getAllSubTermsInListAsParts("Sdf3Section").ifSome(subParts -> {
-            final CompileSdf3Input.Builder builder = languageCompilerInputBuilder.withSdf3();
-            subParts.forOneSubtermAsPath("Sdf3MainSourceDirectory", rootDirectory, builder::mainSourceDirectory);
-            subParts.forOneSubtermAsPath("Sdf3MainFile", rootDirectory, builder::mainFile);
+            final CfgSdf3Config.Builder builder = languageCompilerInputBuilder.withSdf3();
+            final ResourcePath mainSourceDirectory = subParts.getOneSubtermAsPath("Sdf3FilesMainSourceDirectory", rootDirectory)
+                .unwrapOrElse(() -> CfgSdf3Config.Builder.getDefaultMainSourceDirectory(rootDirectory));
+            final ResourcePath mainFile = subParts.getOneSubtermAsPath("Sdf3FilesMainFile", rootDirectory)
+                .unwrapOrElse(() -> CfgSdf3Config.Builder.getDefaultMainFile(rootDirectory));
+            builder.source(CfgSdf3Source.files(mainSourceDirectory, mainFile));
             subParts.getAllSubTermsInListAsParts("Sdf3ParseTableGeneratorSection").ifSome(ptgParts -> {
                 ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorDynamic", builder::createDynamicParseTable);
                 ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorDataDependent", builder::createDataDependentParseTable);

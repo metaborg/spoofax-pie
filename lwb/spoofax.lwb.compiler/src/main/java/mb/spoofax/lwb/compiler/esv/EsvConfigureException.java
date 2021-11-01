@@ -4,7 +4,7 @@ import mb.cfg.task.CfgRootDirectoryToObjectException;
 import mb.common.util.ADT;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.lwb.compiler.sdf3.Sdf3ConfigureException;
+import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3ConfigureException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -21,7 +21,7 @@ public abstract class EsvConfigureException extends Exception {
 
         R includeDirectoryFail(ResourcePath includeDirectory);
 
-        R sdf3ConfigureFail(Sdf3ConfigureException sdf3ConfigureException);
+        R sdf3ConfigureFail(SpoofaxSdf3ConfigureException spoofaxSdf3ConfigureException);
     }
 
     public static EsvConfigureException getLanguageCompilerConfigurationFail(CfgRootDirectoryToObjectException cfgRootDirectoryToObjectException) {
@@ -40,8 +40,8 @@ public abstract class EsvConfigureException extends Exception {
         return EsvConfigureExceptions.includeDirectoryFail(includeDirectory);
     }
 
-    public static EsvConfigureException sdf3ConfigureFail(Sdf3ConfigureException sdf3ConfigureException) {
-        return withCause(EsvConfigureExceptions.sdf3ConfigureFail(sdf3ConfigureException), sdf3ConfigureException);
+    public static EsvConfigureException sdf3ConfigureFail(SpoofaxSdf3ConfigureException spoofaxSdf3ConfigureException) {
+        return withCause(EsvConfigureExceptions.sdf3ConfigureFail(spoofaxSdf3ConfigureException), spoofaxSdf3ConfigureException);
     }
 
     private static EsvConfigureException withCause(EsvConfigureException e, Exception cause) {

@@ -18,15 +18,18 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import javax.inject.Inject;
 import java.io.IOException;
 
-public class Sdf3GenerationUtil {
-    private final ConfigureSdf3 configure;
+/**
+ * Generation utilities for SDF3 in the context of the Spoofax LWB compiler.
+ */
+public class SpoofaxSdf3GenerationUtil {
+    private final SpoofaxSdf3Configure configure;
     private final Sdf3Parse parse;
     private final Sdf3GetSourceFiles getSourceFiles;
     private final Sdf3Desugar desugar;
     private final Sdf3AnalyzeMulti analyze;
 
-    @Inject public Sdf3GenerationUtil(
-        ConfigureSdf3 configure,
+    @Inject public SpoofaxSdf3GenerationUtil(
+        SpoofaxSdf3Configure configure,
         Sdf3Parse parse,
         Sdf3GetSourceFiles getSourceFiles,
         Sdf3Desugar desugar,
@@ -52,15 +55,15 @@ public class Sdf3GenerationUtil {
         ExecContext context,
         ResourcePath rootDirectory,
         Callbacks<E> callbacks
-    ) throws E, InterruptedException, IOException, Sdf3ConfigureException {
-        final Result<Option<Sdf3SpecConfig>, Sdf3ConfigureException> configureResult = context.require(configure, rootDirectory);
-        configureResult.throwIfError();
-        // noinspection ConstantConditions (value is present)
-        final Option<Sdf3SpecConfig> configureOption = configureResult.get();
-        // noinspection ConstantConditions (value is present)
+    ) throws E, InterruptedException, IOException, SpoofaxSdf3ConfigureException {
+        final Result<Option<SpoofaxSdf3Config>, SpoofaxSdf3ConfigureException> configureResult = context.require(configure, rootDirectory);
+        final Option<SpoofaxSdf3Config> configureOption = configureResult.unwrap();
         if(configureOption.isSome()) {
-            // noinspection ConstantConditions (value is present)
-            final Sdf3SpecConfig config = configureOption.get();
+            final SpoofaxSdf3Config spoofaxSdf3Config = configureOption.unwrap();
+            if(!spoofaxSdf3Config.getSdf3SpecConfig().isSome()) {
+                return; // Only generate when there are SDF3 source files (not prebuilt).
+            }
+            final Sdf3SpecConfig config = spoofaxSdf3Config.getSdf3SpecConfig().unwrap();
             final JsglrParseTaskInput.Builder parseInputBuilder = parse.inputBuilder().rootDirectoryHint(rootDirectory);
             final Sdf3AnalyzeMulti.Input analyzeInput = new Sdf3AnalyzeMulti.Input(config.rootDirectory, parse.createRecoverableMultiAstSupplierFunction(getSourceFiles.createFunction()));
             for(ResourcePath file : context.require(getSourceFiles, rootDirectory)) {

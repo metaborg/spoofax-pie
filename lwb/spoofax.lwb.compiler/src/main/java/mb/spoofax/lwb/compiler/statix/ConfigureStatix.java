@@ -17,8 +17,8 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.sdf3.task.spec.Sdf3SpecConfig;
 import mb.sdf3_ext_statix.task.Sdf3ExtStatixGenerateStatix;
-import mb.spoofax.lwb.compiler.sdf3.Sdf3ConfigureException;
-import mb.spoofax.lwb.compiler.sdf3.Sdf3GenerationUtil;
+import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3ConfigureException;
+import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3GenerationUtil;
 import mb.statix.task.StatixConfig;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -33,18 +33,18 @@ public class ConfigureStatix implements TaskDef<ResourcePath, Result<Option<Stat
 
     private final StatixGenerationUtil statixGenerationUtil;
 
-    private final Sdf3GenerationUtil sdf3GenerationUtil;
+    private final SpoofaxSdf3GenerationUtil spoofaxSdf3GenerationUtil;
     private final Sdf3ExtStatixGenerateStatix sdf3ExtStatixGenerateStatix;
 
     @Inject public ConfigureStatix(
         CfgRootDirectoryToObject cfgRootDirectoryToObject,
         StatixGenerationUtil statixGenerationUtil,
-        Sdf3GenerationUtil sdf3GenerationUtil,
+        SpoofaxSdf3GenerationUtil spoofaxSdf3GenerationUtil,
         Sdf3ExtStatixGenerateStatix sdf3ExtStatixGenerateStatix
     ) {
         this.cfgRootDirectoryToObject = cfgRootDirectoryToObject;
         this.statixGenerationUtil = statixGenerationUtil;
-        this.sdf3GenerationUtil = sdf3GenerationUtil;
+        this.spoofaxSdf3GenerationUtil = spoofaxSdf3GenerationUtil;
         this.sdf3ExtStatixGenerateStatix = sdf3ExtStatixGenerateStatix;
     }
 
@@ -89,7 +89,7 @@ public class ConfigureStatix implements TaskDef<ResourcePath, Result<Option<Stat
         final ResourcePath generatedSourcesDirectory = statixInput.generatedSourcesDirectory();
         if(statixInput.enableSdf3SignatureGen()) {
             try {
-                sdf3GenerationUtil.performSdf3GenerationIfEnabled(context, rootDirectory, new Sdf3GenerationUtil.Callbacks<StatixConfigureException>() {
+                spoofaxSdf3GenerationUtil.performSdf3GenerationIfEnabled(context, rootDirectory, new SpoofaxSdf3GenerationUtil.Callbacks<StatixConfigureException>() {
                     @Override
                     public void generateFromAst(ExecContext context, STask<Result<IStrategoTerm, ?>> astSupplier) throws StatixConfigureException, InterruptedException {
                         try {
@@ -111,7 +111,7 @@ public class ConfigureStatix implements TaskDef<ResourcePath, Result<Option<Stat
                 });
             } catch(StatixConfigureException e) {
                 return Result.ofErr(e);
-            } catch(Sdf3ConfigureException e) {
+            } catch(SpoofaxSdf3ConfigureException e) {
                 return Result.ofErr(StatixConfigureException.sdf3ConfigureFail(e));
             }
         }

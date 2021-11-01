@@ -4,8 +4,7 @@ import mb.cfg.task.CfgRootDirectoryToObjectException;
 import mb.common.util.ADT;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.lwb.compiler.sdf3.Sdf3ConfigureException;
-import mb.spoofax.lwb.compiler.stratego.StrategoConfigureException;
+import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3ConfigureException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 @ADT
@@ -17,7 +16,7 @@ public abstract class StatixConfigureException extends Exception {
 
         R mainFileFail(ResourceKey mainFile);
 
-        R sdf3ConfigureFail(Sdf3ConfigureException sdf3ConfigureException);
+        R sdf3ConfigureFail(SpoofaxSdf3ConfigureException spoofaxSdf3ConfigureException);
 
         R sdf3ExtStatixGenInjFail(Exception cause);
     }
@@ -34,8 +33,8 @@ public abstract class StatixConfigureException extends Exception {
         return StatixConfigureExceptions.mainFileFail(mainFile);
     }
 
-    public static StatixConfigureException sdf3ConfigureFail(Sdf3ConfigureException sdf3ConfigureException) {
-        return withCause(StatixConfigureExceptions.sdf3ConfigureFail(sdf3ConfigureException), sdf3ConfigureException);
+    public static StatixConfigureException sdf3ConfigureFail(SpoofaxSdf3ConfigureException spoofaxSdf3ConfigureException) {
+        return withCause(StatixConfigureExceptions.sdf3ConfigureFail(spoofaxSdf3ConfigureException), spoofaxSdf3ConfigureException);
     }
 
     public static StatixConfigureException sdf3ExtStatixGenInjFail(Exception cause) {

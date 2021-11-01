@@ -9,7 +9,7 @@ import org.immutables.value.Value;
 import java.io.Serializable;
 
 /**
- * Configuration for the ESV meta-language in the context of CFG.
+ * Configuration for ESV in the context of CFG.
  */
 @Value.Immutable
 public interface CfgEsvConfig extends Serializable {

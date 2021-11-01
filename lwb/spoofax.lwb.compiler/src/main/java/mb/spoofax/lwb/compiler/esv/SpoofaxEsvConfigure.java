@@ -7,18 +7,18 @@ import mb.cfg.task.CfgToObject;
 import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.common.util.ListView;
-import mb.common.util.StreamIterable;
 import mb.esv.task.EsvConfig;
-import mb.jsglr.pie.JsglrParseTaskInput;
 import mb.libspoofax2.LibSpoofax2ClassLoaderResources;
 import mb.libspoofax2.LibSpoofax2Exports;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Interactivity;
+import mb.pie.api.STask;
 import mb.pie.api.SerializableFunction;
 import mb.pie.api.StatelessSerializableFunction;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.pie.api.ValueSupplier;
+import mb.pie.api.exec.UncheckedInterruptedException;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.pie.task.archive.UnarchiveFromJar;
 import mb.resource.classloader.ClassLoaderResourceLocations;
@@ -26,16 +26,10 @@ import mb.resource.classloader.JarFileWithPath;
 import mb.resource.fs.FSResource;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
-import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.match.path.string.PathStringMatcher;
-import mb.resource.hierarchical.walk.ResourceWalker;
-import mb.sdf3.task.Sdf3Desugar;
-import mb.sdf3.task.Sdf3Parse;
 import mb.sdf3.task.Sdf3ToCompletionColorer;
-import mb.sdf3.task.spec.Sdf3SpecConfig;
-import mb.sdf3.task.util.Sdf3Util;
-import mb.spoofax.lwb.compiler.sdf3.ConfigureSdf3;
-import mb.spoofax.lwb.compiler.sdf3.Sdf3ConfigureException;
+import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3ConfigureException;
+import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3GenerationUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -45,7 +39,6 @@ import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.stream.Stream;
 
 /**
  * Configuration task for ESV in the context of the Spoofax LWB compiler.
@@ -56,9 +49,7 @@ public class SpoofaxEsvConfigure implements TaskDef<ResourcePath, Result<Option<
     private final UnarchiveFromJar unarchiveFromJar;
     private final LibSpoofax2ClassLoaderResources libSpoofax2ClassLoaderResources;
 
-    private final ConfigureSdf3 configureSdf3;
-    private final Sdf3Parse sdf3Parse;
-    private final Sdf3Desugar sdf3Desugar;
+    private final SpoofaxSdf3GenerationUtil spoofaxSdf3GenerationUtil;
     private final Sdf3ToCompletionColorer sdf3ToCompletionColorer;
 
 
@@ -68,9 +59,7 @@ public class SpoofaxEsvConfigure implements TaskDef<ResourcePath, Result<Option<
         UnarchiveFromJar unarchiveFromJar,
         LibSpoofax2ClassLoaderResources libSpoofax2ClassLoaderResources,
 
-        ConfigureSdf3 configureSdf3,
-        Sdf3Parse sdf3Parse,
-        Sdf3Desugar sdf3Desugar,
+        SpoofaxSdf3GenerationUtil spoofaxSdf3GenerationUtil,
         Sdf3ToCompletionColorer sdf3ToCompletionColorer
     ) {
         this.cfgRootDirectoryToObject = cfgRootDirectoryToObject;
@@ -78,9 +67,7 @@ public class SpoofaxEsvConfigure implements TaskDef<ResourcePath, Result<Option<
         this.unarchiveFromJar = unarchiveFromJar;
         this.libSpoofax2ClassLoaderResources = libSpoofax2ClassLoaderResources;
 
-        this.configureSdf3 = configureSdf3;
-        this.sdf3Parse = sdf3Parse;
-        this.sdf3Desugar = sdf3Desugar;
+        this.spoofaxSdf3GenerationUtil = spoofaxSdf3GenerationUtil;
         this.sdf3ToCompletionColorer = sdf3ToCompletionColorer;
     }
 
@@ -127,7 +114,7 @@ public class SpoofaxEsvConfigure implements TaskDef<ResourcePath, Result<Option<
                 ;
         } catch(UncheckedIOException e) {
             throw e.getCause();
-        }
+        } // No need to unwrap UncheckedInterruptedException here, PIE handles UncheckedInterruptedException.
     }
 
     public Result<SpoofaxEsvConfig, EsvConfigureException> configureSourcesCatching(
@@ -141,13 +128,15 @@ public class SpoofaxEsvConfigure implements TaskDef<ResourcePath, Result<Option<
         ResourcePath libSpoofax2UnarchiveDirectory
     ) {
         try {
-            return configureSources(context, rootDirectory, cfgEsvConfig, mainSourceDirectoryPath, mainFilePath, includeDirectoryPaths, includeLibSpoofax2Export, libSpoofax2UnarchiveDirectory);
+            return configureSourceFiles(context, rootDirectory, cfgEsvConfig, mainSourceDirectoryPath, mainFilePath, includeDirectoryPaths, includeLibSpoofax2Export, libSpoofax2UnarchiveDirectory);
         } catch(IOException e) {
             throw new UncheckedIOException(e);
+        } catch(InterruptedException e) {
+            throw new UncheckedInterruptedException(e);
         }
     }
 
-    public Result<SpoofaxEsvConfig, EsvConfigureException> configureSources(
+    public Result<SpoofaxEsvConfig, EsvConfigureException> configureSourceFiles(
         ExecContext context,
         ResourcePath rootDirectory,
         CfgEsvConfig cfgEsvConfig,
@@ -156,7 +145,7 @@ public class SpoofaxEsvConfigure implements TaskDef<ResourcePath, Result<Option<
         ListView<ResourcePath> includeDirectoryPaths,
         boolean includeLibSpoofax2Export,
         ResourcePath libSpoofax2UnarchiveDirectory
-    ) throws IOException {
+    ) throws IOException, InterruptedException {
         // Check main source directory, main file, and include directories.
         final HierarchicalResource mainSourceDirectory = context.require(mainSourceDirectoryPath, ResourceStampers.<HierarchicalResource>exists());
         if(!mainSourceDirectory.exists() || !mainSourceDirectory.isDirectory()) {
@@ -212,27 +201,21 @@ public class SpoofaxEsvConfigure implements TaskDef<ResourcePath, Result<Option<
             }
         }
 
-        // SDF3 to completion colorer (if SDF3 is enabled).
-        final Result<Option<Sdf3SpecConfig>, Sdf3ConfigureException> configureSdf3Result = context.require(configureSdf3, rootDirectory);
-        if(configureSdf3Result.isErr()) {
-            // noinspection ConstantConditions (error is present)
-            return Result.ofErr(EsvConfigureException.sdf3ConfigureFail(configureSdf3Result.getErr()));
-        }
         final ArrayList<Supplier<Result<IStrategoTerm, ?>>> includeAstSuppliers = new ArrayList<>();
-        // noinspection ConstantConditions (value is present)
-        configureSdf3Result.get().ifSomeThrowing(sdf3Config -> {
-            final HierarchicalResource sdf3SourceDirectory = context.getHierarchicalResource(sdf3Config.mainSourceDirectory);
-            final JsglrParseTaskInput.Builder parseInputBuilder = sdf3Parse.inputBuilder().rootDirectoryHint(rootDirectory);
-            final ResourceWalker resourceWalker = Sdf3Util.createResourceWalker();
-            final ResourceMatcher resourceMatcher = Sdf3Util.createResourceMatcher();
-            context.require(sdf3SourceDirectory, ResourceStampers.modifiedDirRec(resourceWalker, resourceMatcher));
-            try(final Stream<? extends HierarchicalResource> stream = sdf3SourceDirectory.walk(resourceWalker, resourceMatcher)) {
-                for(HierarchicalResource sdf3File : new StreamIterable<>(stream)) {
-                    final Supplier<Result<IStrategoTerm, ?>> astSupplier = sdf3Desugar.createSupplier(parseInputBuilder.withFile(sdf3File.getPath()).buildAstSupplier());
+
+        // Compile each SDF3 source file (if SDF3 is enabled) to a completion colorer.
+        try {
+            spoofaxSdf3GenerationUtil.performSdf3GenerationIfEnabled(context, rootDirectory, new SpoofaxSdf3GenerationUtil.Callbacks<EsvConfigureException>() {
+                @Override
+                public void generateFromAst(ExecContext context, STask<Result<IStrategoTerm, ?>> astSupplier) {
                     includeAstSuppliers.add(sdf3ToCompletionColorer.createSupplier(astSupplier));
                 }
-            }
-        });
+            });
+        } catch(EsvConfigureException e) {
+            return Result.ofErr(e);
+        } catch(SpoofaxSdf3ConfigureException e) {
+            return Result.ofErr(EsvConfigureException.sdf3ConfigureFail(e));
+        }
 
         final EsvConfig config = new EsvConfig(rootDirectory, mainFilePath, ListView.copyOf(sourceFileOrigins), ListView.copyOf(includeDirectorySuppliers), ListView.of(includeAstSuppliers));
         return Result.ofOk(SpoofaxEsvConfig.files(config, cfgEsvConfig.outputFile()));
