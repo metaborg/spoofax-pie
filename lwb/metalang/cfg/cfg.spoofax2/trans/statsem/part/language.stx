@@ -14,10 +14,27 @@ rules // Sdf3 section and options
   sdf3OptionOk : scope * Sdf3Option
   sdf3OptionsOk maps sdf3OptionOk(*, list(*))
   
-  sdf3OptionOk(s, Sdf3MainSourceDirectory(e)) :-
-    typeOfExpr(s, e) == PATH() | error $[Expected path]. 
-  sdf3OptionOk(s, Sdf3MainFile(e)) :-
-    typeOfExpr(s, e) == PATH() | error $[Expected path]. 
+  sdf3OptionOk(s, Sdf3Source(source)) :-
+    sdf3SourceOk(s, source).
+    
+  sdf3SourceOk : scope * Sdf3Source
+  sdf3SourceOk(s, Sdf3Files(options)) :- sdf3FilesOptionsOk(s, options).
+  sdf3SourceOk(s, Sdf3Prebuilt(options)) :- sdf3PrebuiltOptionsOk(s, options).
+  
+  sdf3FilesOptionOk : scope * Sdf3FilesOption
+  sdf3FilesOptionsOk maps sdf3FilesOptionOk(*, list(*))
+  sdf3FilesOptionOk(s, Sdf3FilesMainSourceDirectory(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path].
+  sdf3FilesOptionOk(s, Sdf3FilesMainFile(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path].
+
+  sdf3PrebuiltOptionOk : scope * Sdf3PrebuiltOption
+  sdf3PrebuiltOptionsOk maps sdf3PrebuiltOptionOk(*, list(*))
+  sdf3PrebuiltOptionOk(s, Sdf3PrebuiltParseTableAtermFile(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path].
+  sdf3PrebuiltOptionOk(s, Sdf3PrebuiltParseTablePersistedFile(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path].
+
   sdf3OptionOk(s, Sdf3ParseTableGeneratorSection(options)) :-
     sdf3ParseTableGeneratorOptionsOk(s, options).
   

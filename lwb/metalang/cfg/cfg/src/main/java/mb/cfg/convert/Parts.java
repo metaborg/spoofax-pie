@@ -8,7 +8,10 @@ import mb.common.region.Region;
 import mb.common.util.MultiMap;
 import mb.common.util.StreamIterable;
 import mb.jsglr.common.TermTracer;
+import mb.pie.api.ExecContext;
+import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceKey;
+import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.TypeInfo;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -19,21 +22,25 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.TermFactory;
 import org.spoofax.terms.util.TermUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 class Parts {
+    private final ExecContext context;
     private final KeyedMessagesBuilder messagesBuilder;
     private final @Nullable ResourceKey cfgFile;
     private final MultiMap<IStrategoConstructor, IStrategoAppl> parts;
     private final TermFactory termFactory = new TermFactory();
 
     Parts(
+        ExecContext context,
         KeyedMessagesBuilder messagesBuilder,
         @Nullable ResourceKey cfgFile,
         Iterable<IStrategoTerm> terms
     ) throws InvalidAstShapeException {
+        this.context = context;
         this.messagesBuilder = messagesBuilder;
         this.cfgFile = cfgFile;
         final MultiMap<IStrategoConstructor, IStrategoAppl> parts = MultiMap.withLinkedHash();
@@ -45,11 +52,12 @@ class Parts {
     }
 
     Parts(
+        ExecContext context,
         KeyedMessagesBuilder messagesBuilder,
         @Nullable ResourceKey cfgFile,
         Stream<IStrategoTerm> terms
     ) throws InvalidAstShapeException {
-        this(messagesBuilder, cfgFile, new StreamIterable<>(terms));
+        this(context, messagesBuilder, cfgFile, new StreamIterable<>(terms));
     }
 
 
@@ -140,6 +148,50 @@ class Parts {
         getOneSubtermAsPath(name, base).ifSome(consumer);
     }
 
+    Option<ResourcePath> getOneSubtermAsExistingFile(String name, ResourcePath base, String errorSuffix) {
+        return getOneSubterm(name).map(pathTerm -> {
+            final String relativePath = Parts.toJavaString(pathTerm);
+            final ResourcePath path = base.appendRelativePath(relativePath).getNormalized();
+            try {
+                final HierarchicalResource file = context.require(path, ResourceStampers.<HierarchicalResource>exists());
+                if(!file.exists()) {
+                    messagesBuilder.addMessage(errorSuffix + " '" + path + "' does not exist", Severity.Error, cfgFile, TermTracer.getRegion(pathTerm));
+                } else if(!file.isFile()) {
+                    messagesBuilder.addMessage(errorSuffix + " '" + path + "' is not a file", Severity.Error, cfgFile, TermTracer.getRegion(pathTerm));
+                }
+            } catch(IOException e) {
+                messagesBuilder.addMessage("Failed to check if " + errorSuffix + " '" + path + "' exists", e, Severity.Error, cfgFile, TermTracer.getRegion(pathTerm));
+            }
+            return path;
+        });
+    }
+
+    void forOneSubtermAsExistingFile(String name, ResourcePath base, String errorSuffix, Consumer<ResourcePath> consumer) {
+        getOneSubtermAsExistingFile(name, base, errorSuffix).ifSome(consumer);
+    }
+
+    Option<ResourcePath> getOneSubtermAsExistingDirectory(String name, ResourcePath base, String errorSuffix) {
+        return getOneSubterm(name).map(pathTerm -> {
+            final String relativePath = Parts.toJavaString(pathTerm);
+            final ResourcePath path = base.appendRelativePath(relativePath).getNormalized();
+            try {
+                final HierarchicalResource directory = context.require(path, ResourceStampers.<HierarchicalResource>exists());
+                if(!directory.exists()) {
+                    messagesBuilder.addMessage(errorSuffix + " '" + path + "' does not exist", Severity.Error, cfgFile, TermTracer.getRegion(pathTerm));
+                } else if(!directory.isDirectory()) {
+                    messagesBuilder.addMessage(errorSuffix + " '" + path + "' is not a directory", Severity.Error, cfgFile, TermTracer.getRegion(pathTerm));
+                }
+            } catch(IOException e) {
+                messagesBuilder.addMessage("Failed to check if " + errorSuffix + " '" + path + "' exists", e, Severity.Error, cfgFile, TermTracer.getRegion(pathTerm));
+            }
+            return path;
+        });
+    }
+
+    void forOneSubtermAsExistingDirectory(String name, ResourcePath base, String errorSuffix, Consumer<ResourcePath> consumer) {
+        getOneSubtermAsExistingDirectory(name, base, errorSuffix).ifSome(consumer);
+    }
+
     Option<TypeInfo> getOneSubtermAsTypeInfo(String name) {
         return getOneSubtermAsString(name).map(TypeInfo::of);
     }
@@ -200,7 +252,7 @@ class Parts {
 
     Option<Parts> getAllSubTermsAsParts(String name) {
         if(!contains(name)) return Option.ofNone();
-        return Option.ofSome(new Parts(messagesBuilder, cfgFile, getAllSubTerms(name)));
+        return Option.ofSome(new Parts(context, messagesBuilder, cfgFile, getAllSubTerms(name)));
     }
 
 
@@ -214,16 +266,16 @@ class Parts {
 
     Option<Parts> getAllSubTermsInListAsParts(String name) {
         if(!contains(name)) return Option.ofNone();
-        return Option.ofSome(new Parts(messagesBuilder, cfgFile, getAllSubTermsInList(name)));
+        return Option.ofSome(new Parts(context, messagesBuilder, cfgFile, getAllSubTermsInList(name)));
     }
 
 
     Parts subParts(Iterable<IStrategoTerm> terms) {
-        return new Parts(messagesBuilder, cfgFile, terms);
+        return new Parts(context, messagesBuilder, cfgFile, terms);
     }
 
     Parts subParts(Stream<IStrategoTerm> terms) {
-        return new Parts(messagesBuilder, cfgFile, terms);
+        return new Parts(context, messagesBuilder, cfgFile, terms);
     }
 
 

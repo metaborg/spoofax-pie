@@ -350,9 +350,27 @@ The following `Sdf3Option`s are supported:
 
 | Syntax | Required? | Description | Type |
 | - | - | - | - |
+| `source = $Sdf3Source` | no | The source of the SDF3 definition. Defaults to a `files` source with the top-level `source-directory` option as its main source directory, and `./start.sdf3` as its main file relative to the main source directory. | n/a |
+| `parse-table-generator { $ParseTableGeneratorOption* }` | no | Parse table generator options. | n/a |
+
+The following `$Sdf3Source`s are supported:
+
+* Files: `files { $Sdf3FilesOption* }`
+* Prebuilt: `prebuilt { $Sdf3PrebuiltOption }`
+
+The following `Sdf3FilesOption`s are supported:
+
+| Syntax | Required? | Description | Type |
+| - | - | - | - |
 | `main-source-directory = $Expression` | no | The directory relative to the root directory that contains the main SDF3 file. Defaults to the value of the top-level `source-directory` option. | Path |
 | `main-file = $Expression` | no | The main SDF3 file relative to the `main-source-directory`. Defaults to `./start.sdf3`. | Path |
-| `parse-table-generator { $ParseTableGeneratorOption* }` | no | Parse table generator options. | n/a |
+
+The following `$Sdf3PrebuiltOption`s are supported:
+
+| Syntax | Required? | Description | Type |
+| - | - | - | - |
+| `parse-table-aterm-file = $Expression` | yes | The prebuilt SDF3 parse table ATerm file to use (usually called `sdf.tbl`) relative to the root directory | Path |
+| `parse-table-persisted-file = $Expression` | yes | The prebuilt SDF3 parse table persisted file to use (usually called `sdf.bin`) relative to the root directory | Path |
 
 The following `ParseTableGeneratorOption`s are supported:
 

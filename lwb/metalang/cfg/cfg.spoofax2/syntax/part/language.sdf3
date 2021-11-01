@@ -7,7 +7,7 @@ imports
 
 context-free sorts
 
-  Sdf3Option
+  Sdf3Option Sdf3Source Sdf3FilesOption Sdf3PrebuiltOption
   Sdf3ParseTableGeneratorOption
 
 context-free syntax
@@ -15,12 +15,23 @@ context-free syntax
   Part.Sdf3Section = <sdf3 {
   <{Sdf3Option "\n"}*>
 }>
-  Sdf3Option.Sdf3MainSourceDirectory   = <main-source-directory = <Expr>>
-  Sdf3Option.Sdf3MainFile              = <main-file = <Expr>>
+  Sdf3Option.Sdf3Source = <source = <Sdf3Source>>
+  
+  Sdf3Source.Sdf3Files  = <files {
+  <{Sdf3FilesOption "\n"}*>
+}>
+  Sdf3FilesOption.Sdf3FilesMainSourceDirectory       = <main-source-directory = <Expr>>
+  Sdf3FilesOption.Sdf3FilesMainFile                  = <main-file = <Expr>>
+  
+  Sdf3Source.Sdf3Prebuilt = <prebuilt {
+  <{Sdf3PrebuiltOption "\n"}*>
+}>
+  Sdf3PrebuiltOption.Sdf3PrebuiltParseTableAtermFile     = <parse-table-aterm-file = <Expr>>
+  Sdf3PrebuiltOption.Sdf3PrebuiltParseTablePersistedFile = <parse-table-persisted-file = <Expr>>
+  
   Sdf3Option.Sdf3ParseTableGeneratorSection = <parse-table-generator {
   <{Sdf3ParseTableGeneratorOption "\n"}*>
 }>
-
   Sdf3ParseTableGeneratorOption.Sdf3ParseTableGeneratorDynamic = <dynamic = <Expr>>
   Sdf3ParseTableGeneratorOption.Sdf3ParseTableGeneratorDataDependent = <data-dependent = <Expr>>
   Sdf3ParseTableGeneratorOption.Sdf3ParseTableGeneratorLayoutSensitive = <layout-sensitive = <Expr>>

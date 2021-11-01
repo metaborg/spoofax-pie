@@ -13,26 +13,22 @@ import java.io.Serializable;
 @Value.Immutable
 public interface CfgSdf3Config extends Serializable {
     class Builder extends ImmutableCfgSdf3Config.Builder {
-        public static ResourcePath getDefaultMainSourceDirectory(ResourcePath rootDirectory) {
-            return rootDirectory.appendRelativePath("src");
+        public static ResourcePath getDefaultMainSourceDirectory(CompileLanguageSpecificationShared shared) {
+            return shared.languageProject().project().srcDirectory();
         }
 
-        public static ResourcePath getDefaultMainFile(ResourcePath rootDirectory) {
-            return getDefaultMainSourceDirectory(rootDirectory).appendRelativePath("start.sdf3");
+        public static ResourcePath getDefaultMainFile(CompileLanguageSpecificationShared shared) {
+            return getDefaultMainSourceDirectory(shared).appendRelativePath("start.sdf3");
         }
     }
 
     static Builder builder() { return new Builder(); }
 
 
-    default ResourcePath rootDirectory() {
-        return compileLanguageShared().languageProject().project().baseDirectory();
-    }
-
     @Value.Default default CfgSdf3Source source() {
         return CfgSdf3Source.files(
-            Builder.getDefaultMainSourceDirectory(rootDirectory()),
-            Builder.getDefaultMainFile(rootDirectory())
+            Builder.getDefaultMainSourceDirectory(compileLanguageShared()),
+            Builder.getDefaultMainFile(compileLanguageShared())
         );
     }
 

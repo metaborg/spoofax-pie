@@ -14,12 +14,12 @@ import java.io.Serializable;
 @Value.Immutable
 public interface CfgEsvConfig extends Serializable {
     class Builder extends ImmutableCfgEsvConfig.Builder {
-        public static ResourcePath getDefaultMainSourceDirectory(ResourcePath rootDirectory) {
-            return rootDirectory.appendRelativePath("src");
+        public static ResourcePath getDefaultMainSourceDirectory(CompileLanguageSpecificationShared shared) {
+            return shared.languageProject().project().srcDirectory();
         }
 
-        public static ResourcePath getDefaultMainFile(ResourcePath rootDirectory) {
-            return getDefaultMainSourceDirectory(rootDirectory).appendRelativePath("main.esv");
+        public static ResourcePath getDefaultMainFile(CompileLanguageSpecificationShared shared) {
+            return getDefaultMainSourceDirectory(shared).appendRelativePath("main.esv");
         }
 
         public static boolean getDefaultIncludeLibSpoofax2Exports(CompileLanguageSpecificationShared shared) {
@@ -34,14 +34,10 @@ public interface CfgEsvConfig extends Serializable {
     static Builder builder() { return new Builder(); }
 
 
-    default ResourcePath rootDirectory() {
-        return compileLanguageShared().languageProject().project().baseDirectory();
-    }
-
     @Value.Default default CfgEsvSource source() {
         return CfgEsvSource.files(
-            Builder.getDefaultMainSourceDirectory(rootDirectory()),
-            Builder.getDefaultMainFile(rootDirectory()),
+            Builder.getDefaultMainSourceDirectory(compileLanguageShared()),
+            Builder.getDefaultMainFile(compileLanguageShared()),
             ListView.of(),
             Builder.getDefaultIncludeLibSpoofax2Exports(compileLanguageShared()),
             Builder.getDefaultLibSpoofax2UnarchiveDirectory(compileLanguageShared())

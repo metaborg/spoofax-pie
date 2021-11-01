@@ -6,10 +6,13 @@ All notable changes to this project are documented in this file, based on [Keep 
 ### Fixed
 - Evaluating .stxtest files outside of the Statix source directory (src by default) silently failing.
 - Errors in CFG not appearing, or just displaying a single error on the first line.
+- Source file configuration in `spoofaxc.cfg` to be relative to the respective source directory, instead of relative to the root directory.
+- Missing source directories or files not giving errors in `spoofaxc.cfg`.
 
 ### Changed
 - Spoofax Eclipse LWB plugin to show an error dialog when building a language fails due to errors in language definition files.
 - LWB compiler to make it possible to supply a prebuilt ESV output file for a language instead of always having to compile that from ESV sources. This is done with the `esv { source = prebuilt { file = ./prebuilt/editor.esf.af }}` configuration in `spoofaxc.cfg`. The syntax for setting the main source directory, main file, and include directories has also changed. See the configuration reference on the documentation site for details.
+- LWB compiler to make it possible to supply prebuilt SDF3 parse table files for a language instead of always having to compile that from SDF3 sources. This is done with the `sdf3 { source = prebuilt { parse-table-aterm-file = ./prebuilt/sdf.tbl parse-table-persisted-file = ./prebuilt/sdf.bin }}` configuration in `spoofaxc.cfg`. The syntax for setting the main source directory and main file has also changed. See the configuration reference on the documentation site for details.
 - LWB compiler to be more incremental by adding output stampers to high-level tasks, ensuring they only get re-executed when a relevant part of the configuration changes.
 
 

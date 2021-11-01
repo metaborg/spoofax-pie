@@ -23,21 +23,25 @@ public interface CompileStrategoInput extends Serializable {
             with(properties, languageStrategyAffix, this::languageStrategyAffix);
             return this;
         }
+
+        public static ResourcePath getDefaultMainSourceDirectory(CompileLanguageSpecificationShared shared) {
+            return shared.languageProject().project().srcDirectory();
+        }
+
+        public static ResourcePath getDefaultMainFile(CompileLanguageSpecificationShared shared) {
+            return getDefaultMainSourceDirectory(shared).appendRelativePath("main.str2");
+        }
     }
 
     static Builder builder() { return new Builder(); }
 
 
-    default ResourcePath rootDirectory() {
-        return compileLanguageShared().languageProject().project().baseDirectory();
-    }
-
     @Value.Default default ResourcePath mainSourceDirectory() {
-        return rootDirectory().appendRelativePath("src");
+        return CompileStrategoInput.Builder.getDefaultMainSourceDirectory(compileLanguageShared());
     }
 
     @Value.Default default ResourcePath mainFile() {
-        return mainSourceDirectory().appendRelativePath("main.str2");
+        return CompileStrategoInput.Builder.getDefaultMainFile(compileLanguageShared());
     }
 
     @Value.Default default String mainModule() {

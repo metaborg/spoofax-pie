@@ -10,21 +10,25 @@ import java.util.List;
 
 @Value.Immutable
 public interface CompileStatixInput extends Serializable {
-    class Builder extends ImmutableCompileStatixInput.Builder {}
+    class Builder extends ImmutableCompileStatixInput.Builder {
+        public static ResourcePath getDefaultMainSourceDirectory(CompileLanguageSpecificationShared shared) {
+            return shared.languageProject().project().srcDirectory();
+        }
+
+        public static ResourcePath getDefaultMainFile(CompileLanguageSpecificationShared shared) {
+            return getDefaultMainSourceDirectory(shared).appendRelativePath("main.stx");
+        }
+    }
 
     static Builder builder() { return new Builder(); }
 
 
-    default ResourcePath rootDirectory() {
-        return compileLanguageShared().languageProject().project().baseDirectory();
-    }
-
     @Value.Default default ResourcePath mainSourceDirectory() {
-        return compileLanguageShared().languageProject().project().srcDirectory();
+        return CompileStatixInput.Builder.getDefaultMainSourceDirectory(compileLanguageShared());
     }
 
     @Value.Default default ResourcePath mainFile() {
-        return mainSourceDirectory().appendRelativePath("main.stx");
+        return CompileStatixInput.Builder.getDefaultMainFile(compileLanguageShared());
     }
 
     List<ResourcePath> includeDirectories();

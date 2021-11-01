@@ -67,7 +67,7 @@ public class CompileStatix implements TaskDef<ResourcePath, Result<KeyedMessages
                 i -> context.require(configure, rootDirectory)
                     .mapErr(StatixCompileException::configureFail)
                     .flatMapThrowing(o2 -> o2.mapThrowingOr(
-                        c -> checkAndCompile(context, c, i),
+                        c -> checkAndCompile(context, rootDirectory, c, i),
                         Result.ofOk(KeyedMessages.of())
                     )),
                 Result.ofOk(KeyedMessages.of())
@@ -78,15 +78,15 @@ public class CompileStatix implements TaskDef<ResourcePath, Result<KeyedMessages
         return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 
-    public Result<KeyedMessages, StatixCompileException> checkAndCompile(ExecContext context, StatixConfig config, CompileStatixInput input) throws IOException {
-        final KeyedMessages messages = context.require(check, input.rootDirectory());
+    public Result<KeyedMessages, StatixCompileException> checkAndCompile(ExecContext context, ResourcePath rootDirectory, StatixConfig config, CompileStatixInput input) throws IOException {
+        final KeyedMessages messages = context.require(check, rootDirectory);
         if(messages.containsError()) {
             return Result.ofErr(StatixCompileException.checkFail(messages));
         }
 
         final HierarchicalResource outputDirectory = context.getHierarchicalResource(input.outputDirectory()).ensureDirectoryExists();
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
-        final Result<KeyedMessages, StatixCompileException> result = context.require(compileProject, input.rootDirectory())
+        final Result<KeyedMessages, StatixCompileException> result = context.require(compileProject, rootDirectory)
             .mapThrowing(o -> {
                 writeAllOutputs(context, o, outputDirectory);
                 return messages;
@@ -94,7 +94,7 @@ public class CompileStatix implements TaskDef<ResourcePath, Result<KeyedMessages
             .ifOk(messagesBuilder::addMessages)
             .mapErr(StatixCompileException::compileFail)
             .and(
-                context.require(compileAndMergeProject, input.rootDirectory())
+                context.require(compileAndMergeProject, rootDirectory)
                     .mapThrowing(o -> {
                         final HierarchicalResource mergedOutputFile = outputDirectory.appendAsRelativePath("src-gen/statix/statix.merged.aterm").ensureFileExists();
                         writeOutput(context, o, mergedOutputFile);
