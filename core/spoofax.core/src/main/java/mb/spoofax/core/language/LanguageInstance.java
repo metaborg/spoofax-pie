@@ -1,16 +1,17 @@
 package mb.spoofax.core.language;
 
+import mb.common.codecompletion.CodeCompletionResult;
 import mb.common.editor.HoverResult;
 import mb.common.editor.ReferenceResolutionResult;
 import mb.common.message.KeyedMessages;
 import mb.common.option.Option;
 import mb.common.region.Region;
+import mb.common.result.Result;
 import mb.common.style.Styling;
 import mb.common.token.Tokens;
 import mb.common.util.CollectionView;
 import mb.common.util.ListView;
 import mb.common.util.SetView;
-import mb.completions.common.CompletionResult;
 import mb.pie.api.Task;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
@@ -40,11 +41,12 @@ public interface LanguageInstance {
     /**
      * Creates a task that produces completions.
      *
-     * @param resourceKey      the key of the resource in which completion is invoked
      * @param primarySelection the primary selection at which completion is invoked
-     * @return a {@link CompletionResult}; or {@code null} when no completions could be generated
+     * @param file      the key of the resource in which completion is invoked
+     * @param rootDirectoryHint the root directory of the project; or {@code null} when not specified
+     * @return a {@link CodeCompletionResult} result; or an exception when no completions could be generated
      */
-    Task<@Nullable CompletionResult> createCompletionTask(ResourceKey resourceKey, Region primarySelection);
+    Task<Result<CodeCompletionResult, ?>> createCodeCompletionTask(Region primarySelection, ResourceKey file, @Nullable ResourcePath rootDirectoryHint);
 
 
     Task<KeyedMessages> createCheckOneTask(ResourceKey file, @Nullable ResourcePath rootDirectoryHint);

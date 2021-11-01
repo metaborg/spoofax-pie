@@ -33,14 +33,15 @@ public class AdapterProjectCompilerInputBuilder {
     private boolean tegoRuntimeEnabled = false;
     public final TegoRuntimeAdapterCompiler.Input.Builder tegoRuntime = TegoRuntimeAdapterCompiler.Input.builder();
 
-    private boolean completerEnabled = false;
-    public final CompleterAdapterCompiler.Input.Builder completer = CompleterAdapterCompiler.Input.builder();
-
     private boolean referenceResolutionEnabled = false;
     public final ReferenceResolutionAdapterCompiler.Input.Builder referenceResolution = ReferenceResolutionAdapterCompiler.Input.builder();
 
+    private boolean codeCompletionEnabled = false;
+    public final CodeCompletionAdapterCompiler.Input.Builder codeCompletion = CodeCompletionAdapterCompiler.Input.builder();
+
     private boolean hoverEnabled = false;
     public final HoverAdapterCompiler.Input.Builder hover = HoverAdapterCompiler.Input.builder();
+
 
     public AdapterProjectCompiler.Input.Builder project = AdapterProjectCompiler.Input.builder();
 
@@ -83,9 +84,9 @@ public class AdapterProjectCompilerInputBuilder {
         return tegoRuntime;
     }
 
-    public CompleterAdapterCompiler.Input.Builder withCompleter() {
-        completerEnabled = true;
-        return completer;
+    public CodeCompletionAdapterCompiler.Input.Builder withCodeCompletion() {
+        codeCompletionEnabled = true;
+        return codeCompletion;
     }
 
     public ReferenceResolutionAdapterCompiler.Input.Builder withReferenceResolution() {
@@ -126,15 +127,15 @@ public class AdapterProjectCompilerInputBuilder {
         final TegoRuntimeAdapterCompiler.@Nullable Input tegoRuntime = buildTegoRuntime(shared, adapterProject, languageProjectInput, classLoaderResources);
         if(tegoRuntime != null) project.tegoRuntime(tegoRuntime);
 
+        final CodeCompletionAdapterCompiler.@Nullable Input codeCompletion = buildCodeCompletion(shared, adapterProject, languageProjectInput, parser, constraintAnalyzer, strategoRuntime, tegoRuntime, classLoaderResources);
+        if(codeCompletion != null) project.codeCompletion(codeCompletion);
+
         final ReferenceResolutionAdapterCompiler.@Nullable Input referenceResolution = buildReferenceResolution(shared, adapterProject, strategoRuntime, constraintAnalyzer, classLoaderResources);
         if(referenceResolution != null) project.referenceResolution(referenceResolution);
 
         final HoverAdapterCompiler.@Nullable Input hover = buildHover(shared, adapterProject, strategoRuntime, constraintAnalyzer, classLoaderResources);
         if(hover != null) project.hover(hover);
 
-        final CompleterAdapterCompiler.@Nullable Input completer = buildCompleter(shared, adapterProject, languageProjectInput);
-
-        if(completer != null) project.completer(completer);
         project.languageProjectDependency(languageProjectDependency);
 
         return project
@@ -267,16 +268,37 @@ public class AdapterProjectCompilerInputBuilder {
             .build();
     }
 
-    private CompleterAdapterCompiler.@Nullable Input buildCompleter(
+    private CodeCompletionAdapterCompiler.@Nullable Input buildCodeCompletion(
         Shared shared,
         AdapterProject adapterProject,
-        LanguageProjectCompiler.Input languageProjectInput
+        LanguageProjectCompiler.Input languageProjectInput,
+        ParserAdapterCompiler.@Nullable Input parseInput,
+        ConstraintAnalyzerAdapterCompiler.@Nullable Input constraintAnalyzerInput,
+        StrategoRuntimeAdapterCompiler.@Nullable Input strategoRuntimeInput,
+        TegoRuntimeAdapterCompiler.@Nullable Input tegoRuntimeInput,
+        ClassLoaderResourcesCompiler.Input classloaderResources
     ) {
-        if(!completerEnabled) return null;
-        return completer
+        if(!codeCompletionEnabled) return null;
+        if(parseInput == null) {
+            throw new RuntimeException("Code completion input requires a parser, but the parser has not been set");
+        }
+        if(constraintAnalyzerInput == null) {
+            throw new RuntimeException("Code completion input requires a constraint analyzer, but the constraint analyzer has not been set");
+        }
+        if(strategoRuntimeInput == null) {
+            throw new RuntimeException("Code completion input requires a Stratego runtime, but the Stratego runtime has not been set");
+        }
+        if(tegoRuntimeInput == null) {
+            throw new RuntimeException("Code completion input requires a Tego runtime, but the Tego runtime has not been set");
+        }
+        return codeCompletion
             .shared(shared)
             .adapterProject(adapterProject)
-            .languageProjectInput(languageProjectInput.completer().orElseThrow(() -> new RuntimeException("Mismatch between presence of completer input between language project and adapter project")))
+            .parserInput(parseInput)
+            .constraintAnalyzerInput(constraintAnalyzerInput)
+            .strategoRuntimeInput(strategoRuntimeInput)
+            .tegoRuntimeInput(tegoRuntimeInput)
+            .classLoaderResourcesInput(classloaderResources)
             .build();
     }
 

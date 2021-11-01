@@ -41,7 +41,7 @@ import mb.tiger.spoofax.task.TigerShowParsedAst;
 import mb.tiger.spoofax.task.TigerShowPrettyPrintedText;
 import mb.tiger.spoofax.task.TigerShowScopeGraph;
 import mb.tiger.spoofax.task.reusable.TigerAnalyze;
-import mb.tiger.spoofax.task.reusable.TigerCompleteTaskDef;
+import mb.spoofax.core.language.taskdef.NoneCodeCompletionTaskDef;
 import mb.tiger.spoofax.task.reusable.TigerListDefNames;
 import mb.tiger.spoofax.task.reusable.TigerListLiteralVals;
 import mb.tiger.spoofax.task.reusable.TigerParse;
@@ -114,7 +114,7 @@ public class TigerModule {
         TigerParse parse,
         TigerStyle style,
         TigerAnalyze analyze,
-        TigerCompleteTaskDef complete,
+        NoneCodeCompletionTaskDef complete,
 
         TigerListLiteralVals listLiteralVals,
         TigerListDefNames listDefNames,

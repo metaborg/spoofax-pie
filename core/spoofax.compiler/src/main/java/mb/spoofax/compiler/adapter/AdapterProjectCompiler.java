@@ -25,11 +25,11 @@ import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
 import mb.spoofax.compiler.util.TypeInfoCollection;
 import mb.spoofax.compiler.util.UniqueNamer;
+import mb.spoofax.core.language.taskdef.NoneCodeCompletionTaskDef;
 import mb.spoofax.core.language.taskdef.NoneHoverTaskDef;
 import mb.spoofax.core.language.taskdef.NoneResolveTaskDef;
 import mb.spoofax.core.language.taskdef.NoneStyler;
 import mb.spoofax.core.language.taskdef.NoneTokenizer;
-import mb.spoofax.core.language.taskdef.NullCompleteTaskDef;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
 
@@ -64,10 +64,10 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
 
     private final ParserAdapterCompiler parserCompiler;
     private final StylerAdapterCompiler stylerCompiler;
-    private final CompleterAdapterCompiler completerCompiler;
     private final StrategoRuntimeAdapterCompiler strategoRuntimeCompiler;
     private final ConstraintAnalyzerAdapterCompiler constraintAnalyzerCompiler;
     private final MultilangAnalyzerAdapterCompiler multilangAnalyzerCompiler;
+    private final CodeCompletionAdapterCompiler codeCompletionCompiler;
     private final TegoRuntimeAdapterCompiler tegoRuntimeCompiler;
     private final ReferenceResolutionAdapterCompiler referenceResolutionAdapterCompiler;
     private final HoverAdapterCompiler hoverAdapterCompiler;
@@ -77,10 +77,10 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         TemplateCompiler templateCompiler,
         ParserAdapterCompiler parserCompiler,
         StylerAdapterCompiler stylerCompiler,
-        CompleterAdapterCompiler completerCompiler,
         StrategoRuntimeAdapterCompiler strategoRuntimeCompiler,
         ConstraintAnalyzerAdapterCompiler constraintAnalyzerCompiler,
         MultilangAnalyzerAdapterCompiler multilangAnalyzerCompiler,
+        CodeCompletionAdapterCompiler codeCompletionCompiler,
         TegoRuntimeAdapterCompiler tegoRuntimeCompiler,
         ReferenceResolutionAdapterCompiler referenceResolutionAdapterCompiler,
         HoverAdapterCompiler hoverAdapterCompiler,
@@ -105,10 +105,10 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
 
         this.parserCompiler = parserCompiler;
         this.stylerCompiler = stylerCompiler;
-        this.completerCompiler = completerCompiler;
         this.strategoRuntimeCompiler = strategoRuntimeCompiler;
         this.constraintAnalyzerCompiler = constraintAnalyzerCompiler;
         this.multilangAnalyzerCompiler = multilangAnalyzerCompiler;
+        this.codeCompletionCompiler = codeCompletionCompiler;
         this.tegoRuntimeCompiler = tegoRuntimeCompiler;
         this.referenceResolutionAdapterCompiler = referenceResolutionAdapterCompiler;
         this.hoverAdapterCompiler = hoverAdapterCompiler;
@@ -133,10 +133,10 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         // Files from other compilers.
         Option.ofOptional(input.parser()).ifSomeThrowing((i) -> parserCompiler.compile(context, i));
         Option.ofOptional(input.styler()).ifSomeThrowing((i) -> stylerCompiler.compile(context, i));
-        Option.ofOptional(input.completer()).ifSomeThrowing((i) -> completerCompiler.compile(context, i));
         Option.ofOptional(input.strategoRuntime()).ifSomeThrowing((i) -> strategoRuntimeCompiler.compile(context, i));
         Option.ofOptional(input.constraintAnalyzer()).ifSomeThrowing((i) -> constraintAnalyzerCompiler.compile(context, i));
         Option.ofOptional(input.multilangAnalyzer()).ifSomeThrowing((i) -> multilangAnalyzerCompiler.compile(context, i));
+        Option.ofOptional(input.codeCompletion()).ifSomeThrowing((i) -> codeCompletionCompiler.compile(context, i));
         Option.ofOptional(input.tegoRuntime()).ifSomeThrowing((i) -> tegoRuntimeCompiler.compile(context, i));
         Option.ofOptional(input.referenceResolution()).ifSomeThrowing((i) -> referenceResolutionAdapterCompiler.compile(context, i));
         Option.ofOptional(input.hover()).ifSomeThrowing((i) -> hoverAdapterCompiler.compile(context, i));
@@ -256,14 +256,14 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             }
             map.put("styleInjection", styleInjection);
             injected.add(styleInjection);
-            final NamedTypeInfo completeInjection;
-            if(input.completer().isPresent() && input.parser().isPresent()) {
-                completeInjection = uniqueNamer.makeUnique(input.completer().get().completeTaskDef());
+            final NamedTypeInfo codeCompletionInjection;
+            if(input.codeCompletion().isPresent() && input.parser().isPresent()) {
+                codeCompletionInjection = uniqueNamer.makeUnique(input.codeCompletion().get().codeCompletionTaskDef());
             } else {
-                completeInjection = uniqueNamer.makeUnique(TypeInfo.of(NullCompleteTaskDef.class));
+                codeCompletionInjection = uniqueNamer.makeUnique(TypeInfo.of(NoneCodeCompletionTaskDef.class));
             }
-            map.put("completeInjection", completeInjection);
-            injected.add(completeInjection);
+            map.put("codeCompletionInjection", codeCompletionInjection);
+            injected.add(codeCompletionInjection);
             final NamedTypeInfo resolveInjection;
             if(input.referenceResolution().isPresent()) {
                 resolveInjection = uniqueNamer.makeUnique(input.referenceResolution().get().resolveTaskDef());
@@ -353,6 +353,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         input.constraintAnalyzer().ifPresent((i) -> constraintAnalyzerCompiler.getDependencies(i).addAllTo(dependencies));
         input.strategoRuntime().ifPresent((i) -> strategoRuntimeCompiler.getDependencies(i).addAllTo(dependencies));
         input.tegoRuntime().ifPresent((i) -> tegoRuntimeCompiler.getDependencies(i).addAllTo(dependencies));
+        input.codeCompletion().ifPresent((i) -> codeCompletionCompiler.getDependencies(i).addAllTo(dependencies));
         dependencies.add(GradleConfiguredDependency.api(shared.sptApiDep()));
         return dependencies;
     }
@@ -377,13 +378,13 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
 
         Optional<StylerAdapterCompiler.Input> styler();
 
-        Optional<CompleterAdapterCompiler.Input> completer();
-
         Optional<StrategoRuntimeAdapterCompiler.Input> strategoRuntime();
 
         Optional<ConstraintAnalyzerAdapterCompiler.Input> constraintAnalyzer();
 
         Optional<MultilangAnalyzerAdapterCompiler.Input> multilangAnalyzer();
+
+        Optional<CodeCompletionAdapterCompiler.Input> codeCompletion();
 
         Optional<ReferenceResolutionAdapterCompiler.Input> referenceResolution();
 
@@ -420,12 +421,6 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             } else {
                 taskDefs.add(TypeInfo.of(NoneStyler.class));
             }
-            if(completer().isPresent()) {
-                final CompleterAdapterCompiler.Input i = completer().get();
-                taskDefs.add(i.completeTaskDef(), i.baseCompleteTaskDef());
-            } else {
-                taskDefs.add(TypeInfo.of(NullCompleteTaskDef.class));
-            }
             strategoRuntime().ifPresent((i) -> {
                 taskDefs.add(i.getStrategoRuntimeProviderTaskDef(), i.baseGetStrategoRuntimeProviderTaskDef());
             });
@@ -440,6 +435,13 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
                 taskDefs.add(i.checkTaskDef(), i.baseCheckTaskDef());
                 taskDefs.addAll(i.libraryTaskDefs());
             });
+            codeCompletion().ifPresent((i) -> {
+                taskDefs.add(i.codeCompletionTaskDef(), i.baseCodeCompletionTaskDef());
+                taskDefs.add(i.statixSpecTaskDef(), i.baseStatixSpecTaskDef());
+            });
+            if(!codeCompletion().isPresent()) {
+                taskDefs.add(TypeInfo.of(NoneCodeCompletionTaskDef.class));
+            }
             referenceResolution().ifPresent((i) -> {
                 taskDefs.add(i.resolveTaskDef(), i.baseResolveTaskDef());
             });
@@ -746,11 +748,11 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             }
             parser().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             styler().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
-            completer().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             strategoRuntime().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             constraintAnalyzer().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             referenceResolution().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             multilangAnalyzer().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
+            codeCompletion().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             tegoRuntime().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             hover().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             getSourceFiles().javaSourceFiles().addAllTo(javaSourceFiles);

@@ -1,0 +1,69 @@
+package {{baseCodeCompletionTaskDef.packageId}};
+
+import mb.common.codecompletion.CodeCompletionResult;
+import mb.common.result.Result;
+import mb.log.api.LoggerFactory;
+import mb.nabl2.terms.stratego.StrategoTerms;
+import mb.pie.api.ExecContext;
+import mb.pie.api.stamp.resource.ResourceStampers;
+import mb.statix.codecompletion.pie.CodeCompletionEventHandlerBase;
+import mb.statix.codecompletion.pie.CodeCompletionTaskDef;
+import mb.tego.strategies.runtime.TegoRuntime;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import javax.inject.Inject;
+
+@{{adapterProject.scope.qualifiedId}}
+public class {{baseCodeCompletionTaskDef.id}} extends CodeCompletionTaskDef {
+
+    private final {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources;
+
+    @Inject
+    public {{baseCodeCompletionTaskDef.id}}(
+        {{parserInput.parseTaskDef.qualifiedId}} parseTask,
+        {{constraintAnalyzerInput.analyzeFileTaskDef.qualifiedId}} analyzeFileTask,
+        {{strategoRuntimeInput.getStrategoRuntimeProviderTaskDef.qualifiedId}} getStrategoRuntimeProviderTask,
+        TegoRuntime tegoRuntime,
+        {{statixSpecTaskDef.qualifiedId}} statixSpec,
+        StrategoTerms strategoTerms,
+        LoggerFactory loggerFactory,
+        {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources
+    ) {
+        super(
+            parseTask,
+            analyzeFileTask,
+            getStrategoRuntimeProviderTask,
+            tegoRuntime,
+            statixSpec,
+            strategoTerms,
+            loggerFactory,
+            () -> null,
+
+            "{{preAnalyzeStrategy}}",
+            "{{postAnalyzeStrategy}}",
+            "{{upgradePlaceholdersStrategy}}",
+            "{{downgradePlaceholdersStrategy}}",
+            "{{isInjStrategy}}",
+            "{{ppPartialStrategy}}",
+
+            "{{statixSpecName}}",
+            "{{statixRootPredicateName}}"
+        );
+
+        this.classLoaderResources = classLoaderResources;
+    }
+
+    @Override
+    public String getId() {
+        return "{{baseCodeCompletionTaskDef.id}}";
+    }
+
+    @Override
+    public @Nullable Result<CodeCompletionResult, ?> exec(ExecContext context, CodeCompletionTaskDef.Input input) throws Exception {
+        context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(CodeCompletionTaskDef.Input.class), ResourceStampers.hashFile());
+
+        return super.exec(context, input);
+    }
+
+}

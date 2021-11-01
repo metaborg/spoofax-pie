@@ -6,7 +6,7 @@ import mb.pie.api.TaskDef;
 import mb.pie.dagger.TaskDefsProvider;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
-import mb.spoofax.compiler.adapter.CompleterAdapterCompiler;
+import mb.spoofax.compiler.adapter.CodeCompletionAdapterCompiler;
 import mb.spoofax.compiler.adapter.ConstraintAnalyzerAdapterCompiler;
 import mb.spoofax.compiler.adapter.GetSourceFilesAdapterCompiler;
 import mb.spoofax.compiler.adapter.HoverAdapterCompiler;
@@ -16,7 +16,6 @@ import mb.spoofax.compiler.adapter.ReferenceResolutionAdapterCompiler;
 import mb.spoofax.compiler.adapter.StrategoRuntimeAdapterCompiler;
 import mb.spoofax.compiler.adapter.StylerAdapterCompiler;
 import mb.spoofax.compiler.language.ClassLoaderResourcesCompiler;
-import mb.spoofax.compiler.language.CompleterLanguageCompiler;
 import mb.spoofax.compiler.adapter.TegoRuntimeAdapterCompiler;
 import mb.spoofax.compiler.language.ConstraintAnalyzerLanguageCompiler;
 import mb.spoofax.compiler.language.LanguageProjectCompiler;
@@ -50,8 +49,6 @@ public interface SpoofaxCompilerComponent extends TaskDefsProvider {
 
     StylerLanguageCompiler getStylerLanguageCompiler();
 
-    CompleterLanguageCompiler getCompleterLanguageCompiler();
-
     StrategoRuntimeLanguageCompiler getStrategoRuntimeLanguageCompiler();
 
     ConstraintAnalyzerLanguageCompiler getConstraintAnalyzerLanguageCompiler();
@@ -65,7 +62,7 @@ public interface SpoofaxCompilerComponent extends TaskDefsProvider {
 
     StylerAdapterCompiler getStylerAdapterCompiler();
 
-    CompleterAdapterCompiler getCompleterAdapterCompiler();
+    CodeCompletionAdapterCompiler getCodeCompletionAdapterCompiler();
 
     StrategoRuntimeAdapterCompiler getStrategoRuntimeAdapterCompiler();
 

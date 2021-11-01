@@ -108,6 +108,8 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
 
   addTaskDefs(taskPackageId, "StatixCompileModule")
   addTaskDefs(taskPackageId, "StatixCompileProject")
+  addTaskDefs(taskPackageId, "StatixCompileAndMergeProject")
+  addTaskDefs(taskPackageId, "StatixCompileSpec")
 
   // Evaluate test
   val evaluateTest = TypeInfo.of(taskPackageId, "StatixEvaluateTest")

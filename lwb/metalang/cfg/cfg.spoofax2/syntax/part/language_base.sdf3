@@ -17,7 +17,7 @@ context-free sorts
   MultilangAnalyzerOption
   StrategoRuntimeOption
   TegoRuntimeOption
-  CompleterOption
+  CodeCompletionOption
   ExportsOption
 
 context-free syntax
@@ -94,8 +94,8 @@ context-free syntax
 
 context-free syntax
 
-  Part.CompleterSection = <completer {
-  <{CompleterOption "\n"}*>
+  Part.CodeCompletionSection = <code-completion {
+  <{CodeCompletionOption "\n"}*>
 }>
 
 context-free syntax

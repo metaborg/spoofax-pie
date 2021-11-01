@@ -26,6 +26,7 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.adapter.AdapterProject;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
 import mb.spoofax.compiler.adapter.AdapterProjectCompilerInputBuilder;
+import mb.spoofax.compiler.adapter.CodeCompletionAdapterCompiler;
 import mb.spoofax.compiler.adapter.ConstraintAnalyzerAdapterCompiler;
 import mb.spoofax.compiler.adapter.HoverAdapterCompiler;
 import mb.spoofax.compiler.adapter.MultilangAnalyzerAdapterCompiler;
@@ -313,7 +314,9 @@ public class CfgAstToObject {
         parts.getAllSubTermsInListAsParts("TegoRuntimeSection").ifSome(subParts -> {
             final TegoRuntimeAdapterCompiler.Input.Builder adapter = adapterBuilder.withTegoRuntime();
         });
-        // TODO: completion
+        parts.getAllSubTermsInListAsParts("CodeCompletionSection").ifSome(subParts -> {
+            final CodeCompletionAdapterCompiler.Input.Builder adapter = adapterBuilder.withCodeCompletion();
+        });
         parts.getAllSubTermsInListAsParts("ExportsSection").ifSome(subParts -> {
             final ExportsLanguageCompiler.Input.Builder builder = baseBuilder.withExports();
             // TODO: exports language properties

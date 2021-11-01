@@ -6,7 +6,7 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.adapter.AdapterProject;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
 import mb.spoofax.compiler.adapter.AdapterProjectCompilerInputBuilder;
-import mb.spoofax.compiler.adapter.CompleterAdapterCompiler;
+import mb.spoofax.compiler.adapter.CodeCompletionAdapterCompiler;
 import mb.spoofax.compiler.adapter.ConstraintAnalyzerAdapterCompiler;
 import mb.spoofax.compiler.adapter.ParserAdapterCompiler;
 import mb.spoofax.compiler.adapter.StrategoRuntimeAdapterCompiler;
@@ -17,7 +17,6 @@ import mb.spoofax.compiler.adapter.data.CliCommandRepr;
 import mb.spoofax.compiler.adapter.data.CliParamRepr;
 import mb.spoofax.compiler.adapter.data.CommandActionRepr;
 import mb.spoofax.compiler.adapter.data.CommandDefRepr;
-import mb.spoofax.compiler.language.CompleterLanguageCompiler;
 import mb.spoofax.compiler.language.ConstraintAnalyzerLanguageCompiler;
 import mb.spoofax.compiler.language.LanguageProject;
 import mb.spoofax.compiler.language.LanguageProjectCompiler;
@@ -107,11 +106,6 @@ public class TigerInputs {
         return languageProjectCompilerInput().strategoRuntime().get();
     }
 
-    public CompleterLanguageCompiler.Input completerLanguageCompilerInput() {
-        //noinspection OptionalGetWithoutIsPresent
-        return languageProjectCompilerInput().completer().get();
-    }
-
 
     public AdapterProjectCompiler.Input adapterProjectCompilerInput() {
         if(adapterProjectCompilerInput == null) {
@@ -148,9 +142,9 @@ public class TigerInputs {
         return adapterProjectCompilerInput().strategoRuntime().get();
     }
 
-    public CompleterAdapterCompiler.Input completerAdapterCompilerInput() {
+    public CodeCompletionAdapterCompiler.Input codeCompletionAdapterCompilerInput() {
         //noinspection OptionalGetWithoutIsPresent
-        return adapterProjectCompilerInput().completer().get();
+        return adapterProjectCompilerInput().codeCompletion().get();
     }
 
 
@@ -201,7 +195,6 @@ public class TigerInputs {
                 "org.metaborg.lang.tiger.trans.InteropRegisterer",
                 "org.metaborg.lang.tiger.strategies.InteropRegisterer"
             );
-        languageProjectCompilerInputBuilder.withCompleter();
     }
 
     private void setAdapterProjectCompilerInput(ResourcePath rootDirectory, Shared shared, AdapterProjectCompilerInputBuilder adapterProjectCompilerInputBuilder) {
@@ -210,7 +203,7 @@ public class TigerInputs {
         adapterProjectCompilerInputBuilder.withConstraintAnalyzer();
         adapterProjectCompilerInputBuilder.withStrategoRuntime();
         adapterProjectCompilerInputBuilder.withTegoRuntime();
-        adapterProjectCompilerInputBuilder.withCompleter();
+        adapterProjectCompilerInputBuilder.withCodeCompletion();
 
         final TypeInfo showParsedAstTaskDef = TypeInfo.of(adapterProject.taskPackageId(), "TigerShowParsedAstTaskDef");
         final TypeInfo listDefNamesTaskDef = TypeInfo.of(adapterProject.taskPackageId(), "TigerListDefNames");

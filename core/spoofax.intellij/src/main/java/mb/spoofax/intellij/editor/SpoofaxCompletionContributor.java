@@ -3,24 +3,39 @@ package mb.spoofax.intellij.editor;
 import com.intellij.codeInsight.completion.CompletionContributor;
 import com.intellij.codeInsight.completion.CompletionParameters;
 import com.intellij.codeInsight.completion.CompletionResultSet;
+import com.intellij.codeInsight.completion.InsertionContext;
+import com.intellij.codeInsight.completion.PrioritizedLookupElement;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.editor.Editor;
+import com.intellij.psi.PsiFile;
 import com.intellij.ui.LayeredIcon;
 import com.intellij.ui.RowIcon;
 import com.intellij.util.PlatformIcons;
 import com.intellij.util.SmartList;
 import com.intellij.util.ui.EmptyIcon;
+import mb.common.codecompletion.CodeCompletionItem;
+import mb.common.codecompletion.CodeCompletionResult;
+import mb.common.editing.TextEdit;
+import mb.common.option.Option;
 import mb.common.region.Region;
+import mb.common.result.Result;
 import mb.common.style.StyleNames;
-import mb.completions.common.CompletionProposal;
-import mb.completions.common.CompletionResult;
+import mb.log.api.Logger;
+import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecException;
+import mb.pie.api.Interactivity;
 import mb.pie.api.MixedSession;
 import mb.pie.api.Task;
+import mb.pie.api.TopDownSession;
+import mb.pie.api.UncheckedExecException;
 import mb.pie.dagger.PieComponent;
 import mb.resource.Resource;
 import mb.resource.ResourceKey;
+import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.intellij.IntellijLanguageComponent;
 import mb.spoofax.intellij.SpoofaxPlugin;
@@ -31,55 +46,90 @@ import javax.inject.Provider;
 import javax.swing.*;
 import java.util.AbstractMap;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static mb.common.style.StyleNameConstants.*;
 
 /**
- * Completion contributor for IntelliJ.
+ * Spoofax Intellij completion contributor (code completion) contributor.
  */
 public abstract class SpoofaxCompletionContributor extends CompletionContributor {
 
+    private final Logger log;
 
     private final IntellijResourceRegistry resourceRegistry;
-    private final LanguageInstance languageInstance;
-    private final Provider<MixedSession> pieSessionProvider;
+    private final @Nullable LanguageComponent languageComponent;
+    private final @Nullable PieComponent pieComponent;
 
-    protected SpoofaxCompletionContributor(IntellijLanguageComponent languageComponent, PieComponent pieComponent) {
+    protected SpoofaxCompletionContributor(
+        @Nullable IntellijLanguageComponent languageComponent,
+        @Nullable PieComponent pieComponent,
+        LoggerFactory loggerFactory
+    ) {
         this.resourceRegistry = SpoofaxPlugin.getResourceServiceComponent().getResourceRegistry();
-        this.languageInstance = languageComponent.getLanguageInstance();
-        this.pieSessionProvider = () -> pieComponent.getPie().newSession();
+        this.languageComponent = languageComponent;
+        this.pieComponent = pieComponent;
 
+        this.log = loggerFactory.create(getClass());
     }
 
     @Override
     public void fillCompletionVariants(CompletionParameters parameters, CompletionResultSet result) {
-        final Resource resource = resourceRegistry.getResource(parameters.getOriginalFile());
-        final ResourceKey resourceKey = resource.getKey();
-        final Region selection = Region.atOffset(parameters.getOffset());
-        final @Nullable CompletionResult completionResult;
-        try(final MixedSession session = this.pieSessionProvider.get()) {
-            Task<@Nullable CompletionResult> completionTask = this.languageInstance.createCompletionTask(resourceKey, selection);
-            completionResult = session.require(completionTask);
-        } catch(ExecException e) {
-            throw new RuntimeException("Code completion on resource '" + resourceKey + "' failed unexpectedly.", e);
-        } catch(InterruptedException e) {
+        final Option<CodeCompletionResult> optCodeCompletionResult = getCodeCompletionResult(parameters.getOriginalFile(), parameters.getOffset());
+        if (optCodeCompletionResult.isNone()) {
+            // No completions.
             return;
         }
+        final CodeCompletionResult codeCompletionResult = optCodeCompletionResult.unwrap();
 
-        if(completionResult == null) return;
-        result.addAllElements(completionResult.getProposals().stream().map(this::proposalToElement).collect(Collectors.toList()));
+        List<LookupElement> elements = IntStream.range(0, codeCompletionResult.getProposals().size()).mapToObj(i -> proposalToElement(codeCompletionResult.getProposals().get(i), i)).collect(Collectors.toList());
+        result.addAllElements(elements);
     }
 
-    private LookupElement proposalToElement(CompletionProposal proposal) {
-        return LookupElementBuilder
+    /**
+     * Invokes the code completion task and returns the code completion result.
+     *
+     * @param originalFile the editor's file
+     * @param offset the offset at which to invoke code completion
+     * @return an option of the code completion result; or none if it failed
+     */
+    private Option<CodeCompletionResult> getCodeCompletionResult(PsiFile originalFile, int offset) {
+        if(languageComponent == null || pieComponent == null) return Option.ofNone();
+
+        final ResourceKey fileKey = resourceRegistry.getResource(originalFile).getKey();
+        final @Nullable ResourcePath projectRoot = null;// TODO: Get the project root
+        final Region selection = Region.atOffset(offset);
+
+        final Optional<MixedSession> sessionOpt = pieComponent.getPie().tryNewSession();
+        if (!sessionOpt.isPresent()) return Option.ofNone();
+        try (final MixedSession session = sessionOpt.get()) {
+            final TopDownSession topDownSession = session.updateAffectedBy(Collections.emptySet(), Collections.singleton(Interactivity.Interactive));
+            final Result<CodeCompletionResult, ?> codeCompletionResultResult = topDownSession.requireWithoutObserving(
+                languageComponent.getLanguageInstance().createCodeCompletionTask(selection, fileKey, projectRoot)
+            );
+            return Option.ofSome(codeCompletionResultResult.unwrap());
+        } catch(InterruptedException e) {
+            return Option.ofNone();
+        } catch(Exception e) {
+            // Bubble error up to Eclipse, which will handle it and show a dialog.
+            throw new UncheckedExecException("Code completion on resource '" + fileKey + "' failed unexpectedly.", e);
+        }
+    }
+
+    private LookupElement proposalToElement(CodeCompletionItem proposal, int priority) {
+        LookupElementBuilder element = LookupElementBuilder
             .create(proposal.getLabel())
             .withTailText(proposal.getParameters() + (proposal.getLocation().isEmpty() ? "" : " " + proposal.getLocation()))
             .withTypeText(proposal.getType().isEmpty() ? proposal.getDescription() : proposal.getType(), true)
+            .withInsertHandler((ctx, item) -> insertHandler(ctx, item, proposal))
             .withIcon(getIcon(StyleNames.of(proposal.getKind())));
+        return PrioritizedLookupElement.withPriority(element, priority);
     }
 
     private @Nullable Icon getIcon(StyleNames styles) {
@@ -174,6 +224,23 @@ public abstract class SpoofaxCompletionContributor extends CompletionContributor
         } else {
             return kindIcon;
         }
+    }
+
+    private void insertHandler(InsertionContext context, LookupElement item, CodeCompletionItem proposal) {
+        final Editor editor = context.getEditor();
+        final Document document = editor.getDocument();
+        final int startOffset = context.getStartOffset();
+        final int tailOffset = context.getTailOffset();
+        // First, we replace the automatically inserted text with an empty string
+        document.replaceString(startOffset, tailOffset, "");
+        // Then we apply our text edits, which includes edits that replace the placeholder, if any
+        // Note that we apply them back to front, such that an earlier text editor will not influence
+        // the offset of the later text edits
+        for (int i = (proposal.getEdits().size() - 1); i >= 0; i--) {
+            final TextEdit edit = proposal.getEdits().get(i);
+            document.replaceString(edit.getRegion().getStartOffset(), edit.getRegion().getEndOffset(), edit.getNewText());
+        }
+        assert Boolean.TRUE;
     }
 
 }

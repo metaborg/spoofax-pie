@@ -8,23 +8,26 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public class LanguageProjectCompilerInputBuilder {
     public final ClassLoaderResourcesCompiler.Input.Builder classLoaderResources = ClassLoaderResourcesCompiler.Input.builder();
-    public final ParserLanguageCompiler.Input.Builder parser = ParserLanguageCompiler.Input.builder();
+
     private boolean parserEnabled = false;
-    public final StylerLanguageCompiler.Input.Builder styler = StylerLanguageCompiler.Input.builder();
+    public final ParserLanguageCompiler.Input.Builder parser = ParserLanguageCompiler.Input.builder();
+
     private boolean stylerEnabled = false;
-    public final ConstraintAnalyzerLanguageCompiler.Input.Builder constraintAnalyzer = ConstraintAnalyzerLanguageCompiler.Input.builder();
+    public final StylerLanguageCompiler.Input.Builder styler = StylerLanguageCompiler.Input.builder();
+
     private boolean constraintAnalyzerEnabled = false;
-    public final MultilangAnalyzerLanguageCompiler.Input.Builder multilangAnalyzer = MultilangAnalyzerLanguageCompiler.Input.builder();
+    public final ConstraintAnalyzerLanguageCompiler.Input.Builder constraintAnalyzer = ConstraintAnalyzerLanguageCompiler.Input.builder();
+
     private boolean multilangAnalyzerEnabled = false;
-    public final StrategoRuntimeLanguageCompiler.Input.Builder strategoRuntime = StrategoRuntimeLanguageCompiler.Input.builder();
+    public final MultilangAnalyzerLanguageCompiler.Input.Builder multilangAnalyzer = MultilangAnalyzerLanguageCompiler.Input.builder();
+
     private boolean strategoRuntimeEnabled = false;
-    public final CompleterLanguageCompiler.Input.Builder completer = CompleterLanguageCompiler.Input.builder();
+    public final StrategoRuntimeLanguageCompiler.Input.Builder strategoRuntime = StrategoRuntimeLanguageCompiler.Input.builder();
+
     private boolean exportsEnabled = false;
     public final ExportsLanguageCompiler.Input.Builder exports = ExportsLanguageCompiler.Input.builder();
 
-    private boolean completerEnabled = false;
     public final LanguageProjectCompiler.Input.Builder project = LanguageProjectCompiler.Input.builder();
-
 
     public ClassLoaderResourcesCompiler.Input.Builder withClassloaderResources() {
         return classLoaderResources;
@@ -55,11 +58,6 @@ public class LanguageProjectCompilerInputBuilder {
         return strategoRuntime;
     }
 
-    public CompleterLanguageCompiler.Input.Builder withCompleter() {
-        completerEnabled = true;
-        return completer;
-    }
-
     public ExportsLanguageCompiler.Input.Builder withExports() {
         exportsEnabled = true;
         return exports;
@@ -84,9 +82,6 @@ public class LanguageProjectCompilerInputBuilder {
 
         final StrategoRuntimeLanguageCompiler.@Nullable Input strategoRuntime = buildStrategoRuntime(shared, languageProject, constraintAnalyzer);
         if(strategoRuntime != null) project.strategoRuntime(strategoRuntime);
-
-        final CompleterLanguageCompiler.@Nullable Input completer = buildCompleter(shared, languageProject);
-        if(completer != null) project.completer(completer);
 
         final ExportsLanguageCompiler.@Nullable Input exports = buildExports(shared, languageProject);
         if(exports != null) project.exports(exports);
@@ -160,14 +155,6 @@ public class LanguageProjectCompilerInputBuilder {
         }
 
         return builder.build();
-    }
-
-    private CompleterLanguageCompiler.@Nullable Input buildCompleter(Shared shared, LanguageProject languageProject) {
-        if(!completerEnabled) return null;
-        return completer
-            .shared(shared)
-            .languageProject(languageProject)
-            .build();
     }
 
     private ExportsLanguageCompiler.@Nullable Input buildExports(Shared shared, LanguageProject languageProject) {

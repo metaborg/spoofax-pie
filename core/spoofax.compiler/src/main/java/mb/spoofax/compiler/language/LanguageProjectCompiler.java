@@ -33,7 +33,6 @@ public class LanguageProjectCompiler implements TaskDef<Supplier<Result<Language
     private final ConstraintAnalyzerLanguageCompiler constraintAnalyzerCompiler;
     private final MultilangAnalyzerLanguageCompiler multilangAnalyzerCompiler;
     private final StrategoRuntimeLanguageCompiler strategoRuntimeCompiler;
-    private final CompleterLanguageCompiler completerCompiler;
     private final ExportsLanguageCompiler exportsCompiler;
 
 
@@ -45,7 +44,6 @@ public class LanguageProjectCompiler implements TaskDef<Supplier<Result<Language
         ConstraintAnalyzerLanguageCompiler constraintAnalyzerCompiler,
         MultilangAnalyzerLanguageCompiler multilangAnalyzerCompiler,
         StrategoRuntimeLanguageCompiler strategoRuntimeCompiler,
-        CompleterLanguageCompiler completerCompiler,
         ExportsLanguageCompiler exportsCompiler
     ) {
         templateCompiler = templateCompiler.loadingFromClass(getClass());
@@ -56,7 +54,6 @@ public class LanguageProjectCompiler implements TaskDef<Supplier<Result<Language
         this.constraintAnalyzerCompiler = constraintAnalyzerCompiler;
         this.multilangAnalyzerCompiler = multilangAnalyzerCompiler;
         this.strategoRuntimeCompiler = strategoRuntimeCompiler;
-        this.completerCompiler = completerCompiler;
         this.exportsCompiler = exportsCompiler;
     }
 
@@ -86,7 +83,6 @@ public class LanguageProjectCompiler implements TaskDef<Supplier<Result<Language
         Option.ofOptional(input.constraintAnalyzer()).ifSomeThrowing((i) -> constraintAnalyzerCompiler.compile(context, i));
         Option.ofOptional(input.multilangAnalyzer()).ifSomeThrowing((i) -> multilangAnalyzerCompiler.compile(context, i));
         Option.ofOptional(input.strategoRuntime()).ifSomeThrowing((i) -> strategoRuntimeCompiler.compile(context, i));
-        Option.ofOptional(input.completer()).ifSomeThrowing((i) -> completerCompiler.compile(context, i));
         Option.ofOptional(input.exports()).ifSomeThrowing((i) -> exportsCompiler.compile(context, i));
 
         return None.instance;
@@ -110,7 +106,6 @@ public class LanguageProjectCompiler implements TaskDef<Supplier<Result<Language
         input.constraintAnalyzer().ifPresent((i) -> constraintAnalyzerCompiler.getDependencies(i).addAllTo(dependencies));
         input.multilangAnalyzer().ifPresent((i) -> multilangAnalyzerCompiler.getDependencies(i).addAllTo(dependencies));
         input.strategoRuntime().ifPresent((i) -> strategoRuntimeCompiler.getDependencies(i).addAllTo(dependencies));
-        input.completer().ifPresent((i) -> completerCompiler.getDependencies(i).addAllTo(dependencies));
         input.exports().ifPresent((i) -> exportsCompiler.getDependencies(i).addAllTo(dependencies));
         return dependencies;
     }
@@ -140,8 +135,6 @@ public class LanguageProjectCompiler implements TaskDef<Supplier<Result<Language
         Optional<MultilangAnalyzerLanguageCompiler.Input> multilangAnalyzer();
 
         Optional<StrategoRuntimeLanguageCompiler.Input> strategoRuntime();
-
-        Optional<CompleterLanguageCompiler.Input> completer();
 
         Optional<ExportsLanguageCompiler.Input> exports();
 
@@ -199,7 +192,6 @@ public class LanguageProjectCompiler implements TaskDef<Supplier<Result<Language
             constraintAnalyzer().ifPresent((i) -> i.javaSourceFiles().addAllTo(providedFiles));
             multilangAnalyzer().ifPresent((i) -> i.javaSourceFiles().addAllTo(providedFiles));
             strategoRuntime().ifPresent((i) -> i.javaSourceFiles().addAllTo(providedFiles));
-            completer().ifPresent((i) -> i.javaSourceFiles().addAllTo(providedFiles));
             exports().ifPresent((i) -> i.javaSourceFiles().addAllTo(providedFiles));
             return providedFiles;
         }

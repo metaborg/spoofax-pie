@@ -26,7 +26,6 @@ val yamlVersion = "1.26"
 dependencies {
   constraints {
     // Own projects
-    api(project(":completions.common"))
     api(project(":jsglr.common"))
     api(project(":jsglr1.common"))
     api(project(":jsglr.pie"))
@@ -35,6 +34,8 @@ dependencies {
     api(project(":stratego.common"))
     api(project(":constraint.common"))
     api(project(":nabl2.common"))
+    api(project(":statix.codecompletion"))
+    api(project(":statix.codecompletion.pie"))
     api(project(":statix.common"))
     api(project(":statix.pie"))
     api(project(":statix.multilang"))

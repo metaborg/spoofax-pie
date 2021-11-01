@@ -111,13 +111,13 @@ rules // Tego runtime section and options
   tegoRuntimeOptionOk : scope * TegoRuntimeOption
   tegoRuntimeOptionsOk maps tegoRuntimeOptionOk(*, list(*))
 
-rules // Completer section and options
+rules // Code completion section and options
 
-  partOk(s, CompleterSection(options)) :-
-    completerOptionsOk(s, options).
-
-  completerOptionOk : scope * CompleterOption
-  completerOptionsOk maps completerOptionOk(*, list(*))
+  partOk(s, CodeCompletionSection(options)) :-
+    codeCompletionOptionsOk(s, options).
+    
+  codeCompletionOptionOk : scope * CodeCompletionOption
+  codeCompletionOptionsOk maps codeCompletionOptionOk(*, list(*))
 
 rules // Exports section and options
 

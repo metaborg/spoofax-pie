@@ -24,7 +24,7 @@ public class {{basePlugin.id}} {
 
     public static ResourceServiceComponent getResourceServiceComponent() {
         if(resourceServiceComponent == null) {
-            throw new RuntimeException("Cannot access ResourceServiceComponent; TigerPlugin has not been started yet, or has been stopped");
+            throw new RuntimeException("Cannot access ResourceServiceComponent; {{basePlugin.id}} has not been started yet, or has been stopped");
         }
         return resourceServiceComponent;
     }
@@ -38,7 +38,7 @@ public class {{basePlugin.id}} {
 
     public static PieComponent getPieComponent() {
         if(pieComponent == null) {
-            throw new RuntimeException("Cannot access PieComponent; TigerPlugin has not been started yet, or has been stopped");
+            throw new RuntimeException("Cannot access PieComponent; {{basePlugin.id}} has not been started yet, or has been stopped");
         }
         return pieComponent;
     }
