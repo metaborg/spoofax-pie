@@ -54,6 +54,7 @@ import org.spoofax.terms.util.TermUtils;
 
 import java.io.Serializable;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -248,7 +249,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
         final StrategoRuntime strategoRuntime = context.require(getStrategoRuntimeProviderTask, None.instance).getValue().get();
         final Result<Spec, ?> specResult = context.require(statixSpec, None.instance);
         if (specResult.isErr()) return specResult.ignoreValueIfErr();
-        final Spec spec = specResult.unwrap();
+        final Spec spec = specResult.unwrapUnchecked();
 
         return new Execution(
             context, input, strategoRuntime, spec
@@ -312,7 +313,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * @return the code completion result
          * @throws Exception if an exception occurred
          */
-        public Result<CodeCompletionResult, ?> complete() throws Exception {
+        public Result<CodeCompletionResult, ?> complete() throws InterruptedException {
             @Nullable final CodeCompletionEventHandler eventHandler = eventHandlerProvider.get();
             if (eventHandler != null) eventHandler.begin();
 
@@ -320,20 +321,20 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
             if (eventHandler != null) eventHandler.beginParse();
             final Result<IStrategoTerm, ?> parsedAstResult = parse();
             if (parsedAstResult.isErr()) return parsedAstResult.ignoreValueIfErr();
-            final IStrategoTerm parsedAst = parsedAstResult.unwrap();
+            final IStrategoTerm parsedAst = parsedAstResult.unwrapUnchecked();
             if (eventHandler != null) eventHandler.endParse();
 
             // Prepare the AST (explicate, add term indices, upgrade placeholders)
             if (eventHandler != null) eventHandler.beginPreparation();
             final Result<IStrategoTerm, ?> explicatedAstResult = preAnalyze(parsedAst);
             if (explicatedAstResult.isErr()) return explicatedAstResult.ignoreValueIfErr();
-            final IStrategoTerm explicatedAst = explicatedAstResult.unwrap();
+            final IStrategoTerm explicatedAst = explicatedAstResult.unwrapUnchecked();
             final IStrategoTerm indexedAst = addTermIndices(explicatedAst);
             final ITerm statixAst = toStatix(indexedAst);
             final PlaceholderVarMap placeholderVarMap = new PlaceholderVarMap(file.toString());
             final Result<ITerm, ?> upgradedAstResult = upgradePlaceholders(statixAst, placeholderVarMap);
             if (upgradedAstResult.isErr()) return upgradedAstResult.ignoreValueIfErr();
-            final ITerm upgradedAst = upgradedAstResult.unwrap();
+            final ITerm upgradedAst = upgradedAstResult.unwrapUnchecked();
             final ITermVar placeholder = getCompletionPlaceholder(upgradedAst);
             final SolverState initialState = createInitialSolverState(upgradedAst, statixSecName, statixRootPredicateName, placeholderVarMap);
             if (eventHandler != null) eventHandler.endPreparation();
@@ -354,7 +355,9 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
             if (eventHandler != null) eventHandler.beginFinishing();
             final List<CodeCompletionProposal> orderedProposals = orderProposals(instantiatedProposals);
             final Region placeholderRegion = getRegion(placeholder, Region.atOffset(primarySelection.getStartOffset() /* TODO: Support the whole selection? */));
-            final List<CodeCompletionItem> finalProposals = proposalsToCodeCompletionItems(orderedProposals, placeholderRegion);
+            final Result<List<CodeCompletionItem>, ?> finalProposalsResult = proposalsToCodeCompletionItems(orderedProposals, placeholderRegion);
+            if (finalProposalsResult.isErr()) return finalProposalsResult.ignoreValueIfErr();
+            final List<CodeCompletionItem> finalProposals = finalProposalsResult.unwrapUnchecked();
             if (eventHandler != null) eventHandler.endFinishing();
 
             if (finalProposals.isEmpty()) {
@@ -390,12 +393,15 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * Pretty-prints the given term.
          *
          * @param term the term to pretty-print
-         * @return the pretty-printed term; or {@code null} when pretty-printing failed
-         * @throws StrategoException if an error occurred while invoking the Stratego strategy
+         * @return the pretty-printed term
          */
-        private @Nullable String prettyPrint(IStrategoTerm term) throws StrategoException {
-            @Nullable final IStrategoTerm output = strategoRuntime.invokeOrNull(ppPartialStrategyName, term);
-            return TermUtils.asJavaString(output).orElse(null);
+        private Result<String, ?> prettyPrint(IStrategoTerm term) {
+            try {
+                final IStrategoTerm output = strategoRuntime.invoke(ppPartialStrategyName, term);
+                return Result.ofOk(TermUtils.toJavaString(output));
+            } catch (StrategoException ex) {
+                return Result.ofErr(ex);
+            }
         }
 
         /**
@@ -403,9 +409,8 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          *
          * @param ast     the AST to explicate
          * @return the explicated AST
-         * @throws StrategoException if an error occurred while invoking the Stratego strategy
          */
-        private Result<IStrategoTerm, ?> preAnalyze(IStrategoTerm ast) throws StrategoException {
+        private Result<IStrategoTerm, ?> preAnalyze(IStrategoTerm ast) {
             try {
                 return Result.ofOk(strategoRuntime.invoke(preAnalyzeStrategyName, ast));
             } catch (StrategoException ex) {
@@ -417,11 +422,14 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * Performs post-analysis on the given term.
          *
          * @param term     the term to implicate
-         * @return the implicated AST; or {@code null} when implication failed
-         * @throws StrategoException if an error occurred while invoking the Stratego strategy
+         * @return the implicated AST
          */
-        private @Nullable IStrategoTerm postAnalyze(IStrategoTerm term) throws StrategoException {
-            return strategoRuntime.invokeOrNull(postAnalyzeStrategyName, term);
+        private Result<IStrategoTerm, ?> postAnalyze(IStrategoTerm term) {
+            try {
+                return Result.ofOk(strategoRuntime.invoke(postAnalyzeStrategyName, term));
+            } catch (StrategoException ex) {
+                return Result.ofErr(ex);
+            }
         }
 
         /**
@@ -429,10 +437,9 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          *
          * @param ast the AST to upgrade
          * @param placeholderVarMap the map to which mappings of placeholders to variables are added
-         * @return the upgraded AST; or {@code null} when upgrading failed
-         * @throws StrategoException if an error occurred while invoking the Stratego strategy
+         * @return the upgraded AST
          */
-        private Result<ITerm, ?> upgradePlaceholders(ITerm ast, PlaceholderVarMap placeholderVarMap) throws StrategoException {
+        private Result<ITerm, ?> upgradePlaceholders(ITerm ast, PlaceholderVarMap placeholderVarMap) {
             // FIXME: Ideally we would know the sort of the placeholder
             //  so we can use that sort to call the correct downgrade-placeholders-Lang-Sort strategy
             // FIXME: We can generate: downgrade-placeholders-Lang(|sort) = where(<?"Exp"> sort); downgrade-placeholders-Lang-Exp
@@ -443,11 +450,14 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * Downgrades the placeholder term variables to actual placeholders.
          *
          * @param term the term to downgrade
-         * @return the downgraded term; or {@code null} when downgrading failed
-         * @throws StrategoException if an error occurred while invoking the Stratego strategy
+         * @return the downgraded term
          */
-        private @Nullable IStrategoTerm downgradePlaceholders(IStrategoTerm term) throws StrategoException {
-            return strategoRuntime.invokeOrNull(downgradePlaceholdersStrategyName, term);
+        private Result<IStrategoTerm, ?> downgradePlaceholders(IStrategoTerm term) {
+            try {
+                return Result.ofOk(strategoRuntime.invoke(downgradePlaceholdersStrategyName, term));
+            } catch (StrategoException ex) {
+                return Result.ofErr(ex);
+            }
         }
 
         /**
@@ -455,7 +465,6 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          *
          * @param term the term to check
          * @return {@code true} when the term is an injection; otherwise, {@code false}
-         * @throws RuntimeException if a {@link StrategoException} occurred
          */
         private boolean isInjection(ITerm term) {
             try {
@@ -645,8 +654,14 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * @param placeholderRegion the placeholder region to be replaced
          * @return the list of completion proposals terms
          */
-        private List<CodeCompletionItem> proposalsToCodeCompletionItems(List<CodeCompletionProposal> proposals, Region placeholderRegion) {
-            return proposals.stream().map(p -> proposalToCodeCompletionItem(p, placeholderRegion)).collect(Collectors.toList());
+        private Result<List<CodeCompletionItem>, ?> proposalsToCodeCompletionItems(List<CodeCompletionProposal> proposals, Region placeholderRegion) {
+            final List<CodeCompletionItem> items = new ArrayList<>();
+            for (CodeCompletionProposal proposal : proposals) {
+                final Result<CodeCompletionItem, ?> codeCompletionItemResult = proposalToCodeCompletionItem(proposal, placeholderRegion);
+                if (codeCompletionItemResult.isErr()) return codeCompletionItemResult.ignoreValueIfErr();
+                items.add(codeCompletionItemResult.unwrapUnchecked());
+            }
+            return Result.ofOk(items);
         }
 
         /**
@@ -656,9 +671,12 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * @param placeholderRegion the placeholder region to be replaced
          * @return the code completion item
          */
-        private CodeCompletionItem proposalToCodeCompletionItem(CodeCompletionProposal proposal, Region placeholderRegion) {
-            final IStrategoTerm strategoTerm = proposalToStrategoTerm(proposal);
-            final String text = strategoTermToString(strategoTerm);
+        private Result<CodeCompletionItem, ?> proposalToCodeCompletionItem(CodeCompletionProposal proposal, Region placeholderRegion) {
+            final Result<IStrategoTerm, ?> strategoTermResult = proposalToStrategoTerm(proposal);
+            final Result<String, ?> textResult = proposalToStrategoTerm(proposal).flatMap(strategoTerm -> strategoTermToString(strategoTerm).ignoreErrIfOk());
+            if (textResult.isErr()) return textResult.ignoreValueIfErr();
+            final IStrategoTerm strategoTerm = strategoTermResult.unwrapUnchecked();
+            final String text = textResult.unwrapUnchecked();
             ListView<TextEdit> textEdits = ListView.of(new TextEdit(placeholderRegion, text));
             String label = normalizeText(text);
             // TODO: Determine the style of the completion
@@ -666,8 +684,19 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
             StyleName style = Objects.requireNonNull(StyleName.fromString("meta.template"));
             // TODO: Fill out the other useful fields too
             //  (basically depends on what entity it represents)
-            //  This is an opportunity for rich metadata to be unerstood by Spoofax
-            return new TermCodeCompletionItem(proposal.getTerm(), strategoTerm, label, "", "", "", "", style, textEdits, false);
+            //  This is an opportunity for rich metadata to be understood by Spoofax
+            return Result.ofOk(new TermCodeCompletionItem(
+                proposal.getTerm(),
+                strategoTerm,
+                label,
+                "",
+                "",
+                "",
+                "",
+                style,
+                textEdits,
+                false
+            ));
         }
 
         /**
@@ -676,17 +705,10 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * @param proposal the proposal
          * @return the proposal term
          */
-        private IStrategoTerm proposalToStrategoTerm(CodeCompletionProposal proposal) {
-            try {
+        private Result<IStrategoTerm, ?> proposalToStrategoTerm(CodeCompletionProposal proposal) {
                 final IStrategoTerm proposalTerm = strategoTerms.toStratego(proposal.getTerm(), true);
-                @Nullable final IStrategoTerm downgradedTerm = downgradePlaceholders(proposalTerm);
-                if (downgradedTerm == null) return proposalTerm; // Return the term when downgrading failed
-                @Nullable final IStrategoTerm implicatedTerm = postAnalyze(downgradedTerm);
-                if (implicatedTerm == null) return downgradedTerm; // Return the term when implication failed
-                return implicatedTerm;
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
+                return downgradePlaceholders(proposalTerm)
+                    .flatMap((IStrategoTerm term) -> postAnalyze(term).ignoreErrIfOk());
         }
 
         /**
@@ -695,14 +717,8 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * @param implicatedTerm the implicated term of the proposal
          * @return the string representation
          */
-        private String strategoTermToString(IStrategoTerm implicatedTerm) {
-            try {
-                @Nullable final String prettyPrintedTerm = prettyPrint(implicatedTerm);
-                if (prettyPrintedTerm == null) return implicatedTerm.toString(); // Return the term when pretty-printing failed
-                return prettyPrintedTerm;
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
+        private Result<String, ?> strategoTermToString(IStrategoTerm implicatedTerm) {
+            return prettyPrint(implicatedTerm);
         }
     }
 
