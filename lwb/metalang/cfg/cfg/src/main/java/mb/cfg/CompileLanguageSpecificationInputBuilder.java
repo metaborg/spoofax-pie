@@ -1,6 +1,6 @@
 package mb.cfg;
 
-import mb.cfg.metalang.CompileEsvInput;
+import mb.cfg.metalang.CfgEsvConfig;
 import mb.cfg.metalang.CompileSdf3Input;
 import mb.cfg.metalang.CompileStatixInput;
 import mb.cfg.metalang.CompileStrategoInput;
@@ -16,7 +16,7 @@ public class CompileLanguageSpecificationInputBuilder {
     public CompileSdf3Input.Builder sdf3 = CompileSdf3Input.builder();
 
     private boolean esvEnabled = false;
-    public CompileEsvInput.Builder esv = CompileEsvInput.builder();
+    public CfgEsvConfig.Builder esv = CfgEsvConfig.builder();
 
     private boolean statixEnabled = false;
     public CompileStatixInput.Builder statix = CompileStatixInput.builder();
@@ -32,7 +32,7 @@ public class CompileLanguageSpecificationInputBuilder {
         return sdf3;
     }
 
-    public CompileEsvInput.Builder withEsv() {
+    public CfgEsvConfig.Builder withEsv() {
         esvEnabled = true;
         return esv;
     }
@@ -52,7 +52,7 @@ public class CompileLanguageSpecificationInputBuilder {
         final @Nullable CompileSdf3Input sdf3 = buildSdf3(compileLanguageSpecificationShared);
         if(sdf3 != null) compileLanguage.sdf3(sdf3);
 
-        final @Nullable CompileEsvInput esv = buildEsv(compileLanguageSpecificationShared);
+        final @Nullable CfgEsvConfig esv = buildEsv(compileLanguageSpecificationShared);
         if(esv != null) compileLanguage.esv(esv);
 
         final @Nullable CompileStatixInput statix = buildStatix(compileLanguageSpecificationShared);
@@ -76,7 +76,7 @@ public class CompileLanguageSpecificationInputBuilder {
             .build();
     }
 
-    private @Nullable CompileEsvInput buildEsv(
+    private @Nullable CfgEsvConfig buildEsv(
         CompileLanguageSpecificationShared compileLanguageSpecificationShared
     ) {
         if(!esvEnabled) return null;

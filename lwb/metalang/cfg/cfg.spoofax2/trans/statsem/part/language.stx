@@ -43,14 +43,30 @@ rules // Esv section and options
   
   esvOptionOk : scope * EsvOption
   esvOptionsOk maps esvOptionOk(*, list(*))
+
+  esvOptionOk(s, EsvSource(source)) :-
+    esvSourceOk(s, source).
+    
+  esvSourceOk : scope * EsvSource
+  esvSourceOk(s, EsvFiles(options)) :- esvFilesOptionsOk(s, options).
+  esvSourceOk(s, EsvPrebuilt(options)) :- esvPrebuiltOptionsOk(s, options).
   
-  esvOptionOk(s, EsvMainSourceDirectory(e)) :-
-    typeOfExpr(s, e) == PATH() | error $[Expected path]. 
-  esvOptionOk(s, EsvMainFile(e)) :-
-    typeOfExpr(s, e) == PATH() | error $[Expected path]. 
-  esvOptionOk(s, EsvIncludeDirectory(e)) :-
-    typeOfExpr(s, e) == PATH() | error $[Expected path]. 
-      
+  esvFilesOptionOk : scope * EsvFilesOption
+  esvFilesOptionsOk maps esvFilesOptionOk(*, list(*))
+  esvFilesOptionOk(s, EsvFilesMainSourceDirectory(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path].
+  esvFilesOptionOk(s, EsvFilesMainFile(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path].
+  esvFilesOptionOk(s, EsvFilesIncludeDirectory(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path].
+  esvFilesOptionOk(s, EsvFilesIncludeLibspoofax2Exports(e)) :-
+    typeOfExpr(s, e) == BOOL() | error $[Expected boolean].
+
+  esvPrebuiltOptionOk : scope * EsvPrebuiltOption
+  esvPrebuiltOptionsOk maps esvPrebuiltOptionOk(*, list(*))
+  esvPrebuiltOptionOk(s, EsvPrebuiltFile(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path].
+
 rules // Statix section and options
 
   partOk(s, StatixSection(options)) :- statixOptionsOk(s, options).

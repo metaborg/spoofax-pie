@@ -1,4 +1,4 @@
-# Development Troubleshooting
+# Troubleshooting
 
 This guide explains how to troubleshoot issues when developing Spoofax itself.
 

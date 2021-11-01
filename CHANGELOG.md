@@ -3,6 +3,19 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+### Fixed
+- Evaluating .stxtest files outside of the Statix source directory (src by default) silently failing.
+- Errors in CFG not appearing, or just displaying a single error on the first line.
+
+### Changed
+- Spoofax Eclipse LWB plugin to show an error dialog when building a language fails due to errors in language definition files.
+- LWB compiler to make it possible to supply a prebuilt ESV output file for a language instead of always having to compile that from ESV sources.
+- LWB compiler to be more incremental by adding output stampers to high-level tasks, ensuring they only get re-executed when a relevant part of the configuration changes.
+
+
+## [0.15.3] - 2021-10-22
+### Fixed
+- Another instance of cancellation/interrupt during PIE execution leaving behind an inconsistent state in certain edge cases. This should resolve all instances of intermittent `NullPointerException`s. (https://github.com/metaborg/spoofax-pie/issues/81)
 
 
 ## [0.15.2] - 2021-10-21
@@ -18,7 +31,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 - No errors for certain kinds of SDF3 context-free productions that do require a constructor. All context-free productions except those of the form `A = B` and `A = {B ","}*`, excluding productions that have a `{reject}` or `{bracket}` annotation, now require a constructor or produce an error.
 - No error for ill-formed SDF3 bracket productions. Bracket productions must be of the form `A = "(" B ")"` or produce an error.
 - `IndexOutOfBoundsException` in SPT tests with `resolve` and `resolve to` expectations where there was no valid target for a selection.
-- Cancellation/interrupt during PIE execution leaving behind an inconsistent state in certain edge cases. Hopefully this solves "random" `NullPointerException`s, but more investigation is needed for that (https://github.com/metaborg/spoofax-pie/issues/81).
+- Cancellation/interrupt during PIE execution leaving behind an inconsistent state in certain edge cases. This solved some intermittent `NullPointerException`s, but not all (https://github.com/metaborg/spoofax-pie/issues/81).
 
 ### Changed
 - `pie` requirement to `0.19.1`
@@ -265,7 +278,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.15.2...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.15.3...HEAD
+[0.15.3]: https://github.com/metaborg/spoofax-pie/compare/release-0.15.2...release-0.15.3
 [0.15.2]: https://github.com/metaborg/spoofax-pie/compare/release-0.15.1...release-0.15.2
 [0.15.1]: https://github.com/metaborg/spoofax-pie/compare/release-0.15.0...release-0.15.1
 [0.15.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.14.2...release-0.15.0

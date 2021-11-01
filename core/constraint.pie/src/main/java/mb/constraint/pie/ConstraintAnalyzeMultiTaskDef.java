@@ -4,7 +4,6 @@ import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Messages;
 import mb.common.message.Severity;
-import mb.common.result.MessagesException;
 import mb.common.result.Result;
 import mb.common.util.MapView;
 import mb.constraint.common.ConstraintAnalyzer;
@@ -183,7 +182,7 @@ class SingleFileMapper implements SerializableFunction<Result<ConstraintAnalyzeM
                     messages
                 )));
             } else {
-                return Result.ofErr(new MessagesException(output.result.messages, "Multi file constraint analyzer result is missing a result for resource '" + resource + "' that was part of the input"));
+                return Result.ofErr(new MissingResultException(resource));
             }
         }, Result::ofErr);
     }

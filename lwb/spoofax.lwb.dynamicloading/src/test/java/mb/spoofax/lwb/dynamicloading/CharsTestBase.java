@@ -92,7 +92,7 @@ class CharsTestBase extends TestBase {
 
 
     TopDownSession modifyStyler(MixedSession session, CompileLanguageInput input) throws IOException, ExecException, InterruptedException {
-        final ResourcePath path = input.compileLanguageSpecificationInput().esv().get().mainFile();
+        final ResourcePath path = input.compileLanguageSpecificationInput().esv().get().source().getMainFile().orElseThrow(() -> new RuntimeException("Not using source files with ESV"));
         final WritableResource file = resourceService.getWritableResource(path);
         final String text = file.readString().replace("0 0 150 bold", "255 255 0 italic");
         file.writeString(text);

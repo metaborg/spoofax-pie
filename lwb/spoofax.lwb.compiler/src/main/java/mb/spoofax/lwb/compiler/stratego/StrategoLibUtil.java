@@ -49,7 +49,7 @@ public class StrategoLibUtil {
     }
 
     public Supplier<Stratego2LibInfo> getStrategoLibInfo(
-        CompileLanguageSpecificationShared compileLanguageSpecificationShared
+        ResourcePath strategoLibUnarchiveDirectory
     ) throws IOException {
         for(String export : StrategoLibExports.getStr2LibExports()) {
             final ClassLoaderResourceLocations<FSResource> locations = strategoLibClassLoaderResources.definitionDirectory.getLocations();
@@ -59,11 +59,10 @@ public class StrategoLibUtil {
                     return new ValueSupplier<>(new Stratego2LibInfo(exportFile.getPath(), new ArrayList<>()));
                 }
             }
-            final ResourcePath unarchiveDirectoryBase = compileLanguageSpecificationShared.unarchiveDirectory().appendRelativePath("strategoLib");
             for(JarFileWithPath<FSResource> jarFileWithPath : locations.jarFiles) {
                 final FSPath jarFilePath = jarFileWithPath.file.getPath();
                 @SuppressWarnings("ConstantConditions") // JAR files always have leaves.
-                final ResourcePath unarchiveDirectory = unarchiveDirectoryBase.appendRelativePath(jarFilePath.getLeaf());
+                final ResourcePath unarchiveDirectory = strategoLibUnarchiveDirectory.appendRelativePath(jarFilePath.getLeaf());
                 final Task<ResourcePath> task = unarchiveFromJar.createTask(new UnarchiveFromJar.Input(jarFilePath, unarchiveDirectory, PathStringMatcher.ofExtension("str2lib"), false, false));
                 return new Stratego2LibInfoSupplier(task.toSupplier(), jarFileWithPath.path, export);
             }

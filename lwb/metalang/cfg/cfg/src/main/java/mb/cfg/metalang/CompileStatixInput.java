@@ -29,6 +29,9 @@ public interface CompileStatixInput extends Serializable {
 
     List<ResourcePath> includeDirectories();
 
+    @Value.Default default ResourcePath generatedSourcesDirectory() {
+        return compileLanguageShared().generatedSourcesDirectory().appendRelativePath("statix");
+    }
 
     @Value.Default default boolean enableSdf3SignatureGen() {
         return false;

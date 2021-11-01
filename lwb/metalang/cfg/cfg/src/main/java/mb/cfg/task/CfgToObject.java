@@ -1,15 +1,14 @@
 package mb.cfg.task;
 
+import mb.aterm.common.InvalidAstShapeException;
 import mb.cfg.CfgScope;
 import mb.cfg.CompileLanguageInput;
 import mb.cfg.CompileLanguageInputCustomizer;
 import mb.cfg.convert.CfgAstToObject;
-import mb.aterm.common.InvalidAstShapeException;
 import mb.common.message.KeyedMessages;
 import mb.common.result.Result;
 import mb.common.util.Properties;
 import mb.pie.api.ExecContext;
-import mb.pie.api.Interactivity;
 import mb.pie.api.None;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
@@ -23,7 +22,6 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import java.io.Serializable;
-import java.util.Set;
 
 @CfgScope
 public class CfgToObject implements TaskDef<CfgToObject.Input, Result<CfgToObject.Output, CfgToObjectException>> {
@@ -134,13 +132,9 @@ public class CfgToObject implements TaskDef<CfgToObject.Input, Result<CfgToObjec
         return context.require(input.analysisOutputSupplier)
             .mapErr(CfgToObjectException::analyzeExceptionalFail)
             .flatMap(analysisOutput -> context.require(input.propertiesSupplier)
-                .mapErr(CfgToObjectException::analyzeExceptionalFail)
+                .mapErr(CfgToObjectException::propertiesSupplyFail)
                 .flatMap(properties -> toOutput(context, input.rootDirectory, input.cfgResource, analysisOutput, properties))
             );
-    }
-
-    @Override public boolean shouldExecWhenAffected(Input input, Set<?> tags) {
-        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 
     private Result<Output, CfgToObjectException> toOutput(
@@ -150,34 +144,22 @@ public class CfgToObject implements TaskDef<CfgToObject.Input, Result<CfgToObjec
         CfgAnalyze.Output analysisOutput,
         Properties properties
     ) throws InvalidAstShapeException {
-        if(analysisOutput.result.messages.containsError()) {
-            final KeyedMessages messages;
-            if(cfgFile != null) {
-                messages = analysisOutput.result.messages.toKeyed(cfgFile);
-            } else {
-                messages = analysisOutput.result.messages.toKeyed();
-            }
-            return Result.ofErr(CfgToObjectException.analyzeFail(messages));
-        }
-
         final Provider<StrategoRuntime> strategoRuntimeProvider = context.require(getStrategoRuntimeProvider, None.instance).getValue();
         final IStrategoTerm ast;
         try {
-            ast = strategoRuntimeProvider.get().addContextObject(analysisOutput.context).invoke("normalize", analysisOutput.result.analyzedAst);
+            ast = strategoRuntimeProvider.get()
+                .addContextObject(analysisOutput.context)
+                .invoke("normalize", analysisOutput.result.analyzedAst);
         } catch(StrategoException e) {
             return Result.ofErr(CfgToObjectException.normalizationFail(e));
         }
 
         final CfgAstToObject.Output output;
         try {
-            output = CfgAstToObject.convert(rootDirectory, cfgFile, ast, properties, customizer);
+            output = CfgAstToObject.convert(context, rootDirectory, cfgFile, ast, properties, customizer);
         } catch(IllegalStateException e) {
             return Result.ofErr(CfgToObjectException.buildConfigObjectFail(e));
         }
-        if(output.messages.containsError()) {
-            return Result.ofErr(CfgToObjectException.validationFail(output.messages));
-        } else {
-            return Result.ofOk(new Output(output.messages, output.compileLanguageInput, output.properties));
-        }
+        return Result.ofOk(new Output(output.messages, output.compileLanguageInput, output.properties));
     }
 }

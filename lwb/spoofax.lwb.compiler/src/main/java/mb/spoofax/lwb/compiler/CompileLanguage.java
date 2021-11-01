@@ -14,6 +14,7 @@ import mb.pie.api.Interactivity;
 import mb.pie.api.None;
 import mb.pie.api.STask;
 import mb.pie.api.Stateful1Supplier;
+import mb.pie.api.StatelessSerializableFunction;
 import mb.pie.api.Supplier;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
@@ -195,8 +196,14 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
         }
 
         @Override public Result<LanguageProjectCompiler.Input, ?> get(ExecContext context) {
-            // OPTO: set output stamper
-            return context.require(state).map(o -> o.compileLanguageInput.languageProjectInput());
+            return context.requireMapping(state, new LanguageProjectInputMapper());
+        }
+
+        private static class LanguageProjectInputMapper extends StatelessSerializableFunction<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>, Result<LanguageProjectCompiler.Input, CfgRootDirectoryToObjectException>> {
+            @Override
+            public Result<LanguageProjectCompiler.Input, CfgRootDirectoryToObjectException> apply(Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result) {
+                return result.map(o -> o.compileLanguageInput.languageProjectInput());
+            }
         }
     }
 
@@ -206,8 +213,14 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
         }
 
         @Override public Result<AdapterProjectCompiler.Input, ?> get(ExecContext context) {
-            // OPTO: set output stamper
-            return context.require(state).map(o -> o.compileLanguageInput.adapterProjectInput());
+            return context.requireMapping(state, new AdapterProjectInputMapper());
+        }
+
+        private static class AdapterProjectInputMapper extends StatelessSerializableFunction<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>, Result<AdapterProjectCompiler.Input, CfgRootDirectoryToObjectException>> {
+            @Override
+            public Result<AdapterProjectCompiler.Input, CfgRootDirectoryToObjectException> apply(Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result) {
+                return result.map(o -> o.compileLanguageInput.adapterProjectInput());
+            }
         }
     }
 
@@ -217,8 +230,14 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
         }
 
         @Override public Result<Option<EclipseProjectCompiler.Input>, ?> get(ExecContext context) {
-            // OPTO: set output stamper
-            return context.require(state).map(o -> Option.ofOptional(o.compileLanguageInput.eclipseProjectInput()));
+            return context.requireMapping(state, new EclipseProjectInputMapper());
+        }
+
+        private static class EclipseProjectInputMapper extends StatelessSerializableFunction<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>, Result<Option<EclipseProjectCompiler.Input>, CfgRootDirectoryToObjectException>> {
+            @Override
+            public Result<Option<EclipseProjectCompiler.Input>, CfgRootDirectoryToObjectException> apply(Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result) {
+                return result.map(o -> Option.ofOptional(o.compileLanguageInput.eclipseProjectInput()));
+            }
         }
     }
 
@@ -228,8 +247,14 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
         }
 
         @Override public Result<CompileJava.Sources, ?> get(ExecContext context) {
-            // OPTO: set output stamper
-            return context.require(state).map(o -> CompileJava.Sources.builder().addAllSourceFiles(o.providedJavaFiles()).build());
+            return context.requireMapping(state, new LangaugeSpecificationJavaSourcesMapper());
+        }
+
+        private static class LangaugeSpecificationJavaSourcesMapper extends StatelessSerializableFunction<Result<CompileLanguageSpecification.Output, CompileLanguageSpecificationException>, Result<CompileJava.Sources, CompileLanguageSpecificationException>> {
+            @Override
+            public Result<CompileJava.Sources, CompileLanguageSpecificationException> apply(Result<CompileLanguageSpecification.Output, CompileLanguageSpecificationException> result) {
+                return result.map(o -> CompileJava.Sources.builder().addAllSourceFiles(o.providedJavaFiles()).build());
+            }
         }
     }
 
@@ -239,14 +264,20 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
         }
 
         @Override public Result<CompileJava.Sources, ?> get(ExecContext context) {
-            // OPTO: set output stamper
-            return context.require(state).map(o -> CompileJava.Sources.builder()
-                .addAllSourceFiles(o.compileLanguageInput.javaSourceFiles())
-                .sourceFilesFromPaths(o.compileLanguageInput.userJavaSourcePaths())
-                .sourcePaths(o.compileLanguageInput.javaSourcePaths())
-                .packagePaths(o.compileLanguageInput.javaSourceDirectoryPaths())
-                .build()
-            );
+            return context.requireMapping(state, new JavaSourcesMapper());
+        }
+
+        private static class JavaSourcesMapper extends StatelessSerializableFunction<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>, Result<CompileJava.Sources, CfgRootDirectoryToObjectException>> {
+            @Override
+            public Result<CompileJava.Sources, CfgRootDirectoryToObjectException> apply(Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result) {
+                return result.map(o -> CompileJava.Sources.builder()
+                    .addAllSourceFiles(o.compileLanguageInput.javaSourceFiles())
+                    .sourceFilesFromPaths(o.compileLanguageInput.userJavaSourcePaths())
+                    .sourcePaths(o.compileLanguageInput.javaSourcePaths())
+                    .packagePaths(o.compileLanguageInput.javaSourceDirectoryPaths())
+                    .build()
+                );
+            }
         }
     }
 }

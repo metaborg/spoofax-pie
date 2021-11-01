@@ -2,9 +2,13 @@ package mb.spoofax.lwb.compiler.sdf3;
 
 import mb.cfg.metalang.CompileSdf3Input;
 import mb.cfg.task.CfgRootDirectoryToObject;
+import mb.cfg.task.CfgRootDirectoryToObjectException;
+import mb.cfg.task.CfgToObject;
 import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
+import mb.pie.api.StatelessSerializableFunction;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.hierarchical.HierarchicalResource;
@@ -14,6 +18,7 @@ import org.metaborg.sdf2table.parsetable.ParseTableConfiguration;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.util.Set;
 
 public class ConfigureSdf3 implements TaskDef<ResourcePath, Result<Option<Sdf3SpecConfig>, Sdf3ConfigureException>> {
     private final CfgRootDirectoryToObject cfgRootDirectoryToObject;
@@ -31,13 +36,14 @@ public class ConfigureSdf3 implements TaskDef<ResourcePath, Result<Option<Sdf3Sp
 
     @Override
     public Result<Option<Sdf3SpecConfig>, Sdf3ConfigureException> exec(ExecContext context, ResourcePath rootDirectory) throws IOException {
-        return context.require(cfgRootDirectoryToObject, rootDirectory)
+        return context.requireMapping(cfgRootDirectoryToObject, rootDirectory, new Sdf3ConfigMapping())
             .mapErr(Sdf3ConfigureException::getLanguageCompilerConfigurationFail)
-            .<Option<Sdf3SpecConfig>, IOException>flatMapThrowing(cfgOutput -> Result.transpose(Option.ofOptional(cfgOutput.compileLanguageInput.compileLanguageSpecificationInput().sdf3())
-                .mapThrowing(sdf3Input -> toSdf3SpecConfig(context, rootDirectory, sdf3Input))
-            ));
+            .<Option<Sdf3SpecConfig>, IOException>flatMapThrowing(o -> Result.transpose(o.mapThrowing(sdf3Input -> toSdf3SpecConfig(context, rootDirectory, sdf3Input))));
     }
 
+    @Override public boolean shouldExecWhenAffected(ResourcePath input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
+    }
 
     public Result<Sdf3SpecConfig, Sdf3ConfigureException> toSdf3SpecConfig(
         ExecContext context,
@@ -61,5 +67,12 @@ public class ConfigureSdf3 implements TaskDef<ResourcePath, Result<Option<Sdf3Sp
             sdf3Input.createLayoutSensitiveParseTable()
         );
         return Result.ofOk(new Sdf3SpecConfig(rootDirectory, mainSourceDirectory.getPath(), mainFile.getKey(), parseTableConfiguration));
+    }
+
+    private static class Sdf3ConfigMapping extends StatelessSerializableFunction<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>, Result<Option<CompileSdf3Input>, CfgRootDirectoryToObjectException>> {
+        @Override
+        public Result<Option<CompileSdf3Input>, CfgRootDirectoryToObjectException> apply(Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result) {
+            return result.map(o -> Option.ofOptional(o.compileLanguageInput.compileLanguageSpecificationInput().sdf3()));
+        }
     }
 }

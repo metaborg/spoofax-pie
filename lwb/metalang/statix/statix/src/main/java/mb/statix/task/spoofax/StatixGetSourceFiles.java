@@ -4,13 +4,12 @@ import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
-import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.ResourceMatcher;
+import mb.resource.hierarchical.match.path.PathMatcher;
 import mb.resource.hierarchical.walk.ResourceWalker;
 import mb.statix.StatixClassLoaderResources;
 import mb.statix.StatixScope;
-import mb.statix.util.StatixUtil;
 
 import javax.inject.Inject;
 import java.io.IOException;
@@ -37,25 +36,33 @@ public class StatixGetSourceFiles implements TaskDef<ResourcePath, ListView<Reso
         return getClass().getName();
     }
 
-    @Override public ListView<ResourcePath> exec(ExecContext context, ResourcePath input) throws IOException {
+    @Override public ListView<ResourcePath> exec(ExecContext context, ResourcePath rootDirectory) throws IOException {
         context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
-        return configFunctionWrapper.get().apply(context, input).mapThrowingOrElse(
+        return configFunctionWrapper.get().apply(context, rootDirectory).mapThrowingOrElse(
             o -> o.mapThrowingOrElse(
                 config -> {
-                    final ResourceWalker walker = StatixUtil.createResourceWalker();
-                    final ResourceMatcher matcher = StatixUtil.createResourceMatcher();
                     final ArrayList<ResourcePath> sourceFiles = new ArrayList<>();
+                    final ResourceWalker walker = ResourceWalker.ofPath(PathMatcher.ofNoHidden());
+
+                    // All .stx files in source and include directories.
+                    final ResourceMatcher stxMatcher = ResourceMatcher.ofPath(PathMatcher.ofExtension("stx")).and(ResourceMatcher.ofFile());
                     for(ResourcePath path : config.sourceAndIncludePaths()) {
-                        final HierarchicalResource directory = context.require(path, ResourceStampers.modifiedDirRec(walker, matcher));
-                        directory.walkForEach(walker, matcher, f -> {
-                            sourceFiles.add(f.getPath());
-                        });
+                        context
+                            .require(path, ResourceStampers.modifiedDirRec(walker, stxMatcher))
+                            .walkForEach(walker, stxMatcher, f -> sourceFiles.add(f.getPath()));
                     }
+
+                    // All .stxtest files in the entire project.
+                    final ResourceMatcher stxTestMatcher = ResourceMatcher.ofPath(PathMatcher.ofExtension("stxtest")).and(ResourceMatcher.ofFile());
+                    context
+                        .require(rootDirectory, ResourceStampers.modifiedDirRec(walker, stxTestMatcher))
+                        .walkForEach(walker, stxTestMatcher, f -> sourceFiles.add(f.getPath()));
+
                     return ListView.of(sourceFiles);
                 },
-                () -> context.require(baseGetSourceFiles, input)
+                () -> context.require(baseGetSourceFiles, rootDirectory)
             ),
-            e -> context.require(baseGetSourceFiles, input)
+            e -> context.require(baseGetSourceFiles, rootDirectory)
         );
     }
 }

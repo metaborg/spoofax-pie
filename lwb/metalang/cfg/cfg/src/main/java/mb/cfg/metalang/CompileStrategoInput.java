@@ -48,11 +48,35 @@ public interface CompileStrategoInput extends Serializable {
 
     @Value.Default default List<String> includeBuiltinLibraries() {
         final ArrayList<String> strategoBuiltinLibs = new ArrayList<>();
-//        strategoBuiltinLibs.add("stratego-lib");
         strategoBuiltinLibs.add("stratego-gpp");
         strategoBuiltinLibs.add("libstratego-sglr");
         return strategoBuiltinLibs;
     }
+
+    default ResourcePath strategoLibUnarchiveDirectory() {
+        return compileLanguageShared().unarchiveDirectory().appendRelativePath("strategoLib");
+    }
+
+    @Value.Default default boolean includeLibSpoofax2Exports() {
+        return compileLanguageShared().includeLibSpoofax2Exports();
+    }
+
+    @Value.Default default ResourcePath libSpoofax2UnarchiveDirectory() {
+        return compileLanguageShared().libSpoofax2UnarchiveDirectory();
+    }
+
+    @Value.Default default boolean includeLibStatixExports() {
+        return compileLanguageShared().includeLibStatixExports();
+    }
+
+    @Value.Default default ResourcePath libStatixUnarchiveDirectory() {
+        return compileLanguageShared().libStatixUnarchiveDirectory();
+    }
+
+    @Value.Default default ResourcePath generatedSourcesDirectory() {
+        return compileLanguageShared().generatedSourcesDirectory().appendRelativePath("stratego");
+    }
+
 
     @Value.Default default ResourcePath cacheDirectory() {
         return compileLanguageShared().languageProject().project().buildDirectory().appendRelativePath("stratego-cache");
@@ -71,9 +95,8 @@ public interface CompileStrategoInput extends Serializable {
 
 
     @Value.Default default ResourcePath javaSourceFileOutputDir() {
-        return compileLanguageShared().generatedJavaSourcesDirectory() // Generated Java sources directory, so that Gradle compiles the Java sources into classes.
-            //.appendRelativePath(outputJavaPackagePath()) // Append package path.
-            ;
+        // Generated Java sources directory, so that Gradle compiles the Java sources into classes.
+        return compileLanguageShared().generatedJavaSourcesDirectory();
     }
 
     @Value.Default default ResourcePath javaClassFileOutputDir() {

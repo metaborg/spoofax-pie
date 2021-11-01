@@ -1,3 +1,9 @@
+---
+hide:
+- navigation
+- toc
+---
+
 # Spoofax 3
 
 --8<-- "docs/_include/_all.md"

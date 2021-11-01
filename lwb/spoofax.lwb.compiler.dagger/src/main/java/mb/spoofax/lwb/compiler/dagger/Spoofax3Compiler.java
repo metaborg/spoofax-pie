@@ -4,6 +4,7 @@ import mb.cfg.CfgComponent;
 import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.esv.EsvComponent;
+import mb.esv.task.EsvConfig;
 import mb.libspoofax2.LibSpoofax2Component;
 import mb.libspoofax2.LibSpoofax2ResourcesComponent;
 import mb.libstatix.LibStatixComponent;
@@ -18,6 +19,8 @@ import mb.spoofax.compiler.dagger.SpoofaxCompilerComponent;
 import mb.spoofax.compiler.dagger.SpoofaxCompilerModule;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.core.platform.PlatformComponent;
+import mb.spoofax.lwb.compiler.esv.EsvConfigureException;
+import mb.spoofax.lwb.compiler.esv.SpoofaxEsvConfig;
 import mb.spoofax.lwb.compiler.stratego.StrategoConfigureException;
 import mb.statix.StatixComponent;
 import mb.str.StrategoComponent;
@@ -98,13 +101,20 @@ public class Spoofax3Compiler implements AutoCloseable {
         this.component = component;
 
         this.sdf3Component.getSdf3SpecConfigFunctionWrapper().set(this.component.getConfigureSdf3().createFunction());
-        this.esvComponent.getEsvConfigFunctionWrapper().set(this.component.getConfigureEsv().createFunction());
-        this.strategoComponent.getStrategoAnalyzeConfigFunctionWrapper().set(this.component.getConfigureStratego().createFunction().mapOutput(new StatelessSerializableFunction<Result<Option<StrategoCompileConfig>, StrategoConfigureException>, Result<Option<StrategoAnalyzeConfig>, StrategoConfigureException>>() {
-            @Override
-            public Result<Option<StrategoAnalyzeConfig>, StrategoConfigureException> apply(Result<Option<StrategoCompileConfig>, StrategoConfigureException> r) {
-                return r.map(o -> o.map(StrategoCompileConfig::toAnalyzeConfig));
-            }
-        }));
+        this.esvComponent.getEsvConfigFunctionWrapper().set(this.component.getConfigureEsv().createFunction().mapOutput(
+            new StatelessSerializableFunction<Result<Option<SpoofaxEsvConfig>, EsvConfigureException>, Result<Option<EsvConfig>, EsvConfigureException>>() {
+                @Override
+                public Result<Option<EsvConfig>, EsvConfigureException> apply(Result<Option<SpoofaxEsvConfig>, EsvConfigureException> r) {
+                    return r.map(o -> o.flatMap(SpoofaxEsvConfig::getEsvConfig));
+                }
+            }));
+        this.strategoComponent.getStrategoAnalyzeConfigFunctionWrapper().set(this.component.getConfigureStratego().createFunction().mapOutput(
+            new StatelessSerializableFunction<Result<Option<StrategoCompileConfig>, StrategoConfigureException>, Result<Option<StrategoAnalyzeConfig>, StrategoConfigureException>>() {
+                @Override
+                public Result<Option<StrategoAnalyzeConfig>, StrategoConfigureException> apply(Result<Option<StrategoCompileConfig>, StrategoConfigureException> r) {
+                    return r.map(o -> o.map(StrategoCompileConfig::toAnalyzeConfig));
+                }
+            }));
         this.statixComponent.getStatixConfigFunctionWrapper().set(this.component.getConfigureStatix().createFunction());
     }
 

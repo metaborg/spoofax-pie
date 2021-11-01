@@ -30,16 +30,27 @@ context-free syntax
 
 context-free sorts
 
-  EsvOption
+  EsvOption EsvSource EsvFilesOption EsvPrebuiltOption
 
 context-free syntax
 
   Part.EsvSection = <esv {
   <{EsvOption "\n"}*>
 }>
-  EsvOption.EsvMainSourceDirectory = <main-source-directory = <Expr>>
-  EsvOption.EsvMainFile            = <main-file = <Expr>>
-  EsvOption.EsvIncludeDirectory    = <include-directory = <Expr>>
+  EsvOption.EsvSource = <source = <EsvSource>>
+  
+  EsvSource.EsvFiles  = <files {
+  <{EsvFilesOption "\n"}*>
+}>
+  EsvFilesOption.EsvFilesMainSourceDirectory       = <main-source-directory = <Expr>>
+  EsvFilesOption.EsvFilesMainFile                  = <main-file = <Expr>>
+  EsvFilesOption.EsvFilesIncludeDirectory          = <include-directory = <Expr>>
+  EsvFilesOption.EsvFilesIncludeLibspoofax2Exports = <include-libspoofax2-exports = <Expr>>
+  
+  EsvSource.EsvPrebuilt = <prebuilt {
+  <{EsvPrebuiltOption "\n"}*>
+}>
+  EsvPrebuiltOption.EsvPrebuiltFile = <file = <Expr>>
 
 context-free sorts
 

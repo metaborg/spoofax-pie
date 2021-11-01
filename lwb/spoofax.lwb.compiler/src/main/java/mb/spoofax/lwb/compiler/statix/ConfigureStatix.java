@@ -1,15 +1,16 @@
 package mb.spoofax.lwb.compiler.statix;
 
-import mb.cfg.CompileLanguageInput;
-import mb.cfg.CompileLanguageSpecificationInput;
-import mb.cfg.CompileLanguageSpecificationShared;
 import mb.cfg.metalang.CompileStatixInput;
 import mb.cfg.task.CfgRootDirectoryToObject;
+import mb.cfg.task.CfgRootDirectoryToObjectException;
+import mb.cfg.task.CfgToObject;
 import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
 import mb.pie.api.STask;
+import mb.pie.api.StatelessSerializableFunction;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.hierarchical.HierarchicalResource;
@@ -25,6 +26,7 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class ConfigureStatix implements TaskDef<ResourcePath, Result<Option<StatixConfig>, StatixConfigureException>> {
     private final CfgRootDirectoryToObject cfgRootDirectoryToObject;
@@ -53,18 +55,18 @@ public class ConfigureStatix implements TaskDef<ResourcePath, Result<Option<Stat
 
     @Override
     public Result<Option<StatixConfig>, StatixConfigureException> exec(ExecContext context, ResourcePath rootDirectory) throws Exception {
-        return context.require(cfgRootDirectoryToObject, rootDirectory)
+        return context.requireMapping(cfgRootDirectoryToObject, rootDirectory, new StatixConfigMapper())
             .mapErr(StatixConfigureException::getLanguageCompilerConfigurationFail)
-            .<Option<StatixConfig>, Exception>flatMapThrowing(cfgOutput -> Result.transpose(Option.ofOptional(cfgOutput.compileLanguageInput.compileLanguageSpecificationInput().statix())
-                .mapThrowing(statixInput -> toStatixConfig(context, rootDirectory, cfgOutput.compileLanguageInput, statixInput))
-            ));
+            .<Option<StatixConfig>, Exception>flatMapThrowing(o -> Result.transpose(o.mapThrowing(statixInput -> toStatixConfig(context, rootDirectory, statixInput))));
     }
 
+    @Override public boolean shouldExecWhenAffected(ResourcePath input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
+    }
 
     public Result<StatixConfig, StatixConfigureException> toStatixConfig(
         ExecContext context,
         ResourcePath rootDirectory,
-        CompileLanguageInput input,
         CompileStatixInput statixInput
     ) throws IOException, InterruptedException {
         final HierarchicalResource mainSourceDirectory = context.require(statixInput.mainSourceDirectory(), ResourceStampers.<HierarchicalResource>exists());
@@ -84,9 +86,7 @@ public class ConfigureStatix implements TaskDef<ResourcePath, Result<Option<Stat
         final LinkedHashSet<ResourcePath> includeDirectories = new LinkedHashSet<>(statixInput.includeDirectories());
 
         // Compile each SDF3 source file (if SDF3 is enabled) to a Statix signature module (if enabled).
-        final CompileLanguageSpecificationInput compileLanguageSpecificationInput = input.compileLanguageSpecificationInput();
-        final CompileLanguageSpecificationShared compileLanguageSpecificationShared = compileLanguageSpecificationInput.compileLanguageShared();
-        final ResourcePath generatedSourcesDirectory = compileLanguageSpecificationShared.generatedStatixSourcesDirectory();
+        final ResourcePath generatedSourcesDirectory = statixInput.generatedSourcesDirectory();
         if(statixInput.enableSdf3SignatureGen()) {
             try {
                 sdf3GenerationUtil.performSdf3GenerationIfEnabled(context, rootDirectory, new Sdf3GenerationUtil.Callbacks<StatixConfigureException>() {
@@ -132,5 +132,12 @@ public class ConfigureStatix implements TaskDef<ResourcePath, Result<Option<Stat
     ) throws Exception {
         final STask<Result<IStrategoTerm, ?>> supplier = sdf3ExtStatixGenerateStatix.createSupplier(astSupplier);
         statixGenerationUtil.writePrettyPrintedFile(context, generatesSourcesDirectory, supplier);
+    }
+
+    private static class StatixConfigMapper extends StatelessSerializableFunction<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>, Result<Option<CompileStatixInput>, CfgRootDirectoryToObjectException>> {
+        @Override
+        public Result<Option<CompileStatixInput>, CfgRootDirectoryToObjectException> apply(Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result) {
+            return result.map(o -> Option.ofOptional(o.compileLanguageInput.compileLanguageSpecificationInput().statix()));
+        }
     }
 }
