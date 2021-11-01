@@ -9,7 +9,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 ### Changed
 - Spoofax Eclipse LWB plugin to show an error dialog when building a language fails due to errors in language definition files.
-- LWB compiler to make it possible to supply a prebuilt ESV output file for a language instead of always having to compile that from ESV sources.
+- LWB compiler to make it possible to supply a prebuilt ESV output file for a language instead of always having to compile that from ESV sources. This is done with the `esv { source = prebuilt { file = ./prebuilt/editor.esf.af }}` configuration in `spoofaxc.cfg`. The syntax for setting the main source directory, main file, and include directories has also changed. See the configuration reference on the documentation site for details.
 - LWB compiler to be more incremental by adding output stampers to high-level tasks, ensuring they only get re-executed when a relevant part of the configuration changes.
 
 
