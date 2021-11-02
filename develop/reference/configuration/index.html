@@ -2033,6 +2033,30 @@ The following <code>StatixOption</code>s are supported:</p>
 </thead>
 <tbody>
 <tr>
+<td><code>source = $StatixSource</code></td>
+<td>no</td>
+<td>The source of the Statix definition. Defaults to a <code>files</code> source with the top-level <code>source-directory</code> option as its main source directory, and <code>./main.stx</code> as its main file relative to the main source directory.</td>
+<td>n/a</td>
+</tr>
+</tbody>
+</table>
+<p>The following <code>$StatixSource</code>s are supported:</p>
+<ul>
+<li>Files: <code>files { $StatixFilesOption* }</code></li>
+<li>Prebuilt: <code>prebuilt { $StatixPrebuiltOption }</code></li>
+</ul>
+<p>The following <code>StatixFilesOption</code>s are supported:</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Required?</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
 <td><code>main-source-directory = $Expression</code></td>
 <td>no</td>
 <td>The directory relative to the root directory that contains the main Statix file. Defaults to the value of the top-level <code>source-directory</code> option.</td>
@@ -2045,10 +2069,35 @@ The following <code>StatixOption</code>s are supported:</p>
 <td>Path</td>
 </tr>
 <tr>
+<td><code>include-directory = $Expression</code></td>
+<td>no</td>
+<td>Adds an include directory from which to resolve Statix imports. May be given multiple times.</td>
+<td>Path</td>
+</tr>
+<tr>
 <td><code>sdf3-statix-signature-generation = $Expression</code></td>
 <td>no</td>
-<td>Whether SDF3 to Statix signature generation is enabled. When enabled, <code>stratego { sdf3-statix-explication-generation = true }</code> must also be enabled. Defaults to <code>false</code>.</td>
+<td>Whether SDF3 to Statix signature generation is enabled. When enabled, <code>stratego { source = files { sdf3-statix-explication-generation = true } }</code> must also be enabled. Defaults to <code>false</code>.</td>
 <td>Boolean</td>
+</tr>
+</tbody>
+</table>
+<p>The following <code>$StatixPrebuiltOption</code>s are supported:</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Required?</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>spec-aterm-directory = $Expression</code></td>
+<td>yes</td>
+<td>The prebuilt Statix spec ATerm directory to use relative to the root directory</td>
+<td>Path</td>
 </tr>
 </tbody>
 </table>
@@ -2056,6 +2105,35 @@ The following <code>StatixOption</code>s are supported:</p>
 <p>The <code>stratego { $StrategoOption* }</code> section enables definition of transformations with <a href="https://www.spoofax.dev/references/stratego/">Stratego</a>.
 The <code>stratego-runtime</code> section must be enabled when the <code>stratego</code> section is enabled.
 The following <code>StrategoOption</code>s are supported:</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Required?</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>source = $StrategoSource</code></td>
+<td>no</td>
+<td>The source of the Statix definition. Defaults to a <code>files</code> source with the top-level <code>source-directory</code> option as its main source directory, and <code>./main.str2</code> as its main file relative to the main source directory.</td>
+<td>n/a</td>
+</tr>
+<tr>
+<td><code>language-strategy-affix = $Expression</code></td>
+<td>no</td>
+<td>The affix that is used to make certain generated strategies unique to the language. This is used both as a prefix and suffix. Defaults to name of the language transformed to a Stratego strategy identifier.</td>
+<td>Stratego strategy identifier</td>
+</tr>
+</tbody>
+</table>
+<p>The following <code>$StrategoSource</code>s are supported:</p>
+<ul>
+<li>Files: <code>files { $StrategoFilesOption* }</code></li>
+</ul>
+<p>The following <code>$StrategoFilesOption</code>s are supported:</p>
 <table>
 <thead>
 <tr>
@@ -2075,19 +2153,19 @@ The following <code>StrategoOption</code>s are supported:</p>
 <tr>
 <td><code>main-file = $Expression</code></td>
 <td>no</td>
-<td>The main Stratego file relative to the <code>main-source-directory</code>. Defaults to <code>./main.stx</code>.</td>
+<td>The main Stratego file relative to the <code>main-source-directory</code>. Defaults to <code>./main.str2</code>.</td>
 <td>Path</td>
 </tr>
 <tr>
-<td><code>language-strategy-affix = $Expression</code></td>
+<td><code>include-directory = $Expression</code></td>
 <td>no</td>
-<td>The affix that is used to make certain generated strategies unique to the language. This is used both as a prefix and suffix. Defaults to name of the language transformed to a Stratego strategy identifier.</td>
-<td>Stratego strategy identifier</td>
+<td>Adds an include directory from which to resolve Stratego imports. May be given multiple times.</td>
+<td>Path</td>
 </tr>
 <tr>
 <td><code>sdf3-statix-explication-generation = $Expression</code></td>
 <td>no</td>
-<td>Whether SDF3 to Statix injection explication/implication generation is enabled. When enabled, <code>statix { sdf3-statix-signature-generation = true }</code> must also be enabled. Defaults to <code>false</code>.</td>
+<td>Whether SDF3 to Statix injection explication/implication generation is enabled. When enabled, <code>statix { source = files { sdf3-statix-signature-generation = true } }</code> must also be enabled. Defaults to <code>false</code>.</td>
 <td>Boolean</td>
 </tr>
 </tbody>
