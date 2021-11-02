@@ -216,37 +216,58 @@ class LanguagePluginInstance(
                 inputs.files(project.fileTree(dir) { include("**/*.esv") })
               }
             }
-            if(includeLibSpoofax2Exports) { // Output: libspoofax2 unarchive directory
+            if(includeLibSpoofax2Exports) {
+              // Output: libspoofax2 unarchive directory
               libSpoofax2UnarchiveDirectory.tryAsLocal("libspoofax2 unarchive directory") { dir ->
                 outputs.dir(dir)
               }
             }
           }
-          .prebuilt { inputFile -> // Input: prebuilt input file
+          .prebuilt { inputFile ->
+            // Input: prebuilt input file
             inputFile.tryAsLocal("ESV prebuilt file") { file ->
               inputs.file(file)
             }
           }
 
-        esvConfig.outputFile().tryAsLocal("ESV output file") { file -> // Output: output file
+        // Output: output file
+        esvConfig.outputFile().tryAsLocal("ESV output file") { file ->
           outputs.file(file)
         }
       }
-      input.statix().ifPresent {
-        // Input: all Statix files
-        val rootDirectory = resourceService.toLocalFile(it.mainSourceDirectory())
-        if(rootDirectory != null) {
-          inputs.files(project.fileTree(rootDirectory) { include("**/*.stx") })
-        } else {
-          logger.warn("Cannot set Statix files as task inputs, because ${it.mainSourceDirectory()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
-        }
+      input.statix().ifPresent { statixConfig ->
+        statixConfig.source().caseOf()
+          .files { mainSourceDirectory, _, includeDirectories ->
+            // Input: all Statix files in the main source directory and include directories
+            mainSourceDirectory.tryAsLocal("Statix files in main source directory") { dir ->
+              inputs.files(project.fileTree(dir) {
+                include("**/*.stx")
+                include("**/*.stxtest")
+              })
+            }
+            includeDirectories.forEach { includeDirectory ->
+              includeDirectory.tryAsLocal("Statix files in include directory") { dir ->
+                inputs.files(project.fileTree(dir) {
+                  include("**/*.stx")
+                  include("**/*.stxtest")
+                })
+              }
+            }
+          }
+          .prebuilt { specAtermDirectory ->
+            // Input: prebuilt spec ATerm directory
+            specAtermDirectory.tryAsLocal("Statix prebuilt spec ATerm directory") { dir ->
+              inputs.files(project.fileTree(dir) {
+                include("**/*.aterm")
+              })
+            }
+          }
 
-        // Output: Statix output directory
-        val outputDirectory = resourceService.toLocalFile(it.outputDirectory())
-        if(outputDirectory != null) {
-          outputs.dir(outputDirectory)
-        } else {
-          logger.warn("Cannot set the Statix output directory as a task output, because ${it.outputDirectory()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
+        // Output: output spec ATerm directory
+        statixConfig.outputSpecAtermDirectory().tryAsLocal("Statix output spec ATerms directory") { dir ->
+          outputs.files(project.fileTree(dir) {
+            include("**/*.aterm")
+          })
         }
       }
       input.stratego().ifPresent {

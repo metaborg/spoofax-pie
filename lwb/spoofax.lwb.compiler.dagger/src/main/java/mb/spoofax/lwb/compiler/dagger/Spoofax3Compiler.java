@@ -22,10 +22,13 @@ import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.core.platform.PlatformComponent;
 import mb.spoofax.lwb.compiler.esv.EsvConfigureException;
 import mb.spoofax.lwb.compiler.esv.SpoofaxEsvConfig;
-import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3ConfigureException;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3Config;
+import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3ConfigureException;
+import mb.spoofax.lwb.compiler.statix.SpoofaxStatixConfig;
+import mb.spoofax.lwb.compiler.statix.SpoofaxStatixConfigureException;
 import mb.spoofax.lwb.compiler.stratego.StrategoConfigureException;
 import mb.statix.StatixComponent;
+import mb.statix.task.StatixConfig;
 import mb.str.StrategoComponent;
 import mb.str.config.StrategoAnalyzeConfig;
 import mb.str.config.StrategoCompileConfig;
@@ -125,7 +128,13 @@ public class Spoofax3Compiler implements AutoCloseable {
                     return r.map(o -> o.map(StrategoCompileConfig::toAnalyzeConfig));
                 }
             }));
-        this.statixComponent.getStatixConfigFunctionWrapper().set(this.component.getConfigureStatix().createFunction());
+        this.statixComponent.getStatixConfigFunctionWrapper().set(this.component.getConfigureStatix().createFunction().mapOutput(
+            new StatelessSerializableFunction<Result<Option<SpoofaxStatixConfig>, SpoofaxStatixConfigureException>, Result<Option<StatixConfig>, SpoofaxStatixConfigureException>>() {
+                @Override
+                public Result<Option<StatixConfig>, SpoofaxStatixConfigureException> apply(Result<Option<SpoofaxStatixConfig>, SpoofaxStatixConfigureException> r) {
+                    return r.map(o -> o.flatMap(SpoofaxStatixConfig::getStatixConfig));
+                }
+            }));
     }
 
     public static Spoofax3Compiler createDefault(

@@ -1,0 +1,192 @@
+package mb.spoofax.lwb.compiler.statix;
+
+import mb.cfg.metalang.CfgStatixConfig;
+import mb.cfg.task.CfgRootDirectoryToObject;
+import mb.cfg.task.CfgRootDirectoryToObjectException;
+import mb.cfg.task.CfgToObject;
+import mb.common.option.Option;
+import mb.common.result.Result;
+import mb.common.util.ListView;
+import mb.pie.api.ExecContext;
+import mb.pie.api.Interactivity;
+import mb.pie.api.STask;
+import mb.pie.api.StatelessSerializableFunction;
+import mb.pie.api.TaskDef;
+import mb.pie.api.exec.UncheckedInterruptedException;
+import mb.pie.api.stamp.resource.ResourceStampers;
+import mb.resource.hierarchical.HierarchicalResource;
+import mb.resource.hierarchical.ResourcePath;
+import mb.sdf3.task.spec.Sdf3SpecConfig;
+import mb.sdf3_ext_statix.task.Sdf3ExtStatixGenerateStatix;
+import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3ConfigureException;
+import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3GenerationUtil;
+import mb.statix.task.StatixConfig;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+
+import javax.inject.Inject;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+/**
+ * Configuration task for Statix in the context of the Spoofax LWB compiler.
+ */
+public class SpoofaxStatixConfigure implements TaskDef<ResourcePath, Result<Option<SpoofaxStatixConfig>, SpoofaxStatixConfigureException>> {
+    private final CfgRootDirectoryToObject cfgRootDirectoryToObject;
+
+    private final SpoofaxStatixGenerationUtil spoofaxStatixGenerationUtil;
+
+    private final SpoofaxSdf3GenerationUtil spoofaxSdf3GenerationUtil;
+    private final Sdf3ExtStatixGenerateStatix sdf3ExtStatixGenerateStatix;
+
+    @Inject public SpoofaxStatixConfigure(
+        CfgRootDirectoryToObject cfgRootDirectoryToObject,
+        SpoofaxStatixGenerationUtil spoofaxStatixGenerationUtil,
+        SpoofaxSdf3GenerationUtil spoofaxSdf3GenerationUtil,
+        Sdf3ExtStatixGenerateStatix sdf3ExtStatixGenerateStatix
+    ) {
+        this.cfgRootDirectoryToObject = cfgRootDirectoryToObject;
+        this.spoofaxStatixGenerationUtil = spoofaxStatixGenerationUtil;
+        this.spoofaxSdf3GenerationUtil = spoofaxSdf3GenerationUtil;
+        this.sdf3ExtStatixGenerateStatix = sdf3ExtStatixGenerateStatix;
+    }
+
+
+    @Override public String getId() {
+        return getClass().getName();
+    }
+
+    @Override
+    public Result<Option<SpoofaxStatixConfig>, SpoofaxStatixConfigureException> exec(ExecContext context, ResourcePath rootDirectory) throws Exception {
+        return context.requireMapping(cfgRootDirectoryToObject, rootDirectory, new StatixConfigMapper())
+            .mapErr(SpoofaxStatixConfigureException::getLanguageCompilerConfigurationFail)
+            .<Option<SpoofaxStatixConfig>, Exception>flatMapThrowing(o -> Result.transpose(o.mapThrowing(statixInput -> configure(context, rootDirectory, statixInput))));
+    }
+
+    @Override public boolean shouldExecWhenAffected(ResourcePath input, Set<?> tags) {
+        return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
+    }
+
+    public Result<SpoofaxStatixConfig, SpoofaxStatixConfigureException> configure(
+        ExecContext context,
+        ResourcePath rootDirectory,
+        CfgStatixConfig cfgStatixConfig
+    ) throws IOException, InterruptedException {
+        try {
+            return cfgStatixConfig.source().caseOf()
+                .files(((mainSourceDirectory, mainFile, includeDirectories) -> configureSourceFilesCatching(context, rootDirectory, cfgStatixConfig, mainSourceDirectory, mainFile, includeDirectories)))
+                .prebuilt((specAtermDirectory) -> configurePrebuilt(cfgStatixConfig, specAtermDirectory))
+                ;
+        } catch(UncheckedIOException e) {
+            throw e.getCause();
+        } // No need to unwrap UncheckedInterruptedException here, PIE handles UncheckedInterruptedException.
+    }
+
+    public Result<SpoofaxStatixConfig, SpoofaxStatixConfigureException> configureSourceFilesCatching(
+        ExecContext context,
+        ResourcePath rootDirectory,
+        CfgStatixConfig cfgStatixConfig,
+        ResourcePath mainSourceDirectoryPath,
+        ResourcePath mainFilePath,
+        ListView<ResourcePath> includeDirectoryPaths
+    ) {
+        try {
+            return configureSourceFiles(context, rootDirectory, cfgStatixConfig, mainSourceDirectoryPath, mainFilePath, includeDirectoryPaths);
+        } catch(IOException e) {
+            throw new UncheckedIOException(e);
+        } catch(InterruptedException e) {
+            throw new UncheckedInterruptedException(e);
+        }
+    }
+
+    public Result<SpoofaxStatixConfig, SpoofaxStatixConfigureException> configureSourceFiles(
+        ExecContext context,
+        ResourcePath rootDirectory,
+        CfgStatixConfig cfgStatixConfig,
+        ResourcePath mainSourceDirectoryPath,
+        ResourcePath mainFilePath,
+        ListView<ResourcePath> includeDirectoryPaths
+    ) throws IOException, InterruptedException {
+        final HierarchicalResource mainSourceDirectory = context.require(mainSourceDirectoryPath, ResourceStampers.<HierarchicalResource>exists());
+        if(!mainSourceDirectory.exists() || !mainSourceDirectory.isDirectory()) {
+            return Result.ofErr(SpoofaxStatixConfigureException.mainSourceDirectoryFail(mainSourceDirectory.getPath()));
+        }
+        final HierarchicalResource mainFile = context.require(mainFilePath, ResourceStampers.<HierarchicalResource>exists());
+        if(!mainFile.exists() || !mainFile.isFile()) {
+            return Result.ofErr(SpoofaxStatixConfigureException.mainFileFail(mainFile.getPath()));
+        }
+        // TODO: check include directories.
+        // TODO: check source directories (if added to input).
+
+        // Gather origins for provided Statix files.
+        final ArrayList<STask<?>> sourceFileOrigins = new ArrayList<>();
+        // Gather include directories. Use LinkedHashSet to remove duplicates while keeping insertion order.
+        final LinkedHashSet<ResourcePath> includeDirectories = new LinkedHashSet<>();
+        includeDirectoryPaths.addAllTo(includeDirectories);
+
+        // Compile each SDF3 source file (if SDF3 is enabled) to a Statix signature module (if enabled).
+        final ResourcePath generatedSourcesDirectory = cfgStatixConfig.generatedSourcesDirectory();
+        if(cfgStatixConfig.enableSdf3SignatureGen()) {
+            try {
+                spoofaxSdf3GenerationUtil.performSdf3GenerationIfEnabled(context, rootDirectory, new SpoofaxSdf3GenerationUtil.Callbacks<SpoofaxStatixConfigureException>() {
+                    @Override
+                    public void generateFromAst(ExecContext context, STask<Result<IStrategoTerm, ?>> astSupplier) throws SpoofaxStatixConfigureException, InterruptedException {
+                        try {
+                            sdf3ToStatixGenInj(context, generatedSourcesDirectory, astSupplier);
+                        } catch(RuntimeException | InterruptedException e) {
+                            throw e; // Do not wrap runtime and interrupted exceptions, rethrow them.
+                        } catch(Exception e) {
+                            throw SpoofaxStatixConfigureException.sdf3ExtStatixGenInjFail(e);
+                        }
+                    }
+
+                    @Override
+                    public void generateFromConfig(ExecContext context, Sdf3SpecConfig sdf3Config) {
+                        // Add generated sources directory as an include Statix imports.
+                        includeDirectories.add(generatedSourcesDirectory);
+                        // Add this as an origin, as this task provides the Statix files (in statixGenerationUtil.writePrettyPrintedFile).
+                        sourceFileOrigins.add(createSupplier(rootDirectory));
+                    }
+                });
+            } catch(SpoofaxStatixConfigureException e) {
+                return Result.ofErr(e);
+            } catch(SpoofaxSdf3ConfigureException e) {
+                return Result.ofErr(SpoofaxStatixConfigureException.sdf3ConfigureFail(e));
+            }
+        }
+
+        final StatixConfig statixConfig = new StatixConfig(
+            rootDirectory,
+            mainFile.getPath(),
+            ListView.of(mainSourceDirectory.getPath()),
+            ListView.copyOf(includeDirectories),
+            ListView.of(sourceFileOrigins)
+        );
+        return Result.ofOk(SpoofaxStatixConfig.files(statixConfig, cfgStatixConfig.outputSpecAtermDirectory()));
+    }
+
+    public Result<SpoofaxStatixConfig, SpoofaxStatixConfigureException> configurePrebuilt(
+        CfgStatixConfig cfgStatixConfig,
+        ResourcePath inputSpecAtermDirectory
+    ) {
+        return Result.ofOk(SpoofaxStatixConfig.prebuilt(inputSpecAtermDirectory, cfgStatixConfig.outputSpecAtermDirectory()));
+    }
+
+    private void sdf3ToStatixGenInj(
+        ExecContext context,
+        ResourcePath generatesSourcesDirectory,
+        STask<Result<IStrategoTerm, ?>> astSupplier
+    ) throws Exception {
+        final STask<Result<IStrategoTerm, ?>> supplier = sdf3ExtStatixGenerateStatix.createSupplier(astSupplier);
+        spoofaxStatixGenerationUtil.writePrettyPrintedFile(context, generatesSourcesDirectory, supplier);
+    }
+
+    private static class StatixConfigMapper extends StatelessSerializableFunction<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>, Result<Option<CfgStatixConfig>, CfgRootDirectoryToObjectException>> {
+        @Override
+        public Result<Option<CfgStatixConfig>, CfgRootDirectoryToObjectException> apply(Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result) {
+            return result.map(o -> Option.ofOptional(o.compileLanguageInput.compileLanguageSpecificationInput().statix()));
+        }
+    }
+}

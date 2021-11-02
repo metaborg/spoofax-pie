@@ -22,8 +22,8 @@ import mb.spoofax.lwb.compiler.esv.SpoofaxEsvConfigure;
 import mb.spoofax.lwb.compiler.generator.LanguageProjectGenerator;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3Check;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3Configure;
-import mb.spoofax.lwb.compiler.statix.CheckStatix;
-import mb.spoofax.lwb.compiler.statix.ConfigureStatix;
+import mb.spoofax.lwb.compiler.statix.SpoofaxStatixCheck;
+import mb.spoofax.lwb.compiler.statix.SpoofaxStatixConfigure;
 import mb.spoofax.lwb.compiler.stratego.CheckStratego;
 import mb.spoofax.lwb.compiler.stratego.ConfigureStratego;
 import mb.spoofax.lwb.compiler.stratego.StrategoLibUtil;
@@ -77,9 +77,9 @@ public interface Spoofax3CompilerComponent extends TaskDefsProvider {
 
     SpoofaxSdf3Check getSpoofaxSdf3Check();
 
-    CheckStatix getCheckStatix();
+    SpoofaxStatixCheck getCheckStatix();
 
-    ConfigureStatix getConfigureStatix();
+    SpoofaxStatixConfigure getConfigureStatix();
 
     CheckStratego getCheckStratego();
 

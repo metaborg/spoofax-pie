@@ -32,7 +32,6 @@ public interface CfgSdf3Config extends Serializable {
         );
     }
 
-
     @Value.Default default boolean createDynamicParseTable() {
         return false;
     }

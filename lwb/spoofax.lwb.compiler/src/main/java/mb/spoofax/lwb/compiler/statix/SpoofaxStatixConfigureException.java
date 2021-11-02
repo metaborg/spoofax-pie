@@ -7,8 +7,11 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3ConfigureException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * Configuration exception for Statix in the context of the Spoofax LWB compiler.
+ */
 @ADT
-public abstract class StatixConfigureException extends Exception {
+public abstract class SpoofaxStatixConfigureException extends Exception {
     public interface Cases<R> {
         R getLanguageCompilerConfigurationFail(CfgRootDirectoryToObjectException cfgRootDirectoryToObjectException);
 
@@ -21,27 +24,27 @@ public abstract class StatixConfigureException extends Exception {
         R sdf3ExtStatixGenInjFail(Exception cause);
     }
 
-    public static StatixConfigureException getLanguageCompilerConfigurationFail(CfgRootDirectoryToObjectException cfgRootDirectoryToObjectException) {
-        return withCause(StatixConfigureExceptions.getLanguageCompilerConfigurationFail(cfgRootDirectoryToObjectException), cfgRootDirectoryToObjectException);
+    public static SpoofaxStatixConfigureException getLanguageCompilerConfigurationFail(CfgRootDirectoryToObjectException cfgRootDirectoryToObjectException) {
+        return withCause(SpoofaxStatixConfigureExceptions.getLanguageCompilerConfigurationFail(cfgRootDirectoryToObjectException), cfgRootDirectoryToObjectException);
     }
 
-    public static StatixConfigureException mainSourceDirectoryFail(ResourcePath sourceDirectory) {
-        return StatixConfigureExceptions.mainSourceDirectoryFail(sourceDirectory);
+    public static SpoofaxStatixConfigureException mainSourceDirectoryFail(ResourcePath sourceDirectory) {
+        return SpoofaxStatixConfigureExceptions.mainSourceDirectoryFail(sourceDirectory);
     }
 
-    public static StatixConfigureException mainFileFail(ResourceKey mainFile) {
-        return StatixConfigureExceptions.mainFileFail(mainFile);
+    public static SpoofaxStatixConfigureException mainFileFail(ResourceKey mainFile) {
+        return SpoofaxStatixConfigureExceptions.mainFileFail(mainFile);
     }
 
-    public static StatixConfigureException sdf3ConfigureFail(SpoofaxSdf3ConfigureException spoofaxSdf3ConfigureException) {
-        return withCause(StatixConfigureExceptions.sdf3ConfigureFail(spoofaxSdf3ConfigureException), spoofaxSdf3ConfigureException);
+    public static SpoofaxStatixConfigureException sdf3ConfigureFail(SpoofaxSdf3ConfigureException spoofaxSdf3ConfigureException) {
+        return withCause(SpoofaxStatixConfigureExceptions.sdf3ConfigureFail(spoofaxSdf3ConfigureException), spoofaxSdf3ConfigureException);
     }
 
-    public static StatixConfigureException sdf3ExtStatixGenInjFail(Exception cause) {
-        return withCause(StatixConfigureExceptions.sdf3ExtStatixGenInjFail(cause), cause);
+    public static SpoofaxStatixConfigureException sdf3ExtStatixGenInjFail(Exception cause) {
+        return withCause(SpoofaxStatixConfigureExceptions.sdf3ExtStatixGenInjFail(cause), cause);
     }
 
-    private static StatixConfigureException withCause(StatixConfigureException e, Exception cause) {
+    private static SpoofaxStatixConfigureException withCause(SpoofaxStatixConfigureException e, Exception cause) {
         e.initCause(cause);
         return e;
     }
@@ -49,12 +52,12 @@ public abstract class StatixConfigureException extends Exception {
 
     public abstract <R> R match(Cases<R> cases);
 
-    public static StatixConfigureExceptions.CasesMatchers.TotalMatcher_GetLanguageCompilerConfigurationFail cases() {
-        return StatixConfigureExceptions.cases();
+    public static SpoofaxStatixConfigureExceptions.CasesMatchers.TotalMatcher_GetLanguageCompilerConfigurationFail cases() {
+        return SpoofaxStatixConfigureExceptions.cases();
     }
 
-    public StatixConfigureExceptions.CaseOfMatchers.TotalMatcher_GetLanguageCompilerConfigurationFail caseOf() {
-        return StatixConfigureExceptions.caseOf(this);
+    public SpoofaxStatixConfigureExceptions.CaseOfMatchers.TotalMatcher_GetLanguageCompilerConfigurationFail caseOf() {
+        return SpoofaxStatixConfigureExceptions.caseOf(this);
     }
 
 

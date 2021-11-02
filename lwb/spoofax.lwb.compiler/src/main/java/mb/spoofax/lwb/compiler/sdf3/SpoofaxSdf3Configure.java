@@ -57,7 +57,7 @@ public class SpoofaxSdf3Configure implements TaskDef<ResourcePath, Result<Option
         try {
             return cfgSdf3Config.source().caseOf()
                 .files((mainSourceDirectory, mainFile) -> configureSourceFilesCatching(context, rootDirectory, cfgSdf3Config, mainSourceDirectory, mainFile))
-                .prebuilt((inputParseTableAtermFile, inputParseTablePersistedFile) -> configurePreBuilt(inputParseTableAtermFile, inputParseTablePersistedFile, cfgSdf3Config));
+                .prebuilt((inputParseTableAtermFile, inputParseTablePersistedFile) -> configurePrebuilt(inputParseTableAtermFile, inputParseTablePersistedFile, cfgSdf3Config));
         } catch(UncheckedIOException e) {
             throw e.getCause();
         }
@@ -104,7 +104,7 @@ public class SpoofaxSdf3Configure implements TaskDef<ResourcePath, Result<Option
         return Result.ofOk(SpoofaxSdf3Config.files(sdf3SpecConfig, cfgSdf3Config.parseTableAtermOutputFile(), cfgSdf3Config.parseTablePersistedOutputFile()));
     }
 
-    public Result<SpoofaxSdf3Config, SpoofaxSdf3ConfigureException> configurePreBuilt(
+    public Result<SpoofaxSdf3Config, SpoofaxSdf3ConfigureException> configurePrebuilt(
         ResourcePath inputParseTableAtermFile,
         ResourcePath inputParseTablePersistedFile,
         CfgSdf3Config cfgSdf3Config

@@ -10,7 +10,8 @@ import mb.cfg.metalang.CfgEsvConfig;
 import mb.cfg.metalang.CfgEsvSource;
 import mb.cfg.metalang.CfgSdf3Config;
 import mb.cfg.metalang.CfgSdf3Source;
-import mb.cfg.metalang.CompileStatixInput;
+import mb.cfg.metalang.CfgStatixConfig;
+import mb.cfg.metalang.CfgStatixSource;
 import mb.cfg.metalang.CompileStrategoInput;
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
@@ -213,11 +214,14 @@ public class CfgAstToObject {
             });
         });
         parts.getAllSubTermsInListAsParts("StatixSection").ifSome(subParts -> {
-            final CompileStatixInput.Builder builder = languageCompilerInputBuilder.withStatix();
+            final CfgStatixConfig.Builder builder = languageCompilerInputBuilder.withStatix();
             final ResourcePath mainSourceDirectory = subParts.getOneSubtermAsExistingDirectory("StatixMainSourceDirectory", rootDirectory, "Statix main source directory")
-                .unwrapOrElse(() -> CompileStatixInput.Builder.getDefaultMainSourceDirectory(languageShared));
-            builder.mainSourceDirectory(mainSourceDirectory);
-            subParts.forOneSubtermAsExistingFile("StatixMainFile", mainSourceDirectory, "Statix main file", builder::mainFile);
+                .unwrapOrElse(() -> CfgStatixConfig.Builder.getDefaultMainSourceDirectory(languageShared));
+            final ResourcePath mainFile = subParts.getOneSubtermAsExistingFile("StatixMainFile", mainSourceDirectory, "Statix main file")
+                .unwrapOrElse(() -> CfgStatixConfig.Builder.getDefaultMainFile(languageShared));
+            final ArrayList<ResourcePath> includeDirectories = new ArrayList<>();
+            subParts.forAllSubtermsAsPaths("StatixIncludeDirectory", rootDirectory, includeDirectories::add);
+            builder.source(CfgStatixSource.files(mainSourceDirectory, mainFile, ListView.of(includeDirectories)));
             subParts.forOneSubtermAsBool("StatixSdf3SignatureGen", builder::enableSdf3SignatureGen);
         });
         parts.getAllSubTermsInListAsParts("StrategoSection").ifSome(subParts -> {

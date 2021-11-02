@@ -2,7 +2,7 @@ package mb.cfg;
 
 import mb.cfg.metalang.CfgEsvConfig;
 import mb.cfg.metalang.CfgSdf3Config;
-import mb.cfg.metalang.CompileStatixInput;
+import mb.cfg.metalang.CfgStatixConfig;
 import mb.cfg.metalang.CompileStrategoInput;
 import mb.common.util.Properties;
 import mb.spoofax.compiler.util.Shared;
@@ -19,7 +19,7 @@ public class CompileLanguageSpecificationInputBuilder {
     public CfgEsvConfig.Builder esv = CfgEsvConfig.builder();
 
     private boolean statixEnabled = false;
-    public CompileStatixInput.Builder statix = CompileStatixInput.builder();
+    public CfgStatixConfig.Builder statix = CfgStatixConfig.builder();
 
     private boolean strategoEnabled = false;
     public CompileStrategoInput.Builder stratego = CompileStrategoInput.builder();
@@ -37,7 +37,7 @@ public class CompileLanguageSpecificationInputBuilder {
         return esv;
     }
 
-    public CompileStatixInput.Builder withStatix() {
+    public CfgStatixConfig.Builder withStatix() {
         statixEnabled = true;
         return statix;
     }
@@ -55,7 +55,7 @@ public class CompileLanguageSpecificationInputBuilder {
         final @Nullable CfgEsvConfig esv = buildEsv(compileLanguageSpecificationShared);
         if(esv != null) compileLanguage.esv(esv);
 
-        final @Nullable CompileStatixInput statix = buildStatix(compileLanguageSpecificationShared);
+        final @Nullable CfgStatixConfig statix = buildStatix(compileLanguageSpecificationShared);
         if(statix != null) compileLanguage.statix(statix);
 
         final @Nullable CompileStrategoInput stratego = buildStratego(persistentProperties, shared, compileLanguageSpecificationShared);
@@ -85,7 +85,7 @@ public class CompileLanguageSpecificationInputBuilder {
             .build();
     }
 
-    private @Nullable CompileStatixInput buildStatix(
+    private @Nullable CfgStatixConfig buildStatix(
         CompileLanguageSpecificationShared compileLanguageSpecificationShared
     ) {
         if(!statixEnabled) return null;

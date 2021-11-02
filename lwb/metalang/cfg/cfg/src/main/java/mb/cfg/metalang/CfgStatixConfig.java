@@ -1,16 +1,19 @@
 package mb.cfg.metalang;
 
 import mb.cfg.CompileLanguageSpecificationShared;
+import mb.common.util.ListView;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.language.ConstraintAnalyzerLanguageCompiler;
 import org.immutables.value.Value;
 
 import java.io.Serializable;
-import java.util.List;
 
+/**
+ * Configuration for Statix in the context of CFG.
+ */
 @Value.Immutable
-public interface CompileStatixInput extends Serializable {
-    class Builder extends ImmutableCompileStatixInput.Builder {
+public interface CfgStatixConfig extends Serializable {
+    class Builder extends ImmutableCfgStatixConfig.Builder {
         public static ResourcePath getDefaultMainSourceDirectory(CompileLanguageSpecificationShared shared) {
             return shared.languageProject().project().srcDirectory();
         }
@@ -23,26 +26,24 @@ public interface CompileStatixInput extends Serializable {
     static Builder builder() { return new Builder(); }
 
 
-    @Value.Default default ResourcePath mainSourceDirectory() {
-        return CompileStatixInput.Builder.getDefaultMainSourceDirectory(compileLanguageShared());
-    }
-
-    @Value.Default default ResourcePath mainFile() {
-        return CompileStatixInput.Builder.getDefaultMainFile(compileLanguageShared());
-    }
-
-    List<ResourcePath> includeDirectories();
-
-    @Value.Default default ResourcePath generatedSourcesDirectory() {
-        return compileLanguageShared().generatedSourcesDirectory().appendRelativePath("statix");
+    @Value.Default default CfgStatixSource source() {
+        return CfgStatixSource.files(
+            CfgStatixConfig.Builder.getDefaultMainSourceDirectory(compileLanguageShared()),
+            CfgStatixConfig.Builder.getDefaultMainFile(compileLanguageShared()),
+            ListView.of()
+        );
     }
 
     @Value.Default default boolean enableSdf3SignatureGen() {
         return false;
     }
 
+    @Value.Default default ResourcePath generatedSourcesDirectory() {
+        return compileLanguageShared().generatedSourcesDirectory().appendRelativePath("statix");
+    }
 
-    default ResourcePath outputDirectory() {
+
+    default ResourcePath outputSpecAtermDirectory() {
         return compileLanguageShared().generatedResourcesDirectory() // Generated resources directory, so that Gradle includes the aterm format file in the JAR file.
             .appendRelativePath(compileLanguageShared().languageProject().packagePath()) // Append package path to make location unique, enabling JAR files to be merged.
             ;

@@ -8,7 +8,7 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.lwb.compiler.cfg.SpoofaxCfgCheck;
 import mb.spoofax.lwb.compiler.esv.SpoofaxEsvCheck;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3Check;
-import mb.spoofax.lwb.compiler.statix.CheckStatix;
+import mb.spoofax.lwb.compiler.statix.SpoofaxStatixCheck;
 import mb.spoofax.lwb.compiler.stratego.CheckStratego;
 import org.immutables.value.Value;
 
@@ -26,20 +26,20 @@ public class CheckLanguageSpecification implements TaskDef<ResourcePath, KeyedMe
     private final SpoofaxCfgCheck spoofaxCfgCheck;
     private final SpoofaxSdf3Check spoofaxSdf3Check;
     private final SpoofaxEsvCheck spoofaxEsvCheck;
-    private final CheckStatix checkStatix;
+    private final SpoofaxStatixCheck spoofaxStatixCheck;
     private final CheckStratego checkStratego;
 
     @Inject public CheckLanguageSpecification(
         SpoofaxCfgCheck spoofaxCfgCheck,
         SpoofaxSdf3Check spoofaxSdf3Check,
         SpoofaxEsvCheck spoofaxEsvCheck,
-        CheckStatix checkStatix,
+        SpoofaxStatixCheck spoofaxStatixCheck,
         CheckStratego checkStratego
     ) {
         this.spoofaxCfgCheck = spoofaxCfgCheck;
         this.spoofaxSdf3Check = spoofaxSdf3Check;
         this.spoofaxEsvCheck = spoofaxEsvCheck;
-        this.checkStatix = checkStatix;
+        this.spoofaxStatixCheck = spoofaxStatixCheck;
         this.checkStratego = checkStratego;
     }
 
@@ -53,7 +53,7 @@ public class CheckLanguageSpecification implements TaskDef<ResourcePath, KeyedMe
         messagesBuilder.addMessages(context.require(spoofaxCfgCheck, rootDirectory));
         messagesBuilder.addMessages(context.require(spoofaxSdf3Check, rootDirectory));
         messagesBuilder.addMessages(context.require(spoofaxEsvCheck, rootDirectory));
-        messagesBuilder.addMessages(context.require(checkStatix, rootDirectory));
+        messagesBuilder.addMessages(context.require(spoofaxStatixCheck, rootDirectory));
         messagesBuilder.addMessages(context.require(checkStratego, rootDirectory));
         return messagesBuilder.build();
     }

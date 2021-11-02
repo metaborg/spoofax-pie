@@ -9,7 +9,7 @@ import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.lwb.compiler.esv.SpoofaxEsvCompile;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3Compile;
-import mb.spoofax.lwb.compiler.statix.CompileStatix;
+import mb.spoofax.lwb.compiler.statix.SpoofaxStatixCompile;
 import mb.spoofax.lwb.compiler.stratego.CompileStratego;
 import org.immutables.value.Value;
 
@@ -46,18 +46,18 @@ public class CompileLanguageSpecification implements TaskDef<ResourcePath, Resul
 
     private final SpoofaxSdf3Compile spoofaxSdf3Compile;
     private final SpoofaxEsvCompile spoofaxEsvCompile;
-    private final CompileStatix compileStatix;
+    private final SpoofaxStatixCompile spoofaxStatixCompile;
     private final CompileStratego compileStratego;
 
     @Inject public CompileLanguageSpecification(
         SpoofaxSdf3Compile spoofaxSdf3Compile,
         SpoofaxEsvCompile spoofaxEsvCompile,
-        CompileStatix compileStatix,
+        SpoofaxStatixCompile spoofaxStatixCompile,
         CompileStratego compileStratego
     ) {
         this.spoofaxSdf3Compile = spoofaxSdf3Compile;
         this.spoofaxEsvCompile = spoofaxEsvCompile;
-        this.compileStatix = compileStatix;
+        this.spoofaxStatixCompile = spoofaxStatixCompile;
         this.compileStratego = compileStratego;
     }
 
@@ -79,7 +79,7 @@ public class CompileLanguageSpecification implements TaskDef<ResourcePath, Resul
                     .ifOk(messagesBuilder::addMessages)
                     .mapErr(CompileLanguageSpecificationException::esvCompileFail)
             ).and(
-                context.require(compileStatix, rootDirectory)
+                context.require(spoofaxStatixCompile, rootDirectory)
                     .ifOk(messagesBuilder::addMessages)
                     .mapErr(CompileLanguageSpecificationException::statixCompileFail)
             ).and(

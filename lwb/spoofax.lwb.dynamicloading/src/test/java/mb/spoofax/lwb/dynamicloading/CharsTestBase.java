@@ -124,7 +124,7 @@ class CharsTestBase extends TestBase {
     }
 
     TopDownSession modifyAnalyzer(MixedSession session, CompileLanguageInput input) throws IOException, ExecException, InterruptedException {
-        final ResourcePath path = input.compileLanguageSpecificationInput().statix().get().mainFile();
+        final ResourcePath path = input.compileLanguageSpecificationInput().statix().get().source().getMainFile().orElseThrow(() -> new RuntimeException("Not using source files with Statix"));
         final WritableResource file = resourceService.getWritableResource(path);
         final String text = file.readString()
             .replace("Chars(\"\")", "Chars(\"abcdefg\")")

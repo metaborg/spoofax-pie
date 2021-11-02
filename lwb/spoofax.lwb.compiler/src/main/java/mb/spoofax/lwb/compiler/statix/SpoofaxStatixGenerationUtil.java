@@ -12,10 +12,10 @@ import org.spoofax.terms.util.TermUtils;
 
 import javax.inject.Inject;
 
-public class StatixGenerationUtil {
+public class SpoofaxStatixGenerationUtil {
     private final StatixPrettyPrint prettyPrint;
 
-    @Inject public StatixGenerationUtil(StatixPrettyPrint prettyPrint) {
+    @Inject public SpoofaxStatixGenerationUtil(StatixPrettyPrint prettyPrint) {
         this.prettyPrint = prettyPrint;
     }
 

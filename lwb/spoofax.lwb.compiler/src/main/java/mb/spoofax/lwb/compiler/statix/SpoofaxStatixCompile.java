@@ -1,10 +1,8 @@
 package mb.spoofax.lwb.compiler.statix;
 
-import mb.cfg.metalang.CompileStatixInput;
 import mb.cfg.task.CfgRootDirectoryToObject;
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
-import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
@@ -12,37 +10,35 @@ import mb.pie.api.Interactivity;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
-import mb.statix.task.StatixCheckMulti;
-import mb.statix.task.StatixCompileModule;
-import mb.statix.task.StatixCompileProject;
-import mb.statix.task.StatixConfig;
-import mb.spoofax.lwb.compiler.CompileLanguageSpecification;
+import mb.resource.hierarchical.match.ResourceMatcher;
+import mb.resource.hierarchical.match.path.PathMatcher;
+import mb.spoofax.lwb.compiler.util.TaskCopyUtil;
 import mb.statix.task.StatixCheckMulti;
 import mb.statix.task.StatixCompileAndMergeProject;
 import mb.statix.task.StatixCompileModule;
 import mb.statix.task.StatixCompileProject;
-import mb.statix.task.StatixConfig;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.io.UncheckedIOException;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-public class CompileStatix implements TaskDef<ResourcePath, Result<KeyedMessages, StatixCompileException>> {
+/**
+ * Compilation task for Statix in the context of the Spoofax LWB compiler.
+ */
+public class SpoofaxStatixCompile implements TaskDef<ResourcePath, Result<KeyedMessages, SpoofaxStatixCompileException>> {
     private final CfgRootDirectoryToObject cfgRootDirectoryToObject;
 
-    private final ConfigureStatix configure;
+    private final SpoofaxStatixConfigure configure;
 
     private final StatixCheckMulti check;
     private final StatixCompileProject compileProject;
     private final StatixCompileAndMergeProject compileAndMergeProject;
 
-    @Inject public CompileStatix(
+    @Inject public SpoofaxStatixCompile(
         CfgRootDirectoryToObject cfgRootDirectoryToObject,
-        ConfigureStatix configure,
+        SpoofaxStatixConfigure configure,
         StatixCheckMulti check,
         StatixCompileProject compileProject,
         StatixCompileAndMergeProject compileAndMergeProject
@@ -60,17 +56,12 @@ public class CompileStatix implements TaskDef<ResourcePath, Result<KeyedMessages
     }
 
     @Override
-    public Result<KeyedMessages, StatixCompileException> exec(ExecContext context, ResourcePath rootDirectory) throws Exception {
-        return context.require(cfgRootDirectoryToObject, rootDirectory)
-            .mapErr(StatixCompileException::getLanguageCompilerConfigurationFail)
-            .flatMapThrowing(o1 -> Option.ofOptional(o1.compileLanguageInput.compileLanguageSpecificationInput().statix()).mapThrowingOr(
-                i -> context.require(configure, rootDirectory)
-                    .mapErr(StatixCompileException::configureFail)
-                    .flatMapThrowing(o2 -> o2.mapThrowingOr(
-                        c -> checkAndCompile(context, rootDirectory, c, i),
-                        Result.ofOk(KeyedMessages.of())
-                    )),
-                Result.ofOk(KeyedMessages.of())
+    public Result<KeyedMessages, SpoofaxStatixCompileException> exec(ExecContext context, ResourcePath rootDirectory) throws IOException {
+        return context.require(configure, rootDirectory)
+            .mapErr(SpoofaxStatixCompileException::configureFail)
+            .flatMapThrowing(o -> o.mapThrowingOr(
+                c -> compile(context, rootDirectory, c),
+                Result.ofOk(KeyedMessages.of()) // Statix is not configured, nothing to do.
             ));
     }
 
@@ -78,21 +69,52 @@ public class CompileStatix implements TaskDef<ResourcePath, Result<KeyedMessages
         return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 
-    public Result<KeyedMessages, StatixCompileException> checkAndCompile(ExecContext context, ResourcePath rootDirectory, StatixConfig config, CompileStatixInput input) throws IOException {
+    public Result<KeyedMessages, SpoofaxStatixCompileException> compile(
+        ExecContext context,
+        ResourcePath rootDirectory,
+        SpoofaxStatixConfig config
+    ) throws IOException {
+        try {
+            return config.caseOf()
+                .files((statixConfig, outputSpecAtermDirectory) -> compileFromSourceFilesCatching(context, rootDirectory, outputSpecAtermDirectory))
+                .prebuilt((inputSpecAtermDirectory, outputSpecAtermDirectory) -> copyPrebuilt(context, inputSpecAtermDirectory, outputSpecAtermDirectory))
+                ;
+        } catch(UncheckedIOException e) {
+            throw e.getCause();
+        }
+    }
+
+    public Result<KeyedMessages, SpoofaxStatixCompileException> compileFromSourceFilesCatching(
+        ExecContext context,
+        ResourcePath rootDirectory,
+        ResourcePath outputSpecAtermDirectoryPath
+    ) {
+        try {
+            return compileFromSourceFiles(context, rootDirectory, outputSpecAtermDirectoryPath);
+        } catch(IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public Result<KeyedMessages, SpoofaxStatixCompileException> compileFromSourceFiles(
+        ExecContext context,
+        ResourcePath rootDirectory,
+        ResourcePath outputSpecAtermDirectoryPath
+    ) throws IOException {
         final KeyedMessages messages = context.require(check, rootDirectory);
         if(messages.containsError()) {
-            return Result.ofErr(StatixCompileException.checkFail(messages));
+            return Result.ofErr(SpoofaxStatixCompileException.checkFail(messages));
         }
 
-        final HierarchicalResource outputDirectory = context.getHierarchicalResource(input.outputDirectory()).ensureDirectoryExists();
+        final HierarchicalResource outputDirectory = context.getHierarchicalResource(outputSpecAtermDirectoryPath).ensureDirectoryExists();
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
-        final Result<KeyedMessages, StatixCompileException> result = context.require(compileProject, rootDirectory)
+        final Result<KeyedMessages, SpoofaxStatixCompileException> result = context.require(compileProject, rootDirectory)
             .mapThrowing(o -> {
                 writeAllOutputs(context, o, outputDirectory);
                 return messages;
             })
             .ifOk(messagesBuilder::addMessages)
-            .mapErr(StatixCompileException::compileFail)
+            .mapErr(SpoofaxStatixCompileException::compileFail)
             .and(
                 context.require(compileAndMergeProject, rootDirectory)
                     .mapThrowing(o -> {
@@ -101,18 +123,31 @@ public class CompileStatix implements TaskDef<ResourcePath, Result<KeyedMessages
                         return messages;
                     })
                     .ifOk(messagesBuilder::addMessages)
-                    .mapErr(StatixCompileException::compileFail)
+                    .mapErr(SpoofaxStatixCompileException::compileFail)
             );
         if(result.isErr()) return result.ignoreValueIfErr();
         return Result.ofOk(messagesBuilder.build());
     }
 
+    public Result<KeyedMessages, SpoofaxStatixCompileException> copyPrebuilt(
+        ExecContext context,
+        ResourcePath inputSpecAtermDirectoryPath,
+        ResourcePath outputSpecAtermDirectoryPath
+    ) {
+        try {
+            TaskCopyUtil.copyAll(context, inputSpecAtermDirectoryPath, outputSpecAtermDirectoryPath, ResourceMatcher.ofPath(PathMatcher.ofExtension("aterm")));
+        } catch(IOException e) {
+            return Result.ofErr(SpoofaxStatixCompileException.compileFail(e));
+        }
+        return Result.ofOk(KeyedMessages.of());
+    }
+
     /**
      * Writes all compiled Statix modules to files.
      *
-     * @param context the execution context
+     * @param context              the execution context
      * @param compileModuleOutputs the compiled Statix modules
-     * @param outputDirectory the path to write the files to
+     * @param outputDirectory      the path to write the files to
      * @throws IOException if an I/O exception occurred
      */
     private void writeAllOutputs(ExecContext context, ListView<StatixCompileModule.Output> compileModuleOutputs, HierarchicalResource outputDirectory) throws IOException {
@@ -125,8 +160,8 @@ public class CompileStatix implements TaskDef<ResourcePath, Result<KeyedMessages
     /**
      * Writes an ATerm to a file.
      *
-     * @param context the execution context
-     * @param ast the AST to write
+     * @param context    the execution context
+     * @param ast        the AST to write
      * @param outputFile the file to write to
      * @throws IOException if an I/O exception occurred
      */

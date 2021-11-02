@@ -2,7 +2,7 @@ package mb.cfg;
 
 import mb.cfg.metalang.CfgEsvConfig;
 import mb.cfg.metalang.CfgSdf3Config;
-import mb.cfg.metalang.CompileStatixInput;
+import mb.cfg.metalang.CfgStatixConfig;
 import mb.cfg.metalang.CompileStrategoInput;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.language.LanguageProjectCompilerInputBuilder;
@@ -31,7 +31,7 @@ public interface CompileLanguageSpecificationInput extends Serializable {
 
     Optional<CfgEsvConfig> esv();
 
-    Optional<CompileStatixInput> statix();
+    Optional<CfgStatixConfig> statix();
 
     Optional<CompileStrategoInput> stratego();
 
