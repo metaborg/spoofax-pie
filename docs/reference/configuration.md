@@ -420,9 +420,27 @@ The following `StatixOption`s are supported:
 
 | Syntax | Required? | Description | Type |
 | - | - | - | - |
+| `source = $StatixSource` | no | The source of the Statix definition. Defaults to a `files` source with the top-level `source-directory` option as its main source directory, and `./main.stx` as its main file relative to the main source directory. | n/a |
+
+The following `$StatixSource`s are supported:
+
+* Files: `files { $StatixFilesOption* }`
+* Prebuilt: `prebuilt { $StatixPrebuiltOption }`
+
+The following `StatixFilesOption`s are supported:
+
+| Syntax | Required? | Description | Type |
+| - | - | - | - |
 | `main-source-directory = $Expression` | no | The directory relative to the root directory that contains the main Statix file. Defaults to the value of the top-level `source-directory` option. | Path |
 | `main-file = $Expression` | no | The main Statix file relative to the `main-source-directory`. Defaults to `./main.stx`. | Path |
-| `sdf3-statix-signature-generation = $Expression` | no | Whether SDF3 to Statix signature generation is enabled. When enabled, `stratego { sdf3-statix-explication-generation = true }` must also be enabled. Defaults to `false`. | Boolean |
+| `include-directory = $Expression` | no | Adds an include directory from which to resolve Statix imports. May be given multiple times. | Path |
+| `sdf3-statix-signature-generation = $Expression` | no | Whether SDF3 to Statix signature generation is enabled. When enabled, `stratego { source = files { sdf3-statix-explication-generation = true } }` must also be enabled. Defaults to `false`. | Boolean |
+
+The following `$StatixPrebuiltOption`s are supported:
+
+| Syntax | Required? | Description | Type |
+| - | - | - | - |
+| `spec-aterm-directory = $Expression` | yes | The prebuilt Statix spec ATerm directory to use relative to the root directory | Path |
 
 ### Stratego
 
@@ -432,10 +450,21 @@ The following `StrategoOption`s are supported:
 
 | Syntax | Required? | Description | Type |
 | - | - | - | - |
-| `main-source-directory = $Expression` | no | The directory relative to the root directory that contains the main Stratego file. Defaults to the value of the top-level `source-directory` option. | Path |
-| `main-file = $Expression` | no | The main Stratego file relative to the `main-source-directory`. Defaults to `./main.stx`. | Path |
+| `source = $StrategoSource` | no | The source of the Statix definition. Defaults to a `files` source with the top-level `source-directory` option as its main source directory, and `./main.str2` as its main file relative to the main source directory. | n/a |
 | `language-strategy-affix = $Expression` | no | The affix that is used to make certain generated strategies unique to the language. This is used both as a prefix and suffix. Defaults to name of the language transformed to a Stratego strategy identifier. | Stratego strategy identifier |
-| `sdf3-statix-explication-generation = $Expression` | no | Whether SDF3 to Statix injection explication/implication generation is enabled. When enabled, `statix { sdf3-statix-signature-generation = true }` must also be enabled. Defaults to `false`. | Boolean |
+
+The following `$StrategoSource`s are supported:
+
+* Files: `files { $StrategoFilesOption* }`
+
+The following `$StrategoFilesOption`s are supported:
+
+| Syntax | Required? | Description | Type |
+| - | - | - | - |
+| `main-source-directory = $Expression` | no | The directory relative to the root directory that contains the main Stratego file. Defaults to the value of the top-level `source-directory` option. | Path |
+| `main-file = $Expression` | no | The main Stratego file relative to the `main-source-directory`. Defaults to `./main.str2`. | Path |
+| `include-directory = $Expression` | no | Adds an include directory from which to resolve Stratego imports. May be given multiple times. | Path |
+| `sdf3-statix-explication-generation = $Expression` | no | Whether SDF3 to Statix injection explication/implication generation is enabled. When enabled, `statix { source = files { sdf3-statix-signature-generation = true } }` must also be enabled. Defaults to `false`. | Boolean |
 
 ## spoofaxc.lock
 
