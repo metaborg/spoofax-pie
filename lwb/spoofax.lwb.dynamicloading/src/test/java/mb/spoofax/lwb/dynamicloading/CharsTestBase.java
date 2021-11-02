@@ -108,7 +108,7 @@ class CharsTestBase extends TestBase {
     }
 
     TopDownSession modifyTransformation(MixedSession session, CompileLanguageInput input) throws IOException, ExecException, InterruptedException {
-        final ResourcePath path = input.compileLanguageSpecificationInput().stratego().get().mainSourceDirectory().appendRelativePath("transform/remove-a.str2");
+        final ResourcePath path = input.compileLanguageSpecificationInput().stratego().get().source().getFiles().mainSourceDirectory().appendRelativePath("transform/remove-a.str2");
         final WritableResource file = resourceService.getWritableResource(path);
         final String text = file.readString().replace("string-replace(|\"a\", \"a\")", "string-replace(|\"a\", \"\")");
         file.writeString(text);

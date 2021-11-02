@@ -10,7 +10,7 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.lwb.compiler.esv.SpoofaxEsvCompile;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3Compile;
 import mb.spoofax.lwb.compiler.statix.SpoofaxStatixCompile;
-import mb.spoofax.lwb.compiler.stratego.CompileStratego;
+import mb.spoofax.lwb.compiler.stratego.SpoofaxStrategoCompile;
 import org.immutables.value.Value;
 
 import javax.inject.Inject;
@@ -47,18 +47,18 @@ public class CompileLanguageSpecification implements TaskDef<ResourcePath, Resul
     private final SpoofaxSdf3Compile spoofaxSdf3Compile;
     private final SpoofaxEsvCompile spoofaxEsvCompile;
     private final SpoofaxStatixCompile spoofaxStatixCompile;
-    private final CompileStratego compileStratego;
+    private final SpoofaxStrategoCompile spoofaxStrategoCompile;
 
     @Inject public CompileLanguageSpecification(
         SpoofaxSdf3Compile spoofaxSdf3Compile,
         SpoofaxEsvCompile spoofaxEsvCompile,
         SpoofaxStatixCompile spoofaxStatixCompile,
-        CompileStratego compileStratego
+        SpoofaxStrategoCompile spoofaxStrategoCompile
     ) {
         this.spoofaxSdf3Compile = spoofaxSdf3Compile;
         this.spoofaxEsvCompile = spoofaxEsvCompile;
         this.spoofaxStatixCompile = spoofaxStatixCompile;
-        this.compileStratego = compileStratego;
+        this.spoofaxStrategoCompile = spoofaxStrategoCompile;
     }
 
 
@@ -83,7 +83,7 @@ public class CompileLanguageSpecification implements TaskDef<ResourcePath, Resul
                     .ifOk(messagesBuilder::addMessages)
                     .mapErr(CompileLanguageSpecificationException::statixCompileFail)
             ).and(
-                context.require(compileStratego, rootDirectory)
+                context.require(spoofaxStrategoCompile, rootDirectory)
                     .ifOk(o -> {
                         messagesBuilder.addMessages(o.messages());
                         providedJavaFiles.addAll(o.providedJavaFiles());

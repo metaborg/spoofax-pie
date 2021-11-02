@@ -9,7 +9,7 @@ import java.io.Serializable;
 import java.util.Optional;
 
 /**
- * Configuration for ESV sources in the context of the CFG meta-language.
+ * Configuration for Statix sources in the context of CFG.
  */
 @ADT
 public abstract class CfgStatixSource implements Serializable {

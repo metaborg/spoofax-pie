@@ -9,7 +9,7 @@ import mb.spoofax.lwb.compiler.cfg.SpoofaxCfgCheck;
 import mb.spoofax.lwb.compiler.esv.SpoofaxEsvCheck;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3Check;
 import mb.spoofax.lwb.compiler.statix.SpoofaxStatixCheck;
-import mb.spoofax.lwb.compiler.stratego.CheckStratego;
+import mb.spoofax.lwb.compiler.stratego.SpoofaxStrategoCheck;
 import org.immutables.value.Value;
 
 import javax.inject.Inject;
@@ -27,20 +27,20 @@ public class CheckLanguageSpecification implements TaskDef<ResourcePath, KeyedMe
     private final SpoofaxSdf3Check spoofaxSdf3Check;
     private final SpoofaxEsvCheck spoofaxEsvCheck;
     private final SpoofaxStatixCheck spoofaxStatixCheck;
-    private final CheckStratego checkStratego;
+    private final SpoofaxStrategoCheck spoofaxStrategoCheck;
 
     @Inject public CheckLanguageSpecification(
         SpoofaxCfgCheck spoofaxCfgCheck,
         SpoofaxSdf3Check spoofaxSdf3Check,
         SpoofaxEsvCheck spoofaxEsvCheck,
         SpoofaxStatixCheck spoofaxStatixCheck,
-        CheckStratego checkStratego
+        SpoofaxStrategoCheck spoofaxStrategoCheck
     ) {
         this.spoofaxCfgCheck = spoofaxCfgCheck;
         this.spoofaxSdf3Check = spoofaxSdf3Check;
         this.spoofaxEsvCheck = spoofaxEsvCheck;
         this.spoofaxStatixCheck = spoofaxStatixCheck;
-        this.checkStratego = checkStratego;
+        this.spoofaxStrategoCheck = spoofaxStrategoCheck;
     }
 
     @Override public String getId() {
@@ -54,7 +54,7 @@ public class CheckLanguageSpecification implements TaskDef<ResourcePath, KeyedMe
         messagesBuilder.addMessages(context.require(spoofaxSdf3Check, rootDirectory));
         messagesBuilder.addMessages(context.require(spoofaxEsvCheck, rootDirectory));
         messagesBuilder.addMessages(context.require(spoofaxStatixCheck, rootDirectory));
-        messagesBuilder.addMessages(context.require(checkStratego, rootDirectory));
+        messagesBuilder.addMessages(context.require(spoofaxStrategoCheck, rootDirectory));
         return messagesBuilder.build();
     }
 }

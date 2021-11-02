@@ -20,9 +20,9 @@ import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3Configure;
 import mb.spoofax.lwb.compiler.statix.SpoofaxStatixCheck;
 import mb.spoofax.lwb.compiler.statix.SpoofaxStatixCompile;
 import mb.spoofax.lwb.compiler.statix.SpoofaxStatixConfigure;
-import mb.spoofax.lwb.compiler.stratego.CheckStratego;
-import mb.spoofax.lwb.compiler.stratego.CompileStratego;
-import mb.spoofax.lwb.compiler.stratego.ConfigureStratego;
+import mb.spoofax.lwb.compiler.stratego.SpoofaxStrategoCheck;
+import mb.spoofax.lwb.compiler.stratego.SpoofaxStrategoCompile;
+import mb.spoofax.lwb.compiler.stratego.SpoofaxStrategoConfigure;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -68,9 +68,9 @@ public class Spoofax3CompilerModule {
         SpoofaxStatixCheck spoofaxStatixCheck,
         SpoofaxStatixCompile spoofaxStatixCompile,
 
-        ConfigureStratego configureStratego,
-        CheckStratego checkStratego,
-        CompileStratego compileStratego,
+        SpoofaxStrategoConfigure spoofaxStrategoConfigure,
+        SpoofaxStrategoCheck spoofaxStrategoCheck,
+        SpoofaxStrategoCompile spoofaxStrategoCompile,
 
         CompileJava compileJava,
         UnarchiveFromJar unarchiveFromJar
@@ -94,9 +94,9 @@ public class Spoofax3CompilerModule {
         taskDefs.add(spoofaxStatixCheck);
         taskDefs.add(spoofaxStatixCompile);
 
-        taskDefs.add(configureStratego);
-        taskDefs.add(checkStratego);
-        taskDefs.add(compileStratego);
+        taskDefs.add(spoofaxStrategoConfigure);
+        taskDefs.add(spoofaxStrategoCheck);
+        taskDefs.add(spoofaxStrategoCompile);
 
         taskDefs.add(compileJava);
         taskDefs.add(unarchiveFromJar);

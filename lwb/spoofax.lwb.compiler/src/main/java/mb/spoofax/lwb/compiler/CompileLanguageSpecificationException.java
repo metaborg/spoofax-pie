@@ -4,7 +4,7 @@ import mb.common.util.ADT;
 import mb.spoofax.lwb.compiler.esv.EsvCompileException;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3CompileException;
 import mb.spoofax.lwb.compiler.statix.SpoofaxStatixCompileException;
-import mb.spoofax.lwb.compiler.stratego.StrategoCompileException;
+import mb.spoofax.lwb.compiler.stratego.SpoofaxStrategoCompileException;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -17,7 +17,7 @@ public abstract class CompileLanguageSpecificationException extends Exception {
 
         R statixCompileFail(SpoofaxStatixCompileException spoofaxStatixCompileException);
 
-        R strategoCompileFail(StrategoCompileException strategoCompileException);
+        R strategoCompileFail(SpoofaxStrategoCompileException spoofaxStrategoCompileException);
     }
 
     public static CompileLanguageSpecificationException sdf3CompileFail(SpoofaxSdf3CompileException cause) {
@@ -32,7 +32,7 @@ public abstract class CompileLanguageSpecificationException extends Exception {
         return withCause(CompileLanguageSpecificationExceptions.statixCompileFail(cause), cause);
     }
 
-    public static CompileLanguageSpecificationException strategoCompileFail(StrategoCompileException cause) {
+    public static CompileLanguageSpecificationException strategoCompileFail(SpoofaxStrategoCompileException cause) {
         return withCause(CompileLanguageSpecificationExceptions.strategoCompileFail(cause), cause);
     }
 

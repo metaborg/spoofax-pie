@@ -62,7 +62,7 @@ public class SpoofaxStatixConfigure implements TaskDef<ResourcePath, Result<Opti
     public Result<Option<SpoofaxStatixConfig>, SpoofaxStatixConfigureException> exec(ExecContext context, ResourcePath rootDirectory) throws Exception {
         return context.requireMapping(cfgRootDirectoryToObject, rootDirectory, new StatixConfigMapper())
             .mapErr(SpoofaxStatixConfigureException::getLanguageCompilerConfigurationFail)
-            .<Option<SpoofaxStatixConfig>, Exception>flatMapThrowing(o -> Result.transpose(o.mapThrowing(statixInput -> configure(context, rootDirectory, statixInput))));
+            .<Option<SpoofaxStatixConfig>, Exception>flatMapThrowing(o -> Result.transpose(o.mapThrowing(c -> configure(context, rootDirectory, c))));
     }
 
     @Override public boolean shouldExecWhenAffected(ResourcePath input, Set<?> tags) {

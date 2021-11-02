@@ -8,7 +8,7 @@ import java.io.Serializable;
 import java.util.Optional;
 
 /**
- * Configuration for SDF3 sources in the context of the CFG meta-language.
+ * Configuration for SDF3 sources in the context of CFG.
  */
 @ADT
 public abstract class CfgSdf3Source implements Serializable {

@@ -29,6 +29,7 @@ context-free syntax
   Sdf3PrebuiltOption.Sdf3PrebuiltParseTableAtermFile     = <parse-table-aterm-file = <Expr>>
   Sdf3PrebuiltOption.Sdf3PrebuiltParseTablePersistedFile = <parse-table-persisted-file = <Expr>>
   
+  // TODO: move into source?
   Sdf3Option.Sdf3ParseTableGeneratorSection = <parse-table-generator {
   <{Sdf3ParseTableGeneratorOption "\n"}*>
 }>
@@ -77,27 +78,34 @@ context-free syntax
   StatixSource.StatixFiles  = <files {
   <{StatixFilesOption "\n"}*>
 }>
-  StatixFilesOption.StatixFilesMainSourceDirectory       = <main-source-directory = <Expr>>
-  StatixFilesOption.StatixFilesMainFile                  = <main-file = <Expr>>
-  StatixFilesOption.StatixFilesIncludeDirectory          = <include-directory = <Expr>>
+  StatixFilesOption.StatixFilesMainSourceDirectory = <main-source-directory = <Expr>>
+  StatixFilesOption.StatixFilesMainFile            = <main-file = <Expr>>
+  StatixFilesOption.StatixFilesIncludeDirectory    = <include-directory = <Expr>>
   
   StatixSource.StatixPrebuilt = <prebuilt {
   <{StatixPrebuiltOption "\n"}*>
 }>
   StatixPrebuiltOption.StatixPrebuiltSpecAtermDirectory = <spec-aterm-directory = <Expr>>
 
-  StatixOption.StatixSdf3SignatureGen    = <sdf3-statix-signature-generation = <Expr>>
+  StatixOption.StatixSdf3SignatureGen = <sdf3-statix-signature-generation = <Expr>> // TODO: move into source?
 
 context-free sorts
 
-  StrategoOption
+  StrategoOption StrategoSource StrategoFilesOption
 
 context-free syntax
 
   Part.StrategoSection = <stratego {
   <{StrategoOption "\n"}*>
 }>
-  StrategoOption.StrategoMainSourceDirectory      = <main-source-directory = <Expr>>
-  StrategoOption.StrategoMainFile                 = <main-file = <Expr>>
-  StrategoOption.StrategoLanguageStrategyAffix    = <language-strategy-affix = <Expr>>
-  StrategoOption.StrategoSdf3StatixExplicationGen = <sdf3-statix-explication-generation = <Expr>>
+  StrategoOption.StrategoSource = <source = <StrategoSource>>
+  
+  StrategoSource.StrategoFiles  = <files {
+  <{StrategoFilesOption "\n"}*>
+}>
+  StrategoFilesOption.StrategoFilesMainSourceDirectory      = <main-source-directory = <Expr>>
+  StrategoFilesOption.StrategoFilesMainFile                 = <main-file = <Expr>>
+  StrategoFilesOption.StrategoFilesIncludeDirectory         = <include-directory = <Expr>>
+  StrategoFilesOption.StrategoFilesSdf3StatixExplicationGen = <sdf3-statix-explication-generation = <Expr>>
+  
+  StrategoOption.StrategoLanguageStrategyAffix = <language-strategy-affix = <Expr>>

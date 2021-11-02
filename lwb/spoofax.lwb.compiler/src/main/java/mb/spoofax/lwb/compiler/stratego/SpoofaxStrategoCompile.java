@@ -1,9 +1,6 @@
 package mb.spoofax.lwb.compiler.stratego;
 
-import mb.cfg.metalang.CompileStrategoInput;
-import mb.cfg.task.CfgRootDirectoryToObject;
 import mb.common.message.KeyedMessages;
-import mb.common.option.Option;
 import mb.common.result.MessagesException;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
@@ -23,11 +20,14 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Check task for Stratego in the context of the Spoofax LWB compiler.
+ */
 @Value.Enclosing
-public class CompileStratego implements TaskDef<ResourcePath, Result<CompileStratego.Output, StrategoCompileException>> {
+public class SpoofaxStrategoCompile implements TaskDef<ResourcePath, Result<SpoofaxStrategoCompile.Output, SpoofaxStrategoCompileException>> {
     @Value.Immutable
     public interface Output extends Serializable {
-        class Builder extends CompileStrategoData.Output.Builder {}
+        class Builder extends SpoofaxStrategoCompileData.Output.Builder {}
 
         static Builder builder() { return new Builder(); }
 
@@ -38,23 +38,18 @@ public class CompileStratego implements TaskDef<ResourcePath, Result<CompileStra
         @Value.Default default KeyedMessages messages() { return KeyedMessages.of(); }
     }
 
-    private final CfgRootDirectoryToObject cfgRootDirectoryToObject;
-
-    private final ConfigureStratego configure;
+    private final SpoofaxStrategoConfigure configure;
 
     private final StrategoCheck check;
     private final StrategoCompileToJava compileToJava;
 
 
-    @Inject public CompileStratego(
-        CfgRootDirectoryToObject cfgRootDirectoryToObject,
-
-        ConfigureStratego configure,
+    @Inject public SpoofaxStrategoCompile(
+        SpoofaxStrategoConfigure configure,
 
         StrategoCheck check,
         StrategoCompileToJava compileToJava
     ) {
-        this.cfgRootDirectoryToObject = cfgRootDirectoryToObject;
         this.configure = configure;
         this.check = check;
         this.compileToJava = compileToJava;
@@ -66,17 +61,12 @@ public class CompileStratego implements TaskDef<ResourcePath, Result<CompileStra
     }
 
     @Override
-    public Result<Output, StrategoCompileException> exec(ExecContext context, ResourcePath rootDirectory) throws IOException {
-        return context.require(cfgRootDirectoryToObject, rootDirectory)
-            .mapErr(StrategoCompileException::getLanguageCompilerConfigurationFail)
-            .flatMapThrowing(o1 -> Option.ofOptional(o1.compileLanguageInput.compileLanguageSpecificationInput().stratego()).mapThrowingOr(
-                i -> context.require(configure, rootDirectory)
-                    .mapErr(StrategoCompileException::configureFail)
-                    .flatMapThrowing(o2 -> o2.mapThrowingOr(
-                        c -> checkAndCompile(context, c, i),
-                        Result.ofOk(Output.builder().build())
-                    )),
-                Result.ofOk(Output.builder().build())
+    public Result<Output, SpoofaxStrategoCompileException> exec(ExecContext context, ResourcePath rootDirectory) throws IOException {
+        return context.require(configure, rootDirectory)
+            .mapErr(SpoofaxStrategoCompileException::configureFail)
+            .flatMapThrowing(o -> o.mapThrowingOr(
+                c -> compile(context, c),
+                Result.ofOk(Output.builder().build()) // Stratego is not configured, nothing to do.
             ));
     }
 
@@ -84,17 +74,17 @@ public class CompileStratego implements TaskDef<ResourcePath, Result<CompileStra
         return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 
-    public Result<Output, StrategoCompileException> checkAndCompile(ExecContext context, StrategoCompileConfig config, CompileStrategoInput input) throws IOException {
+    public Result<Output, SpoofaxStrategoCompileException> compile(ExecContext context, StrategoCompileConfig config) throws IOException {
         final StrategoAnalyzeConfig analyzeConfig = config.toAnalyzeConfig();
         final KeyedMessages messages = context.require(check, analyzeConfig);
         if(messages.containsError()) {
-            return Result.ofErr(StrategoCompileException.checkFail(messages, analyzeConfig));
+            return Result.ofErr(SpoofaxStrategoCompileException.checkFail(messages, analyzeConfig));
         }
 
         final Result<StrategoCompileToJava.Output, MessagesException> compileResult = context.require(compileToJava, config);
         if(compileResult.isErr()) {
             // noinspection ConstantConditions (error is present)
-            return Result.ofErr(StrategoCompileException.compileFail(compileResult.getErr(), config));
+            return Result.ofErr(SpoofaxStrategoCompileException.compileFail(compileResult.getErr(), config));
         } else {
             // noinspection ConstantConditions (value is present)
             final StrategoCompileToJava.Output output = compileResult.get();

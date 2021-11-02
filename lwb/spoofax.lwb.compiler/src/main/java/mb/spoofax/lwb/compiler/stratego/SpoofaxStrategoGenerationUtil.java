@@ -12,10 +12,13 @@ import org.spoofax.terms.util.TermUtils;
 
 import javax.inject.Inject;
 
-public class StrategoGenerationUtil {
+/**
+ * Stratego generation utilities in the context of the Spoofax LWB compiler.
+ */
+public class SpoofaxStrategoGenerationUtil {
     private final StrategoPrettyPrint prettyPrint;
 
-    @Inject public StrategoGenerationUtil(StrategoPrettyPrint prettyPrint) {
+    @Inject public SpoofaxStrategoGenerationUtil(StrategoPrettyPrint prettyPrint) {
         this.prettyPrint = prettyPrint;
     }
 

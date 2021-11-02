@@ -122,12 +122,22 @@ rules // Stratego section and options
   strategoOptionOk : scope * StrategoOption
   strategoOptionsOk maps strategoOptionOk(*, list(*))
 
-  strategoOptionOk(s, StrategoMainSourceDirectory(e)) :-
-    typeOfExpr(s, e) == PATH() | error $[Expected path]. 
-  strategoOptionOk(s, StrategoMainFile(e)) :-
-    typeOfExpr(s, e) == PATH() | error $[Expected path]. 
-  strategoOptionOk(s, StrategoLanguageStrategyAffix(e)) :-
-    typeOfExpr(s, e) == STRATEGY() | error $[Expected Stratego strategy identifier].
-  strategoOptionOk(s, StrategoSdf3StatixExplicationGen(e)) :-
+  strategoOptionOk(s, StrategoSource(source)) :-
+    strategoSourceOk(s, source).
+    
+  strategoSourceOk : scope * StrategoSource
+  strategoSourceOk(s, StrategoFiles(options)) :- strategoFilesOptionsOk(s, options).
+  
+  strategoFilesOptionOk : scope * StrategoFilesOption
+  strategoFilesOptionsOk maps strategoFilesOptionOk(*, list(*))
+  strategoFilesOptionOk(s, StrategoFilesMainSourceDirectory(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path].
+  strategoFilesOptionOk(s, StrategoFilesMainFile(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path].
+  strategoFilesOptionOk(s, StrategoFilesIncludeDirectory(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path].
+  strategoFilesOptionOk(s, StrategoFilesSdf3StatixExplicationGen(e)) :-
     typeOfExpr(s, e) == BOOL() | error $[Expected boolean].
 
+  strategoOptionOk(s, StrategoLanguageStrategyAffix(e)) :-
+    typeOfExpr(s, e) == STRATEGY() | error $[Expected Stratego strategy identifier].

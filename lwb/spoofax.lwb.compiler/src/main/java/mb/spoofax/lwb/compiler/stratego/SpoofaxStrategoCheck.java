@@ -10,12 +10,15 @@ import mb.str.task.StrategoCheck;
 
 import javax.inject.Inject;
 
-public class CheckStratego implements TaskDef<ResourcePath, KeyedMessages> {
-    private final ConfigureStratego configure;
+/**
+ * Check task for Stratego in the context of the Spoofax LWB compiler.
+ */
+public class SpoofaxStrategoCheck implements TaskDef<ResourcePath, KeyedMessages> {
+    private final SpoofaxStrategoConfigure configure;
     private final StrategoCheck check;
 
-    @Inject public CheckStratego(
-        ConfigureStratego configure,
+    @Inject public SpoofaxStrategoCheck(
+        SpoofaxStrategoConfigure configure,
         StrategoCheck check
     ) {
         this.configure = configure;

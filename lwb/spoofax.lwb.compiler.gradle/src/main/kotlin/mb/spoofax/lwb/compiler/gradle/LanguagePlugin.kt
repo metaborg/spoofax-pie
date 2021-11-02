@@ -30,7 +30,7 @@ import mb.spoofax.compiler.util.*
 import mb.spoofax.lwb.compiler.CheckLanguageSpecification
 import mb.spoofax.lwb.compiler.CompileLanguageSpecification
 import mb.spoofax.lwb.compiler.dagger.StandaloneSpoofax3Compiler
-import mb.spoofax.lwb.compiler.stratego.StrategoLibUtil
+import mb.spoofax.lwb.compiler.stratego.SpoofaxStrategoLibUtil
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -117,7 +117,7 @@ class LanguagePluginInstance(
   private fun configure() {
     val languageProjectCompiler = spoofax3Compiler.compiler.spoofaxCompilerComponent.languageProjectCompiler
     val adapterProjectCompiler = spoofax3Compiler.compiler.spoofaxCompilerComponent.adapterProjectCompiler
-    configureProject(languageProjectCompiler, spoofax3Compiler.compiler.component.strategoLibUtil, adapterProjectCompiler)
+    configureProject(languageProjectCompiler, spoofax3Compiler.compiler.component.spoofaxStrategoLibUtil, adapterProjectCompiler)
     configureCompileLanguageProjectTask(languageProjectCompiler, compileLanguageInput.languageProjectInput())
     val check = spoofax3Compiler.compiler.component.checkLanguageSpecification
     val compile = spoofax3Compiler.compiler.component.compileLanguageSpecification
@@ -127,7 +127,7 @@ class LanguagePluginInstance(
 
   private fun configureProject(
     languageProjectCompiler: LanguageProjectCompiler,
-    strategoLibUtil: StrategoLibUtil,
+    spoofaxStrategoLibUtil: SpoofaxStrategoLibUtil,
     adapterProjectCompiler: AdapterProjectCompiler
   ) {
     // Language project compiler
@@ -140,7 +140,7 @@ class LanguagePluginInstance(
     val languageSpecificationInput = compileLanguageInput.compileLanguageSpecificationInput()
     project.addMainResourceDirectory(languageSpecificationInput.compileLanguageShared().generatedResourcesDirectory(), resourceService)
     project.addMainJavaSourceDirectory(languageSpecificationInput.compileLanguageShared().generatedJavaSourcesDirectory(), resourceService)
-    project.dependencies.add("implementation", project.files(strategoLibUtil.strategoLibJavaClassPaths))
+    project.dependencies.add("implementation", project.files(spoofaxStrategoLibUtil.strategoLibJavaClassPaths))
     // Adapter project compiler
     val adapterProjectInput = compileLanguageInput.adapterProjectInput()
     project.addMainJavaSourceDirectory(adapterProjectInput.adapterProject().generatedJavaSourcesDirectory(), resourceService)
@@ -270,21 +270,28 @@ class LanguagePluginInstance(
           })
         }
       }
-      input.stratego().ifPresent {
-        // Input: all Stratego files
-        val rootDirectory = resourceService.toLocalFile(it.mainSourceDirectory())
-        if(rootDirectory != null) {
-          inputs.files(project.fileTree(rootDirectory) { include("**/*.str") })
-        } else {
-          logger.warn("Cannot set Stratego files as task inputs, because ${it.mainSourceDirectory()} cannot be converted into a local file. This breaks incrementality for this Gradle task")
+      input.stratego().ifPresent { strategoConfig ->
+        // Input: all Stratego files in the main source directory and include directories
+        strategoConfig.source().files.mainSourceDirectory().tryAsLocal("Stratego files in main source directory") { dir ->
+          inputs.files(project.fileTree(dir) {
+            include("**/*.str")
+            include("**/*.str2")
+          })
+        }
+        strategoConfig.source().files.includeDirectories().forEach { includeDirectory ->
+          includeDirectory.tryAsLocal("Stratego files in include directory") { dir ->
+            inputs.files(project.fileTree(dir) {
+              include("**/*.str")
+              include("**/*.str2")
+            })
+          }
         }
 
-        // Output: Stratego output directory
-        val outputDirectory = resourceService.toLocalFile(it.javaSourceFileOutputDir())
-        if(outputDirectory != null) {
-          outputs.dir(outputDirectory)
-        } else {
-          logger.warn("Cannot set the Stratego output directory as a task output, because ${it.javaSourceFileOutputDir()} cannot be converted into a local file. This disables incrementality for this Gradle task")
+        // Output: output Java sources directory
+        strategoConfig.javaSourceFileOutputDirectory().tryAsLocal("Stratego output Java sources directory") { dir ->
+          outputs.files(project.fileTree(dir) {
+            include("**/*.java")
+          })
         }
       }
 

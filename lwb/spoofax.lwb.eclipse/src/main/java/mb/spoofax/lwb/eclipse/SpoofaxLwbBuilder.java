@@ -244,8 +244,8 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         final WorkspaceUpdate cfgUpdate = createUpdate(session, rootDirectory, cancelToken, CfgLanguageFactory.getLanguage().getComponent().getEclipseIdentifiers(), spoofax3CompilerComponent.getSpoofaxCfgCheck());
         final WorkspaceUpdate esvUpdate = createUpdate(session, rootDirectory, cancelToken, EsvLanguageFactory.getLanguage().getComponent().getEclipseIdentifiers(), spoofax3CompilerComponent.getSpoofaxEsvCheck());
         final WorkspaceUpdate sdf3Update = createUpdate(session, rootDirectory, cancelToken, Sdf3LanguageFactory.getLanguage().getComponent().getEclipseIdentifiers(), spoofax3CompilerComponent.getSpoofaxSdf3Check());
-        final WorkspaceUpdate statixUpdate = createUpdate(session, rootDirectory, cancelToken, StatixLanguageFactory.getLanguage().getComponent().getEclipseIdentifiers(), spoofax3CompilerComponent.getCheckStatix());
-        final WorkspaceUpdate strategoUpdate = createUpdate(session, rootDirectory, cancelToken, StrategoLanguageFactory.getLanguage().getComponent().getEclipseIdentifiers(), spoofax3CompilerComponent.getCheckStratego());
+        final WorkspaceUpdate statixUpdate = createUpdate(session, rootDirectory, cancelToken, StatixLanguageFactory.getLanguage().getComponent().getEclipseIdentifiers(), spoofax3CompilerComponent.getSpoofaxStatixCheck());
+        final WorkspaceUpdate strategoUpdate = createUpdate(session, rootDirectory, cancelToken, StrategoLanguageFactory.getLanguage().getComponent().getEclipseIdentifiers(), spoofax3CompilerComponent.getSpoofaxStrategoCheck());
         final ICoreRunnable runnable = runnableMonitor -> {
             cfgUpdate.createMarkerUpdate().run(runnableMonitor);
             esvUpdate.createMarkerUpdate().run(runnableMonitor);
@@ -302,14 +302,17 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         try {
             result.unwrap();
         } catch(CompileLanguageException e) {
+            rememberLastBuiltState(); // Ensure rebuild triggers the same error due to remembering previously changed files.
+            final ExceptionPrinter exceptionPrinter = new ExceptionPrinter();
+            exceptionPrinter.addCurrentDirectoryContext(rootDirectory);
+            final String message;
             if(e.caseOf().javaCompilationFail_(true).otherwise_(false)) {
-                // Don't cancel and throw in case of a Java compilation exception, so that the Eclipse Java compiler has a chance to run and show errors.
-                logger.debug("Java compilation failed, but not cancelling the build to give ECJ a chance to run. Error: {}",
-                    new ExceptionPrinter().addCurrentDirectoryContext(rootDirectory).printExceptionToString(e));
+                message = "Java compilation failed. Fix the errors (if they are in your code, otherwise this is a bug) and build again";
             } else {
-                cancel(monitor);
-                throw toCoreException(rootDirectory, e);
+                message = "BUG: compiling language failed unexpectedly." + exceptionPrinter.printExceptionToString(e);
             }
+            logger.info(message);
+            throw new CoreException(new Status(IStatus.ERROR, SpoofaxLwbPlugin.id, IStatus.ERROR, message, e));
         }
     }
 

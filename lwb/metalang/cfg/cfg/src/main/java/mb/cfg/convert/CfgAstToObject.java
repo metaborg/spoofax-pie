@@ -12,7 +12,8 @@ import mb.cfg.metalang.CfgSdf3Config;
 import mb.cfg.metalang.CfgSdf3Source;
 import mb.cfg.metalang.CfgStatixConfig;
 import mb.cfg.metalang.CfgStatixSource;
-import mb.cfg.metalang.CompileStrategoInput;
+import mb.cfg.metalang.CfgStrategoConfig;
+import mb.cfg.metalang.CfgStrategoSource;
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Severity;
@@ -238,13 +239,23 @@ public class CfgAstToObject {
             subParts.forOneSubtermAsBool("StatixSdf3SignatureGen", builder::enableSdf3SignatureGen);
         });
         parts.getAllSubTermsInListAsParts("StrategoSection").ifSome(subParts -> {
-            final CompileStrategoInput.Builder builder = languageCompilerInputBuilder.withStratego();
-            final ResourcePath mainSourceDirectory = subParts.getOneSubtermAsExistingDirectory("StrategoMainSourceDirectory", rootDirectory, "Stratego main source directory")
-                .unwrapOrElse(() -> CompileStrategoInput.Builder.getDefaultMainSourceDirectory(languageShared));
-            builder.mainSourceDirectory(mainSourceDirectory);
-            subParts.forOneSubtermAsExistingFile("StrategoMainFile", mainSourceDirectory, "Stratego main file", builder::mainFile);
+            final CfgStrategoConfig.Builder builder = languageCompilerInputBuilder.withStratego();
+            subParts.getOneSubterm("StrategoSource").ifSome(source -> {
+                if(TermUtils.isAppl(source, "StrategoFiles", 1)) {
+                    final Parts filesParts = subParts.subParts(source.getSubterm(0));
+                    final CfgStrategoSource.Files.Builder filesSourceBuilder = CfgStrategoSource.Files.builder().compileLanguageShared(languageShared);
+                    final ResourcePath mainSourceDirectory = filesParts.getOneSubtermAsExistingDirectory("StrategoFilesMainSourceDirectory", rootDirectory, "Stratego main source directory")
+                        .unwrapOrElse(() -> CfgStrategoSource.Files.Builder.getDefaultMainSourceDirectory(languageShared));
+                    filesSourceBuilder.mainSourceDirectory(mainSourceDirectory);
+                    filesParts.forAllSubtermsAsExistingDirectories("StrategoFilesIncludeDirectory", rootDirectory, "Stratego include directory", filesSourceBuilder::addIncludeDirectories);
+                    filesParts.forOneSubtermAsExistingFile("StrategoFilesMainFile", mainSourceDirectory, "Stratego main file", filesSourceBuilder::mainFile);
+                    filesParts.forOneSubtermAsBool("StrategoFilesSdf3StatixExplicationGen", filesSourceBuilder::enableSdf3StatixExplicationGen);
+                    builder.source(CfgStrategoSource.files(filesSourceBuilder.build()));
+                } else {
+                    throw new InvalidAstShapeException("Stratego source", source);
+                }
+            });
             subParts.forOneSubtermAsString("StrategoLanguageStrategyAffix", builder::languageStrategyAffix);
-            subParts.forOneSubtermAsBool("StrategoSdf3StatixExplicationGen", builder::enableSdf3StatixExplicationGen);
         });
         customizer.customize(languageCompilerInputBuilder);
         final CompileLanguageSpecificationInput languageCompilerInput = languageCompilerInputBuilder.build(properties, shared, languageShared);

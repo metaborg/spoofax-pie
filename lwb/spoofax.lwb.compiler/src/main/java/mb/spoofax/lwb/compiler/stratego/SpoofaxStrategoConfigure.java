@@ -1,6 +1,7 @@
 package mb.spoofax.lwb.compiler.stratego;
 
-import mb.cfg.metalang.CompileStrategoInput;
+import mb.cfg.metalang.CfgStrategoConfig;
+import mb.cfg.metalang.CfgStrategoSource;
 import mb.cfg.task.CfgRootDirectoryToObject;
 import mb.cfg.task.CfgRootDirectoryToObjectException;
 import mb.cfg.task.CfgToObject;
@@ -56,7 +57,10 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<StrategoCompileConfig>, StrategoConfigureException>> {
+/**
+ * Configure task for Stratego in the context of the Spoofax LWB compiler.
+ */
+public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Option<StrategoCompileConfig>, SpoofaxStrategoConfigureException>> {
     private final TemplateWriter completionTemplate;
     private final TemplateWriter ppTemplate;
 
@@ -66,8 +70,8 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
     private final LibSpoofax2ClassLoaderResources libSpoofax2ClassLoaderResources;
     private final LibStatixClassLoaderResources libStatixClassLoaderResources;
 
-    private final StrategoLibUtil strategoLibUtil;
-    private final StrategoGenerationUtil strategoGenerationUtil;
+    private final SpoofaxStrategoLibUtil spoofaxStrategoLibUtil;
+    private final SpoofaxStrategoGenerationUtil spoofaxStrategoGenerationUtil;
 
     private final SpoofaxSdf3GenerationUtil spoofaxSdf3GenerationUtil;
     private final Sdf3SpecToParseTable sdf3ToParseTable;
@@ -78,7 +82,7 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
     private final Sdf3ExtStatixGenerateStratego sdf3ExtStatixGenerateStratego;
 
 
-    @Inject public ConfigureStratego(
+    @Inject public SpoofaxStrategoConfigure(
         TemplateCompiler templateCompiler,
 
         CfgRootDirectoryToObject cfgRootDirectoryToObject,
@@ -87,8 +91,8 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
         LibSpoofax2ClassLoaderResources libSpoofax2ClassLoaderResources,
         LibStatixClassLoaderResources libStatixClassLoaderResources,
 
-        StrategoLibUtil strategoLibUtil,
-        StrategoGenerationUtil strategoGenerationUtil,
+        SpoofaxStrategoLibUtil spoofaxStrategoLibUtil,
+        SpoofaxStrategoGenerationUtil spoofaxStrategoGenerationUtil,
 
         SpoofaxSdf3GenerationUtil spoofaxSdf3GenerationUtil,
         Sdf3SpecToParseTable sdf3ToParseTable,
@@ -108,8 +112,8 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
         this.libSpoofax2ClassLoaderResources = libSpoofax2ClassLoaderResources;
         this.libStatixClassLoaderResources = libStatixClassLoaderResources;
 
-        this.strategoLibUtil = strategoLibUtil;
-        this.strategoGenerationUtil = strategoGenerationUtil;
+        this.spoofaxStrategoLibUtil = spoofaxStrategoLibUtil;
+        this.spoofaxStrategoGenerationUtil = spoofaxStrategoGenerationUtil;
 
         this.spoofaxSdf3GenerationUtil = spoofaxSdf3GenerationUtil;
         this.sdf3ToParseTable = sdf3ToParseTable;
@@ -126,34 +130,35 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
     }
 
     @Override
-    public Result<Option<StrategoCompileConfig>, StrategoConfigureException> exec(ExecContext context, ResourcePath rootDirectory) throws Exception {
+    public Result<Option<StrategoCompileConfig>, SpoofaxStrategoConfigureException> exec(ExecContext context, ResourcePath rootDirectory) throws Exception {
         return context.requireMapping(cfgRootDirectoryToObject, rootDirectory, new StrategoConfigMapper())
-            .mapErr(StrategoConfigureException::getLanguageCompilerConfigurationFail)
-            .<Option<StrategoCompileConfig>, Exception>flatMapThrowing(o -> Result.transpose(o.mapThrowing(strategoInput -> toStrategoConfig(context, rootDirectory, strategoInput))));
+            .mapErr(SpoofaxStrategoConfigureException::getLanguageCompilerConfigurationFail)
+            .<Option<StrategoCompileConfig>, Exception>flatMapThrowing(o -> Result.transpose(o.mapThrowing(c -> toStrategoConfig(context, rootDirectory, c, c.source().getFiles()))));
     }
 
     @Override public boolean shouldExecWhenAffected(ResourcePath input, Set<?> tags) {
         return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 
-    public Result<StrategoCompileConfig, StrategoConfigureException> toStrategoConfig(
+    public Result<StrategoCompileConfig, SpoofaxStrategoConfigureException> toStrategoConfig(
         ExecContext context,
         ResourcePath rootDirectory,
-        CompileStrategoInput strategoInput
+        CfgStrategoConfig cfgStrategoConfig,
+        CfgStrategoSource.Files sourceFiles
     ) throws IOException, InterruptedException {
         // Check main source directory, main file, and include directories.
-        final HierarchicalResource mainSourceDirectory = context.require(strategoInput.mainSourceDirectory(), ResourceStampers.<HierarchicalResource>exists());
+        final HierarchicalResource mainSourceDirectory = context.require(sourceFiles.mainSourceDirectory(), ResourceStampers.<HierarchicalResource>exists());
         if(!mainSourceDirectory.exists() || !mainSourceDirectory.isDirectory()) {
-            return Result.ofErr(StrategoConfigureException.mainSourceDirectoryFail(mainSourceDirectory.getPath()));
+            return Result.ofErr(SpoofaxStrategoConfigureException.mainSourceDirectoryFail(mainSourceDirectory.getPath()));
         }
-        final HierarchicalResource mainFile = context.require(strategoInput.mainFile(), ResourceStampers.<HierarchicalResource>exists());
+        final HierarchicalResource mainFile = context.require(sourceFiles.mainFile(), ResourceStampers.<HierarchicalResource>exists());
         if(!mainFile.exists() || !mainFile.isFile()) {
-            return Result.ofErr(StrategoConfigureException.mainFileFail(mainFile.getPath()));
+            return Result.ofErr(SpoofaxStrategoConfigureException.mainFileFail(mainFile.getPath()));
         }
-        for(ResourcePath includeDirectoryPath : strategoInput.includeDirectories()) {
+        for(ResourcePath includeDirectoryPath : sourceFiles.includeDirectories()) {
             final HierarchicalResource includeDirectory = context.require(includeDirectoryPath, ResourceStampers.<HierarchicalResource>exists());
             if(!includeDirectory.exists() || !includeDirectory.isDirectory()) {
-                return Result.ofErr(StrategoConfigureException.includeDirectoryFail(includeDirectoryPath));
+                return Result.ofErr(SpoofaxStrategoConfigureException.includeDirectoryFail(includeDirectoryPath));
             }
         }
 
@@ -162,18 +167,18 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
 
         // Gather include directories, str2libs, and Java classpath.
         final LinkedHashSet<ResourcePath> includeDirectories = new LinkedHashSet<>(); // LinkedHashSet to remove duplicates while keeping insertion order.
-        includeDirectories.add(strategoInput.mainSourceDirectory()); // Add main source directory as an include for imports.
-        includeDirectories.addAll(strategoInput.includeDirectories());
+        includeDirectories.add(sourceFiles.mainSourceDirectory()); // Add main source directory as an include for imports.
+        includeDirectories.addAll(sourceFiles.includeDirectories());
         final LinkedHashSet<Supplier<Stratego2LibInfo>> str2Libs = new LinkedHashSet<>();
-        str2Libs.add(strategoLibUtil.getStrategoLibInfo(strategoInput.strategoLibUnarchiveDirectory()));
-        final LinkedHashSet<File> javaClassPaths = new LinkedHashSet<>(strategoLibUtil.getStrategoLibJavaClassPaths());
+        str2Libs.add(spoofaxStrategoLibUtil.getStrategoLibInfo(sourceFiles.strategoLibUnarchiveDirectory()));
+        final LinkedHashSet<File> javaClassPaths = new LinkedHashSet<>(spoofaxStrategoLibUtil.getStrategoLibJavaClassPaths());
 
         // Determine libspoofax2 definition directories.
         final HashSet<HierarchicalResource> libSpoofax2DefinitionDirs = new LinkedHashSet<>(); // LinkedHashSet to remove duplicates while keeping insertion order.
-        if(strategoInput.includeLibSpoofax2Exports()) {
+        if(sourceFiles.includeLibSpoofax2Exports()) {
             final ClassLoaderResourceLocations<FSResource> locations = libSpoofax2ClassLoaderResources.definitionDirectory.getLocations();
             libSpoofax2DefinitionDirs.addAll(locations.directories);
-            final ResourcePath unarchiveDirectoryBase = strategoInput.libSpoofax2UnarchiveDirectory();
+            final ResourcePath unarchiveDirectoryBase = sourceFiles.libSpoofax2UnarchiveDirectory();
             for(JarFileWithPath<FSResource> jarFileWithPath : locations.jarFiles) {
                 final ResourcePath jarFilePath = jarFileWithPath.file.getPath();
                 @SuppressWarnings("ConstantConditions") // JAR files always have leaves.
@@ -195,10 +200,10 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
 
         // Determine libstatix definition directories.
         final HashSet<HierarchicalResource> libStatixDefinitionDirs = new LinkedHashSet<>(); // LinkedHashSet to remove duplicates while keeping insertion order.
-        if(strategoInput.includeLibStatixExports()) {
+        if(sourceFiles.includeLibStatixExports()) {
             final ClassLoaderResourceLocations<FSResource> locations = libStatixClassLoaderResources.definitionDirectory.getLocations();
             libStatixDefinitionDirs.addAll(locations.directories);
-            final ResourcePath unarchiveDirectoryBase = strategoInput.libStatixUnarchiveDirectory();
+            final ResourcePath unarchiveDirectoryBase = sourceFiles.libStatixUnarchiveDirectory();
             for(JarFileWithPath<FSResource> jarFileWithPath : locations.jarFiles) {
                 final ResourcePath jarFilePath = jarFileWithPath.file.getPath();
                 @SuppressWarnings("ConstantConditions") // JAR files always have leaves.
@@ -220,18 +225,18 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
 
         // Compile each SDF3 source file (if SDF3 is enabled) to a Stratego signature, pretty-printer, completion
         // runtime, and injection explication (if enabled) module.
-        final ResourcePath generatedSourcesDirectory = strategoInput.generatedSourcesDirectory();
-        final String strategyAffix = strategoInput.languageStrategyAffix();
+        final ResourcePath generatedSourcesDirectory = sourceFiles.generatedSourcesDirectory();
+        final String strategyAffix = cfgStrategoConfig.languageStrategyAffix();
         try {
-            spoofaxSdf3GenerationUtil.performSdf3GenerationIfEnabled(context, rootDirectory, new SpoofaxSdf3GenerationUtil.Callbacks<StrategoConfigureException>() {
+            spoofaxSdf3GenerationUtil.performSdf3GenerationIfEnabled(context, rootDirectory, new SpoofaxSdf3GenerationUtil.Callbacks<SpoofaxStrategoConfigureException>() {
                 @Override
-                public void generateFromAst(ExecContext context, STask<Result<IStrategoTerm, ?>> astSupplier) throws StrategoConfigureException, InterruptedException {
+                public void generateFromAst(ExecContext context, STask<Result<IStrategoTerm, ?>> astSupplier) throws SpoofaxStrategoConfigureException, InterruptedException {
                     try {
                         sdf3ToPrettyPrinter(context, strategyAffix, generatedSourcesDirectory, astSupplier);
                     } catch(RuntimeException | InterruptedException e) {
                         throw e; // Do not wrap runtime and interrupted exceptions, rethrow them.
                     } catch(Exception e) {
-                        throw StrategoConfigureException.sdf3PrettyPrinterGenerateFail(e);
+                        throw SpoofaxStrategoConfigureException.sdf3PrettyPrinterGenerateFail(e);
                     }
                     // HACK: for now disabled completion runtime generation, as it is not used in Spoofax 3 (yet?)
 //                    try {
@@ -241,30 +246,30 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
 //                    } catch(Exception e) {
 //                        throw StrategoConfigureException.sdf3CompletionRuntimeGenerateFail(e);
 //                    }
-                    if(strategoInput.enableSdf3StatixExplicationGen()) {
+                    if(sourceFiles.enableSdf3StatixExplicationGen()) {
                         try {
                             sdf3ToStatixGenInj(context, strategyAffix, generatedSourcesDirectory, astSupplier);
                         } catch(RuntimeException | InterruptedException e) {
                             throw e; // Do not wrap runtime and interrupted exceptions, rethrow them.
                         } catch(Exception e) {
-                            throw StrategoConfigureException.sdf3ExtStatixGenInjFail(e);
+                            throw SpoofaxStrategoConfigureException.sdf3ExtStatixGenInjFail(e);
                         }
                     }
                 }
 
                 @Override
-                public void generateFromAnalyzed(ExecContext context, Supplier<Result<ConstraintAnalyzeMultiTaskDef.SingleFileOutput, ?>> singleFileAnalysisOutputSupplier) throws StrategoConfigureException, InterruptedException {
+                public void generateFromAnalyzed(ExecContext context, Supplier<Result<ConstraintAnalyzeMultiTaskDef.SingleFileOutput, ?>> singleFileAnalysisOutputSupplier) throws SpoofaxStrategoConfigureException, InterruptedException {
                     try {
                         sdf3ToSignature(context, generatedSourcesDirectory, singleFileAnalysisOutputSupplier);
                     } catch(RuntimeException | InterruptedException e) {
                         throw e; // Do not wrap runtime and interrupted exceptions, rethrow them.
                     } catch(Exception e) {
-                        throw StrategoConfigureException.sdf3SignatureGenerateFail(e);
+                        throw SpoofaxStrategoConfigureException.sdf3SignatureGenerateFail(e);
                     }
                 }
 
                 @Override
-                public void generateFromConfig(ExecContext context, Sdf3SpecConfig sdf3Config) throws StrategoConfigureException, IOException, InterruptedException {
+                public void generateFromConfig(ExecContext context, Sdf3SpecConfig sdf3Config) throws SpoofaxStrategoConfigureException, IOException, InterruptedException {
                     // Compile SDF3 specification to a Stratego parenthesizer.
                     try {
                         final STask<Result<ParseTable, ?>> parseTableSupplier = sdf3ToParseTable.createSupplier(new Sdf3SpecToParseTable.Input(sdf3Config, false));
@@ -272,15 +277,15 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
                     } catch(RuntimeException | InterruptedException e) {
                         throw e; // Do not wrap runtime and interrupted exceptions, rethrow them.
                     } catch(Exception e) {
-                        throw StrategoConfigureException.sdf3ParenthesizerGenerateFail(e);
+                        throw SpoofaxStrategoConfigureException.sdf3ParenthesizerGenerateFail(e);
                     }
 
                     { // Generate pp and completion Stratego module.
                         final HashMap<String, Object> map = new HashMap<>();
                         map.put("name", strategyAffix);
                         map.put("ppName", strategyAffix);
-                        completionTemplate.write(context, generatedSourcesDirectory.appendRelativePath("completion.str2"), strategoInput, map);
-                        ppTemplate.write(context, generatedSourcesDirectory.appendRelativePath("pp.str2"), strategoInput, map);
+                        completionTemplate.write(context, generatedSourcesDirectory.appendRelativePath("completion.str2"), cfgStrategoConfig, map);
+                        ppTemplate.write(context, generatedSourcesDirectory.appendRelativePath("pp.str2"), cfgStrategoConfig, map);
                     }
 
                     // Add generated sources directory as an include for Stratego imports.
@@ -289,34 +294,34 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
                     sourceFileOrigins.add(createSupplier(rootDirectory));
                 }
             });
-        } catch(StrategoConfigureException e) {
+        } catch(SpoofaxStrategoConfigureException e) {
             return Result.ofErr(e);
         } catch(SpoofaxSdf3ConfigureException e) {
-            return Result.ofErr(StrategoConfigureException.sdf3ConfigureFail(e));
+            return Result.ofErr(SpoofaxStrategoConfigureException.sdf3ConfigureFail(e));
         }
 
-        final ArrayList<BuiltinLibraryIdentifier> builtinLibraryIdentifiers = new ArrayList<>(strategoInput.includeBuiltinLibraries().size());
-        for(String builtinLibraryName : strategoInput.includeBuiltinLibraries()) {
+        final ArrayList<BuiltinLibraryIdentifier> builtinLibraryIdentifiers = new ArrayList<>(sourceFiles.includeBuiltinLibraries().size());
+        for(String builtinLibraryName : sourceFiles.includeBuiltinLibraries()) {
             final @Nullable BuiltinLibraryIdentifier identifier = BuiltinLibraryIdentifier.fromString(builtinLibraryName);
             if(identifier == null) {
-                return Result.ofErr(StrategoConfigureException.builtinLibraryFail(builtinLibraryName));
+                return Result.ofErr(SpoofaxStrategoConfigureException.builtinLibraryFail(builtinLibraryName));
             }
             builtinLibraryIdentifiers.add(identifier);
         }
 
         return Result.ofOk(new StrategoCompileConfig(
             rootDirectory,
-            new ModuleIdentifier(true, false, strategoInput.mainModule(), mainFile.getPath()),
+            new ModuleIdentifier(true, false, sourceFiles.mainModule(), mainFile.getPath()),
             ListView.copyOf(includeDirectories),
             ListView.of(builtinLibraryIdentifiers),
             ListView.copyOf(str2Libs),
             new Arguments(), // TODO: add to input and configure
             ListView.of(sourceFileOrigins),
             null, //strategoInput.cacheDirectory(), // TODO: settings this crashes the compiler, most likely due to the ## symbols in the path.
-            strategoInput.javaSourceFileOutputDir(),
-            strategoInput.javaClassFileOutputDir(),
-            strategoInput.outputJavaPackageId(),
-            strategoInput.outputLibraryName(),
+            cfgStrategoConfig.javaSourceFileOutputDirectory(),
+            cfgStrategoConfig.javaClassFileOutputDirectory(),
+            cfgStrategoConfig.outputJavaPackageId(),
+            cfgStrategoConfig.outputLibraryName(),
             ListView.copyOf(javaClassPaths)
         ));
     }
@@ -327,7 +332,7 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
         Supplier<Result<ConstraintAnalyzeMultiTaskDef.SingleFileOutput, ?>> singleFileAnalysisOutputSupplier
     ) throws Exception {
         final STask<Result<IStrategoTerm, ?>> supplier = sdf3ToSignature.createSupplier(singleFileAnalysisOutputSupplier);
-        strategoGenerationUtil.writePrettyPrintedFile(context, generatesSourcesDirectory, supplier);
+        spoofaxStrategoGenerationUtil.writePrettyPrintedFile(context, generatesSourcesDirectory, supplier);
     }
 
     private void sdf3ToPrettyPrinter(
@@ -337,7 +342,7 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
         STask<Result<IStrategoTerm, ?>> astSupplier
     ) throws Exception {
         final STask<Result<IStrategoTerm, ?>> supplier = sdf3ToPrettyPrinter.createSupplier(new Sdf3ToPrettyPrinter.Input(astSupplier, strategyAffix));
-        strategoGenerationUtil.writePrettyPrintedFile(context, generatesSourcesDirectory, supplier);
+        spoofaxStrategoGenerationUtil.writePrettyPrintedFile(context, generatesSourcesDirectory, supplier);
     }
 
     private void sdf3ToParenthesizer(
@@ -347,7 +352,7 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
         STask<Result<ParseTable, ?>> parseTableSupplier
     ) throws Exception {
         final STask<Result<IStrategoTerm, ?>> supplier = sdf3ToParenthesizer.createSupplier(new Sdf3ParseTableToParenthesizer.Args(parseTableSupplier, strategyAffix));
-        strategoGenerationUtil.writePrettyPrintedFile(context, generatesSourcesDirectory, supplier);
+        spoofaxStrategoGenerationUtil.writePrettyPrintedFile(context, generatesSourcesDirectory, supplier);
     }
 
     private void sdf3ToCompletionRuntime(
@@ -356,7 +361,7 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
         STask<Result<IStrategoTerm, ?>> astSupplier
     ) throws Exception {
         final STask<Result<IStrategoTerm, ?>> supplier = sdf3ToCompletionRuntime.createSupplier(astSupplier);
-        strategoGenerationUtil.writePrettyPrintedFile(context, generatesSourcesDirectory, supplier);
+        spoofaxStrategoGenerationUtil.writePrettyPrintedFile(context, generatesSourcesDirectory, supplier);
     }
 
     private void sdf3ToStatixGenInj(
@@ -366,12 +371,12 @@ public class ConfigureStratego implements TaskDef<ResourcePath, Result<Option<St
         STask<Result<IStrategoTerm, ?>> astSupplier
     ) throws Exception {
         final STask<Result<IStrategoTerm, ?>> supplier = sdf3ExtStatixGenerateStratego.createSupplier(new Sdf3ExtStatixGenerateStratego.Input(astSupplier, strategyAffix));
-        strategoGenerationUtil.writePrettyPrintedFile(context, generatesSourcesDirectory, supplier);
+        spoofaxStrategoGenerationUtil.writePrettyPrintedFile(context, generatesSourcesDirectory, supplier);
     }
 
-    private static class StrategoConfigMapper extends StatelessSerializableFunction<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>, Result<Option<CompileStrategoInput>, CfgRootDirectoryToObjectException>> {
+    private static class StrategoConfigMapper extends StatelessSerializableFunction<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>, Result<Option<CfgStrategoConfig>, CfgRootDirectoryToObjectException>> {
         @Override
-        public Result<Option<CompileStrategoInput>, CfgRootDirectoryToObjectException> apply(Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result) {
+        public Result<Option<CfgStrategoConfig>, CfgRootDirectoryToObjectException> apply(Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result) {
             return result.map(o -> Option.ofOptional(o.compileLanguageInput.compileLanguageSpecificationInput().stratego()));
         }
     }

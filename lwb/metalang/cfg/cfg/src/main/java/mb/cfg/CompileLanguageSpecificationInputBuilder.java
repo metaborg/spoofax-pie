@@ -3,7 +3,7 @@ package mb.cfg;
 import mb.cfg.metalang.CfgEsvConfig;
 import mb.cfg.metalang.CfgSdf3Config;
 import mb.cfg.metalang.CfgStatixConfig;
-import mb.cfg.metalang.CompileStrategoInput;
+import mb.cfg.metalang.CfgStrategoConfig;
 import mb.common.util.Properties;
 import mb.spoofax.compiler.util.Shared;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -22,7 +22,7 @@ public class CompileLanguageSpecificationInputBuilder {
     public CfgStatixConfig.Builder statix = CfgStatixConfig.builder();
 
     private boolean strategoEnabled = false;
-    public CompileStrategoInput.Builder stratego = CompileStrategoInput.builder();
+    public CfgStrategoConfig.Builder stratego = CfgStrategoConfig.builder();
 
     public CompileLanguageSpecificationInput.Builder compileLanguage = CompileLanguageSpecificationInput.builder();
 
@@ -42,7 +42,7 @@ public class CompileLanguageSpecificationInputBuilder {
         return statix;
     }
 
-    public CompileStrategoInput.Builder withStratego() {
+    public CfgStrategoConfig.Builder withStratego() {
         strategoEnabled = true;
         return stratego;
     }
@@ -58,7 +58,7 @@ public class CompileLanguageSpecificationInputBuilder {
         final @Nullable CfgStatixConfig statix = buildStatix(compileLanguageSpecificationShared);
         if(statix != null) compileLanguage.statix(statix);
 
-        final @Nullable CompileStrategoInput stratego = buildStratego(persistentProperties, shared, compileLanguageSpecificationShared);
+        final @Nullable CfgStrategoConfig stratego = buildStratego(persistentProperties, shared, compileLanguageSpecificationShared);
         if(stratego != null) compileLanguage.stratego(stratego);
 
         return compileLanguage
@@ -94,7 +94,7 @@ public class CompileLanguageSpecificationInputBuilder {
             .build();
     }
 
-    private @Nullable CompileStrategoInput buildStratego(
+    private @Nullable CfgStrategoConfig buildStratego(
         Properties persistentProperties,
         Shared shared,
         CompileLanguageSpecificationShared compileLanguageSpecificationShared

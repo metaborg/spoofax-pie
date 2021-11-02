@@ -1,6 +1,5 @@
 package mb.spoofax.lwb.compiler.stratego;
 
-import mb.cfg.CompileLanguageSpecificationShared;
 import mb.pie.api.ExecContext;
 import mb.pie.api.STask;
 import mb.pie.api.Supplier;
@@ -24,11 +23,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 
-public class StrategoLibUtil {
+/**
+ * Stratego library utilities in the context of the Spoofax LWB compiler.
+ */
+public class SpoofaxStrategoLibUtil {
     private final StrategoLibClassLoaderResources strategoLibClassLoaderResources;
     private final UnarchiveFromJar unarchiveFromJar;
 
-    @Inject public StrategoLibUtil(
+    @Inject public SpoofaxStrategoLibUtil(
         StrategoLibClassLoaderResources strategoLibClassLoaderResources,
         UnarchiveFromJar unarchiveFromJar
     ) {

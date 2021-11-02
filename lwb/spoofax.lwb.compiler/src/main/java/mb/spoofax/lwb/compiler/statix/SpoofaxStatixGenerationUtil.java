@@ -12,6 +12,9 @@ import org.spoofax.terms.util.TermUtils;
 
 import javax.inject.Inject;
 
+/**
+ * Statix generation utilities in the context of the Spoofax LWB compiler.
+ */
 public class SpoofaxStatixGenerationUtil {
     private final StatixPrettyPrint prettyPrint;
 

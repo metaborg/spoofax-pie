@@ -19,7 +19,7 @@ import javax.inject.Inject;
 import java.io.IOException;
 
 /**
- * Generation utilities for SDF3 in the context of the Spoofax LWB compiler.
+ * SDF3 generation utilities in the context of the Spoofax LWB compiler.
  */
 public class SpoofaxSdf3GenerationUtil {
     private final SpoofaxSdf3Configure configure;

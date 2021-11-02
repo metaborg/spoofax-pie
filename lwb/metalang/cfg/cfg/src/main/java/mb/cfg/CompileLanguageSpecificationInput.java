@@ -3,7 +3,7 @@ package mb.cfg;
 import mb.cfg.metalang.CfgEsvConfig;
 import mb.cfg.metalang.CfgSdf3Config;
 import mb.cfg.metalang.CfgStatixConfig;
-import mb.cfg.metalang.CompileStrategoInput;
+import mb.cfg.metalang.CfgStrategoConfig;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.language.LanguageProjectCompilerInputBuilder;
 import org.immutables.value.Value;
@@ -33,7 +33,7 @@ public interface CompileLanguageSpecificationInput extends Serializable {
 
     Optional<CfgStatixConfig> statix();
 
-    Optional<CompileStrategoInput> stratego();
+    Optional<CfgStrategoConfig> stratego();
 
 
     /// Files information, known up-front for build systems with static dependencies such as Gradle.

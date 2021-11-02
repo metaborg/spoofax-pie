@@ -13,8 +13,8 @@ import mb.resource.hierarchical.walk.ResourceWalker;
 import java.io.IOException;
 
 public abstract class TaskCopyUtil {
-    public static void copy(ExecContext context, ResourceKey input, ResourceKey output) throws IOException {
-        final WritableResource outputFile = context.getWritableResource(output);
+    public static void copy(ExecContext context, ResourceKey input, ResourcePath output) throws IOException {
+        final HierarchicalResource outputFile = context.getHierarchicalResource(output).ensureFileExists();
         ResourceUtil.copy(context.require(input), outputFile);
         context.provide(outputFile);
     }

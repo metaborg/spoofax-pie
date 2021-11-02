@@ -26,7 +26,7 @@ import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3Config;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3ConfigureException;
 import mb.spoofax.lwb.compiler.statix.SpoofaxStatixConfig;
 import mb.spoofax.lwb.compiler.statix.SpoofaxStatixConfigureException;
-import mb.spoofax.lwb.compiler.stratego.StrategoConfigureException;
+import mb.spoofax.lwb.compiler.stratego.SpoofaxStrategoConfigureException;
 import mb.statix.StatixComponent;
 import mb.statix.task.StatixConfig;
 import mb.str.StrategoComponent;
@@ -121,14 +121,14 @@ public class Spoofax3Compiler implements AutoCloseable {
                     return r.map(o -> o.flatMap(SpoofaxEsvConfig::getEsvConfig));
                 }
             }));
-        this.strategoComponent.getStrategoAnalyzeConfigFunctionWrapper().set(this.component.getConfigureStratego().createFunction().mapOutput(
-            new StatelessSerializableFunction<Result<Option<StrategoCompileConfig>, StrategoConfigureException>, Result<Option<StrategoAnalyzeConfig>, StrategoConfigureException>>() {
+        this.strategoComponent.getStrategoAnalyzeConfigFunctionWrapper().set(this.component.getSpoofaxStrategoConfigure().createFunction().mapOutput(
+            new StatelessSerializableFunction<Result<Option<StrategoCompileConfig>, SpoofaxStrategoConfigureException>, Result<Option<StrategoAnalyzeConfig>, SpoofaxStrategoConfigureException>>() {
                 @Override
-                public Result<Option<StrategoAnalyzeConfig>, StrategoConfigureException> apply(Result<Option<StrategoCompileConfig>, StrategoConfigureException> r) {
+                public Result<Option<StrategoAnalyzeConfig>, SpoofaxStrategoConfigureException> apply(Result<Option<StrategoCompileConfig>, SpoofaxStrategoConfigureException> r) {
                     return r.map(o -> o.map(StrategoCompileConfig::toAnalyzeConfig));
                 }
             }));
-        this.statixComponent.getStatixConfigFunctionWrapper().set(this.component.getConfigureStatix().createFunction().mapOutput(
+        this.statixComponent.getStatixConfigFunctionWrapper().set(this.component.getSpoofaxStatixConfigure().createFunction().mapOutput(
             new StatelessSerializableFunction<Result<Option<SpoofaxStatixConfig>, SpoofaxStatixConfigureException>, Result<Option<StatixConfig>, SpoofaxStatixConfigureException>>() {
                 @Override
                 public Result<Option<StatixConfig>, SpoofaxStatixConfigureException> apply(Result<Option<SpoofaxStatixConfig>, SpoofaxStatixConfigureException> r) {
