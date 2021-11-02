@@ -38,7 +38,9 @@ public class {{baseParseTaskDef.id}} extends JsglrParseTaskDef {
         Text text,
         @Nullable String startSymbol,
         @Nullable ResourceKey fileHint,
-        @Nullable ResourcePath rootDirectoryHint
+        @Nullable ResourcePath rootDirectoryHint,
+        boolean codeCompletionMode,
+        int cursorOffset
     ) throws IOException, InterruptedException {
         context.require(classLoaderResources.tryGetAsNativeDefinitionResource("{{languageProjectInput.parseTableAtermFileRelativePath}}"));
 {{#languageProjectInput.isJsglr2}}
@@ -50,7 +52,14 @@ public class {{baseParseTaskDef.id}} extends JsglrParseTaskDef {
         context.require(classLoaderResources.tryGetAsNativeResource({{languageProjectInput.parseTable.qualifiedId}}.class), ResourceStampers.hashFile());
         final {{languageProjectInput.parser.qualifiedId}} parser = parserProvider.get();
         try {
-            return Result.ofOk(parser.parse(new JsglrParseInput(text, startSymbol != null ? startSymbol : "{{languageProjectInput.startSymbol}}", fileHint, rootDirectoryHint)));
+            return Result.ofOk(parser.parse(new JsglrParseInput(
+                text,
+                startSymbol != null ? startSymbol : "{{languageProjectInput.startSymbol}}",
+                fileHint,
+                rootDirectoryHint,
+                codeCompletionMode,
+                cursorOffset
+            )));
         } catch(JsglrParseException e) {
             return Result.ofErr(e);
         }

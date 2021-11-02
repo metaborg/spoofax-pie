@@ -119,4 +119,8 @@ public interface JsglrParseTaskInput extends Serializable {
     }
 
     Optional<ResourcePath> rootDirectoryHint();
+
+    @Value.Default default boolean codeCompletionMode() { return false; }
+
+    @Value.Default default int cursorOffset() { return Integer.MAX_VALUE; }
 }

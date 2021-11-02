@@ -6,18 +6,53 @@ import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
+import java.util.Objects;
 
-public class JsglrParseInput implements Serializable {
+/**
+ * JSGLR parser input.
+ */
+public final class JsglrParseInput implements Serializable {
+
     public final Text text;
     public final String startSymbol;
     public final @Nullable ResourceKey fileHint;
     public final @Nullable ResourcePath rootDirectoryHint;
+    public final boolean codeCompletionMode;
+    public final int cursorOffset;
 
-    public JsglrParseInput(Text text, String startSymbol, @Nullable ResourceKey fileHint, @Nullable ResourcePath rootDirectoryHint) {
+    /**
+     * Initializes a new instance of the {@link JsglrParseInput} class.
+     *
+     * @param text the text to be parsed
+     * @param startSymbol the start symbol of the grammar
+     * @param fileHint a hint of the file being parsed; or {@code null} when not specified
+     * @param rootDirectoryHint a hint of the project root directory; or {@code null} when not specified
+     * @param codeCompletionMode whether to parse in completion mode
+     * @param cursorOffset the zero-based cursor offset in the text
+     */
+    public JsglrParseInput(
+        Text text,
+        String startSymbol,
+        @Nullable ResourceKey fileHint,
+        @Nullable ResourcePath rootDirectoryHint,
+        boolean codeCompletionMode,
+        int cursorOffset
+    ) {
         this.text = text;
         this.startSymbol = startSymbol;
         this.fileHint = fileHint;
         this.rootDirectoryHint = rootDirectoryHint;
+        this.codeCompletionMode = codeCompletionMode;
+        this.cursorOffset = cursorOffset;
+    }
+
+    public JsglrParseInput(
+        Text text,
+        String startSymbol,
+        @Nullable ResourceKey fileHint,
+        @Nullable ResourcePath rootDirectoryHint
+    ) {
+        this(text, startSymbol, fileHint, rootDirectoryHint, false, 0);
     }
 
     public JsglrParseInput(Text text, String startSymbol, @Nullable ResourceKey fileHint) {
@@ -44,18 +79,23 @@ public class JsglrParseInput implements Serializable {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
         final JsglrParseInput that = (JsglrParseInput)o;
-        if(!text.equals(that.text)) return false;
-        if(!startSymbol.equals(that.startSymbol)) return false;
-        if(fileHint != null ? !fileHint.equals(that.fileHint) : that.fileHint != null) return false;
-        return rootDirectoryHint != null ? rootDirectoryHint.equals(that.rootDirectoryHint) : that.rootDirectoryHint == null;
+        return this.text.equals(that.text)
+            && this.startSymbol.equals(that.startSymbol)
+            && Objects.equals(this.fileHint, that.fileHint)
+            && Objects.equals(this.rootDirectoryHint, that.rootDirectoryHint)
+            && this.codeCompletionMode == that.codeCompletionMode
+            && this.cursorOffset == that.cursorOffset;
     }
 
     @Override public int hashCode() {
-        int result = text.hashCode();
-        result = 31 * result + startSymbol.hashCode();
-        result = 31 * result + (fileHint != null ? fileHint.hashCode() : 0);
-        result = 31 * result + (rootDirectoryHint != null ? rootDirectoryHint.hashCode() : 0);
-        return result;
+        return Objects.hash(
+            text,
+            startSymbol,
+            fileHint,
+            rootDirectoryHint,
+            codeCompletionMode,
+            cursorOffset
+        );
     }
 
     @Override public String toString() {
@@ -64,6 +104,8 @@ public class JsglrParseInput implements Serializable {
             ", startSymbol='" + startSymbol + '\'' +
             ", fileHint=" + fileHint +
             ", rootDirectoryHint=" + rootDirectoryHint +
+            ", codeCompletionMode=" + codeCompletionMode +
+            ", cursorOffset=" + cursorOffset +
             '}';
     }
 }
