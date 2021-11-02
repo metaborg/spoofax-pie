@@ -91,10 +91,27 @@ rules // Statix section and options
   statixOptionOk : scope * StatixOption
   statixOptionsOk maps statixOptionOk(*, list(*))
   
-  statixOptionOk(s, StatixMainSourceDirectory(e)) :-
-    typeOfExpr(s, e) == PATH() | error $[Expected path]. 
-  statixOptionOk(s, StatixMainFile(e)) :-
-    typeOfExpr(s, e) == PATH() | error $[Expected path]. 
+  statixOptionOk(s, StatixSource(source)) :-
+    statixSourceOk(s, source).
+    
+  statixSourceOk : scope * StatixSource
+  statixSourceOk(s, StatixFiles(options)) :- statixFilesOptionsOk(s, options).
+  statixSourceOk(s, StatixPrebuilt(options)) :- statixPrebuiltOptionsOk(s, options).
+  
+  statixFilesOptionOk : scope * StatixFilesOption
+  statixFilesOptionsOk maps statixFilesOptionOk(*, list(*))
+  statixFilesOptionOk(s, StatixFilesMainSourceDirectory(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path].
+  statixFilesOptionOk(s, StatixFilesMainFile(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path].
+  statixFilesOptionOk(s, StatixFilesIncludeDirectory(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path].
+
+  statixPrebuiltOptionOk : scope * StatixPrebuiltOption
+  statixPrebuiltOptionsOk maps statixPrebuiltOptionOk(*, list(*))
+  statixPrebuiltOptionOk(s, StatixPrebuiltSpecAtermDirectory(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path].
+
   statixOptionOk(s, StatixSdf3SignatureGen(e)) :-
     typeOfExpr(s, e) == BOOL() | error $[Expected boolean]. 
       

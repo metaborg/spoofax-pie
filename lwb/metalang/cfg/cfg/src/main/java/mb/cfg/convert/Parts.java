@@ -149,21 +149,7 @@ class Parts {
     }
 
     Option<ResourcePath> getOneSubtermAsExistingFile(String name, ResourcePath base, String errorSuffix) {
-        return getOneSubterm(name).map(pathTerm -> {
-            final String relativePath = Parts.toJavaString(pathTerm);
-            final ResourcePath path = base.appendRelativePath(relativePath).getNormalized();
-            try {
-                final HierarchicalResource file = context.require(path, ResourceStampers.<HierarchicalResource>exists());
-                if(!file.exists()) {
-                    messagesBuilder.addMessage(errorSuffix + " '" + path + "' does not exist", Severity.Error, cfgFile, TermTracer.getRegion(pathTerm));
-                } else if(!file.isFile()) {
-                    messagesBuilder.addMessage(errorSuffix + " '" + path + "' is not a file", Severity.Error, cfgFile, TermTracer.getRegion(pathTerm));
-                }
-            } catch(IOException e) {
-                messagesBuilder.addMessage("Failed to check if " + errorSuffix + " '" + path + "' exists", e, Severity.Error, cfgFile, TermTracer.getRegion(pathTerm));
-            }
-            return path;
-        });
+        return getOneSubterm(name).map(t -> pathAsExistingFile(t, base, errorSuffix));
     }
 
     void forOneSubtermAsExistingFile(String name, ResourcePath base, String errorSuffix, Consumer<ResourcePath> consumer) {
@@ -171,21 +157,7 @@ class Parts {
     }
 
     Option<ResourcePath> getOneSubtermAsExistingDirectory(String name, ResourcePath base, String errorSuffix) {
-        return getOneSubterm(name).map(pathTerm -> {
-            final String relativePath = Parts.toJavaString(pathTerm);
-            final ResourcePath path = base.appendRelativePath(relativePath).getNormalized();
-            try {
-                final HierarchicalResource directory = context.require(path, ResourceStampers.<HierarchicalResource>exists());
-                if(!directory.exists()) {
-                    messagesBuilder.addMessage(errorSuffix + " '" + path + "' does not exist", Severity.Error, cfgFile, TermTracer.getRegion(pathTerm));
-                } else if(!directory.isDirectory()) {
-                    messagesBuilder.addMessage(errorSuffix + " '" + path + "' is not a directory", Severity.Error, cfgFile, TermTracer.getRegion(pathTerm));
-                }
-            } catch(IOException e) {
-                messagesBuilder.addMessage("Failed to check if " + errorSuffix + " '" + path + "' exists", e, Severity.Error, cfgFile, TermTracer.getRegion(pathTerm));
-            }
-            return path;
-        });
+        return getOneSubterm(name).map(t -> pathAsExistingDirectory(t, base, errorSuffix));
     }
 
     void forOneSubtermAsExistingDirectory(String name, ResourcePath base, String errorSuffix, Consumer<ResourcePath> consumer) {
@@ -242,6 +214,22 @@ class Parts {
         getAllSubTermsAsPaths(name, base).forEach(consumer);
     }
 
+    Stream<ResourcePath> getAllSubTermsAsExistingFiles(String name, ResourcePath base, String errorSuffix) {
+        return getAllSubTerms(name).map(t -> pathAsExistingFile(t, base, errorSuffix));
+    }
+
+    void forAllSubtermsAsExistingFiles(String name, ResourcePath base, String errorSuffix, Consumer<ResourcePath> consumer) {
+        getAllSubTermsAsExistingFiles(name, base, errorSuffix).forEach(consumer);
+    }
+
+    Stream<ResourcePath> getAllSubTermsAsExistingDirectories(String name, ResourcePath base, String errorSuffix) {
+        return getAllSubTerms(name).map(t -> pathAsExistingDirectory(t, base, errorSuffix));
+    }
+
+    void forAllSubtermsAsExistingDirectories(String name, ResourcePath base, String errorSuffix, Consumer<ResourcePath> consumer) {
+        getAllSubTermsAsExistingDirectories(name, base, errorSuffix).forEach(consumer);
+    }
+
     Stream<TypeInfo> getAllSubtermsAsTypeInfo(String name) {
         return getAllSubTermsAsStrings(name).map(TypeInfo::of);
     }
@@ -285,21 +273,20 @@ class Parts {
     }
 
     private void createCfgMessage(String text, Severity severity, IStrategoTerm term) {
-        final @Nullable ResourceKey resource = getCfgFile(term);
-        if(resource != null) {
-            final @Nullable Region region = getRegion(term);
-            if(region != null) {
-                messagesBuilder.addMessage(text, severity, resource, region);
-            } else {
-                messagesBuilder.addMessage(text, severity, resource);
-            }
-        } else {
-            messagesBuilder.addMessage(text, severity);
-        }
+        messagesBuilder.addMessage(text, severity, getCfgFile(term), getRegion(term));
     }
+
+    private void createCfgMessage(String text, Throwable e, IStrategoTerm term) {
+        messagesBuilder.addMessage(text, e, Severity.Error, getCfgFile(term), getRegion(term));
+    }
+
 
     private void createCfgError(String text, IStrategoTerm term) {
         createCfgMessage(text, Severity.Error, term);
+    }
+
+    private void createCfgError(String text, Throwable e, IStrategoTerm term) {
+        createCfgMessage(text, e, term);
     }
 
     private void createCfgWarning(String text, IStrategoTerm term) {
@@ -307,10 +294,42 @@ class Parts {
     }
 
 
-    public static @Nullable Region getRegion(IStrategoTerm term) {
-        return TermTracer.getRegion(term);
+    private ResourcePath pathAsExistingFile(IStrategoTerm pathTerm, ResourcePath base, String errorSuffix) {
+        final String relativePath = Parts.toJavaString(pathTerm);
+        final ResourcePath path = base.appendRelativePath(relativePath).getNormalized();
+        try {
+            final HierarchicalResource file = context.require(path, ResourceStampers.<HierarchicalResource>exists());
+            if(!file.exists()) {
+                createCfgError(errorSuffix + " '" + path + "' does not exist", pathTerm);
+            } else if(!file.isFile()) {
+                createCfgError(errorSuffix + " '" + path + "' is not a file", pathTerm);
+            }
+        } catch(IOException e) {
+            createCfgError("Failed to check if " + errorSuffix + " '" + path + "' exists", e, pathTerm);
+        }
+        return path;
     }
 
+    private ResourcePath pathAsExistingDirectory(IStrategoTerm pathTerm, ResourcePath base, String errorSuffix) {
+        final String relativePath = Parts.toJavaString(pathTerm);
+        final ResourcePath path = base.appendRelativePath(relativePath).getNormalized();
+        try {
+            final HierarchicalResource directory = context.require(path, ResourceStampers.<HierarchicalResource>exists());
+            if(!directory.exists()) {
+                createCfgError(errorSuffix + " '" + path + "' does not exist", pathTerm);
+            } else if(!directory.isDirectory()) {
+                createCfgError(errorSuffix + " '" + path + "' is not a directory", pathTerm);
+            }
+        } catch(IOException e) {
+            createCfgError("Failed to check if " + errorSuffix + " '" + path + "' exists", e, pathTerm);
+        }
+        return path;
+    }
+
+
+    private static @Nullable Region getRegion(IStrategoTerm term) {
+        return TermTracer.getRegion(term);
+    }
 
     public static Integer toJavaInt(IStrategoTerm term) {
         if(TermUtils.isAppl(term, "Int", 1) || TermUtils.isAppl(term, "UInt", 1)) {

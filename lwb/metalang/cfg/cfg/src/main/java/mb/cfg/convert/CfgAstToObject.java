@@ -165,10 +165,10 @@ public class CfgAstToObject {
                     final Option<ResourcePath> atermFile = prebuiltParts.getOneSubtermAsExistingFile("Sdf3PrebuiltParseTableAtermFile", rootDirectory, "SDF3 prebuilt parse table ATerm file");
                     final Option<ResourcePath> persistedFile = prebuiltParts.getOneSubtermAsExistingFile("Sdf3PrebuiltParseTablePersistedFile", rootDirectory, "SDF3 prebuilt parse table persisted file");
                     if(!atermFile.isSome()) {
-                        messagesBuilder.addMessage("parse-table-aterm-file = $FilePath option is missing", Severity.Error, cfgFile, TermTracer.getRegion(source));
+                        messagesBuilder.addMessage("parse-table-aterm-file = $Path option is missing", Severity.Error, cfgFile, TermTracer.getRegion(source));
                     }
                     if(!persistedFile.isSome()) {
-                        messagesBuilder.addMessage("parse-table-persisted-file = $FilePath option is missing", Severity.Error, cfgFile, TermTracer.getRegion(source));
+                        messagesBuilder.addMessage("parse-table-persisted-file = $Path option is missing", Severity.Error, cfgFile, TermTracer.getRegion(source));
                     }
                     if(atermFile.isSome() && persistedFile.isSome()) {
                         builder.source(CfgSdf3Source.prebuilt(atermFile.unwrap(), persistedFile.unwrap()));
@@ -197,7 +197,7 @@ public class CfgAstToObject {
                     final ResourcePath mainFile = filesParts.getOneSubtermAsExistingFile("EsvFilesMainFile", mainSourceDirectory, "ESV main file")
                         .unwrapOrElse(() -> CfgEsvConfig.Builder.getDefaultMainFile(languageShared));
                     final ArrayList<ResourcePath> includeDirectories = new ArrayList<>();
-                    filesParts.forAllSubtermsAsPaths("EsvFilesIncludeDirectory", rootDirectory, includeDirectories::add);
+                    filesParts.forAllSubtermsAsExistingDirectories("EsvFilesIncludeDirectory", rootDirectory, "ESV include directory", includeDirectories::add);
                     final boolean includeLibSpoofax2Exports = filesParts.getOneSubtermAsBool("EsvFilesIncludeLibspoofax2Exports")
                         .unwrapOrElse(() -> CfgEsvConfig.Builder.getDefaultIncludeLibSpoofax2Exports(languageShared));
                     final ResourcePath libSpoofax2UnarchiveDirectory = CfgEsvConfig.Builder.getDefaultLibSpoofax2UnarchiveDirectory(languageShared);
@@ -206,7 +206,7 @@ public class CfgAstToObject {
                     final Parts prebuiltParts = subParts.subParts(source.getSubterm(0));
                     prebuiltParts.getOneSubtermAsExistingFile("EsvPrebuiltFile", rootDirectory, "ESV prebuilt file").ifElse(
                         file -> builder.source(CfgEsvSource.prebuilt(file)),
-                        () -> messagesBuilder.addMessage("file = $FilePath option is missing", Severity.Error, cfgFile, TermTracer.getRegion(source))
+                        () -> messagesBuilder.addMessage("file = $Path option is missing", Severity.Error, cfgFile, TermTracer.getRegion(source))
                     );
                 } else {
                     throw new InvalidAstShapeException("ESV source", source);
@@ -215,13 +215,26 @@ public class CfgAstToObject {
         });
         parts.getAllSubTermsInListAsParts("StatixSection").ifSome(subParts -> {
             final CfgStatixConfig.Builder builder = languageCompilerInputBuilder.withStatix();
-            final ResourcePath mainSourceDirectory = subParts.getOneSubtermAsExistingDirectory("StatixMainSourceDirectory", rootDirectory, "Statix main source directory")
-                .unwrapOrElse(() -> CfgStatixConfig.Builder.getDefaultMainSourceDirectory(languageShared));
-            final ResourcePath mainFile = subParts.getOneSubtermAsExistingFile("StatixMainFile", mainSourceDirectory, "Statix main file")
-                .unwrapOrElse(() -> CfgStatixConfig.Builder.getDefaultMainFile(languageShared));
-            final ArrayList<ResourcePath> includeDirectories = new ArrayList<>();
-            subParts.forAllSubtermsAsPaths("StatixIncludeDirectory", rootDirectory, includeDirectories::add);
-            builder.source(CfgStatixSource.files(mainSourceDirectory, mainFile, ListView.of(includeDirectories)));
+            subParts.getOneSubterm("StatixSource").ifSome(source -> {
+                if(TermUtils.isAppl(source, "StatixFiles", 1)) {
+                    final Parts filesParts = subParts.subParts(source.getSubterm(0));
+                    final ResourcePath mainSourceDirectory = filesParts.getOneSubtermAsExistingDirectory("StatixFilesMainSourceDirectory", rootDirectory, "Statix main source directory")
+                        .unwrapOrElse(() -> CfgStatixConfig.Builder.getDefaultMainSourceDirectory(languageShared));
+                    final ResourcePath mainFile = filesParts.getOneSubtermAsExistingFile("StatixFilesMainFile", mainSourceDirectory, "Statix main file")
+                        .unwrapOrElse(() -> CfgStatixConfig.Builder.getDefaultMainFile(languageShared));
+                    final ArrayList<ResourcePath> includeDirectories = new ArrayList<>();
+                    filesParts.forAllSubtermsAsExistingDirectories("StatixFilesIncludeDirectory", rootDirectory, "Statix include directory", includeDirectories::add);
+                    builder.source(CfgStatixSource.files(mainSourceDirectory, mainFile, ListView.of(includeDirectories)));
+                } else if(TermUtils.isAppl(source, "StatixPrebuilt", 1)) {
+                    final Parts prebuiltParts = subParts.subParts(source.getSubterm(0));
+                    prebuiltParts.getOneSubtermAsExistingDirectory("StatixPrebuiltSpecAtermDirectory", rootDirectory, "Statix prebuilt spec ATerm directory").ifElse(
+                        dir -> builder.source(CfgStatixSource.prebuilt(dir)),
+                        () -> messagesBuilder.addMessage("spec-aterm-directory = $Path option is missing", Severity.Error, cfgFile, TermTracer.getRegion(source))
+                    );
+                } else {
+                    throw new InvalidAstShapeException("Statix source", source);
+                }
+            });
             subParts.forOneSubtermAsBool("StatixSdf3SignatureGen", builder::enableSdf3SignatureGen);
         });
         parts.getAllSubTermsInListAsParts("StrategoSection").ifSome(subParts -> {

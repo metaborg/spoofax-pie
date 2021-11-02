@@ -65,15 +65,27 @@ context-free syntax
 
 context-free sorts
 
-  StatixOption
+  StatixOption StatixSource StatixFilesOption StatixPrebuiltOption
 
 context-free syntax
 
   Part.StatixSection = <statix {
   <{StatixOption "\n"}*>
 }>
-  StatixOption.StatixMainSourceDirectory = <main-source-directory = <Expr>>
-  StatixOption.StatixMainFile            = <main-file = <Expr>>
+  StatixOption.StatixSource = <source = <StatixSource>>
+  
+  StatixSource.StatixFiles  = <files {
+  <{StatixFilesOption "\n"}*>
+}>
+  StatixFilesOption.StatixFilesMainSourceDirectory       = <main-source-directory = <Expr>>
+  StatixFilesOption.StatixFilesMainFile                  = <main-file = <Expr>>
+  StatixFilesOption.StatixFilesIncludeDirectory          = <include-directory = <Expr>>
+  
+  StatixSource.StatixPrebuilt = <prebuilt {
+  <{StatixPrebuiltOption "\n"}*>
+}>
+  StatixPrebuiltOption.StatixPrebuiltSpecAtermDirectory = <spec-aterm-directory = <Expr>>
+
   StatixOption.StatixSdf3SignatureGen    = <sdf3-statix-signature-generation = <Expr>>
 
 context-free sorts
