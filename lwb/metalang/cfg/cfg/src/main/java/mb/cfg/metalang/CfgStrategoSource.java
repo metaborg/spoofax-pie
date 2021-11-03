@@ -76,10 +76,6 @@ public abstract class CfgStrategoSource implements Serializable {
             return compileLanguageShared().languageProject().project().buildDirectory().appendRelativePath("stratego-cache");
         }
 
-        @Value.Default default boolean enableSdf3StatixExplicationGen() {
-            return false;
-        }
-
         /// Automatically provided sub-inputs
 
         CompileLanguageSpecificationShared compileLanguageShared();

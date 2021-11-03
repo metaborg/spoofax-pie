@@ -29,7 +29,7 @@ context-free syntax
   Sdf3PrebuiltOption.Sdf3PrebuiltParseTableAtermFile     = <parse-table-aterm-file = <Expr>>
   Sdf3PrebuiltOption.Sdf3PrebuiltParseTablePersistedFile = <parse-table-persisted-file = <Expr>>
   
-  // TODO: move into source?
+  // TODO: move into source after CC lab.
   Sdf3Option.Sdf3ParseTableGeneratorSection = <parse-table-generator {
   <{Sdf3ParseTableGeneratorOption "\n"}*>
 }>
@@ -87,7 +87,8 @@ context-free syntax
 }>
   StatixPrebuiltOption.StatixPrebuiltSpecAtermDirectory = <spec-aterm-directory = <Expr>>
 
-  StatixOption.StatixSdf3SignatureGen = <sdf3-statix-signature-generation = <Expr>> // TODO: move into source?
+  // TODO: move into source after CC lab.
+  StatixOption.StatixSdf3SignatureGen = <sdf3-statix-signature-generation = <Expr>>
 
 context-free sorts
 
@@ -106,6 +107,8 @@ context-free syntax
   StrategoFilesOption.StrategoFilesMainSourceDirectory      = <main-source-directory = <Expr>>
   StrategoFilesOption.StrategoFilesMainFile                 = <main-file = <Expr>>
   StrategoFilesOption.StrategoFilesIncludeDirectory         = <include-directory = <Expr>>
-  StrategoFilesOption.StrategoFilesSdf3StatixExplicationGen = <sdf3-statix-explication-generation = <Expr>>
+  
+  // TODO: move into source after CC lab.
+  StrategoOption.StrategoSdf3StatixExplicationGen = <sdf3-statix-explication-generation = <Expr>>
   
   StrategoOption.StrategoLanguageStrategyAffix = <language-strategy-affix = <Expr>>

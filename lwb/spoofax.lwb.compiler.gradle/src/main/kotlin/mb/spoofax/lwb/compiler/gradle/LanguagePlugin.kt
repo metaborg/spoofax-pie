@@ -4,6 +4,7 @@ package mb.spoofax.lwb.compiler.gradle
 
 import mb.cfg.CompileLanguageInput
 import mb.cfg.CompileLanguageSpecificationInput
+import mb.cfg.task.CfgRootDirectoryToObjectException
 import mb.common.message.KeyedMessages
 import mb.common.message.Message
 import mb.common.message.Messages
@@ -82,15 +83,22 @@ open class LanguagePlugin : Plugin<Project> {
     val extension = LanguageExtension()
     project.extensions.add(LanguageExtension.id, extension)
 
-    val input = getInput(project, spoofax3Compiler)
-
-    LanguagePluginInstance(project, resourceServiceComponent, spoofax3Compiler, input)
+    try {
+      val input = getInput(project, spoofax3Compiler)
+      LanguagePluginInstance(project, resourceServiceComponent, spoofax3Compiler, input)
+    } catch(e: CfgRootDirectoryToObjectException) {
+      val exceptionPrinter = ExceptionPrinter()
+      exceptionPrinter.addCurrentDirectoryContext(project.path)
+      System.err.println("Reading configuration failed")
+      exceptionPrinter.printException(e, System.err)
+      throw e
+    }
   }
 
   private fun getInput(project: Project, spoofax3Compiler: StandaloneSpoofax3Compiler): CompileLanguageInput {
     spoofax3Compiler.pieComponent.pie.newSession().use {
       return it.require(spoofax3Compiler.compiler.cfgComponent.cfgRootDirectoryToObject.createTask(FSPath(project.projectDir)))
-        .unwrap().compileLanguageInput // TODO: proper error handling
+        .unwrap().compileLanguageInput // Note: exception is caught in apply.
     }
   }
 }

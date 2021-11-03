@@ -249,12 +249,12 @@ public class CfgAstToObject {
                     filesSourceBuilder.mainSourceDirectory(mainSourceDirectory);
                     filesParts.forAllSubtermsAsExistingDirectories("StrategoFilesIncludeDirectory", rootDirectory, "Stratego include directory", filesSourceBuilder::addIncludeDirectories);
                     filesParts.forOneSubtermAsExistingFile("StrategoFilesMainFile", mainSourceDirectory, "Stratego main file", filesSourceBuilder::mainFile);
-                    filesParts.forOneSubtermAsBool("StrategoFilesSdf3StatixExplicationGen", filesSourceBuilder::enableSdf3StatixExplicationGen);
                     builder.source(CfgStrategoSource.files(filesSourceBuilder.build()));
                 } else {
                     throw new InvalidAstShapeException("Stratego source", source);
                 }
             });
+            subParts.forOneSubtermAsBool("StrategoSdf3StatixExplicationGen", builder::enableSdf3StatixExplicationGen);
             subParts.forOneSubtermAsString("StrategoLanguageStrategyAffix", builder::languageStrategyAffix);
         });
         customizer.customize(languageCompilerInputBuilder);

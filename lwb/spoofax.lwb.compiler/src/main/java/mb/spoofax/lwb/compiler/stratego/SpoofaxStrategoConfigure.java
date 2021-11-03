@@ -246,7 +246,7 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
 //                    } catch(Exception e) {
 //                        throw StrategoConfigureException.sdf3CompletionRuntimeGenerateFail(e);
 //                    }
-                    if(sourceFiles.enableSdf3StatixExplicationGen()) {
+                    if(cfgStrategoConfig.enableSdf3StatixExplicationGen()) {
                         try {
                             sdf3ToStatixGenInj(context, strategyAffix, generatedSourcesDirectory, astSupplier);
                         } catch(RuntimeException | InterruptedException e) {

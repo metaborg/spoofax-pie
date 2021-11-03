@@ -35,6 +35,7 @@ public interface CfgStatixConfig extends Serializable {
     }
 
     @Value.Default default boolean enableSdf3SignatureGen() {
+        // TODO: move into source after CC lab.
         return false;
     }
 

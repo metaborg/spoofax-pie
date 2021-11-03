@@ -37,6 +37,11 @@ public interface CfgStrategoConfig extends Serializable {
     }
 
 
+    @Value.Default default boolean enableSdf3StatixExplicationGen() {
+        // TODO: move into source after CC lab.
+        return false;
+    }
+
     @Value.Default default String languageStrategyAffix() {
         // TODO: should go into CfgStrategoSource.Files? complicated due to persistent properties though...
         // TODO: convert to Stratego ID instead of Java ID.

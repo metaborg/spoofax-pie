@@ -136,8 +136,8 @@ rules // Stratego section and options
     typeOfExpr(s, e) == PATH() | error $[Expected path].
   strategoFilesOptionOk(s, StrategoFilesIncludeDirectory(e)) :-
     typeOfExpr(s, e) == PATH() | error $[Expected path].
-  strategoFilesOptionOk(s, StrategoFilesSdf3StatixExplicationGen(e)) :-
-    typeOfExpr(s, e) == BOOL() | error $[Expected boolean].
 
+  strategoOptionOk(s, StrategoSdf3StatixExplicationGen(e)) :-
+    typeOfExpr(s, e) == BOOL() | error $[Expected boolean].
   strategoOptionOk(s, StrategoLanguageStrategyAffix(e)) :-
     typeOfExpr(s, e) == STRATEGY() | error $[Expected Stratego strategy identifier].

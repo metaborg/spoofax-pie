@@ -434,7 +434,7 @@ The following `StatixFilesOption`s are supported:
 | `main-source-directory = $Expression` | no | The directory relative to the root directory that contains the main Statix file. Defaults to the value of the top-level `source-directory` option. | Path |
 | `main-file = $Expression` | no | The main Statix file relative to the `main-source-directory`. Defaults to `./main.stx`. | Path |
 | `include-directory = $Expression` | no | Adds an include directory from which to resolve Statix imports. May be given multiple times. | Path |
-| `sdf3-statix-signature-generation = $Expression` | no | Whether SDF3 to Statix signature generation is enabled. When enabled, `stratego { source = files { sdf3-statix-explication-generation = true } }` must also be enabled. Defaults to `false`. | Boolean |
+| `sdf3-statix-signature-generation = $Expression` | no | Whether SDF3 to Statix signature generation is enabled. When enabled, `stratego { sdf3-statix-explication-generation = true }` must also be enabled. Defaults to `false`. | Boolean |
 
 The following `$StatixPrebuiltOption`s are supported:
 
@@ -451,6 +451,7 @@ The following `StrategoOption`s are supported:
 | Syntax | Required? | Description | Type |
 | - | - | - | - |
 | `source = $StrategoSource` | no | The source of the Statix definition. Defaults to a `files` source with the top-level `source-directory` option as its main source directory, and `./main.str2` as its main file relative to the main source directory. | n/a |
+| `sdf3-statix-explication-generation = $Expression` | no | Whether SDF3 to Statix injection explication/implication generation is enabled. When enabled, `statix { sdf3-statix-signature-generation = true }` must also be enabled. Defaults to `false`. | Boolean |
 | `language-strategy-affix = $Expression` | no | The affix that is used to make certain generated strategies unique to the language. This is used both as a prefix and suffix. Defaults to name of the language transformed to a Stratego strategy identifier. | Stratego strategy identifier |
 
 The following `$StrategoSource`s are supported:
@@ -464,7 +465,7 @@ The following `$StrategoFilesOption`s are supported:
 | `main-source-directory = $Expression` | no | The directory relative to the root directory that contains the main Stratego file. Defaults to the value of the top-level `source-directory` option. | Path |
 | `main-file = $Expression` | no | The main Stratego file relative to the `main-source-directory`. Defaults to `./main.str2`. | Path |
 | `include-directory = $Expression` | no | Adds an include directory from which to resolve Stratego imports. May be given multiple times. | Path |
-| `sdf3-statix-explication-generation = $Expression` | no | Whether SDF3 to Statix injection explication/implication generation is enabled. When enabled, `statix { source = files { sdf3-statix-signature-generation = true } }` must also be enabled. Defaults to `false`. | Boolean |
+
 
 ## spoofaxc.lock
 
