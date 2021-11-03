@@ -8,6 +8,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 - Errors in CFG not appearing, or just displaying a single error on the first line.
 - Source file configuration in `spoofaxc.cfg` to be relative to the respective source directory, instead of relative to the root directory.
 - Missing source directories or files not giving errors in `spoofaxc.cfg`.
+- Serialization failure when an Eclipse resource issue occurred due to `CoreException` not being serializable. Fixed by turning `CoreException` into `SerializableCoreException` which is serializable.
 
 ### Changed
 - Spoofax Eclipse LWB plugin to show an error dialog when building a language fails due to errors in language definition files.

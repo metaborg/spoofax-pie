@@ -9,6 +9,7 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.walk.ResourceWalker;
 import mb.spoofax.eclipse.util.ResourceUtil;
+import mb.spoofax.eclipse.util.SerializableCoreException;
 import mb.spoofax.eclipse.util.UncheckedCoreException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.filesystem.EFS;
@@ -184,7 +185,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
             try {
                 return getStore().openInputStream(EFS.NONE, null);
             } catch(CoreException e) {
-                throw new IOException("Creating a new input stream for resource '" + resource + "' failed unexpectedly", e);
+                throw new IOException("Creating a new input stream for resource '" + resource + "' failed unexpectedly", new SerializableCoreException(e));
             }
         }
     }
@@ -214,7 +215,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
             info.setLastModified(time.toEpochMilli());
             getStore().putInfo(info, EFS.SET_LAST_MODIFIED, null);
         } catch(CoreException e) {
-            throw new IOException("Setting last modified time for resource '" + resource + "' failed unexpectedly", e);
+            throw new IOException("Setting last modified time for resource '" + resource + "' failed unexpectedly", new SerializableCoreException(e));
         }
     }
 
@@ -223,7 +224,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
         try {
             return getStore().openOutputStream(EFS.OVERWRITE, null);
         } catch(CoreException e) {
-            throw new IOException("Creating a new output stream for resource '" + resource + "' failed unexpectedly", e);
+            throw new IOException("Creating a new output stream for resource '" + resource + "' failed unexpectedly", new SerializableCoreException(e));
         }
     }
 
@@ -232,7 +233,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
         try {
             return getStore().openOutputStream(EFS.APPEND, null);
         } catch(CoreException e) {
-            throw new IOException("Creating a new output stream for resource '" + resource + "' failed unexpectedly", e);
+            throw new IOException("Creating a new output stream for resource '" + resource + "' failed unexpectedly", new SerializableCoreException(e));
         }
     }
 
@@ -241,7 +242,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
         try {
             return getStore().openOutputStream(EFS.OVERWRITE, null);
         } catch(CoreException e) {
-            throw new IOException("Creating a new output stream for resource '" + resource + "' failed unexpectedly", e);
+            throw new IOException("Creating a new output stream for resource '" + resource + "' failed unexpectedly", new SerializableCoreException(e));
         }
     }
 
@@ -250,7 +251,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
         try {
             return getStore().openOutputStream(EFS.NONE, null);
         } catch(CoreException e) {
-            throw new IOException("Creating a new output stream for resource '" + resource + "' failed unexpectedly", e);
+            throw new IOException("Creating a new output stream for resource '" + resource + "' failed unexpectedly", new SerializableCoreException(e));
         }
     }
 
@@ -334,7 +335,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
             final IResource[] members = container.members();
             return Arrays.stream(members).map(m -> new EclipseResource(registry, m));
         } catch(CoreException e) {
-            throw new IOException("Listing resources in '" + path + "' failed unexpectedly", e);
+            throw new IOException("Listing resources in '" + path + "' failed unexpectedly", new SerializableCoreException(e));
         }
     }
 
@@ -355,7 +356,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
             throw e.getCause();
         } catch(CoreException e) {
             throw new IOException(
-                "Listing resources in '" + path + "' with matcher '" + matcher + "' failed unexpectedly", e);
+                "Listing resources in '" + path + "' with matcher '" + matcher + "' failed unexpectedly", new SerializableCoreException(e));
         }
     }
 
@@ -367,7 +368,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
             container.refreshLocal(IResource.DEPTH_INFINITE, null);
             recursiveMembers(container, builder, null, null);
         } catch(CoreException e) {
-            throw new IOException("Walking resources in '" + path + "' failed unexpectedly", e);
+            throw new IOException("Walking resources in '" + path + "' failed unexpectedly", new SerializableCoreException(e));
         }
         return builder.build();
     }
@@ -380,7 +381,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
             container.refreshLocal(IResource.DEPTH_INFINITE, null);
             recursiveMembers(container, builder, walker, matcher);
         } catch(CoreException e) {
-            throw new IOException("Walking resources in '" + path + "' with walker '" + walker + "' and matcher '" + matcher + "' failed unexpectedly", e);
+            throw new IOException("Walking resources in '" + path + "' with walker '" + walker + "' and matcher '" + matcher + "' failed unexpectedly", new SerializableCoreException(e));
         }
         return builder.build();
     }
@@ -413,7 +414,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
         try {
             getResource().copy(other.path.path, true, null);
         } catch(CoreException e) {
-            throw new IOException("Copying from '" + path + "' to '" + other.path + "' failed unexpectedly", e);
+            throw new IOException("Copying from '" + path + "' to '" + other.path + "' failed unexpectedly", new SerializableCoreException(e));
         }
     }
 
@@ -460,7 +461,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
         } catch(UncheckedIOException e) {
             throw e.getCause();
         } catch(UncheckedCoreException e) {
-            throw new IOException(e.getCause());
+            throw new IOException(new SerializableCoreException(e.getCause()));
         }
     }
 
@@ -475,7 +476,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
         try {
             getResource().move(other.path.path, true, null);
         } catch(CoreException e) {
-            throw new IOException("Moving from '" + path + "' to '" + other.path + "' failed unexpectedly", e);
+            throw new IOException("Moving from '" + path + "' to '" + other.path + "' failed unexpectedly", new SerializableCoreException(e));
         }
     }
 
@@ -491,7 +492,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
             if(code == IResourceStatus.PATH_OCCUPIED || code == IResourceStatus.RESOURCE_EXISTS || code == IResourceStatus.CASE_VARIANT_EXISTS) {
                 throw new FileAlreadyExistsException("The resource already exists: " + path);
             } else {
-                throw new IOException("Creating file '" + path + "' failed unexpectedly", e);
+                throw new IOException("Creating file '" + path + "' failed unexpectedly", new SerializableCoreException(e));
             }
         }
         return this;
@@ -539,7 +540,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
                 return; // Ignore; workspace root always exists.
             }
         } catch(CoreException e) {
-            throw new IOException("Creating directory '" + container + "' failed unexpectedly", e);
+            throw new IOException("Creating directory '" + container + "' failed unexpectedly", new SerializableCoreException(e));
         }
         throw new IOException("Cannot create directory '" + container + "', it is not an IFolder nor an IProject");
     }
@@ -549,7 +550,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
         try {
             getResource().delete(true, null);
         } catch(CoreException e) {
-            throw new IOException("Deleting '" + path + "' failed unexpectedly", e);
+            throw new IOException("Deleting '" + path + "' failed unexpectedly", new SerializableCoreException(e));
         }
     }
 
@@ -615,7 +616,7 @@ public class EclipseResource extends HierarchicalResourceDefaults<EclipseResourc
             store = EFS.getStore(getResource().getLocationURI());
             return store;
         } catch(CoreException e) {
-            throw new IOException("Getting file store for resource '" + resource + "' failed unexpectedly", e);
+            throw new IOException("Getting file store for resource '" + resource + "' failed unexpectedly", new SerializableCoreException(e));
         }
     }
 
