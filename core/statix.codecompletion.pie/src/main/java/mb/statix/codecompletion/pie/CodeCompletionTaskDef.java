@@ -319,10 +319,11 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
 
             // Parse the AST
             if (eventHandler != null) eventHandler.beginParse();
-            final Result<IStrategoTerm, ?> parsedAstResult = parse();
+            final Result<IStrategoTerm, ?> parsedAstResult = parse(primarySelection);
             if (parsedAstResult.isErr()) return parsedAstResult.ignoreValueIfErr();
             final IStrategoTerm parsedAst = parsedAstResult.unwrapUnchecked();
             if (eventHandler != null) eventHandler.endParse();
+            log.trace("Parsed completion AST: " + parsedAst);
 
             // Prepare the AST (explicate, add term indices, upgrade placeholders)
             if (eventHandler != null) eventHandler.beginPreparation();
@@ -334,8 +335,8 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
             final PlaceholderVarMap placeholderVarMap = new PlaceholderVarMap(file.toString());
             final Result<ITerm, ?> upgradedAstResult = upgradePlaceholders(statixAst, placeholderVarMap);
             if (upgradedAstResult.isErr()) return upgradedAstResult.ignoreValueIfErr();
-            final ITerm upgradedAst = upgradedAstResult.unwrapUnchecked();
-            final ITermVar placeholder = getCompletionPlaceholder(upgradedAst);
+            final ITerm upgradedAst = upgradedAstResult.unwrap();
+            final ITermVar placeholder = getCompletionPlaceholder(upgradedAst, primarySelection);
             final SolverState initialState = createInitialSolverState(upgradedAst, statixSecName, statixRootPredicateName, placeholderVarMap);
             if (eventHandler != null) eventHandler.endPreparation();
 
@@ -379,12 +380,15 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
         /**
          * Parses the input file.
          *
+         * @param selection code selection
          * @return the AST of the file
          */
-        private Result<IStrategoTerm, ?> parse() {
+        private Result<IStrategoTerm, ?> parse(Region selection) {
             return context.require(parseTask.inputBuilder()
                 .withFile(file)
                 .rootDirectoryHint(Optional.ofNullable(rootDirectoryHint))
+                .codeCompletionMode(true)
+                .cursorOffset(selection.getStartOffset() /* TODO: Support the whole selection? */)
                 .buildRecoverableAstSupplier()
             );
         }
@@ -500,10 +504,11 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * Determines the placeholder being completed.
          *
          * @param ast the AST to inspect
+         * @param selection code selection
          * @return the term variable of the placeholder being completed
          */
-        private ITermVar getCompletionPlaceholder(ITerm ast) {
-            @Nullable ITermVar placeholderVar = findPlaceholderAt(ast, primarySelection.getStartOffset() /* TODO: Support the whole selection? */);
+        private ITermVar getCompletionPlaceholder(ITerm ast, Region selection) {
+            @Nullable ITermVar placeholderVar = findPlaceholderAt(ast, selection.getStartOffset() /* TODO: Support the whole selection? */);
             if (placeholderVar == null) {
                 throw new IllegalStateException("Completion failed: we don't know the placeholder.");
             }

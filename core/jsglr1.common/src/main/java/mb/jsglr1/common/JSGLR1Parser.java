@@ -47,6 +47,7 @@ public class JSGLR1Parser {
 
     public JsglrParseOutput parse(JsglrParseInput input) throws JsglrParseException, InterruptedException {
         try {
+            parser.setCompletionParse(input.codeCompletionMode, input.cursorOffset);
             final SGLRParseResult result = parser.parse(input.text.toString(), input.fileHint != null ? input.fileHint.toString() : null, input.startSymbol);
             if(result.output == null) {
                 throw new RuntimeException("BUG: parser returned null output even though parsing did not fail");
