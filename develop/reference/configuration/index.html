@@ -2077,7 +2077,7 @@ The following <code>StatixOption</code>s are supported:</p>
 <tr>
 <td><code>sdf3-statix-signature-generation = $Expression</code></td>
 <td>no</td>
-<td>Whether SDF3 to Statix signature generation is enabled. When enabled, <code>stratego { source = files { sdf3-statix-explication-generation = true } }</code> must also be enabled. Defaults to <code>false</code>.</td>
+<td>Whether SDF3 to Statix signature generation is enabled. When enabled, <code>stratego { sdf3-statix-explication-generation = true }</code> must also be enabled. Defaults to <code>false</code>.</td>
 <td>Boolean</td>
 </tr>
 </tbody>
@@ -2122,6 +2122,12 @@ The following <code>StrategoOption</code>s are supported:</p>
 <td>n/a</td>
 </tr>
 <tr>
+<td><code>sdf3-statix-explication-generation = $Expression</code></td>
+<td>no</td>
+<td>Whether SDF3 to Statix injection explication/implication generation is enabled. When enabled, <code>statix { sdf3-statix-signature-generation = true }</code> must also be enabled. Defaults to <code>false</code>.</td>
+<td>Boolean</td>
+</tr>
+<tr>
 <td><code>language-strategy-affix = $Expression</code></td>
 <td>no</td>
 <td>The affix that is used to make certain generated strategies unique to the language. This is used both as a prefix and suffix. Defaults to name of the language transformed to a Stratego strategy identifier.</td>
@@ -2161,12 +2167,6 @@ The following <code>StrategoOption</code>s are supported:</p>
 <td>no</td>
 <td>Adds an include directory from which to resolve Stratego imports. May be given multiple times.</td>
 <td>Path</td>
-</tr>
-<tr>
-<td><code>sdf3-statix-explication-generation = $Expression</code></td>
-<td>no</td>
-<td>Whether SDF3 to Statix injection explication/implication generation is enabled. When enabled, <code>statix { source = files { sdf3-statix-signature-generation = true } }</code> must also be enabled. Defaults to <code>false</code>.</td>
-<td>Boolean</td>
 </tr>
 </tbody>
 </table>
