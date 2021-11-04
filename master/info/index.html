@@ -12,7 +12,7 @@
       
       
       <link rel="icon" href="../assets/spoofax.png">
-      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-7.1.4">
+      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-7.3.4">
     
     
       
@@ -20,10 +20,10 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.bde7dde4.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.db9e7362.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.ef6f36e2.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.3f5d1f46.min.css">
         
           
           
@@ -46,6 +46,8 @@
     
     
       
+
+
     
     
   </head>
@@ -76,7 +78,11 @@
       
     </div>
     
-      <header class="md-header" data-md-component="header">
+      
+
+  
+
+<header class="md-header md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href=".." title="Spoofax 3" class="md-header__button md-logo" aria-label="Spoofax 3" data-md-component="logo">
       
@@ -113,14 +119,18 @@
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active" required>
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
       </label>
-      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
-      </button>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+        </button>
+      </nav>
+      
     </form>
     <div class="md-search__output">
       <div class="md-search__scrollwrap" data-md-scrollfix>
@@ -150,13 +160,9 @@
       </div>
     
   </nav>
-</header>
+  
     
-    <div class="md-container" data-md-component="container">
       
-      
-        
-          
 <nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
   <div class="md-tabs__inner md-grid">
     <ul class="md-tabs__list">
@@ -256,6 +262,13 @@
     </ul>
   </div>
 </nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
         
       
       <main class="md-main" data-md-component="main">
@@ -322,12 +335,24 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" data-md-state="indeterminate" type="checkbox" id="__nav_2" checked>
       
-      <label class="md-nav__link" for="__nav_2">
-        Tutorials
-        <span class="md-nav__icon md-icon"></span>
-      </label>
+      
+      
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_2">
+          Tutorials
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <nav class="md-nav" aria-label="Tutorials" data-md-level="1">
         <label class="md-nav__title" for="__nav_2">
           <span class="md-nav__icon md-icon"></span>
@@ -336,6 +361,7 @@
         <ul class="md-nav__list" data-md-scrollfix>
           
             
+              
   
   
   
@@ -346,8 +372,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -358,8 +386,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -370,6 +400,7 @@
     </li>
   
 
+            
           
         </ul>
       </nav>
@@ -388,12 +419,26 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" data-md-state="indeterminate" type="checkbox" id="__nav_3" checked>
       
-      <label class="md-nav__link" for="__nav_3">
-        How-to Guides
-        <span class="md-nav__icon md-icon"></span>
-      </label>
+      
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_3">
+          How-to Guides
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <nav class="md-nav" aria-label="How-to Guides" data-md-level="1">
         <label class="md-nav__title" for="__nav_3">
           <span class="md-nav__icon md-icon"></span>
@@ -402,6 +447,7 @@
         <ul class="md-nav__list" data-md-scrollfix>
           
             
+              
   
   
   
@@ -412,8 +458,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -424,30 +472,129 @@
     </li>
   
 
+            
           
             
+              
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3" data-md-state="indeterminate" type="checkbox" id="__nav_3_3" checked>
+      
+      
+      
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_3_3">
+          Eclipse LWB
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Eclipse LWB" data-md-level="2">
+        <label class="md-nav__title" for="__nav_3_3">
+          <span class="md-nav__icon md-icon"></span>
+          Eclipse LWB
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/eclipse_lwb/update/" class="md-nav__link">
+        Updating & Downgrading
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
   
   
   
     <li class="md-nav__item">
       <a href="../guide/eclipse_lwb/troubleshooting/" class="md-nav__link">
-        Eclipse LWB Troubleshooting
+        Troubleshooting
       </a>
     </li>
   
 
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
           
             
+              
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_4" data-md-state="indeterminate" type="checkbox" id="__nav_3_4" checked>
+      
+      
+      
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_3_4">
+          Development
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Development" data-md-level="2">
+        <label class="md-nav__title" for="__nav_3_4">
+          <span class="md-nav__icon md-icon"></span>
+          Development
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
   
   
   
     <li class="md-nav__item">
       <a href="../guide/development/troubleshooting/" class="md-nav__link">
-        Development Troubleshooting
+        Troubleshooting
       </a>
     </li>
   
 
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
           
         </ul>
       </nav>
@@ -466,12 +613,20 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" data-md-state="indeterminate" type="checkbox" id="__nav_4" checked>
       
-      <label class="md-nav__link" for="__nav_4">
-        Reference
-        <span class="md-nav__icon md-icon"></span>
-      </label>
+      
+      
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_4">
+          Reference
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <nav class="md-nav" aria-label="Reference" data-md-level="1">
         <label class="md-nav__title" for="__nav_4">
           <span class="md-nav__icon md-icon"></span>
@@ -480,6 +635,7 @@
         <ul class="md-nav__list" data-md-scrollfix>
           
             
+              
   
   
   
@@ -490,6 +646,7 @@
     </li>
   
 
+            
           
         </ul>
       </nav>
@@ -508,12 +665,26 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" data-md-state="indeterminate" type="checkbox" id="__nav_5" checked>
       
-      <label class="md-nav__link" for="__nav_5">
-        Background
-        <span class="md-nav__icon md-icon"></span>
-      </label>
+      
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_5">
+          Background
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <nav class="md-nav" aria-label="Background" data-md-level="1">
         <label class="md-nav__title" for="__nav_5">
           <span class="md-nav__icon md-icon"></span>
@@ -522,6 +693,7 @@
         <ul class="md-nav__list" data-md-scrollfix>
           
             
+              
   
   
   
@@ -532,8 +704,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -544,8 +718,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -556,8 +732,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -568,6 +746,7 @@
     </li>
   
 
+            
           
         </ul>
       </nav>
@@ -586,12 +765,20 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" data-md-state="indeterminate" type="checkbox" id="__nav_6" checked>
       
-      <label class="md-nav__link" for="__nav_6">
-        Releases
-        <span class="md-nav__icon md-icon"></span>
-      </label>
+      
+      
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_6">
+          Releases
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <nav class="md-nav" aria-label="Releases" data-md-level="1">
         <label class="md-nav__title" for="__nav_6">
           <span class="md-nav__icon md-icon"></span>
@@ -600,6 +787,7 @@
         <ul class="md-nav__list" data-md-scrollfix>
           
             
+              
   
   
   
@@ -610,6 +798,7 @@
     </li>
   
 
+            
           
         </ul>
       </nav>
@@ -652,6 +841,13 @@
         <li class="md-nav__item">
   <a href="#config-information" class="md-nav__link">
     Config Information
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#macros" class="md-nav__link">
+    Macros
   </a>
   
 </li>
@@ -729,7 +925,7 @@
 
             <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><i>Config</i></td>
 
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">config_file_path = '/home/runner/work/spoofax-pie/spoofax-pie/mkdocs.yml', site_name = 'Spoofax 3', nav = [{'Home': 'index.md'}, {'Tutorials': ['tutorial/install.md', 'tutorial/create_language_project.md', 'tutorial/change_static_semantics.md']}, {'How-to Guides': ['guide/ask_for_help.md', 'guide/report_a_bug.md', 'guide/eclipse_lwb/troubleshooting.md', 'guide/development/troubleshooting.md']}, {'Reference': ['reference/configuration.md']}, {'Background': ['background/documentation.md', 'background/motivation.md', 'background/key_ideas.md', 'background/status.md']}, {'Releases': ['release/download.md']}], <b>pages</b> [<i>NoneType</i>], site_url = '', site_description = 'Spoofax 3 documentation website', <b>site_author</b> [<i>NoneType</i>], <b>theme</b> [<i>Theme</i>], docs_dir = '/home/runner/work/spoofax-pie/spoofax-pie/docs', site_dir = '/home/runner/work/spoofax-pie/spoofax-pie/site', <b>copyright</b> [<i>NoneType</i>], <b>google_analytics</b> [<i>NoneType</i>], <b>dev_addr</b> [<i>Address</i>], use_directory_urls = True, repo_url = 'https://github.com/metaborg/spoofax-pie/', repo_name = 'metaborg/spoofax-pie', edit_uri = 'edit/master/docs/', extra_css = ['extra.css'], extra_javascript = [], extra_templates = [], markdown_extensions = ['toc', 'tables', 'fenced_code', 'abbr', 'admonition', 'attr_list', 'codehilite', 'def_list', 'pymdownx.betterem', 'pymdownx.caret', 'pymdownx.details', 'pymdownx.emoji', 'pymdownx.inlinehilite', 'pymdownx.keys', 'pymdownx.magiclink', 'pymdownx.mark', 'pymdownx.saneheaders', 'pymdownx.smartsymbols', 'pymdownx.snippets', 'pymdownx.superfences', 'pymdownx.tabbed', 'pymdownx.tasklist', 'pymdownx.tilde'], <b>mdx_configs</b> [<i>dict</i>], strict = False, remote_branch = 'gh-pages', remote_name = 'origin', <b>extra</b> [<i>SubConfig</i>], <b>plugins</b> [<i>PluginCollection</i>]</td>
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">config_file_path = '/home/runner/work/spoofax-pie/spoofax-pie/mkdocs.yml', site_name = 'Spoofax 3', nav = [{'Home': 'index.md'}, {'Tutorials': ['tutorial/install.md', 'tutorial/create_language_project.md', 'tutorial/change_static_semantics.md']}, {'How-to Guides': ['guide/ask_for_help.md', 'guide/report_a_bug.md', {'Eclipse LWB': ['guide/eclipse_lwb/update.md', 'guide/eclipse_lwb/troubleshooting.md']}, {'Development': ['guide/development/troubleshooting.md']}]}, {'Reference': ['reference/configuration.md']}, {'Background': ['background/documentation.md', 'background/motivation.md', 'background/key_ideas.md', 'background/status.md']}, {'Releases': ['release/download.md']}], <b>pages</b> [<i>NoneType</i>], site_url = '', site_description = 'Spoofax 3 documentation website', <b>site_author</b> [<i>NoneType</i>], <b>theme</b> [<i>Theme</i>], docs_dir = '/home/runner/work/spoofax-pie/spoofax-pie/docs', site_dir = '/home/runner/work/spoofax-pie/spoofax-pie/site', <b>copyright</b> [<i>NoneType</i>], <b>google_analytics</b> [<i>NoneType</i>], <b>dev_addr</b> [<i>Address</i>], use_directory_urls = True, repo_url = 'https://github.com/metaborg/spoofax-pie/', repo_name = 'metaborg/spoofax-pie', edit_uri = 'edit/master/docs/', extra_css = ['extra.css'], extra_javascript = [], extra_templates = [], markdown_extensions = ['toc', 'tables', 'fenced_code', 'abbr', 'admonition', 'attr_list', 'codehilite', 'def_list', 'pymdownx.betterem', 'pymdownx.caret', 'pymdownx.details', 'pymdownx.emoji', 'pymdownx.inlinehilite', 'pymdownx.keys', 'pymdownx.magiclink', 'pymdownx.mark', 'pymdownx.saneheaders', 'pymdownx.smartsymbols', 'pymdownx.snippets', 'pymdownx.superfences', 'pymdownx.tabbed', 'pymdownx.tasklist', 'pymdownx.tilde'], <b>mdx_configs</b> [<i>dict</i>], strict = False, remote_branch = 'gh-pages', remote_name = 'origin', <b>extra</b> [<i>SubConfig</i>], <b>plugins</b> [<i>PluginCollection</i>]</td>
 
         </tr>
 
@@ -739,7 +935,7 @@
 
             <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><i>dict</i></td>
 
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">system = 'Linux', system_version = '5.4.0-1059-azure', python_version = '3.8.12', mkdocs_version = '1.2.3', macros_plugin_version = '0.5.5', jinja2_version = '3.0.2'</td>
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">system = 'Linux', system_version = '5.4.0-1062-azure', python_version = '3.8.12', mkdocs_version = '1.2.3', macros_plugin_version = '0.6.0', jinja2_version = '3.0.2'</td>
 
         </tr>
 
@@ -749,7 +945,7 @@
 
             <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><i>Config</i></td>
 
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">module_name = 'docs/macro', modules = [], include_dir = '', include_yaml = [], j2_block_start_string = '', j2_block_end_string = '', j2_variable_start_string = '', j2_variable_end_string = '', verbose = False</td>
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">module_name = 'docs/macro', modules = [], include_dir = 'docs/include', include_yaml = [], j2_block_start_string = '', j2_block_end_string = '', j2_variable_start_string = '', j2_variable_end_string = '', verbose = False</td>
 
         </tr>
 
@@ -759,47 +955,7 @@
 
             <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><i>dict</i></td>
 
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">status = True, <b>date</b> [<i>datetime</i>], short_commit = '17c1402', commit = '17c1402d65bbe109ce52654a7c9f8d5c16f98948', author = 'Gabriel Konat', tag = '', date_ISO = '2021-10-21 10:09:05 +0200', message = 'Update changelog.', raw = 'commit 17c1402d65bbe109ce52654a7c9f8d5c16f98948\nAuthor: Gabriel Konat <gabrielkonat@gmail.com>\nDate:   Thu Oct 21 10:09:05 2021 +0200\n\n    Update changelog.', root_dir = '/home/runner/work/spoofax-pie/spoofax-pie'</td>
-
-        </tr>
-
-        <tr>
-
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><b>context</b></td>
-
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><i>function</i></td>
-
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">(<i>obj, e</i>)<br/> <p><em>Default mkdocs_macro</em> List the defined variables</p></td>
-
-        </tr>
-
-        <tr>
-
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><b>macros_info</b></td>
-
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><i>function</i></td>
-
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">(<i></i>)<br/> <p>Test/debug function:         list useful documentation on the mkdocs_macro environment.</p></td>
-
-        </tr>
-
-        <tr>
-
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><b>now</b></td>
-
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><i>function</i></td>
-
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">(<i></i>)<br/> <p>Get the current time (returns a datetime object).          Used alone, it provides a timestamp.         To get the year use <code>now().year</code>, for the month number          <code>now().month</code>, etc.</p></td>
-
-        </tr>
-
-        <tr>
-
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><b>fix_url</b></td>
-
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><i>function</i></td>
-
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">(<i>url, r</i>)<br/> <p>If url is relative, fix it so that it points to the docs diretory.     This is necessary because relative links in markdown must be adapted     in html ('img/foo.png' =&gt; '../img/img.png').</p></td>
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">status = True, <b>date</b> [<i>datetime</i>], short_commit = 'c7b750a', commit = 'c7b750af3432b402183b19637cbbcafa72992ca8', author = 'Gabriel Konat', tag = '', date_ISO = '2021-11-04 14:46:39 +0100', message = 'Update requirements and changelog.', raw = 'commit c7b750af3432b402183b19637cbbcafa72992ca8\nAuthor: Gabriel Konat <gabrielkonat@gmail.com>\nDate:   Thu Nov 4 14:46:39 2021 +0100\n\n    Update requirements and changelog.', root_dir = '/home/runner/work/spoofax-pie/spoofax-pie'</td>
 
         </tr>
 
@@ -819,7 +975,17 @@
 
             <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><i>dict</i></td>
 
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><b>0.15.1</b> [<i>dict</i>], <b>0.15.0</b> [<i>dict</i>], <b>0.14.2</b> [<i>dict</i>], <b>0.14.1</b> [<i>dict</i>], <b>0.14.0</b> [<i>dict</i>], <b>0.13.0</b> [<i>dict</i>], <b>0.12.1</b> [<i>dict</i>], <b>0.12.0</b> [<i>dict</i>], <b>0.11.13</b> [<i>dict</i>], <b>0.11.12</b> [<i>dict</i>], <b>0.11.11</b> [<i>dict</i>], <b>0.11.10</b> [<i>dict</i>], <b>0.11.9</b> [<i>dict</i>], <b>0.11.8</b> [<i>dict</i>], <b>0.11.7</b> [<i>dict</i>], <b>0.11.6</b> [<i>dict</i>], <b>0.11.5</b> [<i>dict</i>], <b>0.11.4</b> [<i>dict</i>], <b>0.11.3</b> [<i>dict</i>], <b>0.11.2</b> [<i>dict</i>], <b>0.11.1</b> [<i>dict</i>], <b>0.11.0</b> [<i>dict</i>], <b>0.10.0</b> [<i>dict</i>], <b>0.9.0</b> [<i>dict</i>], <b>0.8.0</b> [<i>dict</i>], <b>rel</b> [<i>dict</i>], <b>dev</b> [<i>dict</i>]</td>
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><b>0.15.3</b> [<i>dict</i>], <b>0.15.2</b> [<i>dict</i>], <b>0.15.1</b> [<i>dict</i>], <b>0.15.0</b> [<i>dict</i>], <b>0.14.2</b> [<i>dict</i>], <b>0.14.1</b> [<i>dict</i>], <b>0.14.0</b> [<i>dict</i>], <b>0.13.0</b> [<i>dict</i>], <b>0.12.1</b> [<i>dict</i>], <b>0.12.0</b> [<i>dict</i>], <b>0.11.13</b> [<i>dict</i>], <b>0.11.12</b> [<i>dict</i>], <b>0.11.11</b> [<i>dict</i>], <b>0.11.10</b> [<i>dict</i>], <b>0.11.9</b> [<i>dict</i>], <b>0.11.8</b> [<i>dict</i>], <b>0.11.7</b> [<i>dict</i>], <b>0.11.6</b> [<i>dict</i>], <b>0.11.5</b> [<i>dict</i>], <b>0.11.4</b> [<i>dict</i>], <b>0.11.3</b> [<i>dict</i>], <b>0.11.2</b> [<i>dict</i>], <b>0.11.1</b> [<i>dict</i>], <b>0.11.0</b> [<i>dict</i>], <b>0.10.0</b> [<i>dict</i>], <b>0.9.0</b> [<i>dict</i>], <b>0.8.0</b> [<i>dict</i>], <b>rel</b> [<i>dict</i>], <b>dev</b> [<i>dict</i>]</td>
+
+        </tr>
+
+        <tr>
+
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><b>macros</b></td>
+
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><i>SuperDict</i></td>
+
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><b>context</b> [<i>function</i>], <b>macros_info</b> [<i>function</i>], <b>now</b> [<i>function</i>], <b>fix_url</b> [<i>function</i>]</td>
 
         </tr>
 
@@ -849,7 +1015,17 @@
 
             <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><i>Navigation</i></td>
 
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">Page(title='Home', url='.')<br/>Section(title='Tutorials')<br/>    Page(title=[blank], url='tutorial/install/')<br/>    Page(title=[blank], url='tutorial/create_language_project/')<br/>    Page(title=[blank], url='tutorial/change_static_semantics/')<br/>Section(title='How-to Guides')<br/>    Page(title=[blank], url='guide/ask_for_help/')<br/>    Page(title=[blank], url='guide/report_a_bug/')<br/>    Page(title=[blank], url='guide/eclipse_lwb/troubleshooting/')<br/>    Page(title=[blank], url='guide/development/troubleshooting/')<br/>Section(title='Reference')<br/>    Page(title=[blank], url='reference/configuration/')<br/>Section(title='Background')<br/>    Page(title=[blank], url='background/documentation/')<br/>    Page(title=[blank], url='background/motivation/')<br/>    Page(title=[blank], url='background/key_ideas/')<br/>    Page(title=[blank], url='background/status/')<br/>Section(title='Releases')<br/>    Page(title=[blank], url='release/download/')</td>
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">Page(title='Home', url='.')<br/>Section(title='Tutorials')<br/>    Page(title=[blank], url='tutorial/install/')<br/>    Page(title=[blank], url='tutorial/create_language_project/')<br/>    Page(title=[blank], url='tutorial/change_static_semantics/')<br/>Section(title='How-to Guides')<br/>    Page(title=[blank], url='guide/ask_for_help/')<br/>    Page(title=[blank], url='guide/report_a_bug/')<br/>    Section(title='Eclipse LWB')<br/>        Page(title=[blank], url='guide/eclipse_lwb/update/')<br/>        Page(title=[blank], url='guide/eclipse_lwb/troubleshooting/')<br/>    Section(title='Development')<br/>        Page(title=[blank], url='guide/development/troubleshooting/')<br/>Section(title='Reference')<br/>    Page(title=[blank], url='reference/configuration/')<br/>Section(title='Background')<br/>    Page(title=[blank], url='background/documentation/')<br/>    Page(title=[blank], url='background/motivation/')<br/>    Page(title=[blank], url='background/key_ideas/')<br/>    Page(title=[blank], url='background/status/')<br/>Section(title='Releases')<br/>    Page(title=[blank], url='release/download/')</td>
+
+        </tr>
+
+        <tr>
+
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><b>files</b></td>
+
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><i>Files</i></td>
+
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><mkdocs.structure.files.Files object at 0x7f1627a4cf10></td>
 
         </tr>
 
@@ -904,7 +1080,7 @@
 
             <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><i>list</i></td>
 
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">[{'Home': 'index.md'}, {'Tutorials': ['tutorial/install.md', 'tutorial/create_language_project.md', 'tutorial/change_static_semantics.md']}, {'How-to Guides': ['guide/ask_for_help.md', 'guide/report_a_bug.md', 'guide/eclipse_lwb/troubleshooting.md', 'guide/development/troubleshooting.md']}, {'Reference': ['reference/configuration.md']}, {'Background': ['background/documentation.md', 'background/motivation.md', 'background/key_ideas.md', 'background/status.md']}, {'Releases': ['release/download.md']}]</td>
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">[{'Home': 'index.md'}, {'Tutorials': ['tutorial/install.md', 'tutorial/create_language_project.md', 'tutorial/change_static_semantics.md']}, {'How-to Guides': ['guide/ask_for_help.md', 'guide/report_a_bug.md', {'Eclipse LWB': ['guide/eclipse_lwb/update.md', 'guide/eclipse_lwb/troubleshooting.md']}, {'Development': ['guide/development/troubleshooting.md']}]}, {'Reference': ['reference/configuration.md']}, {'Background': ['background/documentation.md', 'background/motivation.md', 'background/key_ideas.md', 'background/status.md']}, {'Releases': ['release/download.md']}]</td>
 
         </tr>
 
@@ -954,7 +1130,7 @@
 
             <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><i>Theme</i></td>
 
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">Theme(name='material', dirs=['/opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/material', '/opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/mkdocs/templates'], static_templates=['sitemap.xml', '404.html'], locale=Locale(language='en', territory=''), language='en', direction=None, features=['navigation.instant', 'navigation.tabs', 'navigation.top'], palette={'primary': 'indigo', 'accent': 'indigo'}, font={'code': 'JetBrains Mono'}, icon=None, favicon='assets/spoofax.png', include_search_page=False, search_index_only=True, logo='assets/spoofax.svg')</td>
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">Theme(name='material', dirs=['/opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/material', '/opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/mkdocs/templates'], static_templates=['404.html', 'sitemap.xml'], locale=Locale(language='en', territory=''), language='en', direction=None, features=['navigation.expand', 'navigation.instant', 'navigation.tabs', 'navigation.tabs.sticky', 'navigation.sections', 'navigation.indexes', 'navigation.top'], palette={'primary': 'indigo', 'accent': 'indigo'}, font={'code': 'JetBrains Mono'}, icon=None, favicon='assets/spoofax.png', include_search_page=False, search_index_only=True, logo='assets/spoofax.svg')</td>
 
         </tr>
 
@@ -1150,6 +1326,60 @@
 
 </table>
 
+<h2 id="macros">Macros<a class="headerlink" href="#macros" title="Permanent link">&para;</a></h2>
+<p>These macros have been defined programmatically for this environment
+(module or pluglets). </p>
+<table class="pretty" style="background-color: #F0FFFF; border:1px solid #DCDCDC; padding: 5px">
+
+    <th style="border:1px solid #DCDCDC; padding: 5px">Variable</th>
+
+    <th style="border:1px solid #DCDCDC; padding: 5px">Type</th>
+
+    <th style="border:1px solid #DCDCDC; padding: 5px">Content</th>
+
+
+        <tr>
+
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><b>context</b></td>
+
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><i>function</i></td>
+
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">(<i>obj, e</i>)<br/> <p><em>Default mkdocs_macro</em> List the defined variables</p></td>
+
+        </tr>
+
+        <tr>
+
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><b>macros_info</b></td>
+
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><i>function</i></td>
+
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">(<i></i>)<br/> <p>Test/debug function:         list useful documentation on the mkdocs_macro environment.</p></td>
+
+        </tr>
+
+        <tr>
+
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><b>now</b></td>
+
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><i>function</i></td>
+
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">(<i></i>)<br/> <p>Get the current time (returns a datetime object).          Used alone, it provides a timestamp.         To get the year use <code>now().year</code>, for the month number          <code>now().month</code>, etc.</p></td>
+
+        </tr>
+
+        <tr>
+
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><b>fix_url</b></td>
+
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><i>function</i></td>
+
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">(<i>url, r</i>)<br/> <p>If url is relative, fix it so that it points to the docs diretory.     This is necessary because relative links in markdown must be adapted     in html ('img/foo.png' =&gt; '../img/img.png').</p></td>
+
+        </tr>
+
+</table>
+
 <h2 id="git-information">Git Information<a class="headerlink" href="#git-information" title="Permanent link">&para;</a></h2>
 <p>Information available on the last commit and the git repository containing the
 documentation project:</p>
@@ -1179,7 +1409,7 @@ documentation project:</p>
 
             <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><i>datetime</i></td>
 
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">datetime.datetime(2021, 10, 21, 10, 9, 5, tzinfo=tzoffset(None, 7200))</td>
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">datetime.datetime(2021, 11, 4, 14, 46, 39, tzinfo=tzoffset(None, 3600))</td>
 
         </tr>
 
@@ -1189,7 +1419,7 @@ documentation project:</p>
 
             <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><i>str</i></td>
 
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">'17c1402'</td>
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">'c7b750a'</td>
 
         </tr>
 
@@ -1199,7 +1429,7 @@ documentation project:</p>
 
             <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><i>str</i></td>
 
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">'17c1402d65bbe109ce52654a7c9f8d5c16f98948'</td>
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">'c7b750af3432b402183b19637cbbcafa72992ca8'</td>
 
         </tr>
 
@@ -1229,7 +1459,7 @@ documentation project:</p>
 
             <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><i>str</i></td>
 
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">'2021-10-21 10:09:05 +0200'</td>
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">'2021-11-04 14:46:39 +0100'</td>
 
         </tr>
 
@@ -1239,7 +1469,7 @@ documentation project:</p>
 
             <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><i>str</i></td>
 
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">'Update changelog.'</td>
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">'Update requirements and changelog.'</td>
 
         </tr>
 
@@ -1249,7 +1479,7 @@ documentation project:</p>
 
             <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><i>str</i></td>
 
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">'commit 17c1402d65bbe109ce52654a7c9f8d5c16f98948\nAuthor: Gabriel Konat <gabrielkonat@gmail.com>\nDate:   Thu Oct 21 10:09:05 2021 +0200\n\n    Update changelog.'</td>
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">'commit c7b750af3432b402183b19637cbbcafa72992ca8\nAuthor: Gabriel Konat <gabrielkonat@gmail.com>\nDate:   Thu Nov 4 14:46:39 2021 +0100\n\n    Update requirements and changelog.'</td>
 
         </tr>
 
@@ -1385,7 +1615,7 @@ documentation project:</p>
 
             <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px"><i>str</i></td>
 
-            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">'2021-10-21'</td>
+            <td style="vertical-align:top; border:1px solid #DCDCDC; padding: 5px">'2021-11-04'</td>
 
         </tr>
 
@@ -2043,8 +2273,9 @@ documentation project:</p>
           </div>
         </div>
         
-          <a href="#" class="md-top md-icon" title="Back to top" data-md-component="top" data-md-state="hidden">
+          <a href="#" class="md-top md-icon" data-md-component="top" data-md-state="hidden">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"/></svg>
+            Back to top
           </a>
         
       </main>
@@ -2056,10 +2287,12 @@ documentation project:</p>
     <div class="md-footer-meta__inner md-grid">
       <div class="md-footer-copyright">
         
-        Made with
-        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
-          Material for MkDocs
-        </a>
+        
+          Made with
+          <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+            Material for MkDocs
+          </a>
+        
         
       </div>
       
@@ -2071,10 +2304,10 @@ documentation project:</p>
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.instant", "navigation.tabs", "navigation.top"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../assets/javascripts/workers/search.4fa0e4ee.min.js", "version": null}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.expand", "navigation.instant", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.8397ff9e.min.js", "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.1d3bfcf1.min.js"></script>
+      <script src="../assets/javascripts/bundle.1e84347e.min.js"></script>
       
     
   </body>

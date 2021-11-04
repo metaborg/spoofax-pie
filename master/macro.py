@@ -1,50 +1,78 @@
 from typing import Optional
 
-windows_icon = ":fontawesome-brands-windows:"
-macos_icon = ":fontawesome-brands-apple:"
-linux_icon = ":fontawesome-brands-linux:"
+windows_icon = ':fontawesome-brands-windows:'
+macos_icon = ':fontawesome-brands-apple:'
+linux_icon = ':fontawesome-brands-linux:'
+
+artifacts_url_base = 'https://artifacts.metaborg.org'
+artifacts_releases_url = f'{artifacts_url_base}/content/repositories/releases/org/metaborg/'
 
 
-def download_link(repo: str, artifact: str, classifier: str, packaging: str, version="LATEST", group="org.metaborg"):
-    return f"https://artifacts.metaborg.org/service/local/artifact/maven/redirect?r={repo}&g={group}&a={artifact}&c={classifier}&p={packaging}&v={version}"
+def artifacts_download(repo, artifact, classifier=None, packaging="jar", version="LATEST", group="org.metaborg"):
+    return f'{artifacts_url_base}/service/local/artifact/maven/redirect?r={repo}&g={group}' \
+           f'&a={artifact}{f"&c={classifier}" if classifier is not None else ""}&p={packaging}&v={version}'
 
 
-def eclipse_lwb_download_link(repo: str, variant: str, version: str):
-    return download_link(repo, "spoofax.lwb.eclipse.repository", f"spoofax3-{variant}", "zip", version)
+def eclipse_lwb_artifacts_download(repo: str, variant: str, version: str):
+    return artifacts_download(repo, 'spoofax.lwb.eclipse.repository', f'spoofax3-{variant}', "zip", version)
 
 
-def eclipse_lwb_download(icon: str, name: str, repo: str, variant: str, version: str):
-    return f"{icon} [{name}]({eclipse_lwb_download_link(repo, variant, version)})"
+win_jvm_variant = 'win32-x86_64-jvm'
+win_variant = 'win32-x86_64'
+macos_jvm_variant = 'macosx-x86_64-jvm'
+macos_variant = 'macosx-x64'
+linux_jvm_variant = 'linux-x86_64-jvm'
+linux_variant = 'linux-x86_64'
 
 
-def fill_env_with_release(env, env_version: str, version: str, download_version: str, date: Optional[str]):
-    repo = "snapshots" if "SNAPSHOT" in version else "releases"
-    env.variables.release[env_version] = {
-        "date": date,
-        "version": version,
-        "lwb": {"eclipse": {
-            "install": {
-                "jvm": {
-                    "windows": eclipse_lwb_download(windows_icon, "Windows 64-bit with embedded JVM", repo,
-                                                    "win32-x86_64-jvm", download_version),
-                    "macos": eclipse_lwb_download(macos_icon, "macOS 64-bit with embedded JVM", repo,
-                                                  "macosx-x86_64-jvm",
-                                                  download_version),
-                    "linux": eclipse_lwb_download(linux_icon, "Linux 64-bit with embedded JVM", repo,
-                                                  "linux-x86_64-jvm",
-                                                  download_version),
-                },
-                "windows": eclipse_lwb_download(windows_icon, "Windows 64-bit", repo, "win32-x86_64", download_version),
-                "macos": eclipse_lwb_download(macos_icon, "macOS 64-bit", repo, "macosx-x86_64", download_version),
-                "linux": eclipse_lwb_download(linux_icon, "Linux 64-bit", repo, "linux-x86_64", download_version),
-            },
-            "repository": f"https://artifacts.metaborg.org/content/unzip/releases-unzipped/org/metaborg/spoofax.lwb.eclipse.repository/{version}/spoofax.lwb.eclipse.repository-{version}.zip-unzip/"
-        }}
-    }
+def download_link(icon: str, name: str, link: str):
+    return f'{icon} [{name}]({link})'
+
+
+def fill_variables_with_release(variables, env_version: str, version: str, download_version: str, date: Optional[str]):
+    repo = 'snapshots' if 'SNAPSHOT' in version else 'releases'
+
+    windows = eclipse_lwb_artifacts_download(repo, win_variant, download_version)
+    windows_jvm = eclipse_lwb_artifacts_download(repo, win_jvm_variant, download_version)
+    macos_jvm = eclipse_lwb_artifacts_download(repo, macos_jvm_variant, download_version)
+    macos = eclipse_lwb_artifacts_download(repo, macos_variant, download_version)
+    linux_jvm = eclipse_lwb_artifacts_download(repo, linux_jvm_variant, download_version)
+    linux = eclipse_lwb_artifacts_download(repo, linux_variant, download_version)
+    eclipse_repo = f'https://artifacts.metaborg.org/content/unzip/releases-unzipped/org/metaborg/spoofax.lwb.eclipse' \
+                   f'.repository/{version}/spoofax.lwb.eclipse.repository-{version}.zip-unzip/ '
+
+    variables.release[env_version] = dict(
+        date=date,
+        version=version,
+        eclipse_lwb=dict(
+            install=dict(
+                jvm=dict(
+                    link=dict(
+                        macos=download_link(macos_icon, "macOS 64-bit with embedded JVM", macos_jvm),
+                        linux=download_link(linux_icon, "Linux 64-bit with embedded JVM", linux_jvm),
+                        windows=download_link(windows_icon, "Windows 64-bit with embedded JVM", windows_jvm),
+                    ),
+                    macos=macos_jvm,
+                    linux=linux_jvm,
+                    windows=windows_jvm,
+                ), link=dict(
+                    macos=download_link(macos_icon, "macOS 64-bit", macos_jvm),
+                    linux=download_link(linux_icon, "Linux 64-bit", linux_jvm),
+                    windows=download_link(windows_icon, "Windows 64-bit", windows_jvm),
+                ),
+                macos=macos,
+                linux=linux,
+                windows=windows,
+            ),
+            repository=eclipse_repo,
+        ),
+    )
 
 
 release_versions = {
-    "0.15.1": "21-10-2021",
+    "0.15.3": "22-10-2021",
+    "0.15.2": "21-10-2021",
+    "0.15.1": "19-10-2021",
     "0.15.0": "18-10-2021",
     "0.14.2": "13-10-2021",
     "0.14.1": "12-10-2021",
@@ -74,14 +102,18 @@ development_version = "develop-SNAPSHOT"
 
 
 def define_env(env):
-    env.variables.os = {
-        "windows": f"{windows_icon} Windows",
-        "linux": f"{linux_icon} Linux",
-        "macos": f"{macos_icon} macOS",
-    }
-    env.variables.release = {}
+    define_macros(env.variables)
+
+
+def define_macros(variables):
+    variables.os = dict(
+        windows=f'{windows_icon} Windows',
+        linux=f'{linux_icon} Linux',
+        macos=f'{macos_icon} macOS'
+    )
+    variables.release = {}
     for version, date in release_versions.items():
-        fill_env_with_release(env, version, version, version, date)
+        fill_variables_with_release(variables, version, version, version, date)
     latest_rel_version, latest_rel_date = next(iter(release_versions.items()))
-    fill_env_with_release(env, "rel", latest_rel_version, latest_rel_version, latest_rel_date)
-    fill_env_with_release(env, "dev", "develop-SNAPSHOT", "LATEST", None)
+    fill_variables_with_release(variables, 'rel', latest_rel_version, latest_rel_version, latest_rel_date)
+    fill_variables_with_release(variables, 'dev', 'develop-SNAPSHOT', 'LATEST', None)
