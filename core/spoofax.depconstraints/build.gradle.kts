@@ -90,6 +90,7 @@ dependencies {
     api("org.metaborg.devenv:nabl2.terms:$spoofax2DevenvVersion")
     api("org.metaborg.devenv:nabl2.solver:$spoofax2DevenvVersion")
     api("org.metaborg.devenv:statix.solver:$spoofax2DevenvVersion")
+    api("org.metaborg.devenv:statix.generator:$spoofax2DevenvVersion")
 
     /// Picocli
     api("info.picocli:picocli:$picocliVersion")
