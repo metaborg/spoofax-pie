@@ -3,6 +3,9 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+
+
+## [0.16.0] - 2021-11-05
 ### Fixed
 - Evaluating .stxtest files outside of the Statix source directory (src by default) silently failing.
 - Errors in CFG not appearing, or just displaying a single error on the first line.
@@ -292,7 +295,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.15.3...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.0...HEAD
+[0.16.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.15.3...release-0.16.0
 [0.15.3]: https://github.com/metaborg/spoofax-pie/compare/release-0.15.2...release-0.15.3
 [0.15.2]: https://github.com/metaborg/spoofax-pie/compare/release-0.15.1...release-0.15.2
 [0.15.1]: https://github.com/metaborg/spoofax-pie/compare/release-0.15.0...release-0.15.1
