@@ -6,6 +6,7 @@ gradlePipeline(
   buildOtherBranch: false,
   buildTag: false,
   gradleParallel: false,
+  gradleMaxWorkers: '1',
   slack: true,
   slackChannel: '#spoofax3-dev'
 )
