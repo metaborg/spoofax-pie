@@ -1,33 +1,71 @@
 package mb.rv32im.task;
 
-import mb.aterm.common.InvalidAstShapeException;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Severity;
 import mb.common.region.Region;
-import mb.common.result.Result;
-import mb.jsglr.common.JsglrParseException;
 import mb.pie.api.ExecContext;
-import mb.pie.api.None;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.rv32im.Rv32ImScope;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
-import mb.stratego.common.StrategoException;
-import mb.stratego.common.StrategoRuntime;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.terms.util.TermUtils;
 import venus.assembler.Assembler;
 import venus.assembler.AssemblerError;
 import venus.assembler.AssemblerOutput;
 import venus.linker.LinkedProgram;
 import venus.linker.Linker;
-import venus.riscv.insts.*;
+import venus.riscv.insts.AddKt;
+import venus.riscv.insts.AddiKt;
+import venus.riscv.insts.AndKt;
+import venus.riscv.insts.AndiKt;
+import venus.riscv.insts.AuipcKt;
+import venus.riscv.insts.BeqKt;
+import venus.riscv.insts.BgeKt;
+import venus.riscv.insts.BgeuKt;
+import venus.riscv.insts.BltKt;
+import venus.riscv.insts.BltuKt;
+import venus.riscv.insts.BneKt;
+import venus.riscv.insts.DivKt;
+import venus.riscv.insts.DivuKt;
+import venus.riscv.insts.EcallKt;
+import venus.riscv.insts.JalKt;
+import venus.riscv.insts.JalrKt;
+import venus.riscv.insts.LbKt;
+import venus.riscv.insts.LbuKt;
+import venus.riscv.insts.LhKt;
+import venus.riscv.insts.LhuKt;
+import venus.riscv.insts.LuiKt;
+import venus.riscv.insts.LwKt;
+import venus.riscv.insts.MulKt;
+import venus.riscv.insts.MulhKt;
+import venus.riscv.insts.MulhsuKt;
+import venus.riscv.insts.MulhuKt;
+import venus.riscv.insts.OrKt;
+import venus.riscv.insts.OriKt;
+import venus.riscv.insts.RemKt;
+import venus.riscv.insts.RemuKt;
+import venus.riscv.insts.SbKt;
+import venus.riscv.insts.ShKt;
+import venus.riscv.insts.SllKt;
+import venus.riscv.insts.SlliKt;
+import venus.riscv.insts.SltKt;
+import venus.riscv.insts.SltiKt;
+import venus.riscv.insts.SltiuKt;
+import venus.riscv.insts.SltuKt;
+import venus.riscv.insts.SraKt;
+import venus.riscv.insts.SraiKt;
+import venus.riscv.insts.SrlKt;
+import venus.riscv.insts.SrliKt;
+import venus.riscv.insts.SubKt;
+import venus.riscv.insts.SwKt;
+import venus.riscv.insts.XorKt;
+import venus.riscv.insts.XoriKt;
 import venus.simulator.Simulator;
 
 import javax.inject.Inject;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.Arrays;
@@ -60,43 +98,24 @@ public class ExecuteRiscV implements TaskDef<ExecuteRiscV.Args, CommandFeedback>
         }
     }
 
-    private final Rv32ImParse parse;
-    private final Rv32ImGetStrategoRuntimeProvider getStrategoRuntimeProvider;
-
-    @Inject public ExecuteRiscV(
-        Rv32ImParse parse,
-        Rv32ImGetStrategoRuntimeProvider getStrategoRuntimeProvider
-    ) {
-        this.parse = parse;
-        this.getStrategoRuntimeProvider = getStrategoRuntimeProvider;
-    }
+    @Inject public ExecuteRiscV() {}
 
     @Override public String getId() {
         return getClass().getName();
     }
 
-    @Override public CommandFeedback exec(ExecContext context, Args input) throws Exception {
-        // Parse
-        final Result<IStrategoTerm, JsglrParseException> parseResult = context.require(parse.inputBuilder().withFile(input.file).buildAstSupplier());
-        if(parseResult.isErr()) {
-            return CommandFeedback.ofTryExtractMessagesFrom(parseResult.getErr());
-        }
-        final IStrategoTerm ast = parseResult.get();
-
-        // Pretty-print
-        final StrategoRuntime strategoRuntime = context.require(getStrategoRuntimeProvider, None.instance).getValue().get();
-        final IStrategoTerm prettyPrintedTerm;
+    @Override public CommandFeedback exec(ExecContext context, Args input) {
+        final ResourceKey file = input.file;
+        final String text;
         try {
-            prettyPrintedTerm = strategoRuntime.invoke("pp-debug", ast);
-        } catch(StrategoException e) {
-            return CommandFeedback.ofTryExtractMessagesFrom(e);
+            text = context.require(input.file).readString();
+        } catch(IOException e) {
+            return CommandFeedback.ofTryExtractMessagesFrom(e, file);
         }
-        final String prettyPrinted = TermUtils.asJavaString(prettyPrintedTerm)
-            .orElseThrow(() -> new InvalidAstShapeException("pretty-printed RISC-V term", prettyPrintedTerm));
 
         // Assemble
         setupObjects();
-        final AssemblerOutput assemblerOutput = Assembler.INSTANCE.assemble(prettyPrinted);
+        final AssemblerOutput assemblerOutput = Assembler.INSTANCE.assemble(text);
         if(assemblerOutput.getErrors().size() > 0) {
             final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
             for(AssemblerError error : assemblerOutput.getErrors()) {
@@ -107,9 +126,9 @@ public class ExecuteRiscV implements TaskDef<ExecuteRiscV.Args, CommandFeedback>
                 } else {
                     region = null;
                 }
-                messagesBuilder.addMessage(error.getMessage(), Severity.Error, input.file, region);
+                messagesBuilder.addMessage(error.getMessage(), Severity.Error, file, region);
             }
-            return CommandFeedback.of(messagesBuilder.build());
+            return CommandFeedback.of(messagesBuilder.build(file));
         }
 
         // Link
@@ -118,7 +137,7 @@ public class ExecuteRiscV implements TaskDef<ExecuteRiscV.Args, CommandFeedback>
             program = Linker.INSTANCE.link(Arrays.asList(assemblerOutput.getProg()));
         } catch(Throwable e) {
             // HACK: throws AssemblerError, but Kotlin methods do not have checked exceptions, so we catch all.
-            return CommandFeedback.ofTryExtractMessagesFrom(e);
+            return CommandFeedback.ofTryExtractMessagesFrom(e, file);
         }
 
         // Simulate
