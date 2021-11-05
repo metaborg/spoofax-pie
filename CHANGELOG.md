@@ -22,6 +22,9 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `pie` requirement to `0.19.3`.
 - `coronium` plugin requirements to `0.3.12`.
 
+### Added
+- RV32IM language for targeting RISC-V.
+
 
 ## [0.15.3] - 2021-10-22
 ### Fixed

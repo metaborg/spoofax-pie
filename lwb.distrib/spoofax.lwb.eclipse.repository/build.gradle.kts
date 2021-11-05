@@ -3,8 +3,6 @@ plugins {
   `maven-publish`
 }
 
-fun compositeBuild(name: String) = "$group:$name:$version"
-
 mavenize {
   majorVersion.set("2021-03")
 }
@@ -15,8 +13,10 @@ repository {
   createEclipseInstallationWithJvmPublications.set(true)
 }
 
+fun compositeBuild(name: String) = "$group:$name:$version"
+
 dependencies {
-  feature(project(":spoofax.lwb.eclipse.feature"))
+  feature(compositeBuild("spoofax.lwb.eclipse.feature"))
 }
 
 tasks {
