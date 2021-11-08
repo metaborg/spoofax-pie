@@ -313,7 +313,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * @return the code completion result
          * @throws Exception if an exception occurred
          */
-        public Result<CodeCompletionResult, ?> complete() throws InterruptedException {
+        public Result<CodeCompletionResult, ?> complete() throws Exception {
             @Nullable final CodeCompletionEventHandler eventHandler = eventHandlerProvider.get();
             if (eventHandler != null) eventHandler.begin();
 
