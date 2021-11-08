@@ -1,8 +1,8 @@
-module start
+module rv32im/start
 
 imports
   
-  lex
+  rv32im/lex
 
 context-free start-symbols
   

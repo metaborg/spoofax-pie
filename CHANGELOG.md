@@ -3,6 +3,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+### Fixed
+- Fix wrong pretty-printer import in Stratego when SDF3 main file is not `./start.sdf3`.
 
 
 ## [0.16.0] - 2021-11-05

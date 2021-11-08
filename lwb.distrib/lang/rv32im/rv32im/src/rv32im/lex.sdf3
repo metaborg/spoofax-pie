@@ -1,4 +1,4 @@
-module lex
+module rv32im/lex
 
 lexical sorts
 

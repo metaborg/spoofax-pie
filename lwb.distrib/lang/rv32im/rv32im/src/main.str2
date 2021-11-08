@@ -2,6 +2,6 @@ module main
 
 imports
 
-  signatures/-
+  signatures/rv32im/-
   pp
   completion

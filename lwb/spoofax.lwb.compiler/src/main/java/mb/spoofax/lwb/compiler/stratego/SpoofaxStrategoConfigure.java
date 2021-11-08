@@ -284,6 +284,7 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
                         final HashMap<String, Object> map = new HashMap<>();
                         map.put("name", strategyAffix);
                         map.put("ppName", strategyAffix);
+                        map.put("sdf3MainModule", sdf3Config.getMainModuleName());
                         completionTemplate.write(context, generatedSourcesDirectory.appendRelativePath("completion.str2"), cfgStrategoConfig, map);
                         ppTemplate.write(context, generatedSourcesDirectory.appendRelativePath("pp.str2"), cfgStrategoConfig, map);
                     }

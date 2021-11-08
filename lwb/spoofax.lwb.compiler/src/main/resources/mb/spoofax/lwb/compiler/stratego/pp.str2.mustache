@@ -6,7 +6,7 @@ imports
   libstratego-gpp
   libspoofax/sdf/pp
   pp/{{name}}-parenthesize
-  pp/start-pp
+  pp/{{sdf3MainModule}}-pp
 
 rules
 
@@ -28,9 +28,9 @@ rules
     ; !V([], <id>)
     ; box2text-string(|120)
 
-  pp-debug :
+  pp-debug-{{name}}-string :
     ast -> result
     with
        result := <pp-{{name}}-string> ast
-    <+ <bottomup(try(not(is-string); not(is-list); not(pp-{{name}}-string); debug(!"cannot pp ")))> ast
+    <+ <bottomup(try(not(is-string); not(is-list); not(pp-{{name}}-string); debug(!"cannot pretty-print term to {{name}}")))> ast
     ;  result := ""

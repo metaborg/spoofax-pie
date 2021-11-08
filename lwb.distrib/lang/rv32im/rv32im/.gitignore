@@ -6,6 +6,8 @@
 hs_err_pid*
 # Eclipse
 /bin
+# Allow Eclipse .project for now
+!/.project
 # IntelliJ
 /out
 /.idea

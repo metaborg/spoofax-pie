@@ -19,7 +19,7 @@ class SpecToParenthesizerTest extends TestBase {
         final Sdf3ParseTableToParenthesizer taskDef = component.getSdf3ParseTableToParenthesizer();
         try(final MixedSession session = newSession()) {
             final Sdf3SpecToParseTable.Input parseTableInput = new Sdf3SpecToParseTable.Input(
-                specConfig(rootDirectory.getPath(), rootDirectory.getPath(), resource.getKey()),
+                specConfig(rootDirectory.getPath(), rootDirectory.getPath(), resource.getPath()),
                 false
             );
             final Sdf3ParseTableToParenthesizer.Args parenthesizerArgs = new Sdf3ParseTableToParenthesizer.Args(
