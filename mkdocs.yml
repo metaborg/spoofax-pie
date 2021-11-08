@@ -14,6 +14,8 @@ nav:
       - Eclipse LWB:
           - guide/eclipse_lwb/update.md
           - guide/eclipse_lwb/troubleshooting.md
+      - Static Semantics:
+          - guide/static-semantics/code-completion.md
       - Development:
           - guide/development/troubleshooting.md
   - Reference:
