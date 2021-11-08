@@ -6,9 +6,6 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [0.16.0] - 2021-11-05
-### Added
-- Semantic code completion.
-
 ### Fixed
 - Evaluating .stxtest files outside of the Statix source directory (src by default) silently failing.
 - Errors in CFG not appearing, or just displaying a single error on the first line.
@@ -31,6 +28,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 ### Added
 - RV32IM language for targeting RISC-V.
+- Semantic code completion.
 
 
 ## [0.15.3] - 2021-10-22
