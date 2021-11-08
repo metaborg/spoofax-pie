@@ -3,11 +3,11 @@ plugins {
   `maven-publish`
 }
 
-val commonVersion = "0.9.8"
+val commonVersion = "0.9.9"
 val logVersion = "0.5.5"
 val slf4jVersion = "1.7.30"
 val resourceVersion = "0.13.0"
-val pieVersion = "0.19.2"
+val pieVersion = "0.19.3"
 
 val spoofax2Version: String by ext
 val spoofax2DevenvVersion: String by ext
@@ -90,6 +90,7 @@ dependencies {
     api("org.metaborg.devenv:nabl2.terms:$spoofax2DevenvVersion")
     api("org.metaborg.devenv:nabl2.solver:$spoofax2DevenvVersion")
     api("org.metaborg.devenv:statix.solver:$spoofax2DevenvVersion")
+    api("org.metaborg.devenv:statix.generator:$spoofax2DevenvVersion")
 
     /// Picocli
     api("info.picocli:picocli:$picocliVersion")

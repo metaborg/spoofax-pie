@@ -1,0 +1,6 @@
+shared.defaultArtifactId=rv32im
+shared.defaultClassPrefix=Rv32Im
+shared.defaultGroupId=org.metaborg
+shared.defaultPackageId=mb.rv32im
+shared.defaultVersion=0.1.0
+stratego.languageStrategyAffix=rv32im

@@ -92,5 +92,4 @@ include("spoofax.lwb.compiler.gradle")
 include("spoofax.lwb.dynamicloading")
 
 include("spoofax.lwb.eclipse")
-include("spoofax.lwb.eclipse.feature")
-include("spoofax.lwb.eclipse.repository")
+

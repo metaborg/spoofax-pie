@@ -3,6 +3,9 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+
+
+## [0.16.0] - 2021-11-05
 ### Fixed
 - Evaluating .stxtest files outside of the Statix source directory (src by default) silently failing.
 - Errors in CFG not appearing, or just displaying a single error on the first line.
@@ -16,8 +19,16 @@ All notable changes to this project are documented in this file, based on [Keep 
 - LWB compiler to make it possible to supply a prebuilt ESV output file for a language instead of always having to compile ESV from sources. This is done with the `esv { source = prebuilt { file = ./prebuilt/editor.esf.af } }` configuration in `spoofaxc.cfg`. The syntax for setting the main source directory, main file, and include directories has also changed. See the configuration reference on the documentation site for details.
 - LWB compiler to make it possible to supply prebuilt SDF3 parse table files for a language instead of always having to compile SDF3 from sources. This is done with the `sdf3 { source = prebuilt { parse-table-aterm-file = ./prebuilt/sdf.tbl parse-table-persisted-file = ./prebuilt/sdf.bin } }` configuration in `spoofaxc.cfg`. The syntax for setting the main source directory and main file has also changed. See the configuration reference on the documentation site for details.
 - LWB compiler to make it possible to supply prebuilt Statix spec ATerm files for a language instead of always having to compile Statix from sources. This is done with the `statix { source = prebuilt { spec-aterm-directory = ./prebuilt/resource/statix } }` configuration in `spoofaxc.cfg`. The syntax for setting the main source directory and main file has also changed. See the configuration reference on the documentation site for details.
-- Most Stratego configuration to be moved into a `source = files {}` section in accordance with the other meta-languages. See the configuration reference on the documentation site for details.
+- Moved most Stratego configuration into a `source = files {}` section in accordance with the other meta-languages. See the configuration reference on the documentation site for details.
 - LWB compiler to be more incremental by adding output stampers to high-level tasks, ensuring they only get re-executed when a relevant part of the configuration changes.
+- `common` requirement to `0.9.9`.
+- `pie` requirement to `0.19.3`.
+- `coronium` plugin requirements to `0.3.12`.
+- `releng` (devenv-release) requirement to 0.1.17.
+
+### Added
+- RV32IM language for targeting RISC-V.
+- Semantic code completion.
 
 
 ## [0.15.3] - 2021-10-22
@@ -285,7 +296,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.15.3...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.0...HEAD
+[0.16.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.15.3...release-0.16.0
 [0.15.3]: https://github.com/metaborg/spoofax-pie/compare/release-0.15.2...release-0.15.3
 [0.15.2]: https://github.com/metaborg/spoofax-pie/compare/release-0.15.1...release-0.15.2
 [0.15.1]: https://github.com/metaborg/spoofax-pie/compare/release-0.15.0...release-0.15.1

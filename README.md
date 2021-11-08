@@ -32,7 +32,9 @@ You may use the files in this project in compliance with the license.
 ├── metalib                 # Spoofax 3 meta libraries, in a separate composite build because it
 │                             uses a Gradle plugin from core.
 ├── lwb                     # Spoofax 3 language workbench, in a separate composite build because
-│                             it uses a Gradle plugin from core.
+│                             it uses Gradle plugins from core.
+├── lwb.distrib             # Spoofax 3 language workbench distribution, in a separate composite
+│                             build because it uses Gradle plugins from core and lwb.
 ├── example                 # Spoofax 3 examples, in a separate composite build because
 │                             it uses Gradle plugins from core and lwb.
 ├── gradle.properties       # Properties f
