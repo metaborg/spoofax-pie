@@ -16,7 +16,7 @@
     
     
       
-        <title>Troubleshooting - Spoofax 3</title>
+        <title>Semantic Code Completion - Spoofax 3</title>
       
     
     
@@ -69,7 +69,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#troubleshooting" class="md-skip">
+        <a href="#how-to-enable-semantic-code-completion" class="md-skip">
           Skip to content
         </a>
       
@@ -102,7 +102,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Troubleshooting
+              Semantic Code Completion
             
           </span>
         </div>
@@ -553,14 +553,16 @@
               
   
   
+    
+  
   
     
       
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_4" data-md-state="indeterminate" type="checkbox" id="__nav_3_4" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_4" type="checkbox" id="__nav_3_4" checked>
       
       
       
@@ -585,11 +587,65 @@
               
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../../static-semantics/code-completion/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Semantic Code Completion
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         Semantic Code Completion
       </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#enabling-semantic-code-completion" class="md-nav__link">
+    Enabling Semantic Code Completion
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-semantic-code-completion" class="md-nav__link">
+    Using Semantic Code Completion
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limitations" class="md-nav__link">
+    Limitations
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -606,16 +662,14 @@
               
   
   
-    
-  
   
     
       
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_5" type="checkbox" id="__nav_3_5" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_5" data-md-state="indeterminate" type="checkbox" id="__nav_3_5" checked>
       
       
       
@@ -640,134 +694,11 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Troubleshooting
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../development/troubleshooting/" class="md-nav__link">
         Troubleshooting
       </a>
-      
-        
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#known-problems" class="md-nav__link">
-    Known Problems
-  </a>
-  
-    <nav class="md-nav" aria-label="Known Problems">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#many-errors-about-unresolved-classes-in-intellij" class="md-nav__link">
-    Many errors about unresolved classes in IntelliJ
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#cannot-debug-in-intellij" class="md-nav__link">
-    Cannot debug in IntelliJ
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#profiling-in-intellij" class="md-nav__link">
-    Profiling in IntelliJ
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#spoofax-2-language-fails-to-build-with-previous-build-failed-and-no-change-in-the-build-input-has-been-observed" class="md-nav__link">
-    Spoofax 2 language fails to build with "Previous build failed and no change in the build input has been observed"
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#task-buildall-not-found-in-root-project-devenv" class="md-nav__link">
-    Task 'buildAll' not found in root project 'devenv'
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#expiring-daemon-because-jvm-heap-space-is-exhausted" class="md-nav__link">
-    Expiring Daemon because JVM heap space is exhausted
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#could-not-create-service-of-type-fileaccesstimejournal-using-gradleuserhomescopeservicescreatefileaccesstimejournal" class="md-nav__link">
-    Could not create service of type FileAccessTimeJournal using GradleUserHomeScopeServices.createFileAccessTimeJournal()
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#error-resolving-plugin-plugin-request-for-plugin-already-on-the-classpath-must-not-include-a-version" class="md-nav__link">
-    Error resolving plugin: Plugin request for plugin already on the classpath must not include a version
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#unknown-command-line-option-args" class="md-nav__link">
-    Unknown command-line option '--args'
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#failed-to-create-jar-file" class="md-nav__link">
-    Failed to create Jar file
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#could-not-generate-a-decorated-class-for-type-eclipsecompilerplugin" class="md-nav__link">
-    Could not generate a decorated class for type EclipseCompilerPlugin
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1016,92 +947,23 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#known-problems" class="md-nav__link">
-    Known Problems
-  </a>
-  
-    <nav class="md-nav" aria-label="Known Problems">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#many-errors-about-unresolved-classes-in-intellij" class="md-nav__link">
-    Many errors about unresolved classes in IntelliJ
+  <a href="#enabling-semantic-code-completion" class="md-nav__link">
+    Enabling Semantic Code Completion
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#cannot-debug-in-intellij" class="md-nav__link">
-    Cannot debug in IntelliJ
+      
+        <li class="md-nav__item">
+  <a href="#using-semantic-code-completion" class="md-nav__link">
+    Using Semantic Code Completion
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#profiling-in-intellij" class="md-nav__link">
-    Profiling in IntelliJ
+      
+        <li class="md-nav__item">
+  <a href="#limitations" class="md-nav__link">
+    Limitations
   </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#spoofax-2-language-fails-to-build-with-previous-build-failed-and-no-change-in-the-build-input-has-been-observed" class="md-nav__link">
-    Spoofax 2 language fails to build with "Previous build failed and no change in the build input has been observed"
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#task-buildall-not-found-in-root-project-devenv" class="md-nav__link">
-    Task 'buildAll' not found in root project 'devenv'
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#expiring-daemon-because-jvm-heap-space-is-exhausted" class="md-nav__link">
-    Expiring Daemon because JVM heap space is exhausted
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#could-not-create-service-of-type-fileaccesstimejournal-using-gradleuserhomescopeservicescreatefileaccesstimejournal" class="md-nav__link">
-    Could not create service of type FileAccessTimeJournal using GradleUserHomeScopeServices.createFileAccessTimeJournal()
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#error-resolving-plugin-plugin-request-for-plugin-already-on-the-classpath-must-not-include-a-version" class="md-nav__link">
-    Error resolving plugin: Plugin request for plugin already on the classpath must not include a version
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#unknown-command-line-option-args" class="md-nav__link">
-    Unknown command-line option '--args'
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#failed-to-create-jar-file" class="md-nav__link">
-    Failed to create Jar file
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#could-not-generate-a-decorated-class-for-type-eclipsecompilerplugin" class="md-nav__link">
-    Could not generate a decorated class for type EclipseCompilerPlugin
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1117,104 +979,65 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/metaborg/spoofax-pie/edit/master/docs/guide/development/troubleshooting.md" title="Edit this page" class="md-content__button md-icon">
+                  <a href="https://github.com/metaborg/spoofax-pie/edit/master/docs/guide/static-semantics/code-completion.md" title="Edit this page" class="md-content__button md-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
                   </a>
                 
                 
-                <h1 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h1>
-<p>This guide explains how to troubleshoot issues when developing Spoofax itself.</p>
-<p>In general, ensure you're calling <code>./repo</code> and <code>./gradlew</code> on Linux and MacOS (or <code>repo.bat</code> and <code>gradlew.bat</code> on Windows) instead of your local Gradle installation. The local one may be too old or too new.</p>
-<h2 id="known-problems">Known Problems<a class="headerlink" href="#known-problems" title="Permanent link">&para;</a></h2>
-<p>The following are known problems that can occur, and their solutions or workarounds.</p>
-<h3 id="many-errors-about-unresolved-classes-in-intellij">Many errors about unresolved classes in IntelliJ<a class="headerlink" href="#many-errors-about-unresolved-classes-in-intellij" title="Permanent link">&para;</a></h3>
-<p>If after importing there are many errors in files about classes not existing, re-import all the projects by pressing the <code>Reload All Gradle Projects</code> button in the Gradle tool window.</p>
-<h3 id="cannot-debug-in-intellij">Cannot debug in IntelliJ<a class="headerlink" href="#cannot-debug-in-intellij" title="Permanent link">&para;</a></h3>
-<p>Debugging in IntelliJ is a bit buggy at the moment. To force debugging, add the following environment variable to your run configuration:</p>
-<div class="highlight"><pre><span></span><code>JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005
+                <h1 id="how-to-enable-semantic-code-completion">How to Enable Semantic Code Completion<a class="headerlink" href="#how-to-enable-semantic-code-completion" title="Permanent link">&para;</a></h1>
+<p>Semantic code completion is now part of Spoofax 3.</p>
+<h2 id="enabling-semantic-code-completion">Enabling Semantic Code Completion<a class="headerlink" href="#enabling-semantic-code-completion" title="Permanent link">&para;</a></h2>
+<p>To enable support for semantic code completion in your language:</p>
+<ol>
+<li>
+<p>Add the following to your language's <code>spoofaxc.cfg</code> file:</p>
+<div class="highlight"><pre><span></span><code><span class="na">tego-runtime {}</span>
+<span class="na">code-completion {}</span>
 </code></pre></div>
-<p>Then start the run configuration in debug mode, and wait until the following shows up in the console:</p>
-<div class="highlight"><pre><span></span><code>Listening for transport dt_socket at address: 5005 Attach debugger
-</code></pre></div>
-<p>Then click the <span class="guilabel">Attach debugger</span> text in the console to attach the debugger and start debugging.</p>
-<p>Note that this enables debugging for any Gradle task that executes Java in an isolated way, including any (Java/Kotlin) compilation tasks that run in a separate process.
-Make sure to first build normally such that these tasks are no longer executed, then run your debugging configuration.</p>
-<p>If you are debugging tests, make sure that the test results are cleaned before by running <code>cleanTest</code>, otherwise Gradle may skip the test task. For example, run the following Gradle tasks as part of the run configuration:</p>
-<div class="highlight"><pre><span></span><code>:spoofax3.lwb.root:spoofax.dynamicloading:cleanTest :spoofax3.lwb.root:spoofax.dynamicloading:test
-</code></pre></div>
-<h3 id="profiling-in-intellij">Profiling in IntelliJ<a class="headerlink" href="#profiling-in-intellij" title="Permanent link">&para;</a></h3>
-<p>Profiling in IntelliJ can be done similarly to debugging. For example, to profile with YourKit, add the following environment variable to your run configuration:</p>
-<div class="highlight"><pre><span></span><code>JAVA_TOOL_OPTIONS=-agentpath:/Applications/YourKit-Java-Profiler-2020.9.app/Contents/Resources/bin/mac/libyjpagent.dylib=listen=all,sampling,onexit=snapshot
-</code></pre></div>
-<p>If you are using a different profiler, the <code>agentpath</code> needs to point to the corresponding agent of your profiler, and the settings after the agent will need to be tailored towards your profiler.
-In the example above, the YourKit profiler will attach to the program, enable CPU sampling, and create a snapshot when the program ends.
-The snapshot can then be opened and inspected in YourKit.</p>
-<p>Similar to debugging, this enables profiling for any Gradle task that executes Java in an isolated way, and tests must be cleaned before profiling to force tests to be executed.</p>
-<h3 id="spoofax-2-language-fails-to-build-with-previous-build-failed-and-no-change-in-the-build-input-has-been-observed">Spoofax 2 language fails to build with "Previous build failed and no change in the build input has been observed"<a class="headerlink" href="#spoofax-2-language-fails-to-build-with-previous-build-failed-and-no-change-in-the-build-input-has-been-observed" title="Permanent link">&para;</a></h3>
-<p>If building a Spoofax 2 language fails due to some ephemeral issue, or if building is cancelled (because you cancelled the Gradle build), the following exception may be thrown during the build:</p>
-<div class="highlight"><pre><span></span><code>org.metaborg.core.MetaborgException: Previous build failed and no change in the build input has been observed, not rebuilding. Fix the problem, or clean and rebuild the project to force a rebuild
-</code></pre></div>
-<p>This is an artefact of the Pluto build system refusing to rebuild if it failed but no changes to the input were detected.
-To force Pluto to rebuild, delete the <code>target/pluto</code> directory of the language.</p>
-<h3 id="task-buildall-not-found-in-root-project-devenv">Task 'buildAll' not found in root project 'devenv'<a class="headerlink" href="#task-buildall-not-found-in-root-project-devenv" title="Permanent link">&para;</a></h3>
-<p>You have 'configure on demand' enabled, such as <code>org.gradle.configureondemand=true</code> in your <code>~/.gradle/gradle.properties</code> file. Disable this.</p>
-<h3 id="expiring-daemon-because-jvm-heap-space-is-exhausted">Expiring Daemon because JVM heap space is exhausted<a class="headerlink" href="#expiring-daemon-because-jvm-heap-space-is-exhausted" title="Permanent link">&para;</a></h3>
-<p>The memory limits in <code>gradle.properties</code> may be too low, and may need to be increased.
-Running the build without <code>--parallel</code> may decrease memory pressure, as less tasks are executed concurrently.
-Or, there is a memory leak in the build: please make a heap dump and send this to the developers so it can be addressed.</p>
-<h3 id="could-not-create-service-of-type-fileaccesstimejournal-using-gradleuserhomescopeservicescreatefileaccesstimejournal">Could not create service of type FileAccessTimeJournal using GradleUserHomeScopeServices.createFileAccessTimeJournal()<a class="headerlink" href="#could-not-create-service-of-type-fileaccesstimejournal-using-gradleuserhomescopeservicescreatefileaccesstimejournal" title="Permanent link">&para;</a></h3>
-<p>The permissions in your <code>~/.gradle/</code> directory are too restrictive. For example, if you're using WSL, ensure the directory is not a symlink to the Windows' <code>.gradle/</code> directory.</p>
-<h3 id="error-resolving-plugin-plugin-request-for-plugin-already-on-the-classpath-must-not-include-a-version">Error resolving plugin: Plugin request for plugin already on the classpath must not include a version<a class="headerlink" href="#error-resolving-plugin-plugin-request-for-plugin-already-on-the-classpath-must-not-include-a-version" title="Permanent link">&para;</a></h3>
-<blockquote>
-<p>Error resolving plugin [id: 'org.metaborg.gradle.config.devenv', version: '?']</p>
-<p>Plugin request for plugin already on the classpath must not include a version</p>
-</blockquote>
-<p>You are not running with the recommended version of Gradle.</p>
-<h3 id="unknown-command-line-option-args">Unknown command-line option '--args'<a class="headerlink" href="#unknown-command-line-option-args" title="Permanent link">&para;</a></h3>
-<p>Command-line arguments such as <code>--args</code> are not supported for tasks in the root project, such as the <code>runSdf3Cli</code> task. Instead, go to the relevant included build and call the task directly.</p>
-<div class="highlight"><pre><span></span><code>cd spoofax.pie/example
-./gradlew :sdf3.cli:run --args=&quot;-V&quot;
-</code></pre></div>
-<p>The working directory is the directory with the <code>gradle.build.kts</code> file of the CLI project. This cannot be changed. For example, <code>spoofax.pie/example/sdf3/sdf3.cli/</code> for the <code>:sdf3.cli</code> project.</p>
-<h3 id="failed-to-create-jar-file">Failed to create Jar file<a class="headerlink" href="#failed-to-create-jar-file" title="Permanent link">&para;</a></h3>
-<p>Due to a bug in the Java 8 and 9 compiler, it sometimes generates the <a href="https://bugs.openjdk.java.net/browse/JDK-8144185">wrong byte code for annotations</a>. This, in turn, causes Gradle to fail reading the JAR file with the following error:</p>
-<div class="highlight"><pre><span></span><code>A problem occurred configuring project &#39;:spoofax3.example.root&#39;.
-&gt; Failed to create Jar file /Users/username/.gradle/caches/jars-8/defabc/jsglr.common-develop-SNAPSHOT.jar.
-</code></pre></div>
-<p>The stack trace will look something like this:</p>
-<div class="highlight"><pre><span></span><code>org.gradle.api.ProjectConfigurationException: A problem occurred configuring project &#39;:spoofax3.example.root&#39;.
-        at org.gradle.configuration.project.LifecycleProjectEvaluator.wrapException(LifecycleProjectEvaluator.java:75)
-        at org.gradle.configuration.project.LifecycleProjectEvaluator.addConfigurationFailure(LifecycleProjectEvaluator.java:68)
-        at org.gradle.configuration.project.LifecycleProjectEvaluator.access$400(LifecycleProjectEvaluator.java:51)
-        ... 142 more
-Caused by: org.gradle.api.GradleException: Failed to create Jar file /Users/username/.gradle/caches/jars-8/defabc/jsglr.common-develop-SNAPSHOT.jar.
-        at org.gradle.internal.classpath.ClasspathBuilder.jar(ClasspathBuilder.java:47)
-        at org.gradle.internal.classpath.InstrumentingClasspathFileTransformer.instrument(InstrumentingClasspathFileTransformer.java:83)
-        ... 6 more
-Caused by: java.lang.ArrayIndexOutOfBoundsException: 195
-        at org.objectweb.asm.ClassReader.readLabel(ClassReader.java:2654)
-        at org.objectweb.asm.ClassReader.createLabel(ClassReader.java:2670)
-        at org.objectweb.asm.ClassReader.readTypeAnnotations(ClassReader.java:2736)
-        at org.objectweb.asm.ClassReader.readCode(ClassReader.java:1912)
-        at org.objectweb.asm.ClassReader.readMethod(ClassReader.java:1492)
-        at org.objectweb.asm.ClassReader.accept(ClassReader.java:717)
-        ... 15 more
-</code></pre></div>
-<p>Determine the version of Java using <code>java -version</code>. Java 8 and 9 can exhibit this problem. The solution is to update your Java to version 11 or later. You can use a tool such as <a href="https://sdkman.io/">SDKMAN!</a> to easily manage the (default) versions of Java on your system.</p>
-<h3 id="could-not-generate-a-decorated-class-for-type-eclipsecompilerplugin">Could not generate a decorated class for type EclipseCompilerPlugin<a class="headerlink" href="#could-not-generate-a-decorated-class-for-type-eclipsecompilerplugin" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>FAILURE: Build failed with an exception.
+</li>
+<li>
+<p>Declare the following strategies in your language's <code>main.str2</code> file, where <code>MyLang</code> is the name of your languages (as defined in <code>spoofaxc.cfg</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="k">rules</span><span class="w"> </span><span class="c c-Singleline">// Analysis</span><span class="w"></span>
 
-* Where:
-Build file &#39;esv/org.metaborg.meta.lang.esv/build.gradle.kts&#39; line: 1
-
-* What went wrong:
-An exception occurred applying plugin request [id: &#39;de.set.ecj&#39;]
-&gt; Failed to apply plugin &#39;de.set.ecj&#39;.
-   &gt; Could not create plugin of type &#39;EclipseCompilerPlugin&#39;.
-      &gt; Could not generate a decorated class for type EclipseCompilerPlugin.
-         &gt; org/gradle/jvm/toolchain/JavaToolChain
+<span class="w">  </span><span class="nv">downgrade-placeholders</span><span class="w"> </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">downgrade-placeholders-MyLang</span><span class="w"></span>
+<span class="w">  </span><span class="nv">upgrade-placeholders</span><span class="w">   </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">upgrade-placeholders-MyLang</span><span class="w"></span>
+<span class="w">  </span><span class="nv">is-inj</span><span class="w">                 </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">is-MyLang-inj-cons</span><span class="w"></span>
+<span class="w">  </span><span class="nv">pp-partial</span><span class="w">             </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">pp-partial-MyLang-string</span><span class="w"></span>
+<span class="w">  </span><span class="nv">pre-analyze</span><span class="w">            </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">explicate-injections-MyLang</span><span class="w"></span>
+<span class="w">  </span><span class="nv">post-analyze</span><span class="w">           </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">implicate-injections-MyLang</span><span class="w"></span>
 </code></pre></div>
-<p>The above error is caused by using Gradle 7 or newer, for which the ECJ plugin is not yet compatible. See <a href="https://github.com/TwoStone/gradle-eclipse-compiler-plugin/issues/13">TwoStone/gradle-eclipse-compiler-plugin#13</a>. If this error occurs while importing the project into IntelliJ, then your version of Gradle is not set correctly. Select Gradle version 6.8.</p>
+</li>
+<li>
+<p>In your Statix files, for each rule define a predicate that accepts a placeholder where a syntactic sort is permitted. For example:</p>
+<div class="highlight"><pre><span></span><code><span class="k">rules</span><span class="w"> </span><span class="c c-Singleline">// placeholders</span><span class="w"></span>
+
+<span class="w">  </span><span class="nv">programOk</span><span class="p">(</span><span class="nv">Module-Plhdr</span><span class="p">()).</span><span class="w"></span>
+
+<span class="w">  </span><span class="nv">declOk</span><span class="p">(</span><span class="nv">_</span><span class="p">,</span><span class="w"> </span><span class="nv">Decl-Plhdr</span><span class="p">()).</span><span class="w"></span>
+
+<span class="w">  </span><span class="nv">typeOfExp</span><span class="p">(</span><span class="nv">_</span><span class="p">,</span><span class="w"> </span><span class="nv">Exp-Plhdr</span><span class="p">())</span><span class="w"> </span>=<span class="w"> </span><span class="nv">_</span><span class="p">.</span><span class="w"></span>
+</code></pre></div>
+</li>
+</ol>
+<h2 id="using-semantic-code-completion">Using Semantic Code Completion<a class="headerlink" href="#using-semantic-code-completion" title="Permanent link">&para;</a></h2>
+<p>In Eclipse, in a file of your language, type the placeholder somewhere where it is permitted. Unless overridden, the placeholder is a sort name within double square brackets, such as <code>[[Exp]]</code>. Then put the caret on the placeholder and press <span class="keys"><kbd class="key-command">Cmd</kbd><span>+</span><kbd class="key-space">Space</kbd></span> on macOS (or <span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-space">Space</kbd></span> on Linux/Windows) to invoke code completion.</p>
+<div class="admonition tip">
+<p class="admonition-title">In a future release the placeholder will not need to be input explicitly.</p>
+</div>
+<h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
+<p>For this first release of semantic code completion, there are some limitations:</p>
+<ul>
+<li>You have to type the placeholder explicitly to invoke code completion.</li>
+<li>If the file contains errors, code completion might fail to return results.</li>
+<li>If you have <em>catch-all</em> predicates, code completion will not work. For example:
+  <div class="highlight"><pre><span></span><code><span class="c c-Singleline">// This prevents code completion from finding completions:</span><span class="w"></span>
+<span class="nv">typeOfExp</span><span class="p">(</span><span class="nv">_</span><span class="p">,</span><span class="w"> </span><span class="nv">_</span><span class="p">)</span><span class="w"> </span>=<span class="w"> </span><span class="nv">_</span><span class="w"> </span><span class="p">:</span><span class="nv">-</span><span class="w"></span>
+<span class="w">  </span><span class="nv">try</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">false</span><span class="w"> </span><span class="p">}</span><span class="w"> </span>|<span class="w"> </span><span class="nv">warning</span><span class="w"> </span>$[<span class="nv">This</span><span class="w"> </span><span class="nv">expression</span><span class="w"> </span><span class="nv">is</span><span class="w"> </span><span class="nv">not</span><span class="w"> </span><span class="nv">yet</span><span class="w"> </span><span class="nv">implemented</span>]<span class="p">.</span><span class="w"></span>
+</code></pre></div></li>
+</ul>
+<p>These limitations will be lifted in subsequent releases.</p>
+                
+                  
                 
               
               
@@ -1239,7 +1062,7 @@ An exception occurred applying plugin request [id: &#39;de.set.ecj&#39;]
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../../static-semantics/code-completion/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Semantic Code Completion" rel="prev">
+        <a href="../../eclipse_lwb/troubleshooting/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Troubleshooting" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -1248,20 +1071,20 @@ An exception occurred applying plugin request [id: &#39;de.set.ecj&#39;]
               <span class="md-footer__direction">
                 Previous
               </span>
-              Semantic Code Completion
+              Troubleshooting
             </div>
           </div>
         </a>
       
       
         
-        <a href="../../../reference/configuration/" class="md-footer__link md-footer__link--next" aria-label="Next: Configuration" rel="next">
+        <a href="../../development/troubleshooting/" class="md-footer__link md-footer__link--next" aria-label="Next: Troubleshooting" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Configuration
+              Troubleshooting
             </div>
           </div>
           <div class="md-footer__button md-icon">
