@@ -101,7 +101,9 @@ public class Sdf3SpecToParseTable implements TaskDef<Sdf3SpecToParseTable.Input,
         final ResourceWalker walker = Sdf3Util.createResourceWalker();
         final ResourceMatcher matcher = Sdf3Util.createResourceMatcher();
         final HierarchicalResource mainSourceDirectory = context.require(input.config.mainSourceDirectory, ResourceStampers.modifiedDirRec(walker, matcher));
-        context.require(mainSourceDirectory, ResourceStampers.modifiedDirRec(walker, matcher));
+        if(!mainSourceDirectory.exists() || !mainSourceDirectory.isDirectory()) {
+            return Result.ofErr(new IOException("Main SDF3 source directory '" + mainSourceDirectory +"' does not exist or is not a directory"));
+        }
         final ArrayList<Supplier<? extends Result<IStrategoTerm, ?>>> modulesAstSuppliers;
         try(final Stream<? extends HierarchicalResource> stream = mainSourceDirectory.walk(walker, matcher)) {
             modulesAstSuppliers = stream

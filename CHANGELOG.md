@@ -5,6 +5,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 ## [Unreleased]
 ### Fixed
 - Fix "Resource ‘...’ does not exist." in Eclipse when outputting files from commands.
+- Fix exception being thrown, halting the entire pipeline, when the SDF3 source directory does not exist. Now a result with the error is returned instead.
+- Fix exception being thrown, halting the entire pipeline, when meta-language files are moved around. Now an error is logged instead.
 
 
 ## [0.16.2] - 2021-11-09
