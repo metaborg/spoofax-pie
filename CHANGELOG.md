@@ -6,6 +6,9 @@ All notable changes to this project are documented in this file, based on [Keep 
 ### Fixed
 - Fix wrong separator being used on Windows in `pp.str2` Stratego import.
 
+### Changed
+- `resource` requirement to `0.13.1`.
+
 
 ## [0.16.1] - 2021-11-08
 ### Fixed
