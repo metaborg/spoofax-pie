@@ -3,6 +3,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+### Fixed
+- Fix wrong separator being used on Windows in `pp.str2` Stratego import.
 
 
 ## [0.16.1] - 2021-11-08
