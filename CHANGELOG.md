@@ -3,6 +3,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+### Fixed
+- Fix "Resource ‘...’ does not exist." in Eclipse when outputting files from commands.
 
 
 ## [0.16.2] - 2021-11-09

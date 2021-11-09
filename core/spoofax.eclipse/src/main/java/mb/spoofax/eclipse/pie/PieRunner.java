@@ -404,6 +404,11 @@ public class PieRunner {
         showFeedback.caseOf()
             .showFile((file, region) -> {
                 final IFile eclipseFile = resourceUtil.getEclipseFile(file);
+                try {
+                    eclipseFile.refreshLocal(IResource.DEPTH_ZERO, null);
+                } catch(CoreException e) {
+                    logger.error("Failed to refresh file '{}' from command feedback", e, eclipseFile);
+                }
                 // Execute in UI thread because getActiveWorkbenchWindow is only available in the UI thread.
                 Display.getDefault().asyncExec(() -> {
                     final IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
