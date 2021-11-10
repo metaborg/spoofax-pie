@@ -3,15 +3,18 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+
+
+## [0.16.3] - 2021-11-10
 ### Fixed
 - Fix "Resource ‘...’ does not exist." in Eclipse when outputting files from commands.
 - Fix exception being thrown, halting the entire pipeline, when the SDF3 source directory does not exist. Now a result with the error is returned instead.
 - Fix exception being thrown, halting the entire pipeline, when meta-language files are moved around. Now an error is logged instead.
 - Importing language project into Eclipse causing many duplicate definition errors due to all files being copied into `bin`. The `bin` directory is now ignored as a source directory by default.
 
-
 ### Changed
 - `resource` requirement to `0.13.2`.
+- `pie` requirement to `0.19.4`.
 
 
 ## [0.16.2] - 2021-11-09
