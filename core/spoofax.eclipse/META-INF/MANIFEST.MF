@@ -1,6 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Spoofax 3 core plugin
+Bundle-Vendor: MetaBorg
 Bundle-Activator: mb.spoofax.eclipse.SpoofaxPlugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy

@@ -3,7 +3,7 @@ plugins {
   id("org.metaborg.gitonium") version "0.1.4"
 
   id("org.metaborg.devenv.spoofax.gradle.langspec") version "0.1.4" apply false
-  id("org.metaborg.coronium.bundle") version "0.3.13" apply false
+  id("org.metaborg.coronium.bundle") version "0.3.14" apply false
   id("biz.aQute.bnd.builder") version "5.3.0" apply false
 
   id("org.metaborg.spoofax.compiler.gradle.adapter") apply false
