@@ -1,6 +1,6 @@
 package mb.spoofax.lwb.eclipse.compiler;
 
-import mb.pie.task.java.JavaResource;
+import mb.pie.task.java.jdk.JavaResource;
 import mb.resource.fs.FSResource;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.spoofax.eclipse.resource.EclipseResource;
