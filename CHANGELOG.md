@@ -11,6 +11,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 - Fix exception being thrown, halting the entire pipeline, when the SDF3 source directory does not exist. Now a result with the error is returned instead.
 - Fix exception being thrown, halting the entire pipeline, when meta-language files are moved around. Now an error is logged instead.
 - Importing language project into Eclipse causing many duplicate definition errors due to all files being copied into `bin`. The `bin` directory is now ignored as a source directory by default.
+- Spoofax Eclipse plugins/features/repositories not having names or providers (https://github.com/metaborg/spoofax-pie/issues/85).
 
 ### Changed
 - `resource` requirement to `0.13.2`.
