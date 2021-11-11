@@ -12,6 +12,7 @@ nav:
       - guide/ask_for_help.md
       - guide/report_a_bug.md
       - Eclipse LWB:
+          - guide/eclipse_lwb/import.md
           - guide/eclipse_lwb/update.md
           - guide/eclipse_lwb/troubleshooting.md
       - Static Semantics:

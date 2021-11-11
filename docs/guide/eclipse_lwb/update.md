@@ -11,7 +11,7 @@ If you want to install the latest released version, use this update site:
 {{release.rel.eclipse_lwb.repository}}
 ```
 
-In the table below, check the checkbox next to <span class="guilabel">Uncategorized</span> and press <span class="guilabel">Next ></span>.
+In the table below, check the checkbox next to <span class="guilabel">Spoofax LWB</span> and press <span class="guilabel">Next ></span>.
 A dialog will pop up with install details.
 Press <span class="guilabel">Finish</span> and wait for Eclipse to install the plugin.
 
@@ -30,8 +30,8 @@ Eclipse does not support directly downgrading to a previous version.
 Therefore, we must first uninstall the plugin.
 
 In the main menu, select <span class="guilabel">Help ‣ Install New Software...</span> to open a new dialog.
-In this dialog, click the <span class="guilabel">already installed</span> link to open a list of all installed plugins.
-In that list, select the <span class="guilabel">Spoofax 3 Language Workbench plugin</span> and press <span class="guilabel">Uninstall...</span>.
+In this dialog, click the <span class="guilabel">already installed</span> link to open a list of all installed features.
+In that list, select <span class="guilabel">Spoofax LWB</span> and press <span class="guilabel">Uninstall...</span>.
 
 A dialog will pop up detailing the uninstall details.
 Press <span class="guilabel">Finish</span> and wait for Eclipse to uninstall the plugin.
