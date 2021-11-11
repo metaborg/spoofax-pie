@@ -11,6 +11,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 ### Changed
 - `common` requirement to `0.10.0`.
+- `pie` requirement to `0.19.5`.
 
 ### Added
 - Documentation page on importing a project into the Eclipse LWB.
