@@ -3,6 +3,11 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+### Fixed
+- Fix `InvalidAstShapeException` for incomplete CFG files (https://github.com/metaborg/spoofax-pie/issues/93).
+
+### Changed
+- `common` requirement to `0.10.0`.
 
 
 ## [0.16.3] - 2021-11-10
