@@ -29,8 +29,6 @@ You may use the files in this project in compliance with the license.
 ├── build.gradle.kts        # Gradle build configuration
 ├── settings.gradle.kts     # Gradle build settings (multi-project and composite build)
 ├── core                    # Spoofax 3 core libraries
-├── metalib                 # Spoofax 3 meta libraries, in a separate composite build because it
-│                             uses a Gradle plugin from core.
 ├── lwb                     # Spoofax 3 language workbench, in a separate composite build because
 │                             it uses Gradle plugins from core.
 ├── lwb.distrib             # Spoofax 3 language workbench distribution, in a separate composite

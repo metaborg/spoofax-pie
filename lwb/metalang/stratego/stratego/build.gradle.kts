@@ -28,6 +28,8 @@ dependencies {
   testImplementation(compositeBuild("spoofax.test"))
   testImplementation("org.metaborg:pie.task.java")
   testImplementation("org.metaborg:pie.task.archive")
+  testImplementation(compositeBuild("spoofax.test"))
+  testImplementation(project(":strategolib"))
   testAnnotationProcessor("com.google.dagger:dagger-compiler")
   testCompileOnly("org.checkerframework:checker-qual-android")
 }

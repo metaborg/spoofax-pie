@@ -8,6 +8,8 @@ import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecException;
 import mb.pie.dagger.PieComponent;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
+import mb.spoofax.eclipse.SpoofaxPlugin;
+import mb.spoofax.eclipse.job.ThreadKillerJob;
 import mb.spoofax.eclipse.pie.PieRunner;
 import mb.spoofax.eclipse.util.StatusUtil;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -35,6 +37,7 @@ public class EditorUpdateJob extends Job {
 
     private final Logger logger;
     private final PieRunner pieRunner;
+    private final ThreadKillerJob.Factory threadKillerJobFactory;
     private final EclipseLanguageComponent languageComponent;
     private final PieComponent pieComponent;
     private final String languageDisplayName;
@@ -43,6 +46,8 @@ public class EditorUpdateJob extends Job {
     private final IDocument document;
     private final IEditorInput input;
     private final SpoofaxEditorBase editor;
+
+    private @Nullable ThreadKillerJob threadKillerJob;
 
     @AssistedInject public EditorUpdateJob(
         LoggerFactory loggerFactory,
@@ -58,6 +63,7 @@ public class EditorUpdateJob extends Job {
         super(languageComponent.getLanguageInstance().getDisplayName() + " editor update");
         this.logger = loggerFactory.create(getClass());
         this.pieRunner = pieRunner;
+        this.threadKillerJobFactory = SpoofaxPlugin.getPlatformComponent().getThreadKillerJobFactory();
         this.languageComponent = languageComponent;
         this.pieComponent = pieComponent;
         this.languageDisplayName = languageComponent.getLanguageInstance().getDisplayName();
@@ -78,6 +84,10 @@ public class EditorUpdateJob extends Job {
             final String message = languageDisplayName + " editor update for " + file + " failed";
             logger.error(message, e);
             return StatusUtil.error(message, e);
+        } finally {
+            if(threadKillerJob != null) {
+                threadKillerJob.cancel();
+            }
         }
     }
 
@@ -86,7 +96,13 @@ public class EditorUpdateJob extends Job {
         if(thread == null) {
             return;
         }
+
+        logger.debug("Cancelling {} editor update job for {}", languageDisplayName, file);
         thread.interrupt();
+        if(threadKillerJob == null) {
+            threadKillerJob = threadKillerJobFactory.create(thread, 10000);
+            threadKillerJob.schedule();
+        }
     }
 
     @Override public boolean belongsTo(Object family) {

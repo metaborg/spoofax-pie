@@ -3,6 +3,7 @@ package mb.str.util;
 import dagger.Component;
 import mb.log.dagger.LoggerComponent;
 import mb.pie.task.archive.ArchiveToJar;
+import mb.pie.task.archive.UnarchiveFromJar;
 import mb.pie.task.java.CompileJava;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.core.platform.PlatformComponent;
@@ -30,4 +31,6 @@ public interface StrategoTestComponent extends StrategoComponent {
     CompileJava getCompileJava();
 
     ArchiveToJar getArchiveToJar();
+
+    UnarchiveFromJar getUnarchiveFromJar();
 }

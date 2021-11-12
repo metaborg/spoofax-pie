@@ -26,7 +26,6 @@ import mb.spoofax.lwb.compiler.statix.SpoofaxStatixCheck;
 import mb.spoofax.lwb.compiler.statix.SpoofaxStatixConfigure;
 import mb.spoofax.lwb.compiler.stratego.SpoofaxStrategoCheck;
 import mb.spoofax.lwb.compiler.stratego.SpoofaxStrategoConfigure;
-import mb.spoofax.lwb.compiler.stratego.SpoofaxStrategoLibUtil;
 import mb.statix.StatixComponent;
 import mb.str.StrategoComponent;
 import mb.strategolib.StrategoLibComponent;
@@ -56,7 +55,7 @@ import java.util.Set;
         LibSpoofax2Component.class,
         LibSpoofax2ResourcesComponent.class,
         LibStatixComponent.class,
-        LibStatixResourcesComponent.class
+        LibStatixResourcesComponent.class,
     }
 )
 public interface Spoofax3CompilerComponent extends TaskDefsProvider {
@@ -84,8 +83,6 @@ public interface Spoofax3CompilerComponent extends TaskDefsProvider {
     SpoofaxStrategoCheck getSpoofaxStrategoCheck();
 
     SpoofaxStrategoConfigure getSpoofaxStrategoConfigure();
-
-    SpoofaxStrategoLibUtil getSpoofaxStrategoLibUtil();
 
 
     LanguageProjectGenerator getLanguageProjectGenerator();

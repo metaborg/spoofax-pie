@@ -1,4 +1,4 @@
-package mb.spoofax.lwb.compiler.stratego;
+package mb.strategolib;
 
 import mb.pie.api.ExecContext;
 import mb.pie.api.STask;
@@ -12,9 +12,6 @@ import mb.resource.fs.FSPath;
 import mb.resource.fs.FSResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.path.string.PathStringMatcher;
-import mb.stratego.build.strincr.Stratego2LibInfo;
-import mb.strategolib.StrategoLibClassLoaderResources;
-import mb.strategolib.StrategoLibExports;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
@@ -26,21 +23,19 @@ import java.util.LinkedHashSet;
 /**
  * Stratego library utilities in the context of the Spoofax LWB compiler.
  */
-public class SpoofaxStrategoLibUtil {
-    private final StrategoLibClassLoaderResources strategoLibClassLoaderResources;
-    private final UnarchiveFromJar unarchiveFromJar;
+@StrategoLibScope
+public class StrategoLibUtil {
+    private final StrategoLibClassLoaderResources classLoaderResources;
 
-    @Inject public SpoofaxStrategoLibUtil(
-        StrategoLibClassLoaderResources strategoLibClassLoaderResources,
-        UnarchiveFromJar unarchiveFromJar
+    @Inject public StrategoLibUtil(
+        StrategoLibClassLoaderResources classLoaderResources
     ) {
-        this.strategoLibClassLoaderResources = strategoLibClassLoaderResources;
-        this.unarchiveFromJar = unarchiveFromJar;
+        this.classLoaderResources = classLoaderResources;
     }
 
     public LinkedHashSet<File> getStrategoLibJavaClassPaths() throws IOException {
         final LinkedHashSet<File> javaClassPaths = new LinkedHashSet<>();
-        final ClassLoaderResourceLocations<FSResource> locations = strategoLibClassLoaderResources.definitionDirectory.getLocations();
+        final ClassLoaderResourceLocations<FSResource> locations = classLoaderResources.definitionDirectory.getLocations();
         for(FSResource directory : locations.directories) {
             javaClassPaths.add(directory.getJavaPath().toFile());
         }
@@ -50,15 +45,16 @@ public class SpoofaxStrategoLibUtil {
         return javaClassPaths;
     }
 
-    public Supplier<Stratego2LibInfo> getStrategoLibInfo(
-        ResourcePath strategoLibUnarchiveDirectory
+    public Supplier<StrategoLibInfo> getStrategoLibInfo(
+        ResourcePath strategoLibUnarchiveDirectory,
+        UnarchiveFromJar unarchiveFromJar
     ) throws IOException {
         for(String export : StrategoLibExports.getStr2LibExports()) {
-            final ClassLoaderResourceLocations<FSResource> locations = strategoLibClassLoaderResources.definitionDirectory.getLocations();
+            final ClassLoaderResourceLocations<FSResource> locations = classLoaderResources.definitionDirectory.getLocations();
             for(FSResource directory : locations.directories) {
                 final FSResource exportFile = directory.appendAsRelativePath(export);
                 if(exportFile.exists()) {
-                    return new ValueSupplier<>(new Stratego2LibInfo(exportFile.getPath(), new ArrayList<>()));
+                    return new ValueSupplier<>(new StrategoLibInfo(exportFile.getPath(), new ArrayList<>()));
                 }
             }
             for(JarFileWithPath<FSResource> jarFileWithPath : locations.jarFiles) {
@@ -66,32 +62,32 @@ public class SpoofaxStrategoLibUtil {
                 @SuppressWarnings("ConstantConditions") // JAR files always have leaves.
                 final ResourcePath unarchiveDirectory = strategoLibUnarchiveDirectory.appendRelativePath(jarFilePath.getLeaf());
                 final Task<ResourcePath> task = unarchiveFromJar.createTask(new UnarchiveFromJar.Input(jarFilePath, unarchiveDirectory, PathStringMatcher.ofExtension("str2lib"), false, false));
-                return new Stratego2LibInfoSupplier(task.toSupplier(), jarFileWithPath.path, export);
+                return new StrategoLibInfoSupplier(task.toSupplier(), jarFileWithPath.path, export);
             }
         }
         throw new IOException("Could not get strategolib .str2lib file");
     }
 
-    public static class Stratego2LibInfoSupplier implements Supplier<Stratego2LibInfo> {
+    public static class StrategoLibInfoSupplier implements Supplier<StrategoLibInfo> {
         private final STask<ResourcePath> unarchiveTask;
         private final String path;
         private final String export;
 
-        private Stratego2LibInfoSupplier(STask<ResourcePath> unarchiveTask, String path, String export) {
+        private StrategoLibInfoSupplier(STask<ResourcePath> unarchiveTask, String path, String export) {
             this.unarchiveTask = unarchiveTask;
             this.path = path;
             this.export = export;
         }
 
-        @Override public Stratego2LibInfo get(ExecContext context) {
+        @Override public StrategoLibInfo get(ExecContext context) {
             final ResourcePath unarchiveDirectory = context.require(unarchiveTask);
-            return new Stratego2LibInfo(unarchiveDirectory.appendAsRelativePath(path).appendAsRelativePath(export), new ArrayList<>());
+            return new StrategoLibInfo(unarchiveDirectory.appendAsRelativePath(path).appendAsRelativePath(export), new ArrayList<>());
         }
 
         @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
-            final Stratego2LibInfoSupplier that = (Stratego2LibInfoSupplier)o;
+            final StrategoLibInfoSupplier that = (StrategoLibInfoSupplier)o;
             if(!unarchiveTask.equals(that.unarchiveTask)) return false;
             if(!path.equals(that.path)) return false;
             return export.equals(that.export);

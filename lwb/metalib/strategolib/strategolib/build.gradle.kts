@@ -7,6 +7,12 @@ plugins {
   id("org.metaborg.spoofax.compiler.gradle.adapter")
 }
 
+fun compositeBuild(name: String) = "$group:$name:$version"
+
+dependencies {
+  api("org.metaborg:pie.task.archive")
+}
+
 languageProject {
   shared {
     name("StrategoLib")
@@ -47,5 +53,9 @@ languageAdapterProject {
   }
 }
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
+  val packageId = "mb.strategolib"
 
+  // Extend component
+  baseComponent(packageId, "BaseStrategoLibComponent")
+  extendComponent(packageId, "StrategoLibComponent")
 }
