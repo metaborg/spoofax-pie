@@ -4,7 +4,7 @@ plugins {
 
   // Set versions for plugins to use, only applying them in subprojects (apply false here).
   id("org.metaborg.gradle.config.kotlin-gradle-plugin") version "0.4.7" apply false
-  id("org.metaborg.coronium.bundle") version "0.3.13" apply false
+  id("org.metaborg.coronium.bundle") version "0.3.14" apply false
   id("biz.aQute.bnd.builder") version "5.3.0" apply false
   id("org.jetbrains.intellij") version "0.6.5" apply false
   kotlin("jvm") version "1.4.20" apply false // Use 1.4.20 to keep in sync with embedded Kotlin version of Gradle 6.8.

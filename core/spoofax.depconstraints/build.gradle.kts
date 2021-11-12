@@ -3,11 +3,11 @@ plugins {
   `maven-publish`
 }
 
-val commonVersion = "0.9.9"
+val commonVersion = "0.10.0"
 val logVersion = "0.5.5"
 val slf4jVersion = "1.7.30"
-val resourceVersion = "0.13.0"
-val pieVersion = "0.19.3"
+val resourceVersion = "0.13.2"
+val pieVersion = "0.19.5"
 
 val spoofax2Version: String by ext
 val spoofax2DevenvVersion: String by ext

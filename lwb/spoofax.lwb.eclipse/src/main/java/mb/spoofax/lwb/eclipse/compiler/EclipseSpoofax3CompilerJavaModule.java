@@ -3,13 +3,12 @@ package mb.spoofax.lwb.eclipse.compiler;
 import dagger.Module;
 import dagger.Provides;
 import mb.pie.task.java.CompileJava;
-import mb.pie.task.java.FileManagerFactory;
-import mb.pie.task.java.JavaFileObjectFactory;
-import mb.pie.task.java.JavaResourceManager;
+import mb.pie.task.java.jdk.FileManagerFactory;
+import mb.pie.task.java.jdk.JavaFileObjectFactory;
+import mb.pie.task.java.jdk.JavaResourceManager;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.spoofax.lwb.compiler.dagger.Spoofax3CompilerScope;
-import org.eclipse.jdt.internal.compiler.tool.EclipseCompiler;
 
 import javax.tools.JavaFileManager;
 import javax.tools.JavaFileObject;

@@ -8,6 +8,7 @@ import mb.pie.api.Pie;
 import mb.pie.dagger.PieComponent;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceRuntimeException;
+import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.command.CommandContext;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.CommandRequest;
@@ -88,6 +89,14 @@ public class RunCommandHandler extends AbstractHandler {
 
     private void collectContextResources(CommandContext context, LinkedHashSet<ResourceKey> resources) {
         context.getResourcePathWithKind().ifPresent(p -> resources.add(p.getPath()));
+        context.getResourcePathWithKind().ifPresent(p -> {
+            final @Nullable ResourcePath parent = p.getPath().getParent();
+            // Add parent for ResourcePaths as these paths are usually used to output something into the parent
+            // directory, which requires a scheduling rule for the parent.
+            if(parent != null) {
+                resources.add(parent);
+            }
+        });
         context.getResourceKey().ifPresent(resources::add);
         for(CommandContext enclosingContext : context.getEnclosings()) {
             collectContextResources(enclosingContext, resources);

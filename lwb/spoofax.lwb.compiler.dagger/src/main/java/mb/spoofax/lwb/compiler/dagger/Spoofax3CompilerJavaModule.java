@@ -3,10 +3,11 @@ package mb.spoofax.lwb.compiler.dagger;
 import dagger.Module;
 import dagger.Provides;
 import mb.pie.task.java.CompileJava;
-import mb.pie.task.java.FileManagerFactory;
-import mb.pie.task.java.JavaFileObjectFactory;
-import mb.pie.task.java.JavaResource;
-import mb.pie.task.java.JavaResourceManager;
+import mb.pie.task.java.jdk.FileManagerFactory;
+import mb.pie.task.java.jdk.JavaFileObjectFactory;
+import mb.pie.task.java.jdk.JavaResource;
+import mb.pie.task.java.jdk.JavaResourceManager;
+import mb.pie.task.java.jdk.JdkJavaCompiler;
 
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
@@ -29,6 +30,6 @@ public class Spoofax3CompilerJavaModule {
 
     @Provides @Spoofax3CompilerScope
     CompileJava provideCompileJava() {
-        return new CompileJava(compiler, fileManagerFactory, javaFileObjectFactory);
+        return new CompileJava(new JdkJavaCompiler(compiler, fileManagerFactory, javaFileObjectFactory));
     }
 }

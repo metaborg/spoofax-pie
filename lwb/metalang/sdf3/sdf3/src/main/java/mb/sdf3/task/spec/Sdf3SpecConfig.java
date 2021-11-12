@@ -1,7 +1,7 @@
 package mb.sdf3.task.spec;
 
-import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
+import mb.resource.util.SeparatorUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.sdf2table.parsetable.ParseTableConfiguration;
 
@@ -26,7 +26,7 @@ public class Sdf3SpecConfig implements Serializable {
     }
 
     public String getMainModuleName() {
-        return mainSourceDirectory.relativize(mainFile.removeLeafExtension());
+        return SeparatorUtil.convertCurrentToUnixSeparator(mainSourceDirectory.relativize(mainFile.removeLeafExtension()));
     }
 
     public static Sdf3SpecConfig createDefault(ResourcePath rootDirectory) {

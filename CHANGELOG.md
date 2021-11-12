@@ -3,6 +3,42 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+
+
+## [0.16.4] - 2021-11-11
+### Fixed
+- Fix `InvalidAstShapeException` for incomplete CFG files (https://github.com/metaborg/spoofax-pie/issues/93).
+
+### Changed
+- `common` requirement to `0.10.0`.
+- `pie` requirement to `0.19.5`.
+
+### Added
+- Documentation page on importing a project into the Eclipse LWB.
+
+
+## [0.16.3] - 2021-11-10
+### Fixed
+- Fix "Resource ‘...’ does not exist." in Eclipse when outputting files from commands.
+- Fix exception being thrown, halting the entire pipeline, when the SDF3 source directory does not exist. Now a result with the error is returned instead.
+- Fix exception being thrown, halting the entire pipeline, when meta-language files are moved around. Now an error is logged instead.
+- Importing language project into Eclipse causing many duplicate definition errors due to all files being copied into `bin`. The `bin` directory is now ignored as a source directory by default.
+- Spoofax Eclipse plugins/features/repositories not having names or providers (https://github.com/metaborg/spoofax-pie/issues/85).
+
+### Changed
+- `resource` requirement to `0.13.2`.
+- `pie` requirement to `0.19.4`.
+
+
+## [0.16.2] - 2021-11-09
+### Fixed
+- Fix wrong separator being used on Windows in `pp.str2` Stratego import.
+
+### Changed
+- `resource` requirement to `0.13.1`.
+
+
+## [0.16.1] - 2021-11-08
 ### Fixed
 - Fix wrong pretty-printer import in Stratego when SDF3 main file is not `./start.sdf3`.
 
@@ -298,7 +334,11 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.0...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.4...HEAD
+[0.16.4]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.3...release-0.16.4
+[0.16.3]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.2...release-0.16.3
+[0.16.2]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.1...release-0.16.2
+[0.16.1]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.0...release-0.16.1
 [0.16.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.15.3...release-0.16.0
 [0.15.3]: https://github.com/metaborg/spoofax-pie/compare/release-0.15.2...release-0.15.3
 [0.15.2]: https://github.com/metaborg/spoofax-pie/compare/release-0.15.1...release-0.15.2

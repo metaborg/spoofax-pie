@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+  <category-def name="mb.spoofax.lwb" label="Spoofax LWB">
+    <description>Spoofax Language Workbench</description>
+  </category-def>
+  <feature id="spoofax.lwb.eclipse.feature">
+    <category name="mb.spoofax.lwb"/>
+  </feature>
+</site>
