@@ -3,6 +3,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+### Changed
+- `releng` (devenv-release) requirement to `0.1.18`.
 
 
 ## [0.16.4] - 2021-11-11
@@ -62,7 +64,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `common` requirement to `0.9.9`.
 - `pie` requirement to `0.19.3`.
 - `coronium` plugin requirements to `0.3.12`.
-- `releng` (devenv-release) requirement to 0.1.17.
+- `releng` (devenv-release) requirement to `0.1.17`.
 
 ### Added
 - RV32IM language for targeting RISC-V.
