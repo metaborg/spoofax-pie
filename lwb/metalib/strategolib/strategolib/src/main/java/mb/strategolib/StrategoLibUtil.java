@@ -1,4 +1,4 @@
-package mb.spoofax.lwb.compiler.stratego;
+package mb.strategolib;
 
 import mb.pie.api.ExecContext;
 import mb.pie.api.STask;
@@ -13,8 +13,6 @@ import mb.resource.fs.FSResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.path.string.PathStringMatcher;
 import mb.stratego.build.strincr.Stratego2LibInfo;
-import mb.strategolib.StrategoLibClassLoaderResources;
-import mb.strategolib.StrategoLibExports;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
@@ -26,21 +24,19 @@ import java.util.LinkedHashSet;
 /**
  * Stratego library utilities in the context of the Spoofax LWB compiler.
  */
-public class SpoofaxStrategoLibUtil {
-    private final StrategoLibClassLoaderResources strategoLibClassLoaderResources;
-    private final UnarchiveFromJar unarchiveFromJar;
+@StrategoLibScope
+public class StrategoLibUtil {
+    private final StrategoLibClassLoaderResources classLoaderResources;
 
-    @Inject public SpoofaxStrategoLibUtil(
-        StrategoLibClassLoaderResources strategoLibClassLoaderResources,
-        UnarchiveFromJar unarchiveFromJar
+    @Inject public StrategoLibUtil(
+        StrategoLibClassLoaderResources classLoaderResources
     ) {
-        this.strategoLibClassLoaderResources = strategoLibClassLoaderResources;
-        this.unarchiveFromJar = unarchiveFromJar;
+        this.classLoaderResources = classLoaderResources;
     }
 
     public LinkedHashSet<File> getStrategoLibJavaClassPaths() throws IOException {
         final LinkedHashSet<File> javaClassPaths = new LinkedHashSet<>();
-        final ClassLoaderResourceLocations<FSResource> locations = strategoLibClassLoaderResources.definitionDirectory.getLocations();
+        final ClassLoaderResourceLocations<FSResource> locations = classLoaderResources.definitionDirectory.getLocations();
         for(FSResource directory : locations.directories) {
             javaClassPaths.add(directory.getJavaPath().toFile());
         }
@@ -51,10 +47,11 @@ public class SpoofaxStrategoLibUtil {
     }
 
     public Supplier<Stratego2LibInfo> getStrategoLibInfo(
-        ResourcePath strategoLibUnarchiveDirectory
+        ResourcePath strategoLibUnarchiveDirectory,
+        UnarchiveFromJar unarchiveFromJar
     ) throws IOException {
         for(String export : StrategoLibExports.getStr2LibExports()) {
-            final ClassLoaderResourceLocations<FSResource> locations = strategoLibClassLoaderResources.definitionDirectory.getLocations();
+            final ClassLoaderResourceLocations<FSResource> locations = classLoaderResources.definitionDirectory.getLocations();
             for(FSResource directory : locations.directories) {
                 final FSResource exportFile = directory.appendAsRelativePath(export);
                 if(exportFile.exists()) {

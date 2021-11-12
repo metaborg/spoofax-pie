@@ -43,6 +43,7 @@ import mb.str.config.StrategoCompileConfig;
 import mb.stratego.build.strincr.BuiltinLibraryIdentifier;
 import mb.stratego.build.strincr.ModuleIdentifier;
 import mb.stratego.build.strincr.Stratego2LibInfo;
+import mb.strategolib.StrategoLibUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.sdf2table.parsetable.ParseTable;
 import org.metaborg.util.cmd.Arguments;
@@ -70,7 +71,7 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
     private final LibSpoofax2ClassLoaderResources libSpoofax2ClassLoaderResources;
     private final LibStatixClassLoaderResources libStatixClassLoaderResources;
 
-    private final SpoofaxStrategoLibUtil spoofaxStrategoLibUtil;
+    private final StrategoLibUtil strategoLibUtil;
     private final SpoofaxStrategoGenerationUtil spoofaxStrategoGenerationUtil;
 
     private final SpoofaxSdf3GenerationUtil spoofaxSdf3GenerationUtil;
@@ -91,7 +92,7 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
         LibSpoofax2ClassLoaderResources libSpoofax2ClassLoaderResources,
         LibStatixClassLoaderResources libStatixClassLoaderResources,
 
-        SpoofaxStrategoLibUtil spoofaxStrategoLibUtil,
+        StrategoLibUtil strategoLibUtil,
         SpoofaxStrategoGenerationUtil spoofaxStrategoGenerationUtil,
 
         SpoofaxSdf3GenerationUtil spoofaxSdf3GenerationUtil,
@@ -112,7 +113,7 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
         this.libSpoofax2ClassLoaderResources = libSpoofax2ClassLoaderResources;
         this.libStatixClassLoaderResources = libStatixClassLoaderResources;
 
-        this.spoofaxStrategoLibUtil = spoofaxStrategoLibUtil;
+        this.strategoLibUtil = strategoLibUtil;
         this.spoofaxStrategoGenerationUtil = spoofaxStrategoGenerationUtil;
 
         this.spoofaxSdf3GenerationUtil = spoofaxSdf3GenerationUtil;
@@ -170,8 +171,8 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
         includeDirectories.add(sourceFiles.mainSourceDirectory()); // Add main source directory as an include for imports.
         includeDirectories.addAll(sourceFiles.includeDirectories());
         final LinkedHashSet<Supplier<Stratego2LibInfo>> str2Libs = new LinkedHashSet<>();
-        str2Libs.add(spoofaxStrategoLibUtil.getStrategoLibInfo(sourceFiles.strategoLibUnarchiveDirectory()));
-        final LinkedHashSet<File> javaClassPaths = new LinkedHashSet<>(spoofaxStrategoLibUtil.getStrategoLibJavaClassPaths());
+        str2Libs.add(strategoLibUtil.getStrategoLibInfo(sourceFiles.strategoLibUnarchiveDirectory(), unarchiveFromJar));
+        final LinkedHashSet<File> javaClassPaths = new LinkedHashSet<>(strategoLibUtil.getStrategoLibJavaClassPaths());
 
         // Determine libspoofax2 definition directories.
         final HashSet<HierarchicalResource> libSpoofax2DefinitionDirs = new LinkedHashSet<>(); // LinkedHashSet to remove duplicates while keeping insertion order.
