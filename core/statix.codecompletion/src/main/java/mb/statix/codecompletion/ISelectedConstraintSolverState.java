@@ -8,6 +8,9 @@ import mb.statix.solver.IState;
 import mb.statix.spec.ApplyResult;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.AbstractMap;
+import java.util.Collections;
+
 /**
  * A solver state with a selected constraint.
  *
@@ -44,6 +47,8 @@ public interface ISelectedConstraintSolverState<C extends IConstraint> extends I
     @Override ISelectedConstraintSolverState<C> withUpdatedConstraints(Iterable<IConstraint> add, Iterable<IConstraint> remove);
 
     @Override ISelectedConstraintSolverState<C> withDelays(Iterable<? extends java.util.Map.Entry<IConstraint, Delay>> delays);
+
+    @Override ISelectedConstraintSolverState<C> withDelay(IConstraint constraint, Delay delay);
 
     @Override ISelectedConstraintSolverState<C> withMeta(SolutionMeta newMeta);
 

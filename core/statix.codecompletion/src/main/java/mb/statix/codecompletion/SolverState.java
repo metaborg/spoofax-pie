@@ -35,6 +35,8 @@ import org.metaborg.util.log.ILogger;
 import org.metaborg.util.log.LoggerUtils;
 import org.metaborg.util.tuple.Tuple2;
 
+import java.util.AbstractMap;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -321,6 +323,10 @@ public class SolverState implements ISolverState {
         });
         return copy(this.spec, this.state, this.messages, constraints.freeze(), newDelays.freeze(),
             this.existentials, this.completeness, this.expanded, this.meta);
+    }
+
+    @Override public SolverState withDelay(IConstraint constraint, Delay delay) {
+        return withDelays(Collections.singletonList(new AbstractMap.SimpleEntry<>(constraint, delay)));
     }
 
     @Override public SolverState withMeta(SolutionMeta newMeta) {

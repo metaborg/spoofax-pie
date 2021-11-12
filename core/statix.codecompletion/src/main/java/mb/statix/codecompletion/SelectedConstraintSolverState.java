@@ -17,6 +17,9 @@ import mb.tego.utils.TextStringBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.functions.Function2;
 
+import java.util.AbstractMap;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Objects;
 
 /**
@@ -141,6 +144,11 @@ public final class SelectedConstraintSolverState<C extends IConstraint> extends 
     @SuppressWarnings("unchecked")
     @Override public SelectedConstraintSolverState<C> withDelays(Iterable<? extends java.util.Map.Entry<IConstraint, Delay>> delays) {
         return (SelectedConstraintSolverState<C>)super.withDelays(delays);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override public SelectedConstraintSolverState<C> withDelay(IConstraint constraint, Delay delay) {
+        return (SelectedConstraintSolverState<C>)super.withDelays(Collections.singletonList(new AbstractMap.SimpleEntry<>(constraint, delay)));
     }
 
     @SuppressWarnings("unchecked")
