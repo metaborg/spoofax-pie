@@ -3,6 +3,9 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+
+
+## [0.16.5] - 2021-11-12
 ### Changed
 - `releng` (devenv-release) requirement to `0.1.18`.
 
@@ -336,7 +339,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.4...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.5...HEAD
+[0.16.5]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.4...release-0.16.5
 [0.16.4]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.3...release-0.16.4
 [0.16.3]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.2...release-0.16.3
 [0.16.2]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.1...release-0.16.2
