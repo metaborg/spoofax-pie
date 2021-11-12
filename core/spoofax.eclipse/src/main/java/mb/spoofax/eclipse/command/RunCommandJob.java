@@ -14,6 +14,7 @@ import mb.spoofax.core.language.command.CommandRequest;
 import mb.spoofax.core.language.command.EnclosingCommandContextType;
 import mb.spoofax.core.language.command.ResourcePathWithKind;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
+import mb.spoofax.eclipse.job.ThreadKillerJob;
 import mb.spoofax.eclipse.pie.CommandContextAndFeedback;
 import mb.spoofax.eclipse.pie.PieRunner;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -35,6 +36,9 @@ public class RunCommandJob extends Job {
     private final CommandData data;
     private final CommandRequest<?> request;
 
+    private final ThreadKillerJob.Factory threadKillerJobFactory;
+    private @Nullable ThreadKillerJob threadKillerJob;
+
 
     public RunCommandJob(
         LoggerFactory loggerFactory,
@@ -42,7 +46,8 @@ public class RunCommandJob extends Job {
         Pie pie,
         PieRunner pieRunner,
         CommandData data,
-        CommandRequest<?> request
+        CommandRequest<?> request,
+        ThreadKillerJob.Factory threadKillerJobFactory
     ) {
         super(request.def().getDisplayName());
         this.logger = loggerFactory.create(getClass());
@@ -51,12 +56,13 @@ public class RunCommandJob extends Job {
         this.pieRunner = pieRunner;
         this.data = data;
         this.request = request;
+        this.threadKillerJobFactory = threadKillerJobFactory;
     }
 
 
     @Override protected IStatus run(IProgressMonitor monitor) {
         final String pluginId = languageComponent.getEclipseIdentifiers().getPlugin();
-        logger.trace("Running command '{}' from language '{}'", request.def().getDisplayName(), languageComponent.getLanguageInstance().getDisplayName());
+        logger.trace("Running command job for '{}' from language '{}'", request.def().getDisplayName(), languageComponent.getLanguageInstance().getDisplayName());
         try(final MixedSession session = pie.newSession()) {
             final ArrayList<CommandContextAndFeedback> contextsAndFeedbacks = pieRunner.requireCommand(languageComponent.getLanguageInstance().getId(), request, data.contexts, pie, session, monitor);
             final ArrayList<Throwable> exceptions = new ArrayList<>();
@@ -111,6 +117,10 @@ public class RunCommandJob extends Job {
         } catch(InterruptedException e) {
             // Execution was interrupted. No need to re-set interrupt, as we are the final handler of the interrupt.
             return new Status(IStatus.CANCEL, pluginId, "");
+        } finally {
+            if(threadKillerJob != null) {
+                threadKillerJob.cancel();
+            }
         }
     }
 
@@ -119,7 +129,13 @@ public class RunCommandJob extends Job {
         if(thread == null) {
             return;
         }
+
+        logger.debug("Cancelling command job '{}' from language '{}'", request.def().getDisplayName(), languageComponent.getLanguageInstance().getDisplayName());
         thread.interrupt();
+        if(threadKillerJob == null) {
+            threadKillerJob = threadKillerJobFactory.create(thread, 10000);
+            threadKillerJob.schedule();
+        }
     }
 
     private IStatus exceptionToStatus(Throwable e, String pluginId) {

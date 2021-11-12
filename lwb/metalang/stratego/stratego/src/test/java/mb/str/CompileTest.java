@@ -5,6 +5,7 @@ import mb.common.result.MessagesException;
 import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.pie.api.MixedSession;
+import mb.pie.api.StatelessSerializableFunction;
 import mb.pie.api.Supplier;
 import mb.pie.api.Task;
 import mb.pie.api.ValueSupplier;
@@ -18,6 +19,7 @@ import mb.str.util.TestBase;
 import mb.stratego.build.strincr.Stratego2LibInfo;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
+import mb.strategolib.StrategoLibInfo;
 import mb.strategolib.StrategoLibUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Test;
@@ -59,7 +61,8 @@ class CompileTest extends TestBase {
 
         final LinkedHashSet<Supplier<Stratego2LibInfo>> str2Libs = new LinkedHashSet<>();
         final StrategoLibUtil strategoLibUtil = strategoLibComponent.getStrategoLibUtil();
-        str2Libs.add(strategoLibUtil.getStrategoLibInfo(strategoLibUnarchiveDirectory.getPath(), unarchiveFromJar));
+        final Supplier<StrategoLibInfo> strategoLibInfoSupplier = strategoLibUtil.getStrategoLibInfo(strategoLibUnarchiveDirectory.getPath(), unarchiveFromJar);
+        str2Libs.add(strategoLibInfoSupplier.map(new ToStratego2LibInfo()));
         final LinkedHashSet<File> javaClassPaths = new LinkedHashSet<>(strategoLibUtil.getStrategoLibJavaClassPaths());
 
         try(final MixedSession session = newSession()) {
@@ -149,6 +152,12 @@ class CompileTest extends TestBase {
             assertNotNull(strategoInvokeResult);
             assertTrue(strategoInvokeResult instanceof IStrategoString);
             assertEquals("Hello, world!", ((IStrategoString)strategoInvokeResult).stringValue());
+        }
+    }
+
+    private static class ToStratego2LibInfo extends StatelessSerializableFunction<StrategoLibInfo, Stratego2LibInfo> {
+        @Override public Stratego2LibInfo apply(StrategoLibInfo strategoLibInfo) {
+            return new Stratego2LibInfo(strategoLibInfo.str2libFile, strategoLibInfo.jarFilesOrDirectories);
         }
     }
 }

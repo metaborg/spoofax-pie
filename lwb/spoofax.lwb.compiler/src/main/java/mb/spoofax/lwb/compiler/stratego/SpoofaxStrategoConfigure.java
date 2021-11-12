@@ -43,6 +43,7 @@ import mb.str.config.StrategoCompileConfig;
 import mb.stratego.build.strincr.BuiltinLibraryIdentifier;
 import mb.stratego.build.strincr.ModuleIdentifier;
 import mb.stratego.build.strincr.Stratego2LibInfo;
+import mb.strategolib.StrategoLibInfo;
 import mb.strategolib.StrategoLibUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.sdf2table.parsetable.ParseTable;
@@ -171,7 +172,8 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
         includeDirectories.add(sourceFiles.mainSourceDirectory()); // Add main source directory as an include for imports.
         includeDirectories.addAll(sourceFiles.includeDirectories());
         final LinkedHashSet<Supplier<Stratego2LibInfo>> str2Libs = new LinkedHashSet<>();
-        str2Libs.add(strategoLibUtil.getStrategoLibInfo(sourceFiles.strategoLibUnarchiveDirectory(), unarchiveFromJar));
+        final Supplier<StrategoLibInfo> strategoLibInfoSupplier = strategoLibUtil.getStrategoLibInfo(sourceFiles.strategoLibUnarchiveDirectory(), unarchiveFromJar);
+        str2Libs.add(strategoLibInfoSupplier.map(new ToStratego2LibInfo()));
         final LinkedHashSet<File> javaClassPaths = new LinkedHashSet<>(strategoLibUtil.getStrategoLibJavaClassPaths());
 
         // Determine libspoofax2 definition directories.
@@ -380,6 +382,12 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
         @Override
         public Result<Option<CfgStrategoConfig>, CfgRootDirectoryToObjectException> apply(Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result) {
             return result.map(o -> Option.ofOptional(o.compileLanguageInput.compileLanguageSpecificationInput().stratego()));
+        }
+    }
+
+    private static class ToStratego2LibInfo extends StatelessSerializableFunction<StrategoLibInfo, Stratego2LibInfo> {
+        @Override public Stratego2LibInfo apply(StrategoLibInfo strategoLibInfo) {
+            return new Stratego2LibInfo(strategoLibInfo.str2libFile, strategoLibInfo.jarFilesOrDirectories);
         }
     }
 }

@@ -10,7 +10,6 @@ plugins {
 fun compositeBuild(name: String) = "$group:$name:$version"
 
 dependencies {
-  api("org.metaborg.devenv:stratego.build")
   api("org.metaborg:pie.task.archive")
 }
 
