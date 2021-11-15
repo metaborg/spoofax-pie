@@ -23,17 +23,17 @@ dependencies {
   bundleApi(compositeBuild("spoofax.compiler.eclipsebundle"))
 
 
-  bundleImplementation(project(":cfg.eclipse"))
-  bundleImplementation(project(":sdf3.eclipse"))
-  bundleImplementation(project(":esv.eclipse"))
-  bundleImplementation(project(":stratego.eclipse"))
-  bundleImplementation(project(":statix.eclipse"))
-  bundleImplementation(project(":sdf3_ext_statix.eclipse"))
-  bundleImplementation(project(":spt.eclipse"))
+  bundleImplementation(compositeBuild("cfg.eclipse"))
+  bundleImplementation(compositeBuild("sdf3.eclipse"))
+  bundleImplementation(compositeBuild("esv.eclipse"))
+  bundleImplementation(compositeBuild("stratego.eclipse"))
+  bundleImplementation(compositeBuild("statix.eclipse"))
+  bundleImplementation(compositeBuild("sdf3_ext_statix.eclipse"))
+  bundleImplementation(compositeBuild("spt.eclipse"))
 
   bundleImplementation(compositeBuild("strategolib.eclipse"))
-  bundleImplementation(project(":libspoofax2.eclipse"))
-  bundleImplementation(project(":libstatix.eclipse"))
+  bundleImplementation(compositeBuild("libspoofax2.eclipse"))
+  bundleImplementation(compositeBuild("libstatix.eclipse"))
 
 
   // Convenient library to get the current classpath, which works under OSGi (Eclipse) as well. Used to pass the current
@@ -50,7 +50,7 @@ dependencies {
   bundleEmbedImplementation("javax.inject:javax.inject:1")
 
   // Embed `:spoofax.lwb.dynamicloading`, which includes `:spoofax.lwb.compiler` and `:spoofax.lwb.compiler.dagger`.
-  bundleEmbedImplementation(project(":spoofax.lwb.dynamicloading")) {
+  bundleEmbedImplementation(compositeBuild("spoofax.lwb.dynamicloading")) {
     // Exclude meta-languages and libraries, as they have their own Eclipse plugins
     exclude("org.metaborg", "cfg")
     exclude("org.metaborg", "esv")
@@ -81,7 +81,7 @@ dependencies {
   }
 
   // Embed `:spt.dynamicloading`.
-  bundleEmbedImplementation(project(":spt.dynamicloading"))
+  bundleEmbedImplementation(compositeBuild("spt.dynamicloading"))
 
   // Embed `org.metaborg:pie.task.archive` and `org.metaborg:pie.task.java`
   bundleEmbedImplementation("org.metaborg:pie.task.archive")

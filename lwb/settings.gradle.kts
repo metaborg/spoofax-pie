@@ -93,6 +93,3 @@ include("spoofax.lwb.compiler.dagger")
 include("spoofax.lwb.compiler.gradle")
 
 include("spoofax.lwb.dynamicloading")
-
-include("spoofax.lwb.eclipse")
-

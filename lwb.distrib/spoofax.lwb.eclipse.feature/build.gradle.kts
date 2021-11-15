@@ -9,7 +9,7 @@ mavenize {
 fun compositeBuild(name: String) = "$group:$name:$version"
 
 dependencies {
-  bundle(compositeBuild("spoofax.lwb.eclipse"))
+  bundle(project(":spoofax.lwb.eclipse"))
   bundle(project(":rv32im.eclipse"))
 }
 

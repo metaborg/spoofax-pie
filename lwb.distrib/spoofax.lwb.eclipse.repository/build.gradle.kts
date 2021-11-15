@@ -16,7 +16,7 @@ repository {
 fun compositeBuild(name: String) = "$group:$name:$version"
 
 dependencies {
-  feature(compositeBuild("spoofax.lwb.eclipse.feature"))
+  feature(project(":spoofax.lwb.eclipse.feature"))
 }
 
 tasks {
