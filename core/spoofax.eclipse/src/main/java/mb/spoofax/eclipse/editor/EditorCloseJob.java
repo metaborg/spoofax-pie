@@ -1,8 +1,5 @@
 package mb.spoofax.eclipse.editor;
 
-import dagger.assisted.Assisted;
-import dagger.assisted.AssistedFactory;
-import dagger.assisted.AssistedInject;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecException;
@@ -18,8 +15,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
 
+import javax.inject.Inject;
+
 public class EditorCloseJob extends Job {
-    @AssistedFactory public interface Factory {
+    public interface Factory {
         EditorCloseJob create(
             EclipseLanguageComponent languageComponent,
             PieComponent pieComponent,
@@ -36,13 +35,13 @@ public class EditorCloseJob extends Job {
     private final @Nullable IProject project;
     private final IFile file;
 
-    @AssistedInject public EditorCloseJob(
+    @Inject public EditorCloseJob(
         LoggerFactory loggerFactory,
         PieRunner pieRunner,
-        @Assisted EclipseLanguageComponent languageComponent,
-        @Assisted PieComponent pieComponent,
-        @Assisted @Nullable IProject project,
-        @Assisted IFile file
+        EclipseLanguageComponent languageComponent,
+        PieComponent pieComponent,
+        @Nullable IProject project,
+        IFile file
     ) {
         super(languageComponent.getLanguageInstance().getDisplayName() + " editor close");
         this.logger = loggerFactory.create(getClass());

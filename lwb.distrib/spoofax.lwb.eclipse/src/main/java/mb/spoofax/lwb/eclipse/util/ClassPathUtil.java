@@ -4,6 +4,7 @@ import io.github.classgraph.ClassGraph;
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
+import mb.rv32im.eclipse.Rv32ImEclipseComponent;
 import mb.spoofax.compiler.eclipsebundle.SpoofaxCompilerEclipseBundle;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.lwb.eclipse.SpoofaxLwbPlugin;
@@ -44,6 +45,7 @@ public class ClassPathUtil {
             .addClassLoader(ToolingEclipseBundle.class.getClassLoader())
             .addClassLoader(SpoofaxCompilerEclipseBundle.class.getClassLoader())
             .addClassLoader(StrategoLibLanguage.class.getClassLoader())
+            .addClassLoader(Rv32ImEclipseComponent.class.getClassLoader())
 
             .addClassLoader(Generated.class.getClassLoader()) // Artifact: javax.annotation:jsr250-api:1.0
 

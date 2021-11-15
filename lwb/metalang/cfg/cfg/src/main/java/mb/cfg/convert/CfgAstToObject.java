@@ -433,6 +433,12 @@ public class CfgAstToObject {
             toMenuItemRepr(messagesBuilder, cfgFile, parts, menuItem, languageAdapterShared)
                 .ifSome(menuItemRepr -> adapterBuilder.project.addEditorContextMenuItems(menuItemRepr));
         });
+
+        // LanguageAdapterCompilerInput > dependencies
+        if(parts.getOneSubtermAsBool("DependOnRv32Im").unwrapOr(false)) {
+            adapterBuilder.project.dependOnRv32Im(true);
+        }
+
         customizer.customize(baseBuilder);
         final LanguageProjectCompiler.Input languageBaseCompilerInput = baseBuilder.build(shared, languageBaseShared);
         compileLanguageInputBuilder.languageProjectInput(languageBaseCompilerInput);

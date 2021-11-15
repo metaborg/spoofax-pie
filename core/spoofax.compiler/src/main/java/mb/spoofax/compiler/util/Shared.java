@@ -335,6 +335,17 @@ public interface Shared extends Serializable {
     }
 
 
+    /// Spoofax 3 lang
+
+    @Value.Default default GradleDependency rv32ImDep() {
+        return GradleDependency.module(Coordinate.of("org.metaborg", "rv32im", spoofax3Version()));
+    }
+
+    @Value.Default default GradleDependency rv32ImEclipseDep() {
+        return GradleDependency.module(Coordinate.of("org.metaborg", "rv32im.eclipse", spoofax3Version()));
+    }
+
+
     default void savePersistentProperties(Properties properties) {
         properties.setProperty(Builder.defaultClassPrefix, defaultClassPrefix());
         properties.setProperty(Builder.defaultGroupId, defaultGroupId());

@@ -30,7 +30,8 @@ import java.util.Set;
         {{resourcesComponent.qualifiedId}}.class,
         ResourceServiceComponent.class,
         PlatformComponent.class{{#isMultiLang}},
-        MultiLangComponent.class{{/isMultiLang}}
+        MultiLangComponent.class{{/isMultiLang}}{{#dependOnRv32Im}},
+        mb.rv32im.Rv32ImComponent.class{{/dependOnRv32Im}}
     }
 )
 {{/addComponentAnnotationToBaseComponent}}

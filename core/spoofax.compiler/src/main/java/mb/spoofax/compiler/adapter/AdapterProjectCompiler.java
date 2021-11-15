@@ -355,6 +355,9 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         input.tegoRuntime().ifPresent((i) -> tegoRuntimeCompiler.getDependencies(i).addAllTo(dependencies));
         input.codeCompletion().ifPresent((i) -> codeCompletionCompiler.getDependencies(i).addAllTo(dependencies));
         dependencies.add(GradleConfiguredDependency.api(shared.sptApiDep()));
+        if(input.dependOnRv32Im()) {
+            dependencies.add(GradleConfiguredDependency.api(shared.rv32ImDep()));
+        }
         return dependencies;
     }
 
@@ -362,7 +365,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
     @Value.Immutable public interface Input extends Serializable {
         class Builder extends AdapterProjectCompilerData.Input.Builder {}
 
-        static Builder builder() { return new Builder(); }
+        static Builder builder() {return new Builder();}
 
 
         /// Project
@@ -503,7 +506,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             return Optional.empty();
         }
 
-        default List<NamedTypeInfo> checkInjections() {
+        @Value.Lazy default List<NamedTypeInfo> checkInjections() {
             ArrayList<NamedTypeInfo> results = new ArrayList<>();
             results.add(NamedTypeInfo.of("classLoaderResources", classLoaderResources().classLoaderResources()));
             parser().ifPresent(i -> results.add(NamedTypeInfo.of("parse", i.parseTaskDef())));
@@ -511,7 +514,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             return results;
         }
 
-        default List<NamedTypeInfo> checkMultiInjections() {
+        @Value.Lazy default List<NamedTypeInfo> checkMultiInjections() {
             ArrayList<NamedTypeInfo> results = new ArrayList<>();
             results.add(NamedTypeInfo.of("classLoaderResources", classLoaderResources().classLoaderResources()));
             results.add(NamedTypeInfo.of("getSourceFiles", getSourceFiles().getSourceFilesTaskDef()));
@@ -519,6 +522,11 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             constraintAnalyzer().ifPresent(i -> results.add(NamedTypeInfo.of("analyze", i.analyzeMultiTaskDef())));
             return results;
         }
+
+        @Value.Default default boolean dependOnRv32Im() {
+            return false;
+        }
+
 
         /// Gradle files
 
@@ -557,9 +565,9 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
 
         // Dagger resources scope (passthrough from AdapterProject)
 
-        default TypeInfo baseResourcesScope() { return adapterProject().baseResourcesScope(); }
+        default TypeInfo baseResourcesScope() {return adapterProject().baseResourcesScope();}
 
-        default TypeInfo resourcesScope() { return adapterProject().resourcesScope(); }
+        default TypeInfo resourcesScope() {return adapterProject().resourcesScope();}
 
         // Dagger resources component
 
@@ -591,15 +599,15 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
 
         // Dagger Scope (passthrough from AdapterProject)
 
-        default TypeInfo baseScope() { return adapterProject().baseScope(); }
+        default TypeInfo baseScope() {return adapterProject().baseScope();}
 
-        default TypeInfo scope() { return adapterProject().scope(); }
+        default TypeInfo scope() {return adapterProject().scope();}
 
         // Dagger Qualifier (passthrough from AdapterProject)
 
-        default TypeInfo baseQualifier() { return adapterProject().baseQualifier(); }
+        default TypeInfo baseQualifier() {return adapterProject().baseQualifier();}
 
-        default TypeInfo qualifier() { return adapterProject().qualifier(); }
+        default TypeInfo qualifier() {return adapterProject().qualifier();}
 
         // Dagger component
 

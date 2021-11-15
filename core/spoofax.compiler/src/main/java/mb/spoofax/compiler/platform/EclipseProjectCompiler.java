@@ -90,7 +90,7 @@ public class EclipseProjectCompiler implements TaskDef<Supplier<Result<Option<Ec
     }
 
 
-    @Override public String getId() { return getClass().getName(); }
+    @Override public String getId() {return getClass().getName();}
 
     @Override
     public Result<None, ?> exec(ExecContext context, Supplier<Result<Option<EclipseProjectCompiler.Input>, ?>> input) throws IOException {
@@ -166,6 +166,9 @@ public class EclipseProjectCompiler implements TaskDef<Supplier<Result<Option<Ec
         }
         if(input.adapterProjectCompilerInput().strategoRuntime().isPresent()) {
             bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.strategolibEclipseDep()));
+        }
+        if(input.adapterProjectCompilerInput().dependOnRv32Im()) {
+            bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.rv32ImEclipseDep()));
         }
         input.languageProjectDependency().ifSome(d -> bundleDependencies.add(GradleConfiguredBundleDependency.bundleEmbedApi(d)));
         input.adapterProjectDependency().ifSome(d -> bundleDependencies.add(GradleConfiguredBundleDependency.bundleEmbedApi(d)));
@@ -249,7 +252,7 @@ public class EclipseProjectCompiler implements TaskDef<Supplier<Result<Option<Ec
             }
         }
 
-        static Builder builder() { return new Builder(); }
+        static Builder builder() {return new Builder();}
 
 
         /// Project
@@ -282,51 +285,51 @@ public class EclipseProjectCompiler implements TaskDef<Supplier<Result<Option<Ec
 
         /// Eclipse configuration
 
-        @Value.Default default String pluginId() { return project().coordinate().artifactId(); }
+        @Value.Default default String pluginId() {return project().coordinate().artifactId();}
 
-        @Value.Default default String componentExtensionPointId() { return pluginId() + ".component"; }
+        @Value.Default default String componentExtensionPointId() {return pluginId() + ".component";}
 
-        @Value.Default default String contextId() { return pluginId() + ".context"; }
+        @Value.Default default String contextId() {return pluginId() + ".context";}
 
-        @Value.Default default String documentProviderId() { return pluginId() + ".documentprovider"; }
+        @Value.Default default String documentProviderId() {return pluginId() + ".documentprovider";}
 
-        @Value.Default default String editorId() { return pluginId() + ".editor"; }
+        @Value.Default default String editorId() {return pluginId() + ".editor";}
 
-        @Value.Default default String natureRelativeId() { return "nature"; }
+        @Value.Default default String natureRelativeId() {return "nature";}
 
-        @Value.Default default String natureId() { return pluginId() + "." + natureRelativeId(); }
+        @Value.Default default String natureId() {return pluginId() + "." + natureRelativeId();}
 
-        @Value.Default default String addNatureCommandId() { return natureId() + ".add"; }
+        @Value.Default default String addNatureCommandId() {return natureId() + ".add";}
 
-        @Value.Default default String removeNatureCommandId() { return natureId() + ".remove"; }
+        @Value.Default default String removeNatureCommandId() {return natureId() + ".remove";}
 
-        @Value.Default default String projectBuilderRelativeId() { return "builder"; }
+        @Value.Default default String projectBuilderRelativeId() {return "builder";}
 
-        @Value.Default default String projectBuilderId() { return pluginId() + "." + projectBuilderRelativeId(); }
+        @Value.Default default String projectBuilderId() {return pluginId() + "." + projectBuilderRelativeId();}
 
-        @Value.Default default String baseMarkerId() { return pluginId() + ".marker"; }
+        @Value.Default default String baseMarkerId() {return pluginId() + ".marker";}
 
-        @Value.Default default String infoMarkerId() { return baseMarkerId() + ".info"; }
+        @Value.Default default String infoMarkerId() {return baseMarkerId() + ".info";}
 
-        @Value.Default default String warningMarkerId() { return baseMarkerId() + ".warning"; }
+        @Value.Default default String warningMarkerId() {return baseMarkerId() + ".warning";}
 
-        @Value.Default default String errorMarkerId() { return baseMarkerId() + ".error"; }
+        @Value.Default default String errorMarkerId() {return baseMarkerId() + ".error";}
 
-        @Value.Default default String observeCommandId() { return pluginId() + ".observe"; }
+        @Value.Default default String observeCommandId() {return pluginId() + ".observe";}
 
-        @Value.Default default String unobserveCommandId() { return pluginId() + ".unobserve"; }
+        @Value.Default default String unobserveCommandId() {return pluginId() + ".unobserve";}
 
-        @Value.Default default String runCommandId() { return pluginId() + ".runcommand"; }
+        @Value.Default default String runCommandId() {return pluginId() + ".runcommand";}
 
-        @Value.Default default String baseMenuId() { return pluginId() + ".menu"; }
+        @Value.Default default String baseMenuId() {return pluginId() + ".menu";}
 
-        @Value.Default default String resourceContextMenuId() { return baseMenuId() + ".resource.context"; }
+        @Value.Default default String resourceContextMenuId() {return baseMenuId() + ".resource.context";}
 
-        @Value.Default default String editorContextMenuId() { return baseMenuId() + ".editor.context"; }
+        @Value.Default default String editorContextMenuId() {return baseMenuId() + ".editor.context";}
 
-        @Value.Default default String mainMenuId() { return baseMenuId() + ".main"; }
+        @Value.Default default String mainMenuId() {return baseMenuId() + ".main";}
 
-        @Value.Default default String mainMenuDynamicId() { return mainMenuId() + ".dynamic"; }
+        @Value.Default default String mainMenuDynamicId() {return mainMenuId() + ".dynamic";}
 
 
         Optional<ResourcePath> fileIconRelativePath();
@@ -353,7 +356,7 @@ public class EclipseProjectCompiler implements TaskDef<Supplier<Result<Option<Ec
 
         /// Kinds of classes (generated/extended/manual)
 
-        @Value.Default default ClassKind classKind() { return ClassKind.Generated; }
+        @Value.Default default ClassKind classKind() {return ClassKind.Generated;}
 
         @Value.Default default ResourcePath generatedJavaSourcesDirectory() {
             return project().buildGeneratedSourcesDirectory().appendRelativePath("eclipse");
@@ -364,7 +367,7 @@ public class EclipseProjectCompiler implements TaskDef<Supplier<Result<Option<Ec
 
         // package-info
 
-        @Value.Default default TypeInfo basePackageInfo() { return TypeInfo.of(packageId(), "package-info"); }
+        @Value.Default default TypeInfo basePackageInfo() {return TypeInfo.of(packageId(), "package-info");}
 
         Optional<TypeInfo> manualPackageInfo();
 
