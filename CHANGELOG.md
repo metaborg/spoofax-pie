@@ -3,6 +3,9 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+
+
+## [0.16.6] - 2021-11-16
 ### Fixed
 - Messages with exceptions not showing their exception in Eclipse.
 - SPT transform expectation halting the entire pipeline due to an exception when building the arguments for a command. It now creates an error in the SPT file.
@@ -353,7 +356,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.5...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.6...HEAD
+[0.16.6]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.5...release-0.16.6
 [0.16.5]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.4...release-0.16.5
 [0.16.4]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.3...release-0.16.4
 [0.16.3]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.2...release-0.16.3
