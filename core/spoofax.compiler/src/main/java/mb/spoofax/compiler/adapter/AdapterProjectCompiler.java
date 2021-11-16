@@ -164,7 +164,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         qualifierTemplate.write(context, input.baseQualifier().file(generatedJavaSourcesDirectory), input);
 
         for(CommandDefRepr commandDef : input.allCommandDefs()) {
-            final UniqueNamer uniqueNamer = new UniqueNamer();
+            final UniqueNamer uniqueNamer = new UniqueNamer(input.scope(), input.qualifier());
             final HashMap<String, Object> map = new HashMap<>();
             map.put("scope", input.scope());
             map.put("taskDefInjection", uniqueNamer.makeUnique(commandDef.taskDefType()));
@@ -184,7 +184,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         }
 
         { // Component
-            final UniqueNamer uniqueNamer = new UniqueNamer();
+            final UniqueNamer uniqueNamer = new UniqueNamer(input.scope(), input.qualifier());
             final HashMap<String, Object> map = new HashMap<>();
             map.put("providedTaskDefs", input.allTaskDefs().stream().map(uniqueNamer::makeUnique).collect(Collectors.toList()));
             map.put("providedCommandDefs", input.allCommandDefs().stream().map(CommandDefRepr::type).map(uniqueNamer::makeUnique).collect(Collectors.toList()));
@@ -192,7 +192,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         }
 
         { // Module
-            final UniqueNamer uniqueNamer = new UniqueNamer();
+            final UniqueNamer uniqueNamer = new UniqueNamer(input.scope(), input.qualifier());
             final HashMap<String, Object> map = new HashMap<>();
             map.put("providedTaskDefs", input.allTaskDefs().stream().map(uniqueNamer::makeUnique).collect(Collectors.toList()));
             uniqueNamer.reset(); // New method scope
@@ -203,7 +203,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         }
 
         { // Instance
-            final UniqueNamer uniqueNamer = new UniqueNamer();
+            final UniqueNamer uniqueNamer = new UniqueNamer(input.scope(), input.qualifier());
             uniqueNamer.reserve("fileExtensions");
             uniqueNamer.reserve("taskDefs");
             uniqueNamer.reserve("commandDefs");
@@ -228,6 +228,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
                 map.put("tokenizeInjection", tokenizeInjection);
                 injected.add(tokenizeInjection);
             }
+
             final NamedTypeInfo checkInjection;
             final NamedTypeInfo checkOneInjection;
             if(input.multilangAnalyzer().isPresent()) { // isMultiLang will be true
@@ -248,6 +249,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             injected.add(checkOneInjection);
             map.put("checkInjection", checkInjection);
             map.put("checkOneInjection", checkOneInjection);
+
             final NamedTypeInfo styleInjection;
             if(input.styler().isPresent()) {
                 styleInjection = uniqueNamer.makeUnique(input.styler().get().styleTaskDef());
@@ -256,14 +258,17 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             }
             map.put("styleInjection", styleInjection);
             injected.add(styleInjection);
-            final NamedTypeInfo codeCompletionInjection;
+
+            final Optional<NamedTypeInfo> codeCompletionInjection;
             if(input.codeCompletion().isPresent() && input.parser().isPresent()) {
-                codeCompletionInjection = uniqueNamer.makeUnique(input.codeCompletion().get().codeCompletionTaskDef());
+                final NamedTypeInfo namedTypeInfo = uniqueNamer.makeUnique(input.codeCompletion().get().codeCompletionTaskDef());
+                injected.add(namedTypeInfo);
+                codeCompletionInjection = Optional.of(namedTypeInfo);
             } else {
-                codeCompletionInjection = uniqueNamer.makeUnique(TypeInfo.of(NoneCodeCompletionTaskDef.class));
+                codeCompletionInjection = Optional.empty();
             }
             map.put("codeCompletionInjection", codeCompletionInjection);
-            injected.add(codeCompletionInjection);
+
             final NamedTypeInfo resolveInjection;
             if(input.referenceResolution().isPresent()) {
                 resolveInjection = uniqueNamer.makeUnique(input.referenceResolution().get().resolveTaskDef());
@@ -274,6 +279,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             }
             map.put("resolveInjection", resolveInjection);
             injected.add(resolveInjection);
+
             final NamedTypeInfo hoverInjection;
             if(input.hover().isPresent()) {
                 hoverInjection = uniqueNamer.makeUnique(input.hover().get().hoverTaskDef());
@@ -442,9 +448,6 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
                 taskDefs.add(i.codeCompletionTaskDef(), i.baseCodeCompletionTaskDef());
                 taskDefs.add(i.statixSpecTaskDef(), i.baseStatixSpecTaskDef());
             });
-            if(!codeCompletion().isPresent()) {
-                taskDefs.add(TypeInfo.of(NoneCodeCompletionTaskDef.class));
-            }
             referenceResolution().ifPresent((i) -> {
                 taskDefs.add(i.resolveTaskDef(), i.baseResolveTaskDef());
             });

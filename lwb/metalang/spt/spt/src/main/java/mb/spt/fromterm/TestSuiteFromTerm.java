@@ -114,7 +114,7 @@ public class TestSuiteFromTerm {
         }
         final String resourceName = getResourceName(usedResourceNames, description);
         final SptTestCaseResource resource = testCaseResourceRegistry.registerTestCase(suiteFile, resourceName, testFragment.asText());
-        return new TestCase(resource.getKey(), suiteFile, rootDirectoryHint, description, descriptionRegion, testFragment, ListView.of(testExpectations));
+        return new TestCase(resource.getPath(), suiteFile, rootDirectoryHint, description, descriptionRegion, testFragment, ListView.of(testExpectations));
     }
 
     public static String getResourceName(HashSet<String> usedResourceNames, String name) {

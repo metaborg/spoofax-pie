@@ -29,7 +29,6 @@ import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.spoofax.core.language.menu.CommandAction;
 import mb.spoofax.core.language.menu.MenuItem;
-import mb.spoofax.core.language.taskdef.NoneCodeCompletionTaskDef;
 import mb.spoofax.core.language.taskdef.NoneHoverTaskDef;
 import mb.spoofax.core.language.taskdef.NoneResolveTaskDef;
 import mb.spt.api.parse.ParseResult;
@@ -61,7 +60,6 @@ public class TigerInstance implements LanguageInstance, TestableParse {
     private final TigerCheckAggregator checkAggregate;
     private final TigerStyle style;
     private final TigerIdeTokenize tokenize;
-    private final NoneCodeCompletionTaskDef codeCompletion;
     private final NoneResolveTaskDef resolve;
     private final NoneHoverTaskDef hover;
 
@@ -83,7 +81,6 @@ public class TigerInstance implements LanguageInstance, TestableParse {
         TigerCheckAggregator checkAggregate,
         TigerStyle style,
         TigerIdeTokenize tokenize,
-        NoneCodeCompletionTaskDef codeCompletion,
         NoneResolveTaskDef resolve,
         NoneHoverTaskDef hover,
 
@@ -103,7 +100,6 @@ public class TigerInstance implements LanguageInstance, TestableParse {
         this.checkAggregate = checkAggregate;
         this.style = style;
         this.tokenize = tokenize;
-        this.codeCompletion = codeCompletion;
         this.resolve = resolve;
         this.hover = hover;
 
@@ -120,7 +116,7 @@ public class TigerInstance implements LanguageInstance, TestableParse {
     }
 
 
-    @Override public String getId() { return "tiger"; }
+    @Override public String getId() {return "tiger";}
 
     @Override public String getDisplayName() {
         return "Tiger";
@@ -141,12 +137,8 @@ public class TigerInstance implements LanguageInstance, TestableParse {
     }
 
     @Override
-    public Task<Result<CodeCompletionResult, ?>> createCodeCompletionTask(Region primarySelection, ResourceKey resourceKey, @Nullable ResourcePath rootDirectoryHint) {
-        return codeCompletion.createTask(new NoneCodeCompletionTaskDef.Input(
-            primarySelection,
-            resourceKey,
-            rootDirectoryHint
-        ));
+    public Option<Task<Result<CodeCompletionResult, ?>>> createCodeCompletionTask(Region primarySelection, ResourceKey resourceKey, @Nullable ResourcePath rootDirectoryHint) {
+        return Option.ofNone();
     }
 
     @Override

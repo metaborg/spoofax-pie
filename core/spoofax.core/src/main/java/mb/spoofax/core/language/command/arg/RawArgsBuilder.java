@@ -51,7 +51,7 @@ public class RawArgsBuilder {
             }
             final boolean argSet = arg != null;
             if(!argSet && isRequired) {
-                throw new RuntimeException("Parameter '" + id + "' of type '" + type + "' is required, but no argument was set, and no argument could be retrieved from providers '" + param.getProviders() + "'");
+                throw new ArgumentBuilderException("Parameter '" + id + "' of type '" + type + "' is required, but no argument was set, and no argument could be retrieved from providers '" + param.getProviders() + "'");
             }
             if(argSet) {
                 if(String.class.equals(arg.getClass()) && !String.class.isAssignableFrom(type)) {
@@ -69,15 +69,13 @@ public class RawArgsBuilder {
         if(converter == null) {
             converter = argConverters.allConverters.get(type);
             if(converter == null) {
-                throw new RuntimeException("Cannot convert argument '" + argStr + "' to an object of type '" + type + "', no type converter was found for that type");
+                throw new ArgumentBuilderException("Cannot convert argument '" + argStr + "' to an object of type '" + type + "', no type converter was found for that type");
             }
         }
         try {
             return converter.convert(argStr);
-        } catch(RuntimeException e) {
-            throw e; // Just rethrow runtime exceptions.
         } catch(Exception e) {
-            throw new RuntimeException("Cannot convert argument '" + argStr + "' to an object of type '" + type + "', conversion failed unexpectedly", e);
+            throw new ArgumentBuilderException("Cannot convert argument '" + argStr + "' to an object of type '" + type + "', conversion failed unexpectedly", e);
         }
     }
 }

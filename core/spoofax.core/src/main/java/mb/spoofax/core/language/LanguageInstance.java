@@ -46,7 +46,7 @@ public interface LanguageInstance {
      * @param rootDirectoryHint the root directory of the project; or {@code null} when not specified
      * @return a {@link CodeCompletionResult} result; or an exception when no completions could be generated
      */
-    Task<Result<CodeCompletionResult, ?>> createCodeCompletionTask(Region primarySelection, ResourceKey file, @Nullable ResourcePath rootDirectoryHint);
+    Option<Task<Result<CodeCompletionResult, ?>>> createCodeCompletionTask(Region primarySelection, ResourceKey file, @Nullable ResourcePath rootDirectoryHint);
 
 
     Task<KeyedMessages> createCheckOneTask(ResourceKey file, @Nullable ResourcePath rootDirectoryHint);

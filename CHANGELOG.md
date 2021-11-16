@@ -3,6 +3,20 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+### Fixed
+- Messages with exceptions not showing their exception in Eclipse.
+- SPT transform expectation halting the entire pipeline due to an exception when building the arguments for a command. It now creates an error in the SPT file.
+- SPT transform expectation not working on commands that require an enclosing context. Fixed by making SPT test case resources implement `HierarchicalResource` that mock a directory with itself in it.
+- SPT transform to term expectation not giving an error if a command returned no feedback at all.
+
+### Changed
+- `LanguageInstance#createCodeCompletionTask` to return an `Option` to signal that the language does not support code completion. This change will be rolled out to the other task creating functions of `LanguageInstance` in the future.
+- `RawArgsBuilder` to throw `ArgumentBuilderException` instead of a generic `RuntimeException` to differentiate between other `RuntimeException`s.
+- RV32IM execution task to be split into `ExecuteRiscV` which takes a supplier of RV32IM text, and produces the printed text or an error, and `ShowExecuteRiscV` which shows that as a command.
+- SPT transform to ATerm expectation not checking whether the command feedback matches the expected term pattern. It now checks the "show text" feedback against the term pattern, which will only work if the pattern is a wildcard or a string.
+
+### Added
+- Made it possible to depend on the RV32IM language, giving access to its tasks. A dependency can be added with the following syntax in CFG: `depend-on-rv32im = true`. A more general language dependency system will be added in the future.
 
 
 ## [0.16.5] - 2021-11-12

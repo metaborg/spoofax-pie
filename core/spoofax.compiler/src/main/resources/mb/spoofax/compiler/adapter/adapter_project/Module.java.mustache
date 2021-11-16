@@ -168,6 +168,14 @@ public class {{baseModule.id}} {
 {{/providedTaskDefs}}
         return taskDefs;
     }
+
+{{#dependOnRv32Im}}
+    @Provides @{{scope.id}} @{{qualifier.id}} @ElementsIntoSet
+    static Set<TaskDef<?, ?>> provideRv32ImTaskDefs(@mb.rv32im.Rv32ImQualifier Set<TaskDef<?, ?>> taskDefs) {
+        return taskDefs;
+    }
+
+{{/dependOnRv32Im}}
 {{#multilangAnalyzer}}
     @Provides @{{scope.id}}
     static LanguageId provideLanguageId() {

@@ -96,7 +96,7 @@ public class TransformExpectationsFromTerm implements TestExpectationFromTerm {
         final TestFragmentImpl fragment = TestSuiteFromTerm.fragmentFromTerm(toPart.getSubterm(2), null);
         final String resourceName = TestSuiteFromTerm.getResourceName(usedResourceNames, testSuiteDescription);
         final SptTestCaseResource resource = testCaseResourceRegistry.registerTestCase(testSuiteFile, resourceName, fragment.asText());
-        return new TransformToFragmentExpectation(resource.getKey(), languageIdHint.orElse(null), tryRemoveDoubleQuotes(commandDisplayName), sourceRegion);
+        return new TransformToFragmentExpectation(resource.getPath(), languageIdHint.orElse(null), tryRemoveDoubleQuotes(commandDisplayName), sourceRegion);
     }
 
     public static String tryRemoveDoubleQuotes(String string) {

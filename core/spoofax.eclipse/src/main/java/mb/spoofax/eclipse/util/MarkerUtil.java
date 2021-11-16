@@ -2,6 +2,7 @@ package mb.spoofax.eclipse.util;
 
 import mb.common.message.Severity;
 import mb.common.region.Region;
+import mb.common.util.ExceptionPrinter;
 import mb.spoofax.eclipse.EclipseIdentifiers;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.IMarker;
@@ -16,10 +17,12 @@ import java.nio.charset.StandardCharsets;
 public final class MarkerUtil {
     public static IMarker create(
         EclipseIdentifiers eclipseIdentifiers,
+        ExceptionPrinter exceptionPrinter,
         String text,
         Severity severity,
         IResource resource,
-        @Nullable Region region
+        @Nullable Region region,
+        @Nullable Throwable exception
     ) throws CoreException {
         final int eclipseSeverity = severity(severity);
         final String markerId = id(eclipseIdentifiers, eclipseSeverity);
@@ -30,6 +33,10 @@ public final class MarkerUtil {
             marker.setAttribute(IMarker.CHAR_END, region.getEndOffset());
         } else {
             marker.setAttribute(IMarker.LINE_NUMBER, 1);
+        }
+
+        if(exception != null) {
+            text += ".\nException: " + exceptionPrinter.printExceptionToString(exception);
         }
 
         // Clamp text to 65535 bytes, Mimicking behavior from MarkerInfo.checkValidAttribute.

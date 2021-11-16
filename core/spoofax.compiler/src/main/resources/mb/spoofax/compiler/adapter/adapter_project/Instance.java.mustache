@@ -108,12 +108,17 @@ public class {{baseInstance.id}} implements LanguageInstance
     }
 
     @Override
-    public Task<Result<CodeCompletionResult, ?>> createCodeCompletionTask(Region primarySelection, ResourceKey resourceKey, @Nullable ResourcePath rootDirectoryHint) {
-        return {{codeCompletionInjection.name}}.createTask(new {{codeCompletionInjection.type.qualifiedId}}.Input(
+    public Option<Task<Result<CodeCompletionResult, ?>>> createCodeCompletionTask(Region primarySelection, ResourceKey resourceKey, @Nullable ResourcePath rootDirectoryHint) {
+{{#codeCompletionInjection}}
+        return Option.ofSome({{name}}.createTask(new {{type.qualifiedId}}.Input(
             primarySelection,
             resourceKey,
             rootDirectoryHint
-        ));
+        )));
+{{/codeCompletionInjection}}
+{{^codeCompletionInjection}}
+        return Option.ofNone();
+{{/codeCompletionInjection}}
     }
 
     @Override public Task<KeyedMessages> createCheckOneTask(ResourceKey file, @Nullable ResourcePath rootDirectoryHint) {

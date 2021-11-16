@@ -4,6 +4,7 @@ import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Message;
 import mb.common.style.Styling;
+import mb.common.util.ExceptionPrinter;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.resource.ResourceKey;
@@ -150,6 +151,7 @@ public class WorkspaceUpdate {
     public ICoreRunnable createMarkerUpdate() {
         final KeyedMessages keyedMessages = keyedMessagesBuilder.build();
         return workspaceMonitor -> {
+            final ExceptionPrinter exceptionPrinter = new ExceptionPrinter();
             for(ClearMessages clear : clears) {
                 if(workspaceMonitor != null && workspaceMonitor.isCanceled()) return;
                 try {
@@ -165,10 +167,10 @@ public class WorkspaceUpdate {
             }
             try {
                 if(workspaceMonitor == null || !workspaceMonitor.isCanceled()) {
-                    keyedMessages.getMessagesWithKey().forEach(entry -> createMarkers(entry.getKey(), entry.getValue()));
+                    keyedMessages.getMessagesWithKey().forEach(entry -> createMarkers(exceptionPrinter, entry.getKey(), entry.getValue()));
                     final @Nullable ResourceKey resourceForMessagesWithoutKey = keyedMessages.getResourceForMessagesWithoutKeys();
                     if(resourceForMessagesWithoutKey != null) {
-                        createMarkers(resourceForMessagesWithoutKey, keyedMessages.getMessagesWithoutKey());
+                        createMarkers(exceptionPrinter, resourceForMessagesWithoutKey, keyedMessages.getMessagesWithoutKey());
                     }
                 }
             } catch(UncheckedCoreException e) {
@@ -177,7 +179,7 @@ public class WorkspaceUpdate {
         };
     }
 
-    private void createMarkers(ResourceKey resourceKey, Iterable<Message> messages) {
+    private void createMarkers(ExceptionPrinter exceptionPrinter, ResourceKey resourceKey, Iterable<Message> messages) {
         try {
             final IResource resource = resourceUtil.getEclipseResource(resourceKey);
             if(!resource.exists() || !enclosingProjectIsOpen(resource)) {
@@ -185,16 +187,16 @@ public class WorkspaceUpdate {
                 return;
             }
             if(!(resource instanceof IContainer)) { // HACK: do not create errors on containers for now.
-                messages.forEach(m -> createMarker(m, resource));
+                messages.forEach(m -> createMarker(exceptionPrinter, m, resource));
             }
         } catch(ResourceRuntimeException e) {
             logger.error("Cannot create markers for resource '{}'; getting Eclipse resource failed unexpectedly", e, resourceKey);
         }
     }
 
-    private void createMarker(Message message, IResource resource) {
+    private void createMarker(ExceptionPrinter exceptionPrinter, Message message, IResource resource) {
         try {
-            MarkerUtil.create(eclipseIdentifiers, message.text, message.severity, resource, message.region);
+            MarkerUtil.create(eclipseIdentifiers, exceptionPrinter, message.text, message.severity, resource, message.region, message.exception);
         } catch(CoreException e) {
             throw new UncheckedCoreException(e);
         }
