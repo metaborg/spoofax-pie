@@ -27,6 +27,7 @@ dependencies {
   constraints {
     // Own projects
     api(project(":spoofax.common"))
+    api(project(":aterm.common"))
     api(project(":jsglr.common"))
     api(project(":jsglr1.common"))
     api(project(":jsglr.pie"))
