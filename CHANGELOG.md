@@ -3,6 +3,9 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+
+
+## [0.16.8] - 2021-11-17
 ### Added
 - Support for toggle comment in Eclipse plugins.
 - Support for bracket matching in Eclipse plugins.
