@@ -6,6 +6,7 @@ dependencies {
   api(platform(project(":spoofax.depconstraints")))
   annotationProcessor(platform(project(":spoofax.depconstraints")))
 
+  api(project(":spoofax.common"))
   api("org.metaborg:common")
   api("org.metaborg:log.api")
   api("org.metaborg:log.dagger")

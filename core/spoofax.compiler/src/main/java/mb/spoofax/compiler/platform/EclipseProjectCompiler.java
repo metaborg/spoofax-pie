@@ -299,6 +299,8 @@ public class EclipseProjectCompiler implements TaskDef<Supplier<Result<Option<Ec
 
         @Value.Default default String natureId() {return pluginId() + "." + natureRelativeId();}
 
+        @Value.Default default String toggleCommentCommandId() {return pluginId() + ".togglecomment";}
+
         @Value.Default default String addNatureCommandId() {return natureId() + ".add";}
 
         @Value.Default default String removeNatureCommandId() {return natureId() + ".remove";}

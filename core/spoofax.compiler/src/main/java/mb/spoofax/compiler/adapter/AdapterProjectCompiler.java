@@ -9,6 +9,8 @@ import mb.pie.api.None;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.common.BlockCommentSymbols;
+import mb.spoofax.common.BracketSymbols;
 import mb.spoofax.compiler.adapter.data.AutoCommandRequestRepr;
 import mb.spoofax.compiler.adapter.data.CliCommandRepr;
 import mb.spoofax.compiler.adapter.data.CommandDefRepr;
@@ -25,7 +27,6 @@ import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
 import mb.spoofax.compiler.util.TypeInfoCollection;
 import mb.spoofax.compiler.util.UniqueNamer;
-import mb.spoofax.core.language.taskdef.NoneCodeCompletionTaskDef;
 import mb.spoofax.core.language.taskdef.NoneHoverTaskDef;
 import mb.spoofax.core.language.taskdef.NoneResolveTaskDef;
 import mb.spoofax.core.language.taskdef.NoneStyler;
@@ -350,6 +351,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         dependencies.add(GradleConfiguredDependency.apiPlatform(shared.spoofaxDependencyConstraintsDep()));
         dependencies.add(GradleConfiguredDependency.annotationProcessorPlatform(shared.spoofaxDependencyConstraintsDep()));
         input.languageProjectDependency().ifSome((d) -> dependencies.add(GradleConfiguredDependency.api(d)));
+        dependencies.add(GradleConfiguredDependency.api(shared.spoofaxCommonDep()));
         dependencies.add(GradleConfiguredDependency.api(shared.spoofaxCoreDep()));
         dependencies.add(GradleConfiguredDependency.api(shared.pieApiDep()));
         dependencies.add(GradleConfiguredDependency.api(shared.daggerDep()));
@@ -415,6 +417,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
 
         List<TypeInfo> additionalResourcesModules();
 
+
         List<TypeInfo> taskDefs();
 
         @Value.Lazy default TypeInfoCollection allTaskDefs() {
@@ -473,6 +476,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             return taskDefs;
         }
 
+
         List<CommandDefRepr> commandDefs();
 
         @Value.Lazy default ArrayList<CommandDefRepr> allCommandDefs() {
@@ -484,9 +488,11 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
 
         List<AutoCommandRequestRepr> autoCommandDefs();
 
+
         @Value.Default default CliCommandRepr cliCommand() {
             return CliCommandRepr.builder().name(shared().name()).build();
         }
+
 
         @Value.Default default List<MenuItemRepr> mainMenuItems() {
             return editorContextMenuItems();
@@ -495,6 +501,14 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         List<MenuItemRepr> resourceContextMenuItems();
 
         List<MenuItemRepr> editorContextMenuItems();
+
+
+        List<String> lineCommentSymbols();
+
+        List<BlockCommentSymbols> blockCommentSymbols();
+
+        List<BracketSymbols> bracketSymbols();
+
 
         @Value.Default default boolean isMultiFile() {
             return constraintAnalyzer().map(a -> a.languageProjectInput().multiFile()).orElse(false);

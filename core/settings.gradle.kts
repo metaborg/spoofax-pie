@@ -12,6 +12,7 @@ if(org.gradle.util.VersionNumber.parse(gradle.gradleVersion).major < 6) {
 
 include("spoofax.depconstraints")
 
+include("spoofax.common")
 include("aterm.common")
 include("jsglr.common")
 include("jsglr.pie")

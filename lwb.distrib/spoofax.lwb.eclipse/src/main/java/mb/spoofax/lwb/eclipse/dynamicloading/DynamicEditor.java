@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.jobs.MultiRule;
 import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 
 public class DynamicEditor extends SpoofaxEditorBase {
     public static final String id = "spoofax.lwb.eclipse.dynamicloading.editor";
@@ -93,6 +94,16 @@ public class DynamicEditor extends SpoofaxEditorBase {
             }
         }
         return new SpoofaxSourceViewerConfiguration(this);
+    }
+
+    @Override protected void configureSourceViewerDecorationSupport(SourceViewerDecorationSupport support) {
+        super.configureSourceViewerDecorationSupport(support);
+        if(languageId != null) {
+            final @Nullable DynamicLanguage language = languageRegistry.getLanguageForId(languageId);
+            if(language != null) {
+                setBracketSymbols(language.getLanguageComponent().getLanguageInstance(), support);
+            }
+        }
     }
 
     private void setLanguageId() {

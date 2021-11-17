@@ -377,4 +377,22 @@ class Parts {
         }
         return string;
     }
+
+    public static char toJavaChar(IStrategoTerm term) {
+        if(TermUtils.isAppl(term, "Char", 1)) {
+            return tryRemoveSingleQuotes(TermUtils.toJavaStringAt(term, 0)).charAt(0);
+        } else {
+            throw new InvalidAstShapeException("Char application", term);
+        }
+    }
+
+    public static String tryRemoveSingleQuotes(String string) {
+        if(string.startsWith("'")) {
+            string = string.substring(1);
+        }
+        if(string.endsWith("'")) {
+            string = string.substring(0, string.length() - 1);
+        }
+        return string;
+    }
 }

@@ -24,6 +24,8 @@ import mb.jsglr.common.TermTracer;
 import mb.pie.api.ExecContext;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.common.BlockCommentSymbols;
+import mb.spoofax.common.BracketSymbols;
 import mb.spoofax.compiler.adapter.AdapterProject;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
 import mb.spoofax.compiler.adapter.AdapterProjectCompilerInputBuilder;
@@ -314,6 +316,21 @@ public class CfgAstToObject {
             // TODO: parser language properties
             final ParserAdapterCompiler.Input.Builder adapter = adapterBuilder.withParser();
             // TODO: parser adapter properties
+        });
+        parts.getAllSubTermsInListAsParts("CommentSymbolSection").ifSome(subParts -> {
+            subParts.forAllSubtermsAsStrings("LineComment", adapterBuilder.project::addLineCommentSymbols);
+            subParts.forAll("BlockComment", 2, blockCommentTerm -> {
+                final String open = Parts.toJavaString(blockCommentTerm.getSubterm(0));
+                final String close = Parts.toJavaString(blockCommentTerm.getSubterm(1));
+                adapterBuilder.project.addBlockCommentSymbols(new BlockCommentSymbols(open, close));
+            });
+        });
+        parts.getAllSubTermsInListAsParts("BracketSymbolSection").ifSome(subParts -> {
+            subParts.forAll("Bracket", 2, bracketTerm -> {
+                final char open = Parts.toJavaChar(bracketTerm.getSubterm(0));
+                final char close = Parts.toJavaChar(bracketTerm.getSubterm(1));
+                adapterBuilder.project.addBracketSymbols(new BracketSymbols(open, close));
+            });
         });
         parts.getAllSubTermsInListAsParts("StylerSection").ifSome(subParts -> {
             final StylerLanguageCompiler.Input.Builder base = baseBuilder.withStyler();

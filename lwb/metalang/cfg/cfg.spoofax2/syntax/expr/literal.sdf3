@@ -4,6 +4,7 @@ imports
 
   expr
   lex/int
+  lex/char
   lex/string
   lex/path
   lex/java_id
@@ -22,6 +23,8 @@ context-free syntax
 
   Expr.Int = <<IntLit>>
   Expr.UInt = <<UIntLit>>
+
+  Expr.Char = <<CharLit>>
 
   Expr.String = <<StringLit>>
   

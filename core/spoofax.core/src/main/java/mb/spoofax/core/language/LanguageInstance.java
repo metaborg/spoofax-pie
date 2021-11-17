@@ -15,6 +15,8 @@ import mb.common.util.SetView;
 import mb.pie.api.Task;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.common.BracketSymbols;
+import mb.spoofax.common.BlockCommentSymbols;
 import mb.spoofax.core.language.cli.CliCommand;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandDef;
@@ -38,21 +40,20 @@ public interface LanguageInstance {
         return createStyleTask(file, null);
     }
 
-    /**
-     * Creates a task that produces completions.
-     *
-     * @param primarySelection the primary selection at which completion is invoked
-     * @param file      the key of the resource in which completion is invoked
-     * @param rootDirectoryHint the root directory of the project; or {@code null} when not specified
-     * @return a {@link CodeCompletionResult} result; or an exception when no completions could be generated
-     */
-    Option<Task<Result<CodeCompletionResult, ?>>> createCodeCompletionTask(Region primarySelection, ResourceKey file, @Nullable ResourcePath rootDirectoryHint);
-
-
     Task<KeyedMessages> createCheckOneTask(ResourceKey file, @Nullable ResourcePath rootDirectoryHint);
 
     Task<KeyedMessages> createCheckTask(ResourcePath rootDirectory);
 
+
+    /**
+     * Creates a task that produces completions.
+     *
+     * @param primarySelection  the primary selection at which completion is invoked
+     * @param file              the key of the resource in which completion is invoked
+     * @param rootDirectoryHint the root directory of the project; or {@code null} when not specified
+     * @return a {@link CodeCompletionResult} result; or an exception when no completions could be generated
+     */
+    Option<Task<Result<CodeCompletionResult, ?>>> createCodeCompletionTask(Region primarySelection, ResourceKey file, @Nullable ResourcePath rootDirectoryHint);
 
     Task<Option<ReferenceResolutionResult>> createResolveTask(ResourcePath rootDirectory, ResourceKey file, Region region);
 
@@ -72,4 +73,11 @@ public interface LanguageInstance {
     ListView<MenuItem> getResourceContextMenuItems();
 
     ListView<MenuItem> getEditorContextMenuItems();
+
+
+    ListView<String> getLineCommentSymbols();
+
+    ListView<BlockCommentSymbols> getBlockCommentSymbols();
+
+    ListView<BracketSymbols> getBracketSymbols();
 }

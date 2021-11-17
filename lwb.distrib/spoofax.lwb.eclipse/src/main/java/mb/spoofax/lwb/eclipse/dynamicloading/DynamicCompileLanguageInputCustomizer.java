@@ -55,6 +55,7 @@ public class DynamicCompileLanguageInputCustomizer implements CompileLanguageInp
         builder.natureId(DynamicNature.id);
         builder.addNatureCommandId("spoofax.lwb.eclipse.dynamicloading.nature.add");
         builder.removeNatureCommandId("spoofax.lwb.eclipse.dynamicloading.nature.remove");
+        builder.toggleCommentCommandId("spoofax.lwb.eclipse.dynamicloading.togglecomment");
         builder.projectBuilderRelativeId(DynamicProjectBuilder.relativeId);
         builder.projectBuilderId(DynamicProjectBuilder.id);
         return true;

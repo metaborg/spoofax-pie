@@ -15,6 +15,6 @@ rules
   eclipseOptionsOk maps eclipseOptionOk(*, list(*))
   
   eclipseOptionOk(s, EclipseBaseLanguage(e)) :-
-    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]. 
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e. 
   eclipseOptionOk(s, EclipseExtendLanguage(e)) :-
-    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]. 
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e. 

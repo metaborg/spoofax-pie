@@ -21,6 +21,8 @@ import mb.pie.api.Session;
 import mb.pie.api.Task;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.common.BlockCommentSymbols;
+import mb.spoofax.common.BracketSymbols;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.cli.CliCommand;
 import mb.spoofax.core.language.cli.CliParam;
@@ -267,6 +269,18 @@ public class TigerInstance implements LanguageInstance, TestableParse {
                 )
             )
         );
+    }
+
+    @Override public ListView<String> getLineCommentSymbols() {
+        return ListView.of();
+    }
+
+    @Override public ListView<BlockCommentSymbols> getBlockCommentSymbols() {
+        return ListView.of();
+    }
+
+    @Override public ListView<BracketSymbols> getBracketSymbols() {
+        return ListView.of();
     }
 
 

@@ -1,5 +1,6 @@
 import mb.spoofax.compiler.adapter.*
 import mb.spoofax.compiler.util.*
+import mb.spoofax.common.*
 
 plugins {
   id("org.metaborg.gradle.config.java-library")
@@ -10,6 +11,7 @@ plugins {
 fun compositeBuild(name: String) = "$group:$name:$version"
 
 dependencies {
+  api(compositeBuild("spoofax.common"))
   api(compositeBuild("spoofax.compiler"))
   api(compositeBuild("spoofax.compiler.dagger"))
 
@@ -76,6 +78,13 @@ languageAdapterProject {
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   val packageId = "mb.cfg"
   val taskPackageId = "$packageId.task"
+
+  // Symbols
+  addLineCommentSymbols("//")
+  addBlockCommentSymbols(BlockCommentSymbols("/*", "*/"))
+  addBracketSymbols(BracketSymbols('[', ']'))
+  addBracketSymbols(BracketSymbols('{', '}'))
+  addBracketSymbols(BracketSymbols('(', ')'))
 
   addAdditionalModules(packageId, "CfgCustomizerModule");
 

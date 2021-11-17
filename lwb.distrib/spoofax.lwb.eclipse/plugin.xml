@@ -274,4 +274,23 @@
       class="mb.spoofax.lwb.eclipse.dynamicloading.DynamicRunCommandHandler"
     />
   </extension>
+ <!-- Toggle comment -->
+  <extension point="org.eclipse.ui.commands">
+    <command id="spoofax.lwb.eclipse.dynamicloading.togglecomment" name="Toggle comment"/>
+  </extension>
+  <extension point="org.eclipse.ui.handlers">
+    <handler
+      commandId="spoofax.lwb.eclipse.dynamicloading.togglecomment"
+      class="mb.spoofax.eclipse.editor.ToggleCommentHandler"
+    />
+  </extension>
+  <extension point="org.eclipse.ui.bindings">
+    <key
+      commandId="spoofax.lwb.eclipse.dynamicloading.togglecomment"
+      contextId="spoofax.lwb.eclipse.dynamicloading.context"
+      schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+      sequence="M1+/"
+    >
+    </key>
+  </extension>
 </plugin>

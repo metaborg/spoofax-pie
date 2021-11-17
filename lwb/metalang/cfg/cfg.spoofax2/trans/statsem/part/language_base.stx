@@ -19,7 +19,7 @@ rules // Parser section and options
   parserOptionsOk maps parserOptionOk(*, list(*))
 
   parserOptionOk(s, DefaultStartSymbol(e)) :-
-    typeOfExpr(s, e) == SORT() | error $[Expected sort].
+    typeOfExpr(s, e) == SORT() | error $[Expected sort]@e.
   parserOptionOk(s, ParserVariant(variant)) :-
     parserVariantOk(s, variant).
 
@@ -42,6 +42,32 @@ rules // Parser section and options
   hasDefaultStartSymbol([_|s]) = hasDefaultStartSymbol(s).
   hasDefaultStartSymbol([]) = FALSE().
 
+rules // Comment symbols and options
+
+  partOk(s, t@CommentSymbolSection(options)) :-
+    commentSymbolOptionsOk(s, options).
+
+  commentSymbolOptionOk : scope * CommentSymbolOption
+  commentSymbolOptionsOk maps commentSymbolOptionOk(*, list(*))
+  
+  commentSymbolOptionOk(s, LineComment(e)) :-
+    typeOfExpr(s, e) == STRING() | error $[Expected string]@e.
+  commentSymbolOptionOk(s, BlockComment(e1, e2)) :-
+    typeOfExpr(s, e1) == STRING() | error $[Expected string]@e1,
+    typeOfExpr(s, e2) == STRING() | error $[Expected string]@e2.
+
+rules // Bracket symbols and options
+
+  partOk(s, t@BracketSymbolSection(options)) :-
+    bracketSymbolOptionsOk(s, options).
+
+  bracketSymbolOptionOk : scope * BracketSymbolOption
+  bracketSymbolOptionsOk maps bracketSymbolOptionOk(*, list(*))
+  
+  bracketSymbolOptionOk(s, Bracket(e1, e2)) :-
+    typeOfExpr(s, e1) == CHAR() | error $[Expected symbol (e.g., '\[')]@e1,
+    typeOfExpr(s, e2) == CHAR() | error $[Expected symbol (e.g., '\]')]@e2.
+
 rules // Styler section and options
 
   partOk(s, StylerSection(options)) :-
@@ -59,22 +85,22 @@ rules // Constraint analyzer section and options
   constraintAnalyzerOptionsOk maps constraintAnalyzerOptionOk(*, list(*))
 
   constraintAnalyzerOptionOk(s, ConstraintAnalyzerEnableNaBL2(e)) :-
-    typeOfExpr(s, e) == BOOL() | error $[Expected boolean].
+    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
   constraintAnalyzerOptionOk(s, ConstraintAnalyzerEnableStatix(e)) :-
-    typeOfExpr(s, e) == BOOL() | error $[Expected boolean].
+    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
   constraintAnalyzerOptionOk(s, ConstraintAnalyzerMultiFile(e)) :-
-    typeOfExpr(s, e) == BOOL() | error $[Expected boolean].
+    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
   constraintAnalyzerOptionOk(s, ConstraintAnalyzerStrategoStrategy(e)) :-
-    typeOfExpr(s, e) == STRATEGY() | error $[Expected Stratego strategy identifier].
+    typeOfExpr(s, e) == STRATEGY() | error $[Expected Stratego strategy identifier]@e.
 
   constraintAnalyzerOptionOk(s, ConstraintAnalyzerDefaultStatixMessageStacktraceLength(e)) :-
-    typeOfExpr(s, e) == UINT() | error $[Expected unsigned integer].
+    typeOfExpr(s, e) == UINT() | error $[Expected unsigned integer]@e.
   constraintAnalyzerOptionOk(s, ConstraintAnalyzerDefaultStatixMessageTermDepth(e)) :-
-    typeOfExpr(s, e) == UINT() | error $[Expected unsigned integer].
+    typeOfExpr(s, e) == UINT() | error $[Expected unsigned integer]@e.
   constraintAnalyzerOptionOk(s, ConstraintAnalyzerDefaultStatixTestLogLevel(e)) :-
-    typeOfExpr(s, e) == STRING() | error $[Expected string].
+    typeOfExpr(s, e) == STRING() | error $[Expected string]@e.
   constraintAnalyzerOptionOk(s, ConstraintAnalyzerDefaultStatixSuppressCascadingErrors(e)) :-
-    typeOfExpr(s, e) == BOOL() | error $[Expected boolean].
+    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
 
 rules // Multilang analyzer section and options
 
@@ -93,15 +119,15 @@ rules // Stratego runtime section and options
   strategoRuntimeOptionsOk maps strategoRuntimeOptionOk(*, list(*))
 
   strategoRuntimeOptionOk(s, StrategoRuntimeStrategyPackageId(e)) :-
-    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java package identifier].
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java package identifier]@e.
   strategoRuntimeOptionOk(s, StrategoRuntimeInteropRegistererByReflection(e)) :-
-    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier].
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e.
   strategoRuntimeOptionOk(s, StrategoRuntimeAddSpoofax2Primitives(e)) :-
-    typeOfExpr(s, e) == BOOL() | error $[Expected boolean].
+    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
   strategoRuntimeOptionOk(s, StrategoRuntimeAddNaBL2Primitives(e)) :-
-    typeOfExpr(s, e) == BOOL() | error $[Expected boolean].
+    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
   strategoRuntimeOptionOk(s, StrategoRuntimeAddStatixPrimitives(e)) :-
-    typeOfExpr(s, e) == BOOL() | error $[Expected boolean].
+    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
 
 rules // Tego runtime section and options
 

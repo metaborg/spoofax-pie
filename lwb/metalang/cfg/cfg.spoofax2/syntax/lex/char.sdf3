@@ -1,0 +1,12 @@
+module lex/char
+
+lexical sorts
+
+  CharLit CharChar
+
+lexical syntax
+
+  CharLit = "'" CharChar "'"
+
+  CharChar = ~[\'\$\n\r\\]
+  CharChar = "\\" ~[\n\r]

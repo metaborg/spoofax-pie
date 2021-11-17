@@ -2,6 +2,7 @@ import mb.spoofax.compiler.adapter.*
 import mb.spoofax.compiler.adapter.data.*
 import mb.spoofax.compiler.language.*
 import mb.spoofax.compiler.util.*
+import mb.spoofax.common.*
 import mb.spoofax.core.language.command.CommandContextType
 import mb.spoofax.core.language.command.CommandExecutionType
 import mb.spoofax.core.language.command.EnclosingCommandContextType
@@ -85,6 +86,13 @@ languageAdapterProject {
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   val incrPackageId = "$packageId.incr"
   val commandPackageId = "$packageId.command"
+
+  // Symbols
+  addLineCommentSymbols("//")
+  addBlockCommentSymbols(BlockCommentSymbols("/*", "*/"))
+  addBracketSymbols(BracketSymbols('[', ']'))
+  addBracketSymbols(BracketSymbols('{', '}'))
+  addBracketSymbols(BracketSymbols('(', ')'))
 
   // Extend component
   baseComponent(packageId, "BaseStrategoComponent")
