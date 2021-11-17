@@ -1044,7 +1044,9 @@ Under the <code class="highlight"><span class="k">context-free</span><span class
 <p>Now we will add syntax productions to <code class="highlight"><span class="nv">Part</span><span class="w"></span></code> to the <code class="highlight"><span class="k">context-free</span><span class="w"> </span><span class="k">syntax</span><span class="w"></span></code> section.
 Add <code class="highlight"><span class="nv">Part</span><span class=" -Punctuation">.</span><span class="nv">Hello</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;</span><span class="nv">hello</span><span class=" -Punctuation">&gt;</span><span class="w"></span></code> on a new line, indicating that one sort of <code class="highlight"><span class="nv">Part</span><span class="w"></span></code> is the word <code>hello.</code>
 Then add <code class="highlight"><span class="nv">Part</span><span class=" -Punctuation">.</span><span class="nv">World</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;</span><span class="nv">world</span><span class=" -Punctuation">&gt;</span><span class="w"></span></code> on a new line, indicating that one sort of <code class="highlight"><span class="nv">Part</span><span class="w"></span></code> is the word <code>world</code>.</p>
-<details class="note"><summary><code>src/start.sdf3</code> full contents</summary><div class="highlight"><pre><span></span><code><span class="k">module</span><span class="w"> </span><span class="nv">start</span><span class="w"></span>
+<details class="note">
+<summary><code>src/start.sdf3</code> full contents</summary>
+<div class="highlight"><pre><span></span><code><span class="k">module</span><span class="w"> </span><span class="nv">start</span><span class="w"></span>
 
 <span class="k">context-free</span><span class="w"> </span><span class="k">start-symbols</span><span class="w"></span>
 
@@ -1108,7 +1110,9 @@ This file contains one test which tests that the empty program parses successful
   asdfasdfasdf
 ]] parse fails
 </code></pre></div>
-<details class="note"><summary><code>test/test.spt</code> full contents</summary><div class="highlight"><pre><span></span><code>module test
+<details class="note">
+<summary><code>test/test.spt</code> full contents</summary>
+<div class="highlight"><pre><span></span><code>module test
 
 test parse empty [[]] parse succeeds
 
