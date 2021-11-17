@@ -26,6 +26,7 @@ val yamlVersion = "1.26"
 dependencies {
   constraints {
     // Own projects
+    api(project(":aterm.common"))
     api(project(":jsglr.common"))
     api(project(":jsglr1.common"))
     api(project(":jsglr.pie"))
