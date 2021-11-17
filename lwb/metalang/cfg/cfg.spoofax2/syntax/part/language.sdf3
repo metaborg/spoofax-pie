@@ -112,3 +112,4 @@ context-free syntax
   StrategoOption.StrategoSdf3StatixExplicationGen = <sdf3-statix-explication-generation = <Expr>>
   
   StrategoOption.StrategoLanguageStrategyAffix = <language-strategy-affix = <Expr>>
+  StrategoOption.StrategoOutputJavaPackageId = <output-java-package = <Expr>>

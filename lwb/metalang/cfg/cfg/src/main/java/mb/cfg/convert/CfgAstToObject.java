@@ -257,6 +257,7 @@ public class CfgAstToObject {
             });
             subParts.forOneSubtermAsBool("StrategoSdf3StatixExplicationGen", builder::enableSdf3StatixExplicationGen);
             subParts.forOneSubtermAsString("StrategoLanguageStrategyAffix", builder::languageStrategyAffix);
+            subParts.forOneSubtermAsString("StrategoOutputJavaPackageId", builder::outputJavaPackageId);
         });
         customizer.customize(languageCompilerInputBuilder);
         final CompileLanguageSpecificationInput languageCompilerInput = languageCompilerInputBuilder.build(properties, shared, languageShared);
