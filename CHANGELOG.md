@@ -5,7 +5,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 ## [Unreleased]
 
 
-## [0.16.7] - 2021-11-16
+## [0.16.7] - 2021-11-17
 ### Fixed
 - Many Stratego messages having no origin locations.
 
