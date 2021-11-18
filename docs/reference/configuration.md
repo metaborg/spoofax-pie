@@ -45,6 +45,9 @@ CFG has the following literals:
 | Syntax | Example(s) | Type |
 | - | - | - |
 | `(true|false)` | `true` `false` | Boolean |
+| `-?[0-9]+` | `1` `-20` | Integer |
+| `[0-9]+` | `1` `20` | Unsigned integer |
+| `'(~[\'\$\n\r\\] | \\~[\n\r])'` | `'['` `'l'` | Character |
 | `"(~[\"\$\n\r\\] | \\~[\n\r])*"` | `"foo"` `"bar"` | String |
 | `(./|/)~[\n\r\,\;\]\)\}\ ]*` | `./relative/file` `/absolute/file` | Filesystem path |
 | `$JavaIdChars` | `Java foo` | Java identifier |
