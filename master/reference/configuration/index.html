@@ -805,6 +805,20 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#comment-symbols" class="md-nav__link">
+    Comment symbols
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bracket-symbols" class="md-nav__link">
+    Bracket symbols
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#styler" class="md-nav__link">
     Styler
   </a>
@@ -1156,6 +1170,20 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#comment-symbols" class="md-nav__link">
+    Comment symbols
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bracket-symbols" class="md-nav__link">
+    Bracket symbols
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#styler" class="md-nav__link">
     Styler
   </a>
@@ -1319,6 +1347,21 @@ CFG has the following literals:</p>
 <td><code>(true|false)</code></td>
 <td><code>true</code> <code>false</code></td>
 <td>Boolean</td>
+</tr>
+<tr>
+<td><code>-?[0-9]+</code></td>
+<td><code>1</code> <code>-20</code></td>
+<td>Integer</td>
+</tr>
+<tr>
+<td><code>[0-9]+</code></td>
+<td><code>1</code> <code>20</code></td>
+<td>Unsigned integer</td>
+</tr>
+<tr>
+<td><code>'(~[\'\$\n\r\\] | \\~[\n\r])'</code></td>
+<td><code>'['</code> <code>'l'</code></td>
+<td>Character</td>
 </tr>
 <tr>
 <td><code>"(~[\"\$\n\r\\] | \\~[\n\r])*"</code></td>
@@ -1761,6 +1804,54 @@ The following <code>ParserOption</code>s are supported:</p>
 </ul>
 </li>
 </ul>
+<h3 id="comment-symbols">Comment symbols<a class="headerlink" href="#comment-symbols" title="Permanent link">&para;</a></h3>
+<p>The <code>comment-symbols { $CommentSymbolOption* }</code> section enables specification of line and block comment characters, which are required for the "toggle comment" editor service.
+The following <code>CommentSymbolOption</code>s are supported:</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Required?</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>line = $Expression</code></td>
+<td>no</td>
+<td>Adds a line comment symbol. Can be given multiple times to list multiple line comment symbols. The first one will be used to comment a line with the "toggle comment" editor service.</td>
+<td>String</td>
+</tr>
+<tr>
+<td><code>block = $Expression * $Expression</code></td>
+<td>no</td>
+<td>Adds block comment symbols, with an opening and close symbol. Current "toggle comment" editor services do not use block comment symbols yet.</td>
+<td>String</td>
+</tr>
+</tbody>
+</table>
+<h3 id="bracket-symbols">Bracket symbols<a class="headerlink" href="#bracket-symbols" title="Permanent link">&para;</a></h3>
+<p>The <code>bracket-symbols { $BracketSymbolOption* }</code> section enables specification of bracket symbols (e.g., square brackets, curly brackets, parentheses, etc.), which are required for the "bracket matching" editor service.
+The following <code>BracketSymbolOption</code>s are supported:</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Required?</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>bracket = $Expression * $Expression</code></td>
+<td>no</td>
+<td>Adds bracket symbols, with an opening and closing symbol. Can be given multiple times to list multiple bracket symbols.</td>
+<td>Character</td>
+</tr>
+</tbody>
+</table>
 <h3 id="styler">Styler<a class="headerlink" href="#styler" title="Permanent link">&para;</a></h3>
 <p>The <code>styler { $StylerOption* }</code> section enables generation of a styler, and groups options.
 The <code>esv</code> section must be enabled when the <code>styler</code> section is enabled.
@@ -2203,6 +2294,12 @@ The following <code>StrategoOption</code>s are supported:</p>
 <td>no</td>
 <td>The affix that is used to make certain generated strategies unique to the language. This is used both as a prefix and suffix. Defaults to name of the language transformed to a Stratego strategy identifier.</td>
 <td>Stratego strategy identifier</td>
+</tr>
+<tr>
+<td><code>output-java-package = $Expression</code></td>
+<td>no</td>
+<td>The Java package into which compiled Stratego Java files are generated. Defaults to the language's package, followed by <code>.strategies</code>.</td>
+<td>String</td>
 </tr>
 </tbody>
 </table>
