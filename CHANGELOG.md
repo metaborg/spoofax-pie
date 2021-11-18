@@ -3,9 +3,15 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+
+
+## [0.16.9] - 2021-11-18
 ### Fixed
 - Eclipse editors of dynamically loaded languages lacking many editor services.
-- Add `stratego.output-java-package` option to CFG, for configuring the Startego generated Java files package.
+- Add `stratego.output-java-package` option to CFG, for configuring the Stratego generated Java files package.
+
+### Changed
+- `releng` (devenv-release) requirement to `0.1.19`.
 
 
 ## [0.16.8] - 2021-11-17
@@ -370,7 +376,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.8...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.9...HEAD
+[0.16.9]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.8...release-0.16.9
 [0.16.8]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.7...release-0.16.8
 [0.16.7]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.6...release-0.16.7
 [0.16.6]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.5...release-0.16.6
