@@ -1349,6 +1349,21 @@ CFG has the following literals:</p>
 <td>Boolean</td>
 </tr>
 <tr>
+<td><code>-?[0-9]+</code></td>
+<td><code>1</code> <code>-20</code></td>
+<td>Integer</td>
+</tr>
+<tr>
+<td><code>[0-9]+</code></td>
+<td><code>1</code> <code>20</code></td>
+<td>Unsigned integer</td>
+</tr>
+<tr>
+<td><code>'(~[\'\$\n\r\\] | \\~[\n\r])'</code></td>
+<td><code>'['</code> <code>'l'</code></td>
+<td>Character</td>
+</tr>
+<tr>
 <td><code>"(~[\"\$\n\r\\] | \\~[\n\r])*"</code></td>
 <td><code>"foo"</code> <code>"bar"</code></td>
 <td>String</td>
