@@ -367,7 +367,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.7...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.8...HEAD
+[0.16.8]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.7...release-0.16.8
 [0.16.7]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.6...release-0.16.7
 [0.16.6]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.5...release-0.16.6
 [0.16.5]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.4...release-0.16.5
