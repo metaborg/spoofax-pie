@@ -9,13 +9,17 @@ import mb.spoofax.lwb.dynamicloading.DynamicLanguage;
 import mb.spoofax.lwb.dynamicloading.DynamicLanguageRegistry;
 import mb.spoofax.lwb.eclipse.SpoofaxLwbLifecycleParticipant;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.MultiRule;
 import org.eclipse.jface.text.TextPresentation;
+import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 
@@ -104,6 +108,13 @@ public class DynamicEditor extends SpoofaxEditorBase {
                 setBracketSymbols(language.getLanguageComponent().getLanguageInstance(), support);
             }
         }
+    }
+
+    @Override
+    protected ISourceViewer createSourceViewer(@NonNull Composite parent, @NonNull IVerticalRuler ruler, int styles) {
+        final ISourceViewer sourceViewer = super.createSourceViewer(parent, ruler, styles);
+        reconfigure();
+        return sourceViewer;
     }
 
     private void setLanguageId() {
