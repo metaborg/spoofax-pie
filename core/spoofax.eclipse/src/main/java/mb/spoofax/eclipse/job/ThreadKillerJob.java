@@ -43,7 +43,6 @@ public class ThreadKillerJob extends Job {
     @SuppressWarnings("deprecation") @Override protected IStatus run(IProgressMonitor monitor) {
         if(monitor.isCanceled()) return StatusUtil.cancel();
 
-        logger.warn("Killing thread {} in {}ms", thread, killTimeMs);
         try {
             Thread.sleep(killTimeMs);
         } catch(InterruptedException e) {
