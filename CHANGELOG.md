@@ -5,6 +5,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 ## [Unreleased]
 ### Fixed
 - Eclipse editors of dynamically loaded languages lacking many editor services.
+- Add `stratego.output-java-package` option to CFG, for configuring the Startego generated Java files package.
 
 
 ## [0.16.8] - 2021-11-17

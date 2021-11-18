@@ -472,6 +472,7 @@ The following `StrategoOption`s are supported:
 | `source = $StrategoSource` | no | The source of the Statix definition. Defaults to a `files` source with the top-level `source-directory` option as its main source directory, and `./main.str2` as its main file relative to the main source directory. | n/a |
 | `sdf3-statix-explication-generation = $Expression` | no | Whether SDF3 to Statix injection explication/implication generation is enabled. When enabled, `statix { sdf3-statix-signature-generation = true }` must also be enabled. Defaults to `false`. | Boolean |
 | `language-strategy-affix = $Expression` | no | The affix that is used to make certain generated strategies unique to the language. This is used both as a prefix and suffix. Defaults to name of the language transformed to a Stratego strategy identifier. | Stratego strategy identifier |
+| `output-java-package = $Expression` | no | The Java package into which compiled Stratego Java files are generated. Defaults to the language's package, followed by `.strategies`. | String |
 
 The following `$StrategoSource`s are supported:
 

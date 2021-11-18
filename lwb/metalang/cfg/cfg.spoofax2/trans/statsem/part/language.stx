@@ -141,3 +141,5 @@ rules // Stratego section and options
     typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
   strategoOptionOk(s, StrategoLanguageStrategyAffix(e)) :-
     typeOfExpr(s, e) == STRATEGY() | error $[Expected Stratego strategy identifier]@e.
+  strategoOptionOk(s, StrategoOutputJavaPackageId(e)) :-
+    typeOfExpr(s, e) == STRING() | error $[Expected string]@e.
