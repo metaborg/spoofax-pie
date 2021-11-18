@@ -275,6 +275,25 @@ The following `ParserVariant`s are supported:
     * `Incremental`
     * `IncrementalRecovery`
 
+### Comment symbols
+
+The `comment-symbols { $CommentSymbolOption* }` section enables specification of line and block comment characters, which are required for the "toggle comment" editor service.
+The following `CommentSymbolOption`s are supported:
+
+| Syntax | Required? | Description | Type |
+| - | - | - | - |
+| `line = $Expression` | no | Adds a line comment symbol. Can be given multiple times to list multiple line comment symbols. The first one will be used to comment a line with the "toggle comment" editor service. | String |
+| `block = $Expression * $Expression` | no | Adds block comment symbols, with an opening and close symbol. Current "toggle comment" editor services do not use block comment symbols yet. | String |
+
+### Bracket symbols
+
+The `bracket-symbols { $BracketSymbolOption* }` section enables specification of bracket symbols (e.g., square brackets, curly brackets, parentheses, etc.), which are required for the "bracket matching" editor service.
+The following `BracketSymbolOption`s are supported:
+
+| Syntax | Required? | Description | Type |
+| - | - | - | - |
+| `bracket = $Expression * $Expression` | no | Adds bracket symbols, with an opening and closing symbol. Can be given multiple times to list multiple bracket symbols. | Character |
+
 ### Styler
 
 The `styler { $StylerOption* }` section enables generation of a styler, and groups options.

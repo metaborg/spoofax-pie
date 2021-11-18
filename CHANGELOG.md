@@ -3,6 +3,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+### Fixed
+- Eclipse editors of dynamically loaded languages lacking many editor services.
 
 
 ## [0.16.8] - 2021-11-17
