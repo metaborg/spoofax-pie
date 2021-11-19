@@ -2,43 +2,49 @@ module rv32im/lex
 
 lexical sorts
 
-  ID
-  INT
-  STRING
-  StringChar
-  BackSlashChar
-  NewLineEOF
-  EOF
+  RID
+  RINT
+  RSTRING
+  RStringChar
+  RBackSlashChar
+  RNewLineEOF
+  REOF
+  RLBL
+  RComment
 
 lexical syntax
 
-  ID             = "-"? [\_\.\$\@a-zA-Z][\-\_\.\$\@a-zA-Z0-9]* 
-  INT            = "-"? [0-9]+ 
-  STRING         = "\"" StringChar* "\"" 
-  StringChar     = ~[\"\n] 
-  StringChar     = "\\\"" 
-  StringChar     = BackSlashChar 
-  BackSlashChar  = "\\" 
+  RLBL            = [A-Z][\-\_\.\$\@a-zA-Z0-9]* 
+  RID             = "-"? [\_\.\$\@a-z][\-\_\.\$\@a-zA-Z0-9]* 
+  RINT            = "-"? [0-9]+ 
+  RSTRING         = "\"" RStringChar* "\"" 
+  RStringChar     = ~[\"\n] 
+  RStringChar     = "\\\"" 
+  RStringChar     = RBackSlashChar 
+  RBackSlashChar  = "\\" 
   LAYOUT         = [\ \t\n\r] 
-  LAYOUT         = "#" ~[\n\r]* NewLineEOF
-  NewLineEOF     = [\n\r] 
-  NewLineEOF     = EOF 
-  EOF            =  
+  
+  RComment        = /* "#" */ ~[\n\r]* /* NewLineEOF */
+  RNewLineEOF     = [\n\r] 
+  RNewLineEOF     = REOF 
+  REOF            =  
 
 lexical restrictions
 
+  RComment -/- ~[\n\r]
+
   // Ensure greedy matching for lexicals
   
-  INT           -/- [0-9]
-  ID            -/- [\-\_\.\$\@a-zA-Z0-9]
+  RINT           -/- [0-9]
+  RID            -/- [\-\_\.\$\@a-zA-Z0-9]
   
   // EOF may not be followed by any char
   
-  EOF           -/- ~[]
+  REOF           -/- ~[]
   
   // Backslash chars in strings may not be followed by " 
   
-  BackSlashChar -/- [\"]
+  RBackSlashChar -/- [\"]
 
 context-free restrictions
 
