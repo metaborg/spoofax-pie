@@ -18,18 +18,19 @@ public interface CfgStatixConfig extends Serializable {
             return shared.languageProject().project().srcDirectory();
         }
 
-        public static ResourcePath getDefaultMainFile(CompileLanguageSpecificationShared shared) {
-            return getDefaultMainSourceDirectory(shared).appendRelativePath("main.stx");
+        public static ResourcePath getDefaultMainFile(ResourcePath mainSourceDirectory) {
+            return mainSourceDirectory.appendRelativePath("main.stx");
         }
     }
 
-    static Builder builder() { return new Builder(); }
+    static Builder builder() {return new Builder();}
 
 
     @Value.Default default CfgStatixSource source() {
+        final ResourcePath mainSourceDirectory = Builder.getDefaultMainSourceDirectory(compileLanguageShared());
         return CfgStatixSource.files(
-            CfgStatixConfig.Builder.getDefaultMainSourceDirectory(compileLanguageShared()),
-            CfgStatixConfig.Builder.getDefaultMainFile(compileLanguageShared()),
+            mainSourceDirectory,
+            CfgStatixConfig.Builder.getDefaultMainFile(mainSourceDirectory),
             ListView.of()
         );
     }

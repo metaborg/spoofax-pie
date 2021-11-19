@@ -3,6 +3,14 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+### Fixed
+- Wrong main files being used when only main source directory was set for a meta-language in `spoofaxc.cfg`.
+
+
+## [0.16.10] - 2021-11-19
+### Changed
+- `releng` (devenv-release) requirement to `0.1.20`.
+- Updated RV32IM syntax.
 
 
 ## [0.16.9] - 2021-11-18

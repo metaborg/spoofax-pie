@@ -18,8 +18,8 @@ public interface CfgEsvConfig extends Serializable {
             return shared.languageProject().project().srcDirectory();
         }
 
-        public static ResourcePath getDefaultMainFile(CompileLanguageSpecificationShared shared) {
-            return getDefaultMainSourceDirectory(shared).appendRelativePath("main.esv");
+        public static ResourcePath getDefaultMainFile(ResourcePath mainSourceDirectory) {
+            return mainSourceDirectory.appendRelativePath("main.esv");
         }
 
         public static boolean getDefaultIncludeLibSpoofax2Exports(CompileLanguageSpecificationShared shared) {
@@ -31,13 +31,14 @@ public interface CfgEsvConfig extends Serializable {
         }
     }
 
-    static Builder builder() { return new Builder(); }
+    static Builder builder() {return new Builder();}
 
 
     @Value.Default default CfgEsvSource source() {
+        final ResourcePath mainSourceDirectory = Builder.getDefaultMainSourceDirectory(compileLanguageShared());
         return CfgEsvSource.files(
-            Builder.getDefaultMainSourceDirectory(compileLanguageShared()),
-            Builder.getDefaultMainFile(compileLanguageShared()),
+            mainSourceDirectory,
+            Builder.getDefaultMainFile(mainSourceDirectory),
             ListView.of(),
             Builder.getDefaultIncludeLibSpoofax2Exports(compileLanguageShared()),
             Builder.getDefaultLibSpoofax2UnarchiveDirectory(compileLanguageShared())

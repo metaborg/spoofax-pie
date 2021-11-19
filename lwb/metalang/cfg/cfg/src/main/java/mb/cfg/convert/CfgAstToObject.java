@@ -160,7 +160,7 @@ public class CfgAstToObject {
                     final ResourcePath mainSourceDirectory = filesParts.getOneSubtermAsExistingDirectory("Sdf3FilesMainSourceDirectory", rootDirectory, "SDF3 main source directory")
                         .unwrapOrElse(() -> CfgSdf3Config.Builder.getDefaultMainSourceDirectory(languageShared));
                     final ResourcePath mainFile = filesParts.getOneSubtermAsExistingFile("Sdf3FilesMainFile", mainSourceDirectory, "SDF3 main file")
-                        .unwrapOrElse(() -> CfgSdf3Config.Builder.getDefaultMainFile(languageShared));
+                        .unwrapOrElse(() -> CfgSdf3Config.Builder.getDefaultMainFile(mainSourceDirectory));
                     builder.source(CfgSdf3Source.files(mainSourceDirectory, mainFile));
                 } else if(TermUtils.isAppl(source, "Sdf3Prebuilt", 1)) {
                     final Parts prebuiltParts = subParts.subParts(source.getSubterm(0));
@@ -197,7 +197,7 @@ public class CfgAstToObject {
                     final ResourcePath mainSourceDirectory = filesParts.getOneSubtermAsExistingDirectory("EsvFilesMainSourceDirectory", rootDirectory, "ESV main source directory")
                         .unwrapOrElse(() -> CfgEsvConfig.Builder.getDefaultMainSourceDirectory(languageShared));
                     final ResourcePath mainFile = filesParts.getOneSubtermAsExistingFile("EsvFilesMainFile", mainSourceDirectory, "ESV main file")
-                        .unwrapOrElse(() -> CfgEsvConfig.Builder.getDefaultMainFile(languageShared));
+                        .unwrapOrElse(() -> CfgEsvConfig.Builder.getDefaultMainFile(mainSourceDirectory));
                     final ArrayList<ResourcePath> includeDirectories = new ArrayList<>();
                     filesParts.forAllSubtermsAsExistingDirectories("EsvFilesIncludeDirectory", rootDirectory, "ESV include directory", includeDirectories::add);
                     final boolean includeLibSpoofax2Exports = filesParts.getOneSubtermAsBool("EsvFilesIncludeLibspoofax2Exports")
@@ -223,7 +223,7 @@ public class CfgAstToObject {
                     final ResourcePath mainSourceDirectory = filesParts.getOneSubtermAsExistingDirectory("StatixFilesMainSourceDirectory", rootDirectory, "Statix main source directory")
                         .unwrapOrElse(() -> CfgStatixConfig.Builder.getDefaultMainSourceDirectory(languageShared));
                     final ResourcePath mainFile = filesParts.getOneSubtermAsExistingFile("StatixFilesMainFile", mainSourceDirectory, "Statix main file")
-                        .unwrapOrElse(() -> CfgStatixConfig.Builder.getDefaultMainFile(languageShared));
+                        .unwrapOrElse(() -> CfgStatixConfig.Builder.getDefaultMainFile(mainSourceDirectory));
                     final ArrayList<ResourcePath> includeDirectories = new ArrayList<>();
                     filesParts.forAllSubtermsAsExistingDirectories("StatixFilesIncludeDirectory", rootDirectory, "Statix include directory", includeDirectories::add);
                     builder.source(CfgStatixSource.files(mainSourceDirectory, mainFile, ListView.of(includeDirectories)));
