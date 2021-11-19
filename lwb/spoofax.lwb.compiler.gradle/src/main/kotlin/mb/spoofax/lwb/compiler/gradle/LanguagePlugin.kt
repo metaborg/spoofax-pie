@@ -189,9 +189,9 @@ class LanguagePluginInstance(
       // Inputs and outputs
       input.sdf3().ifPresent { sdf3Config ->
         sdf3Config.source().caseOf()
-          .files { mainSourceDirectory, _ ->
+          .files { files ->
             // Input: all SDF3 files in the main source directory
-            mainSourceDirectory.tryAsLocal("SDF3 files in main source directory") { dir ->
+            files.mainSourceDirectory().tryAsLocal("SDF3 files in main source directory") { dir ->
               inputs.files(project.fileTree(dir) { include("**/*.sdf3") })
             }
           }
@@ -214,19 +214,19 @@ class LanguagePluginInstance(
       }
       input.esv().ifPresent { esvConfig ->
         esvConfig.source().caseOf()
-          .files { mainSourceDirectory, _, includeDirectories, includeLibSpoofax2Exports, libSpoofax2UnarchiveDirectory ->
+          .files { files ->
             // Input: all ESV files in the main source directory and include directories
-            mainSourceDirectory.tryAsLocal("ESV files in main source directory") { dir ->
+            files.mainSourceDirectory().tryAsLocal("ESV files in main source directory") { dir ->
               inputs.files(project.fileTree(dir) { include("**/*.esv") })
             }
-            includeDirectories.forEach { includeDirectory ->
+            files.includeDirectories().forEach { includeDirectory ->
               includeDirectory.tryAsLocal("ESV files in include directory") { dir ->
                 inputs.files(project.fileTree(dir) { include("**/*.esv") })
               }
             }
-            if(includeLibSpoofax2Exports) {
+            if(files.includeLibSpoofax2Exports()) {
               // Output: libspoofax2 unarchive directory
-              libSpoofax2UnarchiveDirectory.tryAsLocal("libspoofax2 unarchive directory") { dir ->
+              files.libSpoofax2UnarchiveDirectory().tryAsLocal("libspoofax2 unarchive directory") { dir ->
                 outputs.dir(dir)
               }
             }
@@ -245,15 +245,15 @@ class LanguagePluginInstance(
       }
       input.statix().ifPresent { statixConfig ->
         statixConfig.source().caseOf()
-          .files { mainSourceDirectory, _, includeDirectories ->
+          .files { files ->
             // Input: all Statix files in the main source directory and include directories
-            mainSourceDirectory.tryAsLocal("Statix files in main source directory") { dir ->
+            files.mainSourceDirectory().tryAsLocal("Statix files in main source directory") { dir ->
               inputs.files(project.fileTree(dir) {
                 include("**/*.stx")
                 include("**/*.stxtest")
               })
             }
-            includeDirectories.forEach { includeDirectory ->
+            files.includeDirectories().forEach { includeDirectory ->
               includeDirectory.tryAsLocal("Statix files in include directory") { dir ->
                 inputs.files(project.fileTree(dir) {
                   include("**/*.stx")

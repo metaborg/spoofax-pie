@@ -4,7 +4,13 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 ## [Unreleased]
 ### Fixed
-- Wrong main files being used when only main source directory was set for a meta-language in `spoofaxc.cfg`.
+- More wrong main files being used when only the main source directory was set for a meta-language in `spoofaxc.cfg`.
+
+
+## [0.16.11] - 2021-11-19
+### Fixed
+- RV32IM not being parsed due to wrong start symbol.
+- Wrong main files being used when only the main SDF3 source directory was set in `spoofaxc.cfg`.
 
 
 ## [0.16.10] - 2021-11-19
@@ -384,7 +390,9 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.9...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.11...HEAD
+[0.16.11]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.10...release-0.16.11
+[0.16.10]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.9...release-0.16.10
 [0.16.9]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.8...release-0.16.9
 [0.16.8]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.7...release-0.16.8
 [0.16.7]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.6...release-0.16.7

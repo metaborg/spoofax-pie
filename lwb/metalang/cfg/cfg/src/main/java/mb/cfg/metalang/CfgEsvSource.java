@@ -1,38 +1,62 @@
 package mb.cfg.metalang;
 
+import mb.cfg.CompileLanguageSpecificationShared;
 import mb.common.util.ADT;
-import mb.common.util.ListView;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.immutables.value.Value;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Optional;
 
 /**
  * Configuration for ESV sources in the context of the CFG.
  */
-@ADT
+@ADT @Value.Enclosing
 public abstract class CfgEsvSource implements Serializable {
+    @Value.Immutable
+    public interface Files extends Serializable {
+        class Builder extends ImmutableCfgEsvSource.Files.Builder {
+            public static ResourcePath getDefaultMainSourceDirectory(CompileLanguageSpecificationShared shared) {
+                return shared.languageProject().project().srcDirectory();
+            }
+        }
+
+        static Builder builder() {return new Builder();}
+
+
+        @Value.Default default ResourcePath mainSourceDirectory() {
+            return Builder.getDefaultMainSourceDirectory(compileLanguageShared());
+        }
+
+        @Value.Default default ResourcePath mainFile() {
+            return mainSourceDirectory().appendRelativePath("main.esv");
+        }
+
+        List<ResourcePath> includeDirectories();
+
+        @Value.Default default boolean includeLibSpoofax2Exports() {
+            return compileLanguageShared().includeLibSpoofax2Exports();
+        }
+
+        @Value.Default default ResourcePath libSpoofax2UnarchiveDirectory() {
+            return compileLanguageShared().libSpoofax2UnarchiveDirectory();
+        }
+
+        /// Automatically provided sub-inputs
+
+        CompileLanguageSpecificationShared compileLanguageShared();
+    }
+
     interface Cases<R> {
-        R files(
-            ResourcePath mainSourceDirectory,
-            ResourcePath mainFile,
-            ListView<ResourcePath> includeDirectories,
-            boolean includeLibSpoofax2Exports,
-            ResourcePath libSpoofax2UnarchiveDirectory
-        );
+        R files(Files files);
 
         R prebuilt(ResourcePath esvAtermFile);
     }
 
-    public static CfgEsvSource files(
-        ResourcePath mainSourceDirectory,
-        ResourcePath mainFile,
-        ListView<ResourcePath> includeDirectories,
-        boolean includeLibSpoofax2Exports,
-        ResourcePath libSpoofax2UnarchiveDirectory
-    ) {
-        return CfgEsvSources.files(mainSourceDirectory, mainFile, includeDirectories, includeLibSpoofax2Exports, libSpoofax2UnarchiveDirectory);
+    public static CfgEsvSource files(Files files) {
+        return CfgEsvSources.files(files);
     }
 
     public static CfgEsvSource prebuilt(ResourcePath inputFile) {
@@ -50,12 +74,8 @@ public abstract class CfgEsvSource implements Serializable {
         return CfgEsvSources.caseOf(this);
     }
 
-    public Optional<ResourcePath> getMainSourceDirectory() {
-        return CfgEsvSources.getMainSourceDirectory(this);
-    }
-
-    public Optional<ResourcePath> getMainFile() {
-        return CfgEsvSources.getMainFile(this);
+    public Optional<Files> getFiles() {
+        return CfgEsvSources.getFiles(this);
     }
 
 

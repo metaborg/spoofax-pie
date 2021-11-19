@@ -1,6 +1,7 @@
 package mb.spoofax.lwb.compiler.sdf3;
 
 import mb.cfg.metalang.CfgSdf3Config;
+import mb.cfg.metalang.CfgSdf3Source;
 import mb.cfg.task.CfgRootDirectoryToObject;
 import mb.cfg.task.CfgRootDirectoryToObjectException;
 import mb.cfg.task.CfgToObject;
@@ -56,7 +57,7 @@ public class SpoofaxSdf3Configure implements TaskDef<ResourcePath, Result<Option
     ) throws IOException {
         try {
             return cfgSdf3Config.source().caseOf()
-                .files((mainSourceDirectory, mainFile) -> configureSourceFilesCatching(context, rootDirectory, cfgSdf3Config, mainSourceDirectory, mainFile))
+                .files(files -> configureSourceFilesCatching(context, rootDirectory, cfgSdf3Config, files))
                 .prebuilt((inputParseTableAtermFile, inputParseTablePersistedFile) -> configurePrebuilt(inputParseTableAtermFile, inputParseTablePersistedFile, cfgSdf3Config));
         } catch(UncheckedIOException e) {
             throw e.getCause();
@@ -67,11 +68,10 @@ public class SpoofaxSdf3Configure implements TaskDef<ResourcePath, Result<Option
         ExecContext context,
         ResourcePath rootDirectory,
         CfgSdf3Config cfgSdf3Config,
-        ResourcePath mainSourceDirectoryPath,
-        ResourcePath mainFilePath
+        CfgSdf3Source.Files files
     ) {
         try {
-            return configureSourceFiles(context, rootDirectory, cfgSdf3Config, mainSourceDirectoryPath, mainFilePath);
+            return configureSourceFiles(context, rootDirectory, cfgSdf3Config, files);
         } catch(IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -81,14 +81,13 @@ public class SpoofaxSdf3Configure implements TaskDef<ResourcePath, Result<Option
         ExecContext context,
         ResourcePath rootDirectory,
         CfgSdf3Config cfgSdf3Config,
-        ResourcePath mainSourceDirectoryPath,
-        ResourcePath mainFilePath
+        CfgSdf3Source.Files files
     ) throws IOException {
-        final HierarchicalResource mainSourceDirectory = context.require(mainSourceDirectoryPath, ResourceStampers.<HierarchicalResource>exists());
+        final HierarchicalResource mainSourceDirectory = context.require(files.mainSourceDirectory(), ResourceStampers.<HierarchicalResource>exists());
         if(!mainSourceDirectory.exists() || !mainSourceDirectory.isDirectory()) {
             return Result.ofErr(SpoofaxSdf3ConfigureException.mainSourceDirectoryFail(mainSourceDirectory.getPath()));
         }
-        final HierarchicalResource mainFile = context.require(mainFilePath, ResourceStampers.<HierarchicalResource>exists());
+        final HierarchicalResource mainFile = context.require(files.mainFile(), ResourceStampers.<HierarchicalResource>exists());
         if(!mainFile.exists() || !mainFile.isFile()) {
             return Result.ofErr(SpoofaxSdf3ConfigureException.mainFileFail(mainFile.getPath()));
         }

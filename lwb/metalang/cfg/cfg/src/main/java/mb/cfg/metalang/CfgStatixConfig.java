@@ -1,7 +1,6 @@
 package mb.cfg.metalang;
 
 import mb.cfg.CompileLanguageSpecificationShared;
-import mb.common.util.ListView;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.language.ConstraintAnalyzerLanguageCompiler;
 import org.immutables.value.Value;
@@ -13,25 +12,15 @@ import java.io.Serializable;
  */
 @Value.Immutable
 public interface CfgStatixConfig extends Serializable {
-    class Builder extends ImmutableCfgStatixConfig.Builder {
-        public static ResourcePath getDefaultMainSourceDirectory(CompileLanguageSpecificationShared shared) {
-            return shared.languageProject().project().srcDirectory();
-        }
-
-        public static ResourcePath getDefaultMainFile(ResourcePath mainSourceDirectory) {
-            return mainSourceDirectory.appendRelativePath("main.stx");
-        }
-    }
+    class Builder extends ImmutableCfgStatixConfig.Builder {}
 
     static Builder builder() {return new Builder();}
 
 
     @Value.Default default CfgStatixSource source() {
-        final ResourcePath mainSourceDirectory = Builder.getDefaultMainSourceDirectory(compileLanguageShared());
-        return CfgStatixSource.files(
-            mainSourceDirectory,
-            CfgStatixConfig.Builder.getDefaultMainFile(mainSourceDirectory),
-            ListView.of()
+        return CfgStatixSource.files(CfgStatixSource.Files.builder()
+            .compileLanguageShared(compileLanguageShared())
+            .build()
         );
     }
 

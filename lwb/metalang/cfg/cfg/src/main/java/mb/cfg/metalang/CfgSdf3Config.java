@@ -26,10 +26,9 @@ public interface CfgSdf3Config extends Serializable {
 
 
     @Value.Default default CfgSdf3Source source() {
-        final ResourcePath mainSourceDirectory = Builder.getDefaultMainSourceDirectory(compileLanguageShared());
-        return CfgSdf3Source.files(
-            mainSourceDirectory,
-            Builder.getDefaultMainFile(mainSourceDirectory)
+        return CfgSdf3Source.files(CfgSdf3Source.Files.builder()
+            .compileLanguageShared(compileLanguageShared())
+            .build()
         );
     }
 

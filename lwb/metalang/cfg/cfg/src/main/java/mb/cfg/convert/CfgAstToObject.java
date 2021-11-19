@@ -18,7 +18,6 @@ import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Severity;
 import mb.common.option.Option;
-import mb.common.util.ListView;
 import mb.common.util.Properties;
 import mb.jsglr.common.TermTracer;
 import mb.pie.api.ExecContext;
@@ -69,7 +68,6 @@ import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.util.TermUtils;
 
-import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 /**
@@ -157,11 +155,12 @@ public class CfgAstToObject {
             subParts.getOneSubterm("Sdf3Source").ifSome(source -> {
                 if(TermUtils.isAppl(source, "Sdf3Files", 1)) {
                     final Parts filesParts = subParts.subParts(source.getSubterm(0));
+                    final CfgSdf3Source.Files.Builder filesSourceBuilder = CfgSdf3Source.Files.builder().compileLanguageShared(languageShared);
                     final ResourcePath mainSourceDirectory = filesParts.getOneSubtermAsExistingDirectory("Sdf3FilesMainSourceDirectory", rootDirectory, "SDF3 main source directory")
-                        .unwrapOrElse(() -> CfgSdf3Config.Builder.getDefaultMainSourceDirectory(languageShared));
-                    final ResourcePath mainFile = filesParts.getOneSubtermAsExistingFile("Sdf3FilesMainFile", mainSourceDirectory, "SDF3 main file")
-                        .unwrapOrElse(() -> CfgSdf3Config.Builder.getDefaultMainFile(mainSourceDirectory));
-                    builder.source(CfgSdf3Source.files(mainSourceDirectory, mainFile));
+                        .unwrapOrElse(() -> CfgSdf3Source.Files.Builder.getDefaultMainSourceDirectory(languageShared));
+                    filesSourceBuilder.mainSourceDirectory(mainSourceDirectory);
+                    filesParts.forOneSubtermAsExistingFile("Sdf3FilesMainFile", mainSourceDirectory, "SDF3 main file", filesSourceBuilder::mainFile);
+                    builder.source(CfgSdf3Source.files(filesSourceBuilder.build()));
                 } else if(TermUtils.isAppl(source, "Sdf3Prebuilt", 1)) {
                     final Parts prebuiltParts = subParts.subParts(source.getSubterm(0));
                     final Option<ResourcePath> atermFile = prebuiltParts.getOneSubtermAsExistingFile("Sdf3PrebuiltParseTableAtermFile", rootDirectory, "SDF3 prebuilt parse table ATerm file");
@@ -194,16 +193,14 @@ public class CfgAstToObject {
             subParts.getOneSubterm("EsvSource").ifSome(source -> {
                 if(TermUtils.isAppl(source, "EsvFiles", 1)) {
                     final Parts filesParts = subParts.subParts(source.getSubterm(0));
+                    final CfgEsvSource.Files.Builder filesSourceBuilder = CfgEsvSource.Files.builder().compileLanguageShared(languageShared);
                     final ResourcePath mainSourceDirectory = filesParts.getOneSubtermAsExistingDirectory("EsvFilesMainSourceDirectory", rootDirectory, "ESV main source directory")
-                        .unwrapOrElse(() -> CfgEsvConfig.Builder.getDefaultMainSourceDirectory(languageShared));
-                    final ResourcePath mainFile = filesParts.getOneSubtermAsExistingFile("EsvFilesMainFile", mainSourceDirectory, "ESV main file")
-                        .unwrapOrElse(() -> CfgEsvConfig.Builder.getDefaultMainFile(mainSourceDirectory));
-                    final ArrayList<ResourcePath> includeDirectories = new ArrayList<>();
-                    filesParts.forAllSubtermsAsExistingDirectories("EsvFilesIncludeDirectory", rootDirectory, "ESV include directory", includeDirectories::add);
-                    final boolean includeLibSpoofax2Exports = filesParts.getOneSubtermAsBool("EsvFilesIncludeLibspoofax2Exports")
-                        .unwrapOrElse(() -> CfgEsvConfig.Builder.getDefaultIncludeLibSpoofax2Exports(languageShared));
-                    final ResourcePath libSpoofax2UnarchiveDirectory = CfgEsvConfig.Builder.getDefaultLibSpoofax2UnarchiveDirectory(languageShared);
-                    builder.source(CfgEsvSource.files(mainSourceDirectory, mainFile, ListView.of(includeDirectories), includeLibSpoofax2Exports, libSpoofax2UnarchiveDirectory));
+                        .unwrapOrElse(() -> CfgEsvSource.Files.Builder.getDefaultMainSourceDirectory(languageShared));
+                    filesSourceBuilder.mainSourceDirectory(mainSourceDirectory);
+                    filesParts.forOneSubtermAsExistingFile("EsvFilesMainFile", mainSourceDirectory, "ESV main file", filesSourceBuilder::mainFile);
+                    filesParts.forAllSubtermsAsExistingDirectories("EsvFilesIncludeDirectory", rootDirectory, "ESV include directory", filesSourceBuilder::addIncludeDirectories);
+                    filesParts.forOneSubtermAsBool("EsvFilesIncludeLibspoofax2Exports", filesSourceBuilder::includeLibSpoofax2Exports);
+                    builder.source(CfgEsvSource.files(filesSourceBuilder.build()));
                 } else if(TermUtils.isAppl(source, "EsvPrebuilt", 1)) {
                     final Parts prebuiltParts = subParts.subParts(source.getSubterm(0));
                     prebuiltParts.getOneSubtermAsExistingFile("EsvPrebuiltFile", rootDirectory, "ESV prebuilt file").ifElse(
@@ -220,13 +217,13 @@ public class CfgAstToObject {
             subParts.getOneSubterm("StatixSource").ifSome(source -> {
                 if(TermUtils.isAppl(source, "StatixFiles", 1)) {
                     final Parts filesParts = subParts.subParts(source.getSubterm(0));
+                    final CfgStatixSource.Files.Builder filesSourceBuilder = CfgStatixSource.Files.builder().compileLanguageShared(languageShared);
                     final ResourcePath mainSourceDirectory = filesParts.getOneSubtermAsExistingDirectory("StatixFilesMainSourceDirectory", rootDirectory, "Statix main source directory")
-                        .unwrapOrElse(() -> CfgStatixConfig.Builder.getDefaultMainSourceDirectory(languageShared));
-                    final ResourcePath mainFile = filesParts.getOneSubtermAsExistingFile("StatixFilesMainFile", mainSourceDirectory, "Statix main file")
-                        .unwrapOrElse(() -> CfgStatixConfig.Builder.getDefaultMainFile(mainSourceDirectory));
-                    final ArrayList<ResourcePath> includeDirectories = new ArrayList<>();
-                    filesParts.forAllSubtermsAsExistingDirectories("StatixFilesIncludeDirectory", rootDirectory, "Statix include directory", includeDirectories::add);
-                    builder.source(CfgStatixSource.files(mainSourceDirectory, mainFile, ListView.of(includeDirectories)));
+                        .unwrapOrElse(() -> CfgStatixSource.Files.Builder.getDefaultMainSourceDirectory(languageShared));
+                    filesSourceBuilder.mainSourceDirectory(mainSourceDirectory);
+                    filesParts.forOneSubtermAsExistingFile("StatixFilesMainFile", mainSourceDirectory, "Statix main file", filesSourceBuilder::mainFile);
+                    filesParts.forAllSubtermsAsExistingDirectories("StatixFilesIncludeDirectory", rootDirectory, "Statix include directory", filesSourceBuilder::addIncludeDirectories);
+                    builder.source(CfgStatixSource.files(filesSourceBuilder.build()));
                 } else if(TermUtils.isAppl(source, "StatixPrebuilt", 1)) {
                     final Parts prebuiltParts = subParts.subParts(source.getSubterm(0));
                     prebuiltParts.getOneSubtermAsExistingDirectory("StatixPrebuiltSpecAtermDirectory", rootDirectory, "Statix prebuilt spec ATerm directory").ifElse(
@@ -248,8 +245,8 @@ public class CfgAstToObject {
                     final ResourcePath mainSourceDirectory = filesParts.getOneSubtermAsExistingDirectory("StrategoFilesMainSourceDirectory", rootDirectory, "Stratego main source directory")
                         .unwrapOrElse(() -> CfgStrategoSource.Files.Builder.getDefaultMainSourceDirectory(languageShared));
                     filesSourceBuilder.mainSourceDirectory(mainSourceDirectory);
-                    filesParts.forAllSubtermsAsExistingDirectories("StrategoFilesIncludeDirectory", rootDirectory, "Stratego include directory", filesSourceBuilder::addIncludeDirectories);
                     filesParts.forOneSubtermAsExistingFile("StrategoFilesMainFile", mainSourceDirectory, "Stratego main file", filesSourceBuilder::mainFile);
+                    filesParts.forAllSubtermsAsExistingDirectories("StrategoFilesIncludeDirectory", rootDirectory, "Stratego include directory", filesSourceBuilder::addIncludeDirectories);
                     builder.source(CfgStrategoSource.files(filesSourceBuilder.build()));
                 } else {
                     throw new InvalidAstShapeException("Stratego source", source);
