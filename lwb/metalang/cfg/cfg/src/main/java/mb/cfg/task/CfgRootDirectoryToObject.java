@@ -26,6 +26,9 @@ import java.util.Set;
 
 @CfgScope
 public class CfgRootDirectoryToObject implements TaskDef<ResourcePath, Result<CfgToObject.Output, CfgRootDirectoryToObjectException>> {
+    public static final String cfgFileRelativePath = "spoofaxc.cfg";
+    public static final String lockFileRelativePath = "spoofaxc.lock";
+
     private final ResourceService resourceService;
     private final CfgParse parse;
     private final CfgAnalyze analyze;
@@ -50,10 +53,10 @@ public class CfgRootDirectoryToObject implements TaskDef<ResourcePath, Result<Cf
 
     @Override
     public Result<CfgToObject.Output, CfgRootDirectoryToObjectException> exec(ExecContext context, ResourcePath rootDirectory) throws Exception {
-        final ResourcePath cfgFile = rootDirectory.appendRelativePath("spoofaxc.cfg");
+        final ResourcePath cfgFile = rootDirectory.appendRelativePath(cfgFileRelativePath);
         final Supplier<Result<IStrategoTerm, JsglrParseException>> astSupplier = parse.inputBuilder().withFile(cfgFile).rootDirectoryHint(rootDirectory).buildAstSupplier();
         final Supplier<Result<CfgAnalyze.Output, ?>> analyzeOutputSupplier = analyze.createSupplier(new CfgAnalyze.Input(cfgFile, astSupplier));
-        final ResourcePath lockFilePath = rootDirectory.appendRelativePath("spoofaxc.lock");
+        final ResourcePath lockFilePath = rootDirectory.appendRelativePath(lockFileRelativePath);
         final WritableResource lockFile = resourceService.getWritableResource(lockFilePath);
         final Supplier<Result<Properties, IOException>> propertiesSupplier = new PropertiesSupplier(lockFilePath);
         return context.require(toObject, new CfgToObject.Input(rootDirectory, cfgFile, analyzeOutputSupplier, propertiesSupplier))

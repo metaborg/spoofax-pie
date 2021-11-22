@@ -87,6 +87,13 @@
     </wizard>
   </extension>
 
+  <!-- Project configurator -->
+  <extension point="org.eclipse.ui.ide.projectConfigurators">
+    <projectConfigurator
+      class="mb.spoofax.lwb.eclipse.SpoofaxLwbProjectConfigurator"
+      label="Spoofax LWB"
+    />
+  </extension>
 
 
   <!--                        -->
@@ -274,7 +281,7 @@
       class="mb.spoofax.lwb.eclipse.dynamicloading.DynamicRunCommandHandler"
     />
   </extension>
- <!-- Toggle comment -->
+  <!-- Toggle comment -->
   <extension point="org.eclipse.ui.commands">
     <command id="spoofax.lwb.eclipse.dynamicloading.togglecomment" name="Toggle comment"/>
   </extension>
