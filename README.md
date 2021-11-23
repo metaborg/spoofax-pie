@@ -92,6 +92,9 @@ publish.repository.metaborg.artifacts.password=<password>
 Then run `./gradlew publishAll` to publish all built artifacts.
 You should also push the release tag you made such that this release is reproducible by others.
 
+Finally, add the release to the documentation by adding the release and date to the top of the `release_versions` dictionary in `docs/macro.py`.
+Push this change to the `develop` branch and a GitHub actions build will automatically update the [documentation website](https://metaborg.github.io/spoofax-pie/develop/download/).
+
 ## Copyright and License
 
 Copyright © 2018-2021 Delft University of Technology
