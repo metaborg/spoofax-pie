@@ -3,10 +3,17 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+
+
+## [0.16.12] - 2021-11-23
 ### Fixed
 - More wrong main files being used when only the main source directory was set for a meta-language in `spoofaxc.cfg`.
 - Extract more messages in SPT `transform` expectations.
 - Out-of-bounds messages in SPT. Messages outside the bounds of the test fragment are now moved to the expectation.
+
+### Changed
+- `common` requirement to `0.10.1`.
+- `pie` requirement to `0.19.6`.
 
 
 ## [0.16.11] - 2021-11-19
@@ -392,7 +399,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.11...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.12...HEAD
+[0.16.12]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.11...release-0.16.12
 [0.16.11]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.10...release-0.16.11
 [0.16.10]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.9...release-0.16.10
 [0.16.9]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.8...release-0.16.9
