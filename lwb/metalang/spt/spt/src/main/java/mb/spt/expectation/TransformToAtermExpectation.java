@@ -91,7 +91,7 @@ public class TransformToAtermExpectation implements TestExpectation {
         }
 
         if(feedback.hasErrorMessages()) {
-            SptMessageRemap.addMessagesRemapped(messagesBuilder, testCase.resource, file, feedback.getMessages());
+            SptMessageRemap.addMessagesRemapped(messagesBuilder, testCase, file, sourceRegion, feedback.getMessages());
         }
 
         return messagesBuilder.build(file);
