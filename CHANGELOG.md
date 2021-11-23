@@ -5,6 +5,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 ## [Unreleased]
 ### Fixed
 - More wrong main files being used when only the main source directory was set for a meta-language in `spoofaxc.cfg`.
+- Extract more messages in SPT `transform` expectations.
 
 
 ## [0.16.11] - 2021-11-19

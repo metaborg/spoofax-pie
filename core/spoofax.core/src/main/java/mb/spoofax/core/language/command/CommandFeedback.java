@@ -1,6 +1,7 @@
 package mb.spoofax.core.language.command;
 
 import mb.common.message.KeyedMessages;
+import mb.common.message.KeyedMessagesBuilder;
 import mb.common.util.ListView;
 import mb.resource.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -57,9 +58,12 @@ public class CommandFeedback implements Serializable {
     }
 
     public static CommandFeedback ofTryExtractMessagesFrom(Throwable throwable, @Nullable ResourceKey resourceForMessagesWithoutKeys) {
-        return KeyedMessages.ofTryExtractMessagesFrom(throwable, resourceForMessagesWithoutKeys)
-            .map(k -> new CommandFeedback(k, null, ListView.of()))
-            .orElse(new CommandFeedback(KeyedMessages.of(), throwable, ListView.of()));
+        final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
+        if(messagesBuilder.optionalExtractMessagesRecursivelyWithFallbackKey(throwable, resourceForMessagesWithoutKeys)) {
+            return new CommandFeedback(messagesBuilder.build(), null, ListView.of());
+        } else {
+            return new CommandFeedback(KeyedMessages.of(), throwable, ListView.of());
+        }
     }
 
     public static CommandFeedback ofTryExtractMessagesFrom(Throwable throwable) {
