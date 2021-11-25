@@ -55,7 +55,7 @@ However, the `develop` branch must be built via the [devenv repository](https://
 
 This repository is built with Gradle, which requires a JDK of at least version 8 to be installed. Higher versions may work depending on [which version of Gradle is used](https://docs.gradle.org/current/userguide/compatibility.html).
 
-To build this repository, run `./gradlew buildAll` on Linux and macOS, or `gradlew buildAll` on Windows.
+To build this repository, run `./gradlew buildAll` on Linux and macOS, or `gradlew.bat buildAll` on Windows.
 
 ### Automated Builds
 
@@ -83,7 +83,7 @@ Then first build the project with `./gradlew buildAll` to check if building succ
 If you want our buildfarm to publish this release, just push the tag you just made, and our buildfarm will build the repository and publish the release.
 
 If you want to publish this release locally, you will need an account with write access to our artifact server, and tell Gradle about this account.
-Create the `./gradle/gradle.properties` file if it does not exist.
+Create the `~/.gradle/gradle.properties` file if it does not exist.
 Add the following lines to it, replacing `<username>` and `<password>` with those of your artifact server account:
 ```
 publish.repository.metaborg.artifacts.username=<username>
