@@ -56,9 +56,9 @@ def fill_variables_with_release(variables, env_version: str, version: str, downl
                     linux=linux_jvm,
                     windows=windows_jvm,
                 ), link=dict(
-                    macos=download_link(macos_icon, "macOS 64-bit", macos_jvm),
-                    linux=download_link(linux_icon, "Linux 64-bit", linux_jvm),
-                    windows=download_link(windows_icon, "Windows 64-bit", windows_jvm),
+                    macos=download_link(macos_icon, "macOS 64-bit", macos),
+                    linux=download_link(linux_icon, "Linux 64-bit", linux),
+                    windows=download_link(windows_icon, "Windows 64-bit", windows),
                 ),
                 macos=macos,
                 linux=linux,
