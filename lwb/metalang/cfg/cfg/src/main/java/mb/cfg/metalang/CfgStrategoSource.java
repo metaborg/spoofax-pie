@@ -44,6 +44,7 @@ public abstract class CfgStrategoSource implements Serializable {
             final ArrayList<String> strategoBuiltinLibs = new ArrayList<>();
             strategoBuiltinLibs.add("stratego-gpp");
             strategoBuiltinLibs.add("libstratego-sglr");
+            strategoBuiltinLibs.add("libstratego-aterm");
             return strategoBuiltinLibs;
         }
 
