@@ -3,6 +3,9 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+
+
+## [0.16.17] - 2021-12-13
 ### Changed
 - `pie` requirement to `0.19.7`.
 
@@ -424,7 +427,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.16...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.17...HEAD
+[0.16.17]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.16...release-0.16.17
 [0.16.16]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.15...release-0.16.16
 [0.16.15]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.14...release-0.16.15
 [0.16.14]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.13...release-0.16.14
