@@ -3,6 +3,9 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+### Changed
+- `pie` requirement to `0.19.7`.
+
 
 ## [0.16.16] - 2021-12-11
 ### Changed

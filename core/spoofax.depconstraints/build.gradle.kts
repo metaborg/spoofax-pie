@@ -7,7 +7,7 @@ val commonVersion = "0.10.1"
 val logVersion = "0.5.5"
 val slf4jVersion = "1.7.30"
 val resourceVersion = "0.13.2"
-val pieVersion = "0.19.6"
+val pieVersion = "0.19.7"
 
 val spoofax2Version: String by ext
 val spoofax2DevenvVersion: String by ext
