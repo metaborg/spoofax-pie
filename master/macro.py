@@ -56,9 +56,9 @@ def fill_variables_with_release(variables, env_version: str, version: str, downl
                     linux=linux_jvm,
                     windows=windows_jvm,
                 ), link=dict(
-                    macos=download_link(macos_icon, "macOS 64-bit", macos_jvm),
-                    linux=download_link(linux_icon, "Linux 64-bit", linux_jvm),
-                    windows=download_link(windows_icon, "Windows 64-bit", windows_jvm),
+                    macos=download_link(macos_icon, "macOS 64-bit", macos),
+                    linux=download_link(linux_icon, "Linux 64-bit", linux),
+                    windows=download_link(windows_icon, "Windows 64-bit", windows),
                 ),
                 macos=macos,
                 linux=linux,
@@ -70,6 +70,9 @@ def fill_variables_with_release(variables, env_version: str, version: str, downl
 
 
 release_versions = {
+    "0.16.16": "11-12-2021",
+    "0.16.15": "09-12-2021",
+    "0.16.14": "01-12-2021",
     "0.16.13": "25-11-2021",
     "0.16.12": "23-11-2021",
     "0.16.11": "19-11-2021",
