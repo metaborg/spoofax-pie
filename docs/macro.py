@@ -70,6 +70,7 @@ def fill_variables_with_release(variables, env_version: str, version: str, downl
 
 
 release_versions = {
+    "0.16.17": "13-12-2021",
     "0.16.16": "11-12-2021",
     "0.16.15": "09-12-2021",
     "0.16.14": "01-12-2021",
