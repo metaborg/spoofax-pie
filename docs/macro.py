@@ -20,7 +20,7 @@ def eclipse_lwb_artifacts_download(repo: str, variant: str, version: str):
 win_jvm_variant = 'win32-x86_64-jvm'
 win_variant = 'win32-x86_64'
 macos_jvm_variant = 'macosx-x86_64-jvm'
-macos_variant = 'macosx-x64'
+macos_variant = 'macosx-x86_64'
 linux_jvm_variant = 'linux-x86_64-jvm'
 linux_variant = 'linux-x86_64'
 
