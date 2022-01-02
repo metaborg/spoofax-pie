@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-  <!-- Language registration -->
-  <extension point="spoofax.eclipse.language">
+
+  <!-- Lifecycle participant -->
+  <extension point="spoofax.eclipse.lifecycle">
     <language group="mb.tiger" class="mb.tiger.eclipse.TigerLanguageFactory"/>
   </extension>
 
