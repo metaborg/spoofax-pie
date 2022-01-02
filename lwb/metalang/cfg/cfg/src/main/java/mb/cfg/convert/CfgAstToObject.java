@@ -163,17 +163,28 @@ public class CfgAstToObject {
                     builder.source(CfgSdf3Source.files(filesSourceBuilder.build()));
                 } else if(TermUtils.isAppl(source, "Sdf3Prebuilt", 1)) {
                     final Parts prebuiltParts = subParts.subParts(source.getSubterm(0));
-                    final Option<ResourcePath> atermFile = prebuiltParts.getOneSubtermAsExistingFile("Sdf3PrebuiltParseTableAtermFile", rootDirectory, "SDF3 prebuilt parse table ATerm file");
-                    final Option<ResourcePath> persistedFile = prebuiltParts.getOneSubtermAsExistingFile("Sdf3PrebuiltParseTablePersistedFile", rootDirectory, "SDF3 prebuilt parse table persisted file");
-                    if(!atermFile.isSome()) {
+                    final Option<ResourcePath> parseTableAtermFile = prebuiltParts.getOneSubtermAsExistingFile("Sdf3PrebuiltParseTableAtermFile", rootDirectory, "SDF3 prebuilt parse table ATerm file");
+                    final Option<ResourcePath> parseTablePersistedFile = prebuiltParts.getOneSubtermAsExistingFile("Sdf3PrebuiltParseTablePersistedFile", rootDirectory, "SDF3 prebuilt parse table persisted file");
+                    final Option<ResourcePath> completionParseTableAtermFile = prebuiltParts.getOneSubtermAsExistingFile("Sdf3PrebuiltCompletionParseTableAtermFile", rootDirectory, "SDF3 prebuilt completion parse table ATerm file");
+                    final Option<ResourcePath> completionParseTablePersistedFile = prebuiltParts.getOneSubtermAsExistingFile("Sdf3PrebuiltCompletionParseTablePersistedFile", rootDirectory, "SDF3 prebuilt completion parse table persisted file");
+                    if(!parseTableAtermFile.isSome()) {
                         messagesBuilder.addMessage("parse-table-aterm-file = $Path option is missing", Severity.Error, cfgFile, TermTracer.getRegion(source));
                     }
-                    if(!persistedFile.isSome()) {
+                    if(!parseTablePersistedFile.isSome()) {
                         messagesBuilder.addMessage("parse-table-persisted-file = $Path option is missing", Severity.Error, cfgFile, TermTracer.getRegion(source));
                     }
-                    if(atermFile.isSome() && persistedFile.isSome()) {
-                        builder.source(CfgSdf3Source.prebuilt(atermFile.unwrap(), persistedFile.unwrap()));
+                    if(!completionParseTableAtermFile.isSome()) {
+                        messagesBuilder.addMessage("completion-parse-table-aterm-file = $Path option is missing", Severity.Error, cfgFile, TermTracer.getRegion(source));
                     }
+                    if(!completionParseTablePersistedFile.isSome()) {
+                        messagesBuilder.addMessage("completion-parse-table-persisted-file = $Path option is missing", Severity.Error, cfgFile, TermTracer.getRegion(source));
+                    }
+                    builder.source(CfgSdf3Source.prebuilt(
+                        parseTableAtermFile.unwrap(),
+                        parseTablePersistedFile.unwrap(),
+                        completionParseTableAtermFile.unwrap(),
+                        completionParseTablePersistedFile.unwrap()
+                    ));
                 } else {
                     throw new InvalidAstShapeException("SDF3 source", source);
                 }

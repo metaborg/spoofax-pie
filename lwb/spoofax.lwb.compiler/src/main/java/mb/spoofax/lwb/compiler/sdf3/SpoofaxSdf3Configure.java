@@ -58,7 +58,8 @@ public class SpoofaxSdf3Configure implements TaskDef<ResourcePath, Result<Option
         try {
             return cfgSdf3Config.source().caseOf()
                 .files(files -> configureSourceFilesCatching(context, rootDirectory, cfgSdf3Config, files))
-                .prebuilt((inputParseTableAtermFile, inputParseTablePersistedFile) -> configurePrebuilt(inputParseTableAtermFile, inputParseTablePersistedFile, cfgSdf3Config));
+                .prebuilt((inputParseTableAtermFile, inputParseTablePersistedFile, inputCompletionParseTableAtermFile, inputCompletionParseTablePersistedFile) -> configurePrebuilt(
+                    inputParseTableAtermFile, inputParseTablePersistedFile, inputCompletionParseTableAtermFile, inputCompletionParseTablePersistedFile, cfgSdf3Config));
         } catch(UncheckedIOException e) {
             throw e.getCause();
         }
@@ -100,19 +101,31 @@ public class SpoofaxSdf3Configure implements TaskDef<ResourcePath, Result<Option
             cfgSdf3Config.createLayoutSensitiveParseTable()
         );
         final Sdf3SpecConfig sdf3SpecConfig = new Sdf3SpecConfig(rootDirectory, mainSourceDirectory.getPath(), mainFile.getPath(), parseTableConfiguration);
-        return Result.ofOk(SpoofaxSdf3Config.files(sdf3SpecConfig, cfgSdf3Config.parseTableAtermOutputFile(), cfgSdf3Config.parseTablePersistedOutputFile()));
+        return Result.ofOk(SpoofaxSdf3Config.files(
+            sdf3SpecConfig,
+            cfgSdf3Config.parseTableAtermOutputFile(),
+            cfgSdf3Config.parseTablePersistedOutputFile(),
+            cfgSdf3Config.completionParseTableAtermOutputFile(),
+            cfgSdf3Config.completionParseTablePersistedOutputFile()
+        ));
     }
 
     public Result<SpoofaxSdf3Config, SpoofaxSdf3ConfigureException> configurePrebuilt(
         ResourcePath inputParseTableAtermFile,
         ResourcePath inputParseTablePersistedFile,
+        ResourcePath inputCompletionParseTableAtermFile,
+        ResourcePath inputCompletionParseTablePersistedFile,
         CfgSdf3Config cfgSdf3Config
     ) {
         return Result.ofOk(SpoofaxSdf3Config.prebuilt(
             inputParseTableAtermFile,
             inputParseTablePersistedFile,
+            inputCompletionParseTableAtermFile,
+            inputCompletionParseTablePersistedFile,
             cfgSdf3Config.parseTableAtermOutputFile(),
-            cfgSdf3Config.parseTablePersistedOutputFile()
+            cfgSdf3Config.parseTablePersistedOutputFile(),
+            cfgSdf3Config.completionParseTableAtermOutputFile(),
+            cfgSdf3Config.completionParseTablePersistedOutputFile()
         ));
     }
 

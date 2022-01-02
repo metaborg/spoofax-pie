@@ -13,6 +13,7 @@ import mb.statix.StatixScope;
 import mb.statix.task.StatixParse;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Provider;
 
 @StatixScope
@@ -23,9 +24,10 @@ public class StatixParseWrapper extends StatixParse {
     @Inject public StatixParseWrapper(
         StatixClassLoaderResources classLoaderResources,
         Provider<StatixParser> parserProvider,
+        @Named("completion") Provider<StatixParser> completionParserProvider,
         StatixConfigFunctionWrapper configFunctionWrapper
     ) {
-        super(classLoaderResources, parserProvider);
+        super(classLoaderResources, parserProvider, completionParserProvider);
         this.classLoaderResources = classLoaderResources;
         this.configFunctionWrapper = configFunctionWrapper;
     }

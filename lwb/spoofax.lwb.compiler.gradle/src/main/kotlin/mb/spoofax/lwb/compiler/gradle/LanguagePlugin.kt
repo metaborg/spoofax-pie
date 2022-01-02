@@ -195,12 +195,18 @@ class LanguagePluginInstance(
               inputs.files(project.fileTree(dir) { include("**/*.sdf3") })
             }
           }
-          .prebuilt { inputParseTableAtermFile, inputParseTablePersistedFile ->
+          .prebuilt { inputParseTableAtermFile, inputParseTablePersistedFile, inputCompletionParseTableAtermFile, inputCompletionParseTablePersistedFile ->
             // Input: prebuilt input files
             inputParseTableAtermFile.tryAsLocal("SDF3 prebuilt parse table ATerm file") { file ->
               inputs.file(file)
             }
             inputParseTablePersistedFile.tryAsLocal("SDF3 prebuilt parse table persisted file") { file ->
+              inputs.file(file)
+            }
+            inputCompletionParseTableAtermFile.tryAsLocal("SDF3 prebuilt completion parse table ATerm file") { file ->
+              inputs.file(file)
+            }
+            inputCompletionParseTablePersistedFile.tryAsLocal("SDF3 prebuilt completion parse table persisted file") { file ->
               inputs.file(file)
             }
           }
@@ -209,6 +215,12 @@ class LanguagePluginInstance(
           outputs.file(file)
         }
         sdf3Config.parseTablePersistedOutputFile().tryAsLocal("SDF3 parse table persisted output file") { file ->
+          outputs.file(file)
+        }
+        sdf3Config.completionParseTableAtermOutputFile().tryAsLocal("SDF3 completion parse table ATerm output file") { file ->
+          outputs.file(file)
+        }
+        sdf3Config.completionParseTablePersistedOutputFile().tryAsLocal("SDF3 completion parse table persisted output file") { file ->
           outputs.file(file)
         }
       }

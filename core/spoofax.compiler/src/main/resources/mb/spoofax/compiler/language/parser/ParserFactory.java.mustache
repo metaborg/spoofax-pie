@@ -7,7 +7,11 @@ public class {{baseParserFactory.id}} implements ParserFactory {
     private final {{parseTable.qualifiedId}} parseTable;
 
     public {{baseParserFactory.id}}(HierarchicalResource definitionDir) {
-        this.parseTable = {{parseTable.qualifiedId}}.fromDefinitionDir(definitionDir);
+        final HierarchicalResource atermFile = definitionDir.appendRelativePath("{{parseTableAtermFileRelativePath}}");
+{{#isJsglr2}}
+        final HierarchicalResource persistedFile = definitionDir.appendRelativePath("{{parseTablePersistedFileRelativePath}}");
+{{/isJsglr2}}
+        this.parseTable = {{parseTable.qualifiedId}}.fromResources(atermFile{{#isJsglr2}}, persistedFile{{/isJsglr2}});
     }
 
     @Override public {{parser.qualifiedId}} create() {

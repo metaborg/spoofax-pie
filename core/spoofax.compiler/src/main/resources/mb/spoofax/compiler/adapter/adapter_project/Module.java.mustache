@@ -78,6 +78,16 @@ public class {{baseModule.id}} {
         return parserFactory.create();
     }
 
+    @Provides @{{scope.id}} @Named("completion")
+    static {{this.languageProjectInput.completionParserFactory.qualifiedId}} provideCompletionParserFactory(@{{qualifier.id}}("definition-directory") HierarchicalResource definitionDir) {
+        return new {{this.languageProjectInput.completionParserFactory.qualifiedId}}(definitionDir);
+    }
+
+    @Provides @Named("completion") /* Unscoped: parser has state, so create a new parser every call. */
+    static {{this.languageProjectInput.completionParser.qualifiedId}} provideCompletionParser(@Named("completion") {{this.languageProjectInput.completionParserFactory.qualifiedId}} parserFactory) {
+        return parserFactory.create();
+    }
+
     @Provides @{{scope.id}}
     static ITermFactory provideTermFactory() {
         return new org.spoofax.jsglr.client.imploder.ImploderOriginTermFactory(new TermFactory());

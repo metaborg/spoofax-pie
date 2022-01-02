@@ -71,8 +71,40 @@ public class SpoofaxSdf3Compile implements TaskDef<ResourcePath, Result<KeyedMes
 
     public Result<KeyedMessages, SpoofaxSdf3CompileException> compile(ExecContext context, SpoofaxSdf3Config config) {
         return config.caseOf()
-            .files((sdf3SpecConfig, outputParseTableAtermFile, outputParseTablePersistedFile) -> compileFromSourceFiles(context, sdf3SpecConfig, outputParseTableAtermFile, outputParseTablePersistedFile))
-            .prebuilt((inputParseTableAtermFile, inputParseTablePersistedFile, outputParseTableAtermFile, outputParseTablePersistedFile) -> copyPrebuilt(context, inputParseTableAtermFile, inputParseTablePersistedFile, outputParseTableAtermFile, outputParseTablePersistedFile))
+            .files((
+                sdf3SpecConfig,
+                outputParseTableAtermFile,
+                outputParseTablePersistedFile,
+                outputCompletionParseTableAtermFile,
+                outputCompletionParseTablePersistedFile
+            ) -> compileFromSourceFiles(
+                context,
+                sdf3SpecConfig,
+                outputParseTableAtermFile,
+                outputParseTablePersistedFile,
+                outputCompletionParseTableAtermFile,
+                outputCompletionParseTablePersistedFile
+            ))
+            .prebuilt((
+                inputParseTableAtermFile,
+                inputParseTablePersistedFile,
+                inputCompletionParseTableAtermFile,
+                inputCompletionParseTablePersistedFile,
+                outputParseTableAtermFile,
+                outputParseTablePersistedFile,
+                outputCompletionParseTableAtermFile,
+                outputCompletionParseTablePersistedFile
+            ) -> copyPrebuilt(
+                context,
+                inputParseTableAtermFile,
+                inputParseTablePersistedFile,
+                inputCompletionParseTableAtermFile,
+                inputCompletionParseTablePersistedFile,
+                outputParseTableAtermFile,
+                outputParseTablePersistedFile,
+                outputCompletionParseTableAtermFile,
+                outputCompletionParseTablePersistedFile
+            ))
             ;
     }
 
@@ -80,7 +112,9 @@ public class SpoofaxSdf3Compile implements TaskDef<ResourcePath, Result<KeyedMes
         ExecContext context,
         Sdf3SpecConfig config,
         ResourcePath outputParseTableAtermFile,
-        ResourcePath outputParseTablePersistedFile
+        ResourcePath outputParseTablePersistedFile,
+        ResourcePath outputCompletionParseTableAtermFile,
+        ResourcePath outputCompletionParseTablePersistedFile
     ) {
         final KeyedMessages messages = context.require(check, config);
         if(messages.containsError()) {
@@ -88,10 +122,14 @@ public class SpoofaxSdf3Compile implements TaskDef<ResourcePath, Result<KeyedMes
         }
 
         final Supplier<Result<ParseTable, ?>> parseTableSupplier = toParseTable.createSupplier(new Sdf3SpecToParseTable.Input(config, false));
+        final Supplier<Result<ParseTable, ?>> completionParseTableSupplier = toParseTable.createSupplier(new Sdf3SpecToParseTable.Input(config, true));
         final Result<None, ? extends Exception> compileResult = context.require(parseTableToFile, new Sdf3ParseTableToFile.Input(
             parseTableSupplier,
+            completionParseTableSupplier,
             outputParseTableAtermFile,
-            outputParseTablePersistedFile
+            outputParseTablePersistedFile,
+            outputCompletionParseTableAtermFile,
+            outputCompletionParseTablePersistedFile
         ));
         if(compileResult.isErr()) {
             return Result.ofErr(SpoofaxSdf3CompileException.parseTableCompileFail(compileResult.getErr()));
@@ -104,12 +142,18 @@ public class SpoofaxSdf3Compile implements TaskDef<ResourcePath, Result<KeyedMes
         ExecContext context,
         ResourcePath inputParseTableAtermFilePath,
         ResourcePath inputParseTablePersistedFilePath,
+        ResourcePath inputCompletionParseTableAtermFilePath,
+        ResourcePath inputCompletionParseTablePersistedFilePath,
         ResourcePath outputParseTableAtermFilePath,
-        ResourcePath outputParseTablePersistedFilePath
+        ResourcePath outputParseTablePersistedFilePath,
+        ResourcePath outputCompletionParseTableAtermFilePath,
+        ResourcePath outputCompletionParseTablePersistedFilePath
     ) {
         try {
             TaskCopyUtil.copy(context, inputParseTableAtermFilePath, outputParseTableAtermFilePath);
             TaskCopyUtil.copy(context, inputParseTablePersistedFilePath, outputParseTablePersistedFilePath);
+            TaskCopyUtil.copy(context, inputCompletionParseTableAtermFilePath, outputCompletionParseTableAtermFilePath);
+            TaskCopyUtil.copy(context, inputCompletionParseTablePersistedFilePath, outputCompletionParseTablePersistedFilePath);
         } catch(IOException e) {
             return Result.ofErr(SpoofaxSdf3CompileException.parseTableCompileFail(e));
         }

@@ -1,0 +1,20 @@
+package {{baseParserFactory.packageId}};
+
+import mb.resource.hierarchical.HierarchicalResource;
+import mb.spoofax.compiler.interfaces.spoofaxcore.ParserFactory;
+
+public class {{baseCompletionParserFactory.id}} implements ParserFactory {
+    private final {{parseTable.qualifiedId}} parseTable;
+
+    public {{baseCompletionParserFactory.id}}(HierarchicalResource definitionDir) {
+        final HierarchicalResource atermFile = definitionDir.appendRelativePath("{{completionParseTableAtermFileRelativePath}}");
+{{#isJsglr2}}
+        final HierarchicalResource persistedFile = definitionDir.appendRelativePath("{{completionParseTablePersistedFileRelativePath}}");
+{{/isJsglr2}}
+        this.parseTable = {{parseTable.qualifiedId}}.fromResources(atermFile{{#isJsglr2}}, persistedFile{{/isJsglr2}});
+    }
+
+    @Override public {{completionParser.qualifiedId}} create() {
+        return new {{completionParser.qualifiedId}}(parseTable);
+    }
+}

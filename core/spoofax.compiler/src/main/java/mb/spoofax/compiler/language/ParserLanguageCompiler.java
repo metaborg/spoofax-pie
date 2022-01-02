@@ -22,12 +22,14 @@ public class ParserLanguageCompiler {
     private final TemplateWriter tableTemplate;
     private final TemplateWriter parserTemplate;
     private final TemplateWriter factoryTemplate;
+    private final TemplateWriter completionFactoryTemplate;
 
     @Inject public ParserLanguageCompiler(TemplateCompiler templateCompiler) {
         templateCompiler = templateCompiler.loadingFromClass(getClass());
         this.tableTemplate = templateCompiler.getOrCompileToWriter("parser/ParseTable.java.mustache");
         this.parserTemplate = templateCompiler.getOrCompileToWriter("parser/Parser.java.mustache");
         this.factoryTemplate = templateCompiler.getOrCompileToWriter("parser/ParserFactory.java.mustache");
+        this.completionFactoryTemplate = templateCompiler.getOrCompileToWriter("parser/CompletionParserFactory.java.mustache");
     }
 
 
@@ -37,6 +39,7 @@ public class ParserLanguageCompiler {
         tableTemplate.write(context, input.baseParseTable().file(generatedJavaSourcesDirectory), input);
         parserTemplate.write(context, input.baseParser().file(generatedJavaSourcesDirectory), input);
         factoryTemplate.write(context, input.baseParserFactory().file(generatedJavaSourcesDirectory), input);
+        completionFactoryTemplate.write(context, input.baseCompletionParserFactory().file(generatedJavaSourcesDirectory), input);
         return None.instance;
     }
 
@@ -73,6 +76,16 @@ public class ParserLanguageCompiler {
          * @return path to the parse table persisted file to load, relative to the classloader resources.
          */
         String parseTablePersistedFileRelativePath();
+
+        /**
+         * @return path to the completion parse table aterm file to load, relative to the classloader resources.
+         */
+        String completionParseTableAtermFileRelativePath();
+
+        /**
+         * @return path to the completion parse table persisted file to load, relative to the classloader resources.
+         */
+        String completionParseTablePersistedFileRelativePath();
 
         @Value.Default default ParserVariant variant() { return ParserVariant.jsglr1(); }
 
@@ -124,6 +137,30 @@ public class ParserLanguageCompiler {
 
         default TypeInfo parserFactory() {
             return extendParserFactory().orElseGet(this::baseParserFactory);
+        }
+
+        // Completion Parser
+
+        @Value.Default default TypeInfo baseCompletionParser() {
+            return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "Parser");
+        }
+
+        Optional<TypeInfo> extendCompletionParser();
+
+        default TypeInfo completionParser() {
+            return extendCompletionParser().orElseGet(this::baseCompletionParser);
+        }
+
+        // Completion Parser factory
+
+        @Value.Default default TypeInfo baseCompletionParserFactory() {
+            return TypeInfo.of(languageProject().packageId(), shared().defaultClassPrefix() + "CompletionParserFactory");
+        }
+
+        Optional<TypeInfo> extendCompletionParserFactory();
+
+        default TypeInfo completionParserFactory() {
+            return extendCompletionParserFactory().orElseGet(this::baseCompletionParserFactory);
         }
 
 

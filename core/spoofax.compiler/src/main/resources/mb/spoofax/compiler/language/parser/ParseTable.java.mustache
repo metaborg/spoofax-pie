@@ -13,11 +13,16 @@ public class {{baseParseTable.id}} implements Serializable {
         this.parseTable = parseTable;
     }
 
+    @Deprecated // Use `ParserFactory.create()` instead.
     public static {{baseParseTable.id}} fromDefinitionDir(HierarchicalResource definitionDir) {
         final HierarchicalResource atermFile = definitionDir.appendRelativePath("{{parseTableAtermFileRelativePath}}");
 {{#isJsglr2}}
-    final HierarchicalResource persistedFile = definitionDir.appendRelativePath("{{parseTablePersistedFileRelativePath}}");
+        final HierarchicalResource persistedFile = definitionDir.appendRelativePath("{{parseTablePersistedFileRelativePath}}");
 {{/isJsglr2}}
+        return fromResources(atermFile{{#isJsglr2}}, persistedFile{{/isJsglr2}});
+    }
+
+    public static {{baseParseTable.id}} fromResources(HierarchicalResource atermFile{{#isJsglr2}}, HierarchicalResource persistedFile{{/isJsglr2}}) {
         try(final InputStream atermInputStream = atermFile.openRead(){{#isJsglr2}}; final InputStream persistedInputStream = persistedFile.openRead(){{/isJsglr2}}) {
             final {{parseTableType.qualifiedId}} parseTable = {{parseTableType.qualifiedId}}.fromStream(atermInputStream{{#isJsglr2}}, persistedInputStream{{/isJsglr2}});
             return new {{baseParseTable.id}}(parseTable);
