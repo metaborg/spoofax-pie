@@ -1,0 +1,197 @@
+module rv32im/start
+
+imports rv32im/lex 
+
+context-free start-symbols RProgram
+  
+context-free sorts
+  RProgram
+  RLine
+  RLabel
+  RStatement
+  RPseudodirective
+  RInstruction
+  RArg
+  RType
+  
+context-free syntax
+  
+  RProgram.RProgram = <<{RLine "\n"}*>>
+  
+  RLine = RStatement
+  RLine = RLabel
+  
+  RLabel.RLabel = <
+  
+    <RLBL>:
+  >
+  
+  RLabel.RLabelC = <
+  
+    <RLBL>: # <RComment>
+  >
+  
+  RStatement.D = <<RPseudodirective> # <RComment>>
+  RStatement.I = <<RInstruction> # <RComment>>
+  RStatement   = RPseudodirective 
+  RStatement   = RInstruction 
+ 
+context-free syntax // symbolic registers
+
+  RArg.RInt = RINT  
+  RArg.RVar = <#<RID>>  
+  RArg.RLbl = RLBL
+  RArg.RReg = RID
+  RArg.RMem = <<RINT>(<RID>)>
+  
+  RInstruction.RLocal = <  local <RArg> : <RType>>
+    
+  RType.RIntT = <int>
+  
+context-free syntax // Venus Pseudo instructions
+  
+  RPseudodirective.RPSData = <
+  
+  .data>
+  RPseudodirective.RPSText = <
+  
+  .text>
+  RPseudodirective.RPSByte   = <.byte <{RINT ", "}*>>
+  RPseudodirective.RPSString = <.string <RSTRING>>
+  RPseudodirective.RPSAsciiz = <.asciiz <RSTRING>>
+  RPseudodirective.RPSWord   = <.word <{RArg ", "}*>>
+  RPseudodirective.RPSSpace  = <.space <RINT>>
+  RPseudodirective.RPSGlobl  = <
+  
+  .globl <RArg>
+  >
+  RPseudodirective.RPSAlign = <.align <RINT>>
+  RPseudodirective.RPSEquiv = <.equiv <RArg>, <RArg>>
+  RPseudodirective.RPSEqu   = <.equ   <RArg>, <RArg>>
+  RPseudodirective.RPSSet   = <.set   <RArg>, <RArg>>
+  
+context-free syntax // RV32I - Base Math
+
+  // schema: op dst, src1, src2
+
+  RInstruction.RAdd     = <  add    <RArg>, <RArg>, <RArg>>      {case-insensitive}
+  RInstruction.RAddi    = <  addi   <RArg>, <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RAnd     = <  and    <RArg>, <RArg>, <RArg>>      {case-insensitive}
+  RInstruction.RAndi    = <  andi   <RArg>, <RArg>, <RArg>> {case-insensitive}
+  RInstruction.ROr      = <  or     <RArg>, <RArg>, <RArg>>      {case-insensitive}
+  RInstruction.ROri     = <  ori    <RArg>, <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RXor     = <  xor    <RArg>, <RArg>, <RArg>>      {case-insensitive}
+  RInstruction.RXori    = <  xori   <RArg>, <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RSub     = <  sub    <RArg>, <RArg>, <RArg>>      {case-insensitive}
+  
+context-free syntax // Branches
+
+  // schema: op src1, src2, label 
+
+  RInstruction.RBeq     = <  beq    <RArg>, <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RBne     = <  bne    <RArg>, <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RBlt     = <  blt    <RArg>, <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RBge     = <  bge    <RArg>, <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RBltu    = <  bltu   <RArg>, <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RBgeu    = <  bgeu   <RArg>, <RArg>, <RArg>> {case-insensitive}
+  
+//  RInstruction.RBeq     = <  beq    <RArg>, <RArg>, <RArg>>  {case-insensitive}
+//  RInstruction.RBne     = <  bne    <RArg>, <RArg>, <RArg>>  {case-insensitive}
+//  RInstruction.RBlt     = <  blt    <RArg>, <RArg>, <RArg>>  {case-insensitive}
+//  RInstruction.RBge     = <  bge    <RArg>, <RArg>, <RArg>>  {case-insensitive}
+//  RInstruction.RBltu    = <  bltu   <RArg>, <RArg>, <RArg>> {case-insensitive}
+//  RInstruction.RBgeu    = <  bgeu   <RArg>, <RArg>, <RArg>> {case-insensitive}
+  
+context-free syntax // Misc.
+
+  RInstruction.REcall   = <  ecall>
+  RInstruction.RLui     = <  lui    <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RAuipc   = <  auipc  <RArg>, <RArg>> {case-insensitive}
+  
+context-free syntax // Jumps
+
+  RInstruction.RJal2    = <  jal    <RArg>, <RArg>>       {case-insensitive}
+  RInstruction.RJalr3   = <  jalr   <RArg>, <RArg>, <RArg>> {case-insensitive}
+  
+context-free syntax // Loading
+
+  RInstruction.RLb      = <  lb     <RArg>, <RArg>(<RArg>)> {case-insensitive}
+  RInstruction.RLw3     = <  lw     <RArg>, <RArg>(<RArg>)> {case-insensitive}
+  RInstruction.RLw2     = <  lw     <RArg>, <RArg>>       {case-insensitive}
+  RInstruction.RLh      = <  lh     <RArg>, <RArg>(<RArg>)> {case-insensitive}
+  RInstruction.RLbu     = <  lbu    <RArg>, <RArg>(<RArg>)> {case-insensitive}
+  RInstruction.RLhu     = <  lhu    <RArg>, <RArg>(<RArg>)> {case-insensitive}
+  
+context-free syntax // Storing
+
+  RInstruction.RSb      = <  sb     <RArg>, <RArg>(<RArg>)> {case-insensitive}
+  RInstruction.RSh      = <  sh     <RArg>, <RArg>(<RArg>)> {case-insensitive}
+  RInstruction.RSw      = <  sw     <RArg>, <RArg>(<RArg>)> {case-insensitive}
+  RInstruction.RSw2     = <  sw     <RArg>, <RArg>, <RArg>> {case-insensitive} 
+  
+  // Set less than
+  RInstruction.RSlt     = <  slt    <RArg>, <RArg>, <RArg>>      {case-insensitive}
+  RInstruction.RSltu    = <  sltu   <RArg>, <RArg>, <RArg>>      {case-insensitive}
+  RInstruction.RSlti    = <  slti   <RArg>, <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RSltiu   = <  sltiu  <RArg>, <RArg>, <RArg>> {case-insensitive}
+  
+  // Shifts
+  RInstruction.RSll     = <  sll    <RArg>, <RArg>, <RArg>>      {case-insensitive}
+  RInstruction.RSrl     = <  srl    <RArg>, <RArg>, <RArg>>      {case-insensitive}
+  RInstruction.RSra     = <  sra    <RArg>, <RArg>, <RArg>>      {case-insensitive}
+  RInstruction.RSlli    = <  slli   <RArg>, <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RSrli    = <  srli   <RArg>, <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RSrai    = <  srai   <RArg>, <RArg>, <RArg>> {case-insensitive}
+  
+  // RV32IM - Extension
+  // Math
+  RInstruction.RMul     = <  mul    <RArg>, <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RMulh    = <  mulh   <RArg>, <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RMulhsu  = <  mulhsu <RArg>, <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RMulhu   = <  mulhu  <RArg>, <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RRem     = <  rem    <RArg>, <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RRemu    = <  rmeu   <RArg>, <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RDiv     = <  div    <RArg>, <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RDivu    = <  divu   <RArg>, <RArg>, <RArg>> {case-insensitive}
+  
+context-free syntax  // Venus Sugar
+
+  RInstruction.RBeqz    = <  beqz   <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RBgez    = <  bgez   <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RBgtz    = <  bgtz   <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RBltz    = <  bltz   <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RBnez    = <  bnez   <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RBgt     = <  bgt    <RArg>, <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RBgtu    = <  bgtu   <RArg>, <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RBle     = <  ble    <RArg>, <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RBleu    = <  bleu   <RArg>, <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RBlez    = <  blez   <RArg>, <RArg>, <RArg>> {case-insensitive}
+  
+  RInstruction.RCall    = <  call   <RArg>> {case-insensitive}
+  RInstruction.RJ       = <  j      <RArg>> {case-insensitive}
+  RInstruction.RJal1    = <  jal    <RArg>> {case-insensitive}
+  RInstruction.RJalr1   = <  jalr   <RArg>> {case-insensitive}
+  RInstruction.RJr      = <  jr     <RArg>> {case-insensitive}
+  RInstruction.RRet     = <  ret>       {case-insensitive}
+  
+  RInstruction.RLa      = <  la     <RArg>, <RArg>>      {case-insensitive}
+  RInstruction.RLi      = <  li     <RArg>, <RArg>> {case-insensitive}
+  
+  RInstruction.RMv      = <  mv     <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RNeg     = <  neg    <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RNot     = <  not    <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RNop     = <  nop>             {case-insensitive}
+  RInstruction.RTail    = <  tail   <RArg>>       {case-insensitive}
+  
+  RInstruction.RSeqz    = <  seqz   <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RSgtz    = <  sgtz   <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RSltz    = <  sltz   <RArg>, <RArg>> {case-insensitive}
+  RInstruction.RSnez    = <  snez   <RArg>, <RArg>> {case-insensitive}
+  
+  //  RInstruction.RSeq = 'seq' ID "," ID "," ID
+  //  RInstruction.RSge = 'sge' ID "," ID "," ID
+  //  RInstruction.RSgt = 'sgt' ID "," ID "," ID
+  //  RInstruction.RSle = 'sle' ID "," ID "," ID
+  //  RInstruction.RSne = 'sne' ID "," ID "," ID  
+  //  RInstruction.RLoad = 
+  //  RInstruction.RStore = 

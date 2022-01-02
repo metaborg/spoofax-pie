@@ -77,6 +77,19 @@ public class {{baseModule.id}} {
     static {{this.languageProjectInput.parser.qualifiedId}} provideParser({{this.languageProjectInput.parserFactory.qualifiedId}} parserFactory) {
         return parserFactory.create();
     }
+
+    @Provides @{{scope.id}}
+    static ITermFactory provideTermFactory() {
+        return new org.spoofax.jsglr.client.imploder.ImploderOriginTermFactory(new TermFactory());
+    }
+{{/parser}}
+{{^parser}}
+
+
+    @Provides @{{scope.id}}
+    static ITermFactory provideTermFactory() {
+        return new TermFactory();
+    }
 {{/parser}}
 {{#styler}}
 
@@ -111,11 +124,6 @@ public class {{baseModule.id}} {
 {{/constraintAnalyzer}}
 {{#strategoRuntime}}
 
-
-    @Provides @{{scope.id}}
-    static ITermFactory provideTermFactory() {
-        return new TermFactory();
-    }
 
     @Provides @{{scope.id}}
     static {{this.languageProjectInput.strategoRuntimeBuilderFactory.qualifiedId}} provideStrategoRuntimeBuilderFactory(LoggerFactory loggerFactory, ResourceService resourceService, @{{qualifier.id}}("definition-directory") HierarchicalResource definitionDir) {
@@ -168,6 +176,14 @@ public class {{baseModule.id}} {
 {{/providedTaskDefs}}
         return taskDefs;
     }
+
+{{#dependOnRv32Im}}
+    @Provides @{{scope.id}} @{{qualifier.id}} @ElementsIntoSet
+    static Set<TaskDef<?, ?>> provideRv32ImTaskDefs(@mb.rv32im.Rv32ImQualifier Set<TaskDef<?, ?>> taskDefs) {
+        return taskDefs;
+    }
+
+{{/dependOnRv32Im}}
 {{#multilangAnalyzer}}
     @Provides @{{scope.id}}
     static LanguageId provideLanguageId() {

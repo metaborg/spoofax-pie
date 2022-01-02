@@ -31,7 +31,7 @@ import mb.spoofax.compiler.util.*
 import mb.spoofax.lwb.compiler.CheckLanguageSpecification
 import mb.spoofax.lwb.compiler.CompileLanguageSpecification
 import mb.spoofax.lwb.compiler.dagger.StandaloneSpoofax3Compiler
-import mb.spoofax.lwb.compiler.stratego.SpoofaxStrategoLibUtil
+import mb.strategolib.StrategoLibUtil
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -125,7 +125,7 @@ class LanguagePluginInstance(
   private fun configure() {
     val languageProjectCompiler = spoofax3Compiler.compiler.spoofaxCompilerComponent.languageProjectCompiler
     val adapterProjectCompiler = spoofax3Compiler.compiler.spoofaxCompilerComponent.adapterProjectCompiler
-    configureProject(languageProjectCompiler, spoofax3Compiler.compiler.component.spoofaxStrategoLibUtil, adapterProjectCompiler)
+    configureProject(languageProjectCompiler, spoofax3Compiler.compiler.strategolibComponent.strategoLibUtil, adapterProjectCompiler)
     configureCompileLanguageProjectTask(languageProjectCompiler, compileLanguageInput.languageProjectInput())
     val check = spoofax3Compiler.compiler.component.checkLanguageSpecification
     val compile = spoofax3Compiler.compiler.component.compileLanguageSpecification
@@ -135,7 +135,7 @@ class LanguagePluginInstance(
 
   private fun configureProject(
     languageProjectCompiler: LanguageProjectCompiler,
-    spoofaxStrategoLibUtil: SpoofaxStrategoLibUtil,
+    strategoLibUtil: StrategoLibUtil,
     adapterProjectCompiler: AdapterProjectCompiler
   ) {
     // Language project compiler
@@ -148,7 +148,7 @@ class LanguagePluginInstance(
     val languageSpecificationInput = compileLanguageInput.compileLanguageSpecificationInput()
     project.addMainResourceDirectory(languageSpecificationInput.compileLanguageShared().generatedResourcesDirectory(), resourceService)
     project.addMainJavaSourceDirectory(languageSpecificationInput.compileLanguageShared().generatedJavaSourcesDirectory(), resourceService)
-    project.dependencies.add("implementation", project.files(spoofaxStrategoLibUtil.strategoLibJavaClassPaths))
+    project.dependencies.add("implementation", project.files(strategoLibUtil.strategoLibJavaClassPaths))
     // Adapter project compiler
     val adapterProjectInput = compileLanguageInput.adapterProjectInput()
     project.addMainJavaSourceDirectory(adapterProjectInput.adapterProject().generatedJavaSourcesDirectory(), resourceService)
@@ -189,9 +189,9 @@ class LanguagePluginInstance(
       // Inputs and outputs
       input.sdf3().ifPresent { sdf3Config ->
         sdf3Config.source().caseOf()
-          .files { mainSourceDirectory, _ ->
+          .files { files ->
             // Input: all SDF3 files in the main source directory
-            mainSourceDirectory.tryAsLocal("SDF3 files in main source directory") { dir ->
+            files.mainSourceDirectory().tryAsLocal("SDF3 files in main source directory") { dir ->
               inputs.files(project.fileTree(dir) { include("**/*.sdf3") })
             }
           }
@@ -214,19 +214,19 @@ class LanguagePluginInstance(
       }
       input.esv().ifPresent { esvConfig ->
         esvConfig.source().caseOf()
-          .files { mainSourceDirectory, _, includeDirectories, includeLibSpoofax2Exports, libSpoofax2UnarchiveDirectory ->
+          .files { files ->
             // Input: all ESV files in the main source directory and include directories
-            mainSourceDirectory.tryAsLocal("ESV files in main source directory") { dir ->
+            files.mainSourceDirectory().tryAsLocal("ESV files in main source directory") { dir ->
               inputs.files(project.fileTree(dir) { include("**/*.esv") })
             }
-            includeDirectories.forEach { includeDirectory ->
+            files.includeDirectories().forEach { includeDirectory ->
               includeDirectory.tryAsLocal("ESV files in include directory") { dir ->
                 inputs.files(project.fileTree(dir) { include("**/*.esv") })
               }
             }
-            if(includeLibSpoofax2Exports) {
+            if(files.includeLibSpoofax2Exports()) {
               // Output: libspoofax2 unarchive directory
-              libSpoofax2UnarchiveDirectory.tryAsLocal("libspoofax2 unarchive directory") { dir ->
+              files.libSpoofax2UnarchiveDirectory().tryAsLocal("libspoofax2 unarchive directory") { dir ->
                 outputs.dir(dir)
               }
             }
@@ -245,15 +245,15 @@ class LanguagePluginInstance(
       }
       input.statix().ifPresent { statixConfig ->
         statixConfig.source().caseOf()
-          .files { mainSourceDirectory, _, includeDirectories ->
+          .files { files ->
             // Input: all Statix files in the main source directory and include directories
-            mainSourceDirectory.tryAsLocal("Statix files in main source directory") { dir ->
+            files.mainSourceDirectory().tryAsLocal("Statix files in main source directory") { dir ->
               inputs.files(project.fileTree(dir) {
                 include("**/*.stx")
                 include("**/*.stxtest")
               })
             }
-            includeDirectories.forEach { includeDirectory ->
+            files.includeDirectories().forEach { includeDirectory ->
               includeDirectory.tryAsLocal("Statix files in include directory") { dir ->
                 inputs.files(project.fileTree(dir) {
                   include("**/*.stx")

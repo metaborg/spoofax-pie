@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Spoofax 3 Language Workbench plugin
+Bundle-Vendor: MetaBorg
+Bundle-Activator: mb.spoofax.lwb.eclipse.SpoofaxLwbPlugin
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ActivationPolicy: lazy
+Eclipse-RegisterBuddy: spoofax.eclipse,
+  tooling.eclipsebundle,
+  spoofax.compiler.eclipsebundle,
+  cfg.eclipse,
+  sdf3.eclipse,
+  esv.eclipse,
+  statix.eclipse,
+  stratego.eclipse,
+  strategolib.eclipse
+  libspoofax2.eclipse,
+  libstatix.eclipse

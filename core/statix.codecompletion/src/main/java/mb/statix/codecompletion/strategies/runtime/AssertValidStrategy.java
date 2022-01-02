@@ -45,7 +45,7 @@ public final class AssertValidStrategy extends NamedStrategy2<SolverContext, ITe
         //    delayStuckQueries
 
         final InferStrategy infer = InferStrategy.getInstance();
-        final DelayStuckQueriesStrategy delayStuckQueries = DelayStuckQueriesStrategy.getInstance();
+//        final DelayStuckQueriesStrategy delayStuckQueries = DelayStuckQueriesStrategy.getInstance();
         final NotStrategy<SolverState, SolverState> not = NotStrategy.getInstance();
 
         final @Nullable SolverState r1 = engine.eval(infer, input);
@@ -55,11 +55,12 @@ public final class AssertValidStrategy extends NamedStrategy2<SolverContext, ITe
         final Strategy<SolverState, @Nullable SolverState> s3 = not.apply(s2);
         final @Nullable SolverState r3 = engine.eval(s3, r1);
         if (r3 == null) return null;
+        return r3;
 
-        final @Nullable SolverState r4 = engine.eval(delayStuckQueries, ctx, r3);
-        if (r4 == null) return null;
+//        final @Nullable SolverState r4 = engine.eval(delayStuckQueries, ctx, r3);
+//        if (r4 == null) return null;
 
-        return r4;
+//        return r4;
     }
 
     @Override

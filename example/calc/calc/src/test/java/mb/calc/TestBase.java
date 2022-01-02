@@ -9,12 +9,14 @@ class TestBase extends SingleLanguageTestBase<CalcResourcesComponent, CalcCompon
         super(
             DaggerLoggerComponent.builder().loggerModule(LoggerModule.stdOutVerbose()).build(),
             DaggerCalcResourcesComponent::create,
-            (loggerComponent, resourcesComponent, resourceServiceComponent, platformComponent) -> DaggerCalcComponent.builder()
-                .loggerComponent(loggerComponent)
-                .calcResourcesComponent(resourcesComponent)
-                .resourceServiceComponent(resourceServiceComponent)
-                .platformComponent(platformComponent)
-                .build()
+            (loggerComponent, resourcesComponent, resourceServiceComponent, platformComponent) -> {
+                return DaggerCalcComponent.builder()
+                    .loggerComponent(loggerComponent)
+                    .calcResourcesComponent(resourcesComponent)
+                    .resourceServiceComponent(resourceServiceComponent)
+                    .platformComponent(platformComponent)
+                    .build();
+            }
         );
     }
 }

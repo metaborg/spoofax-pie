@@ -14,7 +14,6 @@ if(org.gradle.util.VersionNumber.parse(gradle.gradleVersion).major < 6) {
 // from the command-line. Otherwise, the parent project (spoofax.root) will include these composite builds.
 if(gradle.parent == null) {
   includeBuildWithName("../core", "spoofax3.core.root")
-  includeBuildWithName("../metalib", "spoofax3.metalib.root")
 }
 
 fun includeBuildWithName(dir: String, name: String) {
@@ -84,12 +83,13 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
   includeProject("libstatix")
   includeProject("libstatix.eclipse")
 }
+"metalib/strategolib".run {
+  includeProject("strategolib")
+  includeProject("strategolib.eclipse")
+}
 
 include("spoofax.lwb.compiler")
 include("spoofax.lwb.compiler.dagger")
 include("spoofax.lwb.compiler.gradle")
 
 include("spoofax.lwb.dynamicloading")
-
-include("spoofax.lwb.eclipse")
-

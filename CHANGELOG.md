@@ -5,6 +5,137 @@ All notable changes to this project are documented in this file, based on [Keep 
 ## [Unreleased]
 
 
+## [0.16.17] - 2021-12-13
+### Changed
+- `pie` requirement to `0.19.7`.
+
+
+## [0.16.16] - 2021-12-11
+### Changed
+- `releng` (devenv-release) requirement to `0.1.28`. (skipped a few versions due to bugs)
+
+
+## [0.16.15] - 2021-12-01
+### Fixed
+- imports to `libspoofax` in Stratego 2 not working due to unresolved import to `libstratego-aterm`. This precompiled Stratego 1 library is now passed in by default.
+
+### Changed
+- `releng` (devenv-release) requirement to `0.1.23`.
+
+
+## [0.16.14] - 2021-12-01
+### Changed
+- `releng` (devenv-release) requirement to `0.1.22`.
+
+
+## [0.16.13] - 2021-11-24
+### Changed
+- `releng` (devenv-release) requirement to `0.1.21`.
+
+
+## [0.16.12] - 2021-11-23
+### Fixed
+- More wrong main files being used when only the main source directory was set for a meta-language in `spoofaxc.cfg`.
+- Extract more messages in SPT `transform` expectations.
+- Out-of-bounds messages in SPT. Messages outside the bounds of the test fragment are now moved to the expectation.
+
+### Changed
+- `common` requirement to `0.10.1`.
+- `pie` requirement to `0.19.6`.
+
+
+## [0.16.11] - 2021-11-19
+### Fixed
+- RV32IM not being parsed due to wrong start symbol.
+- Wrong main files being used when only the main SDF3 source directory was set in `spoofaxc.cfg`.
+
+
+## [0.16.10] - 2021-11-19
+### Changed
+- `releng` (devenv-release) requirement to `0.1.20`.
+- Updated RV32IM syntax.
+
+
+## [0.16.9] - 2021-11-18
+### Fixed
+- Eclipse editors of dynamically loaded languages lacking many editor services.
+- Add `stratego.output-java-package` option to CFG, for configuring the Stratego generated Java files package.
+
+### Changed
+- `releng` (devenv-release) requirement to `0.1.19`.
+
+
+## [0.16.8] - 2021-11-17
+### Added
+- Support for toggle comment in Eclipse plugins.
+- Support for bracket matching in Eclipse plugins.
+
+
+## [0.16.7] - 2021-11-17
+### Fixed
+- Many Stratego messages having no origin locations.
+
+
+## [0.16.6] - 2021-11-16
+### Fixed
+- Messages with exceptions not showing their exception in Eclipse.
+- SPT transform expectation halting the entire pipeline due to an exception when building the arguments for a command. It now creates an error in the SPT file.
+- SPT transform expectation not working on commands that require an enclosing context. Fixed by making SPT test case resources implement `HierarchicalResource` that mock a directory with itself in it.
+- SPT transform to term expectation not giving an error if a command returned no feedback at all.
+
+### Changed
+- `LanguageInstance#createCodeCompletionTask` to return an `Option` to signal that the language does not support code completion. This change will be rolled out to the other task creating functions of `LanguageInstance` in the future.
+- `RawArgsBuilder` to throw `ArgumentBuilderException` instead of a generic `RuntimeException` to differentiate between other `RuntimeException`s.
+- RV32IM execution task to be split into `ExecuteRiscV` which takes a supplier of RV32IM text, and produces the printed text or an error, and `ShowExecuteRiscV` which shows that as a command.
+- SPT transform to ATerm expectation not checking whether the command feedback matches the expected term pattern. It now checks the "show text" feedback against the term pattern, which will only work if the pattern is a wildcard or a string.
+
+### Added
+- Made it possible to depend on the RV32IM language, giving access to its tasks. A dependency can be added with the following syntax in CFG: `depend-on-rv32im = true`. A more general language dependency system will be added in the future.
+
+
+## [0.16.5] - 2021-11-12
+### Changed
+- `releng` (devenv-release) requirement to `0.1.18`.
+
+
+## [0.16.4] - 2021-11-11
+### Fixed
+- Fix `InvalidAstShapeException` for incomplete CFG files (https://github.com/metaborg/spoofax-pie/issues/93).
+
+### Changed
+- `common` requirement to `0.10.0`.
+- `pie` requirement to `0.19.5`.
+
+### Added
+- Documentation page on importing a project into the Eclipse LWB.
+
+
+## [0.16.3] - 2021-11-10
+### Fixed
+- Fix "Resource ‘...’ does not exist." in Eclipse when outputting files from commands.
+- Fix exception being thrown, halting the entire pipeline, when the SDF3 source directory does not exist. Now a result with the error is returned instead.
+- Fix exception being thrown, halting the entire pipeline, when meta-language files are moved around. Now an error is logged instead.
+- Importing language project into Eclipse causing many duplicate definition errors due to all files being copied into `bin`. The `bin` directory is now ignored as a source directory by default.
+- Spoofax Eclipse plugins/features/repositories not having names or providers (https://github.com/metaborg/spoofax-pie/issues/85).
+
+### Changed
+- `resource` requirement to `0.13.2`.
+- `pie` requirement to `0.19.4`.
+
+
+## [0.16.2] - 2021-11-09
+### Fixed
+- Fix wrong separator being used on Windows in `pp.str2` Stratego import.
+
+### Changed
+- `resource` requirement to `0.13.1`.
+
+
+## [0.16.1] - 2021-11-08
+### Fixed
+- Fix wrong pretty-printer import in Stratego when SDF3 main file is not `./start.sdf3`.
+
+
 ## [0.16.0] - 2021-11-05
 ### Fixed
 - Evaluating .stxtest files outside of the Statix source directory (src by default) silently failing.
@@ -24,7 +155,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `common` requirement to `0.9.9`.
 - `pie` requirement to `0.19.3`.
 - `coronium` plugin requirements to `0.3.12`.
-- `releng` (devenv-release) requirement to 0.1.17.
+- `releng` (devenv-release) requirement to `0.1.17`.
 
 ### Added
 - RV32IM language for targeting RISC-V.
@@ -296,7 +427,24 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.0...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.17...HEAD
+[0.16.17]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.16...release-0.16.17
+[0.16.16]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.15...release-0.16.16
+[0.16.15]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.14...release-0.16.15
+[0.16.14]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.13...release-0.16.14
+[0.16.13]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.12...release-0.16.13
+[0.16.12]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.11...release-0.16.12
+[0.16.11]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.10...release-0.16.11
+[0.16.10]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.9...release-0.16.10
+[0.16.9]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.8...release-0.16.9
+[0.16.8]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.7...release-0.16.8
+[0.16.7]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.6...release-0.16.7
+[0.16.6]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.5...release-0.16.6
+[0.16.5]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.4...release-0.16.5
+[0.16.4]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.3...release-0.16.4
+[0.16.3]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.2...release-0.16.3
+[0.16.2]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.1...release-0.16.2
+[0.16.1]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.0...release-0.16.1
 [0.16.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.15.3...release-0.16.0
 [0.15.3]: https://github.com/metaborg/spoofax-pie/compare/release-0.15.2...release-0.15.3
 [0.15.2]: https://github.com/metaborg/spoofax-pie/compare/release-0.15.1...release-0.15.2

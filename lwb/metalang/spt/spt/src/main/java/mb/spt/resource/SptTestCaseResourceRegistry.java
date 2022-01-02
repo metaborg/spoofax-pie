@@ -27,18 +27,18 @@ public class SptTestCaseResourceRegistry implements ResourceRegistry, AutoClosea
         return qualifier;
     }
 
-    @Override public SptTestCaseResourceKey getResourceKey(ResourceKeyString keyStr) {
+    @Override public SptTestCaseResourcePath getResourceKey(ResourceKeyString keyStr) {
         if(!keyStr.qualifierMatchesOrMissing(qualifier)) {
             throw new ResourceRuntimeException("Qualifier of '" + keyStr + "' does not match qualifier '" + qualifier + "' of this resource registry");
         }
-        return new SptTestCaseResourceKey(keyStr.getId());
+        return new SptTestCaseResourcePath(keyStr.getId());
     }
 
     @Override public SptTestCaseResource getResource(ResourceKey key) {
-        if(!(key instanceof SptTestCaseResourceKey)) {
+        if(!(key instanceof SptTestCaseResourcePath)) {
             throw new ResourceRuntimeException("Cannot get SptTestCaseResource for key '" + key + "'; it is not of type SptTestCaseResourceKey");
         }
-        return getResource(((SptTestCaseResourceKey)key).identifier);
+        return getResource(((SptTestCaseResourcePath)key).identifier);
     }
 
     @Override public SptTestCaseResource getResource(ResourceKeyString keyStr) {
@@ -51,7 +51,7 @@ public class SptTestCaseResourceRegistry implements ResourceRegistry, AutoClosea
 
     public SptTestCaseResource registerTestCase(ResourceKey testSuiteFile, String testCase, Text text) {
         final String testSuite = testSuiteFile.getIdAsString();
-        final SptTestCaseResourceKey key = new SptTestCaseResourceKey(testSuiteFile.getIdAsString(), testCase);
+        final SptTestCaseResourcePath key = new SptTestCaseResourcePath(testSuiteFile.getIdAsString(), testCase);
         final SptTestCaseResource resource = new SptTestCaseResource(key, text);
         identifierToResource.put(key.identifier, resource);
         testSuiteToIdentifiers.put(testSuite, key.identifier);

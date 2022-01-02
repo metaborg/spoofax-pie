@@ -30,6 +30,8 @@ import mb.resource.hierarchical.match.PathResourceMatcher;
 import mb.resource.hierarchical.match.path.ExtensionsPathMatcher;
 import mb.resource.hierarchical.match.path.NoHiddenPathMatcher;
 import mb.resource.hierarchical.walk.PathResourceWalker;
+import mb.spoofax.common.BracketSymbols;
+import mb.spoofax.common.BlockCommentSymbols;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.cli.CliCommand;
 import mb.spoofax.core.language.cli.CliParam;
@@ -113,13 +115,40 @@ public class {{baseInstance.id}} implements LanguageInstance
     }
 
     @Override
-    public Task<Result<CodeCompletionResult, ?>> createCodeCompletionTask(Region primarySelection, ResourceKey resourceKey, @Nullable ResourcePath rootDirectoryHint) {
-        return {{codeCompletionInjection.name}}.createTask(new {{codeCompletionInjection.type.qualifiedId}}.Input(
+    public Option<Task<Result<CodeCompletionResult, ?>>> createCodeCompletionTask(Region primarySelection, ResourceKey resourceKey, @Nullable ResourcePath rootDirectoryHint) {
+{{#codeCompletionInjection}}
+        return Option.ofSome({{name}}.createTask(new {{type.qualifiedId}}.Input(
             primarySelection,
             resourceKey,
             rootDirectoryHint
-        ));
+        )));
+{{/codeCompletionInjection}}
+{{^codeCompletionInjection}}
+        return Option.ofNone();
+{{/codeCompletionInjection}}
     }
+
+
+    @Override
+    public Task<Option<ReferenceResolutionResult>> createResolveTask(ResourcePath rootDirectory, ResourceKey file, Region region) {
+{{#hasResolveInjection}}
+        return {{resolveInjection.name}}.createTask(new {{resolveInjection.type.qualifiedId}}.Args(file, rootDirectory, region));
+{{/hasResolveInjection}}
+{{^hasResolveInjection}}
+        return {{resolveInjection.name}}.createTask({{resolveInjection.type.qualifiedId}}.Args.Empty);
+{{/hasResolveInjection}}
+    }
+
+    @Override
+    public Task<Option<HoverResult>> createHoverTask(ResourcePath rootDirectory, ResourceKey file, Region region) {
+{{#hasHoverInjection}}
+        return {{hoverInjection.name}}.createTask(new {{hoverInjection.type.qualifiedId}}.Args(file, rootDirectory, region));
+{{/hasHoverInjection}}
+{{^hasHoverInjection}}
+        return {{hoverInjection.name}}.createTask({{hoverInjection.type.qualifiedId}}.Args.Empty);
+{{/hasHoverInjection}}
+    }
+
 
     @Override public Task<KeyedMessages> createCheckOneTask(ResourceKey file, @Nullable ResourcePath rootDirectoryHint) {
         return {{checkOneInjection.name}}.createTask(new {{checkOneInjection.type.qualifiedId}}.Input(file, rootDirectoryHint));
@@ -169,24 +198,29 @@ public class {{baseInstance.id}} implements LanguageInstance
         );
     }
 
-    @Override
-    public Task<Option<ReferenceResolutionResult>> createResolveTask(ResourcePath rootDirectory, ResourceKey file, Region region) {
-{{#hasResolveInjection}}
-        return {{resolveInjection.name}}.createTask(new {{resolveInjection.type.qualifiedId}}.Args(file, rootDirectory, region));
-{{/hasResolveInjection}}
-{{^hasResolveInjection}}
-        return {{resolveInjection.name}}.createTask({{resolveInjection.type.qualifiedId}}.Args.Empty);
-{{/hasResolveInjection}}
+
+    @Override public ListView<String> getLineCommentSymbols() {
+        return ListView.of(
+{{#lineCommentSymbols}}
+            "{{this}}"{{^-last}},{{/-last}}
+{{/lineCommentSymbols}}
+        );
     }
 
-    @Override
-    public Task<Option<HoverResult>> createHoverTask(ResourcePath rootDirectory, ResourceKey file, Region region) {
-{{#hasHoverInjection}}
-        return {{hoverInjection.name}}.createTask(new {{hoverInjection.type.qualifiedId}}.Args(file, rootDirectory, region));
-{{/hasHoverInjection}}
-{{^hasHoverInjection}}
-        return {{hoverInjection.name}}.createTask({{hoverInjection.type.qualifiedId}}.Args.Empty);
-{{/hasHoverInjection}}
+    @Override public ListView<BlockCommentSymbols> getBlockCommentSymbols() {
+        return ListView.of(
+{{#blockCommentSymbols}}
+            new BlockCommentSymbols("{{open}}", "{{close}}"){{^-last}},{{/-last}}
+{{/blockCommentSymbols}}
+        );
+    }
+
+    @Override public ListView<BracketSymbols> getBracketSymbols() {
+        return ListView.of(
+{{#bracketSymbols}}
+            new BracketSymbols('{{open}}', '{{close}}'){{^-last}},{{/-last}}
+{{/bracketSymbols}}
+        );
     }
 
 {{#parseInjection}}

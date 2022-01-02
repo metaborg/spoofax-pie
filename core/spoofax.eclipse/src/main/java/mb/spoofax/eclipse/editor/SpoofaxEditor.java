@@ -1,12 +1,17 @@
 package mb.spoofax.eclipse.editor;
 
+import mb.common.util.ListView;
 import mb.pie.dagger.PieComponent;
+import mb.spoofax.common.BracketSymbols;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.MultiRule;
+import org.eclipse.jface.text.source.DefaultCharacterPairMatcher;
+import org.eclipse.jface.text.source.ICharacterPairMatcher;
+import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 
 public abstract class SpoofaxEditor extends SpoofaxEditorBase {
     private final EclipseLanguageComponent languageComponent;
@@ -33,6 +38,11 @@ public abstract class SpoofaxEditor extends SpoofaxEditorBase {
         return languageComponent;
     }
 
+
+    @Override protected void configureSourceViewerDecorationSupport(SourceViewerDecorationSupport support) {
+        super.configureSourceViewerDecorationSupport(support);
+        setBracketSymbols(languageComponent.getLanguageInstance(), support);
+    }
 
     @Override protected void scheduleJob(boolean initialUpdate) {
         // TODO: support case where file is null but document is not.

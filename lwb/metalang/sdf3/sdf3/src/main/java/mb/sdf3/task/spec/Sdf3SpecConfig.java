@@ -1,7 +1,7 @@
 package mb.sdf3.task.spec;
 
-import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
+import mb.resource.util.SeparatorUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.sdf2table.parsetable.ParseTableConfiguration;
 
@@ -10,13 +10,13 @@ import java.io.Serializable;
 public class Sdf3SpecConfig implements Serializable {
     public final ResourcePath rootDirectory;
     public final ResourcePath mainSourceDirectory;
-    public final ResourceKey mainFile;
+    public final ResourcePath mainFile;
     public final ParseTableConfiguration parseTableConfig;
 
     public Sdf3SpecConfig(
         ResourcePath rootDirectory,
         ResourcePath mainSourceDirectory,
-        ResourceKey mainFile,
+        ResourcePath mainFile,
         ParseTableConfiguration parseTableConfig
     ) {
         this.rootDirectory = rootDirectory;
@@ -25,9 +25,13 @@ public class Sdf3SpecConfig implements Serializable {
         this.parseTableConfig = parseTableConfig;
     }
 
+    public String getMainModuleName() {
+        return SeparatorUtil.convertCurrentToUnixSeparator(mainSourceDirectory.relativize(mainFile.removeLeafExtension()));
+    }
+
     public static Sdf3SpecConfig createDefault(ResourcePath rootDirectory) {
         final ResourcePath mainSourceDirectory = rootDirectory.appendRelativePath("src");
-        final ResourceKey mainFile = mainSourceDirectory.appendRelativePath("start.sdf3");
+        final ResourcePath mainFile = mainSourceDirectory.appendRelativePath("start.sdf3");
         final ParseTableConfiguration parseTableConfig = createDefaultParseTableConfiguration();
         return new Sdf3SpecConfig(rootDirectory, mainSourceDirectory, mainFile, parseTableConfig);
     }

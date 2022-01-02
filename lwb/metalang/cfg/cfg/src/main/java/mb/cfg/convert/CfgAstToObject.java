@@ -18,12 +18,13 @@ import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Severity;
 import mb.common.option.Option;
-import mb.common.util.ListView;
 import mb.common.util.Properties;
 import mb.jsglr.common.TermTracer;
 import mb.pie.api.ExecContext;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.common.BlockCommentSymbols;
+import mb.spoofax.common.BracketSymbols;
 import mb.spoofax.compiler.adapter.AdapterProject;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
 import mb.spoofax.compiler.adapter.AdapterProjectCompilerInputBuilder;
@@ -67,8 +68,6 @@ import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.util.TermUtils;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -156,11 +155,12 @@ public class CfgAstToObject {
             subParts.getOneSubterm("Sdf3Source").ifSome(source -> {
                 if(TermUtils.isAppl(source, "Sdf3Files", 1)) {
                     final Parts filesParts = subParts.subParts(source.getSubterm(0));
+                    final CfgSdf3Source.Files.Builder filesSourceBuilder = CfgSdf3Source.Files.builder().compileLanguageShared(languageShared);
                     final ResourcePath mainSourceDirectory = filesParts.getOneSubtermAsExistingDirectory("Sdf3FilesMainSourceDirectory", rootDirectory, "SDF3 main source directory")
-                        .unwrapOrElse(() -> CfgSdf3Config.Builder.getDefaultMainSourceDirectory(languageShared));
-                    final ResourcePath mainFile = filesParts.getOneSubtermAsExistingFile("Sdf3FilesMainFile", mainSourceDirectory, "SDF3 main file")
-                        .unwrapOrElse(() -> CfgSdf3Config.Builder.getDefaultMainFile(languageShared));
-                    builder.source(CfgSdf3Source.files(mainSourceDirectory, mainFile));
+                        .unwrapOrElse(() -> CfgSdf3Source.Files.Builder.getDefaultMainSourceDirectory(languageShared));
+                    filesSourceBuilder.mainSourceDirectory(mainSourceDirectory);
+                    filesParts.forOneSubtermAsExistingFile("Sdf3FilesMainFile", mainSourceDirectory, "SDF3 main file", filesSourceBuilder::mainFile);
+                    builder.source(CfgSdf3Source.files(filesSourceBuilder.build()));
                 } else if(TermUtils.isAppl(source, "Sdf3Prebuilt", 1)) {
                     final Parts prebuiltParts = subParts.subParts(source.getSubterm(0));
                     final Option<ResourcePath> atermFile = prebuiltParts.getOneSubtermAsExistingFile("Sdf3PrebuiltParseTableAtermFile", rootDirectory, "SDF3 prebuilt parse table ATerm file");
@@ -193,16 +193,14 @@ public class CfgAstToObject {
             subParts.getOneSubterm("EsvSource").ifSome(source -> {
                 if(TermUtils.isAppl(source, "EsvFiles", 1)) {
                     final Parts filesParts = subParts.subParts(source.getSubterm(0));
+                    final CfgEsvSource.Files.Builder filesSourceBuilder = CfgEsvSource.Files.builder().compileLanguageShared(languageShared);
                     final ResourcePath mainSourceDirectory = filesParts.getOneSubtermAsExistingDirectory("EsvFilesMainSourceDirectory", rootDirectory, "ESV main source directory")
-                        .unwrapOrElse(() -> CfgEsvConfig.Builder.getDefaultMainSourceDirectory(languageShared));
-                    final ResourcePath mainFile = filesParts.getOneSubtermAsExistingFile("EsvFilesMainFile", mainSourceDirectory, "ESV main file")
-                        .unwrapOrElse(() -> CfgEsvConfig.Builder.getDefaultMainFile(languageShared));
-                    final ArrayList<ResourcePath> includeDirectories = new ArrayList<>();
-                    filesParts.forAllSubtermsAsExistingDirectories("EsvFilesIncludeDirectory", rootDirectory, "ESV include directory", includeDirectories::add);
-                    final boolean includeLibSpoofax2Exports = filesParts.getOneSubtermAsBool("EsvFilesIncludeLibspoofax2Exports")
-                        .unwrapOrElse(() -> CfgEsvConfig.Builder.getDefaultIncludeLibSpoofax2Exports(languageShared));
-                    final ResourcePath libSpoofax2UnarchiveDirectory = CfgEsvConfig.Builder.getDefaultLibSpoofax2UnarchiveDirectory(languageShared);
-                    builder.source(CfgEsvSource.files(mainSourceDirectory, mainFile, ListView.of(includeDirectories), includeLibSpoofax2Exports, libSpoofax2UnarchiveDirectory));
+                        .unwrapOrElse(() -> CfgEsvSource.Files.Builder.getDefaultMainSourceDirectory(languageShared));
+                    filesSourceBuilder.mainSourceDirectory(mainSourceDirectory);
+                    filesParts.forOneSubtermAsExistingFile("EsvFilesMainFile", mainSourceDirectory, "ESV main file", filesSourceBuilder::mainFile);
+                    filesParts.forAllSubtermsAsExistingDirectories("EsvFilesIncludeDirectory", rootDirectory, "ESV include directory", filesSourceBuilder::addIncludeDirectories);
+                    filesParts.forOneSubtermAsBool("EsvFilesIncludeLibspoofax2Exports", filesSourceBuilder::includeLibSpoofax2Exports);
+                    builder.source(CfgEsvSource.files(filesSourceBuilder.build()));
                 } else if(TermUtils.isAppl(source, "EsvPrebuilt", 1)) {
                     final Parts prebuiltParts = subParts.subParts(source.getSubterm(0));
                     prebuiltParts.getOneSubtermAsExistingFile("EsvPrebuiltFile", rootDirectory, "ESV prebuilt file").ifElse(
@@ -219,13 +217,13 @@ public class CfgAstToObject {
             subParts.getOneSubterm("StatixSource").ifSome(source -> {
                 if(TermUtils.isAppl(source, "StatixFiles", 1)) {
                     final Parts filesParts = subParts.subParts(source.getSubterm(0));
+                    final CfgStatixSource.Files.Builder filesSourceBuilder = CfgStatixSource.Files.builder().compileLanguageShared(languageShared);
                     final ResourcePath mainSourceDirectory = filesParts.getOneSubtermAsExistingDirectory("StatixFilesMainSourceDirectory", rootDirectory, "Statix main source directory")
-                        .unwrapOrElse(() -> CfgStatixConfig.Builder.getDefaultMainSourceDirectory(languageShared));
-                    final ResourcePath mainFile = filesParts.getOneSubtermAsExistingFile("StatixFilesMainFile", mainSourceDirectory, "Statix main file")
-                        .unwrapOrElse(() -> CfgStatixConfig.Builder.getDefaultMainFile(languageShared));
-                    final ArrayList<ResourcePath> includeDirectories = new ArrayList<>();
-                    filesParts.forAllSubtermsAsExistingDirectories("StatixFilesIncludeDirectory", rootDirectory, "Statix include directory", includeDirectories::add);
-                    builder.source(CfgStatixSource.files(mainSourceDirectory, mainFile, ListView.of(includeDirectories)));
+                        .unwrapOrElse(() -> CfgStatixSource.Files.Builder.getDefaultMainSourceDirectory(languageShared));
+                    filesSourceBuilder.mainSourceDirectory(mainSourceDirectory);
+                    filesParts.forOneSubtermAsExistingFile("StatixFilesMainFile", mainSourceDirectory, "Statix main file", filesSourceBuilder::mainFile);
+                    filesParts.forAllSubtermsAsExistingDirectories("StatixFilesIncludeDirectory", rootDirectory, "Statix include directory", filesSourceBuilder::addIncludeDirectories);
+                    builder.source(CfgStatixSource.files(filesSourceBuilder.build()));
                 } else if(TermUtils.isAppl(source, "StatixPrebuilt", 1)) {
                     final Parts prebuiltParts = subParts.subParts(source.getSubterm(0));
                     prebuiltParts.getOneSubtermAsExistingDirectory("StatixPrebuiltSpecAtermDirectory", rootDirectory, "Statix prebuilt spec ATerm directory").ifElse(
@@ -247,8 +245,8 @@ public class CfgAstToObject {
                     final ResourcePath mainSourceDirectory = filesParts.getOneSubtermAsExistingDirectory("StrategoFilesMainSourceDirectory", rootDirectory, "Stratego main source directory")
                         .unwrapOrElse(() -> CfgStrategoSource.Files.Builder.getDefaultMainSourceDirectory(languageShared));
                     filesSourceBuilder.mainSourceDirectory(mainSourceDirectory);
-                    filesParts.forAllSubtermsAsExistingDirectories("StrategoFilesIncludeDirectory", rootDirectory, "Stratego include directory", filesSourceBuilder::addIncludeDirectories);
                     filesParts.forOneSubtermAsExistingFile("StrategoFilesMainFile", mainSourceDirectory, "Stratego main file", filesSourceBuilder::mainFile);
+                    filesParts.forAllSubtermsAsExistingDirectories("StrategoFilesIncludeDirectory", rootDirectory, "Stratego include directory", filesSourceBuilder::addIncludeDirectories);
                     builder.source(CfgStrategoSource.files(filesSourceBuilder.build()));
                 } else {
                     throw new InvalidAstShapeException("Stratego source", source);
@@ -256,6 +254,7 @@ public class CfgAstToObject {
             });
             subParts.forOneSubtermAsBool("StrategoSdf3StatixExplicationGen", builder::enableSdf3StatixExplicationGen);
             subParts.forOneSubtermAsString("StrategoLanguageStrategyAffix", builder::languageStrategyAffix);
+            subParts.forOneSubtermAsString("StrategoOutputJavaPackageId", builder::outputJavaPackageId);
         });
         customizer.customize(languageCompilerInputBuilder);
         final CompileLanguageSpecificationInput languageCompilerInput = languageCompilerInputBuilder.build(properties, shared, languageShared);
@@ -315,6 +314,21 @@ public class CfgAstToObject {
             // TODO: parser language properties
             final ParserAdapterCompiler.Input.Builder adapter = adapterBuilder.withParser();
             // TODO: parser adapter properties
+        });
+        parts.getAllSubTermsInListAsParts("CommentSymbolSection").ifSome(subParts -> {
+            subParts.forAllSubtermsAsStrings("LineComment", adapterBuilder.project::addLineCommentSymbols);
+            subParts.forAll("BlockComment", 2, blockCommentTerm -> {
+                final String open = Parts.toJavaString(blockCommentTerm.getSubterm(0));
+                final String close = Parts.toJavaString(blockCommentTerm.getSubterm(1));
+                adapterBuilder.project.addBlockCommentSymbols(new BlockCommentSymbols(open, close));
+            });
+        });
+        parts.getAllSubTermsInListAsParts("BracketSymbolSection").ifSome(subParts -> {
+            subParts.forAll("Bracket", 2, bracketTerm -> {
+                final char open = Parts.toJavaChar(bracketTerm.getSubterm(0));
+                final char close = Parts.toJavaChar(bracketTerm.getSubterm(1));
+                adapterBuilder.project.addBracketSymbols(new BracketSymbols(open, close));
+            });
         });
         parts.getAllSubTermsInListAsParts("StylerSection").ifSome(subParts -> {
             final StylerLanguageCompiler.Input.Builder base = baseBuilder.withStyler();
@@ -387,44 +401,59 @@ public class CfgAstToObject {
         for(IStrategoTerm commandDefTerm : commandDefList) {
             final Parts commandDefParts = parts.subParts(commandDefTerm.getSubterm(0));
             final CommandDefRepr.Builder commandDefBuilder = CommandDefRepr.builder();
-            final TypeInfo taskDefType = getCommandDefTaskType(commandDefParts, commandDefTerm);
-            commandDefBuilder.taskDefType(taskDefType);
-            commandDefBuilder.type(getCommandDefType(commandDefParts, languageAdapterShared, taskDefType));
-            commandDefBuilder.displayName(getCommandDefDisplayName(commandDefParts, commandDefTerm));
-            getCommandDefDescription(commandDefParts).ifSome(commandDefBuilder::description);
-            commandDefParts.forOneSubterm("CommandDefSupportedExecutionTypes", types -> types.forEach(term -> {
-                commandDefBuilder.addSupportedExecutionTypes(toCommandExecutionType(term));
-            }));
-            commandDefParts.getAllSubTermsInListAsParts("CommandDefParameters").ifSome(parametersParts -> {
-                parametersParts.forAll("Parameter", 2, parameterTerm -> {
-                    final ParamRepr.Builder parameterBuilder = ParamRepr.builder();
-                    final String id = TermUtils.asJavaStringAt(parameterTerm, 0).orElseThrow(() -> new InvalidAstShapeException("id as first subterm", parameterTerm));
-                    parameterBuilder.id(id);
-                    final IStrategoList parameterProperties = TermUtils.asListAt(parameterTerm, 1).orElseThrow(() -> new InvalidAstShapeException("list as second subterm", parameterTerm));
-                    final Parts parameterParts = new Parts(context, messagesBuilder, cfgFile, parameterProperties);
-                    parameterParts.forOneSubtermAsTypeInfo("ParameterType", parameterBuilder::type);
-                    parameterParts.forOneSubtermAsBool("ParameterRequired", parameterBuilder::required);
-                    parameterParts.getAllSubTermsInList("ParameterArgumentProviders").forEach(parameterArgumentProviderTerm -> {
-                        // NOTE: not using getAllSubTermsInListAsParts because order matters here.
-                        parameterBuilder.addProviders(toParameterArgumentProvider(parameterArgumentProviderTerm));
-                    });
-                    commandDefBuilder.addParams(parameterBuilder.build());
+            getCommandDefTaskType(commandDefParts)
+                .ifNone(() -> messagesBuilder.addMessage("display-name = $String option is missing", Severity.Error, cfgFile, TermTracer.getRegion(commandDefTerm)))
+                .ifSome(taskDefType -> {
+                    commandDefBuilder.taskDefType(taskDefType);
+                    commandDefBuilder.type(getCommandDefType(commandDefParts, languageAdapterShared, taskDefType));
+                    getCommandDefDisplayName(commandDefParts)
+                        .ifNone(() -> messagesBuilder.addMessage("task-def = $TaskDef option is missing", Severity.Error, cfgFile, TermTracer.getRegion(commandDefTerm)))
+                        .ifSome(displayName -> {
+                            commandDefBuilder.displayName(displayName);
+                            getCommandDefDescription(commandDefParts).ifSome(commandDefBuilder::description);
+                            commandDefParts.forOneSubterm("CommandDefSupportedExecutionTypes", types -> types.forEach(term -> {
+                                commandDefBuilder.addSupportedExecutionTypes(toCommandExecutionType(term));
+                            }));
+                            commandDefParts.getAllSubTermsInListAsParts("CommandDefParameters").ifSome(parametersParts -> {
+                                parametersParts.forAll("Parameter", 2, parameterTerm -> {
+                                    final ParamRepr.Builder parameterBuilder = ParamRepr.builder();
+                                    final String id = TermUtils.asJavaStringAt(parameterTerm, 0).orElseThrow(() -> new InvalidAstShapeException("id as first subterm", parameterTerm));
+                                    parameterBuilder.id(id);
+                                    final IStrategoList parameterProperties = TermUtils.asListAt(parameterTerm, 1).orElseThrow(() -> new InvalidAstShapeException("list as second subterm", parameterTerm));
+                                    final Parts parameterParts = new Parts(context, messagesBuilder, cfgFile, parameterProperties);
+                                    parameterParts.forOneSubtermAsTypeInfo("ParameterType", parameterBuilder::type);
+                                    parameterParts.forOneSubtermAsBool("ParameterRequired", parameterBuilder::required);
+                                    parameterParts.getAllSubTermsInList("ParameterArgumentProviders").forEach(parameterArgumentProviderTerm -> { // NOTE: not using getAllSubTermsInListAsParts because order matters here.
+                                        parameterBuilder.addProviders(toParameterArgumentProvider(parameterArgumentProviderTerm));
+                                    });
+                                    commandDefBuilder.addParams(parameterBuilder.build());
+                                });
+                            });
+                        });
+                    adapterBuilder.project.addCommandDefs(commandDefBuilder.build());
                 });
-            });
-            adapterBuilder.project.addCommandDefs(commandDefBuilder.build());
         }
 
         // TODO: adapt to new AST shape, set sane defaults, and ensure that menus are merged!
         // LanguageAdapterCompilerInput > Menus
         parts.forAllSubTermsInList("MainMenu", menuItem -> {
-            adapterBuilder.project.addMainMenuItems(toMenuItemRepr(parts, menuItem, languageAdapterShared));
+            toMenuItemRepr(messagesBuilder, cfgFile, parts, menuItem, languageAdapterShared)
+                .ifSome(menuItemRepr -> adapterBuilder.project.addMainMenuItems(menuItemRepr));
         });
         parts.forAllSubTermsInList("ResourceContextMenu", menuItem -> {
-            adapterBuilder.project.addResourceContextMenuItems(toMenuItemRepr(parts, menuItem, languageAdapterShared));
+            toMenuItemRepr(messagesBuilder, cfgFile, parts, menuItem, languageAdapterShared)
+                .ifSome(menuItemRepr -> adapterBuilder.project.addResourceContextMenuItems(menuItemRepr));
         });
         parts.forAllSubTermsInList("EditorContextMenu", menuItem -> {
-            adapterBuilder.project.addEditorContextMenuItems(toMenuItemRepr(parts, menuItem, languageAdapterShared));
+            toMenuItemRepr(messagesBuilder, cfgFile, parts, menuItem, languageAdapterShared)
+                .ifSome(menuItemRepr -> adapterBuilder.project.addEditorContextMenuItems(menuItemRepr));
         });
+
+        // LanguageAdapterCompilerInput > dependencies
+        if(parts.getOneSubtermAsBool("DependOnRv32Im").unwrapOr(false)) {
+            adapterBuilder.project.dependOnRv32Im(true);
+        }
+
         customizer.customize(baseBuilder);
         final LanguageProjectCompiler.Input languageBaseCompilerInput = baseBuilder.build(shared, languageBaseShared);
         compileLanguageInputBuilder.languageProjectInput(languageBaseCompilerInput);
@@ -487,11 +516,8 @@ public class CfgAstToObject {
         }
     }
 
-    private static TypeInfo getCommandDefTaskType(Parts commandDefParts, IStrategoTerm commandDefTerm) {
-        // CommandDefTaskDef must be set, ensured by static semantics.
-        final IStrategoTerm taskDefTerm = commandDefParts.getOneSubterm("CommandDefTaskDef")
-            .unwrapOrElseThrow(() -> new InvalidAstShapeException("command definition with one CommandDefTaskDef option", commandDefTerm));
-        return taskDefToTypeInfo(taskDefTerm);
+    private static Option<TypeInfo> getCommandDefTaskType(Parts commandDefParts) {
+        return commandDefParts.getOneSubterm("CommandDefTaskDef").map(CfgAstToObject::taskDefToTypeInfo);
     }
 
     private static TypeInfo getCommandDefType(Parts commandDefParts, AdapterProject languageAdapterShared, TypeInfo taskDefType) {
@@ -499,10 +525,8 @@ public class CfgAstToObject {
         return commandDefParts.getOneSubtermAsTypeInfo("CommandDefType").unwrapOrElse(() -> TypeInfo.of(languageAdapterShared.commandPackageId(), taskDefType.id() + "Command"));
     }
 
-    private static String getCommandDefDisplayName(Parts commandDefParts, IStrategoTerm commandDefTerm) {
-        // CommandDefDisplayName must be set, ensured by static semantics.
-        return commandDefParts.getOneSubtermAsString("CommandDefDisplayName")
-            .unwrapOrElseThrow(() -> new InvalidAstShapeException("command definition with one CommandDefDisplayName option", commandDefTerm));
+    private static Option<String> getCommandDefDisplayName(Parts commandDefParts) {
+        return commandDefParts.getOneSubtermAsString("CommandDefDisplayName");
     }
 
     private static Option<String> getCommandDefDescription(Parts commandDefParts) {
@@ -571,18 +595,18 @@ public class CfgAstToObject {
         }
     }
 
-    private static MenuItemRepr toMenuItemRepr(Parts mainParts, IStrategoTerm menuItem, AdapterProject languageAdapterShared) {
+    private static Option<MenuItemRepr> toMenuItemRepr(KeyedMessagesBuilder messagesBuilder, @Nullable ResourceKey cfgFile, Parts mainParts, IStrategoTerm menuItem, AdapterProject languageAdapterShared) {
         final IStrategoTerm actualMenuItem = menuItem.getSubterm(0); // Menu item expressions are always wrapped in a MenuItem(...) term.
         final IStrategoAppl appl = TermUtils.asAppl(actualMenuItem).orElseThrow(() -> new InvalidAstShapeException("a term application", actualMenuItem));
         switch(appl.getConstructor().getName()) {
             case "Separator":
-                return MenuItemRepr.separator();
+                return Option.ofSome(MenuItemRepr.separator());
             case "Menu": {
                 final String displayName = Parts.toJavaString(appl.getSubterm(0));
                 final IStrategoList subMenuItemsTerm = TermUtils.asListAt(appl, 1)
                     .orElseThrow(() -> new InvalidAstShapeException("a list of sub-menu items as second subterm", appl));
-                final List<MenuItemRepr> subMenuItems = subMenuItemsTerm.getSubterms().stream().map(t -> toMenuItemRepr(mainParts, t, languageAdapterShared)).collect(Collectors.toList());
-                return MenuItemRepr.menu(displayName, subMenuItems);
+                return Option.transpose(subMenuItemsTerm.getSubterms().stream().map(t -> toMenuItemRepr(messagesBuilder, cfgFile, mainParts, t, languageAdapterShared)).collect(Collectors.toList()))
+                    .map(subMenuItems -> MenuItemRepr.menu(displayName, subMenuItems));
             }
             case "CommandAction": {
                 final IStrategoList properties = TermUtils.asListAt(appl, 0)
@@ -590,32 +614,40 @@ public class CfgAstToObject {
                 final Parts commandActionParts = mainParts.subParts(properties);
                 final CommandActionRepr.Builder commandActionBuilder = CommandActionRepr.builder();
 
-                // CommandActionDef must be set, ensured by static semantics.
-                final IStrategoTerm commandDefTerm = getActualCommandDefTerm(commandActionParts.getOneSubterm("CommandActionDef")
-                    .unwrapOrElseThrow(() -> new InvalidAstShapeException("command action with one CommandActionDef option", actualMenuItem)));
-                final Parts commandDefParts = mainParts.subParts(commandDefTerm.getSubterm(0));
-                final TypeInfo commandDefTaskType = getCommandDefTaskType(commandDefParts, commandDefTerm);
-                final TypeInfo commandDefType = getCommandDefType(commandDefParts, languageAdapterShared, commandDefTaskType);
-
-                final CommandRequestRepr.Builder commandRequestBuilder = CommandRequestRepr.builder();
-                commandRequestBuilder.commandDefType(commandDefType);
-                // CommandActionExecutionType must be set, ensured by static semantics.
-                final CommandExecutionType commandExecutionType = commandActionParts.getOneSubterm("CommandActionExecutionType")
-                    .map(CfgAstToObject::toCommandExecutionType)
-                    .unwrapOrElseThrow(() -> new InvalidAstShapeException("command action with one CommandActionExecutionType option", actualMenuItem));
-                commandRequestBuilder.executionType(commandExecutionType);
-                // TODO: initial arguments
-                commandActionBuilder.commandRequest(commandRequestBuilder.build());
-
-                final String displayName = commandActionParts.getOneSubtermAsString("CommandActionDisplayName")
-                    .unwrapOrElse(() -> getCommandDefDisplayName(commandDefParts, commandDefTerm) + (commandExecutionType == CommandExecutionType.ManualContinuous ? " (continuous)" : ""));
-                commandActionBuilder.displayName(displayName);
-                commandActionParts.getOneSubtermAsString("CommandActionDescription").orElse(() -> getCommandDefDescription(commandDefParts)).ifSome(commandActionBuilder::description);
-                commandActionParts.forAllSubTermsInList("CommandActionRequiredEditorSelectionTypes", term -> commandActionBuilder.addRequiredEditorSelectionTypes(toEditorSelectionType(term)));
-                commandActionParts.forAllSubTermsInList("CommandActionRequiredEditorFileTypes", term -> commandActionBuilder.addRequiredEditorFileTypes(toEditorFileType(term)));
-                commandActionParts.forAllSubTermsInList("CommandActionRequiredHierarchicalResourceTypes", term -> commandActionBuilder.addRequiredResourceTypes(toHierarchicalResourceType(term)));
-                commandActionParts.forAllSubTermsInList("CommandActionRequiredEnclosingResourceTypes", term -> commandActionBuilder.addRequiredEnclosingResourceTypes(toEnclosingCommandContextType(term)));
-                return MenuItemRepr.commandAction(commandActionBuilder.build());
+                return commandActionParts.getOneSubterm("CommandActionDef")
+                    .ifNone(() -> messagesBuilder.addMessage("command-def = $CommandDef option is missing", Severity.Error, cfgFile, TermTracer.getRegion(appl)))
+                    .map(CfgAstToObject::getActualCommandDefTerm)
+                    .flatMap(commandDefTerm -> {
+                        final Parts commandDefParts = mainParts.subParts(commandDefTerm.getSubterm(0));
+                        return getCommandDefTaskType(commandDefParts)
+                            .ifNone(() -> messagesBuilder.addMessage("task-def = $TaskDef option is missing", Severity.Error, cfgFile, TermTracer.getRegion(commandDefTerm)))
+                            .flatMap(commandDefTaskType -> {
+                                final CommandRequestRepr.Builder commandRequestBuilder = CommandRequestRepr.builder();
+                                final TypeInfo commandDefType = getCommandDefType(commandDefParts, languageAdapterShared, commandDefTaskType);
+                                commandRequestBuilder.commandDefType(commandDefType);
+                                return commandActionParts.getOneSubterm("CommandActionExecutionType")
+                                    .ifNone(() -> messagesBuilder.addMessage("execution-type = $ExecutionType option is missing", Severity.Error, cfgFile, TermTracer.getRegion(appl)))
+                                    .map(CfgAstToObject::toCommandExecutionType)
+                                    .flatMap(commandExecutionType -> {
+                                        commandRequestBuilder.executionType(commandExecutionType);
+                                        // TODO: initial arguments
+                                        commandActionBuilder.commandRequest(commandRequestBuilder.build());
+                                        return getCommandDefDisplayName(commandDefParts)
+                                            .ifNone(() -> messagesBuilder.addMessage("display-name = $String option is missing", Severity.Error, cfgFile, TermTracer.getRegion(commandDefTerm)))
+                                            .map(commandDefDisplayName -> {
+                                                final String displayName = commandActionParts.getOneSubtermAsString("CommandActionDisplayName")
+                                                    .unwrapOrElse(() -> commandDefDisplayName + (commandExecutionType == CommandExecutionType.ManualContinuous ? " (continuous)" : ""));
+                                                commandActionBuilder.displayName(displayName);
+                                                commandActionParts.getOneSubtermAsString("CommandActionDescription").orElse(() -> getCommandDefDescription(commandDefParts)).ifSome(commandActionBuilder::description);
+                                                commandActionParts.forAllSubTermsInList("CommandActionRequiredEditorSelectionTypes", term -> commandActionBuilder.addRequiredEditorSelectionTypes(toEditorSelectionType(term)));
+                                                commandActionParts.forAllSubTermsInList("CommandActionRequiredEditorFileTypes", term -> commandActionBuilder.addRequiredEditorFileTypes(toEditorFileType(term)));
+                                                commandActionParts.forAllSubTermsInList("CommandActionRequiredHierarchicalResourceTypes", term -> commandActionBuilder.addRequiredResourceTypes(toHierarchicalResourceType(term)));
+                                                commandActionParts.forAllSubTermsInList("CommandActionRequiredEnclosingResourceTypes", term -> commandActionBuilder.addRequiredEnclosingResourceTypes(toEnclosingCommandContextType(term)));
+                                                return MenuItemRepr.commandAction(commandActionBuilder.build());
+                                            });
+                                    });
+                            });
+                    });
             }
             default:
                 throw new InvalidAstShapeException("a term of sort MenuItem", appl);

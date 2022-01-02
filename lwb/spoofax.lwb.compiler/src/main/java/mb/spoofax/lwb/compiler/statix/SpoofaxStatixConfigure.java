@@ -1,6 +1,7 @@
 package mb.spoofax.lwb.compiler.statix;
 
 import mb.cfg.metalang.CfgStatixConfig;
+import mb.cfg.metalang.CfgStatixSource;
 import mb.cfg.task.CfgRootDirectoryToObject;
 import mb.cfg.task.CfgRootDirectoryToObjectException;
 import mb.cfg.task.CfgToObject;
@@ -76,7 +77,7 @@ public class SpoofaxStatixConfigure implements TaskDef<ResourcePath, Result<Opti
     ) throws IOException, InterruptedException {
         try {
             return cfgStatixConfig.source().caseOf()
-                .files(((mainSourceDirectory, mainFile, includeDirectories) -> configureSourceFilesCatching(context, rootDirectory, cfgStatixConfig, mainSourceDirectory, mainFile, includeDirectories)))
+                .files((files -> configureSourceFilesCatching(context, rootDirectory, cfgStatixConfig, files)))
                 .prebuilt((specAtermDirectory) -> configurePrebuilt(cfgStatixConfig, specAtermDirectory))
                 ;
         } catch(UncheckedIOException e) {
@@ -88,12 +89,10 @@ public class SpoofaxStatixConfigure implements TaskDef<ResourcePath, Result<Opti
         ExecContext context,
         ResourcePath rootDirectory,
         CfgStatixConfig cfgStatixConfig,
-        ResourcePath mainSourceDirectoryPath,
-        ResourcePath mainFilePath,
-        ListView<ResourcePath> includeDirectoryPaths
+        CfgStatixSource.Files files
     ) {
         try {
-            return configureSourceFiles(context, rootDirectory, cfgStatixConfig, mainSourceDirectoryPath, mainFilePath, includeDirectoryPaths);
+            return configureSourceFiles(context, rootDirectory, cfgStatixConfig, files);
         } catch(IOException e) {
             throw new UncheckedIOException(e);
         } catch(InterruptedException e) {
@@ -105,15 +104,13 @@ public class SpoofaxStatixConfigure implements TaskDef<ResourcePath, Result<Opti
         ExecContext context,
         ResourcePath rootDirectory,
         CfgStatixConfig cfgStatixConfig,
-        ResourcePath mainSourceDirectoryPath,
-        ResourcePath mainFilePath,
-        ListView<ResourcePath> includeDirectoryPaths
+        CfgStatixSource.Files files
     ) throws IOException, InterruptedException {
-        final HierarchicalResource mainSourceDirectory = context.require(mainSourceDirectoryPath, ResourceStampers.<HierarchicalResource>exists());
+        final HierarchicalResource mainSourceDirectory = context.require(files.mainSourceDirectory(), ResourceStampers.<HierarchicalResource>exists());
         if(!mainSourceDirectory.exists() || !mainSourceDirectory.isDirectory()) {
             return Result.ofErr(SpoofaxStatixConfigureException.mainSourceDirectoryFail(mainSourceDirectory.getPath()));
         }
-        final HierarchicalResource mainFile = context.require(mainFilePath, ResourceStampers.<HierarchicalResource>exists());
+        final HierarchicalResource mainFile = context.require(files.mainFile(), ResourceStampers.<HierarchicalResource>exists());
         if(!mainFile.exists() || !mainFile.isFile()) {
             return Result.ofErr(SpoofaxStatixConfigureException.mainFileFail(mainFile.getPath()));
         }
@@ -124,7 +121,7 @@ public class SpoofaxStatixConfigure implements TaskDef<ResourcePath, Result<Opti
         final ArrayList<STask<?>> sourceFileOrigins = new ArrayList<>();
         // Gather include directories. Use LinkedHashSet to remove duplicates while keeping insertion order.
         final LinkedHashSet<ResourcePath> includeDirectories = new LinkedHashSet<>();
-        includeDirectoryPaths.addAllTo(includeDirectories);
+        includeDirectories.addAll(files.includeDirectories());
 
         // Compile each SDF3 source file (if SDF3 is enabled) to a Statix signature module (if enabled).
         final ResourcePath generatedSourcesDirectory = cfgStatixConfig.generatedSourcesDirectory();

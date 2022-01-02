@@ -3,8 +3,11 @@ package mb.spoofax.eclipse.editor;
 import mb.common.region.Region;
 import mb.common.region.Selection;
 import mb.common.region.Selections;
+import mb.common.util.ListView;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
+import mb.spoofax.common.BracketSymbols;
+import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 import mb.spoofax.eclipse.util.EditorInputUtil;
@@ -19,14 +22,18 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
+import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewerExtension4;
 import org.eclipse.jface.text.TextPresentation;
+import org.eclipse.jface.text.source.DefaultCharacterPairMatcher;
+import org.eclipse.jface.text.source.ICharacterPairMatcher;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.ISourceViewerExtension2;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
@@ -98,6 +105,10 @@ public abstract class SpoofaxEditorBase extends TextEditor {
         return true;
     }
 
+    public @Nullable IDocument getDocument() {
+        return document;
+    }
+
     public @Nullable IProject getProject() {
         return project;
     }
@@ -109,6 +120,23 @@ public abstract class SpoofaxEditorBase extends TextEditor {
     public @Nullable String getFileExtension() {
         if(file == null) return null;
         return file.getFileExtension();
+    }
+
+
+    @Override public ISelectionProvider getSelectionProvider() {
+        return super.getSelectionProvider();
+    }
+
+    public ITextOperationTarget getTextOperationTarget() {
+        return (ITextOperationTarget)getAdapter(ITextOperationTarget.class);
+    }
+
+    public SourceViewerConfiguration getSourceViewerConfigurationReally() {
+        return getSourceViewerConfiguration();
+    }
+
+    public ISourceViewer getSourceViewerReally() {
+        return getSourceViewer();
     }
 
 
@@ -178,6 +206,8 @@ public abstract class SpoofaxEditorBase extends TextEditor {
     protected void initializeEditor() {
         super.initializeEditor();
 
+        SpoofaxEditorPreferences.setDefaults(getPreferenceStore());
+
         this.jobManager = Job.getJobManager();
 
         final EclipseLoggerComponent loggerComponent = SpoofaxPlugin.getLoggerComponent();
@@ -185,8 +215,8 @@ public abstract class SpoofaxEditorBase extends TextEditor {
         this.logger = loggerFactory.create(getClass());
 
         setDocumentProvider(new SpoofaxDocumentProvider());
-        setSourceViewerConfiguration(this.createSourceViewerConfiguration());
         setEditorContextMenuId("#SpoofaxEditorContext");
+        setSourceViewerConfiguration(this.createSourceViewerConfiguration());
     }
 
     protected void setInput() {
@@ -303,5 +333,19 @@ public abstract class SpoofaxEditorBase extends TextEditor {
                 job.cancel();
             }
         }
+    }
+
+
+    protected void setBracketSymbols(LanguageInstance languageInstance, SourceViewerDecorationSupport support) {
+        final ListView<BracketSymbols> allBracketSymbols = languageInstance.getBracketSymbols();
+        final char[] pairMatcherChars = new char[allBracketSymbols.size() * 2];
+        int i = 0;
+        for(BracketSymbols bracketSymbols : allBracketSymbols) {
+            pairMatcherChars[i++] = bracketSymbols.open;
+            pairMatcherChars[i++] = bracketSymbols.close;
+        }
+        final ICharacterPairMatcher matcher = new DefaultCharacterPairMatcher(pairMatcherChars);
+        support.setCharacterPairMatcher(matcher);
+        SpoofaxEditorPreferences.setPairMatcherKeys(support);
     }
 }

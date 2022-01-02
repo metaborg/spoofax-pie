@@ -7,7 +7,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.jface.internal.text.html.HTMLTextPresenter;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
@@ -16,7 +15,6 @@ import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.quickassist.IQuickAssistAssistant;
 import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
 
 import java.util.Arrays;
@@ -31,8 +29,7 @@ public class SpoofaxSourceViewerConfiguration extends TextSourceViewerConfigurat
         SpoofaxEditorBase editorBase,
         @Nullable LanguageComponent languageComponent,
         @Nullable PieComponent pieComponent
-    )
-    {
+    ) {
         this.editorBase = editorBase;
         this.languageComponent = languageComponent;
         this.pieComponent = pieComponent;
@@ -69,6 +66,11 @@ public class SpoofaxSourceViewerConfiguration extends TextSourceViewerConfigurat
     @Override public @Nullable IQuickAssistAssistant getQuickAssistAssistant(ISourceViewer sourceViewer) {
         // Return null to disable TextSourceViewerConfiguration quick assist which does spell checking.
         return null;
+    }
+
+    @Override public String[] getDefaultPrefixes(ISourceViewer sourceViewer, String contentType) {
+        if(languageComponent == null) return super.getDefaultPrefixes(sourceViewer, contentType);
+        return languageComponent.getLanguageInstance().getLineCommentSymbols().toArray(new String[0]);
     }
 
     @Override public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {

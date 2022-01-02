@@ -6,6 +6,7 @@ import mb.spoofax.compiler.language.*
 import mb.spoofax.compiler.spoofax2.language.*
 import mb.spoofax.compiler.util.*
 import mb.spoofax.core.language.command.*
+import mb.spoofax.common.*
 
 plugins {
   id("org.metaborg.gradle.config.java-library")
@@ -63,6 +64,12 @@ languageAdapterProject {
   }
 }
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
+  // Symbols
+  addLineCommentSymbols("//")
+  addBlockCommentSymbols(BlockCommentSymbols("/*", "*/"))
+  addBracketSymbols(BracketSymbols('(', ')'))
+  addBracketSymbols(BracketSymbols('<', '>'))
+
   // Extend component
   baseComponent(packageId, "BaseEsvComponent")
   extendComponent(packageId, "EsvComponent")

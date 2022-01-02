@@ -1,34 +1,54 @@
 package mb.cfg.metalang;
 
+import mb.cfg.CompileLanguageSpecificationShared;
 import mb.common.util.ADT;
-import mb.common.util.ListView;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.immutables.value.Value;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Optional;
 
 /**
  * Configuration for Statix sources in the context of CFG.
  */
-@ADT
+@ADT @Value.Enclosing
 public abstract class CfgStatixSource implements Serializable {
+    @Value.Immutable
+    public interface Files extends Serializable {
+        class Builder extends ImmutableCfgStatixSource.Files.Builder {
+            public static ResourcePath getDefaultMainSourceDirectory(CompileLanguageSpecificationShared shared) {
+                return shared.languageProject().project().srcDirectory();
+            }
+        }
+
+        static Builder builder() {return new Builder();}
+
+
+        @Value.Default default ResourcePath mainSourceDirectory() {
+            return Builder.getDefaultMainSourceDirectory(compileLanguageShared());
+        }
+
+        @Value.Default default ResourcePath mainFile() {
+            return mainSourceDirectory().appendRelativePath("main.stx");
+        }
+
+        List<ResourcePath> includeDirectories();
+
+        /// Automatically provided sub-inputs
+
+        CompileLanguageSpecificationShared compileLanguageShared();
+    }
+
     interface Cases<R> {
-        R files(
-            ResourcePath mainSourceDirectory,
-            ResourcePath mainFile,
-            ListView<ResourcePath> includeDirectories
-        );
+        R files(Files files);
 
         R prebuilt(ResourcePath specAtermDirectory);
     }
 
-    public static CfgStatixSource files(
-        ResourcePath mainSourceDirectory,
-        ResourcePath mainFile,
-        ListView<ResourcePath> includeDirectories
-    ) {
-        return CfgStatixSources.files(mainSourceDirectory, mainFile, includeDirectories);
+    public static CfgStatixSource files(Files files) {
+        return CfgStatixSources.files(files);
     }
 
     public static CfgStatixSource prebuilt(ResourcePath specAtermDirectory) {
@@ -46,12 +66,8 @@ public abstract class CfgStatixSource implements Serializable {
         return CfgStatixSources.caseOf(this);
     }
 
-    public Optional<ResourcePath> getMainSourceDirectory() {
-        return CfgStatixSources.getMainSourceDirectory(this);
-    }
-
-    public Optional<ResourcePath> getMainFile() {
-        return CfgStatixSources.getMainFile(this);
+    public Optional<Files> getFiles() {
+        return CfgStatixSources.getFiles(this);
     }
 
 

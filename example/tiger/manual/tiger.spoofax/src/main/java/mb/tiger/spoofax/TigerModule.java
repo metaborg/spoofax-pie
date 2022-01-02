@@ -28,11 +28,11 @@ import mb.tiger.spoofax.command.TigerShowDesugaredAstCommand;
 import mb.tiger.spoofax.command.TigerShowParsedAstCommand;
 import mb.tiger.spoofax.command.TigerShowPrettyPrintedTextCommand;
 import mb.tiger.spoofax.command.TigerShowScopeGraphCommand;
+import mb.tiger.spoofax.task.TigerCheck;
 import mb.tiger.spoofax.task.TigerCheckAggregator;
 import mb.tiger.spoofax.task.TigerCompileDirectory;
 import mb.tiger.spoofax.task.TigerCompileFile;
 import mb.tiger.spoofax.task.TigerCompileFileAlt;
-import mb.tiger.spoofax.task.TigerCheck;
 import mb.tiger.spoofax.task.TigerGetSourceFiles;
 import mb.tiger.spoofax.task.TigerIdeTokenize;
 import mb.tiger.spoofax.task.TigerShowAnalyzedAst;
@@ -41,7 +41,6 @@ import mb.tiger.spoofax.task.TigerShowParsedAst;
 import mb.tiger.spoofax.task.TigerShowPrettyPrintedText;
 import mb.tiger.spoofax.task.TigerShowScopeGraph;
 import mb.tiger.spoofax.task.reusable.TigerAnalyze;
-import mb.spoofax.core.language.taskdef.NoneCodeCompletionTaskDef;
 import mb.tiger.spoofax.task.reusable.TigerListDefNames;
 import mb.tiger.spoofax.task.reusable.TigerListLiteralVals;
 import mb.tiger.spoofax.task.reusable.TigerParse;
@@ -114,7 +113,6 @@ public class TigerModule {
         TigerParse parse,
         TigerStyle style,
         TigerAnalyze analyze,
-        NoneCodeCompletionTaskDef complete,
 
         TigerListLiteralVals listLiteralVals,
         TigerListDefNames listDefNames,
@@ -139,7 +137,6 @@ public class TigerModule {
         taskDefs.add(parse);
         taskDefs.add(style);
         taskDefs.add(analyze);
-        taskDefs.add(complete);
 
         taskDefs.add(listLiteralVals);
         taskDefs.add(listDefNames);

@@ -11,6 +11,7 @@ import mb.pie.runtime.PieBuilderImpl;
 import mb.pie.runtime.store.SerializingStoreBuilder;
 import mb.pie.runtime.store.SerializingStoreInMemoryBuffer;
 import mb.pie.runtime.tracer.LoggingTracer;
+import mb.pie.runtime.tracer.MetricsTracer;
 import mb.resource.ResourceRegistry;
 import mb.resource.dagger.DaggerResourceServiceComponent;
 import mb.resource.dagger.ResourceRegistriesProvider;
@@ -252,7 +253,7 @@ public class LifecycleParticipantManager implements AutoCloseable {
         }
         participants.forEach(p -> p.customizePieModule(pieModule));
         // HACK: enable logging for all dynamic PIE instances
-        pieModule.withTracerFactory(tf -> new LoggingTracer(tf, Level.Debug, Level.None, Level.None, Level.None, 1024));
+        pieModule.withTracerFactory(tf -> new LoggingTracer(tf, Level.Debug, Level.None, Level.None, Level.None, 1024, new MetricsTracer(true)));
         return DaggerRootPieComponent.builder()
             .rootPieModule(pieModule)
             .loggerComponent(loggerComponent)

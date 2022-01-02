@@ -12,7 +12,6 @@ import mb.spoofax.compiler.util.StringUtil;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
-import mb.spoofax.compiler.util.UniqueNamer;
 import org.immutables.value.Value;
 
 import javax.inject.Inject;
@@ -42,7 +41,6 @@ public class ExportsLanguageCompiler {
                 final CombinedExport combinedExport = combinedExports.computeIfAbsent(export.languageId(), CombinedExport::new);
                 combinedExport.relativePaths.add(export.relativePath());
             }
-            final UniqueNamer uniqueNamer = new UniqueNamer();
             final HashMap<String, Object> map = new HashMap<>();
             map.put("combinedExports", combinedExports.values());
             exportsTemplate.write(context, input.baseExports().file(generatedJavaSourcesDirectory), input, map);
@@ -63,7 +61,7 @@ public class ExportsLanguageCompiler {
     @Value.Immutable public interface Input extends Serializable {
         class Builder extends ExportsLanguageCompilerData.Input.Builder {}
 
-        static Builder builder() { return new Builder(); }
+        static Builder builder() {return new Builder();}
 
 
         /// Configuration
@@ -73,7 +71,7 @@ public class ExportsLanguageCompiler {
 
         /// Kinds of classes (generated/extended/manual)
 
-        @Value.Default default ClassKind classKind() { return ClassKind.Generated; }
+        @Value.Default default ClassKind classKind() {return ClassKind.Generated;}
 
 
         /// Classes

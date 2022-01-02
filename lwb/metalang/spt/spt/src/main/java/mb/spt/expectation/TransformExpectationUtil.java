@@ -7,12 +7,15 @@ import mb.pie.api.ExecException;
 import mb.pie.api.Session;
 import mb.pie.api.Task;
 import mb.resource.ResourceKey;
+import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.command.CommandContext;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.CommandExecutionType;
 import mb.spoofax.core.language.command.CommandFeedback;
+import mb.spoofax.core.language.command.EnclosingCommandContextType;
 import mb.spoofax.core.language.command.arg.ArgConverters;
+import mb.spoofax.core.language.command.arg.ArgumentBuilderException;
 import mb.spt.model.LanguageUnderTest;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -36,7 +39,7 @@ public class TransformExpectationUtil {
     }
 
     public static @Nullable CommandFeedback runCommand(
-        ResourceKey resource,
+        ResourcePath resource,
         CommandDef<?> commandDef,
         LanguageUnderTest languageUnderTest,
         Session languageUnderTestSession,
@@ -44,11 +47,13 @@ public class TransformExpectationUtil {
         ResourceKey failMessageFile,
         Region fileMessageRegion
     ) throws InterruptedException {
-        final CommandContext commandContext = CommandContext.ofReadableResource(resource);
-        final Task<CommandFeedback> task = commandDef.createTask(CommandExecutionType.ManualOnce, commandContext, new ArgConverters(languageUnderTest.getResourceServiceComponent().getResourceService()));
         try {
+            final CommandContext commandContext = CommandContext.ofReadableResource(resource);
+            commandContext.setEnclosing(EnclosingCommandContextType.Directory, CommandContext.ofDirectory(resource));
+            commandContext.setEnclosing(EnclosingCommandContextType.Project, CommandContext.ofProject(resource));
+            final Task<CommandFeedback> task = commandDef.createTask(CommandExecutionType.ManualOnce, commandContext, new ArgConverters(languageUnderTest.getResourceServiceComponent().getResourceService()));
             return languageUnderTestSession.require(task);
-        } catch(ExecException e) {
+        } catch(ExecException | ArgumentBuilderException e) {
             messagesBuilder.addMessage("Failed to execute command '" + commandDef + "'; see exception", e, Severity.Error, failMessageFile, fileMessageRegion);
             return null;
         }

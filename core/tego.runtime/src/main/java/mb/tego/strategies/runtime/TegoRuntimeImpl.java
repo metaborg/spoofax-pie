@@ -164,6 +164,8 @@ public /* open */ class TegoRuntimeImpl implements TegoRuntime, TegoEngine {
         // Most logger implementations (e.g., Log4J) perform some logger caching
         // using a hashtable lookup on the name. Therefore, we are not going to
         // do any effort here to reuse loggers on every log call.
-        return loggerFactory.create(strategy.toString());
+        // We separate the strategy name from the prefix with "::.", such that you
+        // can filter logs on a dot-prefix or colon-colon-prefix.
+        return loggerFactory.create("tego::." + strategy.getName());
     }
 }

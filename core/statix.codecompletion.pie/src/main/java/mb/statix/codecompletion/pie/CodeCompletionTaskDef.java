@@ -362,7 +362,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
             if (eventHandler != null) eventHandler.endFinishing();
 
             if (finalProposals.isEmpty()) {
-                log.warn("Completion returned no completion proposals.");
+                log.info("Completion returned no completion proposals.");
             } else {
                 log.trace("Completion returned the following proposals:\n - " + finalProposals.stream()
                     .map(i -> i.getLabel()).collect(Collectors.joining("\n - ")));

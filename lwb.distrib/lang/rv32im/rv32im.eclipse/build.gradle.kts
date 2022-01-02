@@ -11,10 +11,6 @@ languageEclipseProject {
   adapterProject.set(project(":rv32im"))
 }
 
-repositories {
-  maven("https://raw.github.com/chocopy/venus/maven-repository/")
-}
-
 tasks {
   "jar"(Jar::class) {
     val exportPackages = LinkedHashSet<String>()

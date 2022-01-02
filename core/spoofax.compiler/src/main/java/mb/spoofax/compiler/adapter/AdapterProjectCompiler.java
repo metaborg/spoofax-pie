@@ -9,6 +9,8 @@ import mb.pie.api.None;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.common.BlockCommentSymbols;
+import mb.spoofax.common.BracketSymbols;
 import mb.spoofax.compiler.adapter.data.AutoCommandRequestRepr;
 import mb.spoofax.compiler.adapter.data.CliCommandRepr;
 import mb.spoofax.compiler.adapter.data.CommandDefRepr;
@@ -25,7 +27,6 @@ import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
 import mb.spoofax.compiler.util.TypeInfoCollection;
 import mb.spoofax.compiler.util.UniqueNamer;
-import mb.spoofax.core.language.taskdef.NoneCodeCompletionTaskDef;
 import mb.spoofax.core.language.taskdef.NoneHoverTaskDef;
 import mb.spoofax.core.language.taskdef.NoneResolveTaskDef;
 import mb.spoofax.core.language.taskdef.NoneStyler;
@@ -164,7 +165,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         qualifierTemplate.write(context, input.baseQualifier().file(generatedJavaSourcesDirectory), input);
 
         for(CommandDefRepr commandDef : input.allCommandDefs()) {
-            final UniqueNamer uniqueNamer = new UniqueNamer();
+            final UniqueNamer uniqueNamer = new UniqueNamer(input.scope(), input.qualifier());
             final HashMap<String, Object> map = new HashMap<>();
             map.put("scope", input.scope());
             map.put("taskDefInjection", uniqueNamer.makeUnique(commandDef.taskDefType()));
@@ -184,7 +185,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         }
 
         { // Component
-            final UniqueNamer uniqueNamer = new UniqueNamer();
+            final UniqueNamer uniqueNamer = new UniqueNamer(input.scope(), input.qualifier());
             final HashMap<String, Object> map = new HashMap<>();
             map.put("providedTaskDefs", input.allTaskDefs().stream().map(uniqueNamer::makeUnique).collect(Collectors.toList()));
             map.put("providedCommandDefs", input.allCommandDefs().stream().map(CommandDefRepr::type).map(uniqueNamer::makeUnique).collect(Collectors.toList()));
@@ -192,7 +193,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         }
 
         { // Module
-            final UniqueNamer uniqueNamer = new UniqueNamer();
+            final UniqueNamer uniqueNamer = new UniqueNamer(input.scope(), input.qualifier());
             final HashMap<String, Object> map = new HashMap<>();
             map.put("providedTaskDefs", input.allTaskDefs().stream().map(uniqueNamer::makeUnique).collect(Collectors.toList()));
             uniqueNamer.reset(); // New method scope
@@ -203,7 +204,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         }
 
         { // Instance
-            final UniqueNamer uniqueNamer = new UniqueNamer();
+            final UniqueNamer uniqueNamer = new UniqueNamer(input.scope(), input.qualifier());
             uniqueNamer.reserve("fileExtensions");
             uniqueNamer.reserve("taskDefs");
             uniqueNamer.reserve("commandDefs");
@@ -228,6 +229,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
                 map.put("tokenizeInjection", tokenizeInjection);
                 injected.add(tokenizeInjection);
             }
+
             final NamedTypeInfo checkInjection;
             final NamedTypeInfo checkOneInjection;
             if(input.multilangAnalyzer().isPresent()) { // isMultiLang will be true
@@ -248,6 +250,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             injected.add(checkOneInjection);
             map.put("checkInjection", checkInjection);
             map.put("checkOneInjection", checkOneInjection);
+
             final NamedTypeInfo styleInjection;
             if(input.styler().isPresent()) {
                 styleInjection = uniqueNamer.makeUnique(input.styler().get().styleTaskDef());
@@ -256,14 +259,17 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             }
             map.put("styleInjection", styleInjection);
             injected.add(styleInjection);
-            final NamedTypeInfo codeCompletionInjection;
+
+            final Optional<NamedTypeInfo> codeCompletionInjection;
             if(input.codeCompletion().isPresent() && input.parser().isPresent()) {
-                codeCompletionInjection = uniqueNamer.makeUnique(input.codeCompletion().get().codeCompletionTaskDef());
+                final NamedTypeInfo namedTypeInfo = uniqueNamer.makeUnique(input.codeCompletion().get().codeCompletionTaskDef());
+                injected.add(namedTypeInfo);
+                codeCompletionInjection = Optional.of(namedTypeInfo);
             } else {
-                codeCompletionInjection = uniqueNamer.makeUnique(TypeInfo.of(NoneCodeCompletionTaskDef.class));
+                codeCompletionInjection = Optional.empty();
             }
             map.put("codeCompletionInjection", codeCompletionInjection);
-            injected.add(codeCompletionInjection);
+
             final NamedTypeInfo resolveInjection;
             if(input.referenceResolution().isPresent()) {
                 resolveInjection = uniqueNamer.makeUnique(input.referenceResolution().get().resolveTaskDef());
@@ -274,6 +280,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             }
             map.put("resolveInjection", resolveInjection);
             injected.add(resolveInjection);
+
             final NamedTypeInfo hoverInjection;
             if(input.hover().isPresent()) {
                 hoverInjection = uniqueNamer.makeUnique(input.hover().get().hoverTaskDef());
@@ -344,6 +351,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         dependencies.add(GradleConfiguredDependency.apiPlatform(shared.spoofaxDependencyConstraintsDep()));
         dependencies.add(GradleConfiguredDependency.annotationProcessorPlatform(shared.spoofaxDependencyConstraintsDep()));
         input.languageProjectDependency().ifSome((d) -> dependencies.add(GradleConfiguredDependency.api(d)));
+        dependencies.add(GradleConfiguredDependency.api(shared.spoofaxCommonDep()));
         dependencies.add(GradleConfiguredDependency.api(shared.spoofaxCoreDep()));
         dependencies.add(GradleConfiguredDependency.api(shared.pieApiDep()));
         dependencies.add(GradleConfiguredDependency.api(shared.daggerDep()));
@@ -355,6 +363,9 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         input.tegoRuntime().ifPresent((i) -> tegoRuntimeCompiler.getDependencies(i).addAllTo(dependencies));
         input.codeCompletion().ifPresent((i) -> codeCompletionCompiler.getDependencies(i).addAllTo(dependencies));
         dependencies.add(GradleConfiguredDependency.api(shared.sptApiDep()));
+        if(input.dependOnRv32Im()) {
+            dependencies.add(GradleConfiguredDependency.api(shared.rv32ImDep()));
+        }
         return dependencies;
     }
 
@@ -362,7 +373,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
     @Value.Immutable public interface Input extends Serializable {
         class Builder extends AdapterProjectCompilerData.Input.Builder {}
 
-        static Builder builder() { return new Builder(); }
+        static Builder builder() {return new Builder();}
 
 
         /// Project
@@ -406,6 +417,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
 
         List<TypeInfo> additionalResourcesModules();
 
+
         List<TypeInfo> taskDefs();
 
         @Value.Lazy default TypeInfoCollection allTaskDefs() {
@@ -439,9 +451,6 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
                 taskDefs.add(i.codeCompletionTaskDef(), i.baseCodeCompletionTaskDef());
                 taskDefs.add(i.statixSpecTaskDef(), i.baseStatixSpecTaskDef());
             });
-            if(!codeCompletion().isPresent()) {
-                taskDefs.add(TypeInfo.of(NoneCodeCompletionTaskDef.class));
-            }
             referenceResolution().ifPresent((i) -> {
                 taskDefs.add(i.resolveTaskDef(), i.baseResolveTaskDef());
             });
@@ -467,6 +476,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             return taskDefs;
         }
 
+
         List<CommandDefRepr> commandDefs();
 
         @Value.Lazy default ArrayList<CommandDefRepr> allCommandDefs() {
@@ -478,9 +488,11 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
 
         List<AutoCommandRequestRepr> autoCommandDefs();
 
+
         @Value.Default default CliCommandRepr cliCommand() {
             return CliCommandRepr.builder().name(shared().name()).build();
         }
+
 
         @Value.Default default List<MenuItemRepr> mainMenuItems() {
             return editorContextMenuItems();
@@ -489,6 +501,14 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         List<MenuItemRepr> resourceContextMenuItems();
 
         List<MenuItemRepr> editorContextMenuItems();
+
+
+        List<String> lineCommentSymbols();
+
+        List<BlockCommentSymbols> blockCommentSymbols();
+
+        List<BracketSymbols> bracketSymbols();
+
 
         @Value.Default default boolean isMultiFile() {
             return constraintAnalyzer().map(a -> a.languageProjectInput().multiFile()).orElse(false);
@@ -503,7 +523,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             return Optional.empty();
         }
 
-        default List<NamedTypeInfo> checkInjections() {
+        @Value.Lazy default List<NamedTypeInfo> checkInjections() {
             ArrayList<NamedTypeInfo> results = new ArrayList<>();
             results.add(NamedTypeInfo.of("classLoaderResources", classLoaderResources().classLoaderResources()));
             parser().ifPresent(i -> results.add(NamedTypeInfo.of("parse", i.parseTaskDef())));
@@ -511,7 +531,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             return results;
         }
 
-        default List<NamedTypeInfo> checkMultiInjections() {
+        @Value.Lazy default List<NamedTypeInfo> checkMultiInjections() {
             ArrayList<NamedTypeInfo> results = new ArrayList<>();
             results.add(NamedTypeInfo.of("classLoaderResources", classLoaderResources().classLoaderResources()));
             results.add(NamedTypeInfo.of("getSourceFiles", getSourceFiles().getSourceFilesTaskDef()));
@@ -519,6 +539,11 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             constraintAnalyzer().ifPresent(i -> results.add(NamedTypeInfo.of("analyze", i.analyzeMultiTaskDef())));
             return results;
         }
+
+        @Value.Default default boolean dependOnRv32Im() {
+            return false;
+        }
+
 
         /// Gradle files
 
@@ -557,9 +582,9 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
 
         // Dagger resources scope (passthrough from AdapterProject)
 
-        default TypeInfo baseResourcesScope() { return adapterProject().baseResourcesScope(); }
+        default TypeInfo baseResourcesScope() {return adapterProject().baseResourcesScope();}
 
-        default TypeInfo resourcesScope() { return adapterProject().resourcesScope(); }
+        default TypeInfo resourcesScope() {return adapterProject().resourcesScope();}
 
         // Dagger resources component
 
@@ -591,15 +616,15 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
 
         // Dagger Scope (passthrough from AdapterProject)
 
-        default TypeInfo baseScope() { return adapterProject().baseScope(); }
+        default TypeInfo baseScope() {return adapterProject().baseScope();}
 
-        default TypeInfo scope() { return adapterProject().scope(); }
+        default TypeInfo scope() {return adapterProject().scope();}
 
         // Dagger Qualifier (passthrough from AdapterProject)
 
-        default TypeInfo baseQualifier() { return adapterProject().baseQualifier(); }
+        default TypeInfo baseQualifier() {return adapterProject().baseQualifier();}
 
-        default TypeInfo qualifier() { return adapterProject().qualifier(); }
+        default TypeInfo qualifier() {return adapterProject().qualifier();}
 
         // Dagger component
 

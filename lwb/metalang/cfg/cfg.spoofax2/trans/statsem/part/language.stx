@@ -24,16 +24,16 @@ rules // Sdf3 section and options
   sdf3FilesOptionOk : scope * Sdf3FilesOption
   sdf3FilesOptionsOk maps sdf3FilesOptionOk(*, list(*))
   sdf3FilesOptionOk(s, Sdf3FilesMainSourceDirectory(e)) :-
-    typeOfExpr(s, e) == PATH() | error $[Expected path].
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
   sdf3FilesOptionOk(s, Sdf3FilesMainFile(e)) :-
-    typeOfExpr(s, e) == PATH() | error $[Expected path].
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
 
   sdf3PrebuiltOptionOk : scope * Sdf3PrebuiltOption
   sdf3PrebuiltOptionsOk maps sdf3PrebuiltOptionOk(*, list(*))
   sdf3PrebuiltOptionOk(s, Sdf3PrebuiltParseTableAtermFile(e)) :-
-    typeOfExpr(s, e) == PATH() | error $[Expected path].
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
   sdf3PrebuiltOptionOk(s, Sdf3PrebuiltParseTablePersistedFile(e)) :-
-    typeOfExpr(s, e) == PATH() | error $[Expected path].
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
 
   sdf3OptionOk(s, Sdf3ParseTableGeneratorSection(options)) :-
     sdf3ParseTableGeneratorOptionsOk(s, options).
@@ -42,17 +42,17 @@ rules // Sdf3 section and options
   sdf3ParseTableGeneratorOptionsOk maps sdf3ParseTableGeneratorOptionOk(*, list(*))
   
   sdf3ParseTableGeneratorOptionOk(s, Sdf3ParseTableGeneratorDynamic(e)) :- 
-    typeOfExpr(s, e) == BOOL() | error $[Expected boolean].
+    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
   sdf3ParseTableGeneratorOptionOk(s, Sdf3ParseTableGeneratorDataDependent(e)) :- 
-    typeOfExpr(s, e) == BOOL() | error $[Expected boolean].
+    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
   sdf3ParseTableGeneratorOptionOk(s, Sdf3ParseTableGeneratorLayoutSensitive(e)) :- 
-    typeOfExpr(s, e) == BOOL() | error $[Expected boolean].
+    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
   sdf3ParseTableGeneratorOptionOk(s, Sdf3ParseTableGeneratorSolveDeepConflicts(e)) :- 
-    typeOfExpr(s, e) == BOOL() | error $[Expected boolean].
+    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
   sdf3ParseTableGeneratorOptionOk(s, Sdf3ParseTableGeneratorCheckOverlap(e)) :- 
-    typeOfExpr(s, e) == BOOL() | error $[Expected boolean].
+    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
   sdf3ParseTableGeneratorOptionOk(s, Sdf3ParseTableGeneratorCheckPriorities(e)) :- 
-    typeOfExpr(s, e) == BOOL() | error $[Expected boolean].
+    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
 
 rules // Esv section and options
 
@@ -71,18 +71,18 @@ rules // Esv section and options
   esvFilesOptionOk : scope * EsvFilesOption
   esvFilesOptionsOk maps esvFilesOptionOk(*, list(*))
   esvFilesOptionOk(s, EsvFilesMainSourceDirectory(e)) :-
-    typeOfExpr(s, e) == PATH() | error $[Expected path].
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
   esvFilesOptionOk(s, EsvFilesMainFile(e)) :-
-    typeOfExpr(s, e) == PATH() | error $[Expected path].
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
   esvFilesOptionOk(s, EsvFilesIncludeDirectory(e)) :-
-    typeOfExpr(s, e) == PATH() | error $[Expected path].
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
   esvFilesOptionOk(s, EsvFilesIncludeLibspoofax2Exports(e)) :-
-    typeOfExpr(s, e) == BOOL() | error $[Expected boolean].
+    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
 
   esvPrebuiltOptionOk : scope * EsvPrebuiltOption
   esvPrebuiltOptionsOk maps esvPrebuiltOptionOk(*, list(*))
   esvPrebuiltOptionOk(s, EsvPrebuiltFile(e)) :-
-    typeOfExpr(s, e) == PATH() | error $[Expected path].
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
 
 rules // Statix section and options
 
@@ -101,19 +101,19 @@ rules // Statix section and options
   statixFilesOptionOk : scope * StatixFilesOption
   statixFilesOptionsOk maps statixFilesOptionOk(*, list(*))
   statixFilesOptionOk(s, StatixFilesMainSourceDirectory(e)) :-
-    typeOfExpr(s, e) == PATH() | error $[Expected path].
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
   statixFilesOptionOk(s, StatixFilesMainFile(e)) :-
-    typeOfExpr(s, e) == PATH() | error $[Expected path].
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
   statixFilesOptionOk(s, StatixFilesIncludeDirectory(e)) :-
-    typeOfExpr(s, e) == PATH() | error $[Expected path].
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
 
   statixPrebuiltOptionOk : scope * StatixPrebuiltOption
   statixPrebuiltOptionsOk maps statixPrebuiltOptionOk(*, list(*))
   statixPrebuiltOptionOk(s, StatixPrebuiltSpecAtermDirectory(e)) :-
-    typeOfExpr(s, e) == PATH() | error $[Expected path].
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
 
   statixOptionOk(s, StatixSdf3SignatureGen(e)) :-
-    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]. 
+    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e. 
       
 rules // Stratego section and options
 
@@ -131,13 +131,15 @@ rules // Stratego section and options
   strategoFilesOptionOk : scope * StrategoFilesOption
   strategoFilesOptionsOk maps strategoFilesOptionOk(*, list(*))
   strategoFilesOptionOk(s, StrategoFilesMainSourceDirectory(e)) :-
-    typeOfExpr(s, e) == PATH() | error $[Expected path].
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
   strategoFilesOptionOk(s, StrategoFilesMainFile(e)) :-
-    typeOfExpr(s, e) == PATH() | error $[Expected path].
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
   strategoFilesOptionOk(s, StrategoFilesIncludeDirectory(e)) :-
-    typeOfExpr(s, e) == PATH() | error $[Expected path].
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
 
   strategoOptionOk(s, StrategoSdf3StatixExplicationGen(e)) :-
-    typeOfExpr(s, e) == BOOL() | error $[Expected boolean].
+    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
   strategoOptionOk(s, StrategoLanguageStrategyAffix(e)) :-
-    typeOfExpr(s, e) == STRATEGY() | error $[Expected Stratego strategy identifier].
+    typeOfExpr(s, e) == STRATEGY() | error $[Expected Stratego strategy identifier]@e.
+  strategoOptionOk(s, StrategoOutputJavaPackageId(e)) :-
+    typeOfExpr(s, e) == STRING() | error $[Expected string]@e.

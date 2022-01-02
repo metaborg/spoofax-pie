@@ -105,7 +105,7 @@ public class ParseExpectation implements TestExpectation {
                 }
             }
             if(addParseMessages) {
-                SptMessageRemap.addMessagesRemapped(messagesBuilder, testCase.resource, file, r.messages);
+                SptMessageRemap.addMessagesRemapped(messagesBuilder, testCase, file, sourceRegion, r.messages);
             }
         }, e -> {
             messagesBuilder.addMessage("Failed to parse test fragment; see exception", e, Severity.Error, file, sourceRegion);

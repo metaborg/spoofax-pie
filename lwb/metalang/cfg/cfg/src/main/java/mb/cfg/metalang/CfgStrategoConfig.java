@@ -26,7 +26,7 @@ public interface CfgStrategoConfig extends Serializable {
         }
     }
 
-    static Builder builder() { return new Builder(); }
+    static Builder builder() {return new Builder();}
 
 
     @Value.Default default CfgStrategoSource source() {

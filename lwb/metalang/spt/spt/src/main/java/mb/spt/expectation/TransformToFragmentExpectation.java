@@ -9,6 +9,7 @@ import mb.pie.api.MixedSession;
 import mb.pie.api.Session;
 import mb.pie.api.exec.CancelToken;
 import mb.resource.ResourceKey;
+import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spt.lut.LanguageUnderTestProvider;
@@ -19,12 +20,12 @@ import mb.spt.util.SptMessageRemap;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class TransformToFragmentExpectation implements TestExpectation {
-    private final ResourceKey fragmentResource;
+    private final ResourcePath fragmentResource;
     private final @Nullable String languageIdHint;
     private final String commandDisplayName;
     private final Region sourceRegion;
 
-    public TransformToFragmentExpectation(ResourceKey fragmentResource, @Nullable String languageIdHint, String commandDisplayName, Region sourceRegion) {
+    public TransformToFragmentExpectation(ResourcePath fragmentResource, @Nullable String languageIdHint, String commandDisplayName, Region sourceRegion) {
         this.fragmentResource = fragmentResource;
         this.languageIdHint = languageIdHint;
         this.commandDisplayName = commandDisplayName;
@@ -79,7 +80,7 @@ public class TransformToFragmentExpectation implements TestExpectation {
         }
 
         if(feedback.hasErrorMessages()) {
-            SptMessageRemap.addMessagesRemapped(messagesBuilder, testCase.resource, file, feedback.getMessages());
+            SptMessageRemap.addMessagesRemapped(messagesBuilder, testCase, file, sourceRegion, feedback.getMessages());
         }
 
         return messagesBuilder.build(file);

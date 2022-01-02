@@ -33,6 +33,7 @@ dependencies {
   bundleEmbedApi(project(":stratego.pie"))
   bundleEmbedApi(project(":spt.api"))
   bundleEmbedApi(project(":tego.runtime"))
+  bundleEmbedApi("org.metaborg:pie.task.archive")
 
   bundleEmbedApi(project(":spoofax.compiler.interfaces"))
 }

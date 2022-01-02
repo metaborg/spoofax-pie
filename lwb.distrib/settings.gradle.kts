@@ -34,10 +34,11 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
   project(":$id").projectDir = file(path)
 }
 
-include("spoofax.lwb.eclipse.feature")
-include("spoofax.lwb.eclipse.repository")
-
 "lang/rv32im".run {
   includeProject("rv32im")
   includeProject("rv32im.eclipse")
 }
+
+include("spoofax.lwb.eclipse")
+include("spoofax.lwb.eclipse.feature")
+include("spoofax.lwb.eclipse.repository")

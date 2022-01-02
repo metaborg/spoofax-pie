@@ -9,7 +9,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Objects;
 
 public class TestCase {
-    public final ResourceKey resource;
+    public final ResourcePath resource;
     public final ResourceKey testSuiteFile;
     public final @Nullable ResourcePath rootDirectoryHint;
     public final String description;
@@ -18,7 +18,7 @@ public class TestCase {
     public final ListView<TestExpectation> expectations;
 
     public TestCase(
-        ResourceKey resource,
+        ResourcePath resource,
         ResourceKey testSuiteFile,
         @Nullable ResourcePath rootDirectoryHint,
         String description,

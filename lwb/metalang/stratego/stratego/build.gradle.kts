@@ -2,6 +2,7 @@ import mb.spoofax.compiler.adapter.*
 import mb.spoofax.compiler.adapter.data.*
 import mb.spoofax.compiler.language.*
 import mb.spoofax.compiler.util.*
+import mb.spoofax.common.*
 import mb.spoofax.core.language.command.CommandContextType
 import mb.spoofax.core.language.command.CommandExecutionType
 import mb.spoofax.core.language.command.EnclosingCommandContextType
@@ -28,6 +29,8 @@ dependencies {
   testImplementation(compositeBuild("spoofax.test"))
   testImplementation("org.metaborg:pie.task.java")
   testImplementation("org.metaborg:pie.task.archive")
+  testImplementation(compositeBuild("spoofax.test"))
+  testImplementation(project(":strategolib"))
   testAnnotationProcessor("com.google.dagger:dagger-compiler")
   testCompileOnly("org.checkerframework:checker-qual-android")
 }
@@ -83,6 +86,13 @@ languageAdapterProject {
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   val incrPackageId = "$packageId.incr"
   val commandPackageId = "$packageId.command"
+
+  // Symbols
+  addLineCommentSymbols("//")
+  addBlockCommentSymbols(BlockCommentSymbols("/*", "*/"))
+  addBracketSymbols(BracketSymbols('[', ']'))
+  addBracketSymbols(BracketSymbols('{', '}'))
+  addBracketSymbols(BracketSymbols('(', ')'))
 
   // Extend component
   baseComponent(packageId, "BaseStrategoComponent")

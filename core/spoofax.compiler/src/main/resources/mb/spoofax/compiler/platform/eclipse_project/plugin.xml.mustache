@@ -219,6 +219,25 @@
       class="{{runCommandHandler.qualifiedId}}"
     />
   </extension>
+  <!-- Toggle comment -->
+  <extension point="org.eclipse.ui.commands">
+    <command id="{{toggleCommentCommandId}}" name="Toggle comment"/>
+  </extension>
+  <extension point="org.eclipse.ui.handlers">
+    <handler
+      commandId="{{toggleCommentCommandId}}"
+      class="mb.spoofax.eclipse.editor.ToggleCommentHandler"
+    />
+  </extension>
+  <extension point="org.eclipse.ui.bindings">
+    <key
+      commandId="{{toggleCommentCommandId}}"
+      contextId="{{contextId}}"
+      schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+      sequence="M1+/"
+    >
+    </key>
+  </extension>
   {{#adapterProjectCompilerInput.isMultiLang}}
   <extension point="mb.statix.multilang.analysiscontext">
     <languagemetadata class="{{metadataProvider.qualifiedId}}"/>

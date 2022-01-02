@@ -3,12 +3,25 @@ package mb.spoofax.compiler.util;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 public class UniqueNamer {
+    private final Optional<TypeInfo> scope;
+    private final Optional<TypeInfo> qualifier;
     private final HashMap<String, AtomicInteger> nameToNextInteger = new HashMap<>();
     private final HashMap<Object, String> names = new HashMap<>();
+
+    public UniqueNamer(TypeInfo scope, TypeInfo qualifier) {
+        this.scope = Optional.of(scope);
+        this.qualifier = Optional.of(qualifier);
+    }
+
+    public UniqueNamer() {
+        this.scope = Optional.empty();
+        this.qualifier = Optional.empty();
+    }
 
     public void reserve(String name) {
         if(!nameToNextInteger.containsKey(name)) {
@@ -19,7 +32,7 @@ public class UniqueNamer {
     public NamedTypeInfo makeUnique(TypeInfo type) {
         final String newName = makeUnique(type.asVariableId());
         names.put(type, newName);
-        return NamedTypeInfo.of(newName, type);
+        return NamedTypeInfo.of(newName, type, scope, qualifier);
     }
 
     public <T> Named<T> makeUnique(T value, String name) {

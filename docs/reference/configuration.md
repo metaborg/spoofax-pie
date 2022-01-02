@@ -45,6 +45,9 @@ CFG has the following literals:
 | Syntax | Example(s) | Type |
 | - | - | - |
 | `(true|false)` | `true` `false` | Boolean |
+| `-?[0-9]+` | `1` `-20` | Integer |
+| `[0-9]+` | `1` `20` | Unsigned integer |
+| `'(~[\'\$\n\r\\] | \\~[\n\r])'` | `'['` `'l'` | Character |
 | `"(~[\"\$\n\r\\] | \\~[\n\r])*"` | `"foo"` `"bar"` | String |
 | `(./|/)~[\n\r\,\;\]\)\}\ ]*` | `./relative/file` `/absolute/file` | Filesystem path |
 | `$JavaIdChars` | `Java foo` | Java identifier |
@@ -275,6 +278,25 @@ The following `ParserVariant`s are supported:
     * `Incremental`
     * `IncrementalRecovery`
 
+### Comment symbols
+
+The `comment-symbols { $CommentSymbolOption* }` section enables specification of line and block comment characters, which are required for the "toggle comment" editor service.
+The following `CommentSymbolOption`s are supported:
+
+| Syntax | Required? | Description | Type |
+| - | - | - | - |
+| `line = $Expression` | no | Adds a line comment symbol. Can be given multiple times to list multiple line comment symbols. The first one will be used to comment a line with the "toggle comment" editor service. | String |
+| `block = $Expression * $Expression` | no | Adds block comment symbols, with an opening and close symbol. Current "toggle comment" editor services do not use block comment symbols yet. | String |
+
+### Bracket symbols
+
+The `bracket-symbols { $BracketSymbolOption* }` section enables specification of bracket symbols (e.g., square brackets, curly brackets, parentheses, etc.), which are required for the "bracket matching" editor service.
+The following `BracketSymbolOption`s are supported:
+
+| Syntax | Required? | Description | Type |
+| - | - | - | - |
+| `bracket = $Expression * $Expression` | no | Adds bracket symbols, with an opening and closing symbol. Can be given multiple times to list multiple bracket symbols. | Character |
+
 ### Styler
 
 The `styler { $StylerOption* }` section enables generation of a styler, and groups options.
@@ -453,6 +475,7 @@ The following `StrategoOption`s are supported:
 | `source = $StrategoSource` | no | The source of the Statix definition. Defaults to a `files` source with the top-level `source-directory` option as its main source directory, and `./main.str2` as its main file relative to the main source directory. | n/a |
 | `sdf3-statix-explication-generation = $Expression` | no | Whether SDF3 to Statix injection explication/implication generation is enabled. When enabled, `statix { sdf3-statix-signature-generation = true }` must also be enabled. Defaults to `false`. | Boolean |
 | `language-strategy-affix = $Expression` | no | The affix that is used to make certain generated strategies unique to the language. This is used both as a prefix and suffix. Defaults to name of the language transformed to a Stratego strategy identifier. | Stratego strategy identifier |
+| `output-java-package = $Expression` | no | The Java package into which compiled Stratego Java files are generated. Defaults to the language's package, followed by `.strategies`. | String |
 
 The following `$StrategoSource`s are supported:
 

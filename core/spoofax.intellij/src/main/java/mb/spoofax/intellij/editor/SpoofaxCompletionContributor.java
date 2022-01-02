@@ -106,13 +106,15 @@ public abstract class SpoofaxCompletionContributor extends CompletionContributor
         final @Nullable ResourcePath projectRoot = null;// TODO: Get the project root
         final Region selection = Region.atOffset(offset);
 
+        final Option<Task<Result<CodeCompletionResult, ?>>> taskOpt = languageComponent.getLanguageInstance().createCodeCompletionTask(selection, fileKey, projectRoot);
+        if(taskOpt.isNone()) return Option.ofNone();
+        final Task<Result<CodeCompletionResult, ?>> task = taskOpt.unwrap();
+
         final Optional<MixedSession> sessionOpt = pieComponent.getPie().tryNewSession();
         if (!sessionOpt.isPresent()) return Option.ofNone();
         try (final MixedSession session = sessionOpt.get()) {
             final TopDownSession topDownSession = session.updateAffectedBy(Collections.emptySet(), Collections.singleton(Interactivity.Interactive));
-            final Result<CodeCompletionResult, ?> codeCompletionResultResult = topDownSession.requireWithoutObserving(
-                languageComponent.getLanguageInstance().createCodeCompletionTask(selection, fileKey, projectRoot)
-            );
+            final Result<CodeCompletionResult, ?> codeCompletionResultResult = topDownSession.requireWithoutObserving(task);
             return Option.ofSome(codeCompletionResultResult.unwrap());
         } catch(InterruptedException e) {
             return Option.ofNone();

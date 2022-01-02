@@ -8,6 +8,7 @@ import mb.spoofax.eclipse.editor.PartClosedCallback;
 import mb.spoofax.eclipse.editor.ScopeManager;
 import mb.spoofax.eclipse.job.LockRule;
 import mb.spoofax.eclipse.job.ReadLockRule;
+import mb.spoofax.eclipse.job.ThreadKillerJob;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 import mb.spoofax.eclipse.pie.PieRunner;
 import mb.spoofax.eclipse.pie.WorkspaceUpdate;
@@ -43,6 +44,8 @@ public interface EclipsePlatformComponent extends PlatformComponent {
     EnclosingCommandContextProvider getEnclosingCommandContextProvider();
 
     WorkspaceUpdate.Factory getWorkspaceUpdateFactory();
+
+    ThreadKillerJob.Factory getThreadKillerJobFactory();
 
     @Named("LifecycleParticipantManager") LockRule lifecycleParticipantManagerWriteLockRule();
 

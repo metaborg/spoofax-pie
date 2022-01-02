@@ -2,39 +2,68 @@ package {{baseEclipseModule.packageId}};
 
 import dagger.Module;
 import dagger.Provides;
+import mb.log.api.LoggerFactory;
 import mb.spoofax.eclipse.EclipseIdentifiers;
+import mb.spoofax.eclipse.editor.EditorCloseJob;
+import mb.spoofax.eclipse.editor.EditorUpdateJob;
 import mb.spoofax.eclipse.job.LockRule;
 import mb.spoofax.eclipse.job.ReadLockRule;
 {{#adapterProjectCompilerInput.multilangAnalyzer}}
 import mb.statix.multilang.MultiLang;
 {{/adapterProjectCompilerInput.multilangAnalyzer}}
-
-import {{adapterProjectCompilerInput.scope.qualifiedId}};
+import mb.spoofax.eclipse.pie.PieRunner;
 
 import javax.inject.Named;
 
 @Module
 public class {{baseEclipseModule.id}} {
-    @Provides @{{adapterProjectCompilerInput.scope.id}}
+    @Provides @{{adapterProjectCompilerInput.qualifier.qualifiedId}} @{{adapterProjectCompilerInput.scope.qualifiedId}}
     static EclipseIdentifiers provideEclipseIdentifiers() {
         return new {{eclipseIdentifiers.qualifiedId}}();
     }
 
 {{#adapterProjectCompilerInput.multilangAnalyzer}}
-    @Provides @Named("StartupWriteLock") @{{adapterProjectCompilerInput.scope.id}}
+    @Provides @{{adapterProjectCompilerInput.qualifier.qualifiedId}}("StartupWriteLock") @{{adapterProjectCompilerInput.scope.qualifiedId}}
     static LockRule provideStartupWriteLockRule(@MultiLang LockRule startUpWriteLockRule) {
         return startUpWriteLockRule;
     }
 {{/adapterProjectCompilerInput.multilangAnalyzer}}
 {{^adapterProjectCompilerInput.multilangAnalyzer}}
-    @Provides @Named("StartupWriteLock") @{{adapterProjectCompilerInput.scope.id}}
+    @Provides @{{adapterProjectCompilerInput.qualifier.qualifiedId}}("StartupWriteLock") @{{adapterProjectCompilerInput.scope.qualifiedId}}
     static LockRule provideStartupWriteLockRule() {
         return new LockRule("Startup");
     }
 {{/adapterProjectCompilerInput.multilangAnalyzer}}
 
-    @Provides /* Unscoped: creates a new read lock every time, which is intended. */
-    static ReadLockRule provideStartupReadLockRule(@Named("StartupWriteLock") LockRule writeLock) {
+    @Provides @{{adapterProjectCompilerInput.qualifier.qualifiedId}} /* Unscoped: creates a new read lock every time, which is intended. */
+    static ReadLockRule provideStartupReadLockRule(@{{adapterProjectCompilerInput.qualifier.qualifiedId}}("StartupWriteLock") LockRule writeLock) {
         return writeLock.createReadLock();
+    }
+
+    @Provides @{{adapterProjectCompilerInput.qualifier.qualifiedId}} @{{adapterProjectCompilerInput.scope.qualifiedId}}
+    static EditorUpdateJob.Factory provideEditorUpdateJobFactory(LoggerFactory loggerFactory, PieRunner pieRunner) {
+        return (languageComponent, pieComponent, project, file, document, input, editor) -> new EditorUpdateJob(
+            loggerFactory,
+            pieRunner,
+            languageComponent,
+            pieComponent,
+            project,
+            file,
+            document,
+            input,
+            editor
+        );
+    }
+
+    @Provides @{{adapterProjectCompilerInput.qualifier.qualifiedId}} @{{adapterProjectCompilerInput.scope.qualifiedId}}
+    static EditorCloseJob.Factory provideEditorCloseJobFactory(LoggerFactory loggerFactory, PieRunner pieRunner) {
+        return (languageComponent, pieComponent, project, file) -> new EditorCloseJob(
+            loggerFactory,
+            pieRunner,
+            languageComponent,
+            pieComponent,
+            project,
+            file
+        );
     }
 }

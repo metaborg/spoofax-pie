@@ -17,18 +17,18 @@ public interface CfgSdf3Config extends Serializable {
             return shared.languageProject().project().srcDirectory();
         }
 
-        public static ResourcePath getDefaultMainFile(CompileLanguageSpecificationShared shared) {
-            return getDefaultMainSourceDirectory(shared).appendRelativePath("start.sdf3");
+        public static ResourcePath getDefaultMainFile(ResourcePath mainSourceDirectory) {
+            return mainSourceDirectory.appendRelativePath("start.sdf3");
         }
     }
 
-    static Builder builder() { return new Builder(); }
+    static Builder builder() {return new Builder();}
 
 
     @Value.Default default CfgSdf3Source source() {
-        return CfgSdf3Source.files(
-            Builder.getDefaultMainSourceDirectory(compileLanguageShared()),
-            Builder.getDefaultMainFile(compileLanguageShared())
+        return CfgSdf3Source.files(CfgSdf3Source.Files.builder()
+            .compileLanguageShared(compileLanguageShared())
+            .build()
         );
     }
 

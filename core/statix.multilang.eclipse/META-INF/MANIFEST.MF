@@ -5,4 +5,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-SymbolicName: statix.multilang.eclipse;singleton:=true
 Bundle-Name: Multilanguage Analysis Eclipse plugin
-Bundle-Vendor: Metaborg
+Bundle-Vendor: MetaBorg

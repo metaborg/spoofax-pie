@@ -48,3 +48,7 @@ context-free syntax
   HoverVariant.HoverStrategoVariant = <stratego {
     strategy = <Expr>
   }>
+
+context-free syntax
+
+  Part.DependOnRv32Im = <depend-on-rv32im = <Expr>>

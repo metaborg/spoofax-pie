@@ -67,7 +67,7 @@ class TestBase extends SingleLanguageTestBase<Sdf3ResourcesComponent, Sdf3Compon
     }
 
 
-    Sdf3SpecConfig specConfig(ResourcePath rootDirectory, ResourcePath mainSourceDirectory, ResourceKey mainFile) {
+    Sdf3SpecConfig specConfig(ResourcePath rootDirectory, ResourcePath mainSourceDirectory, ResourcePath mainFile) {
         return new Sdf3SpecConfig(rootDirectory, mainSourceDirectory, mainFile, Sdf3SpecConfig.createDefaultParseTableConfiguration());
     }
 

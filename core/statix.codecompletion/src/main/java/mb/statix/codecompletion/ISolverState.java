@@ -20,7 +20,10 @@ import mb.tego.utils.TextStringBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.functions.Function2;
 
+import java.util.AbstractMap;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * The state of the solver.
@@ -182,6 +185,15 @@ public interface ISolverState {
      * @return the modified copy of the {@link ISolverState}
      */
     ISolverState withDelays(Iterable<? extends java.util.Map.Entry<IConstraint, Delay>> delays);
+
+    /**
+     * Creates a copy of this {@link ISolverState} with the specified delay added.
+     *
+     * @param constraint the constraint being delayed
+     * @param delay the delay to add
+     * @return the modified copy of the {@link ISolverState}
+     */
+    ISolverState withDelay(IConstraint constraint, Delay delay);
 
     /**
      * Creates a copy of this {@link ISolverState} with the specified meta data.

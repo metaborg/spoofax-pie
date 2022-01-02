@@ -1,8 +1,10 @@
 package mb.cfg.metalang;
 
+import mb.cfg.CompileLanguageSpecificationShared;
 import mb.common.util.ADT;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.immutables.value.Value;
 
 import java.io.Serializable;
 import java.util.Optional;
@@ -10,16 +12,40 @@ import java.util.Optional;
 /**
  * Configuration for SDF3 sources in the context of CFG.
  */
-@ADT
+@ADT @Value.Enclosing
 public abstract class CfgSdf3Source implements Serializable {
+    @Value.Immutable
+    public interface Files extends Serializable {
+        class Builder extends ImmutableCfgSdf3Source.Files.Builder {
+            public static ResourcePath getDefaultMainSourceDirectory(CompileLanguageSpecificationShared shared) {
+                return shared.languageProject().project().srcDirectory();
+            }
+        }
+
+        static Builder builder() {return new Builder();}
+
+
+        @Value.Default default ResourcePath mainSourceDirectory() {
+            return Builder.getDefaultMainSourceDirectory(compileLanguageShared());
+        }
+
+        @Value.Default default ResourcePath mainFile() {
+            return mainSourceDirectory().appendRelativePath("start.sdf3");
+        }
+
+        /// Automatically provided sub-inputs
+
+        CompileLanguageSpecificationShared compileLanguageShared();
+    }
+
     interface Cases<R> {
-        R files(ResourcePath mainSourceDirectory, ResourcePath mainFile);
+        R files(Files files);
 
         R prebuilt(ResourcePath inputParseTableAtermFile, ResourcePath inputParseTablePersistedFile);
     }
 
-    public static CfgSdf3Source files(ResourcePath mainSourceDirectory, ResourcePath mainFile) {
-        return CfgSdf3Sources.files(mainSourceDirectory, mainFile);
+    public static CfgSdf3Source files(Files files) {
+        return CfgSdf3Sources.files(files);
     }
 
     public static CfgSdf3Source prebuilt(ResourcePath inputParseTableAtermFile, ResourcePath inputParseTablePersistedFile) {
@@ -37,12 +63,8 @@ public abstract class CfgSdf3Source implements Serializable {
         return CfgSdf3Sources.caseOf(this);
     }
 
-    public Optional<ResourcePath> getMainSourceDirectory() {
-        return CfgSdf3Sources.getMainSourceDirectory(this);
-    }
-
-    public Optional<ResourcePath> getMainFile() {
-        return CfgSdf3Sources.getMainFile(this);
+    public Optional<Files> getFiles() {
+        return CfgSdf3Sources.getFiles(this);
     }
 
 

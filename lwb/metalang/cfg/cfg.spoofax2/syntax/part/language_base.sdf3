@@ -11,7 +11,8 @@ context-free sorts
   ParserVariant
   Jsglr2Option
   Jsglr2Preset
-
+  CommentSymbolOption
+  BracketSymbolOption
   StylerOption
   ConstraintAnalyzerOption
   MultilangAnalyzerOption
@@ -45,6 +46,23 @@ context-free syntax
   Jsglr2Preset.Jsglr2CompositePreset           = <Composite>
   Jsglr2Preset.Jsglr2IncrementalPreset         = <Incremental>
   Jsglr2Preset.Jsglr2IncrementalRecoveryPreset = <IncrementalRecovery>
+
+context-free syntax
+
+  Part.CommentSymbolSection = <comment-symbols {
+    <{CommentSymbolOption "\n"}*> 
+}>
+
+  CommentSymbolOption.LineComment = <line = <Expr>>
+  CommentSymbolOption.BlockComment = <block = <Expr> * <Expr>>
+
+context-free syntax
+
+  Part.BracketSymbolSection = <bracket-symbols {
+    <{BracketSymbolOption "\n"}*> 
+}>
+
+  BracketSymbolOption.Bracket = <bracket = <Expr> * <Expr>>
 
 context-free syntax
 

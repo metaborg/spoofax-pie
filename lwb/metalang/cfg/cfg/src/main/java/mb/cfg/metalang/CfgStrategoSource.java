@@ -3,7 +3,6 @@ package mb.cfg.metalang;
 import mb.cfg.CompileLanguageSpecificationShared;
 import mb.common.util.ADT;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.compiler.util.Shared;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
 
@@ -24,7 +23,7 @@ public abstract class CfgStrategoSource implements Serializable {
             }
         }
 
-        static Builder builder() { return new Builder(); }
+        static Builder builder() {return new Builder();}
 
 
         @Value.Default default ResourcePath mainSourceDirectory() {
@@ -45,6 +44,7 @@ public abstract class CfgStrategoSource implements Serializable {
             final ArrayList<String> strategoBuiltinLibs = new ArrayList<>();
             strategoBuiltinLibs.add("stratego-gpp");
             strategoBuiltinLibs.add("libstratego-sglr");
+            strategoBuiltinLibs.add("libstratego-aterm");
             return strategoBuiltinLibs;
         }
 

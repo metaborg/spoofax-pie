@@ -1,6 +1,9 @@
 package mb.spoofax.lwb.dynamicloading;
 
 import mb.cfg.CompileLanguageInput;
+import mb.cfg.metalang.CfgEsvSource;
+import mb.cfg.metalang.CfgSdf3Source;
+import mb.cfg.metalang.CfgStatixSource;
 import mb.pie.api.ExecException;
 import mb.pie.api.MixedSession;
 import mb.pie.api.Task;
@@ -92,7 +95,8 @@ class CharsTestBase extends TestBase {
 
 
     TopDownSession modifyStyler(MixedSession session, CompileLanguageInput input) throws IOException, ExecException, InterruptedException {
-        final ResourcePath path = input.compileLanguageSpecificationInput().esv().get().source().getMainFile().orElseThrow(() -> new RuntimeException("Not using source files with ESV"));
+        final CfgEsvSource.Files files = input.compileLanguageSpecificationInput().esv().get().source().getFiles().orElseThrow(() -> new RuntimeException("Not using source files with ESV"));
+        final ResourcePath path = files.mainFile();
         final WritableResource file = resourceService.getWritableResource(path);
         final String text = file.readString().replace("0 0 150 bold", "255 255 0 italic");
         file.writeString(text);
@@ -100,7 +104,8 @@ class CharsTestBase extends TestBase {
     }
 
     TopDownSession modifyParser(MixedSession session, CompileLanguageInput input) throws IOException, ExecException, InterruptedException {
-        final ResourcePath path = input.compileLanguageSpecificationInput().sdf3().get().source().getMainFile().orElseThrow(() -> new RuntimeException("Not using source files with SDF3"));
+        final CfgSdf3Source.Files files = input.compileLanguageSpecificationInput().sdf3().get().source().getFiles().orElseThrow(() -> new RuntimeException("Not using source files with SDF3"));
+        final ResourcePath path = files.mainFile();
         final WritableResource file = resourceService.getWritableResource(path);
         final String text = file.readString().replace("\\ ", "\\ \\t");
         file.writeString(text);
@@ -124,7 +129,8 @@ class CharsTestBase extends TestBase {
     }
 
     TopDownSession modifyAnalyzer(MixedSession session, CompileLanguageInput input) throws IOException, ExecException, InterruptedException {
-        final ResourcePath path = input.compileLanguageSpecificationInput().statix().get().source().getMainFile().orElseThrow(() -> new RuntimeException("Not using source files with Statix"));
+        final CfgStatixSource.Files files = input.compileLanguageSpecificationInput().statix().get().source().getFiles().orElseThrow(() -> new RuntimeException("Not using source files with Statix"));
+        final ResourcePath path = files.mainFile();
         final WritableResource file = resourceService.getWritableResource(path);
         final String text = file.readString()
             .replace("Chars(\"\")", "Chars(\"abcdefg\")")

@@ -111,7 +111,7 @@ public class CheckCountExpectation implements TestExpectation {
         }
 
         if(addMessages) {
-            SptMessageRemap.addMessagesRemapped(messagesBuilder, testCase.resource, file, result);
+            SptMessageRemap.addMessagesRemapped(messagesBuilder, testCase, file, sourceRegion, result);
         }
 
         return messagesBuilder.build(file);

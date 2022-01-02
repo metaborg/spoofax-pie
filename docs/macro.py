@@ -20,7 +20,7 @@ def eclipse_lwb_artifacts_download(repo: str, variant: str, version: str):
 win_jvm_variant = 'win32-x86_64-jvm'
 win_variant = 'win32-x86_64'
 macos_jvm_variant = 'macosx-x86_64-jvm'
-macos_variant = 'macosx-x64'
+macos_variant = 'macosx-x86_64'
 linux_jvm_variant = 'linux-x86_64-jvm'
 linux_variant = 'linux-x86_64'
 
@@ -56,9 +56,9 @@ def fill_variables_with_release(variables, env_version: str, version: str, downl
                     linux=linux_jvm,
                     windows=windows_jvm,
                 ), link=dict(
-                    macos=download_link(macos_icon, "macOS 64-bit", macos_jvm),
-                    linux=download_link(linux_icon, "Linux 64-bit", linux_jvm),
-                    windows=download_link(windows_icon, "Windows 64-bit", windows_jvm),
+                    macos=download_link(macos_icon, "macOS 64-bit", macos),
+                    linux=download_link(linux_icon, "Linux 64-bit", linux),
+                    windows=download_link(windows_icon, "Windows 64-bit", windows),
                 ),
                 macos=macos,
                 linux=linux,
@@ -70,6 +70,23 @@ def fill_variables_with_release(variables, env_version: str, version: str, downl
 
 
 release_versions = {
+    "0.16.17": "13-12-2021",
+    "0.16.16": "11-12-2021",
+    "0.16.15": "09-12-2021",
+    "0.16.14": "01-12-2021",
+    "0.16.13": "25-11-2021",
+    "0.16.12": "23-11-2021",
+    "0.16.11": "19-11-2021",
+    "0.16.10": "19-11-2021",
+    "0.16.9": "18-11-2021",
+    "0.16.8": "17-11-2021",
+    "0.16.7": "17-11-2021",
+    "0.16.6": "16-11-2021",
+    "0.16.5": "12-11-2021",
+    "0.16.4": "11-11-2021",
+    "0.16.3": "10-11-2021",
+    "0.16.2": "09-11-2021",
+    "0.16.1": "08-11-2021",
     "0.16.0": "05-11-2021",
     "0.15.3": "22-10-2021",
     "0.15.2": "21-10-2021",

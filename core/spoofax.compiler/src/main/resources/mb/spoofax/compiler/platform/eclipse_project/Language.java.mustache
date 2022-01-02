@@ -95,7 +95,8 @@ public class {{baseLanguage.id}} implements EclipseLifecycleParticipant {
                 .multiLangEclipseComponent(mb.statix.multilang.eclipse.MultiLangPlugin.getComponent())
                 {{/adapterProjectCompilerInput.multilangAnalyzer}}
                 .resourceServiceComponent(resourceServiceComponent)
-                .eclipsePlatformComponent(platformComponent)
+                .eclipsePlatformComponent(platformComponent){{#adapterProjectCompilerInput.dependOnRv32Im}}
+                .rv32ImEclipseComponent(mb.rv32im.eclipse.Rv32ImLanguageFactory.getLanguage().getComponent()){{/adapterProjectCompilerInput.dependOnRv32Im}}
                 ;
             getCustomizers(loggerComponent).forEach(c -> c.customize(builder));
             component = builder.build();

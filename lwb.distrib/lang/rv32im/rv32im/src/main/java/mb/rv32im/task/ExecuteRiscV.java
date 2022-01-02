@@ -3,12 +3,12 @@ package mb.rv32im.task;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Severity;
 import mb.common.region.Region;
+import mb.common.result.MessagesException;
+import mb.common.result.Result;
 import mb.pie.api.ExecContext;
+import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
-import mb.resource.ResourceKey;
 import mb.rv32im.Rv32ImScope;
-import mb.spoofax.core.language.command.CommandFeedback;
-import mb.spoofax.core.language.command.ShowFeedback;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import venus.assembler.Assembler;
 import venus.assembler.AssemblerError;
@@ -65,53 +65,23 @@ import venus.simulator.Simulator;
 
 import javax.inject.Inject;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.PrintStream;
-import java.io.Serializable;
 import java.util.Arrays;
-import java.util.Objects;
 
 @Rv32ImScope
-public class ExecuteRiscV implements TaskDef<ExecuteRiscV.Args, CommandFeedback> {
-    public static class Args implements Serializable {
-        public final ResourceKey file;
-
-        public Args(ResourceKey file) {
-            this.file = file;
-        }
-
-        @Override public boolean equals(@Nullable Object o) {
-            if(this == o) return true;
-            if(o == null || getClass() != o.getClass()) return false;
-            final Args args = (Args)o;
-            return file.equals(args.file);
-        }
-
-        @Override public int hashCode() {
-            return Objects.hash(file);
-        }
-
-        @Override public String toString() {
-            return "ExecuteRiscV$Args{" +
-                "file=" + file +
-                '}';
-        }
-    }
-
+public class ExecuteRiscV implements TaskDef<Supplier<Result<String, ?>>, Result<String, ?>> {
     @Inject public ExecuteRiscV() {}
 
     @Override public String getId() {
         return getClass().getName();
     }
 
-    @Override public CommandFeedback exec(ExecContext context, Args input) {
-        final ResourceKey file = input.file;
-        final String text;
-        try {
-            text = context.require(input.file).readString();
-        } catch(IOException e) {
-            return CommandFeedback.ofTryExtractMessagesFrom(e, file);
+    @Override public Result<String, ?> exec(ExecContext context, Supplier<Result<String, ?>> textSupplier) {
+        final Result<String, ?> result = context.require(textSupplier);
+        if(result.isErr()) {
+            return result;
         }
+        final String text = result.unwrapUnchecked();
 
         // Assemble
         setupObjects();
@@ -126,9 +96,9 @@ public class ExecuteRiscV implements TaskDef<ExecuteRiscV.Args, CommandFeedback>
                 } else {
                     region = null;
                 }
-                messagesBuilder.addMessage(error.getMessage(), Severity.Error, file, region);
+                messagesBuilder.addMessage(error.getMessage(), Severity.Error, null, region);
             }
-            return CommandFeedback.of(messagesBuilder.build(file));
+            return Result.ofErr(new MessagesException(messagesBuilder.build(), "Assembling RISC-V failed"));
         }
 
         // Link
@@ -137,7 +107,7 @@ public class ExecuteRiscV implements TaskDef<ExecuteRiscV.Args, CommandFeedback>
             program = Linker.INSTANCE.link(Arrays.asList(assemblerOutput.getProg()));
         } catch(Throwable e) {
             // HACK: throws AssemblerError, but Kotlin methods do not have checked exceptions, so we catch all.
-            return CommandFeedback.ofTryExtractMessagesFrom(e, file);
+            return Result.ofErr(new Exception("Linking RISC-V failed", e));
         }
 
         // Simulate
@@ -150,7 +120,7 @@ public class ExecuteRiscV implements TaskDef<ExecuteRiscV.Args, CommandFeedback>
         } finally {
             System.setOut(old);
         }
-        return CommandFeedback.of(ShowFeedback.showText(out.toString(), "RISC-V simulation output for '" + input.file + "'"));
+        return Result.ofOk(out.toString());
     }
 
     private void setupObjects() {

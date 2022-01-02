@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 
 @{{adapterProject.scope.qualifiedId}}
 public class {{baseGetSourceFilesTaskDef.id}} implements TaskDef<ResourcePath, ListView<ResourcePath>> {
-    private static final ResourceWalker WALKER = ResourceWalker.ofNoHidden();
+    private static final ResourceWalker WALKER = ResourceWalker.ofNoHidden().and(ResourceWalker.ofNot(ResourceWalker.ofPath(PathMatcher.ofStartsWith("bin")))); // HACK: ignore bin directory in root directory
     private static final ResourceMatcher MATCHER = ResourceMatcher.ofPath(
         PathMatcher.ofExtensions({{#shared.fileExtensions}}"{{this}}"{{^-last}}, {{/-last}}{{/shared.fileExtensions}})
     ).and(ResourceMatcher.ofFile());

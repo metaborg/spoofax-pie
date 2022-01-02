@@ -4,6 +4,7 @@ import mb.spoofax.compiler.util.*
 import mb.spoofax.core.language.command.CommandContextType
 import mb.spoofax.core.language.command.EnclosingCommandContextType
 import mb.spoofax.core.language.command.CommandExecutionType
+import mb.spoofax.common.*
 
 plugins {
   id("org.metaborg.gradle.config.java-library")
@@ -58,6 +59,13 @@ languageAdapterProject {
   }
 }
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
+  // Symbols
+  addLineCommentSymbols("//")
+  addBlockCommentSymbols(BlockCommentSymbols("/*", "*/"))
+  addBracketSymbols(BracketSymbols('[', ']'))
+  addBracketSymbols(BracketSymbols('{', '}'))
+  addBracketSymbols(BracketSymbols('(', ')'))
+
   // Extend resources component and add modules
   baseResourcesComponent(packageId, "BaseSptResourcesComponent")
   extendResourcesComponent(packageId, "SptResourcesComponent")

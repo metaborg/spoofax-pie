@@ -15,6 +15,7 @@ signature
     BOOL        : TYPE
     INT         : TYPE
     UINT        : TYPE
+    CHAR        : TYPE
     STRING      : TYPE
     PATH        : TYPE
     JAVA_ID     : TYPE

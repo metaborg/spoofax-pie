@@ -46,4 +46,8 @@ rules
   hoverVariantOk : scope * HoverVariant
   hoverVariantOk(s, HoverStrategoVariant(e)) :-
     typeOfExpr(s, e) == STRATEGY() | error $[Expected Stratego strategy identifier]@e.
-    
+
+rules
+
+  partOk(s, DependOnRv32Im(e)) :-
+    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
