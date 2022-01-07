@@ -449,6 +449,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             });
             codeCompletion().ifPresent((i) -> {
                 taskDefs.add(i.codeCompletionTaskDef(), i.baseCodeCompletionTaskDef());
+                taskDefs.add(i.astWithPlaceholdersTaskDef(), i.baseAstWithPlaceholdersTaskDef());
                 taskDefs.add(i.statixSpecTaskDef(), i.baseStatixSpecTaskDef());
             });
             referenceResolution().ifPresent((i) -> {

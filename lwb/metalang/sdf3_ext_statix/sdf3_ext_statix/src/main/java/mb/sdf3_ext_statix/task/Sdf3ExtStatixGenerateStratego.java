@@ -41,7 +41,7 @@ public class Sdf3ExtStatixGenerateStratego implements TaskDef<Sdf3ExtStatixGener
         }
 
         @Override public String toString() {
-            return "Sdf3ExtStatixGenerateStratego$Input{" +
+            return "Sdf3ExtStatixGenerateStratego$InpGut{" +
                 "astSupplier=" + astSupplier +
                 ", strategoQualifier='" + strategyAffix + '\'' +
                 '}';

@@ -66,6 +66,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static mb.statix.codecompletion.pie.CodeCompletionUtils.findAllPlaceholdersIn;
 import static mb.statix.codecompletion.pie.CodeCompletionUtils.findPlaceholderAt;
 import static mb.statix.codecompletion.pie.CodeCompletionUtils.getRegion;
 import static mb.statix.codecompletion.pie.CodeCompletionUtils.iterableToListView;
@@ -134,10 +135,12 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * otherwise, {@code false}
          */
         protected boolean innerEquals(Input that) {
+            // @formatter:off
             return this.primarySelection.equals(that.primarySelection)
                 && this.file.equals(that.file)
                 && Objects.equals(this.rootDirectoryHint, that.rootDirectoryHint)
                 && this.completeDeterministic == that.completeDeterministic;
+            // @formatter:on
         }
 
         @Override public int hashCode() {
@@ -150,7 +153,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
         }
 
         @Override public String toString() {
-            return "CodeCompletionTaskDef.Input{" +
+            return "CodeCompletionTaskDef$Input{" +
                 "primarySelection=" + primarySelection + ", " +
                 "rootDirectoryHint=" + rootDirectoryHint + ", " +
                 "file=" + file + ", " +
@@ -162,6 +165,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
     private final Logger log;
     private final JsglrParseTaskDef parseTask;
     private final ConstraintAnalyzeFile analyzeFileTask;
+    private final AstWithPlaceholdersTaskDef astWithPlaceholdersTaskDef;
     private final GetStrategoRuntimeProvider getStrategoRuntimeProviderTask;
     private final TegoRuntime tegoRuntime;
     private final StatixSpecTaskDef statixSpec;
@@ -183,6 +187,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
      *
      * @param parseTask the parser task
      * @param analyzeFileTask the analysis task
+     * @param astWithPlaceholdersTaskDef the task that inserts placeholders near the caret location in the AST
      * @param getStrategoRuntimeProviderTask the Stratego runtime provider task
      * @param statixSpec the Statix spec task
      * @param strategoTerms the Stratego to NaBL terms utility class
@@ -202,6 +207,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
     public CodeCompletionTaskDef(
         JsglrParseTaskDef parseTask,
         ConstraintAnalyzeFile analyzeFileTask,
+        AstWithPlaceholdersTaskDef astWithPlaceholdersTaskDef,
         GetStrategoRuntimeProvider getStrategoRuntimeProviderTask,
         TegoRuntime tegoRuntime,
         StatixSpecTaskDef statixSpec,
@@ -221,6 +227,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
     ) {
         this.parseTask = parseTask;
         this.analyzeFileTask = analyzeFileTask;
+        this.astWithPlaceholdersTaskDef = astWithPlaceholdersTaskDef;
         this.getStrategoRuntimeProviderTask = getStrategoRuntimeProviderTask;
         this.tegoRuntime = tegoRuntime;
         this.statixSpec = statixSpec;
@@ -269,8 +276,11 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
      * Keeps objects used by the code completion algorithm in a more accessible place.
      */
     private final class Execution {
+        /** The execution context. */
         private final ExecContext context;
+        /** The Stratego runtime. */
         private final StrategoRuntime strategoRuntime;
+        /** The term factory. */
         private final ITermFactory termFactory;
         /** The root directory of the project; or {@code null} when not specified. */
         public final @Nullable ResourcePath rootDirectoryHint;
@@ -336,7 +346,10 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
             final Result<ITerm, ?> upgradedAstResult = upgradePlaceholders(statixAst, placeholderVarMap);
             if (upgradedAstResult.isErr()) return upgradedAstResult.ignoreValueIfErr();
             final ITerm upgradedAst = upgradedAstResult.unwrap();
-            final ITermVar placeholder = getCompletionPlaceholder(upgradedAst, primarySelection);
+            // TODO: We can perform our own placeholder inference here, since in the upgraded AST placeholders
+            //  for lists _are_ possible.  The only remaining problem is that we don't have a way to represent
+            //  placeholders for lists in code completion proposals.
+            final ITermVar placeholder = getCompletionPlaceholders(upgradedAst, primarySelection).get(0);   // FIXME: Use all placeholders instead of just the first
             final SolverState initialState = createInitialSolverState(upgradedAst, statixSecName, statixRootPredicateName, placeholderVarMap);
             if (eventHandler != null) eventHandler.endPreparation();
 
@@ -365,8 +378,11 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
                 log.info("Completion returned no completion proposals.");
             } else {
                 log.trace("Completion returned the following proposals:\n - " + finalProposals.stream()
-                    .map(i -> i.getLabel()).collect(Collectors.joining("\n - ")));
+                    .map(CodeCompletionItem::getLabel).collect(Collectors.joining("\n - ")));
             }
+
+            // TODO: We should track to which placeholder each completion belongs,
+            //  and insert the completion at that placeholder with properly parenthesized.
 
             if (eventHandler != null) eventHandler.end();
             return Result.ofOk(new TermCodeCompletionResult(
@@ -384,13 +400,15 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * @return the AST of the file
          */
         private Result<IStrategoTerm, ?> parse(Region selection) {
-            return context.require(parseTask.inputBuilder()
+            final mb.pie.api.Supplier<Result<IStrategoTerm, JsglrParseException>> astSupplier = parseTask.inputBuilder()
                 .withFile(file)
                 .rootDirectoryHint(Optional.ofNullable(rootDirectoryHint))
                 .codeCompletionMode(true)
                 .cursorOffset(selection.getStartOffset() /* TODO: Support the whole selection? */)
-                .buildRecoverableAstSupplier()
-            );
+                .buildRecoverableAstSupplier();
+
+            return context.require(astWithPlaceholdersTaskDef, new AstWithPlaceholdersTaskDef.Input(selection, astSupplier))
+                .map(o -> o.ast);
         }
 
         /**
@@ -507,12 +525,28 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * @param selection code selection
          * @return the term variable of the placeholder being completed
          */
+        @Deprecated
         private ITermVar getCompletionPlaceholder(ITerm ast, Region selection) {
             @Nullable ITermVar placeholderVar = findPlaceholderAt(ast, selection.getStartOffset() /* TODO: Support the whole selection? */);
             if (placeholderVar == null) {
                 throw new IllegalStateException("Completion failed: we don't know the placeholder.");
             }
             return placeholderVar;
+        }
+
+        /**
+         * Determines all placeholders near or intersecting the selection.
+         *
+         * @param ast the AST to inspect
+         * @param selection the selection to complete at
+         * @return the list of term variables of the placeholders being completed
+         */
+        private List<? extends ITermVar> getCompletionPlaceholders(ITerm ast, Region selection) {
+            List<? extends ITermVar> placeholderVars = findAllPlaceholdersIn(ast, selection);
+            if (placeholderVars.isEmpty()) {
+                throw new IllegalStateException("Completion failed: we don't know the placeholder.");
+            }
+            return placeholderVars;
         }
 
         /**
