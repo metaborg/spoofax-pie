@@ -87,6 +87,10 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
   includeProject("strategolib")
   includeProject("strategolib.eclipse")
 }
+"metalib/gpp".run {
+  includeProject("gpp")
+  includeProject("gpp.eclipse")
+}
 
 include("spoofax.lwb.compiler")
 include("spoofax.lwb.compiler.dagger")

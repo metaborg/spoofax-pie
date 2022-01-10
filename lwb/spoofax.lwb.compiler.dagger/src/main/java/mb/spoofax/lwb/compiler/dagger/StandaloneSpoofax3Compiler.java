@@ -8,6 +8,10 @@ import mb.esv.DaggerEsvComponent;
 import mb.esv.DaggerEsvResourcesComponent;
 import mb.esv.EsvComponent;
 import mb.esv.EsvResourcesComponent;
+import mb.gpp.DaggerGppComponent;
+import mb.gpp.DaggerGppResourcesComponent;
+import mb.gpp.GppComponent;
+import mb.gpp.GppResourcesComponent;
 import mb.libspoofax2.DaggerLibSpoofax2Component;
 import mb.libspoofax2.DaggerLibSpoofax2ResourcesComponent;
 import mb.libspoofax2.LibSpoofax2Component;
@@ -90,6 +94,8 @@ public class StandaloneSpoofax3Compiler implements AutoCloseable {
 
         final StrategoLibResourcesComponent strategoLibResourcesComponent = DaggerStrategoLibResourcesComponent.create();
         resourceServiceModule.addRegistriesFrom(strategoLibResourcesComponent);
+        final GppResourcesComponent gppResourcesComponent = DaggerGppResourcesComponent.create();
+        resourceServiceModule.addRegistriesFrom(gppResourcesComponent);
         final LibSpoofax2ResourcesComponent libSpoofax2ResourcesComponent = DaggerLibSpoofax2ResourcesComponent.create();
         resourceServiceModule.addRegistriesFrom(libSpoofax2ResourcesComponent);
         final LibStatixResourcesComponent libStatixResourcesComponent = DaggerLibStatixResourcesComponent.create();
@@ -155,6 +161,13 @@ public class StandaloneSpoofax3Compiler implements AutoCloseable {
             .platformComponent(platformComponent)
             .build();
         pieModule.addTaskDefsFrom(strategoLibComponent);
+        final GppComponent gppComponent = DaggerGppComponent.builder()
+            .loggerComponent(loggerComponent)
+            .gppResourcesComponent(gppResourcesComponent)
+            .resourceServiceComponent(resourceServiceComponent)
+            .platformComponent(platformComponent)
+            .build();
+        pieModule.addTaskDefsFrom(gppComponent);
         final LibSpoofax2Component libSpoofax2Component = DaggerLibSpoofax2Component.builder()
             .loggerComponent(loggerComponent)
             .libSpoofax2ResourcesComponent(libSpoofax2ResourcesComponent)
@@ -192,6 +205,8 @@ public class StandaloneSpoofax3Compiler implements AutoCloseable {
 
             .strategoLibComponent(strategoLibComponent)
             .strategoLibResourcesComponent(strategoLibResourcesComponent)
+            .gppComponent(gppComponent)
+            .gppResourcesComponent(gppResourcesComponent)
             .libSpoofax2Component(libSpoofax2Component)
             .libSpoofax2ResourcesComponent(libSpoofax2ResourcesComponent)
             .libStatixComponent(libStatixComponent)
@@ -213,6 +228,8 @@ public class StandaloneSpoofax3Compiler implements AutoCloseable {
 
             strategoLibComponent,
             strategoLibResourcesComponent,
+            gppComponent,
+            gppResourcesComponent,
             libSpoofax2Component,
             libSpoofax2ResourcesComponent,
             libStatixComponent,

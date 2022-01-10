@@ -32,6 +32,7 @@ dependencies {
   bundleImplementation(compositeBuild("spt.eclipse"))
 
   bundleImplementation(compositeBuild("strategolib.eclipse"))
+  bundleImplementation(compositeBuild("gpp.eclipse"))
   bundleImplementation(compositeBuild("libspoofax2.eclipse"))
   bundleImplementation(compositeBuild("libstatix.eclipse"))
 

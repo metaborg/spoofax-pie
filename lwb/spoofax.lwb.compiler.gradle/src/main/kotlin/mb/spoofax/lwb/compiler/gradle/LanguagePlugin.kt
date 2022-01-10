@@ -11,6 +11,7 @@ import mb.common.message.Messages
 import mb.common.message.Severity
 import mb.common.result.Result
 import mb.common.util.ExceptionPrinter
+import mb.gpp.GppUtil
 import mb.log.dagger.DaggerLoggerComponent
 import mb.log.dagger.LoggerModule
 import mb.pie.api.Pie
@@ -125,7 +126,7 @@ class LanguagePluginInstance(
   private fun configure() {
     val languageProjectCompiler = spoofax3Compiler.compiler.spoofaxCompilerComponent.languageProjectCompiler
     val adapterProjectCompiler = spoofax3Compiler.compiler.spoofaxCompilerComponent.adapterProjectCompiler
-    configureProject(languageProjectCompiler, spoofax3Compiler.compiler.strategolibComponent.strategoLibUtil, adapterProjectCompiler)
+    configureProject(languageProjectCompiler, spoofax3Compiler.compiler.strategolibComponent.strategoLibUtil, spoofax3Compiler.compiler.gppComponent.gppUtil, adapterProjectCompiler)
     configureCompileLanguageProjectTask(languageProjectCompiler, compileLanguageInput.languageProjectInput())
     val check = spoofax3Compiler.compiler.component.checkLanguageSpecification
     val compile = spoofax3Compiler.compiler.component.compileLanguageSpecification
@@ -136,6 +137,7 @@ class LanguagePluginInstance(
   private fun configureProject(
     languageProjectCompiler: LanguageProjectCompiler,
     strategoLibUtil: StrategoLibUtil,
+    gppUtil: GppUtil,
     adapterProjectCompiler: AdapterProjectCompiler
   ) {
     // Language project compiler
@@ -149,6 +151,7 @@ class LanguagePluginInstance(
     project.addMainResourceDirectory(languageSpecificationInput.compileLanguageShared().generatedResourcesDirectory(), resourceService)
     project.addMainJavaSourceDirectory(languageSpecificationInput.compileLanguageShared().generatedJavaSourcesDirectory(), resourceService)
     project.dependencies.add("implementation", project.files(strategoLibUtil.strategoLibJavaClassPaths))
+    project.dependencies.add("implementation", project.files(gppUtil.gppJavaClassPaths))
     // Adapter project compiler
     val adapterProjectInput = compileLanguageInput.adapterProjectInput()
     project.addMainJavaSourceDirectory(adapterProjectInput.adapterProject().generatedJavaSourcesDirectory(), resourceService)

@@ -13,6 +13,7 @@ Eclipse-RegisterBuddy: spoofax.eclipse,
   esv.eclipse,
   statix.eclipse,
   stratego.eclipse,
-  strategolib.eclipse
+  strategolib.eclipse,
+  gpp.eclipse,
   libspoofax2.eclipse,
   libstatix.eclipse

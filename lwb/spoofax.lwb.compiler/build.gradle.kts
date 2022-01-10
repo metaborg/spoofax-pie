@@ -26,7 +26,8 @@ dependencies {
   api(project(":statix"))
   api(project(":sdf3_ext_statix"))
 
-  api(compositeBuild("strategolib"))
+  api(project(":strategolib"))
+  api(project(":gpp"))
   api(project(":libspoofax2"))
   api(project(":libstatix"))
 

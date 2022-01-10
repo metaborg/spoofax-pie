@@ -5,6 +5,8 @@ import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.esv.EsvComponent;
 import mb.esv.task.EsvConfig;
+import mb.gpp.GppComponent;
+import mb.gpp.GppResourcesComponent;
 import mb.libspoofax2.LibSpoofax2Component;
 import mb.libspoofax2.LibSpoofax2ResourcesComponent;
 import mb.libstatix.LibStatixComponent;
@@ -52,6 +54,8 @@ public class Spoofax3Compiler implements AutoCloseable {
 
     public final StrategoLibComponent strategolibComponent;
     public final StrategoLibResourcesComponent strategolibResourcesComponent;
+    public final GppComponent gppComponent;
+    public final GppResourcesComponent gppResourcesComponent;
     public final LibSpoofax2Component libSpoofax2Component;
     public final LibSpoofax2ResourcesComponent libSpoofax2ResourcesComponent;
     public final LibStatixComponent libStatixComponent;
@@ -76,6 +80,8 @@ public class Spoofax3Compiler implements AutoCloseable {
 
         StrategoLibComponent strategoLibComponent,
         StrategoLibResourcesComponent strategoLibResourcesComponent,
+        GppComponent gppComponent,
+        GppResourcesComponent gppResourcesComponent,
         LibSpoofax2Component libSpoofax2Component,
         LibSpoofax2ResourcesComponent libSpoofax2ResourcesComponent,
         LibStatixComponent libStatixComponent,
@@ -97,6 +103,8 @@ public class Spoofax3Compiler implements AutoCloseable {
         this.sdf3ExtStatixComponent = sdf3ExtStatixComponent;
         this.strategolibComponent = strategoLibComponent;
         this.strategolibResourcesComponent = strategoLibResourcesComponent;
+        this.gppComponent = gppComponent;
+        this.gppResourcesComponent = gppResourcesComponent;
         this.libSpoofax2Component = libSpoofax2Component;
         this.libSpoofax2ResourcesComponent = libSpoofax2ResourcesComponent;
         this.libStatixComponent = libStatixComponent;
@@ -152,6 +160,8 @@ public class Spoofax3Compiler implements AutoCloseable {
 
         StrategoLibComponent strategoLibComponent,
         StrategoLibResourcesComponent strategoLibResourcesComponent,
+        GppComponent gppComponent,
+        GppResourcesComponent gppResourcesComponent,
         LibSpoofax2Component libSpoofax2Component,
         LibSpoofax2ResourcesComponent libSpoofax2ResourcesComponent,
         LibStatixComponent libStatixComponent,
@@ -177,6 +187,8 @@ public class Spoofax3Compiler implements AutoCloseable {
 
             .strategoLibComponent(strategoLibComponent)
             .strategoLibResourcesComponent(strategoLibResourcesComponent)
+            .gppComponent(gppComponent)
+            .gppResourcesComponent(gppResourcesComponent)
             .libSpoofax2Component(libSpoofax2Component)
             .libSpoofax2ResourcesComponent(libSpoofax2ResourcesComponent)
             .libStatixComponent(libStatixComponent)
@@ -192,8 +204,14 @@ public class Spoofax3Compiler implements AutoCloseable {
             strategoComponent,
             esvComponent,
             statixComponent,
+
             sdf3ExtStatixComponent,
-            strategoLibComponent, strategoLibResourcesComponent, libSpoofax2Component,
+
+            strategoLibComponent,
+            strategoLibResourcesComponent,
+            gppComponent,
+            gppResourcesComponent,
+            libSpoofax2Component,
             libSpoofax2ResourcesComponent,
             libStatixComponent,
             libStatixResourcesComponent,
