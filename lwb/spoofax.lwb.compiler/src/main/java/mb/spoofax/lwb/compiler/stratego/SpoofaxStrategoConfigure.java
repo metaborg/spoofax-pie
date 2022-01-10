@@ -9,6 +9,8 @@ import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.constraint.pie.ConstraintAnalyzeMultiTaskDef;
+import mb.gpp.GppInfo;
+import mb.gpp.GppUtil;
 import mb.libspoofax2.LibSpoofax2ClassLoaderResources;
 import mb.libspoofax2.LibSpoofax2Exports;
 import mb.libstatix.LibStatixClassLoaderResources;
@@ -73,6 +75,7 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
     private final LibStatixClassLoaderResources libStatixClassLoaderResources;
 
     private final StrategoLibUtil strategoLibUtil;
+    private final GppUtil gppUtil;
     private final SpoofaxStrategoGenerationUtil spoofaxStrategoGenerationUtil;
 
     private final SpoofaxSdf3GenerationUtil spoofaxSdf3GenerationUtil;
@@ -94,6 +97,7 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
         LibStatixClassLoaderResources libStatixClassLoaderResources,
 
         StrategoLibUtil strategoLibUtil,
+        GppUtil gppUtil,
         SpoofaxStrategoGenerationUtil spoofaxStrategoGenerationUtil,
 
         SpoofaxSdf3GenerationUtil spoofaxSdf3GenerationUtil,
@@ -115,6 +119,7 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
         this.libStatixClassLoaderResources = libStatixClassLoaderResources;
 
         this.strategoLibUtil = strategoLibUtil;
+        this.gppUtil = gppUtil;
         this.spoofaxStrategoGenerationUtil = spoofaxStrategoGenerationUtil;
 
         this.spoofaxSdf3GenerationUtil = spoofaxSdf3GenerationUtil;
@@ -173,8 +178,12 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
         includeDirectories.addAll(sourceFiles.includeDirectories());
         final LinkedHashSet<Supplier<Stratego2LibInfo>> str2Libs = new LinkedHashSet<>();
         final Supplier<StrategoLibInfo> strategoLibInfoSupplier = strategoLibUtil.getStrategoLibInfo(sourceFiles.strategoLibUnarchiveDirectory(), unarchiveFromJar);
-        str2Libs.add(strategoLibInfoSupplier.map(new ToStratego2LibInfo()));
-        final LinkedHashSet<File> javaClassPaths = new LinkedHashSet<>(strategoLibUtil.getStrategoLibJavaClassPaths());
+        str2Libs.add(strategoLibInfoSupplier.map(new FromStrategoLibInfoToStratego2LibInfo()));
+        final Supplier<GppInfo> gppInfoSupplier = gppUtil.getGppInfo(sourceFiles.gppUnarchiveDirectory(), unarchiveFromJar);
+        str2Libs.add(gppInfoSupplier.map(new FromGppToStratego2LibInfo()));
+        final LinkedHashSet<File> javaClassPaths = new LinkedHashSet<>();
+        javaClassPaths.addAll(strategoLibUtil.getStrategoLibJavaClassPaths());
+        javaClassPaths.addAll(gppUtil.getGppJavaClassPaths());
 
         // Determine libspoofax2 definition directories.
         final HashSet<HierarchicalResource> libSpoofax2DefinitionDirs = new LinkedHashSet<>(); // LinkedHashSet to remove duplicates while keeping insertion order.
@@ -385,9 +394,15 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
         }
     }
 
-    private static class ToStratego2LibInfo extends StatelessSerializableFunction<StrategoLibInfo, Stratego2LibInfo> {
+    private static class FromStrategoLibInfoToStratego2LibInfo extends StatelessSerializableFunction<StrategoLibInfo, Stratego2LibInfo> {
         @Override public Stratego2LibInfo apply(StrategoLibInfo strategoLibInfo) {
             return new Stratego2LibInfo(strategoLibInfo.str2libFile, strategoLibInfo.jarFilesOrDirectories);
+        }
+    }
+
+    private static class FromGppToStratego2LibInfo extends StatelessSerializableFunction<GppInfo, Stratego2LibInfo> {
+        @Override public Stratego2LibInfo apply(GppInfo gppInfo) {
+            return new Stratego2LibInfo(gppInfo.str2libFile, gppInfo.jarFilesOrDirectories);
         }
     }
 }

@@ -166,6 +166,7 @@ public class EclipseProjectCompiler implements TaskDef<Supplier<Result<Option<Ec
         }
         if(input.adapterProjectCompilerInput().strategoRuntime().isPresent()) {
             bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.strategolibEclipseDep()));
+            bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.gppEclipseDep()));
         }
         if(input.adapterProjectCompilerInput().dependOnRv32Im()) {
             bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.rv32ImEclipseDep()));

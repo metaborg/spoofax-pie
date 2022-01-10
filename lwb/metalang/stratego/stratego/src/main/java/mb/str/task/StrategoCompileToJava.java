@@ -86,6 +86,7 @@ public class StrategoCompileToJava implements TaskDef<StrategoCompileConfig, Res
             config.sourceFileOrigins.asCopy(),
             true,
             true,
+            false,
             config.outputLibraryName,
             config.str2libraries.asCopy()
         ));

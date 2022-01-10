@@ -42,7 +42,6 @@ public abstract class CfgStrategoSource implements Serializable {
 
         @Value.Default default List<String> includeBuiltinLibraries() {
             final ArrayList<String> strategoBuiltinLibs = new ArrayList<>();
-            strategoBuiltinLibs.add("stratego-gpp");
             strategoBuiltinLibs.add("libstratego-sglr");
             strategoBuiltinLibs.add("libstratego-aterm");
             return strategoBuiltinLibs;
@@ -50,6 +49,10 @@ public abstract class CfgStrategoSource implements Serializable {
 
         default ResourcePath strategoLibUnarchiveDirectory() {
             return compileLanguageShared().unarchiveDirectory().appendRelativePath("strategoLib");
+        }
+
+        default ResourcePath gppUnarchiveDirectory() {
+            return compileLanguageShared().unarchiveDirectory().appendRelativePath("gpp");
         }
 
         @Value.Default default boolean includeLibSpoofax2Exports() {

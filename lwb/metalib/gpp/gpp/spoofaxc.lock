@@ -1,0 +1,5 @@
+shared.defaultArtifactId=gpp
+shared.defaultClassPrefix=Gpp
+shared.defaultGroupId=org.metaborg
+shared.defaultPackageId=mb.gpp
+shared.defaultVersion=0.1.0

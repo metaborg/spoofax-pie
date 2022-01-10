@@ -338,6 +338,14 @@ public interface Shared extends Serializable {
         return GradleDependency.module(Coordinate.of("org.metaborg", "strategolib.eclipse", spoofax3Version()));
     }
 
+    @Value.Default default GradleDependency gppDep() {
+        return GradleDependency.module(Coordinate.of("org.metaborg", "gpp", spoofax3Version()));
+    }
+
+    @Value.Default default GradleDependency gppEclipseDep() {
+        return GradleDependency.module(Coordinate.of("org.metaborg", "gpp.eclipse", spoofax3Version()));
+    }
+
 
     /// Spoofax 3 lang
 

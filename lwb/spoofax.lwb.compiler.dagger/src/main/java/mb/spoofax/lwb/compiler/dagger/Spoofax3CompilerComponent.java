@@ -3,6 +3,8 @@ package mb.spoofax.lwb.compiler.dagger;
 import dagger.Component;
 import mb.cfg.CfgComponent;
 import mb.esv.EsvComponent;
+import mb.gpp.GppComponent;
+import mb.gpp.GppResourcesComponent;
 import mb.libspoofax2.LibSpoofax2Component;
 import mb.libspoofax2.LibSpoofax2ResourcesComponent;
 import mb.libstatix.LibStatixComponent;
@@ -52,6 +54,8 @@ import java.util.Set;
 
         StrategoLibComponent.class,
         StrategoLibResourcesComponent.class,
+        GppComponent.class,
+        GppResourcesComponent.class,
         LibSpoofax2Component.class,
         LibSpoofax2ResourcesComponent.class,
         LibStatixComponent.class,
