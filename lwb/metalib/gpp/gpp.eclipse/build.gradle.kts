@@ -3,6 +3,11 @@ plugins {
   id("org.metaborg.spoofax.compiler.gradle.eclipse")
 }
 
+fun compositeBuild(name: String) = "$group:$name:$version"
+dependencies {
+  bundleImplementation(compositeBuild("strategolib.eclipse"))
+}
+
 languageEclipseProject {
   adapterProject.set(project(":gpp"))
   compilerInput {
