@@ -37,6 +37,7 @@ import mb.statix.codecompletion.strategies.runtime.CompleteStrategy;
 import mb.statix.codecompletion.strategies.runtime.InferStrategy;
 import mb.statix.constraints.CUser;
 import mb.statix.constraints.messages.IMessage;
+import mb.statix.constraints.messages.MessageKind;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.persistent.State;
 import mb.statix.spec.Spec;
@@ -53,6 +54,7 @@ import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.terms.util.TermUtils;
 
 import java.io.Serializable;
+import java.util.AbstractMap;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -356,11 +358,19 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
             // Analyze the AST
             if (eventHandler != null) eventHandler.beginAnalysis();
             final SolverState analyzedState = analyze(initialState);
+            final ArrayList<Map.Entry<IConstraint, IMessage>> allowedMessages = new ArrayList<>();
+            if (analyzedState.hasErrors()) {
+                analyzedState.getMessages().forEach((c, m) -> {
+                    if(m.kind() == MessageKind.ERROR) {
+                        allowedMessages.add(new AbstractMap.SimpleEntry<>(c, m));
+                    }
+                });
+            }
             if (eventHandler != null) eventHandler.endAnalysis();
 
             // Execute the code completion Tego strategy
             if (eventHandler != null) eventHandler.beginCodeCompletion();
-            final Seq<CodeCompletionProposal> completionProposals = complete(analyzedState, placeholder, Collections.emptyList() /* TODO: Get the set of analysis errors */);
+            final Seq<CodeCompletionProposal> completionProposals = complete(analyzedState, placeholder, allowedMessages /*Collections.emptyList() */);
             final Seq<CodeCompletionProposal> filteredProposals = filterProposals(completionProposals);
             final List<CodeCompletionProposal> instantiatedProposals = filteredProposals.toList(); // NOTE: This is where we actually coerce the lazy list find the completions.
             if (eventHandler != null) eventHandler.endCodeCompletion();
@@ -583,9 +593,9 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
             final @Nullable SolverState analyzedState = tegoRuntime.eval(InferStrategy.getInstance(), initialState);
             if (analyzedState == null) {
                 throw new IllegalStateException("Completion failed: got no result from Tego strategy.");
-            } else if(analyzedState.hasErrors()) {
-                // TODO: We can add these errors to the set of allowed errors
-                throw new IllegalStateException("Completion failed: input program validation failed:\n" + analyzedState.messagesToString());
+//            } else if(analyzedState.hasErrors()) {
+//                // TODO: We can add these errors to the set of allowed errors
+//                throw new IllegalStateException("Completion failed: input program validation failed:\n" + analyzedState.messagesToString());
             } else if(analyzedState.getConstraints().isEmpty()) {
                 throw new IllegalStateException("Completion failed: no constraints left, nothing to complete.\n" + analyzedState);
             }
