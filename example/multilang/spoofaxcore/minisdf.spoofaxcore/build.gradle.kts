@@ -37,7 +37,7 @@ afterEvaluate {
     from("../module-interface.spoofaxcore/trans/modules")
     into("trans/modules")
   }
-  tasks.getByName("spoofaxGenerateSources") {
+  tasks.getByName("spoofaxBuildLanguageSpec") {
     dependsOn(importSignature)
     dependsOn(importModule)
   }

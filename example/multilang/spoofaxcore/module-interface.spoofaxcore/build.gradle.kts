@@ -23,7 +23,7 @@ afterEvaluate {
     from("../signature-interface.spoofaxcore/trans/abstract-sig")
     into("trans/abstract-sig")
   }
-  tasks.getByName("spoofaxGenerateSources") {
+  tasks.getByName("spoofaxBuildLanguageSpec") {
     dependsOn(importSignature)
   }
 }
