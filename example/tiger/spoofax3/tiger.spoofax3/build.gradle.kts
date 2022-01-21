@@ -13,12 +13,3 @@ dependencies {
   testImplementation(compositeBuild("spoofax.test"))
   testCompileOnly("org.checkerframework:checker-qual-android")
 }
-
-// For ccbench project
-publishing {
-  publications {
-    create<MavenPublication>("mavenJava") {
-       from(components["java"])
-    }
-  }
-}

@@ -23,10 +23,12 @@ plugins {
 subprojects {
   metaborg {
     configureSubProject()
-    // Do not publish examples.
-    javaCreatePublication = false
-    javaCreateSourcesJar = false
-    javaCreateJavadocJar = false
+    // Do not publish examples, except for `tiger.spoofax3`
+    if(this@subprojects.name != "tiger.spoofax3") {
+      javaCreatePublication = false
+      javaCreateSourcesJar = false
+      javaCreateJavadocJar = false
+    }
   }
 }
 
