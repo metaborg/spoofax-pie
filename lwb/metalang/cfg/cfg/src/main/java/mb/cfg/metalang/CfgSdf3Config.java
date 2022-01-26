@@ -79,6 +79,13 @@ public interface CfgSdf3Config extends Serializable {
             ;
     }
 
+    @Value.Default default String sdf3PlaceholderPrefix() {
+        return "$";
+    }
+
+    @Value.Default default String sdf3PlaceholderSuffix() {
+        return "";
+    }
 
     /// Automatically provided sub-inputs
 

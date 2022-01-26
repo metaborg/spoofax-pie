@@ -99,7 +99,14 @@ public class SpoofaxSdf3Configure implements TaskDef<ResourcePath, Result<Option
             cfgSdf3Config.checkPrioritiesInParseTable(),
             cfgSdf3Config.createLayoutSensitiveParseTable()
         );
-        final Sdf3SpecConfig sdf3SpecConfig = new Sdf3SpecConfig(rootDirectory, mainSourceDirectory.getPath(), mainFile.getPath(), parseTableConfiguration);
+        final Sdf3SpecConfig sdf3SpecConfig = new Sdf3SpecConfig(
+            rootDirectory,
+            mainSourceDirectory.getPath(),
+            mainFile.getPath(),
+            parseTableConfiguration,
+            cfgSdf3Config.sdf3PlaceholderPrefix(),
+            cfgSdf3Config.sdf3PlaceholderSuffix()
+        );
         return Result.ofOk(SpoofaxSdf3Config.files(sdf3SpecConfig, cfgSdf3Config.parseTableAtermOutputFile(), cfgSdf3Config.parseTablePersistedOutputFile()));
     }
 

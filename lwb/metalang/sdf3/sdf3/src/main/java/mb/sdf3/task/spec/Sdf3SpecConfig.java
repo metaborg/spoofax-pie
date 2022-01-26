@@ -12,17 +12,23 @@ public class Sdf3SpecConfig implements Serializable {
     public final ResourcePath mainSourceDirectory;
     public final ResourcePath mainFile;
     public final ParseTableConfiguration parseTableConfig;
+    public final String placeholderPrefix;
+    public final String placeholderSuffix;
 
     public Sdf3SpecConfig(
         ResourcePath rootDirectory,
         ResourcePath mainSourceDirectory,
         ResourcePath mainFile,
-        ParseTableConfiguration parseTableConfig
+        ParseTableConfiguration parseTableConfig,
+        String placeholderPrefix,
+        String placeholderSuffix
     ) {
         this.rootDirectory = rootDirectory;
         this.mainSourceDirectory = mainSourceDirectory;
         this.mainFile = mainFile;
         this.parseTableConfig = parseTableConfig;
+        this.placeholderPrefix = placeholderPrefix;
+        this.placeholderSuffix = placeholderSuffix;
     }
 
     public String getMainModuleName() {
@@ -33,7 +39,7 @@ public class Sdf3SpecConfig implements Serializable {
         final ResourcePath mainSourceDirectory = rootDirectory.appendRelativePath("src");
         final ResourcePath mainFile = mainSourceDirectory.appendRelativePath("start.sdf3");
         final ParseTableConfiguration parseTableConfig = createDefaultParseTableConfiguration();
-        return new Sdf3SpecConfig(rootDirectory, mainSourceDirectory, mainFile, parseTableConfig);
+        return new Sdf3SpecConfig(rootDirectory, mainSourceDirectory, mainFile, parseTableConfig, "$", "");
     }
 
     public static ParseTableConfiguration createDefaultParseTableConfiguration() {
@@ -44,10 +50,12 @@ public class Sdf3SpecConfig implements Serializable {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
         final Sdf3SpecConfig that = (Sdf3SpecConfig)o;
-        if(!rootDirectory.equals(that.rootDirectory)) return false;
-        if(!mainSourceDirectory.equals(that.mainSourceDirectory)) return false;
-        if(!mainFile.equals(that.mainFile)) return false;
-        return parseTableConfig.equals(that.parseTableConfig);
+        return rootDirectory.equals(that.rootDirectory)
+            && mainSourceDirectory.equals(that.mainSourceDirectory)
+            && mainFile.equals(that.mainFile)
+            && parseTableConfig.equals(that.parseTableConfig)
+            && placeholderPrefix.equals(that.placeholderPrefix)
+            && placeholderSuffix.equals(that.placeholderSuffix);
     }
 
     @Override public int hashCode() {
@@ -55,6 +63,8 @@ public class Sdf3SpecConfig implements Serializable {
         result = 31 * result + mainSourceDirectory.hashCode();
         result = 31 * result + mainFile.hashCode();
         result = 31 * result + parseTableConfig.hashCode();
+        result = 31 * result + placeholderPrefix.hashCode();
+        result = 31 * result + placeholderSuffix.hashCode();
         return result;
     }
 
@@ -64,6 +74,9 @@ public class Sdf3SpecConfig implements Serializable {
             ", mainSourceDirectory=" + mainSourceDirectory +
             ", mainFile=" + mainFile +
             ", parseTableConfig=" + parseTableConfig +
+            ", placeholderPrefix='" + placeholderPrefix + '\'' +
+            ", placeholderSuffix='" + placeholderSuffix + '\'' +
             '}';
     }
+
 }
