@@ -1,5 +1,6 @@
 package mb.spoofax.lwb.compiler.stratego;
 
+import mb.cfg.metalang.CfgSdf3Config;
 import mb.cfg.metalang.CfgStrategoConfig;
 import mb.cfg.metalang.CfgStrategoSource;
 import mb.cfg.task.CfgRootDirectoryToObject;
@@ -30,6 +31,7 @@ import mb.resource.fs.FSResource;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.path.string.PathStringMatcher;
+import mb.sdf3.stratego.Sdf3Context;
 import mb.sdf3.task.Sdf3ToCompletionRuntime;
 import mb.sdf3.task.Sdf3ToPrettyPrinter;
 import mb.sdf3.task.Sdf3ToSignature;
@@ -242,9 +244,14 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
         try {
             spoofaxSdf3GenerationUtil.performSdf3GenerationIfEnabled(context, rootDirectory, new SpoofaxSdf3GenerationUtil.Callbacks<SpoofaxStrategoConfigureException>() {
                 @Override
-                public void generateFromAst(ExecContext context, STask<Result<IStrategoTerm, ?>> astSupplier) throws SpoofaxStrategoConfigureException, InterruptedException {
+                public void generateFromAst(ExecContext context, STask<Result<IStrategoTerm, ?>> astSupplier, Sdf3SpecConfig sdf3Config) throws SpoofaxStrategoConfigureException, InterruptedException {
+                    final Sdf3Context sdf3Context = new Sdf3Context(
+                        strategyAffix,
+                        sdf3Config.placeholderPrefix,
+                        sdf3Config.placeholderSuffix
+                    );
                     try {
-                        sdf3ToPrettyPrinter(context, strategyAffix, generatedSourcesDirectory, astSupplier);
+                        sdf3ToPrettyPrinter(context, sdf3Context, generatedSourcesDirectory, astSupplier);
                     } catch(RuntimeException | InterruptedException e) {
                         throw e; // Do not wrap runtime and interrupted exceptions, rethrow them.
                     } catch(Exception e) {
@@ -350,11 +357,11 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
 
     private void sdf3ToPrettyPrinter(
         ExecContext context,
-        String strategyAffix,
+        Sdf3Context sdf3Context,
         ResourcePath generatesSourcesDirectory,
         STask<Result<IStrategoTerm, ?>> astSupplier
     ) throws Exception {
-        final STask<Result<IStrategoTerm, ?>> supplier = sdf3ToPrettyPrinter.createSupplier(new Sdf3ToPrettyPrinter.Input(astSupplier, strategyAffix));
+        final STask<Result<IStrategoTerm, ?>> supplier = sdf3ToPrettyPrinter.createSupplier(new Sdf3ToPrettyPrinter.Input(astSupplier, sdf3Context));
         spoofaxStrategoGenerationUtil.writePrettyPrintedFile(context, generatesSourcesDirectory, supplier);
     }
 
