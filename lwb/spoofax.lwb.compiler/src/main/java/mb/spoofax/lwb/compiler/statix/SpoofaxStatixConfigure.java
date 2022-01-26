@@ -129,7 +129,7 @@ public class SpoofaxStatixConfigure implements TaskDef<ResourcePath, Result<Opti
             try {
                 spoofaxSdf3GenerationUtil.performSdf3GenerationIfEnabled(context, rootDirectory, new SpoofaxSdf3GenerationUtil.Callbacks<SpoofaxStatixConfigureException>() {
                     @Override
-                    public void generateFromAst(ExecContext context, STask<Result<IStrategoTerm, ?>> astSupplier) throws SpoofaxStatixConfigureException, InterruptedException {
+                    public void generateFromAst(ExecContext context, STask<Result<IStrategoTerm, ?>> astSupplier, Sdf3SpecConfig sdf3Config) throws SpoofaxStatixConfigureException, InterruptedException {
                         try {
                             sdf3ToStatixGenInj(context, generatedSourcesDirectory, astSupplier);
                         } catch(RuntimeException | InterruptedException e) {

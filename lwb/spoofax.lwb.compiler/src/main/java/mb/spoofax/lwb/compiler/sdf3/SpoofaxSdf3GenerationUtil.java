@@ -44,7 +44,7 @@ public class SpoofaxSdf3GenerationUtil {
 
 
     public interface Callbacks<E extends Exception> {
-        default void generateFromAst(ExecContext context, STask<Result<IStrategoTerm, ?>> astSupplier) throws E, IOException, InterruptedException {}
+        default void generateFromAst(ExecContext context, STask<Result<IStrategoTerm, ?>> astSupplier, Sdf3SpecConfig sdf3Config) throws E, IOException, InterruptedException {}
 
         default void generateFromAnalyzed(ExecContext context, Supplier<Result<ConstraintAnalyzeMultiTaskDef.SingleFileOutput, ?>> singleFileAnalysisOutputSupplier) throws E, IOException, InterruptedException {}
 
@@ -70,7 +70,7 @@ public class SpoofaxSdf3GenerationUtil {
                 final Supplier<Result<ConstraintAnalyzeMultiTaskDef.SingleFileOutput, ?>> singleFileAnalysisOutputSupplier = analyze.createSingleFileOutputSupplier(analyzeInput, file);
                 callbacks.generateFromAnalyzed(context, singleFileAnalysisOutputSupplier);
                 final STask<Result<IStrategoTerm, ?>> astSupplier = desugar.createSupplier(parseInputBuilder.withFile(file).buildAstSupplier());
-                callbacks.generateFromAst(context, astSupplier);
+                callbacks.generateFromAst(context, astSupplier, config);
             }
             callbacks.generateFromConfig(context, config);
         }
