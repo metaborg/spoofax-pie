@@ -41,8 +41,8 @@ public class StatixPrimitiveLibrary extends AbstractStrategoOperatorRegistry {
         add(new STX_test_log_level());
 
         add(new StatixProjectConfigPrimitive());
-
-        add(new FailingPrimitive("STX_is_concurrent_enabled"));
+        add(new StatixConcurrentEnabledPrimitive());
+        add(new StatixSolverModePrimitive());
     }
 
     @Override public String getOperatorRegistryName() {

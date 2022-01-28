@@ -1,0 +1,52 @@
+package mb.statix.common;
+
+import org.spoofax.interpreter.core.IContext;
+import org.spoofax.interpreter.core.InterpreterException;
+import org.spoofax.interpreter.library.AbstractPrimitive;
+import org.spoofax.interpreter.stratego.PrimT;
+import org.spoofax.interpreter.stratego.Strategy;
+import org.spoofax.interpreter.terms.IStrategoString;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.terms.util.TermUtils;
+
+import java.util.Optional;
+
+public abstract class StatixCommonPrimitive extends AbstractPrimitive  {
+    public StatixCommonPrimitive(String name, int svars, int tvars) {
+        super(name, svars, tvars);
+    }
+
+    protected Optional<String> getQualifiedLanguageId(IContext env) throws InterpreterException {
+        IStrategoTerm current = env.current();
+        if(!new PrimT("language_components", new Strategy[0], new IStrategoTerm[0]).evaluate(env)) {
+            return Optional.empty();
+        }
+
+        IStrategoTerm languageComponentsTerm = env.current();
+        env.setCurrent(current);
+
+        if(!TermUtils.isList(languageComponentsTerm, 1)) {
+            return Optional.empty();
+        }
+
+        IStrategoTerm languageComponentTerm = languageComponentsTerm.getSubterm(0);
+        if(!TermUtils.isTuple(languageComponentTerm)) {
+            return Optional.empty();
+        }
+
+        IStrategoTerm artifactIdTerm = languageComponentTerm.getSubterm(1);
+        if(!TermUtils.isString(artifactIdTerm)) {
+            return Optional.empty();
+        }
+        String artifactId = ((IStrategoString) artifactIdTerm).stringValue();
+
+        IStrategoTerm groupIdTerm = languageComponentTerm.getSubterm(0);
+        if(!TermUtils.isString(groupIdTerm)) {
+            return Optional.empty();
+        }
+        String groupId = ((IStrategoString) groupIdTerm).stringValue();
+
+        String qualifiedArtifactId = groupId + ":" + artifactId;
+        return Optional.of(qualifiedArtifactId);
+    }
+}
