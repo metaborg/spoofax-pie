@@ -37,6 +37,7 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.lwb.compiler.CompileLanguage;
 import mb.spoofax.lwb.compiler.dagger.StandaloneSpoofax3Compiler;
+import mb.spoofax.lwb.dynamicloading.component.DynamicComponent;
 import mb.spt.DaggerSptComponent;
 import mb.spt.DaggerSptResourcesComponent;
 import mb.spt.SptComponent;
@@ -120,7 +121,7 @@ class TestBase {
             .spoofax3CompilerComponent(standaloneSpoofax3Compiler.compiler.component)
             .build();
         dynamicLoad = dynamicLoadingComponent.getDynamicLoad();
-        dynamicLanguageRegistry = dynamicLoadingComponent.getDynamicLanguageRegistry();
+        dynamicLanguageRegistry = dynamicLoadingComponent.getDynamicComponentManager();
 
         sptComponent.getLanguageUnderTestProviderWrapper().set(new DynamicLanguageUnderTestProvider(
             dynamicLanguageRegistry,
@@ -174,15 +175,15 @@ class TestBase {
         return pieComponent.newSession();
     }
 
-    Task<OutTransient<Result<DynamicLanguage, ?>>> dynamicLoadTask(ResourcePath rootDirectory) {
+    Task<OutTransient<Result<DynamicComponent, ?>>> dynamicLoadTask(ResourcePath rootDirectory) {
         return dynamicLoad.createTask(compileLanguageArgs(rootDirectory));
     }
 
-    DynamicLanguage requireDynamicLoad(Session session, ResourcePath rootDirectory) throws Exception {
+    DynamicComponent requireDynamicLoad(Session session, ResourcePath rootDirectory) throws Exception {
         return session.require(dynamicLoadTask(rootDirectory)).getValue().unwrap();
     }
 
-    DynamicLanguage getDynamicLoadOutput(TopDownSession session, ResourcePath rootDirectory) throws Exception {
+    DynamicComponent getDynamicLoadOutput(TopDownSession session, ResourcePath rootDirectory) throws Exception {
         return session.getOutputOrRequireAndEnsureExplicitlyObserved(dynamicLoadTask(rootDirectory)).getValue().unwrap();
     }
 

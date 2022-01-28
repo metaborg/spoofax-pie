@@ -1,11 +1,12 @@
-package mb.spoofax.lwb.dynamicloading;
+package mb.spoofax.lwb.dynamicloading.component;
 
-import mb.cfg.CompileLanguageInput;
+import mb.common.util.MapView;
 import mb.common.util.SetView;
 import mb.pie.dagger.PieComponent;
-import mb.resource.dagger.ResourceRegistriesProvider;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.core.Coordinate;
+import mb.spoofax.core.component.Component;
 import mb.spoofax.core.language.LanguageComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -13,52 +14,57 @@ import java.io.IOException;
 import java.net.URLClassLoader;
 import java.time.Instant;
 
-public class DynamicLanguage implements AutoCloseable {
+public class DynamicComponent implements Component, AutoCloseable {
     protected final ResourcePath rootDirectory;
-    protected final CompileLanguageInput compileInput;
-    protected final String id;
+    //    protected final CompileLanguageInput compileInput;
+    protected final Coordinate coordinate;
     protected final String displayName;
     protected final SetView<String> fileExtensions;
     protected final Instant created;
 
     protected URLClassLoader classLoader;
-    protected ResourceRegistriesProvider resourceRegistriesProvider;
+    //    protected ResourceRegistriesProvider resourceRegistriesProvider;
     protected ResourceServiceComponent resourceServiceComponent;
-    protected LanguageComponent languageComponent;
+    protected @Nullable LanguageComponent languageComponent;
     protected PieComponent pieComponent;
     protected boolean closed = false;
 
-    public DynamicLanguage(
+    public DynamicComponent(
         ResourcePath rootDirectory,
-        CompileLanguageInput compileInput,
+        Coordinate coordinate,
+//        CompileLanguageInput compileInput,
         URLClassLoader classLoader,
-        ResourceRegistriesProvider resourceRegistriesProvider,
+//        ResourceRegistriesProvider resourceRegistriesProvider,
         ResourceServiceComponent resourceServiceComponent,
-        LanguageComponent languageComponent,
+        @Nullable LanguageComponent languageComponent,
         PieComponent pieComponent
     ) {
         this.rootDirectory = rootDirectory;
-        this.compileInput = compileInput;
-        this.id = languageComponent.getLanguageInstance().getId();
-        this.displayName = languageComponent.getLanguageInstance().getDisplayName();
-        this.fileExtensions = languageComponent.getLanguageInstance().getFileExtensions();
+//        this.compileInput = compileInput;
+        this.coordinate = coordinate;
+        if(languageComponent != null) {
+            this.displayName = languageComponent.getLanguageInstance().getDisplayName();
+            this.fileExtensions = languageComponent.getLanguageInstance().getFileExtensions();
+        } else {
+            this.displayName = coordinate.toString();
+            this.fileExtensions = SetView.of();
+        }
         this.created = Instant.now();
 
         this.classLoader = classLoader;
-        this.resourceRegistriesProvider = resourceRegistriesProvider;
+//        this.resourceRegistriesProvider = resourceRegistriesProvider;
         this.resourceServiceComponent = resourceServiceComponent;
         this.languageComponent = languageComponent;
         this.pieComponent = pieComponent;
     }
 
-
     /**
      * Closes the dynamically loaded language, closing the {@link URLClassLoader classloader} and {@link
      * LanguageComponent language component}, freeing any resources they hold.
      *
-     * This dynamically loaded language cannot be used any more after closing it, with the exception of the {@link
-     * #getRootDirectory}, {@link #getId()}, {@link #getDisplayName()}, {@link #getFileExtensions()}, and {@link
-     * #getCompileInput()} methods.
+     * This dynamically loaded language cannot be used any more after closing it, except the {@link #getRootDirectory},
+     * {@link #getCoordinate()}, {@link #getDisplayName()}, {@link #getFileExtensions()}, and {@link #getCompileInput()}
+     * methods.
      *
      * @throws IOException when {@link URLClassLoader#close() closing the classloader} fails.
      */
@@ -71,7 +77,7 @@ public class DynamicLanguage implements AutoCloseable {
             languageComponent = null;
             resourceServiceComponent.close();
             resourceServiceComponent = null;
-            resourceRegistriesProvider = null;
+//            resourceRegistriesProvider = null;
             classLoader.close();
             classLoader = null;
         } finally {
@@ -80,41 +86,54 @@ public class DynamicLanguage implements AutoCloseable {
     }
 
 
+    @Override public @Nullable LanguageComponent getLanguageComponent(Coordinate coordinate) {
+        if(this.coordinate.equals(coordinate)) {
+            return languageComponent;
+        }
+        return null;
+    }
+
+    @Override public MapView<Coordinate, LanguageComponent> getLanguageComponents() {
+        if(languageComponent != null) return MapView.of(coordinate, languageComponent);
+        return MapView.of();
+    }
+
+
     /**
-     * Gets the root directory this language was dynamically loaded from.
+     * Gets the root directory this component was dynamically loaded from.
      */
     public ResourcePath getRootDirectory() {
         return rootDirectory;
     }
 
     /**
-     * Gets the identifier of this dynamically loaded language.
+     * Gets the coordinate of this dynamically loaded component.
      */
-    public String getId() {
-        return id;
+    public Coordinate getCoordinate() {
+        return coordinate;
     }
 
     /**
-     * Gets the display name of this dynamically loaded language.
+     * Gets the display name of this dynamically loaded component.
      */
     public String getDisplayName() {
         return displayName;
     }
 
     /**
-     * Gets the file extensions of this dynamically loaded language.
+     * Gets the file extensions of the language of this dynamically loaded component.
      */
     public SetView<String> getFileExtensions() {
         return fileExtensions;
     }
 
 
-    /**
-     * Gets the {@link CompileLanguageInput compiler input} that was used to compile this dynamically loaded language.
-     */
-    public CompileLanguageInput getCompileInput() {
-        return compileInput;
-    }
+//    /**
+//     * Gets the {@link CompileLanguageInput compiler input} that was used to compile this dynamically loaded language.
+//     */
+//    public CompileLanguageInput getCompileInput() {
+//        return compileInput;
+//    }
 
 
     /**
@@ -135,16 +154,16 @@ public class DynamicLanguage implements AutoCloseable {
         return classLoader;
     }
 
-    /**
-     * Gets the {@link ResourceRegistriesProvider language resources component} of this dynamically loaded language.
-     *
-     * @throws IllegalStateException if the dynamically loaded language has been closed with {@link #close}.
-     */
-    public ResourceRegistriesProvider getResourceRegistriesProvider() {
-        if(closed)
-            throw new IllegalStateException("Cannot get language resources component, dynamically loaded language has been closed");
-        return resourceRegistriesProvider;
-    }
+//    /**
+//     * Gets the {@link ResourceRegistriesProvider language resources component} of this dynamically loaded language.
+//     *
+//     * @throws IllegalStateException if the dynamically loaded language has been closed with {@link #close}.
+//     */
+//    public ResourceRegistriesProvider getResourceRegistriesProvider() {
+//        if(closed)
+//            throw new IllegalStateException("Cannot get language resources component, dynamically loaded language has been closed");
+//        return resourceRegistriesProvider;
+//    }
 
     /**
      * Gets the {@link ResourceServiceComponent resource service component} of this dynamically loaded language.
@@ -158,11 +177,12 @@ public class DynamicLanguage implements AutoCloseable {
     }
 
     /**
-     * Gets the {@link LanguageComponent language component} of this dynamically loaded language.
+     * Gets the {@link LanguageComponent language component} of this dynamically loaded component, or {@code null} if it
+     * does not have one.
      *
      * @throws IllegalStateException if the dynamically loaded language has been closed with {@link #close}.
      */
-    public LanguageComponent getLanguageComponent() {
+    public @Nullable LanguageComponent getLanguageComponent() {
         if(closed)
             throw new IllegalStateException("Cannot get language component, dynamically loaded language has been closed");
         return languageComponent;
@@ -183,7 +203,7 @@ public class DynamicLanguage implements AutoCloseable {
     @Override public boolean equals(@Nullable Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
-        final DynamicLanguage that = (DynamicLanguage)o;
+        final DynamicComponent that = (DynamicComponent)o;
         if(!rootDirectory.equals(that.rootDirectory)) return false;
         return created.equals(that.created);
     }

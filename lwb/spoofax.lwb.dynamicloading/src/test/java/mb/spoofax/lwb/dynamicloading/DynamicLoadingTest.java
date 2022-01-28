@@ -23,6 +23,7 @@ import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
+import mb.spoofax.lwb.dynamicloading.component.DynamicComponent;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -51,7 +52,7 @@ class DynamicLoadingTest extends CharsTestBase {
 
         {
             System.out.println("Initial dynamic load");
-            final DynamicLanguage dynamicLanguage;
+            final DynamicComponent dynamicLanguage;
             try(final MixedSession session = newSession()) {
                 dynamicLanguage = requireDynamicLoad(session, rootDirectoryPath);
                 previousInput = dynamicLanguage.getCompileInput();
@@ -116,7 +117,7 @@ class DynamicLoadingTest extends CharsTestBase {
 
         {
             System.out.println("Change styler and reload");
-            final DynamicLanguage dynamicLanguage;
+            final DynamicComponent dynamicLanguage;
             try(final MixedSession session = newSession()) {
                 final TopDownSession topDownSession = modifyStyler(session, previousInput);
                 dynamicLanguage = getDynamicLoadOutput(topDownSession, rootDirectoryPath);
@@ -163,7 +164,7 @@ class DynamicLoadingTest extends CharsTestBase {
 
         {
             System.out.println("Change parser and reload");
-            final DynamicLanguage dynamicLanguage;
+            final DynamicComponent dynamicLanguage;
             final Set<ResourceKey> providedResources;
             try(final MixedSession session = newSession()) {
                 final TopDownSession topDownSession = modifyParser(session, previousInput);
@@ -198,7 +199,7 @@ class DynamicLoadingTest extends CharsTestBase {
 
         {
             System.out.println("Change transformation and reload");
-            final DynamicLanguage dynamicLanguage;
+            final DynamicComponent dynamicLanguage;
             final Set<ResourceKey> providedResources;
             try(final MixedSession session = newSession()) {
                 final TopDownSession topDownSession = modifyTransformation(session, previousInput);
@@ -241,7 +242,7 @@ class DynamicLoadingTest extends CharsTestBase {
 
         {
             System.out.println("Change command and reload");
-            final DynamicLanguage dynamicLanguage;
+            final DynamicComponent dynamicLanguage;
             final Set<ResourceKey> providedResources;
             try(final MixedSession session = newSession()) {
                 final TopDownSession topDownSession = modifyCommand(session, previousInput);
@@ -284,7 +285,7 @@ class DynamicLoadingTest extends CharsTestBase {
 
         {
             System.out.println("Hover test");
-            final DynamicLanguage dynamicLanguage;
+            final DynamicComponent dynamicLanguage;
             final Set<ResourceKey> providedResources;
             try(final MixedSession session = newSession()) {
                 final TopDownSession topDownSession = session.updateAffectedBy(Collections.emptySet());
@@ -325,7 +326,7 @@ class DynamicLoadingTest extends CharsTestBase {
 
         {
             System.out.println("Change analyzer and reload");
-            final DynamicLanguage dynamicLanguage;
+            final DynamicComponent dynamicLanguage;
             final Set<ResourceKey> providedResources;
             try(final MixedSession session = newSession()) {
                 final TopDownSession topDownSession = modifyAnalyzer(session, previousInput);
@@ -374,7 +375,7 @@ class DynamicLoadingTest extends CharsTestBase {
     @Disabled @Test void testDynamicLanguage() throws Exception {
         CompileLanguageInput previousInput;
 
-        DynamicLanguage lang1a;
+        DynamicComponent lang1a;
         try(MixedSession session = newSession()) {
             // Load language.
             lang1a = requireDynamicLoad(session, rootDirectoryPath);
@@ -385,7 +386,7 @@ class DynamicLoadingTest extends CharsTestBase {
             assertFalse(lang1a.isClosed());
         }
 
-        DynamicLanguage lang1b;
+        DynamicComponent lang1b;
         try(MixedSession session = newSession()) {
             // Load language again, but nothing has changed.
             lang1b = requireDynamicLoad(session, rootDirectoryPath);
@@ -396,7 +397,7 @@ class DynamicLoadingTest extends CharsTestBase {
             assertFalse(lang1b.isClosed());
         }
 
-        DynamicLanguage lang2;
+        DynamicComponent lang2;
         try(MixedSession session = newSession()) {
             // Modify language specification and reload language.
             lang2 = getDynamicLoadOutput(modifyStyler(session, previousInput), rootDirectoryPath);
@@ -416,7 +417,7 @@ class DynamicLoadingTest extends CharsTestBase {
             lang1b = null;
         }
 
-        DynamicLanguage lang3;
+        DynamicComponent lang3;
         try(MixedSession session = newSession()) {
             // Modify language specification and reload language.
             lang3 = getDynamicLoadOutput(modifyParser(session, previousInput), rootDirectoryPath);

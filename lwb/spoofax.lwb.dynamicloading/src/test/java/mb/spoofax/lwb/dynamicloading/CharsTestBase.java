@@ -18,6 +18,7 @@ import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.CommandExecutionType;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.arg.ArgConverters;
+import mb.spoofax.lwb.dynamicloading.component.DynamicComponent;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -61,15 +62,15 @@ class CharsTestBase extends TestBase {
     }
 
 
-    boolean hasTokenizeTaskDefExecuted(MetricsTracer.Report report, DynamicLanguage language) {
+    boolean hasTokenizeTaskDefExecuted(MetricsTracer.Report report, DynamicComponent language) {
         return report.hasTaskDefExecuted(language.getCompileInput().adapterProjectInput().parser().get().tokenizeTaskDef().qualifiedId());
     }
 
-    boolean hasParseTaskDefExecuted(MetricsTracer.Report report, DynamicLanguage language) {
+    boolean hasParseTaskDefExecuted(MetricsTracer.Report report, DynamicComponent language) {
         return report.hasTaskDefExecuted(language.getCompileInput().adapterProjectInput().parser().get().parseTaskDef().qualifiedId());
     }
 
-    boolean hasStyleTaskDefExecuted(MetricsTracer.Report report, DynamicLanguage language) {
+    boolean hasStyleTaskDefExecuted(MetricsTracer.Report report, DynamicComponent language) {
         return report.hasTaskDefExecuted(language.getCompileInput().adapterProjectInput().styler().get().styleTaskDef().qualifiedId());
     }
 
@@ -81,15 +82,15 @@ class CharsTestBase extends TestBase {
         return report.hasTaskDefExecuted("mb.chars.CharsDebugRemoveA");
     }
 
-    boolean hasConstraintAnalysisTaskExecuted(MetricsTracer.Report report, DynamicLanguage language) {
+    boolean hasConstraintAnalysisTaskExecuted(MetricsTracer.Report report, DynamicComponent language) {
         return report.hasTaskDefExecuted(language.getCompileInput().adapterProjectInput().constraintAnalyzer().get().analyzeTaskDef().qualifiedId());
     }
 
-    boolean hasCheckTaskExecuted(MetricsTracer.Report report, DynamicLanguage language) {
+    boolean hasCheckTaskExecuted(MetricsTracer.Report report, DynamicComponent language) {
         return report.hasTaskDefExecuted(language.getCompileInput().adapterProjectInput().checkTaskDef().qualifiedId());
     }
 
-    boolean hasHoverTaskExecuted(MetricsTracer.Report report, DynamicLanguage language) {
+    boolean hasHoverTaskExecuted(MetricsTracer.Report report, DynamicComponent language) {
         return report.hasTaskDefExecuted(language.getCompileInput().adapterProjectInput().hover().get().hoverTaskDef().qualifiedId());
     }
 

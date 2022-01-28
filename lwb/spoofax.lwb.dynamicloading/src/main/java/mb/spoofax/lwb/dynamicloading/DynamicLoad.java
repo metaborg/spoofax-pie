@@ -15,27 +15,27 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.walk.ResourceWalker;
 import mb.spoofax.lwb.compiler.CompileLanguage;
+import mb.spoofax.lwb.dynamicloading.component.DynamicComponent;
+import mb.spoofax.lwb.dynamicloading.component.DynamicComponentManager;
 
 import javax.inject.Inject;
 import java.util.Set;
 import java.util.stream.Stream;
 
 @DynamicLoadingScope
-public class DynamicLoad implements TaskDef<CompileLanguage.Args, OutTransient<Result<DynamicLanguage, ?>>> {
+public class DynamicLoad implements TaskDef<CompileLanguage.Args, OutTransient<Result<DynamicComponent, ?>>> {
     private final CompileLanguage compileLanguage;
     private final CfgRootDirectoryToObject cfgRootDirectoryToObject;
-    private final DynamicLanguageLoader dynamicLanguageLoader;
-    private final DynamicLanguageRegistry dynamicLanguageRegistry;
+    private final DynamicComponentManager dynamicComponentManager;
 
     @Inject public DynamicLoad(
         CompileLanguage compileLanguage,
         CfgRootDirectoryToObject cfgRootDirectoryToObject,
-        DynamicLanguageLoader dynamicLanguageLoader, DynamicLanguageRegistry dynamicLanguageRegistry
+        DynamicComponentManager dynamicComponentManager
     ) {
         this.compileLanguage = compileLanguage;
         this.cfgRootDirectoryToObject = cfgRootDirectoryToObject;
-        this.dynamicLanguageLoader = dynamicLanguageLoader;
-        this.dynamicLanguageRegistry = dynamicLanguageRegistry;
+        this.dynamicComponentManager = dynamicComponentManager;
     }
 
     @Override
@@ -44,7 +44,7 @@ public class DynamicLoad implements TaskDef<CompileLanguage.Args, OutTransient<R
     }
 
     @Override
-    public OutTransient<Result<DynamicLanguage, ?>> exec(ExecContext context, CompileLanguage.Args args) throws Exception {
+    public OutTransient<Result<DynamicComponent, ?>> exec(ExecContext context, CompileLanguage.Args args) throws Exception {
         return new OutTransientImpl<>(context.require(compileLanguage, args)
             .<Exception>mapErr(e -> e)
             .flatMapThrowing(
@@ -59,7 +59,7 @@ public class DynamicLoad implements TaskDef<CompileLanguage.Args, OutTransient<R
         return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 
-    public DynamicLanguage run(
+    public DynamicComponent run(
         ExecContext context,
         ResourcePath rootDirectory,
         CompileLanguage.Output compileLanguageOutput,
@@ -74,8 +74,6 @@ public class DynamicLoad implements TaskDef<CompileLanguage.Args, OutTransient<R
                 }
             }
         }
-        final DynamicLanguage dynamicLanguage = dynamicLanguageLoader.load(rootDirectory, cfgOutput.compileLanguageInput, compileLanguageOutput.javaClassPaths());
-        dynamicLanguageRegistry.reload(rootDirectory, dynamicLanguage);
-        return dynamicLanguage;
+        return dynamicComponentManager.loadOrReloadFromCompiledSources(rootDirectory, compileLanguageOutput.javaClassPaths(), )
     }
 }

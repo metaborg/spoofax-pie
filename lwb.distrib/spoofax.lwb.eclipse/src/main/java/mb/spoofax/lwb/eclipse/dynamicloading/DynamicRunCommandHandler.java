@@ -13,7 +13,7 @@ public class DynamicRunCommandHandler extends AbstractHandler {
         if(languageId == null) {
             throw new ExecutionException("Cannot execute command, no argument for '" + RunCommandHandler.languageIdParameterId + "' parameter was set");
         }
-        final @Nullable EclipseDynamicLanguage language = (EclipseDynamicLanguage)SpoofaxLwbLifecycleParticipant.getInstance().getDynamicLoadingComponent().getDynamicLanguageRegistry().getLanguageForId(languageId);
+        final @Nullable EclipseDynamicLanguage language = (EclipseDynamicLanguage)SpoofaxLwbLifecycleParticipant.getInstance().getDynamicLoadingComponent().getDynamicComponentManager().getLanguageForId(languageId);
         if(language == null) {
             throw new ExecutionException("Cannot execute command, no dynamic language for ID '" + languageId + "' was found");
         }

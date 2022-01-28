@@ -8,12 +8,12 @@ import mb.resource.dagger.ResourceServiceComponent;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.menu.MenuShared;
-import mb.spoofax.lwb.dynamicloading.DynamicLanguage;
+import mb.spoofax.lwb.dynamicloading.component.DynamicComponent;
 import org.eclipse.core.commands.AbstractHandler;
 
 import java.net.URLClassLoader;
 
-public class EclipseDynamicLanguage extends DynamicLanguage {
+public class EclipseDynamicLanguage extends DynamicComponent {
     private final MenuShared resourceContextMenu;
     private final MenuShared editorContextMenu;
     private final MenuShared mainMenu;

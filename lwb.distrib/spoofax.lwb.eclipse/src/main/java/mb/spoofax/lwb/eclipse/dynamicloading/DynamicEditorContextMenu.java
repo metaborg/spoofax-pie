@@ -26,7 +26,7 @@ public class DynamicEditorContextMenu extends MenuShared {
         } else {
             languageId = editor.getLanguageId();
         }
-        final @Nullable EclipseDynamicLanguage language = (EclipseDynamicLanguage)SpoofaxLwbLifecycleParticipant.getInstance().getDynamicLoadingComponent().getDynamicLanguageRegistry().getLanguageForId(languageId);
+        final @Nullable EclipseDynamicLanguage language = (EclipseDynamicLanguage)SpoofaxLwbLifecycleParticipant.getInstance().getDynamicLoadingComponent().getDynamicComponentManager().getLanguageForId(languageId);
         if(language == null) { // Dynamic editor of unknown language.
             return new IContributionItem[0];
         }

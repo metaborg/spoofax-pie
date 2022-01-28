@@ -227,7 +227,7 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
                     .build();
             }
             SptLanguageFactory.getLanguage().getComponent().getLanguageUnderTestProviderWrapper().set(new DynamicLanguageUnderTestProvider(
-                SpoofaxLwbLifecycleParticipant.getInstance().getDynamicLoadingComponent().getDynamicLanguageRegistry(),
+                SpoofaxLwbLifecycleParticipant.getInstance().getDynamicLoadingComponent().getDynamicComponentManager(),
                 SpoofaxLwbLifecycleParticipant.getInstance().getDynamicLoadingComponent().getDynamicLoad(),
                 rootDirectory -> {
                     // TODO: reduce code duplication with SpoofaxLwbBuilder

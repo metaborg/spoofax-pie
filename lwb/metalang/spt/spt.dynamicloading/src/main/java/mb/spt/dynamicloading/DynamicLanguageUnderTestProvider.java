@@ -5,7 +5,7 @@ import mb.pie.api.ExecContext;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.lwb.compiler.CompileLanguage;
-import mb.spoofax.lwb.dynamicloading.DynamicLanguage;
+import mb.spoofax.lwb.dynamicloading.component.DynamicComponent;
 import mb.spoofax.lwb.dynamicloading.DynamicLanguageRegistry;
 import mb.spoofax.lwb.dynamicloading.DynamicLoad;
 import mb.spt.model.LanguageUnderTest;
@@ -39,14 +39,14 @@ public class DynamicLanguageUnderTestProvider implements LanguageUnderTestProvid
     ) {
         if(rootDirectoryHint != null) {
             final CompileLanguage.Args args = compileLanguageArgsFunction.apply(rootDirectoryHint);
-            final Result<DynamicLanguage, ?> result = context.require(dynamicLoad, args).getValue();
+            final Result<DynamicComponent, ?> result = context.require(dynamicLoad, args).getValue();
             return result
                 .mapErr(e -> new DynamicLanguageUnderTestProviderException(
                     "Could not provide dynamic language under test for SPT file '" + file + "'" + "; compiling and dynamically loading at '" + rootDirectoryHint + "' failed", e)
                 )
                 .map(this::toLanguageUnderTest);
         } else if(languageIdHint != null) {
-            final @Nullable DynamicLanguage dynamicLanguage = dynamicLanguageRegistry.getLanguageForId(languageIdHint);
+            final @Nullable DynamicComponent dynamicLanguage = dynamicLanguageRegistry.getLanguageForId(languageIdHint);
             if(dynamicLanguage != null) {
                 return Result.ofOk(toLanguageUnderTest(dynamicLanguage));
             } else {
@@ -61,7 +61,7 @@ public class DynamicLanguageUnderTestProvider implements LanguageUnderTestProvid
         }
     }
 
-    private LanguageUnderTest toLanguageUnderTest(DynamicLanguage language) {
+    private LanguageUnderTest toLanguageUnderTest(DynamicComponent language) {
         return new LanguageUnderTestImpl(language.getResourceServiceComponent(), language.getLanguageComponent(), language.getPieComponent());
     }
 }

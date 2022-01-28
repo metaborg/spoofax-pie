@@ -8,8 +8,8 @@ import mb.spoofax.eclipse.EclipseLifecycleParticipant;
 import mb.spoofax.eclipse.LifecycleParticipantManager;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.menu.MenuShared;
-import mb.spoofax.lwb.dynamicloading.DynamicLanguage;
-import mb.spoofax.lwb.dynamicloading.DynamicLanguageLoader;
+import mb.spoofax.lwb.dynamicloading.component.DynamicComponent;
+import mb.spoofax.lwb.dynamicloading.component.DynamicComponentLoader;
 import mb.spoofax.lwb.dynamicloading.DynamicLoadingScope;
 import mb.spt.eclipse.SptLanguageFactory;
 import org.eclipse.core.commands.AbstractHandler;
@@ -17,14 +17,13 @@ import org.eclipse.core.commands.AbstractHandler;
 import javax.inject.Inject;
 import java.lang.reflect.Method;
 import java.net.URLClassLoader;
-import java.util.List;
 
 @DynamicLoadingScope
-public class EclipseDynamicLanguageLoader implements DynamicLanguageLoader {
+public class EclipseDynamicLanguageLoader implements DynamicComponentLoader {
     @Inject public EclipseDynamicLanguageLoader() {} /* Default constructor needed for injection. */
 
     @Override
-    public DynamicLanguage load(
+    public DynamicComponent load(
         ResourcePath rootDirectory,
         CompileLanguageInput compileInput,
         Iterable<ResourcePath> classPath
@@ -35,13 +34,13 @@ public class EclipseDynamicLanguageLoader implements DynamicLanguageLoader {
         return load(rootDirectory, compileInput, compileInput.eclipseProjectInput().get(), classPath);
     }
 
-    private DynamicLanguage load(
+    private DynamicComponent load(
         ResourcePath rootDirectory,
         CompileLanguageInput compileInput,
         EclipseProjectCompiler.Input eclipseInput,
         Iterable<ResourcePath> classPath
     ) throws Exception {
-        final URLClassLoader classLoader = new URLClassLoader(DynamicLanguageLoader.classPathToUrl(classPath, SpoofaxPlugin.getBaseResourceServiceComponent().getResourceService()), EclipseDynamicLanguageLoader.class.getClassLoader());
+        final URLClassLoader classLoader = new URLClassLoader(DynamicComponentLoader.classPathToUrl(classPath, SpoofaxPlugin.getBaseResourceServiceComponent().getResourceService()), EclipseDynamicLanguageLoader.class.getClassLoader());
         final Class<?> factoryClass = classLoader.loadClass(eclipseInput.languageFactory().qualifiedId());
         final Method getLanguageMethod = factoryClass.getDeclaredMethod("getLanguage");
         final EclipseLifecycleParticipant participant = (EclipseLifecycleParticipant)getLanguageMethod.invoke(null);

@@ -31,7 +31,7 @@ import mb.spoofax.eclipse.resource.EclipseResourcePath;
 import mb.spoofax.lwb.compiler.CompileLanguage;
 import mb.spoofax.lwb.compiler.CompileLanguageException;
 import mb.spoofax.lwb.compiler.dagger.Spoofax3CompilerComponent;
-import mb.spoofax.lwb.dynamicloading.DynamicLanguage;
+import mb.spoofax.lwb.dynamicloading.component.DynamicComponent;
 import mb.spoofax.lwb.dynamicloading.DynamicLanguageRegistry;
 import mb.spoofax.lwb.eclipse.util.ClassPathUtil;
 import mb.spoofax.lwb.eclipse.util.JavaProjectUtil;
@@ -69,7 +69,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
     public SpoofaxLwbBuilder() {
         this.logger = SpoofaxPlugin.getLoggerComponent().getLoggerFactory().create(getClass());
         this.workspaceUpdateFactory = SpoofaxPlugin.getPlatformComponent().getWorkspaceUpdateFactory();
-        this.dynamicLanguageRegistry = SpoofaxLwbLifecycleParticipant.getInstance().getDynamicLoadingComponent().getDynamicLanguageRegistry();
+        this.dynamicLanguageRegistry = SpoofaxLwbLifecycleParticipant.getInstance().getDynamicLoadingComponent().getDynamicComponentManager();
         this.compileTags = Interactivity.NonInteractive.asSingletonSet();
     }
 
@@ -166,7 +166,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         final Result<CompileLanguage.Output, CompileLanguageException> result = session.require(createCompileTask(rootDirectory), cancelToken);
         handleCompileResult(rootDirectory, result, monitor);
 
-        final OutTransient<Result<DynamicLanguage, ?>> dynamicLanguage = session.require(createDynamicLoadTask(rootDirectory), cancelToken);
+        final OutTransient<Result<DynamicComponent, ?>> dynamicLanguage = session.require(createDynamicLoadTask(rootDirectory), cancelToken);
         handleDynamicLoadResult(dynamicLanguage, session);
 
         logger.debug("Deleting unobserved tasks");
@@ -203,7 +203,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         final Result<CompileLanguage.Output, CompileLanguageException> result = topDownSession.getOutputOrRequireAndEnsureExplicitlyObserved(createCompileTask(rootDirectory), cancelToken);
         handleCompileResult(rootDirectory, result, monitor);
 
-        final OutTransient<Result<DynamicLanguage, ?>> dynamicLanguage = topDownSession.getOutputOrRequireAndEnsureExplicitlyObserved(createDynamicLoadTask(rootDirectory), cancelToken);
+        final OutTransient<Result<DynamicComponent, ?>> dynamicLanguage = topDownSession.getOutputOrRequireAndEnsureExplicitlyObserved(createDynamicLoadTask(rootDirectory), cancelToken);
         handleDynamicLoadResult(dynamicLanguage, topDownSession);
 
         logger.debug("Deleting unobserved tasks");
@@ -233,7 +233,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         return SpoofaxLwbLifecycleParticipant.getInstance().getSpoofax3Compiler().component.getCompileLanguage().createTask(createCompileArgs(rootDirectory));
     }
 
-    private Task<OutTransient<Result<DynamicLanguage, ?>>> createDynamicLoadTask(ResourcePath rootDirectory) {
+    private Task<OutTransient<Result<DynamicComponent, ?>>> createDynamicLoadTask(ResourcePath rootDirectory) {
         return SpoofaxLwbLifecycleParticipant.getInstance().getDynamicLoadingComponent().getDynamicLoad().createTask(createCompileArgs(rootDirectory));
     }
 
@@ -316,7 +316,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         }
     }
 
-    private void handleDynamicLoadResult(OutTransient<Result<DynamicLanguage, ?>> dynamicLanguage, Session session) throws ExecException {
+    private void handleDynamicLoadResult(OutTransient<Result<DynamicComponent, ?>> dynamicLanguage, Session session) throws ExecException {
         if(dynamicLanguage.isConsistent()) {
             dynamicLanguage.getValue().ifThrowingElse(
                 l -> {

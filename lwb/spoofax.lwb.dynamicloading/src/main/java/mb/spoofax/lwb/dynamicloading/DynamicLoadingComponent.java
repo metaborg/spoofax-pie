@@ -8,6 +8,7 @@ import mb.pie.dagger.TaskDefsProvider;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.core.platform.PlatformComponent;
 import mb.spoofax.lwb.compiler.dagger.Spoofax3CompilerComponent;
+import mb.spoofax.lwb.dynamicloading.component.DynamicComponentManager;
 
 import java.util.Set;
 
@@ -26,7 +27,7 @@ import java.util.Set;
     }
 )
 public interface DynamicLoadingComponent extends TaskDefsProvider, AutoCloseable {
-    DynamicLanguageRegistry getDynamicLanguageRegistry();
+    DynamicComponentManager getDynamicComponentManager();
 
     DynamicLoad getDynamicLoad();
 
@@ -34,6 +35,6 @@ public interface DynamicLoadingComponent extends TaskDefsProvider, AutoCloseable
     @Override @DynamicLoadingQualifier Set<TaskDef<?, ?>> getTaskDefs();
 
     @Override default void close() {
-        getDynamicLanguageRegistry().close();
+        getDynamicComponentManager().close();
     }
 }

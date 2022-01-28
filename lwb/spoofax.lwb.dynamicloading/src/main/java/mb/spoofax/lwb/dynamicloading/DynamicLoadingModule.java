@@ -1,9 +1,20 @@
 package mb.spoofax.lwb.dynamicloading;
 
-import dagger.Binds;
 import dagger.Module;
+import dagger.Provides;
+import mb.spoofax.core.component.StaticComponentManager;
+import mb.spoofax.lwb.dynamicloading.component.DynamicComponentManager;
 
 @Module
-public interface DynamicLoadingModule {
-    @Binds @DynamicLoadingScope DynamicLanguageLoader bindDynamicLanguageLoader(DefaultDynamicLanguageLoader impl);
+public class DynamicLoadingModule {
+    private final StaticComponentManager staticComponentManager;
+
+    public DynamicLoadingModule(StaticComponentManager staticComponentManager) {
+        this.staticComponentManager = staticComponentManager;
+    }
+
+    @Provides @DynamicLoadingScope
+    DynamicComponentManager provideDynamicComponentManager() {
+        return new DynamicComponentManager(staticComponentManager);
+    }
 }

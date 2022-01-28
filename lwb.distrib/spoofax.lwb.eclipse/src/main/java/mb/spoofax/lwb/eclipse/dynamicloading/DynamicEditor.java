@@ -5,7 +5,7 @@ import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.editor.SpoofaxEditorBase;
 import mb.spoofax.eclipse.editor.SpoofaxSourceViewerConfiguration;
 import mb.spoofax.eclipse.util.StyleUtil;
-import mb.spoofax.lwb.dynamicloading.DynamicLanguage;
+import mb.spoofax.lwb.dynamicloading.component.DynamicComponent;
 import mb.spoofax.lwb.dynamicloading.DynamicLanguageRegistry;
 import mb.spoofax.lwb.eclipse.SpoofaxLwbLifecycleParticipant;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -82,7 +82,7 @@ public class DynamicEditor extends SpoofaxEditorBase {
         super.initializeEditor();
 
         this.styleUtil = SpoofaxPlugin.getPlatformComponent().getStyleUtil();
-        this.languageRegistry = SpoofaxLwbLifecycleParticipant.getInstance().getDynamicLoadingComponent().getDynamicLanguageRegistry();
+        this.languageRegistry = SpoofaxLwbLifecycleParticipant.getInstance().getDynamicLoadingComponent().getDynamicComponentManager();
     }
 
     @Override protected void setInput() {
@@ -92,7 +92,7 @@ public class DynamicEditor extends SpoofaxEditorBase {
 
     @Override protected SourceViewerConfiguration createSourceViewerConfiguration() {
         if(languageId != null) {
-            final @Nullable DynamicLanguage language = languageRegistry.getLanguageForId(languageId);
+            final @Nullable DynamicComponent language = languageRegistry.getLanguageForId(languageId);
             if(language != null) {
                 return new SpoofaxSourceViewerConfiguration(this, language.getLanguageComponent(), language.getPieComponent());
             }
@@ -103,7 +103,7 @@ public class DynamicEditor extends SpoofaxEditorBase {
     @Override protected void configureSourceViewerDecorationSupport(SourceViewerDecorationSupport support) {
         super.configureSourceViewerDecorationSupport(support);
         if(languageId != null) {
-            final @Nullable DynamicLanguage language = languageRegistry.getLanguageForId(languageId);
+            final @Nullable DynamicComponent language = languageRegistry.getLanguageForId(languageId);
             if(language != null) {
                 setBracketSymbols(language.getLanguageComponent().getLanguageInstance(), support);
             }
@@ -123,12 +123,12 @@ public class DynamicEditor extends SpoofaxEditorBase {
             logger.error("Cannot set dynamically loaded language for editor '{}' because its input does not have have a file extension", inputName);
             return;
         }
-        final @Nullable DynamicLanguage language = languageRegistry.getLanguageForFileExtension(fileExtension);
+        final @Nullable DynamicComponent language = languageRegistry.getLanguageForFileExtension(fileExtension);
         if(language == null) {
             logger.error("Cannot set dynamically loaded language for editor '{}' because no language was found for file extension '{}'", inputName, fileExtension);
             return;
         }
-        languageId = language.getId();
+        languageId = language.getCoordinate();
         logger.debug("Set dynamically loaded language for editor '{}' to '{}'", inputName, languageId);
     }
 
