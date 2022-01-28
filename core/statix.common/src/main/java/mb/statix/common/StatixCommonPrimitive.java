@@ -1,5 +1,9 @@
 package mb.statix.common;
 
+import mb.statix.spoofax.IStatixProjectConfig;
+import mb.statix.spoofax.SolverMode;
+import mb.stratego.common.AdaptException;
+import mb.stratego.common.AdaptableContext;
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.core.InterpreterException;
 import org.spoofax.interpreter.library.AbstractPrimitive;
@@ -17,6 +21,7 @@ public abstract class StatixCommonPrimitive extends AbstractPrimitive  {
     }
 
     protected Optional<String> getQualifiedLanguageId(IContext env) throws InterpreterException {
+        // Call language_components primitive defined in spoofax2.common
         IStrategoTerm current = env.current();
         if(!new PrimT("language_components", new Strategy[0], new IStrategoTerm[0]).evaluate(env)) {
             return Optional.empty();
@@ -48,5 +53,15 @@ public abstract class StatixCommonPrimitive extends AbstractPrimitive  {
 
         String qualifiedArtifactId = groupId + ":" + artifactId;
         return Optional.of(qualifiedArtifactId);
+    }
+
+    protected Optional<SolverMode> getSolverMode(IContext env) throws InterpreterException, AdaptException {
+        Optional<String> qualifiedLanguageId = getQualifiedLanguageId(env);
+        if(!qualifiedLanguageId.isPresent()) {
+            return Optional.empty();
+        }
+        IStatixProjectConfig config = AdaptableContext.adaptContextObject(env.contextObject(), IStatixProjectConfig.class);
+        SolverMode mode = config.languageMode(qualifiedLanguageId.get(), SolverMode.DEFAULT);
+        return Optional.of(mode);
     }
 }
