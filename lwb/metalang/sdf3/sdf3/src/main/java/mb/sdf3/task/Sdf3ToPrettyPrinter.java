@@ -7,6 +7,8 @@ import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.sdf3.stratego.Sdf3Context;
 import mb.sdf3.Sdf3Scope;
+import mb.sdf3.task.spec.Sdf3Config;
+import mb.sdf3.task.spec.Sdf3SpecConfig;
 import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -22,14 +24,17 @@ import java.util.Set;
 public class Sdf3ToPrettyPrinter implements TaskDef<Sdf3ToPrettyPrinter.Input, Result<IStrategoTerm, ?>> {
     public static class Input implements Serializable {
         public final Supplier<? extends Result<IStrategoTerm, ?>> astSupplier;
-        public final Sdf3Context sdf3Context;
+        public final String strategyAffix;
+        public final Sdf3Config sdf3Config;
 
         public Input(
             Supplier<? extends Result<IStrategoTerm, ?>> astSupplier,
-            Sdf3Context sdf3Context
+            String strategyAffix,
+            Sdf3Config sdf3Config
         ) {
             this.astSupplier = astSupplier;
-            this.sdf3Context = sdf3Context;
+            this.strategyAffix = strategyAffix;
+            this.sdf3Config = sdf3Config;
         }
 
         @Override public boolean equals(@Nullable Object o) {
@@ -37,17 +42,19 @@ public class Sdf3ToPrettyPrinter implements TaskDef<Sdf3ToPrettyPrinter.Input, R
             if(o == null || getClass() != o.getClass()) return false;
             final Input input = (Input)o;
             return astSupplier.equals(input.astSupplier)
-                && sdf3Context.equals(input.sdf3Context);
+                && strategyAffix.equals(input.strategyAffix)
+                && sdf3Config.equals(input.sdf3Config);
         }
 
         @Override public int hashCode() {
-            return Objects.hash(astSupplier, sdf3Context);
+            return Objects.hash(astSupplier, strategyAffix, sdf3Config);
         }
 
         @Override public String toString() {
-            return "Input{" +
+            return "Sdf3ToPrettyPrinter$Input{" +
                 "astSupplier=" + astSupplier +
-                ", sdf3Context=" + sdf3Context +
+                ", strategyAffix='" + strategyAffix + '\'' +
+                ", sdf3Config=" + sdf3Config +
                 '}';
         }
     }
@@ -64,7 +71,12 @@ public class Sdf3ToPrettyPrinter implements TaskDef<Sdf3ToPrettyPrinter.Input, R
     }
 
     @Override public Result<IStrategoTerm, ?> exec(ExecContext context, Input input) throws Exception {
-        final StrategoRuntime strategoRuntime = strategoRuntimeProvider.get().addContextObject(input.sdf3Context);
+        final Sdf3Context sdf3Context = new Sdf3Context(
+            input.strategyAffix,
+            input.sdf3Config.placeholderPrefix,
+            input.sdf3Config.placeholderSuffix
+        );
+        final StrategoRuntime strategoRuntime = strategoRuntimeProvider.get().addContextObject(sdf3Context);
         return context.require(input.astSupplier).flatMapOrElse((ast) -> {
             try {
                 ast = strategoRuntime.invoke("module-to-pp", ast, strategoRuntime.getTermFactory().makeString("2"));

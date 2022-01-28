@@ -10,6 +10,7 @@ import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.sdf3.task.spec.Sdf3CheckSpec;
+import mb.sdf3.task.spec.Sdf3Config;
 import mb.sdf3.task.spec.Sdf3ParseTableToFile;
 import mb.sdf3.task.spec.Sdf3SpecConfig;
 import mb.sdf3.task.spec.Sdf3SpecToParseTable;
@@ -71,7 +72,7 @@ public class SpoofaxSdf3Compile implements TaskDef<ResourcePath, Result<KeyedMes
 
     public Result<KeyedMessages, SpoofaxSdf3CompileException> compile(ExecContext context, SpoofaxSdf3Config config) {
         return config.caseOf()
-            .files((sdf3SpecConfig, outputParseTableAtermFile, outputParseTablePersistedFile) -> compileFromSourceFiles(context, sdf3SpecConfig, outputParseTableAtermFile, outputParseTablePersistedFile))
+            .files((sdf3SpecConfig, sdf3Config, outputParseTableAtermFile, outputParseTablePersistedFile) -> compileFromSourceFiles(context, sdf3SpecConfig, outputParseTableAtermFile, outputParseTablePersistedFile))
             .prebuilt((inputParseTableAtermFile, inputParseTablePersistedFile, outputParseTableAtermFile, outputParseTablePersistedFile) -> copyPrebuilt(context, inputParseTableAtermFile, inputParseTablePersistedFile, outputParseTableAtermFile, outputParseTablePersistedFile))
             ;
     }

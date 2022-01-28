@@ -12,6 +12,7 @@ import mb.sdf3.task.Sdf3AnalyzeMulti;
 import mb.sdf3.task.Sdf3Desugar;
 import mb.sdf3.task.Sdf3GetSourceFiles;
 import mb.sdf3.task.Sdf3Parse;
+import mb.sdf3.task.spec.Sdf3Config;
 import mb.sdf3.task.spec.Sdf3SpecConfig;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -44,11 +45,11 @@ public class SpoofaxSdf3GenerationUtil {
 
 
     public interface Callbacks<E extends Exception> {
-        default void generateFromAst(ExecContext context, STask<Result<IStrategoTerm, ?>> astSupplier, Sdf3SpecConfig sdf3Config) throws E, IOException, InterruptedException {}
+        default void generateFromAst(ExecContext context, STask<Result<IStrategoTerm, ?>> astSupplier, Sdf3Config sdf3Config) throws E, IOException, InterruptedException {}
 
         default void generateFromAnalyzed(ExecContext context, Supplier<Result<ConstraintAnalyzeMultiTaskDef.SingleFileOutput, ?>> singleFileAnalysisOutputSupplier) throws E, IOException, InterruptedException {}
 
-        default void generateFromConfig(ExecContext context, Sdf3SpecConfig sdf3Config) throws E, IOException, InterruptedException {}
+        default void generateFromConfig(ExecContext context, Sdf3SpecConfig sdf3SpecConfig, Sdf3Config sdf3Config) throws E, IOException, InterruptedException {}
     }
 
     public <E extends Exception> void performSdf3GenerationIfEnabled(
@@ -63,16 +64,17 @@ public class SpoofaxSdf3GenerationUtil {
             if(!spoofaxSdf3Config.getSdf3SpecConfig().isSome()) {
                 return; // Only generate when there are SDF3 source files (not prebuilt).
             }
-            final Sdf3SpecConfig config = spoofaxSdf3Config.getSdf3SpecConfig().unwrap();
+            final Sdf3SpecConfig specConfig = spoofaxSdf3Config.getSdf3SpecConfig().unwrap();
+            final Sdf3Config config = spoofaxSdf3Config.getSdf3Config().unwrap();
             final JsglrParseTaskInput.Builder parseInputBuilder = parse.inputBuilder().rootDirectoryHint(rootDirectory);
-            final Sdf3AnalyzeMulti.Input analyzeInput = new Sdf3AnalyzeMulti.Input(config.rootDirectory, parse.createRecoverableMultiAstSupplierFunction(getSourceFiles.createFunction()));
+            final Sdf3AnalyzeMulti.Input analyzeInput = new Sdf3AnalyzeMulti.Input(specConfig.rootDirectory, parse.createRecoverableMultiAstSupplierFunction(getSourceFiles.createFunction()));
             for(ResourcePath file : context.require(getSourceFiles, rootDirectory)) {
                 final Supplier<Result<ConstraintAnalyzeMultiTaskDef.SingleFileOutput, ?>> singleFileAnalysisOutputSupplier = analyze.createSingleFileOutputSupplier(analyzeInput, file);
                 callbacks.generateFromAnalyzed(context, singleFileAnalysisOutputSupplier);
                 final STask<Result<IStrategoTerm, ?>> astSupplier = desugar.createSupplier(parseInputBuilder.withFile(file).buildAstSupplier());
                 callbacks.generateFromAst(context, astSupplier, config);
             }
-            callbacks.generateFromConfig(context, config);
+            callbacks.generateFromConfig(context, specConfig, config);
         }
     }
 }

@@ -5,6 +5,7 @@ import mb.pie.api.MixedSession;
 import mb.resource.text.TextResource;
 import mb.sdf3.stratego.Sdf3Context;
 import mb.sdf3.task.Sdf3ToPrettyPrinter;
+import mb.sdf3.task.spec.Sdf3Config;
 import org.junit.jupiter.api.Test;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -16,7 +17,8 @@ class ToPrettyPrinterTest extends TestBase {
         final TextResource resource = textResource("a.sdf3", "module nested/a context-free syntax A = <A>");
         final Sdf3ToPrettyPrinter taskDef = component.getSdf3ToPrettyPrinter();
         try(final MixedSession session = newSession()) {
-            final Result<IStrategoTerm, ?> result = session.require(taskDef.createTask(new Sdf3ToPrettyPrinter.Input(desugarSupplier(resource), new Sdf3Context("lang", "$", ""))));
+            final Result<IStrategoTerm, ?> result = session.require(taskDef.createTask(new Sdf3ToPrettyPrinter.Input(
+                desugarSupplier(resource), "lang", new Sdf3Config("$", ""))));
             assertOk(result);
             final IStrategoTerm output = result.unwrap();
             log.info("{}", output);
