@@ -77,7 +77,10 @@ public class {{baseAnalyzeMultiTaskDef.id}} extends ConstraintAnalyzeMultiTaskDe
     {{#languageProjectInput.enableStatix}}
     protected mb.statix.spoofax.IStatixProjectConfig createStatixProjectConfig() {
         return new mb.statix.spoofax.StatixProjectConfig(
-            null,
+            // Spoofax 2 uses language name here. In Spoofax 3, we use the FQ artifact id, because that can be retrieved from the context object.
+            // Currently, we do not differentiate by version, because that is optional (which slightly complicates creating identical strings.
+            // This place should be kept in sync with `StatixCommonPrimitive`.
+            java.util.Collections.singletonMap("{{qualifiedLanguageId}}", mb.statix.spoofax.SolverMode.{{statixSolverMode}}),
             {{#defaultStatixMessageStacktraceLength}}{{this}}{{/defaultStatixMessageStacktraceLength}}{{^defaultStatixMessageStacktraceLength}}null{{/defaultStatixMessageStacktraceLength}},
             {{#defaultStatixMessageTermDepth}}{{this}}{{/defaultStatixMessageTermDepth}}{{^defaultStatixMessageTermDepth}}null{{/defaultStatixMessageTermDepth}},
             {{#defaultStatixTestLogLevel}}"{{this}}"{{/defaultStatixTestLogLevel}}{{^defaultStatixTestLogLevel}}null{{/defaultStatixTestLogLevel}},

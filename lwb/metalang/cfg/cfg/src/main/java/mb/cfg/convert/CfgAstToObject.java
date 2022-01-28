@@ -342,6 +342,8 @@ public class CfgAstToObject {
             subParts.forOneSubtermAsBool("ConstraintAnalyzerEnableStatix", base::enableStatix);
             subParts.forOneSubtermAsBool("ConstraintAnalyzerMultiFile", base::multiFile);
             subParts.forOneSubtermAsString("ConstraintAnalyzerStrategoStrategy", base::strategoStrategy);
+            subParts.forOneSubtermAsConstructorName("StatixSolverMode", base::statixSolverMode);
+
             // TODO: more constraintAnalyzer language properties
             final ConstraintAnalyzerAdapterCompiler.Input.Builder adapter = adapterBuilder.withConstraintAnalyzer();
             subParts.forOneSubtermAsInt("ConstraintAnalyzerDefaultStatixMessageStacktraceLength", adapter::defaultStatixMessageStacktraceLength);

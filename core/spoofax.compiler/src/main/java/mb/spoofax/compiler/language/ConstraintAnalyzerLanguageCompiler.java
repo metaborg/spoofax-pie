@@ -59,6 +59,7 @@ public class ConstraintAnalyzerLanguageCompiler {
 
         @Value.Default default boolean multiFile() { return false; }
 
+        @Value.Default default String statixSolverMode() { return "traditional"; }
 
         /// Kinds of classes (generated/extended/manual)
 

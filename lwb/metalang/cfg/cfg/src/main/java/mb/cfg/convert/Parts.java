@@ -172,6 +172,14 @@ class Parts {
         getOneSubtermAsTypeInfo(name).ifSome(consumer);
     }
 
+    Option<String> getOneSubtermAsConstructorName(String name) {
+        return getOneSubterm(name).map(IStrategoAppl.class::cast).map(IStrategoAppl::getName);
+    }
+
+    void forOneSubtermAsConstructorName(String name, Consumer<String> consumer) {
+        getOneSubtermAsConstructorName(name).ifSome(consumer);
+    }
+
 
     ArrayList<IStrategoAppl> getAll(IStrategoConstructor constructor) {
         return parts.get(constructor);

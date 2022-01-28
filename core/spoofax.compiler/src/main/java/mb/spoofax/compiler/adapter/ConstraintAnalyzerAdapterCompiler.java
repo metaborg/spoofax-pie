@@ -12,6 +12,7 @@ import mb.spoofax.compiler.adapter.data.MenuItemRepr;
 import mb.spoofax.compiler.language.ClassLoaderResourcesCompiler;
 import mb.spoofax.compiler.language.ConstraintAnalyzerLanguageCompiler;
 import mb.spoofax.compiler.util.ClassKind;
+import mb.spoofax.compiler.util.Coordinate;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.MenuItemCollection;
 import mb.spoofax.compiler.util.Shared;
@@ -91,6 +92,15 @@ public class ConstraintAnalyzerAdapterCompiler {
 
         /// Configuration
 
+        default String statixSolverMode() {
+            return languageProjectInput().statixSolverMode().toUpperCase();
+        }
+
+        default String qualifiedLanguageId() {
+            Coordinate coord = languageProjectInput().languageProject().project().coordinate();
+            return coord.groupId() + ":" + coord.artifactId();
+        }
+
         Optional<Integer> defaultStatixMessageStacktraceLength();
 
         Optional<Integer> defaultStatixMessageTermDepth();
@@ -98,7 +108,6 @@ public class ConstraintAnalyzerAdapterCompiler {
         Optional<String> defaultStatixTestLogLevel();
 
         Optional<Boolean> defaultStatixSuppressCascadingErrors();
-
 
         /// Kinds of classes (generated/extended/manual)
 
