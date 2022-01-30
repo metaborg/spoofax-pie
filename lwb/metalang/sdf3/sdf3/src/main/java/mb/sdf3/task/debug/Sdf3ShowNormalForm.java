@@ -11,7 +11,6 @@ import mb.sdf3.task.Sdf3GetStrategoRuntimeProvider;
 import mb.sdf3.task.Sdf3Parse;
 import mb.sdf3.task.Sdf3ToNormalForm;
 import mb.sdf3.task.spec.Sdf3Config;
-import mb.sdf3.task.spec.Sdf3SpecConfig;
 import mb.sdf3.task.spoofax.Sdf3ConfigSupplierWrapper;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
@@ -22,15 +21,15 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @Sdf3Scope
-public final class Sdf3ShowNormalForm extends ProvideOutputShared implements TaskDef<Sdf3ShowNormalForm.Input, CommandFeedback> {
-    public static class Input implements Serializable {
+public final class Sdf3ShowNormalForm extends ProvideOutputShared implements TaskDef<Sdf3ShowNormalForm.Args, CommandFeedback> {
+    public static class Args implements Serializable {
         // TODO: this should take a Sdf3SpecConfig and Sdf3Config directly,
         //  which must be assignable from CLI and such, but this is not possible yet.
         public final ResourcePath root;
         public final ResourceKey file;
         public final boolean concrete;
 
-        public Input(ResourcePath root, ResourceKey file, boolean concrete) {
+        public Args(ResourcePath root, ResourceKey file, boolean concrete) {
             this.root = root;
             this.file = file;
             this.concrete = concrete;
@@ -38,7 +37,7 @@ public final class Sdf3ShowNormalForm extends ProvideOutputShared implements Tas
         @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
-            final Sdf3ShowNormalForm.Input that = (Sdf3ShowNormalForm.Input)o;
+            final Args that = (Args)o;
             return this.root.equals(that.root)
                 && this.file.equals(that.file)
                 && this.concrete == that.concrete;
@@ -85,7 +84,7 @@ public final class Sdf3ShowNormalForm extends ProvideOutputShared implements Tas
         return getClass().getName();
     }
 
-    @Override public CommandFeedback exec(ExecContext context, Sdf3ShowNormalForm.Input args) {
+    @Override public CommandFeedback exec(ExecContext context, Args args) {
         return context.require(configSupplierWrapper.get()).mapOrElse(
             configOpt -> configOpt.mapOrElse(
                 config -> run(context, config, args),
@@ -97,12 +96,13 @@ public final class Sdf3ShowNormalForm extends ProvideOutputShared implements Tas
         );
     }
 
-    private CommandFeedback run(ExecContext context, Sdf3Config config, Sdf3ShowNormalForm.Input args) {
+    private CommandFeedback run(ExecContext context, Sdf3Config config, Args args) {
+        final String strategyAffix = "";
         return context.require(operation.createTask(
             new Sdf3AstStrategoTransformTaskDef.Input(
                 desugar.createSupplier(parse.inputBuilder().withFile(args.file).buildRecoverableAstSupplier()),
-                "", // TODO
-                config
+                config,
+                strategyAffix
             )
         )).mapOrElse(
             ast -> provideOutput(context, args.concrete, ast, args.file),

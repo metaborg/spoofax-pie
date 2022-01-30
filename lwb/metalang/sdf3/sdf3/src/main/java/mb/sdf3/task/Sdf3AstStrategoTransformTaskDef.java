@@ -27,17 +27,17 @@ import java.util.Set;
 public abstract class Sdf3AstStrategoTransformTaskDef<I extends Sdf3AstStrategoTransformTaskDef.Input> implements TaskDef<I, Result<IStrategoTerm, ?>> {
     public /* open */ static class Input implements Serializable {
         public final Supplier<? extends Result<IStrategoTerm, ?>> astSupplier;
-        public final String strategyAffix;
         public final Sdf3Config sdf3Config;
+        public final String strategyAffix;
 
         public Input(
             Supplier<? extends Result<IStrategoTerm, ?>> astSupplier,
-            String strategyAffix,
-            Sdf3Config sdf3Config
+            Sdf3Config sdf3Config,
+            String strategyAffix
         ) {
             this.astSupplier = astSupplier;
-            this.strategyAffix = strategyAffix;
             this.sdf3Config = sdf3Config;
+            this.strategyAffix = strategyAffix;
         }
 
         @Override public boolean equals(@Nullable Object o) {
@@ -45,19 +45,19 @@ public abstract class Sdf3AstStrategoTransformTaskDef<I extends Sdf3AstStrategoT
             if(o == null || getClass() != o.getClass()) return false;
             final Input input = (Input)o;
             return astSupplier.equals(input.astSupplier)
-                && strategyAffix.equals(input.strategyAffix)
-                && sdf3Config.equals(input.sdf3Config);
+                && sdf3Config.equals(input.sdf3Config)
+                && strategyAffix.equals(input.strategyAffix);
         }
 
         @Override public int hashCode() {
-            return Objects.hash(astSupplier, strategyAffix, sdf3Config);
+            return Objects.hash(astSupplier, sdf3Config, strategyAffix);
         }
 
         @Override public String toString() {
             return "Sdf3AstStrategoTransformTaskDef$Input{" +
                 "astSupplier=" + astSupplier +
-                ", strategyAffix='" + strategyAffix + '\'' +
                 ", sdf3Config=" + sdf3Config +
+                ", strategyAffix='" + strategyAffix + '\'' +
                 '}';
         }
     }

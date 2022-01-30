@@ -187,16 +187,16 @@ public class Sdf3SpecToParseTable implements TaskDef<Sdf3SpecToParseTable.Input,
     private Task<Result<IStrategoTerm, ?>> toNormalized(Supplier<? extends Result<IStrategoTerm, ?>> astSupplier, Input input) {
         return toNormalForm.createTask(new Sdf3AstStrategoTransformTaskDef.Input(
             toPermissive.createSupplier(astSupplier),
-            input.strategyAffix,
-            input.config
+            input.config,
+            input.strategyAffix
         ));
     }
 
     private Task<Result<IStrategoTerm, ?>> toCompletionNormalized(Supplier<? extends Result<IStrategoTerm, ?>> astSupplier, Input input) {
         return toNormalForm.createTask(new Sdf3AstStrategoTransformTaskDef.Input(
             toCompletion.createSupplier(astSupplier),
-            input.strategyAffix,
-            input.config
+            input.config,
+            input.strategyAffix
         ));
     }
 }

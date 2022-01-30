@@ -287,8 +287,13 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
                 public void generateFromConfig(ExecContext context, Sdf3SpecConfig sdf3SpecConfig, Sdf3Config sdf3Config) throws SpoofaxStrategoConfigureException, IOException, InterruptedException {
                     // Compile SDF3 specification to a Stratego parenthesizer.
                     try {
-                        final STask<Result<ParseTable, ?>> parseTableSupplier = sdf3ToParseTable.createSupplier(new Sdf3SpecToParseTable.Input(sdf3SpecConfig, false));
-                        sdf3ToParenthesizer(context, strategyAffix, generatedSourcesDirectory, parseTableSupplier);
+                        final STask<Result<ParseTable, ?>> parseTableSupplier = sdf3ToParseTable.createSupplier(new Sdf3SpecToParseTable.Input(
+                            sdf3SpecConfig,
+                            sdf3Config,
+                            strategyAffix,
+                            false
+                        ));
+                        sdf3ToParenthesizer(context, strategyAffix, sdf3Config, generatedSourcesDirectory, parseTableSupplier);
                     } catch(RuntimeException | InterruptedException e) {
                         throw e; // Do not wrap runtime and interrupted exceptions, rethrow them.
                     } catch(Exception e) {
@@ -358,13 +363,14 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
         ResourcePath generatesSourcesDirectory,
         STask<Result<IStrategoTerm, ?>> astSupplier
     ) throws Exception {
-        final STask<Result<IStrategoTerm, ?>> supplier = sdf3ToPrettyPrinter.createSupplier(new Sdf3ToPrettyPrinter.Input(astSupplier, strategyAffix, sdf3Config));
+        final STask<Result<IStrategoTerm, ?>> supplier = sdf3ToPrettyPrinter.createSupplier(new Sdf3ToPrettyPrinter.Input(astSupplier, sdf3Config, strategyAffix));
         spoofaxStrategoGenerationUtil.writePrettyPrintedFile(context, generatesSourcesDirectory, supplier);
     }
 
     private void sdf3ToParenthesizer(
         ExecContext context,
         String strategyAffix,
+        Sdf3Config sdf3Config,
         ResourcePath generatesSourcesDirectory,
         STask<Result<ParseTable, ?>> parseTableSupplier
     ) throws Exception {

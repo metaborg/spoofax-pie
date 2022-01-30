@@ -15,10 +15,15 @@ import static org.spoofax.terms.util.TermUtils.*;
 class ToPrettyPrinterTest extends TestBase {
     @Test void testTask() throws Exception {
         final TextResource resource = textResource("a.sdf3", "module nested/a context-free syntax A = <A>");
+        final Sdf3Config sdf3Config = new Sdf3Config("$", "");
+        final String strategyAffix = "lang";
         final Sdf3ToPrettyPrinter taskDef = component.getSdf3ToPrettyPrinter();
         try(final MixedSession session = newSession()) {
             final Result<IStrategoTerm, ?> result = session.require(taskDef.createTask(new Sdf3ToPrettyPrinter.Input(
-                desugarSupplier(resource), "lang", new Sdf3Config("$", ""))));
+                desugarSupplier(resource),
+                sdf3Config,
+                strategyAffix
+            )));
             assertOk(result);
             final IStrategoTerm output = result.unwrap();
             log.info("{}", output);
