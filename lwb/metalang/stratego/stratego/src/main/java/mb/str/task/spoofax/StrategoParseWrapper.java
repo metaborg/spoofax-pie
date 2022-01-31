@@ -13,6 +13,7 @@ import mb.str.StrategoScope;
 import mb.str.task.StrategoParse;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Provider;
 
 @StrategoScope
@@ -23,9 +24,10 @@ public class StrategoParseWrapper extends StrategoParse {
     @Inject public StrategoParseWrapper(
         StrategoClassLoaderResources classLoaderResources,
         Provider<StrategoParser> parserProvider,
+        @Named("completion") Provider<StrategoParser> completionParserProvider,
         StrategoAnalyzeConfigFunctionWrapper configFunctionWrapper
     ) {
-        super(classLoaderResources, parserProvider);
+        super(classLoaderResources, parserProvider, completionParserProvider);
         this.classLoaderResources = classLoaderResources;
         this.configFunctionWrapper = configFunctionWrapper;
     }

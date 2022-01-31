@@ -11,6 +11,7 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.stamp.resource.ResourceStampers;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Provider;
 
 public class EsvParseWrapper extends EsvParse {
@@ -20,9 +21,10 @@ public class EsvParseWrapper extends EsvParse {
     @Inject public EsvParseWrapper(
         EsvClassLoaderResources classLoaderResources,
         Provider<EsvParser> parserProvider,
+        @Named("completion") Provider<EsvParser> completionParserProvider,
         EsvConfigFunctionWrapper configFunctionWrapper
     ) {
-        super(classLoaderResources, parserProvider);
+        super(classLoaderResources, parserProvider, completionParserProvider);
         this.classLoaderResources = classLoaderResources;
         this.configFunctionWrapper = configFunctionWrapper;
     }

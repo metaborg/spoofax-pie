@@ -14,6 +14,7 @@ class CodeCompletionCompilerTest extends TestBase {
         component.getCodeCompletionAdapterCompiler().compile(new MockExecContext(), adapterProjectInput);
         fileAssertions.scopedExists(adapterProjectInput.generatedJavaSourcesDirectory(), (s) -> {
             s.assertPublicJavaClass(adapterProjectInput.baseCodeCompletionTaskDef(), "TigerCodeCompletionTaskDef");
+            s.assertPublicJavaClass(adapterProjectInput.baseAstWithPlaceholdersTaskDef(), "TigerAstWithPlaceholdersTaskDef");
         });
     }
 }

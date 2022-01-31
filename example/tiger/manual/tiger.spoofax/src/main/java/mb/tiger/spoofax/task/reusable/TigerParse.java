@@ -33,11 +33,20 @@ public class TigerParse extends JsglrParseTaskDef {
         Text text,
         @Nullable String startSymbol,
         @Nullable ResourceKey fileHint,
-        @Nullable ResourcePath rootDirectoryHint
+        @Nullable ResourcePath rootDirectoryHint,
+        boolean codeCompletionMode,
+        int cursorOffset
     ) throws InterruptedException {
         final TigerParser parser = parserProvider.get();
         try {
-            return Result.ofOk(parser.parse(new JsglrParseInput(text, startSymbol != null ? startSymbol : "Module", fileHint, rootDirectoryHint)));
+            return Result.ofOk(parser.parse(new JsglrParseInput(
+                text,
+                startSymbol != null ? startSymbol : "Module",
+                fileHint,
+                rootDirectoryHint,
+                codeCompletionMode,
+                cursorOffset
+            )));
         } catch(JsglrParseException e) {
             return Result.ofErr(e);
         }

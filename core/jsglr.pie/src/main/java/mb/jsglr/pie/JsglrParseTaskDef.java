@@ -89,7 +89,9 @@ public abstract class JsglrParseTaskDef implements TaskDef<JsglrParseTaskInput, 
         Text text,
         @Nullable String startSymbol,
         @Nullable ResourceKey fileHint,
-        @Nullable ResourcePath rootDirectoryHint
+        @Nullable ResourcePath rootDirectoryHint,
+        boolean codeCompletionMode,
+        int cursorOffset
     ) throws IOException, InterruptedException;
 
 
@@ -98,8 +100,10 @@ public abstract class JsglrParseTaskDef implements TaskDef<JsglrParseTaskInput, 
         final @Nullable String startSymbol = input.startSymbol().orElse(null);
         final @Nullable ResourceKey fileHint = input.fileHint().getOr(null);
         final @Nullable ResourcePath rootDirectoryHint = input.rootDirectoryHint().orElse(null);
+        final boolean codeCompletionMode = input.codeCompletionMode();
+        final int cursorOffset = input.cursorOffset();
         try {
-            return parse(context, context.require(input.textSupplier()), startSymbol, fileHint, rootDirectoryHint);
+            return parse(context, context.require(input.textSupplier()), startSymbol, fileHint, rootDirectoryHint, codeCompletionMode, cursorOffset);
         } catch(UncheckedIOException e) {
             return Result.ofErr(JsglrParseException.readStringFail(e.getCause(), startSymbol, fileHint, rootDirectoryHint));
         }

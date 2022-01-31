@@ -56,6 +56,7 @@ public interface CfgSdf3Config extends Serializable {
         return false;
     }
 
+    // Normal Parse Table
 
     @Value.Default default String parseTableAtermFileRelativePath() {
         return "sdf.tbl";
@@ -79,6 +80,30 @@ public interface CfgSdf3Config extends Serializable {
             ;
     }
 
+    // Completion Parse Table
+
+    @Value.Default default String completionParseTableAtermFileRelativePath() {
+        return "sdf-completions.tbl";
+    }
+
+    default ResourcePath completionParseTableAtermOutputFile() {
+        return compileLanguageShared().generatedResourcesDirectory() // Generated resources directory, so that Gradle includes the parse table in the JAR file.
+            .appendRelativePath(compileLanguageShared().languageProject().packagePath()) // Append package path to make location unique, enabling JAR files to be merged.
+            .appendRelativePath(completionParseTableAtermFileRelativePath()) // Append the relative path to the parse table.
+            ;
+    }
+
+    @Value.Default default String completionParseTablePersistedFileRelativePath() {
+        return "sdf-completions.bin";
+    }
+
+    default ResourcePath completionParseTablePersistedOutputFile() {
+        return compileLanguageShared().generatedResourcesDirectory() // Generated resources directory, so that Gradle includes the parse table in the JAR file.
+            .appendRelativePath(compileLanguageShared().languageProject().packagePath()) // Append package path to make location unique, enabling JAR files to be merged.
+            .appendRelativePath(completionParseTablePersistedFileRelativePath()) // Append the relative path to the parse table.
+            ;
+    }
+
 
     /// Automatically provided sub-inputs
 
@@ -88,5 +113,7 @@ public interface CfgSdf3Config extends Serializable {
     default void syncTo(ParserLanguageCompiler.Input.Builder builder) {
         builder.parseTableAtermFileRelativePath(parseTableAtermFileRelativePath());
         builder.parseTablePersistedFileRelativePath(parseTablePersistedFileRelativePath());
+        builder.completionParseTableAtermFileRelativePath(completionParseTableAtermFileRelativePath());
+        builder.completionParseTablePersistedFileRelativePath(completionParseTablePersistedFileRelativePath());
     }
 }

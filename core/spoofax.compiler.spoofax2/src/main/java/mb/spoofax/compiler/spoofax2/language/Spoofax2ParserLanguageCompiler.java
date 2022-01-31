@@ -33,7 +33,9 @@ public class Spoofax2ParserLanguageCompiler implements TaskDef<Spoofax2ParserLan
     public ListView<String> getCopyResources(Input input) {
         return ListView.of(
             input.parseTableAtermFileRelativePath(),
-            input.parseTablePersistedFileRelativePath()
+            input.parseTablePersistedFileRelativePath(),
+            input.completionParseTableAtermFileRelativePath(),
+            input.completionParseTablePersistedFileRelativePath()
         );
     }
 
@@ -61,10 +63,28 @@ public class Spoofax2ParserLanguageCompiler implements TaskDef<Spoofax2ParserLan
             return "target/metaborg/table.bin";
         }
 
+        /**
+         * @return path to the completion parse table aterm file to copy, relative to the Spoofax 2 language specification project
+         * directory.
+         */
+        @Value.Default default String completionParseTableAtermFileRelativePath() {
+            return "target/metaborg/sdf-completions.tbl";
+        }
+
+        /**
+         * @return path to the completion parse table persisted file to copy, relative to the Spoofax 2 language specification
+         * project directory.
+         */
+        @Value.Default default String completionParseTablePersistedFileRelativePath() {
+            return "target/metaborg/table-completions.bin";
+        }
+
 
         default void syncTo(ParserLanguageCompiler.Input.Builder builder) {
             builder.parseTableAtermFileRelativePath(parseTableAtermFileRelativePath());
             builder.parseTablePersistedFileRelativePath(parseTablePersistedFileRelativePath());
+            builder.completionParseTableAtermFileRelativePath(completionParseTableAtermFileRelativePath());
+            builder.completionParseTablePersistedFileRelativePath(completionParseTablePersistedFileRelativePath());
         }
     }
 }

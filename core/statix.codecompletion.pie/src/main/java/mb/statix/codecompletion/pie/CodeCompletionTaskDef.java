@@ -37,6 +37,7 @@ import mb.statix.codecompletion.strategies.runtime.CompleteStrategy;
 import mb.statix.codecompletion.strategies.runtime.InferStrategy;
 import mb.statix.constraints.CUser;
 import mb.statix.constraints.messages.IMessage;
+import mb.statix.constraints.messages.MessageKind;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.persistent.State;
 import mb.statix.spec.Spec;
@@ -53,6 +54,7 @@ import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.terms.util.TermUtils;
 
 import java.io.Serializable;
+import java.util.AbstractMap;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -66,6 +68,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static mb.statix.codecompletion.pie.CodeCompletionUtils.findAllPlaceholdersIn;
 import static mb.statix.codecompletion.pie.CodeCompletionUtils.findPlaceholderAt;
 import static mb.statix.codecompletion.pie.CodeCompletionUtils.getRegion;
 import static mb.statix.codecompletion.pie.CodeCompletionUtils.iterableToListView;
@@ -134,10 +137,12 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * otherwise, {@code false}
          */
         protected boolean innerEquals(Input that) {
+            // @formatter:off
             return this.primarySelection.equals(that.primarySelection)
                 && this.file.equals(that.file)
                 && Objects.equals(this.rootDirectoryHint, that.rootDirectoryHint)
                 && this.completeDeterministic == that.completeDeterministic;
+            // @formatter:on
         }
 
         @Override public int hashCode() {
@@ -150,7 +155,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
         }
 
         @Override public String toString() {
-            return "CodeCompletionTaskDef.Input{" +
+            return "CodeCompletionTaskDef$Input{" +
                 "primarySelection=" + primarySelection + ", " +
                 "rootDirectoryHint=" + rootDirectoryHint + ", " +
                 "file=" + file + ", " +
@@ -162,6 +167,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
     private final Logger log;
     private final JsglrParseTaskDef parseTask;
     private final ConstraintAnalyzeFile analyzeFileTask;
+    private final AstWithPlaceholdersTaskDef astWithPlaceholdersTaskDef;
     private final GetStrategoRuntimeProvider getStrategoRuntimeProviderTask;
     private final TegoRuntime tegoRuntime;
     private final StatixSpecTaskDef statixSpec;
@@ -183,6 +189,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
      *
      * @param parseTask the parser task
      * @param analyzeFileTask the analysis task
+     * @param astWithPlaceholdersTaskDef the task that inserts placeholders near the caret location in the AST
      * @param getStrategoRuntimeProviderTask the Stratego runtime provider task
      * @param statixSpec the Statix spec task
      * @param strategoTerms the Stratego to NaBL terms utility class
@@ -202,6 +209,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
     public CodeCompletionTaskDef(
         JsglrParseTaskDef parseTask,
         ConstraintAnalyzeFile analyzeFileTask,
+        AstWithPlaceholdersTaskDef astWithPlaceholdersTaskDef,
         GetStrategoRuntimeProvider getStrategoRuntimeProviderTask,
         TegoRuntime tegoRuntime,
         StatixSpecTaskDef statixSpec,
@@ -221,6 +229,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
     ) {
         this.parseTask = parseTask;
         this.analyzeFileTask = analyzeFileTask;
+        this.astWithPlaceholdersTaskDef = astWithPlaceholdersTaskDef;
         this.getStrategoRuntimeProviderTask = getStrategoRuntimeProviderTask;
         this.tegoRuntime = tegoRuntime;
         this.statixSpec = statixSpec;
@@ -269,8 +278,11 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
      * Keeps objects used by the code completion algorithm in a more accessible place.
      */
     private final class Execution {
+        /** The execution context. */
         private final ExecContext context;
+        /** The Stratego runtime. */
         private final StrategoRuntime strategoRuntime;
+        /** The term factory. */
         private final ITermFactory termFactory;
         /** The root directory of the project; or {@code null} when not specified. */
         public final @Nullable ResourcePath rootDirectoryHint;
@@ -313,16 +325,17 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * @return the code completion result
          * @throws Exception if an exception occurred
          */
-        public Result<CodeCompletionResult, ?> complete() throws InterruptedException {
+        public Result<CodeCompletionResult, ?> complete() throws Exception {
             @Nullable final CodeCompletionEventHandler eventHandler = eventHandlerProvider.get();
             if (eventHandler != null) eventHandler.begin();
 
             // Parse the AST
             if (eventHandler != null) eventHandler.beginParse();
-            final Result<IStrategoTerm, ?> parsedAstResult = parse();
+            final Result<IStrategoTerm, ?> parsedAstResult = parse(primarySelection);
             if (parsedAstResult.isErr()) return parsedAstResult.ignoreValueIfErr();
             final IStrategoTerm parsedAst = parsedAstResult.unwrapUnchecked();
             if (eventHandler != null) eventHandler.endParse();
+            log.trace("Parsed completion AST: " + parsedAst);
 
             // Prepare the AST (explicate, add term indices, upgrade placeholders)
             if (eventHandler != null) eventHandler.beginPreparation();
@@ -334,19 +347,30 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
             final PlaceholderVarMap placeholderVarMap = new PlaceholderVarMap(file.toString());
             final Result<ITerm, ?> upgradedAstResult = upgradePlaceholders(statixAst, placeholderVarMap);
             if (upgradedAstResult.isErr()) return upgradedAstResult.ignoreValueIfErr();
-            final ITerm upgradedAst = upgradedAstResult.unwrapUnchecked();
-            final ITermVar placeholder = getCompletionPlaceholder(upgradedAst);
+            final ITerm upgradedAst = upgradedAstResult.unwrap();
+            // TODO: We can perform our own placeholder inference here, since in the upgraded AST placeholders
+            //  for lists _are_ possible.  The only remaining problem is that we don't have a way to represent
+            //  placeholders for lists in code completion proposals.
+            final ITermVar placeholder = getCompletionPlaceholders(upgradedAst, primarySelection).get(0);   // FIXME: Use all placeholders instead of just the first
             final SolverState initialState = createInitialSolverState(upgradedAst, statixSecName, statixRootPredicateName, placeholderVarMap);
             if (eventHandler != null) eventHandler.endPreparation();
 
             // Analyze the AST
             if (eventHandler != null) eventHandler.beginAnalysis();
             final SolverState analyzedState = analyze(initialState);
+            final ArrayList<Map.Entry<IConstraint, IMessage>> allowedMessages = new ArrayList<>();
+            if (analyzedState.hasErrors()) {
+                analyzedState.getMessages().forEach((c, m) -> {
+                    if(m.kind() == MessageKind.ERROR) {
+                        allowedMessages.add(new AbstractMap.SimpleEntry<>(c, m));
+                    }
+                });
+            }
             if (eventHandler != null) eventHandler.endAnalysis();
 
             // Execute the code completion Tego strategy
             if (eventHandler != null) eventHandler.beginCodeCompletion();
-            final Seq<CodeCompletionProposal> completionProposals = complete(analyzedState, placeholder, Collections.emptyList() /* TODO: Get the set of analysis errors */);
+            final Seq<CodeCompletionProposal> completionProposals = complete(analyzedState, placeholder, allowedMessages /*Collections.emptyList() */);
             final Seq<CodeCompletionProposal> filteredProposals = filterProposals(completionProposals);
             final List<CodeCompletionProposal> instantiatedProposals = filteredProposals.toList(); // NOTE: This is where we actually coerce the lazy list find the completions.
             if (eventHandler != null) eventHandler.endCodeCompletion();
@@ -364,8 +388,11 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
                 log.info("Completion returned no completion proposals.");
             } else {
                 log.trace("Completion returned the following proposals:\n - " + finalProposals.stream()
-                    .map(i -> i.getLabel()).collect(Collectors.joining("\n - ")));
+                    .map(CodeCompletionItem::getLabel).collect(Collectors.joining("\n - ")));
             }
+
+            // TODO: We should track to which placeholder each completion belongs,
+            //  and insert the completion at that placeholder with properly parenthesized.
 
             if (eventHandler != null) eventHandler.end();
             return Result.ofOk(new TermCodeCompletionResult(
@@ -379,14 +406,19 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
         /**
          * Parses the input file.
          *
+         * @param selection code selection
          * @return the AST of the file
          */
-        private Result<IStrategoTerm, ?> parse() {
-            return context.require(parseTask.inputBuilder()
+        private Result<IStrategoTerm, ?> parse(Region selection) {
+            final mb.pie.api.Supplier<Result<IStrategoTerm, JsglrParseException>> astSupplier = parseTask.inputBuilder()
                 .withFile(file)
                 .rootDirectoryHint(Optional.ofNullable(rootDirectoryHint))
-                .buildRecoverableAstSupplier()
-            );
+                .codeCompletionMode(true)
+                .cursorOffset(selection.getStartOffset() /* TODO: Support the whole selection? */)
+                .buildRecoverableAstSupplier();
+
+            return context.require(astWithPlaceholdersTaskDef, new AstWithPlaceholdersTaskDef.Input(selection, astSupplier))
+                .map(o -> o.ast);
         }
 
         /**
@@ -500,14 +532,31 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * Determines the placeholder being completed.
          *
          * @param ast the AST to inspect
+         * @param selection code selection
          * @return the term variable of the placeholder being completed
          */
-        private ITermVar getCompletionPlaceholder(ITerm ast) {
-            @Nullable ITermVar placeholderVar = findPlaceholderAt(ast, primarySelection.getStartOffset() /* TODO: Support the whole selection? */);
+        @Deprecated
+        private ITermVar getCompletionPlaceholder(ITerm ast, Region selection) {
+            @Nullable ITermVar placeholderVar = findPlaceholderAt(ast, selection.getStartOffset() /* TODO: Support the whole selection? */);
             if (placeholderVar == null) {
                 throw new IllegalStateException("Completion failed: we don't know the placeholder.");
             }
             return placeholderVar;
+        }
+
+        /**
+         * Determines all placeholders near or intersecting the selection.
+         *
+         * @param ast the AST to inspect
+         * @param selection the selection to complete at
+         * @return the list of term variables of the placeholders being completed
+         */
+        private List<? extends ITermVar> getCompletionPlaceholders(ITerm ast, Region selection) {
+            List<? extends ITermVar> placeholderVars = findAllPlaceholdersIn(ast, selection);
+            if (placeholderVars.isEmpty()) {
+                throw new IllegalStateException("Completion failed: we don't know the placeholder.");
+            }
+            return placeholderVars;
         }
 
         /**
@@ -544,9 +593,9 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
             final @Nullable SolverState analyzedState = tegoRuntime.eval(InferStrategy.getInstance(), initialState);
             if (analyzedState == null) {
                 throw new IllegalStateException("Completion failed: got no result from Tego strategy.");
-            } else if(analyzedState.hasErrors()) {
-                // TODO: We can add these errors to the set of allowed errors
-                throw new IllegalStateException("Completion failed: input program validation failed:\n" + analyzedState.messagesToString());
+//            } else if(analyzedState.hasErrors()) {
+//                // TODO: We can add these errors to the set of allowed errors
+//                throw new IllegalStateException("Completion failed: input program validation failed:\n" + analyzedState.messagesToString());
             } else if(analyzedState.getConstraints().isEmpty()) {
                 throw new IllegalStateException("Completion failed: no constraints left, nothing to complete.\n" + analyzedState);
             }

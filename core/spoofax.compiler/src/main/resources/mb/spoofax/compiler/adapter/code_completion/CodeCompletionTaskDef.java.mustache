@@ -6,7 +6,7 @@ import mb.log.api.LoggerFactory;
 import mb.nabl2.terms.stratego.StrategoTerms;
 import mb.pie.api.ExecContext;
 import mb.pie.api.stamp.resource.ResourceStampers;
-import mb.statix.codecompletion.pie.CodeCompletionEventHandlerBase;
+import mb.statix.codecompletion.pie.AstWithPlaceholdersTaskDef;
 import mb.statix.codecompletion.pie.CodeCompletionTaskDef;
 import mb.tego.strategies.runtime.TegoRuntime;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -22,6 +22,7 @@ public class {{baseCodeCompletionTaskDef.id}} extends CodeCompletionTaskDef {
     public {{baseCodeCompletionTaskDef.id}}(
         {{parserInput.parseTaskDef.qualifiedId}} parseTask,
         {{constraintAnalyzerInput.analyzeFileTaskDef.qualifiedId}} analyzeFileTask,
+        {{astWithPlaceholdersTaskDef.qualifiedId}} astWithPlaceholdersTaskDef,
         {{strategoRuntimeInput.getStrategoRuntimeProviderTaskDef.qualifiedId}} getStrategoRuntimeProviderTask,
         TegoRuntime tegoRuntime,
         {{statixSpecTaskDef.qualifiedId}} statixSpec,
@@ -32,6 +33,7 @@ public class {{baseCodeCompletionTaskDef.id}} extends CodeCompletionTaskDef {
         super(
             parseTask,
             analyzeFileTask,
+            astWithPlaceholdersTaskDef,
             getStrategoRuntimeProviderTask,
             tegoRuntime,
             statixSpec,

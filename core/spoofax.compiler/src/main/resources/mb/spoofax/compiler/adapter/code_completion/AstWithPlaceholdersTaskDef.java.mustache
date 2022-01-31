@@ -1,0 +1,27 @@
+package {{baseAstWithPlaceholdersTaskDef.packageId}};
+
+import mb.log.api.LoggerFactory;
+import mb.statix.codecompletion.pie.AstWithPlaceholdersTaskDef;
+
+import javax.inject.Inject;
+
+@{{adapterProject.scope.qualifiedId}}
+public class {{baseAstWithPlaceholdersTaskDef.id}} extends AstWithPlaceholdersTaskDef {
+
+    @Inject
+    public {{baseAstWithPlaceholdersTaskDef.id}}(
+        {{strategoRuntimeInput.getStrategoRuntimeProviderTaskDef.qualifiedId}} getStrategoRuntimeProviderTask,
+        LoggerFactory loggerFactory
+    ) {
+        super(
+            getStrategoRuntimeProviderTask,
+            loggerFactory
+        );
+    }
+
+    @Override
+    public String getId() {
+        return "{{baseAstWithPlaceholdersTaskDef.id}}";
+    }
+
+}

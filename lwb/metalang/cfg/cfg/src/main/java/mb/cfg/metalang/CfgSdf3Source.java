@@ -41,15 +41,30 @@ public abstract class CfgSdf3Source implements Serializable {
     interface Cases<R> {
         R files(Files files);
 
-        R prebuilt(ResourcePath inputParseTableAtermFile, ResourcePath inputParseTablePersistedFile);
+        R prebuilt(
+            ResourcePath inputParseTableAtermFile,
+            ResourcePath inputParseTablePersistedFile,
+            ResourcePath inputCompletionParseTableAtermFile,
+            ResourcePath inputCompletionParseTablePersistedFile
+        );
     }
 
     public static CfgSdf3Source files(Files files) {
         return CfgSdf3Sources.files(files);
     }
 
-    public static CfgSdf3Source prebuilt(ResourcePath inputParseTableAtermFile, ResourcePath inputParseTablePersistedFile) {
-        return CfgSdf3Sources.prebuilt(inputParseTableAtermFile, inputParseTablePersistedFile);
+    public static CfgSdf3Source prebuilt(
+        ResourcePath inputParseTableAtermFile,
+        ResourcePath inputParseTablePersistedFile,
+        ResourcePath inputCompletionParseTableAtermFile,
+        ResourcePath inputCompletionParseTablePersistedFile
+    ) {
+        return CfgSdf3Sources.prebuilt(
+            inputParseTableAtermFile,
+            inputParseTablePersistedFile,
+            inputCompletionParseTableAtermFile,
+            inputCompletionParseTablePersistedFile
+        );
     }
 
 

@@ -24,6 +24,7 @@ import java.util.Optional;
 @Value.Enclosing
 public class CodeCompletionAdapterCompiler {
     private final TemplateWriter codeCompletionTaskDefTemplate;
+    private final TemplateWriter astWithPlaceholdersTaskDefTemplate;
     private final TemplateWriter statixSpecTaskDefTemplate;
 
     /**
@@ -34,6 +35,7 @@ public class CodeCompletionAdapterCompiler {
     @Inject public CodeCompletionAdapterCompiler(TemplateCompiler templateCompiler) {
         templateCompiler = templateCompiler.loadingFromClass(getClass());
         this.codeCompletionTaskDefTemplate = templateCompiler.getOrCompileToWriter("code_completion/CodeCompletionTaskDef.java.mustache");
+        this.astWithPlaceholdersTaskDefTemplate = templateCompiler.getOrCompileToWriter("code_completion/AstWithPlaceholdersTaskDef.java.mustache");
         this.statixSpecTaskDefTemplate = templateCompiler.getOrCompileToWriter("code_completion/StatixSpecTaskDef.java.mustache");
     }
 
@@ -41,6 +43,7 @@ public class CodeCompletionAdapterCompiler {
         if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         codeCompletionTaskDefTemplate.write(context, input.baseCodeCompletionTaskDef().file(generatedJavaSourcesDirectory), input);
+        astWithPlaceholdersTaskDefTemplate.write(context, input.baseAstWithPlaceholdersTaskDef().file(generatedJavaSourcesDirectory), input);
         statixSpecTaskDefTemplate.write(context, input.baseStatixSpecTaskDef().file(generatedJavaSourcesDirectory), input);
         return None.instance;
     }
@@ -84,6 +87,18 @@ public class CodeCompletionAdapterCompiler {
             return extendCompleteTaskDef().orElseGet(this::baseCodeCompletionTaskDef);
         }
 
+        // AST-with-placeholders task definition
+
+        @Value.Default default TypeInfo baseAstWithPlaceholdersTaskDef() {
+            return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "AstWithPlaceholdersTaskDef");
+        }
+
+        Optional<TypeInfo> extendAstWithPlaceholdersTaskDef();
+
+        default TypeInfo astWithPlaceholdersTaskDef() {
+            return extendAstWithPlaceholdersTaskDef().orElseGet(this::baseAstWithPlaceholdersTaskDef);
+        }
+
         // Statix Spec task definition
 
         @Value.Default default TypeInfo baseStatixSpecTaskDef() {
@@ -125,6 +140,7 @@ public class CodeCompletionAdapterCompiler {
             final ResourcePath generatedJavaSourcesDirectory = generatedJavaSourcesDirectory();
             return ListView.of(
                 baseCodeCompletionTaskDef().file(generatedJavaSourcesDirectory),
+                baseAstWithPlaceholdersTaskDef().file(generatedJavaSourcesDirectory),
                 baseStatixSpecTaskDef().file(generatedJavaSourcesDirectory)
             );
         }

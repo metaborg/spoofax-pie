@@ -13,6 +13,7 @@ import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Provider;
 import java.io.IOException;
 
@@ -20,13 +21,16 @@ import java.io.IOException;
 public class {{baseParseTaskDef.id}} extends JsglrParseTaskDef {
     private final {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources;
     private final Provider<{{languageProjectInput.parser.qualifiedId}}> parserProvider;
+    private final Provider<{{languageProjectInput.parser.qualifiedId}}> completionParserProvider;
 
     @Inject public {{baseParseTaskDef.id}}(
         {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources,
-        Provider<{{languageProjectInput.parser.qualifiedId}}> parserProvider
+        Provider<{{languageProjectInput.parser.qualifiedId}}> parserProvider,
+        @Named("completion") Provider<{{languageProjectInput.parser.qualifiedId}}> completionParserProvider
     ) {
         this.classLoaderResources = classLoaderResources;
         this.parserProvider = parserProvider;
+        this.completionParserProvider = completionParserProvider;
     }
 
     @Override public String getId() {
@@ -38,19 +42,30 @@ public class {{baseParseTaskDef.id}} extends JsglrParseTaskDef {
         Text text,
         @Nullable String startSymbol,
         @Nullable ResourceKey fileHint,
-        @Nullable ResourcePath rootDirectoryHint
+        @Nullable ResourcePath rootDirectoryHint,
+        boolean codeCompletionMode,
+        int cursorOffset
     ) throws IOException, InterruptedException {
         context.require(classLoaderResources.tryGetAsNativeDefinitionResource("{{languageProjectInput.parseTableAtermFileRelativePath}}"));
+        context.require(classLoaderResources.tryGetAsNativeDefinitionResource("{{languageProjectInput.completionParseTableAtermFileRelativePath}}"));
 {{#languageProjectInput.isJsglr2}}
         context.require(classLoaderResources.tryGetAsNativeDefinitionResource("{{languageProjectInput.parseTablePersistedFileRelativePath}}"));
+        context.require(classLoaderResources.tryGetAsNativeDefinitionResource("{{languageProjectInput.completionParseTablePersistedFileRelativePath}}"));
 {{/languageProjectInput.isJsglr2}}
         context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
         context.require(classLoaderResources.tryGetAsNativeResource({{languageProjectInput.parser.qualifiedId}}.class), ResourceStampers.hashFile());
         context.require(classLoaderResources.tryGetAsNativeResource({{languageProjectInput.parserFactory.qualifiedId}}.class), ResourceStampers.hashFile());
         context.require(classLoaderResources.tryGetAsNativeResource({{languageProjectInput.parseTable.qualifiedId}}.class), ResourceStampers.hashFile());
-        final {{languageProjectInput.parser.qualifiedId}} parser = parserProvider.get();
+        final {{languageProjectInput.parser.qualifiedId}} parser = codeCompletionMode ? completionParserProvider.get() : parserProvider.get();
         try {
-            return Result.ofOk(parser.parse(new JsglrParseInput(text, startSymbol != null ? startSymbol : "{{languageProjectInput.startSymbol}}", fileHint, rootDirectoryHint)));
+            return Result.ofOk(parser.parse(new JsglrParseInput(
+                text,
+                startSymbol != null ? startSymbol : "{{languageProjectInput.startSymbol}}",
+                fileHint,
+                rootDirectoryHint,
+                codeCompletionMode,
+                cursorOffset
+            )));
         } catch(JsglrParseException e) {
             return Result.ofErr(e);
         }

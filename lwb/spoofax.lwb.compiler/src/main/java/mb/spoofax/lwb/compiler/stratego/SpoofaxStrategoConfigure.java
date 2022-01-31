@@ -250,14 +250,13 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
                     } catch(Exception e) {
                         throw SpoofaxStrategoConfigureException.sdf3PrettyPrinterGenerateFail(e);
                     }
-                    // HACK: for now disabled completion runtime generation, as it is not used in Spoofax 3 (yet?)
-//                    try {
-//                        sdf3ToCompletionRuntime(context, generatedSourcesDirectory, astSupplier);
-//                    } catch(RuntimeException | InterruptedException e) {
-//                        throw e; // Do not wrap runtime and interrupted exceptions, rethrow them.
-//                    } catch(Exception e) {
-//                        throw StrategoConfigureException.sdf3CompletionRuntimeGenerateFail(e);
-//                    }
+                    try {
+                        sdf3ToCompletionRuntime(context, generatedSourcesDirectory, astSupplier);
+                    } catch(RuntimeException | InterruptedException e) {
+                        throw e; // Do not wrap runtime and interrupted exceptions, rethrow them.
+                    } catch(Exception e) {
+                        throw SpoofaxStrategoConfigureException.sdf3CompletionRuntimeGenerateFail(e);
+                    }
                     if(cfgStrategoConfig.enableSdf3StatixExplicationGen()) {
                         try {
                             sdf3ToStatixGenInj(context, strategyAffix, generatedSourcesDirectory, astSupplier);

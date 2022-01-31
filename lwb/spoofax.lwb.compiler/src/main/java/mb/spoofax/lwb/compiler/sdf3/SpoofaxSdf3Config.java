@@ -14,17 +14,62 @@ import java.io.Serializable;
 @ADT
 public abstract class SpoofaxSdf3Config implements Serializable {
     public interface Cases<R> {
-        R files(Sdf3SpecConfig sdf3SpecConfig, ResourcePath outputParseTableAtermFile, ResourcePath outputParseTablePersistedFile);
+        R files(
+            Sdf3SpecConfig sdf3SpecConfig,
+            ResourcePath outputParseTableAtermFile,
+            ResourcePath outputParseTablePersistedFile,
+            ResourcePath outputCompletionParseTableAtermFile,
+            ResourcePath outputCompletionParseTablePersistedFile
+        );
 
-        R prebuilt(ResourcePath inputParseTableAtermFile, ResourcePath inputParseTablePersistedFile, ResourcePath outputParseTableAtermFile, ResourcePath outputParseTablePersistedFile);
+        R prebuilt(
+            ResourcePath inputParseTableAtermFile,
+            ResourcePath inputParseTablePersistedFile,
+            ResourcePath inputCompletionParseTableAtermFile,
+            ResourcePath inputCompletionParseTablePersistedFile,
+            ResourcePath outputParseTableAtermFile,
+            ResourcePath outputParseTablePersistedFile,
+            ResourcePath outputCompletionParseTableAtermFile,
+            ResourcePath outputCompletionParseTablePersistedFile
+        );
     }
 
-    public static SpoofaxSdf3Config files(Sdf3SpecConfig sdf3SpecConfig, ResourcePath outputParseTableAtermFile, ResourcePath outputParseTablePersistedFile) {
-        return SpoofaxSdf3Configs.files(sdf3SpecConfig, outputParseTableAtermFile, outputParseTablePersistedFile);
+    public static SpoofaxSdf3Config files(
+        Sdf3SpecConfig sdf3SpecConfig,
+        ResourcePath outputParseTableAtermFile,
+        ResourcePath outputParseTablePersistedFile,
+        ResourcePath outputCompletionParseTableAtermFile,
+        ResourcePath outputCompletionParseTablePersistedFile
+    ) {
+        return SpoofaxSdf3Configs.files(
+            sdf3SpecConfig,
+            outputParseTableAtermFile,
+            outputParseTablePersistedFile,
+            outputCompletionParseTableAtermFile,
+            outputCompletionParseTablePersistedFile
+        );
     }
 
-    public static SpoofaxSdf3Config prebuilt(ResourcePath inputParseTableAtermFile, ResourcePath inputParseTablePersistedFile, ResourcePath outputParseTableAtermFile, ResourcePath outputParseTablePersistedFile) {
-        return SpoofaxSdf3Configs.prebuilt(inputParseTableAtermFile, inputParseTablePersistedFile, outputParseTableAtermFile, outputParseTablePersistedFile);
+    public static SpoofaxSdf3Config prebuilt(
+        ResourcePath inputParseTableAtermFile,
+        ResourcePath inputParseTablePersistedFile,
+        ResourcePath inputCompletionParseTableAtermFile,
+        ResourcePath inputCompletionParseTablePersistedFile,
+        ResourcePath outputParseTableAtermFile,
+        ResourcePath outputParseTablePersistedFile,
+        ResourcePath outputCompletionParseTableAtermFile,
+        ResourcePath outputCompletionParseTablePersistedFile
+    ) {
+        return SpoofaxSdf3Configs.prebuilt(
+            inputParseTableAtermFile,
+            inputParseTablePersistedFile,
+            inputCompletionParseTableAtermFile,
+            inputCompletionParseTablePersistedFile,
+            outputParseTableAtermFile,
+            outputParseTablePersistedFile,
+            outputCompletionParseTableAtermFile,
+            outputCompletionParseTablePersistedFile
+        );
     }
 
 
