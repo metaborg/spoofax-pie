@@ -706,9 +706,10 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * @return the proposal term
          */
         private Result<IStrategoTerm, ?> proposalToStrategoTerm(CodeCompletionProposal proposal) {
-                final IStrategoTerm proposalTerm = strategoTerms.toStratego(proposal.getTerm(), true);
-                return downgradePlaceholders(proposalTerm)
-                    .flatMap((IStrategoTerm term) -> postAnalyze(term).ignoreErrIfOk());
+            final ITerm proposalTerm = removeListVariables(proposal.getTerm());
+            final IStrategoTerm proposalStrategoTerm = strategoTerms.toStratego(proposalTerm, true);
+            return downgradePlaceholders(proposalStrategoTerm)
+                .flatMap((IStrategoTerm term) -> postAnalyze(term).ignoreErrIfOk());
         }
 
         /**
@@ -719,6 +720,19 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          */
         private Result<String, ?> strategoTermToString(IStrategoTerm implicatedTerm) {
             return prettyPrint(implicatedTerm);
+        }
+
+        /**
+         * Removes term variables in list positions.
+         *
+         * This is because they are not supported in Stratego, and no conversion is possible.
+         * We'll replace them with empty lists.
+         *
+         * @param term the term to transform
+         * @return the new term
+         */
+        private ITerm removeListVariables(ITerm term) {
+            return StrategoPlaceholders.replaceListVariablesByEmptyList(term);
         }
     }
 
