@@ -1,0 +1,19 @@
+package {{baseParticipantFactory.packageId}};
+
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.eclipse.core.runtime.IExecutableExtensionFactory;
+
+public class {{baseParticipantFactory.id}} implements IExecutableExtensionFactory {
+    private static {{participant.nullableQualifiedId}} instance;
+
+    public static {{participant.qualifiedId}} getParticipant() {
+        if(instance == null) {
+            instance = new {{participant.qualifiedId}}();
+        }
+        return instance;
+    }
+
+    @Override public {{participant.qualifiedId}} create() {
+        return getParticipant();
+    }
+}

@@ -44,7 +44,7 @@ public class EclipseDynamicLanguageLoader implements DynamicComponentLoader {
         final Class<?> factoryClass = classLoader.loadClass(eclipseInput.languageFactory().qualifiedId());
         final Method getLanguageMethod = factoryClass.getDeclaredMethod("getLanguage");
         final EclipseLifecycleParticipant participant = (EclipseLifecycleParticipant)getLanguageMethod.invoke(null);
-        final LifecycleParticipantManager.DynamicGroup group = SpoofaxPlugin.getLifecycleParticipantManager().registerDynamic(
+        final LifecycleParticipantManager.DynamicGroup group = SpoofaxPlugin.getStaticComponentManager().registerDynamic(
             rootDirectory,
             participant,
             // HACK: add SPT test case resource registry as an additional resource registry to enable SPT testing

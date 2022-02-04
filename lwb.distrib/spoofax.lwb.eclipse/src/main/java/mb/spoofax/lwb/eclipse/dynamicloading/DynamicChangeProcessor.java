@@ -97,6 +97,6 @@ public class DynamicChangeProcessor implements DynamicComponentManagerListener, 
         }
         // TODO: remove markers for files with removed file extension.
 
-        SpoofaxPlugin.getLifecycleParticipantManager().unregisterDynamic(component.getRootDirectory());
+        SpoofaxPlugin.getStaticComponentManager().unregisterDynamic(component.getRootDirectory());
     }
 }

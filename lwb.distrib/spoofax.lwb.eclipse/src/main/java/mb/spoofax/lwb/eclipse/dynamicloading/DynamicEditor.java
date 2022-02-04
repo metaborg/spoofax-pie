@@ -7,7 +7,7 @@ import mb.spoofax.eclipse.editor.SpoofaxSourceViewerConfiguration;
 import mb.spoofax.eclipse.util.StyleUtil;
 import mb.spoofax.lwb.dynamicloading.component.DynamicComponent;
 import mb.spoofax.lwb.dynamicloading.DynamicLanguageRegistry;
-import mb.spoofax.lwb.eclipse.SpoofaxLwbLifecycleParticipant;
+import mb.spoofax.lwb.eclipse.SpoofaxLwbParticipant;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -82,7 +82,7 @@ public class DynamicEditor extends SpoofaxEditorBase {
         super.initializeEditor();
 
         this.styleUtil = SpoofaxPlugin.getPlatformComponent().getStyleUtil();
-        this.languageRegistry = SpoofaxLwbLifecycleParticipant.getInstance().getDynamicLoadingComponent().getDynamicComponentManager();
+        this.languageRegistry = SpoofaxLwbParticipant.getInstance().getDynamicLoadingComponent().getDynamicComponentManager();
     }
 
     @Override protected void setInput() {

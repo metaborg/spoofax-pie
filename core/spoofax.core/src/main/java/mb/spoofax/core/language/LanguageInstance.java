@@ -17,6 +17,7 @@ import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.common.BracketSymbols;
 import mb.spoofax.common.BlockCommentSymbols;
+import mb.spoofax.core.Coordinate;
 import mb.spoofax.core.language.cli.CliCommand;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandDef;
@@ -24,7 +25,7 @@ import mb.spoofax.core.language.menu.MenuItem;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface LanguageInstance {
-    String getId();
+    Coordinate getCoordinate();
 
     String getDisplayName();
 

@@ -1,7 +1,7 @@
 package mb.spoofax.lwb.eclipse.dynamicloading;
 
 import mb.spoofax.eclipse.menu.MenuShared;
-import mb.spoofax.lwb.eclipse.SpoofaxLwbLifecycleParticipant;
+import mb.spoofax.lwb.eclipse.SpoofaxLwbParticipant;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.ui.IWorkbenchPart;
@@ -26,7 +26,7 @@ public class DynamicEditorContextMenu extends MenuShared {
         } else {
             languageId = editor.getLanguageId();
         }
-        final @Nullable EclipseDynamicLanguage language = (EclipseDynamicLanguage)SpoofaxLwbLifecycleParticipant.getInstance().getDynamicLoadingComponent().getDynamicComponentManager().getLanguageForId(languageId);
+        final @Nullable EclipseDynamicLanguage language = (EclipseDynamicLanguage)SpoofaxLwbParticipant.getInstance().getDynamicLoadingComponent().getDynamicComponentManager().getLanguageForId(languageId);
         if(language == null) { // Dynamic editor of unknown language.
             return new IContributionItem[0];
         }

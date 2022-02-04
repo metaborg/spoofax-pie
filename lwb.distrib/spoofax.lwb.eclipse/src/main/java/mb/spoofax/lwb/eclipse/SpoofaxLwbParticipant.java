@@ -21,7 +21,6 @@ import mb.pie.runtime.PieBuilderImpl;
 import mb.pie.runtime.store.SerializingStoreBuilder;
 import mb.pie.runtime.tracer.LoggingTracer;
 import mb.pie.serde.fst.FstSerde;
-import mb.resource.dagger.EmptyResourceRegistriesProvider;
 import mb.resource.dagger.ResourceRegistriesProvider;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.resource.fs.FSResource;
@@ -33,8 +32,10 @@ import mb.spoofax.compiler.dagger.DaggerSpoofaxCompilerComponent;
 import mb.spoofax.compiler.dagger.SpoofaxCompilerComponent;
 import mb.spoofax.compiler.dagger.SpoofaxCompilerModule;
 import mb.spoofax.compiler.util.TemplateCompiler;
+import mb.spoofax.core.Coordinate;
+import mb.spoofax.core.Version;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
-import mb.spoofax.eclipse.EclipseLifecycleParticipant;
+import mb.spoofax.eclipse.EclipseParticipant;
 import mb.spoofax.eclipse.EclipsePlatformComponent;
 import mb.spoofax.eclipse.EclipseResourceServiceComponent;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
@@ -63,22 +64,23 @@ import org.eclipse.core.runtime.IPath;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
+import java.util.function.Consumer;
 
-public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipant {
-    private static @Nullable SpoofaxLwbLifecycleParticipant instance;
+public class SpoofaxLwbParticipant implements EclipseParticipant {
+    private static @Nullable SpoofaxLwbParticipant instance;
 
-    private SpoofaxLwbLifecycleParticipant() {}
+    private SpoofaxLwbParticipant() {}
 
-    public static SpoofaxLwbLifecycleParticipant getInstance() {
+    public static SpoofaxLwbParticipant getInstance() {
         if(instance == null) {
-            instance = new SpoofaxLwbLifecycleParticipant();
+            instance = new SpoofaxLwbParticipant();
         }
         return instance;
     }
 
     public static class Factory implements IExecutableExtensionFactory {
-        @Override public SpoofaxLwbLifecycleParticipant create() {
-            return SpoofaxLwbLifecycleParticipant.getInstance();
+        @Override public SpoofaxLwbParticipant create() {
+            return SpoofaxLwbParticipant.getInstance();
         }
     }
 
@@ -126,17 +128,29 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
     }
 
 
-    @Override public ResourceRegistriesProvider getResourceRegistriesProvider(
+    @Override
+    public Coordinate getCoordinates() {
+        return new Coordinate("org.metaborg", "spoofax.eclipse.lwb", new Version(3)); // TODO: get actual version.
+    }
+
+    @Override
+    public @Nullable String getGroup() {
+        return "mb.spoofax.lwb";
+    }
+
+    @Override
+    public @Nullable ResourceRegistriesProvider getResourceRegistriesProvider(
         EclipseLoggerComponent loggerComponent,
         EclipseResourceServiceComponent baseResourceServiceComponent,
         EclipsePlatformComponent platformComponent
     ) {
-        return new EmptyResourceRegistriesProvider();
+        return null;
     }
 
     @Override
     public TaskDefsProvider getTaskDefsProvider(
         EclipseLoggerComponent loggerComponent,
+        EclipseResourceServiceComponent baseResourceServiceComponent,
         ResourceServiceComponent resourceServiceComponent,
         EclipsePlatformComponent platformComponent
     ) {
@@ -227,8 +241,9 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
                     .build();
             }
             SptLanguageFactory.getLanguage().getComponent().getLanguageUnderTestProviderWrapper().set(new DynamicLanguageUnderTestProvider(
-                SpoofaxLwbLifecycleParticipant.getInstance().getDynamicLoadingComponent().getDynamicComponentManager(),
-                SpoofaxLwbLifecycleParticipant.getInstance().getDynamicLoadingComponent().getDynamicLoad(),
+                SpoofaxLwbParticipant.getInstance().getDynamicLoadingComponent().getDynamicComponentManager(),
+                SpoofaxLwbParticipant.getInstance().getDynamicLoadingComponent().getDynamicLoad(),
+                spoofax3Compiler.component.getCompileLanguage(),
                 rootDirectory -> {
                     // TODO: reduce code duplication with SpoofaxLwbBuilder
                     return CompileLanguage.Args.builder()
@@ -253,16 +268,18 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
         };
     }
 
-    @Override public @Nullable EclipseLanguageComponent getLanguageComponent(
+    @Override
+    public @Nullable EclipseLanguageComponent getLanguageComponent(
         EclipseLoggerComponent loggerComponent,
+        EclipseResourceServiceComponent baseResourceServiceComponent,
         ResourceServiceComponent resourceServiceComponent,
         EclipsePlatformComponent platformComponent
     ) {
         return null;
     }
 
-    @Override public void customizePieModule(RootPieModule pieModule) {
-        pieModule
+    @Override public @Nullable Consumer<RootPieModule> getPieModuleCustomizer() {
+        return pieModule -> pieModule
             // Use Fst Serde implementation for better serialization performance.
             .withSerdeFactory((loggerFactory) -> new FstSerde())
             // Use logging tracer to create build logs.
@@ -291,7 +308,8 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
         spoofaxLwbComponent.getDynamicEditorTracker().register();
     }
 
-    @Override public void close() {
+    @Override
+    public void close() {
         pieComponent = null;
         spoofaxLwbComponent.close();
         spoofaxLwbComponent = null;

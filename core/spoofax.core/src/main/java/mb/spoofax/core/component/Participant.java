@@ -14,7 +14,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.Consumer;
 
-public interface Participant extends AutoCloseable {
+public interface Participant<L extends LoggerComponent, R extends ResourceServiceComponent, P extends PlatformComponent> extends AutoCloseable {
     /**
      * Gets the coordinates of this participant.
      */
@@ -27,14 +27,39 @@ public interface Participant extends AutoCloseable {
 
 
     /**
+     * Gets the {@link LoggerComponent} class that this participant requires. Primarily used to check that the required
+     * class matches when dynamically loading this participant through reflection.
+     */
+    default Class<? super L> getRequiredLoggerComponentClass() {
+        return LoggerComponent.class;
+    }
+
+    /**
+     * Gets the {@link ResourceServiceComponent} class that this participant requires. Primarily used to check that the
+     * required class matches when dynamically loading this participant through reflection.
+     */
+    default Class<? super R> getRequiredBaseResourceServiceComponentClass() {
+        return ResourceServiceComponent.class;
+    }
+
+    /**
+     * Gets the {@link ResourceServiceComponent} class that this participant requires. Primarily used to check that the
+     * required class matches when dynamically loading this participant through reflection.
+     */
+    default Class<? super P> getRequiredPlatformComponentClass() {
+        return PlatformComponent.class;
+    }
+
+
+    /**
      * Gets a {@link ResourceRegistriesProvider resource registries provider} that should be provided globally to all
      * participants, or {@code null} if this participant does not have one. The return value of this method is only used
      * when this participant is constructed statically at startup time, not when it is dynamically loaded.
      */
     default @Nullable ResourceRegistriesProvider getGlobalResourceRegistriesProvider(
-        LoggerComponent loggerComponent,
-        ResourceServiceComponent baseResourceServiceComponent,
-        PlatformComponent platformComponent
+        L loggerComponent,
+        R baseResourceServiceComponent,
+        P platformComponent
     ) {return null;}
 
     /**
@@ -43,9 +68,9 @@ public interface Participant extends AutoCloseable {
      * participant is constructed statically at startup time, not when it is dynamically loaded.
      */
     default @Nullable TaskDefsProvider getGlobalTaskDefsProvider(
-        LoggerComponent loggerComponent,
+        L loggerComponent,
         ResourceServiceComponent resourceServiceComponent,
-        PlatformComponent platformComponent
+        P platformComponent
     ) {return null;}
 
 
@@ -54,9 +79,9 @@ public interface Participant extends AutoCloseable {
      * this participant does not have one.
      */
     @Nullable ResourceRegistriesProvider getResourceRegistriesProvider(
-        LoggerComponent loggerComponent,
-        ResourceServiceComponent baseResourceServiceComponent,
-        PlatformComponent platformComponent
+        L loggerComponent,
+        R baseResourceServiceComponent,
+        P platformComponent
     );
 
     /**
@@ -70,11 +95,14 @@ public interface Participant extends AutoCloseable {
      * Gets the {@link TaskDefsProvider task definitions provider} of this participant, or {@code null} if this
      * participant does not have one. Only called after {@link #getResourceRegistriesProvider} has been called.
      */
-    @Nullable TaskDefsProvider getTaskDefsProvider(
-        LoggerComponent loggerComponent,
+    default @Nullable TaskDefsProvider getTaskDefsProvider(
+        L loggerComponent,
+        R baseResourceServiceComponent,
         ResourceServiceComponent resourceServiceComponent,
-        PlatformComponent platformComponent
-    );
+        P platformComponent
+    ) {
+        return getLanguageComponent(loggerComponent, baseResourceServiceComponent, resourceServiceComponent, platformComponent);
+    }
 
     /**
      * Gets a {@link RootPieModule} customizer that is applied to the PIE module of this participant, or {@code null} if
@@ -86,13 +114,13 @@ public interface Participant extends AutoCloseable {
 
     /**
      * Gets the {@link LanguageComponent language component} of this participant, or {@code null} if this participant
-     * does not have one. Only called after {@link #getResourceRegistriesProvider} and {@link #getTaskDefsProvider} have
-     * been called.
+     * does not have one. Only called after {@link #getResourceRegistriesProvider} has been called.
      */
     @Nullable LanguageComponent getLanguageComponent(
-        LoggerComponent loggerComponent,
+        L loggerComponent,
+        R baseResourceServiceComponent,
         ResourceServiceComponent resourceServiceComponent,
-        PlatformComponent platformComponent
+        P platformComponent
     );
 
 
@@ -101,9 +129,9 @@ public interface Participant extends AutoCloseable {
      * #getTaskDefsProvider}, and {@link #getLanguageComponent} have been called.
      */
     void start(
-        LoggerComponent loggerComponent,
+        L loggerComponent,
         ResourceServiceComponent resourceServiceComponent,
-        PlatformComponent platformComponent,
+        P platformComponent,
         PieComponent pieComponent
     );
 

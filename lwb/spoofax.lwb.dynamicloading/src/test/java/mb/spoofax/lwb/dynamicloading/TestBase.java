@@ -126,7 +126,7 @@ class TestBase {
         sptComponent.getLanguageUnderTestProviderWrapper().set(new DynamicLanguageUnderTestProvider(
             dynamicLanguageRegistry,
             dynamicLoad,
-            TestBase::compileLanguageArgs
+            compileLanguage, TestBase::compileLanguageArgs
         ));
 
         pieComponent = DaggerPieComponent.builder()

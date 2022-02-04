@@ -15,7 +15,7 @@ public class {{baseMetadataProvider.id}} implements LanguageMetadataProvider {
     // Don't inline this method into getLanguageMetadataSuppliers
     // Because call to getComponent should be delayed for concurrency reasons
     private LanguageMetadata getLanguageMetadata() {
-        return {{languageFactory.id}}.getLanguage().getComponent().getLanguageMetadata();
+        return {{participantFactory.id}}.getLanguage().getComponent().getLanguageMetadata();
     }
 
     {{#adapterProjectCompilerInput.multilangAnalyzer}}
@@ -26,7 +26,7 @@ public class {{baseMetadataProvider.id}} implements LanguageMetadataProvider {
     }
 
     @Override public Map<SpecFragmentId, SpecConfig> getSpecConfigs() {
-        return {{languageFactory.id}}.getLanguage().getComponent().getSpecConfigs();
+        return {{participantFactory.id}}.getLanguage().getComponent().getSpecConfigs();
     }
 
     @Override public Map<LanguageId, ContextId> getDefaultLanguageContexts() {

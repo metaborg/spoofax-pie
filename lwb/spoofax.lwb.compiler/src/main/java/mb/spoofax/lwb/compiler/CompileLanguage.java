@@ -71,6 +71,8 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
         @Value.NaturalOrder
         SortedSet<ResourcePath> javaClassPaths();
 
+        String participantClassQualifiedId();
+
         KeyedMessages messages();
     }
 

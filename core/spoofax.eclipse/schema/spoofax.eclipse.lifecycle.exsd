@@ -31,7 +31,6 @@
 
   <element name="participant">
     <complexType>
-      <attribute name="group" type="string"/>
       <attribute name="class" type="string" use="required">
         <annotation>
           <documentation/>

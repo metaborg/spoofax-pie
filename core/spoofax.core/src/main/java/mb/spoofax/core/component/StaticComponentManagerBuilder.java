@@ -15,8 +15,8 @@ import java.util.ArrayList;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class StaticComponentManagerBuilder extends ComponentBuilder {
-    private final ArrayList<Participant> participants = new ArrayList<>();
+public class StaticComponentManagerBuilder<L extends LoggerComponent, R extends ResourceServiceComponent, P extends PlatformComponent> extends ComponentBuilder<L, R, P> {
+    private final ArrayList<Participant<L, R, P>> participants = new ArrayList<>();
     private final ArrayList<Consumer<ResourceServiceModule>> resourceServiceModuleCustomizers = new ArrayList<>();
     private final MultiMap<String, Consumer<ResourceServiceModule>> groupedResourceServiceModuleCustomizers = MultiMap.withLinkedHash();
     private final ArrayList<Consumer<RootPieModule>> pieModuleCustomizers = new ArrayList<>();
@@ -24,9 +24,9 @@ public class StaticComponentManagerBuilder extends ComponentBuilder {
 
 
     public StaticComponentManagerBuilder(
-        LoggerComponent loggerComponent,
-        ResourceServiceComponent baseResourceServiceComponent,
-        PlatformComponent platformComponent,
+        L loggerComponent,
+        R baseResourceServiceComponent,
+        P platformComponent,
         Supplier<PieBuilder> pieBuilderSupplier
     ) {
         super(loggerComponent, baseResourceServiceComponent, platformComponent, pieBuilderSupplier);
@@ -54,7 +54,7 @@ public class StaticComponentManagerBuilder extends ComponentBuilder {
      *
      * @param participant {@link Participant Participant} to register.
      */
-    public void registerParticipant(Participant participant) {
+    public void registerParticipant(Participant<L, R, P> participant) {
         participants.add(participant);
     }
 
@@ -106,7 +106,7 @@ public class StaticComponentManagerBuilder extends ComponentBuilder {
      *
      * @return {@link ComponentManager Language manager} providing access to the composed participants.
      */
-    public StaticComponentManager build() {
+    public StaticComponentManager<L, R, P> build() {
         final ListView<Consumer<ResourceServiceModule>> resourceServiceModuleCustomizers = ListView.copyOf(this.resourceServiceModuleCustomizers);
         final MultiMapView<String, Consumer<ResourceServiceModule>> groupedResourceServiceModuleCustomizers = MultiMapView.copyOf(this.groupedResourceServiceModuleCustomizers);
         final ListView<Consumer<RootPieModule>> pieModuleCustomizers = ListView.copyOf(this.pieModuleCustomizers);
@@ -121,7 +121,7 @@ public class StaticComponentManagerBuilder extends ComponentBuilder {
             null
         );
 
-        return new StaticComponentManager(
+        return new StaticComponentManager<L, R, P>(
             loggerComponent,
             platformComponent,
 

@@ -22,6 +22,8 @@ import mb.pie.api.exec.NullCancelableToken;
 import mb.pie.dagger.PieComponent;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.core.Coordinate;
+import mb.spoofax.core.component.Component;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandContext;
@@ -305,7 +307,7 @@ public class PieRunner {
     // Requiring commands
 
     public ArrayList<CommandContextAndFeedback> requireCommand(
-        String languageId,
+        Coordinate languageCoordinate,
         CommandRequest<?> request,
         ListView<? extends CommandContext> contexts,
         Pie pie,
@@ -328,7 +330,7 @@ public class PieRunner {
                     final TaskKey key = task.key();
                     final CommandFeedback feedback = require(task, session, monitor);
                     contextsAndFeedbacks.add(new CommandContextAndFeedback(context, feedback));
-                    processShowFeedbacks(logger, resourceUtil, partClosedCallback, feedback, true, getClosedCallback(logger, lifecycleParticipantManagerLock, languageId, key));
+                    processShowFeedbacks(logger, resourceUtil, partClosedCallback, feedback, true, getClosedCallback(logger, lifecycleParticipantManagerLock, languageCoordinate, key));
                     if(feedback.hasErrorMessagesOrException()) {
                         // Command feedback indicates failure, unobserve to cancel continuous execution.
                         try(final MixedSession newSession = pie.newSession()) {
@@ -345,7 +347,7 @@ public class PieRunner {
                                 platformComponent.getPartClosedCallback(),
                                 callbackFeedback,
                                 false,
-                                getClosedCallback(logger, platformComponent.lifecycleParticipantManagerWriteLockRule(), languageId, key)
+                                getClosedCallback(logger, platformComponent.lifecycleParticipantManagerWriteLockRule(), languageCoordinate, key)
                             );
                         });
                     }
@@ -365,18 +367,20 @@ public class PieRunner {
     private static Consumer<IWorkbenchPart> getClosedCallback(
         Logger logger,
         LockRule lifecycleParticipantManagerLock,
-        String languageId,
+        Coordinate languageCoordinate,
         TaskKey key
     ) {
         return (p) -> {
-            final @Nullable PieComponent pieComponent = SpoofaxPlugin.getLifecycleParticipantManager().getPieComponent(languageId);
-            if(pieComponent == null) {
-                logger.error("Cannot unobserve and remove callback for continuous command '" + key + "'; no language with ID '" + languageId + "' is registered");
+            final Option<? extends Component> component = SpoofaxPlugin.getStaticComponentManager().getComponent(languageCoordinate);
+            if(component.isNone()) {
+                logger.error("Cannot unobserve and remove callback for continuous command '" + key + "'; no component with coordinate '" + languageCoordinate + "' is registered");
                 return;
             }
-            final CommandFeedbackClosedJob job = new CommandFeedbackClosedJob(pieComponent, key);
-            job.setRule(lifecycleParticipantManagerLock.createReadLock());
-            job.schedule();
+            component.ifSome(c -> {
+                final CommandFeedbackClosedJob job = new CommandFeedbackClosedJob(c.getPieComponent(), key);
+                job.setRule(lifecycleParticipantManagerLock.createReadLock());
+                job.schedule();
+            });
         };
     }
 
@@ -678,12 +682,12 @@ public class PieRunner {
         Session session,
         @Nullable IProgressMonitor monitor
     ) throws ExecException, InterruptedException, IOException {
-        final String languageId = languageComponent.getLanguageInstance().getId();
+        final Coordinate languageCoordinate = languageComponent.getLanguageInstance().getCoordinate();
         final AutoCommandRequests autoCommandRequests = new AutoCommandRequests(languageComponent); // OPTO: calculate once per language component
         for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.project) {
             final CommandRequest<?> request = autoCommandRequest.toCommandRequest();
             for(ResourcePath newProject : resourceChanges.newProjects) {
-                requireCommand(languageId, request, CommandUtil.context(CommandContext.ofProject(newProject)), pie, session, monitor);
+                requireCommand(languageCoordinate, request, CommandUtil.context(CommandContext.ofProject(newProject)), pie, session, monitor);
             }
             for(ResourcePath removedProject : resourceChanges.removedProjects) {
                 final Task<CommandFeedback> task = request.createTask(CommandContext.ofProject(removedProject), argConverters);
@@ -693,7 +697,7 @@ public class PieRunner {
         for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.directory) {
             final CommandRequest<?> request = autoCommandRequest.toCommandRequest();
             for(ResourcePath newDirectory : resourceChanges.newDirectories) {
-                requireCommand(languageId, request, CommandUtil.context(CommandContext.ofDirectory(newDirectory)), pie, session, monitor);
+                requireCommand(languageCoordinate, request, CommandUtil.context(CommandContext.ofDirectory(newDirectory)), pie, session, monitor);
             }
             for(ResourcePath removedDirectory : resourceChanges.removedDirectories) {
                 final Task<CommandFeedback> task = request.createTask(CommandContext.ofDirectory(removedDirectory), argConverters);
@@ -703,7 +707,7 @@ public class PieRunner {
         for(AutoCommandRequest<?> autoCommandRequest : autoCommandRequests.file) {
             final CommandRequest<?> request = autoCommandRequest.toCommandRequest();
             for(ResourcePath newFile : resourceChanges.newFiles) {
-                requireCommand(languageId, request, CommandUtil.context(CommandContext.ofFile(newFile)), pie, session, monitor);
+                requireCommand(languageCoordinate, request, CommandUtil.context(CommandContext.ofFile(newFile)), pie, session, monitor);
             }
             for(ResourcePath removedFile : resourceChanges.removedFiles) {
                 final Task<CommandFeedback> task = request.createTask(CommandContext.ofFile(removedFile), argConverters);

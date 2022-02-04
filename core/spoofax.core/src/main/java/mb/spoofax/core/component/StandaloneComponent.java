@@ -1,21 +1,26 @@
 package mb.spoofax.core.component;
 
+import mb.common.option.Option;
+import mb.common.util.CollectionView;
 import mb.common.util.MapView;
+import mb.log.dagger.LoggerComponent;
 import mb.pie.dagger.PieComponent;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.core.Coordinate;
+import mb.spoofax.core.CoordinateRequirement;
 import mb.spoofax.core.language.LanguageComponent;
+import mb.spoofax.core.platform.PlatformComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class StandaloneComponent implements Component {
+public class StandaloneComponent<L extends LoggerComponent, R extends ResourceServiceComponent, P extends PlatformComponent> implements Component {
     public final Coordinate coordinate;
-    final Participant participant;
+    private final Participant<L, R, P> participant;
     public final ResourceServiceComponent resourceServiceComponent;
     public final @Nullable LanguageComponent languageComponent;
     public final PieComponent pieComponent;
 
     public StandaloneComponent(
-        Participant participant,
+        Participant<L, R, P> participant,
         ResourceServiceComponent resourceServiceComponent,
         @Nullable LanguageComponent languageComponent,
         PieComponent pieComponent
@@ -34,27 +39,43 @@ public class StandaloneComponent implements Component {
         participant.close();
     }
 
-    @Override public ResourceServiceComponent getResourceServiceComponent() {
+    @Override
+    public ResourceServiceComponent getResourceServiceComponent() {
         return resourceServiceComponent;
     }
 
-    @Override public @Nullable LanguageComponent getLanguageComponent(Coordinate coordinate) {
-        if(participant.getCoordinates().equals(coordinate)) {
-            return languageComponent;
+
+    @Override
+    public Option<LanguageComponent> getLanguageComponent(Coordinate coordinate) {
+        if(this.coordinate.equals(coordinate)) {
+            return Option.ofNullable(languageComponent);
         }
-        return null;
+        return Option.ofNone();
     }
 
-    @Override public MapView<Coordinate, LanguageComponent> getLanguageComponents() {
+    @Override
+    public CollectionView<LanguageComponent> getLanguageComponents(CoordinateRequirement coordinateRequirement) {
+        if(languageComponent != null && coordinateRequirement.matches(this.coordinate)) {
+            return CollectionView.of(languageComponent);
+        }
+        return CollectionView.of();
+    }
+
+    @Override
+    public MapView<Coordinate, LanguageComponent> getLanguageComponents() {
         if(languageComponent != null) return MapView.of(coordinate, languageComponent);
         return MapView.of();
     }
 
-    @Override public PieComponent getPieComponent() {
+
+    @Override
+    public PieComponent getPieComponent() {
         return pieComponent;
     }
 
-    @Override public String toString() {
+
+    @Override
+    public String toString() {
         return "StandaloneComponent{" +
             "coordinate=" + coordinate +
             ", participant=" + participant +

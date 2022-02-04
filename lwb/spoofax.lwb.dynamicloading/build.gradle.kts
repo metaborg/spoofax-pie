@@ -10,8 +10,6 @@ dependencies {
   annotationProcessor(platform(compositeBuild("spoofax.depconstraints")))
 
   api(compositeBuild("spoofax.core"))
-  api(project(":spoofax.lwb.compiler"))
-  api(project(":spoofax.lwb.compiler.dagger"))
   api("com.google.dagger:dagger")
 
   compileOnly("org.checkerframework:checker-qual-android")

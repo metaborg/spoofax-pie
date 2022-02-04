@@ -60,6 +60,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
     private final TemplateWriter componentTemplate;
     private final TemplateWriter moduleTemplate;
     private final TemplateWriter instanceTemplate;
+    private final TemplateWriter participantTemplate;
     private final TemplateWriter commandDefTemplate;
     private final TemplateWriter testStrategoTaskDef;
 
@@ -101,6 +102,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         this.componentTemplate = templateCompiler.getOrCompileToWriter("adapter_project/Component.java.mustache");
         this.moduleTemplate = templateCompiler.getOrCompileToWriter("adapter_project/Module.java.mustache");
         this.instanceTemplate = templateCompiler.getOrCompileToWriter("adapter_project/Instance.java.mustache");
+        this.participantTemplate = templateCompiler.getOrCompileToWriter("adapter_project/Participant.java.mustache");
         this.commandDefTemplate = templateCompiler.getOrCompileToWriter("adapter_project/CommandDef.java.mustache");
         this.testStrategoTaskDef = templateCompiler.getOrCompileToWriter("adapter_project/TestStrategoTaskDef.java.mustache");
 
@@ -163,6 +165,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
 
         scopeTemplate.write(context, input.adapterProject().baseScope().file(generatedJavaSourcesDirectory), input);
         qualifierTemplate.write(context, input.baseQualifier().file(generatedJavaSourcesDirectory), input);
+        participantTemplate.write(context, input.baseParticipant().file(generatedJavaSourcesDirectory), input);
 
         for(CommandDefRepr commandDef : input.allCommandDefs()) {
             final UniqueNamer uniqueNamer = new UniqueNamer(input.scope(), input.qualifier());
@@ -407,6 +410,8 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
 
 
         /// Configuration
+
+        Optional<String> componentGroup();
 
         /* None indicates that the language project is the same project as the adapter project */
         Option<GradleDependency> languageProjectDependency();
@@ -670,6 +675,18 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             return extendInstance().orElseGet(this::baseInstance);
         }
 
+        // Participant
+
+        @Value.Default default TypeInfo baseParticipant() {
+            return TypeInfo.of(adapterProject().packageId(), shared().defaultClassPrefix() + "Participant");
+        }
+
+        Optional<TypeInfo> extendParticipant();
+
+        default TypeInfo participant() {
+            return extendParticipant().orElseGet(this::baseParticipant);
+        }
+
 
         /// Adapter project task definitions
 
@@ -758,6 +775,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
                 javaSourceFiles.add(baseComponent().file(generatedJavaSourcesDirectory));
                 javaSourceFiles.add(baseModule().file(generatedJavaSourcesDirectory));
                 javaSourceFiles.add(baseInstance().file(generatedJavaSourcesDirectory));
+                javaSourceFiles.add(baseParticipant().file(generatedJavaSourcesDirectory));
                 javaSourceFiles.add(baseCheckTaskDef().file(generatedJavaSourcesDirectory));
                 javaSourceFiles.add(baseCheckMultiTaskDef().file(generatedJavaSourcesDirectory));
                 javaSourceFiles.add(baseCheckAggregatorTaskDef().file(generatedJavaSourcesDirectory));

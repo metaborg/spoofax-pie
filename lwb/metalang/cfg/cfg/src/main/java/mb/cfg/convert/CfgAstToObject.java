@@ -467,8 +467,8 @@ public class CfgAstToObject {
                 .withDefaultsSameProject(rootDirectory, shared)
                 .languageProjectCompilerInput(languageBaseCompilerInput)
                 .adapterProjectCompilerInput(languageAdapterCompilerInput);
-            subParts.forOneSubtermAsTypeInfo("EclipseBaseLanguage", builder::baseLanguage);
-            subParts.forOneSubtermAsTypeInfo("EclipseExtendLanguage", builder::extendLanguage);
+            subParts.forOneSubtermAsTypeInfo("EclipseBaseParticipant", builder::baseParticipant);
+            subParts.forOneSubtermAsTypeInfo("EclipseExtendParticipant", builder::extendParticipant);
             if(customizer.customize(builder)) {
                 final EclipseProjectCompiler.Input input = builder.build();
                 compileLanguageInputBuilder.eclipseProjectInput(input);

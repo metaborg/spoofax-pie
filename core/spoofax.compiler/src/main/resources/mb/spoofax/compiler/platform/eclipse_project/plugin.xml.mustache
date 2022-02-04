@@ -8,9 +8,9 @@
     schema="schema/{{componentExtensionPointId}}.exsd"
   />
 
-  <!-- Lifecycle participant -->
-  <extension point="spoofax.eclipse.lifecycle">
-    <participant group="{{languageGroup}}" class="{{languageFactory.qualifiedId}}"/>
+  <!-- Spoofax (Eclipse) Participant -->
+  <extension point="spoofax.eclipse.participant">
+    <participant class="{{participantFactory.qualifiedId}}"/>
   </extension>
 
   <!-- Context -->

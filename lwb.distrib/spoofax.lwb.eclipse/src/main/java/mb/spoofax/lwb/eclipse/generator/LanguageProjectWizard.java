@@ -7,7 +7,7 @@ import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.resource.EclipseResourcePath;
 import mb.spoofax.eclipse.util.StatusUtil;
 import mb.spoofax.lwb.compiler.generator.LanguageProjectGenerator;
-import mb.spoofax.lwb.eclipse.SpoofaxLwbLifecycleParticipant;
+import mb.spoofax.lwb.eclipse.SpoofaxLwbParticipant;
 import mb.spoofax.lwb.eclipse.SpoofaxLwbNature;
 import mb.spoofax.lwb.eclipse.util.JavaProjectUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -39,7 +39,7 @@ public class LanguageProjectWizard extends Wizard implements INewWizard {
         final LoggerFactory loggerFactory = SpoofaxPlugin.getLoggerComponent().getLoggerFactory();
         this.logger = loggerFactory.create(getClass());
         this.page = new LanguageProjectWizardPage(loggerFactory);
-        this.languageProjectGenerator = SpoofaxLwbLifecycleParticipant.getInstance().getSpoofax3Compiler().component.getLanguageProjectGenerator();
+        this.languageProjectGenerator = SpoofaxLwbParticipant.getInstance().getSpoofax3Compiler().component.getLanguageProjectGenerator();
         addPage(this.page);
         setNeedsProgressMonitor(true);
     }
