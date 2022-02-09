@@ -23,6 +23,8 @@ import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.common.BlockCommentSymbols;
 import mb.spoofax.common.BracketSymbols;
+import mb.spoofax.core.Coordinate;
+import mb.spoofax.core.Version;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.cli.CliCommand;
 import mb.spoofax.core.language.cli.CliParam;
@@ -55,7 +57,7 @@ import java.util.Optional;
 import java.util.Set;
 
 public class TigerInstance implements LanguageInstance, TestableParse {
-    private final static SetView<String> extensions = SetView.of("tig");
+    public final static SetView<String> extensions = SetView.of("tig");
 
     private final TigerParse parse;
     private final TigerCheck check;
@@ -118,7 +120,9 @@ public class TigerInstance implements LanguageInstance, TestableParse {
     }
 
 
-    @Override public String getId() {return "tiger";}
+    @Override public Coordinate getCoordinate() {
+        return new Coordinate("org.metaborg", "tiger", new Version(0, 1, 0));
+    }
 
     @Override public String getDisplayName() {
         return "Tiger";

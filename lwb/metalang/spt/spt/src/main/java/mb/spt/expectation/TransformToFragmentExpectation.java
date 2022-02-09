@@ -10,6 +10,7 @@ import mb.pie.api.Session;
 import mb.pie.api.exec.CancelToken;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.core.CoordinateRequirement;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spt.lut.LanguageUnderTestProvider;
@@ -21,13 +22,18 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class TransformToFragmentExpectation implements TestExpectation {
     private final ResourcePath fragmentResource;
-    private final @Nullable String languageIdHint;
+    private final @Nullable CoordinateRequirement languageCoordinateRequirementHint;
     private final String commandDisplayName;
     private final Region sourceRegion;
 
-    public TransformToFragmentExpectation(ResourcePath fragmentResource, @Nullable String languageIdHint, String commandDisplayName, Region sourceRegion) {
+    public TransformToFragmentExpectation(
+        ResourcePath fragmentResource,
+        @Nullable CoordinateRequirement languageCoordinateRequirementHint,
+        String commandDisplayName,
+        Region sourceRegion
+    ) {
         this.fragmentResource = fragmentResource;
-        this.languageIdHint = languageIdHint;
+        this.languageCoordinateRequirementHint = languageCoordinateRequirementHint;
         this.commandDisplayName = commandDisplayName;
         this.sourceRegion = sourceRegion;
     }
@@ -53,9 +59,9 @@ public class TransformToFragmentExpectation implements TestExpectation {
             return messagesBuilder.build(file);
         }
 
-        final @Nullable LanguageUnderTest fragmentLanguageUnderTest = ExpectationFragmentUtil.getLanguageUnderTest(testCase, languageUnderTest, languageUnderTestProvider, context, languageIdHint);
+        final @Nullable LanguageUnderTest fragmentLanguageUnderTest = ExpectationFragmentUtil.getLanguageUnderTest(testCase, languageUnderTest, languageUnderTestProvider, context, languageCoordinateRequirementHint);
         if(fragmentLanguageUnderTest == null) {
-            messagesBuilder.addMessage("Cannot evaluate parse to fragment expectation because providing language under test for language id '" + languageIdHint + "' failed unexpectedly", Severity.Error, file, sourceRegion);
+            messagesBuilder.addMessage("Cannot evaluate parse to fragment expectation because providing language under test for language '" + languageCoordinateRequirementHint + "' failed unexpectedly", Severity.Error, file, sourceRegion);
             return messagesBuilder.build(file);
         }
         final @Nullable CommandDef<?> fragmentCommandDef = TransformExpectationUtil.getCommandDef(fragmentLanguageUnderTest, commandDisplayName, messagesBuilder, file, sourceRegion);
@@ -63,7 +69,7 @@ public class TransformToFragmentExpectation implements TestExpectation {
             return messagesBuilder.build(file);
         }
         final @Nullable CommandFeedback fragmentFeedback;
-        try (final MixedSession session = fragmentLanguageUnderTest.getPieComponent().newSession() /* OPTO: share a single session for one test suite run. */) {
+        try(final MixedSession session = fragmentLanguageUnderTest.getPieComponent().newSession() /* OPTO: share a single session for one test suite run. */) {
             fragmentFeedback = TransformExpectationUtil.runCommand(fragmentResource, commandDef, fragmentLanguageUnderTest, session, messagesBuilder, file, sourceRegion);
         }
         if(fragmentFeedback == null) {

@@ -182,6 +182,7 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
         return Result.ofOk(outputBuilder
             .addJavaClassPaths(input.javaClassFileOutputDirectory())
             .addAllJavaClassPaths(input.resourcePaths())
+            .participantClassQualifiedId(input.adapterProjectInput().participant().qualifiedId())
             .messages(messagesBuilder.build())
             .build()
         );

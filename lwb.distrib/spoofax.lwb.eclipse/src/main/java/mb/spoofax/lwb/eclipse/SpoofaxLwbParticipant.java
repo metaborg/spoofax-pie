@@ -129,7 +129,7 @@ public class SpoofaxLwbParticipant implements EclipseParticipant {
 
 
     @Override
-    public Coordinate getCoordinates() {
+    public Coordinate getCoordinate() {
         return new Coordinate("org.metaborg", "spoofax.eclipse.lwb", new Version(3)); // TODO: get actual version.
     }
 
@@ -299,7 +299,7 @@ public class SpoofaxLwbParticipant implements EclipseParticipant {
     @Override
     public void start(
         EclipseLoggerComponent loggerComponent,
-        ResourceServiceComponent resourceServiceComponent,
+        EclipseResourceServiceComponent baseResourceServiceComponent, ResourceServiceComponent resourceServiceComponent,
         EclipsePlatformComponent platformComponent,
         PieComponent pieComponent
     ) {

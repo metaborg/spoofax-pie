@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class StaticComponentManagerBuilder<L extends LoggerComponent, R extends ResourceServiceComponent, P extends PlatformComponent> extends ComponentBuilder<L, R, P> {
+public class StaticComponentManagerBuilder<L extends LoggerComponent, R extends ResourceServiceComponent, P extends PlatformComponent> extends ComponentBuilderBase<L, R, P> {
     private final ArrayList<Participant<L, R, P>> participants = new ArrayList<>();
     private final ArrayList<Consumer<ResourceServiceModule>> resourceServiceModuleCustomizers = new ArrayList<>();
     private final MultiMap<String, Consumer<ResourceServiceModule>> groupedResourceServiceModuleCustomizers = MultiMap.withLinkedHash();
@@ -54,8 +54,9 @@ public class StaticComponentManagerBuilder<L extends LoggerComponent, R extends 
      *
      * @param participant {@link Participant Participant} to register.
      */
-    public void registerParticipant(Participant<L, R, P> participant) {
+    public StaticComponentManagerBuilder<L, R, P> registerParticipant(Participant<L, R, P> participant) {
         participants.add(participant);
+        return this;
     }
 
 
@@ -65,8 +66,9 @@ public class StaticComponentManagerBuilder<L extends LoggerComponent, R extends 
      *
      * @param customizer Customizer function to apply.
      */
-    public void registerResourceServiceModuleCustomizer(Consumer<ResourceServiceModule> customizer) {
+    public StaticComponentManagerBuilder<L, R, P> registerResourceServiceModuleCustomizer(Consumer<ResourceServiceModule> customizer) {
         resourceServiceModuleCustomizers.add(customizer);
+        return this;
     }
 
     /**
@@ -75,8 +77,9 @@ public class StaticComponentManagerBuilder<L extends LoggerComponent, R extends 
      *
      * @param customizer Customizer function to apply.
      */
-    public void registerResourceServiceModuleCustomizer(Consumer<ResourceServiceModule> customizer, String group) {
+    public StaticComponentManagerBuilder<L, R, P> registerResourceServiceModuleCustomizer(Consumer<ResourceServiceModule> customizer, String group) {
         groupedResourceServiceModuleCustomizers.put(group, customizer);
+        return this;
     }
 
     /**
@@ -85,8 +88,9 @@ public class StaticComponentManagerBuilder<L extends LoggerComponent, R extends 
      *
      * @param customizer Customizer function to apply.
      */
-    public void registerPieModuleCustomizer(Consumer<RootPieModule> customizer) {
+    public StaticComponentManagerBuilder<L, R, P> registerPieModuleCustomizer(Consumer<RootPieModule> customizer) {
         pieModuleCustomizers.add(customizer);
+        return this;
     }
 
     /**
@@ -95,8 +99,9 @@ public class StaticComponentManagerBuilder<L extends LoggerComponent, R extends 
      *
      * @param customizer Customizer function to apply.
      */
-    public void registerPieModuleCustomizer(Consumer<RootPieModule> customizer, String group) {
+    public StaticComponentManagerBuilder<L, R, P> registerPieModuleCustomizer(Consumer<RootPieModule> customizer, String group) {
         groupedPieModuleCustomizers.put(group, customizer);
+        return this;
     }
 
 
@@ -106,7 +111,7 @@ public class StaticComponentManagerBuilder<L extends LoggerComponent, R extends 
      *
      * @return {@link ComponentManager Language manager} providing access to the composed participants.
      */
-    public StaticComponentManager<L, R, P> build() {
+    public StaticComponentManager build() {
         final ListView<Consumer<ResourceServiceModule>> resourceServiceModuleCustomizers = ListView.copyOf(this.resourceServiceModuleCustomizers);
         final MultiMapView<String, Consumer<ResourceServiceModule>> groupedResourceServiceModuleCustomizers = MultiMapView.copyOf(this.groupedResourceServiceModuleCustomizers);
         final ListView<Consumer<RootPieModule>> pieModuleCustomizers = ListView.copyOf(this.pieModuleCustomizers);
@@ -121,17 +126,17 @@ public class StaticComponentManagerBuilder<L extends LoggerComponent, R extends 
             null
         );
 
-        return new StaticComponentManager<L, R, P>(
+        return new StaticComponentManager(
             loggerComponent,
             platformComponent,
 
-            result.standaloneComponents,
-            result.groupedComponents,
+            result.components,
+            result.componentGroups,
 
             baseResourceServiceComponent,
             pieBuilderSupplier,
-            result.globalResourceRegistryProviders,
-            result.globalTaskDefsProviders,
+            ListView.of(result.globalResourceRegistryProviders),
+            ListView.of(result.globalTaskDefsProviders),
             resourceServiceModuleCustomizers,
             groupedResourceServiceModuleCustomizers,
             pieModuleCustomizers,

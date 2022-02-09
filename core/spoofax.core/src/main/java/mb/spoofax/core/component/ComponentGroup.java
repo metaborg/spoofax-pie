@@ -3,39 +3,21 @@ package mb.spoofax.core.component;
 import mb.common.option.Option;
 import mb.common.util.CollectionView;
 import mb.common.util.MapView;
-import mb.log.dagger.LoggerComponent;
+import mb.pie.dagger.PieComponent;
+import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.core.Coordinate;
 import mb.spoofax.core.CoordinateRequirement;
 import mb.spoofax.core.language.LanguageComponent;
-import mb.spoofax.core.platform.PlatformComponent;
 
-public interface ComponentManager extends AutoCloseable {
-    LoggerComponent getLoggerComponent();
-
-    PlatformComponent getPlatformComponent();
+public interface ComponentGroup {
+    String getGroup();
 
 
-    // Components
+    // Resource service component
 
-    Option<? extends Component> getComponent(Coordinate coordinate);
+    ResourceServiceComponent getResourceServiceComponent();
 
-    CollectionView<? extends Component> getComponents(CoordinateRequirement coordinateRequirement);
-
-    default Option<? extends Component> getOneComponent(CoordinateRequirement coordinateRequirement) {
-        final CollectionView<? extends Component> components = getComponents(coordinateRequirement);
-        if(components.size() == 1) {
-            return Option.ofSome(components.iterator().next());
-        } else {
-            return Option.ofNone();
-        }
-    }
-
-    Option<? extends ComponentGroup> getComponentGroup(String group);
-
-    MapView<String, ? extends ComponentGroup> getComponentGroups();
-
-
-    // Language components (of components)
+    // Language components
 
     Option<LanguageComponent> getLanguageComponent(Coordinate coordinate);
 
@@ -50,6 +32,15 @@ public interface ComponentManager extends AutoCloseable {
         }
     }
 
+    CollectionView<LanguageComponent> getLanguageComponents();
+
+    // PIE component
+
+    PieComponent getPieComponent();
+
+    // Components
+
+    MapView<Coordinate, ? extends Component> getComponents();
 
     // Typed subcomponents
 
@@ -76,7 +67,4 @@ public interface ComponentManager extends AutoCloseable {
             return Option.ofNone();
         }
     }
-
-
-    @Override void close();
 }

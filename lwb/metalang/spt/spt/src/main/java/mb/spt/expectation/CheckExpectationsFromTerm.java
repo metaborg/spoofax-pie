@@ -92,7 +92,7 @@ public class CheckExpectationsFromTerm implements TestExpectationFromTerm {
                         throw new FromTermException("Cannot convert term '" + someTerm + "' to an Operator; term is not a valid operator (no matching constructor)");
                 }
             })
-            .orElse(Operator.Equal);
+            .unwrapOr(Operator.Equal);
     }
 
 
@@ -124,6 +124,6 @@ public class CheckExpectationsFromTerm implements TestExpectationFromTerm {
                 }
                 return selections;
             })
-            .orElse(new ArrayList<>(0));
+            .unwrapOr(new ArrayList<>(0));
     }
 }

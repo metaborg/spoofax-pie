@@ -12,6 +12,7 @@ dependencies {
   api(project(":spoofax.compiler"))
   api("com.google.dagger:dagger")
 
+  compileOnly("org.checkerframework:checker-qual-android")
   compileOnly("org.immutables:value-annotations") // Dagger accesses these annotations, which have class retention.
 
   annotationProcessor("com.google.dagger:dagger-compiler")

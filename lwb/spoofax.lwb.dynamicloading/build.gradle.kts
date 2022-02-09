@@ -11,12 +11,17 @@ dependencies {
 
   api(compositeBuild("spoofax.core"))
   api("com.google.dagger:dagger")
+  implementation("org.metaborg:pie.runtime")
 
   compileOnly("org.checkerframework:checker-qual-android")
+  compileOnly("org.derive4j:derive4j-annotation")
 
   annotationProcessor("com.google.dagger:dagger-compiler")
+  annotationProcessor("org.derive4j:derive4j")
 
   testImplementation("org.slf4j:slf4j-nop:1.7.30")
+  testImplementation(project(":spoofax.lwb.compiler"))
+  testImplementation(project(":spoofax.lwb.compiler.dagger"))
   testImplementation(project(":spt"))
   testImplementation(project(":spt.dynamicloading"))
   testImplementation("org.metaborg:pie.runtime")

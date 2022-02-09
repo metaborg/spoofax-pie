@@ -6,6 +6,7 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.Coordinate;
 import mb.spoofax.core.CoordinateRequirement;
 import mb.spoofax.core.component.ComponentManager;
+import mb.spoofax.lwb.dynamicloading.DynamicLoadException;
 
 public interface DynamicComponentManager extends ComponentManager {
     Option<DynamicComponent> getDynamicComponent(ResourcePath rootDirectory);
@@ -24,6 +25,20 @@ public interface DynamicComponentManager extends ComponentManager {
     }
 
     Option<DynamicComponent> getDynamicComponent(String fileExtension);
+
+
+    void registerListener(DynamicComponentManagerListener listener);
+
+    void unregisterListener(DynamicComponentManagerListener listener);
+
+
+    DynamicComponent loadOrReloadFromCompiledSources(
+        ResourcePath rootDirectory,
+        Iterable<ResourcePath> javaClassPaths,
+        String participantClassQualifiedId
+    ) throws DynamicLoadException;
+
+    void unloadFromCompiledSources(ResourcePath rootDirectory);
 
 
     @Override void close();

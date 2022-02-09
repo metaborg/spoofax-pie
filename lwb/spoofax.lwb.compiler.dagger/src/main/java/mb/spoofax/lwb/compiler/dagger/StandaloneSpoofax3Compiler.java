@@ -1,256 +1,109 @@
 package mb.spoofax.lwb.compiler.dagger;
 
 import mb.cfg.CfgComponent;
-import mb.cfg.CfgResourcesComponent;
-import mb.cfg.DaggerCfgComponent;
-import mb.cfg.DaggerCfgResourcesComponent;
-import mb.esv.DaggerEsvComponent;
-import mb.esv.DaggerEsvResourcesComponent;
+import mb.cfg.CfgParticipant;
 import mb.esv.EsvComponent;
-import mb.esv.EsvResourcesComponent;
-import mb.gpp.DaggerGppComponent;
-import mb.gpp.DaggerGppResourcesComponent;
+import mb.esv.EsvParticipant;
 import mb.gpp.GppComponent;
+import mb.gpp.GppParticipant;
 import mb.gpp.GppResourcesComponent;
-import mb.libspoofax2.DaggerLibSpoofax2Component;
-import mb.libspoofax2.DaggerLibSpoofax2ResourcesComponent;
 import mb.libspoofax2.LibSpoofax2Component;
+import mb.libspoofax2.LibSpoofax2Participant;
 import mb.libspoofax2.LibSpoofax2ResourcesComponent;
-import mb.libstatix.DaggerLibStatixComponent;
-import mb.libstatix.DaggerLibStatixResourcesComponent;
 import mb.libstatix.LibStatixComponent;
+import mb.libstatix.LibStatixParticipant;
 import mb.libstatix.LibStatixResourcesComponent;
 import mb.log.dagger.LoggerComponent;
-import mb.pie.dagger.DaggerPieComponent;
 import mb.pie.dagger.PieComponent;
-import mb.pie.dagger.PieModule;
-import mb.resource.dagger.DaggerResourceServiceComponent;
 import mb.resource.dagger.ResourceServiceComponent;
-import mb.resource.dagger.ResourceServiceModule;
-import mb.sdf3.DaggerSdf3Component;
-import mb.sdf3.DaggerSdf3ResourcesComponent;
 import mb.sdf3.Sdf3Component;
-import mb.sdf3.Sdf3ResourcesComponent;
-import mb.sdf3_ext_statix.DaggerSdf3ExtStatixComponent;
-import mb.sdf3_ext_statix.DaggerSdf3ExtStatixResourcesComponent;
+import mb.sdf3.Sdf3Participant;
 import mb.sdf3_ext_statix.Sdf3ExtStatixComponent;
-import mb.sdf3_ext_statix.Sdf3ExtStatixResourcesComponent;
-import mb.spoofax.compiler.dagger.DaggerSpoofaxCompilerComponent;
+import mb.sdf3_ext_statix.Sdf3ExtStatixParticipant;
 import mb.spoofax.compiler.dagger.SpoofaxCompilerComponent;
 import mb.spoofax.compiler.dagger.SpoofaxCompilerModule;
+import mb.spoofax.compiler.dagger.SpoofaxCompilerParticipant;
 import mb.spoofax.compiler.util.TemplateCompiler;
-import mb.spoofax.core.platform.DaggerPlatformComponent;
+import mb.spoofax.core.component.ComponentGroup;
+import mb.spoofax.core.component.ComponentManager;
+import mb.spoofax.core.component.StaticComponentManagerBuilder;
 import mb.spoofax.core.platform.PlatformComponent;
-import mb.statix.DaggerStatixComponent;
-import mb.statix.DaggerStatixResourcesComponent;
 import mb.statix.StatixComponent;
-import mb.statix.StatixResourcesComponent;
-import mb.str.DaggerStrategoComponent;
-import mb.str.DaggerStrategoResourcesComponent;
+import mb.statix.StatixParticipant;
 import mb.str.StrategoComponent;
-import mb.str.StrategoResourcesComponent;
-import mb.strategolib.DaggerStrategoLibComponent;
-import mb.strategolib.DaggerStrategoLibResourcesComponent;
 import mb.strategolib.StrategoLibComponent;
+import mb.strategolib.StrategoLibParticipant;
 import mb.strategolib.StrategoLibResourcesComponent;
 
 import java.nio.charset.StandardCharsets;
 
 public class StandaloneSpoofax3Compiler implements AutoCloseable {
+    public final ComponentManager componentManager;
     public final Spoofax3Compiler compiler;
     public final PieComponent pieComponent;
 
-    /**
-     * Creates a {@link StandaloneSpoofax3Compiler} by:
-     * <ul>
-     *     <li>Creating all meta-language and library resource components and composing those into a {@link ResourceServiceModule} using {@code resourceServiceModule}</li>
-     *     <li>Creating all meta-language and library components, and all compiler components, and composing their task definitions into a {@link PieComponent} using {@code pieModule}</li>
-     * </ul>
-     * This facade is useful for tests or other usages where we run the compiler in an standalone/isolated way.
-     *
-     * @param loggerComponent       {@link LoggerComponent} to pass as a dependency to components that require it.
-     * @param resourceServiceModule {@link ResourceServiceModule} used to compose into a {@link ResourceServiceModule}.
-     * @param pieModule             {@link PieModule} used to compose into a {@link PieComponent}.
-     */
     public StandaloneSpoofax3Compiler(
-        LoggerComponent loggerComponent,
-        ResourceServiceModule resourceServiceModule,
-        PieModule pieModule,
+        StaticComponentManagerBuilder<LoggerComponent, ResourceServiceComponent, PlatformComponent> builder,
         Spoofax3CompilerJavaModule spoofax3CompilerJavaModule
     ) {
-        final CfgResourcesComponent cfgResourcesComponent = DaggerCfgResourcesComponent.create();
-        resourceServiceModule.addRegistriesFrom(cfgResourcesComponent);
-        final Sdf3ResourcesComponent sdf3ResourcesComponent = DaggerSdf3ResourcesComponent.create();
-        resourceServiceModule.addRegistriesFrom(sdf3ResourcesComponent);
-        final StrategoResourcesComponent strategoResourcesComponent = DaggerStrategoResourcesComponent.create();
-        resourceServiceModule.addRegistriesFrom(strategoResourcesComponent);
-        final EsvResourcesComponent esvResourcesComponent = DaggerEsvResourcesComponent.create();
-        resourceServiceModule.addRegistriesFrom(esvResourcesComponent);
-        final StatixResourcesComponent statixResourcesComponent = DaggerStatixResourcesComponent.create();
-        resourceServiceModule.addRegistriesFrom(statixResourcesComponent);
+        builder.registerParticipant(new CfgParticipant<>());
+        builder.registerParticipant(new Sdf3Participant<>());
+        builder.registerParticipant(new StrategoLibParticipant<>());
+        builder.registerParticipant(new EsvParticipant<>());
+        builder.registerParticipant(new StatixParticipant<>());
 
-        final Sdf3ExtStatixResourcesComponent sdf3ExtStatixResourcesComponent = DaggerSdf3ExtStatixResourcesComponent.create();
-        resourceServiceModule.addRegistriesFrom(sdf3ExtStatixResourcesComponent);
+        builder.registerParticipant(new Sdf3ExtStatixParticipant<>());
 
-        final StrategoLibResourcesComponent strategoLibResourcesComponent = DaggerStrategoLibResourcesComponent.create();
-        resourceServiceModule.addRegistriesFrom(strategoLibResourcesComponent);
-        final GppResourcesComponent gppResourcesComponent = DaggerGppResourcesComponent.create();
-        resourceServiceModule.addRegistriesFrom(gppResourcesComponent);
-        final LibSpoofax2ResourcesComponent libSpoofax2ResourcesComponent = DaggerLibSpoofax2ResourcesComponent.create();
-        resourceServiceModule.addRegistriesFrom(libSpoofax2ResourcesComponent);
-        final LibStatixResourcesComponent libStatixResourcesComponent = DaggerLibStatixResourcesComponent.create();
-        resourceServiceModule.addRegistriesFrom(libStatixResourcesComponent);
+        builder.registerParticipant(new StrategoLibParticipant<>());
+        builder.registerParticipant(new GppParticipant<>());
 
-        final ResourceServiceComponent resourceServiceComponent = DaggerResourceServiceComponent.builder()
-            .resourceServiceModule(resourceServiceModule)
-            .loggerComponent(loggerComponent)
-            .build();
-        final PlatformComponent platformComponent = DaggerPlatformComponent.builder()
-            .loggerComponent(loggerComponent)
-            .resourceServiceComponent(resourceServiceComponent)
-            .build();
-
-        final CfgComponent cfgComponent = DaggerCfgComponent.builder()
-            .loggerComponent(loggerComponent)
-            .cfgResourcesComponent(cfgResourcesComponent)
-            .resourceServiceComponent(resourceServiceComponent)
-            .platformComponent(platformComponent)
-            .build();
-        pieModule.addTaskDefsFrom(cfgComponent);
-        final Sdf3Component sdf3Component = DaggerSdf3Component.builder()
-            .loggerComponent(loggerComponent)
-            .sdf3ResourcesComponent(sdf3ResourcesComponent)
-            .resourceServiceComponent(resourceServiceComponent)
-            .platformComponent(platformComponent)
-            .build();
-        pieModule.addTaskDefsFrom(sdf3Component);
-        final StrategoComponent strategoComponent = DaggerStrategoComponent.builder()
-            .loggerComponent(loggerComponent)
-            .strategoResourcesComponent(strategoResourcesComponent)
-            .resourceServiceComponent(resourceServiceComponent)
-            .platformComponent(platformComponent)
-            .build();
-        pieModule.addTaskDefsFrom(strategoComponent);
-        final EsvComponent esvComponent = DaggerEsvComponent.builder()
-            .loggerComponent(loggerComponent)
-            .esvResourcesComponent(esvResourcesComponent)
-            .resourceServiceComponent(resourceServiceComponent)
-            .platformComponent(platformComponent)
-            .build();
-        pieModule.addTaskDefsFrom(esvComponent);
-        final StatixComponent statixComponent = DaggerStatixComponent.builder()
-            .loggerComponent(loggerComponent)
-            .statixResourcesComponent(statixResourcesComponent)
-            .resourceServiceComponent(resourceServiceComponent)
-            .platformComponent(platformComponent)
-            .build();
-        pieModule.addTaskDefsFrom(statixComponent);
-
-        final Sdf3ExtStatixComponent sdf3ExtStatixComponent = DaggerSdf3ExtStatixComponent.builder()
-            .loggerComponent(loggerComponent)
-            .sdf3ExtStatixResourcesComponent(sdf3ExtStatixResourcesComponent)
-            .resourceServiceComponent(resourceServiceComponent)
-            .platformComponent(platformComponent)
-            .build();
-        pieModule.addTaskDefsFrom(sdf3ExtStatixComponent);
-
-        final StrategoLibComponent strategoLibComponent = DaggerStrategoLibComponent.builder()
-            .loggerComponent(loggerComponent)
-            .strategoLibResourcesComponent(strategoLibResourcesComponent)
-            .resourceServiceComponent(resourceServiceComponent)
-            .platformComponent(platformComponent)
-            .build();
-        pieModule.addTaskDefsFrom(strategoLibComponent);
-        final GppComponent gppComponent = DaggerGppComponent.builder()
-            .loggerComponent(loggerComponent)
-            .gppResourcesComponent(gppResourcesComponent)
-            .resourceServiceComponent(resourceServiceComponent)
-            .platformComponent(platformComponent)
-            .build();
-        pieModule.addTaskDefsFrom(gppComponent);
-        final LibSpoofax2Component libSpoofax2Component = DaggerLibSpoofax2Component.builder()
-            .loggerComponent(loggerComponent)
-            .libSpoofax2ResourcesComponent(libSpoofax2ResourcesComponent)
-            .resourceServiceComponent(resourceServiceComponent)
-            .platformComponent(platformComponent)
-            .build();
-        pieModule.addTaskDefsFrom(libSpoofax2Component);
-        final LibStatixComponent libStatixComponent = DaggerLibStatixComponent.builder()
-            .loggerComponent(loggerComponent)
-            .libStatixResourcesComponent(libStatixResourcesComponent)
-            .resourceServiceComponent(resourceServiceComponent)
-            .platformComponent(platformComponent)
-            .build();
-        pieModule.addTaskDefsFrom(libStatixComponent);
+        builder.registerParticipant(new LibSpoofax2Participant<>());
+        builder.registerParticipant(new LibStatixParticipant<>());
 
         final TemplateCompiler templateCompiler = new TemplateCompiler(StandardCharsets.UTF_8);
-        final SpoofaxCompilerComponent spoofaxCompilerComponent = DaggerSpoofaxCompilerComponent.builder()
-            .spoofaxCompilerModule(new SpoofaxCompilerModule(templateCompiler))
-            .loggerComponent(loggerComponent)
-            .resourceServiceComponent(resourceServiceComponent)
-            .build();
-        pieModule.addTaskDefsFrom(spoofaxCompilerComponent);
-        final Spoofax3CompilerComponent component = DaggerSpoofax3CompilerComponent.builder()
-            .spoofax3CompilerModule(new Spoofax3CompilerModule(templateCompiler))
-            .spoofax3CompilerJavaModule(spoofax3CompilerJavaModule)
-            .loggerComponent(loggerComponent)
-            .resourceServiceComponent(resourceServiceComponent)
-            .cfgComponent(cfgComponent)
-            .sdf3Component(sdf3Component)
-            .strategoComponent(strategoComponent)
-            .esvComponent(esvComponent)
-            .statixComponent(statixComponent)
+        builder.registerParticipant(new SpoofaxCompilerParticipant<>(new SpoofaxCompilerModule(templateCompiler)));
+        builder.registerParticipant(new Spoofax3CompilerParticipant<>(new Spoofax3CompilerModule(templateCompiler), spoofax3CompilerJavaModule));
+        this.componentManager = builder.build();
 
-            .sdf3ExtStatixComponent(sdf3ExtStatixComponent)
+        final ComponentGroup componentGroup = componentManager.getComponentGroup("mb.spoofax.lwb").unwrap();
+        this.compiler = new Spoofax3Compiler(
+            componentManager.getLoggerComponent(),
+            componentGroup.getResourceServiceComponent(),
+            componentManager.getPlatformComponent(),
 
-            .strategoLibComponent(strategoLibComponent)
-            .strategoLibResourcesComponent(strategoLibResourcesComponent)
-            .gppComponent(gppComponent)
-            .gppResourcesComponent(gppResourcesComponent)
-            .libSpoofax2Component(libSpoofax2Component)
-            .libSpoofax2ResourcesComponent(libSpoofax2ResourcesComponent)
-            .libStatixComponent(libStatixComponent)
-            .libStatixResourcesComponent(libStatixResourcesComponent)
-            .build();
-        pieModule.addTaskDefsFrom(component);
+            componentManager.getOneSubcomponent(CfgComponent.class).unwrap(),
+            componentManager.getOneSubcomponent(Sdf3Component.class).unwrap(),
+            componentManager.getOneSubcomponent(StrategoComponent.class).unwrap(),
+            componentManager.getOneSubcomponent(EsvComponent.class).unwrap(),
+            componentManager.getOneSubcomponent(StatixComponent.class).unwrap(),
 
-        this.compiler = Spoofax3Compiler.createDefault(
-            loggerComponent,
-            resourceServiceComponent,
-            platformComponent,
-            cfgComponent,
-            sdf3Component,
-            strategoComponent,
-            esvComponent,
-            statixComponent,
+            componentManager.getOneSubcomponent(Sdf3ExtStatixComponent.class).unwrap(),
 
-            sdf3ExtStatixComponent,
+            componentManager.getOneSubcomponent(StrategoLibComponent.class).unwrap(),
+            componentManager.getOneSubcomponent(StrategoLibResourcesComponent.class).unwrap(),
+            componentManager.getOneSubcomponent(GppComponent.class).unwrap(),
+            componentManager.getOneSubcomponent(GppResourcesComponent.class).unwrap(),
 
-            strategoLibComponent,
-            strategoLibResourcesComponent,
-            gppComponent,
-            gppResourcesComponent,
-            libSpoofax2Component,
-            libSpoofax2ResourcesComponent,
-            libStatixComponent,
-            libStatixResourcesComponent
+            componentManager.getOneSubcomponent(LibSpoofax2Component.class).unwrap(),
+            componentManager.getOneSubcomponent(LibSpoofax2ResourcesComponent.class).unwrap(),
+            componentManager.getOneSubcomponent(LibStatixComponent.class).unwrap(),
+            componentManager.getOneSubcomponent(LibStatixResourcesComponent.class).unwrap(),
+
+            componentManager.getOneSubcomponent(SpoofaxCompilerComponent.class).unwrap(),
+            componentManager.getOneSubcomponent(Spoofax3CompilerComponent.class).unwrap()
         );
-        this.pieComponent = DaggerPieComponent.builder()
-            .pieModule(pieModule)
-            .loggerComponent(loggerComponent)
-            .resourceServiceComponent(resourceServiceComponent)
-            .build();
+        this.pieComponent = componentGroup.getPieComponent();
     }
 
     public StandaloneSpoofax3Compiler(
-        LoggerComponent loggerComponent,
-        ResourceServiceModule resourceServiceModule,
-        PieModule pieModule
+        StaticComponentManagerBuilder<LoggerComponent, ResourceServiceComponent, PlatformComponent> builder
     ) {
-        this(loggerComponent, resourceServiceModule, pieModule, new Spoofax3CompilerJavaModule());
+        this(builder, new Spoofax3CompilerJavaModule());
     }
 
     @Override public void close() {
         pieComponent.close();
+        compiler.close();
+        componentManager.close();
     }
 }

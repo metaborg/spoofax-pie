@@ -19,18 +19,20 @@ import mb.spoofax.core.platform.PlatformComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class StaticComponentManager<L extends LoggerComponent, R extends ResourceServiceComponent, P extends PlatformComponent> implements ComponentManager {
-    public final L loggerComponent;
-    public final P platformComponent;
+public class StaticComponentManager implements ComponentManager {
+    public final LoggerComponent loggerComponent;
+    public final PlatformComponent platformComponent;
 
-    private final MapView<Coordinate, StandaloneComponent<L, R, P>> standaloneComponents;
-    private final MapView<String, GroupedComponents<L, R, P>> groupedComponents;
+    private final MapView<Coordinate, ComponentImpl> componentsByCoordinate;
+    private final MapView<String, ComponentGroupImpl> componentGroups;
 
     // Following fields are kept for use by dynamic component managers.
-    public final R baseResourceServiceComponent;
+    public final ResourceServiceComponent baseResourceServiceComponent;
     public final Supplier<PieBuilder> pieBuilderSupplier;
     public final ListView<ResourceRegistriesProvider> globalResourceRegistryProviders;
     public final ListView<TaskDefsProvider> globalTaskDefsProviders;
@@ -41,13 +43,13 @@ public class StaticComponentManager<L extends LoggerComponent, R extends Resourc
 
 
     StaticComponentManager(
-        L loggerComponent,
-        P platformComponent,
+        LoggerComponent loggerComponent,
+        PlatformComponent platformComponent,
 
-        MapView<Coordinate, StandaloneComponent<L, R, P>> standaloneComponents,
-        MapView<String, GroupedComponents<L, R, P>> groupedComponents,
+        ArrayList<ComponentImpl> componentsList,
+        ArrayList<ComponentGroupImpl> componentGroupsList,
 
-        R baseResourceServiceComponent,
+        ResourceServiceComponent baseResourceServiceComponent,
         Supplier<PieBuilder> pieBuilderSupplier,
         ListView<ResourceRegistriesProvider> globalResourceRegistryProviders,
         ListView<TaskDefsProvider> globalTaskDefsProviders,
@@ -59,8 +61,17 @@ public class StaticComponentManager<L extends LoggerComponent, R extends Resourc
         this.loggerComponent = loggerComponent;
         this.platformComponent = platformComponent;
 
-        this.standaloneComponents = standaloneComponents;
-        this.groupedComponents = groupedComponents;
+        final LinkedHashMap<Coordinate, ComponentImpl> componentsByCoordinate = new LinkedHashMap<>();
+        for(ComponentImpl component : componentsList) {
+            componentsByCoordinate.put(component.getCoordinate(), component);
+        }
+        final Map<String, ComponentGroupImpl> componentGroups = new LinkedHashMap<>();
+        for(ComponentGroupImpl componentGroup : componentGroupsList) {
+            componentGroups.put(componentGroup.getGroup(), componentGroup);
+        }
+
+        this.componentsByCoordinate = MapView.of(componentsByCoordinate);
+        this.componentGroups = MapView.of(componentGroups);
 
         this.baseResourceServiceComponent = baseResourceServiceComponent;
         this.pieBuilderSupplier = pieBuilderSupplier;
@@ -74,8 +85,8 @@ public class StaticComponentManager<L extends LoggerComponent, R extends Resourc
 
     @Override
     public void close() {
-        groupedComponents.values().forEach(GroupedComponents::close);
-        standaloneComponents.values().forEach(StandaloneComponent::close);
+        componentsByCoordinate.values().forEach(ComponentImpl::close);
+        componentGroups.values().forEach(ComponentGroupImpl::close);
     }
 
 
@@ -90,67 +101,36 @@ public class StaticComponentManager<L extends LoggerComponent, R extends Resourc
     }
 
 
+    // Components
+
     @Override
     public Option<? extends Component> getComponent(Coordinate coordinate) {
-        final @Nullable Component standaloneComponent = standaloneComponents.get(coordinate);
-        if(standaloneComponent != null) {
-            return Option.ofSome(standaloneComponent);
-        }
-        for(GroupedComponents<L, R, P> component : groupedComponents.values()) {
-            if(component.languageComponents.keySet().contains(coordinate)) {
-                return Option.ofSome(component);
-            }
-        }
-        return Option.ofNone();
+        final @Nullable Component component = componentsByCoordinate.get(coordinate);
+        return Option.ofNullable(component);
     }
 
     @Override
-    public CollectionView<Component> getComponents(CoordinateRequirement coordinateRequirement) {
-        final ArrayList<Component> components = new ArrayList<>();
-        for(StandaloneComponent<L, R, P> component : standaloneComponents.values()) {
-            if(coordinateRequirement.matches(component.coordinate)) {
-                components.add(component);
-            }
-        }
-        for(GroupedComponents<L, R, P> component : groupedComponents.values()) {
-            for(Coordinate coordinate : component.languageComponents.keySet()) {
-                if(coordinateRequirement.matches(coordinate)) {
-                    components.add(component);
-                }
-            }
-
-        }
-        return CollectionView.of(components);
-    }
-
-
-    @Override
-    public Option<StandaloneComponent<?, ?, ?>> getStandaloneComponent(Coordinate coordinate) {
-        return Option.ofNullable(standaloneComponents.get(coordinate));
-    }
-
-    @Override public MapView<Coordinate, ? extends StandaloneComponent<?, ?, ?>> getStandaloneComponents() {
-        return standaloneComponents;
+    public CollectionView<? extends Component> getComponents(CoordinateRequirement coordinateRequirement) {
+        return componentsByCoordinate.values();
     }
 
     @Override
-    public Option<GroupedComponents<?, ?, ?>> getGroupedComponents(String group) {
-        return Option.ofNullable(groupedComponents.get(group));
+    public Option<? extends ComponentGroup> getComponentGroup(String group) {
+        return Option.ofNullable(componentGroups.get(group));
     }
 
-    @Override public MapView<String, ? extends GroupedComponents<?, ?, ?>> getGroupedComponents() {
-        return groupedComponents;
+    @Override
+    public MapView<String, ? extends ComponentGroup> getComponentGroups() {
+        return componentGroups;
     }
 
+
+    // Language components (of components)
 
     @Override
     public Option<LanguageComponent> getLanguageComponent(Coordinate coordinate) {
-        for(StandaloneComponent<L, R, P> component : standaloneComponents.values()) {
-            final Option<LanguageComponent> languageComponent = component.getLanguageComponent(coordinate);
-            if(languageComponent.isSome()) return languageComponent;
-        }
-        for(GroupedComponents<L, R, P> component : groupedComponents.values()) {
-            final Option<LanguageComponent> languageComponent = component.getLanguageComponent(coordinate);
+        for(ComponentImpl component : componentsByCoordinate.values()) {
+            final Option<LanguageComponent> languageComponent = component.getLanguageComponent();
             if(languageComponent.isSome()) return languageComponent;
         }
         return Option.ofNone();
@@ -159,12 +139,40 @@ public class StaticComponentManager<L extends LoggerComponent, R extends Resourc
     @Override
     public CollectionView<LanguageComponent> getLanguageComponents(CoordinateRequirement coordinateRequirement) {
         final ArrayList<LanguageComponent> languageComponents = new ArrayList<>();
-        for(StandaloneComponent<L, R, P> component : standaloneComponents.values()) {
-            component.getLanguageComponents().values().addAllTo(languageComponents);
-        }
-        for(GroupedComponents<L, R, P> component : groupedComponents.values()) {
-            component.getLanguageComponents().values().addAllTo(languageComponents);
+        for(ComponentImpl component : componentsByCoordinate.values()) {
+            component.getLanguageComponent().ifSome(languageComponent -> {
+                if(coordinateRequirement.matches(component.coordinate)) {
+                    languageComponents.add(languageComponent);
+                }
+            });
         }
         return CollectionView.of(languageComponents);
+    }
+
+
+    // Typed subcomponents
+
+    @Override
+    public <T> Option<T> getSubcomponent(Coordinate coordinate, Class<T> subcomponentClass) {
+        final @Nullable ComponentImpl component = componentsByCoordinate.get(coordinate);
+        if(component != null) {
+            return component.getSubcomponent(subcomponentClass);
+        }
+        return Option.ofNone();
+    }
+
+    @Override
+    public <T> CollectionView<T> getSubcomponents(Class<T> subcomponentClass) {
+        return CollectionView.of(componentsByCoordinate.values().stream()
+            .flatMap(c -> c.getSubcomponent(subcomponentClass).stream())
+        );
+    }
+
+    @Override
+    public <T> CollectionView<T> getSubcomponents(CoordinateRequirement coordinateRequirement, Class<T> subcomponentClass) {
+        return CollectionView.of(componentsByCoordinate.values().stream()
+            .filter(c -> c.matchesCoordinate(coordinateRequirement))
+            .flatMap(c -> c.getSubcomponent(subcomponentClass).stream())
+        );
     }
 }

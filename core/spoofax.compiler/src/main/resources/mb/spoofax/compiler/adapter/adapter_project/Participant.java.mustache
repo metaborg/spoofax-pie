@@ -1,41 +1,71 @@
 package {{baseParticipant.packageId}};
 
+import mb.common.util.ListView;
+import mb.common.util.MapView;
 import mb.log.dagger.LoggerComponent;
 import mb.pie.dagger.PieComponent;
+import mb.pie.dagger.RootPieModule;
 import mb.pie.dagger.TaskDefsProvider;
+import mb.resource.dagger.ResourceRegistriesProvider;
 import mb.resource.dagger.ResourceServiceComponent;
+import mb.resource.dagger.ResourceServiceModule;
 import mb.spoofax.core.Coordinate;
 import mb.spoofax.core.Version;
+import mb.spoofax.core.component.ComponentDependency;
 import mb.spoofax.core.component.Participant;
-import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.platform.PlatformComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.function.Consumer;
 
 public class {{baseParticipant.id}}<L extends LoggerComponent, R extends ResourceServiceComponent, P extends PlatformComponent> implements Participant<L, R, P> {
     protected {{resourcesComponent.nullableQualifiedId}} resourcesComponent;
     protected {{component.nullableQualifiedId}} component;
 
 
-    @Override public Coordinate getCoordinates() {
+    @Override
+    public Coordinate getCoordinate() {
         return new Coordinate(
             "{{adapterProject.project.coordinate.groupId}}",
             "{{adapterProject.project.coordinate.artifactId}}",
-{{#adapterProject.project.coordinate.artifactId}}
+{{#adapterProject.project.coordinate.version}}
             Version.parse("{{this}}")
-{{/adapterProject.project.coordinate.artifactId}}
-{{^adapterProject.project.coordinate.artifactId}}
+{{/adapterProject.project.coordinate.version}}
+{{^adapterProject.project.coordinate.version}}
             new Version(0, 1, 0)
-{{/adapterProject.project.coordinate.artifactId}}
+{{/adapterProject.project.coordinate.version}}
         );
     }
 
-    @Override public @Nullable String getGroup() {
+    @Override
+    public ListView<ComponentDependency> getDependencies() {
+        return ListView.of();
+    }
+
+    @Override
+    public @Nullable String getGroup() {
 {{#componentGroup}}
         return "{{this}}";
 {{/componentGroup}}
 {{^componentGroup}}
         return null;
 {{/componentGroup}}
+    }
+
+    @Override
+    public ListView<String> getLanguageFileExtensions() {
+        return ListView.of({{#shared.fileExtensions}}"{{this}}"{{^-last}}, {{/-last}}{{/shared.fileExtensions}});
+    }
+
+
+    @Override
+    public @Nullable ResourceRegistriesProvider getGlobalResourceRegistriesProvider(L loggerComponent, R baseResourceServiceComponent, P platformComponent) {
+        return null;
+    }
+
+    @Override
+    public @Nullable TaskDefsProvider getGlobalTaskDefsProvider(L loggerComponent, ResourceServiceComponent resourceServiceComponent, P platformComponent) {
+        return null;
     }
 
 
@@ -78,12 +108,16 @@ public class {{baseParticipant.id}}<L extends LoggerComponent, R extends Resourc
         return resourcesComponent;
     }
 
+    @Override
+    public @Nullable Consumer<ResourceServiceModule> getResourceServiceModuleCustomizer() {
+        return null;
+    }
+
 
     @Override
     public TaskDefsProvider getTaskDefsProvider(L loggerComponent, R baseResourceServiceComponent, ResourceServiceComponent resourceServiceComponent, P platformComponent) {
         return getLanguageComponent(loggerComponent, baseResourceServiceComponent, resourceServiceComponent, platformComponent);
     }
-
 
     protected {{module.qualifiedId}} createModule(
         L loggerComponent,
@@ -103,7 +137,7 @@ public class {{baseParticipant.id}}<L extends LoggerComponent, R extends Resourc
     ) {}
 
     @Override
-    public LanguageComponent getLanguageComponent(L loggerComponent, R baseResourceServiceComponent, ResourceServiceComponent resourceServiceComponent, P platformComponent) {
+    public {{component.qualifiedId}} getLanguageComponent(L loggerComponent, R baseResourceServiceComponent, ResourceServiceComponent resourceServiceComponent, P platformComponent) {
         if(component == null) {
             final {{module.qualifiedId}} module = createModule(loggerComponent, baseResourceServiceComponent, resourceServiceComponent, platformComponent);
             customizeModule(loggerComponent, baseResourceServiceComponent, resourceServiceComponent, platformComponent, module);
@@ -118,9 +152,23 @@ public class {{baseParticipant.id}}<L extends LoggerComponent, R extends Resourc
         return component;
     }
 
+    @Override
+    public @Nullable Consumer<RootPieModule> getPieModuleCustomizer() {
+        return null;
+    }
+
 
     @Override
-    public void start(L loggerComponent, ResourceServiceComponent resourceServiceComponent, P platformComponent, PieComponent pieComponent) {
+    public MapView<Class<?>, Object> getSubcomponents(L loggerComponent, R baseResourceServiceComponent, ResourceServiceComponent resourceServiceComponent, P platformComponent, PieComponent pieComponent) {
+        return MapView.of(
+            {{resourcesComponent.qualifiedId}}.class, getResourceRegistriesProvider(loggerComponent, baseResourceServiceComponent, platformComponent),
+            {{component.qualifiedId}}.class, getLanguageComponent(loggerComponent, baseResourceServiceComponent, resourceServiceComponent, platformComponent)
+        );
+    }
+
+
+    @Override
+    public void start(L loggerComponent, R baseResourceServiceComponent, ResourceServiceComponent resourceServiceComponent, P platformComponent, PieComponent pieComponent) {
 
     }
 

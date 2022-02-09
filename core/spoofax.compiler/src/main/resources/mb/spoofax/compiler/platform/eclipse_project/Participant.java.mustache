@@ -55,7 +55,7 @@ public class {{baseParticipant.id}} extends {{adapterProjectCompilerInput.partic
         EclipseResourceServiceComponent baseResourceServiceComponent,
         EclipsePlatformComponent platformComponent
     ) {
-        return {{adapterProjectCompilerInput.resourcesModule.qualifiedId}}(
+        return new {{adapterProjectCompilerInput.resourcesModule.qualifiedId}}(
             new EclipseClassLoaderUrlResolver(),
             new EclipseClassLoaderToNativeResolver(baseResourceServiceComponent.getEclipseResourceRegistry())
         );

@@ -1,5 +1,7 @@
 package mb.spoofax.core.component;
 
+import mb.common.util.ListView;
+import mb.common.util.MapView;
 import mb.log.dagger.LoggerComponent;
 import mb.pie.dagger.PieComponent;
 import mb.pie.dagger.RootPieModule;
@@ -14,16 +16,27 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.Consumer;
 
-public interface Participant<L extends LoggerComponent, R extends ResourceServiceComponent, P extends PlatformComponent> extends AutoCloseable {
+public interface Participant<L extends LoggerComponent, R extends ResourceServiceComponent, P extends PlatformComponent> extends ParticipantCloseable {
     /**
-     * Gets the coordinates of this participant.
+     * Gets the coordinate of this participant.
      */
-    Coordinate getCoordinates();
+    Coordinate getCoordinate();
+
+    /**
+     * Gets the dependencies of this participant.
+     */
+    ListView<ComponentDependency> getDependencies();
 
     /**
      * Gets the group of this participant, or {@code null} if it does not belong to a group (i.e., it is standalone).
      */
     @Nullable String getGroup();
+
+    /**
+     * Gets the file extensions of the language of this participant (or an empty list if this participant has no
+     * language).
+     */
+    ListView<String> getLanguageFileExtensions();
 
 
     /**
@@ -56,27 +69,27 @@ public interface Participant<L extends LoggerComponent, R extends ResourceServic
      * participants, or {@code null} if this participant does not have one. The return value of this method is only used
      * when this participant is constructed statically at startup time, not when it is dynamically loaded.
      */
-    default @Nullable ResourceRegistriesProvider getGlobalResourceRegistriesProvider(
+    @Nullable ResourceRegistriesProvider getGlobalResourceRegistriesProvider(
         L loggerComponent,
         R baseResourceServiceComponent,
         P platformComponent
-    ) {return null;}
+    );
 
     /**
      * Gets the {@link TaskDefsProvider task definitions provider} that should be provided globally to all participants,
      * or {@code null} if this participant does not have one. The return value of this method is only used when this
      * participant is constructed statically at startup time, not when it is dynamically loaded.
      */
-    default @Nullable TaskDefsProvider getGlobalTaskDefsProvider(
+    @Nullable TaskDefsProvider getGlobalTaskDefsProvider(
         L loggerComponent,
         ResourceServiceComponent resourceServiceComponent,
         P platformComponent
-    ) {return null;}
+    );
 
 
     /**
-     * Gets the {@link ResourceRegistriesProvider resource registries provider} of this participant, or {@code null} if
-     * this participant does not have one.
+     * Gets the {@link ResourceRegistriesProvider resource registry provider} of this participant, or {@code null} if this
+     * participant does not have one.
      */
     @Nullable ResourceRegistriesProvider getResourceRegistriesProvider(
         L loggerComponent,
@@ -89,28 +102,19 @@ public interface Participant<L extends LoggerComponent, R extends ResourceServic
      * participant, or {@code null} if this participant does not have one. If this participant is grouped, (i.e, {@link
      * #getGroup() returns non-null}, the customizer is applied to the module of the group.
      */
-    @Nullable default Consumer<ResourceServiceModule> getResourceServiceModuleCustomizer() {return null;}
+    @Nullable Consumer<ResourceServiceModule> getResourceServiceModuleCustomizer();
+
 
     /**
      * Gets the {@link TaskDefsProvider task definitions provider} of this participant, or {@code null} if this
      * participant does not have one. Only called after {@link #getResourceRegistriesProvider} has been called.
      */
-    default @Nullable TaskDefsProvider getTaskDefsProvider(
+    @Nullable TaskDefsProvider getTaskDefsProvider(
         L loggerComponent,
         R baseResourceServiceComponent,
         ResourceServiceComponent resourceServiceComponent,
         P platformComponent
-    ) {
-        return getLanguageComponent(loggerComponent, baseResourceServiceComponent, resourceServiceComponent, platformComponent);
-    }
-
-    /**
-     * Gets a {@link RootPieModule} customizer that is applied to the PIE module of this participant, or {@code null} if
-     * this participant does not have one. If this participant is grouped, (i.e, {@link #getGroup() returns non-null},
-     * the customizer is applied to the module of the group.
-     */
-    @Nullable default Consumer<RootPieModule> getPieModuleCustomizer() {return null;}
-
+    );
 
     /**
      * Gets the {@link LanguageComponent language component} of this participant, or {@code null} if this participant
@@ -123,6 +127,25 @@ public interface Participant<L extends LoggerComponent, R extends ResourceServic
         P platformComponent
     );
 
+    /**
+     * Gets a {@link RootPieModule} customizer that is applied to the PIE module of this participant, or {@code null} if
+     * this participant does not have one. If this participant is grouped, (i.e, {@link #getGroup() returns non-null},
+     * the customizer is applied to the module of the group.
+     */
+    @Nullable Consumer<RootPieModule> getPieModuleCustomizer();
+
+
+    /**
+     * Gets the subcomponents of this participant.
+     */
+    MapView<Class<?>, Object> getSubcomponents(
+        L loggerComponent,
+        R baseResourceServiceComponent,
+        ResourceServiceComponent resourceServiceComponent,
+        P platformComponent,
+        PieComponent pieComponent
+    );
+
 
     /**
      * Starts this participant, allowing setup code. Only called after {@link #getResourceRegistriesProvider}, {@link
@@ -130,6 +153,7 @@ public interface Participant<L extends LoggerComponent, R extends ResourceServic
      */
     void start(
         L loggerComponent,
+        R baseResourceServiceComponent,
         ResourceServiceComponent resourceServiceComponent,
         P platformComponent,
         PieComponent pieComponent

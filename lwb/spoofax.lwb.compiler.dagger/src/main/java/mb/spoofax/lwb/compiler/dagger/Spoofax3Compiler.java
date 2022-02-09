@@ -61,7 +61,6 @@ public class Spoofax3Compiler implements AutoCloseable {
     public final LibStatixComponent libStatixComponent;
     public final LibStatixResourcesComponent libStatixResourcesComponent;
 
-    public final TemplateCompiler templateCompiler;
     public final SpoofaxCompilerComponent spoofaxCompilerComponent;
     public final Spoofax3CompilerComponent component;
 
@@ -87,7 +86,6 @@ public class Spoofax3Compiler implements AutoCloseable {
         LibStatixComponent libStatixComponent,
         LibStatixResourcesComponent libStatixResourcesComponent,
 
-        TemplateCompiler templateCompiler,
         SpoofaxCompilerComponent spoofaxCompilerComponent,
         Spoofax3CompilerComponent component
     ) {
@@ -110,7 +108,6 @@ public class Spoofax3Compiler implements AutoCloseable {
         this.libStatixComponent = libStatixComponent;
         this.libStatixResourcesComponent = libStatixResourcesComponent;
 
-        this.templateCompiler = templateCompiler;
         this.spoofaxCompilerComponent = spoofaxCompilerComponent;
         this.component = component;
 
@@ -162,6 +159,7 @@ public class Spoofax3Compiler implements AutoCloseable {
         StrategoLibResourcesComponent strategoLibResourcesComponent,
         GppComponent gppComponent,
         GppResourcesComponent gppResourcesComponent,
+
         LibSpoofax2Component libSpoofax2Component,
         LibSpoofax2ResourcesComponent libSpoofax2ResourcesComponent,
         LibStatixComponent libStatixComponent,
@@ -189,6 +187,7 @@ public class Spoofax3Compiler implements AutoCloseable {
             .strategoLibResourcesComponent(strategoLibResourcesComponent)
             .gppComponent(gppComponent)
             .gppResourcesComponent(gppResourcesComponent)
+
             .libSpoofax2Component(libSpoofax2Component)
             .libSpoofax2ResourcesComponent(libSpoofax2ResourcesComponent)
             .libStatixComponent(libStatixComponent)
@@ -211,12 +210,12 @@ public class Spoofax3Compiler implements AutoCloseable {
             strategoLibResourcesComponent,
             gppComponent,
             gppResourcesComponent,
+
             libSpoofax2Component,
             libSpoofax2ResourcesComponent,
             libStatixComponent,
             libStatixResourcesComponent,
 
-            templateCompiler,
             spoofaxCompilerComponent,
             component
         );

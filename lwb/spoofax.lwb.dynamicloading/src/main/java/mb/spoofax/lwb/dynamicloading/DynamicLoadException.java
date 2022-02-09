@@ -1,7 +1,5 @@
 package mb.spoofax.lwb.dynamicloading;
 
-import mb.common.message.HasOptionalMessages;
-import mb.common.message.KeyedMessages;
 import mb.common.util.ADT;
 import mb.spoofax.core.Coordinate;
 import mb.spoofax.lwb.dynamicloading.component.DynamicComponentInfo;
@@ -10,10 +8,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.Optional;
 
 @ADT
-public abstract class DynamicLoadException extends Exception implements HasOptionalMessages {
+public abstract class DynamicLoadException extends Exception {
     public interface Cases<R> {
         R supplyDynamicLoadInfoFail(Exception cause);
 
@@ -29,9 +26,11 @@ public abstract class DynamicLoadException extends Exception implements HasOptio
 
         R incompatiblePlatformComponent(String requiredClassName, String className);
 
-        R duplicateCoordinateFail(Coordinate duplicateCoordinate, DynamicComponentInfo info, DynamicComponentInfo otherInfo);
+        R duplicateCoordinateFail(Coordinate duplicateCoordinate, DynamicComponentInfo componentInfo);
 
-        R duplicateFileExtensionFail(String duplicateFileExtension, DynamicComponentInfo info, DynamicComponentInfo otherInfo);
+        R duplicateFileExtensionFail(String duplicateFileExtension, DynamicComponentInfo componentInfo);
+
+        R closeExistingFail(IOException ioException);
     }
 
     public static DynamicLoadException supplyDynamicLoadInfoFail(Exception cause) {
@@ -62,12 +61,16 @@ public abstract class DynamicLoadException extends Exception implements HasOptio
         return DynamicLoadExceptions.incompatiblePlatformComponent(requiredClassName, className);
     }
 
-    public static DynamicLoadException duplicateCoordinateFail(Coordinate duplicateCoordinate, DynamicComponentInfo info, DynamicComponentInfo otherInfo, @Nullable IOException closeException) {
-        return withCause(DynamicLoadExceptions.duplicateCoordinateFail(duplicateCoordinate, info, otherInfo), closeException);
+    public static DynamicLoadException duplicateCoordinateFail(Coordinate duplicateCoordinate, DynamicComponentInfo componentInfo) {
+        return DynamicLoadExceptions.duplicateCoordinateFail(duplicateCoordinate, componentInfo);
     }
 
-    public static DynamicLoadException duplicateFileExtensionFail(String duplicateFileExtension, DynamicComponentInfo info, DynamicComponentInfo otherInfo, @Nullable IOException closeException) {
-        return withCause(DynamicLoadExceptions.duplicateFileExtensionFail(duplicateFileExtension, info, otherInfo), closeException);
+    public static DynamicLoadException duplicateFileExtensionFail(String duplicateFileExtension, DynamicComponentInfo componentInfo) {
+        return DynamicLoadExceptions.duplicateFileExtensionFail(duplicateFileExtension, componentInfo);
+    }
+
+    public static DynamicLoadException closeExistingFail(IOException ioException) {
+        return withCause(DynamicLoadExceptions.closeExistingFail(ioException), ioException);
     }
 
 
@@ -99,24 +102,14 @@ public abstract class DynamicLoadException extends Exception implements HasOptio
             .incompatibleLoggerComponent((requiredClassName, className) -> "Cannot register dynamically loaded component, participant requires a LoggerComponent that implements '" + requiredClassName + "', but ours (" + className + ") does not")
             .incompatibleBaseResourceServiceComponent((requiredClassName, className) -> "Cannot register dynamically loaded component, participant requires a base ResourceServiceComponent that implements '" + requiredClassName + "', but ours (" + className + ") does not")
             .incompatiblePlatformComponent((requiredClassName, className) -> "Cannot register dynamically loaded component, participant requires a PlatformComponent that implements '" + requiredClassName + "', but ours (" + className + ") does not")
-            .duplicateCoordinateFail((duplicateCoordinate, info, otherInfo) -> "Cannot register dynamically loaded component '" + info + "' with coordinate '" + duplicateCoordinate + "', a different component '" + otherInfo + "' is already registered with those coordinates" + closeFailMessage())
-            .duplicateFileExtensionFail((duplicateFileExtension, info, otherInfo) -> "Cannot register dynamically loaded component '" + info.coordinate + "' with a language using file extension '" + duplicateFileExtension + "', another component '" + otherInfo.coordinate + "' has a language that is already registered with that file extension" + closeFailMessage())
+            .duplicateCoordinateFail((duplicateCoordinate, otherInfo) -> "Cannot create dynamic component from participant with coordinate '" + duplicateCoordinate + "', a different component '" + otherInfo + "' is already registered with those coordinates")
+            .duplicateFileExtensionFail((duplicateFileExtension, otherInfo) -> "Cannot create dynamic component from participant with a language using file extension '" + duplicateFileExtension + "', another component '" + otherInfo.coordinate + "' has a language that is already registered with that file extension")
+            .closeExistingFail((e) -> "Closing the existing dynamic component before reloading failed")
             .apply(this);
-    }
-
-    private String closeFailMessage() {
-        if(getCause() != null) {
-            return ". Additionally, closing the dynamic component failed so resources may have leaked. See the cause of this exception for more info";
-        }
-        return "";
     }
 
     @Override public Throwable fillInStackTrace() {
         return this; // Do nothing so that no stack trace is created, saving memory and CPU time.
-    }
-
-    @Override public Optional<KeyedMessages> getOptionalMessages() {
-        return DynamicLoadExceptions.getMessages(this);
     }
 
     @Override public abstract int hashCode();

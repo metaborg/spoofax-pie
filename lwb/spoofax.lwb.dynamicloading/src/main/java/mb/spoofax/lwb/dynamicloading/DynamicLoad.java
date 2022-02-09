@@ -21,7 +21,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.io.Serializable;
-import java.net.MalformedURLException;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -105,13 +104,12 @@ public class DynamicLoad implements TaskDef<Supplier<Result<DynamicLoad.Supplier
                     }
                 }
             }
-            return dynamicComponentManager.loadOrReloadFromCompiledSources(supplierOutput.rootDirectory, supplierOutput.javaClassPaths, supplierOutput.participantClassQualifiedId);
-        } catch(MalformedURLException e) {
-            return Result.ofErr(DynamicLoadException.classPathToUrlFail(e));
+            final DynamicComponent dynamicComponent = dynamicComponentManager.loadOrReloadFromCompiledSources(supplierOutput.rootDirectory, supplierOutput.javaClassPaths, supplierOutput.participantClassQualifiedId);
+            return Result.ofOk(dynamicComponent);
+        } catch(DynamicLoadException e) {
+            return Result.ofErr(e);
         } catch(IOException e) {
             return Result.ofErr(DynamicLoadException.requireInputFileFail(e));
-        } catch(ReflectiveOperationException e) {
-            return Result.ofErr(DynamicLoadException.participantInstantiateFail(e));
         }
     }
 }

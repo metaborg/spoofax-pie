@@ -1,9 +1,11 @@
 package mb.spt.expectation;
 
+import mb.common.option.Option;
 import mb.common.region.Region;
 import mb.common.util.SetView;
 import mb.jsglr.common.TermTracer;
 import mb.resource.ResourceKey;
+import mb.spoofax.core.CoordinateRequirement;
 import mb.spt.fromterm.FromTermException;
 import mb.spt.fromterm.InvalidAstShapeException;
 import mb.spt.fromterm.TestExpectationFromTerm;
@@ -84,11 +86,12 @@ public class ParseExpectationsFromTerm implements TestExpectationFromTerm {
         if(!TermUtils.isAppl(toPart, "ToPart", 4)) {
             throw new InvalidAstShapeException("ToPart/4 term application", toPart);
         }
-        final Optional<String> languageIdHint = SptFromTermUtil.getOptional(toPart.getSubterm(0))
-            .map(t -> TermUtils.asJavaString(t).orElseThrow(() -> new InvalidAstShapeException("term string", t)));
+        final Option<CoordinateRequirement> languageCoordinateRequirementHint = SptFromTermUtil.getOptional(toPart.getSubterm(0))
+            .map(t -> TermUtils.asJavaString(t).orElseThrow(() -> new InvalidAstShapeException("term string", t)))
+            .flatMap(CoordinateRequirement::parse);
         final TestFragmentImpl fragment = TestSuiteFromTerm.fragmentFromTerm(toPart.getSubterm(2), null);
         final String resourceName = TestSuiteFromTerm.getResourceName(usedResourceNames, testSuiteDescription);
         final SptTestCaseResource resource = testCaseResourceRegistry.registerTestCase(testSuiteFile, resourceName, fragment.asText());
-        return new ParseToFragmentExpectation(resource.getKey(), languageIdHint.orElse(null), sourceRegion);
+        return new ParseToFragmentExpectation(resource.getKey(), languageCoordinateRequirementHint.get(), sourceRegion);
     }
 }

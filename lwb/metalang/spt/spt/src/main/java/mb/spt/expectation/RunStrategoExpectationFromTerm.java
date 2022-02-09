@@ -6,6 +6,7 @@ import mb.common.util.ListView;
 import mb.common.util.SetView;
 import mb.jsglr.common.TermTracer;
 import mb.resource.ResourceKey;
+import mb.spoofax.core.CoordinateRequirement;
 import mb.spt.fromterm.FromTermException;
 import mb.spt.fromterm.InvalidAstShapeException;
 import mb.spt.fromterm.TestExpectationFromTerm;
@@ -24,7 +25,6 @@ import org.spoofax.terms.TermFactory;
 import org.spoofax.terms.util.TermUtils;
 
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class RunStrategoExpectationFromTerm implements TestExpectationFromTerm {
@@ -97,41 +97,43 @@ public class RunStrategoExpectationFromTerm implements TestExpectationFromTerm {
         final IStrategoAppl resultExpOpt = TermUtils.asApplAt(term, 3)
             .orElseThrow(() -> new InvalidAstShapeException("term application as fourth subterm", term));
         return SptFromTermUtil.getOptional(resultExpOpt)
-            .map(resultExp -> {
-                IStrategoAppl resultExpectation = TermUtils.asAppl(resultExp)
-                    .orElseThrow(() -> new InvalidAstShapeException("term application as subterm", term));
-                switch (resultExpectation.getConstructor().getName()) {
-                    case "Fails":
-                        return new RunStrategoExpectation(strategyName, arguments, selection, sourceRegion, true);
-                    case "ToPart":
-                        return convertToRunToFragmentExpectation(
-                            strategyName,
-                            arguments,
-                            selection,
-                            resultExp,
-                            sourceRegion,
-                            testSuiteDescription,
-                            testSuiteFile,
-                            testCaseResourceRegistry,
-                            usedResourceNames
-                        );
-                    default:
-                        throw new InvalidAstShapeException("Fails/0 or ToPart/1 as subterm", resultExp);
-                }
-            })
-            .orElseGet(() -> new RunStrategoExpectation(strategyName, arguments, selection, sourceRegion, false));
+            .mapOrElse(resultExp -> {
+                    IStrategoAppl resultExpectation = TermUtils.asAppl(resultExp)
+                        .orElseThrow(() -> new InvalidAstShapeException("term application as subterm", term));
+                    switch(resultExpectation.getConstructor().getName()) {
+                        case "Fails":
+                            return new RunStrategoExpectation(strategyName, arguments, selection, sourceRegion, true);
+                        case "ToPart":
+                            return convertToRunToFragmentExpectation(
+                                strategyName,
+                                arguments,
+                                selection,
+                                resultExp,
+                                sourceRegion,
+                                testSuiteDescription,
+                                testSuiteFile,
+                                testCaseResourceRegistry,
+                                usedResourceNames
+                            );
+                        default:
+                            throw new InvalidAstShapeException("Fails/0 or ToPart/1 as subterm", resultExp);
+                    }
+                },
+                () -> new RunStrategoExpectation(strategyName, arguments, selection, sourceRegion, false)
+            );
     }
 
     private ListView<IStrategoAppl> convertArguments(IStrategoAppl arguments) {
-        return SptFromTermUtil.getOptional(arguments).map(
+        return SptFromTermUtil.getOptional(arguments).mapOrElse(
             (args) -> ListView.of(
                 TermUtils.asJavaListAt(args, 0)
                     .orElseThrow(() -> new InvalidAstShapeException("list", args))
                     .stream()
                     .map(this::convertArgument)
                     .collect(Collectors.toList())
-            )
-        ).orElse(ListView.of());
+            ),
+            ListView::of
+        );
     }
 
     private IStrategoAppl convertArgument(IStrategoTerm term) {
@@ -145,7 +147,7 @@ public class RunStrategoExpectationFromTerm implements TestExpectationFromTerm {
             default:
                 throw new InvalidAstShapeException("Int/1, String/1 or SelectionRef/2", argument);
         }
-        if (!TermUtils.isStringAt(argument, 0)) {
+        if(!TermUtils.isStringAt(argument, 0)) {
             throw new InvalidAstShapeException("string as subterm", argument);
         }
         return argument;
@@ -162,15 +164,16 @@ public class RunStrategoExpectationFromTerm implements TestExpectationFromTerm {
         SptTestCaseResourceRegistry testCaseResourceRegistry,
         HashSet<String> usedResourceNames
     ) {
-        if (!TermUtils.isAppl(toPart, "ToPart", 4)) {
+        if(!TermUtils.isAppl(toPart, "ToPart", 4)) {
             throw new InvalidAstShapeException("ToPart/4 term application", toPart);
         }
-        final Optional<String> languageIdHint = SptFromTermUtil.getOptional(toPart.getSubterm(0))
-            .map(t -> TermUtils.asJavaString(t).orElseThrow(() -> new InvalidAstShapeException("term string", t)));
+        final Option<CoordinateRequirement> languageCoordinateRequirementHint = SptFromTermUtil.getOptional(toPart.getSubterm(0))
+            .map(t -> TermUtils.asJavaString(t).orElseThrow(() -> new InvalidAstShapeException("term string", t)))
+            .flatMap(CoordinateRequirement::parse);
         final TestFragmentImpl fragment = TestSuiteFromTerm.fragmentFromTerm(toPart.getSubterm(2), null);
         final String resourceName = TestSuiteFromTerm.getResourceName(usedResourceNames, testSuiteDescription);
         final SptTestCaseResource resource = testCaseResourceRegistry.registerTestCase(testSuiteFile, resourceName, fragment.asText());
-        return new RunStrategoToFragmentExpectation(strategyName, arguments, selection, resource.getKey(), Option.ofOptional(languageIdHint), sourceRegion);
+        return new RunStrategoToFragmentExpectation(strategyName, arguments, selection, resource.getKey(), languageCoordinateRequirementHint.get(), sourceRegion);
     }
 
     private Option<SelectionReference> convertSelections(IStrategoAppl term, Region fallbackRegion) {
@@ -179,8 +182,7 @@ public class RunStrategoExpectationFromTerm implements TestExpectationFromTerm {
                 final int selection = TermUtils.asJavaInt(subterm)
                     .orElseThrow(() -> new InvalidAstShapeException("an integer", subterm));
                 final @Nullable Region region = TermTracer.getRegion(term);
-                return Option.ofSome(new SelectionReference(selection, region != null ? region : fallbackRegion));
-            })
-            .orElse(Option.ofNone());
+                return new SelectionReference(selection, region != null ? region : fallbackRegion);
+            });
     }
 }

@@ -5,26 +5,27 @@ import mb.common.util.CollectionView;
 import mb.common.util.MapView;
 import mb.common.util.SetView;
 import mb.pie.dagger.PieComponent;
+import mb.pie.runtime.store.SerializingStoreInMemoryBuffer;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.Coordinate;
 import mb.spoofax.core.CoordinateRequirement;
 import mb.spoofax.core.component.Component;
-import mb.spoofax.core.component.StandaloneComponent;
+import mb.spoofax.core.component.ComponentImpl;
 import mb.spoofax.core.language.LanguageComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
 import java.net.URLClassLoader;
 import java.time.Instant;
-import java.util.Optional;
 
 public class DynamicComponent implements Component, AutoCloseable {
     private final DynamicComponentInfo info;
     private final Instant created;
 
     private URLClassLoader classLoader;
-    private StandaloneComponent<?, ?, ?> standaloneComponent;
+    private ComponentImpl<?, ?, ?> standaloneComponent;
+    SerializingStoreInMemoryBuffer serializingStoreInMemoryBuffer;
     private boolean closed = false;
 
 
@@ -32,7 +33,8 @@ public class DynamicComponent implements Component, AutoCloseable {
         ResourcePath rootDirectory,
         Coordinate coordinate,
         URLClassLoader classLoader,
-        StandaloneComponent<?, ?, ?> standaloneComponent
+        ComponentImpl<?, ?, ?> standaloneComponent,
+        SerializingStoreInMemoryBuffer serializingStoreInMemoryBuffer
     ) {
         final String displayName;
         final SetView<String> fileExtensions;
@@ -49,6 +51,7 @@ public class DynamicComponent implements Component, AutoCloseable {
 
         this.classLoader = classLoader;
         this.standaloneComponent = standaloneComponent;
+        this.serializingStoreInMemoryBuffer = serializingStoreInMemoryBuffer;
     }
 
     /**

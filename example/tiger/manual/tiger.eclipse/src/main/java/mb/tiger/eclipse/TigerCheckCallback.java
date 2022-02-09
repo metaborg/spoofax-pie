@@ -6,6 +6,7 @@ import dagger.assisted.AssistedInject;
 import mb.spoofax.eclipse.EclipseIdentifiers;
 import mb.spoofax.eclipse.editor.CheckCallback;
 import mb.spoofax.eclipse.resource.EclipseResourcePath;
+import mb.tiger.spoofax.TigerParticipant;
 
 public class TigerCheckCallback extends CheckCallback {
     @AssistedFactory public interface Factory extends CheckCallback.Factory {
@@ -17,6 +18,6 @@ public class TigerCheckCallback extends CheckCallback {
     }
 
     @Override protected EclipseIdentifiers getEclipseIdentifiers() {
-        return TigerLanguage.getInstance().getComponent().getEclipseIdentifiers();
+        return TigerEclipseParticipantFactory.getParticipant().getComponent().getEclipseIdentifiers();
     }
 }

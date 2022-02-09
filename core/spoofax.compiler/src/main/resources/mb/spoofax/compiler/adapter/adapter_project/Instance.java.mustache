@@ -89,12 +89,12 @@ public class {{baseInstance.id}} implements LanguageInstance
         return new Coordinate(
             "{{adapterProject.project.coordinate.groupId}}",
             "{{adapterProject.project.coordinate.artifactId}}",
-{{#adapterProject.project.coordinate.artifactId}}
+{{#adapterProject.project.coordinate.version}}
             Version.parse("{{this}}")
-{{/adapterProject.project.coordinate.artifactId}}
-{{^adapterProject.project.coordinate.artifactId}}
+{{/adapterProject.project.coordinate.version}}
+{{^adapterProject.project.coordinate.version}}
             new Version(0, 1, 0)
-{{/adapterProject.project.coordinate.artifactId}}
+{{/adapterProject.project.coordinate.version}}
         );
     }
 

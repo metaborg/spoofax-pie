@@ -1,5 +1,6 @@
 package mb.spoofax.lwb.dynamicloading;
 
+import mb.cfg.task.CfgRootDirectoryToObject;
 import mb.common.message.KeyedMessages;
 import mb.common.message.Message;
 import mb.common.result.Result;
@@ -30,18 +31,20 @@ import mb.resource.classloader.ClassLoaderResourceLocations;
 import mb.resource.classloader.ClassLoaderResourceRegistry;
 import mb.resource.classloader.JarFileWithPath;
 import mb.resource.dagger.DaggerRootResourceServiceComponent;
+import mb.resource.dagger.ResourceServiceComponent;
 import mb.resource.dagger.RootResourceServiceComponent;
-import mb.resource.dagger.RootResourceServiceModule;
 import mb.resource.fs.FSResource;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.core.component.StaticComponentManagerBuilder;
+import mb.spoofax.core.platform.DaggerPlatformComponent;
+import mb.spoofax.core.platform.PlatformComponent;
 import mb.spoofax.lwb.compiler.CompileLanguage;
+import mb.spoofax.lwb.compiler.CompileLanguageException;
 import mb.spoofax.lwb.compiler.dagger.StandaloneSpoofax3Compiler;
 import mb.spoofax.lwb.dynamicloading.component.DynamicComponent;
 import mb.spt.DaggerSptComponent;
-import mb.spt.DaggerSptResourcesComponent;
 import mb.spt.SptComponent;
-import mb.spt.SptResourcesComponent;
 import mb.spt.dynamicloading.DynamicLanguageUnderTestProvider;
 
 import java.io.IOException;
@@ -54,20 +57,24 @@ class TestBase {
 
     HierarchicalResource temporaryDirectory;
     HierarchicalResource rootDirectory;
+    ExceptionPrinter exceptionPrinter;
+
     LoggerComponent loggerComponent;
-    SptResourcesComponent sptResourcesComponent;
-    RootResourceServiceComponent rootResourceServiceComponent;
+    //    SptResourcesComponent sptResourcesComponent;
+    RootResourceServiceComponent baseResourceServiceComponent;
+    PlatformComponent platformComponent;
+
     SerializingStoreInMemoryBuffer spoofax3CompilerStoreBuffer;
     StandaloneSpoofax3Compiler standaloneSpoofax3Compiler;
+    CfgRootDirectoryToObject cfgRootDirectoryToObject;
+    CompileLanguage compileLanguage;
     SptComponent sptComponent;
     ResourceService resourceService;
     MetricsTracer languageMetricsTracer;
     SerializingStoreInMemoryBuffer dynamicLoadingStoreBuffer;
     DynamicLoadingComponent dynamicLoadingComponent;
     DynamicLoad dynamicLoad;
-    DynamicLanguageRegistry dynamicLanguageRegistry;
     PieComponent pieComponent;
-    ExceptionPrinter exceptionPrinter;
 
     void setup(Path temporaryDirectoryPath) throws IOException {
         temporaryDirectory = new FSResource(temporaryDirectoryPath);
@@ -77,15 +84,23 @@ class TestBase {
         loggerComponent = DaggerLoggerComponent.builder()
             .loggerModule(LoggerModule.stdOutVeryVerbose())
             .build();
-        sptResourcesComponent = DaggerSptResourcesComponent.create();
-        rootResourceServiceComponent = DaggerRootResourceServiceComponent.builder()
-            .rootResourceServiceModule(new RootResourceServiceModule(classLoaderResourceRegistry).addRegistriesFrom(sptResourcesComponent))
+//        sptResourcesComponent = DaggerSptResourcesComponent.create();
+        baseResourceServiceComponent = DaggerRootResourceServiceComponent.builder()
+//            .rootResourceServiceModule(new RootResourceServiceModule(classLoaderResourceRegistry).addRegistriesFrom(sptResourcesComponent))
             .loggerComponent(loggerComponent)
             .build();
+        platformComponent = DaggerPlatformComponent.builder()
+            .loggerComponent(loggerComponent)
+            .resourceServiceComponent(baseResourceServiceComponent)
+            .build();
+
+        final StaticComponentManagerBuilder<LoggerComponent, ResourceServiceComponent, PlatformComponent> builder = new StaticComponentManagerBuilder<>(loggerComponent, baseResourceServiceComponent, platformComponent, PieBuilderImpl::new);
+
+
         spoofax3CompilerStoreBuffer = new SerializingStoreInMemoryBuffer();
         standaloneSpoofax3Compiler = new StandaloneSpoofax3Compiler(
             loggerComponent,
-            rootResourceServiceComponent.createChildModule(classLoaderResourceRegistry),
+            baseResourceServiceComponent.createChildModule(classLoaderResourceRegistry),
             new PieModule(PieBuilderImpl::new)
                 .withSerdeFactory(loggerFactory -> new FstSerde())
                 .withStoreFactory((serde, resourceService, loggerFactory) -> SerializingStoreBuilder.ofInMemoryStore(serde)
@@ -94,6 +109,8 @@ class TestBase {
                     .build()
                 )
         );
+        cfgRootDirectoryToObject = standaloneSpoofax3Compiler.compiler.cfgComponent.getCfgRootDirectoryToObject();
+        compileLanguage = standaloneSpoofax3Compiler.compiler.component.getCompileLanguage();
         sptComponent = DaggerSptComponent.builder()
             .loggerComponent(loggerComponent)
             .sptResourcesComponent(sptResourcesComponent)
@@ -140,7 +157,6 @@ class TestBase {
         exceptionPrinter = null;
         pieComponent.close();
         pieComponent = null;
-        dynamicLanguageRegistry = null;
         dynamicLoad = null;
         dynamicLoadingStoreBuffer.close();
         dynamicLoadingStoreBuffer = null;
@@ -152,10 +168,12 @@ class TestBase {
         sptComponent = null;
         spoofax3CompilerStoreBuffer.close();
         spoofax3CompilerStoreBuffer = null;
+        compileLanguage = null;
+        cfgRootDirectoryToObject = null;
         standaloneSpoofax3Compiler.close();
         standaloneSpoofax3Compiler = null;
-        rootResourceServiceComponent.close();
-        rootResourceServiceComponent = null;
+        baseResourceServiceComponent.close();
+        baseResourceServiceComponent = null;
         sptResourcesComponent.close();
         sptResourcesComponent = null;
         loggerComponent = null;
@@ -175,8 +193,12 @@ class TestBase {
         return pieComponent.newSession();
     }
 
-    Task<OutTransient<Result<DynamicComponent, ?>>> dynamicLoadTask(ResourcePath rootDirectory) {
-        return dynamicLoad.createTask(compileLanguageArgs(rootDirectory));
+    Task<Result<CompileLanguage.Output, CompileLanguageException>> compileLanguageTask(ResourcePath rootDirectory) {
+        return compileLanguage.createTask(compileLanguageArgs(rootDirectory));
+    }
+
+    Task<OutTransient<Result<DynamicComponent, DynamicLoadException>>> dynamicLoadTask(ResourcePath rootDirectory) {
+        return dynamicLoad.createTask(compileLanguageTask(rootDirectory));
     }
 
     DynamicComponent requireDynamicLoad(Session session, ResourcePath rootDirectory) throws Exception {

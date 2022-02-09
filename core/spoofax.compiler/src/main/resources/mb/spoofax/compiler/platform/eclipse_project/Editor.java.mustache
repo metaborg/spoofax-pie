@@ -6,14 +6,14 @@ import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
 public class {{baseEditor.id}} extends SpoofaxEditor {
     public {{baseEditor.id}}() {
-        super({{participantFactory.qualifiedId}}.getLanguage().getComponent(), {{participantFactory.qualifiedId}}.getLanguage().getPieComponent());
+        super({{participantFactory.qualifiedId}}.getParticipant().getComponent(), {{participantFactory.qualifiedId}}.getParticipant().getPieComponent());
     }
 
     @Override protected SourceViewerConfiguration createSourceViewerConfiguration() {
         return new SpoofaxSourceViewerConfiguration(
             this,
-            {{participantFactory.qualifiedId}}.getLanguage().getComponent(),
-            {{participantFactory.qualifiedId}}.getLanguage().getPieComponent()
+            {{participantFactory.qualifiedId}}.getParticipant().getComponent(),
+            {{participantFactory.qualifiedId}}.getParticipant().getPieComponent()
         );
     }
 }
