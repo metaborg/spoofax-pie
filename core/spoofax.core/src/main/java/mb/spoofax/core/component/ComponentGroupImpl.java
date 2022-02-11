@@ -101,28 +101,28 @@ public class ComponentGroupImpl implements ComponentGroup {
 
     // Typed subcomponents
 
-    @Override public <T> Option<T> getSubcomponent(Coordinate coordinate, Class<T> subcomponentClass) {
+    @Override public <T> Option<T> getSubcomponent(Coordinate coordinate, Class<T> subcomponentType) {
         if(closed)
             throw new IllegalStateException("Cannot get subcomponent, component group '" + group + "' has been closed");
         return Option.ofNullable(components.get(coordinate))
-            .flatMap(c -> c.getSubcomponent(subcomponentClass));
+            .flatMap(c -> c.getSubcomponent(subcomponentType));
     }
 
-    @Override public <T> CollectionView<T> getSubcomponents(Class<T> subcomponentClass) {
+    @Override public <T> CollectionView<T> getSubcomponents(Class<T> subcomponentType) {
         if(closed)
             throw new IllegalStateException("Cannot get subcomponents, component group '" + group + "' has been closed");
         return CollectionView.of(components.values().stream()
-            .flatMap(c -> c.getSubcomponent(subcomponentClass).stream())
+            .flatMap(c -> c.getSubcomponent(subcomponentType).stream())
         );
     }
 
     @Override
-    public <T> CollectionView<T> getSubcomponents(CoordinateRequirement coordinateRequirement, Class<T> subcomponentClass) {
+    public <T> CollectionView<T> getSubcomponents(CoordinateRequirement coordinateRequirement, Class<T> subcomponentType) {
         if(closed)
             throw new IllegalStateException("Cannot get subcomponents, component group '" + group + "' has been closed");
         return CollectionView.of(components.values().stream()
             .filter(c -> c.matchesCoordinate(coordinateRequirement))
-            .flatMap(c -> c.getSubcomponent(subcomponentClass).stream())
+            .flatMap(c -> c.getSubcomponent(subcomponentType).stream())
         );
     }
 }

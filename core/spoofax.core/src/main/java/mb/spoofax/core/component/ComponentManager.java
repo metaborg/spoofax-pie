@@ -53,12 +53,12 @@ public interface ComponentManager extends AutoCloseable {
 
     // Typed subcomponents
 
-    <T> Option<T> getSubcomponent(Coordinate coordinate, Class<T> subcomponentClass);
+    <T> Option<T> getSubcomponent(Coordinate coordinate, Class<T> subcomponentType);
 
-    <T> CollectionView<T> getSubcomponents(Class<T> subcomponentClass);
+    <T> CollectionView<T> getSubcomponents(Class<T> subcomponentType);
 
-    default <T> Option<T> getOneSubcomponent(Class<T> subcomponentClass) {
-        final CollectionView<T> languageComponents = getSubcomponents(subcomponentClass);
+    default <T> Option<T> getOneSubcomponent(Class<T> subcomponentType) {
+        final CollectionView<T> languageComponents = getSubcomponents(subcomponentType);
         if(languageComponents.size() == 1) {
             return Option.ofSome(languageComponents.iterator().next());
         } else {
@@ -66,10 +66,10 @@ public interface ComponentManager extends AutoCloseable {
         }
     }
 
-    <T> CollectionView<T> getSubcomponents(CoordinateRequirement coordinateRequirement, Class<T> subcomponentClass);
+    <T> CollectionView<T> getSubcomponents(CoordinateRequirement coordinateRequirement, Class<T> subcomponentType);
 
-    default <T> Option<T> getOneSubcomponent(CoordinateRequirement coordinateRequirement, Class<T> subcomponentClass) {
-        final CollectionView<T> languageComponents = getSubcomponents(coordinateRequirement, subcomponentClass);
+    default <T> Option<T> getOneSubcomponent(CoordinateRequirement coordinateRequirement, Class<T> subcomponentType) {
+        final CollectionView<T> languageComponents = getSubcomponents(coordinateRequirement, subcomponentType);
         if(languageComponents.size() == 1) {
             return Option.ofSome(languageComponents.iterator().next());
         } else {

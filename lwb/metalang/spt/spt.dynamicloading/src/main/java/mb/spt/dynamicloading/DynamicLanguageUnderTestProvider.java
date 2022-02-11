@@ -2,7 +2,6 @@ package mb.spt.dynamicloading;
 
 import mb.common.option.Option;
 import mb.common.result.Result;
-import mb.common.util.CollectionView;
 import mb.common.util.SetView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.SerializableFunction;
@@ -60,7 +59,7 @@ public class DynamicLanguageUnderTestProvider implements LanguageUnderTestProvid
                 .map(this::toLanguageUnderTest)
                 .flatMap(o -> o.mapOrElse(Result::ofOk, () -> Result.ofErr(new DynamicLanguageUnderTestProviderException("Could not provide dynamic language under test for SPT file '" + file + "'" + "; compiling and dynamically loading at '" + rootDirectoryHint + "' succeeded, but it does not have a language component"))));
         } else if(languageCoordinateRequirementHint != null) {
-            final Option<Component> component = dynamicComponentManager.getOneComponent(languageCoordinateRequirementHint);
+            final Option<? extends Component> component = dynamicComponentManager.getOneComponent(languageCoordinateRequirementHint);
             return component.mapOrElse(c -> toLanguageUnderTest(c, file, languageCoordinateRequirementHint), () -> Result.ofErr(new DynamicLanguageUnderTestProviderException(
                 "Could not provide dynamic language under test for SPT file '" + file + "'" + "; component with coordinate requirement '" + languageCoordinateRequirementHint + "' was not found"
             )));
@@ -75,15 +74,14 @@ public class DynamicLanguageUnderTestProvider implements LanguageUnderTestProvid
         return component.getLanguageComponent().map(l -> new LanguageUnderTestImpl(component.getResourceServiceComponent(), l, component.getPieComponent()));
     }
 
-    private Result<LanguageUnderTest, DynamicLanguageUnderTestProviderException> toLanguageUnderTest(Component component, ResourceKey file, CoordinateRequirement languageCoordinateRequirementHint) {
-        final CollectionView<LanguageComponent> languageComponents = component.getLanguageComponents(languageCoordinateRequirementHint);
-        if(languageComponents.isEmpty()) {
-            return Result.ofErr(new DynamicLanguageUnderTestProviderException("Could not provide dynamic language under test for SPT file '" + file + "'" + "; language with coordinate requirement '" + languageCoordinateRequirementHint + "' was not found"));
-        } else if(languageComponents.size() > 1) {
-            return Result.ofErr(new DynamicLanguageUnderTestProviderException("Could not provide dynamic language under test for SPT file '" + file + "'" + "; multiple language with coordinate requirement '" + languageCoordinateRequirementHint + "' were found: " + languageComponents));
-        } else {
-            return Result.ofOk(new LanguageUnderTestImpl(component.getResourceServiceComponent(), languageComponents.iterator().next(), component.getPieComponent()));
-        }
+    private Result<LanguageUnderTest, DynamicLanguageUnderTestProviderException> toLanguageUnderTest(
+        Component component,
+        ResourceKey file,
+        CoordinateRequirement languageCoordinateRequirementHint
+    ) {
+        final Option<LanguageComponent> languageComponent = component.getLanguageComponent();
+        return Result.ofOptionOrElse(languageComponent, () -> new DynamicLanguageUnderTestProviderException("Could not provide dynamic language under test for SPT file '" + file + "'" + "; language with coordinate requirement '" + languageCoordinateRequirementHint + "' was not found"))
+            .map(lc -> new LanguageUnderTestImpl(component.getResourceServiceComponent(), lc, component.getPieComponent()));
     }
 
 

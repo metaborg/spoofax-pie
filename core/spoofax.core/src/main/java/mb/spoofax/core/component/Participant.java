@@ -1,7 +1,6 @@
 package mb.spoofax.core.component;
 
 import mb.common.util.ListView;
-import mb.common.util.MapView;
 import mb.log.dagger.LoggerComponent;
 import mb.pie.dagger.PieComponent;
 import mb.pie.dagger.RootPieModule;
@@ -10,6 +9,7 @@ import mb.resource.dagger.ResourceRegistriesProvider;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.resource.dagger.ResourceServiceModule;
 import mb.spoofax.core.Coordinate;
+import mb.spoofax.core.CoordinateRequirement;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.platform.PlatformComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -25,12 +25,12 @@ public interface Participant<L extends LoggerComponent, R extends ResourceServic
     /**
      * Gets the dependencies of this participant.
      */
-    ListView<ComponentDependency> getDependencies();
+    ListView<CoordinateRequirement> getDependencies();
 
     /**
-     * Gets the group of this participant, or {@code null} if it does not belong to a group (i.e., it is standalone).
+     * Gets the composition group of this participant, or {@code null} if it does not belong to a group (i.e., it is standalone).
      */
-    @Nullable String getGroup();
+    @Nullable String getCompositionGroup();
 
     /**
      * Gets the file extensions of the language of this participant (or an empty list if this participant has no
@@ -72,7 +72,9 @@ public interface Participant<L extends LoggerComponent, R extends ResourceServic
     @Nullable ResourceRegistriesProvider getGlobalResourceRegistriesProvider(
         L loggerComponent,
         R baseResourceServiceComponent,
-        P platformComponent
+        P platformComponent,
+        SubcomponentRegistry subcomponentRegistry,
+        ComponentDependencyResolver dependencyResolver
     );
 
     /**
@@ -82,8 +84,11 @@ public interface Participant<L extends LoggerComponent, R extends ResourceServic
      */
     @Nullable TaskDefsProvider getGlobalTaskDefsProvider(
         L loggerComponent,
+        R baseResourceServiceComponent,
         ResourceServiceComponent resourceServiceComponent,
-        P platformComponent
+        P platformComponent,
+        SubcomponentRegistry subcomponentRegistry,
+        ComponentDependencyResolver dependencyResolver
     );
 
 
@@ -94,13 +99,15 @@ public interface Participant<L extends LoggerComponent, R extends ResourceServic
     @Nullable ResourceRegistriesProvider getResourceRegistriesProvider(
         L loggerComponent,
         R baseResourceServiceComponent,
-        P platformComponent
+        P platformComponent,
+        SubcomponentRegistry subcomponentRegistry,
+        ComponentDependencyResolver dependencyResolver
     );
 
     /**
      * Gets a {@link ResourceServiceModule} customizer that is applied to the resource service module of this
      * participant, or {@code null} if this participant does not have one. If this participant is grouped, (i.e, {@link
-     * #getGroup() returns non-null}, the customizer is applied to the module of the group.
+     * #getCompositionGroup() returns non-null}, the customizer is applied to the module of the group.
      */
     @Nullable Consumer<ResourceServiceModule> getResourceServiceModuleCustomizer();
 
@@ -113,7 +120,9 @@ public interface Participant<L extends LoggerComponent, R extends ResourceServic
         L loggerComponent,
         R baseResourceServiceComponent,
         ResourceServiceComponent resourceServiceComponent,
-        P platformComponent
+        P platformComponent,
+        SubcomponentRegistry subcomponentRegistry,
+        ComponentDependencyResolver dependencyResolver
     );
 
     /**
@@ -124,27 +133,17 @@ public interface Participant<L extends LoggerComponent, R extends ResourceServic
         L loggerComponent,
         R baseResourceServiceComponent,
         ResourceServiceComponent resourceServiceComponent,
-        P platformComponent
+        P platformComponent,
+        SubcomponentRegistry subcomponentRegistry,
+        ComponentDependencyResolver dependencyResolver
     );
 
     /**
      * Gets a {@link RootPieModule} customizer that is applied to the PIE module of this participant, or {@code null} if
-     * this participant does not have one. If this participant is grouped, (i.e, {@link #getGroup() returns non-null},
+     * this participant does not have one. If this participant is grouped, (i.e, {@link #getCompositionGroup() returns non-null},
      * the customizer is applied to the module of the group.
      */
     @Nullable Consumer<RootPieModule> getPieModuleCustomizer();
-
-
-    /**
-     * Gets the subcomponents of this participant.
-     */
-    MapView<Class<?>, Object> getSubcomponents(
-        L loggerComponent,
-        R baseResourceServiceComponent,
-        ResourceServiceComponent resourceServiceComponent,
-        P platformComponent,
-        PieComponent pieComponent
-    );
 
 
     /**
@@ -156,7 +155,8 @@ public interface Participant<L extends LoggerComponent, R extends ResourceServic
         R baseResourceServiceComponent,
         ResourceServiceComponent resourceServiceComponent,
         P platformComponent,
-        PieComponent pieComponent
+        PieComponent pieComponent,
+        ComponentDependencyResolver dependencyResolver
     );
 
     /**

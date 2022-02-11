@@ -44,7 +44,9 @@ spoofax2BasedLanguageProject {
       copyCtree(false)
       copyClasses(true)
     }
-    project.languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:org.metaborg.meta.lang.esv:${ext["spoofax2DevenvVersion"]}"))
+    project.run {
+      languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:org.metaborg.meta.lang.esv:${ext["spoofax2DevenvVersion"]}"))
+    }
   }
 }
 
@@ -64,6 +66,8 @@ languageAdapterProject {
   }
 }
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
+  compositionGroup("mb.spoofax.lwb")
+
   // Symbols
   addLineCommentSymbols("//")
   addBlockCommentSymbols(BlockCommentSymbols("/*", "*/"))

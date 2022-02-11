@@ -1,15 +1,12 @@
 package mb.spoofax.lwb.dynamicloading.component;
 
 import mb.common.option.Option;
-import mb.common.util.CollectionView;
-import mb.common.util.MapView;
 import mb.common.util.SetView;
 import mb.pie.dagger.PieComponent;
 import mb.pie.runtime.store.SerializingStoreInMemoryBuffer;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.Coordinate;
-import mb.spoofax.core.CoordinateRequirement;
 import mb.spoofax.core.component.Component;
 import mb.spoofax.core.component.ComponentImpl;
 import mb.spoofax.core.language.LanguageComponent;
@@ -24,7 +21,7 @@ public class DynamicComponent implements Component, AutoCloseable {
     private final Instant created;
 
     private URLClassLoader classLoader;
-    private ComponentImpl<?, ?, ?> standaloneComponent;
+    private ComponentImpl component;
     SerializingStoreInMemoryBuffer serializingStoreInMemoryBuffer;
     private boolean closed = false;
 
@@ -33,12 +30,12 @@ public class DynamicComponent implements Component, AutoCloseable {
         ResourcePath rootDirectory,
         Coordinate coordinate,
         URLClassLoader classLoader,
-        ComponentImpl<?, ?, ?> standaloneComponent,
+        ComponentImpl component,
         SerializingStoreInMemoryBuffer serializingStoreInMemoryBuffer
     ) {
         final String displayName;
         final SetView<String> fileExtensions;
-        final @Nullable LanguageComponent languageComponent = standaloneComponent.languageComponent;
+        final @Nullable LanguageComponent languageComponent = component.getLanguageComponent().get();
         if(languageComponent != null) {
             displayName = languageComponent.getLanguageInstance().getDisplayName();
             fileExtensions = languageComponent.getLanguageInstance().getFileExtensions();
@@ -50,7 +47,7 @@ public class DynamicComponent implements Component, AutoCloseable {
         this.created = Instant.now();
 
         this.classLoader = classLoader;
-        this.standaloneComponent = standaloneComponent;
+        this.component = component;
         this.serializingStoreInMemoryBuffer = serializingStoreInMemoryBuffer;
     }
 
@@ -66,13 +63,25 @@ public class DynamicComponent implements Component, AutoCloseable {
     public void close() throws IOException {
         if(closed) return;
         try {
-            standaloneComponent.close();
-            standaloneComponent = null;
+            component.close();
+            component = null;
             classLoader.close();
             classLoader = null;
         } finally {
             closed = true;
         }
+    }
+
+
+    @Override public Coordinate getCoordinate() {
+        return info.coordinate;
+    }
+
+    /**
+     * Gets the info of this dynamic component.
+     */
+    public DynamicComponentInfo getInfo() {
+        return info;
     }
 
 
@@ -83,24 +92,17 @@ public class DynamicComponent implements Component, AutoCloseable {
      */
     @Override
     public ResourceServiceComponent getResourceServiceComponent() {
-        if(closed)
-            throw new IllegalStateException("Cannot get resource service component, dynamically loaded component has been closed");
-        return standaloneComponent.resourceServiceComponent;
+        return component.getResourceServiceComponent();
     }
 
-    @Override
-    public Option<LanguageComponent> getLanguageComponent(Coordinate coordinate) {
-        return standaloneComponent.getLanguageComponent(coordinate);
-    }
-
-    @Override
-    public CollectionView<LanguageComponent> getLanguageComponents(CoordinateRequirement coordinateRequirement) {
-        return standaloneComponent.getLanguageComponents(coordinateRequirement);
-    }
-
-    @Override
-    public MapView<Coordinate, LanguageComponent> getLanguageComponents() {
-        return standaloneComponent.getLanguageComponents();
+    /**
+     * Gets the {@link LanguageComponent language component} of this dynamically loaded component, or {@code null} if it
+     * does not have one.
+     *
+     * @throws IllegalStateException if the dynamically loaded language has been closed with {@link #close}.
+     */
+    @Override public Option<LanguageComponent> getLanguageComponent() {
+        return component.getLanguageComponent();
     }
 
     /**
@@ -110,18 +112,13 @@ public class DynamicComponent implements Component, AutoCloseable {
      */
     @Override
     public PieComponent getPieComponent() {
-        if(closed)
-            throw new IllegalStateException("Cannot get PIE component, dynamically loaded component has been closed");
-        return standaloneComponent.pieComponent;
+        return component.getPieComponent();
     }
 
-
-    /**
-     * Gets the info of this dynamic component.
-     */
-    public DynamicComponentInfo getInfo() {
-        return info;
+    @Override public <T> Option<T> getSubcomponent(Class<T> subcomponentType) {
+        return component.getSubcomponent(subcomponentType);
     }
+
 
     /**
      * @return true if the dynamically loaded language has been closed with {@link #close}.
@@ -139,18 +136,6 @@ public class DynamicComponent implements Component, AutoCloseable {
         if(closed)
             throw new IllegalStateException("Cannot get class loader, dynamically loaded language has been closed");
         return classLoader;
-    }
-
-    /**
-     * Gets the {@link LanguageComponent language component} of this dynamically loaded component, or {@code null} if it
-     * does not have one.
-     *
-     * @throws IllegalStateException if the dynamically loaded language has been closed with {@link #close}.
-     */
-    public Option<LanguageComponent> getLanguageComponent() {
-        if(closed)
-            throw new IllegalStateException("Cannot get language component, dynamically loaded language has been closed");
-        return Option.ofNullable(standaloneComponent.languageComponent);
     }
 
 

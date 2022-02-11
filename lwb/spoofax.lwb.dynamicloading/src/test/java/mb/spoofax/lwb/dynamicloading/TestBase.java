@@ -36,7 +36,7 @@ import mb.resource.dagger.RootResourceServiceComponent;
 import mb.resource.fs.FSResource;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.core.component.StaticComponentManagerBuilder;
+import mb.spoofax.core.component.StaticComponentBuilder;
 import mb.spoofax.core.platform.DaggerPlatformComponent;
 import mb.spoofax.core.platform.PlatformComponent;
 import mb.spoofax.lwb.compiler.CompileLanguage;
@@ -94,7 +94,7 @@ class TestBase {
             .resourceServiceComponent(baseResourceServiceComponent)
             .build();
 
-        final StaticComponentManagerBuilder<LoggerComponent, ResourceServiceComponent, PlatformComponent> builder = new StaticComponentManagerBuilder<>(loggerComponent, baseResourceServiceComponent, platformComponent, PieBuilderImpl::new);
+        final StaticComponentBuilder<LoggerComponent, ResourceServiceComponent, PlatformComponent> builder = new StaticComponentBuilder<>(loggerComponent, baseResourceServiceComponent, platformComponent, PieBuilderImpl::new);
 
 
         spoofax3CompilerStoreBuffer = new SerializingStoreInMemoryBuffer();

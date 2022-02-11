@@ -9,7 +9,6 @@ import mb.log.dagger.LoggerModule;
 import mb.pie.api.ExecException;
 import mb.pie.api.MixedSession;
 import mb.pie.dagger.PieComponent;
-import mb.pie.dagger.PieModule;
 import mb.pie.runtime.PieBuilderImpl;
 import mb.pie.runtime.store.SerializingStoreBuilder;
 import mb.pie.serde.fst.FstSerde;
@@ -21,10 +20,15 @@ import mb.resource.classloader.ClassLoaderResourceLocations;
 import mb.resource.classloader.ClassLoaderResourceRegistry;
 import mb.resource.classloader.JarFileWithPath;
 import mb.resource.dagger.DaggerRootResourceServiceComponent;
+import mb.resource.dagger.ResourceServiceComponent;
 import mb.resource.dagger.RootResourceServiceComponent;
 import mb.resource.dagger.RootResourceServiceModule;
 import mb.resource.fs.FSResource;
 import mb.resource.hierarchical.HierarchicalResource;
+import mb.spoofax.core.component.StaticComponentBuilder;
+import mb.spoofax.core.platform.DaggerPlatformComponent;
+import mb.spoofax.core.platform.PlatformComponent;
+import mb.spoofax.lwb.compiler.dagger.Spoofax3CompilerComponent;
 import mb.spoofax.lwb.compiler.dagger.StandaloneSpoofax3Compiler;
 
 import java.io.IOException;
@@ -40,7 +44,8 @@ class TestBase {
     HierarchicalResource rootDirectory;
     ExceptionPrinter exceptionPrinter;
     LoggerComponent loggerComponent;
-    RootResourceServiceComponent rootResourceServiceComponent;
+    RootResourceServiceComponent baseResourceServiceComponent;
+    PlatformComponent platformComponent;
     StandaloneSpoofax3Compiler compiler;
     ResourceService resourceService;
     PieComponent pieComponent;
@@ -54,9 +59,13 @@ class TestBase {
         loggerComponent = DaggerLoggerComponent.builder()
             .loggerModule(LoggerModule.stdOutVeryVerbose())
             .build();
-        rootResourceServiceComponent = DaggerRootResourceServiceComponent.builder()
+        baseResourceServiceComponent = DaggerRootResourceServiceComponent.builder()
             .rootResourceServiceModule(new RootResourceServiceModule(classLoaderResourceRegistry))
             .loggerComponent(loggerComponent)
+            .build();
+        platformComponent = DaggerPlatformComponent.builder()
+            .loggerComponent(loggerComponent)
+            .resourceServiceComponent(baseResourceServiceComponent)
             .build();
         recreateCompiler();
     }
@@ -68,8 +77,10 @@ class TestBase {
         resourceService = null;
         compiler.close();
         compiler = null;
-        rootResourceServiceComponent.close();
-        rootResourceServiceComponent = null;
+        platformComponent.close();
+        platformComponent = null;
+        baseResourceServiceComponent.close();
+        baseResourceServiceComponent = null;
         loggerComponent = null;
         exceptionPrinter = null;
         rootDirectory.close();
@@ -112,20 +123,25 @@ class TestBase {
         }
 
         final WritableResource pieStoreFile = tempDirectory.appendRelativePath(".build/compiler.piestore").createParents();
-        compiler = new StandaloneSpoofax3Compiler(
+        final StaticComponentBuilder<LoggerComponent, ResourceServiceComponent, PlatformComponent> builder = new StaticComponentBuilder<>(
             loggerComponent,
-            rootResourceServiceComponent.createChildModule(classLoaderResourceRegistry),
-            new PieModule(PieBuilderImpl::new)
-                .withSerdeFactory((loggerFactory -> new FstSerde()))
-                .withStoreFactory(((serde, resourceService, loggerFactory) -> SerializingStoreBuilder.ofInMemoryStore(serde)
-                    .withResourceStorage(pieStoreFile)
-                    .build()
-                ))
+            baseResourceServiceComponent,
+            platformComponent,
+            PieBuilderImpl::new
         );
-        resourceService = compiler.compiler.resourceServiceComponent.getResourceService();
+        builder.registerPieModuleCustomizer(pieModule -> {
+            pieModule.withSerdeFactory((loggerFactory -> new FstSerde()));
+            pieModule.withStoreFactory((serde, resourceService, loggerFactory) -> SerializingStoreBuilder.ofInMemoryStore(serde)
+                .withResourceStorage(pieStoreFile)
+                .build()
+            );
+        });
+        compiler = new StandaloneSpoofax3Compiler(builder);
+        final Spoofax3CompilerComponent spoofax3CompilerComponent = compiler.spoofax3CompilerComponent;
+        resourceService = spoofax3CompilerComponent.getResourceServiceComponent().getResourceService();
         pieComponent = compiler.pieComponent;
-        compileLanguage = compiler.compiler.component.getCompileLanguage();
-        checkLanguageSpecification = compiler.compiler.component.getCheckLanguageSpecification();
+        compileLanguage = spoofax3CompilerComponent.getCompileLanguage();
+        checkLanguageSpecification = spoofax3CompilerComponent.getCheckLanguageSpecification();
     }
 
     void assertNoErrors(KeyedMessages messages) {

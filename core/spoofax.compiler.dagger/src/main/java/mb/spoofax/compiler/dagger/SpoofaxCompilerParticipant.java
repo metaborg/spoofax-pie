@@ -5,8 +5,9 @@ import mb.pie.dagger.TaskDefsProvider;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.core.Coordinate;
 import mb.spoofax.core.Version;
+import mb.spoofax.core.component.ComponentDependencyResolver;
 import mb.spoofax.core.component.EmptyParticipant;
-import mb.spoofax.core.component.Participant;
+import mb.spoofax.core.component.SubcomponentRegistry;
 import mb.spoofax.core.platform.PlatformComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -27,7 +28,7 @@ public class SpoofaxCompilerParticipant<L extends LoggerComponent, R extends Res
     }
 
     @Override
-    public @Nullable String getGroup() {
+    public @Nullable String getCompositionGroup() {
         return "mb.spoofax.lwb";
     }
 
@@ -37,7 +38,9 @@ public class SpoofaxCompilerParticipant<L extends LoggerComponent, R extends Res
         L loggerComponent,
         R baseResourceServiceComponent,
         ResourceServiceComponent resourceServiceComponent,
-        P platformComponent
+        P platformComponent,
+        SubcomponentRegistry subcomponentRegistry,
+        ComponentDependencyResolver dependencyResolver
     ) {
         if(component == null) {
             component = DaggerSpoofaxCompilerComponent.builder()
@@ -45,6 +48,7 @@ public class SpoofaxCompilerParticipant<L extends LoggerComponent, R extends Res
                 .loggerComponent(loggerComponent)
                 .resourceServiceComponent(resourceServiceComponent)
                 .build();
+            subcomponentRegistry.register(SpoofaxCompilerComponent.class, component);
         }
         return component;
     }

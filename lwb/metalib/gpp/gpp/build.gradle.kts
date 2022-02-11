@@ -54,6 +54,8 @@ languageAdapterProject {
   }
 }
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
+  compositionGroup("mb.spoofax.lwb")
+
   val packageId = "mb.gpp"
 
   // Extend component

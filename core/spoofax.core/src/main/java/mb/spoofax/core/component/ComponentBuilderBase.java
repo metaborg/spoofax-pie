@@ -1,5 +1,8 @@
 package mb.spoofax.core.component;
 
+import mb.common.option.Option;
+import mb.common.util.CollectionView;
+import mb.common.util.IterableUtil;
 import mb.common.util.ListView;
 import mb.common.util.MapView;
 import mb.common.util.MultiMap;
@@ -17,6 +20,7 @@ import mb.resource.dagger.ResourceRegistriesProvider;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.resource.dagger.ResourceServiceModule;
 import mb.spoofax.core.Coordinate;
+import mb.spoofax.core.CoordinateRequirement;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.platform.PlatformComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -28,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends ResourceServiceComponent, P extends PlatformComponent> {
@@ -61,128 +66,137 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
         MultiMapView<String, Consumer<RootPieModule>> groupedPieModuleCustomizers,
         @Nullable ClassLoader classLoader
     ) {
-        // TODO: check for components with duplicate coordinates?
+        // TODO: check for components with duplicate coordinates
+        // TODO: what about duplicate coordinates of a dynamic component with already existing static components?
+
+        // Sort participants in dependency order.
+        final ArrayList<Participant<L, R, P>> participantsOrdered = new ArrayList<>();
+        IterableUtil.addAll(participantsOrdered, participants);
+        participantsOrdered.sort((p1, p2) -> {
+            if(p1.getCoordinate().equals(p2.getCoordinate())) return 0;
+            for(CoordinateRequirement dependency : p1.getDependencies()) {
+                if(dependency.matches(p2.getCoordinate())) {
+                    return -1;
+                }
+                // TODO: if dependency was not found, produce an error?
+                // TODO: what about dependencies of dynamic components on already existing static components?
+            }
+            return 1;
+        });
 
         // Create builders for participants.
-        final ArrayList<ComponentBuilder> componentBuilders = new ArrayList<>();
-        final ArrayList<ComponentGroupBuilder> componentGroupBuilders = new ArrayList<>();
-        {
-            final MultiMap<String, Participant<L, R, P>> groupedParticipants = MultiMap.withLinkedHash();
-            participants.forEach(p -> {
-                final @Nullable String group = p.getGroup();
-                if(group != null) {
-                    groupedParticipants.put(group, p);
-                } else {
-                    componentBuilders.add(new ComponentBuilder(p));
-                }
-            });
-            groupedParticipants.forEach((g, ps) -> componentGroupBuilders.add(new ComponentGroupBuilder(ps, g)));
+        final ArrayList<ComponentBuilder> builders = participantsOrdered.stream()
+            .map(ComponentBuilder::new)
+            .collect(Collectors.toCollection(ArrayList::new));
+        final ArrayList<ComponentBuilder> standaloneBuilders = builders.stream()
+            .filter(b -> b.group == null)
+            .collect(Collectors.toCollection(ArrayList::new));
+        final MultiMap<String, ComponentBuilder> groupedBuilders = MultiMap.withLinkedHash();
+        for(ComponentBuilder builder : builders) {
+            if(builder.group != null) {
+                groupedBuilders.put(builder.group, builder);
+            }
         }
+        final DependencyResolver dependencyResolver = new DependencyResolver(builders);
 
         // Gather global resource registry providers.
         final ArrayList<ResourceRegistriesProvider> globalResourceRegistryProviders = new ArrayList<>();
-        componentBuilders.forEach(b -> addToGlobalResourceRegistryProviders(b.participant, globalResourceRegistryProviders));
-        componentGroupBuilders.forEach(b -> b.participants.forEach(p -> addToGlobalResourceRegistryProviders(p, globalResourceRegistryProviders)));
+        builders.forEach(b -> addToGlobalResourceRegistryProviders(b, globalResourceRegistryProviders, dependencyResolver));
+
+        // Create resource registry providers.
+        builders.forEach(b -> b.resourceRegistriesProvider = b.participant.getResourceRegistriesProvider(
+            loggerComponent,
+            baseResourceServiceComponent,
+            platformComponent,
+            b,
+            dependencyResolver
+        ));
 
         // Create resource service components.
-        componentBuilders.forEach(b -> b.resourceServiceComponent = createResourceComponent(
-            b.singletonParticipant(),
+        standaloneBuilders.forEach(b -> b.resourceServiceComponent = createResourceComponent(
+            b.asSingleton(),
             globalResourceRegistryProviders,
             resourceServiceModuleCustomizers.stream()
         ));
-        componentGroupBuilders.forEach(b -> {
+        groupedBuilders.forEach((g, bs) -> {
             final ResourceServiceComponent resourceServiceComponent = createResourceComponent(
-                participants,
+                bs,
                 globalResourceRegistryProviders,
-                Stream.concat(resourceServiceModuleCustomizers.stream(), groupedResourceServiceModuleCustomizers.get(b.group).stream())
+                Stream.concat(resourceServiceModuleCustomizers.stream(), groupedResourceServiceModuleCustomizers.get(g).stream())
             );
-            b.resourceServiceComponent = resourceServiceComponent;
-            b.componentBuilders.values().forEach(cb -> cb.resourceServiceComponent = resourceServiceComponent);
+            bs.forEach(b -> b.resourceServiceComponent = resourceServiceComponent);
         });
 
         // Gather global task definition providers.
         final ArrayList<TaskDefsProvider> globalTaskDefsProviders = new ArrayList<>();
-        componentBuilders.forEach(b -> addToGlobalTaskDefsProvider(b.participant, globalTaskDefsProviders, b.resourceServiceComponent));
-        componentGroupBuilders.forEach(b -> {
-            for(Participant<L, R, P> participant : b.participants) {
-                addToGlobalTaskDefsProvider(participant, globalTaskDefsProviders, b.resourceServiceComponent);
-            }
-        });
+        builders.forEach(b -> addToGlobalTaskDefsProvider(b, globalTaskDefsProviders, dependencyResolver));
 
-        // Create language components.
-        componentBuilders.forEach(b -> b.languageComponent = b.participant.getLanguageComponent(
+        // Create task definition providers.
+        builders.forEach(b -> b.taskDefsProvider = b.participant.getTaskDefsProvider(
             loggerComponent,
             baseResourceServiceComponent,
             b.resourceServiceComponent,
-            platformComponent
+            platformComponent,
+            b,
+            dependencyResolver
         ));
-        componentGroupBuilders.forEach(b -> {
-            for(ComponentBuilder componentBuilder : b.componentBuilders.values()) {
-                componentBuilder.languageComponent = componentBuilder.participant.getLanguageComponent(
-                    loggerComponent,
-                    baseResourceServiceComponent,
-                    b.resourceServiceComponent,
-                    platformComponent
-                );
-            }
-        });
 
-        // Create PIE modules.
-        componentBuilders.forEach(b -> b.pieComponent = createPieComponent(
-            b.singletonParticipant(),
+        // Create language components.
+        builders.forEach(b -> b.languageComponent = b.participant.getLanguageComponent(
+            loggerComponent,
+            baseResourceServiceComponent,
+            b.resourceServiceComponent,
+            platformComponent,
+            b,
+            dependencyResolver
+        ));
+
+        // Create PIE components.
+        standaloneBuilders.forEach(b -> b.pieComponent = createPieComponent(
+            b.asSingleton(),
             b.resourceServiceComponent,
             globalTaskDefsProviders,
             classLoader,
             pieModuleCustomizers.stream()
         ));
-        componentGroupBuilders.forEach(b -> {
+        groupedBuilders.forEach((g, bs) -> {
             final PieComponent pieComponent = createPieComponent(
-                b.participants,
-                b.resourceServiceComponent,
+                bs,
+                bs.get(0).resourceServiceComponent, // Always contains at least one element in the list, and is the same between all components in the same group, so this is safe.
                 globalTaskDefsProviders,
                 classLoader,
-                Stream.concat(pieModuleCustomizers.stream(), groupedPieModuleCustomizers.get(b.group).stream())
+                Stream.concat(pieModuleCustomizers.stream(), groupedPieModuleCustomizers.get(g).stream())
             );
-            b.pieComponent = pieComponent;
-            b.componentBuilders.values().forEach(cb -> cb.pieComponent = pieComponent);
+            bs.forEach(b -> b.pieComponent = pieComponent);
         });
 
-        // Create subcomponents.
-        componentBuilders.forEach(b -> b.subcomponents = b.participant.getSubcomponents(
+        // Start all components.
+        builders.forEach(b -> b.participant.start(
             loggerComponent,
             baseResourceServiceComponent,
             b.resourceServiceComponent,
             platformComponent,
-            b.pieComponent
+            b.pieComponent,
+            dependencyResolver
         ));
-        componentGroupBuilders.forEach(b -> {
-            for(ComponentBuilder componentBuilder : b.componentBuilders.values()) {
-                componentBuilder.subcomponents = componentBuilder.participant.getSubcomponents(
-                    loggerComponent,
-                    baseResourceServiceComponent,
-                    b.resourceServiceComponent,
-                    platformComponent,
-                    b.pieComponent
-                );
-            }
-        });
-
-        // Start all components.
-        componentBuilders.forEach(b -> b.participant.start(loggerComponent, baseResourceServiceComponent, b.resourceServiceComponent, platformComponent, b.pieComponent));
-        componentGroupBuilders.forEach(b -> {
-            for(Participant<L, R, P> participant : b.participants) {
-                participant.start(loggerComponent, baseResourceServiceComponent, b.resourceServiceComponent, platformComponent, b.pieComponent);
-            }
-        });
 
         // Gather components.
-        final ArrayList<ComponentImpl> components = new ArrayList<>();
-        final ArrayList<ComponentGroupImpl> componentGroups = new ArrayList<>();
-        for(ComponentBuilder builder : componentBuilders) {
-            components.add(builder.toComponent(false));
+        final ArrayList<ComponentImpl> components = new ArrayList<>(builders.size());
+        final MultiMap<String, ComponentImpl> componentsPerGroup = MultiMap.withLinkedHash();
+        for(ComponentBuilder builder : builders) {
+            final ComponentImpl component = builder.toComponent();
+            components.add(component);
+            if(builder.group != null) {
+                componentsPerGroup.put(builder.group, component);
+            }
         }
-        for(ComponentGroupBuilder builder : componentGroupBuilders) {
-            final ComponentGroupImpl componentGroup = builder.toComponentGroup();
+        final ArrayList<ComponentGroupImpl> componentGroups = new ArrayList<>(componentsPerGroup.keySet().size());
+        for(Map.Entry<String, ArrayList<ComponentImpl>> entry : componentsPerGroup.entrySet()) {
+            // Always contains at least one element in the list, and ResourceService/PIE components are the same between all components in the same group, so this is safe.
+            final ComponentImpl firstComponent = entry.getValue().get(0);
+            final LinkedHashMap<Coordinate, ComponentImpl> componentsPerCoordinate = new LinkedHashMap<>();
+            entry.getValue().forEach(c -> componentsPerCoordinate.put(c.getCoordinate(), c));
+            final ComponentGroupImpl componentGroup = new ComponentGroupImpl(entry.getKey(), firstComponent.getResourceServiceComponent(), firstComponent.getPieComponent(), MapView.of(componentsPerCoordinate));
             componentGroup.components.values().addAllTo(components);
             componentGroups.add(componentGroup);
         }
@@ -227,24 +241,67 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
         @Nullable ClassLoader classLoader
     ) {
         final ComponentBuilder builder = new ComponentBuilder(participant);
+        final ComponentDependencyResolver dependencyResolver = new NullResolver();
+        builder.resourceRegistriesProvider = participant.getResourceRegistriesProvider(
+            loggerComponent,
+            baseResourceServiceComponent,
+            platformComponent,
+            builder,
+            dependencyResolver
+        );
         builder.resourceServiceComponent = createResourceComponent(
-            builder.singletonParticipant(),
+            builder.asSingleton(),
             additionalResourceRegistriesProviders,
             resourceServiceModuleCustomizers.stream()
         );
-        builder.languageComponent = participant.getLanguageComponent(loggerComponent, baseResourceServiceComponent, builder.resourceServiceComponent, platformComponent);
+        builder.taskDefsProvider = participant.getTaskDefsProvider(
+            loggerComponent,
+            baseResourceServiceComponent,
+            builder.resourceServiceComponent,
+            platformComponent,
+            builder,
+            dependencyResolver
+        );
+        builder.languageComponent = participant.getLanguageComponent(
+            loggerComponent,
+            baseResourceServiceComponent,
+            builder.resourceServiceComponent,
+            platformComponent,
+            builder,
+            dependencyResolver
+        );
         builder.pieComponent = createPieComponent(
-            builder.singletonParticipant(),
+            builder.asSingleton(),
             builder.resourceServiceComponent,
             additionalTaskDefsProviders,
             classLoader,
             pieModuleCustomizers.stream()
         );
-        participant.start(loggerComponent, baseResourceServiceComponent, builder.resourceServiceComponent, platformComponent, builder.pieComponent);
+        participant.start(
+            loggerComponent,
+            baseResourceServiceComponent,
+            builder.resourceServiceComponent,
+            platformComponent,
+            builder.pieComponent,
+            dependencyResolver
+        );
         return new BuildOneResult(
-            participant.getGlobalResourceRegistriesProvider(loggerComponent, baseResourceServiceComponent, platformComponent),
-            participant.getGlobalTaskDefsProvider(loggerComponent, baseResourceServiceComponent, platformComponent),
-            builder.toComponent(false)
+            participant.getGlobalResourceRegistriesProvider(
+                loggerComponent,
+                baseResourceServiceComponent,
+                platformComponent,
+                builder,
+                dependencyResolver
+            ),
+            participant.getGlobalTaskDefsProvider(
+                loggerComponent,
+                baseResourceServiceComponent,
+                builder.resourceServiceComponent,
+                platformComponent,
+                builder,
+                dependencyResolver
+            ),
+            builder.toComponent(true)
         );
     }
 
@@ -264,87 +321,141 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
         }
     }
 
+    private class DependencyResolver implements ComponentDependencyResolver {
+        final LinkedHashMap<Coordinate, ComponentBuilder> builders;
+
+        private DependencyResolver(ArrayList<ComponentBuilder> builders) {
+            this.builders = new LinkedHashMap<>();
+            for(ComponentBuilder builder : builders) {
+                this.builders.put(builder.coordinate, builder);
+            }
+        }
+
+        @Override public <T> Option<T> getSubcomponent(Coordinate coordinate, Class<T> subcomponentType) {
+            final @Nullable ComponentBuilder builder = builders.get(coordinate);
+            if(builder != null) {
+                @SuppressWarnings("unchecked") final T subcomponent = (T)builder.subcomponents.get(subcomponentType);
+                return Option.ofNullable(subcomponent);
+            }
+            return Option.ofNone();
+        }
+
+        @Override public <T> CollectionView<T> getSubcomponents(Class<T> subcomponentType) {
+            final ArrayList<T> subcomponents = new ArrayList<>();
+            for(ComponentBuilder builder : builders.values()) {
+                @SuppressWarnings("unchecked") final T subcomponent = (T)builder.subcomponents.get(subcomponentType);
+                if(subcomponent != null) {
+                    subcomponents.add(subcomponent);
+                }
+            }
+            return CollectionView.of(subcomponents);
+        }
+    }
+
+    private static class NullResolver implements ComponentDependencyResolver {
+        @Override public <T> Option<T> getSubcomponent(Coordinate coordinate, Class<T> subcomponentType) {
+            return Option.ofNone();
+        }
+
+        @Override public <T> CollectionView<T> getSubcomponents(Class<T> subcomponentType) {
+            return CollectionView.of();
+        }
+    }
 
     @SuppressWarnings("NotNullFieldNotInitialized")
-    private class ComponentBuilder {
+    private class ComponentBuilder implements SubcomponentRegistry {
         final Participant<L, R, P> participant;
         final Coordinate coordinate;
+        final @Nullable String group;
+        final LinkedHashMap<Class<?>, Object> subcomponents = new LinkedHashMap<>();
 
+        @Nullable ResourceRegistriesProvider resourceRegistriesProvider;
         ResourceServiceComponent resourceServiceComponent;
+        @Nullable TaskDefsProvider taskDefsProvider;
         @Nullable LanguageComponent languageComponent;
         PieComponent pieComponent;
-        MapView<Class<?>, Object> subcomponents;
 
         ComponentBuilder(Participant<L, R, P> participant) {
             this.participant = participant;
             this.coordinate = participant.getCoordinate();
+            this.group = participant.getCompositionGroup();
         }
 
-        List<Participant<L, R, P>> singletonParticipant() {
-            return Collections.singletonList(participant);
+        List<ComponentBuilder> asSingleton() {
+            return Collections.singletonList(this);
         }
 
-        ComponentImpl toComponent(boolean partOfGroup) {
-            return new ComponentImpl(coordinate, partOfGroup, resourceServiceComponent, languageComponent, pieComponent, subcomponents, participant);
-        }
-    }
-
-    @SuppressWarnings("NotNullFieldNotInitialized")
-    private class ComponentGroupBuilder {
-        final ArrayList<Participant<L, R, P>> participants;
-        final String group;
-        final LinkedHashMap<Coordinate, ComponentBuilder> componentBuilders;
-
-        ResourceServiceComponent resourceServiceComponent;
-        PieComponent pieComponent;
-
-        ComponentGroupBuilder(ArrayList<Participant<L, R, P>> participants, String group) {
-            this.group = group;
-            this.participants = participants;
-            this.componentBuilders = new LinkedHashMap<>();
-            for(Participant<L, R, P> participant : participants) {
-                componentBuilders.put(participant.getCoordinate(), new ComponentBuilder(participant));
-            }
+        ComponentImpl toComponent() {
+            return toComponent(false);
         }
 
-        ComponentGroupImpl toComponentGroup() {
-            final LinkedHashMap<Coordinate, ComponentImpl> components = new LinkedHashMap<>();
-            for(Map.Entry<Coordinate, ComponentBuilder> entry : componentBuilders.entrySet()) {
-                components.put(entry.getKey(), entry.getValue().toComponent(true));
-            }
-            return new ComponentGroupImpl(group, resourceServiceComponent, pieComponent, MapView.of(components));
+        ComponentImpl toComponent(boolean forceNotPartOfGroup) {
+            return new ComponentImpl(
+                coordinate,
+                !forceNotPartOfGroup && group != null,
+                resourceServiceComponent,
+                languageComponent,
+                pieComponent,
+                MapView.of(subcomponents),
+                participant
+            );
+        }
+
+        @Override public void register(Class<?> type, Object obj) {
+            subcomponents.put(type, obj);
         }
     }
 
-    private void addToGlobalResourceRegistryProviders(Participant<L, R, P> participant, ArrayList<ResourceRegistriesProvider> providers) {
-        final @Nullable ResourceRegistriesProvider provider = participant.getGlobalResourceRegistriesProvider(loggerComponent, baseResourceServiceComponent, platformComponent);
+
+    private void addToGlobalResourceRegistryProviders(
+        ComponentBuilder componentBuilder,
+        ArrayList<ResourceRegistriesProvider> providers,
+        DependencyResolver dependencyResolver
+    ) {
+        final @Nullable ResourceRegistriesProvider provider = componentBuilder.participant.getGlobalResourceRegistriesProvider(
+            loggerComponent,
+            baseResourceServiceComponent,
+            platformComponent,
+            componentBuilder,
+            dependencyResolver
+        );
         if(provider != null) {
             providers.add(provider);
         }
     }
 
-    private void addToGlobalTaskDefsProvider(Participant<L, R, P> participant, ArrayList<TaskDefsProvider> providers, ResourceServiceComponent resourceServiceComponent) {
-        final @Nullable TaskDefsProvider provider = participant.getGlobalTaskDefsProvider(loggerComponent, resourceServiceComponent, platformComponent);
+    private void addToGlobalTaskDefsProvider(
+        ComponentBuilder componentBuilder,
+        ArrayList<TaskDefsProvider> providers,
+        DependencyResolver dependencyResolver
+    ) {
+        final @Nullable TaskDefsProvider provider = componentBuilder.participant.getGlobalTaskDefsProvider(
+            loggerComponent,
+            baseResourceServiceComponent,
+            componentBuilder.resourceServiceComponent,
+            platformComponent,
+            componentBuilder,
+            dependencyResolver
+        );
         if(provider != null) {
             providers.add(provider);
         }
     }
 
     private ResourceServiceComponent createResourceComponent(
-        Iterable<Participant<L, R, P>> participants,
+        Iterable<ComponentBuilder> builders,
         Iterable<ResourceRegistriesProvider> additionalProviders,
         Stream<Consumer<ResourceServiceModule>> customizers
     ) {
         final ResourceServiceModule resourceServiceModule = baseResourceServiceComponent.createChildModule();
-        for(Participant<L, R, P> participant : participants) {
-            final @Nullable ResourceRegistriesProvider provider = participant.getResourceRegistriesProvider(loggerComponent, baseResourceServiceComponent, platformComponent);
-            if(provider != null) {
-                resourceServiceModule.addRegistriesFrom(provider);
+        for(ComponentBuilder builder : builders) {
+            if(builder.resourceRegistriesProvider != null) {
+                resourceServiceModule.addRegistriesFrom(builder.resourceRegistriesProvider);
             }
         }
         additionalProviders.forEach(resourceServiceModule::addRegistriesFrom);
-        for(Participant<L, R, P> participant : participants) {
-            final @Nullable Consumer<ResourceServiceModule> customizer = participant.getResourceServiceModuleCustomizer();
+        for(ComponentBuilder builder : builders) {
+            final @Nullable Consumer<ResourceServiceModule> customizer = builder.participant.getResourceServiceModuleCustomizer();
             if(customizer != null) {
                 customizer.accept(resourceServiceModule);
             }
@@ -357,7 +468,7 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
     }
 
     private RootPieComponent createPieComponent(
-        Iterable<Participant<L, R, P>> participants,
+        Iterable<ComponentBuilder> builders,
         ResourceServiceComponent resourceServiceComponent,
         Iterable<TaskDefsProvider> additionalProviders,
         @Nullable ClassLoader classLoader,
@@ -365,10 +476,9 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
     ) {
         // First collect into list of TaskDefsProvider such that all participants get activated.
         final ArrayList<TaskDefsProvider> taskDefsProviders = new ArrayList<>();
-        for(Participant<L, R, P> participant : participants) {
-            final @Nullable TaskDefsProvider taskDefsProvider = participant.getTaskDefsProvider(loggerComponent, baseResourceServiceComponent, resourceServiceComponent, platformComponent);
-            if(taskDefsProvider != null) {
-                taskDefsProviders.add(taskDefsProvider);
+        for(ComponentBuilder builder : builders) {
+            if(builder.taskDefsProvider != null) {
+                taskDefsProviders.add(builder.taskDefsProvider);
             }
         }
         // Then add all those TaskDefsProviders to the PIE module. This order is important for the order in which
@@ -380,8 +490,8 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
         // Then add additional providers, set classloader, and run customizers.
         additionalProviders.forEach(pieModule::addTaskDefsFrom);
         pieModule.withSerdeFactory(loggerFactory -> new JavaSerde(classLoader));
-        for(Participant<L, R, P> participant : participants) {
-            final @Nullable Consumer<RootPieModule> customizer = participant.getPieModuleCustomizer();
+        for(ComponentBuilder builder : builders) {
+            final @Nullable Consumer<RootPieModule> customizer = builder.participant.getPieModuleCustomizer();
             if(customizer != null) {
                 customizer.accept(pieModule);
             }

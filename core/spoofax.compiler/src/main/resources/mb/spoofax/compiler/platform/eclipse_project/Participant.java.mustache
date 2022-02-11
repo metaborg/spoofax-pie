@@ -4,6 +4,8 @@ import mb.log.api.Logger;
 import mb.pie.api.ExecException;
 import mb.pie.dagger.PieComponent;
 import mb.resource.dagger.ResourceServiceComponent;
+import mb.spoofax.core.component.ComponentDependencyResolver;
+import mb.spoofax.core.component.SubcomponentRegistry;
 import mb.spoofax.eclipse.EclipseParticipant;
 import mb.spoofax.eclipse.EclipsePlatformComponent;
 import mb.spoofax.eclipse.EclipseResourceServiceComponent;
@@ -73,11 +75,35 @@ public class {{baseParticipant.id}} extends {{adapterProjectCompilerInput.partic
 
 
     @Override
+    public {{eclipseComponent.qualifiedId}} getTaskDefsProvider(
+        EclipseLoggerComponent loggerComponent,
+        EclipseResourceServiceComponent baseResourceServiceComponent,
+        ResourceServiceComponent resourceServiceComponent,
+        EclipsePlatformComponent platformComponent,
+        SubcomponentRegistry subcomponentRegistry,
+        ComponentDependencyResolver dependencyResolver
+    ) {
+        final {{eclipseComponent.qualifiedId}} languageComponent = getLanguageComponent(
+            loggerComponent,
+            baseResourceServiceComponent,
+            resourceServiceComponent,
+            platformComponent,
+            subcomponentRegistry,
+            dependencyResolver
+        );
+        subcomponentRegistry.register({{adapterProjectCompilerInput.component.qualifiedId}}.class, languageComponent);
+        subcomponentRegistry.register({{eclipseComponent.qualifiedId}}.class, languageComponent);
+        return languageComponent;
+    }
+
+    @Override
     public {{eclipseComponent.qualifiedId}} getLanguageComponent(
         EclipseLoggerComponent loggerComponent,
         EclipseResourceServiceComponent baseResourceServiceComponent,
         ResourceServiceComponent resourceServiceComponent,
-        EclipsePlatformComponent platformComponent
+        EclipsePlatformComponent platformComponent,
+        SubcomponentRegistry subcomponentRegistry,
+        ComponentDependencyResolver dependencyResolver
     ) {
         if(eclipseComponent == null) {
             final {{adapterProjectCompilerInput.module.qualifiedId}} module = createModule(loggerComponent, baseResourceServiceComponent, resourceServiceComponent, platformComponent);
@@ -85,7 +111,7 @@ public class {{baseParticipant.id}} extends {{adapterProjectCompilerInput.partic
             final {{daggerEclipseComponent.qualifiedId}}.Builder builder = {{daggerEclipseComponent.qualifiedId}}.builder()
                 .{{adapterProjectCompilerInput.module.idAsCamelCase}}(module)
                 .eclipseLoggerComponent(loggerComponent)
-                .{{adapterProjectCompilerInput.resourcesComponent.idAsCamelCase}}(getResourceRegistriesProvider(loggerComponent, baseResourceServiceComponent, platformComponent))
+                .{{adapterProjectCompilerInput.resourcesComponent.idAsCamelCase}}(getResourceRegistriesProvider(loggerComponent, baseResourceServiceComponent, platformComponent, subcomponentRegistry, dependencyResolver))
                 .resourceServiceComponent(resourceServiceComponent)
                 .eclipsePlatformComponent(platformComponent);
             getCustomizers(loggerComponent).forEach(c -> c.customize(builder));
@@ -98,9 +124,11 @@ public class {{baseParticipant.id}} extends {{adapterProjectCompilerInput.partic
 
     @Override public void start(
         EclipseLoggerComponent loggerComponent,
+        EclipseResourceServiceComponent baseResourceServiceComponent,
         ResourceServiceComponent resourceServiceComponent,
         EclipsePlatformComponent platformComponent,
-        PieComponent pieComponent
+        PieComponent pieComponent,
+        ComponentDependencyResolver dependencyResolver
     ) {
         this.pieComponent = pieComponent;
         final {{eclipseComponent.qualifiedId}} component = getComponent();

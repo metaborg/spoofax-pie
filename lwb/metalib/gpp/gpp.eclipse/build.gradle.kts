@@ -10,9 +10,6 @@ dependencies {
 
 languageEclipseProject {
   adapterProject.set(project(":gpp"))
-  compilerInput {
-    languageGroup("mb.spoofax.lwb")
-  }
 }
 
 tasks {

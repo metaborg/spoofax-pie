@@ -262,10 +262,6 @@ public class EclipseProjectCompiler implements TaskDef<Supplier<Result<Option<Ec
 
         String packageId();
 
-        @Value.Default default String languageGroup() {
-            return packageId();
-        }
-
 
         /// Gradle configuration
 

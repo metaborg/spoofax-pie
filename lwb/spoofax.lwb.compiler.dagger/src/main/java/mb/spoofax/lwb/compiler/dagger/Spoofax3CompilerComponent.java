@@ -44,6 +44,7 @@ import java.util.Set;
     dependencies = {
         LoggerComponent.class,
         ResourceServiceComponent.class,
+
         CfgComponent.class,
         Sdf3Component.class,
         StrategoComponent.class,
@@ -56,13 +57,47 @@ import java.util.Set;
         StrategoLibResourcesComponent.class,
         GppComponent.class,
         GppResourcesComponent.class,
+
         LibSpoofax2Component.class,
         LibSpoofax2ResourcesComponent.class,
         LibStatixComponent.class,
         LibStatixResourcesComponent.class,
     }
 )
-public interface Spoofax3CompilerComponent extends TaskDefsProvider {
+public interface Spoofax3CompilerComponent extends TaskDefsProvider, AutoCloseable {
+    LoggerComponent getLoggerComponent();
+
+    ResourceServiceComponent getResourceServiceComponent();
+
+    CfgComponent getCfgComponent();
+
+    Sdf3Component getSdf3Component();
+
+    StrategoComponent getStrategoComponent();
+
+    EsvComponent getEsvComponent();
+
+    StatixComponent getStatixComponent();
+
+    Sdf3ExtStatixComponent getSdf3ExtStatixComponent();
+
+    StrategoLibComponent getStrategoLibComponent();
+
+    StrategoLibResourcesComponent getStrategoLibResourcesComponent();
+
+    GppComponent getGppComponent();
+
+    GppResourcesComponent getGppResourcesComponent();
+
+    LibSpoofax2Component getLibSpoofax2Component();
+
+    LibSpoofax2ResourcesComponent getLibSpoofax2ResourcesComponent();
+
+    LibStatixComponent getLibStatixComponent();
+
+    LibStatixResourcesComponent getLibStatixResourcesComponent();
+
+
     CompileLanguage getCompileLanguage();
 
     CheckLanguageSpecification getCheckLanguageSpecification();
@@ -93,4 +128,8 @@ public interface Spoofax3CompilerComponent extends TaskDefsProvider {
 
 
     @Override @Spoofax3CompilerQualifier Set<TaskDef<?, ?>> getTaskDefs();
+
+    @Override default void close() {
+        // For now, nothing to close. Spoofax3CompilerComponent may implement AutoCloseable in the future.
+    }
 }

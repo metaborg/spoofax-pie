@@ -59,6 +59,8 @@ languageAdapterProject {
   }
 }
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
+  compositionGroup("mb.spoofax.lwb")
+
   // Symbols
   addLineCommentSymbols("//")
   addBlockCommentSymbols(BlockCommentSymbols("/*", "*/"))
@@ -75,6 +77,10 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   baseComponent(packageId, "BaseSptComponent")
   extendComponent(packageId, "SptComponent")
   addAdditionalModules("$packageId.fromterm", "ExpectationFromTermsModule")
+
+  // Extend participant
+  baseParticipant(packageId, "BaseSptParticipant")
+  extendParticipant(packageId, "SptParticipant")
 
   // Wrap Check and rename base tasks
   isMultiFile(false)

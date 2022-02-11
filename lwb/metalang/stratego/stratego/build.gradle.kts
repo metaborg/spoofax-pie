@@ -84,6 +84,8 @@ languageAdapterProject {
   }
 }
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
+  compositionGroup("mb.spoofax.lwb")
+
   val incrPackageId = "$packageId.incr"
   val commandPackageId = "$packageId.command"
 

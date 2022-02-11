@@ -34,6 +34,8 @@ import mb.spoofax.compiler.dagger.SpoofaxCompilerModule;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.core.Coordinate;
 import mb.spoofax.core.Version;
+import mb.spoofax.core.component.ComponentDependencyResolver;
+import mb.spoofax.core.component.SubcomponentRegistry;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.EclipseParticipant;
 import mb.spoofax.eclipse.EclipsePlatformComponent;
@@ -134,7 +136,7 @@ public class SpoofaxLwbParticipant implements EclipseParticipant {
     }
 
     @Override
-    public @Nullable String getGroup() {
+    public @Nullable String getCompositionGroup() {
         return "mb.spoofax.lwb";
     }
 
@@ -142,8 +144,8 @@ public class SpoofaxLwbParticipant implements EclipseParticipant {
     public @Nullable ResourceRegistriesProvider getResourceRegistriesProvider(
         EclipseLoggerComponent loggerComponent,
         EclipseResourceServiceComponent baseResourceServiceComponent,
-        EclipsePlatformComponent platformComponent
-    ) {
+        EclipsePlatformComponent platformComponent,
+        SubcomponentRegistry subcomponentRegistry, ComponentDependencyResolver dependencyResolver) {
         return null;
     }
 
@@ -152,8 +154,8 @@ public class SpoofaxLwbParticipant implements EclipseParticipant {
         EclipseLoggerComponent loggerComponent,
         EclipseResourceServiceComponent baseResourceServiceComponent,
         ResourceServiceComponent resourceServiceComponent,
-        EclipsePlatformComponent platformComponent
-    ) {
+        EclipsePlatformComponent platformComponent,
+        SubcomponentRegistry subcomponentRegistry, ComponentDependencyResolver dependencyResolver) {
         this.resourceServiceComponent = resourceServiceComponent;
         return () -> {
             // Inside closure so that it is lazily initialized -> meta-language instances should be available.
@@ -261,7 +263,6 @@ public class SpoofaxLwbParticipant implements EclipseParticipant {
                     .build();
             }
             final HashSet<TaskDef<?, ?>> taskDefs = new HashSet<>();
-            taskDefs.addAll(spoofax3Compiler.spoofaxCompilerComponent.getTaskDefs());
             taskDefs.addAll(spoofax3Compiler.component.getTaskDefs());
             taskDefs.addAll(dynamicLoadingComponent.getTaskDefs());
             return taskDefs;
@@ -273,8 +274,8 @@ public class SpoofaxLwbParticipant implements EclipseParticipant {
         EclipseLoggerComponent loggerComponent,
         EclipseResourceServiceComponent baseResourceServiceComponent,
         ResourceServiceComponent resourceServiceComponent,
-        EclipsePlatformComponent platformComponent
-    ) {
+        EclipsePlatformComponent platformComponent,
+        SubcomponentRegistry subcomponentRegistry, ComponentDependencyResolver dependencyResolver) {
         return null;
     }
 
@@ -301,8 +302,8 @@ public class SpoofaxLwbParticipant implements EclipseParticipant {
         EclipseLoggerComponent loggerComponent,
         EclipseResourceServiceComponent baseResourceServiceComponent, ResourceServiceComponent resourceServiceComponent,
         EclipsePlatformComponent platformComponent,
-        PieComponent pieComponent
-    ) {
+        PieComponent pieComponent,
+        ComponentDependencyResolver dependencyResolver) {
         this.pieComponent = pieComponent;
         spoofaxLwbComponent.getDynamicChangeProcessor().register();
         spoofaxLwbComponent.getDynamicEditorTracker().register();

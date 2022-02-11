@@ -411,7 +411,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
 
         /// Configuration
 
-        Optional<String> componentGroup();
+        Optional<String> compositionGroup();
 
         /* None indicates that the language project is the same project as the adapter project */
         Option<GradleDependency> languageProjectDependency();

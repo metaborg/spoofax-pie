@@ -16,9 +16,9 @@ import mb.spoofax.core.Coordinate;
 import mb.spoofax.core.CoordinateRequirement;
 import mb.spoofax.core.component.Component;
 import mb.spoofax.core.component.ComponentBuilderBase;
-import mb.spoofax.core.component.ComponentGroupImpl;
-import mb.spoofax.core.component.Participant;
+import mb.spoofax.core.component.ComponentGroup;
 import mb.spoofax.core.component.ComponentImpl;
+import mb.spoofax.core.component.Participant;
 import mb.spoofax.core.component.StaticComponentManager;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.platform.PlatformComponent;
@@ -98,29 +98,19 @@ public class DynamicComponentManagerImpl<L extends LoggerComponent, R extends Re
     }
 
     @Override
-    public CollectionView<Component> getComponents(CoordinateRequirement coordinateRequirement) {
+    public CollectionView<? extends Component> getComponents(CoordinateRequirement coordinateRequirement) {
         final CollectionView<DynamicComponent> dynamicComponents = getDynamicComponents(coordinateRequirement);
-        final CollectionView<Component> staticComponents = staticComponentManager.getComponents(coordinateRequirement);
+        final CollectionView<? extends Component> staticComponents = staticComponentManager.getComponents(coordinateRequirement);
         return CollectionView.of(Stream.concat(dynamicComponents.stream(), staticComponents.stream()));
     }
 
     @Override
-    public Option<ComponentImpl<?, ?, ?>> getStandaloneComponent(Coordinate coordinate) {
-        return staticComponentManager.getStandaloneComponent(coordinate);
-    }
-
-    @Override
-    public MapView<Coordinate, ? extends ComponentImpl<?, ?, ?>> getStandaloneComponents() {
-        return staticComponentManager.getStandaloneComponents();
-    }
-
-    @Override
-    public Option<ComponentGroupImpl<?, ?, ?>> getComponentGroup(String group) {
+    public Option<? extends ComponentGroup> getComponentGroup(String group) {
         return staticComponentManager.getComponentGroup(group);
     }
 
     @Override
-    public MapView<String, ? extends ComponentGroupImpl<?, ?, ?>> getComponentGroups() {
+    public MapView<String, ? extends ComponentGroup> getComponentGroups() {
         return staticComponentManager.getComponentGroups();
     }
 
@@ -134,9 +124,34 @@ public class DynamicComponentManagerImpl<L extends LoggerComponent, R extends Re
     @Override
     public CollectionView<LanguageComponent> getLanguageComponents(CoordinateRequirement coordinateRequirement) {
         final Stream<LanguageComponent> dynamicComponents = dynamicComponentPerCompiledSources.values().stream()
-            .flatMap(dc -> dc.getLanguageComponents(coordinateRequirement).stream());
+            .filter(dc -> coordinateRequirement.matches(dc.getCoordinate()))
+            .flatMap(dc -> dc.getLanguageComponent().stream());
         final CollectionView<LanguageComponent> staticComponents = staticComponentManager.getLanguageComponents(coordinateRequirement);
         return CollectionView.of(Stream.concat(dynamicComponents, staticComponents.stream()));
+    }
+
+    @Override
+    public <T> Option<T> getSubcomponent(Coordinate coordinate, Class<T> subcomponentType) {
+        return Option.ofNullable(dynamicComponentPerCoordinate.get(coordinate))
+            .flatMap(dc -> dc.getSubcomponent(subcomponentType))
+            .orElse(() -> staticComponentManager.getSubcomponent(coordinate, subcomponentType));
+    }
+
+    @Override
+    public <T> CollectionView<T> getSubcomponents(Class<T> subcomponentType) {
+        final Stream<T> dynamicSubcomponents = dynamicComponentPerCompiledSources.values().stream()
+            .flatMap(dc -> dc.getSubcomponent(subcomponentType).stream());
+        final CollectionView<T> staticSubcomponents = staticComponentManager.getSubcomponents(subcomponentType);
+        return CollectionView.of(Stream.concat(dynamicSubcomponents, staticSubcomponents.stream()));
+    }
+
+    @Override
+    public <T> CollectionView<T> getSubcomponents(CoordinateRequirement coordinateRequirement, Class<T> subcomponentType) {
+        final Stream<T> dynamicSubcomponents = dynamicComponentPerCompiledSources.values().stream()
+            .filter(dc -> coordinateRequirement.matches(dc.getCoordinate()))
+            .flatMap(dc -> dc.getSubcomponent(subcomponentType).stream());
+        final CollectionView<T> staticSubcomponents = staticComponentManager.getSubcomponents(coordinateRequirement, subcomponentType);
+        return CollectionView.of(Stream.concat(dynamicSubcomponents, staticSubcomponents.stream()));
     }
 
 
@@ -245,7 +260,7 @@ public class DynamicComponentManagerImpl<L extends LoggerComponent, R extends Re
                 )))),
             classLoader
         ); // NOTE: global providers are ignored, as it would require all participants to be reconstructed.
-        final ComponentImpl<L, R, P> component = result.component;
+        final ComponentImpl component = result.component;
         serializingStoreInMemoryBuffer.close(); // TODO: can we close this here? Should be fine since we do not use the buffer after deserialization?
         final DynamicComponent dynamicComponent = new DynamicComponent(rootDirectory, component.coordinate, classLoader, component, serializingStoreInMemoryBuffer);
         return registerComponent(rootDirectory, dynamicComponent);

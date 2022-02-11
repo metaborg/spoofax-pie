@@ -24,15 +24,15 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class StaticComponentManager implements ComponentManager {
-    public final LoggerComponent loggerComponent;
-    public final PlatformComponent platformComponent;
+public class StaticComponentManager<L extends LoggerComponent, R extends ResourceServiceComponent, P extends PlatformComponent> implements ComponentManager {
+    public final L loggerComponent;
+    public final P platformComponent;
 
     private final MapView<Coordinate, ComponentImpl> componentsByCoordinate;
     private final MapView<String, ComponentGroupImpl> componentGroups;
 
     // Following fields are kept for use by dynamic component managers.
-    public final ResourceServiceComponent baseResourceServiceComponent;
+    public final R baseResourceServiceComponent;
     public final Supplier<PieBuilder> pieBuilderSupplier;
     public final ListView<ResourceRegistriesProvider> globalResourceRegistryProviders;
     public final ListView<TaskDefsProvider> globalTaskDefsProviders;
@@ -43,13 +43,13 @@ public class StaticComponentManager implements ComponentManager {
 
 
     StaticComponentManager(
-        LoggerComponent loggerComponent,
-        PlatformComponent platformComponent,
+        L loggerComponent,
+        P platformComponent,
 
         ArrayList<ComponentImpl> componentsList,
         ArrayList<ComponentGroupImpl> componentGroupsList,
 
-        ResourceServiceComponent baseResourceServiceComponent,
+        R baseResourceServiceComponent,
         Supplier<PieBuilder> pieBuilderSupplier,
         ListView<ResourceRegistriesProvider> globalResourceRegistryProviders,
         ListView<TaskDefsProvider> globalTaskDefsProviders,
@@ -153,26 +153,26 @@ public class StaticComponentManager implements ComponentManager {
     // Typed subcomponents
 
     @Override
-    public <T> Option<T> getSubcomponent(Coordinate coordinate, Class<T> subcomponentClass) {
+    public <T> Option<T> getSubcomponent(Coordinate coordinate, Class<T> subcomponentType) {
         final @Nullable ComponentImpl component = componentsByCoordinate.get(coordinate);
         if(component != null) {
-            return component.getSubcomponent(subcomponentClass);
+            return component.getSubcomponent(subcomponentType);
         }
         return Option.ofNone();
     }
 
     @Override
-    public <T> CollectionView<T> getSubcomponents(Class<T> subcomponentClass) {
+    public <T> CollectionView<T> getSubcomponents(Class<T> subcomponentType) {
         return CollectionView.of(componentsByCoordinate.values().stream()
-            .flatMap(c -> c.getSubcomponent(subcomponentClass).stream())
+            .flatMap(c -> c.getSubcomponent(subcomponentType).stream())
         );
     }
 
     @Override
-    public <T> CollectionView<T> getSubcomponents(CoordinateRequirement coordinateRequirement, Class<T> subcomponentClass) {
+    public <T> CollectionView<T> getSubcomponents(CoordinateRequirement coordinateRequirement, Class<T> subcomponentType) {
         return CollectionView.of(componentsByCoordinate.values().stream()
             .filter(c -> c.matchesCoordinate(coordinateRequirement))
-            .flatMap(c -> c.getSubcomponent(subcomponentClass).stream())
+            .flatMap(c -> c.getSubcomponent(subcomponentType).stream())
         );
     }
 }

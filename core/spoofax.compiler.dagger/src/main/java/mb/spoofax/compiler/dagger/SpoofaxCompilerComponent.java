@@ -39,7 +39,7 @@ import java.util.Set;
         ResourceServiceComponent.class
     }
 )
-public interface SpoofaxCompilerComponent extends TaskDefsProvider {
+public interface SpoofaxCompilerComponent extends TaskDefsProvider, AutoCloseable {
     ClassLoaderResourcesCompiler getClassloaderResourcesCompiler();
 
 
@@ -87,4 +87,8 @@ public interface SpoofaxCompilerComponent extends TaskDefsProvider {
 
 
     @Override @SpoofaxCompilerQualifier Set<TaskDef<?, ?>> getTaskDefs();
+
+    @Override default void close() {
+        // For now, nothing to close. SpoofaxCompilerComponent may implement AutoCloseable in the future.
+    }
 }

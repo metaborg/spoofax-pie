@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-
   <!-- Lifecycle participant -->
-  <extension point="spoofax.eclipse.lifecycle">
-    <language group="mb.tiger" class="mb.tiger.eclipse.TigerLanguageFactory"/>
+  <extension point="spoofax.eclipse.participant">
+    <participant class="mb.tiger.eclipse.TigerEclipseParticipantFactory"/>
   </extension>
 
   <!-- Context -->

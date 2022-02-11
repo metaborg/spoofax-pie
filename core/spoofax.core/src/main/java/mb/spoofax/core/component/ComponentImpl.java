@@ -80,11 +80,11 @@ public class ComponentImpl implements Component {
         return pieComponent;
     }
 
-    @Override public <T> Option<T> getSubcomponent(Class<T> componentClass) {
+    @Override public <T> Option<T> getSubcomponent(Class<T> subcomponentType) {
         if(closed)
             throw new IllegalStateException("Cannot get subcomponent, component '" + coordinate + "' has been closed");
-        final @Nullable Object subcomponent = subcomponents.get(componentClass);
-        if(subcomponent != null && componentClass.isAssignableFrom(subcomponent.getClass())) {
+        final @Nullable Object subcomponent = subcomponents.get(subcomponentType);
+        if(subcomponent != null && subcomponentType.isAssignableFrom(subcomponent.getClass())) {
             @SuppressWarnings("unchecked") final T typed = (T)subcomponent;
             return Option.ofSome(typed);
         }

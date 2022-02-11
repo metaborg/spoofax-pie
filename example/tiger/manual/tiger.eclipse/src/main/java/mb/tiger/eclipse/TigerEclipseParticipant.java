@@ -3,6 +3,8 @@ package mb.tiger.eclipse;
 import mb.pie.api.ExecException;
 import mb.pie.dagger.PieComponent;
 import mb.resource.dagger.ResourceServiceComponent;
+import mb.spoofax.core.component.ComponentDependencyResolver;
+import mb.spoofax.core.component.SubcomponentRegistry;
 import mb.spoofax.eclipse.EclipseParticipant;
 import mb.spoofax.eclipse.EclipsePlatformComponent;
 import mb.spoofax.eclipse.EclipseResourceServiceComponent;
@@ -10,6 +12,7 @@ import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 import mb.spoofax.eclipse.resource.EclipseClassLoaderToNativeResolver;
 import mb.spoofax.eclipse.resource.EclipseClassLoaderUrlResolver;
 import mb.spoofax.eclipse.util.StatusUtil;
+import mb.tiger.spoofax.TigerComponent;
 import mb.tiger.spoofax.TigerModule;
 import mb.tiger.spoofax.TigerParticipant;
 import mb.tiger.spoofax.TigerResourcesModule;
@@ -58,11 +61,35 @@ public class TigerEclipseParticipant extends TigerParticipant<EclipseLoggerCompo
 
 
     @Override
+    public TigerEclipseComponent getTaskDefsProvider(
+        EclipseLoggerComponent loggerComponent,
+        EclipseResourceServiceComponent baseResourceServiceComponent,
+        ResourceServiceComponent resourceServiceComponent,
+        EclipsePlatformComponent platformComponent,
+        SubcomponentRegistry subcomponentRegistry,
+        ComponentDependencyResolver dependencyResolver
+    ) {
+        final TigerEclipseComponent languageComponent = getLanguageComponent(
+            loggerComponent,
+            baseResourceServiceComponent,
+            resourceServiceComponent,
+            platformComponent,
+            subcomponentRegistry,
+            dependencyResolver
+        );
+        subcomponentRegistry.register(TigerComponent.class, languageComponent);
+        subcomponentRegistry.register(TigerEclipseComponent.class, languageComponent);
+        return languageComponent;
+    }
+
+    @Override
     public TigerEclipseComponent getLanguageComponent(
         EclipseLoggerComponent loggerComponent,
         EclipseResourceServiceComponent baseResourceServiceComponent,
         ResourceServiceComponent resourceServiceComponent,
-        EclipsePlatformComponent platformComponent
+        EclipsePlatformComponent platformComponent,
+        SubcomponentRegistry subcomponentRegistry,
+        ComponentDependencyResolver dependencyResolver
     ) {
         if(eclipseComponent == null) {
             final TigerModule module = createModule(loggerComponent, baseResourceServiceComponent, resourceServiceComponent, platformComponent);
@@ -70,7 +97,7 @@ public class TigerEclipseParticipant extends TigerParticipant<EclipseLoggerCompo
             final DaggerTigerEclipseComponent.Builder builder = DaggerTigerEclipseComponent.builder()
                 .tigerModule(module)
                 .eclipseLoggerComponent(loggerComponent)
-                .tigerResourcesComponent(getResourceRegistriesProvider(loggerComponent, baseResourceServiceComponent, platformComponent))
+                .tigerResourcesComponent(getResourceRegistriesProvider(loggerComponent, baseResourceServiceComponent, platformComponent, subcomponentRegistry, dependencyResolver))
                 .resourceServiceComponent(resourceServiceComponent)
                 .eclipsePlatformComponent(platformComponent);
             eclipseComponent = builder.build();
@@ -82,9 +109,11 @@ public class TigerEclipseParticipant extends TigerParticipant<EclipseLoggerCompo
 
     @Override public void start(
         EclipseLoggerComponent loggerComponent,
-        EclipseResourceServiceComponent baseResourceServiceComponent, ResourceServiceComponent resourceServiceComponent,
+        EclipseResourceServiceComponent baseResourceServiceComponent,
+        ResourceServiceComponent resourceServiceComponent,
         EclipsePlatformComponent platformComponent,
-        PieComponent pieComponent
+        PieComponent pieComponent,
+        ComponentDependencyResolver dependencyResolver
     ) {
         this.pieComponent = pieComponent;
         final TigerEclipseComponent component = getComponent();

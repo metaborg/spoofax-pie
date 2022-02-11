@@ -5,9 +5,6 @@ plugins {
 
 languageEclipseProject {
   adapterProject.set(project(":strategolib"))
-  compilerInput {
-    languageGroup("mb.spoofax.lwb")
-  }
 }
 
 tasks {

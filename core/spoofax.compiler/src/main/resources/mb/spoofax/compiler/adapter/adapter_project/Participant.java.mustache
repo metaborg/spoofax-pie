@@ -10,9 +10,11 @@ import mb.resource.dagger.ResourceRegistriesProvider;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.resource.dagger.ResourceServiceModule;
 import mb.spoofax.core.Coordinate;
+import mb.spoofax.core.CoordinateRequirement;
 import mb.spoofax.core.Version;
-import mb.spoofax.core.component.ComponentDependency;
+import mb.spoofax.core.component.ComponentDependencyResolver;
 import mb.spoofax.core.component.Participant;
+import mb.spoofax.core.component.SubcomponentRegistry;
 import mb.spoofax.core.platform.PlatformComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -38,18 +40,18 @@ public class {{baseParticipant.id}}<L extends LoggerComponent, R extends Resourc
     }
 
     @Override
-    public ListView<ComponentDependency> getDependencies() {
+    public ListView<CoordinateRequirement> getDependencies() {
         return ListView.of();
     }
 
     @Override
-    public @Nullable String getGroup() {
-{{#componentGroup}}
+    public @Nullable String getCompositionGroup() {
+{{#compositionGroup}}
         return "{{this}}";
-{{/componentGroup}}
-{{^componentGroup}}
+{{/compositionGroup}}
+{{^compositionGroup}}
         return null;
-{{/componentGroup}}
+{{/compositionGroup}}
     }
 
     @Override
@@ -59,12 +61,25 @@ public class {{baseParticipant.id}}<L extends LoggerComponent, R extends Resourc
 
 
     @Override
-    public @Nullable ResourceRegistriesProvider getGlobalResourceRegistriesProvider(L loggerComponent, R baseResourceServiceComponent, P platformComponent) {
+    public @Nullable ResourceRegistriesProvider getGlobalResourceRegistriesProvider(
+        L loggerComponent,
+        R baseResourceServiceComponent,
+        P platformComponent,
+        SubcomponentRegistry subcomponentRegistry,
+        ComponentDependencyResolver dependencyResolver
+    ) {
         return null;
     }
 
     @Override
-    public @Nullable TaskDefsProvider getGlobalTaskDefsProvider(L loggerComponent, ResourceServiceComponent resourceServiceComponent, P platformComponent) {
+    public @Nullable TaskDefsProvider getGlobalTaskDefsProvider(
+        L loggerComponent,
+        R baseResourceServiceComponent,
+        ResourceServiceComponent resourceServiceComponent,
+        P platformComponent,
+        SubcomponentRegistry subcomponentRegistry,
+        ComponentDependencyResolver dependencyResolver
+    ) {
         return null;
     }
 
@@ -95,7 +110,9 @@ public class {{baseParticipant.id}}<L extends LoggerComponent, R extends Resourc
     public {{resourcesComponent.qualifiedId}} getResourceRegistriesProvider(
         L loggerComponent,
         R baseResourceServiceComponent,
-        P platformComponent
+        P platformComponent,
+        SubcomponentRegistry subcomponentRegistry,
+        ComponentDependencyResolver dependencyResolver
     ) {
         if(resourcesComponent == null) {
             final {{resourcesModule.qualifiedId}} module = createResourcesModule(loggerComponent, baseResourceServiceComponent, platformComponent);
@@ -104,6 +121,7 @@ public class {{baseParticipant.id}}<L extends LoggerComponent, R extends Resourc
                 .{{resourcesModule.idAsCamelCase}}(module);
             customizeResourcesComponentBuilder(loggerComponent, baseResourceServiceComponent, platformComponent, builder);
             resourcesComponent = builder.build();
+            subcomponentRegistry.register({{resourcesComponent.qualifiedId}}.class, resourcesComponent);
         }
         return resourcesComponent;
     }
@@ -115,8 +133,24 @@ public class {{baseParticipant.id}}<L extends LoggerComponent, R extends Resourc
 
 
     @Override
-    public TaskDefsProvider getTaskDefsProvider(L loggerComponent, R baseResourceServiceComponent, ResourceServiceComponent resourceServiceComponent, P platformComponent) {
-        return getLanguageComponent(loggerComponent, baseResourceServiceComponent, resourceServiceComponent, platformComponent);
+    public {{component.qualifiedId}} getTaskDefsProvider(
+        L loggerComponent,
+        R baseResourceServiceComponent,
+        ResourceServiceComponent resourceServiceComponent,
+        P platformComponent,
+        SubcomponentRegistry subcomponentRegistry,
+        ComponentDependencyResolver dependencyResolver
+    ) {
+        final {{component.qualifiedId}} languageComponent = getLanguageComponent(
+            loggerComponent,
+            baseResourceServiceComponent,
+            resourceServiceComponent,
+            platformComponent,
+            subcomponentRegistry,
+            dependencyResolver
+        );
+        subcomponentRegistry.register({{component.qualifiedId}}.class, languageComponent);
+        return languageComponent;
     }
 
     protected {{module.qualifiedId}} createModule(
@@ -137,14 +171,21 @@ public class {{baseParticipant.id}}<L extends LoggerComponent, R extends Resourc
     ) {}
 
     @Override
-    public {{component.qualifiedId}} getLanguageComponent(L loggerComponent, R baseResourceServiceComponent, ResourceServiceComponent resourceServiceComponent, P platformComponent) {
+    public {{component.qualifiedId}} getLanguageComponent(
+        L loggerComponent,
+        R baseResourceServiceComponent,
+        ResourceServiceComponent resourceServiceComponent,
+        P platformComponent,
+        SubcomponentRegistry subcomponentRegistry,
+        ComponentDependencyResolver dependencyResolver
+    ) {
         if(component == null) {
             final {{module.qualifiedId}} module = createModule(loggerComponent, baseResourceServiceComponent, resourceServiceComponent, platformComponent);
             customizeModule(loggerComponent, baseResourceServiceComponent, resourceServiceComponent, platformComponent, module);
             final {{daggerComponent.qualifiedId}}.Builder builder = {{daggerComponent.qualifiedId}}.builder()
                 .{{module.idAsCamelCase}}(module)
                 .loggerComponent(loggerComponent)
-                .{{resourcesComponent.idAsCamelCase}}(getResourceRegistriesProvider(loggerComponent, baseResourceServiceComponent, platformComponent))
+                .{{resourcesComponent.idAsCamelCase}}(getResourceRegistriesProvider(loggerComponent, baseResourceServiceComponent, platformComponent, subcomponentRegistry, dependencyResolver))
                 .resourceServiceComponent(resourceServiceComponent)
                 .platformComponent(platformComponent);
             component = builder.build();
@@ -159,18 +200,14 @@ public class {{baseParticipant.id}}<L extends LoggerComponent, R extends Resourc
 
 
     @Override
-    public MapView<Class<?>, Object> getSubcomponents(L loggerComponent, R baseResourceServiceComponent, ResourceServiceComponent resourceServiceComponent, P platformComponent, PieComponent pieComponent) {
-        return MapView.of(
-            {{resourcesComponent.qualifiedId}}.class, getResourceRegistriesProvider(loggerComponent, baseResourceServiceComponent, platformComponent),
-            {{component.qualifiedId}}.class, getLanguageComponent(loggerComponent, baseResourceServiceComponent, resourceServiceComponent, platformComponent)
-        );
-    }
-
-
-    @Override
-    public void start(L loggerComponent, R baseResourceServiceComponent, ResourceServiceComponent resourceServiceComponent, P platformComponent, PieComponent pieComponent) {
-
-    }
+    public void start(
+        L loggerComponent,
+        R baseResourceServiceComponent,
+        ResourceServiceComponent resourceServiceComponent,
+        P platformComponent,
+        PieComponent pieComponent,
+        ComponentDependencyResolver dependencyResolver
+    ) {}
 
     @Override public void close() {
         if(component != null) {

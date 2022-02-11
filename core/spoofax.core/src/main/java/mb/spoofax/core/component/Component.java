@@ -22,5 +22,5 @@ public interface Component {
 
     PieComponent getPieComponent();
 
-    <T> Option<T> getSubcomponent(Class<T> componentClass);
+    <T> Option<T> getSubcomponent(Class<T> subcomponentType);
 }

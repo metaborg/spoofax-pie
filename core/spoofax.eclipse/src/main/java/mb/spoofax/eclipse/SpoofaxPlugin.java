@@ -2,8 +2,8 @@ package mb.spoofax.eclipse;
 
 import mb.log.api.Logger;
 import mb.pie.runtime.PieBuilderImpl;
+import mb.spoofax.core.component.StaticComponentBuilder;
 import mb.spoofax.core.component.StaticComponentManager;
-import mb.spoofax.core.component.StaticComponentManagerBuilder;
 import mb.spoofax.eclipse.log.DaggerEclipseLoggerComponent;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -85,7 +85,8 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
             .build();
         platformComponent.init();
 
-        final StaticComponentManagerBuilder<EclipseLoggerComponent, EclipseResourceServiceComponent, EclipsePlatformComponent> builder = new StaticComponentManagerBuilder<>(loggerComponent, baseResourceServiceComponent, platformComponent, PieBuilderImpl::new);
+        final StaticComponentBuilder<EclipseLoggerComponent, EclipseResourceServiceComponent, EclipsePlatformComponent> builder =
+            new StaticComponentBuilder<>(loggerComponent, baseResourceServiceComponent, platformComponent, PieBuilderImpl::new);
         gatherParticipants(builder, logger);
         staticComponentManager = builder.build();
     }
@@ -115,20 +116,24 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
 
 
     private static ArrayList<EclipseParticipant> gatherParticipants(
-        StaticComponentManagerBuilder<EclipseLoggerComponent, EclipseResourceServiceComponent, EclipsePlatformComponent> builder,
+        StaticComponentBuilder<EclipseLoggerComponent, EclipseResourceServiceComponent, EclipsePlatformComponent> builder,
         Logger logger
     ) {
         final ArrayList<EclipseParticipant> participants = new ArrayList<>();
         final IExtensionRegistry registry = Platform.getExtensionRegistry();
-        final IExtensionPoint point = registry.getExtensionPoint(participantExtensionPointId);
+        final @Nullable IExtensionPoint point = registry.getExtensionPoint(participantExtensionPointId);
+        if(point == null) {
+            logger.error("Cannot gather Spoofax component creation participants, extension point {} does not exist", participantExtensionPointId);
+            return participants;
+        }
         for(IExtension extension : point.getExtensions()) {
-            addLifecycleParticipants(builder, logger, extension);
+            addParticipants(builder, logger, extension);
         }
         return participants;
     }
 
-    private static void addLifecycleParticipants(
-        StaticComponentManagerBuilder<EclipseLoggerComponent, EclipseResourceServiceComponent, EclipsePlatformComponent> builder,
+    private static void addParticipants(
+        StaticComponentBuilder<EclipseLoggerComponent, EclipseResourceServiceComponent, EclipsePlatformComponent> builder,
         Logger logger,
         IExtension extension
     ) {

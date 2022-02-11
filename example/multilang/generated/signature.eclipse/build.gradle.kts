@@ -5,7 +5,4 @@ plugins {
 
 languageEclipseProject {
   adapterProject.set(project(":signature"))
-  compilerInput {
-    languageGroup("minimeta")
-  }
 }
