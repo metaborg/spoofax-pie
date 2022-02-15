@@ -3,6 +3,8 @@ package mb.spoofax.lwb.compiler.dagger;
 import mb.cfg.CfgComponent;
 import mb.common.option.Option;
 import mb.common.result.Result;
+import mb.dynamix.DynamixComponent;
+import mb.dynamix.task.DynamixConfig;
 import mb.esv.EsvComponent;
 import mb.esv.task.EsvConfig;
 import mb.gpp.GppComponent;
@@ -22,6 +24,8 @@ import mb.spoofax.compiler.dagger.SpoofaxCompilerComponent;
 import mb.spoofax.compiler.dagger.SpoofaxCompilerModule;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.core.platform.PlatformComponent;
+import mb.spoofax.lwb.compiler.dynamix.SpoofaxDynamixConfig;
+import mb.spoofax.lwb.compiler.dynamix.SpoofaxDynamixConfigureException;
 import mb.spoofax.lwb.compiler.esv.EsvConfigureException;
 import mb.spoofax.lwb.compiler.esv.SpoofaxEsvConfig;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3Config;
@@ -49,6 +53,7 @@ public class Spoofax3Compiler implements AutoCloseable {
     public final StrategoComponent strategoComponent;
     public final EsvComponent esvComponent;
     public final StatixComponent statixComponent;
+    public final DynamixComponent dynamixComponent;
 
     public final Sdf3ExtStatixComponent sdf3ExtStatixComponent;
 
@@ -75,6 +80,7 @@ public class Spoofax3Compiler implements AutoCloseable {
         StrategoComponent strategoComponent,
         EsvComponent esvComponent,
         StatixComponent statixComponent,
+        DynamixComponent dynamixComponent,
 
         Sdf3ExtStatixComponent sdf3ExtStatixComponent,
 
@@ -100,6 +106,7 @@ public class Spoofax3Compiler implements AutoCloseable {
         this.strategoComponent = strategoComponent;
         this.esvComponent = esvComponent;
         this.statixComponent = statixComponent;
+        this.dynamixComponent = dynamixComponent;
         this.sdf3ExtStatixComponent = sdf3ExtStatixComponent;
         this.strategolibComponent = strategoLibComponent;
         this.strategolibResourcesComponent = strategoLibResourcesComponent;
@@ -143,6 +150,13 @@ public class Spoofax3Compiler implements AutoCloseable {
                     return r.map(o -> o.flatMap(SpoofaxStatixConfig::getStatixConfig));
                 }
             }));
+        this.dynamixComponent.getDynamixConfigFunctionWrapper().set(this.component.getSpoofaxDynamixConfigure().createFunction().mapOutput(
+            new StatelessSerializableFunction<Result<Option<SpoofaxDynamixConfig>, SpoofaxDynamixConfigureException>, Result<Option<DynamixConfig>, SpoofaxDynamixConfigureException>>() {
+                @Override
+                public Result<Option<DynamixConfig>, SpoofaxDynamixConfigureException> apply(Result<Option<SpoofaxDynamixConfig>, SpoofaxDynamixConfigureException> r) {
+                    return r.map(o -> o.flatMap(SpoofaxDynamixConfig::getDynamixConfig));
+                }
+            }));
     }
 
     public static Spoofax3Compiler createDefault(
@@ -155,6 +169,7 @@ public class Spoofax3Compiler implements AutoCloseable {
         StrategoComponent strategoComponent,
         EsvComponent esvComponent,
         StatixComponent statixComponent,
+        DynamixComponent dynamixComponent,
 
         Sdf3ExtStatixComponent sdf3ExtStatixComponent,
 
@@ -182,6 +197,7 @@ public class Spoofax3Compiler implements AutoCloseable {
             .strategoComponent(strategoComponent)
             .esvComponent(esvComponent)
             .statixComponent(statixComponent)
+            .dynamixComponent(dynamixComponent)
 
             .sdf3ExtStatixComponent(sdf3ExtStatixComponent)
 
@@ -204,6 +220,7 @@ public class Spoofax3Compiler implements AutoCloseable {
             strategoComponent,
             esvComponent,
             statixComponent,
+            dynamixComponent,
 
             sdf3ExtStatixComponent,
 

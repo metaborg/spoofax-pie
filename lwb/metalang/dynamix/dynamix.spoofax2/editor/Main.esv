@@ -1,0 +1,14 @@
+module Main
+
+imports
+
+  Syntax
+  Analysis
+  Refactoring
+
+language
+
+  extensions : dx
+
+  provider : target/metaborg/stratego.ctree
+  provider : target/metaborg/stratego.jar

@@ -281,6 +281,39 @@ class LanguagePluginInstance(
           })
         }
       }
+      input.dynamix().ifPresent { dynamixConfig ->
+        dynamixConfig.source().caseOf()
+          .files { files ->
+            // Input: all Dynamix files in the main source directory and include directories
+            files.mainSourceDirectory().tryAsLocal("Dynamix files in main source directory") { dir ->
+              inputs.files(project.fileTree(dir) {
+                include("**/*.dx")
+              })
+            }
+            files.includeDirectories().forEach { includeDirectory ->
+              includeDirectory.tryAsLocal("Dynamix files in include directory") { dir ->
+                inputs.files(project.fileTree(dir) {
+                  include("**/*.dx")
+                })
+              }
+            }
+          }
+          .prebuilt { specAtermDirectory ->
+            // Input: prebuilt spec ATerm directory
+            specAtermDirectory.tryAsLocal("Dynamix prebuilt spec ATerm directory") { dir ->
+              inputs.files(project.fileTree(dir) {
+                include("**/*.aterm")
+              })
+            }
+          }
+
+        // Output: output spec ATerm directory
+        dynamixConfig.outputSpecAtermDirectory().tryAsLocal("Dynamix output spec ATerms directory") { dir ->
+          outputs.files(project.fileTree(dir) {
+            include("**/*.aterm")
+          })
+        }
+      }
       input.stratego().ifPresent { strategoConfig ->
         // Input: all Stratego files in the main source directory and include directories
         strategoConfig.source().files.mainSourceDirectory().tryAsLocal("Stratego files in main source directory") { dir ->

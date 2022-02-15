@@ -2,6 +2,8 @@ package mb.spoofax.lwb.eclipse;
 
 import mb.cfg.CfgComponent;
 import mb.cfg.eclipse.CfgLanguageFactory;
+import mb.dynamix.DynamixComponent;
+import mb.dynamix.eclipse.DynamixLanguageFactory;
 import mb.esv.eclipse.EsvEclipseComponent;
 import mb.esv.eclipse.EsvLanguageFactory;
 import mb.gpp.GppComponent;
@@ -156,6 +158,7 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
                 final StrategoEclipseComponent strategoComponent = StrategoLanguageFactory.getLanguage().getComponent();
                 final EsvEclipseComponent esvComponent = EsvLanguageFactory.getLanguage().getComponent();
                 final StatixEclipseComponent statixComponent = StatixLanguageFactory.getLanguage().getComponent();
+                final DynamixComponent dynamixComponent = DynamixLanguageFactory.getLanguage().getComponent();
 
                 final Sdf3ExtStatixComponent sdf3ExtStatixComponent = Sdf3ExtStatixLanguageFactory.getLanguage().getComponent();
 
@@ -177,6 +180,7 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
                     .strategoComponent(strategoComponent)
                     .esvComponent(esvComponent)
                     .statixComponent(statixComponent)
+                    .dynamixComponent(dynamixComponent)
 
                     .sdf3ExtStatixComponent(sdf3ExtStatixComponent)
 

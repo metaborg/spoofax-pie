@@ -2,6 +2,7 @@ package mb.spoofax.lwb.eclipse.compiler;
 
 import dagger.Component;
 import mb.cfg.CfgComponent;
+import mb.dynamix.DynamixComponent;
 import mb.esv.EsvComponent;
 import mb.gpp.GppComponent;
 import mb.gpp.GppResourcesComponent;
@@ -35,6 +36,7 @@ import mb.strategolib.StrategoLibResourcesComponent;
         StrategoComponent.class,
         EsvComponent.class,
         StatixComponent.class,
+        DynamixComponent.class,
 
         Sdf3ExtStatixComponent.class,
 

@@ -16,19 +16,19 @@ context-free syntax
   <{Sdf3Option "\n"}*>
 }>
   Sdf3Option.Sdf3Source = <source = <Sdf3Source>>
-  
+
   Sdf3Source.Sdf3Files  = <files {
   <{Sdf3FilesOption "\n"}*>
 }>
   Sdf3FilesOption.Sdf3FilesMainSourceDirectory       = <main-source-directory = <Expr>>
   Sdf3FilesOption.Sdf3FilesMainFile                  = <main-file = <Expr>>
-  
+
   Sdf3Source.Sdf3Prebuilt = <prebuilt {
   <{Sdf3PrebuiltOption "\n"}*>
 }>
   Sdf3PrebuiltOption.Sdf3PrebuiltParseTableAtermFile     = <parse-table-aterm-file = <Expr>>
   Sdf3PrebuiltOption.Sdf3PrebuiltParseTablePersistedFile = <parse-table-persisted-file = <Expr>>
-  
+
   // TODO: move into source after CC lab.
   Sdf3Option.Sdf3ParseTableGeneratorSection = <parse-table-generator {
   <{Sdf3ParseTableGeneratorOption "\n"}*>
@@ -50,7 +50,7 @@ context-free syntax
   <{EsvOption "\n"}*>
 }>
   EsvOption.EsvSource = <source = <EsvSource>>
-  
+
   EsvSource.EsvFiles  = <files {
   <{EsvFilesOption "\n"}*>
 }>
@@ -58,7 +58,7 @@ context-free syntax
   EsvFilesOption.EsvFilesMainFile                  = <main-file = <Expr>>
   EsvFilesOption.EsvFilesIncludeDirectory          = <include-directory = <Expr>>
   EsvFilesOption.EsvFilesIncludeLibspoofax2Exports = <include-libspoofax2-exports = <Expr>>
-  
+
   EsvSource.EsvPrebuilt = <prebuilt {
   <{EsvPrebuiltOption "\n"}*>
 }>
@@ -74,14 +74,14 @@ context-free syntax
   <{StatixOption "\n"}*>
 }>
   StatixOption.StatixSource = <source = <StatixSource>>
-  
+
   StatixSource.StatixFiles  = <files {
   <{StatixFilesOption "\n"}*>
 }>
   StatixFilesOption.StatixFilesMainSourceDirectory = <main-source-directory = <Expr>>
   StatixFilesOption.StatixFilesMainFile            = <main-file = <Expr>>
   StatixFilesOption.StatixFilesIncludeDirectory    = <include-directory = <Expr>>
-  
+
   StatixSource.StatixPrebuilt = <prebuilt {
   <{StatixPrebuiltOption "\n"}*>
 }>
@@ -100,16 +100,38 @@ context-free syntax
   <{StrategoOption "\n"}*>
 }>
   StrategoOption.StrategoSource = <source = <StrategoSource>>
-  
+
   StrategoSource.StrategoFiles  = <files {
   <{StrategoFilesOption "\n"}*>
 }>
   StrategoFilesOption.StrategoFilesMainSourceDirectory      = <main-source-directory = <Expr>>
   StrategoFilesOption.StrategoFilesMainFile                 = <main-file = <Expr>>
   StrategoFilesOption.StrategoFilesIncludeDirectory         = <include-directory = <Expr>>
-  
+
   // TODO: move into source after CC lab.
   StrategoOption.StrategoSdf3StatixExplicationGen = <sdf3-statix-explication-generation = <Expr>>
-  
+
   StrategoOption.StrategoLanguageStrategyAffix = <language-strategy-affix = <Expr>>
   StrategoOption.StrategoOutputJavaPackageId = <output-java-package = <Expr>>
+
+context-free sorts
+
+  DynamixOption DynamixSource DynamixFilesOption DynamixPrebuiltOption
+
+context-free syntax
+
+  Part.DynamixSection = <dynamix {
+  <{DynamixOption "\n"}*>
+}>
+  DynamixOption.DynamixSource = <source = <DynamixSource>>
+
+  DynamixSource.DynamixFiles  = <files {
+  <{DynamixFilesOption "\n"}*>
+}>
+  DynamixFilesOption.DynamixFilesMainSourceDirectory = <main-source-directory = <Expr>>
+  DynamixFilesOption.DynamixFilesMainFile            = <main-file = <Expr>>
+
+  DynamixSource.DynamixPrebuilt = <prebuilt {
+  <{DynamixPrebuiltOption "\n"}*>
+}>
+  DynamixPrebuiltOption.DynamixPrebuiltSpecAtermDirectory = <spec-aterm-directory = <Expr>>

@@ -1,0 +1,49 @@
+module pp
+
+imports
+
+  libstratego-gpp
+  libspoofax/sdf/pp
+  libspoofax/editor/refactoring/-
+  pp/dynamix-parenthesize
+  pp/dynamix-pp
+
+rules
+
+  editor-format:
+    (node, _, ast, path, project-path) -> (filename, result)
+    with
+      ext      := <get-extension> path
+    ; filename := <guarantee-extension(|$[pp.[ext]])> path
+    ; result   := <pp-debug> node
+
+rules
+  
+  pp-dynamix-string =
+    parenthesize-dynamix
+    ; prettyprint-dynamix-start-symbols
+    ; !V([], <id>)
+    ; box2text-string(|120)
+      
+  pp-partial-dynamix-string =
+    parenthesize-dynamix
+    ; prettyprint-dynamix
+    ; !V([], <id>)
+    ; box2text-string(|120)
+    
+  pp-partial-dynamix-string(|sort) =
+    parenthesize-dynamix
+    ; prettyprint-dynamix(|sort)
+    ; !V([], <id>)
+    ; box2text-string(|120)  
+      
+  pp-debug :
+    ast -> result
+    with
+       result := <pp-dynamix-string> ast
+    <+ <bottomup(try(not(is-string); not(is-list); not(pp-dynamix-string); debug(!"cannot pp ")))> ast
+    ;  result := ""
+
+rules
+  
+  construct-textual-change = construct-textual-change(pp-partial-dynamix-string, parenthesize, override-reconstruction, resugar)
