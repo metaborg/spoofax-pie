@@ -68,6 +68,8 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
 
         static Builder builder() { return new Builder(); }
 
+        ResourcePath rootDirectory();
+
         @Value.NaturalOrder
         SortedSet<ResourcePath> javaClassPaths();
 
@@ -180,6 +182,7 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
         }
 
         return Result.ofOk(outputBuilder
+            .rootDirectory(rootDirectory)
             .addJavaClassPaths(input.javaClassFileOutputDirectory())
             .addAllJavaClassPaths(input.resourcePaths())
             .participantClassQualifiedId(input.adapterProjectInput().participant().qualifiedId())

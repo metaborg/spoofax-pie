@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
   api(project(":spt"))
-  api(project(":spoofax.lwb.compiler"))
   api(project(":spoofax.lwb.dynamicloading"))
+
+  compileOnly("org.checkerframework:checker-qual-android")
 }

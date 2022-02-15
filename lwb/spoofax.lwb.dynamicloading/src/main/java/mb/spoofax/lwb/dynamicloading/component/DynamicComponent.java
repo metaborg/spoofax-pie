@@ -92,6 +92,8 @@ public class DynamicComponent implements Component, AutoCloseable {
      */
     @Override
     public ResourceServiceComponent getResourceServiceComponent() {
+        if(closed)
+            throw new IllegalStateException("Cannot get resource service component, dynamically loaded component has been closed");
         return component.getResourceServiceComponent();
     }
 
@@ -102,6 +104,8 @@ public class DynamicComponent implements Component, AutoCloseable {
      * @throws IllegalStateException if the dynamically loaded language has been closed with {@link #close}.
      */
     @Override public Option<LanguageComponent> getLanguageComponent() {
+        if(closed)
+            throw new IllegalStateException("Cannot get language component, dynamically loaded component has been closed");
         return component.getLanguageComponent();
     }
 
@@ -116,6 +120,8 @@ public class DynamicComponent implements Component, AutoCloseable {
     }
 
     @Override public <T> Option<T> getSubcomponent(Class<T> subcomponentType) {
+        if(closed)
+            throw new IllegalStateException("Cannot get subcomponent, dynamically loaded component has been closed");
         return component.getSubcomponent(subcomponentType);
     }
 
@@ -134,7 +140,7 @@ public class DynamicComponent implements Component, AutoCloseable {
      */
     public URLClassLoader getClassLoader() {
         if(closed)
-            throw new IllegalStateException("Cannot get class loader, dynamically loaded language has been closed");
+            throw new IllegalStateException("Cannot get class loader, dynamically loaded component has been closed");
         return classLoader;
     }
 

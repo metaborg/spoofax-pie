@@ -2,7 +2,7 @@ package mb.spoofax.eclipse;
 
 import mb.log.api.Logger;
 import mb.pie.runtime.PieBuilderImpl;
-import mb.spoofax.core.component.StaticComponentBuilder;
+import mb.spoofax.core.component.StaticComponentManagerBuilder;
 import mb.spoofax.core.component.StaticComponentManager;
 import mb.spoofax.eclipse.log.DaggerEclipseLoggerComponent;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
@@ -85,8 +85,8 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
             .build();
         platformComponent.init();
 
-        final StaticComponentBuilder<EclipseLoggerComponent, EclipseResourceServiceComponent, EclipsePlatformComponent> builder =
-            new StaticComponentBuilder<>(loggerComponent, baseResourceServiceComponent, platformComponent, PieBuilderImpl::new);
+        final StaticComponentManagerBuilder<EclipseLoggerComponent, EclipseResourceServiceComponent, EclipsePlatformComponent> builder =
+            new StaticComponentManagerBuilder<>(loggerComponent, baseResourceServiceComponent, platformComponent, PieBuilderImpl::new);
         gatherParticipants(builder, logger);
         staticComponentManager = builder.build();
     }
@@ -116,7 +116,7 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
 
 
     private static ArrayList<EclipseParticipant> gatherParticipants(
-        StaticComponentBuilder<EclipseLoggerComponent, EclipseResourceServiceComponent, EclipsePlatformComponent> builder,
+        StaticComponentManagerBuilder<EclipseLoggerComponent, EclipseResourceServiceComponent, EclipsePlatformComponent> builder,
         Logger logger
     ) {
         final ArrayList<EclipseParticipant> participants = new ArrayList<>();
@@ -133,7 +133,7 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
     }
 
     private static void addParticipants(
-        StaticComponentBuilder<EclipseLoggerComponent, EclipseResourceServiceComponent, EclipsePlatformComponent> builder,
+        StaticComponentManagerBuilder<EclipseLoggerComponent, EclipseResourceServiceComponent, EclipsePlatformComponent> builder,
         Logger logger,
         IExtension extension
     ) {

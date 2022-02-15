@@ -2,17 +2,13 @@ package mb.spt.dynamicloading;
 
 import mb.common.option.Option;
 import mb.common.result.Result;
-import mb.common.util.SetView;
 import mb.pie.api.ExecContext;
-import mb.pie.api.SerializableFunction;
 import mb.pie.api.Supplier;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.CoordinateRequirement;
 import mb.spoofax.core.component.Component;
 import mb.spoofax.core.language.LanguageComponent;
-import mb.spoofax.lwb.compiler.CompileLanguage;
-import mb.spoofax.lwb.compiler.CompileLanguageException;
 import mb.spoofax.lwb.dynamicloading.DynamicLoad;
 import mb.spoofax.lwb.dynamicloading.component.DynamicComponent;
 import mb.spoofax.lwb.dynamicloading.component.DynamicComponentManager;
@@ -26,19 +22,16 @@ import java.util.function.Function;
 public class DynamicLanguageUnderTestProvider implements LanguageUnderTestProvider {
     private final DynamicComponentManager dynamicComponentManager;
     private final DynamicLoad dynamicLoad;
-    private final CompileLanguage compileLanguage;
-    private final Function<ResourcePath, CompileLanguage.Args> compileLanguageArgsFunction;
+    private final Function<ResourcePath, Supplier<Result<DynamicLoad.SupplierOutput, ?>>> dynamicLoadSupplierFunction;
 
     public DynamicLanguageUnderTestProvider(
         DynamicComponentManager dynamicComponentManager,
         DynamicLoad dynamicLoad,
-        CompileLanguage compileLanguage,
-        Function<ResourcePath, CompileLanguage.Args> compileLanguageArgsFunction
+        Function<ResourcePath, Supplier<Result<DynamicLoad.SupplierOutput, ?>>> dynamicLoadSupplierFunction
     ) {
         this.dynamicComponentManager = dynamicComponentManager;
         this.dynamicLoad = dynamicLoad;
-        this.compileLanguage = compileLanguage;
-        this.compileLanguageArgsFunction = compileLanguageArgsFunction;
+        this.dynamicLoadSupplierFunction = dynamicLoadSupplierFunction;
     }
 
     @Override
@@ -49,8 +42,7 @@ public class DynamicLanguageUnderTestProvider implements LanguageUnderTestProvid
         @Nullable CoordinateRequirement languageCoordinateRequirementHint
     ) {
         if(rootDirectoryHint != null) {
-            final CompileLanguage.Args args = compileLanguageArgsFunction.apply(rootDirectoryHint);
-            final Supplier<Result<DynamicLoad.SupplierOutput, ?>> supplier = compileLanguage.createSupplier(args).map(new DynamicLoadSupplierOutputMapper(args));
+            final Supplier<Result<DynamicLoad.SupplierOutput, ?>> supplier = dynamicLoadSupplierFunction.apply(rootDirectoryHint);
             final Result<DynamicComponent, ?> result = context.require(dynamicLoad, supplier).getValue();
             return result
                 .mapErr(e -> new DynamicLanguageUnderTestProviderException(
@@ -82,34 +74,5 @@ public class DynamicLanguageUnderTestProvider implements LanguageUnderTestProvid
         final Option<LanguageComponent> languageComponent = component.getLanguageComponent();
         return Result.ofOptionOrElse(languageComponent, () -> new DynamicLanguageUnderTestProviderException("Could not provide dynamic language under test for SPT file '" + file + "'" + "; language with coordinate requirement '" + languageCoordinateRequirementHint + "' was not found"))
             .map(lc -> new LanguageUnderTestImpl(component.getResourceServiceComponent(), lc, component.getPieComponent()));
-    }
-
-
-    private static class DynamicLoadSupplierOutputMapper implements SerializableFunction<Result<CompileLanguage.Output, CompileLanguageException>, Result<DynamicLoad.SupplierOutput, CompileLanguageException>> {
-        private final CompileLanguage.Args args;
-
-        public DynamicLoadSupplierOutputMapper(CompileLanguage.Args args) {this.args = args;}
-
-        @Override
-        public Result<DynamicLoad.SupplierOutput, CompileLanguageException> apply(Result<CompileLanguage.Output, CompileLanguageException> result) {
-            return result.map(o -> new DynamicLoad.SupplierOutput(args.rootDirectory(), SetView.of(o.javaClassPaths()), o.participantClassQualifiedId()));
-        }
-
-        @Override public boolean equals(@Nullable Object o) {
-            if(this == o) return true;
-            if(o == null || getClass() != o.getClass()) return false;
-            final DynamicLoadSupplierOutputMapper that = (DynamicLoadSupplierOutputMapper)o;
-            return args.equals(that.args);
-        }
-
-        @Override public int hashCode() {
-            return args.hashCode();
-        }
-
-        @Override public String toString() {
-            return "DynamicLoadSupplierOutputMapper{" +
-                "args=" + args +
-                '}';
-        }
     }
 }

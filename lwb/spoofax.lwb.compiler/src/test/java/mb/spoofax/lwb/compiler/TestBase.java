@@ -25,11 +25,11 @@ import mb.resource.dagger.RootResourceServiceComponent;
 import mb.resource.dagger.RootResourceServiceModule;
 import mb.resource.fs.FSResource;
 import mb.resource.hierarchical.HierarchicalResource;
-import mb.spoofax.core.component.StaticComponentBuilder;
+import mb.spoofax.core.component.StaticComponentManagerBuilder;
 import mb.spoofax.core.platform.DaggerPlatformComponent;
 import mb.spoofax.core.platform.PlatformComponent;
 import mb.spoofax.lwb.compiler.dagger.Spoofax3CompilerComponent;
-import mb.spoofax.lwb.compiler.dagger.StandaloneSpoofax3Compiler;
+import mb.spoofax.lwb.compiler.dagger.Spoofax3Compiler;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -46,7 +46,7 @@ class TestBase {
     LoggerComponent loggerComponent;
     RootResourceServiceComponent baseResourceServiceComponent;
     PlatformComponent platformComponent;
-    StandaloneSpoofax3Compiler compiler;
+    Spoofax3Compiler compiler;
     ResourceService resourceService;
     PieComponent pieComponent;
     CheckLanguageSpecification checkLanguageSpecification;
@@ -123,7 +123,7 @@ class TestBase {
         }
 
         final WritableResource pieStoreFile = tempDirectory.appendRelativePath(".build/compiler.piestore").createParents();
-        final StaticComponentBuilder<LoggerComponent, ResourceServiceComponent, PlatformComponent> builder = new StaticComponentBuilder<>(
+        final StaticComponentManagerBuilder<LoggerComponent, ResourceServiceComponent, PlatformComponent> builder = new StaticComponentManagerBuilder<>(
             loggerComponent,
             baseResourceServiceComponent,
             platformComponent,
@@ -136,7 +136,7 @@ class TestBase {
                 .build()
             );
         });
-        compiler = new StandaloneSpoofax3Compiler(builder);
+        compiler = Spoofax3Compiler.fromComponentBuilder(builder);
         final Spoofax3CompilerComponent spoofax3CompilerComponent = compiler.spoofax3CompilerComponent;
         resourceService = spoofax3CompilerComponent.getResourceServiceComponent().getResourceService();
         pieComponent = compiler.pieComponent;

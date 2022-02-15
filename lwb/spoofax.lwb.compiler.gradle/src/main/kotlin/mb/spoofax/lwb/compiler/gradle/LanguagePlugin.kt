@@ -31,7 +31,7 @@ import mb.spoofax.compiler.util.*
 import mb.spoofax.core.platform.DaggerPlatformComponent
 import mb.spoofax.lwb.compiler.CheckLanguageSpecification
 import mb.spoofax.lwb.compiler.CompileLanguageSpecification
-import mb.spoofax.lwb.compiler.dagger.StandaloneSpoofax3Compiler
+import mb.spoofax.lwb.compiler.dagger.Spoofax3Compiler
 import mb.strategolib.StrategoLibUtil
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -81,7 +81,7 @@ open class LanguagePlugin : Plugin<Project> {
       .resourceServiceComponent(baseResourceServiceComponent)
       .build();
 
-    val spoofax3Compiler = StandaloneSpoofax3Compiler(
+    val spoofax3Compiler = Spoofax3Compiler.fromComponents(
       loggerComponent,
       baseResourceServiceComponent,
       platformComponent,
@@ -103,7 +103,7 @@ open class LanguagePlugin : Plugin<Project> {
     }
   }
 
-  private fun getInput(project: Project, spoofax3Compiler: StandaloneSpoofax3Compiler): CompileLanguageInput {
+  private fun getInput(project: Project, spoofax3Compiler: Spoofax3Compiler): CompileLanguageInput {
     spoofax3Compiler.pieComponent.pie.newSession().use {
       return it.require(spoofax3Compiler.spoofax3CompilerComponent.cfgComponent.cfgRootDirectoryToObject.createTask(FSPath(project.projectDir)))
         .unwrap().compileLanguageInput // Note: exception is caught in apply.
@@ -112,10 +112,10 @@ open class LanguagePlugin : Plugin<Project> {
 }
 
 class LanguagePluginInstance(
-  val project: Project,
-  resourceServiceComponent: ResourceServiceComponent,
-  val spoofax3Compiler: StandaloneSpoofax3Compiler,
-  val compileLanguageInput: CompileLanguageInput
+    val project: Project,
+    resourceServiceComponent: ResourceServiceComponent,
+    val spoofax3Compiler: Spoofax3Compiler,
+    val compileLanguageInput: CompileLanguageInput
 ) {
   val resourceService: ResourceService = resourceServiceComponent.resourceService
   val pie: Pie = spoofax3Compiler.pieComponent.pie

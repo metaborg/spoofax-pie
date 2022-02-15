@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class StaticComponentBuilder<L extends LoggerComponent, R extends ResourceServiceComponent, P extends PlatformComponent> extends ComponentBuilderBase<L, R, P> {
+public class StaticComponentManagerBuilder<L extends LoggerComponent, R extends ResourceServiceComponent, P extends PlatformComponent> extends ComponentBuilderBase<L, R, P> {
     private final ArrayList<Participant<L, R, P>> participants = new ArrayList<>();
     private final ArrayList<Consumer<ResourceServiceModule>> resourceServiceModuleCustomizers = new ArrayList<>();
     private final MultiMap<String, Consumer<ResourceServiceModule>> groupedResourceServiceModuleCustomizers = MultiMap.withLinkedHash();
@@ -23,7 +23,7 @@ public class StaticComponentBuilder<L extends LoggerComponent, R extends Resourc
     private final MultiMap<String, Consumer<RootPieModule>> groupedPieModuleCustomizers = MultiMap.withLinkedHash();
 
 
-    public StaticComponentBuilder(
+    public StaticComponentManagerBuilder(
         L loggerComponent,
         R baseResourceServiceComponent,
         P platformComponent,
@@ -54,7 +54,7 @@ public class StaticComponentBuilder<L extends LoggerComponent, R extends Resourc
      *
      * @param participant {@link Participant Participant} to register.
      */
-    public StaticComponentBuilder<L, R, P> registerParticipant(Participant<L, R, P> participant) {
+    public StaticComponentManagerBuilder<L, R, P> registerParticipant(Participant<L, R, P> participant) {
         participants.add(participant);
         return this;
     }
@@ -66,7 +66,7 @@ public class StaticComponentBuilder<L extends LoggerComponent, R extends Resourc
      *
      * @param customizer Customizer function to apply.
      */
-    public StaticComponentBuilder<L, R, P> registerResourceServiceModuleCustomizer(Consumer<ResourceServiceModule> customizer) {
+    public StaticComponentManagerBuilder<L, R, P> registerResourceServiceModuleCustomizer(Consumer<ResourceServiceModule> customizer) {
         resourceServiceModuleCustomizers.add(customizer);
         return this;
     }
@@ -77,7 +77,7 @@ public class StaticComponentBuilder<L extends LoggerComponent, R extends Resourc
      *
      * @param customizer Customizer function to apply.
      */
-    public StaticComponentBuilder<L, R, P> registerResourceServiceModuleCustomizer(Consumer<ResourceServiceModule> customizer, String group) {
+    public StaticComponentManagerBuilder<L, R, P> registerResourceServiceModuleCustomizer(Consumer<ResourceServiceModule> customizer, String group) {
         groupedResourceServiceModuleCustomizers.put(group, customizer);
         return this;
     }
@@ -88,7 +88,7 @@ public class StaticComponentBuilder<L extends LoggerComponent, R extends Resourc
      *
      * @param customizer Customizer function to apply.
      */
-    public StaticComponentBuilder<L, R, P> registerPieModuleCustomizer(Consumer<RootPieModule> customizer) {
+    public StaticComponentManagerBuilder<L, R, P> registerPieModuleCustomizer(Consumer<RootPieModule> customizer) {
         pieModuleCustomizers.add(customizer);
         return this;
     }
@@ -99,7 +99,7 @@ public class StaticComponentBuilder<L extends LoggerComponent, R extends Resourc
      *
      * @param customizer Customizer function to apply.
      */
-    public StaticComponentBuilder<L, R, P> registerPieModuleCustomizer(Consumer<RootPieModule> customizer, String group) {
+    public StaticComponentManagerBuilder<L, R, P> registerPieModuleCustomizer(Consumer<RootPieModule> customizer, String group) {
         groupedPieModuleCustomizers.put(group, customizer);
         return this;
     }

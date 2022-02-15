@@ -30,9 +30,11 @@ dependencies {
 
 tasks.test {
   enableAssertions = false // HACK: disable assertions due to assertion in the Stratego compiler.
-  // Show stderr in tests.
   testLogging {
-    events(org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR)
+    events(
+        //org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_OUT,
+        org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR
+    )
   }
   jvmArgs("-Xss16M") // Set required stack size, mainly for serialization.
 }

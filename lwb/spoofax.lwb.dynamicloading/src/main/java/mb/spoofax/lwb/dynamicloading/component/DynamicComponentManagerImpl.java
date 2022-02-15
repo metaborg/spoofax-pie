@@ -6,7 +6,10 @@ import mb.common.util.ListView;
 import mb.common.util.MapView;
 import mb.common.util.SetView;
 import mb.log.api.Logger;
+import mb.log.api.LoggerFactory;
 import mb.log.dagger.LoggerComponent;
+import mb.pie.api.serde.Serde;
+import mb.pie.dagger.RootPieModule;
 import mb.pie.runtime.store.SerializingStoreBuilder;
 import mb.pie.runtime.store.SerializingStoreInMemoryBuffer;
 import mb.resource.ResourceService;
@@ -35,19 +38,25 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public class DynamicComponentManagerImpl<L extends LoggerComponent, R extends ResourceServiceComponent, P extends PlatformComponent> extends ComponentBuilderBase<L, R, P> implements DynamicComponentManager {
     private final Logger logger;
     private final StaticComponentManager<L, R, P> staticComponentManager;
+    private final ListView<Consumer<RootPieModule>> dynamicPieModuleCustomizers;
+    private final BiFunction<LoggerFactory, ClassLoader, Serde> serdeFactory;
 
     private final HashMap<String, DynamicComponent> dynamicComponentPerFileExtension = new HashMap<>();
     private final HashMap<Coordinate, DynamicComponent> dynamicComponentPerCoordinate = new HashMap<>();
     private final HashMap<ResourcePath, DynamicComponent> dynamicComponentPerCompiledSources = new HashMap<>();
     private final Set<DynamicComponentManagerListener> listeners = new LinkedHashSet<>();
 
-    public DynamicComponentManagerImpl(
-        StaticComponentManager<L, R, P> staticComponentManager
+    DynamicComponentManagerImpl(
+        StaticComponentManager<L, R, P> staticComponentManager,
+        ListView<Consumer<RootPieModule>> dynamicPieModuleCustomizers,
+        BiFunction<LoggerFactory, ClassLoader, Serde> serdeFactory
     ) {
         super(
             staticComponentManager.loggerComponent,
@@ -57,6 +66,8 @@ public class DynamicComponentManagerImpl<L extends LoggerComponent, R extends Re
         );
         this.logger = staticComponentManager.loggerComponent.getLoggerFactory().create(getClass());
         this.staticComponentManager = staticComponentManager;
+        this.dynamicPieModuleCustomizers = dynamicPieModuleCustomizers;
+        this.serdeFactory = serdeFactory;
     }
 
     @Override public void close() {
@@ -247,21 +258,28 @@ public class DynamicComponentManagerImpl<L extends LoggerComponent, R extends Re
             serializingStoreInMemoryBuffer = new SerializingStoreInMemoryBuffer();
         }
 
+        final ListView<Consumer<RootPieModule>> pieModuleCustomizers = ListView.of(Stream.concat(
+            staticComponentManager.pieModuleCustomizers.stream(),
+            Stream.concat(
+                dynamicPieModuleCustomizers.stream(), // Can override static customizers.
+                Stream.of(pieModule -> pieModule // Can override all other customizers, which is necessary for correct serialization/deserialization.
+                    .withSerdeFactory(loggerFactory -> serdeFactory.apply(loggerFactory, classLoader))
+                    .withStoreFactory((serde, resourceService, loggerFactory) -> SerializingStoreBuilder.ofInMemoryStore(serde)
+                        .withInMemoryBuffer(serializingStoreInMemoryBuffer) // Pass in buffer for deserialization.
+                        .withLoggingDeserializeFailHandler(loggerFactory)
+                        .build()
+                    ))
+            )
+        ));
         final BuildOneResult result = super.buildOne( // NOTE: only support dynamically loading a single standalone component right now.
             participant,
             staticComponentManager.globalResourceRegistryProviders,
             staticComponentManager.resourceServiceModuleCustomizers,
             staticComponentManager.globalTaskDefsProviders,
-            ListView.of(Stream.concat(staticComponentManager.pieModuleCustomizers.stream(), Stream.of(pieModule -> pieModule
-                .withStoreFactory((serde, resourceService, loggerFactory) -> SerializingStoreBuilder.ofInMemoryStore(serde)
-                    .withInMemoryBuffer(serializingStoreInMemoryBuffer) // Pass in buffer for deserialization.
-                    .withLoggingDeserializeFailHandler(loggerFactory)
-                    .build()
-                )))),
+            pieModuleCustomizers,
             classLoader
-        ); // NOTE: global providers are ignored, as it would require all participants to be reconstructed.
+        ); // NOTE: global providers from `result` are ignored, as it would require all participants to be reconstructed.
         final ComponentImpl component = result.component;
-        serializingStoreInMemoryBuffer.close(); // TODO: can we close this here? Should be fine since we do not use the buffer after deserialization?
         final DynamicComponent dynamicComponent = new DynamicComponent(rootDirectory, component.coordinate, classLoader, component, serializingStoreInMemoryBuffer);
         return registerComponent(rootDirectory, dynamicComponent);
     }
