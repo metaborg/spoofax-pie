@@ -24,8 +24,8 @@ dependencies {
 }
 
 intellij {
-  version = "2020.2.4" // 2020.2.4 is the last version that can be built with Java 8.
-  instrumentCode = false // Skip non-incremental and slow code instrumentation.
+  version.set("2020.2.4") // 2020.2.4 is the last version that can be built with Java 8.
+  instrumentCode.set(false) // Skip non-incremental and slow code instrumentation.
 }
 
 tasks {
@@ -34,7 +34,7 @@ tasks {
   }
 
   named<org.jetbrains.intellij.tasks.RunIdeTask>("runIde") {
-    this.jbrVersion("11_0_2b159") // Set JBR version because the latest one cannot be downloaded.
+    jbrVersion.set("11_0_2b159") // Set JBR version because the latest one cannot be downloaded.
     // HACK: make task depend on the runtime classpath to forcefully make it depend on `spoofax.intellij`, which the
     //       `org.jetbrains.intellij` plugin seems to ignore. This is probably because `spoofax.intellij` is a plugin
     //       but is not listed as a plugin dependency. This hack may not work when publishing this plugin.
