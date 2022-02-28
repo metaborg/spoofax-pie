@@ -8,7 +8,7 @@ import mb.rv32im.eclipse.Rv32ImEclipseComponent;
 import mb.spoofax.compiler.eclipsebundle.SpoofaxCompilerEclipseBundle;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.lwb.eclipse.SpoofaxLwbPlugin;
-import mb.strategolib.eclipse.StrategoLibLanguage;
+import mb.strategolib.eclipse.StrategoLibEclipseParticipant;
 import mb.tooling.eclipsebundle.ToolingEclipseBundle;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.resources.IProjectNature;
@@ -44,7 +44,7 @@ public class ClassPathUtil {
             .addClassLoader(SpoofaxPlugin.class.getClassLoader())
             .addClassLoader(ToolingEclipseBundle.class.getClassLoader())
             .addClassLoader(SpoofaxCompilerEclipseBundle.class.getClassLoader())
-            .addClassLoader(StrategoLibLanguage.class.getClassLoader())
+            .addClassLoader(StrategoLibEclipseParticipant.class.getClassLoader())
             .addClassLoader(Rv32ImEclipseComponent.class.getClassLoader())
 
             .addClassLoader(Generated.class.getClassLoader()) // Artifact: javax.annotation:jsr250-api:1.0
@@ -83,9 +83,9 @@ public class ClassPathUtil {
             return this == other || other != null && this.getClass() == other.getClass();
         }
 
-        @Override public int hashCode() { return 0; }
+        @Override public int hashCode() {return 0;}
 
-        @Override public String toString() { return getClass().getSimpleName(); }
+        @Override public String toString() {return getClass().getSimpleName();}
 
         private Object readResolve() {
             return instance;

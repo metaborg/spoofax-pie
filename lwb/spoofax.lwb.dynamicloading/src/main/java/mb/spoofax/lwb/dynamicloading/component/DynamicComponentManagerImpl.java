@@ -109,10 +109,17 @@ public class DynamicComponentManagerImpl<L extends LoggerComponent, R extends Re
     }
 
     @Override
-    public CollectionView<? extends Component> getComponents(CoordinateRequirement coordinateRequirement) {
-        final CollectionView<DynamicComponent> dynamicComponents = getDynamicComponents(coordinateRequirement);
-        final CollectionView<? extends Component> staticComponents = staticComponentManager.getComponents(coordinateRequirement);
+    public CollectionView<? extends Component> getComponents() {
+        final CollectionView<DynamicComponent> dynamicComponents = getDynamicComponents();
+        final CollectionView<? extends Component> staticComponents = staticComponentManager.getComponents();
         return CollectionView.of(Stream.concat(dynamicComponents.stream(), staticComponents.stream()));
+    }
+
+    @Override
+    public Stream<? extends Component> getComponents(CoordinateRequirement coordinateRequirement) {
+        final Stream<DynamicComponent> dynamicComponents = getDynamicComponents(coordinateRequirement);
+        final Stream<? extends Component> staticComponents = staticComponentManager.getComponents(coordinateRequirement);
+        return Stream.concat(dynamicComponents, staticComponents);
     }
 
     @Override
@@ -133,12 +140,12 @@ public class DynamicComponentManagerImpl<L extends LoggerComponent, R extends Re
     }
 
     @Override
-    public CollectionView<LanguageComponent> getLanguageComponents(CoordinateRequirement coordinateRequirement) {
+    public Stream<LanguageComponent> getLanguageComponents(CoordinateRequirement coordinateRequirement) {
         final Stream<LanguageComponent> dynamicComponents = dynamicComponentPerCompiledSources.values().stream()
             .filter(dc -> coordinateRequirement.matches(dc.getCoordinate()))
             .flatMap(dc -> dc.getLanguageComponent().stream());
-        final CollectionView<LanguageComponent> staticComponents = staticComponentManager.getLanguageComponents(coordinateRequirement);
-        return CollectionView.of(Stream.concat(dynamicComponents, staticComponents.stream()));
+        final Stream<LanguageComponent> staticComponents = staticComponentManager.getLanguageComponents(coordinateRequirement);
+        return Stream.concat(dynamicComponents, staticComponents);
     }
 
     @Override
@@ -149,20 +156,20 @@ public class DynamicComponentManagerImpl<L extends LoggerComponent, R extends Re
     }
 
     @Override
-    public <T> CollectionView<T> getSubcomponents(Class<T> subcomponentType) {
+    public <T> Stream<T> getSubcomponents(Class<T> subcomponentType) {
         final Stream<T> dynamicSubcomponents = dynamicComponentPerCompiledSources.values().stream()
             .flatMap(dc -> dc.getSubcomponent(subcomponentType).stream());
-        final CollectionView<T> staticSubcomponents = staticComponentManager.getSubcomponents(subcomponentType);
-        return CollectionView.of(Stream.concat(dynamicSubcomponents, staticSubcomponents.stream()));
+        final Stream<T> staticSubcomponents = staticComponentManager.getSubcomponents(subcomponentType);
+        return Stream.concat(dynamicSubcomponents, staticSubcomponents);
     }
 
     @Override
-    public <T> CollectionView<T> getSubcomponents(CoordinateRequirement coordinateRequirement, Class<T> subcomponentType) {
+    public <T> Stream<T> getSubcomponents(CoordinateRequirement coordinateRequirement, Class<T> subcomponentType) {
         final Stream<T> dynamicSubcomponents = dynamicComponentPerCompiledSources.values().stream()
             .filter(dc -> coordinateRequirement.matches(dc.getCoordinate()))
             .flatMap(dc -> dc.getSubcomponent(subcomponentType).stream());
-        final CollectionView<T> staticSubcomponents = staticComponentManager.getSubcomponents(coordinateRequirement, subcomponentType);
-        return CollectionView.of(Stream.concat(dynamicSubcomponents, staticSubcomponents.stream()));
+        final Stream<T> staticSubcomponents = staticComponentManager.getSubcomponents(coordinateRequirement, subcomponentType);
+        return Stream.concat(dynamicSubcomponents, staticSubcomponents);
     }
 
 
@@ -176,9 +183,13 @@ public class DynamicComponentManagerImpl<L extends LoggerComponent, R extends Re
         return Option.ofNullable(dynamicComponentPerCoordinate.get(coordinate));
     }
 
+    @Override public CollectionView<DynamicComponent> getDynamicComponents() {
+        return CollectionView.of(dynamicComponentPerCompiledSources.values());
+    }
+
     @Override
-    public CollectionView<DynamicComponent> getDynamicComponents(CoordinateRequirement coordinateRequirement) {
-        return CollectionView.of(dynamicComponentPerCompiledSources.values().stream().filter(dc -> coordinateRequirement.matches(dc.getInfo().coordinate)));
+    public Stream<DynamicComponent> getDynamicComponents(CoordinateRequirement coordinateRequirement) {
+        return dynamicComponentPerCompiledSources.values().stream().filter(dc -> coordinateRequirement.matches(dc.getInfo().coordinate));
     }
 
     @Override

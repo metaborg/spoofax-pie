@@ -1,6 +1,10 @@
 package mb.spoofax.lwb.eclipse.dynamicloading;
 
+import mb.spoofax.core.Coordinate;
+import mb.spoofax.core.language.LanguageComponent;
+import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.menu.MenuShared;
+import mb.spoofax.lwb.dynamicloading.component.DynamicComponent;
 import mb.spoofax.lwb.eclipse.SpoofaxLwbParticipant;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.jface.action.IContributionItem;
@@ -8,8 +12,8 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 
 public class DynamicEditorContextMenu extends MenuShared {
-    protected MenuShared getLanguageMenu(EclipseDynamicLanguage language) {
-        return language.getEditorContextMenu();
+    protected MenuShared getLanguageMenu(EclipseLanguageComponent languageComponent) {
+        return languageComponent.getEditorContextMenu();
     }
 
     @Override public IContributionItem[] getContributionItems() {
@@ -20,19 +24,22 @@ public class DynamicEditorContextMenu extends MenuShared {
         } else { // Not a dynamic editor.
             return new IContributionItem[0];
         }
-        final String languageId;
-        if(editor.getLanguageId() == null) { // Dynamic editor of unknown language.
+        final Coordinate componentCoordinate;
+        if(editor.getComponentCoordinate() == null) { // Dynamic editor of unknown language.
             return new IContributionItem[0];
         } else {
-            languageId = editor.getLanguageId();
+            componentCoordinate = editor.getComponentCoordinate();
         }
-        final @Nullable EclipseDynamicLanguage language = (EclipseDynamicLanguage)SpoofaxLwbParticipant.getInstance().getDynamicLoadingComponent().getDynamicComponentManager().getLanguageForId(languageId);
-        if(language == null) { // Dynamic editor of unknown language.
+        final @Nullable DynamicComponent component = SpoofaxLwbParticipant.getInstance().getDynamicLoadingComponent().getDynamicComponentManager().getDynamicComponent(componentCoordinate).get();
+        if(component == null) { // Dynamic editor of unknown language.
             return new IContributionItem[0];
         }
-
-        final MenuShared menu = getLanguageMenu(language);
-        menu.initialize(serviceLocator);
-        return menu.getContributionItems();
+        final @Nullable LanguageComponent languageComponent = component.getLanguageComponent().get();
+        if(languageComponent instanceof EclipseLanguageComponent) {
+            final MenuShared menu = getLanguageMenu((EclipseLanguageComponent)languageComponent);
+            menu.initialize(serviceLocator);
+            return menu.getContributionItems();
+        }
+        return new IContributionItem[0]; // Dynamic component has no language component.
     }
 }

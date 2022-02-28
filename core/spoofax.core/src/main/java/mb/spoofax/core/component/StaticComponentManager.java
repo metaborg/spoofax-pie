@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class StaticComponentManager<L extends LoggerComponent, R extends ResourceServiceComponent, P extends PlatformComponent> implements ComponentManager {
     public final L loggerComponent;
@@ -109,9 +110,13 @@ public class StaticComponentManager<L extends LoggerComponent, R extends Resourc
         return Option.ofNullable(component);
     }
 
-    @Override
-    public CollectionView<? extends Component> getComponents(CoordinateRequirement coordinateRequirement) {
+    @Override public CollectionView<? extends Component> getComponents() {
         return componentsByCoordinate.values();
+    }
+
+    @Override
+    public Stream<? extends Component> getComponents(CoordinateRequirement coordinateRequirement) {
+        return componentsByCoordinate.values().stream().filter(c -> c.matchesCoordinate(coordinateRequirement));
     }
 
     @Override
@@ -137,16 +142,10 @@ public class StaticComponentManager<L extends LoggerComponent, R extends Resourc
     }
 
     @Override
-    public CollectionView<LanguageComponent> getLanguageComponents(CoordinateRequirement coordinateRequirement) {
-        final ArrayList<LanguageComponent> languageComponents = new ArrayList<>();
-        for(ComponentImpl component : componentsByCoordinate.values()) {
-            component.getLanguageComponent().ifSome(languageComponent -> {
-                if(coordinateRequirement.matches(component.coordinate)) {
-                    languageComponents.add(languageComponent);
-                }
-            });
-        }
-        return CollectionView.of(languageComponents);
+    public Stream<LanguageComponent> getLanguageComponents(CoordinateRequirement coordinateRequirement) {
+        return componentsByCoordinate.values().stream()
+            .filter(c -> c.matchesCoordinate(coordinateRequirement))
+            .flatMap(c -> c.getLanguageComponent().stream());
     }
 
 
@@ -162,17 +161,15 @@ public class StaticComponentManager<L extends LoggerComponent, R extends Resourc
     }
 
     @Override
-    public <T> CollectionView<T> getSubcomponents(Class<T> subcomponentType) {
-        return CollectionView.of(componentsByCoordinate.values().stream()
-            .flatMap(c -> c.getSubcomponent(subcomponentType).stream())
-        );
+    public <T> Stream<T> getSubcomponents(Class<T> subcomponentType) {
+        return componentsByCoordinate.values().stream()
+            .flatMap(c -> c.getSubcomponent(subcomponentType).stream());
     }
 
     @Override
-    public <T> CollectionView<T> getSubcomponents(CoordinateRequirement coordinateRequirement, Class<T> subcomponentType) {
-        return CollectionView.of(componentsByCoordinate.values().stream()
+    public <T> Stream<T> getSubcomponents(CoordinateRequirement coordinateRequirement, Class<T> subcomponentType) {
+        return componentsByCoordinate.values().stream()
             .filter(c -> c.matchesCoordinate(coordinateRequirement))
-            .flatMap(c -> c.getSubcomponent(subcomponentType).stream())
-        );
+            .flatMap(c -> c.getSubcomponent(subcomponentType).stream());
     }
 }

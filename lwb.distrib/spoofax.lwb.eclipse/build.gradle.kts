@@ -52,14 +52,34 @@ dependencies {
   // HACK: embed javax.inject as classgraph does not seem to pick up the above javax.inject dependency?
   bundleEmbedImplementation("javax.inject:javax.inject:1")
 
-  // Embed `:spoofax.lwb.dynamicloading`, which includes `:spoofax.lwb.compiler` and `:spoofax.lwb.compiler.dagger`.
+  // Embed `:spoofax.lwb.dynamicloading`.
   bundleEmbedImplementation(compositeBuild("spoofax.lwb.dynamicloading")) {
+    // Exclude modules already exported by `spoofax.eclipse`
+    exclude("org.metaborg", "common")
+    exclude("org.metaborg", "spoofax.core")
+    exclude("org.metaborg", "log.api")
+    exclude("org.metaborg", "resource")
+    exclude("org.metaborg", "pie.api")
+    exclude("org.metaborg", "pie.runtime")
+    exclude("com.google.dagger", "dagger")
+
+    // Exclude dagger-compile because we already manually embed it.
+    exclude("com.google.dagger", "dagger-compiler")
+  }
+
+  // Embed `:spoofax.lwb.compiler` and `:spoofax.lwb.compiler.dagger`.
+  bundleEmbedImplementation(compositeBuild("spoofax.lwb.compiler.dagger")) {
     // Exclude meta-languages and libraries, as they have their own Eclipse plugins
     exclude("org.metaborg", "cfg")
-    exclude("org.metaborg", "esv")
     exclude("org.metaborg", "sdf3")
+    exclude("org.metaborg", "esv")
     exclude("org.metaborg", "stratego")
     exclude("org.metaborg", "statix")
+    exclude("org.metaborg", "sdf3_ext_statix")
+    exclude("org.metaborg", "spt")
+
+    exclude("org.metaborg", "strategolib")
+    exclude("org.metaborg", "gpp")
     exclude("org.metaborg", "libspoofax2")
     exclude("org.metaborg", "libstatix")
 
@@ -92,6 +112,8 @@ dependencies {
 
   // Embed FST serialize/deserialize implementation.
   bundleEmbedImplementation("org.metaborg:pie.serde.fst")
+
+  compileOnly("org.checkerframework:checker-qual-android")
 
   annotationProcessor("com.google.dagger:dagger-compiler")
 }

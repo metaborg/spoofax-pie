@@ -36,11 +36,20 @@ public interface {{baseEclipseComponent.id}} extends EclipseLanguageComponent, {
 
     @Override @{{adapterProjectCompilerInput.qualifier.qualifiedId}} EclipseIdentifiers getEclipseIdentifiers();
 
+
     @Override @{{adapterProjectCompilerInput.qualifier.qualifiedId}}("StartupWriteLock") LockRule startupWriteLockRule();
 
     @Override @{{adapterProjectCompilerInput.qualifier.qualifiedId}} ReadLockRule startupReadLockRule();
 
+
     @Override @{{adapterProjectCompilerInput.qualifier.qualifiedId}} EditorUpdateJob.Factory editorUpdateJobFactory();
 
     @Override @{{adapterProjectCompilerInput.qualifier.qualifiedId}} EditorCloseJob.Factory editorCloseJobFactory();
+
+
+    @Override @{{adapterProjectCompilerInput.qualifier.qualifiedId}} {{mainMenu.qualifiedId}} getMainMenu();
+
+    @Override @{{adapterProjectCompilerInput.qualifier.qualifiedId}} {{resourceContextMenu.qualifiedId}} getResourceContextMenu();
+
+    @Override @{{adapterProjectCompilerInput.qualifier.qualifiedId}} {{editorContextMenu.qualifiedId}} getEditorContextMenu();
 }

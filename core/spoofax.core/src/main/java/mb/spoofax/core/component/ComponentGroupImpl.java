@@ -9,6 +9,8 @@ import mb.spoofax.core.Coordinate;
 import mb.spoofax.core.CoordinateRequirement;
 import mb.spoofax.core.language.LanguageComponent;
 
+import java.util.stream.Stream;
+
 public class ComponentGroupImpl implements ComponentGroup {
     public final String group;
     public ResourceServiceComponent resourceServiceComponent;
@@ -64,13 +66,12 @@ public class ComponentGroupImpl implements ComponentGroup {
     }
 
     @Override
-    public CollectionView<LanguageComponent> getLanguageComponents(CoordinateRequirement coordinateRequirement) {
+    public Stream<LanguageComponent> getLanguageComponents(CoordinateRequirement coordinateRequirement) {
         if(closed)
             throw new IllegalStateException("Cannot get language components, component group '" + group + "' has been closed");
-        return CollectionView.of(components.values().stream()
+        return components.values().stream()
             .filter(c -> c.matchesCoordinate(coordinateRequirement))
-            .flatMap(c -> c.getLanguageComponent().stream())
-        );
+            .flatMap(c -> c.getLanguageComponent().stream());
     }
 
     @Override
@@ -108,21 +109,19 @@ public class ComponentGroupImpl implements ComponentGroup {
             .flatMap(c -> c.getSubcomponent(subcomponentType));
     }
 
-    @Override public <T> CollectionView<T> getSubcomponents(Class<T> subcomponentType) {
+    @Override public <T> Stream<T> getSubcomponents(Class<T> subcomponentType) {
         if(closed)
             throw new IllegalStateException("Cannot get subcomponents, component group '" + group + "' has been closed");
-        return CollectionView.of(components.values().stream()
-            .flatMap(c -> c.getSubcomponent(subcomponentType).stream())
-        );
+        return components.values().stream()
+            .flatMap(c -> c.getSubcomponent(subcomponentType).stream());
     }
 
     @Override
-    public <T> CollectionView<T> getSubcomponents(CoordinateRequirement coordinateRequirement, Class<T> subcomponentType) {
+    public <T> Stream<T> getSubcomponents(CoordinateRequirement coordinateRequirement, Class<T> subcomponentType) {
         if(closed)
             throw new IllegalStateException("Cannot get subcomponents, component group '" + group + "' has been closed");
-        return CollectionView.of(components.values().stream()
+        return components.values().stream()
             .filter(c -> c.matchesCoordinate(coordinateRequirement))
-            .flatMap(c -> c.getSubcomponent(subcomponentType).stream())
-        );
+            .flatMap(c -> c.getSubcomponent(subcomponentType).stream());
     }
 }

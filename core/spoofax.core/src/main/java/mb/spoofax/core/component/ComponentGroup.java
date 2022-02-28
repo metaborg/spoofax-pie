@@ -3,11 +3,14 @@ package mb.spoofax.core.component;
 import mb.common.option.Option;
 import mb.common.util.CollectionView;
 import mb.common.util.MapView;
+import mb.common.util.StreamUtil;
 import mb.pie.dagger.PieComponent;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.core.Coordinate;
 import mb.spoofax.core.CoordinateRequirement;
 import mb.spoofax.core.language.LanguageComponent;
+
+import java.util.stream.Stream;
 
 public interface ComponentGroup {
     String getGroup();
@@ -21,15 +24,11 @@ public interface ComponentGroup {
 
     Option<LanguageComponent> getLanguageComponent(Coordinate coordinate);
 
-    CollectionView<LanguageComponent> getLanguageComponents(CoordinateRequirement coordinateRequirement);
+    Stream<LanguageComponent> getLanguageComponents(CoordinateRequirement coordinateRequirement);
 
     default Option<LanguageComponent> getOneLanguageComponent(CoordinateRequirement coordinateRequirement) {
-        final CollectionView<LanguageComponent> languageComponents = getLanguageComponents(coordinateRequirement);
-        if(languageComponents.size() == 1) {
-            return Option.ofSome(languageComponents.iterator().next());
-        } else {
-            return Option.ofNone();
-        }
+        final Stream<LanguageComponent> languageComponents = getLanguageComponents(coordinateRequirement);
+        return StreamUtil.findOne(languageComponents);
     }
 
     CollectionView<LanguageComponent> getLanguageComponents();
@@ -46,25 +45,17 @@ public interface ComponentGroup {
 
     <T> Option<T> getSubcomponent(Coordinate coordinate, Class<T> subcomponentType);
 
-    <T> CollectionView<T> getSubcomponents(Class<T> subcomponentType);
+    <T> Stream<T> getSubcomponents(Class<T> subcomponentType);
 
     default <T> Option<T> getOneSubcomponent(Class<T> subcomponentType) {
-        final CollectionView<T> languageComponents = getSubcomponents(subcomponentType);
-        if(languageComponents.size() == 1) {
-            return Option.ofSome(languageComponents.iterator().next());
-        } else {
-            return Option.ofNone();
-        }
+        final Stream<T> subcomponents = getSubcomponents(subcomponentType);
+        return StreamUtil.findOne(subcomponents);
     }
 
-    <T> CollectionView<T> getSubcomponents(CoordinateRequirement coordinateRequirement, Class<T> subcomponentType);
+    <T> Stream<T> getSubcomponents(CoordinateRequirement coordinateRequirement, Class<T> subcomponentType);
 
     default <T> Option<T> getOneSubcomponent(CoordinateRequirement coordinateRequirement, Class<T> subcomponentType) {
-        final CollectionView<T> languageComponents = getSubcomponents(coordinateRequirement, subcomponentType);
-        if(languageComponents.size() == 1) {
-            return Option.ofSome(languageComponents.iterator().next());
-        } else {
-            return Option.ofNone();
-        }
+        final Stream<T> subcomponents = getSubcomponents(coordinateRequirement, subcomponentType);
+        return StreamUtil.findOne(subcomponents);
     }
 }
