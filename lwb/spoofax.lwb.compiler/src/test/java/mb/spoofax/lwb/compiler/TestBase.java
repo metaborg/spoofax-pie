@@ -28,8 +28,9 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.spoofax.core.component.StaticComponentManagerBuilder;
 import mb.spoofax.core.platform.DaggerPlatformComponent;
 import mb.spoofax.core.platform.PlatformComponent;
-import mb.spoofax.lwb.compiler.dagger.Spoofax3CompilerComponent;
-import mb.spoofax.lwb.compiler.dagger.Spoofax3Compiler;
+import mb.spoofax.lwb.compiler.definition.CheckLanguageDefinition;
+import mb.spoofax.lwb.compiler.definition.CompileLanguageDefinition;
+import mb.spoofax.lwb.compiler.definition.CompileLanguageDefinitionException;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -38,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class TestBase {
     final ClassLoaderResourceRegistry classLoaderResourceRegistry =
-        new ClassLoaderResourceRegistry("language-compiler", CompileLanguageTest.class.getClassLoader());
+        new ClassLoaderResourceRegistry("language-compiler", CompileLanguageDefinitionTest.class.getClassLoader());
 
     HierarchicalResource tempDirectory;
     HierarchicalResource rootDirectory;
@@ -49,8 +50,8 @@ class TestBase {
     Spoofax3Compiler compiler;
     ResourceService resourceService;
     PieComponent pieComponent;
-    CheckLanguageSpecification checkLanguageSpecification;
-    CompileLanguage compileLanguage;
+    CheckLanguageDefinition checkLanguageDefinition;
+    CompileLanguageDefinition compileLanguageDefinition;
 
     void setup(Path temporaryDirectoryPath) throws IOException {
         tempDirectory = new FSResource(temporaryDirectoryPath);
@@ -71,7 +72,7 @@ class TestBase {
     }
 
     void teardown() throws Exception {
-        compileLanguage = null;
+        compileLanguageDefinition = null;
         pieComponent.close();
         pieComponent = null;
         resourceService = null;
@@ -98,23 +99,23 @@ class TestBase {
         }
     }
 
-    void checkAndCompileLanguage() throws CompileLanguageException, ExecException, InterruptedException {
-        final CompileLanguage.Args args = CompileLanguage.Args.builder()
+    void checkAndCompileLanguage() throws CompileLanguageDefinitionException, ExecException, InterruptedException {
+        final CompileLanguageDefinition.Args args = CompileLanguageDefinition.Args.builder()
             .rootDirectory(rootDirectory.getPath())
             .build();
         try(final MixedSession session = pieComponent.getPie().newSession()) {
-            final KeyedMessages messages = session.require(checkLanguageSpecification.createTask(rootDirectory.getPath()));
+            final KeyedMessages messages = session.require(checkLanguageDefinition.createTask(rootDirectory.getPath()));
             assertNoErrors(messages);
-            session.require(compileLanguage.createTask(args)).unwrap();
-        } catch(CompileLanguageException e) {
+            session.require(compileLanguageDefinition.createTask(args)).unwrap();
+        } catch(CompileLanguageDefinitionException e) {
             System.err.println(exceptionPrinter.printExceptionToString(e));
             throw e;
         }
     }
 
     void recreateCompiler() throws IOException {
-        compileLanguage = null;
-        checkLanguageSpecification = null;
+        compileLanguageDefinition = null;
+        checkLanguageDefinition = null;
         pieComponent = null;
         resourceService = null;
         if(compiler != null) {
@@ -140,8 +141,8 @@ class TestBase {
         final Spoofax3CompilerComponent spoofax3CompilerComponent = compiler.spoofax3CompilerComponent;
         resourceService = spoofax3CompilerComponent.getResourceServiceComponent().getResourceService();
         pieComponent = compiler.pieComponent;
-        compileLanguage = spoofax3CompilerComponent.getCompileLanguage();
-        checkLanguageSpecification = spoofax3CompilerComponent.getCheckLanguageSpecification();
+        compileLanguageDefinition = spoofax3CompilerComponent.getCompileLanguageDefinition();
+        checkLanguageDefinition = spoofax3CompilerComponent.getCheckLanguageDefinition();
     }
 
     void assertNoErrors(KeyedMessages messages) {

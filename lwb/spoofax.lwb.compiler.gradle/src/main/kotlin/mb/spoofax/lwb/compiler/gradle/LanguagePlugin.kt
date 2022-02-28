@@ -29,9 +29,9 @@ import mb.spoofax.compiler.gradle.plugin.*
 import mb.spoofax.compiler.language.*
 import mb.spoofax.compiler.util.*
 import mb.spoofax.core.platform.DaggerPlatformComponent
-import mb.spoofax.lwb.compiler.CheckLanguageSpecification
-import mb.spoofax.lwb.compiler.CompileLanguageSpecification
-import mb.spoofax.lwb.compiler.dagger.Spoofax3Compiler
+import mb.spoofax.lwb.compiler.definition.CheckLanguageDefinition
+import mb.spoofax.lwb.compiler.Spoofax3Compiler
+import mb.spoofax.lwb.compiler.definition.CompileMetaLanguageSources
 import mb.strategolib.StrategoLibUtil
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -112,10 +112,10 @@ open class LanguagePlugin : Plugin<Project> {
 }
 
 class LanguagePluginInstance(
-    val project: Project,
-    resourceServiceComponent: ResourceServiceComponent,
-    val spoofax3Compiler: Spoofax3Compiler,
-    val compileLanguageInput: CompileLanguageInput
+  val project: Project,
+  resourceServiceComponent: ResourceServiceComponent,
+  val spoofax3Compiler: Spoofax3Compiler,
+  val compileLanguageInput: CompileLanguageInput
 ) {
   val resourceService: ResourceService = resourceServiceComponent.resourceService
   val pie: Pie = spoofax3Compiler.pieComponent.pie
@@ -135,8 +135,8 @@ class LanguagePluginInstance(
     val adapterProjectCompiler = spoofax3Compiler.spoofaxCompilerComponent.adapterProjectCompiler
     configureProject(languageProjectCompiler, spoofax3Compiler.spoofax3CompilerComponent.strategoLibComponent.strategoLibUtil, spoofax3Compiler.spoofax3CompilerComponent.gppComponent.gppUtil, adapterProjectCompiler)
     configureCompileLanguageProjectTask(languageProjectCompiler, compileLanguageInput.languageProjectInput())
-    val check = spoofax3Compiler.spoofax3CompilerComponent.checkLanguageSpecification
-    val compile = spoofax3Compiler.spoofax3CompilerComponent.compileLanguageSpecification
+    val check = spoofax3Compiler.spoofax3CompilerComponent.checkLanguageDefinition
+    val compile = spoofax3Compiler.spoofax3CompilerComponent.compileMetaLanguageSources
     configureCompileLanguageTask(check, compile, compileLanguageInput.compileLanguageSpecificationInput())
     configureCompileAdapterProjectTask(adapterProjectCompiler, compileLanguageInput.adapterProjectInput())
   }
@@ -188,8 +188,8 @@ class LanguagePluginInstance(
   }
 
   private fun configureCompileLanguageTask(
-    check: CheckLanguageSpecification,
-    compile: CompileLanguageSpecification,
+    check: CheckLanguageDefinition,
+    compile: CompileMetaLanguageSources,
     input: CompileLanguageSpecificationInput
   ) {
     val compileTask = project.tasks.register("compileLanguage") {

@@ -1,4 +1,4 @@
-package mb.spoofax.lwb.compiler.dagger;
+package mb.spoofax.lwb.compiler;
 
 import javax.inject.Scope;
 import java.lang.annotation.Retention;

@@ -1,4 +1,4 @@
-package mb.spoofax.lwb.compiler;
+package mb.spoofax.lwb.compiler.definition;
 
 import mb.cfg.CompileLanguageInput;
 import mb.cfg.task.CfgRootDirectoryToObject;
@@ -35,25 +35,24 @@ import java.util.Set;
 import java.util.SortedSet;
 
 /**
- * Fully compiles a language by running the {@link LanguageProjectCompiler language project compiler}, {@link
- * CompileLanguageSpecification language specification compiler}, {@link AdapterProjectCompiler adapter project
- * compiler}, and the {@link CompileJava Java compiler}. This fully compiles a language from its sources to Java class
- * files and corresponding resources.
+ * Fully compiles a language definition by running the {@link LanguageProjectCompiler language project compiler},
+ * meta-language compilers, {@link AdapterProjectCompiler adapter project compiler}, and the {@link CompileJava Java
+ * compiler}. This fully compiles a language from its sources to Java class files and corresponding resources.
  *
- * Takes an {@link CompileLanguage.Args} as input, which contains the root directory that is used to find the CFG file
- * configuring the various compilers, and fields to add additional Java class and annotation processor paths.
+ * Takes an {@link CompileLanguageDefinition.Args} as input, which contains the root directory that is used to find the
+ * CFG file configuring the various compilers, and fields to add additional Java class and annotation processor paths.
  *
- * Produces a {@link Result} that is either an {@link Output} or a {@link CompileLanguageException} when compilation
- * fails. The {@link Output} contains all {@link KeyedMessages messages} produced during compilation, and the Java class
- * path that can be used to run the language, dynamically load it, or to package it into a JAR file.
+ * Produces a {@link Result} that is either an {@link Output} or a {@link CompileLanguageDefinitionException} when
+ * compilation fails. The {@link Output} contains all {@link KeyedMessages messages} produced during compilation, and
+ * the Java class path that can be used to run the language, dynamically load it, or to package it into a JAR file.
  */
 @Value.Enclosing
-public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<CompileLanguage.Output, CompileLanguageException>> {
+public class CompileLanguageDefinition implements TaskDef<CompileLanguageDefinition.Args, Result<CompileLanguageDefinition.Output, CompileLanguageDefinitionException>> {
     @Value.Immutable
     public interface Args extends Serializable {
-        class Builder extends CompileLanguageData.Args.Builder {}
+        class Builder extends CompileLanguageDefinitionData.Args.Builder {}
 
-        static Builder builder() { return new Builder(); }
+        static Builder builder() {return new Builder();}
 
         ResourcePath rootDirectory();
 
@@ -64,9 +63,9 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
 
     @Value.Immutable
     public interface Output extends Serializable {
-        class Builder extends CompileLanguageData.Output.Builder {}
+        class Builder extends CompileLanguageDefinitionData.Output.Builder {}
 
-        static Builder builder() { return new Builder(); }
+        static Builder builder() {return new Builder();}
 
         ResourcePath rootDirectory();
 
@@ -81,23 +80,23 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
 
     private final CfgRootDirectoryToObject cfgRootDirectoryToObject;
     private final LanguageProjectCompiler languageProjectCompiler;
-    private final CompileLanguageSpecification compileLanguage;
+    private final CompileMetaLanguageSources compileMetaLanguageSources;
     private final AdapterProjectCompiler adapterProjectCompiler;
     private final EclipseProjectCompiler eclipseProjectCompiler;
     private final CompileJava compileJava;
 
 
-    @Inject public CompileLanguage(
+    @Inject public CompileLanguageDefinition(
         CfgRootDirectoryToObject cfgRootDirectoryToObject,
         LanguageProjectCompiler languageProjectCompiler,
-        CompileLanguageSpecification compileLanguage,
+        CompileMetaLanguageSources compileMetaLanguageSources,
         AdapterProjectCompiler adapterProjectCompiler,
         EclipseProjectCompiler eclipseProjectCompiler,
         CompileJava compileJava
     ) {
         this.cfgRootDirectoryToObject = cfgRootDirectoryToObject;
         this.languageProjectCompiler = languageProjectCompiler;
-        this.compileLanguage = compileLanguage;
+        this.compileMetaLanguageSources = compileMetaLanguageSources;
         this.adapterProjectCompiler = adapterProjectCompiler;
         this.eclipseProjectCompiler = eclipseProjectCompiler;
         this.compileJava = compileJava;
@@ -109,14 +108,15 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
     }
 
     @Override
-    public Result<Output, CompileLanguageException> exec(ExecContext context, Args args) {
+    public Result<Output, CompileLanguageDefinitionException> exec(ExecContext context, Args args) {
+        // Check CFG configuration.
         final ResourcePath rootDirectory = args.rootDirectory();
         final Task<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>> cfgTask = cfgRootDirectoryToObject.createTask(rootDirectory);
         final STask<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>> cfgSupplier = cfgTask.toSupplier();
         final Result<CfgToObject.Output, CfgRootDirectoryToObjectException> cfgResult = context.require(cfgTask);
         if(cfgResult.isErr()) {
             // noinspection ConstantConditions (error is present)
-            return Result.ofErr(CompileLanguageException.getConfigurationFail(cfgResult.getErr()));
+            return Result.ofErr(CompileLanguageDefinitionException.getConfigurationFail(cfgResult.getErr()));
         }
 
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
@@ -128,21 +128,21 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
         final CompileJava.Input.Builder compileJavaInputBuilder = CompileJava.Input.builder().key(args.rootDirectory());
         final Output.Builder outputBuilder = Output.builder();
 
-
+        // Generate language project
         final Task<Result<None, ?>> languageProjectCompilerTask = languageProjectCompiler.createTask(new LanguageProjectInputSupplier(cfgSupplier));
         // TODO: check result? It can only fail due to a CFG failure atm.
         context.require(languageProjectCompilerTask);
         compileJavaInputBuilder.addOriginTasks(languageProjectCompilerTask.toSupplier());
 
-        final Task<Result<CompileLanguageSpecification.Output, CompileLanguageSpecificationException>> languageSpecificationCompilerTask = compileLanguage.createTask(rootDirectory);
-        final Result<CompileLanguageSpecification.Output, CompileLanguageSpecificationException> languageSpecificationCompilerResult = context.require(languageSpecificationCompilerTask);
-        compileJavaInputBuilder.addSourceTasks(new LanguageSpecificationJavaSourcesSupplier(languageSpecificationCompilerTask.toSupplier()));
-        if(languageSpecificationCompilerResult.isErr()) {
+        final Task<Result<CompileMetaLanguageSources.Output, CompileMetaLanguageSourcesException>> compileMetaLanguageSourcesTask = compileMetaLanguageSources.createTask(rootDirectory);
+        final Result<CompileMetaLanguageSources.Output, CompileMetaLanguageSourcesException> compileMetaLanguageSourcesResult = context.require(compileMetaLanguageSourcesTask);
+        compileJavaInputBuilder.addSourceTasks(new LanguageSpecificationJavaSourcesSupplier(compileMetaLanguageSourcesTask.toSupplier()));
+        if(compileMetaLanguageSourcesResult.isErr()) {
             // noinspection ConstantConditions (error is present)
-            return Result.ofErr(CompileLanguageException.compileLanguageFail(languageSpecificationCompilerResult.getErr()));
+            return Result.ofErr(CompileLanguageDefinitionException.compileMetaLanguageSourcesFail(compileMetaLanguageSourcesResult.getErr()));
         } else {
             // noinspection ConstantConditions (value is present)
-            final CompileLanguageSpecification.Output output = languageSpecificationCompilerResult.get();
+            final CompileMetaLanguageSources.Output output = compileMetaLanguageSourcesResult.get();
             // noinspection ConstantConditions (value is really present)
             messagesBuilder.addMessages(output.messages());
             compileJavaInputBuilder.addClassPathSuppliers(new ValueSupplier<>(ListView.of(output.javaClassPaths()))); // TODO: use real supplier
@@ -151,16 +151,19 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
             }
         }
 
+        // Generate adapter project.
         final Task<Result<None, ?>> adapterProjectCompilerTask = adapterProjectCompiler.createTask(new AdapterProjectInputSupplier(cfgSupplier));
         // TODO: check result? It can only fail due to a CFG failure atm.
         context.require(adapterProjectCompilerTask);
         compileJavaInputBuilder.addOriginTasks(adapterProjectCompilerTask.toSupplier());
 
+        // Generate Eclipse project.
         final Task<Result<None, ?>> eclipseProjectCompilerTask = eclipseProjectCompiler.createTask(new EclipseProjectInputSupplier(cfgSupplier));
         // TODO: check result? It can only fail due to a CFG failure atm.
         context.require(eclipseProjectCompilerTask);
         compileJavaInputBuilder.addOriginTasks(eclipseProjectCompilerTask.toSupplier());
 
+        // Compile Java source code.
         compileJavaInputBuilder
             .addSourceTasks(new JavaSourcesSupplier(cfgSupplier))
             .addClassPathSuppliers(new ValueSupplier<>(ListView.of(input.javaClassPaths())))
@@ -178,7 +181,7 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
         final KeyedMessages javaCompilationMessages = context.require(compileJava, compileJavaInputBuilder.build());
         messagesBuilder.addMessages(javaCompilationMessages);
         if(javaCompilationMessages.containsError()) {
-            return Result.ofErr(CompileLanguageException.javaCompilationFail(messagesBuilder.build()));
+            return Result.ofErr(CompileLanguageDefinitionException.javaCompilationFail(messagesBuilder.build()));
         }
 
         return Result.ofOk(outputBuilder
@@ -247,8 +250,9 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
         }
     }
 
-    private static class LanguageSpecificationJavaSourcesSupplier extends Stateful1Supplier<STask<Result<CompileLanguageSpecification.Output, CompileLanguageSpecificationException>>, Result<CompileJava.Sources, ?>> {
-        public LanguageSpecificationJavaSourcesSupplier(STask<Result<CompileLanguageSpecification.Output, CompileLanguageSpecificationException>> state) {
+
+    private static class LanguageSpecificationJavaSourcesSupplier extends Stateful1Supplier<STask<Result<CompileMetaLanguageSources.Output, CompileMetaLanguageSourcesException>>, Result<CompileJava.Sources, ?>> {
+        public LanguageSpecificationJavaSourcesSupplier(STask<Result<CompileMetaLanguageSources.Output, CompileMetaLanguageSourcesException>> state) {
             super(state);
         }
 
@@ -256,9 +260,9 @@ public class CompileLanguage implements TaskDef<CompileLanguage.Args, Result<Com
             return context.requireMapping(state, new LangaugeSpecificationJavaSourcesMapper());
         }
 
-        private static class LangaugeSpecificationJavaSourcesMapper extends StatelessSerializableFunction<Result<CompileLanguageSpecification.Output, CompileLanguageSpecificationException>, Result<CompileJava.Sources, CompileLanguageSpecificationException>> {
+        private static class LangaugeSpecificationJavaSourcesMapper extends StatelessSerializableFunction<Result<CompileMetaLanguageSources.Output, CompileMetaLanguageSourcesException>, Result<CompileJava.Sources, CompileMetaLanguageSourcesException>> {
             @Override
-            public Result<CompileJava.Sources, CompileLanguageSpecificationException> apply(Result<CompileLanguageSpecification.Output, CompileLanguageSpecificationException> result) {
+            public Result<CompileJava.Sources, CompileMetaLanguageSourcesException> apply(Result<CompileMetaLanguageSources.Output, CompileMetaLanguageSourcesException> result) {
                 return result.map(o -> CompileJava.Sources.builder().addAllSourceFiles(o.providedJavaFiles()).build());
             }
         }

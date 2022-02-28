@@ -44,9 +44,9 @@ import mb.spoofax.core.component.StaticComponentManager;
 import mb.spoofax.core.component.StaticComponentManagerBuilder;
 import mb.spoofax.core.platform.DaggerPlatformComponent;
 import mb.spoofax.core.platform.PlatformComponent;
-import mb.spoofax.lwb.compiler.CompileLanguage;
-import mb.spoofax.lwb.compiler.CompileLanguageException;
-import mb.spoofax.lwb.compiler.dagger.Spoofax3Compiler;
+import mb.spoofax.lwb.compiler.definition.CompileLanguageDefinition;
+import mb.spoofax.lwb.compiler.definition.CompileLanguageDefinitionException;
+import mb.spoofax.lwb.compiler.Spoofax3Compiler;
 import mb.spoofax.lwb.dynamicloading.component.DynamicComponent;
 import mb.spoofax.lwb.dynamicloading.component.DynamicComponentManager;
 import mb.spoofax.lwb.dynamicloading.component.DynamicComponentManagerBuilder;
@@ -73,7 +73,7 @@ class TestBase {
     SerializingStoreInMemoryBuffer spoofax3CompilerStoreBuffer;
     Spoofax3Compiler spoofax3Compiler;
     CfgRootDirectoryToObject cfgRootDirectoryToObject;
-    CompileLanguage compileLanguage;
+    CompileLanguageDefinition compileLanguageDefinition;
     SptComponent sptComponent;
     ResourceService resourceService;
     MetricsTracer languageMetricsTracer;
@@ -117,7 +117,7 @@ class TestBase {
         spoofax3Compiler = Spoofax3Compiler.fromComponentManager(componentManager);
 
         cfgRootDirectoryToObject = spoofax3Compiler.spoofax3CompilerComponent.getCfgComponent().getCfgRootDirectoryToObject();
-        compileLanguage = spoofax3Compiler.spoofax3CompilerComponent.getCompileLanguage();
+        compileLanguageDefinition = spoofax3Compiler.spoofax3CompilerComponent.getCompileLanguageDefinition();
         sptComponent = spoofax3Compiler.componentManager.getOneSubcomponent(SptComponent.class).unwrap();
         resourceService = spoofax3Compiler.resourceServiceComponent.getResourceService();
         languageMetricsTracer = new MetricsTracer();
@@ -163,7 +163,7 @@ class TestBase {
         sptComponent = null;
         spoofax3CompilerStoreBuffer.close();
         spoofax3CompilerStoreBuffer = null;
-        compileLanguage = null;
+        compileLanguageDefinition = null;
         cfgRootDirectoryToObject = null;
         spoofax3Compiler.close();
         spoofax3Compiler = null;
@@ -177,8 +177,8 @@ class TestBase {
     }
 
 
-    static CompileLanguage.Args compileLanguageArgs(ResourcePath rootDirectory) {
-        return CompileLanguage.Args.builder().rootDirectory(rootDirectory).build();
+    static CompileLanguageDefinition.Args compileLanguageArgs(ResourcePath rootDirectory) {
+        return CompileLanguageDefinition.Args.builder().rootDirectory(rootDirectory).build();
     }
 
 
@@ -186,8 +186,8 @@ class TestBase {
         return pieComponent.newSession();
     }
 
-    Task<Result<CompileLanguage.Output, CompileLanguageException>> compileLanguageTask(ResourcePath rootDirectory) {
-        return compileLanguage.createTask(compileLanguageArgs(rootDirectory));
+    Task<Result<CompileLanguageDefinition.Output, CompileLanguageDefinitionException>> compileLanguageTask(ResourcePath rootDirectory) {
+        return compileLanguageDefinition.createTask(compileLanguageArgs(rootDirectory));
     }
 
     Supplier<Result<DynamicLoad.SupplierOutput, ?>> dynamicLoadSupplierOutputSupplier(ResourcePath rootDirectory) {
@@ -249,9 +249,9 @@ class TestBase {
     }
 
 
-    private static class ToDynamicLoadSupplierOutput extends StatelessSerializableFunction<Result<CompileLanguage.Output, CompileLanguageException>, Result<DynamicLoad.SupplierOutput, ?>> {
+    private static class ToDynamicLoadSupplierOutput extends StatelessSerializableFunction<Result<CompileLanguageDefinition.Output, CompileLanguageDefinitionException>, Result<DynamicLoad.SupplierOutput, ?>> {
         @Override
-        public Result<DynamicLoad.SupplierOutput, ?> apply(Result<CompileLanguage.Output, CompileLanguageException> r) {
+        public Result<DynamicLoad.SupplierOutput, ?> apply(Result<CompileLanguageDefinition.Output, CompileLanguageDefinitionException> r) {
             return r.map(o -> new DynamicLoad.SupplierOutput(o.rootDirectory(), SetView.of(o.javaClassPaths()), o.participantClassQualifiedId()));
         }
     }

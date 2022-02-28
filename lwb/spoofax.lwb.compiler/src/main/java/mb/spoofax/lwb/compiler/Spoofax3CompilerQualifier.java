@@ -1,4 +1,4 @@
-package mb.spoofax.lwb.compiler.dagger;
+package mb.spoofax.lwb.compiler;
 
 import javax.inject.Qualifier;
 import java.lang.annotation.Documented;

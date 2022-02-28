@@ -1,4 +1,4 @@
-package mb.spoofax.lwb.compiler.dagger;
+package mb.spoofax.lwb.compiler;
 
 import mb.cfg.CfgComponent;
 import mb.common.option.Option;
@@ -26,7 +26,7 @@ import mb.spoofax.core.component.ComponentDependencyResolver;
 import mb.spoofax.core.component.EmptyParticipant;
 import mb.spoofax.core.component.SubcomponentRegistry;
 import mb.spoofax.core.platform.PlatformComponent;
-import mb.spoofax.lwb.compiler.esv.EsvConfigureException;
+import mb.spoofax.lwb.compiler.esv.SpoofaxEsvConfigureException;
 import mb.spoofax.lwb.compiler.esv.SpoofaxEsvConfig;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3Config;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3ConfigureException;
@@ -152,9 +152,9 @@ public class Spoofax3CompilerParticipant<L extends LoggerComponent, R extends Re
             }
         ));
         esvComponent.getEsvConfigFunctionWrapper().set(component.getSpoofaxEsvConfigure().createFunction().mapOutput(
-            new StatelessSerializableFunction<Result<Option<SpoofaxEsvConfig>, EsvConfigureException>, Result<Option<EsvConfig>, EsvConfigureException>>() {
+            new StatelessSerializableFunction<Result<Option<SpoofaxEsvConfig>, SpoofaxEsvConfigureException>, Result<Option<EsvConfig>, SpoofaxEsvConfigureException>>() {
                 @Override
-                public Result<Option<EsvConfig>, EsvConfigureException> apply(Result<Option<SpoofaxEsvConfig>, EsvConfigureException> r) {
+                public Result<Option<EsvConfig>, SpoofaxEsvConfigureException> apply(Result<Option<SpoofaxEsvConfig>, SpoofaxEsvConfigureException> r) {
                     return r.map(o -> o.flatMap(SpoofaxEsvConfig::getEsvConfig));
                 }
             }));

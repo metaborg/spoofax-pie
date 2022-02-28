@@ -1,4 +1,4 @@
-package mb.spoofax.lwb.compiler;
+package mb.spoofax.lwb.compiler.definition;
 
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
@@ -15,21 +15,21 @@ import org.immutables.value.Value;
 import javax.inject.Inject;
 
 /**
- * Checks a language specification by running the meta-language checkers.
+ * Checks a language definition by running the meta-language checkers.
  *
  * Takes as input a {@link ResourcePath} path to the root directory of the language specification.
  *
  * Returns all {@link KeyedMessages messages} produced by the meta-language checkers.
  */
 @Value.Enclosing
-public class CheckLanguageSpecification implements TaskDef<ResourcePath, KeyedMessages> {
+public class CheckLanguageDefinition implements TaskDef<ResourcePath, KeyedMessages> {
     private final SpoofaxCfgCheck spoofaxCfgCheck;
     private final SpoofaxSdf3Check spoofaxSdf3Check;
     private final SpoofaxEsvCheck spoofaxEsvCheck;
     private final SpoofaxStatixCheck spoofaxStatixCheck;
     private final SpoofaxStrategoCheck spoofaxStrategoCheck;
 
-    @Inject public CheckLanguageSpecification(
+    @Inject public CheckLanguageDefinition(
         SpoofaxCfgCheck spoofaxCfgCheck,
         SpoofaxSdf3Check spoofaxSdf3Check,
         SpoofaxEsvCheck spoofaxEsvCheck,

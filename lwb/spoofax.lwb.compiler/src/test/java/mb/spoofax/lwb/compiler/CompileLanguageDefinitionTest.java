@@ -8,7 +8,7 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.nio.file.Path;
 
-class CompileLanguageTest extends TestBase {
+class CompileLanguageDefinitionTest extends TestBase {
     @BeforeEach void setup(@TempDir Path temporaryDirectoryPath) throws IOException {
         super.setup(temporaryDirectoryPath);
     }

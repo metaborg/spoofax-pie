@@ -67,8 +67,8 @@ dependencies {
     exclude("com.google.dagger", "dagger-compiler")
   }
 
-  // Embed `:spoofax.lwb.compiler` and `:spoofax.lwb.compiler.dagger`.
-  bundleEmbedImplementation(compositeBuild("spoofax.lwb.compiler.dagger")) {
+  // Embed `:spoofax.lwb.compiler`.
+  bundleEmbedImplementation(compositeBuild("spoofax.lwb.compiler")) {
     // Exclude meta-languages and libraries, as they have their own Eclipse plugins
     exclude("org.metaborg", "cfg")
     exclude("org.metaborg", "sdf3")

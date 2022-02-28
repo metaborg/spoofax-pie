@@ -12,34 +12,34 @@ import java.util.Optional;
  * Error for ESV compile task in the context of the Spoofax LWB compiler.
  */
 @ADT
-public abstract class EsvCompileException extends Exception implements HasOptionalMessages {
+public abstract class SpoofaxEsvCompileException extends Exception implements HasOptionalMessages {
     public interface Cases<R> {
         R getLanguageCompilerConfigurationFail(CfgRootDirectoryToObjectException cfgRootDirectoryToObjectException);
 
-        R configureFail(EsvConfigureException esvConfigureException);
+        R configureFail(SpoofaxEsvConfigureException esvConfigureException);
 
         R checkFail(KeyedMessages messages);
 
         R compileFail(Exception cause);
     }
 
-    public static EsvCompileException getLanguageCompilerConfigurationFail(CfgRootDirectoryToObjectException cfgRootDirectoryToObjectException) {
-        return withCause(EsvCompileExceptions.getLanguageCompilerConfigurationFail(cfgRootDirectoryToObjectException), cfgRootDirectoryToObjectException);
+    public static SpoofaxEsvCompileException getLanguageCompilerConfigurationFail(CfgRootDirectoryToObjectException cfgRootDirectoryToObjectException) {
+        return withCause(SpoofaxEsvCompileExceptions.getLanguageCompilerConfigurationFail(cfgRootDirectoryToObjectException), cfgRootDirectoryToObjectException);
     }
 
-    public static EsvCompileException configureFail(EsvConfigureException esvConfigureException) {
-        return withCause(EsvCompileExceptions.configureFail(esvConfigureException), esvConfigureException);
+    public static SpoofaxEsvCompileException configureFail(SpoofaxEsvConfigureException esvConfigureException) {
+        return withCause(SpoofaxEsvCompileExceptions.configureFail(esvConfigureException), esvConfigureException);
     }
 
-    public static EsvCompileException checkFail(KeyedMessages messages) {
-        return EsvCompileExceptions.checkFail(messages);
+    public static SpoofaxEsvCompileException checkFail(KeyedMessages messages) {
+        return SpoofaxEsvCompileExceptions.checkFail(messages);
     }
 
-    public static EsvCompileException compileFail(Exception cause) {
-        return withCause(EsvCompileExceptions.compileFail(cause), cause);
+    public static SpoofaxEsvCompileException compileFail(Exception cause) {
+        return withCause(SpoofaxEsvCompileExceptions.compileFail(cause), cause);
     }
 
-    private static EsvCompileException withCause(EsvCompileException e, Exception cause) {
+    private static SpoofaxEsvCompileException withCause(SpoofaxEsvCompileException e, Exception cause) {
         e.initCause(cause);
         return e;
     }
@@ -47,16 +47,16 @@ public abstract class EsvCompileException extends Exception implements HasOption
 
     public abstract <R> R match(Cases<R> cases);
 
-    public static EsvCompileExceptions.CasesMatchers.TotalMatcher_GetLanguageCompilerConfigurationFail cases() {
-        return EsvCompileExceptions.cases();
+    public static SpoofaxEsvCompileExceptions.CasesMatchers.TotalMatcher_GetLanguageCompilerConfigurationFail cases() {
+        return SpoofaxEsvCompileExceptions.cases();
     }
 
-    public EsvCompileExceptions.CaseOfMatchers.TotalMatcher_GetLanguageCompilerConfigurationFail caseOf() {
-        return EsvCompileExceptions.caseOf(this);
+    public SpoofaxEsvCompileExceptions.CaseOfMatchers.TotalMatcher_GetLanguageCompilerConfigurationFail caseOf() {
+        return SpoofaxEsvCompileExceptions.caseOf(this);
     }
 
     public Optional<KeyedMessages> getMessages() {
-        return EsvCompileExceptions.getMessages(this);
+        return SpoofaxEsvCompileExceptions.getMessages(this);
     }
 
 
@@ -74,7 +74,7 @@ public abstract class EsvCompileException extends Exception implements HasOption
     }
 
     @Override public Optional<KeyedMessages> getOptionalMessages() {
-        return EsvCompileExceptions.getMessages(this);
+        return SpoofaxEsvCompileExceptions.getMessages(this);
     }
 
 

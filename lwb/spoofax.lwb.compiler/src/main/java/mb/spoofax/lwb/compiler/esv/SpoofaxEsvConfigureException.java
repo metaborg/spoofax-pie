@@ -11,7 +11,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * Error for ESV configuration task in the context of the Spoofax LWB compiler.
  */
 @ADT
-public abstract class EsvConfigureException extends Exception {
+public abstract class SpoofaxEsvConfigureException extends Exception {
     public interface Cases<R> {
         R getLanguageCompilerConfigurationFail(CfgRootDirectoryToObjectException cfgRootDirectoryToObjectException);
 
@@ -24,27 +24,27 @@ public abstract class EsvConfigureException extends Exception {
         R sdf3ConfigureFail(SpoofaxSdf3ConfigureException spoofaxSdf3ConfigureException);
     }
 
-    public static EsvConfigureException getLanguageCompilerConfigurationFail(CfgRootDirectoryToObjectException cfgRootDirectoryToObjectException) {
-        return withCause(EsvConfigureExceptions.getLanguageCompilerConfigurationFail(cfgRootDirectoryToObjectException), cfgRootDirectoryToObjectException);
+    public static SpoofaxEsvConfigureException getLanguageCompilerConfigurationFail(CfgRootDirectoryToObjectException cfgRootDirectoryToObjectException) {
+        return withCause(SpoofaxEsvConfigureExceptions.getLanguageCompilerConfigurationFail(cfgRootDirectoryToObjectException), cfgRootDirectoryToObjectException);
     }
 
-    public static EsvConfigureException mainSourceDirectoryFail(ResourcePath sourceDirectory) {
-        return EsvConfigureExceptions.mainSourceDirectoryFail(sourceDirectory);
+    public static SpoofaxEsvConfigureException mainSourceDirectoryFail(ResourcePath sourceDirectory) {
+        return SpoofaxEsvConfigureExceptions.mainSourceDirectoryFail(sourceDirectory);
     }
 
-    public static EsvConfigureException mainFileFail(ResourceKey mainFile) {
-        return EsvConfigureExceptions.mainFileFail(mainFile);
+    public static SpoofaxEsvConfigureException mainFileFail(ResourceKey mainFile) {
+        return SpoofaxEsvConfigureExceptions.mainFileFail(mainFile);
     }
 
-    public static EsvConfigureException includeDirectoryFail(ResourcePath includeDirectory) {
-        return EsvConfigureExceptions.includeDirectoryFail(includeDirectory);
+    public static SpoofaxEsvConfigureException includeDirectoryFail(ResourcePath includeDirectory) {
+        return SpoofaxEsvConfigureExceptions.includeDirectoryFail(includeDirectory);
     }
 
-    public static EsvConfigureException sdf3ConfigureFail(SpoofaxSdf3ConfigureException spoofaxSdf3ConfigureException) {
-        return withCause(EsvConfigureExceptions.sdf3ConfigureFail(spoofaxSdf3ConfigureException), spoofaxSdf3ConfigureException);
+    public static SpoofaxEsvConfigureException sdf3ConfigureFail(SpoofaxSdf3ConfigureException spoofaxSdf3ConfigureException) {
+        return withCause(SpoofaxEsvConfigureExceptions.sdf3ConfigureFail(spoofaxSdf3ConfigureException), spoofaxSdf3ConfigureException);
     }
 
-    private static EsvConfigureException withCause(EsvConfigureException e, Exception cause) {
+    private static SpoofaxEsvConfigureException withCause(SpoofaxEsvConfigureException e, Exception cause) {
         e.initCause(cause);
         return e;
     }
@@ -52,12 +52,12 @@ public abstract class EsvConfigureException extends Exception {
 
     public abstract <R> R match(Cases<R> cases);
 
-    public static EsvConfigureExceptions.CasesMatchers.TotalMatcher_GetLanguageCompilerConfigurationFail cases() {
-        return EsvConfigureExceptions.cases();
+    public static SpoofaxEsvConfigureExceptions.CasesMatchers.TotalMatcher_GetLanguageCompilerConfigurationFail cases() {
+        return SpoofaxEsvConfigureExceptions.cases();
     }
 
-    public EsvConfigureExceptions.CaseOfMatchers.TotalMatcher_GetLanguageCompilerConfigurationFail caseOf() {
-        return EsvConfigureExceptions.caseOf(this);
+    public SpoofaxEsvConfigureExceptions.CaseOfMatchers.TotalMatcher_GetLanguageCompilerConfigurationFail caseOf() {
+        return SpoofaxEsvConfigureExceptions.caseOf(this);
     }
 
 

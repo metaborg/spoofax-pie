@@ -20,7 +20,7 @@ import java.util.Set;
 /**
  * Compile task for ESV in the context of the Spoofax LWB compiler.
  */
-public class SpoofaxEsvCompile implements TaskDef<ResourcePath, Result<KeyedMessages, EsvCompileException>> {
+public class SpoofaxEsvCompile implements TaskDef<ResourcePath, Result<KeyedMessages, SpoofaxEsvCompileException>> {
     private final SpoofaxEsvConfigure configure;
     private final EsvCheck check;
     private final EsvCompile compile;
@@ -42,9 +42,9 @@ public class SpoofaxEsvCompile implements TaskDef<ResourcePath, Result<KeyedMess
     }
 
     @Override
-    public Result<KeyedMessages, EsvCompileException> exec(ExecContext context, ResourcePath rootDirectory) {
+    public Result<KeyedMessages, SpoofaxEsvCompileException> exec(ExecContext context, ResourcePath rootDirectory) {
         return context.require(configure, rootDirectory)
-            .mapErr(EsvCompileException::configureFail)
+            .mapErr(SpoofaxEsvCompileException::configureFail)
             .flatMap(o -> o.mapOr(
                 c -> compile(context, c),
                 Result.ofOk(KeyedMessages.of()) // ESV is not configured, nothing to do.
@@ -55,26 +55,26 @@ public class SpoofaxEsvCompile implements TaskDef<ResourcePath, Result<KeyedMess
         return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 
-    public Result<KeyedMessages, EsvCompileException> compile(ExecContext context, SpoofaxEsvConfig config) {
+    public Result<KeyedMessages, SpoofaxEsvCompileException> compile(ExecContext context, SpoofaxEsvConfig config) {
         return config.caseOf()
             .files((esvConfig, outputFile) -> compileFromSourceFiles(context, esvConfig, outputFile))
             .prebuilt((inputFile, outputFile) -> copyPrebuilt(context, inputFile, outputFile))
             ;
     }
 
-    public Result<KeyedMessages, EsvCompileException> compileFromSourceFiles(
+    public Result<KeyedMessages, SpoofaxEsvCompileException> compileFromSourceFiles(
         ExecContext context,
         EsvConfig config,
         ResourcePath atermFormatOutputFile
     ) {
         final KeyedMessages messages = context.require(check, config);
         if(messages.containsError()) {
-            return Result.ofErr(EsvCompileException.checkFail(messages));
+            return Result.ofErr(SpoofaxEsvCompileException.checkFail(messages));
         }
 
         final Result<IStrategoTerm, ?> result = context.require(compile, config);
         if(result.isErr()) {
-            return Result.ofErr(EsvCompileException.compileFail(result.unwrapErr()));
+            return Result.ofErr(SpoofaxEsvCompileException.compileFail(result.unwrapErr()));
         }
         final IStrategoTerm atermFormat = result.get();
         final WritableResource atermFormatFile = context.getWritableResource(atermFormatOutputFile);
@@ -82,13 +82,13 @@ public class SpoofaxEsvCompile implements TaskDef<ResourcePath, Result<KeyedMess
             atermFormatFile.writeString(atermFormat.toString());
             context.provide(atermFormatFile);
         } catch(IOException e) {
-            return Result.ofErr(EsvCompileException.compileFail(e));
+            return Result.ofErr(SpoofaxEsvCompileException.compileFail(e));
         }
 
         return Result.ofOk(messages);
     }
 
-    public Result<KeyedMessages, EsvCompileException> copyPrebuilt(
+    public Result<KeyedMessages, SpoofaxEsvCompileException> copyPrebuilt(
         ExecContext context,
         ResourcePath inputFile,
         ResourcePath outputFile
@@ -96,7 +96,7 @@ public class SpoofaxEsvCompile implements TaskDef<ResourcePath, Result<KeyedMess
         try {
             TaskCopyUtil.copy(context, inputFile, outputFile);
         } catch(IOException e) {
-            return Result.ofErr(EsvCompileException.compileFail(e));
+            return Result.ofErr(SpoofaxEsvCompileException.compileFail(e));
         }
         return Result.ofOk(KeyedMessages.of());
     }

@@ -1,4 +1,4 @@
-package mb.spoofax.lwb.compiler;
+package mb.spoofax.lwb.compiler.definition;
 
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
@@ -21,26 +21,26 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Compiles a language specification by running the meta-language compilers.
+ * Compiles the meta-langauge sources by running their compilers.
  *
- * Takes as input a {@link ResourcePath} path to the root directory of the language specification.
+ * Takes as input a {@link ResourcePath} path to the root directory of the meta-language sources.
  *
  * Produces a {@link Result} that is either an output with all {@link KeyedMessages messages} produced by the
- * meta-language compilers, or a {@link CompileLanguageSpecificationException} when compilation fails.
+ * meta-language compilers, or a {@link CompileMetaLanguageSourcesException} when compilation fails.
  */
 @Value.Enclosing
-public class CompileLanguageSpecification implements TaskDef<ResourcePath, Result<CompileLanguageSpecification.Output, CompileLanguageSpecificationException>> {
+public class CompileMetaLanguageSources implements TaskDef<ResourcePath, Result<CompileMetaLanguageSources.Output, CompileMetaLanguageSourcesException>> {
     @Value.Immutable
     public interface Output extends Serializable {
-        class Builder extends CompileLanguageSpecificationData.Output.Builder {}
+        class Builder extends CompileMetaLanguageSourcesData.Output.Builder {}
 
-        static Builder builder() { return new Builder(); }
+        static Builder builder() {return new Builder();}
 
         List<ResourcePath> providedJavaFiles();
 
         List<File> javaClassPaths();
 
-        @Value.Default default KeyedMessages messages() { return KeyedMessages.of(); }
+        @Value.Default default KeyedMessages messages() {return KeyedMessages.of();}
     }
 
 
@@ -49,7 +49,7 @@ public class CompileLanguageSpecification implements TaskDef<ResourcePath, Resul
     private final SpoofaxStatixCompile spoofaxStatixCompile;
     private final SpoofaxStrategoCompile spoofaxStrategoCompile;
 
-    @Inject public CompileLanguageSpecification(
+    @Inject public CompileMetaLanguageSources(
         SpoofaxSdf3Compile spoofaxSdf3Compile,
         SpoofaxEsvCompile spoofaxEsvCompile,
         SpoofaxStatixCompile spoofaxStatixCompile,
@@ -67,21 +67,21 @@ public class CompileLanguageSpecification implements TaskDef<ResourcePath, Resul
     }
 
     @Override
-    public Result<Output, CompileLanguageSpecificationException> exec(ExecContext context, ResourcePath rootDirectory) {
+    public Result<Output, CompileMetaLanguageSourcesException> exec(ExecContext context, ResourcePath rootDirectory) {
         final ArrayList<ResourcePath> providedJavaFiles = new ArrayList<>();
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
         final ArrayList<File> javaClassPaths = new ArrayList<>();
-        final Result<?, CompileLanguageSpecificationException> result = context.require(spoofaxSdf3Compile, rootDirectory)
+        final Result<?, CompileMetaLanguageSourcesException> result = context.require(spoofaxSdf3Compile, rootDirectory)
             .ifOk(messagesBuilder::addMessages)
-            .mapErr(CompileLanguageSpecificationException::sdf3CompileFail)
+            .mapErr(CompileMetaLanguageSourcesException::sdf3CompileFail)
             .and(
                 context.require(spoofaxEsvCompile, rootDirectory)
                     .ifOk(messagesBuilder::addMessages)
-                    .mapErr(CompileLanguageSpecificationException::esvCompileFail)
+                    .mapErr(CompileMetaLanguageSourcesException::esvCompileFail)
             ).and(
                 context.require(spoofaxStatixCompile, rootDirectory)
                     .ifOk(messagesBuilder::addMessages)
-                    .mapErr(CompileLanguageSpecificationException::statixCompileFail)
+                    .mapErr(CompileMetaLanguageSourcesException::statixCompileFail)
             ).and(
                 context.require(spoofaxStrategoCompile, rootDirectory)
                     .ifOk(o -> {
@@ -89,7 +89,7 @@ public class CompileLanguageSpecification implements TaskDef<ResourcePath, Resul
                         providedJavaFiles.addAll(o.providedJavaFiles());
                         javaClassPaths.addAll(o.javaClassPaths());
                     })
-                    .mapErr(CompileLanguageSpecificationException::strategoCompileFail)
+                    .mapErr(CompileMetaLanguageSourcesException::strategoCompileFail)
             );
         if(result.isErr()) return result.ignoreValueIfErr();
         return Result.ofOk(Output.builder()

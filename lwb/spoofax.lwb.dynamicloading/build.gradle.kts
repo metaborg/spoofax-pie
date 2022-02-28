@@ -21,7 +21,6 @@ dependencies {
 
   testImplementation("org.slf4j:slf4j-nop:1.7.30")
   testImplementation(project(":spoofax.lwb.compiler"))
-  testImplementation(project(":spoofax.lwb.compiler.dagger"))
   testImplementation(project(":spt"))
   testImplementation(project(":spt.dynamicloading"))
   testImplementation("org.metaborg:pie.runtime")

@@ -93,7 +93,6 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
 }
 
 include("spoofax.lwb.compiler")
-include("spoofax.lwb.compiler.dagger")
 include("spoofax.lwb.compiler.gradle")
 
 include("spoofax.lwb.dynamicloading")

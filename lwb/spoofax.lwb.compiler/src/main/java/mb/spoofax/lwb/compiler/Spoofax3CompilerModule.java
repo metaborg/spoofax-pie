@@ -1,4 +1,4 @@
-package mb.spoofax.lwb.compiler.dagger;
+package mb.spoofax.lwb.compiler;
 
 import dagger.Module;
 import dagger.Provides;
@@ -7,10 +7,10 @@ import mb.pie.api.TaskDef;
 import mb.pie.task.archive.UnarchiveFromJar;
 import mb.pie.task.java.CompileJava;
 import mb.spoofax.compiler.util.TemplateCompiler;
-import mb.spoofax.lwb.compiler.CheckLanguageSpecification;
-import mb.spoofax.lwb.compiler.CompileLanguage;
-import mb.spoofax.lwb.compiler.CompileLanguageSpecification;
 import mb.spoofax.lwb.compiler.cfg.SpoofaxCfgCheck;
+import mb.spoofax.lwb.compiler.definition.CheckLanguageDefinition;
+import mb.spoofax.lwb.compiler.definition.CompileLanguageDefinition;
+import mb.spoofax.lwb.compiler.definition.CompileMetaLanguageSources;
 import mb.spoofax.lwb.compiler.esv.SpoofaxEsvCheck;
 import mb.spoofax.lwb.compiler.esv.SpoofaxEsvCompile;
 import mb.spoofax.lwb.compiler.esv.SpoofaxEsvConfigure;
@@ -50,9 +50,9 @@ public class Spoofax3CompilerModule {
 
     @Provides @Spoofax3CompilerQualifier @Spoofax3CompilerScope @ElementsIntoSet
     static Set<TaskDef<?, ?>> provideTaskDefsSet(
-        CompileLanguage compileLanguage,
-        CheckLanguageSpecification checkLanguageSpecification,
-        CompileLanguageSpecification compileLanguageSpecification,
+        CompileLanguageDefinition compileLanguageDefinition,
+        CheckLanguageDefinition checkLanguageDefinition,
+        CompileMetaLanguageSources compileMetaLanguageSources,
 
         SpoofaxCfgCheck spoofaxCfgCheck,
 
@@ -76,9 +76,9 @@ public class Spoofax3CompilerModule {
         UnarchiveFromJar unarchiveFromJar
     ) {
         final HashSet<TaskDef<?, ?>> taskDefs = new HashSet<>();
-        taskDefs.add(compileLanguage);
-        taskDefs.add(checkLanguageSpecification);
-        taskDefs.add(compileLanguageSpecification);
+        taskDefs.add(compileLanguageDefinition);
+        taskDefs.add(checkLanguageDefinition);
+        taskDefs.add(compileMetaLanguageSources);
 
         taskDefs.add(spoofaxCfgCheck);
 

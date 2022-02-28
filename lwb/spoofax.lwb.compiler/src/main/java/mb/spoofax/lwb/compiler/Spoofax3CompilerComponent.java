@@ -1,4 +1,4 @@
-package mb.spoofax.lwb.compiler.dagger;
+package mb.spoofax.lwb.compiler;
 
 import dagger.Component;
 import mb.cfg.CfgComponent;
@@ -15,10 +15,10 @@ import mb.pie.dagger.TaskDefsProvider;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.sdf3.Sdf3Component;
 import mb.sdf3_ext_statix.Sdf3ExtStatixComponent;
-import mb.spoofax.lwb.compiler.CheckLanguageSpecification;
-import mb.spoofax.lwb.compiler.CompileLanguage;
-import mb.spoofax.lwb.compiler.CompileLanguageSpecification;
 import mb.spoofax.lwb.compiler.cfg.SpoofaxCfgCheck;
+import mb.spoofax.lwb.compiler.definition.CheckLanguageDefinition;
+import mb.spoofax.lwb.compiler.definition.CompileLanguageDefinition;
+import mb.spoofax.lwb.compiler.definition.CompileMetaLanguageSources;
 import mb.spoofax.lwb.compiler.esv.SpoofaxEsvCheck;
 import mb.spoofax.lwb.compiler.esv.SpoofaxEsvConfigure;
 import mb.spoofax.lwb.compiler.generator.LanguageProjectGenerator;
@@ -98,11 +98,11 @@ public interface Spoofax3CompilerComponent extends TaskDefsProvider, AutoCloseab
     LibStatixResourcesComponent getLibStatixResourcesComponent();
 
 
-    CompileLanguage getCompileLanguage();
+    CompileLanguageDefinition getCompileLanguageDefinition();
 
-    CheckLanguageSpecification getCheckLanguageSpecification();
+    CheckLanguageDefinition getCheckLanguageDefinition();
 
-    CompileLanguageSpecification getCompileLanguageSpecification();
+    CompileMetaLanguageSources getCompileMetaLanguageSources();
 
 
     SpoofaxCfgCheck getSpoofaxCfgCheck();
