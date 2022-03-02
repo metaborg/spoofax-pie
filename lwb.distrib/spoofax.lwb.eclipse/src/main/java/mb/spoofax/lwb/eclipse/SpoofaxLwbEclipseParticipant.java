@@ -12,18 +12,13 @@ import mb.spoofax.eclipse.EclipsePlatformComponent;
 import mb.spoofax.eclipse.EclipseResourceServiceComponent;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 import mb.spoofax.lwb.dynamicloading.DynamicLoadingComponent;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class SpoofaxLwbEclipseParticipant extends EmptyParticipant<EclipseLoggerComponent, EclipseResourceServiceComponent, EclipsePlatformComponent> implements EclipseParticipant {
-    private static SpoofaxLwbComponent component;
+    private @Nullable SpoofaxLwbComponent component;
 
-    public SpoofaxLwbComponent getComponent() {
-        if(component == null) {
-            throw new RuntimeException("SpoofaxLwbComponent has not been initialized yet or has been deinitialized");
-        }
-        return component;
-    }
-
-    @Override public Coordinate getCoordinate() {
+    @Override
+    public Coordinate getCoordinate() {
         return new Coordinate("org.metaborg", "spoofax.lwb.eclipse", new Version(0, 1, 0)); // TODO: get real version
     }
 
@@ -34,11 +29,19 @@ public class SpoofaxLwbEclipseParticipant extends EmptyParticipant<EclipseLogger
         StaticComponentManager staticComponentManager,
         ComponentManager componentManager
     ) {
+        if(component != null) return;
         component = DaggerSpoofaxLwbComponent.builder()
             .loggerComponent(staticComponentManager.getLoggerComponent())
             .resourceServiceComponent(resourceServiceComponent)
             .dynamicLoadingComponent(componentManager.getOneSubcomponent(DynamicLoadingComponent.class).unwrap())
             .build();
         component.start(staticComponentManager);
+    }
+
+    @Override public void close() {
+        if(component != null) {
+            component.close();
+            component = null;
+        }
     }
 }
