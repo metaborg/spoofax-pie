@@ -81,6 +81,10 @@ public class StaticComponentManagerImpl<L extends LoggerComponent, R extends Res
         this.groupedResourceServiceModuleCustomizers = groupedResourceServiceModuleCustomizers;
         this.pieModuleCustomizers = pieModuleCustomizers;
         this.groupedPieModuleCustomizers = groupedPieModuleCustomizers;
+
+        for(ComponentImpl component : componentsList) {
+            component.started(this, this);
+        }
     }
 
     @Override

@@ -178,7 +178,7 @@ public class DynamicComponentManagerImpl<L extends LoggerComponent, R extends Re
 
 
     @Override public DynamicComponent loadOrReloadFromCompiledSources(
-        StaticComponentManager baseComponentManager,
+        StaticComponentManager staticComponentManager,
         ResourcePath rootDirectory,
         Iterable<ResourcePath> javaClassPaths,
         String participantClassQualifiedId
@@ -250,7 +250,7 @@ public class DynamicComponentManagerImpl<L extends LoggerComponent, R extends Re
         }
 
         final Stream<Consumer<RootPieModule>> pieModuleCustomizers = Stream.concat(
-            baseComponentManager.getPieModuleCustomizers().stream(),
+            staticComponentManager.getPieModuleCustomizers().stream(),
             Stream.concat(
                 dynamicPieModuleCustomizers.stream(), // Can override static customizers.
                 Stream.of(pieModule -> pieModule // Can override all other customizers, which is necessary for correct serialization/deserialization.
@@ -264,15 +264,18 @@ public class DynamicComponentManagerImpl<L extends LoggerComponent, R extends Re
         );
         final BuildOneResult result = super.buildOne( // NOTE: only support dynamically loading a single standalone component right now.
             participant,
-            baseComponentManager.getGlobalResourceRegistryProviders().stream(),
-            baseComponentManager.getResourceServiceModuleCustomizers().stream(),
-            baseComponentManager.getGlobalTaskDefsProviders().stream(),
+            staticComponentManager,
+            staticComponentManager.getGlobalResourceRegistryProviders().stream(),
+            staticComponentManager.getResourceServiceModuleCustomizers().stream(),
+            staticComponentManager.getGlobalTaskDefsProviders().stream(),
             pieModuleCustomizers,
             classLoader
         ); // NOTE: global providers from `result` are ignored, as it would require all participants to be reconstructed.
         final ComponentImpl component = result.component;
         final DynamicComponent dynamicComponent = new DynamicComponent(rootDirectory, component.coordinate, classLoader, component, serializingStoreInMemoryBuffer);
-        return registerComponent(rootDirectory, dynamicComponent);
+        registerComponent(rootDirectory, dynamicComponent);
+        component.started(staticComponentManager, this);
+        return dynamicComponent;
     }
 
     @Override public void unloadFromCompiledSources(ResourcePath rootDirectory) {
@@ -293,7 +296,7 @@ public class DynamicComponentManagerImpl<L extends LoggerComponent, R extends Re
     }
 
 
-    private DynamicComponent registerComponent(ResourcePath rootDirectory, DynamicComponent component) {
+    private void registerComponent(ResourcePath rootDirectory, DynamicComponent component) {
         final DynamicComponentInfo info = component.getInfo();
         final Coordinate coordinate = info.coordinate;
 
@@ -320,8 +323,6 @@ public class DynamicComponentManagerImpl<L extends LoggerComponent, R extends Re
         } else {
             notifyLoad(component, SetView.of(addedFileExtensions));
         }
-
-        return component;
     }
 
     private Set<String> unregisterComponent(DynamicComponent component) {

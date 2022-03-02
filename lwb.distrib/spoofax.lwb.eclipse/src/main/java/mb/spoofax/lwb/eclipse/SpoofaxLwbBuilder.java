@@ -31,8 +31,6 @@ import mb.spoofax.lwb.compiler.SpoofaxLwbCompilerComponent;
 import mb.spoofax.lwb.compiler.definition.CompileLanguageDefinition;
 import mb.spoofax.lwb.compiler.definition.CompileLanguageDefinitionException;
 import mb.spoofax.lwb.dynamicloading.DynamicLoadException;
-import mb.spoofax.lwb.dynamicloading.DynamicLoadGetBaseComponentManager;
-import mb.spoofax.lwb.dynamicloading.DynamicLoadingComponent;
 import mb.spoofax.lwb.dynamicloading.component.DynamicComponent;
 import mb.spoofax.lwb.dynamicloading.component.DynamicComponentManager;
 import mb.spoofax.lwb.eclipse.util.JavaProjectUtil;
@@ -70,14 +68,7 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
     public SpoofaxLwbBuilder() {
         this.logger = SpoofaxPlugin.getLoggerComponent().getLoggerFactory().create(getClass());
         this.workspaceUpdateFactory = SpoofaxPlugin.getPlatformComponent().getWorkspaceUpdateFactory();
-        final DynamicLoadingComponent dynamicLoadingComponent = SpoofaxLwbPlugin.getDynamicLoadingComponent();
-        synchronized(this) {
-            final DynamicLoadGetBaseComponentManager dynamicLoadGetBaseComponentManager = dynamicLoadingComponent.getDynamicLoadGetBaseComponentManager();
-            if(!dynamicLoadGetBaseComponentManager.isSet()) { // HACK: set base component manager once
-                dynamicLoadGetBaseComponentManager.set(SpoofaxPlugin.getStaticComponentManager());
-            }
-        }
-        this.dynamicComponentManager = dynamicLoadingComponent.getDynamicComponentManager();
+        this.dynamicComponentManager = SpoofaxLwbPlugin.getDynamicLoadingComponent().getDynamicComponentManager();
         this.compileTags = Interactivity.NonInteractive.asSingletonSet();
     }
 

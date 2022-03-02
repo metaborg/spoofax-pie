@@ -16,7 +16,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.Consumer;
 
-public interface Participant<L extends LoggerComponent, R extends ResourceServiceComponent, P extends PlatformComponent> extends ParticipantCloseable {
+public interface Participant<L extends LoggerComponent, R extends ResourceServiceComponent, P extends PlatformComponent> extends StartedParticipant {
     /**
      * Gets the coordinate of this participant.
      */
@@ -28,7 +28,8 @@ public interface Participant<L extends LoggerComponent, R extends ResourceServic
     ListView<CoordinateRequirement> getDependencies();
 
     /**
-     * Gets the composition group of this participant, or {@code null} if it does not belong to a group (i.e., it is standalone).
+     * Gets the composition group of this participant, or {@code null} if it does not belong to a group (i.e., it is
+     * standalone).
      */
     @Nullable String getCompositionGroup();
 
@@ -93,8 +94,8 @@ public interface Participant<L extends LoggerComponent, R extends ResourceServic
 
 
     /**
-     * Gets the {@link ResourceRegistriesProvider resource registry provider} of this participant, or {@code null} if this
-     * participant does not have one.
+     * Gets the {@link ResourceRegistriesProvider resource registry provider} of this participant, or {@code null} if
+     * this participant does not have one.
      */
     @Nullable ResourceRegistriesProvider getResourceRegistriesProvider(
         L loggerComponent,
@@ -140,8 +141,8 @@ public interface Participant<L extends LoggerComponent, R extends ResourceServic
 
     /**
      * Gets a {@link RootPieModule} customizer that is applied to the PIE module of this participant, or {@code null} if
-     * this participant does not have one. If this participant is grouped, (i.e, {@link #getCompositionGroup() returns non-null},
-     * the customizer is applied to the module of the group.
+     * this participant does not have one. If this participant is grouped, (i.e, {@link #getCompositionGroup() returns
+     * non-null}, the customizer is applied to the module of the group.
      */
     @Nullable Consumer<RootPieModule> getPieModuleCustomizer();
 

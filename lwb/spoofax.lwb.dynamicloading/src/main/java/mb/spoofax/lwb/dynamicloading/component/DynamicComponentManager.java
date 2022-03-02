@@ -35,7 +35,7 @@ public interface DynamicComponentManager extends ComponentManager {
 
 
     DynamicComponent loadOrReloadFromCompiledSources(
-        StaticComponentManager baseComponentManager,
+        StaticComponentManager staticComponentManager,
         ResourcePath rootDirectory,
         Iterable<ResourcePath> javaClassPaths,
         String participantClassQualifiedId

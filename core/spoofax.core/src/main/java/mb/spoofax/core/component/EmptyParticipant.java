@@ -116,6 +116,16 @@ public abstract class EmptyParticipant<L extends LoggerComponent, R extends Reso
     }
 
     @Override
+    public void started(
+        ResourceServiceComponent resourceServiceComponent,
+        PieComponent pieComponent,
+        StaticComponentManager staticComponentManager,
+        ComponentManager componentManager
+    ) {
+
+    }
+
+    @Override
     public void close() {
 
     }

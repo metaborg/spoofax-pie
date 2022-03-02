@@ -10,6 +10,7 @@
     <participant class="mb.spoofax.lwb.eclipse.compiler.SpoofaxCompilerEclipseParticipant"/>
     <participant class="mb.spoofax.lwb.eclipse.compiler.SpoofaxLwbCompilerEclipseParticipant"/>
     <participant class="mb.spoofax.lwb.eclipse.dynamicloading.SpoofaxDynamicLoadingEclipseParticipant"/>
+    <participant class="mb.spoofax.lwb.eclipse.SpoofaxLwbEclipseParticipant"/>
   </extension>
 
   <!-- CFG component customizer -->

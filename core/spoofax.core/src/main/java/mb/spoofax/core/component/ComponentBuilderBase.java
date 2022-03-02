@@ -1,7 +1,6 @@
 package mb.spoofax.core.component;
 
 import mb.common.option.Option;
-import mb.common.util.CollectionView;
 import mb.common.util.ListView;
 import mb.common.util.MapView;
 import mb.common.util.MultiMap;
@@ -113,7 +112,7 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
                 groupedBuilders.put(builder.group, builder);
             }
         }
-        final DependencyResolver dependencyResolver = new DependencyResolver(builders);
+        final ComponentDependencyResolver dependencyResolver = new BuilderDependencyResolver(builders);
 
         // Gather global resource registry providers.
         final ArrayList<ResourceRegistriesProvider> globalResourceRegistryProviders = new ArrayList<>();
@@ -250,6 +249,7 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
      */
     protected BuildOneResult buildOne(
         Participant<L, R, P> participant,
+        StaticComponentManager baseComponentManager,
         Stream<ResourceRegistriesProvider> additionalResourceRegistriesProviders,
         Stream<Consumer<ResourceServiceModule>> resourceServiceModuleCustomizers,
         Stream<TaskDefsProvider> additionalTaskDefsProviders,
@@ -257,7 +257,7 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
         @Nullable ClassLoader classLoader
     ) {
         final ComponentBuilder builder = new ComponentBuilder(participant);
-        final ComponentDependencyResolver dependencyResolver = new NullResolver();
+        final ComponentDependencyResolver dependencyResolver = new BaseComponentManagerDependencyResolver(baseComponentManager);
         builder.resourceRegistriesProvider = participant.getResourceRegistriesProvider(
             loggerComponent,
             baseResourceServiceComponent,
@@ -337,10 +337,10 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
         }
     }
 
-    private class DependencyResolver implements ComponentDependencyResolver {
+    private class BuilderDependencyResolver implements ComponentDependencyResolver {
         final LinkedHashMap<Coordinate, ComponentBuilder> builders;
 
-        private DependencyResolver(ArrayList<ComponentBuilder> builders) {
+        private BuilderDependencyResolver(ArrayList<ComponentBuilder> builders) {
             this.builders = new LinkedHashMap<>();
             for(ComponentBuilder builder : builders) {
                 this.builders.put(builder.coordinate, builder);
@@ -356,7 +356,7 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
             return Option.ofNone();
         }
 
-        @Override public <T> CollectionView<T> getSubcomponents(Class<T> subcomponentType) {
+        @Override public <T> Stream<T> getSubcomponents(Class<T> subcomponentType) {
             final ArrayList<T> subcomponents = new ArrayList<>();
             for(ComponentBuilder builder : builders.values()) {
                 @SuppressWarnings("unchecked") final T subcomponent = (T)builder.subcomponents.get(subcomponentType);
@@ -364,7 +364,23 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
                     subcomponents.add(subcomponent);
                 }
             }
-            return CollectionView.of(subcomponents);
+            return subcomponents.stream();
+        }
+    }
+
+    private static class BaseComponentManagerDependencyResolver implements ComponentDependencyResolver {
+        private final StaticComponentManager baseComponentManager;
+
+        private BaseComponentManagerDependencyResolver(StaticComponentManager baseComponentManager) {
+            this.baseComponentManager = baseComponentManager;
+        }
+
+        @Override public <T> Option<T> getSubcomponent(Coordinate coordinate, Class<T> subcomponentType) {
+            return baseComponentManager.getSubcomponent(coordinate, subcomponentType);
+        }
+
+        @Override public <T> Stream<T> getSubcomponents(Class<T> subcomponentType) {
+            return baseComponentManager.getSubcomponents(subcomponentType);
         }
     }
 
@@ -373,8 +389,8 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
             return Option.ofNone();
         }
 
-        @Override public <T> CollectionView<T> getSubcomponents(Class<T> subcomponentType) {
-            return CollectionView.of();
+        @Override public <T> Stream<T> getSubcomponents(Class<T> subcomponentType) {
+            return Stream.of();
         }
     }
 
@@ -426,7 +442,7 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
     private void addToGlobalResourceRegistryProviders(
         ComponentBuilder componentBuilder,
         ArrayList<ResourceRegistriesProvider> providers,
-        DependencyResolver dependencyResolver
+        ComponentDependencyResolver dependencyResolver
     ) {
         final @Nullable ResourceRegistriesProvider provider = componentBuilder.participant.getGlobalResourceRegistriesProvider(
             loggerComponent,
@@ -443,7 +459,7 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
     private void addToGlobalTaskDefsProvider(
         ComponentBuilder componentBuilder,
         ArrayList<TaskDefsProvider> providers,
-        DependencyResolver dependencyResolver
+        ComponentDependencyResolver dependencyResolver
     ) {
         final @Nullable TaskDefsProvider provider = componentBuilder.participant.getGlobalTaskDefsProvider(
             loggerComponent,

@@ -15,7 +15,7 @@ public class ComponentImpl implements Component {
     private @Nullable LanguageComponent languageComponent;
     private PieComponent pieComponent;
     private MapView<Class<?>, Object> subcomponents;
-    private ParticipantCloseable participantCloseable;
+    private StartedParticipant startedParticipant;
     private boolean closed = false;
 
     public ComponentImpl(
@@ -25,7 +25,7 @@ public class ComponentImpl implements Component {
         @Nullable LanguageComponent languageComponent,
         PieComponent pieComponent,
         MapView<Class<?>, Object> subcomponents,
-        ParticipantCloseable participantCloseable
+        StartedParticipant startedParticipant
     ) {
         this.coordinate = coordinate;
         this.partOfGroup = partOfGroup;
@@ -33,13 +33,17 @@ public class ComponentImpl implements Component {
         this.languageComponent = languageComponent;
         this.pieComponent = pieComponent;
         this.subcomponents = subcomponents;
-        this.participantCloseable = participantCloseable;
+        this.startedParticipant = startedParticipant;
+    }
+
+    public void started(StaticComponentManager staticComponentManager, ComponentManager componentManager) {
+        startedParticipant.started(resourceServiceComponent, pieComponent, staticComponentManager, componentManager);
     }
 
     public void close() {
         if(closed) return;
-        participantCloseable.close();
-        participantCloseable = null;
+        startedParticipant.close();
+        startedParticipant = null;
         subcomponents = null;
         if(!partOfGroup) pieComponent.close();
         pieComponent = null;
@@ -100,7 +104,7 @@ public class ComponentImpl implements Component {
             ", languageComponent=" + languageComponent +
             ", pieComponent=" + pieComponent +
             ", subcomponents=" + subcomponents +
-            ", participantCloseable=" + participantCloseable +
+            ", participantCloseable=" + startedParticipant +
             ", closed=" + closed +
             '}';
     }
