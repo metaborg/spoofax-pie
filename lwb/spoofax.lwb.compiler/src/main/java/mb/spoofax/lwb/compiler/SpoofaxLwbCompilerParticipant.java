@@ -26,8 +26,8 @@ import mb.spoofax.core.component.ComponentDependencyResolver;
 import mb.spoofax.core.component.EmptyParticipant;
 import mb.spoofax.core.component.SubcomponentRegistry;
 import mb.spoofax.core.platform.PlatformComponent;
-import mb.spoofax.lwb.compiler.esv.SpoofaxEsvConfigureException;
 import mb.spoofax.lwb.compiler.esv.SpoofaxEsvConfig;
+import mb.spoofax.lwb.compiler.esv.SpoofaxEsvConfigureException;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3Config;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3ConfigureException;
 import mb.spoofax.lwb.compiler.statix.SpoofaxStatixConfig;
@@ -42,18 +42,18 @@ import mb.strategolib.StrategoLibComponent;
 import mb.strategolib.StrategoLibResourcesComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class Spoofax3CompilerParticipant<L extends LoggerComponent, R extends ResourceServiceComponent, P extends PlatformComponent> extends EmptyParticipant<L, R, P> {
-    private final Spoofax3CompilerModule spoofax3CompilerModule;
-    private final Spoofax3CompilerJavaModule spoofax3CompilerJavaModule;
+public class SpoofaxLwbCompilerParticipant<L extends LoggerComponent, R extends ResourceServiceComponent, P extends PlatformComponent> extends EmptyParticipant<L, R, P> {
+    private final SpoofaxLwbCompilerModule spoofaxLwbCompilerModule;
+    private final SpoofaxLwbCompilerJavaModule spoofaxLwbCompilerJavaModule;
 
-    private @Nullable Spoofax3CompilerComponent component;
+    private @Nullable SpoofaxLwbCompilerComponent component;
 
-    public Spoofax3CompilerParticipant(
-        Spoofax3CompilerModule spoofax3CompilerModule,
-        Spoofax3CompilerJavaModule spoofax3CompilerJavaModule
+    public SpoofaxLwbCompilerParticipant(
+        SpoofaxLwbCompilerModule spoofaxLwbCompilerModule,
+        SpoofaxLwbCompilerJavaModule spoofaxLwbCompilerJavaModule
     ) {
-        this.spoofax3CompilerModule = spoofax3CompilerModule;
-        this.spoofax3CompilerJavaModule = spoofax3CompilerJavaModule;
+        this.spoofaxLwbCompilerModule = spoofaxLwbCompilerModule;
+        this.spoofaxLwbCompilerJavaModule = spoofaxLwbCompilerJavaModule;
     }
 
 
@@ -116,9 +116,9 @@ public class Spoofax3CompilerParticipant<L extends LoggerComponent, R extends Re
         final LibStatixResourcesComponent libStatixResourcesComponent = dependencyResolver.getOneSubcomponent(LibStatixResourcesComponent.class).unwrap();
 
         // Build component
-        final Spoofax3CompilerComponent component = DaggerSpoofax3CompilerComponent.builder()
-            .spoofax3CompilerModule(spoofax3CompilerModule)
-            .spoofax3CompilerJavaModule(spoofax3CompilerJavaModule)
+        final SpoofaxLwbCompilerComponent component = DaggerSpoofaxLwbCompilerComponent.builder()
+            .spoofaxLwbCompilerModule(spoofaxLwbCompilerModule)
+            .spoofaxLwbCompilerJavaModule(spoofaxLwbCompilerJavaModule)
 
             .loggerComponent(loggerComponent)
             .resourceServiceComponent(resourceServiceComponent)
@@ -174,7 +174,7 @@ public class Spoofax3CompilerParticipant<L extends LoggerComponent, R extends Re
             }));
 
         // Register Spoofax3CompilerComponent as a subcomponent.
-        subcomponentRegistry.register(Spoofax3CompilerComponent.class, component);
+        subcomponentRegistry.register(SpoofaxLwbCompilerComponent.class, component);
 
         return component;
     }

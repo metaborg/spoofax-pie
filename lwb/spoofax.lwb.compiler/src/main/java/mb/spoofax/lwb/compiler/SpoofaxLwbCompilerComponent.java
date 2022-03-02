@@ -35,11 +35,11 @@ import mb.strategolib.StrategoLibResourcesComponent;
 
 import java.util.Set;
 
-@Spoofax3CompilerScope
+@SpoofaxLwbCompilerScope
 @Component(
     modules = {
-        Spoofax3CompilerModule.class,
-        Spoofax3CompilerJavaModule.class
+        SpoofaxLwbCompilerModule.class,
+        SpoofaxLwbCompilerJavaModule.class
     },
     dependencies = {
         LoggerComponent.class,
@@ -64,7 +64,7 @@ import java.util.Set;
         LibStatixResourcesComponent.class,
     }
 )
-public interface Spoofax3CompilerComponent extends TaskDefsProvider, AutoCloseable {
+public interface SpoofaxLwbCompilerComponent extends TaskDefsProvider, AutoCloseable {
     LoggerComponent getLoggerComponent();
 
     ResourceServiceComponent getResourceServiceComponent();
@@ -127,7 +127,7 @@ public interface Spoofax3CompilerComponent extends TaskDefsProvider, AutoCloseab
     LanguageProjectGenerator getLanguageProjectGenerator();
 
 
-    @Override @Spoofax3CompilerQualifier Set<TaskDef<?, ?>> getTaskDefs();
+    @Override @SpoofaxLwbCompilerQualifier Set<TaskDef<?, ?>> getTaskDefs();
 
     @Override default void close() {
         // For now, nothing to close. Spoofax3CompilerComponent may implement AutoCloseable in the future.

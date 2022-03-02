@@ -46,7 +46,7 @@ import mb.spoofax.core.platform.DaggerPlatformComponent;
 import mb.spoofax.core.platform.PlatformComponent;
 import mb.spoofax.lwb.compiler.definition.CompileLanguageDefinition;
 import mb.spoofax.lwb.compiler.definition.CompileLanguageDefinitionException;
-import mb.spoofax.lwb.compiler.Spoofax3Compiler;
+import mb.spoofax.lwb.compiler.SpoofaxLwbCompiler;
 import mb.spoofax.lwb.dynamicloading.component.DynamicComponent;
 import mb.spoofax.lwb.dynamicloading.component.DynamicComponentManager;
 import mb.spoofax.lwb.dynamicloading.component.DynamicComponentManagerBuilder;
@@ -71,7 +71,7 @@ class TestBase {
     PlatformComponent platformComponent;
 
     SerializingStoreInMemoryBuffer spoofax3CompilerStoreBuffer;
-    Spoofax3Compiler spoofax3Compiler;
+    SpoofaxLwbCompiler spoofaxLwbCompiler;
     CfgRootDirectoryToObject cfgRootDirectoryToObject;
     CompileLanguageDefinition compileLanguageDefinition;
     SptComponent sptComponent;
@@ -100,7 +100,7 @@ class TestBase {
 
         final StaticComponentManagerBuilder<LoggerComponent, ResourceServiceComponent, PlatformComponent> builder =
             new StaticComponentManagerBuilder<>(loggerComponent, baseResourceServiceComponent, platformComponent, PieBuilderImpl::new);
-        Spoofax3Compiler.registerParticipants(builder);
+        SpoofaxLwbCompiler.registerParticipants(builder);
         builder.registerParticipant(new SptParticipant<>()); // Also register SPT. TODO: should the LWB compiler do this?
         spoofax3CompilerStoreBuffer = new SerializingStoreInMemoryBuffer();
         builder.registerPieModuleCustomizer(pieModule -> {
@@ -114,12 +114,12 @@ class TestBase {
             );
         }, "mb.spoofax.lwb");
         final StaticComponentManager<LoggerComponent, ResourceServiceComponent, PlatformComponent> componentManager = builder.build();
-        spoofax3Compiler = Spoofax3Compiler.fromComponentManager(componentManager);
+        spoofaxLwbCompiler = SpoofaxLwbCompiler.fromComponentManager(componentManager);
 
-        cfgRootDirectoryToObject = spoofax3Compiler.spoofax3CompilerComponent.getCfgComponent().getCfgRootDirectoryToObject();
-        compileLanguageDefinition = spoofax3Compiler.spoofax3CompilerComponent.getCompileLanguageDefinition();
-        sptComponent = spoofax3Compiler.componentManager.getOneSubcomponent(SptComponent.class).unwrap();
-        resourceService = spoofax3Compiler.resourceServiceComponent.getResourceService();
+        cfgRootDirectoryToObject = spoofaxLwbCompiler.spoofaxLwbCompilerComponent.getCfgComponent().getCfgRootDirectoryToObject();
+        compileLanguageDefinition = spoofaxLwbCompiler.spoofaxLwbCompilerComponent.getCompileLanguageDefinition();
+        sptComponent = spoofaxLwbCompiler.componentManager.getOneSubcomponent(SptComponent.class).unwrap();
+        resourceService = spoofaxLwbCompiler.resourceServiceComponent.getResourceService();
         languageMetricsTracer = new MetricsTracer();
         dynamicLoadingComponent = DaggerDynamicLoadingComponent.builder()
             .dynamicLoadingModule(new DynamicLoadingModule(new DynamicComponentManagerBuilder<>()
@@ -143,9 +143,9 @@ class TestBase {
 
         // TODO: this won't work properly with bottom-up building when builds are executed from `standaloneSpoofax3Compiler.pieComponent`.
         pieComponent = DaggerPieComponent.builder()
-            .pieModule(spoofax3Compiler.pieComponent.createChildModule(dynamicLoadingComponent))
+            .pieModule(spoofaxLwbCompiler.pieComponent.createChildModule(dynamicLoadingComponent))
             .loggerComponent(loggerComponent)
-            .resourceServiceComponent(spoofax3Compiler.resourceServiceComponent)
+            .resourceServiceComponent(spoofaxLwbCompiler.resourceServiceComponent)
             .build();
     }
 
@@ -165,8 +165,8 @@ class TestBase {
         spoofax3CompilerStoreBuffer = null;
         compileLanguageDefinition = null;
         cfgRootDirectoryToObject = null;
-        spoofax3Compiler.close();
-        spoofax3Compiler = null;
+        spoofaxLwbCompiler.close();
+        spoofaxLwbCompiler = null;
         baseResourceServiceComponent.close();
         baseResourceServiceComponent = null;
         loggerComponent = null;

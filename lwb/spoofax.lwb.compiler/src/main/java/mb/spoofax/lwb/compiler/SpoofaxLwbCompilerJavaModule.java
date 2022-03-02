@@ -13,22 +13,22 @@ import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 
 @Module
-public class Spoofax3CompilerJavaModule {
+public class SpoofaxLwbCompilerJavaModule {
     private final JavaCompiler compiler;
     private final FileManagerFactory fileManagerFactory;
     private final JavaFileObjectFactory javaFileObjectFactory;
 
-    public Spoofax3CompilerJavaModule(JavaCompiler compiler, FileManagerFactory fileManagerFactory, JavaFileObjectFactory javaFileObjectFactory) {
+    public SpoofaxLwbCompilerJavaModule(JavaCompiler compiler, FileManagerFactory fileManagerFactory, JavaFileObjectFactory javaFileObjectFactory) {
         this.compiler = compiler;
         this.fileManagerFactory = fileManagerFactory;
         this.javaFileObjectFactory = javaFileObjectFactory;
     }
 
-    public Spoofax3CompilerJavaModule() {
+    public SpoofaxLwbCompilerJavaModule() {
         this(ToolProvider.getSystemJavaCompiler(), JavaResourceManager::new, new JavaResource.Factory());
     }
 
-    @Provides @Spoofax3CompilerScope
+    @Provides @SpoofaxLwbCompilerScope
     CompileJava provideCompileJava() {
         return new CompileJava(new JdkJavaCompiler(compiler, fileManagerFactory, javaFileObjectFactory));
     }

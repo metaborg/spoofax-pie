@@ -6,4 +6,4 @@ import java.lang.annotation.RetentionPolicy;
 
 @Scope
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Spoofax3CompilerScope {}
+public @interface SpoofaxLwbCompilerScope {}

@@ -47,7 +47,7 @@ class TestBase {
     LoggerComponent loggerComponent;
     RootResourceServiceComponent baseResourceServiceComponent;
     PlatformComponent platformComponent;
-    Spoofax3Compiler compiler;
+    SpoofaxLwbCompiler compiler;
     ResourceService resourceService;
     PieComponent pieComponent;
     CheckLanguageDefinition checkLanguageDefinition;
@@ -137,12 +137,12 @@ class TestBase {
                 .build()
             );
         });
-        compiler = Spoofax3Compiler.fromComponentBuilder(builder);
-        final Spoofax3CompilerComponent spoofax3CompilerComponent = compiler.spoofax3CompilerComponent;
-        resourceService = spoofax3CompilerComponent.getResourceServiceComponent().getResourceService();
+        compiler = SpoofaxLwbCompiler.fromComponentBuilder(builder);
+        final SpoofaxLwbCompilerComponent spoofaxLwbCompilerComponent = compiler.spoofaxLwbCompilerComponent;
+        resourceService = spoofaxLwbCompilerComponent.getResourceServiceComponent().getResourceService();
         pieComponent = compiler.pieComponent;
-        compileLanguageDefinition = spoofax3CompilerComponent.getCompileLanguageDefinition();
-        checkLanguageDefinition = spoofax3CompilerComponent.getCheckLanguageDefinition();
+        compileLanguageDefinition = spoofaxLwbCompilerComponent.getCompileLanguageDefinition();
+        checkLanguageDefinition = spoofaxLwbCompilerComponent.getCheckLanguageDefinition();
     }
 
     void assertNoErrors(KeyedMessages messages) {

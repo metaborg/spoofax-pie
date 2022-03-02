@@ -32,7 +32,7 @@ class GenerateLanguageTest extends TestBase {
             .addFileExtensions("chars")
             .multiFileAnalysis(multiFileAnalysis)
             .build();
-        compiler.spoofax3CompilerComponent.getLanguageProjectGenerator().generate(input);
+        compiler.spoofaxLwbCompilerComponent.getLanguageProjectGenerator().generate(input);
         assertTrue(rootDirectory.exists());
 
         // Check and compile generated language.

@@ -28,27 +28,27 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Module
-public class Spoofax3CompilerModule {
+public class SpoofaxLwbCompilerModule {
     private final TemplateCompiler templateCompiler;
 
-    public Spoofax3CompilerModule(TemplateCompiler templateCompiler) {
+    public SpoofaxLwbCompilerModule(TemplateCompiler templateCompiler) {
         this.templateCompiler = templateCompiler;
     }
 
 
-    @Provides @Spoofax3CompilerScope
+    @Provides @SpoofaxLwbCompilerScope
     TemplateCompiler provideTemplateCompiler() {
         return templateCompiler;
     }
 
 
-    @Provides @Spoofax3CompilerScope
+    @Provides @SpoofaxLwbCompilerScope
     static UnarchiveFromJar provideUnarchiveFromJar() {
         return new UnarchiveFromJar();
     }
 
 
-    @Provides @Spoofax3CompilerQualifier @Spoofax3CompilerScope @ElementsIntoSet
+    @Provides @SpoofaxLwbCompilerQualifier @SpoofaxLwbCompilerScope @ElementsIntoSet
     static Set<TaskDef<?, ?>> provideTaskDefsSet(
         CompileLanguageDefinition compileLanguageDefinition,
         CheckLanguageDefinition checkLanguageDefinition,

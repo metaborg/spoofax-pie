@@ -8,6 +8,6 @@ import java.lang.annotation.RetentionPolicy;
 @Qualifier
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Spoofax3CompilerQualifier {
+public @interface SpoofaxLwbCompilerQualifier {
     String value() default "";
 }

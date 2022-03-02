@@ -29,83 +29,83 @@ import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 
 /**
- * Facade for easily creating a {@link Spoofax3CompilerComponent}.
+ * Facade for easily creating a {@link SpoofaxLwbCompilerComponent}.
  */
-public class Spoofax3Compiler implements AutoCloseable {
+public class SpoofaxLwbCompiler implements AutoCloseable {
     public final ComponentManager componentManager;
     public final ResourceServiceComponent resourceServiceComponent;
     public final SpoofaxCompilerComponent spoofaxCompilerComponent;
-    public final Spoofax3CompilerComponent spoofax3CompilerComponent;
+    public final SpoofaxLwbCompilerComponent spoofaxLwbCompilerComponent;
     public final PieComponent pieComponent;
 
-    private Spoofax3Compiler(
+    private SpoofaxLwbCompiler(
         ComponentManager componentManager,
         ResourceServiceComponent resourceServiceComponent,
         SpoofaxCompilerComponent spoofaxCompilerComponent,
-        Spoofax3CompilerComponent spoofax3CompilerComponent,
+        SpoofaxLwbCompilerComponent spoofaxLwbCompilerComponent,
         PieComponent pieComponent
     ) {
         this.componentManager = componentManager;
         this.resourceServiceComponent = resourceServiceComponent;
         this.spoofaxCompilerComponent = spoofaxCompilerComponent;
-        this.spoofax3CompilerComponent = spoofax3CompilerComponent;
+        this.spoofaxLwbCompilerComponent = spoofaxLwbCompilerComponent;
         this.pieComponent = pieComponent;
     }
 
     @Override public void close() {
         pieComponent.close();
-        spoofax3CompilerComponent.close();
+        spoofaxLwbCompilerComponent.close();
         spoofaxCompilerComponent.close();
         resourceServiceComponent.close();
         componentManager.close();
     }
 
     /**
-     * Creates a {@link Spoofax3Compiler} from a {@link ComponentManager} which was instantiated with the correct {@link
+     * Creates a {@link SpoofaxLwbCompiler} from a {@link ComponentManager} which was instantiated with the correct {@link
      * Participant}s (see {@link #registerParticipants}). This will throw a {@link NoSuchElementException} when it is
      * not instantiated with the correct participants.
      */
-    public static Spoofax3Compiler fromComponentManager(ComponentManager componentManager) {
+    public static SpoofaxLwbCompiler fromComponentManager(ComponentManager componentManager) {
         final ComponentGroup componentGroup = componentManager.getComponentGroup("mb.spoofax.lwb").unwrap();
         final ResourceServiceComponent resourceServiceComponent = componentGroup.getResourceServiceComponent();
         final SpoofaxCompilerComponent spoofaxCompilerComponent = componentManager.getOneSubcomponent(SpoofaxCompilerComponent.class).unwrap();
-        final Spoofax3CompilerComponent spoofax3CompilerComponent = componentManager.getOneSubcomponent(Spoofax3CompilerComponent.class).unwrap();
+        final SpoofaxLwbCompilerComponent spoofaxLwbCompilerComponent = componentManager.getOneSubcomponent(SpoofaxLwbCompilerComponent.class).unwrap();
         final PieComponent pieComponent = componentGroup.getPieComponent();
-        return new Spoofax3Compiler(componentManager, resourceServiceComponent, spoofaxCompilerComponent, spoofax3CompilerComponent, pieComponent);
+        return new SpoofaxLwbCompiler(componentManager, resourceServiceComponent, spoofaxCompilerComponent, spoofaxLwbCompilerComponent, pieComponent);
     }
 
     /**
-     * Creates a {@link Spoofax3Compiler} from a {@link StaticComponentManagerBuilder} by first registering the correct
+     * Creates a {@link SpoofaxLwbCompiler} from a {@link StaticComponentManagerBuilder} by first registering the correct
      * {@link Participant}s (see {@link #registerParticipants}), and then by building the {@link ComponentManager}.
      *
-     * @param spoofax3CompilerJavaModule Java compiler module to pass to the builder for the {@link
-     *                                   Spoofax3CompilerComponent}.
+     * @param spoofaxLwbCompilerJavaModule Java compiler module to pass to the builder for the {@link
+     *                                   SpoofaxLwbCompilerComponent}.
      */
-    public static Spoofax3Compiler fromComponentBuilder(
+    public static SpoofaxLwbCompiler fromComponentBuilder(
         StaticComponentManagerBuilder<LoggerComponent, ResourceServiceComponent, PlatformComponent> builder,
-        Spoofax3CompilerJavaModule spoofax3CompilerJavaModule
+        SpoofaxLwbCompilerJavaModule spoofaxLwbCompilerJavaModule
     ) {
-        registerParticipants(builder, spoofax3CompilerJavaModule);
+        registerParticipants(builder, spoofaxLwbCompilerJavaModule);
         final ComponentManager componentManager = builder.build();
         return fromComponentManager(componentManager);
     }
 
     /**
-     * Creates a {@link Spoofax3Compiler} from a {@link StaticComponentManagerBuilder} by first registering the correct
+     * Creates a {@link SpoofaxLwbCompiler} from a {@link StaticComponentManagerBuilder} by first registering the correct
      * {@link Participant}s (see {@link #registerParticipants}), and then by building the {@link ComponentManager}.
      */
-    public static Spoofax3Compiler fromComponentBuilder(
+    public static SpoofaxLwbCompiler fromComponentBuilder(
         StaticComponentManagerBuilder<LoggerComponent, ResourceServiceComponent, PlatformComponent> builder
     ) {
-        return fromComponentBuilder(builder, new Spoofax3CompilerJavaModule());
+        return fromComponentBuilder(builder, new SpoofaxLwbCompilerJavaModule());
     }
 
     /**
-     * Creates a {@link Spoofax3Compiler} by first creating a {@link StaticComponentManagerBuilder} from given base
+     * Creates a {@link SpoofaxLwbCompiler} by first creating a {@link StaticComponentManagerBuilder} from given base
      * components, then registering the correct {@link Participant}s (see {@link #registerParticipants}), and finally by
      * building the {@link ComponentManager}.
      */
-    public static Spoofax3Compiler fromComponents(
+    public static SpoofaxLwbCompiler fromComponents(
         LoggerComponent loggerComponent,
         ResourceServiceComponent resourceServiceComponent,
         PlatformComponent platformComponent,
@@ -116,14 +116,14 @@ public class Spoofax3Compiler implements AutoCloseable {
 
     /**
      * Registers the {@link Participant}s with given {@code builder} which are required to create a {@link
-     * Spoofax3CompilerComponent}.
+     * SpoofaxLwbCompilerComponent}.
      *
-     * @param spoofax3CompilerJavaModule Java compiler module to pass to the builder for the {@link
-     *                                   Spoofax3CompilerComponent}.
+     * @param spoofaxLwbCompilerJavaModule Java compiler module to pass to the builder for the {@link
+     *                                   SpoofaxLwbCompilerComponent}.
      */
     public static <L extends LoggerComponent, R extends ResourceServiceComponent, P extends PlatformComponent> void registerParticipants(
         StaticComponentManagerBuilder<L, R, P> builder,
-        Spoofax3CompilerJavaModule spoofax3CompilerJavaModule
+        SpoofaxLwbCompilerJavaModule spoofaxLwbCompilerJavaModule
     ) {
         builder.registerParticipant(new CfgParticipant<>());
         builder.registerParticipant(new Sdf3Participant<>());
@@ -141,16 +141,16 @@ public class Spoofax3Compiler implements AutoCloseable {
 
         final TemplateCompiler templateCompiler = new TemplateCompiler(StandardCharsets.UTF_8);
         builder.registerParticipant(new SpoofaxCompilerParticipant<>(new SpoofaxCompilerModule(templateCompiler)));
-        builder.registerParticipant(new Spoofax3CompilerParticipant<>(new Spoofax3CompilerModule(templateCompiler), spoofax3CompilerJavaModule));
+        builder.registerParticipant(new SpoofaxLwbCompilerParticipant<>(new SpoofaxLwbCompilerModule(templateCompiler), spoofaxLwbCompilerJavaModule));
     }
 
     /**
      * Registers the {@link Participant}s with given {@code builder} which are required to create a {@link
-     * Spoofax3CompilerComponent}.
+     * SpoofaxLwbCompilerComponent}.
      */
     public static <L extends LoggerComponent, R extends ResourceServiceComponent, P extends PlatformComponent> void registerParticipants(
         StaticComponentManagerBuilder<L, R, P> builder
     ) {
-        registerParticipants(builder, new Spoofax3CompilerJavaModule());
+        registerParticipants(builder, new SpoofaxLwbCompilerJavaModule());
     }
 }
