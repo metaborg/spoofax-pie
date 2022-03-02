@@ -12,7 +12,9 @@ import mb.spoofax.core.Coordinate;
 import mb.spoofax.core.CoordinateRequirement;
 import mb.spoofax.core.Version;
 import mb.spoofax.core.component.ComponentDependencyResolver;
+import mb.spoofax.core.component.ComponentManager;
 import mb.spoofax.core.component.Participant;
+import mb.spoofax.core.component.StaticComponentManager;
 import mb.spoofax.core.component.SubcomponentRegistry;
 import mb.spoofax.core.platform.PlatformComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -196,6 +198,16 @@ public class TigerParticipant<L extends LoggerComponent, R extends ResourceServi
         P platformComponent,
         PieComponent pieComponent,
         ComponentDependencyResolver dependencyResolver
+    ) {
+
+    }
+
+    @Override
+    public void started(
+        ResourceServiceComponent resourceServiceComponent,
+        PieComponent pieComponent,
+        StaticComponentManager staticComponentManager,
+        ComponentManager componentManager
     ) {
 
     }

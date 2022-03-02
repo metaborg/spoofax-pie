@@ -1,12 +1,17 @@
 package mb.spoofax.lwb.eclipse;
 
+import mb.common.util.ListView;
 import mb.pie.dagger.PieComponent;
+import mb.pie.dagger.TaskDefsProvider;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.core.Coordinate;
+import mb.spoofax.core.CoordinateRequirement;
 import mb.spoofax.core.Version;
+import mb.spoofax.core.component.ComponentDependencyResolver;
 import mb.spoofax.core.component.ComponentManager;
 import mb.spoofax.core.component.EmptyParticipant;
 import mb.spoofax.core.component.StaticComponentManager;
+import mb.spoofax.core.component.SubcomponentRegistry;
 import mb.spoofax.eclipse.EclipseParticipant;
 import mb.spoofax.eclipse.EclipsePlatformComponent;
 import mb.spoofax.eclipse.EclipseResourceServiceComponent;
@@ -22,6 +27,30 @@ public class SpoofaxLwbEclipseParticipant extends EmptyParticipant<EclipseLogger
         return new Coordinate("org.metaborg", "spoofax.lwb.eclipse", new Version(0, 1, 0)); // TODO: get real version
     }
 
+    @Override public ListView<CoordinateRequirement> getDependencies() {
+        return ListView.of(new CoordinateRequirement("spoofax.lwb.dynamicloading"));
+    }
+
+    @Override
+    public @Nullable TaskDefsProvider getTaskDefsProvider(
+        EclipseLoggerComponent loggerComponent,
+        EclipseResourceServiceComponent baseResourceServiceComponent,
+        ResourceServiceComponent resourceServiceComponent,
+        EclipsePlatformComponent platformComponent,
+        SubcomponentRegistry subcomponentRegistry,
+        ComponentDependencyResolver dependencyResolver
+    ) {
+        if(this.component != null) return null;
+        final SpoofaxLwbComponent component = DaggerSpoofaxLwbComponent.builder()
+            .loggerComponent(loggerComponent)
+            .resourceServiceComponent(resourceServiceComponent)
+            .dynamicLoadingComponent(dependencyResolver.getOneSubcomponent(DynamicLoadingComponent.class).unwrap())
+            .build();
+        subcomponentRegistry.register(SpoofaxLwbComponent.class, component);
+        this.component = component;
+        return null;
+    }
+
     @Override
     public void started(
         ResourceServiceComponent resourceServiceComponent,
@@ -29,12 +58,6 @@ public class SpoofaxLwbEclipseParticipant extends EmptyParticipant<EclipseLogger
         StaticComponentManager staticComponentManager,
         ComponentManager componentManager
     ) {
-        if(component != null) return;
-        component = DaggerSpoofaxLwbComponent.builder()
-            .loggerComponent(staticComponentManager.getLoggerComponent())
-            .resourceServiceComponent(resourceServiceComponent)
-            .dynamicLoadingComponent(componentManager.getOneSubcomponent(DynamicLoadingComponent.class).unwrap())
-            .build();
         component.start(staticComponentManager);
     }
 
