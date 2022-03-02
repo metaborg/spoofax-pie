@@ -2,8 +2,11 @@ package mb.spoofax.lwb.eclipse.dynamicloading;
 
 import mb.common.option.Option;
 import mb.spoofax.core.Coordinate;
+import mb.spoofax.core.language.LanguageComponent;
+import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.command.RunCommandHandler;
-import mb.spoofax.lwb.eclipse.SpoofaxLwbParticipant;
+import mb.spoofax.lwb.dynamicloading.component.DynamicComponent;
+import mb.spoofax.lwb.eclipse.SpoofaxLwbPlugin;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -19,10 +22,14 @@ public class DynamicRunCommandHandler extends AbstractHandler {
         if(componentCoordinate.isNone()) {
             throw new ExecutionException("Cannot execute command, could not parse '" + componentCoordinateString + "' into a Coordinate");
         }
-        final @Nullable EclipseDynamicComponent component = (EclipseDynamicComponent)SpoofaxLwbParticipant.getInstance().getDynamicLoadingComponent().getDynamicComponentManager().getDynamicComponent(componentCoordinate.unwrap()).get();
+        final @Nullable DynamicComponent component = SpoofaxLwbPlugin.getDynamicLoadingComponent().getDynamicComponentManager().getDynamicComponent(componentCoordinate.unwrap()).get();
         if(component == null) {
-            throw new ExecutionException("Cannot execute command, no dynamic component for ID '" + componentCoordinateString + "' was found");
+            throw new ExecutionException("Cannot execute command, no dynamic component for coordinate '" + componentCoordinateString + "' was found");
         }
-        return component.getRunCommandHandler().execute(event);
+        final @Nullable LanguageComponent languageComponent = component.getLanguageComponent().get();
+        if(languageComponent instanceof EclipseLanguageComponent) {
+            return ((EclipseLanguageComponent)languageComponent).getRunCommandHandler().execute(event);
+        }
+        throw new ExecutionException("Cannot execute command, dynamic component with coordinate '" + componentCoordinateString + "' does not have a language component");
     }
 }

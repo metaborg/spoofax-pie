@@ -1,13 +1,13 @@
 package mb.spoofax.lwb.dynamicloading.component;
 
 import mb.common.option.Option;
-import mb.common.util.CollectionView;
 import mb.common.util.ListView;
 import mb.common.util.MapView;
 import mb.common.util.SetView;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.log.dagger.LoggerComponent;
+import mb.pie.api.PieBuilder;
 import mb.pie.api.serde.Serde;
 import mb.pie.dagger.RootPieModule;
 import mb.pie.runtime.store.SerializingStoreBuilder;
@@ -40,11 +40,11 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class DynamicComponentManagerImpl<L extends LoggerComponent, R extends ResourceServiceComponent, P extends PlatformComponent> extends ComponentBuilderBase<L, R, P> implements DynamicComponentManager {
     private final Logger logger;
-    private final StaticComponentManager<L, R, P> staticComponentManager;
     private final ListView<Consumer<RootPieModule>> dynamicPieModuleCustomizers;
     private final BiFunction<LoggerFactory, ClassLoader, Serde> serdeFactory;
 
@@ -53,19 +53,21 @@ public class DynamicComponentManagerImpl<L extends LoggerComponent, R extends Re
     private final HashMap<ResourcePath, DynamicComponent> dynamicComponentPerCompiledSources = new HashMap<>();
     private final Set<DynamicComponentManagerListener> listeners = new LinkedHashSet<>();
 
-    DynamicComponentManagerImpl(
-        StaticComponentManager<L, R, P> staticComponentManager,
+    public DynamicComponentManagerImpl(
+        L loggerComponent,
+        R baseResourceServiceComponent,
+        P platformComponent,
+        Supplier<PieBuilder> pieBuilderSupplier,
         ListView<Consumer<RootPieModule>> dynamicPieModuleCustomizers,
         BiFunction<LoggerFactory, ClassLoader, Serde> serdeFactory
     ) {
         super(
-            staticComponentManager.loggerComponent,
-            staticComponentManager.baseResourceServiceComponent,
-            staticComponentManager.platformComponent,
-            staticComponentManager.pieBuilderSupplier
+            loggerComponent,
+            baseResourceServiceComponent,
+            platformComponent,
+            pieBuilderSupplier
         );
-        this.logger = staticComponentManager.loggerComponent.getLoggerFactory().create(getClass());
-        this.staticComponentManager = staticComponentManager;
+        this.logger = loggerComponent.getLoggerFactory().create(getClass());
         this.dynamicPieModuleCustomizers = dynamicPieModuleCustomizers;
         this.serdeFactory = serdeFactory;
     }
@@ -83,7 +85,6 @@ public class DynamicComponentManagerImpl<L extends LoggerComponent, R extends Re
         dynamicComponentPerCompiledSources.clear();
         dynamicComponentPerCoordinate.clear();
         dynamicComponentPerFileExtension.clear();
-        staticComponentManager.close();
         if(exceptions.size() > 0) {
             final RuntimeException exception = new RuntimeException("Closing one or more dynamically loaded components failed; resources may have been leaked");
             exceptions.forEach(exception::addSuppressed);
@@ -93,83 +94,60 @@ public class DynamicComponentManagerImpl<L extends LoggerComponent, R extends Re
 
 
     @Override
-    public LoggerComponent getLoggerComponent() {
-        return loggerComponent;
-    }
-
-    @Override
-    public PlatformComponent getPlatformComponent() {
-        return platformComponent;
-    }
-
-    @Override
     public Option<? extends Component> getComponent(Coordinate coordinate) {
-        return getDynamicComponent(coordinate)
-            .mapOrElse(Option::ofSome, () -> staticComponentManager.getComponent(coordinate));
+        return getDynamicComponent(coordinate);
     }
 
     @Override
-    public CollectionView<? extends Component> getComponents() {
-        final CollectionView<DynamicComponent> dynamicComponents = getDynamicComponents();
-        final CollectionView<? extends Component> staticComponents = staticComponentManager.getComponents();
-        return CollectionView.of(Stream.concat(dynamicComponents.stream(), staticComponents.stream()));
+    public Stream<? extends Component> getComponents() {
+        return getDynamicComponents();
     }
 
     @Override
     public Stream<? extends Component> getComponents(CoordinateRequirement coordinateRequirement) {
-        final Stream<DynamicComponent> dynamicComponents = getDynamicComponents(coordinateRequirement);
-        final Stream<? extends Component> staticComponents = staticComponentManager.getComponents(coordinateRequirement);
-        return Stream.concat(dynamicComponents, staticComponents);
+        return getDynamicComponents(coordinateRequirement);
     }
 
     @Override
     public Option<? extends ComponentGroup> getComponentGroup(String group) {
-        return staticComponentManager.getComponentGroup(group);
+        return Option.ofNone();
     }
 
     @Override
     public MapView<String, ? extends ComponentGroup> getComponentGroups() {
-        return staticComponentManager.getComponentGroups();
+        return MapView.of();
     }
 
     @Override
     public Option<LanguageComponent> getLanguageComponent(Coordinate coordinate) {
         return Option.ofNullable(dynamicComponentPerCoordinate.get(coordinate))
-            .flatMap(DynamicComponent::getLanguageComponent)
-            .orElse(() -> staticComponentManager.getLanguageComponent(coordinate));
+            .flatMap(DynamicComponent::getLanguageComponent);
     }
 
     @Override
     public Stream<LanguageComponent> getLanguageComponents(CoordinateRequirement coordinateRequirement) {
-        final Stream<LanguageComponent> dynamicComponents = dynamicComponentPerCompiledSources.values().stream()
+        return dynamicComponentPerCompiledSources.values().stream()
             .filter(dc -> coordinateRequirement.matches(dc.getCoordinate()))
             .flatMap(dc -> dc.getLanguageComponent().stream());
-        final Stream<LanguageComponent> staticComponents = staticComponentManager.getLanguageComponents(coordinateRequirement);
-        return Stream.concat(dynamicComponents, staticComponents);
     }
 
     @Override
     public <T> Option<T> getSubcomponent(Coordinate coordinate, Class<T> subcomponentType) {
         return Option.ofNullable(dynamicComponentPerCoordinate.get(coordinate))
-            .flatMap(dc -> dc.getSubcomponent(subcomponentType))
-            .orElse(() -> staticComponentManager.getSubcomponent(coordinate, subcomponentType));
+            .flatMap(dc -> dc.getSubcomponent(subcomponentType));
     }
 
     @Override
     public <T> Stream<T> getSubcomponents(Class<T> subcomponentType) {
-        final Stream<T> dynamicSubcomponents = dynamicComponentPerCompiledSources.values().stream()
+        return dynamicComponentPerCompiledSources.values().stream()
             .flatMap(dc -> dc.getSubcomponent(subcomponentType).stream());
-        final Stream<T> staticSubcomponents = staticComponentManager.getSubcomponents(subcomponentType);
-        return Stream.concat(dynamicSubcomponents, staticSubcomponents);
     }
 
     @Override
     public <T> Stream<T> getSubcomponents(CoordinateRequirement coordinateRequirement, Class<T> subcomponentType) {
-        final Stream<T> dynamicSubcomponents = dynamicComponentPerCompiledSources.values().stream()
+        return dynamicComponentPerCompiledSources.values().stream()
             .filter(dc -> coordinateRequirement.matches(dc.getCoordinate()))
             .flatMap(dc -> dc.getSubcomponent(subcomponentType).stream());
-        final Stream<T> staticSubcomponents = staticComponentManager.getSubcomponents(coordinateRequirement, subcomponentType);
-        return Stream.concat(dynamicSubcomponents, staticSubcomponents);
     }
 
 
@@ -183,8 +161,9 @@ public class DynamicComponentManagerImpl<L extends LoggerComponent, R extends Re
         return Option.ofNullable(dynamicComponentPerCoordinate.get(coordinate));
     }
 
-    @Override public CollectionView<DynamicComponent> getDynamicComponents() {
-        return CollectionView.of(dynamicComponentPerCompiledSources.values());
+    @Override
+    public Stream<DynamicComponent> getDynamicComponents() {
+        return dynamicComponentPerCompiledSources.values().stream();
     }
 
     @Override
@@ -199,6 +178,7 @@ public class DynamicComponentManagerImpl<L extends LoggerComponent, R extends Re
 
 
     @Override public DynamicComponent loadOrReloadFromCompiledSources(
+        StaticComponentManager baseComponentManager,
         ResourcePath rootDirectory,
         Iterable<ResourcePath> javaClassPaths,
         String participantClassQualifiedId
@@ -223,17 +203,17 @@ public class DynamicComponentManagerImpl<L extends LoggerComponent, R extends Re
 
         // Check whether the participant is compatible with our classes, otherwise we cannot use `Participant<L, R, P>`
         final Class<? super L> requiredLoggerComponentClass = participant.getRequiredLoggerComponentClass();
-        final Class<? extends LoggerComponent> loggerComponentClass = staticComponentManager.loggerComponent.getClass();
+        final Class<? extends LoggerComponent> loggerComponentClass = loggerComponent.getClass();
         if(!requiredLoggerComponentClass.isAssignableFrom(loggerComponentClass)) {
             throw DynamicLoadException.incompatibleLoggerComponent(requiredLoggerComponentClass.getName(), loggerComponentClass.getName());
         }
         final Class<? super R> requiredBaseResourceServiceComponentClass = participant.getRequiredBaseResourceServiceComponentClass();
-        final Class<? extends ResourceServiceComponent> baseResourceServiceComponentClass = staticComponentManager.baseResourceServiceComponent.getClass();
+        final Class<? extends ResourceServiceComponent> baseResourceServiceComponentClass = baseResourceServiceComponent.getClass();
         if(!requiredBaseResourceServiceComponentClass.isAssignableFrom(baseResourceServiceComponentClass)) {
             throw DynamicLoadException.incompatibleBaseResourceServiceComponent(requiredBaseResourceServiceComponentClass.getName(), baseResourceServiceComponentClass.getName());
         }
         final Class<? super P> requiredPlatformComponentClass = participant.getRequiredPlatformComponentClass();
-        final Class<? extends PlatformComponent> platformComponentClass = staticComponentManager.platformComponent.getClass();
+        final Class<? extends PlatformComponent> platformComponentClass = platformComponent.getClass();
         if(!requiredPlatformComponentClass.isAssignableFrom(platformComponentClass)) {
             throw DynamicLoadException.incompatiblePlatformComponent(requiredPlatformComponentClass.getName(), platformComponentClass.getName());
         }
@@ -269,8 +249,8 @@ public class DynamicComponentManagerImpl<L extends LoggerComponent, R extends Re
             serializingStoreInMemoryBuffer = new SerializingStoreInMemoryBuffer();
         }
 
-        final ListView<Consumer<RootPieModule>> pieModuleCustomizers = ListView.of(Stream.concat(
-            staticComponentManager.pieModuleCustomizers.stream(),
+        final Stream<Consumer<RootPieModule>> pieModuleCustomizers = Stream.concat(
+            baseComponentManager.getPieModuleCustomizers().stream(),
             Stream.concat(
                 dynamicPieModuleCustomizers.stream(), // Can override static customizers.
                 Stream.of(pieModule -> pieModule // Can override all other customizers, which is necessary for correct serialization/deserialization.
@@ -281,12 +261,12 @@ public class DynamicComponentManagerImpl<L extends LoggerComponent, R extends Re
                         .build()
                     ))
             )
-        ));
+        );
         final BuildOneResult result = super.buildOne( // NOTE: only support dynamically loading a single standalone component right now.
             participant,
-            staticComponentManager.globalResourceRegistryProviders,
-            staticComponentManager.resourceServiceModuleCustomizers,
-            staticComponentManager.globalTaskDefsProviders,
+            baseComponentManager.getGlobalResourceRegistryProviders().stream(),
+            baseComponentManager.getResourceServiceModuleCustomizers().stream(),
+            baseComponentManager.getGlobalTaskDefsProviders().stream(),
             pieModuleCustomizers,
             classLoader
         ); // NOTE: global providers from `result` are ignored, as it would require all participants to be reconstructed.

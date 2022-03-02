@@ -5,9 +5,11 @@
   <!-- Spoofax LWB -->
   <!--             -->
 
-  <!-- Lifecycle participant -->
-  <extension point="spoofax.eclipse.lifecycle">
-    <participant group="mb.spoofax.lwb" class="mb.spoofax.lwb.eclipse.SpoofaxLwbLifecycleParticipant$Factory"/>
+  <!-- Spoofax Eclipse participants -->
+  <extension point="spoofax.eclipse.participant">
+    <participant class="mb.spoofax.lwb.eclipse.compiler.SpoofaxCompilerEclipseParticipant"/>
+    <participant class="mb.spoofax.lwb.eclipse.compiler.SpoofaxLwbCompilerEclipseParticipant"/>
+    <participant class="mb.spoofax.lwb.eclipse.dynamicloading.SpoofaxDynamicLoadingEclipseParticipant"/>
   </extension>
 
   <!-- CFG component customizer -->

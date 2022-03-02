@@ -176,6 +176,14 @@ public class SpoofaxLwbCompilerParticipant<L extends LoggerComponent, R extends 
         // Register Spoofax3CompilerComponent as a subcomponent.
         subcomponentRegistry.register(SpoofaxLwbCompilerComponent.class, component);
 
+        this.component = component;
         return component;
+    }
+
+    @Override public void close() {
+        if(component != null) {
+            component.close();
+            component = null;
+        }
     }
 }

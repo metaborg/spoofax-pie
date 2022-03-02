@@ -44,12 +44,11 @@ import mb.spoofax.core.component.StaticComponentManager;
 import mb.spoofax.core.component.StaticComponentManagerBuilder;
 import mb.spoofax.core.platform.DaggerPlatformComponent;
 import mb.spoofax.core.platform.PlatformComponent;
+import mb.spoofax.lwb.compiler.SpoofaxLwbCompiler;
 import mb.spoofax.lwb.compiler.definition.CompileLanguageDefinition;
 import mb.spoofax.lwb.compiler.definition.CompileLanguageDefinitionException;
-import mb.spoofax.lwb.compiler.SpoofaxLwbCompiler;
 import mb.spoofax.lwb.dynamicloading.component.DynamicComponent;
 import mb.spoofax.lwb.dynamicloading.component.DynamicComponentManager;
-import mb.spoofax.lwb.dynamicloading.component.DynamicComponentManagerBuilder;
 import mb.spt.SptComponent;
 import mb.spt.SptParticipant;
 import mb.spt.dynamicloading.DynamicLanguageUnderTestProvider;
@@ -113,8 +112,8 @@ class TestBase {
                 .build()
             );
         }, "mb.spoofax.lwb");
-        final StaticComponentManager<LoggerComponent, ResourceServiceComponent, PlatformComponent> componentManager = builder.build();
-        spoofaxLwbCompiler = SpoofaxLwbCompiler.fromComponentManager(componentManager);
+        final StaticComponentManager staticComponentManager = builder.build();
+        spoofaxLwbCompiler = SpoofaxLwbCompiler.fromComponentManager(staticComponentManager);
 
         cfgRootDirectoryToObject = spoofaxLwbCompiler.spoofaxLwbCompilerComponent.getCfgComponent().getCfgRootDirectoryToObject();
         compileLanguageDefinition = spoofaxLwbCompiler.spoofaxLwbCompilerComponent.getCompileLanguageDefinition();
@@ -122,13 +121,18 @@ class TestBase {
         resourceService = spoofaxLwbCompiler.resourceServiceComponent.getResourceService();
         languageMetricsTracer = new MetricsTracer();
         dynamicLoadingComponent = DaggerDynamicLoadingComponent.builder()
-            .dynamicLoadingModule(new DynamicLoadingModule(new DynamicComponentManagerBuilder<>()
-                .registerPieModuleCustomizer(pieModule -> {
+            .dynamicLoadingModule(new DynamicLoadingModule(
+                PieBuilderImpl::new,
+                (loggerFactory, classLoader) -> new FstSerde(classLoader)) // Use FstSerde for faster serialization
+                .addPieModuleCustomizers(pieModule -> {
                     // Use languageMetricsTracer to support checking which tasks have been executed.
                     pieModule.withTracerFactory(loggerFactory -> new CompositeTracer(languageMetricsTracer, new LoggingTracer(loggerFactory)));
                 })
-                .withSerdeFactory((loggerFactory, classLoader) -> new FstSerde(classLoader)) // Use FstSerde for faster serialization
-                .build(componentManager)))
+                .withBaseComponentManager(staticComponentManager)
+            )
+            .loggerComponent(loggerComponent)
+            .resourceServiceComponent(baseResourceServiceComponent)
+            .platformComponent(platformComponent)
             .build();
         dynamicComponentManager = dynamicLoadingComponent.getDynamicComponentManager();
         dynamicLoad = dynamicLoadingComponent.getDynamicLoad();

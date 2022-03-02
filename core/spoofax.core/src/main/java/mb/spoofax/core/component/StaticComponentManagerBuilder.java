@@ -111,7 +111,7 @@ public class StaticComponentManagerBuilder<L extends LoggerComponent, R extends 
      *
      * @return {@link ComponentManager Language manager} providing access to the composed participants.
      */
-    public StaticComponentManager<L, R, P> build() {
+    public StaticComponentManagerImpl<L, R, P> build() {
         final ListView<Consumer<ResourceServiceModule>> resourceServiceModuleCustomizers = ListView.copyOf(this.resourceServiceModuleCustomizers);
         final MultiMapView<String, Consumer<ResourceServiceModule>> groupedResourceServiceModuleCustomizers = MultiMapView.copyOf(this.groupedResourceServiceModuleCustomizers);
         final ListView<Consumer<RootPieModule>> pieModuleCustomizers = ListView.copyOf(this.pieModuleCustomizers);
@@ -126,7 +126,7 @@ public class StaticComponentManagerBuilder<L extends LoggerComponent, R extends 
             null
         );
 
-        return new StaticComponentManager<>(
+        return new StaticComponentManagerImpl<>(
             loggerComponent,
             platformComponent,
 

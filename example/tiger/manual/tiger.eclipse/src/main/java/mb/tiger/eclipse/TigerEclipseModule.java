@@ -12,8 +12,6 @@ import mb.spoofax.eclipse.pie.PieRunner;
 import mb.tiger.spoofax.TigerQualifier;
 import mb.tiger.spoofax.TigerScope;
 
-import javax.inject.Named;
-
 @Module
 public class TigerEclipseModule {
     @Provides @TigerQualifier @TigerScope
@@ -74,5 +72,11 @@ public class TigerEclipseModule {
     @Provides @TigerQualifier @TigerScope
     static TigerEditorContextMenu provideEditorContextMenu() {
         return new TigerEditorContextMenu();
+    }
+
+
+    @Provides @TigerQualifier @TigerScope
+    static TigerRunCommandHandler provideRunCommandHandler() {
+        return new TigerRunCommandHandler();
     }
 }

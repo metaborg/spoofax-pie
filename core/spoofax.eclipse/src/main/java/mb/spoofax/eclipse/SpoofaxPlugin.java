@@ -2,8 +2,8 @@ package mb.spoofax.eclipse;
 
 import mb.log.api.Logger;
 import mb.pie.runtime.PieBuilderImpl;
-import mb.spoofax.core.component.StaticComponentManagerBuilder;
 import mb.spoofax.core.component.StaticComponentManager;
+import mb.spoofax.core.component.StaticComponentManagerBuilder;
 import mb.spoofax.eclipse.log.DaggerEclipseLoggerComponent;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -31,7 +31,7 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
     private static @Nullable Logger logger;
     private static @Nullable EclipseResourceServiceComponent baseResourceServiceComponent;
     private static @Nullable EclipsePlatformComponent platformComponent;
-    private static @Nullable StaticComponentManager<EclipseLoggerComponent, EclipseResourceServiceComponent, EclipsePlatformComponent> staticComponentManager;
+    private static @Nullable StaticComponentManager staticComponentManager;
 
 
     public static SpoofaxPlugin getPlugin() {
@@ -62,7 +62,7 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
         return platformComponent;
     }
 
-    public static StaticComponentManager<EclipseLoggerComponent, EclipseResourceServiceComponent, EclipsePlatformComponent> getStaticComponentManager() {
+    public static StaticComponentManager getStaticComponentManager() {
         if(staticComponentManager == null) {
             throw new RuntimeException("Cannot access StaticComponentManager; SpoofaxPlugin has not been started yet, or has been stopped");
         }

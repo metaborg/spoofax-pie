@@ -2,27 +2,32 @@ package mb.spoofax.core.component;
 
 import mb.common.option.Option;
 import mb.common.util.CollectionView;
+import mb.common.util.ListView;
 import mb.common.util.MapView;
+import mb.common.util.MultiMapView;
 import mb.common.util.StreamUtil;
 import mb.log.dagger.LoggerComponent;
+import mb.pie.api.PieBuilder;
+import mb.pie.dagger.RootPieModule;
+import mb.pie.dagger.TaskDefsProvider;
+import mb.resource.dagger.ResourceRegistriesProvider;
+import mb.resource.dagger.ResourceServiceComponent;
+import mb.resource.dagger.ResourceServiceModule;
 import mb.spoofax.core.Coordinate;
 import mb.spoofax.core.CoordinateRequirement;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.platform.PlatformComponent;
 
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public interface ComponentManager extends AutoCloseable {
-    LoggerComponent getLoggerComponent();
-
-    PlatformComponent getPlatformComponent();
-
-
     // Components
 
     Option<? extends Component> getComponent(Coordinate coordinate);
 
-    CollectionView<? extends Component> getComponents();
+    Stream<? extends Component> getComponents();
 
     Stream<? extends Component> getComponents(CoordinateRequirement coordinateRequirement);
 

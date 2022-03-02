@@ -9,7 +9,7 @@ import mb.spoofax.eclipse.editor.SpoofaxSourceViewerConfiguration;
 import mb.spoofax.eclipse.util.StyleUtil;
 import mb.spoofax.lwb.dynamicloading.component.DynamicComponent;
 import mb.spoofax.lwb.dynamicloading.component.DynamicComponentManager;
-import mb.spoofax.lwb.eclipse.SpoofaxLwbParticipant;
+import mb.spoofax.lwb.eclipse.SpoofaxLwbPlugin;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -84,7 +84,7 @@ public class DynamicEditor extends SpoofaxEditorBase {
         super.initializeEditor();
 
         this.styleUtil = SpoofaxPlugin.getPlatformComponent().getStyleUtil();
-        this.dynamicComponentManager = SpoofaxLwbParticipant.getInstance().getDynamicLoadingComponent().getDynamicComponentManager();
+        this.dynamicComponentManager = SpoofaxLwbPlugin.getDynamicLoadingComponent().getDynamicComponentManager();
     }
 
     @Override protected void setInput() {
@@ -140,16 +140,24 @@ public class DynamicEditor extends SpoofaxEditorBase {
     @Override protected void scheduleJob(boolean initialUpdate) {
         // TODO: support case where file is null but document is not.
         if(input == null || document == null || file == null || componentCoordinate == null) return;
-        final @Nullable EclipseDynamicComponent language = (EclipseDynamicComponent)dynamicComponentManager.getDynamicComponent(componentCoordinate).get();
-        if(language == null) {
-            logger.error("Cannot schedule editor update job for editor '{}' because no language for id '{}' was found", inputName, componentCoordinate);
+        final @Nullable DynamicComponent component = dynamicComponentManager.getDynamicComponent(componentCoordinate).get();
+        if(component == null) {
+            logger.error("Cannot schedule editor update job for editor '{}' because no component for coordinate '{}' was found", inputName, componentCoordinate);
             return;
         }
-        final EclipseLanguageComponent languageComponent = language.getLanguageComponent();
-        logger.debug("Scheduling update job for editor '{}' of dynamically loaded language '{}'", inputName, language);
+        final @Nullable LanguageComponent languageComponent = component.getLanguageComponent().get();
+        if(languageComponent == null) {
+            return; // Component has no language component.
+        }
+        if(!(languageComponent instanceof EclipseLanguageComponent)) {
+            logger.error("Cannot schedule editor update job for editor '{}' because component for coordinate '{}' does not have a language component that implements EclipseLanguageComponent", inputName, componentCoordinate);
+            return;
+        }
+        final EclipseLanguageComponent eclipseLanguageComponent = (EclipseLanguageComponent)languageComponent;
+        logger.debug("Scheduling update job for editor '{}' of dynamically loaded language '{}'", inputName, component);
 
         cancelJobs();
-        final Job job = languageComponent.editorUpdateJobFactory().create(languageComponent, language.getPieComponent(), project, file, document, input, this);
+        final Job job = eclipseLanguageComponent.editorUpdateJobFactory().create(eclipseLanguageComponent, component.getPieComponent(), project, file, document, input, this);
 
         //A dd refresh scheduling rule because listing/walking a resource may require refreshes.
         final @Nullable ISchedulingRule refreshSchedulingRule;
@@ -163,7 +171,7 @@ public class DynamicEditor extends SpoofaxEditorBase {
         job.setRule(MultiRule.combine(new ISchedulingRule[]{
             refreshSchedulingRule,
             file,
-            languageComponent.startupReadLockRule()
+            eclipseLanguageComponent.startupReadLockRule()
         }));
         job.schedule(initialUpdate ? 0 : 300);
     }

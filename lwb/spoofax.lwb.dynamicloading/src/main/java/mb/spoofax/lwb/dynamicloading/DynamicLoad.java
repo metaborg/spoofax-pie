@@ -68,10 +68,15 @@ public class DynamicLoad implements TaskDef<Supplier<Result<DynamicLoad.Supplier
 
 
     private final DynamicComponentManager dynamicComponentManager;
+    private final DynamicLoadGetBaseComponentManager dynamicLoadGetBaseComponentManager;
 
 
-    @Inject public DynamicLoad(DynamicComponentManager dynamicComponentManager) {
+    @Inject public DynamicLoad(
+        DynamicComponentManager dynamicComponentManager,
+        DynamicLoadGetBaseComponentManager dynamicLoadGetBaseComponentManager
+    ) {
         this.dynamicComponentManager = dynamicComponentManager;
+        this.dynamicLoadGetBaseComponentManager = dynamicLoadGetBaseComponentManager;
     }
 
 
@@ -104,7 +109,12 @@ public class DynamicLoad implements TaskDef<Supplier<Result<DynamicLoad.Supplier
                     }
                 }
             }
-            final DynamicComponent dynamicComponent = dynamicComponentManager.loadOrReloadFromCompiledSources(supplierOutput.rootDirectory, supplierOutput.javaClassPaths, supplierOutput.participantClassQualifiedId);
+            final DynamicComponent dynamicComponent = dynamicComponentManager.loadOrReloadFromCompiledSources(
+                dynamicLoadGetBaseComponentManager.get(),
+                supplierOutput.rootDirectory,
+                supplierOutput.javaClassPaths,
+                supplierOutput.participantClassQualifiedId
+            );
             return Result.ofOk(dynamicComponent);
         } catch(DynamicLoadException e) {
             return Result.ofErr(e);

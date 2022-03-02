@@ -1,7 +1,6 @@
 package mb.spoofax.core.component;
 
 import mb.common.option.Option;
-import mb.common.util.CollectionView;
 import mb.common.util.MapView;
 import mb.pie.dagger.PieComponent;
 import mb.resource.dagger.ResourceServiceComponent;
@@ -75,12 +74,11 @@ public class ComponentGroupImpl implements ComponentGroup {
     }
 
     @Override
-    public CollectionView<LanguageComponent> getLanguageComponents() {
+    public Stream<LanguageComponent> getLanguageComponents() {
         if(closed)
             throw new IllegalStateException("Cannot get language components, component group '" + group + "' has been closed");
-        return CollectionView.of(components.values().stream()
-            .flatMap(c -> c.getLanguageComponent().stream())
-        );
+        return components.values().stream()
+            .flatMap(c -> c.getLanguageComponent().stream());
     }
 
     // PIE component

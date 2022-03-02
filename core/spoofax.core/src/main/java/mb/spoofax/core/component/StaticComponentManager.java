@@ -1,9 +1,6 @@
 package mb.spoofax.core.component;
 
-import mb.common.option.Option;
-import mb.common.util.CollectionView;
 import mb.common.util.ListView;
-import mb.common.util.MapView;
 import mb.common.util.MultiMapView;
 import mb.log.dagger.LoggerComponent;
 import mb.pie.api.PieBuilder;
@@ -12,164 +9,30 @@ import mb.pie.dagger.TaskDefsProvider;
 import mb.resource.dagger.ResourceRegistriesProvider;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.resource.dagger.ResourceServiceModule;
-import mb.spoofax.core.Coordinate;
-import mb.spoofax.core.CoordinateRequirement;
-import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.platform.PlatformComponent;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
-public class StaticComponentManager<L extends LoggerComponent, R extends ResourceServiceComponent, P extends PlatformComponent> implements ComponentManager {
-    public final L loggerComponent;
-    public final P platformComponent;
+public interface StaticComponentManager extends ComponentManager {
+    LoggerComponent getLoggerComponent();
 
-    private final MapView<Coordinate, ComponentImpl> componentsByCoordinate;
-    private final MapView<String, ComponentGroupImpl> componentGroups;
+    ResourceServiceComponent getBaseResourceServiceComponent();
 
-    // Following fields are kept for use by dynamic component managers.
-    public final R baseResourceServiceComponent;
-    public final Supplier<PieBuilder> pieBuilderSupplier;
-    public final ListView<ResourceRegistriesProvider> globalResourceRegistryProviders;
-    public final ListView<TaskDefsProvider> globalTaskDefsProviders;
-    public final ListView<Consumer<ResourceServiceModule>> resourceServiceModuleCustomizers;
-    public final MultiMapView<String, Consumer<ResourceServiceModule>> groupedResourceServiceModuleCustomizers;
-    public final ListView<Consumer<RootPieModule>> pieModuleCustomizers;
-    public final MultiMapView<String, Consumer<RootPieModule>> groupedPieModuleCustomizers;
+    PlatformComponent getPlatformComponent();
+
+    Supplier<PieBuilder> getPieBuilderSupplier();
 
 
-    StaticComponentManager(
-        L loggerComponent,
-        P platformComponent,
+    ListView<ResourceRegistriesProvider> getGlobalResourceRegistryProviders();
 
-        ArrayList<ComponentImpl> componentsList,
-        ArrayList<ComponentGroupImpl> componentGroupsList,
+    ListView<TaskDefsProvider> getGlobalTaskDefsProviders();
 
-        R baseResourceServiceComponent,
-        Supplier<PieBuilder> pieBuilderSupplier,
-        ListView<ResourceRegistriesProvider> globalResourceRegistryProviders,
-        ListView<TaskDefsProvider> globalTaskDefsProviders,
-        ListView<Consumer<ResourceServiceModule>> resourceServiceModuleCustomizers,
-        MultiMapView<String, Consumer<ResourceServiceModule>> groupedResourceServiceModuleCustomizers,
-        ListView<Consumer<RootPieModule>> pieModuleCustomizers,
-        MultiMapView<String, Consumer<RootPieModule>> groupedPieModuleCustomizers
-    ) {
-        this.loggerComponent = loggerComponent;
-        this.platformComponent = platformComponent;
+    ListView<Consumer<ResourceServiceModule>> getResourceServiceModuleCustomizers();
 
-        final LinkedHashMap<Coordinate, ComponentImpl> componentsByCoordinate = new LinkedHashMap<>();
-        for(ComponentImpl component : componentsList) {
-            componentsByCoordinate.put(component.getCoordinate(), component);
-        }
-        final Map<String, ComponentGroupImpl> componentGroups = new LinkedHashMap<>();
-        for(ComponentGroupImpl componentGroup : componentGroupsList) {
-            componentGroups.put(componentGroup.getGroup(), componentGroup);
-        }
+    MultiMapView<String, Consumer<ResourceServiceModule>> getGroupedResourceServiceModuleCustomizers();
 
-        this.componentsByCoordinate = MapView.of(componentsByCoordinate);
-        this.componentGroups = MapView.of(componentGroups);
+    ListView<Consumer<RootPieModule>> getPieModuleCustomizers();
 
-        this.baseResourceServiceComponent = baseResourceServiceComponent;
-        this.pieBuilderSupplier = pieBuilderSupplier;
-        this.globalResourceRegistryProviders = globalResourceRegistryProviders;
-        this.globalTaskDefsProviders = globalTaskDefsProviders;
-        this.resourceServiceModuleCustomizers = resourceServiceModuleCustomizers;
-        this.groupedResourceServiceModuleCustomizers = groupedResourceServiceModuleCustomizers;
-        this.pieModuleCustomizers = pieModuleCustomizers;
-        this.groupedPieModuleCustomizers = groupedPieModuleCustomizers;
-    }
-
-    @Override
-    public void close() {
-        componentsByCoordinate.values().forEach(ComponentImpl::close);
-        componentGroups.values().forEach(ComponentGroupImpl::close);
-    }
-
-
-    @Override
-    public LoggerComponent getLoggerComponent() {
-        return loggerComponent;
-    }
-
-    @Override
-    public PlatformComponent getPlatformComponent() {
-        return platformComponent;
-    }
-
-
-    // Components
-
-    @Override
-    public Option<? extends Component> getComponent(Coordinate coordinate) {
-        final @Nullable Component component = componentsByCoordinate.get(coordinate);
-        return Option.ofNullable(component);
-    }
-
-    @Override public CollectionView<? extends Component> getComponents() {
-        return componentsByCoordinate.values();
-    }
-
-    @Override
-    public Stream<? extends Component> getComponents(CoordinateRequirement coordinateRequirement) {
-        return componentsByCoordinate.values().stream().filter(c -> c.matchesCoordinate(coordinateRequirement));
-    }
-
-    @Override
-    public Option<? extends ComponentGroup> getComponentGroup(String group) {
-        return Option.ofNullable(componentGroups.get(group));
-    }
-
-    @Override
-    public MapView<String, ? extends ComponentGroup> getComponentGroups() {
-        return componentGroups;
-    }
-
-
-    // Language components (of components)
-
-    @Override
-    public Option<LanguageComponent> getLanguageComponent(Coordinate coordinate) {
-        for(ComponentImpl component : componentsByCoordinate.values()) {
-            final Option<LanguageComponent> languageComponent = component.getLanguageComponent();
-            if(languageComponent.isSome()) return languageComponent;
-        }
-        return Option.ofNone();
-    }
-
-    @Override
-    public Stream<LanguageComponent> getLanguageComponents(CoordinateRequirement coordinateRequirement) {
-        return componentsByCoordinate.values().stream()
-            .filter(c -> c.matchesCoordinate(coordinateRequirement))
-            .flatMap(c -> c.getLanguageComponent().stream());
-    }
-
-
-    // Typed subcomponents
-
-    @Override
-    public <T> Option<T> getSubcomponent(Coordinate coordinate, Class<T> subcomponentType) {
-        final @Nullable ComponentImpl component = componentsByCoordinate.get(coordinate);
-        if(component != null) {
-            return component.getSubcomponent(subcomponentType);
-        }
-        return Option.ofNone();
-    }
-
-    @Override
-    public <T> Stream<T> getSubcomponents(Class<T> subcomponentType) {
-        return componentsByCoordinate.values().stream()
-            .flatMap(c -> c.getSubcomponent(subcomponentType).stream());
-    }
-
-    @Override
-    public <T> Stream<T> getSubcomponents(CoordinateRequirement coordinateRequirement, Class<T> subcomponentType) {
-        return componentsByCoordinate.values().stream()
-            .filter(c -> c.matchesCoordinate(coordinateRequirement))
-            .flatMap(c -> c.getSubcomponent(subcomponentType).stream());
-    }
+    MultiMapView<String, Consumer<RootPieModule>> getGroupedPieModuleCustomizers();
 }

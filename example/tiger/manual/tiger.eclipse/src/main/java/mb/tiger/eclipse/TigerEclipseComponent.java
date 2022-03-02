@@ -53,4 +53,7 @@ public interface TigerEclipseComponent extends EclipseLanguageComponent, TigerCo
     @Override @TigerQualifier TigerResourceContextMenu getResourceContextMenu();
 
     @Override @TigerQualifier TigerEditorContextMenu getEditorContextMenu();
+
+
+    @Override @TigerQualifier TigerRunCommandHandler getRunCommandHandler();
 }

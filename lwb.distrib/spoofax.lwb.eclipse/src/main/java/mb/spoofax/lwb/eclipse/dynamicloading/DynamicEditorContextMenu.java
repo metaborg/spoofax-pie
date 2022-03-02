@@ -5,7 +5,7 @@ import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.menu.MenuShared;
 import mb.spoofax.lwb.dynamicloading.component.DynamicComponent;
-import mb.spoofax.lwb.eclipse.SpoofaxLwbParticipant;
+import mb.spoofax.lwb.eclipse.SpoofaxLwbPlugin;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.ui.IWorkbenchPart;
@@ -30,7 +30,7 @@ public class DynamicEditorContextMenu extends MenuShared {
         } else {
             componentCoordinate = editor.getComponentCoordinate();
         }
-        final @Nullable DynamicComponent component = SpoofaxLwbParticipant.getInstance().getDynamicLoadingComponent().getDynamicComponentManager().getDynamicComponent(componentCoordinate).get();
+        final @Nullable DynamicComponent component = SpoofaxLwbPlugin.getDynamicLoadingComponent().getDynamicComponentManager().getDynamicComponent(componentCoordinate).get();
         if(component == null) { // Dynamic editor of unknown language.
             return new IContributionItem[0];
         }

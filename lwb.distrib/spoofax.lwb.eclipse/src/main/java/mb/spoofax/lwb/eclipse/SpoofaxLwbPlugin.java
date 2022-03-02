@@ -1,11 +1,8 @@
 package mb.spoofax.lwb.eclipse;
 
 import mb.spoofax.eclipse.SpoofaxPlugin;
-import mb.spoofax.lwb.dynamicloading.DaggerDynamicLoadingComponent;
+import mb.spoofax.lwb.compiler.SpoofaxLwbCompilerComponent;
 import mb.spoofax.lwb.dynamicloading.DynamicLoadingComponent;
-import mb.spoofax.lwb.dynamicloading.DynamicLoadingModule;
-import mb.spoofax.lwb.dynamicloading.component.DynamicComponentManager;
-import mb.spoofax.lwb.dynamicloading.component.DynamicComponentManagerBuilder;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -16,8 +13,6 @@ public class SpoofaxLwbPlugin extends AbstractUIPlugin {
 
     private static @Nullable BundleContext bundleContext;
     private static @Nullable SpoofaxLwbPlugin plugin;
-    private static @Nullable DynamicLoadingComponent dynamicLoadingComponent;
-    private static @Nullable DynamicComponentManager dynamicComponentManager;
 
     public static SpoofaxLwbPlugin getPlugin() {
         if(plugin == null) {
@@ -33,20 +28,18 @@ public class SpoofaxLwbPlugin extends AbstractUIPlugin {
         return bundleContext;
     }
 
-    public static DynamicComponentManager getDynamicComponentManager() {
-        if(dynamicComponentManager == null) {
-            throw new RuntimeException("Cannot access DynamicComponentManager; SpoofaxLwbPlugin has not been started yet, or has been stopped");
-        }
-        return dynamicComponentManager;
+    public static SpoofaxLwbCompilerComponent getSpoofaxLwbCompilerComponent() {
+        return SpoofaxPlugin.getStaticComponentManager().getOneSubcomponent(SpoofaxLwbCompilerComponent.class).unwrap();
+    }
+
+    public static DynamicLoadingComponent getDynamicLoadingComponent() {
+        return SpoofaxPlugin.getStaticComponentManager().getOneSubcomponent(DynamicLoadingComponent.class).unwrap();
     }
 
     @Override public void start(@NonNull BundleContext context) throws Exception {
         super.start(context);
         bundleContext = context;
         plugin = this;
-        dynamicLoadingComponent = DaggerDynamicLoadingComponent.builder()
-            .dynamicLoadingModule(new DynamicLoadingModule(new DynamicComponentManagerBuilder().build(SpoofaxPlugin.getStaticComponentManager())))
-            .build();
     }
 
     @Override public void stop(@NonNull BundleContext context) throws Exception {

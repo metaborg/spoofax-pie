@@ -7,6 +7,7 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.Coordinate;
 import mb.spoofax.core.CoordinateRequirement;
 import mb.spoofax.core.component.ComponentManager;
+import mb.spoofax.core.component.StaticComponentManager;
 import mb.spoofax.lwb.dynamicloading.DynamicLoadException;
 
 import java.util.stream.Stream;
@@ -16,7 +17,7 @@ public interface DynamicComponentManager extends ComponentManager {
 
     Option<DynamicComponent> getDynamicComponent(Coordinate coordinate);
 
-    CollectionView<DynamicComponent> getDynamicComponents();
+    Stream<DynamicComponent> getDynamicComponents();
 
     Stream<DynamicComponent> getDynamicComponents(CoordinateRequirement coordinateRequirement);
 
@@ -34,6 +35,7 @@ public interface DynamicComponentManager extends ComponentManager {
 
 
     DynamicComponent loadOrReloadFromCompiledSources(
+        StaticComponentManager baseComponentManager,
         ResourcePath rootDirectory,
         Iterable<ResourcePath> javaClassPaths,
         String participantClassQualifiedId

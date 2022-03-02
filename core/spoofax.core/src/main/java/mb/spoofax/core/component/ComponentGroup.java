@@ -31,7 +31,7 @@ public interface ComponentGroup {
         return StreamUtil.findOne(languageComponents);
     }
 
-    CollectionView<LanguageComponent> getLanguageComponents();
+    Stream<LanguageComponent> getLanguageComponents();
 
     // PIE component
 

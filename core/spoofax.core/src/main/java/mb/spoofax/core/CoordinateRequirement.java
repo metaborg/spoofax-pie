@@ -88,6 +88,6 @@ public class CoordinateRequirement implements Serializable {
     }
 
     @Override public String toString() {
-        return (groupRequirement != null ? (groupRequirement + ":") : "") + id + (versionRequirement != null ? (":" + versionRequirement) : "*");
+        return (groupRequirement != null ? (groupRequirement + ":") : "") + id + (versionRequirement != null ? (":" + versionRequirement) : "");
     }
 }

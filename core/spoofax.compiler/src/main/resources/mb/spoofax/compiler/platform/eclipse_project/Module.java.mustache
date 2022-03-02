@@ -84,4 +84,10 @@ public class {{baseEclipseModule.id}} {
     static {{editorContextMenu.qualifiedId}} provideEditorContextMenu() {
         return new {{editorContextMenu.qualifiedId}}();
     }
+
+
+    @Provides @{{adapterProjectCompilerInput.qualifier.qualifiedId}} @{{adapterProjectCompilerInput.scope.qualifiedId}}
+    static {{runCommandHandler.qualifiedId}} provideRunCommandHandler() {
+        return new {{runCommandHandler.qualifiedId}}();
+    }
 }

@@ -2,7 +2,6 @@ package mb.spoofax.core.component;
 
 import mb.common.option.Option;
 import mb.common.util.CollectionView;
-import mb.common.util.IterableUtil;
 import mb.common.util.ListView;
 import mb.common.util.MapView;
 import mb.common.util.MultiMap;
@@ -15,6 +14,8 @@ import mb.pie.dagger.PieComponent;
 import mb.pie.dagger.RootPieComponent;
 import mb.pie.dagger.RootPieModule;
 import mb.pie.dagger.TaskDefsProvider;
+import mb.pie.graph.DefaultEdge;
+import mb.pie.graph.DirectedAcyclicGraph;
 import mb.resource.dagger.DaggerResourceServiceComponent;
 import mb.resource.dagger.ResourceRegistriesProvider;
 import mb.resource.dagger.ResourceServiceComponent;
@@ -27,6 +28,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +36,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends ResourceServiceComponent, P extends PlatformComponent> {
     protected final L loggerComponent;
@@ -66,26 +69,39 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
         MultiMapView<String, Consumer<RootPieModule>> groupedPieModuleCustomizers,
         @Nullable ClassLoader classLoader
     ) {
-        // TODO: check for components with duplicate coordinates
+        // Check for duplicate coordinates.
         // TODO: what about duplicate coordinates of a dynamic component with already existing static components?
-
-        // Sort participants in dependency order.
-        final ArrayList<Participant<L, R, P>> participantsOrdered = new ArrayList<>();
-        IterableUtil.addAll(participantsOrdered, participants);
-        participantsOrdered.sort((p1, p2) -> {
-            if(p1.getCoordinate().equals(p2.getCoordinate())) return 0;
-            for(CoordinateRequirement dependency : p1.getDependencies()) {
-                if(dependency.matches(p2.getCoordinate())) {
-                    return -1;
-                }
-                // TODO: if dependency was not found, produce an error?
-                // TODO: what about dependencies of dynamic components on already existing static components?
+        final HashSet<Coordinate> coordinates = new HashSet<>();
+        for(Participant<L, R, P> participant : participants) {
+            final Coordinate coordinate = participant.getCoordinate();
+            if(coordinates.contains(coordinate)) {
+                throw new IllegalStateException("Cannot build components, there are multiple participants with coordinate '" + coordinate + "'");
             }
-            return 1;
-        });
+            coordinates.add(coordinate);
+        }
+
+        // Sort participants in dependency order using a DAG.
+        final DirectedAcyclicGraph<Participant<L, R, P>, DefaultEdge> participantsGraph = new DirectedAcyclicGraph<>(DefaultEdge.class);
+        for(Participant<L, R, P> participant : participants) {
+            participantsGraph.addVertex(participant);
+        }
+        for(Participant<L, R, P> source : participants) {
+            for(CoordinateRequirement dependency : source.getDependencies()) {
+                boolean dependencyFound = false;
+                for(Participant<L, R, P> target : participants) {
+                    if(!source.equals(target) && dependency.matches(target.getCoordinate())) {
+                        participantsGraph.addEdge(target, source);
+                        dependencyFound = true;
+                    }
+                }
+                if(!dependencyFound) {
+                    throw new IllegalStateException("Cannot build components, participant with coordinate '" + source + "' depends on participant with coordinate requirement '" + dependency + "', but that participant was not found");
+                }
+            }
+        }
 
         // Create builders for participants.
-        final ArrayList<ComponentBuilder> builders = participantsOrdered.stream()
+        final ArrayList<ComponentBuilder> builders = StreamSupport.stream(participantsGraph.spliterator(), false)
             .map(ComponentBuilder::new)
             .collect(Collectors.toCollection(ArrayList::new));
         final ArrayList<ComponentBuilder> standaloneBuilders = builders.stream()
@@ -115,13 +131,13 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
         // Create resource service components.
         standaloneBuilders.forEach(b -> b.resourceServiceComponent = createResourceComponent(
             b.asSingleton(),
-            globalResourceRegistryProviders,
+            globalResourceRegistryProviders.stream(),
             resourceServiceModuleCustomizers.stream()
         ));
         groupedBuilders.forEach((g, bs) -> {
             final ResourceServiceComponent resourceServiceComponent = createResourceComponent(
                 bs,
-                globalResourceRegistryProviders,
+                globalResourceRegistryProviders.stream(),
                 Stream.concat(resourceServiceModuleCustomizers.stream(), groupedResourceServiceModuleCustomizers.get(g).stream())
             );
             bs.forEach(b -> b.resourceServiceComponent = resourceServiceComponent);
@@ -155,7 +171,7 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
         standaloneBuilders.forEach(b -> b.pieComponent = createPieComponent(
             b.asSingleton(),
             b.resourceServiceComponent,
-            globalTaskDefsProviders,
+            globalTaskDefsProviders.stream(),
             classLoader,
             pieModuleCustomizers.stream()
         ));
@@ -163,7 +179,7 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
             final PieComponent pieComponent = createPieComponent(
                 bs,
                 bs.get(0).resourceServiceComponent, // Always contains at least one element in the list, and is the same between all components in the same group, so this is safe.
-                globalTaskDefsProviders,
+                globalTaskDefsProviders.stream(),
                 classLoader,
                 Stream.concat(pieModuleCustomizers.stream(), groupedPieModuleCustomizers.get(g).stream())
             );
@@ -234,10 +250,10 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
      */
     protected BuildOneResult buildOne(
         Participant<L, R, P> participant,
-        Iterable<ResourceRegistriesProvider> additionalResourceRegistriesProviders,
-        ListView<Consumer<ResourceServiceModule>> resourceServiceModuleCustomizers,
-        Iterable<TaskDefsProvider> additionalTaskDefsProviders,
-        ListView<Consumer<RootPieModule>> pieModuleCustomizers,
+        Stream<ResourceRegistriesProvider> additionalResourceRegistriesProviders,
+        Stream<Consumer<ResourceServiceModule>> resourceServiceModuleCustomizers,
+        Stream<TaskDefsProvider> additionalTaskDefsProviders,
+        Stream<Consumer<RootPieModule>> pieModuleCustomizers,
         @Nullable ClassLoader classLoader
     ) {
         final ComponentBuilder builder = new ComponentBuilder(participant);
@@ -252,7 +268,7 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
         builder.resourceServiceComponent = createResourceComponent(
             builder.asSingleton(),
             additionalResourceRegistriesProviders,
-            resourceServiceModuleCustomizers.stream()
+            resourceServiceModuleCustomizers
         );
         builder.taskDefsProvider = participant.getTaskDefsProvider(
             loggerComponent,
@@ -275,7 +291,7 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
             builder.resourceServiceComponent,
             additionalTaskDefsProviders,
             classLoader,
-            pieModuleCustomizers.stream()
+            pieModuleCustomizers
         );
         participant.start(
             loggerComponent,
@@ -444,7 +460,7 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
 
     private ResourceServiceComponent createResourceComponent(
         Iterable<ComponentBuilder> builders,
-        Iterable<ResourceRegistriesProvider> additionalProviders,
+        Stream<ResourceRegistriesProvider> additionalProviders,
         Stream<Consumer<ResourceServiceModule>> customizers
     ) {
         final ResourceServiceModule resourceServiceModule = baseResourceServiceComponent.createChildModule();
@@ -470,7 +486,7 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
     private RootPieComponent createPieComponent(
         Iterable<ComponentBuilder> builders,
         ResourceServiceComponent resourceServiceComponent,
-        Iterable<TaskDefsProvider> additionalProviders,
+        Stream<TaskDefsProvider> additionalProviders,
         @Nullable ClassLoader classLoader,
         Stream<Consumer<RootPieModule>> customizers
     ) {
