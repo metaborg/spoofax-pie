@@ -1,6 +1,7 @@
 package mb.spoofax.lwb.compiler;
 
 import mb.cfg.CfgParticipant;
+import mb.dynamix.DynamixParticipant;
 import mb.esv.EsvParticipant;
 import mb.gpp.GppParticipant;
 import mb.libspoofax2.LibSpoofax2Participant;
@@ -10,6 +11,7 @@ import mb.pie.api.PieBuilder;
 import mb.pie.dagger.PieComponent;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.sdf3.Sdf3Participant;
+import mb.sdf3_ext_dynamix.Sdf3ExtDynamixParticipant;
 import mb.sdf3_ext_statix.Sdf3ExtStatixParticipant;
 import mb.spoofax.compiler.dagger.SpoofaxCompilerComponent;
 import mb.spoofax.compiler.dagger.SpoofaxCompilerModule;
@@ -61,9 +63,9 @@ public class SpoofaxLwbCompiler implements AutoCloseable {
     }
 
     /**
-     * Creates a {@link SpoofaxLwbCompiler} from a {@link ComponentManager} which was instantiated with the correct {@link
-     * Participant}s (see {@link #registerParticipants}). This will throw a {@link NoSuchElementException} when it is
-     * not instantiated with the correct participants.
+     * Creates a {@link SpoofaxLwbCompiler} from a {@link ComponentManager} which was instantiated with the correct
+     * {@link Participant}s (see {@link #registerParticipants}). This will throw a {@link NoSuchElementException} when
+     * it is not instantiated with the correct participants.
      */
     public static SpoofaxLwbCompiler fromComponentManager(ComponentManager componentManager) {
         final ComponentGroup componentGroup = componentManager.getComponentGroup("mb.spoofax.lwb").unwrap();
@@ -75,11 +77,12 @@ public class SpoofaxLwbCompiler implements AutoCloseable {
     }
 
     /**
-     * Creates a {@link SpoofaxLwbCompiler} from a {@link StaticComponentManagerBuilder} by first registering the correct
-     * {@link Participant}s (see {@link #registerParticipants}), and then by building the {@link ComponentManager}.
+     * Creates a {@link SpoofaxLwbCompiler} from a {@link StaticComponentManagerBuilder} by first registering the
+     * correct {@link Participant}s (see {@link #registerParticipants}), and then by building the {@link
+     * ComponentManager}.
      *
      * @param spoofaxLwbCompilerJavaModule Java compiler module to pass to the builder for the {@link
-     *                                   SpoofaxLwbCompilerComponent}.
+     *                                     SpoofaxLwbCompilerComponent}.
      */
     public static SpoofaxLwbCompiler fromComponentBuilder(
         StaticComponentManagerBuilder<LoggerComponent, ResourceServiceComponent, PlatformComponent> builder,
@@ -91,8 +94,9 @@ public class SpoofaxLwbCompiler implements AutoCloseable {
     }
 
     /**
-     * Creates a {@link SpoofaxLwbCompiler} from a {@link StaticComponentManagerBuilder} by first registering the correct
-     * {@link Participant}s (see {@link #registerParticipants}), and then by building the {@link ComponentManager}.
+     * Creates a {@link SpoofaxLwbCompiler} from a {@link StaticComponentManagerBuilder} by first registering the
+     * correct {@link Participant}s (see {@link #registerParticipants}), and then by building the {@link
+     * ComponentManager}.
      */
     public static SpoofaxLwbCompiler fromComponentBuilder(
         StaticComponentManagerBuilder<LoggerComponent, ResourceServiceComponent, PlatformComponent> builder
@@ -119,7 +123,7 @@ public class SpoofaxLwbCompiler implements AutoCloseable {
      * SpoofaxLwbCompilerComponent}.
      *
      * @param spoofaxLwbCompilerJavaModule Java compiler module to pass to the builder for the {@link
-     *                                   SpoofaxLwbCompilerComponent}.
+     *                                     SpoofaxLwbCompilerComponent}.
      */
     public static <L extends LoggerComponent, R extends ResourceServiceComponent, P extends PlatformComponent> void registerParticipants(
         StaticComponentManagerBuilder<L, R, P> builder,
@@ -130,8 +134,10 @@ public class SpoofaxLwbCompiler implements AutoCloseable {
         builder.registerParticipant(new StrategoParticipant<>());
         builder.registerParticipant(new EsvParticipant<>());
         builder.registerParticipant(new StatixParticipant<>());
+        builder.registerParticipant(new DynamixParticipant<>());
 
         builder.registerParticipant(new Sdf3ExtStatixParticipant<>());
+        builder.registerParticipant(new Sdf3ExtDynamixParticipant<>());
 
         builder.registerParticipant(new StrategoLibParticipant<>());
         builder.registerParticipant(new GppParticipant<>());

@@ -2,6 +2,7 @@ package mb.spoofax.lwb.compiler;
 
 import dagger.Component;
 import mb.cfg.CfgComponent;
+import mb.dynamix.DynamixComponent;
 import mb.esv.EsvComponent;
 import mb.gpp.GppComponent;
 import mb.gpp.GppResourcesComponent;
@@ -14,11 +15,14 @@ import mb.pie.api.TaskDef;
 import mb.pie.dagger.TaskDefsProvider;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.sdf3.Sdf3Component;
+import mb.sdf3_ext_dynamix.Sdf3ExtDynamixComponent;
 import mb.sdf3_ext_statix.Sdf3ExtStatixComponent;
 import mb.spoofax.lwb.compiler.cfg.SpoofaxCfgCheck;
 import mb.spoofax.lwb.compiler.definition.CheckLanguageDefinition;
 import mb.spoofax.lwb.compiler.definition.CompileLanguageDefinition;
 import mb.spoofax.lwb.compiler.definition.CompileMetaLanguageSources;
+import mb.spoofax.lwb.compiler.dynamix.SpoofaxDynamixCheck;
+import mb.spoofax.lwb.compiler.dynamix.SpoofaxDynamixConfigure;
 import mb.spoofax.lwb.compiler.esv.SpoofaxEsvCheck;
 import mb.spoofax.lwb.compiler.esv.SpoofaxEsvConfigure;
 import mb.spoofax.lwb.compiler.generator.LanguageProjectGenerator;
@@ -50,8 +54,10 @@ import java.util.Set;
         StrategoComponent.class,
         EsvComponent.class,
         StatixComponent.class,
+        DynamixComponent.class,
 
         Sdf3ExtStatixComponent.class,
+        Sdf3ExtDynamixComponent.class,
 
         StrategoLibComponent.class,
         StrategoLibResourcesComponent.class,
@@ -69,6 +75,7 @@ public interface SpoofaxLwbCompilerComponent extends TaskDefsProvider, AutoClose
 
     ResourceServiceComponent getResourceServiceComponent();
 
+
     CfgComponent getCfgComponent();
 
     Sdf3Component getSdf3Component();
@@ -79,7 +86,13 @@ public interface SpoofaxLwbCompilerComponent extends TaskDefsProvider, AutoClose
 
     StatixComponent getStatixComponent();
 
+    DynamixComponent getDynamixComponent();
+
+
     Sdf3ExtStatixComponent getSdf3ExtStatixComponent();
+
+    Sdf3ExtDynamixComponent getSdf3ExtDynamixComponent();
+
 
     StrategoLibComponent getStrategoLibComponent();
 
@@ -88,6 +101,7 @@ public interface SpoofaxLwbCompilerComponent extends TaskDefsProvider, AutoClose
     GppComponent getGppComponent();
 
     GppResourcesComponent getGppResourcesComponent();
+
 
     LibSpoofax2Component getLibSpoofax2Component();
 
@@ -118,6 +132,10 @@ public interface SpoofaxLwbCompilerComponent extends TaskDefsProvider, AutoClose
     SpoofaxStatixCheck getSpoofaxStatixCheck();
 
     SpoofaxStatixConfigure getSpoofaxStatixConfigure();
+
+    SpoofaxDynamixCheck getSpoofaxDynamixCheck();
+
+    SpoofaxDynamixConfigure getSpoofaxDynamixConfigure();
 
     SpoofaxStrategoCheck getSpoofaxStrategoCheck();
 

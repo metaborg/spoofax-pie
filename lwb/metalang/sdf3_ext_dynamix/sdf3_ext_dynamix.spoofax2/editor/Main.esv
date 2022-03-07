@@ -1,0 +1,9 @@
+module Main
+
+language
+
+  context  : none
+  provider : target/metaborg/stratego.ctree
+  on save  : generate-statix
+  on save  : generate-stratego
+

@@ -6,6 +6,8 @@ import mb.cfg.CompileLanguageInputCustomizer;
 import mb.cfg.CompileLanguageSpecificationInput;
 import mb.cfg.CompileLanguageSpecificationInputBuilder;
 import mb.cfg.CompileLanguageSpecificationShared;
+import mb.cfg.metalang.CfgDynamixConfig;
+import mb.cfg.metalang.CfgDynamixSource;
 import mb.cfg.metalang.CfgEsvConfig;
 import mb.cfg.metalang.CfgEsvSource;
 import mb.cfg.metalang.CfgSdf3Config;
@@ -235,6 +237,28 @@ public class CfgAstToObject {
                 }
             });
             subParts.forOneSubtermAsBool("StatixSdf3SignatureGen", builder::enableSdf3SignatureGen);
+        });
+        parts.getAllSubTermsInListAsParts("DynamixSection").ifSome(subParts -> {
+            final CfgDynamixConfig.Builder builder = languageCompilerInputBuilder.withDynamix();
+            subParts.getOneSubterm("DynamixSource").ifSome(source -> {
+                if(TermUtils.isAppl(source, "DynamixFiles", 1)) {
+                    final Parts filesParts = subParts.subParts(source.getSubterm(0));
+                    final CfgDynamixSource.Files.Builder filesSourceBuilder = CfgDynamixSource.Files.builder().compileLanguageShared(languageShared);
+                    final ResourcePath mainSourceDirectory = filesParts.getOneSubtermAsExistingDirectory("DynamixFilesMainSourceDirectory", rootDirectory, "Dynamix main source directory")
+                        .unwrapOrElse(() -> CfgDynamixSource.Files.Builder.getDefaultMainSourceDirectory(languageShared));
+                    filesSourceBuilder.mainSourceDirectory(mainSourceDirectory);
+                    filesParts.forOneSubtermAsExistingFile("DynamixFilesMainFile", mainSourceDirectory, "Dynamix main file", filesSourceBuilder::mainFile);
+                    builder.source(CfgDynamixSource.files(filesSourceBuilder.build()));
+                } else if(TermUtils.isAppl(source, "DynamixPrebuilt", 1)) {
+                    final Parts prebuiltParts = subParts.subParts(source.getSubterm(0));
+                    prebuiltParts.getOneSubtermAsExistingDirectory("DynamixPrebuiltSpecAtermDirectory", rootDirectory, "Dynamix prebuilt spec ATerm directory").ifElse(
+                        dir -> builder.source(CfgDynamixSource.prebuilt(dir)),
+                        () -> messagesBuilder.addMessage("spec-aterm-directory = $Path option is missing", Severity.Error, cfgFile, TermTracer.getRegion(source))
+                    );
+                } else {
+                    throw new InvalidAstShapeException("Dynamix source", source);
+                }
+            });
         });
         parts.getAllSubTermsInListAsParts("StrategoSection").ifSome(subParts -> {
             final CfgStrategoConfig.Builder builder = languageCompilerInputBuilder.withStratego();

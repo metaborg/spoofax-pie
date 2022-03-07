@@ -1,5 +1,7 @@
 package mb.cfg;
 
+import mb.cfg.metalang.CfgDynamixConfig;
+import mb.cfg.metalang.CfgDynamixSource;
 import mb.cfg.metalang.CfgEsvConfig;
 import mb.cfg.metalang.CfgSdf3Config;
 import mb.cfg.metalang.CfgStatixConfig;
@@ -20,6 +22,9 @@ public class CompileLanguageSpecificationInputBuilder {
 
     private boolean statixEnabled = false;
     public CfgStatixConfig.Builder statix = CfgStatixConfig.builder();
+
+    private boolean dynamixEnabled = false;
+    public CfgDynamixConfig.Builder dynamix = CfgDynamixConfig.builder();
 
     private boolean strategoEnabled = false;
     public CfgStrategoConfig.Builder stratego = CfgStrategoConfig.builder();
@@ -42,6 +47,11 @@ public class CompileLanguageSpecificationInputBuilder {
         return statix;
     }
 
+    public CfgDynamixConfig.Builder withDynamix() {
+        dynamixEnabled = true;
+        return dynamix;
+    }
+
     public CfgStrategoConfig.Builder withStratego() {
         strategoEnabled = true;
         return stratego;
@@ -57,6 +67,9 @@ public class CompileLanguageSpecificationInputBuilder {
 
         final @Nullable CfgStatixConfig statix = buildStatix(compileLanguageSpecificationShared);
         if(statix != null) compileLanguage.statix(statix);
+
+        final @Nullable CfgDynamixConfig dynamix = buildDynamix(compileLanguageSpecificationShared);
+        if(dynamix != null) compileLanguage.dynamix(dynamix);
 
         final @Nullable CfgStrategoConfig stratego = buildStratego(persistentProperties, shared, compileLanguageSpecificationShared);
         if(stratego != null) compileLanguage.stratego(stratego);
@@ -90,6 +103,15 @@ public class CompileLanguageSpecificationInputBuilder {
     ) {
         if(!statixEnabled) return null;
         return statix
+            .compileLanguageShared(compileLanguageSpecificationShared)
+            .build();
+    }
+
+    private @Nullable CfgDynamixConfig buildDynamix(
+        CompileLanguageSpecificationShared compileLanguageSpecificationShared
+    ) {
+        if(!dynamixEnabled) return null;
+        return dynamix
             .compileLanguageShared(compileLanguageSpecificationShared)
             .build();
     }

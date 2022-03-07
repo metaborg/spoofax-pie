@@ -7,6 +7,7 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.Interactivity;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.lwb.compiler.dynamix.SpoofaxDynamixCompile;
 import mb.spoofax.lwb.compiler.esv.SpoofaxEsvCompile;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3Compile;
 import mb.spoofax.lwb.compiler.statix.SpoofaxStatixCompile;
@@ -47,17 +48,20 @@ public class CompileMetaLanguageSources implements TaskDef<ResourcePath, Result<
     private final SpoofaxSdf3Compile spoofaxSdf3Compile;
     private final SpoofaxEsvCompile spoofaxEsvCompile;
     private final SpoofaxStatixCompile spoofaxStatixCompile;
+    private final SpoofaxDynamixCompile spoofaxDynamixCompile;
     private final SpoofaxStrategoCompile spoofaxStrategoCompile;
 
     @Inject public CompileMetaLanguageSources(
         SpoofaxSdf3Compile spoofaxSdf3Compile,
         SpoofaxEsvCompile spoofaxEsvCompile,
         SpoofaxStatixCompile spoofaxStatixCompile,
+        SpoofaxDynamixCompile spoofaxDynamixCompile,
         SpoofaxStrategoCompile spoofaxStrategoCompile
     ) {
         this.spoofaxSdf3Compile = spoofaxSdf3Compile;
         this.spoofaxEsvCompile = spoofaxEsvCompile;
         this.spoofaxStatixCompile = spoofaxStatixCompile;
+        this.spoofaxDynamixCompile = spoofaxDynamixCompile;
         this.spoofaxStrategoCompile = spoofaxStrategoCompile;
     }
 
@@ -82,6 +86,10 @@ public class CompileMetaLanguageSources implements TaskDef<ResourcePath, Result<
                 context.require(spoofaxStatixCompile, rootDirectory)
                     .ifOk(messagesBuilder::addMessages)
                     .mapErr(CompileMetaLanguageSourcesException::statixCompileFail)
+            ).and(
+                context.require(spoofaxDynamixCompile, rootDirectory)
+                    .ifOk(messagesBuilder::addMessages)
+                    .mapErr(CompileMetaLanguageSourcesException::dynamixCompileFail)
             ).and(
                 context.require(spoofaxStrategoCompile, rootDirectory)
                     .ifOk(o -> {

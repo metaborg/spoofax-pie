@@ -6,6 +6,7 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.lwb.compiler.cfg.SpoofaxCfgCheck;
+import mb.spoofax.lwb.compiler.dynamix.SpoofaxDynamixCheck;
 import mb.spoofax.lwb.compiler.esv.SpoofaxEsvCheck;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3Check;
 import mb.spoofax.lwb.compiler.statix.SpoofaxStatixCheck;
@@ -28,19 +29,22 @@ public class CheckLanguageDefinition implements TaskDef<ResourcePath, KeyedMessa
     private final SpoofaxEsvCheck spoofaxEsvCheck;
     private final SpoofaxStatixCheck spoofaxStatixCheck;
     private final SpoofaxStrategoCheck spoofaxStrategoCheck;
+    private final SpoofaxDynamixCheck spoofaxDynamixCheck;
 
     @Inject public CheckLanguageDefinition(
         SpoofaxCfgCheck spoofaxCfgCheck,
         SpoofaxSdf3Check spoofaxSdf3Check,
         SpoofaxEsvCheck spoofaxEsvCheck,
         SpoofaxStatixCheck spoofaxStatixCheck,
-        SpoofaxStrategoCheck spoofaxStrategoCheck
+        SpoofaxStrategoCheck spoofaxStrategoCheck,
+        SpoofaxDynamixCheck spoofaxDynamixCheck
     ) {
         this.spoofaxCfgCheck = spoofaxCfgCheck;
         this.spoofaxSdf3Check = spoofaxSdf3Check;
         this.spoofaxEsvCheck = spoofaxEsvCheck;
         this.spoofaxStatixCheck = spoofaxStatixCheck;
         this.spoofaxStrategoCheck = spoofaxStrategoCheck;
+        this.spoofaxDynamixCheck = spoofaxDynamixCheck;
     }
 
     @Override public String getId() {
@@ -55,6 +59,7 @@ public class CheckLanguageDefinition implements TaskDef<ResourcePath, KeyedMessa
         messagesBuilder.addMessages(context.require(spoofaxEsvCheck, rootDirectory));
         messagesBuilder.addMessages(context.require(spoofaxStatixCheck, rootDirectory));
         messagesBuilder.addMessages(context.require(spoofaxStrategoCheck, rootDirectory));
+        messagesBuilder.addMessages(context.require(spoofaxDynamixCheck, rootDirectory));
         return messagesBuilder.build();
     }
 }

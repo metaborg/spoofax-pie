@@ -12,6 +12,9 @@ import mb.spoofax.lwb.compiler.cfg.SpoofaxCfgCheck;
 import mb.spoofax.lwb.compiler.definition.CheckLanguageDefinition;
 import mb.spoofax.lwb.compiler.definition.CompileLanguageDefinition;
 import mb.spoofax.lwb.compiler.definition.CompileMetaLanguageSources;
+import mb.spoofax.lwb.compiler.dynamix.SpoofaxDynamixCheck;
+import mb.spoofax.lwb.compiler.dynamix.SpoofaxDynamixCompile;
+import mb.spoofax.lwb.compiler.dynamix.SpoofaxDynamixConfigure;
 import mb.spoofax.lwb.compiler.esv.SpoofaxEsvCheck;
 import mb.spoofax.lwb.compiler.esv.SpoofaxEsvCompile;
 import mb.spoofax.lwb.compiler.esv.SpoofaxEsvConfigure;
@@ -82,6 +85,10 @@ public class SpoofaxLwbCompilerModule {
         SpoofaxStatixCheck spoofaxStatixCheck,
         SpoofaxStatixCompile spoofaxStatixCompile,
 
+        SpoofaxDynamixConfigure spoofaxDynamixConfigure,
+        SpoofaxDynamixCheck spoofaxDynamixCheck,
+        SpoofaxDynamixCompile spoofaxDynamixCompile,
+
         SpoofaxStrategoConfigure spoofaxStrategoConfigure,
         SpoofaxStrategoCheck spoofaxStrategoCheck,
         SpoofaxStrategoCompile spoofaxStrategoCompile,
@@ -107,6 +114,10 @@ public class SpoofaxLwbCompilerModule {
         taskDefs.add(spoofaxStatixConfigure);
         taskDefs.add(spoofaxStatixCheck);
         taskDefs.add(spoofaxStatixCompile);
+
+        taskDefs.add(spoofaxDynamixConfigure);
+        taskDefs.add(spoofaxDynamixCheck);
+        taskDefs.add(spoofaxDynamixCompile);
 
         taskDefs.add(spoofaxStrategoConfigure);
         taskDefs.add(spoofaxStrategoCheck);

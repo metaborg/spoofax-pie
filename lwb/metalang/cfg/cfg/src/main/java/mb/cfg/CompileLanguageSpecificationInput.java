@@ -1,5 +1,6 @@
 package mb.cfg;
 
+import mb.cfg.metalang.CfgDynamixConfig;
 import mb.cfg.metalang.CfgEsvConfig;
 import mb.cfg.metalang.CfgSdf3Config;
 import mb.cfg.metalang.CfgStatixConfig;
@@ -32,6 +33,8 @@ public interface CompileLanguageSpecificationInput extends Serializable {
     Optional<CfgEsvConfig> esv();
 
     Optional<CfgStatixConfig> statix();
+
+    Optional<CfgDynamixConfig> dynamix();
 
     Optional<CfgStrategoConfig> stratego();
 
@@ -76,5 +79,6 @@ public interface CompileLanguageSpecificationInput extends Serializable {
         esv().ifPresent(i -> i.syncTo(builder.styler));
         statix().ifPresent(i -> i.syncTo(builder.constraintAnalyzer));
         stratego().ifPresent(i -> i.syncTo(builder.strategoRuntime));
+        // todo: dynamix sync?
     }
 }

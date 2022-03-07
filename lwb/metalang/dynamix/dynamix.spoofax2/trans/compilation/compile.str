@@ -1,0 +1,44 @@
+module compilation/compile
+
+imports
+  signatures/dynamix-sig
+  statix/api
+
+rules
+  // during compilation, we fully qualify all references to rules by prefixing
+  // them with "<modname>!" (e.g. exprs!compileExpr). This allows us to merge
+  // all specifications together without worrying about ambiguity about which
+  // specific rule was selected.
+  dx--generate-aterm: (_, _, p@Program(mid, _), path, project-path) -> ($[[mid].aterm], p')
+    where
+      p' := <dx--qualify-module(|mid); strip-annos> p
+  
+  dx--qualify-module(|mid) = topdown(try(dx--fully-qualify(|mid)))
+  dx--fully-qualify(|mid): MRuleDeclSignature(name, sig) -> MRuleDeclSignature($[[mid]![name]], sig)
+  dx--fully-qualify(|mid): MRuleDecl(name, pats, body) -> MRuleDecl($[[mid]![name]], pats, body)
+  dx--fully-qualify(|mid): n@MExprCall(name, args) -> MExprCall(qualifiedName, args)
+    where
+      a := <stx-get-ast-analysis> n;
+      ref := <stx-get-ast-ref(|a)> name;
+      refMod := <stx-get-ast-property(|a, "declaringModule")> ref;
+      qualifiedName := $[[refMod]![name]]
+
+  // merging simply combines together all of the rule sections
+  // from the input asts. it is assumed that each of the specs
+  // has already been fully qualified (and as a result, we can
+  // throw away any signatures, primitives and import sections
+  // without worrying that we lose information)
+  dx--merge-specifications: specs -> Program("merged", mergedSpecs)
+    where
+      sections := <map({ s:
+        ?Program(_, s);
+        <filter(?MSectionRules(_) <+ ?MSectionExample(_))> s
+      })> specs;
+      mergedSpecs := <flatten-list> sections
+
+  // helper function during testing, will merge a MultiProgram
+  // assumes the input is analyzed, because it needs to qualify
+  dx--to-merged: p@Program(_, _) -> p
+  dx--to-merged: MultiProgram(programs) -> result
+    with parts := <map({ mid: ?Program(mid, _); dx--qualify-module(|mid) })> programs
+       ; result := <dx--merge-specifications> parts

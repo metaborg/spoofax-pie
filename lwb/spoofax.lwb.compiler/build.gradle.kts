@@ -24,7 +24,9 @@ dependencies {
   api(project(":stratego"))
   api(project(":esv"))
   api(project(":statix"))
+  api(project(":dynamix"))
   api(project(":sdf3_ext_statix"))
+  api(project(":sdf3_ext_dynamix"))
 
   api(project(":strategolib"))
   api(project(":gpp"))

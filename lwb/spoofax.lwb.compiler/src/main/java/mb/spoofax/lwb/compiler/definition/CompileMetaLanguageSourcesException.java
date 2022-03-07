@@ -1,6 +1,7 @@
 package mb.spoofax.lwb.compiler.definition;
 
 import mb.common.util.ADT;
+import mb.spoofax.lwb.compiler.dynamix.SpoofaxDynamixCompileException;
 import mb.spoofax.lwb.compiler.esv.SpoofaxEsvCompileException;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3CompileException;
 import mb.spoofax.lwb.compiler.statix.SpoofaxStatixCompileException;
@@ -17,6 +18,8 @@ public abstract class CompileMetaLanguageSourcesException extends Exception {
 
         R statixCompileFail(SpoofaxStatixCompileException spoofaxStatixCompileException);
 
+        R dynamixCompileFail(SpoofaxDynamixCompileException spoofaxDynamixCompileException);
+
         R strategoCompileFail(SpoofaxStrategoCompileException spoofaxStrategoCompileException);
     }
 
@@ -30,6 +33,10 @@ public abstract class CompileMetaLanguageSourcesException extends Exception {
 
     public static CompileMetaLanguageSourcesException statixCompileFail(SpoofaxStatixCompileException cause) {
         return withCause(CompileMetaLanguageSourcesExceptions.statixCompileFail(cause), cause);
+    }
+
+    public static CompileMetaLanguageSourcesException dynamixCompileFail(SpoofaxDynamixCompileException cause) {
+        return withCause(CompileMetaLanguageSourcesExceptions.dynamixCompileFail(cause), cause);
     }
 
     public static CompileMetaLanguageSourcesException strategoCompileFail(SpoofaxStrategoCompileException cause) {
@@ -58,6 +65,7 @@ public abstract class CompileMetaLanguageSourcesException extends Exception {
             .sdf3CompileFail((cause) -> "SDF3 compiler failed")
             .esvCompileFail((cause) -> "ESV compiler failed")
             .statixCompileFail((cause) -> "Statix compiler failed")
+            .dynamixCompileFail((cause) -> "Dynamix compiler failed")
             .strategoCompileFail((cause) -> "Stratego compiler failed")
             .apply(this);
     }

@@ -4,6 +4,8 @@ import mb.cfg.CfgComponent;
 import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.common.util.ListView;
+import mb.dynamix.DynamixComponent;
+import mb.dynamix.task.DynamixConfig;
 import mb.esv.EsvComponent;
 import mb.esv.task.EsvConfig;
 import mb.gpp.GppComponent;
@@ -18,6 +20,7 @@ import mb.pie.dagger.TaskDefsProvider;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.sdf3.Sdf3Component;
 import mb.sdf3.task.spec.Sdf3SpecConfig;
+import mb.sdf3_ext_dynamix.Sdf3ExtDynamixComponent;
 import mb.sdf3_ext_statix.Sdf3ExtStatixComponent;
 import mb.spoofax.core.Coordinate;
 import mb.spoofax.core.CoordinateRequirement;
@@ -26,6 +29,8 @@ import mb.spoofax.core.component.ComponentDependencyResolver;
 import mb.spoofax.core.component.EmptyParticipant;
 import mb.spoofax.core.component.SubcomponentRegistry;
 import mb.spoofax.core.platform.PlatformComponent;
+import mb.spoofax.lwb.compiler.dynamix.SpoofaxDynamixConfig;
+import mb.spoofax.lwb.compiler.dynamix.SpoofaxDynamixConfigureException;
 import mb.spoofax.lwb.compiler.esv.SpoofaxEsvConfig;
 import mb.spoofax.lwb.compiler.esv.SpoofaxEsvConfigureException;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3Config;
@@ -68,8 +73,10 @@ public class SpoofaxLwbCompilerParticipant<L extends LoggerComponent, R extends 
             new CoordinateRequirement("sdf3"),
             new CoordinateRequirement("stratego"),
             new CoordinateRequirement("statix"),
+            new CoordinateRequirement("dynamix"),
 
             new CoordinateRequirement("sdf3_ext_statix"),
+            new CoordinateRequirement("sdf3_ext_dynamix"),
 
             new CoordinateRequirement("strategolib"),
             new CoordinateRequirement("gpp"),
@@ -102,8 +109,10 @@ public class SpoofaxLwbCompilerParticipant<L extends LoggerComponent, R extends 
         final StrategoComponent strategoComponent = dependencyResolver.getOneSubcomponent(StrategoComponent.class).unwrap();
         final EsvComponent esvComponent = dependencyResolver.getOneSubcomponent(EsvComponent.class).unwrap();
         final StatixComponent statixComponent = dependencyResolver.getOneSubcomponent(StatixComponent.class).unwrap();
+        final DynamixComponent dynamixComponent = dependencyResolver.getOneSubcomponent(DynamixComponent.class).unwrap();
 
         final Sdf3ExtStatixComponent sdf3ExtStatixComponent = dependencyResolver.getOneSubcomponent(Sdf3ExtStatixComponent.class).unwrap();
+        final Sdf3ExtDynamixComponent sdf3ExtDynamixComponent = dependencyResolver.getOneSubcomponent(Sdf3ExtDynamixComponent.class).unwrap();
 
         final StrategoLibComponent strategoLibComponent = dependencyResolver.getOneSubcomponent(StrategoLibComponent.class).unwrap();
         final StrategoLibResourcesComponent strategoLibResourcesComponent = dependencyResolver.getOneSubcomponent(StrategoLibResourcesComponent.class).unwrap();
@@ -128,8 +137,10 @@ public class SpoofaxLwbCompilerParticipant<L extends LoggerComponent, R extends 
             .strategoComponent(strategoComponent)
             .esvComponent(esvComponent)
             .statixComponent(statixComponent)
+            .dynamixComponent(dynamixComponent)
 
             .sdf3ExtStatixComponent(sdf3ExtStatixComponent)
+            .sdf3ExtDynamixComponent(sdf3ExtDynamixComponent)
 
             .strategoLibComponent(strategoLibComponent)
             .strategoLibResourcesComponent(strategoLibResourcesComponent)
@@ -170,6 +181,13 @@ public class SpoofaxLwbCompilerParticipant<L extends LoggerComponent, R extends 
                 @Override
                 public Result<Option<StatixConfig>, SpoofaxStatixConfigureException> apply(Result<Option<SpoofaxStatixConfig>, SpoofaxStatixConfigureException> r) {
                     return r.map(o -> o.flatMap(SpoofaxStatixConfig::getStatixConfig));
+                }
+            }));
+        dynamixComponent.getDynamixConfigFunctionWrapper().set(component.getSpoofaxDynamixConfigure().createFunction().mapOutput(
+            new StatelessSerializableFunction<Result<Option<SpoofaxDynamixConfig>, SpoofaxDynamixConfigureException>, Result<Option<DynamixConfig>, SpoofaxDynamixConfigureException>>() {
+                @Override
+                public Result<Option<DynamixConfig>, SpoofaxDynamixConfigureException> apply(Result<Option<SpoofaxDynamixConfig>, SpoofaxDynamixConfigureException> r) {
+                    return r.map(o -> o.flatMap(SpoofaxDynamixConfig::getDynamixConfig));
                 }
             }));
 
