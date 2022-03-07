@@ -21,7 +21,6 @@ language:
     placeholder:
       prefix: "$"
   stratego:
-    format: ctree
     args:
     - -la
     - stratego-lib
@@ -40,3 +39,11 @@ language:
 exports:
 - language: ATerm
   directory: src-gen/statix
+- language: Stratego-Sugar
+  directory: trans
+- language: Stratego-Sugar
+  directory: src-gen
+  includes:
+  - "completion/dynamix/**/*.str"
+  - "pp/dynamix/**/*.str"
+  - "signatures/**/*.str"

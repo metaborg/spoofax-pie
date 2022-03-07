@@ -1,18 +1,24 @@
-module Common
-
+module common
+  
 lexical sorts
-  ID INT STRING
+  ID LID UID MID PID INT STRING
   STRING_CHAR BACKSLASH_CHAR
   COMMENT_CHAR INSIDE_COMMENT
-  NEWLINE_EOF EOF
+  NEWLINE_EOF EOF RID
 
 lexical syntax
-
-  ID               = [a-zA-Z] [a-zA-Z0-9]*
+  MID              = [a-zA-Z] [a-zA-Z0-9\_\-\/]* // module id
+  RID              = LID // rule id
+  ID               = [a-zA-Z] [a-zA-Z0-9\_]*
+  LID              = [a-z] [a-zA-Z0-9\_]*
+  UID              = [A-Z] [a-zA-Z0-9\_\-]*
+  PID              = [\+\-\*\/A-Za-z0-9\_]+ // primitive id
   INT              = "-"? [0-9]+
   STRING           = "\"" STRING_CHAR* "\""
-  STRING_CHAR      = ~[\\\"\n]
-  STRING_CHAR      = "\\" [\\\"]
+  STRING_CHAR      = ~[\"\n]
+  STRING_CHAR      = "\\\""
+  STRING_CHAR      = BACKSLASH_CHAR
+  BACKSLASH_CHAR   = "\\"
   LAYOUT           = [\ \t\n\r]
   COMMENT_CHAR     = [\*]
   LAYOUT           = "/*" INSIDE_COMMENT* "*/"
@@ -24,21 +30,22 @@ lexical syntax
   EOF              =
 
 lexical restrictions
-
   // Ensure greedy matching for lexicals
-  
   COMMENT_CHAR    -/- [\/]
   INT             -/- [0-9]
   ID              -/- [a-zA-Z0-9\_]
+  LID             -/- [a-zA-Z0-9\_]
+  UID             -/- [a-zA-Z0-9\_\-]
+  MID             -/- [a-zA-Z0-9\_\-\/]
   
   // EOF may not be followed by any char
-  
   EOF             -/- ~[]
+  
+  // Backslash chars in strings may not be followed by " 
+  BACKSLASH_CHAR  -/- [\"]
 
 context-free restrictions
-
   // Ensure greedy matching for comments
-  
   LAYOUT? -/- [\ \t\n\r]
   LAYOUT? -/- [\/].[\/]
   LAYOUT? -/- [\/].[\*]

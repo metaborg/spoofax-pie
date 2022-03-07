@@ -7,6 +7,7 @@ import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.dynamix.DynamixClassLoaderResources;
 import mb.dynamix.DynamixScope;
+import mb.dynamix.task.spoofax.DynamixGetSourceFiles;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Interactivity;
 import mb.pie.api.TaskDef;

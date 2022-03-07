@@ -8,17 +8,16 @@ imports
 
   pp
   injections/-
+  
+  compilation/compile
+  
+  evaluation/eval
 
   libspoofax/term/origin
 
 rules // Analysis
-
-  // single-file analysis
-  editor-analyze = stx-editor-analyze(pre-analyze, post-analyze|"statics", "programOk")
-
-  // see README.md for details on how to switch to multi-file analysis
   // multi-file analysis
-//  editor-analyze = stx-editor-analyze(pre-analyze, post-analyze|"statics", "projectOk", "fileOk")
+  editor-analyze = stx-editor-analyze(pre-analyze, post-analyze|"statics", "projectOk", "fileOk")
 
   pre-analyze  = origin-track-forced(explicate-injections-dynamix-Start)
   post-analyze = origin-track-forced(implicate-injections-dynamix-Start)
@@ -45,6 +44,18 @@ rules // Debugging
   debug-show-analyzed: (selected, _, _, path, project-path) -> (filename, result)
     with filename := <guarantee-extension(|"analyzed.aterm")> path
        ; result   := selected
+       
+  debug-qualify-usages: (_, _, p@Program(mid, _), path, project-path) -> (filename, result)
+    with filename := <guarantee-extension(|"qualified.dx")> path
+       ; result   := <dx--qualify-module(|mid); pp-dynamix-string> p
+       
+  debug-merge-specs: (_, _, p, path, project-path) -> (filename, result)
+    with filename := <guarantee-extension(|"merged.dx")> path
+       ; result := <dx--to-merged; pp-dynamix-string> p
+       
+  debug-evaluate-specs: (_, _, p, path, project-path) -> (filename, result)
+    with filename := <guarantee-extension(|"out")> path
+       ; result := <dx--to-merged; dx--eval-program> p
 
 rules // Rename refactoring
 

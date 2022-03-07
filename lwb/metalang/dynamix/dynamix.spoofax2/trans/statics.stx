@@ -1,24 +1,383 @@
 module statics
 
-// see README.md for details on how to switch to multi-file analysis
-
-rules // single-file entry point
-
-  programOk : Start
-
-  programOk(Empty()).
-
-rules // multi-file entry point
-
+imports
+  signatures/dynamix-sig
+  
+  statics/names
+  statics/type
+  
+rules
   projectOk : scope
-
   projectOk(s).
 
   fileOk : scope * Start
+  fileOk(globalS, Program(modname, sections)) :- {modS}
+    new modS,
+    insertModuleName(modS, modname),
+    declareModule(globalS, modname, modS),
+    sectionsOk(globalS, modS, sections).
+  fileOk(globalS, MultiProgram(programs)) :- 
+    filesOk(globalS, programs).
+  filesOk maps fileOk(*, list(*))
+  
+rules
+  sectionOk : scope * scope * MSection
+  sectionsOk maps sectionOk(*, *, list(*))
+  
+  sectionOk(globalS, s, MSectionImports(imports)) :- importsOk(globalS, s, imports).
+  sectionOk(_, s, MSectionSignature(decls)) :- signatureDeclsOk(s, decls).
+  sectionOk(_, s, MSectionRules(rules)) :- ruleDeclsOk(s, rules).
+  sectionOk(_, s, MSectionExample(exp)) :- typeOfExp(s, exp) == _.
+  sectionOk(_, s, MSectionPrimitives(decls)) :- primitiveDeclsOk(s, decls).
 
-  fileOk(s, Empty()).
+  importOk : scope * scope * MID
+  importsOk maps importOk(*, *, list(*))
+  importOk(globalS, modS, import) :- {importS}
+    resolveModule(globalS, import) == importS,
+    modS -I-> importS.
+  
+// primitives section
+rules
+  primitiveDeclOk : scope * MPrimitiveDecl
+  primitiveDeclsOk maps primitiveDeclOk(*, list(*))
+  
+  primitiveDeclOk(s, MPrimitiveDeclExpression(name, tys)) :- {AT}
+    mTypesToMTYPEs(s, tys) == AT,
+    primitiveArgumentTypesOk(AT) | error $[Primitives may only take @value or List(@value) as argument type.],
+    declarePrimitive(s, name, MPRIMITIVEEXPR(AT)).
+  primitiveDeclOk(s, MPrimitiveDeclStatement(name, tys)) :- {AT}
+    mTypesToMTYPEs(s, tys) == AT,
+    primitiveArgumentTypesOk(AT) | error $[Primitives may only take @value or List(@value) as argument type.],
+    declarePrimitive(s, name, MPRIMITIVESTMT(AT)).
+  primitiveDeclOk(s, MPrimitiveDeclConditional(name, tys)) :- {AT}
+    mTypesToMTYPEs(s, tys) == AT,
+    primitiveArgumentTypesOk(AT) | error $[Primitives may only take @value or List(@value) as argument type.],
+    declarePrimitive(s, name, MPRIMITIVECOND(AT)).
+  
+  primitiveArgumentTypeOk : MTYPE
+  primitiveArgumentTypesOk maps primitiveArgumentTypeOk(list(*))
+  
+  primitiveArgumentTypeOk(MTTYPE(TVALUE())).
+  primitiveArgumentTypeOk(MLIST(MTTYPE(TVALUE()))).
+  
+// signatures section
+rules
+  signatureDeclOk : scope * MSignatureDecl
+  signatureDeclsOk maps signatureDeclOk(*, list(*))
+  
+  signatureDeclOk(s, MSignatureSortsDecl(sorts)) :- defineSorts(s, sorts).
+  signatureDeclOk(s, MSignatureConstructorsDecl(cons)) :- constructorDeclsOk(s, cons).
+  
+  constructorDeclOk : scope * MConstructorDecl
+  constructorDeclsOk maps constructorDeclOk(*, list(*))
+  
+  constructorDeclOk(s, MConstructorDeclSingleton(consname, sortname)) :-
+    declareConstructor(s, consname, SCONS([], resolveSort(s, sortname))).
+  constructorDeclOk(s, MConstructorDeclInjection(from, to)) :- {S}
+    resolveSort(s, to) == S,
+    declareInjection(
+      s,
+      constructorArgumentToType(s, from),
+      S
+    ).
+  constructorDeclOk(s, MConstructorDecl(consname, args, sortname)) :-
+    declareConstructor(s, consname, SCONS(
+      constructorArgumentsToTypes(s, args),
+      resolveSort(s, sortname)
+    )).
+  
+  defineSort : scope * UID
+  defineSort(s, x) :- declareSort(s, x, SSORT(x, s)).
+  defineSorts maps defineSort(*, list(*))
 
-signature
+// rules section
+rules
+  ruleDeclOk : scope * MRuleDecl
+  ruleDeclsOk maps ruleDeclOk(*, list(*))
+  
+  ruleDeclOk(s, MRuleDeclSignature(name, sig)) :-
+    declareRule(s, name, ruleSignatureToMRULE(s, sig)),
+    assignModuleName(s, astId(name)).
+  ruleDeclOk(s, MRuleDecl(name, pats, body)) :- {as bs AT RT BT}
+    new as, as -P-> s, new bs, bs -P-> as,
+    assertRuleDefinedInLocalModule(s, name),
+    resolveRule(s, name) == MRULE(AT, RT),
+    declareZipPatterns(s, as, pats, AT) == _, // | error $[The argument pattern for [name] does not agree with its definition.],
+    typeOfExp(bs, body) == BT,
+    typeCoercibleTo(BT, RT) | error $[The return type of this rule, [BT], is not compatible with the declared return type, [RT].].
+  
+  ruleSignatureToMRULE : scope * MRuleSignature -> MRULE
+  ruleSignatureToMRULE(s, MRuleSignature(args, ret)) = MRULE(mTypesToMTYPEs(s, args), mTypeToMTYPE(s, ret)).
+  ruleSignatureToMRULE(s, MRuleZeroSignature(ret)) = MRULE([], mTypeToMTYPE(s, ret)).  
 
-  sorts Start constructors
-    Empty : Start
+// rule patterns
+rules
+  declareZipPatterns maps declarePattern(*, *, list(*), list(*)) = list(*)
+  declarePatterns maps declarePattern(*, *, list(*), *) = list(*)
+  
+  //               s       defS    pat        expectedType    actualType
+  declarePattern : scope * scope * MPattern * MTYPE        -> MTYPE
+  declarePattern(_, _, MPatternWildcard(), T) = T.
+  declarePattern(_, _, MPatternString(_), T) = MSTYPE(SSTRING()) :-
+    typeCoercibleTo(MSTYPE(SSTRING()), T) | error $[A string pattern cannot be used to match values of type [T].].
+  declarePattern(_, _, MPatternInt(_), T) = MSTYPE(SINT()) :-
+    typeCoercibleTo(MSTYPE(SINT()), T) | error $[An integer pattern cannot be used to match values of type [T].].
+  declarePattern(_, ds, p@MPatternVariable(name), ty) = ty :-
+    declareVar(ds, name, ty),
+    @p.type := ty.
+  declarePattern(s, ds, MPatternList(pats), ty) = ty :- {ET}
+    ty == MLIST(ET) | error $[Cannot list-pattern match on a non-list type [ty].],
+    declarePatterns(s, ds, pats, ET) == _.
+  declarePattern(s, ds, MPatternListCons(pats, retpat), ty) = ty :- {ET}
+    ty == MLIST(ET) | error $[Cannot list-pattern match on a non-list type [ty].],
+    declarePatterns(s, ds, pats, ET) == _,
+    declarePattern(s, ds, retpat, ty) == _.
+  declarePattern(s, ds, MPatternConstructor(name, argpats), ty) = MSTYPE(ST) :- {sn AT}
+    resolveConstructor(s, name) == SCONS(AT, ST),    
+    declareZipPatterns(s, ds, argpats, AT) == _,    
+    typeCoercibleTo(MSTYPE(ST), ty) | error $[This pattern matches values of sort [ST], which is not compatible with the expected type of this pattern [ty].].
+  declarePattern(s, ds, MPatternBound(name, pat), ty) = PT :-
+    declarePattern(s, ds, pat, ty) == PT,
+    declareVar(ds, name, PT),
+    @name.type := PT.
+    
+// expressions
+rules
+  typeOfExp : scope * MExpr -> MTYPE
+  typesOfExps maps typeOfExp(*, list(*)) = list(*)
+  typeOfExp(s, e) = T :-
+    typeOfExp_(s, e) == T,
+    @e.type := T.
+  
+  typeOfExp_ : scope * MExpr -> MTYPE
+  typeOfExp_(s, MExprVar(x)) = resolveVar(s, x).
+  typeOfExp_(s, MExprQuote(t)) = typeOfQuote(s, t).
+  typeOfExp_(s, MExprBlock(stmts)) = typeOfBlockStmts(s, stmts).
+  typeOfExp_(s, MExprCall(ruleName, args)) = RT :- {AT}
+    resolveRule(s, ruleName) == MRULE(AT, RT),
+    callTypesCompatible(typesOfExps(s, args), AT).
+  typeOfExp_(s, MExprLabeled0(body, labelName)) = MHOLY0() :- {s' RT}
+    new s', s' -P-> s,
+    declareVar(s', labelName, MTTYPE(TVALUE())),
+    typeOfExp(s', body) == RT,
+    try { RT == MTTYPE(TSTATEMENT()) } | error $[The body of a labeled expression must always result in a tail-call (value of type @statement).].
+  typeOfExp_(s, MExprLabeled1(body, labelName)) = MHOLY1(MTTYPE(TVALUE())) :- {s' RT}
+    new s', s' -P-> s,
+    declareVar(s', labelName, MTTYPE(TVALUE())),
+    typeOfExp(s', body) == RT,
+    try { RT == MTTYPE(TSTATEMENT()) } | error $[The body of a labeled expression must always result in a tail-call (value of type @statement).].
+  typeOfExp_(s, MExprSourceIntToTargetInt(v)) = MTTYPE(TVALUE()) :- {T}
+    typeOfExp(s, v) == T,
+    try { coercibleToInt(T) } | error $[Can only coerce strings and integers to target integers.].
+  typeOfExp_(s, MExprSourceVarToTargetVar(v)) = MTTYPE(TVALUE()) :- {T}
+    typeOfExp(s, v) == T,
+    try { typeCoercibleTo(MSTYPE(SSTRING()), T) } | error $[Can only coerce strings to target variables.].
+  typeOfExp_(s, MExprSourceStrToTargetStr(v)) = MTTYPE(TVALUE()) :- {T}
+    typeOfExp(s, v) == T,
+    try { typeCoercibleTo(MSTYPE(SSTRING()), T) } | error $[Can only coerce strings to target strings.].
+  typeOfExp_(s, MExprFreshNamedTargetVar(_)) = MTTYPE(TVALUE()).
+  typeOfExp_(s, MExprList([])) = MLIST(MAUTO(_)).
+  typeOfExp_(s, MExprList(es)) = MLIST(ET) :-
+    lub(typesOfExps(s, es)) == ET | error $[List literal does not have a common type.].
+  typeOfExp_(s, MExprListCons(es, rest)) = MLIST(ET) :-
+    lub(typesOfExps(s, es)) == ET | error $[List literal does not have a common type.],
+    typeCoercibleTo(typeOfExp(s, rest), MLIST(ET)) | error $[List rest literal does not share a type with the given elements.].
+  typeOfExp_(s, MExprConcatList(left, right)) = MLIST(LET) :- {RET}
+    typeOfExp(s, left) == MLIST(LET) | error $[List concatenation performed on non-list value.],
+    typeOfExp(s, right) == MLIST(RET) | error $[List concatenation performed on non-list value.],
+    try { LET == RET } | error $[List concatenation types are not compatible with each other.].
+  typeOfExp_(s, MExprContinueAt(tgt, args)) = MTTYPE(TSTATEMENT()) :-
+    typeCoercibleTo(typeOfExp(s, tgt), MTTYPE(TVALUE())) | error $[Can only continue on target values.],
+    typeCoercibleTo(typeOfExp(s, args), MLIST(MTTYPE(TVALUE()))) | error $[Continuation arguments must be a list of target values.].
+  typeOfExp_(s, MExprCallPrimitive(name, args)) = primitiveReturnType(P) :- {AT EAT}
+    typesOfExps(s, args) == AT,
+    resolvePrimitive(s, name) == P,
+    primitiveArgumentsType(P) == EAT | error $[Primitive [name] is not defined or not an expression or statement primitive.],
+    callTypesCompatible(AT, EAT).
+  typeOfExp_(s, MExprConditionalPrimitive(name, args, ift, ife)) = RT :- {AT IT ET EAT}
+    typesOfExps(s, args) == AT,
+    resolvePrimitive(s, name) == MPRIMITIVECOND(EAT) | error $[Primitive [name] is not defined or is not a conditional primitive.],
+    callTypesCompatible(AT, EAT),
+    typeOfExp(s, ift) == IT,
+    typeOfExp(s, ife) == ET,
+    lub([IT, ET]) == RT | error $[[IT] and [ET] have no common type.].
+  typeOfExp_(s, MExprTLet(name, val, body)) = RT :-
+    typeOfExp(s, name) == MTTYPE(TVALUE()) | error $[`let` name must be a @value.]@name,
+    typeOfExp(s, val) == MTTYPE(TVALUE()) | error $[`let` value must be a @value.]@val,
+    RT == composeTypes(MHOLY0(), typeOfExp(s, body)).
+  typeOfExp_(s, MExprHole()) = MHOLY0().
+  typeOfExp_(s, MExprTFix(funs)) = MHOLY0() :-
+    funDefsOk(s, funs).
+  typeOfExp_(s, MExprConcatenateStr(left, right)) = MSTYPE(SSTRING()) :-
+    typeCoercibleTo(MSTYPE(SSTRING()), typeOfExp(s, left)) | error $[The left-hand side of the `+` operator must be a source string. Runtime addition is done through primitives, not the + operator.]@left,
+    typeCoercibleTo(MSTYPE(SSTRING()), typeOfExp(s, right)) | error $[The right-hand side of the `+` operator must be a source string. Runtime addition is done through primitives, not the + operator.]@right.
+  typeOfExp_(s, MExprQuoteTarget(_)) = MHOLY0() :-
+    try { false } | warning $[Quoted target blocks are deprecated and will be removed.].
+    
+  coercibleToInt : MTYPE
+  coercibleToInt(MSTYPE(SSTRING())).
+  coercibleToInt(MSTYPE(SINT())).
+  coercibleToInt(T) :- typeCoercibleTo(MSTYPE(SSTRING()), T).
+  
+  primitiveArgumentsType : MPRIMITIVE -> list(MTYPE)
+  primitiveArgumentsType(MPRIMITIVEEXPR(A)) = A.
+  primitiveArgumentsType(MPRIMITIVESTMT(A)) = A.
+  
+  primitiveReturnType : MPRIMITIVE -> MTYPE
+  primitiveReturnType(MPRIMITIVEEXPR(_)) = MTTYPE(TVALUE()).
+  primitiveReturnType(MPRIMITIVESTMT(_)) = MTTYPE(TSTATEMENT()).
+  
+  callTypesCompatible : list(MTYPE) * list(MTYPE)
+  callTypesCompatible([], []).
+  callTypesCompatible(_, []) :- false | error $[Too many arguments supplied to this call.].
+  callTypesCompatible([], _) :- false | error $[Not enough arguments supplied to this call.].
+  callTypesCompatible([A|ar], [B|br]) :-
+    typeCoercibleTo(A, B) | error $[The given parameter type [A] is not compatible with the expected parameter type [B].],
+    callTypesCompatible(ar, br).
+  
+  funDefOk : scope * MTFun
+  funDefsOk maps funDefOk(*, list(*))
+  funDefOk(s, MTFun(name, args, body)) :- {s'}
+    typeCoercibleTo(typeOfExp(s, name), MTTYPE(TVALUE())) | error $[The name of a function must be a value.],
+    typeCoercibleTo(typeOfExp(s, args), MLIST(MTTYPE(TVALUE()))) | error $[The arguments of a function must be a list of values.],
+    new s', s' -P-> s,
+    typeOfExp(s', body) == _.
+  
+// quoted expressions
+rules
+  typeOfQuote : scope * STerm -> MTYPE
+  typeOfQuote_ : scope * STerm -> MTYPE
+  typesOfQuotes maps typeOfQuote(*, list(*)) = list(*)
+  
+  typeOfQuote(s, e) = T :-
+    typeOfQuote_(s, e) == T,
+    @e.type := T.
+  
+  typeOfQuote_(_, STermInt(_)) = MSTYPE(SINT()).
+  typeOfQuote_(_, STermString(_)) = MSTYPE(SSTRING()).
+  typeOfQuote_(_, STermList([])) = MLIST(MAUTO(_)).
+  typeOfQuote_(s, STermList(els)) = MLIST(lub(typesOfQuotes(s, els))).
+  typeOfQuote_(s, STermApp(name, args)) = MSTYPE(ST) :- {AT}
+    resolveConstructor(s, name) == SCONS(AT, ST),
+    quoteTypesCompatible(s, args, AT) | error $[Mismatched number of arguments.].
+    
+  quoteTypeCompatible : scope * STerm * MTYPE
+  quoteTypesCompatible maps quoteTypeCompatible(*, list(*), list(*))
+  
+  quoteTypeCompatible(s, term, T) :- {TT}
+    typeOfQuote(s, term) == TT,
+    typeCoercibleTo(TT, T) | error $[The type [TT] is not compatible with the expected type [T].].
+   
+rules // statements and composition
+  typeOfBlockStmts : scope * list(MStatement) -> MTYPE
+  typeOfBlockStmts(s, [stmt]) = typeOfBlockStmt(s, stmt).
+  typeOfBlockStmts(s, [stmt|rest@[_|_]]) = composeTypes(ST, RT) :- 
+    typeOfBlockStmt(s, stmt) == ST,
+    typeOfBlockStmts(s, rest) == RT.
+  
+  typeOfBlockStmt : scope * MStatement -> MTYPE
+  typeOfBlockStmt(s, MStatementExpr(e)) = typeOfExp(s, e).
+  typeOfBlockStmt(s, MStatementAssign(name, e)) = T :-
+    typeOfExp(s, e) == T,
+    performAssignment(s, name, T).
+    
+  performAssignment : scope * string * MTYPE
+  performAssignment(s, n, MHOLY1(x)) :- declareVar(s, n, x).
+  performAssignment(s, n, x@MTTYPE(TVALUE())) :- declareVar(s, n, x).
+  performAssignment(s, n, x@MLIST(_)) :- declareVar(s, n, x).
+  performAssignment(s, n, x@MSTYPE(_)) :- declareVar(s, n, x).
+  performAssignment(s, n, x) :-
+    try { false } | error $[Cannot assign variables of type [x] since it does not have a concrete value.],
+    false.
+   
+rules // primitives
+  assertExprPrimitive : string * list(MTYPE) -> MTYPE
+  assertExprPrimitive("int-add", [MTTYPE(TVALUE()), MTTYPE(TVALUE())]) = MTTYPE(TVALUE()).
+  
+  assertConditionalPrimitive : string * list(MTYPE)
+   
+/*
+  typeOfExp_(s, MExprBlock(stmts)) = typeOfBlockStmts(s, stmts).
+  typeOfExp_(s, MExprCall(ruleName, args)) = _ :- {RT}
+    resolveRule(s, ruleName) == MRULE(RT),
+    typesCoercibleToSTypes(typesOfExps(s, args), RT),
+    try { false } | warning $[TODO].
+  // todo: Labeled0
+  typeOfExp_(s, MExprLabeled1(body, labelName)) = THOLY1(TVALUE()) :- {s' RT}
+    new s', s' -P-> s,
+    declareVar(s', labelName, TVALUE()),
+    typeOfExp(s', body) == RT,
+    try { RT == TFIN() } | error $[The body of a labeled expression must diverge (tail-call a continuation).].
+  typeOfExp_(s, MExprSourceIntToTargetInt(v)) = TVALUE() :- {T}
+    typeOfExp(s, v) == T,
+    try { coercibleToInt(T) } | error $[Can only coerce strings and integers to target integers.].
+  typeOfExp_(s, MExprSourceVarToTargetVar(v)) = TVALUE() :- {T}
+    typeOfExp(s, v) == T,
+    try { T == SQUOTE(SSTRING()) } | error $[Can only coerce strings to target variables.].
+  typeOfExp_(s, MExprSourceStrToTargetStr(v)) = TVALUE() :- {T}
+    typeOfExp(s, v) == T,
+    try { T == SQUOTE(SSTRING()) } | error $[Can only coerce strings to target strings.].
+  typeOfExp_(s, MExprFreshNamedTargetVar(_)) = TVALUE().
+  typeOfExp_(s, MExprList(es)) = MLIST(ET) :-
+    lub(typesOfExps(s, es)) == ET | error $[List literal does not have a common type.].
+  typeOfExp_(s, MExprListCons(es, rest)) = MLIST(ET) :-
+    lub(typesOfExps(s, es)) == ET | error $[List literal does not have a common type.],
+    typeCoercibleTo(typeOfExp(s, rest), MLIST(ET)) | error $[List rest literal does not share a type with the given elements.].
+  typeOfExp_(s, MExprConcatList(left, right)) = MLIST(LET) :- {RET}
+    typeOfExp(s, left) == MLIST(LET) | error $[List concatenation performed on non-list value.],
+    typeOfExp(s, right) == MLIST(RET) | error $[List concatenation performed on non-list value.],
+    try { LET == RET } | error $[List concatenation types are not compatible with each other.].
+  typeOfExp_(s, MExprContinueAt(tgt, args)) = TFIN() :-
+    typeOfExp(s, tgt) == TVALUE() | error $[Can only continue on target values.],
+    typeOfExp(s, args) == MLIST(TVALUE()) | error $[Continuation arguments must be a list of target values.].
+  typeOfExp_(s, MExprCallPrimitive(name, args)) = T :- {AT}
+    typesOfExps(s, args) == AT,
+    assertExprPrimitive(name, AT) == T | error $[Illegal or unknown primitive call.].
+  typeOfExp_(s, MExprConditionalPrimitive(name, args, ift, ife)) = RT :- {AT IT ET}
+    typesOfExps(s, args) == AT,
+    assertConditionalPrimitive(name, AT) | error $[Illegal or unknown primitive call.],
+    typeOfExp(s, ift) == IT,
+    typeOfExp(s, ife) == ET,
+    lub([IT, ET]) == RT | error $[[IT] and [ET] have no common type.].
+  typeOfExp_(s, MExprTFix(funs)) = THOLY0() :-
+    funDefsOk(s, funs).
+      
+  funDefOk : scope * MTFun
+  funDefsOk maps funDefOk(*, list(*))
+  funDefOk(s, MTFun(name, args, body)) :-
+    typeOfExp(s, name) == TVALUE() | error $[The name of a function must be a value.],
+    typeOfExp(s, args) == MLIST(TVALUE()) | error $[The arguments of a function must be a list of values.],
+    typeOfExp(s, body) == _.
+      
+  coercibleToInt : TYPE
+  coercibleToInt(SQUOTE(SINT())).
+  coercibleToInt(SQUOTE(SSTRING())).
+  
+rules // statements and composition
+  typeOfBlockStmts : scope * list(MStatement) -> TYPE
+  typeOfBlockStmts(s, [stmt]) = typeOfBlockStmt(s, stmt).
+  typeOfBlockStmts(s, [stmt|rest@[_|_]]) = T :- {ST RT}
+    typeOfBlockStmt(s, stmt) == ST,
+    typeOfBlockStmts(s, rest) == RT,
+    composeTypes(ST, RT) == T.
+  
+  typeOfBlockStmt : scope * MStatement -> TYPE
+  typeOfBlockStmt(s, MStatementExpr(e)) = typeOfExp(s, e).
+  typeOfBlockStmt(s, MStatementAssign(name, e)) = T :-
+    typeOfExp(s, e) == T,
+    performAssignment(s, name, T).
+    
+  performAssignment : scope * string * TYPE
+  performAssignment(s, n, THOLY1(x)) :- declareVar(s, n, x).
+  performAssignment(s, n, x@TVALUE()) :- declareVar(s, n, x).
+  performAssignment(s, n, x@MLIST(_)) :- declareVar(s, n, x).
+  performAssignment(s, n, x@SQUOTE(_)) :- declareVar(s, n, x).
+  performAssignment(s, n, x) :-
+    try { false } | error $[Cannot assign variables of type [x] since it does not have a concrete value.],
+    false.
+    
+rules // primitives
+  assertExprPrimitive : string * list(TYPE) -> TYPE
+  assertExprPrimitive("int+", [TVALUE(), TVALUE()]) = TVALUE().
+  
+  assertConditionalPrimitive : string * list(TYPE)*/
