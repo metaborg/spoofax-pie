@@ -15,6 +15,7 @@ import mb.pie.api.TaskDef;
 import mb.pie.dagger.TaskDefsProvider;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.sdf3.Sdf3Component;
+import mb.sdf3_ext_dynamix.Sdf3ExtDynamixComponent;
 import mb.sdf3_ext_statix.Sdf3ExtStatixComponent;
 import mb.spoofax.lwb.compiler.CheckLanguageSpecification;
 import mb.spoofax.lwb.compiler.CompileLanguage;
@@ -55,6 +56,7 @@ import java.util.Set;
         DynamixComponent.class,
 
         Sdf3ExtStatixComponent.class,
+        Sdf3ExtDynamixComponent.class,
 
         StrategoLibComponent.class,
         StrategoLibResourcesComponent.class,

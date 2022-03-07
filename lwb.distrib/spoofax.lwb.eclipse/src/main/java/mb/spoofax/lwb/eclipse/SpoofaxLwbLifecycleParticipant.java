@@ -29,6 +29,8 @@ import mb.resource.dagger.ResourceServiceComponent;
 import mb.resource.fs.FSResource;
 import mb.sdf3.Sdf3Component;
 import mb.sdf3.eclipse.Sdf3LanguageFactory;
+import mb.sdf3_ext_dynamix.Sdf3ExtDynamixComponent;
+import mb.sdf3_ext_dynamix.eclipse.Sdf3ExtDynamixLanguageFactory;
 import mb.sdf3_ext_statix.Sdf3ExtStatixComponent;
 import mb.sdf3_ext_statix.eclipse.Sdf3ExtStatixLanguageFactory;
 import mb.spoofax.compiler.dagger.DaggerSpoofaxCompilerComponent;
@@ -161,6 +163,7 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
                 final DynamixComponent dynamixComponent = DynamixLanguageFactory.getLanguage().getComponent();
 
                 final Sdf3ExtStatixComponent sdf3ExtStatixComponent = Sdf3ExtStatixLanguageFactory.getLanguage().getComponent();
+                final Sdf3ExtDynamixComponent sdf3ExtDynamixComponent = Sdf3ExtDynamixLanguageFactory.getLanguage().getComponent();
 
                 final StrategoLibComponent strategoLibComponent = StrategoLibLanguageFactory.getLanguage().getComponent();
                 final StrategoLibResourcesComponent strategoLibResourcesComponent = StrategoLibLanguageFactory.getLanguage().getResourcesComponent();
@@ -183,6 +186,7 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
                     .dynamixComponent(dynamixComponent)
 
                     .sdf3ExtStatixComponent(sdf3ExtStatixComponent)
+                    .sdf3ExtDynamixComponent(sdf3ExtDynamixComponent)
 
                     .strategoLibComponent(strategoLibComponent)
                     .strategoLibResourcesComponent(strategoLibResourcesComponent)
@@ -204,7 +208,10 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
                     strategoComponent,
                     esvComponent,
                     statixComponent,
+                    dynamixComponent,
+
                     sdf3ExtStatixComponent,
+                    sdf3ExtDynamixComponent,
 
                     strategoLibComponent,
                     strategoLibResourcesComponent,

@@ -30,6 +30,7 @@ dependencies {
   bundleImplementation(compositeBuild("statix.eclipse"))
   bundleImplementation(compositeBuild("dynamix.eclipse"))
   bundleImplementation(compositeBuild("sdf3_ext_statix.eclipse"))
+  bundleImplementation(compositeBuild("sdf3_ext_dynamix.eclipse"))
   bundleImplementation(compositeBuild("spt.eclipse"))
 
   bundleImplementation(compositeBuild("strategolib.eclipse"))

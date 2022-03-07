@@ -18,6 +18,7 @@ import mb.pie.api.StatelessSerializableFunction;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.sdf3.Sdf3Component;
 import mb.sdf3.task.spec.Sdf3SpecConfig;
+import mb.sdf3_ext_dynamix.Sdf3ExtDynamixComponent;
 import mb.sdf3_ext_statix.Sdf3ExtStatixComponent;
 import mb.spoofax.compiler.dagger.DaggerSpoofaxCompilerComponent;
 import mb.spoofax.compiler.dagger.SpoofaxCompilerComponent;
@@ -56,6 +57,7 @@ public class Spoofax3Compiler implements AutoCloseable {
     public final DynamixComponent dynamixComponent;
 
     public final Sdf3ExtStatixComponent sdf3ExtStatixComponent;
+    public final Sdf3ExtDynamixComponent sdf3ExtDynamixComponent;
 
     public final StrategoLibComponent strategolibComponent;
     public final StrategoLibResourcesComponent strategolibResourcesComponent;
@@ -83,6 +85,7 @@ public class Spoofax3Compiler implements AutoCloseable {
         DynamixComponent dynamixComponent,
 
         Sdf3ExtStatixComponent sdf3ExtStatixComponent,
+        Sdf3ExtDynamixComponent sdf3ExtDynamixComponent,
 
         StrategoLibComponent strategoLibComponent,
         StrategoLibResourcesComponent strategoLibResourcesComponent,
@@ -108,6 +111,7 @@ public class Spoofax3Compiler implements AutoCloseable {
         this.statixComponent = statixComponent;
         this.dynamixComponent = dynamixComponent;
         this.sdf3ExtStatixComponent = sdf3ExtStatixComponent;
+        this.sdf3ExtDynamixComponent = sdf3ExtDynamixComponent;
         this.strategolibComponent = strategoLibComponent;
         this.strategolibResourcesComponent = strategoLibResourcesComponent;
         this.gppComponent = gppComponent;
@@ -172,6 +176,7 @@ public class Spoofax3Compiler implements AutoCloseable {
         DynamixComponent dynamixComponent,
 
         Sdf3ExtStatixComponent sdf3ExtStatixComponent,
+        Sdf3ExtDynamixComponent sdf3ExtDynamixComponent,
 
         StrategoLibComponent strategoLibComponent,
         StrategoLibResourcesComponent strategoLibResourcesComponent,
@@ -200,6 +205,7 @@ public class Spoofax3Compiler implements AutoCloseable {
             .dynamixComponent(dynamixComponent)
 
             .sdf3ExtStatixComponent(sdf3ExtStatixComponent)
+            .sdf3ExtDynamixComponent(sdf3ExtDynamixComponent)
 
             .strategoLibComponent(strategoLibComponent)
             .strategoLibResourcesComponent(strategoLibResourcesComponent)
@@ -223,6 +229,7 @@ public class Spoofax3Compiler implements AutoCloseable {
             dynamixComponent,
 
             sdf3ExtStatixComponent,
+            sdf3ExtDynamixComponent,
 
             strategoLibComponent,
             strategoLibResourcesComponent,
