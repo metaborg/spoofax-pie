@@ -2,6 +2,7 @@ package mb.spoofax.eclipse;
 
 import mb.log.api.Logger;
 import mb.pie.runtime.PieBuilderImpl;
+import mb.spoofax.core.component.ComponentManager;
 import mb.spoofax.core.component.StaticComponentManager;
 import mb.spoofax.core.component.StaticComponentManagerBuilder;
 import mb.spoofax.eclipse.log.DaggerEclipseLoggerComponent;
@@ -32,6 +33,7 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
     private static @Nullable EclipseResourceServiceComponent baseResourceServiceComponent;
     private static @Nullable EclipsePlatformComponent platformComponent;
     private static @Nullable StaticComponentManager staticComponentManager;
+    private static @Nullable ComponentManager componentManager;
 
 
     public static SpoofaxPlugin getPlugin() {
@@ -69,6 +71,13 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
         return staticComponentManager;
     }
 
+    public static ComponentManager getComponentManager() {
+        if(componentManager == null) {
+            throw new RuntimeException("Cannot access ComponentManager; SpoofaxPlugin has not been started yet, or has been stopped");
+        }
+        return componentManager;
+    }
+
 
     @Override public void start(@NonNull BundleContext context) throws Exception {
         super.start(context);
@@ -89,6 +98,9 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
             new StaticComponentManagerBuilder<>(loggerComponent, baseResourceServiceComponent, platformComponent, PieBuilderImpl::new);
         gatherParticipants(builder, logger);
         staticComponentManager = builder.build();
+        if(componentManager == null) {
+            componentManager = staticComponentManager;
+        }
     }
 
     @Override public void earlyStartup() {
@@ -157,5 +169,10 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
                 }
             }
         }
+    }
+
+    // HACK: allow overriding of the component manager (for dynamic loading)
+    public static void setComponentManager(ComponentManager componentManager) {
+        SpoofaxPlugin.componentManager = componentManager;
     }
 }

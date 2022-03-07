@@ -33,6 +33,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.function.Function;
 
 /**
  * Fully compiles a language definition by running the {@link LanguageProjectCompiler language project compiler},
@@ -84,6 +85,7 @@ public class CompileLanguageDefinition implements TaskDef<CompileLanguageDefinit
     private final AdapterProjectCompiler adapterProjectCompiler;
     private final EclipseProjectCompiler eclipseProjectCompiler;
     private final CompileJava compileJava;
+    private final Function<CompileLanguageInput, String> participantClassQualifiedIdSelector;
 
 
     @Inject public CompileLanguageDefinition(
@@ -92,7 +94,8 @@ public class CompileLanguageDefinition implements TaskDef<CompileLanguageDefinit
         CompileMetaLanguageSources compileMetaLanguageSources,
         AdapterProjectCompiler adapterProjectCompiler,
         EclipseProjectCompiler eclipseProjectCompiler,
-        CompileJava compileJava
+        CompileJava compileJava,
+        Function<CompileLanguageInput, String> participantClassQualifiedIdSelector
     ) {
         this.cfgRootDirectoryToObject = cfgRootDirectoryToObject;
         this.languageProjectCompiler = languageProjectCompiler;
@@ -100,6 +103,7 @@ public class CompileLanguageDefinition implements TaskDef<CompileLanguageDefinit
         this.adapterProjectCompiler = adapterProjectCompiler;
         this.eclipseProjectCompiler = eclipseProjectCompiler;
         this.compileJava = compileJava;
+        this.participantClassQualifiedIdSelector = participantClassQualifiedIdSelector;
     }
 
 
@@ -188,7 +192,7 @@ public class CompileLanguageDefinition implements TaskDef<CompileLanguageDefinit
             .rootDirectory(rootDirectory)
             .addJavaClassPaths(input.javaClassFileOutputDirectory())
             .addAllJavaClassPaths(input.resourcePaths())
-            .participantClassQualifiedId(input.adapterProjectInput().participant().qualifiedId())
+            .participantClassQualifiedId(participantClassQualifiedIdSelector.apply(input))
             .messages(messagesBuilder.build())
             .build()
         );

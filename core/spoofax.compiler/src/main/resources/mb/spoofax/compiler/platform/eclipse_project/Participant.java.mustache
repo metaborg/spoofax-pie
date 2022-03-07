@@ -113,7 +113,9 @@ public class {{baseParticipant.id}} extends {{adapterProjectCompilerInput.partic
                 .eclipseLoggerComponent(loggerComponent)
                 .{{adapterProjectCompilerInput.resourcesComponent.idAsCamelCase}}(getResourceRegistriesProvider(loggerComponent, baseResourceServiceComponent, platformComponent, subcomponentRegistry, dependencyResolver))
                 .resourceServiceComponent(resourceServiceComponent)
-                .eclipsePlatformComponent(platformComponent);
+                .eclipsePlatformComponent(platformComponent)
+                {{#adapterProjectCompilerInput.dependOnRv32Im}}.rv32ImEclipseComponent(dependencyResolver.getOneSubcomponent(mb.rv32im.eclipse.Rv32ImEclipseComponent.class).unwrap()){{/adapterProjectCompilerInput.dependOnRv32Im}}
+                ;
             getCustomizers(loggerComponent).forEach(c -> c.customize(builder));
             eclipseComponent = builder.build();
             component = builder.build();

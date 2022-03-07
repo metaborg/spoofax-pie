@@ -371,7 +371,7 @@ public class PieRunner {
         TaskKey key
     ) {
         return (p) -> {
-            final Option<? extends Component> component = SpoofaxPlugin.getStaticComponentManager().getComponent(languageCoordinate);
+            final Option<? extends Component> component = SpoofaxPlugin.getComponentManager().getComponent(languageCoordinate);
             if(component.isNone()) {
                 logger.error("Cannot unobserve and remove callback for continuous command '" + key + "'; no component with coordinate '" + languageCoordinate + "' is registered");
                 return;

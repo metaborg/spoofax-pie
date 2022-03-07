@@ -22,6 +22,7 @@ import mb.spoofax.core.component.ComponentBuilderBase;
 import mb.spoofax.core.component.ComponentGroup;
 import mb.spoofax.core.component.ComponentImpl;
 import mb.spoofax.core.component.Participant;
+import mb.spoofax.core.component.ParticipantFactory;
 import mb.spoofax.core.component.StaticComponentManager;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.platform.PlatformComponent;
@@ -192,11 +193,21 @@ public class DynamicComponentManagerImpl<L extends LoggerComponent, R extends Re
         }
 
         // Get participant instance.
+        final @Nullable ParticipantFactory<L, R, P> participantFactory;
         final Participant<L, R, P> participant;
         try {
             final Class<?> participantClass = classLoader.loadClass(participantClassQualifiedId);
-            // noinspection unchecked (cast is safe due to checks in the next code block)
-            participant = (Participant<L, R, P>)participantClass.getDeclaredConstructor().newInstance();
+            if(ParticipantFactory.class.isAssignableFrom(participantClass)) {
+                // noinspection unchecked (cast is safe due to checks in the next code block)
+                participantFactory = (ParticipantFactory<L, R, P>)participantClass.getDeclaredConstructor().newInstance();
+                participant = participantFactory.create();
+            } else if(Participant.class.isAssignableFrom(participantClass)) {
+                participantFactory = null;
+                // noinspection unchecked (cast is safe due to checks in the next code block)
+                participant = (Participant<L, R, P>)participantClass.getDeclaredConstructor().newInstance();
+            } else {
+                throw DynamicLoadException.invalidParticipantClassFail(participantClassQualifiedId);
+            }
         } catch(ReflectiveOperationException e) {
             throw DynamicLoadException.participantInstantiateFail(e);
         }
@@ -263,6 +274,7 @@ public class DynamicComponentManagerImpl<L extends LoggerComponent, R extends Re
             )
         );
         final BuildOneResult result = super.buildOne( // NOTE: only support dynamically loading a single standalone component right now.
+            participantFactory,
             participant,
             staticComponentManager,
             staticComponentManager.getGlobalResourceRegistryProviders().stream(),

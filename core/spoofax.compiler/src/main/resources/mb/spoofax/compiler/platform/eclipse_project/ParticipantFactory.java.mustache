@@ -1,9 +1,13 @@
 package {{baseParticipantFactory.packageId}};
 
+import mb.spoofax.core.component.ParticipantFactory;
+import mb.spoofax.eclipse.EclipsePlatformComponent;
+import mb.spoofax.eclipse.EclipseResourceServiceComponent;
+import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.runtime.IExecutableExtensionFactory;
 
-public class {{baseParticipantFactory.id}} implements IExecutableExtensionFactory {
+public class {{baseParticipantFactory.id}} implements IExecutableExtensionFactory, ParticipantFactory<EclipseLoggerComponent, EclipseResourceServiceComponent, EclipsePlatformComponent> {
     private static {{participant.nullableQualifiedId}} instance;
 
     public static {{participant.qualifiedId}} getParticipant() {
@@ -15,5 +19,9 @@ public class {{baseParticipantFactory.id}} implements IExecutableExtensionFactor
 
     @Override public {{participant.qualifiedId}} create() {
         return getParticipant();
+    }
+
+    @Override public void close() {
+        instance = null;
     }
 }

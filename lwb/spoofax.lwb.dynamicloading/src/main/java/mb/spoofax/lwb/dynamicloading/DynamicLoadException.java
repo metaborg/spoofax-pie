@@ -18,6 +18,8 @@ public abstract class DynamicLoadException extends Exception {
 
         R classPathToUrlFail(MalformedURLException malformedURLException);
 
+        R invalidParticipantClassFail(String className);
+
         R participantInstantiateFail(ReflectiveOperationException reflectiveOperationException);
 
         R incompatibleLoggerComponent(String requiredClassName, String className);
@@ -43,6 +45,10 @@ public abstract class DynamicLoadException extends Exception {
 
     public static DynamicLoadException classPathToUrlFail(MalformedURLException malformedURLException) {
         return withCause(DynamicLoadExceptions.classPathToUrlFail(malformedURLException), malformedURLException);
+    }
+
+    public static DynamicLoadException invalidParticipantClassFail(String className) {
+        return DynamicLoadExceptions.invalidParticipantClassFail(className);
     }
 
     public static DynamicLoadException participantInstantiateFail(ReflectiveOperationException reflectiveOperationException) {
@@ -98,6 +104,7 @@ public abstract class DynamicLoadException extends Exception {
             .supplyDynamicLoadInfoFail((e) -> "Supplying the dynamic load information failed")
             .requireInputFileFail((e) -> "Requiring input file of the classpath failed")
             .classPathToUrlFail((e) -> "Converting a part of the classpath to a URL failed")
+            .invalidParticipantClassFail(name -> "Participant class '" + name + "' does not implement ParticipantFactory nor Participant")
             .participantInstantiateFail((e) -> "Instantiating the Participant of the component through reflection failed")
             .incompatibleLoggerComponent((requiredClassName, className) -> "Cannot register dynamically loaded component, participant requires a LoggerComponent that implements '" + requiredClassName + "', but ours (" + className + ") does not")
             .incompatibleBaseResourceServiceComponent((requiredClassName, className) -> "Cannot register dynamically loaded component, participant requires a base ResourceServiceComponent that implements '" + requiredClassName + "', but ours (" + className + ") does not")

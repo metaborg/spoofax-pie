@@ -3,6 +3,7 @@ package mb.spoofax.lwb.compiler;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ElementsIntoSet;
+import mb.cfg.CompileLanguageInput;
 import mb.pie.api.TaskDef;
 import mb.pie.task.archive.UnarchiveFromJar;
 import mb.pie.task.java.CompileJava;
@@ -26,19 +27,32 @@ import mb.spoofax.lwb.compiler.stratego.SpoofaxStrategoConfigure;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Function;
 
 @Module
 public class SpoofaxLwbCompilerModule {
     private final TemplateCompiler templateCompiler;
+    private Function<CompileLanguageInput, String> participantClassQualifiedIdSelector = input -> input.adapterProjectInput().participant().qualifiedId();
 
     public SpoofaxLwbCompilerModule(TemplateCompiler templateCompiler) {
         this.templateCompiler = templateCompiler;
     }
 
 
+    public SpoofaxLwbCompilerModule setParticipantClassQualifiedIdSelector(Function<CompileLanguageInput, String> participantClassQualifiedIdSelector) {
+        this.participantClassQualifiedIdSelector = participantClassQualifiedIdSelector;
+        return this;
+    }
+
+
     @Provides @SpoofaxLwbCompilerScope
     TemplateCompiler provideTemplateCompiler() {
         return templateCompiler;
+    }
+
+    @Provides @SpoofaxLwbCompilerScope
+    Function<CompileLanguageInput, String> provideParticipantClassQualifiedIdSelector() {
+        return participantClassQualifiedIdSelector;
     }
 
 

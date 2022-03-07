@@ -15,6 +15,7 @@ public class ComponentImpl implements Component {
     private @Nullable LanguageComponent languageComponent;
     private PieComponent pieComponent;
     private MapView<Class<?>, Object> subcomponents;
+    private @Nullable StartedParticipantFactory startedParticipantFactory;
     private StartedParticipant startedParticipant;
     private boolean closed = false;
 
@@ -25,6 +26,7 @@ public class ComponentImpl implements Component {
         @Nullable LanguageComponent languageComponent,
         PieComponent pieComponent,
         MapView<Class<?>, Object> subcomponents,
+        @Nullable StartedParticipantFactory startedParticipantFactory,
         StartedParticipant startedParticipant
     ) {
         this.coordinate = coordinate;
@@ -33,6 +35,7 @@ public class ComponentImpl implements Component {
         this.languageComponent = languageComponent;
         this.pieComponent = pieComponent;
         this.subcomponents = subcomponents;
+        this.startedParticipantFactory = startedParticipantFactory;
         this.startedParticipant = startedParticipant;
     }
 
@@ -44,6 +47,10 @@ public class ComponentImpl implements Component {
         if(closed) return;
         startedParticipant.close();
         startedParticipant = null;
+        if(startedParticipantFactory != null) {
+            startedParticipantFactory.close();
+            startedParticipantFactory = null;
+        }
         subcomponents = null;
         if(!partOfGroup) pieComponent.close();
         pieComponent = null;

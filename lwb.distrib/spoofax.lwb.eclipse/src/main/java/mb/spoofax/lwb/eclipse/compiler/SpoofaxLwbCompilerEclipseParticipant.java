@@ -13,6 +13,17 @@ import java.nio.charset.StandardCharsets;
 
 public class SpoofaxLwbCompilerEclipseParticipant extends SpoofaxLwbCompilerParticipant<EclipseLoggerComponent, EclipseResourceServiceComponent, EclipsePlatformComponent> implements EclipseParticipant {
     public SpoofaxLwbCompilerEclipseParticipant() {
-        super(new SpoofaxLwbCompilerModule(new TemplateCompiler(StandardCharsets.UTF_8)), new SpoofaxLwbCompilerJavaModule());
+        super(createModule(), new SpoofaxLwbCompilerJavaModule());
+    }
+
+    private static SpoofaxLwbCompilerModule createModule() {
+        final SpoofaxLwbCompilerModule module = new SpoofaxLwbCompilerModule(new TemplateCompiler(StandardCharsets.UTF_8));
+        module.setParticipantClassQualifiedIdSelector(input -> input.eclipseProjectInput()
+            // Use Eclipse participant factory to initialize their singletons and to ensure an Eclipse language component is created.
+            .map(e -> e.participantFactory().qualifiedId())
+            // Fallback to default if Eclipse project input is somehow unavailable.
+            .orElse(input.adapterProjectInput().participant().qualifiedId())
+        );
+        return module;
     }
 }

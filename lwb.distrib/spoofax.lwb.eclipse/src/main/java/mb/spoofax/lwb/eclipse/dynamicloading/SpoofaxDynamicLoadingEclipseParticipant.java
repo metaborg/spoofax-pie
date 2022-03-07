@@ -18,6 +18,7 @@ import mb.spoofax.core.component.SubcomponentRegistry;
 import mb.spoofax.eclipse.EclipseParticipant;
 import mb.spoofax.eclipse.EclipsePlatformComponent;
 import mb.spoofax.eclipse.EclipseResourceServiceComponent;
+import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 import mb.spoofax.eclipse.util.ResourceUtil;
 import mb.spoofax.lwb.dynamicloading.DynamicLoadingComponent;
@@ -62,6 +63,8 @@ public class SpoofaxDynamicLoadingEclipseParticipant extends DynamicLoadingParti
             dynamicLoadingComponent.getDynamicLoad(),
             SpoofaxLwbCompilerUtil::dynamicLoadSupplierOutputSupplier
         ));
+        // HACK: override component manager
+        SpoofaxPlugin.setComponentManager(dynamicLoadingComponent.getDynamicComponentManager());
         return dynamicLoadingComponent;
     }
 

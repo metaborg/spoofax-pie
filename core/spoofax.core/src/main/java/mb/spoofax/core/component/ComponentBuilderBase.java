@@ -101,7 +101,7 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
 
         // Create builders for participants.
         final ArrayList<ComponentBuilder> builders = StreamSupport.stream(participantsGraph.spliterator(), false)
-            .map(ComponentBuilder::new)
+            .map(participant -> new ComponentBuilder(null, participant))
             .collect(Collectors.toCollection(ArrayList::new));
         final ArrayList<ComponentBuilder> standaloneBuilders = builders.stream()
             .filter(b -> b.group == null)
@@ -248,6 +248,7 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
      * Builds one {@link ComponentImpl} from one {@link Participant}. The group of the participant is ignored.
      */
     protected BuildOneResult buildOne(
+        @Nullable ParticipantFactory<L, R, P> participantFactory,
         Participant<L, R, P> participant,
         StaticComponentManager baseComponentManager,
         Stream<ResourceRegistriesProvider> additionalResourceRegistriesProviders,
@@ -256,7 +257,7 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
         Stream<Consumer<RootPieModule>> pieModuleCustomizers,
         @Nullable ClassLoader classLoader
     ) {
-        final ComponentBuilder builder = new ComponentBuilder(participant);
+        final ComponentBuilder builder = new ComponentBuilder(participantFactory, participant);
         final ComponentDependencyResolver dependencyResolver = new BaseComponentManagerDependencyResolver(baseComponentManager);
         builder.resourceRegistriesProvider = participant.getResourceRegistriesProvider(
             loggerComponent,
@@ -396,6 +397,7 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
 
     @SuppressWarnings("NotNullFieldNotInitialized")
     private class ComponentBuilder implements SubcomponentRegistry {
+        final @Nullable StartedParticipantFactory startedParticipantFactory;
         final Participant<L, R, P> participant;
         final Coordinate coordinate;
         final @Nullable String group;
@@ -407,7 +409,8 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
         @Nullable LanguageComponent languageComponent;
         PieComponent pieComponent;
 
-        ComponentBuilder(Participant<L, R, P> participant) {
+        ComponentBuilder(@Nullable StartedParticipantFactory startedParticipantFactory, Participant<L, R, P> participant) {
+            this.startedParticipantFactory = startedParticipantFactory;
             this.participant = participant;
             this.coordinate = participant.getCoordinate();
             this.group = participant.getCompositionGroup();
@@ -429,6 +432,7 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
                 languageComponent,
                 pieComponent,
                 MapView.of(subcomponents),
+                startedParticipantFactory,
                 participant
             );
         }

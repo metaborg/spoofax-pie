@@ -21,19 +21,19 @@ public abstract class CompileMetaLanguageSourcesException extends Exception {
     }
 
     public static CompileMetaLanguageSourcesException sdf3CompileFail(SpoofaxSdf3CompileException cause) {
-        return withCause(CompileMetaLanguageSourcesException.sdf3CompileFail(cause), cause);
+        return withCause(CompileMetaLanguageSourcesExceptions.sdf3CompileFail(cause), cause);
     }
 
     public static CompileMetaLanguageSourcesException esvCompileFail(SpoofaxEsvCompileException cause) {
-        return withCause(CompileMetaLanguageSourcesException.esvCompileFail(cause), cause);
+        return withCause(CompileMetaLanguageSourcesExceptions.esvCompileFail(cause), cause);
     }
 
     public static CompileMetaLanguageSourcesException statixCompileFail(SpoofaxStatixCompileException cause) {
-        return withCause(CompileMetaLanguageSourcesException.statixCompileFail(cause), cause);
+        return withCause(CompileMetaLanguageSourcesExceptions.statixCompileFail(cause), cause);
     }
 
     public static CompileMetaLanguageSourcesException strategoCompileFail(SpoofaxStrategoCompileException cause) {
-        return withCause(CompileMetaLanguageSourcesException.strategoCompileFail(cause), cause);
+        return withCause(CompileMetaLanguageSourcesExceptions.strategoCompileFail(cause), cause);
     }
 
     private static CompileMetaLanguageSourcesException withCause(CompileMetaLanguageSourcesException e, Exception cause) {

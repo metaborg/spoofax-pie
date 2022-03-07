@@ -15,5 +15,5 @@ public interface StartedParticipant extends AutoCloseable {
         ComponentManager componentManager
     );
 
-    @Override void close(); // Override with `throws Exception`.
+    @Override void close(); // Override without `throws Exception`.
 }
