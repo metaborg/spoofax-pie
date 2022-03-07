@@ -2,6 +2,7 @@ package mb.spoofax.lwb.eclipse.compiler;
 
 import dagger.Component;
 import mb.cfg.CfgComponent;
+import mb.dynamix.DynamixComponent;
 import mb.esv.EsvComponent;
 import mb.gpp.GppComponent;
 import mb.gpp.GppResourcesComponent;
@@ -12,6 +13,7 @@ import mb.libstatix.LibStatixResourcesComponent;
 import mb.log.dagger.LoggerComponent;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.sdf3.Sdf3Component;
+import mb.sdf3_ext_dynamix.Sdf3ExtDynamixComponent;
 import mb.sdf3_ext_statix.Sdf3ExtStatixComponent;
 import mb.spoofax.lwb.compiler.dagger.Spoofax3CompilerComponent;
 import mb.spoofax.lwb.compiler.dagger.Spoofax3CompilerModule;
@@ -35,8 +37,10 @@ import mb.strategolib.StrategoLibResourcesComponent;
         StrategoComponent.class,
         EsvComponent.class,
         StatixComponent.class,
+        DynamixComponent.class,
 
         Sdf3ExtStatixComponent.class,
+        Sdf3ExtDynamixComponent.class,
 
         StrategoLibComponent.class,
         StrategoLibResourcesComponent.class,

@@ -40,6 +40,18 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
   includeProject("cfg.intellij")
   includeProject("cfg.spoofax2")
 }
+"metalang/dynamix".run {
+  includeProject("dynamix")
+  includeProject("dynamix.cli")
+  includeProject("dynamix.eclipse")
+  includeProject("dynamix.intellij")
+  includeProject("dynamix.spoofax2")
+}
+"metalang/sdf3_ext_dynamix".run {
+  includeProject("sdf3_ext_dynamix")
+  includeProject("sdf3_ext_dynamix.eclipse")
+  includeProject("sdf3_ext_dynamix.spoofax2")
+}
 "metalang/sdf3".run {
   includeProject("sdf3")
   includeProject("sdf3.cli")

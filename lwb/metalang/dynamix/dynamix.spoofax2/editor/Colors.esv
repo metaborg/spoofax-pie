@@ -1,0 +1,67 @@
+module Colors
+
+colorer Default, token-based highlighting
+                                  
+  keyword    : 127 0 85 bold      
+  identifier : default            
+  string     : blue               
+  number     : darkgreen          
+  var        : 139 69 19 italic   
+  operator   : 0 0 230        
+  layout     : 63 127 95 italic  
+  
+colorer Constants
+  INT        : blue
+  STRING     : blue   
+  
+colorer Identifiers
+
+  LID               : 30 30 30 italic     
+  UID               : 50 50 50 bold    
+  RID               : 0 0 0
+  
+colorer Identifiers
+
+  MExpr.MExprSourceIntToTargetInt : darkorange
+  MExpr.MExprSourceStrToTargetStr : darkorange
+  MExpr.MExprSourceVarToTargetVar : darkorange
+  MExpr.MExprContinueAt : darkorange
+  MExpr.MExprCallPrimitive : darkorange
+  MExpr.MExprConditionalPrimitive : darkorange
+  MExpr.MExprTLet : darkorange
+  MTFun.MTFun : darkorange
+  MExpr.MExprTFix : darkorange
+  MExpr.MExprQuoteTarget : darkorange
+
+colorer System colors
+                                  
+  darkblue   = 0 0 128 italic     
+  blue       = 0 0 255     
+  mediumblue = 0 0 200 
+  
+  darkred   = 128 0 0       
+  red       = 255 0 0       
+  red2      = 240 0 0       
+  red3      = 225 0 0       
+  red4      = 210 0 0   
+   
+  flred     = 255 10 0       
+  flred2    = 240 10 0       
+  flred3    = 225 10 0       
+  flred4    = 210 10 0       
+  
+  darkgreen = 0 128 0       
+  green     = 0 255 0       
+  
+  cyan      = 0 255 255     
+  magenta   = 255 0 255     
+  yellow    = 255 255 0     
+  white     = 255 255 255   
+  black     = 0 0 0         
+  gray      = 128 128 128   
+  grey      = gray          
+  orange            = 255 165 0     
+  darkorange    = 255 10 0     
+  pink      = 255 105 180   
+  brown     = 139 69 19     
+  default   = _   

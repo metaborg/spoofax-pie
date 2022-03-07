@@ -1,0 +1,11 @@
+module sdf3extdynamix
+
+imports
+  signatures/TemplateLang-sig
+  signatures/modules/Modules-sig
+
+  signatures/dynamix-sig
+
+rules
+  // todo
+  generate-dynamix-signature: Module(Unparameterized(name), _, _) -> Program($[signatures/[name]-sig], [])

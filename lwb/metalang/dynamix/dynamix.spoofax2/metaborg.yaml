@@ -1,0 +1,49 @@
+---
+id: org.metaborg:dynamix:0.1.0-SNAPSHOT
+name: dynamix
+dependencies:
+  compile:
+  - org.metaborg:org.metaborg.meta.lang.esv:${metaborgVersion}
+  - org.metaborg:org.metaborg.meta.lang.template:${metaborgVersion}
+  - org.metaborg:statix.lang:${metaborgVersion}
+  - org.metaborg:sdf3.ext.statix:${metaborgVersion}
+  source:
+  - org.metaborg:meta.lib.spoofax:${metaborgVersion}
+  - org.metaborg:statix.runtime:${metaborgVersion}
+pardonedLanguages:
+- EditorService
+- Stratego-Sugar
+- SDF
+language:
+  sdf:
+    pretty-print: dynamix
+    sdf2table: java
+    placeholder:
+      prefix: "$"
+  stratego:
+    args:
+    - -la
+    - stratego-lib
+    - -la
+    - stratego-sglr
+    - -la
+    - stratego-gpp
+    - -la
+    - stratego-xtc
+    - -la
+    - stratego-aterm
+    - -la
+    - stratego-sdf
+    - -la
+    - strc
+exports:
+- language: ATerm
+  directory: src-gen/statix
+- language: Stratego-Sugar
+  directory: trans
+- language: Stratego-Sugar
+  directory: src-gen
+  includes:
+  - "completion/dynamix/**/*.str"
+  - "pp/dynamix/**/*.str"
+  - "signatures/**/*.str"

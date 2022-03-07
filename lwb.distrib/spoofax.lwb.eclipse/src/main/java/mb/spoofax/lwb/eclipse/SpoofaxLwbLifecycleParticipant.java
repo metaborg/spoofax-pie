@@ -2,6 +2,8 @@ package mb.spoofax.lwb.eclipse;
 
 import mb.cfg.CfgComponent;
 import mb.cfg.eclipse.CfgLanguageFactory;
+import mb.dynamix.DynamixComponent;
+import mb.dynamix.eclipse.DynamixLanguageFactory;
 import mb.esv.eclipse.EsvEclipseComponent;
 import mb.esv.eclipse.EsvLanguageFactory;
 import mb.gpp.GppComponent;
@@ -27,6 +29,8 @@ import mb.resource.dagger.ResourceServiceComponent;
 import mb.resource.fs.FSResource;
 import mb.sdf3.Sdf3Component;
 import mb.sdf3.eclipse.Sdf3LanguageFactory;
+import mb.sdf3_ext_dynamix.Sdf3ExtDynamixComponent;
+import mb.sdf3_ext_dynamix.eclipse.Sdf3ExtDynamixLanguageFactory;
 import mb.sdf3_ext_statix.Sdf3ExtStatixComponent;
 import mb.sdf3_ext_statix.eclipse.Sdf3ExtStatixLanguageFactory;
 import mb.spoofax.compiler.dagger.DaggerSpoofaxCompilerComponent;
@@ -156,8 +160,10 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
                 final StrategoEclipseComponent strategoComponent = StrategoLanguageFactory.getLanguage().getComponent();
                 final EsvEclipseComponent esvComponent = EsvLanguageFactory.getLanguage().getComponent();
                 final StatixEclipseComponent statixComponent = StatixLanguageFactory.getLanguage().getComponent();
+                final DynamixComponent dynamixComponent = DynamixLanguageFactory.getLanguage().getComponent();
 
                 final Sdf3ExtStatixComponent sdf3ExtStatixComponent = Sdf3ExtStatixLanguageFactory.getLanguage().getComponent();
+                final Sdf3ExtDynamixComponent sdf3ExtDynamixComponent = Sdf3ExtDynamixLanguageFactory.getLanguage().getComponent();
 
                 final StrategoLibComponent strategoLibComponent = StrategoLibLanguageFactory.getLanguage().getComponent();
                 final StrategoLibResourcesComponent strategoLibResourcesComponent = StrategoLibLanguageFactory.getLanguage().getResourcesComponent();
@@ -177,8 +183,10 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
                     .strategoComponent(strategoComponent)
                     .esvComponent(esvComponent)
                     .statixComponent(statixComponent)
+                    .dynamixComponent(dynamixComponent)
 
                     .sdf3ExtStatixComponent(sdf3ExtStatixComponent)
+                    .sdf3ExtDynamixComponent(sdf3ExtDynamixComponent)
 
                     .strategoLibComponent(strategoLibComponent)
                     .strategoLibResourcesComponent(strategoLibResourcesComponent)
@@ -200,7 +208,10 @@ public class SpoofaxLwbLifecycleParticipant implements EclipseLifecycleParticipa
                     strategoComponent,
                     esvComponent,
                     statixComponent,
+                    dynamixComponent,
+
                     sdf3ExtStatixComponent,
+                    sdf3ExtDynamixComponent,
 
                     strategoLibComponent,
                     strategoLibResourcesComponent,

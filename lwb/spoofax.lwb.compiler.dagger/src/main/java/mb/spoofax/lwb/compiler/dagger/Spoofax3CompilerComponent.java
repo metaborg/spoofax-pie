@@ -2,6 +2,7 @@ package mb.spoofax.lwb.compiler.dagger;
 
 import dagger.Component;
 import mb.cfg.CfgComponent;
+import mb.dynamix.DynamixComponent;
 import mb.esv.EsvComponent;
 import mb.gpp.GppComponent;
 import mb.gpp.GppResourcesComponent;
@@ -14,11 +15,14 @@ import mb.pie.api.TaskDef;
 import mb.pie.dagger.TaskDefsProvider;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.sdf3.Sdf3Component;
+import mb.sdf3_ext_dynamix.Sdf3ExtDynamixComponent;
 import mb.sdf3_ext_statix.Sdf3ExtStatixComponent;
 import mb.spoofax.lwb.compiler.CheckLanguageSpecification;
 import mb.spoofax.lwb.compiler.CompileLanguage;
 import mb.spoofax.lwb.compiler.CompileLanguageSpecification;
 import mb.spoofax.lwb.compiler.cfg.SpoofaxCfgCheck;
+import mb.spoofax.lwb.compiler.dynamix.SpoofaxDynamixCheck;
+import mb.spoofax.lwb.compiler.dynamix.SpoofaxDynamixConfigure;
 import mb.spoofax.lwb.compiler.esv.SpoofaxEsvCheck;
 import mb.spoofax.lwb.compiler.esv.SpoofaxEsvConfigure;
 import mb.spoofax.lwb.compiler.generator.LanguageProjectGenerator;
@@ -49,8 +53,10 @@ import java.util.Set;
         StrategoComponent.class,
         EsvComponent.class,
         StatixComponent.class,
+        DynamixComponent.class,
 
         Sdf3ExtStatixComponent.class,
+        Sdf3ExtDynamixComponent.class,
 
         StrategoLibComponent.class,
         StrategoLibResourcesComponent.class,
@@ -83,6 +89,10 @@ public interface Spoofax3CompilerComponent extends TaskDefsProvider {
     SpoofaxStatixCheck getSpoofaxStatixCheck();
 
     SpoofaxStatixConfigure getSpoofaxStatixConfigure();
+
+    SpoofaxDynamixCheck getSpoofaxDynamixCheck();
+
+    SpoofaxDynamixConfigure getSpoofaxDynamixConfigure();
 
     SpoofaxStrategoCheck getSpoofaxStrategoCheck();
 
