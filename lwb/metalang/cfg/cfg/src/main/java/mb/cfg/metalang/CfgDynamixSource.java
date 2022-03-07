@@ -11,13 +11,6 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * enum CfgDynamixSource {
- *     files(string, string),
- *     prebuilt(string)
- * }
- */
-
-/**
  * Configuration for Dynamix sources in the context of CFG.
  */
 @ADT @Value.Enclosing
@@ -41,6 +34,10 @@ public abstract class CfgDynamixSource implements Serializable {
             return mainSourceDirectory().appendRelativePath("main.stx");
         }
 
+        @Value.Default default ResourcePath generatedSourcesDirectory() {
+            return compileLanguageShared().generatedSourcesDirectory().appendRelativePath("dynamix");
+        }
+
         List<ResourcePath> includeDirectories();
 
         /// Automatically provided sub-inputs
@@ -55,11 +52,11 @@ public abstract class CfgDynamixSource implements Serializable {
     }
 
     public static CfgDynamixSource files(Files files) {
-        return CfgDynamixSource.files(files);
+        return CfgDynamixSources.files(files);
     }
 
     public static CfgDynamixSource prebuilt(ResourcePath specAtermDirectory) {
-        return CfgDynamixSource.prebuilt(specAtermDirectory);
+        return CfgDynamixSources.prebuilt(specAtermDirectory);
     }
 
 

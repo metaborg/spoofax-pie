@@ -1,6 +1,5 @@
 package mb.spoofax.lwb.compiler.dynamix;
 
-import mb.cfg.task.CfgRootDirectoryToObject;
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.result.Result;
@@ -28,8 +27,6 @@ import java.util.Set;
  * Compilation task for Dynamix in the context of the Spoofax LWB compiler.
  */
 public class SpoofaxDynamixCompile implements TaskDef<ResourcePath, Result<KeyedMessages, SpoofaxDynamixCompileException>> {
-    private final CfgRootDirectoryToObject cfgRootDirectoryToObject;
-
     private final SpoofaxDynamixConfigure configure;
 
     private final DynamixCheckMulti check;
@@ -37,13 +34,11 @@ public class SpoofaxDynamixCompile implements TaskDef<ResourcePath, Result<Keyed
     private final DynamixCompileAndMergeProject compileAndMergeProject;
 
     @Inject public SpoofaxDynamixCompile(
-        CfgRootDirectoryToObject cfgRootDirectoryToObject,
         SpoofaxDynamixConfigure configure,
         DynamixCheckMulti check,
         DynamixCompileProject compileProject,
         DynamixCompileAndMergeProject compileAndMergeProject
     ) {
-        this.cfgRootDirectoryToObject = cfgRootDirectoryToObject;
         this.configure = configure;
         this.check = check;
         this.compileProject = compileProject;

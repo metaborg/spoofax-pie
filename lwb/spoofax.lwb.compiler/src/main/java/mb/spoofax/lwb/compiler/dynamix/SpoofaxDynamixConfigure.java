@@ -18,6 +18,10 @@ import mb.pie.api.exec.UncheckedInterruptedException;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
+import mb.sdf3_ext_dynamix.task.Sdf3ExtDynamixGenerateDynamix;
+import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3ConfigureException;
+import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3GenerationUtil;
+import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 import java.io.IOException;
@@ -32,10 +36,23 @@ import java.util.Set;
 public class SpoofaxDynamixConfigure implements TaskDef<ResourcePath, Result<Option<SpoofaxDynamixConfig>, SpoofaxDynamixConfigureException>> {
     private final CfgRootDirectoryToObject cfgRootDirectoryToObject;
 
+    private final SpoofaxSdf3GenerationUtil spoofaxSdf3GenerationUtil;
+
+    private final Sdf3ExtDynamixGenerateDynamix sdf3ToSignature;
+    private final SpoofaxDynamixGenerationUtil spoofaxDynamixGenerationUtil;
+
     @Inject public SpoofaxDynamixConfigure(
-        CfgRootDirectoryToObject cfgRootDirectoryToObject
+        CfgRootDirectoryToObject cfgRootDirectoryToObject,
+        SpoofaxSdf3GenerationUtil spoofaxSdf3GenerationUtil,
+
+        Sdf3ExtDynamixGenerateDynamix sdf3ToSignature,
+        SpoofaxDynamixGenerationUtil spoofaxDynamixGenerationUtil
     ) {
         this.cfgRootDirectoryToObject = cfgRootDirectoryToObject;
+        this.spoofaxSdf3GenerationUtil = spoofaxSdf3GenerationUtil;
+
+        this.sdf3ToSignature = sdf3ToSignature;
+        this.spoofaxDynamixGenerationUtil = spoofaxDynamixGenerationUtil;
     }
 
 
@@ -107,7 +124,28 @@ public class SpoofaxDynamixConfigure implements TaskDef<ResourcePath, Result<Opt
         final LinkedHashSet<ResourcePath> includeDirectories = new LinkedHashSet<>();
         includeDirectories.addAll(files.includeDirectories());
 
-        // TODO: compilation
+        final ResourcePath generatedSourcesDirectory = files.generatedSourcesDirectory();
+
+        // TODO: toggle for signature generation?
+        try {
+            spoofaxSdf3GenerationUtil.performSdf3GenerationIfEnabled(context, rootDirectory, new SpoofaxSdf3GenerationUtil.Callbacks<SpoofaxDynamixConfigureException>() {
+                @Override
+                public void generateFromAst(ExecContext context, STask<Result<IStrategoTerm, ?>> astSupplier) throws SpoofaxDynamixConfigureException, InterruptedException {
+                    try {
+                        sdf3ToSignature(context, generatedSourcesDirectory, astSupplier);
+                    } catch(RuntimeException | InterruptedException e) {
+                        throw e; // Do not wrap runtime and interrupted exceptions, rethrow them.
+                    } catch(Exception e) {
+                        // TODO: wrap in Dynamix exception
+                        throw new RuntimeException(e);
+                    }
+                }
+            });
+        } catch(SpoofaxSdf3ConfigureException e) {
+            return Result.ofErr(SpoofaxDynamixConfigureException.sdf3ConfigureFail(e));
+        } catch(SpoofaxDynamixConfigureException e) {
+            return Result.ofErr(e);
+        }
 
         final DynamixConfig dynamixConfig = new DynamixConfig(
             rootDirectory,
@@ -127,6 +165,15 @@ public class SpoofaxDynamixConfigure implements TaskDef<ResourcePath, Result<Opt
     }
 
     // todo: compilation
+
+    private void sdf3ToSignature(
+        ExecContext context,
+        ResourcePath generatesSourcesDirectory,
+        STask<Result<IStrategoTerm, ?>> singleFileAnalysisOutputSupplier
+    ) throws Exception {
+        final STask<Result<IStrategoTerm, ?>> supplier = sdf3ToSignature.createSupplier(singleFileAnalysisOutputSupplier);
+        spoofaxDynamixGenerationUtil.writePrettyPrintedFile(context, generatesSourcesDirectory, supplier);
+    }
 
     private static class DynamixConfigMapper extends StatelessSerializableFunction<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>, Result<Option<CfgDynamixConfig>, CfgRootDirectoryToObjectException>> {
         @Override
