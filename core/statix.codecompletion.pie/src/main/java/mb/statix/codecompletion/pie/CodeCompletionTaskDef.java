@@ -421,6 +421,14 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
                 .map(o -> o.ast);
         }
 
+        private Result<IStrategoTerm, ?> parenthesize(IStrategoTerm term) {
+            try {
+                return Result.ofOk(strategoRuntime.invoke("parenthesize-completion-term", term));
+            } catch (StrategoException ex) {
+                return Result.ofErr(ex);
+            }
+        }
+
         /**
          * Pretty-prints the given term.
          *

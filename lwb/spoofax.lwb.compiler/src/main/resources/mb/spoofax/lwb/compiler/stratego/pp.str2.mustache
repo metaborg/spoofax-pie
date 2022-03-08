@@ -4,6 +4,7 @@ imports
 
   strategolib
   gpp
+  libspoofax/editor/refactoring/-
   libspoofax/sdf/pp
   pp/{{name}}-parenthesize
   pp/{{sdf3MainModule}}-pp
@@ -34,3 +35,6 @@ rules
        result := <pp-{{name}}-string> ast
     <+ <bottomup(try(not(is-string); not(is-list); not(pp-{{name}}-string); debug(!"cannot pretty-print term to {{name}}")))> ast
     ;  result := ""
+
+  construct-textual-change-{{name}} =
+    construct-textual-change(pp-partial-{{name}}-string, parenthesize-{{name}}, id, id)
