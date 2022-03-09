@@ -12,7 +12,7 @@ import mb.pie.dagger.RootPieModule
 import mb.pie.runtime.PieBuilderImpl
 import mb.resource.dagger.DaggerRootResourceServiceComponent
 import mb.resource.dagger.ResourceServiceComponent
-import mb.spoofax.compiler.dagger.*
+import mb.spoofax.compiler.*
 import mb.spoofax.compiler.gradle.*
 import mb.spoofax.compiler.language.*
 import mb.spoofax.compiler.util.*

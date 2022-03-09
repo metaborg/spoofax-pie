@@ -1,4 +1,4 @@
-package mb.spoofax.compiler.dagger;
+package mb.spoofax.compiler;
 
 import mb.log.dagger.LoggerComponent;
 import mb.pie.dagger.TaskDefsProvider;

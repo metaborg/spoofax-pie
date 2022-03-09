@@ -20,7 +20,6 @@ dependencies {
   kapt(platform(project(":spoofax.depconstraints")))
 
   api(project(":spoofax.compiler"))
-  api(project(":spoofax.compiler.dagger"))
   api("com.google.dagger:dagger")
 
   implementation("org.metaborg:pie.runtime")

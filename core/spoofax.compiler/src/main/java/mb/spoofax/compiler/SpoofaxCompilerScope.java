@@ -1,4 +1,4 @@
-package mb.spoofax.compiler.dagger;
+package mb.spoofax.compiler;
 
 import javax.inject.Scope;
 import java.lang.annotation.Retention;

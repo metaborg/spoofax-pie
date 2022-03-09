@@ -8,8 +8,7 @@ import mb.coronium.plugin.BundleExtension
 import mb.pie.api.ValueSupplier
 import mb.pie.dagger.PieComponent
 import mb.resource.dagger.ResourceServiceComponent
-import mb.spoofax.compiler.adapter.*
-import mb.spoofax.compiler.dagger.*
+import mb.spoofax.compiler.*
 import mb.spoofax.compiler.gradle.*
 import mb.spoofax.compiler.platform.*
 import mb.spoofax.compiler.util.*

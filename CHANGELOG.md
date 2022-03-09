@@ -3,6 +3,12 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+### Changed
+- Improve "language/component management" and make it cross-platform.
+- Merge `spoofax.compiler.dagger` into `spoofax.compiler`.
+- Merge `spoofax.lwb.compiler.dagger` into `spoofax.lwb.compiler`.
+- Rename `Spoofax3` -> `SpoofaxLwb` in `spoofax.lwb.compiler`.
+- Update org.jetbrains.intellij Gradle plugin to 1.0.
 
 
 ## [0.16.17] - 2021-12-13

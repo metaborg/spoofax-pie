@@ -99,7 +99,6 @@ dependencies {
 
     // Exclude modules already exported by `spoofax.compiler.eclipsebundle`
     exclude("org.metaborg", "spoofax.compiler")
-    exclude("org.metaborg", "spoofax.compiler.dagger")
 
     // Exclude dagger-compile because we already manually embed it.
     exclude("com.google.dagger", "dagger-compiler")
