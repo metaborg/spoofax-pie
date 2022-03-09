@@ -60,5 +60,6 @@ languageAdapterProject {
       fileConstraint("mini-sdf!fileOk")
       projectConstraint("mini-sdf!projectOk")
     }
+    project.compositionGroup("minimeta")
   }
 }

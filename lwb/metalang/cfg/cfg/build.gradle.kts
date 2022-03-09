@@ -13,7 +13,6 @@ fun compositeBuild(name: String) = "$group:$name:$version"
 dependencies {
   api(compositeBuild("spoofax.common"))
   api(compositeBuild("spoofax.compiler"))
-  api(compositeBuild("spoofax.compiler.dagger"))
 
   compileOnly("org.derive4j:derive4j-annotation")
 
@@ -76,6 +75,8 @@ languageAdapterProject {
   }
 }
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
+  compositionGroup("mb.spoofax.lwb")
+
   val packageId = "mb.cfg"
   val taskPackageId = "$packageId.task"
 

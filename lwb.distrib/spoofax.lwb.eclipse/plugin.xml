@@ -5,9 +5,12 @@
   <!-- Spoofax LWB -->
   <!--             -->
 
-  <!-- Lifecycle participant -->
-  <extension point="spoofax.eclipse.lifecycle">
-    <participant group="mb.spoofax.lwb" class="mb.spoofax.lwb.eclipse.SpoofaxLwbLifecycleParticipant$Factory"/>
+  <!-- Spoofax Eclipse participants -->
+  <extension point="spoofax.eclipse.participant">
+    <participant class="mb.spoofax.lwb.eclipse.compiler.SpoofaxCompilerEclipseParticipant"/>
+    <participant class="mb.spoofax.lwb.eclipse.compiler.SpoofaxLwbCompilerEclipseParticipant"/>
+    <participant class="mb.spoofax.lwb.eclipse.dynamicloading.SpoofaxDynamicLoadingEclipseParticipant"/>
+    <participant class="mb.spoofax.lwb.eclipse.SpoofaxLwbEclipseParticipant"/>
   </extension>
 
   <!-- CFG component customizer -->
@@ -271,7 +274,7 @@
   <!-- Transform -->
   <extension point="org.eclipse.ui.commands">
     <command id="spoofax.lwb.eclipse.dynamicloading.runcommand" name="Run Spoofax dynamic command">
-      <commandParameter id="languageId" name="Language ID" optional="false"/>
+      <commandParameter id="languageCoordinate" name="Language coordinate" optional="false"/>
       <commandParameter id="data" name="Data" optional="false"/>
     </command>
   </extension>

@@ -4,6 +4,7 @@ import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.core.CoordinateRequirement;
 import mb.spt.model.LanguageUnderTest;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -12,6 +13,6 @@ public interface LanguageUnderTestProvider {
         ExecContext context,
         ResourceKey file,
         @Nullable ResourcePath rootDirectoryHint,
-        @Nullable String languageIdHint
+        @Nullable CoordinateRequirement languageCoordinateRequirementHint
     );
 }

@@ -16,7 +16,6 @@ import mb.log.dagger.DaggerLoggerComponent
 import mb.log.dagger.LoggerModule
 import mb.pie.api.Pie
 import mb.pie.api.ValueSupplier
-import mb.pie.dagger.PieModule
 import mb.pie.runtime.PieBuilderImpl
 import mb.resource.ResourceKey
 import mb.resource.ResourceService
@@ -29,9 +28,10 @@ import mb.spoofax.compiler.gradle.*
 import mb.spoofax.compiler.gradle.plugin.*
 import mb.spoofax.compiler.language.*
 import mb.spoofax.compiler.util.*
-import mb.spoofax.lwb.compiler.CheckLanguageSpecification
-import mb.spoofax.lwb.compiler.CompileLanguageSpecification
-import mb.spoofax.lwb.compiler.dagger.StandaloneSpoofax3Compiler
+import mb.spoofax.core.platform.DaggerPlatformComponent
+import mb.spoofax.lwb.compiler.definition.CheckLanguageDefinition
+import mb.spoofax.lwb.compiler.SpoofaxLwbCompiler
+import mb.spoofax.lwb.compiler.definition.CompileMetaLanguageSources
 import mb.strategolib.StrategoLibUtil
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -39,6 +39,7 @@ import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPlugin
 import java.io.File
 import java.util.*
+import java.util.function.Supplier
 
 open class LanguageExtension() {
   companion object {
@@ -72,21 +73,27 @@ open class LanguagePlugin : Plugin<Project> {
     val loggerComponent = DaggerLoggerComponent.builder()
       .loggerModule(LoggerModule.stdErrErrorsAndWarnings())
       .build()
-    val resourceServiceComponent = DaggerRootResourceServiceComponent.builder()
+    val baseResourceServiceComponent = DaggerRootResourceServiceComponent.builder()
       .loggerComponent(loggerComponent)
       .build()
-    val spoofax3Compiler = StandaloneSpoofax3Compiler(
+    val platformComponent = DaggerPlatformComponent.builder()
+      .loggerComponent(loggerComponent)
+      .resourceServiceComponent(baseResourceServiceComponent)
+      .build();
+
+    val spoofaxLwbCompiler = SpoofaxLwbCompiler.fromComponents(
       loggerComponent,
-      resourceServiceComponent.createChildModule(),
-      PieModule { PieBuilderImpl() }
+      baseResourceServiceComponent,
+      platformComponent,
+      Supplier { PieBuilderImpl() }
     )
 
     val extension = LanguageExtension()
     project.extensions.add(LanguageExtension.id, extension)
 
     try {
-      val input = getInput(project, spoofax3Compiler)
-      LanguagePluginInstance(project, resourceServiceComponent, spoofax3Compiler, input)
+      val input = getInput(project, spoofaxLwbCompiler)
+      LanguagePluginInstance(project, baseResourceServiceComponent, spoofaxLwbCompiler, input)
     } catch(e: CfgRootDirectoryToObjectException) {
       val exceptionPrinter = ExceptionPrinter()
       exceptionPrinter.addCurrentDirectoryContext(project.path)
@@ -96,22 +103,22 @@ open class LanguagePlugin : Plugin<Project> {
     }
   }
 
-  private fun getInput(project: Project, spoofax3Compiler: StandaloneSpoofax3Compiler): CompileLanguageInput {
-    spoofax3Compiler.pieComponent.pie.newSession().use {
-      return it.require(spoofax3Compiler.compiler.cfgComponent.cfgRootDirectoryToObject.createTask(FSPath(project.projectDir)))
+  private fun getInput(project: Project, spoofaxLwbCompiler: SpoofaxLwbCompiler): CompileLanguageInput {
+    spoofaxLwbCompiler.pieComponent.pie.newSession().use {
+      return it.require(spoofaxLwbCompiler.spoofaxLwbCompilerComponent.cfgComponent.cfgRootDirectoryToObject.createTask(FSPath(project.projectDir)))
         .unwrap().compileLanguageInput // Note: exception is caught in apply.
     }
   }
 }
 
 class LanguagePluginInstance(
-  val project: Project,
-  resourceServiceComponent: ResourceServiceComponent,
-  val spoofax3Compiler: StandaloneSpoofax3Compiler,
-  val compileLanguageInput: CompileLanguageInput
+    val project: Project,
+    resourceServiceComponent: ResourceServiceComponent,
+    val spoofaxLwbCompiler: SpoofaxLwbCompiler,
+    val compileLanguageInput: CompileLanguageInput
 ) {
   val resourceService: ResourceService = resourceServiceComponent.resourceService
-  val pie: Pie = spoofax3Compiler.pieComponent.pie
+  val pie: Pie = spoofaxLwbCompiler.pieComponent.pie
 
   init {
     project.extensions.add(Spoofax3AdapterExtension.id, Spoofax3AdapterExtension(project, compileLanguageInput))
@@ -124,12 +131,12 @@ class LanguagePluginInstance(
 
 
   private fun configure() {
-    val languageProjectCompiler = spoofax3Compiler.compiler.spoofaxCompilerComponent.languageProjectCompiler
-    val adapterProjectCompiler = spoofax3Compiler.compiler.spoofaxCompilerComponent.adapterProjectCompiler
-    configureProject(languageProjectCompiler, spoofax3Compiler.compiler.strategolibComponent.strategoLibUtil, spoofax3Compiler.compiler.gppComponent.gppUtil, adapterProjectCompiler)
+    val languageProjectCompiler = spoofaxLwbCompiler.spoofaxCompilerComponent.languageProjectCompiler
+    val adapterProjectCompiler = spoofaxLwbCompiler.spoofaxCompilerComponent.adapterProjectCompiler
+    configureProject(languageProjectCompiler, spoofaxLwbCompiler.spoofaxLwbCompilerComponent.strategoLibComponent.strategoLibUtil, spoofaxLwbCompiler.spoofaxLwbCompilerComponent.gppComponent.gppUtil, adapterProjectCompiler)
     configureCompileLanguageProjectTask(languageProjectCompiler, compileLanguageInput.languageProjectInput())
-    val check = spoofax3Compiler.compiler.component.checkLanguageSpecification
-    val compile = spoofax3Compiler.compiler.component.compileLanguageSpecification
+    val check = spoofaxLwbCompiler.spoofaxLwbCompilerComponent.checkLanguageDefinition
+    val compile = spoofaxLwbCompiler.spoofaxLwbCompilerComponent.compileMetaLanguageSources
     configureCompileLanguageTask(check, compile, compileLanguageInput.compileLanguageSpecificationInput())
     configureCompileAdapterProjectTask(adapterProjectCompiler, compileLanguageInput.adapterProjectInput())
   }
@@ -181,8 +188,8 @@ class LanguagePluginInstance(
   }
 
   private fun configureCompileLanguageTask(
-    check: CheckLanguageSpecification,
-    compile: CompileLanguageSpecification,
+    check: CheckLanguageDefinition,
+    compile: CompileMetaLanguageSources,
     input: CompileLanguageSpecificationInput
   ) {
     val compileTask = project.tasks.register("compileLanguage") {

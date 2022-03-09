@@ -61,16 +61,16 @@ class CharsTestBase extends TestBase {
     }
 
 
-    boolean hasTokenizeTaskDefExecuted(MetricsTracer.Report report, DynamicLanguage language) {
-        return report.hasTaskDefExecuted(language.getCompileInput().adapterProjectInput().parser().get().tokenizeTaskDef().qualifiedId());
+    boolean hasTokenizeTaskDefExecuted(MetricsTracer.Report report, CompileLanguageInput input) {
+        return report.hasTaskDefExecuted(input.adapterProjectInput().parser().get().tokenizeTaskDef().qualifiedId());
     }
 
-    boolean hasParseTaskDefExecuted(MetricsTracer.Report report, DynamicLanguage language) {
-        return report.hasTaskDefExecuted(language.getCompileInput().adapterProjectInput().parser().get().parseTaskDef().qualifiedId());
+    boolean hasParseTaskDefExecuted(MetricsTracer.Report report, CompileLanguageInput input) {
+        return report.hasTaskDefExecuted(input.adapterProjectInput().parser().get().parseTaskDef().qualifiedId());
     }
 
-    boolean hasStyleTaskDefExecuted(MetricsTracer.Report report, DynamicLanguage language) {
-        return report.hasTaskDefExecuted(language.getCompileInput().adapterProjectInput().styler().get().styleTaskDef().qualifiedId());
+    boolean hasStyleTaskDefExecuted(MetricsTracer.Report report, CompileLanguageInput input) {
+        return report.hasTaskDefExecuted(input.adapterProjectInput().styler().get().styleTaskDef().qualifiedId());
     }
 
     boolean hasRemoveATaskDefExecuted(MetricsTracer.Report report) {
@@ -81,16 +81,16 @@ class CharsTestBase extends TestBase {
         return report.hasTaskDefExecuted("mb.chars.CharsDebugRemoveA");
     }
 
-    boolean hasConstraintAnalysisTaskExecuted(MetricsTracer.Report report, DynamicLanguage language) {
-        return report.hasTaskDefExecuted(language.getCompileInput().adapterProjectInput().constraintAnalyzer().get().analyzeTaskDef().qualifiedId());
+    boolean hasConstraintAnalysisTaskExecuted(MetricsTracer.Report report, CompileLanguageInput input) {
+        return report.hasTaskDefExecuted(input.adapterProjectInput().constraintAnalyzer().get().analyzeTaskDef().qualifiedId());
     }
 
-    boolean hasCheckTaskExecuted(MetricsTracer.Report report, DynamicLanguage language) {
-        return report.hasTaskDefExecuted(language.getCompileInput().adapterProjectInput().checkTaskDef().qualifiedId());
+    boolean hasCheckTaskExecuted(MetricsTracer.Report report, CompileLanguageInput input) {
+        return report.hasTaskDefExecuted(input.adapterProjectInput().checkTaskDef().qualifiedId());
     }
 
-    boolean hasHoverTaskExecuted(MetricsTracer.Report report, DynamicLanguage language) {
-        return report.hasTaskDefExecuted(language.getCompileInput().adapterProjectInput().hover().get().hoverTaskDef().qualifiedId());
+    boolean hasHoverTaskExecuted(MetricsTracer.Report report, CompileLanguageInput input) {
+        return report.hasTaskDefExecuted(input.adapterProjectInput().hover().get().hoverTaskDef().qualifiedId());
     }
 
 

@@ -10,15 +10,17 @@ dependencies {
   annotationProcessor(platform(compositeBuild("spoofax.depconstraints")))
 
   api(compositeBuild("spoofax.core"))
-  api(project(":spoofax.lwb.compiler"))
-  api(project(":spoofax.lwb.compiler.dagger"))
   api("com.google.dagger:dagger")
+  implementation("org.metaborg:pie.runtime")
 
   compileOnly("org.checkerframework:checker-qual-android")
+  compileOnly("org.derive4j:derive4j-annotation")
 
   annotationProcessor("com.google.dagger:dagger-compiler")
+  annotationProcessor("org.derive4j:derive4j")
 
   testImplementation("org.slf4j:slf4j-nop:1.7.30")
+  testImplementation(project(":spoofax.lwb.compiler"))
   testImplementation(project(":spt"))
   testImplementation(project(":spt.dynamicloading"))
   testImplementation("org.metaborg:pie.runtime")
@@ -27,9 +29,11 @@ dependencies {
 
 tasks.test {
   enableAssertions = false // HACK: disable assertions due to assertion in the Stratego compiler.
-  // Show stderr in tests.
   testLogging {
-    events(org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR)
+    events(
+        //org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_OUT,
+        org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR
+    )
   }
   jvmArgs("-Xss16M") // Set required stack size, mainly for serialization.
 }

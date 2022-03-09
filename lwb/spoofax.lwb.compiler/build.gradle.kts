@@ -44,12 +44,12 @@ dependencies {
 
   annotationProcessor("org.immutables:value")
   annotationProcessor("org.derive4j:derive4j")
+  annotationProcessor("com.google.dagger:dagger-compiler")
 
 
   testImplementation("org.junit.jupiter:junit-jupiter-params:${metaborg.junitVersion}")
   testImplementation("org.metaborg:pie.runtime")
   testImplementation("org.metaborg:pie.serde.fst")
-  testImplementation(project(":spoofax.lwb.compiler.dagger"))
   testCompileOnly("org.checkerframework:checker-qual-android")
 }
 

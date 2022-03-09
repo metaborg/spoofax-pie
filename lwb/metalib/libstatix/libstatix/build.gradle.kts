@@ -35,5 +35,5 @@ languageAdapterProject {
   }
 }
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
-
+  compositionGroup("mb.spoofax.lwb")
 }

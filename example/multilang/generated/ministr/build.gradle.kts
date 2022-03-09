@@ -60,5 +60,6 @@ languageAdapterProject {
       fileConstraint("mini-str!fileOk")
       projectConstraint("mini-str!projectOk")
     }
+    project.compositionGroup("minimeta")
   }
 }

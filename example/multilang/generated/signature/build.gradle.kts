@@ -31,5 +31,7 @@ spoofax2BasedLanguageProject {
 }
 
 languageAdapterProject {
-
+  compilerInput {
+    project.compositionGroup("minimeta")
+  }
 }

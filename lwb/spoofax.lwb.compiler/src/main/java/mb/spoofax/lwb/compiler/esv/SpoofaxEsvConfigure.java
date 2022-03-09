@@ -44,7 +44,7 @@ import java.util.Set;
 /**
  * Configuration task for ESV in the context of the Spoofax LWB compiler.
  */
-public class SpoofaxEsvConfigure implements TaskDef<ResourcePath, Result<Option<SpoofaxEsvConfig>, EsvConfigureException>> {
+public class SpoofaxEsvConfigure implements TaskDef<ResourcePath, Result<Option<SpoofaxEsvConfig>, SpoofaxEsvConfigureException>> {
     private final CfgRootDirectoryToObject cfgRootDirectoryToObject;
 
     private final UnarchiveFromJar unarchiveFromJar;
@@ -78,9 +78,9 @@ public class SpoofaxEsvConfigure implements TaskDef<ResourcePath, Result<Option<
     }
 
     @Override
-    public Result<Option<SpoofaxEsvConfig>, EsvConfigureException> exec(ExecContext context, ResourcePath rootDirectory) throws IOException {
+    public Result<Option<SpoofaxEsvConfig>, SpoofaxEsvConfigureException> exec(ExecContext context, ResourcePath rootDirectory) throws IOException {
         return context.requireMapping(cfgRootDirectoryToObject, rootDirectory, new EsvConfigMapper())
-            .mapErr(EsvConfigureException::getLanguageCompilerConfigurationFail)
+            .mapErr(SpoofaxEsvConfigureException::getLanguageCompilerConfigurationFail)
             .<Option<SpoofaxEsvConfig>, IOException>flatMapThrowing(o -> Result.transpose(o.mapThrowing(cfgEsvConfig -> configure(context, rootDirectory, cfgEsvConfig))));
     }
 
@@ -88,7 +88,7 @@ public class SpoofaxEsvConfigure implements TaskDef<ResourcePath, Result<Option<
         return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 
-    public Result<SpoofaxEsvConfig, EsvConfigureException> configure(
+    public Result<SpoofaxEsvConfig, SpoofaxEsvConfigureException> configure(
         ExecContext context,
         ResourcePath rootDirectory,
         CfgEsvConfig cfgEsvConfig
@@ -108,7 +108,7 @@ public class SpoofaxEsvConfigure implements TaskDef<ResourcePath, Result<Option<
         } // No need to unwrap UncheckedInterruptedException here, PIE handles UncheckedInterruptedException.
     }
 
-    public Result<SpoofaxEsvConfig, EsvConfigureException> configureSourcesCatching(
+    public Result<SpoofaxEsvConfig, SpoofaxEsvConfigureException> configureSourcesCatching(
         ExecContext context,
         ResourcePath rootDirectory,
         CfgEsvConfig cfgEsvConfig,
@@ -123,7 +123,7 @@ public class SpoofaxEsvConfigure implements TaskDef<ResourcePath, Result<Option<
         }
     }
 
-    public Result<SpoofaxEsvConfig, EsvConfigureException> configureSourceFiles(
+    public Result<SpoofaxEsvConfig, SpoofaxEsvConfigureException> configureSourceFiles(
         ExecContext context,
         ResourcePath rootDirectory,
         CfgEsvConfig cfgEsvConfig,
@@ -132,16 +132,16 @@ public class SpoofaxEsvConfigure implements TaskDef<ResourcePath, Result<Option<
         // Check main source directory, main file, and include directories.
         final HierarchicalResource mainSourceDirectory = context.require(files.mainSourceDirectory(), ResourceStampers.<HierarchicalResource>exists());
         if(!mainSourceDirectory.exists() || !mainSourceDirectory.isDirectory()) {
-            return Result.ofErr(EsvConfigureException.mainSourceDirectoryFail(mainSourceDirectory.getPath()));
+            return Result.ofErr(SpoofaxEsvConfigureException.mainSourceDirectoryFail(mainSourceDirectory.getPath()));
         }
         final HierarchicalResource mainFile = context.require(files.mainFile(), ResourceStampers.<HierarchicalResource>exists());
         if(!mainFile.exists() || !mainFile.isFile()) {
-            return Result.ofErr(EsvConfigureException.mainFileFail(mainFile.getPath()));
+            return Result.ofErr(SpoofaxEsvConfigureException.mainFileFail(mainFile.getPath()));
         }
         for(ResourcePath includeDirectoryPath : files.includeDirectories()) {
             final HierarchicalResource includeDirectory = context.require(includeDirectoryPath, ResourceStampers.<HierarchicalResource>exists());
             if(!includeDirectory.exists() || !includeDirectory.isDirectory()) {
-                return Result.ofErr(EsvConfigureException.includeDirectoryFail(includeDirectoryPath));
+                return Result.ofErr(SpoofaxEsvConfigureException.includeDirectoryFail(includeDirectoryPath));
             }
         }
 
@@ -188,23 +188,23 @@ public class SpoofaxEsvConfigure implements TaskDef<ResourcePath, Result<Option<
 
         // Compile each SDF3 source file (if SDF3 is enabled) to a completion colorer.
         try {
-            spoofaxSdf3GenerationUtil.performSdf3GenerationIfEnabled(context, rootDirectory, new SpoofaxSdf3GenerationUtil.Callbacks<EsvConfigureException>() {
+            spoofaxSdf3GenerationUtil.performSdf3GenerationIfEnabled(context, rootDirectory, new SpoofaxSdf3GenerationUtil.Callbacks<SpoofaxEsvConfigureException>() {
                 @Override
                 public void generateFromAst(ExecContext context, STask<Result<IStrategoTerm, ?>> astSupplier) {
                     includeAstSuppliers.add(sdf3ToCompletionColorer.createSupplier(astSupplier));
                 }
             });
-        } catch(EsvConfigureException e) {
+        } catch(SpoofaxEsvConfigureException e) {
             return Result.ofErr(e);
         } catch(SpoofaxSdf3ConfigureException e) {
-            return Result.ofErr(EsvConfigureException.sdf3ConfigureFail(e));
+            return Result.ofErr(SpoofaxEsvConfigureException.sdf3ConfigureFail(e));
         }
 
         final EsvConfig config = new EsvConfig(rootDirectory, files.mainFile(), ListView.copyOf(sourceFileOrigins), ListView.copyOf(includeDirectorySuppliers), ListView.of(includeAstSuppliers));
         return Result.ofOk(SpoofaxEsvConfig.files(config, cfgEsvConfig.outputFile()));
     }
 
-    public Result<SpoofaxEsvConfig, EsvConfigureException> configurePreBuilt(ResourcePath inputFile, CfgEsvConfig cfgEsvConfig) {
+    public Result<SpoofaxEsvConfig, SpoofaxEsvConfigureException> configurePreBuilt(ResourcePath inputFile, CfgEsvConfig cfgEsvConfig) {
         return Result.ofOk(SpoofaxEsvConfig.prebuilt(inputFile, cfgEsvConfig.outputFile()));
     }
 

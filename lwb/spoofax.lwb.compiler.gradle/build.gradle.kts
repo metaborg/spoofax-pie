@@ -19,7 +19,6 @@ dependencies {
 
   compileOnly("org.metaborg:spoofax.compiler.gradle")
   api(project(":spoofax.lwb.compiler"))
-  api(project(":spoofax.lwb.compiler.dagger"))
   api("com.google.dagger:dagger")
   implementation("org.metaborg:pie.runtime")
   implementation("org.metaborg:log.backend.slf4j")

@@ -4,6 +4,7 @@ import mb.common.message.KeyedMessages;
 import mb.common.util.ExceptionPrinter;
 import mb.pie.api.MixedSession;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.lwb.dynamicloading.component.DynamicComponent;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,7 @@ public class LanguageTest extends TestBase {
         copyResourcesToTemporaryDirectory("mb/spoofax/lwb/dynamicloading/layout_sensitive");
         try(final MixedSession session = newSession()) {
             final ResourcePath rootDirectory = this.rootDirectory.getPath();
-            try(final DynamicLanguage ignored = requireDynamicLoad(session, rootDirectory)) {
+            try(final DynamicComponent ignored = requireDynamicLoad(session, rootDirectory)) {
                 final KeyedMessages messages = requireSptCheck(session, rootDirectory);
                 assertNoErrors(messages, "SPT tests to succeed, but one or more failed");
             }

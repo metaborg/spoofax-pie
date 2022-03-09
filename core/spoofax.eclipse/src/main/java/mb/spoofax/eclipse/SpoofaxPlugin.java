@@ -1,7 +1,10 @@
 package mb.spoofax.eclipse;
 
-import mb.common.util.MultiMap;
 import mb.log.api.Logger;
+import mb.pie.runtime.PieBuilderImpl;
+import mb.spoofax.core.component.ComponentManager;
+import mb.spoofax.core.component.StaticComponentManager;
+import mb.spoofax.core.component.StaticComponentManagerBuilder;
 import mb.spoofax.eclipse.log.DaggerEclipseLoggerComponent;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -18,16 +21,19 @@ import org.eclipse.ui.IStartup;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import java.util.ArrayList;
+
 public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
     public static final String id = "spoofax.eclipse";
-    public static final String extensionPointId = "spoofax.eclipse.lifecycle";
+    public static final String participantExtensionPointId = "spoofax.eclipse.participant";
 
     private static @Nullable SpoofaxPlugin plugin;
     private static @Nullable EclipseLoggerComponent loggerComponent;
     private static @Nullable Logger logger;
     private static @Nullable EclipseResourceServiceComponent baseResourceServiceComponent;
     private static @Nullable EclipsePlatformComponent platformComponent;
-    private static @Nullable LifecycleParticipantManager lifecycleParticipantManager;
+    private static @Nullable StaticComponentManager staticComponentManager;
+    private static @Nullable ComponentManager componentManager;
 
 
     public static SpoofaxPlugin getPlugin() {
@@ -58,11 +64,18 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
         return platformComponent;
     }
 
-    public static LifecycleParticipantManager getLifecycleParticipantManager() {
-        if(lifecycleParticipantManager == null) {
-            throw new RuntimeException("Cannot access LifecycleParticipantManager; SpoofaxPlugin has not been started yet, or has been stopped");
+    public static StaticComponentManager getStaticComponentManager() {
+        if(staticComponentManager == null) {
+            throw new RuntimeException("Cannot access StaticComponentManager; SpoofaxPlugin has not been started yet, or has been stopped");
         }
-        return lifecycleParticipantManager;
+        return staticComponentManager;
+    }
+
+    public static ComponentManager getComponentManager() {
+        if(componentManager == null) {
+            throw new RuntimeException("Cannot access ComponentManager; SpoofaxPlugin has not been started yet, or has been stopped");
+        }
+        return componentManager;
     }
 
 
@@ -80,8 +93,14 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
             .eclipseResourceServiceComponent(baseResourceServiceComponent)
             .build();
         platformComponent.init();
-        lifecycleParticipantManager = new LifecycleParticipantManager(loggerComponent, baseResourceServiceComponent, platformComponent);
-        lifecycleParticipantManager.registerStatic(gatherLifecycleParticipants(logger));
+
+        final StaticComponentManagerBuilder<EclipseLoggerComponent, EclipseResourceServiceComponent, EclipsePlatformComponent> builder =
+            new StaticComponentManagerBuilder<>(loggerComponent, baseResourceServiceComponent, platformComponent, PieBuilderImpl::new);
+        gatherParticipants(builder, logger);
+        staticComponentManager = builder.build();
+        if(componentManager == null) {
+            componentManager = staticComponentManager;
+        }
     }
 
     @Override public void earlyStartup() {
@@ -90,9 +109,9 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
 
     @Override public void stop(@NonNull BundleContext context) throws Exception {
         super.stop(context);
-        if(lifecycleParticipantManager != null) {
-            lifecycleParticipantManager.close();
-            lifecycleParticipantManager = null;
+        if(staticComponentManager != null) {
+            staticComponentManager.close();
+            staticComponentManager = null;
         }
         if(platformComponent != null) {
             platformComponent.close();
@@ -108,44 +127,52 @@ public class SpoofaxPlugin extends AbstractUIPlugin implements IStartup {
     }
 
 
-    private static MultiMap<String, EclipseLifecycleParticipant> gatherLifecycleParticipants(Logger logger) {
-        final MultiMap<String, EclipseLifecycleParticipant> lifecycleParticipants = MultiMap.withLinkedHash();
+    private static ArrayList<EclipseParticipant> gatherParticipants(
+        StaticComponentManagerBuilder<EclipseLoggerComponent, EclipseResourceServiceComponent, EclipsePlatformComponent> builder,
+        Logger logger
+    ) {
+        final ArrayList<EclipseParticipant> participants = new ArrayList<>();
         final IExtensionRegistry registry = Platform.getExtensionRegistry();
-        final IExtensionPoint point = registry.getExtensionPoint(extensionPointId);
-        for(IExtension extension : point.getExtensions()) {
-            addLifecycleParticipants(logger, extension, lifecycleParticipants);
+        final @Nullable IExtensionPoint point = registry.getExtensionPoint(participantExtensionPointId);
+        if(point == null) {
+            logger.error("Cannot gather Spoofax component creation participants, extension point {} does not exist", participantExtensionPointId);
+            return participants;
         }
-        return lifecycleParticipants;
+        for(IExtension extension : point.getExtensions()) {
+            addParticipants(builder, logger, extension);
+        }
+        return participants;
     }
 
-    private static void addLifecycleParticipants(
+    private static void addParticipants(
+        StaticComponentManagerBuilder<EclipseLoggerComponent, EclipseResourceServiceComponent, EclipsePlatformComponent> builder,
         Logger logger,
-        IExtension extension,
-        MultiMap<String, EclipseLifecycleParticipant> lifecycleParticipants
+        IExtension extension
     ) {
         final IContributor contributor = extension.getContributor();
         for(IConfigurationElement config : extension.getConfigurationElements()) {
             if(config.getName().equals("participant")) {
-                final String group = config.getAttribute("group");
-                if(group == null) {
-                    logger.error("Found participant in '{}', but it does not have a 'group' attribute; skipping...", contributor);
-                    continue;
-                }
                 try {
-                    final Object lifecycleParticipantObject = config.createExecutableExtension("class");
-                    if(lifecycleParticipantObject == null) {
+                    final Object participantObject = config.createExecutableExtension("class");
+                    if(participantObject == null) {
                         logger.error("Found participant in '{}', but it does not have a 'class' property; skipping...", contributor);
+                        continue;
                     }
-                    if(lifecycleParticipantObject instanceof EclipseLifecycleParticipant) {
-                        final EclipseLifecycleParticipant eclipseLifecycleParticipant = (EclipseLifecycleParticipant)lifecycleParticipantObject;
-                        lifecycleParticipants.put(group, eclipseLifecycleParticipant);
+                    if(participantObject instanceof EclipseParticipant) {
+                        final EclipseParticipant eclipseParticipant = (EclipseParticipant)participantObject;
+                        builder.registerParticipant(eclipseParticipant);
                     } else {
-                        logger.error("Found participant in '{}', but the object '{}' instantiated from its 'class' property does not implement 'EclipseLifecycleParticipant'; skipping...", contributor, lifecycleParticipantObject);
+                        logger.error("Found participant in '{}', but the object '{}' instantiated from its 'class' property does not implement 'EclipseParticipant'; skipping...", contributor, participantObject);
                     }
                 } catch(CoreException | InvalidRegistryObjectException e) {
                     logger.error("Found participant in '{}', but instantiating an object of its 'class' property failed unexpectedly; skipping...", e, contributor);
                 }
             }
         }
+    }
+
+    // HACK: allow overriding of the component manager (for dynamic loading)
+    public static void setComponentManager(ComponentManager componentManager) {
+        SpoofaxPlugin.componentManager = componentManager;
     }
 }

@@ -15,7 +15,4 @@ dependencies {
 
 languageEclipseProject {
   adapterProject.set(project(":dynamix"))
-  compilerInput {
-    languageGroup("mb.spoofax.lwb")
-  }
 }

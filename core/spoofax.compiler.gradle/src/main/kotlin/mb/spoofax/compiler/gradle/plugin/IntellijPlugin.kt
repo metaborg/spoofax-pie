@@ -3,10 +3,10 @@
 package mb.spoofax.compiler.gradle.plugin
 
 import mb.pie.dagger.PieComponent
-import mb.spoofax.compiler.dagger.*
+import mb.resource.dagger.ResourceServiceComponent
+import mb.spoofax.compiler.*
 import mb.spoofax.compiler.gradle.*
 import mb.spoofax.compiler.platform.*
-import mb.resource.dagger.ResourceServiceComponent
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -15,7 +15,6 @@ import org.gradle.api.plugins.JavaLibraryPlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
 import org.gradle.kotlin.dsl.*
-import org.jetbrains.intellij.IntelliJPlugin
 import org.jetbrains.intellij.IntelliJPluginExtension
 
 open class IntellijProjectCompilerExtension(project: Project) {
@@ -80,8 +79,8 @@ open class IntellijPlugin : Plugin<Project> {
   private fun configureIntelliJPlugin(project: Project) {
     // Disable some IntelliJ plugin functionality to increase incrementality.
     project.configure<IntelliJPluginExtension> {
-      version = "2020.2.4" // 2020.2.4 is the last version that can be built with Java 8.
-      instrumentCode = false // Skip non-incremental and slow code instrumentation.
+      version.set("2020.2.4") // 2020.2.4 is the last version that can be built with Java 8.
+      instrumentCode.set(false) // Skip non-incremental and slow code instrumentation.
     }
     project.tasks {
       named("buildSearchableOptions") {
@@ -89,7 +88,7 @@ open class IntellijPlugin : Plugin<Project> {
       }
 
       named<org.jetbrains.intellij.tasks.RunIdeTask>("runIde") {
-        jbrVersion("11_0_2b159") // Set JBR version because the latest one cannot be downloaded.
+        jbrVersion.set("11_0_2b159") // Set JBR version because the latest one cannot be downloaded.
         // HACK: make task depend on the runtime classpath to forcefully make it depend on `spoofax.intellij`, which
         //       `org.jetbrains.intellij` seems to ignore. This is probably because `spoofax.intellij` is a plugin
         //       but is not listed as a plugin dependency. This hack may not work when publishing this plugin.
@@ -152,11 +151,11 @@ open class IntellijPlugin : Plugin<Project> {
     project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(compileTask)
 
     // Make all of IntelliJ's tasks depend on our task, because we generate Java code and a plugin.xml file.
-    project.tasks.getByName(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME).dependsOn(compileTask)
-    project.tasks.getByName(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME).dependsOn(compileTask)
-    project.tasks.getByName(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME).dependsOn(compileTask)
-    project.tasks.getByName(IntelliJPlugin.RUN_IDE_TASK_NAME).dependsOn(compileTask)
-    project.tasks.getByName(IntelliJPlugin.PUBLISH_PLUGIN_TASK_NAME).dependsOn(compileTask)
-    project.tasks.getByName(IntelliJPlugin.VERIFY_PLUGIN_TASK_NAME).dependsOn(compileTask)
+    project.tasks.named("buildPlugin").configure { dependsOn(compileTask) }
+    project.tasks.named("patchPluginXml").configure { dependsOn(compileTask) }
+    project.tasks.named("prepareSandbox").configure { dependsOn(compileTask) }
+    project.tasks.named("runIde").configure { dependsOn(compileTask) }
+    project.tasks.named("publishPlugin").configure { dependsOn(compileTask) }
+    project.tasks.named("verifyPlugin").configure { dependsOn(compileTask) }
   }
 }

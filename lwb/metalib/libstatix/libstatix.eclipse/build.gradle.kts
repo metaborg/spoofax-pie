@@ -5,7 +5,4 @@ plugins {
 
 languageEclipseProject {
   adapterProject.set(project(":libstatix"))
-  compilerInput {
-    languageGroup("mb.spoofax.lwb")
-  }
 }

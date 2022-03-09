@@ -15,7 +15,4 @@ dependencies {
 
 languageEclipseProject {
   adapterProject.set(project(":cfg"))
-  compilerInput {
-    languageGroup("mb.spoofax.lwb")
-  }
 }
