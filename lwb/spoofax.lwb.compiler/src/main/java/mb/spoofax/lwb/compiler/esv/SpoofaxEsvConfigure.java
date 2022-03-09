@@ -29,6 +29,8 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.path.string.PathStringMatcher;
 import mb.sdf3.task.Sdf3ToCompletionColorer;
+import mb.sdf3.task.spec.Sdf3Config;
+import mb.sdf3.task.spec.Sdf3SpecConfig;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3ConfigureException;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3GenerationUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -190,7 +192,7 @@ public class SpoofaxEsvConfigure implements TaskDef<ResourcePath, Result<Option<
         try {
             spoofaxSdf3GenerationUtil.performSdf3GenerationIfEnabled(context, rootDirectory, new SpoofaxSdf3GenerationUtil.Callbacks<SpoofaxEsvConfigureException>() {
                 @Override
-                public void generateFromAst(ExecContext context, STask<Result<IStrategoTerm, ?>> astSupplier) {
+                public void generateFromAst(ExecContext context, STask<Result<IStrategoTerm, ?>> astSupplier, Sdf3Config sdf3Config) {
                     includeAstSuppliers.add(sdf3ToCompletionColorer.createSupplier(astSupplier));
                 }
             });

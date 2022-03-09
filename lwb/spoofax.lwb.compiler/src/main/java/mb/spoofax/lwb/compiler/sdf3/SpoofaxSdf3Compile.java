@@ -10,6 +10,7 @@ import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.sdf3.task.spec.Sdf3CheckSpec;
+import mb.sdf3.task.spec.Sdf3Config;
 import mb.sdf3.task.spec.Sdf3ParseTableToFile;
 import mb.sdf3.task.spec.Sdf3SpecConfig;
 import mb.sdf3.task.spec.Sdf3SpecToParseTable;
@@ -71,23 +72,32 @@ public class SpoofaxSdf3Compile implements TaskDef<ResourcePath, Result<KeyedMes
 
     public Result<KeyedMessages, SpoofaxSdf3CompileException> compile(ExecContext context, SpoofaxSdf3Config config) {
         return config.caseOf()
-            .files((sdf3SpecConfig, outputParseTableAtermFile, outputParseTablePersistedFile) -> compileFromSourceFiles(context, sdf3SpecConfig, outputParseTableAtermFile, outputParseTablePersistedFile))
+            .files((sdf3SpecConfig, sdf3Config, outputParseTableAtermFile, outputParseTablePersistedFile) -> compileFromSourceFiles(
+                context,
+                sdf3SpecConfig,
+                sdf3Config,
+                "",
+                outputParseTableAtermFile,
+                outputParseTablePersistedFile
+            ))
             .prebuilt((inputParseTableAtermFile, inputParseTablePersistedFile, outputParseTableAtermFile, outputParseTablePersistedFile) -> copyPrebuilt(context, inputParseTableAtermFile, inputParseTablePersistedFile, outputParseTableAtermFile, outputParseTablePersistedFile))
             ;
     }
 
     public Result<KeyedMessages, SpoofaxSdf3CompileException> compileFromSourceFiles(
         ExecContext context,
-        Sdf3SpecConfig config,
+        Sdf3SpecConfig specConfig,
+        Sdf3Config config,
+        String strategyAffix,
         ResourcePath outputParseTableAtermFile,
         ResourcePath outputParseTablePersistedFile
     ) {
-        final KeyedMessages messages = context.require(check, config);
+        final KeyedMessages messages = context.require(check, specConfig);
         if(messages.containsError()) {
             return Result.ofErr(SpoofaxSdf3CompileException.checkFail(messages));
         }
 
-        final Supplier<Result<ParseTable, ?>> parseTableSupplier = toParseTable.createSupplier(new Sdf3SpecToParseTable.Input(config, false));
+        final Supplier<Result<ParseTable, ?>> parseTableSupplier = toParseTable.createSupplier(new Sdf3SpecToParseTable.Input(specConfig, config, strategyAffix, false));
         final Result<None, ? extends Exception> compileResult = context.require(parseTableToFile, new Sdf3ParseTableToFile.Input(
             parseTableSupplier,
             outputParseTableAtermFile,

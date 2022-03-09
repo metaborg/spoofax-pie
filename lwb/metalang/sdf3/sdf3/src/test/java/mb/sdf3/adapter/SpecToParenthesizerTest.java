@@ -5,7 +5,9 @@ import mb.common.util.ExceptionPrinter;
 import mb.pie.api.MixedSession;
 import mb.resource.fs.FSResource;
 import mb.resource.text.TextResource;
+import mb.sdf3.task.spec.Sdf3Config;
 import mb.sdf3.task.spec.Sdf3ParseTableToParenthesizer;
+import mb.sdf3.task.spec.Sdf3SpecConfig;
 import mb.sdf3.task.spec.Sdf3SpecToParseTable;
 import org.junit.jupiter.api.Test;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -17,9 +19,14 @@ class SpecToParenthesizerTest extends TestBase {
     @Test void testTask() throws Exception {
         final FSResource resource = textFile("a.sdf3", "module test context-free syntax A = <A>");
         final Sdf3ParseTableToParenthesizer taskDef = component.getSdf3ParseTableToParenthesizer();
+        final Sdf3SpecConfig sdf3SpecConfig = specConfig(rootDirectory.getPath(), rootDirectory.getPath(), resource.getPath());
+        final Sdf3Config sdf3Config = new Sdf3Config("$", "");
+        final String strategyAffix = "lang";
         try(final MixedSession session = newSession()) {
             final Sdf3SpecToParseTable.Input parseTableInput = new Sdf3SpecToParseTable.Input(
-                specConfig(rootDirectory.getPath(), rootDirectory.getPath(), resource.getPath()),
+                sdf3SpecConfig,
+                sdf3Config,
+                strategyAffix,
                 false
             );
             final Sdf3ParseTableToParenthesizer.Args parenthesizerArgs = new Sdf3ParseTableToParenthesizer.Args(

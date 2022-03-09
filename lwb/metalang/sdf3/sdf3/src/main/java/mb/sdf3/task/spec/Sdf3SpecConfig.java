@@ -44,10 +44,10 @@ public class Sdf3SpecConfig implements Serializable {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
         final Sdf3SpecConfig that = (Sdf3SpecConfig)o;
-        if(!rootDirectory.equals(that.rootDirectory)) return false;
-        if(!mainSourceDirectory.equals(that.mainSourceDirectory)) return false;
-        if(!mainFile.equals(that.mainFile)) return false;
-        return parseTableConfig.equals(that.parseTableConfig);
+        return rootDirectory.equals(that.rootDirectory)
+            && mainSourceDirectory.equals(that.mainSourceDirectory)
+            && mainFile.equals(that.mainFile)
+            && parseTableConfig.equals(that.parseTableConfig);
     }
 
     @Override public int hashCode() {

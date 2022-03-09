@@ -17,6 +17,7 @@ import mb.pie.api.exec.UncheckedInterruptedException;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
+import mb.sdf3.task.spec.Sdf3Config;
 import mb.sdf3.task.spec.Sdf3SpecConfig;
 import mb.sdf3_ext_statix.task.Sdf3ExtStatixGenerateStatix;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3ConfigureException;
@@ -129,7 +130,7 @@ public class SpoofaxStatixConfigure implements TaskDef<ResourcePath, Result<Opti
             try {
                 spoofaxSdf3GenerationUtil.performSdf3GenerationIfEnabled(context, rootDirectory, new SpoofaxSdf3GenerationUtil.Callbacks<SpoofaxStatixConfigureException>() {
                     @Override
-                    public void generateFromAst(ExecContext context, STask<Result<IStrategoTerm, ?>> astSupplier) throws SpoofaxStatixConfigureException, InterruptedException {
+                    public void generateFromAst(ExecContext context, STask<Result<IStrategoTerm, ?>> astSupplier, Sdf3Config sdf3Config) throws SpoofaxStatixConfigureException, InterruptedException {
                         try {
                             sdf3ToStatixGenInj(context, generatedSourcesDirectory, astSupplier);
                         } catch(RuntimeException | InterruptedException e) {
@@ -140,7 +141,7 @@ public class SpoofaxStatixConfigure implements TaskDef<ResourcePath, Result<Opti
                     }
 
                     @Override
-                    public void generateFromConfig(ExecContext context, Sdf3SpecConfig sdf3Config) {
+                    public void generateFromConfig(ExecContext context, Sdf3SpecConfig sdf3SpecConfig, Sdf3Config sdf3Config) {
                         // Add generated sources directory as an include Statix imports.
                         includeDirectories.add(generatedSourcesDirectory);
                         // Add this as an origin, as this task provides the Statix files (in statixGenerationUtil.writePrettyPrintedFile).

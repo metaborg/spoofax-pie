@@ -3,6 +3,7 @@ package mb.spoofax.lwb.compiler.sdf3;
 import mb.common.option.Option;
 import mb.common.util.ADT;
 import mb.resource.hierarchical.ResourcePath;
+import mb.sdf3.task.spec.Sdf3Config;
 import mb.sdf3.task.spec.Sdf3SpecConfig;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -14,17 +15,47 @@ import java.io.Serializable;
 @ADT
 public abstract class SpoofaxSdf3Config implements Serializable {
     public interface Cases<R> {
-        R files(Sdf3SpecConfig sdf3SpecConfig, ResourcePath outputParseTableAtermFile, ResourcePath outputParseTablePersistedFile);
+        R files(
+            Sdf3SpecConfig sdf3SpecConfig,
+            Sdf3Config sdf3Config,
+            ResourcePath outputParseTableAtermFile,
+            ResourcePath outputParseTablePersistedFile
+        );
 
-        R prebuilt(ResourcePath inputParseTableAtermFile, ResourcePath inputParseTablePersistedFile, ResourcePath outputParseTableAtermFile, ResourcePath outputParseTablePersistedFile);
+        R prebuilt(
+            ResourcePath inputParseTableAtermFile,
+            ResourcePath inputParseTablePersistedFile,
+            ResourcePath outputParseTableAtermFile,
+            ResourcePath outputParseTablePersistedFile
+        );
     }
 
-    public static SpoofaxSdf3Config files(Sdf3SpecConfig sdf3SpecConfig, ResourcePath outputParseTableAtermFile, ResourcePath outputParseTablePersistedFile) {
-        return SpoofaxSdf3Configs.files(sdf3SpecConfig, outputParseTableAtermFile, outputParseTablePersistedFile);
+    public static SpoofaxSdf3Config files(
+        Sdf3SpecConfig sdf3SpecConfig,
+        Sdf3Config sdf3Config,
+        ResourcePath outputParseTableAtermFile,
+        ResourcePath outputParseTablePersistedFile
+    ) {
+        return SpoofaxSdf3Configs.files(
+            sdf3SpecConfig,
+            sdf3Config,
+            outputParseTableAtermFile,
+            outputParseTablePersistedFile
+        );
     }
 
-    public static SpoofaxSdf3Config prebuilt(ResourcePath inputParseTableAtermFile, ResourcePath inputParseTablePersistedFile, ResourcePath outputParseTableAtermFile, ResourcePath outputParseTablePersistedFile) {
-        return SpoofaxSdf3Configs.prebuilt(inputParseTableAtermFile, inputParseTablePersistedFile, outputParseTableAtermFile, outputParseTablePersistedFile);
+    public static SpoofaxSdf3Config prebuilt(
+        ResourcePath inputParseTableAtermFile,
+        ResourcePath inputParseTablePersistedFile,
+        ResourcePath outputParseTableAtermFile,
+        ResourcePath outputParseTablePersistedFile
+    ) {
+        return SpoofaxSdf3Configs.prebuilt(
+            inputParseTableAtermFile,
+            inputParseTablePersistedFile,
+            outputParseTableAtermFile,
+            outputParseTablePersistedFile
+        );
     }
 
 
@@ -43,6 +74,9 @@ public abstract class SpoofaxSdf3Config implements Serializable {
         return Option.ofOptional(SpoofaxSdf3Configs.getSdf3SpecConfig(this));
     }
 
+    public Option<Sdf3Config> getSdf3Config() {
+        return Option.ofOptional(SpoofaxSdf3Configs.getSdf3Config(this));
+    }
 
     @Override public abstract int hashCode();
 

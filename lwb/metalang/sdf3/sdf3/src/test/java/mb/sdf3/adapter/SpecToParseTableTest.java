@@ -5,6 +5,8 @@ import mb.common.util.ExceptionPrinter;
 import mb.pie.api.MixedSession;
 import mb.resource.fs.FSResource;
 import mb.resource.text.TextResource;
+import mb.sdf3.task.spec.Sdf3Config;
+import mb.sdf3.task.spec.Sdf3SpecConfig;
 import mb.sdf3.task.spec.Sdf3SpecToParseTable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -28,9 +30,14 @@ class SpecToParseTableTest extends TestBase {
         textFile("src/nested/a.sdf3", "module nested/a context-free syntax A.A = <key>");
         textFile("src/nested/b.sdf3", "module nested/b context-free syntax B.B = <word>");
         final Sdf3SpecToParseTable taskDef = component.getSdf3SpecToParseTable();
+        final Sdf3SpecConfig sdf3SpecConfig = specConfig(rootDirectory.getPath());
+        final Sdf3Config sdf3Config = new Sdf3Config("$", "");
+        final String strategyAffix = "lang";
         try(final MixedSession session = newSession()) {
             final Sdf3SpecToParseTable.Input input = new Sdf3SpecToParseTable.Input(
-                specConfig(rootDirectory.getPath()),
+                sdf3SpecConfig,
+                sdf3Config,
+                strategyAffix,
                 createCompletionTable
             );
             final Result<ParseTable, ?> parseTableResult = session.require(taskDef.createTask(input));

@@ -54,6 +54,17 @@ rules // Sdf3 section and options
   sdf3ParseTableGeneratorOptionOk(s, Sdf3ParseTableGeneratorCheckPriorities(e)) :-
     typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
 
+  sdf3OptionOk(s, Sdf3PlaceholderSection(options)) :-
+    sdf3PlaceholderOptionsOk(s, options).
+
+  sdf3PlaceholderOptionOk : scope * Sdf3PlaceholderOption
+  sdf3PlaceholderOptionsOk maps sdf3PlaceholderOptionOk(*, list(*))
+
+  sdf3PlaceholderOptionOk(s, Sdf3PlaceholderPrefix(e)) :-
+    typeOfExpr(s, e) == STRING() | error $[Expected string]@e.
+  sdf3PlaceholderOptionOk(s, Sdf3PlaceholderSuffix(e)) :-
+    typeOfExpr(s, e) == STRING() | error $[Expected string]@e.
+
 rules // Esv section and options
 
   partOk(s, EsvSection(options)) :- esvOptionsOk(s, options).

@@ -7,6 +7,8 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
 import mb.sdf3.task.spec.Sdf3CheckSpec;
+import mb.sdf3.task.spec.Sdf3Config;
+import mb.sdf3.task.spec.Sdf3SpecConfig;
 
 import javax.inject.Inject;
 
@@ -43,7 +45,7 @@ public class SpoofaxSdf3Check implements TaskDef<ResourcePath, KeyedMessages> {
 
     public KeyedMessages check(ExecContext context, SpoofaxSdf3Config config) {
         return config.caseOf()
-            .files((sdf3SpecConfig, outputParseTableAtermFile, outputParseTablePersistedFile) -> context.require(check, sdf3SpecConfig))
+            .files((sdf3SpecConfig, sdf3Config, outputParseTableAtermFile, outputParseTablePersistedFile) -> context.require(check, sdf3SpecConfig))
             .prebuilt((inputParseTableAtermFile, inputParseTablePersistedFile, outputParseTableAtermFile, outputParseTablePersistedFile) -> KeyedMessages.of())
             ;
     }

@@ -1,5 +1,6 @@
 package mb.spoofax.lwb.compiler.stratego;
 
+import mb.cfg.metalang.CfgSdf3Config;
 import mb.cfg.metalang.CfgStrategoConfig;
 import mb.cfg.metalang.CfgStrategoSource;
 import mb.cfg.task.CfgRootDirectoryToObject;
@@ -30,9 +31,11 @@ import mb.resource.fs.FSResource;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.path.string.PathStringMatcher;
+import mb.sdf3.stratego.Sdf3Context;
 import mb.sdf3.task.Sdf3ToCompletionRuntime;
 import mb.sdf3.task.Sdf3ToPrettyPrinter;
 import mb.sdf3.task.Sdf3ToSignature;
+import mb.sdf3.task.spec.Sdf3Config;
 import mb.sdf3.task.spec.Sdf3ParseTableToParenthesizer;
 import mb.sdf3.task.spec.Sdf3SpecConfig;
 import mb.sdf3.task.spec.Sdf3SpecToParseTable;
@@ -242,9 +245,9 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
         try {
             spoofaxSdf3GenerationUtil.performSdf3GenerationIfEnabled(context, rootDirectory, new SpoofaxSdf3GenerationUtil.Callbacks<SpoofaxStrategoConfigureException>() {
                 @Override
-                public void generateFromAst(ExecContext context, STask<Result<IStrategoTerm, ?>> astSupplier) throws SpoofaxStrategoConfigureException, InterruptedException {
+                public void generateFromAst(ExecContext context, STask<Result<IStrategoTerm, ?>> astSupplier, Sdf3Config sdf3Config) throws SpoofaxStrategoConfigureException, InterruptedException {
                     try {
-                        sdf3ToPrettyPrinter(context, strategyAffix, generatedSourcesDirectory, astSupplier);
+                        sdf3ToPrettyPrinter(context, strategyAffix, sdf3Config, generatedSourcesDirectory, astSupplier);
                     } catch(RuntimeException | InterruptedException e) {
                         throw e; // Do not wrap runtime and interrupted exceptions, rethrow them.
                     } catch(Exception e) {
@@ -281,11 +284,16 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
                 }
 
                 @Override
-                public void generateFromConfig(ExecContext context, Sdf3SpecConfig sdf3Config) throws SpoofaxStrategoConfigureException, IOException, InterruptedException {
+                public void generateFromConfig(ExecContext context, Sdf3SpecConfig sdf3SpecConfig, Sdf3Config sdf3Config) throws SpoofaxStrategoConfigureException, IOException, InterruptedException {
                     // Compile SDF3 specification to a Stratego parenthesizer.
                     try {
-                        final STask<Result<ParseTable, ?>> parseTableSupplier = sdf3ToParseTable.createSupplier(new Sdf3SpecToParseTable.Input(sdf3Config, false));
-                        sdf3ToParenthesizer(context, strategyAffix, generatedSourcesDirectory, parseTableSupplier);
+                        final STask<Result<ParseTable, ?>> parseTableSupplier = sdf3ToParseTable.createSupplier(new Sdf3SpecToParseTable.Input(
+                            sdf3SpecConfig,
+                            sdf3Config,
+                            strategyAffix,
+                            false
+                        ));
+                        sdf3ToParenthesizer(context, strategyAffix, sdf3Config, generatedSourcesDirectory, parseTableSupplier);
                     } catch(RuntimeException | InterruptedException e) {
                         throw e; // Do not wrap runtime and interrupted exceptions, rethrow them.
                     } catch(Exception e) {
@@ -296,7 +304,7 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
                         final HashMap<String, Object> map = new HashMap<>();
                         map.put("name", strategyAffix);
                         map.put("ppName", strategyAffix);
-                        map.put("sdf3MainModule", sdf3Config.getMainModuleName());
+                        map.put("sdf3MainModule", sdf3SpecConfig.getMainModuleName());
                         completionTemplate.write(context, generatedSourcesDirectory.appendRelativePath("completion.str2"), cfgStrategoConfig, map);
                         ppTemplate.write(context, generatedSourcesDirectory.appendRelativePath("pp.str2"), cfgStrategoConfig, map);
                     }
@@ -351,16 +359,18 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
     private void sdf3ToPrettyPrinter(
         ExecContext context,
         String strategyAffix,
+        Sdf3Config sdf3Config,
         ResourcePath generatesSourcesDirectory,
         STask<Result<IStrategoTerm, ?>> astSupplier
     ) throws Exception {
-        final STask<Result<IStrategoTerm, ?>> supplier = sdf3ToPrettyPrinter.createSupplier(new Sdf3ToPrettyPrinter.Input(astSupplier, strategyAffix));
+        final STask<Result<IStrategoTerm, ?>> supplier = sdf3ToPrettyPrinter.createSupplier(new Sdf3ToPrettyPrinter.Input(astSupplier, sdf3Config, strategyAffix));
         spoofaxStrategoGenerationUtil.writePrettyPrintedFile(context, generatesSourcesDirectory, supplier);
     }
 
     private void sdf3ToParenthesizer(
         ExecContext context,
         String strategyAffix,
+        Sdf3Config sdf3Config,
         ResourcePath generatesSourcesDirectory,
         STask<Result<ParseTable, ?>> parseTableSupplier
     ) throws Exception {

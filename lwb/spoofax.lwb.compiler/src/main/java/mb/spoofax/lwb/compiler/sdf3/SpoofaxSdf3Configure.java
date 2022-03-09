@@ -14,6 +14,7 @@ import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
+import mb.sdf3.task.spec.Sdf3Config;
 import mb.sdf3.task.spec.Sdf3SpecConfig;
 import org.metaborg.sdf2table.parsetable.ParseTableConfiguration;
 
@@ -99,8 +100,22 @@ public class SpoofaxSdf3Configure implements TaskDef<ResourcePath, Result<Option
             cfgSdf3Config.checkPrioritiesInParseTable(),
             cfgSdf3Config.createLayoutSensitiveParseTable()
         );
-        final Sdf3SpecConfig sdf3SpecConfig = new Sdf3SpecConfig(rootDirectory, mainSourceDirectory.getPath(), mainFile.getPath(), parseTableConfiguration);
-        return Result.ofOk(SpoofaxSdf3Config.files(sdf3SpecConfig, cfgSdf3Config.parseTableAtermOutputFile(), cfgSdf3Config.parseTablePersistedOutputFile()));
+        final Sdf3SpecConfig sdf3SpecConfig = new Sdf3SpecConfig(
+            rootDirectory,
+            mainSourceDirectory.getPath(),
+            mainFile.getPath(),
+            parseTableConfiguration
+        );
+        final Sdf3Config sdf3Config = new Sdf3Config(
+            cfgSdf3Config.sdf3PlaceholderPrefix(),
+            cfgSdf3Config.sdf3PlaceholderSuffix()
+        );
+        return Result.ofOk(SpoofaxSdf3Config.files(
+            sdf3SpecConfig,
+            sdf3Config,
+            cfgSdf3Config.parseTableAtermOutputFile(),
+            cfgSdf3Config.parseTablePersistedOutputFile())
+        );
     }
 
     public Result<SpoofaxSdf3Config, SpoofaxSdf3ConfigureException> configurePrebuilt(

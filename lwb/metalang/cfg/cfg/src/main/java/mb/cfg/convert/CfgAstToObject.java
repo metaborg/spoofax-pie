@@ -189,6 +189,11 @@ public class CfgAstToObject {
                 ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorCheckOverlap", builder::checkOverlapInParseTable);
                 ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorCheckPriorities", builder::checkPrioritiesInParseTable);
             });
+
+            subParts.getAllSubTermsInListAsParts("Sdf3PlaceholderSection").ifSome(plhdrParts -> {
+                plhdrParts.forOneSubtermAsString("Sdf3PlaceholderPrefix", builder::sdf3PlaceholderPrefix);
+                plhdrParts.forOneSubtermAsString("Sdf3PlaceholderSuffix", builder::sdf3PlaceholderSuffix);
+            });
         });
         parts.getAllSubTermsInListAsParts("EsvSection").ifSome(subParts -> {
             final CfgEsvConfig.Builder builder = languageCompilerInputBuilder.withEsv();
