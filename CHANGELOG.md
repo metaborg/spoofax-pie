@@ -3,6 +3,9 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+### Fixed
+- Literals on the left-hand side in SDF3 kernel syntax productions causing errors even though they are valid.
+
 ### Changed
 - Improve "language/component management" and make it cross-platform.
 - Merge `spoofax.compiler.dagger` into `spoofax.compiler`.
