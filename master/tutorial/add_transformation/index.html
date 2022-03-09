@@ -1160,43 +1160,43 @@ The <code class="highlight"><span class="nv">replace-worlds</span><span class="w
 </td></tr></table>
 <p>This class very similar to <code>HelloWorldShowParsedAst</code>, but runs the <code>HelloWorldReplaceWorlds</code> task on the parsed AST, transforming the AST.</p>
 <p>Now open <code>helloworld/spoofax.cfg</code> again and register the tasks by adding:</p>
-<div class="highlight"><pre><span></span><code><span class="na">task-def mb.helloworld.task.HelloWorldReplaceWorlds</span>
-<span class="na">let showReplaceWorlds</span> <span class="o">=</span> <span class="s">task-def mb.helloworld.task.HelloWorldShowReplaceWorlds</span>
+<div class="highlight"><pre><span></span><code><span class="na">task-def mb.helloworld.task.HelloWorldReplaceWorlds</span><span class="w"></span>
+<span class="na">let showReplaceWorlds</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">task-def mb.helloworld.task.HelloWorldShowReplaceWorlds</span><span class="w"></span>
 </code></pre></div>
 <p>Then add a command for it by adding:</p>
-<div class="highlight"><pre><span></span><code><span class="na">let showReplaceWorldsCommand</span> <span class="o">=</span> <span class="s">command-def {</span>
-  <span class="na">task-def</span> <span class="o">=</span> <span class="s">showReplaceWorlds</span>
-  <span class="na">display-name</span> <span class="o">=</span> <span class="s">&quot;Replace world with hello&quot;</span>
-  <span class="na">parameters</span> <span class="o">=</span> <span class="s">[</span>
-    <span class="na">file</span> <span class="o">=</span> <span class="s">parameter {</span>
-      <span class="na">type</span> <span class="o">=</span> <span class="s">java mb.resource.ResourceKey</span>
-      <span class="na">argument-providers</span> <span class="o">=</span> <span class="s">[Context(ReadableResource)]</span>
-    <span class="na">}</span>
-  <span class="na">]</span>
-<span class="na">}</span>
+<div class="highlight"><pre><span></span><code><span class="na">let showReplaceWorldsCommand</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">command-def {</span><span class="w"></span>
+<span class="w">  </span><span class="na">task-def</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">showReplaceWorlds</span><span class="w"></span>
+<span class="w">  </span><span class="na">display-name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Replace world with hello&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="na">parameters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">[</span><span class="w"></span>
+<span class="w">    </span><span class="na">file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">parameter {</span><span class="w"></span>
+<span class="w">      </span><span class="na">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">java mb.resource.ResourceKey</span><span class="w"></span>
+<span class="w">      </span><span class="na">argument-providers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">[Context(ReadableResource)]</span><span class="w"></span>
+<span class="w">    </span><span class="na">}</span><span class="w"></span>
+<span class="w">  </span><span class="na">]</span><span class="w"></span>
+<span class="na">}</span><span class="w"></span>
 </code></pre></div>
 <p>Finally, add menu items for the command by adding:</p>
-<div class="highlight"><pre><span></span><code><span class="na">editor-context-menu [</span>
-  <span class="na">menu &quot;Transform&quot; [</span>
-    <span class="na">command-action {</span>
-      <span class="na">command-def</span> <span class="o">=</span> <span class="s">showReplaceWorldsCommand</span>
-      <span class="na">execution-type</span> <span class="o">=</span> <span class="s">Once</span>
-    <span class="na">}</span>
-    <span class="na">command-action {</span>
-      <span class="na">command-def</span> <span class="o">=</span> <span class="s">showReplaceWorldsCommand</span>
-      <span class="na">execution-type</span> <span class="o">=</span> <span class="s">Continuous</span>
-    <span class="na">}</span>
-  <span class="na">]</span>
-<span class="na">]</span>
-<span class="na">resource-context-menu [</span>
-  <span class="na">menu &quot;Transform&quot; [</span>
-    <span class="na">command-action {</span>
-      <span class="na">command-def</span> <span class="o">=</span> <span class="s">showReplaceWorldsCommand</span>
-      <span class="na">execution-type</span> <span class="o">=</span> <span class="s">Once</span>
-      <span class="na">required-resource-types</span> <span class="o">=</span> <span class="s">[File]</span>
-    <span class="na">}</span>
-  <span class="na">]</span>
-<span class="na">]</span>
+<div class="highlight"><pre><span></span><code><span class="na">editor-context-menu [</span><span class="w"></span>
+<span class="w">  </span><span class="na">menu &quot;Transform&quot; [</span><span class="w"></span>
+<span class="w">    </span><span class="na">command-action {</span><span class="w"></span>
+<span class="w">      </span><span class="na">command-def</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">showReplaceWorldsCommand</span><span class="w"></span>
+<span class="w">      </span><span class="na">execution-type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">Once</span><span class="w"></span>
+<span class="w">    </span><span class="na">}</span><span class="w"></span>
+<span class="w">    </span><span class="na">command-action {</span><span class="w"></span>
+<span class="w">      </span><span class="na">command-def</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">showReplaceWorldsCommand</span><span class="w"></span>
+<span class="w">      </span><span class="na">execution-type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">Continuous</span><span class="w"></span>
+<span class="w">    </span><span class="na">}</span><span class="w"></span>
+<span class="w">  </span><span class="na">]</span><span class="w"></span>
+<span class="na">]</span><span class="w"></span>
+<span class="na">resource-context-menu [</span><span class="w"></span>
+<span class="w">  </span><span class="na">menu &quot;Transform&quot; [</span><span class="w"></span>
+<span class="w">    </span><span class="na">command-action {</span><span class="w"></span>
+<span class="w">      </span><span class="na">command-def</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">showReplaceWorldsCommand</span><span class="w"></span>
+<span class="w">      </span><span class="na">execution-type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">Once</span><span class="w"></span>
+<span class="w">      </span><span class="na">required-resource-types</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">[File]</span><span class="w"></span>
+<span class="w">    </span><span class="na">}</span><span class="w"></span>
+<span class="w">  </span><span class="na">]</span><span class="w"></span>
+<span class="na">]</span><span class="w"></span>
 </code></pre></div>
 <p>Build the project so that we can test our changes.
 Test the command similarly to testing the "Show parsed AST" command.</p>
