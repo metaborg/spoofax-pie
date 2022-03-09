@@ -97,7 +97,7 @@ Push this change to the `develop` branch and a GitHub actions build will automat
 
 ## Copyright and License
 
-Copyright © 2018-2021 Delft University of Technology
+Copyright © 2018-2022 Delft University of Technology
 
 The files in this repository are licensed under the [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
 You may use the files in this repository in compliance with the license.

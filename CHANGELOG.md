@@ -3,6 +3,9 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+
+
+## [0.17.0] - 2022-03-09
 ### Fixed
 - Literals on the left-hand side in SDF3 kernel syntax productions causing errors even though they are valid.
 
@@ -11,7 +14,10 @@ All notable changes to this project are documented in this file, based on [Keep 
 - Merge `spoofax.compiler.dagger` into `spoofax.compiler`.
 - Merge `spoofax.lwb.compiler.dagger` into `spoofax.lwb.compiler`.
 - Rename `Spoofax3` -> `SpoofaxLwb` in `spoofax.lwb.compiler`.
-- Update org.jetbrains.intellij Gradle plugin to 1.0.
+- Update `org.jetbrains.intellij` Gradle plugin to `1.0`.
+- `releng` (devenv-release) requirement to `0.1.29`.
+- `common` requirement to `0.10.2`.
+- `pie` requirement to `0.19.8`.
 
 
 ## [0.16.17] - 2021-12-13
@@ -436,7 +442,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.17...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.17.0...HEAD
+[0.17.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.17...release-0.17.0
 [0.16.17]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.16...release-0.16.17
 [0.16.16]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.15...release-0.16.16
 [0.16.15]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.14...release-0.16.15
