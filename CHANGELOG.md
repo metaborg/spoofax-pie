@@ -3,6 +3,11 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+### Fixed
+- Ensure that `strategolib.eclipse` and `gpp.eclipse` are published, as they are required by Eclipse plugins of languages.
+
+### Changed
+- Update `org.jetbrains.intellij` Gradle plugin to `1.4.0`.
 
 
 ## [0.17.0] - 2022-03-09
