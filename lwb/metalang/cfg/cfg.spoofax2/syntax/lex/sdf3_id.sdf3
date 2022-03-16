@@ -1,5 +1,9 @@
 module lex/sdf3_id
 
+imports
+
+  lex/keyword
+
 lexical sorts
 
   Sdf3SortIdLit Sdf3SortIdChars Sdf3Keyword
@@ -9,6 +13,7 @@ lexical syntax
   Sdf3SortIdLit  = Sdf3SortIdChars
   
   Sdf3SortIdChars = [a-zA-Z0-9\-\_\$]+ // TODO: check if this is correct
+  Sdf3SortIdChars = Keyword {reject}
   Sdf3SortIdChars = Sdf3Keyword {reject}
 
 lexical restrictions

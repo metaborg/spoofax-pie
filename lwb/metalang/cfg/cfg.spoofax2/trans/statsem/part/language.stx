@@ -4,6 +4,7 @@ imports
 
   statsem/part
   statsem/expr
+  statsem/util
 
   signatures/part/language-sig
 
@@ -170,3 +171,27 @@ rules // Dynamix section and options
   dynamixPrebuiltOptionOk(s, DynamixPrebuiltSpecAtermDirectory(e)) :-
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
 
+rules
+
+  partOk(s, Dependencies(dependency_kinds)) :-
+    dependenciesOk(s, dependency_kinds).
+
+  dependencyOk : scope * Dependency
+  dependenciesOk maps dependencyOk(*, list(*))
+
+  dependencyOk(s, Dependency(e, kind)) :-
+    dependencyExprOk(s, e),
+    dependencyKindOk(s, kind).
+
+
+  dependencyExprOk : scope * Expr
+  dependencyExprsOk maps dependencyExprOk(*, list(*))
+
+  dependencyExprOk(s, e) :- {T}
+    typeOfExpr(s, e) == T,
+    bOr(bOr(bOr(typeEq(T, STRING()), typeEq(T, COORDINATE())), typeEq(T, COORDINATE_REQUIREMENT())), typeEq(T, PATH())) == TRUE() | error $[Expected string, coordinate, coordinate requirement, or path]@e.
+
+  dependencyKindOk : scope * DependencyKind
+  dependencyKindsOk maps dependencyKindOk(*, list(*))
+
+  dependencyKindOk(s, CompileTimeDependency()).

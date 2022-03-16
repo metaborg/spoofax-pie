@@ -135,3 +135,21 @@ context-free syntax
   <{DynamixPrebuiltOption "\n"}*>
 }>
   DynamixPrebuiltOption.DynamixPrebuiltSpecAtermDirectory = <spec-aterm-directory = <Expr>>
+
+context-free sorts
+
+  DependencyKind Dependency
+
+context-free syntax
+
+  Part.Dependencies = <dependencies [
+  <{Dependency "\n"}*>
+]>
+
+  Dependency.Dependency = <<Expr> = <DependencyKind>>
+  DependencyKind.CompileTimeDependency = <compile-time>
+
+lexical syntax
+
+  Keyword = "dependencies"
+  Keyword = "compile-time"

@@ -5,6 +5,7 @@ imports
   statsem/part
   statsem/expr
   statsem/expr/menu_item
+  statsem/util
 
   signatures/part/language_adapter-sig
 

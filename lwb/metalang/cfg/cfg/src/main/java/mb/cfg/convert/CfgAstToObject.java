@@ -6,6 +6,9 @@ import mb.cfg.CompileLanguageInputCustomizer;
 import mb.cfg.CompileLanguageSpecificationInput;
 import mb.cfg.CompileLanguageSpecificationInputBuilder;
 import mb.cfg.CompileLanguageSpecificationShared;
+import mb.cfg.Dependency;
+import mb.cfg.DependencyKind;
+import mb.cfg.DependencySource;
 import mb.cfg.metalang.CfgDynamixConfig;
 import mb.cfg.metalang.CfgDynamixSource;
 import mb.cfg.metalang.CfgEsvConfig;
@@ -21,6 +24,7 @@ import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Severity;
 import mb.common.option.Option;
 import mb.common.util.Properties;
+import mb.common.util.SetView;
 import mb.jsglr.common.TermTracer;
 import mb.pie.api.ExecContext;
 import mb.resource.ResourceKey;
@@ -58,6 +62,9 @@ import mb.spoofax.compiler.language.StylerLanguageCompiler;
 import mb.spoofax.compiler.platform.EclipseProjectCompiler;
 import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.TypeInfo;
+import mb.spoofax.core.Coordinate;
+import mb.spoofax.core.CoordinateRequirement;
+import mb.spoofax.core.Version;
 import mb.spoofax.core.language.command.CommandContextType;
 import mb.spoofax.core.language.command.CommandExecutionType;
 import mb.spoofax.core.language.command.EditorFileType;
@@ -70,6 +77,7 @@ import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.util.TermUtils;
 
+import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
 /**
@@ -279,6 +287,71 @@ public class CfgAstToObject {
             subParts.forOneSubtermAsBool("StrategoSdf3StatixExplicationGen", builder::enableSdf3StatixExplicationGen);
             subParts.forOneSubtermAsString("StrategoLanguageStrategyAffix", builder::languageStrategyAffix);
             subParts.forOneSubtermAsString("StrategoOutputJavaPackageId", builder::outputJavaPackageId);
+        });
+        parts.getAllSubTermsInListAsParts("Dependencies").ifSome(subParts -> {
+            subParts.forAll("Dependency", 2, dependencyTerm -> {
+                final IStrategoAppl exprTerm = TermUtils.asApplAt(dependencyTerm, 0)
+                    .orElseThrow(() -> new InvalidAstShapeException("constructor application as first subterm", dependencyTerm));
+                final DependencySource dependencySource;
+                switch(exprTerm.getConstructor().getName()) {
+                    case "String": {
+                        final String id = TermUtils.asJavaStringAt(exprTerm, 0)
+                            .orElseThrow(() -> new InvalidAstShapeException("string as first subterm", exprTerm));
+                        dependencySource = DependencySource.coordinateRequirement(new CoordinateRequirement(id));
+                        break;
+                    }
+                    case "CoordinateRequirement": {
+                        final String groupString = TermUtils.asJavaStringAt(exprTerm, 0)
+                            .orElseThrow(() -> new InvalidAstShapeException("string as first subterm", exprTerm));
+                        final String id = TermUtils.asJavaStringAt(exprTerm, 1)
+                            .orElseThrow(() -> new InvalidAstShapeException("string as second subterm", exprTerm));
+                        final String versionString = TermUtils.asJavaStringAt(exprTerm, 2)
+                            .orElseThrow(() -> new InvalidAstShapeException("string as third subterm", exprTerm));
+                        dependencySource = DependencySource.coordinateRequirement(new CoordinateRequirement(
+                            groupString.equals("*") ? null : groupString,
+                            id,
+                            versionString.equals("*") ? null : Version.parse(versionString)
+                        ));
+                        break;
+                    }
+                    case "Coordinate": {
+                        final String groupId = TermUtils.asJavaStringAt(exprTerm, 0)
+                            .orElseThrow(() -> new InvalidAstShapeException("string as first subterm", exprTerm));
+                        final String id = TermUtils.asJavaStringAt(exprTerm, 1)
+                            .orElseThrow(() -> new InvalidAstShapeException("string as second subterm", exprTerm));
+                        final String version = TermUtils.asJavaStringAt(exprTerm, 2)
+                            .orElseThrow(() -> new InvalidAstShapeException("string as third subterm", exprTerm));
+                        dependencySource = DependencySource.coordinate(new Coordinate(
+                            groupId,
+                            id,
+                            Version.parse(version)
+                        ));
+                        break;
+                    }
+                    case "Path": {
+                        final String path = TermUtils.asJavaStringAt(exprTerm, 0)
+                            .orElseThrow(() -> new InvalidAstShapeException("string as first subterm", exprTerm));
+                        dependencySource = DependencySource.path(path);
+                        break;
+                    }
+                    default:
+                        throw new InvalidAstShapeException("Dependency expression", exprTerm);
+                }
+                final LinkedHashSet<DependencyKind> dependencyKinds = new LinkedHashSet<>();
+                final IStrategoAppl kindTerm = TermUtils.asApplAt(dependencyTerm, 1) // TODO: go over list once this becomes a list of kinds.
+                    .orElseThrow(() -> new InvalidAstShapeException("constructor application as second subterm", dependencyTerm));
+                switch(kindTerm.getConstructor().getName()) {
+                    case "CompileTimeDependency":
+                        dependencyKinds.add(DependencyKind.CompileTime);
+                        break;
+                    case "RunTimeDependency":
+                        dependencyKinds.add(DependencyKind.RunTime);
+                        break;
+                    default:
+                        throw new InvalidAstShapeException("Dependency kind", kindTerm);
+                }
+                languageCompilerInputBuilder.compileLanguage.addDependencies(new Dependency(dependencySource, SetView.of(dependencyKinds)));
+            });
         });
         customizer.customize(languageCompilerInputBuilder);
         final CompileLanguageSpecificationInput languageCompilerInput = languageCompilerInputBuilder.build(properties, shared, languageShared);

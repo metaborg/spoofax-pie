@@ -5,26 +5,25 @@ imports
   statsem/util
 
   signatures/expr-sig
-  signatures/expr/literal-sig
-  signatures/expr/command-sig
-  signatures/expr/menu_item-sig
 
 signature
 
   sorts TYPE constructors
-    BOOL        : TYPE
-    INT         : TYPE
-    UINT        : TYPE
-    CHAR        : TYPE
-    STRING      : TYPE
-    PATH        : TYPE
-    JAVA_ID     : TYPE
-    SORT        : TYPE
-    STRATEGY    : TYPE
-    TASK_DEF    : TYPE
-    COMMAND_DEF : TYPE
-    MENU_ITEM   : TYPE
-    
+    BOOL                   : TYPE
+    INT                    : TYPE
+    UINT                   : TYPE
+    CHAR                   : TYPE
+    STRING                 : TYPE
+    PATH                   : TYPE
+    JAVA_ID                : TYPE
+    SORT                   : TYPE
+    STRATEGY               : TYPE
+    TASK_DEF               : TYPE
+    COMMAND_DEF            : TYPE
+    MENU_ITEM              : TYPE
+    COORDINATE             : TYPE
+    COORDINATE_REQUIREMENT : TYPE
+
 rules
 
   typeOfExpr : scope * Expr -> TYPE

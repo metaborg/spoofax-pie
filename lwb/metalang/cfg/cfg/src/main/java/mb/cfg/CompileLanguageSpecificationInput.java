@@ -11,6 +11,7 @@ import org.immutables.value.Value;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -18,7 +19,7 @@ import java.util.Properties;
 public interface CompileLanguageSpecificationInput extends Serializable {
     class Builder extends ImmutableCompileLanguageSpecificationInput.Builder {}
 
-    static Builder builder() { return new Builder(); }
+    static Builder builder() {return new Builder();}
 
 
     /// Shared
@@ -37,6 +38,8 @@ public interface CompileLanguageSpecificationInput extends Serializable {
     Optional<CfgDynamixConfig> dynamix();
 
     Optional<CfgStrategoConfig> stratego();
+
+    List<Dependency> dependencies();
 
 
     /// Files information, known up-front for build systems with static dependencies such as Gradle.

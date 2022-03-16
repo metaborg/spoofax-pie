@@ -1,0 +1,25 @@
+module lex/coordinate
+
+imports
+
+  lex/keyword
+
+lexical sorts
+
+  CoordinateChars CoordinateCharsMiddle CoordinateChar CoordinateRequirementChars
+
+lexical syntax
+
+  CoordinateChars = CoordinateChar+
+  CoordinateChars = Keyword {reject}
+  CoordinateCharsMiddle = CoordinateChar+
+
+  CoordinateChar = ~[\"\:\;\,\*\$\{\}\[\]\n\r\\\ ]
+  CoordinateChar = "\\" ~[\n\r]
+
+  CoordinateRequirementChars = CoordinateChars
+  CoordinateRequirementChars = "*"
+
+lexical restrictions
+
+  CoordinateChars -/- ~[\"\:\;\,\*\$\{\}\[\]\n\r\\\ ]

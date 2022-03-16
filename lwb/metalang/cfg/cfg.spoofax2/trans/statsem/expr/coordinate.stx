@@ -1,0 +1,13 @@
+module statsem/expr/coordinate
+
+imports
+
+  statsem/expr
+  
+  signatures/expr-sig
+  signatures/expr/coordinate-sig
+
+rules
+  
+  typeOfExpr(_, Coordinate(_, _, _))            = COORDINATE().
+  typeOfExpr(_, CoordinateRequirement(_, _, _)) = COORDINATE_REQUIREMENT().
