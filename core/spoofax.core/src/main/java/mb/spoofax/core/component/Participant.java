@@ -12,6 +12,7 @@ import mb.spoofax.core.Coordinate;
 import mb.spoofax.core.CoordinateRequirement;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.platform.PlatformComponent;
+import mb.spoofax.core.resource.ResourcesComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.Consumer;
@@ -98,6 +99,18 @@ public interface Participant<L extends LoggerComponent, R extends ResourceServic
      * this participant does not have one.
      */
     @Nullable ResourceRegistriesProvider getResourceRegistriesProvider(
+        L loggerComponent,
+        R baseResourceServiceComponent,
+        P platformComponent,
+        SubcomponentRegistry subcomponentRegistry,
+        ComponentDependencyResolver dependencyResolver
+    );
+
+    /**
+     * Gets the {@link ResourcesComponent resources component} of this participant, or {@code null} if this participant
+     * does not have one.
+     */
+    @Nullable ResourcesComponent getResourcesComponent(
         L loggerComponent,
         R baseResourceServiceComponent,
         P platformComponent,

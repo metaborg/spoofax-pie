@@ -2,7 +2,6 @@ package mb.spoofax.lwb.eclipse.dynamicloading;
 
 import mb.common.util.ListView;
 import mb.log.api.Level;
-import mb.pie.dagger.PieComponent;
 import mb.pie.dagger.RootPieModule;
 import mb.pie.runtime.PieBuilderImpl;
 import mb.pie.runtime.store.SerializingStoreBuilder;
@@ -13,7 +12,6 @@ import mb.resource.dagger.ResourceServiceComponent;
 import mb.resource.fs.FSResource;
 import mb.spoofax.core.CoordinateRequirement;
 import mb.spoofax.core.component.ComponentDependencyResolver;
-import mb.spoofax.core.component.StaticComponentManager;
 import mb.spoofax.core.component.SubcomponentRegistry;
 import mb.spoofax.eclipse.EclipseParticipant;
 import mb.spoofax.eclipse.EclipsePlatformComponent;
@@ -52,7 +50,7 @@ public class SpoofaxDynamicLoadingEclipseParticipant extends DynamicLoadingParti
 
     @Override
     public ListView<CoordinateRequirement> getDependencies() {
-        return ListView.copyOf(Stream.concat(super.getDependencies().stream(), Stream.of(new CoordinateRequirement("spt"))));
+        return ListView.copyOf(Stream.concat(super.getDependencies().stream(), Stream.of(new CoordinateRequirement("org.metaborg", "spt"))));
     }
 
     @Override

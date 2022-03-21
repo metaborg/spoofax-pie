@@ -115,6 +115,25 @@ public class {{baseParticipant.id}}<L extends LoggerComponent, R extends Resourc
         SubcomponentRegistry subcomponentRegistry,
         ComponentDependencyResolver dependencyResolver
     ) {
+        final {{resourcesComponent.qualifiedId}} resourcesComponent = getResourcesComponent(
+            loggerComponent,
+            baseResourceServiceComponent,
+            platformComponent,
+            subcomponentRegistry,
+            dependencyResolver
+        );
+        subcomponentRegistry.register({{resourcesComponent.qualifiedId}}.class, resourcesComponent);
+        return resourcesComponent;
+    }
+
+    @Override
+    public {{resourcesComponent.qualifiedId}} getResourcesComponent(
+        L loggerComponent,
+        R baseResourceServiceComponent,
+        P platformComponent,
+        SubcomponentRegistry subcomponentRegistry,
+        ComponentDependencyResolver dependencyResolver
+    ) {
         if(resourcesComponent == null) {
             final {{resourcesModule.qualifiedId}} module = createResourcesModule(loggerComponent, baseResourceServiceComponent, platformComponent);
             customizeResourcesModule(loggerComponent, baseResourceServiceComponent, platformComponent, module);

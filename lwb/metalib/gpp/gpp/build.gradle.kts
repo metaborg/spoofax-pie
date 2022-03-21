@@ -25,10 +25,6 @@ languageProject {
       addStrategyPackageIds("gpp.trans")
       addInteropRegisterersByReflection("gpp.trans.InteropRegisterer")
     }
-    withExports().run {
-      addExports("Stratego", "trans")
-      addExports("Str2Lib", "src-gen/java/gpp/trans/gpp.str2lib")
-    }
   }
 }
 spoofax2BasedLanguageProject {
@@ -51,6 +47,10 @@ spoofax2BasedLanguageProject {
 languageAdapterProject {
   compilerInput {
     project.configureCompilerInput()
+    withExports().run {
+      addDirectoryExport("Stratego", "trans")
+      addFileExport("Str2Lib", "src-gen/java/gpp/trans/gpp.str2lib")
+    }
   }
 }
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {

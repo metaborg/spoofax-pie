@@ -4,6 +4,7 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.Conversion;
 import mb.spoofax.compiler.util.GradleProject;
+import mb.spoofax.core.Coordinate;
 import org.immutables.value.Value;
 
 import java.io.Serializable;
@@ -18,7 +19,7 @@ public interface LanguageProject extends Serializable {
 
         public Builder withDefaults(ResourcePath baseDirectory, Shared shared) {
             final GradleProject gradleProject = GradleProject.builder()
-                .coordinate(shared.defaultGroupId(), defaultArtifactId(shared), Optional.of(shared.defaultVersion()))
+                .coordinate(new Coordinate(shared.defaultGroupId(), defaultArtifactId(shared), shared.defaultVersion()))
                 .baseDirectory(baseDirectory)
                 .build();
             return this

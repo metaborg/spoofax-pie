@@ -16,6 +16,7 @@ import mb.pie.api.TaskDef;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.spoofax.core.language.LanguageInstance;
+import mb.spoofax.core.language.ResourceExports;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandDef;
 {{#isMultiLang}}
@@ -64,6 +65,10 @@ public class {{baseModule.id}} {
 
     @Provides @Named("packageId") String providePackageId() {
         return "{{adapterProject.packageId}}";
+    }
+
+    @Provides ResourceExports provideResourceExports({{exports.resourceExportsClass.qualifiedId}} resourceExports) {
+        return resourceExports;
     }
 {{#parser}}
 

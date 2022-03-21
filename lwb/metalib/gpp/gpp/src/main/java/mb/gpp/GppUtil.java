@@ -12,6 +12,7 @@ import mb.resource.fs.FSPath;
 import mb.resource.fs.FSResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.path.string.PathStringMatcher;
+import mb.spoofax.core.language.Export;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
@@ -26,11 +27,14 @@ import java.util.LinkedHashSet;
 @GppScope
 public class GppUtil {
     private final GppClassLoaderResources classLoaderResources;
+    private final GppResourceExports resourceExports;
 
     @Inject public GppUtil(
-        GppClassLoaderResources classLoaderResources
+        GppClassLoaderResources classLoaderResources,
+        GppResourceExports resourceExports
     ) {
         this.classLoaderResources = classLoaderResources;
+        this.resourceExports = resourceExports;
     }
 
     public LinkedHashSet<File> getGppJavaClassPaths() throws IOException {
@@ -49,10 +53,12 @@ public class GppUtil {
         ResourcePath gppUnarchiveDirectory,
         UnarchiveFromJar unarchiveFromJar
     ) throws IOException {
-        for(String export : GppExports.getStr2LibExports()) {
+        for(Export export : resourceExports.str2LibExports) {
+            final String fileRelativePath = export.caseOf().file(path -> path).otherwiseEmpty()
+                .orElseThrow(() -> new IllegalStateException("Stratego 2 GPP library export '" + export + "' is not a file export. Only file exports are supported"));
             final ClassLoaderResourceLocations<FSResource> locations = classLoaderResources.definitionDirectory.getLocations();
             for(FSResource directory : locations.directories) {
-                final FSResource exportFile = directory.appendAsRelativePath(export);
+                final FSResource exportFile = directory.appendAsRelativePath(fileRelativePath);
                 if(exportFile.exists()) {
                     return new ValueSupplier<>(new GppInfo(exportFile.getPath(), new ArrayList<>()));
                 }
@@ -62,7 +68,7 @@ public class GppUtil {
                 @SuppressWarnings("ConstantConditions") // JAR files always have leaves.
                 final ResourcePath unarchiveDirectory = gppUnarchiveDirectory.appendRelativePath(jarFilePath.getLeaf());
                 final Task<ResourcePath> task = unarchiveFromJar.createTask(new UnarchiveFromJar.Input(jarFilePath, unarchiveDirectory, PathStringMatcher.ofExtension("str2lib"), false, false));
-                return new GppInfoSupplier(task.toSupplier(), jarFileWithPath.path, export);
+                return new GppInfoSupplier(task.toSupplier(), jarFileWithPath.path, fileRelativePath);
             }
         }
         throw new IOException("Could not get Gpp .str2lib file");

@@ -26,6 +26,7 @@ import mb.spoofax.common.BracketSymbols;
 import mb.spoofax.core.Coordinate;
 import mb.spoofax.core.Version;
 import mb.spoofax.core.language.LanguageInstance;
+import mb.spoofax.core.language.ResourceExports;
 import mb.spoofax.core.language.cli.CliCommand;
 import mb.spoofax.core.language.cli.CliParam;
 import mb.spoofax.core.language.command.AutoCommandRequest;
@@ -285,6 +286,11 @@ public class TigerInstance implements LanguageInstance, TestableParse {
 
     @Override public ListView<BracketSymbols> getBracketSymbols() {
         return ListView.of();
+    }
+
+
+    @Override public ResourceExports getResourceExports() {
+        return id -> ListView.of(); // Nothing to export
     }
 
 

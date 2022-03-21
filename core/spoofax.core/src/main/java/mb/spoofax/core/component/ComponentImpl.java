@@ -6,11 +6,13 @@ import mb.pie.dagger.PieComponent;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.core.Coordinate;
 import mb.spoofax.core.language.LanguageComponent;
+import mb.spoofax.core.resource.ResourcesComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class ComponentImpl implements Component {
     public final Coordinate coordinate;
     private final boolean partOfGroup;
+    private @Nullable ResourcesComponent resourcesComponent;
     private ResourceServiceComponent resourceServiceComponent;
     private @Nullable LanguageComponent languageComponent;
     private PieComponent pieComponent;
@@ -22,6 +24,7 @@ public class ComponentImpl implements Component {
     public ComponentImpl(
         Coordinate coordinate,
         boolean partOfGroup,
+        @Nullable ResourcesComponent resourcesComponent,
         ResourceServiceComponent resourceServiceComponent,
         @Nullable LanguageComponent languageComponent,
         PieComponent pieComponent,
@@ -31,6 +34,7 @@ public class ComponentImpl implements Component {
     ) {
         this.coordinate = coordinate;
         this.partOfGroup = partOfGroup;
+        this.resourcesComponent = resourcesComponent;
         this.resourceServiceComponent = resourceServiceComponent;
         this.languageComponent = languageComponent;
         this.pieComponent = pieComponent;
@@ -60,6 +64,10 @@ public class ComponentImpl implements Component {
         }
         if(!partOfGroup) resourceServiceComponent.close();
         resourceServiceComponent = null;
+        if(resourcesComponent != null) {
+            resourcesComponent.close();
+            resourcesComponent = null;
+        }
         closed = true;
     }
 
@@ -69,6 +77,12 @@ public class ComponentImpl implements Component {
         return coordinate;
     }
 
+    @Override
+    public Option<ResourcesComponent> getResourcesComponent() {
+        if(closed)
+            throw new IllegalStateException("Cannot get resources component, component '" + coordinate + "' has been closed");
+        return Option.ofNullable(resourcesComponent);
+    }
 
     @Override
     public ResourceServiceComponent getResourceServiceComponent() {
@@ -107,11 +121,13 @@ public class ComponentImpl implements Component {
         return "ComponentImpl{" +
             "coordinate=" + coordinate +
             ", partOfGroup=" + partOfGroup +
+            ", resourcesComponent=" + resourcesComponent +
             ", resourceServiceComponent=" + resourceServiceComponent +
             ", languageComponent=" + languageComponent +
             ", pieComponent=" + pieComponent +
             ", subcomponents=" + subcomponents +
-            ", participantCloseable=" + startedParticipant +
+            ", startedParticipantFactory=" + startedParticipantFactory +
+            ", startedParticipant=" + startedParticipant +
             ", closed=" + closed +
             '}';
     }

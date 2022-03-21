@@ -28,7 +28,7 @@ public class SpoofaxLwbEclipseParticipant extends EmptyParticipant<EclipseLogger
     }
 
     @Override public ListView<CoordinateRequirement> getDependencies() {
-        return ListView.of(new CoordinateRequirement("spoofax.lwb.dynamicloading"));
+        return ListView.of(new CoordinateRequirement("org.metaborg", "spoofax.lwb.dynamicloading"));
     }
 
     @Override

@@ -23,6 +23,7 @@ import mb.spoofax.core.Coordinate;
 import mb.spoofax.core.CoordinateRequirement;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.platform.PlatformComponent;
+import mb.spoofax.core.resource.ResourcesComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
@@ -127,14 +128,23 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
             dependencyResolver
         ));
 
+        // Create resources components
+        builders.forEach(b -> b.resourcesComponent = b.participant.getResourcesComponent(
+            loggerComponent,
+            baseResourceServiceComponent,
+            platformComponent,
+            b,
+            dependencyResolver
+        ));
+
         // Create resource service components.
-        standaloneBuilders.forEach(b -> b.resourceServiceComponent = createResourceComponent(
+        standaloneBuilders.forEach(b -> b.resourceServiceComponent = createResourceServiceComponent(
             b.asSingleton(),
             globalResourceRegistryProviders.stream(),
             resourceServiceModuleCustomizers.stream()
         ));
         groupedBuilders.forEach((g, bs) -> {
-            final ResourceServiceComponent resourceServiceComponent = createResourceComponent(
+            final ResourceServiceComponent resourceServiceComponent = createResourceServiceComponent(
                 bs,
                 globalResourceRegistryProviders.stream(),
                 Stream.concat(resourceServiceModuleCustomizers.stream(), groupedResourceServiceModuleCustomizers.get(g).stream())
@@ -266,7 +276,14 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
             builder,
             dependencyResolver
         );
-        builder.resourceServiceComponent = createResourceComponent(
+        builder.resourcesComponent = participant.getResourcesComponent(
+            loggerComponent,
+            baseResourceServiceComponent,
+            platformComponent,
+            builder,
+            dependencyResolver
+        );
+        builder.resourceServiceComponent = createResourceServiceComponent(
             builder.asSingleton(),
             additionalResourceRegistriesProviders,
             resourceServiceModuleCustomizers
@@ -404,6 +421,7 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
         final LinkedHashMap<Class<?>, Object> subcomponents = new LinkedHashMap<>();
 
         @Nullable ResourceRegistriesProvider resourceRegistriesProvider;
+        @Nullable ResourcesComponent resourcesComponent;
         ResourceServiceComponent resourceServiceComponent;
         @Nullable TaskDefsProvider taskDefsProvider;
         @Nullable LanguageComponent languageComponent;
@@ -428,6 +446,7 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
             return new ComponentImpl(
                 coordinate,
                 !forceNotPartOfGroup && group != null,
+                resourcesComponent,
                 resourceServiceComponent,
                 languageComponent,
                 pieComponent,
@@ -478,7 +497,7 @@ public abstract class ComponentBuilderBase<L extends LoggerComponent, R extends 
         }
     }
 
-    private ResourceServiceComponent createResourceComponent(
+    private ResourceServiceComponent createResourceServiceComponent(
         Iterable<ComponentBuilder> builders,
         Stream<ResourceRegistriesProvider> additionalProviders,
         Stream<Consumer<ResourceServiceModule>> customizers

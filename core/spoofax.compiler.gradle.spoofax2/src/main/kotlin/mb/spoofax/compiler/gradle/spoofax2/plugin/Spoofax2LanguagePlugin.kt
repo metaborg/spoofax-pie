@@ -121,7 +121,7 @@ open class Spoofax2LanguagePlugin : Plugin<Project> {
     // Add language dependency.
     val languageDependency = input.languageSpecificationDependency().caseOf()
       .project<Dependency> { project.dependencies.project(it) }
-      .module { project.dependencies.create(it.toGradleNotation()) }
+      .module { project.dependencies.create(it.groupId, it.artifactId, it.versionRequirement?.toString()) }
       .files { project.dependencies.create(project.files(it)) }
     project.dependencies.add("compileLanguage", languageDependency)
 

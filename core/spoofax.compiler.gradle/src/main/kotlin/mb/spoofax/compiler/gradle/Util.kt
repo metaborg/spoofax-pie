@@ -6,6 +6,8 @@ import mb.resource.ResourceService
 import mb.resource.fs.FSPath
 import mb.resource.hierarchical.ResourcePath
 import mb.spoofax.compiler.util.*
+import mb.spoofax.core.Coordinate
+import mb.spoofax.core.Version
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.UnknownDomainObjectException
@@ -17,7 +19,7 @@ import java.io.IOException
 
 fun Project.toSpoofaxCompilerProject(): GradleProject {
   return GradleProject.builder()
-    .coordinate(Coordinate.of(group.toString(), name, version.toString()))
+    .coordinate(Coordinate(group.toString(), name, Version.parse(version.toString())))
     .baseDirectory(FSPath(projectDir))
     .build()
   // TODO: set src/main and build directory
@@ -124,6 +126,6 @@ fun GradleConfiguredDependency.addToDependencies(project: Project): Dependency {
 fun GradleDependency.toGradleDependency(project: Project): Dependency {
   return caseOf()
     .project<Dependency> { project.dependencies.project(it) }
-    .module { project.dependencies.create(it.groupId(), it.artifactId(), it.version().orElse(null)) }
+    .module { project.dependencies.create(it.groupId, it.artifactId, it.versionRequirement?.toString()) }
     .files { project.dependencies.create(project.files(it)) }
 }

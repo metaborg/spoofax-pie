@@ -5,6 +5,7 @@ import mb.common.message.KeyedMessagesBuilder;
 import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.lwb.compiler.SpoofaxLwbCompilerScope;
 import mb.spoofax.lwb.compiler.cfg.SpoofaxCfgCheck;
 import mb.spoofax.lwb.compiler.dynamix.SpoofaxDynamixCheck;
 import mb.spoofax.lwb.compiler.esv.SpoofaxEsvCheck;
@@ -22,7 +23,7 @@ import javax.inject.Inject;
  *
  * Returns all {@link KeyedMessages messages} produced by the meta-language checkers.
  */
-@Value.Enclosing
+@SpoofaxLwbCompilerScope @Value.Enclosing
 public class CheckLanguageDefinition implements TaskDef<ResourcePath, KeyedMessages> {
     private final SpoofaxCfgCheck spoofaxCfgCheck;
     private final SpoofaxSdf3Check spoofaxSdf3Check;

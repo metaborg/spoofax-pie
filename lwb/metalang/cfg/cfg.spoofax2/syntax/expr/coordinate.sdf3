@@ -12,4 +12,4 @@ context-free sorts
 context-free syntax
 
   Expr.Coordinate            = <<CoordinateChars>:<CoordinateCharsMiddle>:<CoordinateChars>> {prefer}
-  Expr.CoordinateRequirement = <<CoordinateRequirementChars>:<CoordinateCharsMiddle>:<CoordinateRequirementChars>>
+  Expr.CoordinateRequirement = <<CoordinateChars>:<CoordinateCharsMiddle>:<CoordinateRequirementChars>>

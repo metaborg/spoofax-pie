@@ -19,6 +19,7 @@ import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
+import mb.spoofax.core.Coordinate;
 import org.immutables.value.Value;
 
 import javax.inject.Inject;
@@ -199,7 +200,7 @@ public class EclipseProjectCompiler implements TaskDef<Supplier<Result<Option<Ec
 
             public Builder withDefaultProject(ResourcePath baseDirectory, Shared shared) {
                 final GradleProject gradleProject = GradleProject.builder()
-                    .coordinate(shared.defaultGroupId(), defaultArtifactId(shared), Optional.of(shared.defaultVersion()))
+                    .coordinate(new Coordinate(shared.defaultGroupId(), defaultArtifactId(shared), shared.defaultVersion()))
                     .baseDirectory(baseDirectory)
                     .build();
                 return this
@@ -228,7 +229,7 @@ public class EclipseProjectCompiler implements TaskDef<Supplier<Result<Option<Ec
 
             public Builder withDefaultsSameProject(ResourcePath baseDirectory, Shared shared) {
                 final GradleProject gradleProject = GradleProject.builder()
-                    .coordinate(shared.defaultGroupId(), defaultSameArtifactId(shared), Optional.of(shared.defaultVersion()))
+                    .coordinate(new Coordinate(shared.defaultGroupId(), defaultSameArtifactId(shared), shared.defaultVersion()))
                     .baseDirectory(baseDirectory)
                     .build();
                 return this
@@ -282,7 +283,7 @@ public class EclipseProjectCompiler implements TaskDef<Supplier<Result<Option<Ec
 
         /// Eclipse configuration
 
-        @Value.Default default String pluginId() {return project().coordinate().artifactId();}
+        @Value.Default default String pluginId() {return project().coordinate().artifactId;}
 
         @Value.Default default String componentExtensionPointId() {return pluginId() + ".component";}
 

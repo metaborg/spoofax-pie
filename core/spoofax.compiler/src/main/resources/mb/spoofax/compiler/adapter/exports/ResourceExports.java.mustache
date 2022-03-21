@@ -1,0 +1,30 @@
+package {{baseResourceExports.packageId}};
+
+import mb.common.util.ListView;
+import mb.spoofax.core.language.ResourceExports;
+import mb.spoofax.core.language.Export;
+
+import java.lang.IllegalArgumentException;
+import javax.inject.Inject;
+
+@{{adapterProject.scope.qualifiedId}}
+public class {{baseResourceExports.id}} implements ResourceExports {
+{{#combinedExports}}
+    public final ListView<Export> {{idUncapitalized}}Exports = ListView.of(
+{{#exports}}
+        {{this}}{{^-last}},{{/-last}}
+{{/exports}}
+    );
+{{/combinedExports}}
+
+    @Inject public {{baseResourceExports.id}}() {}
+
+    @Override public ListView<Export> getExports(String id) {
+        switch(id) {
+{{#combinedExports}}
+            case "{{id}}": return {{idUncapitalized}}Exports;
+{{/combinedExports}}
+            default: throw new IllegalArgumentException("Cannot get exports for ID '" + id + "', nothing was exported for that ID");
+        }
+    }
+}

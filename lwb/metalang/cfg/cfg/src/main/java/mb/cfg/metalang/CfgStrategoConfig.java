@@ -67,7 +67,7 @@ public interface CfgStrategoConfig extends Serializable {
     }
 
     default String outputLibraryName() {
-        return compileLanguageShared().languageProject().project().coordinate().artifactId();
+        return compileLanguageShared().languageProject().project().coordinate().artifactId;
     }
 
     default ResourcePath outputJavaInteropRegistererFile() {

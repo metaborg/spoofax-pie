@@ -12,4 +12,12 @@ public class StringUtil {
         }
         return str;
     }
+
+    public static String uncapitalizeFirstCharacter(String str) {
+        final char firstChar = str.charAt(0);
+        if(Character.isUpperCase(firstChar)) {
+            return Character.toLowerCase(firstChar) + str.substring(1);
+        }
+        return str;
+    }
 }

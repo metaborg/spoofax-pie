@@ -50,7 +50,6 @@ import mb.spoofax.compiler.adapter.data.CommandRequestRepr;
 import mb.spoofax.compiler.adapter.data.MenuItemRepr;
 import mb.spoofax.compiler.adapter.data.ParamRepr;
 import mb.spoofax.compiler.language.ConstraintAnalyzerLanguageCompiler;
-import mb.spoofax.compiler.language.ExportsLanguageCompiler;
 import mb.spoofax.compiler.language.LanguageProject;
 import mb.spoofax.compiler.language.LanguageProjectCompiler;
 import mb.spoofax.compiler.language.LanguageProjectCompilerInputBuilder;
@@ -116,7 +115,7 @@ public class CfgAstToObject {
         parts.forOneSubtermAsString("Group", sharedBuilder::defaultGroupId);
         parts.forOneSubtermAsString("Id", sharedBuilder::defaultArtifactId);
         parts.forOneSubtermAsString("Name", sharedBuilder::name);
-        parts.forOneSubtermAsString("Version", sharedBuilder::defaultVersion);
+        parts.forOneSubtermAsString("Version", versionString -> sharedBuilder.defaultVersion(Version.parse(versionString)));
         parts.forAllSubtermsAsStrings("FileExtension", sharedBuilder::addFileExtensions);
         parts.forOneSubtermAsString("JavaPackageIdPrefix", prefix -> {
             if(prefix.endsWith(".")) {
@@ -294,22 +293,16 @@ public class CfgAstToObject {
                     .orElseThrow(() -> new InvalidAstShapeException("constructor application as first subterm", dependencyTerm));
                 final DependencySource dependencySource;
                 switch(exprTerm.getConstructor().getName()) {
-                    case "String": {
-                        final String id = TermUtils.asJavaStringAt(exprTerm, 0)
-                            .orElseThrow(() -> new InvalidAstShapeException("string as first subterm", exprTerm));
-                        dependencySource = DependencySource.coordinateRequirement(new CoordinateRequirement(id));
-                        break;
-                    }
                     case "CoordinateRequirement": {
-                        final String groupString = TermUtils.asJavaStringAt(exprTerm, 0)
+                        final String groupIdString = TermUtils.asJavaStringAt(exprTerm, 0)
                             .orElseThrow(() -> new InvalidAstShapeException("string as first subterm", exprTerm));
-                        final String id = TermUtils.asJavaStringAt(exprTerm, 1)
+                        final String artifactId = TermUtils.asJavaStringAt(exprTerm, 1)
                             .orElseThrow(() -> new InvalidAstShapeException("string as second subterm", exprTerm));
                         final String versionString = TermUtils.asJavaStringAt(exprTerm, 2)
                             .orElseThrow(() -> new InvalidAstShapeException("string as third subterm", exprTerm));
                         dependencySource = DependencySource.coordinateRequirement(new CoordinateRequirement(
-                            groupString.equals("*") ? null : groupString,
-                            id,
+                            groupIdString,
+                            artifactId,
                             versionString.equals("*") ? null : Version.parse(versionString)
                         ));
                         break;
@@ -317,13 +310,13 @@ public class CfgAstToObject {
                     case "Coordinate": {
                         final String groupId = TermUtils.asJavaStringAt(exprTerm, 0)
                             .orElseThrow(() -> new InvalidAstShapeException("string as first subterm", exprTerm));
-                        final String id = TermUtils.asJavaStringAt(exprTerm, 1)
+                        final String artifactId = TermUtils.asJavaStringAt(exprTerm, 1)
                             .orElseThrow(() -> new InvalidAstShapeException("string as second subterm", exprTerm));
                         final String version = TermUtils.asJavaStringAt(exprTerm, 2)
                             .orElseThrow(() -> new InvalidAstShapeException("string as third subterm", exprTerm));
                         dependencySource = DependencySource.coordinate(new Coordinate(
                             groupId,
-                            id,
+                            artifactId,
                             Version.parse(version)
                         ));
                         break;
@@ -469,10 +462,6 @@ public class CfgAstToObject {
         });
         parts.getAllSubTermsInListAsParts("CodeCompletionSection").ifSome(subParts -> {
             final CodeCompletionAdapterCompiler.Input.Builder adapter = adapterBuilder.withCodeCompletion();
-        });
-        parts.getAllSubTermsInListAsParts("ExportsSection").ifSome(subParts -> {
-            final ExportsLanguageCompiler.Input.Builder builder = baseBuilder.withExports();
-            // TODO: exports language properties
         });
         parts.getAllSubTermsInListAsParts("ReferenceResolutionSection").ifSome(subParts -> {
             final ReferenceResolutionAdapterCompiler.Input.Builder builder = adapterBuilder.withReferenceResolution();

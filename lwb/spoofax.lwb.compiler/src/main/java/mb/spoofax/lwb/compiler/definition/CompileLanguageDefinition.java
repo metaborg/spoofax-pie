@@ -25,6 +25,7 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
 import mb.spoofax.compiler.language.LanguageProjectCompiler;
 import mb.spoofax.compiler.platform.EclipseProjectCompiler;
+import mb.spoofax.lwb.compiler.SpoofaxLwbCompilerScope;
 import org.immutables.value.Value;
 
 import javax.inject.Inject;
@@ -47,7 +48,7 @@ import java.util.function.Function;
  * compilation fails. The {@link Output} contains all {@link KeyedMessages messages} produced during compilation, and
  * the Java class path that can be used to run the language, dynamically load it, or to package it into a JAR file.
  */
-@Value.Enclosing
+@SpoofaxLwbCompilerScope @Value.Enclosing
 public class CompileLanguageDefinition implements TaskDef<CompileLanguageDefinition.Args, Result<CompileLanguageDefinition.Output, CompileLanguageDefinitionException>> {
     @Value.Immutable
     public interface Args extends Serializable {
@@ -80,6 +81,7 @@ public class CompileLanguageDefinition implements TaskDef<CompileLanguageDefinit
 
 
     private final CfgRootDirectoryToObject cfgRootDirectoryToObject;
+    private final LanguageDefinitionManager languageDefinitionManager;
     private final LanguageProjectCompiler languageProjectCompiler;
     private final CompileMetaLanguageSources compileMetaLanguageSources;
     private final AdapterProjectCompiler adapterProjectCompiler;
@@ -90,6 +92,7 @@ public class CompileLanguageDefinition implements TaskDef<CompileLanguageDefinit
 
     @Inject public CompileLanguageDefinition(
         CfgRootDirectoryToObject cfgRootDirectoryToObject,
+        LanguageDefinitionManager languageDefinitionManager,
         LanguageProjectCompiler languageProjectCompiler,
         CompileMetaLanguageSources compileMetaLanguageSources,
         AdapterProjectCompiler adapterProjectCompiler,
@@ -98,6 +101,7 @@ public class CompileLanguageDefinition implements TaskDef<CompileLanguageDefinit
         Function<CompileLanguageInput, String> participantClassQualifiedIdSelector
     ) {
         this.cfgRootDirectoryToObject = cfgRootDirectoryToObject;
+        this.languageDefinitionManager = languageDefinitionManager;
         this.languageProjectCompiler = languageProjectCompiler;
         this.compileMetaLanguageSources = compileMetaLanguageSources;
         this.adapterProjectCompiler = adapterProjectCompiler;
@@ -126,6 +130,7 @@ public class CompileLanguageDefinition implements TaskDef<CompileLanguageDefinit
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
         @SuppressWarnings("ConstantConditions") final CfgToObject.Output cfgOutput = cfgResult.get();
         // noinspection ConstantConditions (value is present)
+        languageDefinitionManager.registerLanguageDefinition(cfgOutput.compileLanguageInput.adapterProjectInput().adapterProject().project().coordinate(), rootDirectory);
         messagesBuilder.addMessages(cfgOutput.messages);
 
         final CompileLanguageInput input = cfgOutput.compileLanguageInput;

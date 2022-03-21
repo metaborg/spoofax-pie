@@ -39,6 +39,9 @@ public interface {{baseComponent.id}} extends LanguageComponent{{#isMultiLang}},
     @Override {{instance.qualifiedId}} getLanguageInstance();
 
     @Override @{{qualifier.id}} Set<TaskDef<?, ?>> getTaskDefs();
+
+
+    {{exports.resourceExportsClass.qualifiedId}} get{{exports.resourceExportsClass.id}}();
 {{#parser}}
 
 

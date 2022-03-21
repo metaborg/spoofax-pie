@@ -7,6 +7,7 @@ import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.core.Coordinate;
 import mb.spoofax.core.CoordinateRequirement;
 import mb.spoofax.core.language.LanguageComponent;
+import mb.spoofax.core.resource.ResourcesComponent;
 
 import java.util.stream.Stream;
 
@@ -45,6 +46,34 @@ public class ComponentGroupImpl implements ComponentGroup {
     }
 
 
+    // Resources subcomponents
+
+    @Override
+    public Option<ResourcesComponent> getResourcesComponent(Coordinate coordinate) {
+        if(closed)
+            throw new IllegalStateException("Cannot get resources component, component group '" + group + "' has been closed");
+        return Option.ofNullable(components.get(coordinate))
+            .flatMap(ComponentImpl::getResourcesComponent);
+    }
+
+    @Override
+    public Stream<ResourcesComponent> getResourcesComponents(CoordinateRequirement coordinateRequirement) {
+        if(closed)
+            throw new IllegalStateException("Cannot get resources components, component group '" + group + "' has been closed");
+        return components.values().stream()
+            .filter(c -> c.matchesCoordinate(coordinateRequirement))
+            .flatMap(c -> c.getResourcesComponent().stream());
+    }
+
+    @Override
+    public Stream<ResourcesComponent> getResourcesComponents() {
+        if(closed)
+            throw new IllegalStateException("Cannot get resources components, component group '" + group + "' has been closed");
+        return components.values().stream()
+            .flatMap(c -> c.getResourcesComponent().stream());
+    }
+
+
     // Resource service component
 
     @Override
@@ -54,7 +83,7 @@ public class ComponentGroupImpl implements ComponentGroup {
         return resourceServiceComponent;
     }
 
-    // Language components
+    // Language subcomponents
 
     @Override
     public Option<LanguageComponent> getLanguageComponent(Coordinate coordinate) {

@@ -6,6 +6,7 @@ import mb.resource.classloader.ClassLoaderResource;
 import mb.resource.classloader.ClassLoaderResourceRegistry;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.dagger.ResourceRegistriesProvider;
+import mb.spoofax.core.resource.ResourcesComponent;
 
 import java.util.Set;
 
@@ -16,14 +17,14 @@ import java.util.Set;
         {{qualifiedId}}.class{{^-last}},{{/-last}}{{/additionalResourcesModules}}
     }
 )
-public interface {{baseResourcesComponent.id}} extends ResourceRegistriesProvider {
-    {{classLoaderResources.classLoaderResources.qualifiedId}} getClassloaderResources();
+public interface {{baseResourcesComponent.id}} extends ResourcesComponent, ResourceRegistriesProvider {
+    @Override {{classLoaderResources.classLoaderResources.qualifiedId}} getClassloaderResources();
 
-    @{{qualifier.qualifiedId}} ClassLoaderResourceRegistry getClassLoaderResourceRegistry();
+    @Override @{{qualifier.qualifiedId}} ClassLoaderResourceRegistry getClassLoaderResourceRegistry();
 
-    @{{qualifier.qualifiedId}}("definition-directory") ClassLoaderResource getDefinitionDirectory();
+    @Override @{{qualifier.qualifiedId}}("definition-directory") ClassLoaderResource getDefinitionDirectory();
 
-    @{{qualifier.qualifiedId}}("definition-directory") HierarchicalResource getDefinitionDirectoryAsHierarchicalResource();
+    @Override @{{qualifier.qualifiedId}}("definition-directory") HierarchicalResource getDefinitionDirectoryAsHierarchicalResource();
 
-    @{{qualifier.qualifiedId}} Set<ResourceRegistry> getResourceRegistries();
+    @Override @{{qualifier.qualifiedId}} Set<ResourceRegistry> getResourceRegistries();
 }

@@ -10,6 +10,7 @@ import mb.spoofax.core.Coordinate;
 import mb.spoofax.core.component.Component;
 import mb.spoofax.core.component.ComponentImpl;
 import mb.spoofax.core.language.LanguageComponent;
+import mb.spoofax.core.resource.ResourcesComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
@@ -86,7 +87,19 @@ public class DynamicComponent implements Component, AutoCloseable {
 
 
     /**
-     * Gets the {@link ResourceServiceComponent resource service component} of this dynamically loaded language.
+     * Gets the {@link ResourcesComponent resources component} of this dynamically loaded component.
+     *
+     * @throws IllegalStateException if this has been closed with {@link #close}.
+     */
+    @Override
+    public Option<ResourcesComponent> getResourcesComponent() {
+        if(closed)
+            throw new IllegalStateException("Cannot get resources subcomponent, dynamically loaded component has been closed");
+        return component.getResourcesComponent();
+    }
+
+    /**
+     * Gets the {@link ResourceServiceComponent resource service component} of this dynamically loaded component.
      *
      * @throws IllegalStateException if this has been closed with {@link #close}.
      */
@@ -105,21 +118,29 @@ public class DynamicComponent implements Component, AutoCloseable {
      */
     @Override public Option<LanguageComponent> getLanguageComponent() {
         if(closed)
-            throw new IllegalStateException("Cannot get language component, dynamically loaded component has been closed");
+            throw new IllegalStateException("Cannot get language subcomponent, dynamically loaded component has been closed");
         return component.getLanguageComponent();
     }
 
     /**
-     * Gets the {@link PieComponent PIE component} of this dynamically loaded language.
+     * Gets the {@link PieComponent PIE component} of this dynamically loaded component.
      *
      * @throws IllegalStateException if this has been closed with {@link #close}.
      */
     @Override
     public PieComponent getPieComponent() {
+        if(closed)
+            throw new IllegalStateException("Cannot get PIE subcomponent, dynamically loaded component has been closed");
         return component.getPieComponent();
     }
 
-    @Override public <T> Option<T> getSubcomponent(Class<T> subcomponentType) {
+    /**
+     * Gets a subcomponent of this dynamically loaded component.
+     *
+     * @throws IllegalStateException if this has been closed with {@link #close}.
+     */
+    @Override
+    public <T> Option<T> getSubcomponent(Class<T> subcomponentType) {
         if(closed)
             throw new IllegalStateException("Cannot get subcomponent, dynamically loaded component has been closed");
         return component.getSubcomponent(subcomponentType);
