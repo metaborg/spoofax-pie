@@ -222,6 +222,14 @@ class Parts {
         getAllSubTermsAsExistingFiles(name, base, errorSuffix).forEach(consumer);
     }
 
+    Stream<String> getAllSubTermsAsRelativePathOfExistingFiles(String name, ResourcePath base, String errorSuffix) {
+        return getAllSubTerms(name).map(t -> relativePathStringOfExistingFile(t, base, errorSuffix));
+    }
+
+    void forAllSubTermsAsRelativePathOfExistingFiles(String name, ResourcePath base, String errorSuffix, Consumer<String> consumer) {
+        getAllSubTermsAsRelativePathOfExistingFiles(name, base, errorSuffix).forEach(consumer);
+    }
+
     Stream<ResourcePath> getAllSubTermsAsExistingDirectories(String name, ResourcePath base, String errorSuffix) {
         return getAllSubTerms(name).map(t -> pathAsExistingDirectory(t, base, errorSuffix));
     }
@@ -229,6 +237,15 @@ class Parts {
     void forAllSubtermsAsExistingDirectories(String name, ResourcePath base, String errorSuffix, Consumer<ResourcePath> consumer) {
         getAllSubTermsAsExistingDirectories(name, base, errorSuffix).forEach(consumer);
     }
+
+    Stream<String> getAllSubTermsAsRelativePathOfExistingDirectories(String name, ResourcePath base, String errorSuffix) {
+        return getAllSubTerms(name).map(t -> relativePathStringOfExistingDirectory(t, base, errorSuffix));
+    }
+
+    void forAllSubtermsAsRelativePathOfExistingDirectories(String name, ResourcePath base, String errorSuffix, Consumer<String> consumer) {
+        getAllSubTermsAsRelativePathOfExistingDirectories(name, base, errorSuffix).forEach(consumer);
+    }
+
 
     Stream<TypeInfo> getAllSubtermsAsTypeInfo(String name) {
         return getAllSubTermsAsStrings(name).map(TypeInfo::of);
@@ -294,7 +311,7 @@ class Parts {
     }
 
 
-    private ResourcePath pathAsExistingFile(IStrategoTerm pathTerm, ResourcePath base, String errorSuffix) {
+    private String relativePathStringOfExistingFile(IStrategoTerm pathTerm, ResourcePath base, String errorSuffix) {
         final String relativePath = Parts.toJavaString(pathTerm);
         final ResourcePath path = base.appendRelativePath(relativePath).getNormalized();
         try {
@@ -307,10 +324,15 @@ class Parts {
         } catch(IOException e) {
             createCfgError("Failed to check if " + errorSuffix + " '" + path + "' exists", e, pathTerm);
         }
-        return path;
+        return relativePath;
     }
 
-    private ResourcePath pathAsExistingDirectory(IStrategoTerm pathTerm, ResourcePath base, String errorSuffix) {
+    private ResourcePath pathAsExistingFile(IStrategoTerm pathTerm, ResourcePath base, String errorSuffix) {
+        final String relativePath = relativePathStringOfExistingFile(pathTerm, base, errorSuffix);
+        return base.appendRelativePath(relativePath).getNormalized();
+    }
+
+    private String relativePathStringOfExistingDirectory(IStrategoTerm pathTerm, ResourcePath base, String errorSuffix) {
         final String relativePath = Parts.toJavaString(pathTerm);
         final ResourcePath path = base.appendRelativePath(relativePath).getNormalized();
         try {
@@ -323,7 +345,12 @@ class Parts {
         } catch(IOException e) {
             createCfgError("Failed to check if " + errorSuffix + " '" + path + "' exists", e, pathTerm);
         }
-        return path;
+        return relativePath;
+    }
+
+    private ResourcePath pathAsExistingDirectory(IStrategoTerm pathTerm, ResourcePath base, String errorSuffix) {
+        final String relativePath = relativePathStringOfExistingDirectory(pathTerm, base, errorSuffix);
+        return base.appendRelativePath(relativePath).getNormalized();
     }
 
 

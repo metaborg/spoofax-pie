@@ -54,8 +54,22 @@ public class SpoofaxDynamicLoadingEclipseParticipant extends DynamicLoadingParti
     }
 
     @Override
-    public DynamicLoadingComponent getTaskDefsProvider(EclipseLoggerComponent loggerComponent, EclipseResourceServiceComponent baseResourceServiceComponent, ResourceServiceComponent resourceServiceComponent, EclipsePlatformComponent platformComponent, SubcomponentRegistry subcomponentRegistry, ComponentDependencyResolver dependencyResolver) {
-        final DynamicLoadingComponent dynamicLoadingComponent = super.getTaskDefsProvider(loggerComponent, baseResourceServiceComponent, resourceServiceComponent, platformComponent, subcomponentRegistry, dependencyResolver);
+    public DynamicLoadingComponent getTaskDefsProvider(
+        EclipseLoggerComponent loggerComponent,
+        EclipseResourceServiceComponent baseResourceServiceComponent,
+        ResourceServiceComponent resourceServiceComponent,
+        EclipsePlatformComponent platformComponent,
+        SubcomponentRegistry subcomponentRegistry,
+        ComponentDependencyResolver dependencyResolver
+    ) {
+        final DynamicLoadingComponent dynamicLoadingComponent = super.getTaskDefsProvider(
+            loggerComponent,
+            baseResourceServiceComponent,
+            resourceServiceComponent,
+            platformComponent,
+            subcomponentRegistry,
+            dependencyResolver
+        );
         dependencyResolver.getOneSubcomponent(SptComponent.class).unwrap().getLanguageUnderTestProviderWrapper().set(new DynamicLanguageUnderTestProvider(
             dynamicLoadingComponent.getDynamicComponentManager(),
             dynamicLoadingComponent.getDynamicLoad(),

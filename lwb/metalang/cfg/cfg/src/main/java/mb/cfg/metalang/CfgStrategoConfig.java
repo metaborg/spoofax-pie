@@ -2,6 +2,7 @@ package mb.cfg.metalang;
 
 import mb.cfg.CompileLanguageSpecificationShared;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.compiler.adapter.ExportsCompiler;
 import mb.spoofax.compiler.language.StrategoRuntimeLanguageCompiler;
 import mb.spoofax.compiler.util.BuilderBase;
 import mb.spoofax.compiler.util.Conversion;
@@ -94,5 +95,9 @@ public interface CfgStrategoConfig extends Serializable {
     default void syncTo(StrategoRuntimeLanguageCompiler.Input.Builder builder) {
         builder.addStrategyPackageIds(outputJavaPackageId());
         builder.addInteropRegisterersByReflection(outputJavaPackageId() + ".InteropRegisterer");
+    }
+
+    default void syncTo(ExportsCompiler.Input.Builder builder) {
+        source().getFiles().exportDirectories().forEach(exportDirectory -> builder.addDirectoryExport("Stratego", exportDirectory));
     }
 }

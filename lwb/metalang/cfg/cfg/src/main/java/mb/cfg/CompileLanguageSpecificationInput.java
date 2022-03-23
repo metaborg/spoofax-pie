@@ -6,6 +6,7 @@ import mb.cfg.metalang.CfgSdf3Config;
 import mb.cfg.metalang.CfgStatixConfig;
 import mb.cfg.metalang.CfgStrategoConfig;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.compiler.adapter.AdapterProjectCompilerInputBuilder;
 import mb.spoofax.compiler.language.LanguageProjectCompilerInputBuilder;
 import org.immutables.value.Value;
 
@@ -83,5 +84,9 @@ public interface CompileLanguageSpecificationInput extends Serializable {
         statix().ifPresent(i -> i.syncTo(builder.constraintAnalyzer));
         stratego().ifPresent(i -> i.syncTo(builder.strategoRuntime));
         // todo: dynamix sync?
+    }
+
+    default void syncTo(AdapterProjectCompilerInputBuilder builder) {
+        stratego().ifPresent(i -> i.syncTo(builder.exports));
     }
 }

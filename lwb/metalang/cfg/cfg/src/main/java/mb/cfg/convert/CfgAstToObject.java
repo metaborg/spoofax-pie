@@ -278,6 +278,7 @@ public class CfgAstToObject {
                     filesSourceBuilder.mainSourceDirectory(mainSourceDirectory);
                     filesParts.forOneSubtermAsExistingFile("StrategoFilesMainFile", mainSourceDirectory, "Stratego main file", filesSourceBuilder::mainFile);
                     filesParts.forAllSubtermsAsExistingDirectories("StrategoFilesIncludeDirectory", rootDirectory, "Stratego include directory", filesSourceBuilder::addIncludeDirectories);
+                    filesParts.forAllSubtermsAsRelativePathOfExistingDirectories("StrategoFilesExportDirectory", rootDirectory, "Stratego export directory", filesSourceBuilder::addExportDirectories);
                     builder.source(CfgStrategoSource.files(filesSourceBuilder.build()));
                 } else {
                     throw new InvalidAstShapeException("Stratego source", source);
@@ -349,6 +350,7 @@ public class CfgAstToObject {
         customizer.customize(languageCompilerInputBuilder);
         final CompileLanguageSpecificationInput languageCompilerInput = languageCompilerInputBuilder.build(properties, shared, languageShared);
         languageCompilerInput.syncTo(baseBuilder);
+        languageCompilerInput.syncTo(adapterBuilder);
         compileLanguageInputBuilder.compileLanguageSpecificationInput(languageCompilerInput);
 
         // LanguageBaseCompilerInput & LanguageAdapterCompilerInput
