@@ -17,6 +17,7 @@ import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.Sync
 import org.gradle.kotlin.dsl.*
+import org.gradle.language.base.plugins.LifecycleBasePlugin
 
 open class Spoofax2LanguageProjectExtension(project: Project) {
   val compilerInput: Property<Spoofax2LanguageProjectCompilerInputBuilder> = project.objects.property()
@@ -159,6 +160,8 @@ open class Spoofax2LanguagePlugin : Plugin<Project> {
       }
     }
     project.tasks.getByName(JavaPlugin.CLASSES_TASK_NAME).dependsOn(copyMainTask)
+    project.tasks.getByName(JavaPlugin.JAR_TASK_NAME).dependsOn(copyMainTask)
+    project.tasks.getByName(LifecycleBasePlugin.ASSEMBLE_TASK_NAME).dependsOn(copyMainTask)
     val copyTestTask = project.tasks.register<Copy>("copyTestResources") {
       dependsOn(unpackSpoofaxLanguageTask)
       into(project.the<SourceSetContainer>()["test"].java.outputDir)
