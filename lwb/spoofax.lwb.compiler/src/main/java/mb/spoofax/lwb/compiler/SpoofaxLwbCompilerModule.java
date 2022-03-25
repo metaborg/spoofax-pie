@@ -27,6 +27,7 @@ import mb.spoofax.lwb.compiler.statix.SpoofaxStatixConfigure;
 import mb.spoofax.lwb.compiler.stratego.SpoofaxStrategoCheck;
 import mb.spoofax.lwb.compiler.stratego.SpoofaxStrategoCompile;
 import mb.spoofax.lwb.compiler.stratego.SpoofaxStrategoConfigure;
+import mb.spoofax.lwb.compiler.stratego.SpoofaxStrategoResolveIncludes;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -90,6 +91,7 @@ public class SpoofaxLwbCompilerModule {
         SpoofaxDynamixCompile spoofaxDynamixCompile,
 
         SpoofaxStrategoConfigure spoofaxStrategoConfigure,
+        SpoofaxStrategoResolveIncludes spoofaxStrategoResolveIncludes,
         SpoofaxStrategoCheck spoofaxStrategoCheck,
         SpoofaxStrategoCompile spoofaxStrategoCompile,
 
@@ -120,6 +122,7 @@ public class SpoofaxLwbCompilerModule {
         taskDefs.add(spoofaxDynamixCompile);
 
         taskDefs.add(spoofaxStrategoConfigure);
+        taskDefs.add(spoofaxStrategoResolveIncludes);
         taskDefs.add(spoofaxStrategoCheck);
         taskDefs.add(spoofaxStrategoCompile);
 

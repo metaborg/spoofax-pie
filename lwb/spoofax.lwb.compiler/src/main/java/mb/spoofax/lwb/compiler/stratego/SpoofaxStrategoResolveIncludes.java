@@ -1,7 +1,6 @@
 package mb.spoofax.lwb.compiler.stratego;
 
 import mb.cfg.DependencySource;
-import mb.cfg.metalang.CfgStrategoConfig;
 import mb.cfg.task.CfgRootDirectoryToObject;
 import mb.common.result.Result;
 import mb.common.util.ListView;
@@ -19,15 +18,16 @@ import mb.resource.hierarchical.match.path.string.PathStringMatcher;
 import mb.spoofax.core.Coordinate;
 import mb.spoofax.core.CoordinateRequirement;
 import mb.spoofax.core.component.Component;
-import mb.spoofax.core.component.ComponentManager;
 import mb.spoofax.core.language.Export;
 import mb.spoofax.core.language.ResourceExports;
 import mb.spoofax.core.resource.ResourcesComponent;
+import mb.spoofax.lwb.compiler.SpoofaxLwbCompilerComponentManagerWrapper;
 import mb.spoofax.lwb.compiler.SpoofaxLwbCompilerScope;
 import mb.spoofax.lwb.compiler.definition.LanguageDefinitionManager;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -77,20 +77,20 @@ public class SpoofaxStrategoResolveIncludes implements TaskDef<SpoofaxStrategoRe
     }
 
     private final LanguageDefinitionManager languageDefinitionManager;
-    private final ComponentManager componentManager;
+    private final SpoofaxLwbCompilerComponentManagerWrapper componentManagerWrapper;
     private final UnarchiveFromJar unarchiveFromJar;
-    private final SpoofaxStrategoConfigure strategoConfigure;
+    private final Provider<SpoofaxStrategoConfigure> strategoConfigure;
     private final CfgRootDirectoryToObject cfgRootDirectoryToObject;
 
     @Inject public SpoofaxStrategoResolveIncludes(
         LanguageDefinitionManager languageDefinitionManager,
-        ComponentManager componentManager,
+        SpoofaxLwbCompilerComponentManagerWrapper componentManagerWrapper,
         UnarchiveFromJar unarchiveFromJar,
-        SpoofaxStrategoConfigure strategoConfigure,
+        Provider<SpoofaxStrategoConfigure> strategoConfigure,
         CfgRootDirectoryToObject cfgRootDirectoryToObject
     ) {
         this.languageDefinitionManager = languageDefinitionManager;
-        this.componentManager = componentManager;
+        this.componentManagerWrapper = componentManagerWrapper;
         this.unarchiveFromJar = unarchiveFromJar;
         this.strategoConfigure = strategoConfigure;
         this.cfgRootDirectoryToObject = cfgRootDirectoryToObject;
@@ -116,7 +116,7 @@ public class SpoofaxStrategoResolveIncludes implements TaskDef<SpoofaxStrategoRe
         final Class<SpoofaxStrategoResolveIncludesException> exceptionClass = SpoofaxStrategoResolveIncludesException.class;
         return languageDefinitionManager.getLanguageDefinition(coordinate)
             .mapCatching(rootDirectory -> resolveFromLanguageDefinition(context, input, rootDirectory), exceptionClass)
-            .orElse(() -> componentManager.getComponent(coordinate).mapCatching(component -> resolveFromComponent(context, input, component), exceptionClass))
+            .orElse(() -> componentManagerWrapper.get().getComponent(coordinate).mapCatching(component -> resolveFromComponent(context, input, component), exceptionClass))
             .unwrapOrElse(() -> Result.ofErr(SpoofaxStrategoResolveIncludesException.languageDefinitionOrComponentNotFoundFail(input.dependencySource, coordinate)))
             ;
     }
@@ -125,7 +125,7 @@ public class SpoofaxStrategoResolveIncludes implements TaskDef<SpoofaxStrategoRe
         final Class<SpoofaxStrategoResolveIncludesException> exceptionClass = SpoofaxStrategoResolveIncludesException.class;
         return languageDefinitionManager.getOneLanguageDefinition(coordinateRequirement)
             .mapCatching(rootDirectory -> resolveFromLanguageDefinition(context, input, rootDirectory), exceptionClass)
-            .orElse(() -> componentManager.getOneComponent(coordinateRequirement).mapCatching(component -> resolveFromComponent(context, input, component), exceptionClass))
+            .orElse(() -> componentManagerWrapper.get().getOneComponent(coordinateRequirement).mapCatching(component -> resolveFromComponent(context, input, component), exceptionClass))
             .unwrapOrElse(() -> Result.ofErr(SpoofaxStrategoResolveIncludesException.languageDefinitionOrComponentNotFoundOrMultipleFail(input.dependencySource, coordinateRequirement)))
             ;
     }
@@ -178,7 +178,7 @@ public class SpoofaxStrategoResolveIncludes implements TaskDef<SpoofaxStrategoRe
     private ListView<ResourcePath> resolveFromLanguageDefinition(ExecContext context, Input input, ResourcePath rootDirectory) throws SpoofaxStrategoResolveIncludesException {
         final DependencySource source = input.dependencySource;
         // Require Stratego configure so that this task depends on all tasks that generate Stratego code.
-        context.require(strategoConfigure.createTask(rootDirectory), OutputStampers.inconsequential())
+        context.require(strategoConfigure.get().createTask(rootDirectory), OutputStampers.inconsequential())
             .mapErr(e -> SpoofaxStrategoResolveIncludesException.strategoConfigureFail(source, rootDirectory, e))
             .throwIfError();
         return context.requireMapping(cfgRootDirectoryToObject, rootDirectory, new SpoofaxStrategoConfigMapper())
@@ -190,8 +190,8 @@ public class SpoofaxStrategoResolveIncludes implements TaskDef<SpoofaxStrategoRe
             .unwrap();
     }
 
-    private ListView<ResourcePath> resolveFromLanguageDefinition(ResourcePath rootDirectory, CfgStrategoConfig cfgStrategoConfig) {
-        return ListView.copyOf(cfgStrategoConfig.source().getFiles().exportDirectories().stream()
+    private ListView<ResourcePath> resolveFromLanguageDefinition(ResourcePath rootDirectory, SpoofaxStrategoConfig config) {
+        return ListView.copyOf(config.cfgStrategoConfig.source().getFiles().exportDirectories().stream()
             .map(rootDirectory::appendAsRelativePath));
     }
 }

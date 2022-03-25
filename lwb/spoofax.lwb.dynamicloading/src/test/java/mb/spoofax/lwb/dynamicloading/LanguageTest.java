@@ -37,4 +37,20 @@ public class LanguageTest extends TestBase {
             throw e;
         }
     }
+
+    @Test void testCompileDependenciesLanguage() throws Exception {
+        copyResourcesToTemporaryDirectory("mb/spoofax/lwb/dynamicloading/dependencies");
+        final ResourcePath rootDirectory = this.rootDirectory.getPath().appendRelativePath("lang");
+        try(final MixedSession session = newSession()) {
+            try(final DynamicComponent ignored = requireDynamicLoad(session, rootDirectory)) {
+                final KeyedMessages messages = requireSptCheck(session, rootDirectory);
+                assertNoErrors(messages, "SPT tests to succeed, but one or more failed");
+            }
+        } catch(Exception e) {
+            final ExceptionPrinter exceptionPrinter = new ExceptionPrinter();
+            exceptionPrinter.addCurrentDirectoryContext(rootDirectory);
+            System.err.println(exceptionPrinter.printExceptionToString(e));
+            throw e;
+        }
+    }
 }

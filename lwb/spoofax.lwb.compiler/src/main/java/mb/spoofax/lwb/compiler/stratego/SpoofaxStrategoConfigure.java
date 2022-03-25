@@ -1,5 +1,7 @@
 package mb.spoofax.lwb.compiler.stratego;
 
+import mb.cfg.Dependency;
+import mb.cfg.DependencyKind;
 import mb.cfg.metalang.CfgStrategoConfig;
 import mb.cfg.metalang.CfgStrategoSource;
 import mb.cfg.task.CfgRootDirectoryToObject;
@@ -69,6 +71,7 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
 
     private final CfgRootDirectoryToObject cfgRootDirectoryToObject;
 
+    private final SpoofaxStrategoResolveIncludes resolveIncludes;
     private final UnarchiveFromJar unarchiveFromJar;
     private final LibSpoofax2ResourceExports libSpoofax2ResourceExports;
     private final LibSpoofax2ClassLoaderResources libSpoofax2ClassLoaderResources;
@@ -93,6 +96,7 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
 
         CfgRootDirectoryToObject cfgRootDirectoryToObject,
 
+        SpoofaxStrategoResolveIncludes resolveIncludes,
         UnarchiveFromJar unarchiveFromJar,
         LibSpoofax2ResourceExports libSpoofax2ResourceExports,
         LibSpoofax2ClassLoaderResources libSpoofax2ClassLoaderResources,
@@ -111,8 +115,6 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
         Sdf3ToCompletionRuntime sdf3ToCompletionRuntime,
         Sdf3ExtStatixGenerateStratego sdf3ExtStatixGenerateStratego
     ) {
-        this.libSpoofax2ResourceExports = libSpoofax2ResourceExports;
-        this.libStatixResourceExports = libStatixResourceExports;
         templateCompiler = templateCompiler.loadingFromClass(getClass());
         this.completionTemplate = templateCompiler.getOrCompileToWriter("completion.str2.mustache");
         this.ppTemplate = templateCompiler.getOrCompileToWriter("pp.str2.mustache");
@@ -120,6 +122,9 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
         this.cfgRootDirectoryToObject = cfgRootDirectoryToObject;
 
         this.unarchiveFromJar = unarchiveFromJar;
+        this.resolveIncludes = resolveIncludes;
+        this.libSpoofax2ResourceExports = libSpoofax2ResourceExports;
+        this.libStatixResourceExports = libStatixResourceExports;
         this.libSpoofax2ClassLoaderResources = libSpoofax2ClassLoaderResources;
         this.libStatixClassLoaderResources = libStatixClassLoaderResources;
 
@@ -145,7 +150,7 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
     public Result<Option<StrategoCompileConfig>, SpoofaxStrategoConfigureException> exec(ExecContext context, ResourcePath rootDirectory) throws Exception {
         return context.requireMapping(cfgRootDirectoryToObject, rootDirectory, new SpoofaxStrategoConfigMapper())
             .mapErr(SpoofaxStrategoConfigureException::getLanguageCompilerConfigurationFail)
-            .<Option<StrategoCompileConfig>, Exception>flatMapThrowing(o -> Result.transpose(o.mapThrowing(c -> toStrategoConfig(context, rootDirectory, c, c.source().getFiles()))));
+            .<Option<StrategoCompileConfig>, Exception>flatMapThrowing(o -> Result.transpose(o.mapThrowing(c -> toStrategoConfig(context, rootDirectory, c, c.cfgStrategoConfig.source().getFiles()))));
     }
 
     @Override public boolean shouldExecWhenAffected(ResourcePath input, Set<?> tags) {
@@ -155,9 +160,11 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
     public Result<StrategoCompileConfig, SpoofaxStrategoConfigureException> toStrategoConfig(
         ExecContext context,
         ResourcePath rootDirectory,
-        CfgStrategoConfig cfgStrategoConfig,
+        SpoofaxStrategoConfig spoofaxStrategoConfig,
         CfgStrategoSource.Files sourceFiles
     ) throws IOException, InterruptedException {
+        final CfgStrategoConfig cfgStrategoConfig = spoofaxStrategoConfig.cfgStrategoConfig;
+
         // Check main source directory, main file, and include directories.
         final HierarchicalResource mainSourceDirectory = context.require(sourceFiles.mainSourceDirectory(), ResourceStampers.<HierarchicalResource>exists());
         if(!mainSourceDirectory.exists() || !mainSourceDirectory.isDirectory()) {
@@ -241,6 +248,19 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
                 if(exportDirectory.exists()) {
                     includeDirectories.add(exportDirectory.getPath());
                 }
+            }
+        }
+
+        for(Dependency dependency : spoofaxStrategoConfig.dependencies) {
+            if(!dependency.kinds.contains(DependencyKind.CompileTime)) continue;
+            final Result<ListView<ResourcePath>, SpoofaxStrategoResolveIncludesException> result =
+                context.require(resolveIncludes, new SpoofaxStrategoResolveIncludes.Input(dependency.source, rootDirectory, sourceFiles.unarchiveDirectory()));
+            if(result.isErr()) {
+                // noinspection ConstantConditions (err is present)
+                return Result.ofErr(SpoofaxStrategoConfigureException.resolveIncludeFail(result.getErr()));
+            } else {
+                // noinspection ConstantConditions (value is present)
+                result.get().addAllTo(includeDirectories);
             }
         }
 

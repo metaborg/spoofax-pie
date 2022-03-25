@@ -137,6 +137,7 @@ class TestBase {
         dynamicComponentManager = dynamicLoadingComponent.getDynamicComponentManager();
         dynamicLoad = dynamicLoadingComponent.getDynamicLoad();
 
+        // Set dynamic component manager in several places.
         sptComponent.getLanguageUnderTestProviderWrapper().set(new DynamicLanguageUnderTestProvider(
             dynamicComponentManager,
             dynamicLoad,
@@ -144,6 +145,7 @@ class TestBase {
             //       components will be reloaded by SPT, which closes and thus invalidates previous dynamic components.
             this::dynamicLoadSupplierOutputSupplier
         ));
+        spoofaxLwbCompiler.spoofaxLwbCompilerComponent.getSpoofaxLwbCompilerComponentManagerWrapper().set(dynamicComponentManager);
 
         // TODO: this won't work properly with bottom-up building when builds are executed from `standaloneSpoofax3Compiler.pieComponent`.
         pieComponent = DaggerPieComponent.builder()

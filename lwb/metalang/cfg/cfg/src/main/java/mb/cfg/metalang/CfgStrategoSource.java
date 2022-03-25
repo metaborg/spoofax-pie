@@ -49,12 +49,16 @@ public abstract class CfgStrategoSource implements Serializable {
 
         List<String> exportDirectories();
 
+        default ResourcePath unarchiveDirectory() {
+            return compileLanguageShared().unarchiveDirectory();
+        }
+
         default ResourcePath strategoLibUnarchiveDirectory() {
-            return compileLanguageShared().unarchiveDirectory().appendRelativePath("strategoLib");
+            return unarchiveDirectory().appendRelativePath("strategoLib");
         }
 
         default ResourcePath gppUnarchiveDirectory() {
-            return compileLanguageShared().unarchiveDirectory().appendRelativePath("gpp");
+            return unarchiveDirectory().appendRelativePath("gpp");
         }
 
         @Value.Default default boolean includeLibSpoofax2Exports() {

@@ -21,9 +21,11 @@ public abstract class SpoofaxStrategoConfigureException extends Exception {
 
         R includeDirectoryFail(ResourcePath includeDirectory);
 
+        R resolveIncludeFail(SpoofaxStrategoResolveIncludesException resolveIncludesException);
+
         R builtinLibraryFail(String builtinLibraryName);
 
-        R sdf3ConfigureFail(SpoofaxSdf3ConfigureException spoofaxSdf3ConfigureException);
+        R sdf3ConfigureFail(SpoofaxSdf3ConfigureException sdf3ConfigureException);
 
         R sdf3SignatureGenerateFail(Exception cause);
 
@@ -52,12 +54,16 @@ public abstract class SpoofaxStrategoConfigureException extends Exception {
         return SpoofaxStrategoConfigureExceptions.includeDirectoryFail(includeDirectory);
     }
 
+    public static SpoofaxStrategoConfigureException resolveIncludeFail(SpoofaxStrategoResolveIncludesException cause) {
+        return withCause(SpoofaxStrategoConfigureExceptions.resolveIncludeFail(cause), cause);
+    }
+
     public static SpoofaxStrategoConfigureException builtinLibraryFail(String builtinLibraryName) {
         return SpoofaxStrategoConfigureExceptions.builtinLibraryFail(builtinLibraryName);
     }
 
-    public static SpoofaxStrategoConfigureException sdf3ConfigureFail(SpoofaxSdf3ConfigureException spoofaxSdf3ConfigureException) {
-        return withCause(SpoofaxStrategoConfigureExceptions.sdf3ConfigureFail(spoofaxSdf3ConfigureException), spoofaxSdf3ConfigureException);
+    public static SpoofaxStrategoConfigureException sdf3ConfigureFail(SpoofaxSdf3ConfigureException cause) {
+        return withCause(SpoofaxStrategoConfigureExceptions.sdf3ConfigureFail(cause), cause);
     }
 
     public static SpoofaxStrategoConfigureException sdf3SignatureGenerateFail(Exception cause) {
@@ -103,6 +109,7 @@ public abstract class SpoofaxStrategoConfigureException extends Exception {
             .mainSourceDirectoryFail(mainSourceDirectory -> "Stratego main source directory '" + mainSourceDirectory + "' does not exist or is not a directory")
             .mainFileFail(mainFile -> "Stratego main file '" + mainFile + "' does not exist or is not a file")
             .includeDirectoryFail(includeDirectory -> "Stratego include directory '" + includeDirectory + "' does not exist or is not a directory")
+            .resolveIncludeFail(cause -> "Resolving compile-time dependency to Stratego includes failed")
             .builtinLibraryFail(builtinLibraryName -> "Stratego built-in library '" + builtinLibraryName + "' does not exist")
             .sdf3ConfigureFail(cause -> "Configuring SDF3 failed")
             .sdf3SignatureGenerateFail(cause -> "SDF3 to signature generator failed")
