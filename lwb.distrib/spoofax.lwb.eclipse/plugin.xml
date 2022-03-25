@@ -57,6 +57,7 @@
       supportsConfigurations="false"
     >
       <run class="mb.spoofax.lwb.eclipse.SpoofaxLwbBuilder"/>
+      <dynamicReference class="mb.spoofax.lwb.eclipse.SpoofaxLwbDynamicReferenceProvider"/>
     </builder>
   </extension>
 

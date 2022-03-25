@@ -1,7 +1,5 @@
 package mb.spoofax.lwb.compiler.stratego;
 
-import mb.cfg.Dependency;
-import mb.cfg.DependencyKind;
 import mb.cfg.metalang.CfgStrategoConfig;
 import mb.cfg.metalang.CfgStrategoSource;
 import mb.cfg.task.CfgRootDirectoryToObject;
@@ -148,9 +146,9 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
 
     @Override
     public Result<Option<StrategoCompileConfig>, SpoofaxStrategoConfigureException> exec(ExecContext context, ResourcePath rootDirectory) throws Exception {
-        return context.requireMapping(cfgRootDirectoryToObject, rootDirectory, new SpoofaxStrategoConfigMapper())
+        return context.requireMapping(cfgRootDirectoryToObject, rootDirectory, SpoofaxStrategoConfigMapper.instance)
             .mapErr(SpoofaxStrategoConfigureException::getLanguageCompilerConfigurationFail)
-            .<Option<StrategoCompileConfig>, Exception>flatMapThrowing(o -> Result.transpose(o.mapThrowing(c -> toStrategoConfig(context, rootDirectory, c, c.cfgStrategoConfig.source().getFiles()))));
+            .<Option<StrategoCompileConfig>, Exception>flatMapThrowing(o -> Result.transpose(o.mapThrowing(c -> toStrategoConfig(context, rootDirectory, c, c.source().getFiles()))));
     }
 
     @Override public boolean shouldExecWhenAffected(ResourcePath input, Set<?> tags) {
@@ -160,11 +158,9 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
     public Result<StrategoCompileConfig, SpoofaxStrategoConfigureException> toStrategoConfig(
         ExecContext context,
         ResourcePath rootDirectory,
-        SpoofaxStrategoConfig spoofaxStrategoConfig,
+        CfgStrategoConfig cfgStrategoConfig,
         CfgStrategoSource.Files sourceFiles
     ) throws IOException, InterruptedException {
-        final CfgStrategoConfig cfgStrategoConfig = spoofaxStrategoConfig.cfgStrategoConfig;
-
         // Check main source directory, main file, and include directories.
         final HierarchicalResource mainSourceDirectory = context.require(sourceFiles.mainSourceDirectory(), ResourceStampers.<HierarchicalResource>exists());
         if(!mainSourceDirectory.exists() || !mainSourceDirectory.isDirectory()) {
@@ -251,17 +247,14 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
             }
         }
 
-        for(Dependency dependency : spoofaxStrategoConfig.dependencies) {
-            if(!dependency.kinds.contains(DependencyKind.CompileTime)) continue;
-            final Result<ListView<ResourcePath>, SpoofaxStrategoResolveIncludesException> result =
-                context.require(resolveIncludes, new SpoofaxStrategoResolveIncludes.Input(dependency.source, rootDirectory, sourceFiles.unarchiveDirectory()));
-            if(result.isErr()) {
-                // noinspection ConstantConditions (err is present)
-                return Result.ofErr(SpoofaxStrategoConfigureException.resolveIncludeFail(result.getErr()));
-            } else {
-                // noinspection ConstantConditions (value is present)
-                result.get().addAllTo(includeDirectories);
-            }
+        final Result<ListView<ResourcePath>, SpoofaxStrategoResolveIncludesException> result =
+            context.require(resolveIncludes, new SpoofaxStrategoResolveIncludes.Input(rootDirectory, sourceFiles.unarchiveDirectory()));
+        if(result.isErr()) {
+            // noinspection ConstantConditions (err is present)
+            return Result.ofErr(SpoofaxStrategoConfigureException.resolveIncludeFail(result.getErr()));
+        } else {
+            // noinspection ConstantConditions (value is present)
+            result.get().addAllTo(includeDirectories);
         }
 
         // Compile each SDF3 source file (if SDF3 is enabled) to a Stratego signature, pretty-printer, completion
