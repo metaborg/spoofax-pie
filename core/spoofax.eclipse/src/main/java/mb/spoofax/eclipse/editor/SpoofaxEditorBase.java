@@ -8,6 +8,7 @@ import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.spoofax.common.BracketSymbols;
 import mb.spoofax.core.language.LanguageInstance;
+import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 import mb.spoofax.eclipse.util.EditorInputUtil;
@@ -15,10 +16,15 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobManager;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.MultiRule;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
@@ -44,6 +50,7 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public abstract class SpoofaxEditorBase extends TextEditor {
     public final class DocumentListener implements IDocumentListener {
@@ -314,6 +321,44 @@ public abstract class SpoofaxEditorBase extends TextEditor {
         super.dispose();
     }
 
+
+    protected ISchedulingRule getJobSchedulingRule(EclipseLanguageComponent languageComponent, boolean includeBuildDirectory) {
+        final Stream.Builder<ISchedulingRule> ruleBuilder = Stream.builder();
+        if(project != null) {
+            // HACK: try to pass the build directory as a scheduling rule, because sometimes an editor update may require
+            //       unarchiving files into the build directory (usually for meta-languages). This is fine, but the build
+            //       directory should not be hard coded!
+            final IFolder folder = project.getFolder("build");
+            if(folder.exists()) {
+                ruleBuilder.accept(folder);
+            }
+            // NOTE: also add refresh scheduling rule because listing/walking a resource may require refreshes.
+            ruleBuilder.accept(ResourcesPlugin.getWorkspace().getRuleFactory().refreshRule(project));
+
+            try {
+                for(IProject referencedProject : project.getReferencedProjects()) {
+                    ruleBuilder.accept(referencedProject);
+                    // NOTE: Also add refresh scheduling rule because listing/walking a resource may require refreshes.
+                    ruleBuilder.accept(ResourcesPlugin.getWorkspace().getRuleFactory().refreshRule(referencedProject));
+                }
+                // NOTE: also add referencing projects, as a change in a change in this project may require running
+                //       tasks of referencing projects. For example, if I make a change in a library, this may require
+                //       running tasks in languages that require the library.
+                for(IProject referencingProject : project.getReferencingProjects()) {
+                    ruleBuilder.accept(referencingProject);
+                    // NOTE: also add refresh scheduling rule because listing/walking a resource may require refreshes.
+                    ruleBuilder.accept(ResourcesPlugin.getWorkspace().getRuleFactory().refreshRule(referencingProject));
+                }
+            } catch(CoreException e) {
+                logger.error("Failed to get referenced projects of '{}' for use as scheduling rules in editor job of '{}'; skipping referenced projects", e, project, this);
+            }
+        }
+        if(file != null) {
+            ruleBuilder.accept(file);
+        }
+        ruleBuilder.accept(languageComponent.startupReadLockRule());
+        return MultiRule.combine(ruleBuilder.build().toArray(ISchedulingRule[]::new));
+    }
 
     protected void cancelJobs(IEditorInput specificInput) {
         final Job[] existingJobs = jobManager.find(specificInput);

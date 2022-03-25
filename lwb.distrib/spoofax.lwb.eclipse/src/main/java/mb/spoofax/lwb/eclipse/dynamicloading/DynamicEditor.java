@@ -158,21 +158,12 @@ public class DynamicEditor extends SpoofaxEditorBase {
 
         cancelJobs();
         final Job job = eclipseLanguageComponent.editorUpdateJobFactory().create(eclipseLanguageComponent, component.getPieComponent(), project, file, document, input, this);
-
-        //A dd refresh scheduling rule because listing/walking a resource may require refreshes.
-        final @Nullable ISchedulingRule refreshSchedulingRule;
-        if(project != null) {
-            refreshSchedulingRule = ResourcesPlugin.getWorkspace().getRuleFactory().refreshRule(project);
-        } else {
-            refreshSchedulingRule = null;
-        }
-
-        // noinspection ConstantConditions (scheduling rules may be null)
-        job.setRule(MultiRule.combine(new ISchedulingRule[]{
-            refreshSchedulingRule,
-            file,
-            eclipseLanguageComponent.startupReadLockRule()
-        }));
+        final ISchedulingRule rule = getJobSchedulingRule(eclipseLanguageComponent);
+        job.setRule(rule);
         job.schedule(initialUpdate ? 0 : 300);
+    }
+
+    private ISchedulingRule getJobSchedulingRule(EclipseLanguageComponent languageComponent) {
+        return getJobSchedulingRule(languageComponent, false);
     }
 }
