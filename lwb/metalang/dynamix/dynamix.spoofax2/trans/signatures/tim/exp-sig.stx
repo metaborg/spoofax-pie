@@ -1,0 +1,14 @@
+module signatures/tim/exp-sig
+
+// TODO: This is a hack because Spoofax 2 imports/exports are horribly
+// broken and when a language is built, it does not re-export any files
+// that it has imported. As a result, we cannot import the Statix specs
+// from the tim project (not even the generated signature ones), as the
+// Statix interpreter expects the compiled aterm representation of those
+// specs to be included in the build. Since Spoofax doesn't re-export 
+// those, Statix will fail.
+//
+// Currently we work around this by manually stubbing out the tim
+// signatures. Luckily we don't actually do anything with the syntax.
+signature 
+  sorts TExp

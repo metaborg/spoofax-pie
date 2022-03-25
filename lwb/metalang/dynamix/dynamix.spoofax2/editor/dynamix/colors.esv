@@ -1,4 +1,4 @@
-module Colors
+module dynamix/colors
 
 colorer Default, token-based highlighting
                                   

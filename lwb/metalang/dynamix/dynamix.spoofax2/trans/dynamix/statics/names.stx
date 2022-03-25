@@ -1,8 +1,8 @@
-module statics/names
+module dynamix/statics/names
 
 imports
-  signatures/common-sig
-  statics/type
+  signatures/dynamix/common-sig
+  dynamix/statics/type
   
 signature
   name-resolution labels
@@ -13,6 +13,7 @@ signature
     rule : string -> MRULE
     primitive : string -> MPRIMITIVE
     var : string -> MTYPE
+    global : string -> MTYPE
     mod : string -> scope // module
     curmod : -> string // name of current module
     
@@ -43,6 +44,27 @@ rules
     !var[x, T] in s,
     query var filter e and { x' :- x' == x } min and false in s |-> ps,
     try { ps == [_] } | error $[Duplicate declaration of [x] in the same scope.]@x,
+    @x.type := T.
+    
+rules
+  // lookup global in current scope or parent scopes
+  lookupGlobal : scope * string -> list((path * (string * MTYPE)))
+  lookupGlobal(s, x) = ps :-
+    query global filter P* and { x' :- x == x' } min $ < P and true in s |-> ps.
+    
+  // resolve global to the given ID
+  resolveGlobal : scope * string -> MTYPE
+  resolveGlobal(s, x) = T :- {x'}
+    lookupGlobal(s, x) == [(_, (x', T))|_] | error $[Undefined global variable [x].]@x,
+    @x.ref := x'.
+    
+  // declare new global, assert it is not shadowed in the current scope
+  declareGlobal : scope * string * MTYPE
+  declareGlobal(s, x, T) :- {ps}
+    !global[x, T] in s,
+    // allow shadowing by only checking current scope
+    query global filter e and { x' :- x' == x } min and false in s |-> ps,
+    try { ps == [_] } | error $[Duplicate declaration of [x] in this module.]@x,
     @x.type := T.
     
 rules

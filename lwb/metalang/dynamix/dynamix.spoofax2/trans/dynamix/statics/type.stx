@@ -1,8 +1,8 @@
-module statics/type
+module dynamix/statics/type
 
 imports
   signatures/dynamix-sig
-  statics/names
+  dynamix/statics/names
   
 // actual types
 signature

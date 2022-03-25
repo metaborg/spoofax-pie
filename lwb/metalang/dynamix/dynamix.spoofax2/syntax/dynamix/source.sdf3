@@ -1,7 +1,7 @@
-module source
+module dynamix/source
 
 imports
-  common
+  dynamix/common
   
 lexical sorts SConstructorName
 lexical syntax

@@ -3,20 +3,20 @@ module statics
 imports
   signatures/dynamix-sig
   
-  statics/names
-  statics/type
+  dynamix/statics/names
+  dynamix/statics/type
   
 rules
   projectOk : scope
   projectOk(s).
 
-  fileOk : scope * Start
-  fileOk(globalS, Program(modname, sections)) :- {modS}
+  fileOk : scope * DynamixProgram
+  fileOk(globalS, DynamixProgram(modname, sections)) :- {modS}
     new modS,
     insertModuleName(modS, modname),
     declareModule(globalS, modname, modS),
     sectionsOk(globalS, modS, sections).
-  fileOk(globalS, MultiProgram(programs)) :- 
+  fileOk(globalS, DynamixMultiProgram(programs)) :- 
     filesOk(globalS, programs).
   filesOk maps fileOk(*, list(*))
   
@@ -95,6 +95,12 @@ rules
   ruleDeclOk : scope * MRuleDecl
   ruleDeclsOk maps ruleDeclOk(*, list(*))
   
+  ruleDeclOk(s, MRuleDeclGlobal(name, ty)) :- {T}
+    mTypeToMTYPE(s, ty) == T,
+    declareGlobal(s, name, T),
+    T != MHOLY0() | error $[Globals may not be holy values.],
+    T != MHOLY1(_) | error $[Globals may not be holy values.],
+    assignModuleName(s, astId(name)).
   ruleDeclOk(s, MRuleDeclSignature(name, sig)) :-
     declareRule(s, name, ruleSignatureToMRULE(s, sig)),
     assignModuleName(s, astId(name)).
@@ -151,6 +157,7 @@ rules
   
   typeOfExp_ : scope * MExpr -> MTYPE
   typeOfExp_(s, MExprVar(x)) = resolveVar(s, x).
+  typeOfExp_(s, MExprGlobal(x)) = resolveGlobal(s, x).
   typeOfExp_(s, MExprQuote(t)) = typeOfQuote(s, t).
   typeOfExp_(s, MExprBlock(stmts)) = typeOfBlockStmts(s, stmts).
   typeOfExp_(s, MExprCall(ruleName, args)) = RT :- {AT}
@@ -211,6 +218,8 @@ rules
   typeOfExp_(s, MExprConcatenateStr(left, right)) = MSTYPE(SSTRING()) :-
     typeCoercibleTo(MSTYPE(SSTRING()), typeOfExp(s, left)) | error $[The left-hand side of the `+` operator must be a source string. Runtime addition is done through primitives, not the + operator.]@left,
     typeCoercibleTo(MSTYPE(SSTRING()), typeOfExp(s, right)) | error $[The right-hand side of the `+` operator must be a source string. Runtime addition is done through primitives, not the + operator.]@right.
+  typeOfExp_(s, MExprScopedGlobals(bindings, exp)) = typeOfExp(s, exp) :-
+    scopedGlobalBindingsOk(s, bindings).
   typeOfExp_(s, MExprQuoteTarget(_)) = MHOLY0() :-
     try { false } | warning $[Quoted target blocks are deprecated and will be removed.].
     
@@ -218,6 +227,13 @@ rules
   coercibleToInt(MSTYPE(SSTRING())).
   coercibleToInt(MSTYPE(SINT())).
   coercibleToInt(T) :- typeCoercibleTo(MSTYPE(SSTRING()), T).
+  
+  scopedGlobalBindingOk : scope * MScopedGlobalBinding
+  scopedGlobalBindingsOk maps scopedGlobalBindingOk(*, list(*))
+  scopedGlobalBindingOk(s, MScopedGlobalBinding(name, exp)) :- {T GT}
+    typeOfExp(s, exp) == T,
+    resolveGlobal(s, name) == GT,
+    typeCoercibleTo(T, GT) | error $[The type of the expression ([T]) is not compatible with the declared type of `[name]`, [GT].].
   
   primitiveArgumentsType : MPRIMITIVE -> list(MTYPE)
   primitiveArgumentsType(MPRIMITIVEEXPR(A)) = A.
@@ -289,95 +305,3 @@ rules // statements and composition
   performAssignment(s, n, x) :-
     try { false } | error $[Cannot assign variables of type [x] since it does not have a concrete value.],
     false.
-   
-rules // primitives
-  assertExprPrimitive : string * list(MTYPE) -> MTYPE
-  assertExprPrimitive("int-add", [MTTYPE(TVALUE()), MTTYPE(TVALUE())]) = MTTYPE(TVALUE()).
-  
-  assertConditionalPrimitive : string * list(MTYPE)
-   
-/*
-  typeOfExp_(s, MExprBlock(stmts)) = typeOfBlockStmts(s, stmts).
-  typeOfExp_(s, MExprCall(ruleName, args)) = _ :- {RT}
-    resolveRule(s, ruleName) == MRULE(RT),
-    typesCoercibleToSTypes(typesOfExps(s, args), RT),
-    try { false } | warning $[TODO].
-  // todo: Labeled0
-  typeOfExp_(s, MExprLabeled1(body, labelName)) = THOLY1(TVALUE()) :- {s' RT}
-    new s', s' -P-> s,
-    declareVar(s', labelName, TVALUE()),
-    typeOfExp(s', body) == RT,
-    try { RT == TFIN() } | error $[The body of a labeled expression must diverge (tail-call a continuation).].
-  typeOfExp_(s, MExprSourceIntToTargetInt(v)) = TVALUE() :- {T}
-    typeOfExp(s, v) == T,
-    try { coercibleToInt(T) } | error $[Can only coerce strings and integers to target integers.].
-  typeOfExp_(s, MExprSourceVarToTargetVar(v)) = TVALUE() :- {T}
-    typeOfExp(s, v) == T,
-    try { T == SQUOTE(SSTRING()) } | error $[Can only coerce strings to target variables.].
-  typeOfExp_(s, MExprSourceStrToTargetStr(v)) = TVALUE() :- {T}
-    typeOfExp(s, v) == T,
-    try { T == SQUOTE(SSTRING()) } | error $[Can only coerce strings to target strings.].
-  typeOfExp_(s, MExprFreshNamedTargetVar(_)) = TVALUE().
-  typeOfExp_(s, MExprList(es)) = MLIST(ET) :-
-    lub(typesOfExps(s, es)) == ET | error $[List literal does not have a common type.].
-  typeOfExp_(s, MExprListCons(es, rest)) = MLIST(ET) :-
-    lub(typesOfExps(s, es)) == ET | error $[List literal does not have a common type.],
-    typeCoercibleTo(typeOfExp(s, rest), MLIST(ET)) | error $[List rest literal does not share a type with the given elements.].
-  typeOfExp_(s, MExprConcatList(left, right)) = MLIST(LET) :- {RET}
-    typeOfExp(s, left) == MLIST(LET) | error $[List concatenation performed on non-list value.],
-    typeOfExp(s, right) == MLIST(RET) | error $[List concatenation performed on non-list value.],
-    try { LET == RET } | error $[List concatenation types are not compatible with each other.].
-  typeOfExp_(s, MExprContinueAt(tgt, args)) = TFIN() :-
-    typeOfExp(s, tgt) == TVALUE() | error $[Can only continue on target values.],
-    typeOfExp(s, args) == MLIST(TVALUE()) | error $[Continuation arguments must be a list of target values.].
-  typeOfExp_(s, MExprCallPrimitive(name, args)) = T :- {AT}
-    typesOfExps(s, args) == AT,
-    assertExprPrimitive(name, AT) == T | error $[Illegal or unknown primitive call.].
-  typeOfExp_(s, MExprConditionalPrimitive(name, args, ift, ife)) = RT :- {AT IT ET}
-    typesOfExps(s, args) == AT,
-    assertConditionalPrimitive(name, AT) | error $[Illegal or unknown primitive call.],
-    typeOfExp(s, ift) == IT,
-    typeOfExp(s, ife) == ET,
-    lub([IT, ET]) == RT | error $[[IT] and [ET] have no common type.].
-  typeOfExp_(s, MExprTFix(funs)) = THOLY0() :-
-    funDefsOk(s, funs).
-      
-  funDefOk : scope * MTFun
-  funDefsOk maps funDefOk(*, list(*))
-  funDefOk(s, MTFun(name, args, body)) :-
-    typeOfExp(s, name) == TVALUE() | error $[The name of a function must be a value.],
-    typeOfExp(s, args) == MLIST(TVALUE()) | error $[The arguments of a function must be a list of values.],
-    typeOfExp(s, body) == _.
-      
-  coercibleToInt : TYPE
-  coercibleToInt(SQUOTE(SINT())).
-  coercibleToInt(SQUOTE(SSTRING())).
-  
-rules // statements and composition
-  typeOfBlockStmts : scope * list(MStatement) -> TYPE
-  typeOfBlockStmts(s, [stmt]) = typeOfBlockStmt(s, stmt).
-  typeOfBlockStmts(s, [stmt|rest@[_|_]]) = T :- {ST RT}
-    typeOfBlockStmt(s, stmt) == ST,
-    typeOfBlockStmts(s, rest) == RT,
-    composeTypes(ST, RT) == T.
-  
-  typeOfBlockStmt : scope * MStatement -> TYPE
-  typeOfBlockStmt(s, MStatementExpr(e)) = typeOfExp(s, e).
-  typeOfBlockStmt(s, MStatementAssign(name, e)) = T :-
-    typeOfExp(s, e) == T,
-    performAssignment(s, name, T).
-    
-  performAssignment : scope * string * TYPE
-  performAssignment(s, n, THOLY1(x)) :- declareVar(s, n, x).
-  performAssignment(s, n, x@TVALUE()) :- declareVar(s, n, x).
-  performAssignment(s, n, x@MLIST(_)) :- declareVar(s, n, x).
-  performAssignment(s, n, x@SQUOTE(_)) :- declareVar(s, n, x).
-  performAssignment(s, n, x) :-
-    try { false } | error $[Cannot assign variables of type [x] since it does not have a concrete value.],
-    false.
-    
-rules // primitives
-  assertExprPrimitive : string * list(TYPE) -> TYPE
-  assertExprPrimitive("int+", [TVALUE(), TVALUE()]) = TVALUE().
-  
-  assertConditionalPrimitive : string * list(TYPE)*/

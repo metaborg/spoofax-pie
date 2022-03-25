@@ -1,9 +1,8 @@
-module type
+module dynamix/type
 
 imports
-  common
-  source
-  tim/exp
+  dynamix/common
+  dynamix/source
   
 context-free sorts MSourceType
 context-free syntax

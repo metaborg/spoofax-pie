@@ -1,15 +1,17 @@
 module Main
 
 imports
-
-  Colors
   Syntax
   Analysis
   Refactoring
 
+  dynamix/colors
+  // TODO: tim/colors
+
 language
-
   extensions : dx
-
-  provider : target/metaborg/stratego.ctree
   provider : target/metaborg/stratego.jar
+
+menus
+  menu: "Debug" (openeditor)
+    action: "Compile to qualified module" = debug-compile-spec

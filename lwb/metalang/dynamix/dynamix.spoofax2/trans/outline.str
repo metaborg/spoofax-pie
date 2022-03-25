@@ -1,6 +1,9 @@
 module outline
 
 imports
+  libstratego-lib
+
+imports
   
   signatures/dynamix-sig
   libspoofax/editor/outline

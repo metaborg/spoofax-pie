@@ -42,7 +42,7 @@ languageProject {
   }
   compilerInput {
     withParser().run {
-      startSymbol("Start")
+      startSymbol("DynamixProgram")
     }
     withStyler()
     withConstraintAnalyzer().run {

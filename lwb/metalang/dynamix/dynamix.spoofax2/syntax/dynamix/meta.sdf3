@@ -1,9 +1,9 @@
-module meta
+module dynamix/meta
 
 imports
-  common
-  source
-  type
+  dynamix/common
+  dynamix/source
+  dynamix/type
   tim/exp
   
 context-free sorts MSection
@@ -68,6 +68,7 @@ context-free syntax
 context-free sorts MRuleDecl
 context-free syntax
   MRuleDecl.MRuleDeclSignature = <<RID> :: <MRuleSignature>>
+  MRuleDecl.MRuleDeclGlobal = <<GID> :: <MType>>
   MRuleDecl.MRuleDecl = <<RID>(<{MPattern ", "}*>) = <MExpr>>
 
 context-free sorts MPattern
@@ -81,18 +82,19 @@ context-free syntax
   MPattern.MPatternListCons = <[<{MPattern ", "}*>|<MPattern>]>
   MPattern.MPatternBound = <<LID>@<MPattern>>
 
-context-free sorts MExpr MStatement MTFun
+context-free sorts MExpr MStatement MTFun MScopedGlobalBinding
 context-free syntax
   // source language operations
   MExpr.MExprQuote = <'<STerm>>
   
   // meta language operations
   MExpr.MExprVar = <<LID>>
+  MExpr.MExprGlobal = <<GID>>
   MExpr.MExprBlock = <
     {
       <{MStatement "\n"}+>
     }
-  >
+  > // TODO: force newlines between statements?
   MExpr.MExprLabeled1 = <
     <MExpr>
     label <LID>/1:
@@ -108,6 +110,10 @@ context-free syntax
   MExpr.MExprConcatenateStr = <<MExpr> + <MExpr>>
   MExpr.MExprFreshNamedTargetVar = <fresh-var(<ID>)>
   MExpr.MExprContinueAt = <<MExpr>@(<MExpr>)>
+  MExpr.MExprScopedGlobals = <
+    with <{MScopedGlobalBinding ", "}+> do
+      <MExpr>
+  >
   
   MExpr.MExprList = <[<{MExpr ", "}*>]>
   MExpr.MExprListCons = <[<{MExpr ", "}*>|<MExpr>]>
@@ -118,6 +124,8 @@ context-free syntax
   
   MStatement.MStatementAssign = [[LID] <- [MExpr]]
   MStatement.MStatementExpr = [[MExpr]]
+  
+  MScopedGlobalBinding.MScopedGlobalBinding = <<GID> = <MExpr>>
   
   // target language operations
   MExpr.MExprCallPrimitive = <#<PID>(<{MExpr ", "}*>)>
