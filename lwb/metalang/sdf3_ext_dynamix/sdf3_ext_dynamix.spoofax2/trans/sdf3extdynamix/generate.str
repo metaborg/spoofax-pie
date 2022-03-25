@@ -1,0 +1,164 @@
+module generate
+
+imports
+  libstratego-lib
+
+imports
+  // sdf3 imports
+  signatures/TemplateLang-sig
+  signatures/aliases/-
+  signatures/aterms/-
+  signatures/basic/-
+  signatures/characterclass/-
+  signatures/constants/-
+  signatures/grammar/-
+  signatures/kernel/-
+  signatures/labels/-
+  signatures/layout/-
+  signatures/layout-constraints/-
+  signatures/lifting/-
+  signatures/literals/-
+  signatures/modules/-
+  signatures/priority/-
+  signatures/regular/-
+  signatures/renaming/-
+  signatures/restrictions/-
+  signatures/sdf2-core/-
+  signatures/sorts/-
+  signatures/symbols/-
+
+  // dx imports
+  signatures/dynamix-sig
+  signatures/dynamix/meta-sig
+  signatures/dynamix/common-sig
+  signatures/dynamix/source-sig
+  signatures/dynamix/type-sig
+
+  libspoofax/term/origin
+
+rules
+  // generate-dynamix-signature :: SDF3.Module -> Dynamix.Start
+  generate-dynamix-signature: Module(
+    Unparameterized(modname),
+    sdfImports,
+    sdfSections
+  ) -> DynamixProgram(
+    outmod,
+    outSections
+  )
+    with
+      outmod := $[signatures/[modname]-sig];
+      // convert imports to an import section
+      importSec := <gendx-imports> sdfImports;
+      // collect sorts and constructors
+      dxSorts := <gendx-collect-sorts> sdfSections;
+      dxCons := <gendx-collect-constructors> sdfSections;
+      dxLexInj := <gendx-collect-lex-sort-injections> sdfSections;
+
+      // combine final sections
+      outSections := [
+        importSec,
+        MSectionSignature(<concat> [dxSorts, dxLexInj, dxCons])
+      ]
+
+  // gendx-imports :: List(SDF3.Imports) -> Dynamix.MSection
+  gendx-imports: sdf3Imports -> dxImportSection
+    with
+      importedModules := <map({ mods:
+        ?Imports(mods);
+        !mods;
+        map({ x: ?Module(Unparameterized(x)); !$[signatures/[x]-sig] })
+      }); flatten-list> sdf3Imports;
+      dxImportSection := MSectionImports(importedModules)
+
+  // find all sorts across the given list of sdf3 sections and convert
+  // to a section within the dx signature.
+  // gendx-collect-sorts :: List(SDF3.SDFSection) -> List(MSignatureDecl)
+  gendx-collect-sorts: sdf3Sections -> dxSorts
+    with
+      dxSorts := <filter({ x, y:
+        ?SDFSection(Sorts(x));
+        y := <map(gendx-sdf-to-dx-sort)> x;
+        !MSignatureSortsDecl(y)
+      })> sdf3Sections
+
+  // gendx-sdf-to-dx-sort :: Sort -> string
+  gendx-sdf-to-dx-sort: DeclSort(name)    -> name
+  gendx-sdf-to-dx-sort: DeclSortLex(name) -> name
+  gendx-sdf-to-dx-sort: DeclSortVar(name) -> name
+
+  // find all lexical sort definitions and generate string injections for them
+  // gendx-collect-lex-sort-injections :: List(SDF3.SDFSection) -> List(MSignatureDecl)
+  gendx-collect-lex-sort-injections: sdf3Sections -> dxInjections
+    with
+      dxInjections := <filter({ x, y:
+        ?SDFSection(Sorts(x));
+        y := <filter(gendx-sdf-sort-to-inj); where(not(?[]))> x;
+        !MSignatureConstructorsDecl(y)
+      })> sdf3Sections
+
+  // gendx-sdf-to-dx-sort :: Sort -> MConstructorDecl
+  gendx-sdf-sort-to-inj: DeclSortLex(name) -> MConstructorDeclInjection(MConstructorArgumentString(), name)
+
+  // gendx-collect-constructors :: List(SDF3.SDFSection) -> List(MSignatureDecl)
+  gendx-collect-constructors: sdf3Sections -> dxCons
+    with
+      dxCons := <filter({ x, y:
+        ?SDFSection(ContextFreeSyntax(x));
+        y := <filter(gendx-production-to-cons)> x;
+        !MSignatureConstructorsDecl(y)
+      })> sdf3Sections
+
+  // convert a production into a dynamix constructor
+  // gendx-production-to-cons :: SDF3.SDFProduction -> MConstructorDecl
+  gendx-production-to-cons: SdfProduction(SortDef(name), args, _) -> ret
+    with
+      args' := <gendx-collect-args> args;
+      ret := <gendx-to-inj(|name)> args'
+  gendx-production-to-cons: TemplateProduction(SortDef(name), args, _) -> ret
+    with
+      args' := <gendx-collect-args> args;
+      ret := <gendx-to-inj(|name)> args'
+  gendx-production-to-cons: SdfProductionWithCons(SortCons(SortDef(sortName), Constructor(consName)), args, _) -> ret
+    with
+      args' := <gendx-collect-args> args;
+      ret := <gendx-to-decl(|sortName, consName)> args'
+  gendx-production-to-cons: TemplateProductionWithCons(SortCons(SortDef(sortName), Constructor(consName)), args, _) -> ret
+    with
+      args' := <gendx-collect-args> args;
+      ret := <gendx-to-decl(|sortName, consName)> args'
+
+  // gendx-to-inj(|string): List(MConstructorArgument) -> MConstructorDecl
+  gendx-to-inj(|sortName): [a] -> MConstructorDeclInjection(a, sortName)
+  gendx-to-inj(|_): _ -> <errormsg(!"Constructor-less sort declarations are only supported if they are injections"); fail>
+
+  // gendx-to-decl(|string): List(MConstructorArgument) -> MConstructorDecl
+  gendx-to-decl(|sortName, consName): [] -> MConstructorDeclSingleton(consName, sortName)
+  gendx-to-decl(|sortName, consName): args -> MConstructorDecl(consName, args, sortName)
+
+  // traverse input term and find all inputs that can be represented as a sort
+  // gendx-collect-args :: any -> List(MConstructorArgument)
+  gendx-collect-args = collect-om(gendx-sort-to-dx-type, conc)
+
+  // gendx-sort-to-dx-type :: SDF3Param -> MConstructorArgument
+  gendx-sort-to-dx-type: Sort(name)                   -> MConstructorArgumentSortID(name)
+  gendx-sort-to-dx-type: Opt(symbol)                  -> MConstructorArgumentList(<gendx-sort-to-dx-type> symbol)
+  gendx-sort-to-dx-type: Iter(symbol)                 -> MConstructorArgumentList(<gendx-sort-to-dx-type> symbol)
+  gendx-sort-to-dx-type: IterSep(symbol, _)           -> MConstructorArgumentList(<gendx-sort-to-dx-type> symbol)
+  gendx-sort-to-dx-type: IterStar(symbol)             -> MConstructorArgumentList(<gendx-sort-to-dx-type> symbol)
+  gendx-sort-to-dx-type: IterStarSep(symbol, _)       -> MConstructorArgumentList(<gendx-sort-to-dx-type> symbol)
+  gendx-sort-to-dx-type: Cf(symbol)                   -> <gendx-sort-to-dx-type> symbol
+  gendx-sort-to-dx-type: Lex(symbol)                  -> <gendx-sort-to-dx-type> symbol
+  gendx-sort-to-dx-type: Var(symbol)                  -> <gendx-sort-to-dx-type> symbol
+  gendx-sort-to-dx-type: Varsym(symbol)               -> <gendx-sort-to-dx-type> symbol
+  gendx-sort-to-dx-type: Label(_, symbol)             -> <gendx-sort-to-dx-type> symbol
+
+rules // utils
+  errormsg(msg) = errormsg(msg, id)
+
+  errormsg(msg, pp): t -> t
+  with  ofile := <origin-file <+ !"<unknown>"> t
+      ; oline := <(origin-line; inc; int-to-string) <+ !"?"> t
+      ; ocol  := <(origin-column; inc; int-to-string) <+ !"?"> t
+  where fmsg  := <concat-strings> ["ERRROR: ", <msg> t, " (", ofile, ":", oline, ":", ocol, "): "]
+      ; <fprintnl> (stderr(), [fmsg,<pp> t])

@@ -21,4 +21,5 @@ dependencies {
   sourceLanguage("org.metaborg.devenv:statix.runtime:$spoofax2DevenvVersion")
 
   sourceLanguage(project(":dynamix.spoofax2"))
+  sourceLanguage(project(":tim.spoofax2"))
 }
