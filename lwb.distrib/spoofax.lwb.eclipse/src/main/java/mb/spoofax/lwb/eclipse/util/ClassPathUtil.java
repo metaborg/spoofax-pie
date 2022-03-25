@@ -2,6 +2,7 @@ package mb.spoofax.lwb.eclipse.util;
 
 import io.github.classgraph.ClassGraph;
 import mb.common.util.ListView;
+import mb.dynamix_runtime.eclipse.DynamixRuntimeEclipseComponent;
 import mb.gpp.eclipse.GppEclipseParticipant;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
@@ -48,6 +49,7 @@ public class ClassPathUtil {
             .addClassLoader(StrategoLibEclipseParticipant.class.getClassLoader())
             .addClassLoader(GppEclipseParticipant.class.getClassLoader())
             .addClassLoader(Rv32ImEclipseComponent.class.getClassLoader())
+            .addClassLoader(DynamixRuntimeEclipseComponent.class.getClassLoader())
 
             .addClassLoader(Generated.class.getClassLoader()) // Artifact: javax.annotation:jsr250-api:1.0
 

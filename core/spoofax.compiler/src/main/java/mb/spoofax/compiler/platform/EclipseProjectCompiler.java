@@ -171,6 +171,9 @@ public class EclipseProjectCompiler implements TaskDef<Supplier<Result<Option<Ec
         if(input.adapterProjectCompilerInput().dependOnRv32Im()) {
             bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.rv32ImEclipseDep()));
         }
+        if(input.adapterProjectCompilerInput().dynamix().isPresent()) {
+            bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.dynamixRuntimeEclipseDep()));
+        }
         input.languageProjectDependency().ifSome(d -> bundleDependencies.add(GradleConfiguredBundleDependency.bundleEmbedApi(d)));
         input.adapterProjectDependency().ifSome(d -> bundleDependencies.add(GradleConfiguredBundleDependency.bundleEmbedApi(d)));
         return bundleDependencies;

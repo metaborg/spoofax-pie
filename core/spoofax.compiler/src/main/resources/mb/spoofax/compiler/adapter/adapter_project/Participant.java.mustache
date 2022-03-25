@@ -42,7 +42,10 @@ public class {{baseParticipant.id}}<L extends LoggerComponent, R extends Resourc
 
     @Override
     public ListView<CoordinateRequirement> getDependencies() {
-        return ListView.of({{#dependOnRv32Im}}new CoordinateRequirement("rv32im"){{/dependOnRv32Im}});
+        return ListView.of(
+            {{#dependOnRv32Im}}new CoordinateRequirement("rv32im"){{#dynamix}},{{/dynamix}}{{/dependOnRv32Im}}
+            {{#dynamix}}new CoordinateRequirement("dynamix_runtime"){{/dynamix}}
+        );
     }
 
     @Override
@@ -190,6 +193,7 @@ public class {{baseParticipant.id}}<L extends LoggerComponent, R extends Resourc
                 .resourceServiceComponent(resourceServiceComponent)
                 .platformComponent(platformComponent)
                 {{#dependOnRv32Im}}.rv32ImComponent(dependencyResolver.getOneSubcomponent(mb.rv32im.Rv32ImComponent.class).unwrap()){{/dependOnRv32Im}}
+                {{#dynamix}}.dynamixRuntimeComponent(dependencyResolver.getOneSubcomponent(mb.dynamix_runtime.DynamixRuntimeComponent.class).unwrap()){{/dynamix}}
                 ;
             component = builder.build();
         }

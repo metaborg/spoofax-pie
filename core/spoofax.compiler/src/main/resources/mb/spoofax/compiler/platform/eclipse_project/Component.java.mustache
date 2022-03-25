@@ -25,7 +25,8 @@ import mb.spoofax.eclipse.log.EclipseLoggerComponent;
         ResourceServiceComponent.class,
         EclipsePlatformComponent.class{{#adapterProjectCompilerInput.isMultiLang}},
         mb.statix.multilang.eclipse.MultiLangEclipseComponent.class{{/adapterProjectCompilerInput.isMultiLang}}{{#adapterProjectCompilerInput.dependOnRv32Im}},
-        mb.rv32im.eclipse.Rv32ImEclipseComponent.class{{/adapterProjectCompilerInput.dependOnRv32Im}}
+        mb.rv32im.eclipse.Rv32ImEclipseComponent.class{{/adapterProjectCompilerInput.dependOnRv32Im}}{{#adapterProjectCompilerInput.dynamix}},
+        mb.dynamix_runtime.eclipse.DynamixRuntimeEclipseComponent.class{{/adapterProjectCompilerInput.dynamix}}
     }
 )
 public interface {{baseEclipseComponent.id}} extends EclipseLanguageComponent, {{adapterProjectCompilerInput.component.qualifiedId}} {

@@ -1,0 +1,122 @@
+package {{baseExecuteDynamixSpecification.packageId}};
+
+import mb.common.option.Option;
+import mb.common.result.Result;
+import mb.constraint.common.ConstraintAnalyzerContext;
+import mb.constraint.pie.ConstraintAnalyzeFile;
+import mb.constraint.pie.ConstraintAnalyzeFile.Output;
+import mb.dynamix_runtime.DynamixRuntimeConfig;
+import mb.dynamix_runtime.DynamixSpecificationRunningException;
+import mb.dynamix_runtime.task.DynamixRuntimeRunSpecification;
+import mb.pie.api.ExecContext;
+import mb.pie.api.None;
+import mb.pie.api.StatelessSerializableFunction;
+import mb.pie.api.Supplier;
+import mb.pie.api.TaskDef;
+import mb.pie.api.stamp.resource.ResourceStampers;
+import mb.resource.ReadableResource;
+import mb.resource.ResourceKey;
+import mb.resource.hierarchical.ResourcePath;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+
+import javax.inject.Inject;
+
+import java.io.Serializable;
+
+@{{adapterProject.scope.qualifiedId}}
+public class {{baseExecuteDynamixSpecification.id}} implements TaskDef<{{baseExecuteDynamixSpecification.id}}.Input, Result<IStrategoTerm, DynamixSpecificationRunningException>> {
+    public static final class Input implements Serializable {
+        public final ResourcePath rootDirectory;
+        public final ResourceKey file;
+
+        public Input(ResourcePath rootDirectory, ResourceKey file) {
+            this.rootDirectory = rootDirectory;
+            this.file = file;
+        }
+
+        @Override public boolean equals(@Nullable Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            Input input = (Input)o;
+            if(!rootDirectory.equals(input.rootDirectory)) return false;
+            return file.equals(input.file);
+        }
+
+        @Override public int hashCode() {
+            int result = rootDirectory.hashCode();
+            result = 31 * result + file.hashCode();
+            return result;
+        }
+
+        @Override public String toString() {
+            return "{{baseExecuteDynamixSpecification.id}}.Input{" +
+                "rootDirectory=" + rootDirectory +
+                ", file=" + file +
+                '}';
+        }
+    }
+
+    private final {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources;
+    private final {{constraintAnalyzerInput.analyzeFileTaskDef.qualifiedId}} constraintAnalyzeFile;
+    private final {{readDynamixSpecTaskDef.qualifiedId}} readDynamixSpec;
+    private final DynamixRuntimeRunSpecification dynamixRuntimeRunSpecification;
+
+    @Inject public {{baseExecuteDynamixSpecification.id}}(
+        {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources,
+        {{constraintAnalyzerInput.analyzeFileTaskDef.qualifiedId}} constraintAnalyzeFile,
+        {{readDynamixSpecTaskDef.qualifiedId}} readDynamixSpec,
+        DynamixRuntimeRunSpecification dynamixRuntimeRunSpecification
+    ) {
+        this.classLoaderResources = classLoaderResources;
+        this.constraintAnalyzeFile = constraintAnalyzeFile;
+        this.readDynamixSpec = readDynamixSpec;
+        this.dynamixRuntimeRunSpecification = dynamixRuntimeRunSpecification;
+    }
+
+    @Override public String getId() {
+        return "{{baseExecuteDynamixSpecification.qualifiedId}}";
+    }
+
+    @Override
+    public Result<IStrategoTerm, DynamixSpecificationRunningException> exec(ExecContext context, Input input) throws Exception {
+    	context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
+
+    	final Supplier<Result<ConstraintAnalyzeFile.Output, ?>> analyzeSupplier = constraintAnalyzeFile.createSupplier(new ConstraintAnalyzeFile.Input(input.rootDirectory, input.file));
+
+        return context.require(
+    		dynamixRuntimeRunSpecification,
+    		new DynamixRuntimeRunSpecification.Input(
+				readDynamixSpec.createSupplier(None.instance),
+				analyzeSupplier.map(AnalysisResultToAstMapper.instance),
+				Option.ofSome(analyzeSupplier.map(AnalysisResultToConstraintContextMapper.instance)),
+				createDynamixRuntimeConfig()
+			)
+    	);
+    }
+
+    private DynamixRuntimeConfig createDynamixRuntimeConfig() {
+        // TODO
+    	return new DynamixRuntimeConfig("main!evalProgram");
+    }
+
+    private static final class AnalysisResultToAstMapper extends StatelessSerializableFunction<Result<ConstraintAnalyzeFile.Output, ?>, Result<IStrategoTerm, ?>> {
+    	private static final AnalysisResultToAstMapper instance = new AnalysisResultToAstMapper();
+
+		@Override
+		public Result<IStrategoTerm, ?> apply(Result<Output, ?> t) {
+			return t.map((x) -> x.ast);
+		}
+    }
+
+    private static final class AnalysisResultToConstraintContextMapper extends StatelessSerializableFunction<Result<ConstraintAnalyzeFile.Output, ?>, Result<ConstraintAnalyzerContext, ?>> {
+    	private static final AnalysisResultToConstraintContextMapper instance = new AnalysisResultToConstraintContextMapper();
+
+		@Override
+		public Result<ConstraintAnalyzerContext, ?> apply(Result<Output, ?> t) {
+			return t.map((x) -> x.context);
+		}
+    }
+}
+

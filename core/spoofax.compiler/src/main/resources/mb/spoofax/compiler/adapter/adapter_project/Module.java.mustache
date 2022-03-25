@@ -184,6 +184,13 @@ public class {{baseModule.id}} {
     }
 
 {{/dependOnRv32Im}}
+{{#dynamix}}
+    @Provides @{{scope.id}} @{{qualifier.id}} @ElementsIntoSet
+    static Set<TaskDef<?, ?>> provideDynamixRuntimeTaskDefs(@mb.dynamix_runtime.DynamixRuntimeQualifier Set<TaskDef<?, ?>> taskDefs) {
+        return taskDefs;
+    }
+
+{{/dynamix}}
 {{#multilangAnalyzer}}
     @Provides @{{scope.id}}
     static LanguageId provideLanguageId() {
