@@ -1,0 +1,14 @@
+module Main
+
+imports
+
+  Syntax
+  Analysis
+  Refactoring
+  
+  tim/colors
+
+language
+
+  extensions : tim
+  provider : target/metaborg/stratego.jar

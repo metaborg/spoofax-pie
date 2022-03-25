@@ -36,6 +36,7 @@ import mb.statix.StatixComponent;
 import mb.str.StrategoComponent;
 import mb.strategolib.StrategoLibComponent;
 import mb.strategolib.StrategoLibResourcesComponent;
+import mb.tim.TimComponent;
 
 import java.util.Set;
 
@@ -54,6 +55,7 @@ import java.util.Set;
         StrategoComponent.class,
         EsvComponent.class,
         StatixComponent.class,
+        TimComponent.class,
         DynamixComponent.class,
 
         Sdf3ExtStatixComponent.class,
@@ -85,6 +87,8 @@ public interface SpoofaxLwbCompilerComponent extends TaskDefsProvider, AutoClose
     EsvComponent getEsvComponent();
 
     StatixComponent getStatixComponent();
+
+    TimComponent getTimComponent();
 
     DynamixComponent getDynamixComponent();
 

@@ -1,0 +1,30 @@
+module tim/scope
+
+imports
+  libstratego-lib
+  
+  tim/eval
+  
+signature
+  sorts TScope
+  constructors TScope : List(Hashtable) -> TScope
+  
+rules
+  // tim-scope-new :: ? -> TScope
+  tim-scope-new = !TScope([<new-hashtable>])
+  
+  // tim-scope-set(|string, TRuntimeValue) :: TScope -> TScope
+  tim-scope-set(|k, v): s@TScope([cur|_]) -> s
+    with <hashtable-put(|k, v)> cur
+    
+  // tim-scope-get(|string) :: TScope -> TRuntimeValue
+  tim-scope-get(|k): TScope(e) -> <getfirst(hashtable-get(|k))> e
+
+  // tim-scope-push :: TScope -> TScope
+  tim-scope-push: TScope(v) -> TScope([<new-hashtable>|v])
+  
+  // tim-scope-pop :: TScope -> TScope
+  tim-scope-pop: TScope([_|v]) -> TScope(v)
+  
+  // tim-scope-debug :: TScope -> ?
+  tim-scope-debug: TScope(v) -> <map(hashtable-getlist; map(Fst)); concat; debug> v

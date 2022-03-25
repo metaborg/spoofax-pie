@@ -1,0 +1,23 @@
+module tim/types
+
+imports
+  signatures/tim/common-sig
+  
+signature
+  sorts TYPE
+  constructors
+    INT : TYPE
+    STRING : TYPE
+    FUNCTION : list(TYPE) -> TYPE
+    REF : TYPE -> TYPE
+    ARRAY : TYPE
+    RECORD : TYPE
+    
+rules
+  // whether first argument is compatible in a context where a second
+  // argument is expected
+  typeCoercibleTo : TYPE * TYPE
+  typesCoercibleTo maps typeCoercibleTo(list(*), list(*))
+  
+  // todo
+  typeCoercibleTo(T, T).

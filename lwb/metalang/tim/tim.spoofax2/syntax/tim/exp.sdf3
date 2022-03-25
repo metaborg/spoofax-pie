@@ -1,0 +1,61 @@
+module tim/exp
+
+imports
+  tim/common
+  
+context-free sorts TValue
+context-free syntax
+  TValue.TValueInt = <<TINT>>
+  TValue.TValueString = <<TSTRING>>
+  TValue.TValueVar = <<TID>>
+
+context-free sorts TExp TFun
+context-free syntax
+  TExp.THole = [hole]
+
+  TExp.TExpApp = [
+    [TValue]([{TValue ", "}*])
+  ]
+  
+  TExp.TExpFix = [
+    fix {
+      [{TFun "\n"}*]
+    } in
+      [TExp]
+  ]
+  
+  TFun.TFun = [
+    fun [TID]([{TID ", "}*]) =
+      [TExp]
+  ]
+    
+context-free syntax // primitive operations
+  TExp.TExpPrimOp = [
+    #[TPRIM]([{TValue ", "}*]) => [TID];
+    [TExp]
+  ]
+  
+  // does not produce a value and tail-calls (or terminates)
+  TExp.TExpTerminatingPrimOp = [
+    #[TPRIM]([{TValue ", "}*])
+  ]
+  
+  TExp.TExpConditionalPrimOp = [
+    if #[TPRIM]([{TValue ", "}*]) then
+      [TExp]
+    else
+      [TExp]
+  ]
+  
+context-free sorts TBind
+context-free syntax // sugar
+  TExp.TExpLet = [
+    let [{TBind ","}*] in
+      [TExp]
+  ]
+  
+  TBind.TBind = [[TID] = [TValue]]
+  
+template options
+  TID = keyword {reject} // ensure print and friends are parsed as primops and not calls
+  TPRIM = keyword {reject}

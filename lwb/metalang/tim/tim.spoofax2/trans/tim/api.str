@@ -1,0 +1,18 @@
+module tim/api
+
+imports
+  signatures/tim-sig
+
+  tim/eval
+  
+rules
+  // tim-eval-to-string :: TProgram -> string
+  tim-eval-to-string: TProgram(exp) -> ret
+    with {| TEvalOutput:
+      <strip-annos; tim-eval-to-completion(tim--io-to-string)> exp;
+      ret := <bagof-TEvalOutput; reverse; concat-strings> ""
+    |}
+    
+  // tim--io-to-string :: TIOAction -> ?
+  tim--io-to-string: TIOPrint(s) -> ()
+    with rules(TEvalOutput :+ "" -> s)

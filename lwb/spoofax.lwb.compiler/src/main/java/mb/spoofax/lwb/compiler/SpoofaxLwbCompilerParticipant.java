@@ -45,6 +45,7 @@ import mb.str.config.StrategoAnalyzeConfig;
 import mb.str.config.StrategoCompileConfig;
 import mb.strategolib.StrategoLibComponent;
 import mb.strategolib.StrategoLibResourcesComponent;
+import mb.tim.TimComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class SpoofaxLwbCompilerParticipant<L extends LoggerComponent, R extends ResourceServiceComponent, P extends PlatformComponent> extends EmptyParticipant<L, R, P> {
@@ -74,6 +75,7 @@ public class SpoofaxLwbCompilerParticipant<L extends LoggerComponent, R extends 
             new CoordinateRequirement("stratego"),
             new CoordinateRequirement("statix"),
             new CoordinateRequirement("dynamix"),
+            new CoordinateRequirement("tim"),
 
             new CoordinateRequirement("sdf3_ext_statix"),
             new CoordinateRequirement("sdf3_ext_dynamix"),
@@ -110,6 +112,7 @@ public class SpoofaxLwbCompilerParticipant<L extends LoggerComponent, R extends 
         final EsvComponent esvComponent = dependencyResolver.getOneSubcomponent(EsvComponent.class).unwrap();
         final StatixComponent statixComponent = dependencyResolver.getOneSubcomponent(StatixComponent.class).unwrap();
         final DynamixComponent dynamixComponent = dependencyResolver.getOneSubcomponent(DynamixComponent.class).unwrap();
+        final TimComponent timComponent = dependencyResolver.getOneSubcomponent(TimComponent.class).unwrap();
 
         final Sdf3ExtStatixComponent sdf3ExtStatixComponent = dependencyResolver.getOneSubcomponent(Sdf3ExtStatixComponent.class).unwrap();
         final Sdf3ExtDynamixComponent sdf3ExtDynamixComponent = dependencyResolver.getOneSubcomponent(Sdf3ExtDynamixComponent.class).unwrap();
@@ -137,6 +140,7 @@ public class SpoofaxLwbCompilerParticipant<L extends LoggerComponent, R extends 
             .strategoComponent(strategoComponent)
             .esvComponent(esvComponent)
             .statixComponent(statixComponent)
+            .timComponent(timComponent)
             .dynamixComponent(dynamixComponent)
 
             .sdf3ExtStatixComponent(sdf3ExtStatixComponent)

@@ -1,0 +1,10 @@
+module tim
+
+imports
+  tim/common
+  tim/exp
+
+context-free start-symbols TProgram
+context-free sorts TProgram
+context-free syntax
+  TProgram.TProgram = <<TExp>>

@@ -1,0 +1,89 @@
+---
+# TODO: versioning
+id: org.metaborg:tim:0.1.0-SNAPSHOT
+name: tim
+dependencies:
+  compile:
+  - org.metaborg:org.metaborg.meta.lang.esv:${metaborgVersion}
+  - org.metaborg:org.metaborg.meta.lang.template:${metaborgVersion}
+  - org.metaborg:statix.lang:${metaborgVersion}
+  - org.metaborg:sdf3.ext.statix:${metaborgVersion}
+  source:
+  - org.metaborg:meta.lib.spoofax:${metaborgVersion}
+  - org.metaborg:statix.runtime:${metaborgVersion}
+pardonedLanguages:
+- EditorService
+- Stratego-Sugar
+- SDF
+language:
+  sdf:
+    enabled: true
+    pretty-print: tim
+    sdf2table: java
+    placeholder:
+      prefix: "$"
+  stratego:
+    args:
+    - -la
+    - stratego-lib
+    - -la
+    - stratego-gpp
+    - -la
+    - stratego-sglr
+    - -la
+    - stratego-xtc
+    - -la
+    - stratego-aterm
+    - -la
+    - stratego-sdf
+    - -la
+    - strc
+  statix:
+    mode: traditional
+exports:
+# syntax
+- language: ATerm
+  directory: src-gen/syntax
+- language: TemplateLang
+  directory: syntax
+  includes: "**/*.sdf3"
+- language: SDF
+  directory: src-gen/syntax
+  includes: "**/*.sdf"
+# stratego injections (needed for syntax)
+- language: Stratego-Sugar
+  directory: src-gen
+  includes: "injections/tim/**/*.str"
+# stratego pretty-printer (needed for syntax)
+- language: Stratego-Sugar
+  directory: src-gen
+  includes: "pp/**/*.str"
+# stratego completion (needed for syntax)
+- language: Stratego-Sugar
+  directory: src-gen
+  includes: "completion/tim/**/*.str"
+# stratego signatures
+- language: Stratego-Sugar
+  directory: src-gen
+  includes: "signatures/tim/**/*.str"
+- language: Stratego-Sugar
+  directory: src-gen
+  includes: "signatures/tim-sig.str"
+- language: Stratego-Sugar
+  directory: src-gen
+  includes: "signatures/permissive-water-sig.str"
+# esv (colors)
+- language: EditorService
+  directory: editor
+  includes: "editor/tim/**/*.esv"
+# statix signatures
+# todo: disabled due to lack of re-exporting of statix specs, manually copied TExp signature
+# - language: StatixLang
+#   directory: src-gen/statix
+#  includes: "signatures/**/*.stx"
+- language: ATerm
+  directory: src-gen/statix
+# pretty printing helper
+- language: Stratego-Sugar
+  directory: trans
+  includes: "tim/pp.str"

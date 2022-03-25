@@ -1,0 +1,12 @@
+module statics
+
+imports
+  signatures/tim-sig
+  
+  tim/exps
+
+rules
+
+  programOk : TProgram
+  programOk(TProgram-Plhdr()).
+  programOk(TProgram(exp)) :- texpOk(new, exp).

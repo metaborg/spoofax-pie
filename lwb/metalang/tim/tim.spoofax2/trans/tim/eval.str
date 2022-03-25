@@ -1,0 +1,191 @@
+module tim/eval
+
+imports
+  libstratego-lib
+  
+  signatures/tim/common-sig
+  signatures/tim/exp-sig
+  
+  tim/scope
+  tim/box
+  
+  libspoofax/stratego/debug
+  
+// Sort used to represent the value of some entry at runtime.
+// Roughly equivalent to TValue, except that functions are first-class
+// and that we do not support references to labels.
+signature
+  sorts TRuntimeValue
+  constructors
+    TRuntimeInt : int -> TRuntimeValue
+    TRuntimeString : string -> TRuntimeValue
+    TRuntimeFunction : TBox * TFun -> TRuntimeValue 
+    TRuntimeReference : TBox -> TRuntimeValue
+    TRuntimeArray : List(TRuntimeValue) -> TRuntimeValue
+    TRuntimeRecord : Hashtable -> TRuntimeValue
+    TRuntimeVoid : TRuntimeValue
+    
+// Sort used to represent the next step to be taken in the evaluation
+// of some expression. Evaluation is done in a while loop by passing
+// the next value to be evaluated, to ensure tail-calling does not blow
+// the stack.
+signature
+  sorts TContinuation
+  constructors
+    // continue execution with the given expression and the given scope
+    TContinuation : TExp * TScope -> TContinuation
+    
+    // terminate execution, the program is done
+    TTerminate : TContinuation
+    
+// Action to be performed by the IO handler for execution.
+signature
+  sorts TIOAction
+  constructors
+    TIOPrint : string -> TIOAction
+  
+// Evaluation
+rules
+  // Evaluate the given term to completion, using the given print strategy
+  // for any I/O actions taken by the program.
+  // tim-eval-to-completion(TIOAction -> ?) :: TExp -> ()
+  tim-eval-to-completion(io) = tim-eval-to-completion(io|<tim-scope-new>)
+
+  // tim-eval-to-completion(TIOAction -> ?|TScope) :: TExp -> ()
+  tim-eval-to-completion(io|s) = tim-eval-texp(io|s); while(?TContinuation(_, _), tim-eval-continuation(io))
+  
+  // tim-eval-continuation(TIOAction -> ?) :: TContinuation -> TContinuation
+  tim-eval-continuation(io): TContinuation(exp, s) -> ret
+    with ret := <tim-eval-texp(io|s)> exp
+  tim-eval-continuation(io): t@TTerminate() -> t
+
+  // tim-eval-texp(TIOAction -> ?) :: TExp -> TContinuation
+  tim-eval-texp(io) = tim-eval-texp(io|<tim-scope-new>)
+  
+  // tim-eval-texp(TIOAction -> ?|TScope) :: TExp -> TContinuation
+  tim-eval-texp(io|s) = tim-eval-texp-(io|s)
+  
+  // tim-eval-texp-(TIOAction -> ?|TScope) :: TExp -> TContinuation
+  tim-eval-texp-(io|scope): TExpApp(target, args) -> ret
+    with
+      // evaluate fn and args
+      TRuntimeFunction(fnScope, TFun(fnName, argNames, fnBody)) := <tim-eval-tvalue(io|scope)> target;
+      argValues := <map(tim-eval-tvalue(io|scope))> args;
+      fnScope' := <tim-box-get> fnScope;
+      
+      // create new scope for arg values and insert them
+      argScope := <tim-scope-push> fnScope';
+      <zip; map({ argName, argValue:
+        ?(argName, argValue);
+        <tim-scope-set(|argName, argValue)> argScope
+      })> (argNames, argValues);
+            
+      // create new scope for body and evaluate
+      bodyScope := <tim-scope-push> argScope;
+      ret := TContinuation(fnBody, bodyScope)
+  tim-eval-texp-(io|scope): TExpFix(funs, exp) -> val
+    with
+      // new scope for function definitions
+      defScope := <tim-scope-push> scope;
+      defScopeBox := <tim-box-new(|defScope)>;
+      <map({ fn, fnName:
+        ?fn@TFun(fnName, _, _);
+        <tim-scope-set(|fnName, TRuntimeFunction(defScopeBox, fn))> defScope
+      })> funs;
+        
+      // new scope for body
+      bodyScope := <tim-scope-push> defScope;
+      val := <tim-eval-texp(io|bodyScope)> exp
+  tim-eval-texp-(io|scope): TExpLet(binds, exp) -> val
+    with
+      // new nested scope
+      scope' := <tim-scope-push> scope;
+      <map({ n, v:
+        ?TBind(n, v);
+        <tim-scope-set(|n, <tim-eval-tvalue(io|scope)> v)> scope'
+      })> binds;
+      val := <tim-eval-texp(io|scope')> exp
+      
+  tim-eval-texp-(io|scope): TExpPrimOp(op, args, name, rest) -> <tim-eval-texp(io|scope)> rest
+    where
+      val := <tim-eval-primop-exp(io)> (op, <map(tim-eval-tvalue(io|scope))> args);
+      <tim-scope-set(|name, val)> scope
+      
+  tim-eval-texp-(io|scope): TExpTerminatingPrimOp(op, args) -> ret
+    where
+      ret := <tim-eval-primop-stmt(io)> (op, <map(tim-eval-tvalue(io|scope))> args)
+      
+  tim-eval-texp-(io|scope): TExpConditionalPrimOp(op, args, then, else) -> ret
+    where
+      val := <tim-eval-primop-condition(io)> (op, <map(tim-eval-tvalue(io|scope))> args);
+      newScope := <tim-scope-push> scope;
+      if <eq> (val, 1) then
+        ret := <tim-eval-texp(io|scope)> then
+      else
+        ret := <tim-eval-texp(io|scope)> else
+      end
+    
+  // tim-eval-tvalue(TIOAction -> ?|TScope) :: TValue -> TRuntimeValue
+  tim-eval-tvalue(io|s) = tim-eval-tvalue-(io|s)
+
+  // tim-eval-tvalue-(|TScope) :: TValue -> TRuntimeValue
+  tim-eval-tvalue-(io|scope): TValueInt(v) -> TRuntimeInt(<string-to-int> v)
+  tim-eval-tvalue-(io|scope): TValueString(v) -> TRuntimeString(<strip-annos> v)
+  tim-eval-tvalue-(io|scope): TValueVar(v) -> <tim-scope-get(|v) <+ tim-fail-msg(|$[Undeclared variable [v]])> scope
+  
+rules // primops
+  // tim-eval-primop-stmt(TIOAction -> ?) :: TPRIM * List(TRuntimeValue) -> TContinuation
+  tim-eval-primop-stmt(io): ("exit", []) -> TTerminate()
+
+  // tim-eval-primop-exp(TIOAction -> ?) :: TPRIM * List(TRuntimeValue) -> TRuntimeValue
+  tim-eval-primop-exp(io): ("print", [v]) -> <tim-runtime-value-to-string; ![<id>, "\n"]; concat-strings; !TIOPrint(<id>); io> v
+  tim-eval-primop-exp(io): ("int-neg", [TRuntimeInt(v)]) -> TRuntimeInt(<subti> (0, v))
+  tim-eval-primop-exp(io): ("int-add", [TRuntimeInt(a), TRuntimeInt(b)]) -> TRuntimeInt(<addi> (a, b))
+  tim-eval-primop-exp(io): ("int-sub", [TRuntimeInt(a), TRuntimeInt(b)]) -> TRuntimeInt(<subti> (a, b))
+  tim-eval-primop-exp(io): ("int-mul", [TRuntimeInt(a), TRuntimeInt(b)]) -> TRuntimeInt(<muli> (a, b))
+  tim-eval-primop-exp(io): ("int-div", [TRuntimeInt(a), TRuntimeInt(b)]) -> TRuntimeInt(<divi> (a, b))
+  tim-eval-primop-exp(io): ("ref-new", [v]) -> TRuntimeReference(<tim-box-new(|v)>)
+  tim-eval-primop-exp(io): ("ref-fetch", [TRuntimeReference(box)]) -> <tim-box-get> box 
+  tim-eval-primop-exp(io): ("ref-store", [TRuntimeReference(box), v]) -> <tim-box-set(|v); !v> box 
+  tim-eval-primop-exp(io): ("array-new", vs) -> TRuntimeArray(vs)
+  tim-eval-primop-exp(io): ("array-read", [TRuntimeArray(vs), TRuntimeInt(idx)]) -> <index(|<addi> (idx, 1))> vs  
+  tim-eval-primop-exp(io): ("record-new", args) -> TRuntimeRecord(<tim-build-record(|<new-hashtable>)> args)
+  tim-eval-primop-exp(io): ("record-read", [TRuntimeRecord(h), TRuntimeString(x)]) -> <hashtable-get(|x)> h
+  
+  // tim-eval-primop-condition(TIOAction -> ?) :: TPRIM * List(TRuntimeValue) -> int // 1 if branch taken, 0 otherwise
+  tim-eval-primop-condition(io): ("int-eq", [TRuntimeInt(a), TRuntimeInt(b)]) -> <eq < !1 + !0> (a, b)
+  tim-eval-primop-condition(io): ("int-neq", [TRuntimeInt(a), TRuntimeInt(b)]) -> <eq < !0 + !1> (a, b)
+  tim-eval-primop-condition(io): ("int-leq", [TRuntimeInt(a), TRuntimeInt(b)]) -> <leq < !1 + !0> (a, b)
+  tim-eval-primop-condition(io): ("int-geq", [TRuntimeInt(a), TRuntimeInt(b)]) -> <geq < !1 + !0> (a, b)
+  tim-eval-primop-condition(io): ("int-gt", [TRuntimeInt(a), TRuntimeInt(b)]) -> <gt < !1 + !0> (a, b)
+  tim-eval-primop-condition(io): ("int-lt", [TRuntimeInt(a), TRuntimeInt(b)]) -> <lt < !1 + !0> (a, b)
+  
+  tim-eval-primop-condition(io): ("str-eq", [TRuntimeString(a), TRuntimeString(b)]) -> <eq < !1 + !0> (a, b)
+  tim-eval-primop-condition(io): ("str-neq", [TRuntimeString(a), TRuntimeString(b)]) -> <eq < !0 + !1> (a, b)
+  
+  // tim-build-record(|Hashtable) :: List(TRuntimeValue) -> Hashtable
+  tim-build-record(|h): [] -> h
+  tim-build-record(|h): [TRuntimeString(name), v|rest] -> <tim-build-record(|h)> rest
+    with <hashtable-put(|name, v)> h
+    
+  // tim-runtime-value-to-string :: TRuntimeValue -> string
+  tim-runtime-value-to-string: TRuntimeInt(v) -> $[[<int-to-string> v]]
+  tim-runtime-value-to-string: TRuntimeString(v) -> $[[v]]
+  tim-runtime-value-to-string: TRuntimeFunction(_, TFun(name, _, _)) -> $[function [name]]
+  tim-runtime-value-to-string: TRuntimeReference(b) -> $[ref [<tim-box-get; tim-runtime-value-to-string> b]]
+  tim-runtime-value-to-string: TRuntimeArray(v) -> $[array of length [<length; int-to-string> v]]
+  tim-runtime-value-to-string: TRuntimeRecord(v) -> $[record with [<hashtable-getlist; length; int-to-string> v] fields]
+  tim-runtime-value-to-string: TRuntimeVoid() -> $[void]
+  
+rules
+  // Pretty print the input term and write out the given message, then exit.
+  // tim-fail-msg(|string) :: ? -> ?
+  tim-fail-msg(|msg) =
+    // error message
+    ?x; err-msg(|msg); !x;
+    
+    // term
+    ppdebug(|"== On term: ==\n");
+    
+    // exit
+    !1; exit
