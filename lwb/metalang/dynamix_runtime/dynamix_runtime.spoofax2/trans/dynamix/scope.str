@@ -1,0 +1,33 @@
+module dynamix/scope
+
+imports
+  // strategolib
+  libstratego-lib
+  
+  dynamix/eval
+  
+signature
+  sorts MScope
+  constructors MScope : List(Hashtable) -> MScope
+  
+rules
+  // dx--scope-new :: ? -> MScope
+  dx--scope-new = !MScope([<new-hashtable>])
+  
+  // dx--scope-set(|string, MRuntimeValue) :: MScope -> MScope
+  dx--scope-set(|k, v): s@MScope([cur|_]) -> s
+    with <hashtable-put(|k, v)> cur
+    
+  // dx--scope-get(|string) :: MScope -> MRuntimeValue
+  dx--scope-get(|k): MScope(vals) -> <getfirst(hashtable-get(|k))> vals
+  
+  // dx--scope-push :: MScope -> MScope
+  dx--scope-push: MScope(v) -> MScope([<new-hashtable>|v])
+  
+  // dx--scope-debug :: MScope -> List(?)
+  dx--scope-debug: MScope(v) -> <map(hashtable-getlist); concat> v
+  
+  // dx--scope-pop :: MScope -> MScope
+  dx--scope-pop: MScope([_|v]) -> MScope(v)
+  
+  

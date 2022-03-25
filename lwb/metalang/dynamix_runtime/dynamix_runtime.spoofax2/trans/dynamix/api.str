@@ -1,0 +1,18 @@
+module dynamix/api
+
+imports
+  dynamix/eval
+  dynamix/scope
+  
+rules
+  // Evaluate the given rule inside the given specification
+  // using the given input term as only argument, and return
+  // the generated Tim expression.
+  //
+  // The rule name must be the fully qualified name, i.e. the
+  // name of the rule prefixed with the name of the module in
+  // which it was defined (e.g. "main!evalProgram").
+  // 
+  // dx-run-spec(|DynamixProgram, string): ? -> TExp
+  dx-run-spec(|spec, rule): input -> out
+    with out := <dx--eval-program-rule(|rule)> (spec, input)
