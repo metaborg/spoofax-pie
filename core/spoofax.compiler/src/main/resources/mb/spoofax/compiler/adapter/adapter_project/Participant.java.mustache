@@ -42,7 +42,7 @@ public class {{baseParticipant.id}}<L extends LoggerComponent, R extends Resourc
 
     @Override
     public ListView<CoordinateRequirement> getDependencies() {
-        return ListView.of({{#dependOnRv32Im}}new CoordinateRequirement("rv32im"){{/dependOnRv32Im}});
+        return ListView.of({{#dependOnRv32Im}}new CoordinateRequirement("org.metaborg", "rv32im"){{/dependOnRv32Im}});
     }
 
     @Override
