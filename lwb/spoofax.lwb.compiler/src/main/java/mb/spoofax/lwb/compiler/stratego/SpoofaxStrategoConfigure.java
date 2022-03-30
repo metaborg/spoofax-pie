@@ -247,8 +247,11 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
             }
         }
 
+        final Task<Result<ListView<ResourcePath>, SpoofaxStrategoResolveIncludesException>> resolveIncludesTask =
+            resolveIncludes.createTask(new SpoofaxStrategoResolveIncludes.Input(rootDirectory, sourceFiles.unarchiveDirectory()));
+        sourceFileOrigins.add(resolveIncludesTask.toSupplier());
         final Result<ListView<ResourcePath>, SpoofaxStrategoResolveIncludesException> result =
-            context.require(resolveIncludes, new SpoofaxStrategoResolveIncludes.Input(rootDirectory, sourceFiles.unarchiveDirectory()));
+            context.require(resolveIncludesTask);
         if(result.isErr()) {
             // noinspection ConstantConditions (err is present)
             return Result.ofErr(SpoofaxStrategoConfigureException.resolveIncludeFail(result.getErr()));

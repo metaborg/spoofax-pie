@@ -9,6 +9,7 @@ import mb.common.util.ExceptionPrinter;
 import mb.log.api.Logger;
 import mb.pie.api.ExecException;
 import mb.pie.api.MixedSession;
+import mb.pie.api.Task;
 import mb.pie.dagger.PieComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.resource.EclipseResourcePath;
@@ -23,6 +24,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,21 +41,29 @@ public class SpoofaxLwbDynamicReferenceProvider implements IDynamicReferenceProv
         logger.debug("Eclipse is asking for the dependent projects of {}", rootDirectory);
         final PieComponent pieComponent = getPieComponent();
         try(final MixedSession session = pieComponent.getPie().newSession()) {
-            final Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result =
-                session.require(SpoofaxLwbPlugin.getSpoofaxLwbCompilerComponent().getCfgComponent().getCfgRootDirectoryToObject().createTask(rootDirectory));
-            final List<Dependency> dependencies = result.unwrap().compileLanguageInput.compileLanguageSpecificationInput().dependencies();
-            for(Dependency dependency : dependencies) {
-                if(!dependency.kinds.contains(DependencyKind.CompileTime)) continue;
-                final Optional<String> relativePath = dependency.source.caseOf()
-                    .path(p -> p)
-                    .otherwiseEmpty();
-                relativePath.ifPresent(p -> {
-                    final EclipseResourcePath projectPath = rootDirectory.appendAsRelativePath(p);
-                    final @Nullable IResource project = ResourcesPlugin.getWorkspace().getRoot().findMember(projectPath.getEclipsePath());
-                    if(project instanceof IProject) {
-                        dependentProjects.add((IProject)project);
-                    }
-                });
+            final Task<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>> task =
+                SpoofaxLwbPlugin.getSpoofaxLwbCompilerComponent().getCfgComponent().getCfgRootDirectoryToObject().createTask(rootDirectory);
+            if(session.hasBeenExecuted(task)) {
+                // NOTE: get the output of the task instead of requiring it, as requiring it may update tasks which are
+                // then not noticed by bottom-up builds. We do not have access to the changed resources here so we also
+                // cannot do a proper bottom-up build. So we just run a bottom-up build without changes and ask for the
+                // most up-to-date result.
+                final Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result =
+                    session.updateAffectedBy(Collections.emptySet()).getOutput(task);
+                final List<Dependency> dependencies = result.unwrap().compileLanguageInput.compileLanguageSpecificationInput().dependencies();
+                for(Dependency dependency : dependencies) {
+                    if(!dependency.kinds.contains(DependencyKind.CompileTime)) continue;
+                    final Optional<String> relativePath = dependency.source.caseOf()
+                        .path(p -> p)
+                        .otherwiseEmpty();
+                    relativePath.ifPresent(p -> {
+                        final EclipseResourcePath projectPath = rootDirectory.appendAsRelativePath(p);
+                        final @Nullable IResource project = ResourcesPlugin.getWorkspace().getRoot().findMember(projectPath.getEclipsePath());
+                        if(project instanceof IProject) {
+                            dependentProjects.add((IProject)project);
+                        }
+                    });
+                }
             }
         } catch(ExecException | CfgRootDirectoryToObjectException e) {
             final ExceptionPrinter exceptionPrinter = new ExceptionPrinter();

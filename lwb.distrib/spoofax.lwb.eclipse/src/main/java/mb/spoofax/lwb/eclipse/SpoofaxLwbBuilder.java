@@ -287,7 +287,6 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
 
     private void handleCheckResult(ResourcePath rootDirectory, KeyedMessages messages) throws CoreException {
         if(!messages.containsError()) return;
-        rememberLastBuiltState(); // Ensure rebuild triggers the same error due to remembering previously changed files.
         final ExceptionPrinter exceptionPrinter = new ExceptionPrinter();
         exceptionPrinter.addCurrentDirectoryContext(rootDirectory);
         final KeyedMessages errorMessages = messages.filter(Message::isError);
@@ -302,7 +301,6 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         try {
             result.unwrap();
         } catch(CompileLanguageDefinitionException e) {
-            rememberLastBuiltState(); // Ensure rebuild triggers the same error due to remembering previously changed files.
             final ExceptionPrinter exceptionPrinter = new ExceptionPrinter();
             exceptionPrinter.addCurrentDirectoryContext(rootDirectory);
             final String message;
