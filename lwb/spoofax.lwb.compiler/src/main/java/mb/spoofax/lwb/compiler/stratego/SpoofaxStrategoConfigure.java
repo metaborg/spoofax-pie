@@ -38,6 +38,7 @@ import mb.sdf3_ext_statix.task.Sdf3ExtStatixGenerateStratego;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.core.language.Export;
+import mb.spoofax.lwb.compiler.definition.ResolveIncludesException;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3ConfigureException;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3GenerationUtil;
 import mb.str.config.StrategoCompileConfig;
@@ -247,10 +248,10 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
             }
         }
 
-        final Task<Result<ListView<ResourcePath>, SpoofaxStrategoResolveIncludesException>> resolveIncludesTask =
+        final Task<Result<ListView<ResourcePath>, ResolveIncludesException>> resolveIncludesTask =
             resolveIncludes.createTask(new SpoofaxStrategoResolveIncludes.Input(rootDirectory, sourceFiles.unarchiveDirectory()));
         sourceFileOrigins.add(resolveIncludesTask.toSupplier());
-        final Result<ListView<ResourcePath>, SpoofaxStrategoResolveIncludesException> result =
+        final Result<ListView<ResourcePath>, ResolveIncludesException> result =
             context.require(resolveIncludesTask);
         if(result.isErr()) {
             // noinspection ConstantConditions (err is present)
