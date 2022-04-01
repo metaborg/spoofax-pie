@@ -22,12 +22,8 @@ import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.pie.task.archive.UnarchiveFromJar;
-import mb.resource.classloader.ClassLoaderResourceLocations;
-import mb.resource.classloader.JarFileWithPath;
-import mb.resource.fs.FSResource;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
-import mb.resource.hierarchical.match.path.string.PathStringMatcher;
 import mb.sdf3.task.Sdf3ToCompletionRuntime;
 import mb.sdf3.task.Sdf3ToPrettyPrinter;
 import mb.sdf3.task.Sdf3ToSignature;
@@ -37,7 +33,6 @@ import mb.sdf3.task.spec.Sdf3SpecToParseTable;
 import mb.sdf3_ext_statix.task.Sdf3ExtStatixGenerateStratego;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
-import mb.spoofax.core.language.Export;
 import mb.spoofax.lwb.compiler.definition.ResolveIncludesException;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3ConfigureException;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3GenerationUtil;
@@ -57,7 +52,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -72,10 +66,6 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
 
     private final SpoofaxStrategoResolveIncludes resolveIncludes;
     private final UnarchiveFromJar unarchiveFromJar;
-    private final LibSpoofax2ResourceExports libSpoofax2ResourceExports;
-    private final LibSpoofax2ClassLoaderResources libSpoofax2ClassLoaderResources;
-    private final LibStatixResourceExports libStatixResourceExports;
-    private final LibStatixClassLoaderResources libStatixClassLoaderResources;
 
     private final StrategoLibUtil strategoLibUtil;
     private final GppUtil gppUtil;
@@ -97,10 +87,6 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
 
         SpoofaxStrategoResolveIncludes resolveIncludes,
         UnarchiveFromJar unarchiveFromJar,
-        LibSpoofax2ResourceExports libSpoofax2ResourceExports,
-        LibSpoofax2ClassLoaderResources libSpoofax2ClassLoaderResources,
-        LibStatixResourceExports libStatixResourceExports,
-        LibStatixClassLoaderResources libStatixClassLoaderResources,
 
         StrategoLibUtil strategoLibUtil,
         GppUtil gppUtil,
@@ -122,10 +108,6 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
 
         this.unarchiveFromJar = unarchiveFromJar;
         this.resolveIncludes = resolveIncludes;
-        this.libSpoofax2ResourceExports = libSpoofax2ResourceExports;
-        this.libStatixResourceExports = libStatixResourceExports;
-        this.libSpoofax2ClassLoaderResources = libSpoofax2ClassLoaderResources;
-        this.libStatixClassLoaderResources = libStatixClassLoaderResources;
 
         this.strategoLibUtil = strategoLibUtil;
         this.gppUtil = gppUtil;
@@ -193,60 +175,6 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
         final LinkedHashSet<File> javaClassPaths = new LinkedHashSet<>();
         javaClassPaths.addAll(strategoLibUtil.getStrategoLibJavaClassPaths());
         javaClassPaths.addAll(gppUtil.getGppJavaClassPaths());
-
-        // Determine libspoofax2 definition directories.
-        final HashSet<HierarchicalResource> libSpoofax2DefinitionDirs = new LinkedHashSet<>(); // LinkedHashSet to remove duplicates while keeping insertion order.
-        if(sourceFiles.includeLibSpoofax2Exports()) {
-            final ClassLoaderResourceLocations<FSResource> locations = libSpoofax2ClassLoaderResources.definitionDirectory.getLocations();
-            libSpoofax2DefinitionDirs.addAll(locations.directories);
-            final ResourcePath unarchiveDirectoryBase = sourceFiles.libSpoofax2UnarchiveDirectory();
-            for(JarFileWithPath<FSResource> jarFileWithPath : locations.jarFiles) {
-                final ResourcePath jarFilePath = jarFileWithPath.file.getPath();
-                @SuppressWarnings("ConstantConditions") // JAR files always have leaves.
-                final ResourcePath unarchiveDirectory = unarchiveDirectoryBase.appendRelativePath(jarFilePath.getLeaf());
-                final Task<?> task = unarchiveFromJar.createTask(new UnarchiveFromJar.Input(jarFilePath, unarchiveDirectory, PathStringMatcher.ofExtensions("str2"), false, false));
-                sourceFileOrigins.add(task.toSupplier());
-                context.require(task); // HACK: eagerly unarchive such that the directory and contents exist.
-                libSpoofax2DefinitionDirs.add(context.getHierarchicalResource(unarchiveDirectory.appendAsRelativePath(jarFileWithPath.path)));
-            }
-        }
-        for(Export export : libSpoofax2ResourceExports.strategoExports) {
-            final String directoryRelativePath = export.caseOf().directory(path -> path).otherwiseEmpty()
-                .orElseThrow(() -> new IllegalStateException("libspoofax2 Stratego export '" + export + "' is not a directory export. Only directory exports are supported"));
-            for(HierarchicalResource definitionDir : libSpoofax2DefinitionDirs) {
-                final HierarchicalResource exportDirectory = definitionDir.appendAsRelativePath(directoryRelativePath);
-                if(exportDirectory.exists()) {
-                    includeDirectories.add(exportDirectory.getPath());
-                }
-            }
-        }
-
-        // Determine libstatix definition directories.
-        final HashSet<HierarchicalResource> libStatixDefinitionDirs = new LinkedHashSet<>(); // LinkedHashSet to remove duplicates while keeping insertion order.
-        if(sourceFiles.includeLibStatixExports()) {
-            final ClassLoaderResourceLocations<FSResource> locations = libStatixClassLoaderResources.definitionDirectory.getLocations();
-            libStatixDefinitionDirs.addAll(locations.directories);
-            final ResourcePath unarchiveDirectoryBase = sourceFiles.libStatixUnarchiveDirectory();
-            for(JarFileWithPath<FSResource> jarFileWithPath : locations.jarFiles) {
-                final ResourcePath jarFilePath = jarFileWithPath.file.getPath();
-                @SuppressWarnings("ConstantConditions") // JAR files always have leaves.
-                final ResourcePath unarchiveDirectory = unarchiveDirectoryBase.appendRelativePath(jarFilePath.getLeaf());
-                final Task<?> task = unarchiveFromJar.createTask(new UnarchiveFromJar.Input(jarFilePath, unarchiveDirectory, PathStringMatcher.ofExtensions("str2", "str"), false, false));
-                sourceFileOrigins.add(task.toSupplier());
-                context.require(task); // HACK: eagerly unarchive such that the directory and contents exist.
-                libStatixDefinitionDirs.add(context.getHierarchicalResource(unarchiveDirectory.appendAsRelativePath(jarFileWithPath.path)));
-            }
-        }
-        for(Export export : libStatixResourceExports.strategoExports) {
-            final String directoryRelativePath = export.caseOf().directory(path -> path).otherwiseEmpty()
-                .orElseThrow(() -> new IllegalStateException("libstatix Stratego export '" + export + "' is not a directory export. Only directory exports are supported"));
-            for(HierarchicalResource definitionDir : libStatixDefinitionDirs) {
-                final HierarchicalResource exportDirectory = definitionDir.appendAsRelativePath(directoryRelativePath);
-                if(exportDirectory.exists()) {
-                    includeDirectories.add(exportDirectory.getPath());
-                }
-            }
-        }
 
         final Task<Result<ListView<ResourcePath>, ResolveIncludesException>> resolveIncludesTask =
             resolveIncludes.createTask(new SpoofaxStrategoResolveIncludes.Input(rootDirectory, sourceFiles.unarchiveDirectory()));

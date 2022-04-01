@@ -12,7 +12,7 @@ public class DependenciesMapping extends StatelessSerializableFunction<Result<Cf
 
     @Override
     public Result<ListView<Dependency>, CfgRootDirectoryToObjectException> apply(Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result) {
-        return result.map(o -> ListView.of(o.compileLanguageInput.compileLanguageSpecificationInput().dependencies()));
+        return result.map(o -> ListView.of(o.compileLanguageInput.compileLanguageSpecificationInput().allDependencies()));
     }
 
     private DependenciesMapping() {}

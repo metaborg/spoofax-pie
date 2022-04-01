@@ -5,9 +5,12 @@ import mb.cfg.metalang.CfgEsvConfig;
 import mb.cfg.metalang.CfgSdf3Config;
 import mb.cfg.metalang.CfgStatixConfig;
 import mb.cfg.metalang.CfgStrategoConfig;
+import mb.common.util.SetView;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.adapter.AdapterProjectCompilerInputBuilder;
 import mb.spoofax.compiler.language.LanguageProjectCompilerInputBuilder;
+import mb.spoofax.compiler.util.Shared;
+import mb.spoofax.core.CoordinateRequirement;
 import org.immutables.value.Value;
 
 import java.io.Serializable;
@@ -25,6 +28,8 @@ public interface CompileLanguageSpecificationInput extends Serializable {
 
     /// Shared
 
+    Shared shared();
+
     CompileLanguageSpecificationShared compileLanguageShared();
 
 
@@ -41,6 +46,19 @@ public interface CompileLanguageSpecificationInput extends Serializable {
     Optional<CfgStrategoConfig> stratego();
 
     List<Dependency> dependencies();
+
+    default List<Dependency> allDependencies() {
+        final ArrayList<Dependency> dependencies = new ArrayList<>(dependencies());
+        stratego().ifPresent(c -> {
+            if(c.source().getFiles().includeLibSpoofax2Exports()) {
+                dependencies.add(new Dependency(DependencySource.coordinateRequirement(new CoordinateRequirement("org.metaborg", "libspoofax2", shared().spoofax3Version())), SetView.of(DependencyKind.CompileTime)));
+            }
+            if(c.source().getFiles().includeLibStatixExports()) {
+                dependencies.add(new Dependency(DependencySource.coordinateRequirement(new CoordinateRequirement("org.metaborg", "libstatix", shared().spoofax3Version())), SetView.of(DependencyKind.CompileTime)));
+            }
+        });
+        return dependencies;
+    }
 
 
     /// Files information, known up-front for build systems with static dependencies such as Gradle.
