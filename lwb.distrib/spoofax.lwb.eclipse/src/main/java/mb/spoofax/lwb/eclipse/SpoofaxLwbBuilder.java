@@ -18,7 +18,6 @@ import mb.pie.api.Session;
 import mb.pie.api.TaskDef;
 import mb.pie.api.TopDownSession;
 import mb.pie.api.exec.CancelToken;
-import mb.pie.dagger.PieComponent;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
 import mb.sdf3.eclipse.Sdf3EclipseParticipantFactory;
@@ -38,10 +37,8 @@ import mb.statix.eclipse.StatixEclipseParticipantFactory;
 import mb.str.eclipse.StrategoEclipseParticipantFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ICoreRunnable;
@@ -57,7 +54,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
+public class SpoofaxLwbBuilder extends SpoofaxLwbBuilderBase {
     public static final String id = SpoofaxLwbPlugin.id + ".builder";
 
     private final Logger logger;
@@ -72,38 +69,6 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         this.compileTags = Interactivity.NonInteractive.asSingletonSet();
     }
 
-    @Override
-    protected @Nullable IProject[] build(int kind, Map<String, String> args, IProgressMonitor monitor) throws CoreException {
-        if(kind == AUTO_BUILD) {
-            return null; // Ignore automatics builds (for now?)
-        }
-        final IProject project = getProject();
-        final ICoreRunnable runnable = new ICoreRunnable() {
-            @Override public void run(IProgressMonitor monitor) throws CoreException {
-                try {
-                    if(kind == FULL_BUILD) {
-                        fullBuild(project, monitor);
-                    } else {
-                        final @Nullable IResourceDelta delta = getDelta(project);
-                        if(delta == null) {
-                            fullBuild(project, monitor);
-                        } else {
-                            incrBuild(project, delta, monitor);
-                        }
-                    }
-                    project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
-                } catch(InterruptedException e) {
-                    cancel(monitor);
-                }
-            }
-        };
-        ResourcesPlugin.getWorkspace().run(runnable, project, IWorkspace.AVOID_UPDATE, monitor);
-        return null;
-    }
-
-    private PieComponent getPieComponent() {
-        return SpoofaxPlugin.getStaticComponentManager().getComponentGroup("mb.spoofax.lwb").unwrap().getPieComponent();
-    }
 
     @Override protected void clean(@Nullable IProgressMonitor monitor) throws CoreException {
         final Pie pie = getPieComponent().getPie();
@@ -125,39 +90,14 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         return MultiRule.combine(getProject(), SpoofaxPlugin.getPlatformComponent().lifecycleParticipantManagerWriteLockRule());
     }
 
-    private void fullBuild(IProject eclipseProject, @Nullable IProgressMonitor monitor) throws CoreException, InterruptedException {
-        JavaProjectUtil.configureProject(eclipseProject, monitor);
-        final ResourcePath rootDirectory = getResourcePath(eclipseProject);
-        logger.debug("Running full language build of {}", rootDirectory);
-        final PieComponent pieComponent = getPieComponent();
-        try(final MixedSession session = pieComponent.getPie().newSession()) {
-            topDownBuild(eclipseProject, rootDirectory, session, monitor);
-        } catch(ExecException | IOException e) {
-            cancel(monitor);
-            throw toCoreException(rootDirectory, e);
-        }
-    }
 
-    private void incrBuild(IProject eclipseProject, IResourceDelta delta, @Nullable IProgressMonitor monitor) throws CoreException, InterruptedException {
-        JavaProjectUtil.configureProject(eclipseProject, monitor);
-        final ResourcePath rootDirectory = getResourcePath(eclipseProject);
-        logger.debug("Running incremental language build of {}", rootDirectory);
-        final PieComponent pieComponent = getPieComponent();
-        try(final MixedSession session = pieComponent.newSession()) {
-            bottomUpBuild(eclipseProject, rootDirectory, delta, session, monitor);
-        } catch(ExecException | IOException e) {
-            cancel(monitor);
-            throw toCoreException(rootDirectory, e);
-        }
-    }
-
-
-    private void topDownBuild(
+    @Override protected void topDownBuild(
         IProject eclipseProject,
-        ResourcePath rootDirectory,
+        EclipseResourcePath rootDirectory,
         MixedSession session,
         @Nullable IProgressMonitor monitor
     ) throws InterruptedException, CoreException, ExecException, IOException {
+        JavaProjectUtil.configureProject(eclipseProject, monitor);
         logger.debug("Top-down language build of {}", rootDirectory);
 
         final MonitorCancelableToken cancelToken = new MonitorCancelableToken(monitor);
@@ -176,23 +116,15 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         session.deleteUnobservedTasks(t -> true, (t, r) -> false);
     }
 
-    private void bottomUpBuild(
+    @Override protected void bottomUpBuild(
         IProject eclipseProject,
-        ResourcePath rootDirectory,
+        EclipseResourcePath rootDirectory,
         IResourceDelta delta,
         MixedSession session,
         @Nullable IProgressMonitor monitor
     ) throws InterruptedException, CoreException, ExecException, IOException {
-        final LinkedHashSet<ResourceKey> changedResources = new LinkedHashSet<>();
-        delta.accept((d) -> {
-            final int kind = d.getKind();
-            logger.debug(d.getResource().toString());
-            if(kind == IResourceDelta.ADDED || kind == IResourceDelta.REMOVED || kind == IResourceDelta.CHANGED) {
-                changedResources.add(getResourcePath(d.getResource()));
-                return true;
-            }
-            return false;
-        });
+        JavaProjectUtil.configureProject(eclipseProject, monitor);
+        final LinkedHashSet<ResourceKey> changedResources = getChangedResources(delta);
 
         final MonitorCancelableToken cancelToken = new MonitorCancelableToken(monitor);
 
@@ -211,10 +143,6 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
 
         logger.debug("Deleting unobserved tasks");
         session.deleteUnobservedTasks(t -> true, (t, r) -> false);
-    }
-
-    private ResourcePath getResourcePath(IResource eclipseResource) {
-        return new EclipseResourcePath(eclipseResource);
     }
 
 
@@ -332,17 +260,5 @@ public class SpoofaxLwbBuilder extends IncrementalProjectBuilder {
         } else {
             logger.debug("Dynamic language returned from dynamic load task is not consistent");
         }
-    }
-
-    private CoreException toCoreException(ResourcePath rootDirectory, Throwable e) {
-        final ExceptionPrinter exceptionPrinter = new ExceptionPrinter();
-        exceptionPrinter.addCurrentDirectoryContext(rootDirectory);
-        final String message = exceptionPrinter.printExceptionToString(e);
-        return new CoreException(new Status(IStatus.ERROR, SpoofaxLwbPlugin.id, IStatus.ERROR, message, null));
-    }
-
-    private void cancel(@Nullable IProgressMonitor monitor) {
-        rememberLastBuiltState();
-        if(monitor != null) monitor.setCanceled(true);
     }
 }

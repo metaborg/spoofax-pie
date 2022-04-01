@@ -28,6 +28,7 @@
       <run class="mb.spoofax.lwb.eclipse.SpoofaxLwbNature"/>
     </runtime>
     <builder id="spoofax.lwb.eclipse.builder"/>
+    <builder id="spoofax.lwb.eclipse.builder.project.references"/>
   </extension>
   <extension point="org.eclipse.ui.commands">
     <command id="spoofax.lwb.eclipse.nature.add" name="Add Spoofax LWB nature"/>
@@ -44,10 +45,24 @@
     />
   </extension>
 
-  <!-- Builder -->
+  <!-- Builders -->
   <extension
     point="org.eclipse.core.resources.builders"
-    name="Spoofax LWB builder"
+    name="Spoofax LWB project references updater"
+    id="spoofax.lwb.eclipse.builder.project.references"
+  >
+    <builder
+      hasNature="true"
+      isConfigurable="true"
+      callOnEmptyDelta="false"
+      supportsConfigurations="false"
+    >
+      <run class="mb.spoofax.lwb.eclipse.SpoofaxLwbProjectReferencesBuilder"/>
+    </builder>
+  </extension>
+  <extension
+    point="org.eclipse.core.resources.builders"
+    name="Spoofax LWB language definition builder"
     id="builder"
   >
     <builder
@@ -57,7 +72,7 @@
       supportsConfigurations="false"
     >
       <run class="mb.spoofax.lwb.eclipse.SpoofaxLwbBuilder"/>
-      <dynamicReference class="mb.spoofax.lwb.eclipse.SpoofaxLwbDynamicReferenceProvider"/>
+      <dynamicReference class="mb.spoofax.lwb.eclipse.SpoofaxLwbProjectReferencesBuilder"/>
     </builder>
   </extension>
 
