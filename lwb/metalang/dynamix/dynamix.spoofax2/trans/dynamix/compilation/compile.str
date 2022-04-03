@@ -2,8 +2,9 @@ module dynamix/compilation/compile
 
 imports
   signatures/dynamix-sig
+  signatures/dynamix-ext-sig
   signatures/dynamix/meta-sig
-  
+
   statix/api
 
 rules
@@ -14,14 +15,19 @@ rules
   dx--generate-aterm: (_, _, p@DynamixProgram(mid, _), path, project-path) -> ($[[mid].aterm], p')
     where
       p' := <dx--qualify-module(|mid); strip-annos> p
-  
+
   dx--qualify-module(|mid) = topdown(try(dx--fully-qualify(|mid)))
   dx--fully-qualify(|mid): MRuleDeclSignature(name, sig) -> MRuleDeclSignature($[[mid]![name]], sig)
   dx--fully-qualify(|mid): MRuleDeclGlobal(name, sig) -> MRuleDeclGlobal($[[mid]![name]], sig)
   dx--fully-qualify(|mid): MRuleDecl(name, pats, body) -> MRuleDecl($[[mid]![name]], pats, body)
-  dx--fully-qualify(|mid): MExprCall(name, args) -> MExprCall(<dx--qualify-ast-name> name, args)
+
   dx--fully-qualify(|mid): MExprGlobal(name) -> MExprGlobal(<dx--qualify-ast-name> name)
   dx--fully-qualify(|mid): MScopedGlobalBinding(name, exp) -> MScopedGlobalBinding(<dx--qualify-ast-name> name, exp)
+
+  // convert call to either constraint analyzer or qualified call depending on which one it was
+  dx--fully-qualify(|mid): MExprCall(name, [arg]) -> MExprConstraintAnalyzerProperty(name, arg)
+    where <dx--get-ref; dx--get-prop(|"isConstraintProperty")> name
+  dx--fully-qualify(|mid): MExprCall(name, args) -> MExprCall(<dx--qualify-ast-name> name, args)
 
   // merging simply combines together all of the rule sections
   // from the input asts. it is assumed that each of the specs
@@ -35,15 +41,26 @@ rules
         <filter(?MSectionRules(_) <+ ?MSectionExample(_))> s
       })> specs;
       mergedSpecs := <flatten-list> sections
-      
+
   // helper that takes an ast node that references a declaration,
   // with that declaration having a "declaringModule" statix prop,
   // and returns the name with that mod name prefixed to it
   dx--qualify-ast-name: name -> $[[refMod]![name]]
     where
-      a := <stx-get-ast-analysis> name;
-      ref := <stx-get-ast-ref(|a)> name;
-      refMod := <stx-get-ast-property(|a, "declaringModule")> ref
+      ref := <dx--get-ref> name;
+      refMod := <dx--get-prop(|"declaringModule")> ref
+
+  // get the node that this node references (ref prop)
+  dx--get-ref: node -> ref
+    where
+      a := <stx-get-ast-analysis> node;
+      ref := <stx-get-ast-ref(|a)> node
+
+  // get the property with the given name (ref and type don't work)
+  dx--get-prop(|prop): node -> val
+    where
+      a := <stx-get-ast-analysis> node;
+      val := <stx-get-ast-property(|a, prop)> node
 
   // helper function during testing, will merge a MultiProgram
   // assumes the input is analyzed, because it needs to qualify

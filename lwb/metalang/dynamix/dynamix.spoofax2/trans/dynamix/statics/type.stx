@@ -24,6 +24,7 @@ signature
     MHOLY0 : MTYPE // Holy
     MHOLY1 : MTYPE -> MTYPE // Holy(T)
     MAUTO : MTYPE -> MTYPE // automatic derivation of type, used for empty list literal
+    MANYSOURCE : MTYPE // any source type, only used for properties
     
     // Target types
     TVALUE : TTYPE // value
@@ -134,6 +135,7 @@ rules
   typesCoercibleTo maps typeCoercibleTo(list(*), list(*))
   
   typeCoercibleTo(T, T).
+  typeCoercibleTo(MSTYPE(_), MANYSOURCE()).
   typeCoercibleTo(MAUTO(A), B) :- A == B.
   typeCoercibleTo(MHOLY1(_), MHOLY0()).
   typeCoercibleTo(MTTYPE(TSTATEMENT()), MHOLY0()).

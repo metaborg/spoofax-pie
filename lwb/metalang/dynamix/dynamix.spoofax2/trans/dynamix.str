@@ -32,4 +32,4 @@ rules // Debugging
     (node, _, _, path, project-path) -> (filename, result)
     with
       filename := <guarantee-extension(|"compiled.dx")> path
-    ; result   := <dx--to-merged; pp-dynamix-string> node
+    ; result   := <dx--to-merged> node

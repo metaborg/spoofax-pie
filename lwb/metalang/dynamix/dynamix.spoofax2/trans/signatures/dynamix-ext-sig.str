@@ -1,0 +1,7 @@
+module signatures/dynamix-ext-sig
+
+// inserted during compilation/merging
+signature
+  constructors
+    // get the given named property for the given expression
+    MExprConstraintAnalyzerProperty : MExpr * string -> MExpr

@@ -25,7 +25,10 @@ languageProject {
     fileExtensions(listOf()) // No file extensions.
   }
   compilerInput {
-    withStrategoRuntime()
+    withStrategoRuntime().run {
+      addNaBL2Primitives(true) // required for attribute lookup
+      addStatixPrimitives(true) // required for attribute lookup
+    }
   }
 }
 spoofax2BasedLanguageProject {

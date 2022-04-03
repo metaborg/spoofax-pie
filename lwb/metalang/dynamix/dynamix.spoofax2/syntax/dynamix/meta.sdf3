@@ -5,29 +5,34 @@ imports
   dynamix/source
   dynamix/type
   tim/exp
-  
+
 context-free sorts MSection
 context-free syntax
   MSection.MSectionImports = <
     imports
       <{MID "\n"}*>
   >
-  
+
   MSection.MSectionSignature = <
     signature
       <{MSignatureDecl "\n\n"}*>
   >
-  
+
+  MSection.MSectionConstraintAnalyzer = <
+    constraint-analyzer
+      <{MConstraintPropertyDecl "\n"}*>
+  >
+
   MSection.MSectionRules = <
     rules
       <{MRuleDecl "\n\n"}*>
   >
-  
+
   MSection.MSectionExample = <
     example
       <MExpr>
   >
-  
+
   MSection.MSectionPrimitives = <
     primitives
       <{MPrimitiveDecl "\n\n"}*>
@@ -38,33 +43,37 @@ context-free syntax
   MPrimitiveDecl.MPrimitiveDeclExpression = <expression #<PID>(<{MType ", "}*>)>
   MPrimitiveDecl.MPrimitiveDeclStatement = <statement #<PID>(<{MType ", "}*>)>
   MPrimitiveDecl.MPrimitiveDeclConditional = <conditional #<PID>(<{MType ", "}*>)>
-  
+
+context-free sorts MConstraintPropertyDecl
+context-free syntax
+  MConstraintPropertyDecl.MConstraintPropertyDecl = <property <ID> :: <MType>>
+
 context-free sorts MSignatureDecl
 context-free syntax
   MSignatureDecl.MSignatureSortsDecl = <
     sorts
       <{UID "\n"}*>
   >
-  
+
   MSignatureDecl.MSignatureConstructorsDecl = <
     constructors
       <{MConstructorDecl "\n\n"}*>
   >
-  
+
 context-free sorts MConstructorDecl
 context-free syntax
   MConstructorDecl.MConstructorDeclSingleton = <
     <UID> : <UID>
   >
-  
+
   MConstructorDecl.MConstructorDeclInjection = [
     : [MConstructorArgument] -> [UID]
   ]
-  
+
   MConstructorDecl.MConstructorDecl = [
     [UID] : [{MConstructorArgument " * "}+] -> [UID]
   ]
-  
+
 context-free sorts MRuleDecl
 context-free syntax
   MRuleDecl.MRuleDeclSignature = <<RID> :: <MRuleSignature>>
@@ -86,7 +95,7 @@ context-free sorts MExpr MStatement MTFun MScopedGlobalBinding
 context-free syntax
   // source language operations
   MExpr.MExprQuote = <'<STerm>>
-  
+
   // meta language operations
   MExpr.MExprVar = <<LID>>
   MExpr.MExprGlobal = <<GID>>
@@ -114,30 +123,30 @@ context-free syntax
     with <{MScopedGlobalBinding ", "}+> do
       <MExpr>
   >
-  
+
   MExpr.MExprList = <[<{MExpr ", "}*>]>
   MExpr.MExprListCons = <[<{MExpr ", "}*>|<MExpr>]>
   MExpr.MExprConcatList = <<MExpr> ++ <MExpr>> {left}
   // TODO:
   // MExpr.MExprWith = ...
   // MExpr.MExprSplice/Code?
-  
+
   MStatement.MStatementAssign = [[LID] <- [MExpr]]
   MStatement.MStatementExpr = [[MExpr]]
-  
+
   MScopedGlobalBinding.MScopedGlobalBinding = <<GID> = <MExpr>>
-  
+
   // target language operations
   MExpr.MExprCallPrimitive = <#<PID>(<{MExpr ", "}*>)>
   MExpr.MExprQuoteTarget = <@<TExp>>
-  
+
   MExpr.MExprTLet = [
     let [MExpr] = [MExpr] in
       [MExpr]
   ]
-  
+
   MExpr.MExprHole = [hole]
-  
+
   MTFun.MTFun = <
     fun <MExpr>(<MExpr>) =
       <MExpr>
@@ -152,13 +161,13 @@ context-free syntax
       [MExpr]
     else
       [MExpr]
-  ] 
-  
+  ]
+
 template options
   LID = keyword {reject}
   UID = keyword {reject}
   ID = keyword {reject}
   PID = keyword {reject}
-  
+
 context-free priorities
   MExpr.MExprContinueAt > MExpr.MExprTLet

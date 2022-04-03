@@ -29,6 +29,7 @@ rules
   sectionOk(_, s, MSectionRules(rules)) :- ruleDeclsOk(s, rules).
   sectionOk(_, s, MSectionExample(exp)) :- typeOfExp(s, exp) == _.
   sectionOk(_, s, MSectionPrimitives(decls)) :- primitiveDeclsOk(s, decls).
+  sectionOk(_, s, MSectionConstraintAnalyzer(props)) :- constraintPropertyDeclsOk(s, props).
 
   importOk : scope * scope * MID
   importsOk maps importOk(*, *, list(*))
@@ -89,6 +90,17 @@ rules
   defineSort : scope * UID
   defineSort(s, x) :- declareSort(s, x, SSORT(x, s)).
   defineSorts maps defineSort(*, list(*))
+
+// constraint-analyzer section
+rules
+  constraintPropertyDeclOk : scope * MConstraintPropertyDecl
+  constraintPropertyDeclsOk maps constraintPropertyDeclOk(*, list(*))
+  
+  constraintPropertyDeclOk(s, MConstraintPropertyDecl(name, ty)) :- {T}
+    mTypeToMTYPE(s, ty) == T,
+    @name.isConstraintProperty := "1", // for merging/desugaring
+    try { T == MSTYPE(_) } | error $[Constraint property types must be source types (starting with ').],
+    declareRule(s, name, MRULE([MANYSOURCE()], T)).
 
 // rules section
 rules

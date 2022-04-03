@@ -47,3 +47,6 @@ exports:
 - language: Stratego-Sugar
   directory: src-gen
   includes: "signatures/dynamix-sig.str"
+- language: Stratego-Sugar
+  directory: trans
+  includes: "signatures/dynamix-ext-sig.str"

@@ -14,8 +14,10 @@ spoofaxLanguageSpecification {
 }
 dependencies {
   compileLanguage("org.metaborg.devenv:org.metaborg.meta.lang.esv:$spoofax2DevenvVersion")
+  compileLanguage("org.metaborg.devenv:statix.lang:$spoofax2DevenvVersion")
 
   sourceLanguage("org.metaborg.devenv:meta.lib.spoofax:$spoofax2DevenvVersion")
+  sourceLanguage("org.metaborg.devenv:statix.runtime:$spoofax2DevenvVersion")
 
   sourceLanguage(project(":dynamix.spoofax2"))
   sourceLanguage(project(":tim.spoofax2"))

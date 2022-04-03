@@ -4,8 +4,10 @@ name: DynamixRuntime
 dependencies:
   compile:
   - org.metaborg:org.metaborg.meta.lang.esv:${metaborgVersion}
+  - org.metaborg:statix.lang:${metaborgVersion}
   source:
   - org.metaborg:meta.lib.spoofax:${metaborgVersion}
+  - org.metaborg:statix.runtime:${metaborgVersion}
   - org.metaborg:tim:0.1.0-SNAPSHOT
   - org.metaborg:dynamix:0.1.0-SNAPSHOT
 pardonedLanguages:

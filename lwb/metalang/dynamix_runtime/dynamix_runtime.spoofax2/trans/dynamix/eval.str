@@ -5,6 +5,7 @@ imports
   libstratego-lib
 
   signatures/dynamix-sig
+  signatures/dynamix-ext-sig
   signatures/dynamix/common-sig
   signatures/dynamix/source-sig
   signatures/dynamix/meta-sig
@@ -14,6 +15,8 @@ imports
   tim/pp
 
   libspoofax/stratego/debug
+
+  statix/api
 
   dynamix/scope
 
@@ -48,7 +51,7 @@ signature
 rules
   // dx--eval-program-rule(|string) :: DynamixProgram * ? -> TExp
   dx--eval-program-rule(|ruleName): (inp, term) -> ret'
-    where {| MRule, MStackTrace:
+    where {| MRule, MStackTrace, MGlobal:
       <dx--init-trace> ();
       stripped := <strip-annos> inp;
       <dx--declare-mrules> stripped;
@@ -100,24 +103,23 @@ rules
 // Expression evaluation
 rules
   // dx--eval-expr(|MScope) :: MExpr -> MRuntimeValue
+  dx--eval-expr(|scope) = ppdebug(|"dx--eval-expr: "); dx--eval-expr-(|scope)
 
   // source language operations
-  dx--eval-expr(|scope): MExprQuote(term) -> MRuntimeQuote(term)
+  dx--eval-expr-(|scope): MExprQuote(term) -> MRuntimeQuote(term)
 
   // meta language operations
-  dx--eval-expr(|scope): MExprVar(x) -> <dx--scope-get(|x)> scope
-  dx--eval-expr(|scope): MExprBlock(exprs) -> <dx--eval-block-stmts(|scope')> exprs
+  dx--eval-expr-(|scope): MExprVar(x) -> <dx--scope-get(|x)> scope
+  dx--eval-expr-(|scope): MExprGlobal(x) -> <MGlobal <+ dx--fail-msg(|$[Use of global [x] before assignment.])> x
+  dx--eval-expr-(|scope): MExprBlock(exprs) -> <dx--eval-block-stmts(|scope')> exprs
     with scope' := <dx--scope-push> scope
 
-  // todo: do arguments to a function call need to be composed
-  // or be values in order for the call to be valid?
-  dx--eval-expr(|scope): MExprCall(name, args) -> ret
+  dx--eval-expr-(|scope): MExprCall(name, args) -> ret
     with
       args' := <map(dx--eval-expr(|scope))> args;
       ret := <dx--call-function> (name, args')
 
-  // todo: arity for label?
-  dx--eval-expr(|scope): MExprLabeled1(body, labelName) -> ret
+  dx--eval-expr-(|scope): MExprLabeled1(body, labelName) -> ret
     with
       continuationName := <newname> "k";
       argumentName := <newname> "a";
@@ -136,7 +138,7 @@ rules
         <dx--fail-msg(|"Expected the pre-body of a label to always tail-call, but got: ")> bodye
       end
 
-  dx--eval-expr(|scope): MExprLabeled0(body, labelName) -> ret
+  dx--eval-expr-(|scope): MExprLabeled0(body, labelName) -> ret
     with
       continuationName := <newname> "k";
 
@@ -154,34 +156,69 @@ rules
         <dx--fail-msg(|"Expected the pre-body of a label to always tail-call, but got: ")> bodye
       end
 
-  dx--eval-expr(|scope): MExprSourceIntToTargetInt(v) -> MRuntimeValue(tv')
+  dx--eval-expr-(|scope): MExprSourceIntToTargetInt(v) -> MRuntimeValue(tv')
     with MRuntimeQuote(tv) := <dx--eval-expr(|scope)> v
     with tv' := <dx--coerce-source-to-tint> tv
-  dx--eval-expr(|scope): MExprSourceVarToTargetVar(v) -> MRuntimeValue(TValueVar(tv'))
+  dx--eval-expr-(|scope): MExprSourceVarToTargetVar(v) -> MRuntimeValue(TValueVar(tv'))
     with tv := <dx--eval-expr(|scope); dx--assert-source-string(|"var() argument must be a string")> v
     with tv' := <unquote(?'"')> tv // typed stratego bug, doesn't think UID and TID are the same
-  dx--eval-expr(|scope): MExprSourceStrToTargetStr(v) -> MRuntimeValue(TValueString(tv))
+  dx--eval-expr-(|scope): MExprSourceStrToTargetStr(v) -> MRuntimeValue(TValueString(tv))
     with tv := <dx--eval-expr(|scope); dx--assert-source-string(|"str() argument must be a string"); unquote(?'"'); escape; double-quote> v
-  dx--eval-expr(|scope): MExprConcatenateStr(l, r) -> MRuntimeQuote(STermString(out))
+  dx--eval-expr-(|scope): MExprConcatenateStr(l, r) -> MRuntimeQuote(STermString(out))
     with l' := <dx--eval-expr(|scope); dx--assert-source-string(|"left-hand of string concatenation must be a string")> l
     with r' := <dx--eval-expr(|scope); dx--assert-source-string(|"right-hand of string concatenation must be a string")> r
     with out := $["[<unquote(?'"')> l'][<unquote(?'"')> r']"]
-  dx--eval-expr(|scope): MExprFreshNamedTargetVar(p) -> MRuntimeValue(TValueVar(<newname> p))
+  dx--eval-expr-(|scope): MExprFreshNamedTargetVar(p) -> MRuntimeValue(TValueVar(<newname> p))
 
-  dx--eval-expr(|scope): MExprList(args) -> MRuntimeMetaList(args')
+  dx--eval-expr-(|scope): MExprList(args) -> MRuntimeMetaList(args')
     with args' := <map(dx--eval-expr(|scope); dx--assert-runtime-value(|"Meta-list must be constructed from a value, not: "))> args
-  dx--eval-expr(|scope): MExprListCons(args, list) -> MRuntimeMetaList(<conc> (args', list'))
+  dx--eval-expr-(|scope): MExprListCons(args, list) -> MRuntimeMetaList(<conc> (args', list'))
     with args' := <map(dx--eval-expr(|scope); dx--assert-runtime-value(|"Meta-list must be constructed from a value, not: "))> args
     with list' := <dx--eval-expr(|scope); dx--assert-target-metalist(|"Second argument to cons must be a meta-list, not: ")> list
-  dx--eval-expr(|scope): MExprConcatList(l, r) -> MRuntimeMetaList(<conc> (left', right'))
+  dx--eval-expr-(|scope): MExprConcatList(l, r) -> MRuntimeMetaList(<conc> (left', right'))
     with left' := <dx--eval-expr(|scope); dx--assert-target-metalist(|"Left argument to concat must be a meta-list, not: ")> l
     with right' := <dx--eval-expr(|scope); dx--assert-target-metalist(|"Right argument to concat must be a meta-list, not: ")> r
 
   // todo: continuation argument composition? currently force values
-  dx--eval-expr(|scope): MExprContinueAt(tgt, args) -> MRuntimeCPSFinalized(TExpApp(tgtf, argvs))
+  dx--eval-expr-(|scope): MExprContinueAt(tgt, args) -> MRuntimeCPSFinalized(TExpApp(tgtf, argvs))
     with
       tgtf := <dx--eval-expr(|scope); dx--assert-runtime-value(|"Can only call named functions: ")> tgt;
       argvs := <dx--eval-expr(|scope); dx--assert-target-metalist(|"Arguments to a continuation invocation must be a meta-list: ")> args
+
+  dx--eval-expr-(|scope): MExprScopedGlobals(bindings, body) -> ret
+    with
+      // eval all binding first to allow idiomatic swapping
+      evald := <dx--eval-global-bindings(|scope)> bindings;
+      {| MGlobal:
+        <map({ n, v: ?(n, v); rules(MGlobal: n -> v) })> evald;
+        ret := <dx--eval-expr(|scope)> body
+      |}
+
+  dx--eval-expr-(|scope): MExprConstraintAnalyzerProperty(prop, e) -> ret
+    with
+      source := <dx--eval-expr(|scope); dx--assert-quoted(|"Argument passed to constraint-analyzer property lookup is not a source term: ")> e;
+      ret := <dx--get-constraint-property(|prop)> source
+
+  // dx--get-constraint-property(|string) :: STerm -> ?
+  // need to special-case for type and ref, due to Statix being annoying :(
+  dx--get-constraint-property(|"type"): term -> val
+    with
+      a := <stx-get-ast-analysis <+ dx--fail-msg(|"Cannot get constraint-analyzer property on source term without analysis information.")> term;
+      val := <(stx-get-ast-type(|a) <+ dx--fail-msg(|"Term does not have a `type` annotation attached to it.")); dx--quoted-to-runtime> term
+  dx--get-constraint-property(|"ref"): term -> val
+    with
+      a := <stx-get-ast-analysis <+ dx--fail-msg(|"Cannot get constraint-analyzer property on source term without analysis information.")> term;
+      val := <(stx-get-ast-ref(|a) <+ dx--fail-msg(|"Term does not have a `ref` annotation attached to it.")); dx--quoted-to-runtime> term
+  dx--get-constraint-property(|prop): term -> val
+    with
+      a := <stx-get-ast-analysis <+ dx--fail-msg(|"Cannot get constraint-analyzer property on source term without analysis information.")> term;
+      val := <(stx-get-ast-property(|a, prop) <+ dx--fail-msg(|$[Term does not have a `[prop]` annotation attached to it.])); dx--quoted-to-runtime> term
+
+  // dx--eval-global-bindings(|MScope) :: List(MScopedGlobalBinding) -> List(string * MRuntimeValue)
+  dx--eval-global-bindings(|scope) = map({ n, v:
+    ?MScopedGlobalBinding(n, v);
+    !(n, <dx--eval-expr(|scope)> v)
+  })
 
   dx--eval-continuation-arg(s): a -> ret
     with
@@ -189,17 +226,17 @@ rules
       ret := <dx--assert-runtime-value(|"Expected continuation argument to be a value: ")> v
 
   // target language ops
-  dx--eval-expr(|scope): MExprCallPrimitive(op, args) -> MRuntimeHoly([MRuntimeValue(TValueVar(y))], TExpPrimOp(op, v, y, THole()))
+  dx--eval-expr-(|scope): MExprCallPrimitive(op, args) -> MRuntimeHoly([MRuntimeValue(TValueVar(y))], TExpPrimOp(op, v, y, THole()))
     with v := <map(dx--eval-expr(|scope)); dx--assert-runtime-values-or-metalists> args
     with <newname> "y" => y
-  dx--eval-expr(|scope): MExprConditionalPrimitive(primop, args, then, else) -> MRuntimeCPSFinalized(
+  dx--eval-expr-(|scope): MExprConditionalPrimitive(primop, args, then, else) -> MRuntimeCPSFinalized(
     TExpConditionalPrimOp(primop, args', then', else')
   )
     with
       args' := <map(dx--eval-expr(|scope)); dx--assert-runtime-values-or-metalists> args;
       then' := <dx--eval-expr(|scope); dx--assert-tail-call(|"If statement body must be a tail-call: ")> then;
       else' := <dx--eval-expr(|scope); dx--assert-tail-call(|"If statement body must be a tail-call: ")> else
-  dx--eval-expr(|scope): MExprTLet(name, val, body) -> <dx--compose-cps-values> (
+  dx--eval-expr-(|scope): MExprTLet(name, val, body) -> <dx--compose-cps-values> (
     MRuntimeHoly([], TExpLet([TBind(x, val')], THole())),
     res
   )
@@ -207,11 +244,11 @@ rules
       x := <dx--eval-expr(|scope); dx--assert-target-var(|"Name of a let binding must be a target var, not: ")> name;
       val' := <dx--eval-expr(|scope); dx--assert-runtime-value(|"Value of let-stmt must be a value: ")> val;
       res := <dx--eval-expr(|scope)> body
-  dx--eval-expr(|scope): MExprHole() -> MRuntimeHoly([], THole())
-  dx--eval-expr(|scope): MExprTFix(funs) -> MRuntimeHoly([], TExpFix(tfuns, THole()))
+  dx--eval-expr-(|scope): MExprHole() -> MRuntimeHoly([], THole())
+  dx--eval-expr-(|scope): MExprTFix(funs) -> MRuntimeHoly([], TExpFix(tfuns, THole()))
     with
       tfuns := <map(dx--eval-tfun(|scope))> funs
-  dx--eval-expr(|scope): MExprQuoteTarget(lit) -> MRuntimeHoly([], lit)
+  dx--eval-expr-(|scope): MExprQuoteTarget(lit) -> MRuntimeHoly([], lit)
     with <oncetd(?THole()) <+ dx--fail-msg(|"Must have a hole in a target language literal.")> lit
 
   // dx--eval-tfun(|MScope) :: MTFun -> TFun
@@ -234,12 +271,16 @@ rules
       <dx--pop-trace> ()
 
   // convert an arbitrary aterm input into a quoted form
+  // this operation preserves annotations on the term to ensure that
+  // operations that require the annotations (in particular: statix)
+  // can access them when needed. Those annotations will be moved to
+  // the outside of the term (e.g. "foo"{a} -> STermString("foo"){a})
   // dx--quoted-to-runtime :: ? -> TRuntimeValue
   dx--quoted-to-runtime = bottomup(dx--quoted-term-to-runtime); !MRuntimeQuote(<id>)
-  dx--quoted-term-to-runtime: x -> STermInt(<int-to-string> x) where <is-int> x
-  dx--quoted-term-to-runtime: x -> STermString($["[x]"]) where <is-string> x
-  dx--quoted-term-to-runtime: x -> STermList(x) where <is-list> x
-  dx--quoted-term-to-runtime: c#(a) -> STermApp(c, a)
+  dx--quoted-term-to-runtime: x{a*} -> STermInt(<int-to-string> x){a*} where <is-int> x
+  dx--quoted-term-to-runtime: x{a*} -> STermString($["[x]"]){a*} where <is-string> x
+  dx--quoted-term-to-runtime: x{a*} -> STermList(x){a*} where <is-list> x
+  dx--quoted-term-to-runtime: c#(a){an*} -> STermApp(c, a){an*}
 
 // Evaluation helpers
 rules
@@ -268,6 +309,10 @@ rules
   // dx--assert-runtime-value(|string) :: MRuntimeValue -> TValue
   dx--assert-runtime-value(|msg): MRuntimeValue(tval) -> tval
   dx--assert-runtime-value(|msg) = dx--fail-msg(|msg)
+
+  // dx--assert-quoted(|string) :: MRuntimeValue -> STerm
+  dx--assert-quoted(|msg): MRuntimeQuote(s) -> s
+  dx--assert-quoted(|msg) = dx--fail-msg(|msg)
 
   // dx--assert-tail-call(|string) :: MRuntimeValue -> TExp
   dx--assert-tail-call(|_): MRuntimeCPSFinalized(e) -> e
