@@ -6,7 +6,7 @@ plugins {
   kotlin("jvm") version "1.3.41" apply false // Use 1.3.41 to keep in sync with embedded Kotlin version of Gradle 5.6.4.
   `kotlin-dsl` apply false
 
-  id("org.metaborg.devenv.spoofax.gradle.langspec") version "0.1.29" apply false
+  id("org.metaborg.devenv.spoofax.gradle.langspec") version "0.1.30" apply false
   id("de.set.ecj") version "1.4.1" apply false
   id("org.metaborg.coronium.bundle") version "0.3.15" apply false
   id("org.metaborg.coronium.feature") version "0.3.15" apply false
