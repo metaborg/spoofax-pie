@@ -18,6 +18,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `common` requirement to `0.10.3`.
 - `resource` requirement to `0.14.0`.
 - `pie` requirement to `0.20.0`.
+- `releng` (devenv-release) requirement to `0.1.30`.
 
 
 ## [0.17.0] - 2022-03-09
