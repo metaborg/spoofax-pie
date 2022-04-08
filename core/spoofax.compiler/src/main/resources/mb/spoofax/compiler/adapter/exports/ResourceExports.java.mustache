@@ -1,8 +1,9 @@
 package {{baseResourceExports.packageId}};
 
 import mb.common.util.ListView;
-import mb.spoofax.core.language.ResourceExports;
 import mb.spoofax.core.language.Export;
+import mb.spoofax.core.language.NoResourceExportsException;
+import mb.spoofax.core.language.ResourceExports;
 
 import java.lang.IllegalArgumentException;
 import javax.inject.Inject;
@@ -24,7 +25,7 @@ public class {{baseResourceExports.id}} implements ResourceExports {
 {{#combinedExports}}
             case "{{id}}": return {{idUncapitalized}}Exports;
 {{/combinedExports}}
-            default: throw new IllegalArgumentException("Cannot get exports for ID '" + id + "', nothing was exported for that ID");
+            default: throw new NoResourceExportsException("Cannot get exports for ID '" + id + "', nothing was exported for that ID");
         }
     }
 }

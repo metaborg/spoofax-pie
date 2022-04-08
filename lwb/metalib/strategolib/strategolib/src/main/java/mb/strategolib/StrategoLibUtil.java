@@ -53,7 +53,7 @@ public class StrategoLibUtil {
         ResourcePath strategoLibUnarchiveDirectory,
         UnarchiveFromJar unarchiveFromJar
     ) throws IOException {
-        for(Export export : resourceExports.str2LibExports) {
+        for(Export export : resourceExports.strategoExports) {
             final String fileRelativePath = export.caseOf().file(path -> path).otherwiseEmpty()
                 .orElseThrow(() -> new IllegalStateException("Stratego 2 standard library export '" + export + "' is not a file export. Only file exports are supported"));
             final ClassLoaderResourceLocations<FSResource> locations = classLoaderResources.definitionDirectory.getLocations();

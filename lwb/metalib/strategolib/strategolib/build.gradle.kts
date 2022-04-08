@@ -34,8 +34,6 @@ spoofax2BasedLanguageProject {
     }
     project.run {
       addAdditionalCopyResources(
-        "trans/**/*.str",
-        "trans/**/*.str2",
         "src-gen/java/strategolib/trans/strategolib.str2lib"
       )
       languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:strategolib:${ext["spoofax2DevenvVersion"]}"))
@@ -47,8 +45,7 @@ languageAdapterProject {
   compilerInput {
     project.configureCompilerInput()
       withExports().run {
-        addDirectoryExport("Stratego", "trans")
-        addFileExport("Str2Lib", "src-gen/java/strategolib/trans/strategolib.str2lib")
+        addFileExport("Stratego", "src-gen/java/strategolib/trans/strategolib.str2lib")
       }
   }
 }

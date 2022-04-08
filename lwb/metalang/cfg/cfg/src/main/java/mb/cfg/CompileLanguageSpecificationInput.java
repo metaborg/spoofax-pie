@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.function.Function;
 
 @Value.Immutable
 public interface CompileLanguageSpecificationInput extends Serializable {
@@ -49,12 +50,16 @@ public interface CompileLanguageSpecificationInput extends Serializable {
 
     default List<Dependency> allDependencies() {
         final ArrayList<Dependency> dependencies = new ArrayList<>(dependencies());
+        final Function<String, Dependency> createDependency = (artifactId) ->
+            new Dependency(DependencySource.coordinateRequirement(new CoordinateRequirement("org.metaborg", artifactId, shared().spoofax3Version())), SetView.of(DependencyKind.CompileTime));
         stratego().ifPresent(c -> {
+            dependencies.add(createDependency.apply("strategolib"));
+            dependencies.add(createDependency.apply("gpp"));
             if(c.source().getFiles().includeLibSpoofax2Exports()) {
-                dependencies.add(new Dependency(DependencySource.coordinateRequirement(new CoordinateRequirement("org.metaborg", "libspoofax2", shared().spoofax3Version())), SetView.of(DependencyKind.CompileTime)));
+                dependencies.add(createDependency.apply("libspoofax2"));
             }
             if(c.source().getFiles().includeLibStatixExports()) {
-                dependencies.add(new Dependency(DependencySource.coordinateRequirement(new CoordinateRequirement("org.metaborg", "libstatix", shared().spoofax3Version())), SetView.of(DependencyKind.CompileTime)));
+                dependencies.add(createDependency.apply("libstatix"));
             }
         });
         return dependencies;

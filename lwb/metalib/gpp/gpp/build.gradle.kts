@@ -35,8 +35,6 @@ spoofax2BasedLanguageProject {
     }
     project.run {
       addAdditionalCopyResources(
-        "trans/**/*.str",
-        "trans/**/*.str2",
         "src-gen/java/gpp/trans/gpp.str2lib"
       )
       languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:gpp:${ext["spoofax2DevenvVersion"]}"))
@@ -48,8 +46,7 @@ languageAdapterProject {
   compilerInput {
     project.configureCompilerInput()
     withExports().run {
-      addDirectoryExport("Stratego", "trans")
-      addFileExport("Str2Lib", "src-gen/java/gpp/trans/gpp.str2lib")
+      addFileExport("Stratego", "src-gen/java/gpp/trans/gpp.str2lib")
     }
   }
 }

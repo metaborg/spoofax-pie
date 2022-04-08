@@ -4,7 +4,7 @@ import mb.cfg.task.CfgRootDirectoryToObjectException;
 import mb.common.util.ADT;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.lwb.compiler.definition.ResolveIncludesException;
+import mb.spoofax.lwb.compiler.definition.ResolveDependenciesException;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3ConfigureException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -22,7 +22,7 @@ public abstract class SpoofaxStrategoConfigureException extends Exception {
 
         R includeDirectoryFail(ResourcePath includeDirectory);
 
-        R resolveIncludeFail(ResolveIncludesException resolveIncludesException);
+        R resolveIncludeFail(ResolveDependenciesException resolveDependenciesException);
 
         R builtinLibraryFail(String builtinLibraryName);
 
@@ -55,7 +55,7 @@ public abstract class SpoofaxStrategoConfigureException extends Exception {
         return SpoofaxStrategoConfigureExceptions.includeDirectoryFail(includeDirectory);
     }
 
-    public static SpoofaxStrategoConfigureException resolveIncludeFail(ResolveIncludesException cause) {
+    public static SpoofaxStrategoConfigureException resolveIncludeFail(ResolveDependenciesException cause) {
         return withCause(SpoofaxStrategoConfigureExceptions.resolveIncludeFail(cause), cause);
     }
 

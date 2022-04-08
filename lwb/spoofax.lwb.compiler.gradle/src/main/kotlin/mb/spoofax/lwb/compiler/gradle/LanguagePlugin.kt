@@ -157,6 +157,8 @@ class LanguagePluginInstance(
     val languageSpecificationInput = compileLanguageInput.compileLanguageSpecificationInput()
     project.addMainResourceDirectory(languageSpecificationInput.compileLanguageShared().generatedResourcesDirectory(), resourceService)
     project.addMainJavaSourceDirectory(languageSpecificationInput.compileLanguageShared().generatedJavaSourcesDirectory(), resourceService)
+    // TODO: move this classpath functionality into the resources components of those libraries
+    // HACK: add strategolib and gpp classpaths as dependencies, so that the Gradle Java compilation task does not fail.
     project.dependencies.add("implementation", project.files(strategoLibUtil.strategoLibJavaClassPaths))
     project.dependencies.add("implementation", project.files(gppUtil.gppJavaClassPaths))
     // Adapter project compiler

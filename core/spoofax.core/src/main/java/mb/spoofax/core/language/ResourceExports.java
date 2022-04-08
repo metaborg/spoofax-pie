@@ -8,6 +8,7 @@ public interface ResourceExports {
      *
      * @param id (Language) identifier.
      * @return List of exports.
+     * @throws NoResourceExportsException when there are no resource exports for given ID.
      */
     ListView<Export> getExports(String id);
 }

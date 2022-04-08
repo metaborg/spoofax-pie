@@ -7,21 +7,16 @@ import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.constraint.pie.ConstraintAnalyzeMultiTaskDef;
-import mb.gpp.GppInfo;
-import mb.gpp.GppUtil;
-import mb.libspoofax2.LibSpoofax2ClassLoaderResources;
-import mb.libspoofax2.LibSpoofax2ResourceExports;
-import mb.libstatix.LibStatixClassLoaderResources;
-import mb.libstatix.LibStatixResourceExports;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Interactivity;
+import mb.pie.api.None;
 import mb.pie.api.STask;
-import mb.pie.api.StatelessSerializableFunction;
 import mb.pie.api.Supplier;
+import mb.pie.api.SupplierWithOrigin;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
+import mb.pie.api.ValueSupplier;
 import mb.pie.api.stamp.resource.ResourceStampers;
-import mb.pie.task.archive.UnarchiveFromJar;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.sdf3.task.Sdf3ToCompletionRuntime;
@@ -33,15 +28,13 @@ import mb.sdf3.task.spec.Sdf3SpecToParseTable;
 import mb.sdf3_ext_statix.task.Sdf3ExtStatixGenerateStratego;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
-import mb.spoofax.lwb.compiler.definition.ResolveIncludesException;
+import mb.spoofax.lwb.compiler.definition.ResolveDependenciesException;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3ConfigureException;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3GenerationUtil;
 import mb.str.config.StrategoCompileConfig;
 import mb.stratego.build.strincr.BuiltinLibraryIdentifier;
 import mb.stratego.build.strincr.ModuleIdentifier;
 import mb.stratego.build.strincr.Stratego2LibInfo;
-import mb.strategolib.StrategoLibInfo;
-import mb.strategolib.StrategoLibUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.sdf2table.parsetable.ParseTable;
 import org.metaborg.util.cmd.Arguments;
@@ -64,11 +57,8 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
 
     private final CfgRootDirectoryToObject cfgRootDirectoryToObject;
 
-    private final SpoofaxStrategoResolveIncludes resolveIncludes;
-    private final UnarchiveFromJar unarchiveFromJar;
+    private final SpoofaxStrategoResolveDependencies resolveDependencies;
 
-    private final StrategoLibUtil strategoLibUtil;
-    private final GppUtil gppUtil;
     private final SpoofaxStrategoGenerationUtil spoofaxStrategoGenerationUtil;
 
     private final SpoofaxSdf3GenerationUtil spoofaxSdf3GenerationUtil;
@@ -85,11 +75,8 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
 
         CfgRootDirectoryToObject cfgRootDirectoryToObject,
 
-        SpoofaxStrategoResolveIncludes resolveIncludes,
-        UnarchiveFromJar unarchiveFromJar,
+        SpoofaxStrategoResolveDependencies resolveDependencies,
 
-        StrategoLibUtil strategoLibUtil,
-        GppUtil gppUtil,
         SpoofaxStrategoGenerationUtil spoofaxStrategoGenerationUtil,
 
         SpoofaxSdf3GenerationUtil spoofaxSdf3GenerationUtil,
@@ -106,11 +93,8 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
 
         this.cfgRootDirectoryToObject = cfgRootDirectoryToObject;
 
-        this.unarchiveFromJar = unarchiveFromJar;
-        this.resolveIncludes = resolveIncludes;
+        this.resolveDependencies = resolveDependencies;
 
-        this.strategoLibUtil = strategoLibUtil;
-        this.gppUtil = gppUtil;
         this.spoofaxStrategoGenerationUtil = spoofaxStrategoGenerationUtil;
 
         this.spoofaxSdf3GenerationUtil = spoofaxSdf3GenerationUtil;
@@ -164,29 +148,42 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
         final ArrayList<STask<?>> sourceFileOrigins = new ArrayList<>();
 
         // Gather include directories, str2libs, and Java classpath.
-        final LinkedHashSet<ResourcePath> includeDirectories = new LinkedHashSet<>(); // LinkedHashSet to remove duplicates while keeping insertion order.
-        includeDirectories.add(sourceFiles.mainSourceDirectory()); // Add main source directory as an include for imports.
-        includeDirectories.addAll(sourceFiles.includeDirectories());
-        final LinkedHashSet<Supplier<Stratego2LibInfo>> str2Libs = new LinkedHashSet<>();
-        final Supplier<StrategoLibInfo> strategoLibInfoSupplier = strategoLibUtil.getStrategoLibInfo(sourceFiles.strategoLibUnarchiveDirectory(), unarchiveFromJar);
-        str2Libs.add(strategoLibInfoSupplier.map(new FromStrategoLibInfoToStratego2LibInfo()));
-        final Supplier<GppInfo> gppInfoSupplier = gppUtil.getGppInfo(sourceFiles.gppUnarchiveDirectory(), unarchiveFromJar);
-        str2Libs.add(gppInfoSupplier.map(new FromGppToStratego2LibInfo()));
-        final LinkedHashSet<File> javaClassPaths = new LinkedHashSet<>();
-        javaClassPaths.addAll(strategoLibUtil.getStrategoLibJavaClassPaths());
-        javaClassPaths.addAll(gppUtil.getGppJavaClassPaths());
+        final LinkedHashSet<ResourcePath> allIncludeDirectories = new LinkedHashSet<>(); // LinkedHashSet to remove duplicates while keeping insertion order.
+        allIncludeDirectories.add(sourceFiles.mainSourceDirectory()); // Add main source directory as an include for imports.
+        allIncludeDirectories.addAll(sourceFiles.includeDirectories());
+        final LinkedHashSet<Supplier<Stratego2LibInfo>> allStratego2LibInfos = new LinkedHashSet<>(); // LinkedHashSet to remove duplicates while keeping insertion order.
+        final LinkedHashSet<File> allJavaClassPaths = new LinkedHashSet<>();
 
-        final Task<Result<ListView<ResourcePath>, ResolveIncludesException>> resolveIncludesTask =
-            resolveIncludes.createTask(new SpoofaxStrategoResolveIncludes.Input(rootDirectory, sourceFiles.unarchiveDirectory()));
-        sourceFileOrigins.add(resolveIncludesTask.toSupplier());
-        final Result<ListView<ResourcePath>, ResolveIncludesException> result =
-            context.require(resolveIncludesTask);
+        final Task<Result<ListView<StrategoResolvedDependency>, ResolveDependenciesException>> resolveDependenciesTask =
+            resolveDependencies.createTask(new SpoofaxStrategoResolveDependencies.Input(rootDirectory, sourceFiles.unarchiveDirectory()));
+        sourceFileOrigins.add(resolveDependenciesTask.toSupplier());
+        final Result<ListView<StrategoResolvedDependency>, ResolveDependenciesException> result =
+            context.require(resolveDependenciesTask);
         if(result.isErr()) {
             // noinspection ConstantConditions (err is present)
             return Result.ofErr(SpoofaxStrategoConfigureException.resolveIncludeFail(result.getErr()));
         } else {
             // noinspection ConstantConditions (value is present)
-            result.get().addAllTo(includeDirectories);
+            for(StrategoResolvedDependency resolved : result.get()) {
+                resolved.caseOf()
+                    .sourceDirectory(d -> {
+                        allIncludeDirectories.add(d);
+                        return None.instance;
+                    })
+                    .compiledLibrary((str2libFile, javaClassPaths) -> {
+                        // NOTE: passing empty list to jarFilesOrDirectories in Stratego2LibInfo such that the
+                        //       Stratego 2 compiler does not copy classes, as we make a dependency to the classes in
+                        //       Spoofax 3 instead!
+                        final Stratego2LibInfo info = new Stratego2LibInfo(str2libFile, new ArrayList<>());
+                        // NOTE: using SupplierWithOrigin to ensure that when the Stratego 2 compiler supplies the
+                        //       str2libFile, it first depends on the resolveDependenciesTask which performs the
+                        //       unarchiving of str2libFile.
+                        allStratego2LibInfos.add(new SupplierWithOrigin<>(new ValueSupplier<>(info), resolveDependenciesTask.toSupplier()));
+                        javaClassPaths.addAllTo(allJavaClassPaths);
+                        return None.instance;
+                    })
+                ;
+            }
         }
 
         // Compile each SDF3 source file (if SDF3 is enabled) to a Stratego signature, pretty-printer, completion
@@ -256,7 +253,7 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
                     }
 
                     // Add generated sources directory as an include for Stratego imports.
-                    includeDirectories.add(generatedSourcesDirectory);
+                    allIncludeDirectories.add(generatedSourcesDirectory);
                     // Add this as an origin, as this task provides the Stratego files (in strategoGenerationUtil.writePrettyPrintedFile).
                     sourceFileOrigins.add(createSupplier(rootDirectory));
                 }
@@ -279,9 +276,9 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
         return Result.ofOk(new StrategoCompileConfig(
             rootDirectory,
             new ModuleIdentifier(true, false, sourceFiles.mainModule(), mainFile.getPath()),
-            ListView.copyOf(includeDirectories),
+            ListView.copyOf(allIncludeDirectories),
             ListView.of(builtinLibraryIdentifiers),
-            ListView.copyOf(str2Libs),
+            ListView.copyOf(allStratego2LibInfos),
             new Arguments(), // TODO: add to input and configure
             ListView.of(sourceFileOrigins),
             null, //strategoInput.cacheDirectory(), // TODO: settings this crashes the compiler, most likely due to the ## symbols in the path.
@@ -289,7 +286,7 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
             cfgStrategoConfig.javaClassFileOutputDirectory(),
             cfgStrategoConfig.outputJavaPackageId(),
             cfgStrategoConfig.outputLibraryName(),
-            ListView.copyOf(javaClassPaths)
+            ListView.copyOf(allJavaClassPaths)
         ));
     }
 
@@ -339,17 +336,5 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
     ) throws Exception {
         final STask<Result<IStrategoTerm, ?>> supplier = sdf3ExtStatixGenerateStratego.createSupplier(new Sdf3ExtStatixGenerateStratego.Input(astSupplier, strategyAffix));
         spoofaxStrategoGenerationUtil.writePrettyPrintedFile(context, generatesSourcesDirectory, supplier);
-    }
-
-    private static class FromStrategoLibInfoToStratego2LibInfo extends StatelessSerializableFunction<StrategoLibInfo, Stratego2LibInfo> {
-        @Override public Stratego2LibInfo apply(StrategoLibInfo strategoLibInfo) {
-            return new Stratego2LibInfo(strategoLibInfo.str2libFile, strategoLibInfo.jarFilesOrDirectories);
-        }
-    }
-
-    private static class FromGppToStratego2LibInfo extends StatelessSerializableFunction<GppInfo, Stratego2LibInfo> {
-        @Override public Stratego2LibInfo apply(GppInfo gppInfo) {
-            return new Stratego2LibInfo(gppInfo.str2libFile, gppInfo.jarFilesOrDirectories);
-        }
     }
 }

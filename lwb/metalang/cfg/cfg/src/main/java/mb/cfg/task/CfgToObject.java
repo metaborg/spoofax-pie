@@ -72,15 +72,18 @@ public class CfgToObject implements TaskDef<CfgToObject.Input, Result<CfgToObjec
     }
 
     public static class Output implements Serializable {
+        public final ResourcePath rootDirectory;
         public final KeyedMessages messages;
         public final CompileLanguageInput compileLanguageInput;
         public final Properties properties;
 
         public Output(
+            ResourcePath rootDirectory,
             KeyedMessages messages,
             CompileLanguageInput compileLanguageInput,
             Properties properties
         ) {
+            this.rootDirectory = rootDirectory;
             this.messages = messages;
             this.compileLanguageInput = compileLanguageInput;
             this.properties = properties;
@@ -90,13 +93,15 @@ public class CfgToObject implements TaskDef<CfgToObject.Input, Result<CfgToObjec
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             final Output output = (Output)o;
+            if(!rootDirectory.equals(output.rootDirectory)) return false;
             if(!messages.equals(output.messages)) return false;
             if(!compileLanguageInput.equals(output.compileLanguageInput)) return false;
             return properties.equals(output.properties);
         }
 
         @Override public int hashCode() {
-            int result = messages.hashCode();
+            int result = rootDirectory.hashCode();
+            result = 31 * result + messages.hashCode();
             result = 31 * result + compileLanguageInput.hashCode();
             result = 31 * result + properties.hashCode();
             return result;
@@ -104,8 +109,9 @@ public class CfgToObject implements TaskDef<CfgToObject.Input, Result<CfgToObjec
 
         @Override public String toString() {
             return "CfgToObject$Output{" +
-                "messages=" + messages +
-                ", compileLanguageToJavaClassPathInput=" + compileLanguageInput +
+                "rootDirectory=" + rootDirectory +
+                ", messages=" + messages +
+                ", compileLanguageInput=" + compileLanguageInput +
                 ", properties=" + properties +
                 '}';
         }
@@ -160,6 +166,6 @@ public class CfgToObject implements TaskDef<CfgToObject.Input, Result<CfgToObjec
         } catch(IllegalStateException e) {
             return Result.ofErr(CfgToObjectException.buildConfigObjectFail(e));
         }
-        return Result.ofOk(new Output(output.messages, output.compileLanguageInput, output.properties));
+        return Result.ofOk(new Output(rootDirectory, output.messages, output.compileLanguageInput, output.properties));
     }
 }
