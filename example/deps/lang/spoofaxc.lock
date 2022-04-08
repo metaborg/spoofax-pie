@@ -1,0 +1,6 @@
+shared.defaultArtifactId=lang
+shared.defaultClassPrefix=Lang
+shared.defaultGroupId=org.metaborg
+shared.defaultPackageId=mb.lang
+shared.defaultVersion=0.1.0
+stratego.languageStrategyAffix=lang

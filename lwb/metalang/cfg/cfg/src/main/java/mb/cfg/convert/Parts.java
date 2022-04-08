@@ -310,7 +310,7 @@ class Parts {
         createCfgMessage(text, Severity.Warning, term);
     }
 
-
+    
     private String relativePathStringOfExistingFile(IStrategoTerm pathTerm, ResourcePath base, String errorSuffix) {
         final String relativePath = Parts.toJavaString(pathTerm);
         final ResourcePath path = base.appendRelativePath(relativePath).getNormalized();

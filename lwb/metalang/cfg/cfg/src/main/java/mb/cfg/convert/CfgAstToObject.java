@@ -278,7 +278,7 @@ public class CfgAstToObject {
                     filesSourceBuilder.mainSourceDirectory(mainSourceDirectory);
                     filesParts.forOneSubtermAsExistingFile("StrategoFilesMainFile", mainSourceDirectory, "Stratego main file", filesSourceBuilder::mainFile);
                     filesParts.forAllSubtermsAsExistingDirectories("StrategoFilesIncludeDirectory", rootDirectory, "Stratego include directory", filesSourceBuilder::addIncludeDirectories);
-                    filesParts.forAllSubtermsAsRelativePathOfExistingDirectories("StrategoFilesExportDirectory", rootDirectory, "Stratego export directory", filesSourceBuilder::addExportDirectories);
+                    filesParts.forAllSubtermsAsStrings("StrategoFilesExportDirectory", filesSourceBuilder::addExportDirectories);
                     builder.source(CfgStrategoSource.files(filesSourceBuilder.build()));
                 } else {
                     throw new InvalidAstShapeException("Stratego source", source);
