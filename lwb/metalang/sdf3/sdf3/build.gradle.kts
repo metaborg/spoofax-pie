@@ -30,6 +30,7 @@ languageProject {
     name("SDF3")
     defaultClassPrefix("Sdf3")
     defaultPackageId("mb.sdf3")
+    addFileExtensions("sdf3", "tmpl")
   }
   compilerInput {
     withParser().run {
