@@ -40,14 +40,14 @@ public abstract class CfgStrategoSource implements Serializable {
 
         List<ResourcePath> includeDirectories();
 
+        List<String> exportDirectories();
+
         @Value.Default default List<String> includeBuiltinLibraries() {
             final ArrayList<String> strategoBuiltinLibs = new ArrayList<>();
             strategoBuiltinLibs.add("libstratego-sglr");
             strategoBuiltinLibs.add("libstratego-aterm");
             return strategoBuiltinLibs;
         }
-
-        List<String> exportDirectories();
 
         default ResourcePath unarchiveDirectory() {
             return compileLanguageShared().unarchiveDirectory();

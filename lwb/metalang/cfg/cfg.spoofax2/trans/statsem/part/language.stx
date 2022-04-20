@@ -28,6 +28,10 @@ rules // Sdf3 section and options
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
   sdf3FilesOptionOk(s, Sdf3FilesMainFile(e)) :-
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
+  sdf3FilesOptionOk(s, Sdf3FilesIncludeDirectory(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
+  sdf3FilesOptionOk(s, Sdf3FilesExportDirectory(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
 
   sdf3PrebuiltOptionOk : scope * Sdf3PrebuiltOption
   sdf3PrebuiltOptionsOk maps sdf3PrebuiltOptionOk(*, list(*))
@@ -77,6 +81,8 @@ rules // Esv section and options
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
   esvFilesOptionOk(s, EsvFilesIncludeDirectory(e)) :-
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
+  esvFilesOptionOk(s, EsvFilesExportDirectory(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
   esvFilesOptionOk(s, EsvFilesIncludeLibspoofax2Exports(e)) :-
     typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
 
@@ -106,6 +112,8 @@ rules // Statix section and options
   statixFilesOptionOk(s, StatixFilesMainFile(e)) :-
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
   statixFilesOptionOk(s, StatixFilesIncludeDirectory(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
+  statixFilesOptionOk(s, StatixFilesExportDirectory(e)) :-
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
 
   statixPrebuiltOptionOk : scope * StatixPrebuiltOption

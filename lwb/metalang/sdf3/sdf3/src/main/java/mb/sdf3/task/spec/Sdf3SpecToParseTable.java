@@ -2,16 +2,15 @@ package mb.sdf3.task.spec;
 
 import mb.common.result.ExpectException;
 import mb.common.result.Result;
+import mb.common.util.ListView;
 import mb.jsglr.pie.JsglrParseTaskInput;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Interactivity;
+import mb.pie.api.STask;
 import mb.pie.api.Supplier;
 import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
-import mb.pie.api.stamp.resource.ResourceStampers;
-import mb.resource.hierarchical.HierarchicalResource;
-import mb.resource.hierarchical.match.ResourceMatcher;
-import mb.resource.hierarchical.walk.ResourceWalker;
+import mb.resource.hierarchical.ResourcePath;
 import mb.sdf3.Sdf3ClassLoaderResources;
 import mb.sdf3.Sdf3Scope;
 import mb.sdf3.task.Sdf3Desugar;
@@ -19,7 +18,7 @@ import mb.sdf3.task.Sdf3Parse;
 import mb.sdf3.task.Sdf3ToCompletion;
 import mb.sdf3.task.Sdf3ToNormalForm;
 import mb.sdf3.task.Sdf3ToPermissive;
-import mb.sdf3.task.util.Sdf3Util;
+import mb.sdf3.task.spoofax.Sdf3GetSourceFilesWrapper;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.sdf2table.grammar.NormGrammar;
 import org.metaborg.sdf2table.io.NormGrammarReader;
@@ -31,8 +30,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Sdf3Scope
 public class Sdf3SpecToParseTable implements TaskDef<Sdf3SpecToParseTable.Input, Result<ParseTable, ?>> {
@@ -70,6 +67,7 @@ public class Sdf3SpecToParseTable implements TaskDef<Sdf3SpecToParseTable.Input,
     private final Sdf3ClassLoaderResources classLoaderResources;
     private final Sdf3Parse parse;
     private final Sdf3Desugar desugar;
+    private final Sdf3GetSourceFilesWrapper getSourceFiles;
     private final Sdf3ToPermissive toPermissive;
     private final Sdf3ToCompletion toCompletion;
     private final Sdf3ToNormalForm toNormalForm;
@@ -78,6 +76,7 @@ public class Sdf3SpecToParseTable implements TaskDef<Sdf3SpecToParseTable.Input,
         Sdf3ClassLoaderResources classLoaderResources,
         Sdf3Parse parse,
         Sdf3Desugar desugar,
+        Sdf3GetSourceFilesWrapper getSourceFiles,
         Sdf3ToPermissive toPermissive,
         Sdf3ToCompletion toCompletion,
         Sdf3ToNormalForm toNormalForm
@@ -85,6 +84,7 @@ public class Sdf3SpecToParseTable implements TaskDef<Sdf3SpecToParseTable.Input,
         this.classLoaderResources = classLoaderResources;
         this.parse = parse;
         this.desugar = desugar;
+        this.getSourceFiles = getSourceFiles;
         this.toPermissive = toPermissive;
         this.toCompletion = toCompletion;
         this.toNormalForm = toNormalForm;
@@ -98,18 +98,13 @@ public class Sdf3SpecToParseTable implements TaskDef<Sdf3SpecToParseTable.Input,
         final JsglrParseTaskInput.Builder parseInputBuilder = parse.inputBuilder().rootDirectoryHint(input.config.rootDirectory);
         final Supplier<Result<IStrategoTerm, ?>> mainModuleAstSupplier = desugar.createSupplier(parseInputBuilder.withFile(input.config.mainFile).buildAstSupplier());
 
-        final ResourceWalker walker = Sdf3Util.createResourceWalker();
-        final ResourceMatcher matcher = Sdf3Util.createResourceMatcher();
-        final HierarchicalResource mainSourceDirectory = context.require(input.config.mainSourceDirectory, ResourceStampers.modifiedDirRec(walker, matcher));
-        if(!mainSourceDirectory.exists() || !mainSourceDirectory.isDirectory()) {
-            return Result.ofErr(new IOException("Main SDF3 source directory '" + mainSourceDirectory +"' does not exist or is not a directory"));
-        }
-        final ArrayList<Supplier<? extends Result<IStrategoTerm, ?>>> modulesAstSuppliers;
-        try(final Stream<? extends HierarchicalResource> stream = mainSourceDirectory.walk(walker, matcher)) {
-            modulesAstSuppliers = stream
-                .filter(file -> !file.getPath().equals(input.config.mainFile)) // Filter out main module, as it is supplied separately.
-                .map(file -> desugar.createSupplier(parseInputBuilder.withFile(file.getKey()).buildAstSupplier()))
-                .collect(Collectors.toCollection(ArrayList::new));
+        final ListView<ResourcePath> sourceFiles = context.require(getSourceFiles, input.config.rootDirectory);
+        final ArrayList<Supplier<? extends Result<IStrategoTerm, ?>>> modulesAstSuppliers = new ArrayList<>();
+        for(ResourcePath sourceFile : sourceFiles) {
+            if(input.config.mainFile.equals(sourceFile))
+                continue; // Filter out main module, as it is supplied separately.
+            final STask<Result<IStrategoTerm, ?>> supplier = desugar.createSupplier(parseInputBuilder.withFile(sourceFile).buildAstSupplier());
+            modulesAstSuppliers.add(supplier);
         }
         modulesAstSuppliers.add(parseInputBuilder.withFile(classLoaderResources.getDefinitionResource("permissive-water.sdf3").getPath()).buildAstSupplier());
 

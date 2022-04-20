@@ -6,10 +6,12 @@ import mb.resource.hierarchical.walk.ResourceWalker;
 
 public class Sdf3Util {
     public static ResourceWalker createResourceWalker() {
-        return ResourceWalker.ofPath(PathMatcher.ofNoHidden());
+        return ResourceWalker
+            .ofNoHidden()
+            .and(ResourceWalker.ofNot(ResourceWalker.ofPath(PathMatcher.ofStartsWith("bin")))); // HACK: ignore bin directory in root directory
     }
 
     public static ResourceMatcher createResourceMatcher() {
-        return ResourceMatcher.ofPath(PathMatcher.ofExtensions("tmpl", "sdf3")).and(ResourceMatcher.ofFile());
+        return ResourceMatcher.ofPath(PathMatcher.ofExtensions("sdf3", "tmpl")).and(ResourceMatcher.ofFile());
     }
 }

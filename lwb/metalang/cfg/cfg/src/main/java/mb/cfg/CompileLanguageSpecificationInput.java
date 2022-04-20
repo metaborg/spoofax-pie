@@ -110,6 +110,9 @@ public interface CompileLanguageSpecificationInput extends Serializable {
     }
 
     default void syncTo(AdapterProjectCompilerInputBuilder builder) {
+        sdf3().ifPresent(i -> i.syncTo(builder.exports));
+        esv().ifPresent(i -> i.syncTo(builder.exports));
+        statix().ifPresent(i -> i.syncTo(builder.exports));
         stratego().ifPresent(i -> i.syncTo(builder.exports));
     }
 }

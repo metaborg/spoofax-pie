@@ -1,16 +1,20 @@
 package mb.spoofax.lwb.compiler.definition;
 
+import mb.common.function.Action1;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Task;
 import mb.pie.task.archive.UnarchiveFromJar;
+import mb.resource.ResourceService;
 import mb.resource.classloader.ClassLoaderResourceLocations;
 import mb.resource.classloader.JarFileWithPath;
 import mb.resource.fs.FSResource;
+import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.path.string.PathStringMatcher;
 import mb.spoofax.core.resource.ResourcesComponent;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.LinkedHashSet;
 
 public class UnarchiveUtil {
@@ -35,5 +39,30 @@ public class UnarchiveUtil {
             definitionLocations.add(unarchiveDirectory.appendAsRelativePath(jarFileWithPath.path));
         }
         return definitionLocations;
+    }
+
+    public static void resolveDirectory(
+        String relativePath,
+        LinkedHashSet<ResourcePath> unarchivedDefinitionLocations,
+        ResourceService resourceService,
+        String metaLanguageDisplayName,
+        Action1<HierarchicalResource> resolve
+    ) {
+        boolean found = false;
+        for(ResourcePath definitionDirectory : unarchivedDefinitionLocations) {
+            final ResourcePath directoryPath = definitionDirectory.appendAsRelativePath(relativePath);
+            final HierarchicalResource directory = resourceService.getHierarchicalResource(directoryPath);
+            try {
+                if(directory.exists() && directory.isDirectory()) {
+                    resolve.apply(directory);
+                    found = true;
+                }
+            } catch(IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
+        if(!found) {
+            throw new UncheckedIOException(new IOException(metaLanguageDisplayName + "directory export '" + relativePath + "' was not found in any of its definition locations: " + unarchivedDefinitionLocations));
+        }
     }
 }

@@ -19,9 +19,9 @@ import mb.resource.util.SeparatorUtil;
 import mb.sdf3.Sdf3ClassLoaderResources;
 import mb.sdf3.Sdf3Scope;
 import mb.sdf3.task.Sdf3AnalyzeMulti;
-import mb.sdf3.task.Sdf3GetSourceFiles;
 import mb.sdf3.task.Sdf3GetStrategoRuntimeProvider;
 import mb.sdf3.task.Sdf3Parse;
+import mb.sdf3.task.spoofax.Sdf3GetSourceFilesWrapper;
 import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoTermMessageCollector;
@@ -35,7 +35,7 @@ public class Sdf3CheckSpec implements TaskDef<Sdf3SpecConfig, KeyedMessages> {
     private final Sdf3ClassLoaderResources classLoaderResources;
     private final Sdf3Parse parse;
     private final Sdf3GetStrategoRuntimeProvider getStrategoRuntimeProvider;
-    private final Sdf3GetSourceFiles getSourceFiles;
+    private final Sdf3GetSourceFilesWrapper getSourceFiles;
     private final Sdf3AnalyzeMulti analyze;
 
     @Inject
@@ -43,7 +43,7 @@ public class Sdf3CheckSpec implements TaskDef<Sdf3SpecConfig, KeyedMessages> {
         Sdf3ClassLoaderResources classLoaderResources,
         Sdf3Parse parse,
         Sdf3GetStrategoRuntimeProvider getStrategoRuntimeProvider,
-        Sdf3GetSourceFiles getSourceFiles,
+        Sdf3GetSourceFilesWrapper getSourceFiles,
         Sdf3AnalyzeMulti analyze
     ) {
         this.classLoaderResources = classLoaderResources;

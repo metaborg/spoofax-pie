@@ -3,10 +3,10 @@ package mb.sdf3.task.debug;
 import mb.sdf3.Sdf3Scope;
 import mb.sdf3.task.Sdf3AnalyzeMulti;
 import mb.sdf3.task.Sdf3Desugar;
-import mb.sdf3.task.Sdf3GetSourceFiles;
 import mb.sdf3.task.Sdf3GetStrategoRuntimeProvider;
 import mb.sdf3.task.Sdf3Parse;
 import mb.sdf3.task.Sdf3ToDynsemSignature;
+import mb.sdf3.task.spoofax.Sdf3GetSourceFilesWrapper;
 
 import javax.inject.Inject;
 
@@ -14,7 +14,7 @@ import javax.inject.Inject;
 public class Sdf3ShowDynsemSignature extends ShowAnalyzedTaskDef {
     @Inject public Sdf3ShowDynsemSignature(
         Sdf3Parse parse,
-        Sdf3GetSourceFiles getSourceFiles,
+        Sdf3GetSourceFilesWrapper getSourceFiles,
         Sdf3Desugar desugar,
         Sdf3AnalyzeMulti analyzeMulti,
         Sdf3ToDynsemSignature operation,

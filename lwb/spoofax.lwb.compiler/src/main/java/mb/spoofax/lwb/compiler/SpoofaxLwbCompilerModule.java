@@ -21,6 +21,7 @@ import mb.spoofax.lwb.compiler.esv.SpoofaxEsvConfigure;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3Check;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3Compile;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3Configure;
+import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3ResolveDependencies;
 import mb.spoofax.lwb.compiler.statix.SpoofaxStatixCheck;
 import mb.spoofax.lwb.compiler.statix.SpoofaxStatixCompile;
 import mb.spoofax.lwb.compiler.statix.SpoofaxStatixConfigure;
@@ -75,6 +76,7 @@ public class SpoofaxLwbCompilerModule {
         SpoofaxCfgCheck spoofaxCfgCheck,
 
         SpoofaxSdf3Configure spoofaxSdf3Configure,
+        SpoofaxSdf3ResolveDependencies spoofaxSdf3ResolveDependencies,
         SpoofaxSdf3Check spoofaxSdf3Check,
         SpoofaxSdf3Compile spoofaxSdf3Compile,
 
@@ -91,7 +93,7 @@ public class SpoofaxLwbCompilerModule {
         SpoofaxDynamixCompile spoofaxDynamixCompile,
 
         SpoofaxStrategoConfigure spoofaxStrategoConfigure,
-        SpoofaxStrategoResolveDependencies spoofaxStrategoResolveIncludes,
+        SpoofaxStrategoResolveDependencies spoofaxStrategoResolveDependencies,
         SpoofaxStrategoCheck spoofaxStrategoCheck,
         SpoofaxStrategoCompile spoofaxStrategoCompile,
 
@@ -106,6 +108,7 @@ public class SpoofaxLwbCompilerModule {
         taskDefs.add(spoofaxCfgCheck);
 
         taskDefs.add(spoofaxSdf3Configure);
+        taskDefs.add(spoofaxSdf3ResolveDependencies);
         taskDefs.add(spoofaxSdf3Check);
         taskDefs.add(spoofaxSdf3Compile);
 
@@ -122,7 +125,7 @@ public class SpoofaxLwbCompilerModule {
         taskDefs.add(spoofaxDynamixCompile);
 
         taskDefs.add(spoofaxStrategoConfigure);
-        taskDefs.add(spoofaxStrategoResolveIncludes);
+        taskDefs.add(spoofaxStrategoResolveDependencies);
         taskDefs.add(spoofaxStrategoCheck);
         taskDefs.add(spoofaxStrategoCompile);
 

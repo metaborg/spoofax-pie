@@ -171,7 +171,9 @@ public abstract class ResolveDependencies<T extends Serializable> implements Tas
         try {
             return resolveFromComponent.apply(resourceExports, resourcesComponent, context, unarchiveDirectoryBase);
         } catch(NoResourceExportsException e) {
-            throw ResolveDependenciesException.noResourceExportsFail(source, coordinate, metaLanguageName);
+            // TODO: this should throw an exception when a dependency is explicitly configured to resolve exports to imports of the meta-language.
+            // throw ResolveDependenciesException.noResourceExportsFail(source, coordinate, metaLanguageName);
+            return ListView.of();
         } catch(IOException e) {
             throw ResolveDependenciesException.resolveFromComponentFail(source, coordinate, e);
         } catch(UncheckedIOException e) {

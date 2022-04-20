@@ -7,6 +7,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -31,6 +32,14 @@ public abstract class CfgSdf3Source implements Serializable {
 
         @Value.Default default ResourcePath mainFile() {
             return mainSourceDirectory().appendRelativePath("start.sdf3");
+        }
+
+        List<ResourcePath> includeDirectories();
+
+        List<String> exportDirectories();
+
+        default ResourcePath unarchiveDirectory() {
+            return compileLanguageShared().unarchiveDirectory();
         }
 
         /// Automatically provided sub-inputs

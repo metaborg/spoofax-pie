@@ -31,6 +31,7 @@ import mb.spoofax.lwb.compiler.SpoofaxLwbCompilerScope;
 import mb.spoofax.lwb.compiler.definition.LanguageDefinitionManager;
 import mb.spoofax.lwb.compiler.definition.ResolveDependencies;
 import mb.spoofax.lwb.compiler.definition.UnarchiveUtil;
+import mb.spoofax.lwb.compiler.sdf3.Sdf3ResolvedDependency;
 import mb.spoofax.resource.ClassLoaderResources;
 
 import javax.inject.Inject;
@@ -122,14 +123,15 @@ public class SpoofaxStrategoResolveDependencies extends ResolveDependencies<Stra
                 unarchivedDefinitionLocations = new LinkedHashSet<>();
             }
 
-            for(Export export : resourceExports.getExports("Stratego")) {
+            for(Export export : exports) {
                 export.caseOf()
                     .file(relativePath -> {
                         resolveFile(relativePath, unarchivedDefinitionLocations, resourcesComponent.getClassloaderResources(), resolved);
                         return None.instance;
                     })
                     .directory(relativePath -> {
-                        resolveDirectory(relativePath, unarchivedDefinitionLocations, resolved);
+                        UnarchiveUtil.resolveDirectory(relativePath, unarchivedDefinitionLocations, resourceService, "Stratego", directory ->
+                            resolved.add(StrategoResolvedDependency.sourceDirectory(directory.getPath())));
                         return None.instance;
                     });
             }
@@ -207,7 +209,7 @@ public class SpoofaxStrategoResolveDependencies extends ResolveDependencies<Stra
         private ListView<StrategoResolvedDependency> resolve(ResourcePath rootDirectory, CfgStrategoConfig config) {
             final List<String> exportDirectories = config.source().getFiles().exportDirectories();
             final ArrayList<StrategoResolvedDependency> resolved = new ArrayList<>(exportDirectories.size());
-            for(String relativePath : config.source().getFiles().exportDirectories()) {
+            for(String relativePath : exportDirectories) {
                 final ResourcePath directory = rootDirectory.appendAsRelativePath(relativePath);
                 resolved.add(StrategoResolvedDependency.sourceDirectory(directory));
             }

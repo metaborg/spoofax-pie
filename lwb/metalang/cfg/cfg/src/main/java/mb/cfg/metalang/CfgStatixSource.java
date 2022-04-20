@@ -36,6 +36,8 @@ public abstract class CfgStatixSource implements Serializable {
 
         List<ResourcePath> includeDirectories();
 
+        List<String> exportDirectories();
+
         /// Automatically provided sub-inputs
 
         CompileLanguageSpecificationShared compileLanguageShared();

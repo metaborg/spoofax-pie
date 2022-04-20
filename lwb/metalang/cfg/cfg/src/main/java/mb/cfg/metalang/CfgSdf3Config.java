@@ -2,6 +2,7 @@ package mb.cfg.metalang;
 
 import mb.cfg.CompileLanguageSpecificationShared;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.compiler.adapter.ExportsCompiler;
 import mb.spoofax.compiler.language.ParserLanguageCompiler;
 import org.immutables.value.Value;
 
@@ -88,5 +89,9 @@ public interface CfgSdf3Config extends Serializable {
     default void syncTo(ParserLanguageCompiler.Input.Builder builder) {
         builder.parseTableAtermFileRelativePath(parseTableAtermFileRelativePath());
         builder.parseTablePersistedFileRelativePath(parseTablePersistedFileRelativePath());
+    }
+
+    default void syncTo(ExportsCompiler.Input.Builder builder) {
+        source().getFiles().ifPresent(files -> files.exportDirectories().forEach(exportDirectory -> builder.addDirectoryExport("SDF3", exportDirectory)));
     }
 }

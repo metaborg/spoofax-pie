@@ -68,6 +68,10 @@ spoofax2BasedLanguageProject {
   }
 }
 
+val packageId = "mb.sdf3"
+val taskPackageId = "$packageId.task"
+val spoofaxTaskPackageId = "$taskPackageId.spoofax"
+
 languageAdapterProject {
   compilerInput {
     withParser()
@@ -80,13 +84,15 @@ languageAdapterProject {
 //    withHover().run {
 //      hoverStrategy("statix-editor-hover")
 //    }
+    withGetSourceFiles().run {
+      baseGetSourceFilesTaskDef(spoofaxTaskPackageId, "BaseSdf3GetSourceFiles")
+      extendGetSourceFilesTaskDef(spoofaxTaskPackageId, "Sdf3GetSourceFilesWrapper")
+    }
     project.configureCompilerInput()
   }
 }
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   compositionGroup("mb.spoofax.lwb")
-
-  val packageId = "mb.sdf3"
 
   // Symbols
   addLineCommentSymbols("//")
@@ -101,8 +107,6 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
 
 
   /// Tasks
-  val taskPackageId = "$packageId.task"
-
   // Utility task definitions
   val desugar = TypeInfo.of(taskPackageId, "Sdf3Desugar")
   val prettyPrint = TypeInfo.of(taskPackageId, "Sdf3PrettyPrint")
@@ -156,13 +160,11 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
     showSpecParenthesizer
   )
 
-  // Wrap CheckMulti and rename base tasks
-  val spoofaxTaskPackageId = "$taskPackageId.spoofax"
+  // Extend CheckMulti and GetSourceFiles, rename base tasks.
   isMultiFile(true)
   baseCheckTaskDef(spoofaxTaskPackageId, "BaseSdf3Check")
   baseCheckMultiTaskDef(spoofaxTaskPackageId, "BaseSdf3CheckMulti")
   extendCheckMultiTaskDef(spoofaxTaskPackageId, "Sdf3CheckMultiWrapper")
-
 
   /// Commands
   val commandPackageId = "$packageId.command"

@@ -1,5 +1,6 @@
 package mb.sdf3.task.spec;
 
+import mb.common.util.ListView;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.util.SeparatorUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -11,17 +12,20 @@ public class Sdf3SpecConfig implements Serializable {
     public final ResourcePath rootDirectory;
     public final ResourcePath mainSourceDirectory;
     public final ResourcePath mainFile;
+    public final ListView<ResourcePath> includeDirectories;
     public final ParseTableConfiguration parseTableConfig;
 
     public Sdf3SpecConfig(
         ResourcePath rootDirectory,
         ResourcePath mainSourceDirectory,
         ResourcePath mainFile,
+        ListView<ResourcePath> includeDirectories,
         ParseTableConfiguration parseTableConfig
     ) {
         this.rootDirectory = rootDirectory;
         this.mainSourceDirectory = mainSourceDirectory;
         this.mainFile = mainFile;
+        this.includeDirectories = includeDirectories;
         this.parseTableConfig = parseTableConfig;
     }
 
@@ -29,11 +33,15 @@ public class Sdf3SpecConfig implements Serializable {
         return SeparatorUtil.convertCurrentToUnixSeparator(mainSourceDirectory.relativize(mainFile.removeLeafExtension()));
     }
 
-    public static Sdf3SpecConfig createDefault(ResourcePath rootDirectory) {
+    public static Sdf3SpecConfig createDefault(ResourcePath rootDirectory, ListView<ResourcePath> includeDirectories) {
         final ResourcePath mainSourceDirectory = rootDirectory.appendRelativePath("src");
         final ResourcePath mainFile = mainSourceDirectory.appendRelativePath("start.sdf3");
         final ParseTableConfiguration parseTableConfig = createDefaultParseTableConfiguration();
-        return new Sdf3SpecConfig(rootDirectory, mainSourceDirectory, mainFile, parseTableConfig);
+        return new Sdf3SpecConfig(rootDirectory, mainSourceDirectory, mainFile, includeDirectories, parseTableConfig);
+    }
+
+    public static Sdf3SpecConfig createDefault(ResourcePath rootDirectory) {
+        return createDefault(rootDirectory, ListView.of());
     }
 
     public static ParseTableConfiguration createDefaultParseTableConfiguration() {
@@ -47,6 +55,7 @@ public class Sdf3SpecConfig implements Serializable {
         if(!rootDirectory.equals(that.rootDirectory)) return false;
         if(!mainSourceDirectory.equals(that.mainSourceDirectory)) return false;
         if(!mainFile.equals(that.mainFile)) return false;
+        if(!includeDirectories.equals(that.includeDirectories)) return false;
         return parseTableConfig.equals(that.parseTableConfig);
     }
 
@@ -54,6 +63,7 @@ public class Sdf3SpecConfig implements Serializable {
         int result = rootDirectory.hashCode();
         result = 31 * result + mainSourceDirectory.hashCode();
         result = 31 * result + mainFile.hashCode();
+        result = 31 * result + includeDirectories.hashCode();
         result = 31 * result + parseTableConfig.hashCode();
         return result;
     }
@@ -63,6 +73,7 @@ public class Sdf3SpecConfig implements Serializable {
             "rootDirectory=" + rootDirectory +
             ", mainSourceDirectory=" + mainSourceDirectory +
             ", mainFile=" + mainFile +
+            ", includeDirectories=" + includeDirectories +
             ", parseTableConfig=" + parseTableConfig +
             '}';
     }
