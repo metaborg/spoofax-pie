@@ -13,6 +13,9 @@ import java.io.Serializable;
  */
 @Value.Immutable
 public interface CfgStatixConfig extends Serializable {
+    String exportsId = "Statix";
+
+
     class Builder extends ImmutableCfgStatixConfig.Builder {}
 
     static Builder builder() {return new Builder();}
@@ -53,6 +56,6 @@ public interface CfgStatixConfig extends Serializable {
     }
 
     default void syncTo(ExportsCompiler.Input.Builder builder) {
-        source().getFiles().ifPresent(files -> files.exportDirectories().forEach(exportDirectory -> builder.addDirectoryExport("Statix", exportDirectory)));
+        source().getFiles().ifPresent(files -> files.exportDirectories().forEach(exportDirectory -> builder.addDirectoryExport(exportsId, exportDirectory)));
     }
 }

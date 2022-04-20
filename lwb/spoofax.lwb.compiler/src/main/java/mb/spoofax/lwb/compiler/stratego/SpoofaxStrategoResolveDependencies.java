@@ -31,8 +31,8 @@ import mb.spoofax.lwb.compiler.SpoofaxLwbCompilerScope;
 import mb.spoofax.lwb.compiler.definition.LanguageDefinitionManager;
 import mb.spoofax.lwb.compiler.definition.ResolveDependencies;
 import mb.spoofax.lwb.compiler.definition.UnarchiveUtil;
-import mb.spoofax.lwb.compiler.sdf3.Sdf3ResolvedDependency;
 import mb.spoofax.resource.ClassLoaderResources;
+import mb.str.util.StrategoUtil;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -61,7 +61,7 @@ public class SpoofaxStrategoResolveDependencies extends ResolveDependencies<Stra
             new FromComponent(loggerFactory, resourceService, unarchiveFromJar),
             configureTaskDefProvider,
             FromLanguageDefinition.instance,
-            "Stratego"
+            StrategoUtil.displayName
         );
     }
 
@@ -88,7 +88,7 @@ public class SpoofaxStrategoResolveDependencies extends ResolveDependencies<Stra
             ResourcePath unarchiveDirectoryBase
         ) throws IOException {
             final ArrayList<StrategoResolvedDependency> resolved = new ArrayList<>();
-            final ListView<Export> exports = resourceExports.getExports("Stratego");
+            final ListView<Export> exports = resourceExports.getExports(CfgStrategoConfig.exportsId);
 
             boolean requireUnarchiveStr2Lib = false;
             boolean requireUnarchiveSources = false;
@@ -109,8 +109,7 @@ public class SpoofaxStrategoResolveDependencies extends ResolveDependencies<Stra
                     extensions.add("str2lib");
                 }
                 if(requireUnarchiveSources) {
-                    extensions.add("str2");
-                    extensions.add("str");
+                    StrategoUtil.fileExtensions.addAllTo(extensions);
                 }
                 unarchivedDefinitionLocations = UnarchiveUtil.unarchive(
                     context,
@@ -130,7 +129,7 @@ public class SpoofaxStrategoResolveDependencies extends ResolveDependencies<Stra
                         return None.instance;
                     })
                     .directory(relativePath -> {
-                        UnarchiveUtil.resolveDirectory(relativePath, unarchivedDefinitionLocations, resourceService, "Stratego", directory ->
+                        UnarchiveUtil.resolveDirectory(relativePath, unarchivedDefinitionLocations, resourceService, StrategoUtil.displayName, directory ->
                             resolved.add(StrategoResolvedDependency.sourceDirectory(directory.getPath())));
                         return None.instance;
                     });
@@ -171,25 +170,6 @@ public class SpoofaxStrategoResolveDependencies extends ResolveDependencies<Stra
                 }
             } else {
                 logger.warn("Attempting to resolve dependency to Stratego file export '" + relativePath + "', but individual file exports are not supported (with the exception of .str2lib files)");
-            }
-        }
-
-        private void resolveDirectory(String relativePath, LinkedHashSet<ResourcePath> unarchivedDefinitionLocations, ArrayList<StrategoResolvedDependency> resolved) {
-            boolean found = false;
-            for(ResourcePath definitionDirectory : unarchivedDefinitionLocations) {
-                final ResourcePath directoryPath = definitionDirectory.appendAsRelativePath(relativePath);
-                final HierarchicalResource directory = resourceService.getHierarchicalResource(directoryPath);
-                try {
-                    if(directory.exists() && directory.isDirectory()) {
-                        resolved.add(StrategoResolvedDependency.sourceDirectory(directoryPath));
-                        found = true;
-                    }
-                } catch(IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            }
-            if(!found) {
-                throw new UncheckedIOException(new IOException("Stratego directory export '" + relativePath + "' was not found in any of its definition locations: " + unarchivedDefinitionLocations));
             }
         }
 

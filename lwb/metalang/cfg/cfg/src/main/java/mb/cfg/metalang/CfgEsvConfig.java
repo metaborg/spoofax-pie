@@ -13,6 +13,9 @@ import java.io.Serializable;
  */
 @Value.Immutable
 public interface CfgEsvConfig extends Serializable {
+    String exportsId = "ESV";
+
+
     class Builder extends ImmutableCfgEsvConfig.Builder {}
 
     static Builder builder() {return new Builder();}
@@ -48,6 +51,6 @@ public interface CfgEsvConfig extends Serializable {
     }
 
     default void syncTo(ExportsCompiler.Input.Builder builder) {
-        source().getFiles().ifPresent(files -> files.exportDirectories().forEach(exportDirectory -> builder.addDirectoryExport("ESV", exportDirectory)));
+        source().getFiles().ifPresent(files -> files.exportDirectories().forEach(exportDirectory -> builder.addDirectoryExport(exportsId, exportDirectory)));
     }
 }

@@ -17,6 +17,9 @@ import java.util.Properties;
  */
 @Value.Immutable
 public interface CfgStrategoConfig extends Serializable {
+    String exportsId = "Stratego";
+
+
     class Builder extends ImmutableCfgStrategoConfig.Builder implements BuilderBase {
         static final String propertiesPrefix = "stratego.";
         static final String languageStrategyAffix = propertiesPrefix + "languageStrategyAffix";
@@ -98,6 +101,6 @@ public interface CfgStrategoConfig extends Serializable {
     }
 
     default void syncTo(ExportsCompiler.Input.Builder builder) {
-        source().getFiles().exportDirectories().forEach(exportDirectory -> builder.addDirectoryExport("Stratego", exportDirectory));
+        source().getFiles().exportDirectories().forEach(exportDirectory -> builder.addDirectoryExport(exportsId, exportDirectory));
     }
 }

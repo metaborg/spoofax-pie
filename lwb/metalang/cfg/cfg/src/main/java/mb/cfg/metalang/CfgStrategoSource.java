@@ -105,10 +105,6 @@ public abstract class CfgStrategoSource implements Serializable {
         return CfgStrategoSources.cases();
     }
 
-//    public CfgStrategoSources.CaseOfMatchers.TotalMatcher_Files caseOf() {
-//        return CfgStrategoSources.caseOf(this);
-//    }
-
     public Files getFiles() {
         return CfgStrategoSources.getFiles(this);
     }

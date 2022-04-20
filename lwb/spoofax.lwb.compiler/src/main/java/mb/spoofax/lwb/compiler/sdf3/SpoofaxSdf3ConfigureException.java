@@ -66,8 +66,8 @@ public abstract class SpoofaxSdf3ConfigureException extends Exception {
             .getLanguageCompilerConfigurationFail((cause) -> "Getting language compiler configuration failed")
             .mainSourceDirectoryFail((mainSourceDirectory) -> "SDF3 main source directory '" + mainSourceDirectory + "' does not exist or is not a directory")
             .mainFileFail((mainFile) -> "SDF3 main file '" + mainFile + "' does not exist or is not a file")
-            .includeDirectoryFail(includeDirectory -> "Stratego include directory '" + includeDirectory + "' does not exist or is not a directory")
-            .resolveIncludeFail(cause -> "Resolving compile-time dependency to Stratego includes failed")
+            .includeDirectoryFail(includeDirectory -> "SDF3 include directory '" + includeDirectory + "' does not exist or is not a directory")
+            .resolveIncludeFail(cause -> "Resolving compile-time dependency to SDF3 imports failed")
             ;
     }
 

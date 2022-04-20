@@ -150,6 +150,7 @@ public class SpoofaxSdf3Configure implements TaskDef<ResourcePath, Result<Option
             mainSourceDirectory.getPath(),
             mainFile.getPath(),
             ListView.copyOf(allIncludeDirectories),
+            ListView.of(sourceFileOrigins),
             parseTableConfiguration
         );
         return Result.ofOk(SpoofaxSdf3Config.files(sdf3SpecConfig, cfgSdf3Config.parseTableAtermOutputFile(), cfgSdf3Config.parseTablePersistedOutputFile()));

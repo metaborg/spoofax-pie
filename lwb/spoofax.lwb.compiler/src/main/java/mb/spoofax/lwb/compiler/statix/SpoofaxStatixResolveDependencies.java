@@ -1,6 +1,7 @@
-package mb.spoofax.lwb.compiler.sdf3;
+package mb.spoofax.lwb.compiler.statix;
 
 import mb.cfg.metalang.CfgSdf3Config;
+import mb.cfg.metalang.CfgStatixConfig;
 import mb.cfg.task.CfgRootDirectoryToObject;
 import mb.cfg.task.CfgRootDirectoryToObjectException;
 import mb.cfg.task.CfgToObject;
@@ -16,7 +17,7 @@ import mb.pie.api.StatelessSerializableFunction;
 import mb.pie.task.archive.UnarchiveFromJar;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
-import mb.sdf3.task.util.Sdf3Util;
+import mb.resource.hierarchical.match.path.string.ExtensionsPathStringMatcher;
 import mb.spoofax.core.language.Export;
 import mb.spoofax.core.language.ResourceExports;
 import mb.spoofax.core.resource.ResourcesComponent;
@@ -26,6 +27,7 @@ import mb.spoofax.lwb.compiler.definition.LanguageDefinitionManager;
 import mb.spoofax.lwb.compiler.definition.ResolveDependencies;
 import mb.spoofax.lwb.compiler.definition.UnarchiveUtil;
 import mb.spoofax.lwb.compiler.stratego.SpoofaxStrategoConfigure;
+import mb.statix.util.StatixUtil;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -34,8 +36,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 
 @SpoofaxLwbCompilerScope
-public class SpoofaxSdf3ResolveDependencies extends ResolveDependencies<Sdf3ResolvedDependency> {
-    @Inject public SpoofaxSdf3ResolveDependencies(
+public class SpoofaxStatixResolveDependencies extends ResolveDependencies<StatixResolvedDependency> {
+    @Inject public SpoofaxStatixResolveDependencies(
         CfgRootDirectoryToObject cfgRootDirectoryToObject,
         LanguageDefinitionManager languageDefinitionManager,
         SpoofaxLwbCompilerComponentManagerWrapper componentManagerWrapper,
@@ -51,7 +53,7 @@ public class SpoofaxSdf3ResolveDependencies extends ResolveDependencies<Sdf3Reso
             new FromComponent(loggerFactory, resourceService, unarchiveFromJar),
             configureTaskDefProvider,
             FromLanguageDefinition.instance,
-            Sdf3Util.displayName
+            StatixUtil.displayName
         );
     }
 
@@ -59,7 +61,7 @@ public class SpoofaxSdf3ResolveDependencies extends ResolveDependencies<Sdf3Reso
         return getClass().getName();
     }
 
-    static class FromComponent implements Function4Throwing1<ResourceExports, ResourcesComponent, ExecContext, ResourcePath, ListView<Sdf3ResolvedDependency>, IOException> {
+    static class FromComponent implements Function4Throwing1<ResourceExports, ResourcesComponent, ExecContext, ResourcePath, ListView<StatixResolvedDependency>, IOException> {
         private final Logger logger;
         private final ResourceService resourceService;
         private final UnarchiveFromJar unarchiveFromJar;
@@ -71,29 +73,29 @@ public class SpoofaxSdf3ResolveDependencies extends ResolveDependencies<Sdf3Reso
         }
 
         @Override
-        public ListView<Sdf3ResolvedDependency> apply(
+        public ListView<StatixResolvedDependency> apply(
             ResourceExports resourceExports,
             ResourcesComponent resourcesComponent,
             ExecContext context,
             ResourcePath unarchiveDirectoryBase
         ) throws IOException {
-            final ArrayList<Sdf3ResolvedDependency> resolved = new ArrayList<>();
+            final ArrayList<StatixResolvedDependency> resolved = new ArrayList<>();
             final LinkedHashSet<ResourcePath> unarchivedDefinitionLocations = UnarchiveUtil.unarchive(
                 context,
                 resourcesComponent,
                 unarchiveDirectoryBase,
                 unarchiveFromJar,
-                Sdf3Util.extensionsPathStringMatcher
+                StatixUtil.extensionsPathStringMatcher
             );
-            for(Export export : resourceExports.getExports(CfgSdf3Config.exportsId)) {
+            for(Export export : resourceExports.getExports(CfgStatixConfig.exportsId)) {
                 export.caseOf()
                     .file(relativePath -> {
-                        logger.warn("Attempting to resolve dependency to SDF3 file export '" + relativePath + "', but individual file exports are not supported");
+                        logger.warn("Attempting to resolve dependency to Statix file export '" + relativePath + "', but individual file exports are not supported");
                         return None.instance;
                     })
                     .directory(relativePath -> {
-                        UnarchiveUtil.resolveDirectory(relativePath, unarchivedDefinitionLocations, resourceService, Sdf3Util.displayName, directory ->
-                            resolved.add(Sdf3ResolvedDependency.sourceDirectory(directory.getPath())));
+                        UnarchiveUtil.resolveDirectory(relativePath, unarchivedDefinitionLocations, resourceService, StatixUtil.displayName, directory ->
+                            resolved.add(StatixResolvedDependency.sourceDirectory(directory.getPath())));
                         return None.instance;
                     });
             }
@@ -101,20 +103,20 @@ public class SpoofaxSdf3ResolveDependencies extends ResolveDependencies<Sdf3Reso
         }
     }
 
-    static class FromLanguageDefinition extends StatelessSerializableFunction<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>, Result<Option<ListView<Sdf3ResolvedDependency>>, CfgRootDirectoryToObjectException>> {
+    static class FromLanguageDefinition extends StatelessSerializableFunction<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>, Result<Option<ListView<StatixResolvedDependency>>, CfgRootDirectoryToObjectException>> {
         public static final FromLanguageDefinition instance = new FromLanguageDefinition();
 
         @Override
-        public Result<Option<ListView<Sdf3ResolvedDependency>>, CfgRootDirectoryToObjectException> apply(Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result) {
-            return result.map(o -> Option.ofOptional(o.compileLanguageInput.compileLanguageSpecificationInput().sdf3()).map(c -> resolve(o.rootDirectory, c)));
+        public Result<Option<ListView<StatixResolvedDependency>>, CfgRootDirectoryToObjectException> apply(Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result) {
+            return result.map(o -> Option.ofOptional(o.compileLanguageInput.compileLanguageSpecificationInput().statix()).map(c -> resolve(o.rootDirectory, c)));
         }
 
-        private ListView<Sdf3ResolvedDependency> resolve(ResourcePath rootDirectory, CfgSdf3Config config) {
-            final ArrayList<Sdf3ResolvedDependency> resolved = new ArrayList<>();
+        private ListView<StatixResolvedDependency> resolve(ResourcePath rootDirectory, CfgStatixConfig config) {
+            final ArrayList<StatixResolvedDependency> resolved = new ArrayList<>();
             config.source().getFiles().ifPresent(files -> {
                 for(String relativePath : files.exportDirectories()) {
                     final ResourcePath directory = rootDirectory.appendAsRelativePath(relativePath);
-                    resolved.add(Sdf3ResolvedDependency.sourceDirectory(directory));
+                    resolved.add(StatixResolvedDependency.sourceDirectory(directory));
                 }
             });
             return ListView.of(resolved);
