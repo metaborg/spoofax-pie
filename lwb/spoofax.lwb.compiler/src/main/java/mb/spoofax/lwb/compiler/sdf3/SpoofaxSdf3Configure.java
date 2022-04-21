@@ -7,19 +7,27 @@ import mb.cfg.task.CfgRootDirectoryToObjectException;
 import mb.cfg.task.CfgToObject;
 import mb.common.option.Option;
 import mb.common.result.Result;
+import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Interactivity;
+import mb.pie.api.None;
+import mb.pie.api.STask;
 import mb.pie.api.StatelessSerializableFunction;
+import mb.pie.api.Task;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.sdf3.task.spec.Sdf3SpecConfig;
+import mb.spoofax.lwb.compiler.definition.ResolveDependenciesException;
+import mb.spoofax.lwb.compiler.stratego.SpoofaxStrategoResolveDependencies;
 import org.metaborg.sdf2table.parsetable.ParseTableConfiguration;
 
 import javax.inject.Inject;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -28,10 +36,16 @@ import java.util.Set;
 public class SpoofaxSdf3Configure implements TaskDef<ResourcePath, Result<Option<SpoofaxSdf3Config>, SpoofaxSdf3ConfigureException>> {
     private final CfgRootDirectoryToObject cfgRootDirectoryToObject;
 
+    private final SpoofaxSdf3ResolveDependencies resolveDependencies;
+
     @Inject public SpoofaxSdf3Configure(
-        CfgRootDirectoryToObject cfgRootDirectoryToObject
+        CfgRootDirectoryToObject cfgRootDirectoryToObject,
+
+        SpoofaxSdf3ResolveDependencies resolveDependencies
     ) {
         this.cfgRootDirectoryToObject = cfgRootDirectoryToObject;
+
+        this.resolveDependencies = resolveDependencies;
     }
 
 
@@ -91,6 +105,38 @@ public class SpoofaxSdf3Configure implements TaskDef<ResourcePath, Result<Option
         if(!mainFile.exists() || !mainFile.isFile()) {
             return Result.ofErr(SpoofaxSdf3ConfigureException.mainFileFail(mainFile.getPath()));
         }
+        for(ResourcePath includeDirectoryPath : files.includeDirectories()) {
+            final HierarchicalResource includeDirectory = context.require(includeDirectoryPath, ResourceStampers.<HierarchicalResource>exists());
+            if(!includeDirectory.exists() || !includeDirectory.isDirectory()) {
+                return Result.ofErr(SpoofaxSdf3ConfigureException.includeDirectoryFail(includeDirectoryPath));
+            }
+        }
+
+        // Gather origins for provided SDF3 files.
+        final ArrayList<STask<?>> sourceFileOrigins = new ArrayList<>();
+
+        // Gather include directories.
+        final LinkedHashSet<ResourcePath> allIncludeDirectories = new LinkedHashSet<>(); // LinkedHashSet to remove duplicates while keeping insertion order.
+        allIncludeDirectories.addAll(files.includeDirectories());
+
+        final Task<Result<ListView<Sdf3ResolvedDependency>, ResolveDependenciesException>> resolveDependenciesTask =
+            resolveDependencies.createTask(new SpoofaxStrategoResolveDependencies.Input(rootDirectory, files.unarchiveDirectory()));
+        sourceFileOrigins.add(resolveDependenciesTask.toSupplier());
+        final Result<ListView<Sdf3ResolvedDependency>, ResolveDependenciesException> result =
+            context.require(resolveDependenciesTask);
+        if(result.isErr()) {
+            // noinspection ConstantConditions (err is present)
+            return Result.ofErr(SpoofaxSdf3ConfigureException.resolveIncludeFail(result.getErr()));
+        } else {
+            // noinspection ConstantConditions (value is present)
+            for(Sdf3ResolvedDependency resolved : result.get()) {
+                Sdf3ResolvedDependency.cases().sourceDirectory(d -> {
+                    allIncludeDirectories.add(d);
+                    return None.instance;
+                }).apply(resolved);
+            }
+        }
+
         final ParseTableConfiguration parseTableConfiguration = new ParseTableConfiguration(
             cfgSdf3Config.createDynamicParseTable(),
             cfgSdf3Config.createDataDependentParseTable(),
@@ -99,7 +145,14 @@ public class SpoofaxSdf3Configure implements TaskDef<ResourcePath, Result<Option
             cfgSdf3Config.checkPrioritiesInParseTable(),
             cfgSdf3Config.createLayoutSensitiveParseTable()
         );
-        final Sdf3SpecConfig sdf3SpecConfig = new Sdf3SpecConfig(rootDirectory, mainSourceDirectory.getPath(), mainFile.getPath(), parseTableConfiguration);
+        final Sdf3SpecConfig sdf3SpecConfig = new Sdf3SpecConfig(
+            rootDirectory,
+            mainSourceDirectory.getPath(),
+            mainFile.getPath(),
+            ListView.copyOf(allIncludeDirectories),
+            ListView.of(sourceFileOrigins),
+            parseTableConfiguration
+        );
         return Result.ofOk(SpoofaxSdf3Config.files(sdf3SpecConfig, cfgSdf3Config.parseTableAtermOutputFile(), cfgSdf3Config.parseTablePersistedOutputFile()));
     }
 

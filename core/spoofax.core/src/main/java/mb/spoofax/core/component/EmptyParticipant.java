@@ -11,6 +11,7 @@ import mb.resource.dagger.ResourceServiceModule;
 import mb.spoofax.core.CoordinateRequirement;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.platform.PlatformComponent;
+import mb.spoofax.core.resource.ResourcesComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.Consumer;
@@ -58,6 +59,17 @@ public abstract class EmptyParticipant<L extends LoggerComponent, R extends Reso
 
     @Override
     public @Nullable ResourceRegistriesProvider getResourceRegistriesProvider(
+        L loggerComponent,
+        R baseResourceServiceComponent,
+        P platformComponent,
+        SubcomponentRegistry subcomponentRegistry,
+        ComponentDependencyResolver dependencyResolver
+    ) {
+        return null;
+    }
+
+    @Override
+    public @Nullable ResourcesComponent getResourcesComponent(
         L loggerComponent,
         R baseResourceServiceComponent,
         P platformComponent,

@@ -69,22 +69,23 @@ public class SpoofaxLwbCompilerParticipant<L extends LoggerComponent, R extends 
     }
 
     @Override public ListView<CoordinateRequirement> getDependencies() {
+        final String groupId = "org.metaborg";
         return ListView.of(
-            new CoordinateRequirement("cfg"),
-            new CoordinateRequirement("sdf3"),
-            new CoordinateRequirement("stratego"),
-            new CoordinateRequirement("statix"),
-            new CoordinateRequirement("dynamix"),
-            new CoordinateRequirement("tim"),
+            new CoordinateRequirement(groupId, "cfg"),
+            new CoordinateRequirement(groupId, "sdf3"),
+            new CoordinateRequirement(groupId, "stratego"),
+            new CoordinateRequirement(groupId, "statix"),
+            new CoordinateRequirement(groupId, "dynamix"),
+            new CoordinateRequirement(groupId, "tim"),
 
-            new CoordinateRequirement("sdf3_ext_statix"),
-            new CoordinateRequirement("sdf3_ext_dynamix"),
+            new CoordinateRequirement(groupId, "sdf3_ext_statix"),
+            new CoordinateRequirement(groupId, "sdf3_ext_dynamix"),
 
-            new CoordinateRequirement("strategolib"),
-            new CoordinateRequirement("gpp"),
+            new CoordinateRequirement(groupId, "strategolib"),
+            new CoordinateRequirement(groupId, "gpp"),
 
-            new CoordinateRequirement("libspoofax2"),
-            new CoordinateRequirement("libstatix")
+            new CoordinateRequirement(groupId, "libspoofax2"),
+            new CoordinateRequirement(groupId, "libstatix")
         );
     }
 

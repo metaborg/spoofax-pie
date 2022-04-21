@@ -83,23 +83,23 @@ public class SptTestCaseResource extends HierarchicalResourceDefaults<SptTestCas
     }
 
     @Override public @Nullable HierarchicalResource getParent() {
-        return null;
+        return null; // Unsupported
     }
 
     @Override public @Nullable HierarchicalResource getRoot() {
-        return null;
+        return null; // Unsupported
     }
 
     @Override public HierarchicalResource getNormalized() {
-        return this;
+        return this; // Unsupported
     }
 
     @Override public HierarchicalResource appendSegment(String segment) {
-        return this;
+        return this; // Unsupported
     }
 
     @Override public HierarchicalResource appendOrReplaceWithPath(String other) {
-        return this;
+        return this; // Unsupported
     }
 
     @Override public HierarchicalResourceType getType() throws IOException {
@@ -107,76 +107,84 @@ public class SptTestCaseResource extends HierarchicalResourceDefaults<SptTestCas
     }
 
     @Override public void copyTo(HierarchicalResource other) throws IOException {
-
+        // Unsupported
     }
 
     @Override public void copyRecursivelyTo(HierarchicalResource other) throws IOException {
-
+        // Unsupported
     }
 
     @Override public void moveTo(HierarchicalResource other) throws IOException {
-
+        // Unsupported
     }
 
     @Override public HierarchicalResource createParents() throws IOException {
-        return this;
+        return this; // Unsupported
     }
 
     @Override public void delete(boolean deleteRecursively) throws IOException {
-
+        // Unsupported
     }
 
     @Override public boolean isWritable() throws IOException {
-        return false;
+        return false; // Unsupported
     }
 
     @Override public void setLastModifiedTime(Instant moment) throws IOException {
+        // Unsupported
+    }
 
+    @Override public OutputStream openWrite() throws IOException {
+        return new ByteArrayOutputStream(); // Unsupported
     }
 
     @Override public OutputStream openWriteAppend() throws IOException {
-        return new ByteArrayOutputStream();
+        return new ByteArrayOutputStream(); // Unsupported
     }
 
     @Override public OutputStream openWriteExisting() throws IOException {
-        return new ByteArrayOutputStream();
+        return new ByteArrayOutputStream(); // Unsupported
+    }
+
+    @Override public OutputStream openWriteNew() throws IOException {
+        return new ByteArrayOutputStream(); // Unsupported
     }
 
     @Override public SptTestCaseResource appendSegments(Iterable<String> segments) {
-        return this;
+        return this; // Unsupported
     }
 
     @Override public SptTestCaseResource appendRelativePath(String relativePath) {
-        return this;
+        return this; // Unsupported
     }
 
     @Override public SptTestCaseResource appendString(String other) {
-        return this;
+        return this; // Unsupported
     }
 
     @Override public SptTestCaseResource appendRelativePath(ResourcePath relativePath) {
-        return this;
+        return this; // Unsupported
     }
 
     @Override public SptTestCaseResource replaceLeaf(String segment) {
-        return this;
+        return this; // Unsupported
     }
 
     @Override public Stream<SptTestCaseResource> list(ResourceMatcher matcher) throws IOException {
-        return ListView.of(this).stream();
+        return ListView.of(this).stream(); // Unsupported
     }
 
     @Override
     public Stream<SptTestCaseResource> walk(ResourceWalker walker, ResourceMatcher matcher) throws IOException {
-        return ListView.of(this).stream();
+        return ListView.of(this).stream(); // Unsupported
     }
 
     @Override public SptTestCaseResource createFile(boolean createParents) throws IOException {
-        return this;
+        return this; // Unsupported
     }
 
     @Override public SptTestCaseResource createDirectory(boolean createParents) throws IOException {
-        return this;
+        return this; // Unsupported
     }
 
 

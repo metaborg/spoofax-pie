@@ -7,6 +7,7 @@ import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.core.Coordinate;
 import mb.spoofax.core.CoordinateRequirement;
 import mb.spoofax.core.language.LanguageComponent;
+import mb.spoofax.core.resource.ResourcesComponent;
 
 public interface Component {
     Coordinate getCoordinate();
@@ -15,6 +16,8 @@ public interface Component {
         return coordinateRequirement.matches(getCoordinate());
     }
 
+
+    Option<ResourcesComponent> getResourcesComponent();
 
     ResourceServiceComponent getResourceServiceComponent();
 

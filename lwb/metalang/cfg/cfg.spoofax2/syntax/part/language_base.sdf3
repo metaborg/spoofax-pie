@@ -115,9 +115,3 @@ context-free syntax
   Part.CodeCompletionSection = <code-completion {
   <{CodeCompletionOption "\n"}*>
 }>
-
-context-free syntax
-
-  Part.ExportsSection = <exports {
-  <{ExportsOption "\n"}*>
-}>

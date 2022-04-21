@@ -3,11 +3,22 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+
+
+## [0.18.0] - 2022-04-04
+### Added
+- Preliminary support for Stratego compile-time dependencies.
+
 ### Fixed
 - Ensure that `strategolib.eclipse` and `gpp.eclipse` are published, as they are required by Eclipse plugins of languages.
+- Exception in `DynamicLoad` when a classpath directory did not exist.
 
 ### Changed
 - Update `org.jetbrains.intellij` Gradle plugin to `1.4.0`.
+- `common` requirement to `0.10.3`.
+- `resource` requirement to `0.14.0`.
+- `pie` requirement to `0.20.0`.
+- `releng` (devenv-release) requirement to `0.1.30`.
 
 
 ## [0.17.0] - 2022-03-09
@@ -447,7 +458,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.17.0...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.18.0...HEAD
+[0.18.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.17.0...release-0.18.0
 [0.17.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.17...release-0.17.0
 [0.16.17]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.16...release-0.16.17
 [0.16.16]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.15...release-0.16.16

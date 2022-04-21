@@ -25,14 +25,14 @@ public class SpoofaxLwbNature implements IProjectNature {
     @Override public void configure() throws CoreException {
         // noinspection ConstantConditions (project should be present)
         addDependencyBuilders(project, null);
-        BuilderUtil.append(SpoofaxLwbBuilder.id, project, null, IncrementalProjectBuilder.FULL_BUILD,
-            IncrementalProjectBuilder.INCREMENTAL_BUILD, IncrementalProjectBuilder.CLEAN_BUILD);
+        addBuilders(project, null);
         sortBuilders(project, null);
     }
 
     @Override public void deconfigure() throws CoreException {
         // noinspection ConstantConditions (project should be present)
         BuilderUtil.removeFrom(SpoofaxLwbBuilder.id, project, null);
+        BuilderUtil.removeFrom(SpoofaxLwbProjectReferencesBuilder.id, project, null);
     }
 
     @Override public @Nullable IProject getProject() {
@@ -52,6 +52,13 @@ public class SpoofaxLwbNature implements IProjectNature {
         // Cannot add dependency natures in configure method, as Eclipse checks dependencies beforehand. Add them here.
         addDependencyNatures(project, monitor);
         NatureUtil.addTo(id, project, monitor);
+    }
+
+    public static void ensureCorrectNaturesAndBuilders(IProject project, @Nullable IProgressMonitor monitor) throws CoreException {
+        addTo(project, monitor);
+        addDependencyBuilders(project, monitor);
+        addBuilders(project, monitor);
+        sortBuilders(project, monitor);
     }
 
     public static void removeFrom(IProject project, @Nullable IProgressMonitor monitor) throws CoreException {
@@ -98,10 +105,18 @@ public class SpoofaxLwbNature implements IProjectNature {
         CommonBuilder.appendJavaBuilder(project, monitor);
     }
 
+    private static void addBuilders(IProject project, @Nullable IProgressMonitor monitor) throws CoreException {
+        BuilderUtil.append(SpoofaxLwbProjectReferencesBuilder.id, project, monitor, IncrementalProjectBuilder.FULL_BUILD,
+            IncrementalProjectBuilder.AUTO_BUILD, IncrementalProjectBuilder.INCREMENTAL_BUILD, IncrementalProjectBuilder.CLEAN_BUILD);
+        BuilderUtil.append(SpoofaxLwbBuilder.id, project, monitor, IncrementalProjectBuilder.FULL_BUILD,
+            IncrementalProjectBuilder.INCREMENTAL_BUILD, IncrementalProjectBuilder.CLEAN_BUILD);
+    }
+
     private static void sortBuilders(IProject project, @Nullable IProgressMonitor monitor) throws CoreException {
         final String[] buildOrder = new String[]{
             CommonBuilder.mavenBuilderId,
             CommonBuilder.gradleBuilderId,
+            SpoofaxLwbProjectReferencesBuilder.id,
             SpoofaxLwbBuilder.id,
             CommonBuilder.javaBuilderId
         };

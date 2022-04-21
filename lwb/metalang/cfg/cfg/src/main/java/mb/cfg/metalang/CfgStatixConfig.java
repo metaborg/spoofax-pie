@@ -2,6 +2,7 @@ package mb.cfg.metalang;
 
 import mb.cfg.CompileLanguageSpecificationShared;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.compiler.adapter.ExportsCompiler;
 import mb.spoofax.compiler.language.ConstraintAnalyzerLanguageCompiler;
 import org.immutables.value.Value;
 
@@ -12,6 +13,9 @@ import java.io.Serializable;
  */
 @Value.Immutable
 public interface CfgStatixConfig extends Serializable {
+    String exportsId = "Statix";
+
+
     class Builder extends ImmutableCfgStatixConfig.Builder {}
 
     static Builder builder() {return new Builder();}
@@ -49,5 +53,9 @@ public interface CfgStatixConfig extends Serializable {
     default void syncTo(ConstraintAnalyzerLanguageCompiler.Input.Builder builder) {
         builder.enableNaBL2(false);
         builder.enableStatix(true);
+    }
+
+    default void syncTo(ExportsCompiler.Input.Builder builder) {
+        source().getFiles().ifPresent(files -> files.exportDirectories().forEach(exportDirectory -> builder.addDirectoryExport(exportsId, exportDirectory)));
     }
 }

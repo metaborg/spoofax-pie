@@ -9,12 +9,26 @@ import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.core.Coordinate;
 import mb.spoofax.core.CoordinateRequirement;
 import mb.spoofax.core.language.LanguageComponent;
+import mb.spoofax.core.resource.ResourcesComponent;
 
 import java.util.stream.Stream;
 
 public interface ComponentGroup {
     String getGroup();
 
+
+    // Resources component
+
+    Option<ResourcesComponent> getResourcesComponent(Coordinate coordinate);
+
+    Stream<ResourcesComponent> getResourcesComponents(CoordinateRequirement coordinateRequirement);
+
+    default Option<ResourcesComponent> getOneResourcesComponent(CoordinateRequirement coordinateRequirement) {
+        final Stream<ResourcesComponent> resourcesComponents = getResourcesComponents(coordinateRequirement);
+        return StreamUtil.findOne(resourcesComponents);
+    }
+
+    Stream<ResourcesComponent> getResourcesComponents();
 
     // Resource service component
 

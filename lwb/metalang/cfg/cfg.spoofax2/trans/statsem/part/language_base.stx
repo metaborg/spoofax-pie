@@ -144,11 +144,3 @@ rules // Code completion section and options
     
   codeCompletionOptionOk : scope * CodeCompletionOption
   codeCompletionOptionsOk maps codeCompletionOptionOk(*, list(*))
-
-rules // Exports section and options
-
-  partOk(s, ExportsSection(options)) :-
-    exportsOptionsOk(s, options).
-
-  exportsOptionOk : scope * ExportsOption
-  exportsOptionsOk maps exportsOptionOk(*, list(*))

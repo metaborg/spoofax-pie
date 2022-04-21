@@ -75,6 +75,7 @@ public class CompileLanguageSpecificationInputBuilder {
         if(stratego != null) compileLanguage.stratego(stratego);
 
         return compileLanguage
+            .shared(shared)
             .compileLanguageShared(compileLanguageSpecificationShared)
             .build();
     }

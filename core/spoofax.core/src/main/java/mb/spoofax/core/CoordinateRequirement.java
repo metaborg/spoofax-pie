@@ -7,30 +7,22 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.io.Serializable;
 
 public class CoordinateRequirement implements Serializable {
-    public final @Nullable String groupRequirement;
-    public final String id;
+    public final String groupId;
+    public final String artifactId;
     public final @Nullable Version versionRequirement;
 
-    public CoordinateRequirement(@Nullable String groupRequirement, String id, @Nullable Version versionRequirement) {
-        this.groupRequirement = groupRequirement;
-        this.id = id;
+    public CoordinateRequirement(String groupId, String artifactId, @Nullable Version versionRequirement) {
+        this.groupId = groupId;
+        this.artifactId = artifactId;
         this.versionRequirement = versionRequirement;
     }
 
-    public CoordinateRequirement(@Nullable String groupRequirement, String id) {
-        this(groupRequirement, id, null);
-    }
-
-    public CoordinateRequirement(String id, @Nullable Version versionRequirement) {
-        this(null, id, versionRequirement);
-    }
-
-    public CoordinateRequirement(String id) {
-        this(null, id, null);
+    public CoordinateRequirement(String groupId, String artifactId) {
+        this(groupId, artifactId, null);
     }
 
     public CoordinateRequirement(Coordinate coordinate) {
-        this(coordinate.group, coordinate.id, coordinate.version);
+        this(coordinate.groupId, coordinate.artifactId, coordinate.version);
     }
 
     public static Option<CoordinateRequirement> parse(String requirement) {
@@ -39,17 +31,17 @@ public class CoordinateRequirement implements Serializable {
         }
         final int firstColonIndex = requirement.indexOf(':');
         if(firstColonIndex < 0) {
-            return Option.ofSome(new CoordinateRequirement(requirement));
+            return Option.ofNone();
         }
-        final String group = requirement.substring(0, firstColonIndex);
+        final String groupId = requirement.substring(0, firstColonIndex);
         final int lastColonIndex = requirement.lastIndexOf(':');
-        final String id;
+        final String artifactId;
         final @Nullable String versionString;
         if(lastColonIndex == firstColonIndex) { // Only one ':', so id is until the end of the string.
-            id = requirement.substring(firstColonIndex + 1);
+            artifactId = requirement.substring(firstColonIndex + 1);
             versionString = null;
         } else { // Id starts after first colon, until the last colon.
-            id = requirement.substring(firstColonIndex + 1, lastColonIndex);
+            artifactId = requirement.substring(firstColonIndex + 1, lastColonIndex);
             versionString = requirement.substring(lastColonIndex + 1);
         }
         final @Nullable Version versionRequirement;
@@ -58,15 +50,14 @@ public class CoordinateRequirement implements Serializable {
         } else {
             versionRequirement = Version.parse(versionString);
         }
-        return Option.ofSome(new CoordinateRequirement(group, id, versionRequirement));
+        return Option.ofSome(new CoordinateRequirement(groupId, artifactId, versionRequirement));
     }
 
 
     public boolean matches(Coordinate coordinate) {
-        if(groupRequirement != null && !groupRequirement.equals(coordinate.group)) return false;
-        if(!id.equals(coordinate.id)) return false;
-        if(versionRequirement != null && !versionRequirement.equals(coordinate.version)) return false;
-        return true;
+        if(!groupId.equals(coordinate.groupId)) return false;
+        if(!artifactId.equals(coordinate.artifactId)) return false;
+        return versionRequirement == null || versionRequirement.equals(coordinate.version);
     }
 
 
@@ -74,20 +65,19 @@ public class CoordinateRequirement implements Serializable {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
         final CoordinateRequirement that = (CoordinateRequirement)o;
-        if(groupRequirement != null ? !groupRequirement.equals(that.groupRequirement) : that.groupRequirement != null)
-            return false;
-        if(!id.equals(that.id)) return false;
+        if(!groupId.equals(that.groupId)) return false;
+        if(!artifactId.equals(that.artifactId)) return false;
         return versionRequirement != null ? versionRequirement.equals(that.versionRequirement) : that.versionRequirement == null;
     }
 
     @Override public int hashCode() {
-        int result = groupRequirement != null ? groupRequirement.hashCode() : 0;
-        result = 31 * result + id.hashCode();
+        int result = groupId.hashCode();
+        result = 31 * result + artifactId.hashCode();
         result = 31 * result + (versionRequirement != null ? versionRequirement.hashCode() : 0);
         return result;
     }
 
     @Override public String toString() {
-        return (groupRequirement != null ? (groupRequirement + ":") : "") + id + (versionRequirement != null ? (":" + versionRequirement) : "");
+        return groupId + ":" + artifactId + (versionRequirement != null ? (":" + versionRequirement) : "");
     }
 }

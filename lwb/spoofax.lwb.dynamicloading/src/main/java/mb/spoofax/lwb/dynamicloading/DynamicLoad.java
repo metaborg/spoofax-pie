@@ -11,6 +11,7 @@ import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ReadableResource;
+import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.hierarchical.match.ResourceMatcher;
 import mb.resource.hierarchical.walk.ResourceWalker;
@@ -101,11 +102,14 @@ public class DynamicLoad implements TaskDef<Supplier<Result<DynamicLoad.Supplier
     public Result<DynamicComponent, DynamicLoadException> run(ExecContext context, SupplierOutput supplierOutput) {
         try {
             for(ResourcePath path : supplierOutput.javaClassPaths) {
-                // HACK: create dependency to each file separately, instead of one for the directory, to ensure this task
-                //       gets re-executed in a bottom-up build when any file changes
-                try(Stream<? extends ReadableResource> files = context.require(path).walk(ResourceWalker.ofTrue(), ResourceMatcher.ofFile())) {
-                    for(ReadableResource file : new StreamIterable<>(files)) {
-                        context.require(file, ResourceStampers.modifiedFile());
+                final HierarchicalResource directory = context.require(path);
+                if(directory.exists() && directory.isDirectory()) {
+                    // HACK: create dependency to each file separately, instead of one for the directory, to ensure this task
+                    //       gets re-executed in a bottom-up build when any file changes
+                    try(Stream<? extends ReadableResource> files = context.require(path).walk(ResourceWalker.ofTrue(), ResourceMatcher.ofFile())) {
+                        for(ReadableResource file : new StreamIterable<>(files)) {
+                            context.require(file, ResourceStampers.modifiedFile());
+                        }
                     }
                 }
             }

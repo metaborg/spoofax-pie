@@ -13,6 +13,8 @@ import mb.resource.dagger.ResourceServiceComponent;
 import mb.resource.fs.FSResource;
 import mb.spoofax.core.CoordinateRequirement;
 import mb.spoofax.core.component.ComponentDependencyResolver;
+import mb.spoofax.core.component.ComponentManager;
+import mb.spoofax.core.component.CompositeComponentManager;
 import mb.spoofax.core.component.StaticComponentManager;
 import mb.spoofax.core.component.SubcomponentRegistry;
 import mb.spoofax.eclipse.EclipseParticipant;
@@ -21,9 +23,11 @@ import mb.spoofax.eclipse.EclipseResourceServiceComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.log.EclipseLoggerComponent;
 import mb.spoofax.eclipse.util.ResourceUtil;
+import mb.spoofax.lwb.compiler.SpoofaxLwbCompilerComponent;
 import mb.spoofax.lwb.dynamicloading.DynamicLoadingComponent;
 import mb.spoofax.lwb.dynamicloading.DynamicLoadingModule;
 import mb.spoofax.lwb.dynamicloading.DynamicLoadingParticipant;
+import mb.spoofax.lwb.dynamicloading.component.DynamicComponentManager;
 import mb.spoofax.lwb.eclipse.SpoofaxLwbCompilerUtil;
 import mb.spoofax.lwb.eclipse.SpoofaxLwbPlugin;
 import mb.spt.SptComponent;
@@ -31,8 +35,8 @@ import mb.spt.dynamicloading.DynamicLanguageUnderTestProvider;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.runtime.IPath;
 
+import java.util.ArrayList;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 public class SpoofaxDynamicLoadingEclipseParticipant extends DynamicLoadingParticipant<EclipseLoggerComponent, EclipseResourceServiceComponent, EclipsePlatformComponent> implements EclipseParticipant {
     public SpoofaxDynamicLoadingEclipseParticipant() {
@@ -52,19 +56,37 @@ public class SpoofaxDynamicLoadingEclipseParticipant extends DynamicLoadingParti
 
     @Override
     public ListView<CoordinateRequirement> getDependencies() {
-        return ListView.copyOf(Stream.concat(super.getDependencies().stream(), Stream.of(new CoordinateRequirement("spt"))));
+        final ArrayList<CoordinateRequirement> dependencies = new ArrayList<>();
+        super.getDependencies().addAllTo(dependencies);
+        dependencies.add(new CoordinateRequirement("org.metaborg", "spt"));
+        dependencies.add(new CoordinateRequirement("org.metaborg", "spoofax.lwb.compiler"));
+        return ListView.of(dependencies);
     }
 
     @Override
-    public DynamicLoadingComponent getTaskDefsProvider(EclipseLoggerComponent loggerComponent, EclipseResourceServiceComponent baseResourceServiceComponent, ResourceServiceComponent resourceServiceComponent, EclipsePlatformComponent platformComponent, SubcomponentRegistry subcomponentRegistry, ComponentDependencyResolver dependencyResolver) {
-        final DynamicLoadingComponent dynamicLoadingComponent = super.getTaskDefsProvider(loggerComponent, baseResourceServiceComponent, resourceServiceComponent, platformComponent, subcomponentRegistry, dependencyResolver);
+    public DynamicLoadingComponent getTaskDefsProvider(
+        EclipseLoggerComponent loggerComponent,
+        EclipseResourceServiceComponent baseResourceServiceComponent,
+        ResourceServiceComponent resourceServiceComponent,
+        EclipsePlatformComponent platformComponent,
+        SubcomponentRegistry subcomponentRegistry,
+        ComponentDependencyResolver dependencyResolver
+    ) {
+        final DynamicLoadingComponent dynamicLoadingComponent = super.getTaskDefsProvider(
+            loggerComponent,
+            baseResourceServiceComponent,
+            resourceServiceComponent,
+            platformComponent,
+            subcomponentRegistry,
+            dependencyResolver
+        );
+        // Set dynamic component manager in several places.
+        final DynamicComponentManager dynamicComponentManager = dynamicLoadingComponent.getDynamicComponentManager();
         dependencyResolver.getOneSubcomponent(SptComponent.class).unwrap().getLanguageUnderTestProviderWrapper().set(new DynamicLanguageUnderTestProvider(
-            dynamicLoadingComponent.getDynamicComponentManager(),
+            dynamicComponentManager,
             dynamicLoadingComponent.getDynamicLoad(),
             SpoofaxLwbCompilerUtil::dynamicLoadSupplierOutputSupplier
         ));
-        // HACK: override component manager
-        SpoofaxPlugin.setComponentManager(dynamicLoadingComponent.getDynamicComponentManager());
         return dynamicLoadingComponent;
     }
 
@@ -89,5 +111,18 @@ public class SpoofaxDynamicLoadingEclipseParticipant extends DynamicLoadingParti
                 new LoggingTracer(loggerFactory, Level.Info, Level.None, Level.None, Level.None, 1024, new MetricsTracer(true))
             );
         };
+    }
+
+    @Override
+    public void started(
+        ResourceServiceComponent resourceServiceComponent,
+        PieComponent pieComponent,
+        StaticComponentManager staticComponentManager,
+        ComponentManager componentManager
+    ) {
+        super.started(resourceServiceComponent, pieComponent, staticComponentManager, componentManager);
+        final CompositeComponentManager compositeComponentManager = new CompositeComponentManager(componentManager, component.getDynamicComponentManager());
+        componentManager.getOneSubcomponent(SpoofaxLwbCompilerComponent.class).unwrap().getSpoofaxLwbCompilerComponentManagerWrapper().set(compositeComponentManager);
+        SpoofaxPlugin.setComponentManager(compositeComponentManager);
     }
 }

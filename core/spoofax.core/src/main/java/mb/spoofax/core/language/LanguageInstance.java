@@ -15,8 +15,8 @@ import mb.common.util.SetView;
 import mb.pie.api.Task;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.common.BracketSymbols;
 import mb.spoofax.common.BlockCommentSymbols;
+import mb.spoofax.common.BracketSymbols;
 import mb.spoofax.core.Coordinate;
 import mb.spoofax.core.language.cli.CliCommand;
 import mb.spoofax.core.language.command.AutoCommandRequest;
@@ -81,4 +81,7 @@ public interface LanguageInstance {
     ListView<BlockCommentSymbols> getBlockCommentSymbols();
 
     ListView<BracketSymbols> getBracketSymbols();
+
+
+    ResourceExports getResourceExports();
 }

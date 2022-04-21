@@ -64,6 +64,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
     private final TemplateWriter commandDefTemplate;
     private final TemplateWriter testStrategoTaskDef;
 
+    private final ExportsCompiler exportsCompiler;
     private final ParserAdapterCompiler parserCompiler;
     private final StylerAdapterCompiler stylerCompiler;
     private final StrategoRuntimeAdapterCompiler strategoRuntimeCompiler;
@@ -78,6 +79,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
 
     @Inject public AdapterProjectCompiler(
         TemplateCompiler templateCompiler,
+        ExportsCompiler exportsCompiler,
         ParserAdapterCompiler parserCompiler,
         StylerAdapterCompiler stylerCompiler,
         StrategoRuntimeAdapterCompiler strategoRuntimeCompiler,
@@ -108,6 +110,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         this.commandDefTemplate = templateCompiler.getOrCompileToWriter("adapter_project/CommandDef.java.mustache");
         this.testStrategoTaskDef = templateCompiler.getOrCompileToWriter("adapter_project/TestStrategoTaskDef.java.mustache");
 
+        this.exportsCompiler = exportsCompiler;
         this.parserCompiler = parserCompiler;
         this.stylerCompiler = stylerCompiler;
         this.strategoRuntimeCompiler = strategoRuntimeCompiler;
@@ -137,6 +140,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
 
     public None compile(ExecContext context, Input input) throws IOException {
         // Files from other compilers.
+        exportsCompiler.compile(context, input.exports());
         Option.ofOptional(input.parser()).ifSomeThrowing((i) -> parserCompiler.compile(context, i));
         Option.ofOptional(input.styler()).ifSomeThrowing((i) -> stylerCompiler.compile(context, i));
         Option.ofOptional(input.strategoRuntime()).ifSomeThrowing((i) -> strategoRuntimeCompiler.compile(context, i));
@@ -299,6 +303,10 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             map.put("hoverInjection", hoverInjection);
             injected.add(hoverInjection);
 
+            final NamedTypeInfo resourceExportsInjection = uniqueNamer.makeUnique(input.exports().resourceExportsClass());
+            map.put("resourceExportsInjection", resourceExportsInjection);
+            injected.add(resourceExportsInjection);
+
             // Create injections for all command definitions. TODO: only inject needed command definitions?
             injected.addAll(input.allCommandDefs().stream().map(CommandDefRepr::type).map(uniqueNamer::makeUnique).collect(Collectors.toList()));
             // Provide a lambda that gets the name of the injected command definition from the context.
@@ -396,6 +404,8 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         /// Sub-inputs
 
         ClassLoaderResourcesCompiler.Input classLoaderResources();
+
+        ExportsCompiler.Input exports();
 
         Optional<ParserAdapterCompiler.Input> parser();
 
@@ -816,6 +826,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
                     javaSourceFiles.add(commandDef.type().file(generatedJavaSourcesDirectory));
                 }
             }
+            exports().javaSourceFiles().addAllTo(javaSourceFiles);
             parser().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             styler().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             strategoRuntime().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));

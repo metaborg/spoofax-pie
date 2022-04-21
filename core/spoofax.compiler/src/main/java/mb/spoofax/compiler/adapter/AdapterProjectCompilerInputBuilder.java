@@ -13,6 +13,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public class AdapterProjectCompilerInputBuilder {
     public final ClassLoaderResourcesCompiler.Input.Builder classLoaderResources = ClassLoaderResourcesCompiler.Input.builder();
+    public final ExportsCompiler.Input.Builder exports = ExportsCompiler.Input.builder();
     public final GetSourceFilesAdapterCompiler.Input.Builder getSourceFiles = GetSourceFilesAdapterCompiler.Input.builder();
 
     private boolean parserEnabled = false;
@@ -55,6 +56,10 @@ public class AdapterProjectCompilerInputBuilder {
 
     public GetSourceFilesAdapterCompiler.Input.Builder withGetSourceFiles() {
         return getSourceFiles;
+    }
+
+    public ExportsCompiler.Input.Builder withExports() {
+        return exports;
     }
 
     public ParserAdapterCompiler.Input.Builder withParser() {
@@ -114,6 +119,9 @@ public class AdapterProjectCompilerInputBuilder {
         final ClassLoaderResourcesCompiler.Input classLoaderResources = buildClassLoaderResources(shared, languageProjectInput.languageProject());
         project.classLoaderResources(classLoaderResources);
 
+        final ExportsCompiler.Input exports = buildExports(shared, adapterProject);
+        project.exports(exports);
+
         final GetSourceFilesAdapterCompiler.Input getSourceFiles = buildGetSourceFiles(shared, adapterProject, classLoaderResources);
         project.sourceFiles(getSourceFiles);
 
@@ -160,6 +168,13 @@ public class AdapterProjectCompilerInputBuilder {
         return classLoaderResources
             .shared(shared)
             .languageProject(languageProject)
+            .build();
+    }
+
+    private ExportsCompiler.Input buildExports(Shared shared, AdapterProject adapterProject) {
+        return exports
+            .shared(shared)
+            .adapterProject(adapterProject)
             .build();
     }
 

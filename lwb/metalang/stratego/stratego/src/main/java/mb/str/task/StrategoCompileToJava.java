@@ -19,6 +19,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -77,7 +78,7 @@ public class StrategoCompileToJava implements TaskDef<StrategoCompileConfig, Res
             config.rootDirectory,
             config.javaSourceFileOutputDir,
             config.javaClassFileOutputDir,
-            config.outputJavaPackageId,
+            new ArrayList<>(Arrays.asList(config.outputJavaPackageId)),
             config.cacheDir,
             new ArrayList<>(),
             config.includeDirs.asCopy(),

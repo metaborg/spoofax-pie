@@ -6,6 +6,7 @@ import mb.jsglr.common.JsglrParseException;
 import mb.jsglr.common.JsglrParseOutput;
 import mb.jsglr.pie.JsglrParseTaskInput;
 import mb.pie.api.ExecContext;
+import mb.pie.api.stamp.output.OutputStampers;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.str.StrategoClassLoaderResources;
 import mb.str.StrategoParser;
@@ -42,7 +43,7 @@ public class StrategoParseWrapper extends StrategoParse {
             d -> configFunctionWrapper.get().apply(context, d).mapThrowingOrElse(
                 o -> o.mapThrowingOrElseThrowing(
                     c -> {
-                        c.sourceFileOrigins.forEach(context::require);
+                        c.sourceFileOrigins.forEach(sfo -> context.require(sfo, OutputStampers.inconsequential()));
                         return super.exec(context, input); // Parse normally after requiring source file origins.
                     },
                     () -> super.exec(context, input) // Stratego is not configured -> parse normally.

@@ -73,6 +73,7 @@ public class SpoofaxLwbCompiler implements AutoCloseable {
         final ResourceServiceComponent resourceServiceComponent = componentGroup.getResourceServiceComponent();
         final SpoofaxCompilerComponent spoofaxCompilerComponent = componentManager.getOneSubcomponent(SpoofaxCompilerComponent.class).unwrap();
         final SpoofaxLwbCompilerComponent spoofaxLwbCompilerComponent = componentManager.getOneSubcomponent(SpoofaxLwbCompilerComponent.class).unwrap();
+        spoofaxLwbCompilerComponent.getSpoofaxLwbCompilerComponentManagerWrapper().set(componentManager);
         final PieComponent pieComponent = componentGroup.getPieComponent();
         return new SpoofaxLwbCompiler(componentManager, resourceServiceComponent, spoofaxCompilerComponent, spoofaxLwbCompilerComponent, pieComponent);
     }

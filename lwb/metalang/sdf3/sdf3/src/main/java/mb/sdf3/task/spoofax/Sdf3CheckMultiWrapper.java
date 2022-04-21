@@ -20,19 +20,16 @@ public class Sdf3CheckMultiWrapper implements TaskDef<ResourcePath, KeyedMessage
     private final Sdf3ClassLoaderResources classLoaderResources;
     private final Sdf3SpecConfigFunctionWrapper configFunctionWrapper;
     private final Sdf3CheckSpec checkSpec;
-    private final BaseSdf3CheckMulti baseCheckMulti;
 
 
     @Inject public Sdf3CheckMultiWrapper(
         Sdf3ClassLoaderResources classLoaderResources,
         Sdf3SpecConfigFunctionWrapper configFunctionWrapper,
-        Sdf3CheckSpec checkSpec,
-        BaseSdf3CheckMulti baseCheckMulti
+        Sdf3CheckSpec checkSpec
     ) {
         this.classLoaderResources = classLoaderResources;
         this.configFunctionWrapper = configFunctionWrapper;
         this.checkSpec = checkSpec;
-        this.baseCheckMulti = baseCheckMulti;
     }
 
 
@@ -53,9 +50,5 @@ public class Sdf3CheckMultiWrapper implements TaskDef<ResourcePath, KeyedMessage
 
     private KeyedMessages checkWithConfig(ExecContext context, Sdf3SpecConfig config) {
         return context.require(checkSpec, config);
-    }
-
-    private KeyedMessages checkDefault(ExecContext context, ResourcePath rootDirectory) {
-        return context.require(baseCheckMulti, rootDirectory);
     }
 }

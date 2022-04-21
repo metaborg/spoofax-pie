@@ -40,6 +40,8 @@ public abstract class CfgStrategoSource implements Serializable {
 
         List<ResourcePath> includeDirectories();
 
+        List<String> exportDirectories();
+
         @Value.Default default List<String> includeBuiltinLibraries() {
             final ArrayList<String> strategoBuiltinLibs = new ArrayList<>();
             strategoBuiltinLibs.add("libstratego-sglr");
@@ -47,12 +49,16 @@ public abstract class CfgStrategoSource implements Serializable {
             return strategoBuiltinLibs;
         }
 
+        default ResourcePath unarchiveDirectory() {
+            return compileLanguageShared().unarchiveDirectory();
+        }
+
         default ResourcePath strategoLibUnarchiveDirectory() {
-            return compileLanguageShared().unarchiveDirectory().appendRelativePath("strategoLib");
+            return unarchiveDirectory().appendRelativePath("strategoLib");
         }
 
         default ResourcePath gppUnarchiveDirectory() {
-            return compileLanguageShared().unarchiveDirectory().appendRelativePath("gpp");
+            return unarchiveDirectory().appendRelativePath("gpp");
         }
 
         @Value.Default default boolean includeLibSpoofax2Exports() {
@@ -98,10 +104,6 @@ public abstract class CfgStrategoSource implements Serializable {
     public static CfgStrategoSources.CasesMatchers.TotalMatcher_Files cases() {
         return CfgStrategoSources.cases();
     }
-
-//    public CfgStrategoSources.CaseOfMatchers.TotalMatcher_Files caseOf() {
-//        return CfgStrategoSources.caseOf(this);
-//    }
 
     public Files getFiles() {
         return CfgStrategoSources.getFiles(this);

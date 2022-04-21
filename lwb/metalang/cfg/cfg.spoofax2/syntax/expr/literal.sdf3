@@ -10,6 +10,7 @@ imports
   lex/java_id
   lex/sdf3_id
   lex/stratego_id
+  lex/coordinate
 
 context-free sorts
 

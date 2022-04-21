@@ -15,6 +15,7 @@ import mb.spoofax.core.Coordinate;
 import mb.spoofax.core.CoordinateRequirement;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.platform.PlatformComponent;
+import mb.spoofax.core.resource.ResourcesComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
@@ -123,7 +124,26 @@ public class StaticComponentManagerImpl<L extends LoggerComponent, R extends Res
     }
 
 
-    // Language components (of components)
+    // Resources subcomponents
+
+    @Override
+    public Option<ResourcesComponent> getResourcesComponent(Coordinate coordinate) {
+        for(ComponentImpl component : componentsByCoordinate.values()) {
+            final Option<ResourcesComponent> resourcesComponent = component.getResourcesComponent();
+            if(resourcesComponent.isSome()) return resourcesComponent;
+        }
+        return Option.ofNone();
+    }
+
+    @Override
+    public Stream<ResourcesComponent> getResourcesComponents(CoordinateRequirement coordinateRequirement) {
+        return componentsByCoordinate.values().stream()
+            .filter(c -> c.matchesCoordinate(coordinateRequirement))
+            .flatMap(c -> c.getResourcesComponent().stream());
+    }
+
+
+    // Language subcomponents
 
     @Override
     public Option<LanguageComponent> getLanguageComponent(Coordinate coordinate) {

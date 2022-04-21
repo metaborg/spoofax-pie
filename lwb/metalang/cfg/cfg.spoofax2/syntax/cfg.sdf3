@@ -17,6 +17,7 @@ imports
   expr/task_def
   expr/command
   expr/menu_item
+  expr/coordinate
   
   value
   normalize

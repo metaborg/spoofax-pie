@@ -5,23 +5,31 @@ import mb.cfg.metalang.CfgEsvConfig;
 import mb.cfg.metalang.CfgSdf3Config;
 import mb.cfg.metalang.CfgStatixConfig;
 import mb.cfg.metalang.CfgStrategoConfig;
+import mb.common.util.SetView;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.compiler.adapter.AdapterProjectCompilerInputBuilder;
 import mb.spoofax.compiler.language.LanguageProjectCompilerInputBuilder;
+import mb.spoofax.compiler.util.Shared;
+import mb.spoofax.core.CoordinateRequirement;
 import org.immutables.value.Value;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.function.Function;
 
 @Value.Immutable
 public interface CompileLanguageSpecificationInput extends Serializable {
     class Builder extends ImmutableCompileLanguageSpecificationInput.Builder {}
 
-    static Builder builder() { return new Builder(); }
+    static Builder builder() {return new Builder();}
 
 
     /// Shared
+
+    Shared shared();
 
     CompileLanguageSpecificationShared compileLanguageShared();
 
@@ -37,6 +45,25 @@ public interface CompileLanguageSpecificationInput extends Serializable {
     Optional<CfgDynamixConfig> dynamix();
 
     Optional<CfgStrategoConfig> stratego();
+
+    List<Dependency> dependencies();
+
+    default List<Dependency> allDependencies() {
+        final ArrayList<Dependency> dependencies = new ArrayList<>(dependencies());
+        final Function<String, Dependency> createDependency = (artifactId) ->
+            new Dependency(DependencySource.coordinateRequirement(new CoordinateRequirement("org.metaborg", artifactId, shared().spoofax3Version())), SetView.of(DependencyKind.CompileTime));
+        stratego().ifPresent(c -> {
+            dependencies.add(createDependency.apply("strategolib"));
+            dependencies.add(createDependency.apply("gpp"));
+            if(c.source().getFiles().includeLibSpoofax2Exports()) {
+                dependencies.add(createDependency.apply("libspoofax2"));
+            }
+            if(c.source().getFiles().includeLibStatixExports()) {
+                dependencies.add(createDependency.apply("libstatix"));
+            }
+        });
+        return dependencies;
+    }
 
 
     /// Files information, known up-front for build systems with static dependencies such as Gradle.
@@ -80,5 +107,12 @@ public interface CompileLanguageSpecificationInput extends Serializable {
         statix().ifPresent(i -> i.syncTo(builder.constraintAnalyzer));
         stratego().ifPresent(i -> i.syncTo(builder.strategoRuntime));
         // todo: dynamix sync?
+    }
+
+    default void syncTo(AdapterProjectCompilerInputBuilder builder) {
+        sdf3().ifPresent(i -> i.syncTo(builder.exports));
+        esv().ifPresent(i -> i.syncTo(builder.exports));
+        statix().ifPresent(i -> i.syncTo(builder.exports));
+        stratego().ifPresent(i -> i.syncTo(builder.exports));
     }
 }

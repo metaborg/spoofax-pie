@@ -7,6 +7,7 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.Interactivity;
 import mb.pie.api.TaskDef;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.lwb.compiler.SpoofaxLwbCompilerScope;
 import mb.spoofax.lwb.compiler.dynamix.SpoofaxDynamixCompile;
 import mb.spoofax.lwb.compiler.esv.SpoofaxEsvCompile;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3Compile;
@@ -29,7 +30,7 @@ import java.util.Set;
  * Produces a {@link Result} that is either an output with all {@link KeyedMessages messages} produced by the
  * meta-language compilers, or a {@link CompileMetaLanguageSourcesException} when compilation fails.
  */
-@Value.Enclosing
+@SpoofaxLwbCompilerScope @Value.Enclosing
 public class CompileMetaLanguageSources implements TaskDef<ResourcePath, Result<CompileMetaLanguageSources.Output, CompileMetaLanguageSourcesException>> {
     @Value.Immutable
     public interface Output extends Serializable {

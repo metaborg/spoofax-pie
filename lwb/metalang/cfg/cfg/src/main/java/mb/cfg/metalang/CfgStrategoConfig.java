@@ -2,6 +2,7 @@ package mb.cfg.metalang;
 
 import mb.cfg.CompileLanguageSpecificationShared;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.compiler.adapter.ExportsCompiler;
 import mb.spoofax.compiler.language.StrategoRuntimeLanguageCompiler;
 import mb.spoofax.compiler.util.BuilderBase;
 import mb.spoofax.compiler.util.Conversion;
@@ -16,6 +17,9 @@ import java.util.Properties;
  */
 @Value.Immutable
 public interface CfgStrategoConfig extends Serializable {
+    String exportsId = "Stratego";
+
+
     class Builder extends ImmutableCfgStrategoConfig.Builder implements BuilderBase {
         static final String propertiesPrefix = "stratego.";
         static final String languageStrategyAffix = propertiesPrefix + "languageStrategyAffix";
@@ -67,7 +71,7 @@ public interface CfgStrategoConfig extends Serializable {
     }
 
     default String outputLibraryName() {
-        return compileLanguageShared().languageProject().project().coordinate().artifactId();
+        return compileLanguageShared().languageProject().project().coordinate().artifactId;
     }
 
     default ResourcePath outputJavaInteropRegistererFile() {
@@ -94,5 +98,9 @@ public interface CfgStrategoConfig extends Serializable {
     default void syncTo(StrategoRuntimeLanguageCompiler.Input.Builder builder) {
         builder.addStrategyPackageIds(outputJavaPackageId());
         builder.addInteropRegisterersByReflection(outputJavaPackageId() + ".InteropRegisterer");
+    }
+
+    default void syncTo(ExportsCompiler.Input.Builder builder) {
+        source().getFiles().exportDirectories().forEach(exportDirectory -> builder.addDirectoryExport(exportsId, exportDirectory));
     }
 }

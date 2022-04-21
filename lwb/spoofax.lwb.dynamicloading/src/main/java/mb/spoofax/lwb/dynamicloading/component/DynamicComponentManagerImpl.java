@@ -26,6 +26,7 @@ import mb.spoofax.core.component.ParticipantFactory;
 import mb.spoofax.core.component.StaticComponentManager;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.platform.PlatformComponent;
+import mb.spoofax.core.resource.ResourcesComponent;
 import mb.spoofax.lwb.dynamicloading.DynamicLoadException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -118,6 +119,21 @@ public class DynamicComponentManagerImpl<L extends LoggerComponent, R extends Re
     public MapView<String, ? extends ComponentGroup> getComponentGroups() {
         return MapView.of();
     }
+
+
+    @Override
+    public Option<ResourcesComponent> getResourcesComponent(Coordinate coordinate) {
+        return Option.ofNullable(dynamicComponentPerCoordinate.get(coordinate))
+            .flatMap(DynamicComponent::getResourcesComponent);
+    }
+
+    @Override
+    public Stream<ResourcesComponent> getResourcesComponents(CoordinateRequirement coordinateRequirement) {
+        return dynamicComponentPerCompiledSources.values().stream()
+            .filter(dc -> coordinateRequirement.matches(dc.getCoordinate()))
+            .flatMap(dc -> dc.getResourcesComponent().stream());
+    }
+
 
     @Override
     public Option<LanguageComponent> getLanguageComponent(Coordinate coordinate) {

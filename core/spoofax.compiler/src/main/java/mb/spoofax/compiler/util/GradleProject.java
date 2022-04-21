@@ -1,6 +1,7 @@
 package mb.spoofax.compiler.util;
 
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.core.Coordinate;
 import org.immutables.value.Value;
 
 import java.io.Serializable;
@@ -56,10 +57,10 @@ public interface GradleProject extends Serializable {
 
 
     default GradleDependency asProjectDependency() {
-        return GradleDependency.project(":" + coordinate().artifactId());
+        return GradleDependency.project(":" + coordinate().artifactId);
     }
 
     default GradleDependency asModuleDependency() {
-        return GradleDependency.module(coordinate());
+        return GradleDependency.module(coordinate().toCoordinateRequirement());
     }
 }

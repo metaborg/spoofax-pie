@@ -13,7 +13,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class DynamicLoadingParticipant<L extends LoggerComponent, R extends ResourceServiceComponent, P extends PlatformComponent> extends EmptyParticipant<L, R, P> {
     private final DynamicLoadingModule dynamicLoadingModule;
 
-    private @Nullable DynamicLoadingComponent component;
+    protected @Nullable DynamicLoadingComponent component;
 
 
     public DynamicLoadingParticipant(DynamicLoadingModule dynamicLoadingModule) {

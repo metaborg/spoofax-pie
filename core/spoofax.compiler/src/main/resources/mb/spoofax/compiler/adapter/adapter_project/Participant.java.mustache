@@ -43,8 +43,8 @@ public class {{baseParticipant.id}}<L extends LoggerComponent, R extends Resourc
     @Override
     public ListView<CoordinateRequirement> getDependencies() {
         return ListView.of(
-            {{#dependOnRv32Im}}new CoordinateRequirement("rv32im"){{#dynamix}},{{/dynamix}}{{/dependOnRv32Im}}
-            {{#dynamix}}new CoordinateRequirement("dynamix_runtime"){{/dynamix}}
+            {{#dependOnRv32Im}}new CoordinateRequirement("org.metaborg", "rv32im"){{#dynamix}},{{/dynamix}}{{/dependOnRv32Im}}
+            {{#dynamix}}new CoordinateRequirement("org.metaborg", "dynamix_runtime"){{/dynamix}}
         );
     }
 
@@ -112,6 +112,25 @@ public class {{baseParticipant.id}}<L extends LoggerComponent, R extends Resourc
 
     @Override
     public {{resourcesComponent.qualifiedId}} getResourceRegistriesProvider(
+        L loggerComponent,
+        R baseResourceServiceComponent,
+        P platformComponent,
+        SubcomponentRegistry subcomponentRegistry,
+        ComponentDependencyResolver dependencyResolver
+    ) {
+        final {{resourcesComponent.qualifiedId}} resourcesComponent = getResourcesComponent(
+            loggerComponent,
+            baseResourceServiceComponent,
+            platformComponent,
+            subcomponentRegistry,
+            dependencyResolver
+        );
+        subcomponentRegistry.register({{resourcesComponent.qualifiedId}}.class, resourcesComponent);
+        return resourcesComponent;
+    }
+
+    @Override
+    public {{resourcesComponent.qualifiedId}} getResourcesComponent(
         L loggerComponent,
         R baseResourceServiceComponent,
         P platformComponent,

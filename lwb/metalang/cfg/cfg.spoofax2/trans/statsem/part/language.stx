@@ -4,6 +4,7 @@ imports
 
   statsem/part
   statsem/expr
+  statsem/util
 
   signatures/part/language-sig
 
@@ -26,6 +27,10 @@ rules // Sdf3 section and options
   sdf3FilesOptionOk(s, Sdf3FilesMainSourceDirectory(e)) :-
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
   sdf3FilesOptionOk(s, Sdf3FilesMainFile(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
+  sdf3FilesOptionOk(s, Sdf3FilesIncludeDirectory(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
+  sdf3FilesOptionOk(s, Sdf3FilesExportDirectory(e)) :-
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
 
   sdf3PrebuiltOptionOk : scope * Sdf3PrebuiltOption
@@ -76,6 +81,8 @@ rules // Esv section and options
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
   esvFilesOptionOk(s, EsvFilesIncludeDirectory(e)) :-
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
+  esvFilesOptionOk(s, EsvFilesExportDirectory(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
   esvFilesOptionOk(s, EsvFilesIncludeLibspoofax2Exports(e)) :-
     typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
 
@@ -105,6 +112,8 @@ rules // Statix section and options
   statixFilesOptionOk(s, StatixFilesMainFile(e)) :-
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
   statixFilesOptionOk(s, StatixFilesIncludeDirectory(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
+  statixFilesOptionOk(s, StatixFilesExportDirectory(e)) :-
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
 
   statixPrebuiltOptionOk : scope * StatixPrebuiltOption
@@ -136,7 +145,9 @@ rules // Stratego section and options
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
   strategoFilesOptionOk(s, StrategoFilesIncludeDirectory(e)) :-
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
-
+  strategoFilesOptionOk(s, StrategoFilesExportDirectory(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
+    
   strategoOptionOk(s, StrategoSdf3StatixExplicationGen(e)) :-
     typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
   strategoOptionOk(s, StrategoLanguageStrategyAffix(e)) :-
@@ -172,3 +183,27 @@ rules // Dynamix section and options
   dynamixPrebuiltOptionOk(s, DynamixPrebuiltSpecAtermDirectory(e)) :-
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
 
+rules
+
+  partOk(s, Dependencies(dependency_kinds)) :-
+    dependenciesOk(s, dependency_kinds).
+
+  dependencyOk : scope * Dependency
+  dependenciesOk maps dependencyOk(*, list(*))
+
+  dependencyOk(s, Dependency(e, kind)) :-
+    dependencyExprOk(s, e),
+    dependencyKindOk(s, kind).
+
+
+  dependencyExprOk : scope * Expr
+  dependencyExprsOk maps dependencyExprOk(*, list(*))
+
+  dependencyExprOk(s, e) :- {T}
+    typeOfExpr(s, e) == T,
+    bOr(bOr(bOr(typeEq(T, STRING()), typeEq(T, COORDINATE())), typeEq(T, COORDINATE_REQUIREMENT())), typeEq(T, PATH())) == TRUE() | error $[Expected string, coordinate, coordinate requirement, or path]@e.
+
+  dependencyKindOk : scope * DependencyKind
+  dependencyKindsOk maps dependencyKindOk(*, list(*))
+
+  dependencyKindOk(s, CompileTimeDependency()).

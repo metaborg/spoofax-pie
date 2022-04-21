@@ -1,5 +1,9 @@
 module lex/stratego_id
 
+imports
+
+  lex/keyword
+
 lexical sorts
 
   StrStrategyIdLit StrStrategyIdChars StrKeyword
@@ -9,6 +13,7 @@ lexical syntax
   StrStrategyIdLit  = StrStrategyIdChars
   
   StrStrategyIdChars = [a-zA-Z0-9\-\_\$]+ // TODO: check if this is correct
+  StrStrategyIdChars = Keyword {reject}
   StrStrategyIdChars = StrKeyword {reject}
 
 lexical restrictions

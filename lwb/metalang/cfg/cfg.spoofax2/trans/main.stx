@@ -7,6 +7,7 @@ imports
   statsem/expr/task_def
   statsem/expr/command
   statsem/expr/menu_item
+  statsem/expr/coordinate
   
   statsem/part
   statsem/part/shared

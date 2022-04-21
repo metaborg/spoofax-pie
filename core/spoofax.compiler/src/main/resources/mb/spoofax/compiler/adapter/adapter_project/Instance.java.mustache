@@ -35,6 +35,7 @@ import mb.spoofax.common.BlockCommentSymbols;
 import mb.spoofax.core.Coordinate;
 import mb.spoofax.core.Version;
 import mb.spoofax.core.language.LanguageInstance;
+import mb.spoofax.core.language.ResourceExports;
 import mb.spoofax.core.language.cli.CliCommand;
 import mb.spoofax.core.language.cli.CliParam;
 import mb.spoofax.core.language.command.AutoCommandRequest;
@@ -228,6 +229,11 @@ public class {{baseInstance.id}} implements LanguageInstance
 {{/bracketSymbols}}
         );
     }
+
+
+     @Override public {{resourceExportsInjection.type.qualifiedId}} getResourceExports() {
+         return {{resourceExportsInjection.name}};
+     }
 
 {{#parseInjection}}
 

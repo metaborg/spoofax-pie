@@ -36,6 +36,12 @@ public abstract class CfgStatixSource implements Serializable {
 
         List<ResourcePath> includeDirectories();
 
+        List<String> exportDirectories();
+
+        default ResourcePath unarchiveDirectory() {
+            return compileLanguageShared().unarchiveDirectory();
+        }
+
         /// Automatically provided sub-inputs
 
         CompileLanguageSpecificationShared compileLanguageShared();

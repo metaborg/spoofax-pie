@@ -40,6 +40,7 @@ import mb.resource.dagger.RootResourceServiceComponent;
 import mb.resource.fs.FSResource;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.core.component.CompositeComponentManager;
 import mb.spoofax.core.component.StaticComponentManager;
 import mb.spoofax.core.component.StaticComponentManagerBuilder;
 import mb.spoofax.core.platform.DaggerPlatformComponent;
@@ -137,6 +138,7 @@ class TestBase {
         dynamicComponentManager = dynamicLoadingComponent.getDynamicComponentManager();
         dynamicLoad = dynamicLoadingComponent.getDynamicLoad();
 
+        // Set dynamic component manager in several places.
         sptComponent.getLanguageUnderTestProviderWrapper().set(new DynamicLanguageUnderTestProvider(
             dynamicComponentManager,
             dynamicLoad,
@@ -144,6 +146,7 @@ class TestBase {
             //       components will be reloaded by SPT, which closes and thus invalidates previous dynamic components.
             this::dynamicLoadSupplierOutputSupplier
         ));
+        spoofaxLwbCompiler.spoofaxLwbCompilerComponent.getSpoofaxLwbCompilerComponentManagerWrapper().set(new CompositeComponentManager(staticComponentManager, dynamicComponentManager));
 
         // TODO: this won't work properly with bottom-up building when builds are executed from `standaloneSpoofax3Compiler.pieComponent`.
         pieComponent = DaggerPieComponent.builder()

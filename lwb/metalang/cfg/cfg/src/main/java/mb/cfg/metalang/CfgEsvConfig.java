@@ -2,6 +2,7 @@ package mb.cfg.metalang;
 
 import mb.cfg.CompileLanguageSpecificationShared;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.compiler.adapter.ExportsCompiler;
 import mb.spoofax.compiler.language.StylerLanguageCompiler;
 import org.immutables.value.Value;
 
@@ -12,6 +13,9 @@ import java.io.Serializable;
  */
 @Value.Immutable
 public interface CfgEsvConfig extends Serializable {
+    String exportsId = "ESV";
+
+
     class Builder extends ImmutableCfgEsvConfig.Builder {}
 
     static Builder builder() {return new Builder();}
@@ -44,5 +48,9 @@ public interface CfgEsvConfig extends Serializable {
 
     default void syncTo(StylerLanguageCompiler.Input.Builder builder) {
         builder.packedEsvRelativePath(outputFileName());
+    }
+
+    default void syncTo(ExportsCompiler.Input.Builder builder) {
+        source().getFiles().ifPresent(files -> files.exportDirectories().forEach(exportDirectory -> builder.addDirectoryExport(exportsId, exportDirectory)));
     }
 }

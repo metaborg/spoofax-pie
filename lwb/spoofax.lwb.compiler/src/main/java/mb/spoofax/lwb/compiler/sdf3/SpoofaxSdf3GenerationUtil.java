@@ -10,9 +10,9 @@ import mb.pie.api.Supplier;
 import mb.resource.hierarchical.ResourcePath;
 import mb.sdf3.task.Sdf3AnalyzeMulti;
 import mb.sdf3.task.Sdf3Desugar;
-import mb.sdf3.task.Sdf3GetSourceFiles;
 import mb.sdf3.task.Sdf3Parse;
 import mb.sdf3.task.spec.Sdf3SpecConfig;
+import mb.sdf3.task.spoofax.Sdf3GetSourceFilesWrapper;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
@@ -24,14 +24,14 @@ import java.io.IOException;
 public class SpoofaxSdf3GenerationUtil {
     private final SpoofaxSdf3Configure configure;
     private final Sdf3Parse parse;
-    private final Sdf3GetSourceFiles getSourceFiles;
+    private final Sdf3GetSourceFilesWrapper getSourceFiles;
     private final Sdf3Desugar desugar;
     private final Sdf3AnalyzeMulti analyze;
 
     @Inject public SpoofaxSdf3GenerationUtil(
         SpoofaxSdf3Configure configure,
         Sdf3Parse parse,
-        Sdf3GetSourceFiles getSourceFiles,
+        Sdf3GetSourceFilesWrapper getSourceFiles,
         Sdf3Desugar desugar,
         Sdf3AnalyzeMulti analyze
     ) {

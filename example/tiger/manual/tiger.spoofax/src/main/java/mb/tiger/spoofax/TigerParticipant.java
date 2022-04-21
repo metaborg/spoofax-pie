@@ -98,7 +98,26 @@ public class TigerParticipant<L extends LoggerComponent, R extends ResourceServi
     ) {}
 
     @Override
-    public TigerResourcesComponent getResourceRegistriesProvider(
+    public @Nullable TigerResourcesComponent getResourceRegistriesProvider(
+        L loggerComponent,
+        R baseResourceServiceComponent,
+        P platformComponent,
+        SubcomponentRegistry subcomponentRegistry,
+        ComponentDependencyResolver dependencyResolver
+    ) {
+        final TigerResourcesComponent resourcesComponent = getResourcesComponent(
+            loggerComponent,
+            baseResourceServiceComponent,
+            platformComponent,
+            subcomponentRegistry,
+            dependencyResolver
+        );
+        subcomponentRegistry.register(TigerResourcesComponent.class, resourcesComponent);
+        return resourcesComponent;
+    }
+
+    @Override
+    public TigerResourcesComponent getResourcesComponent(
         L loggerComponent,
         R baseResourceServiceComponent,
         P platformComponent,

@@ -20,8 +20,10 @@ context-free syntax
   Sdf3Source.Sdf3Files  = <files {
   <{Sdf3FilesOption "\n"}*>
 }>
-  Sdf3FilesOption.Sdf3FilesMainSourceDirectory       = <main-source-directory = <Expr>>
-  Sdf3FilesOption.Sdf3FilesMainFile                  = <main-file = <Expr>>
+  Sdf3FilesOption.Sdf3FilesMainSourceDirectory = <main-source-directory = <Expr>>
+  Sdf3FilesOption.Sdf3FilesMainFile            = <main-file = <Expr>>
+  Sdf3FilesOption.Sdf3FilesIncludeDirectory    = <include-directory = <Expr>>
+  Sdf3FilesOption.Sdf3FilesExportDirectory     = <export-directory = <Expr>>
 
   Sdf3Source.Sdf3Prebuilt = <prebuilt {
   <{Sdf3PrebuiltOption "\n"}*>
@@ -57,7 +59,8 @@ context-free syntax
   EsvFilesOption.EsvFilesMainSourceDirectory       = <main-source-directory = <Expr>>
   EsvFilesOption.EsvFilesMainFile                  = <main-file = <Expr>>
   EsvFilesOption.EsvFilesIncludeDirectory          = <include-directory = <Expr>>
-  EsvFilesOption.EsvFilesIncludeLibspoofax2Exports = <include-libspoofax2-exports = <Expr>>
+  EsvFilesOption.EsvFilesExportDirectory           = <export-directory = <Expr>>
+  EsvFilesOption.EsvFilesIncludeLibspoofax2Exports = <include-libspoofax2-exports = <Expr>> // TODO: remove and replace with dependency
 
   EsvSource.EsvPrebuilt = <prebuilt {
   <{EsvPrebuiltOption "\n"}*>
@@ -81,6 +84,7 @@ context-free syntax
   StatixFilesOption.StatixFilesMainSourceDirectory = <main-source-directory = <Expr>>
   StatixFilesOption.StatixFilesMainFile            = <main-file = <Expr>>
   StatixFilesOption.StatixFilesIncludeDirectory    = <include-directory = <Expr>>
+  StatixFilesOption.StatixFilesExportDirectory     = <export-directory = <Expr>>
 
   StatixSource.StatixPrebuilt = <prebuilt {
   <{StatixPrebuiltOption "\n"}*>
@@ -104,9 +108,10 @@ context-free syntax
   StrategoSource.StrategoFiles  = <files {
   <{StrategoFilesOption "\n"}*>
 }>
-  StrategoFilesOption.StrategoFilesMainSourceDirectory      = <main-source-directory = <Expr>>
-  StrategoFilesOption.StrategoFilesMainFile                 = <main-file = <Expr>>
-  StrategoFilesOption.StrategoFilesIncludeDirectory         = <include-directory = <Expr>>
+  StrategoFilesOption.StrategoFilesMainSourceDirectory = <main-source-directory = <Expr>>
+  StrategoFilesOption.StrategoFilesMainFile            = <main-file = <Expr>>
+  StrategoFilesOption.StrategoFilesIncludeDirectory    = <include-directory = <Expr>>
+  StrategoFilesOption.StrategoFilesExportDirectory     = <export-directory = <Expr>>
 
   // TODO: move into source after CC lab.
   StrategoOption.StrategoSdf3StatixExplicationGen = <sdf3-statix-explication-generation = <Expr>>
@@ -136,3 +141,21 @@ context-free syntax
   <{DynamixPrebuiltOption "\n"}*>
 }>
   DynamixPrebuiltOption.DynamixPrebuiltSpecAtermDirectory = <spec-aterm-directory = <Expr>>
+
+context-free sorts
+
+  DependencyKind Dependency
+
+context-free syntax
+
+  Part.Dependencies = <dependencies [
+  <{Dependency "\n"}*>
+]>
+
+  Dependency.Dependency = <<Expr> = <DependencyKind>>
+  DependencyKind.CompileTimeDependency = <compile-time>
+
+lexical syntax
+
+  Keyword = "dependencies"
+  Keyword = "compile-time"

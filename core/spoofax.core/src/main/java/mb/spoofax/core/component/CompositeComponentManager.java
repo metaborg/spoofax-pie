@@ -5,6 +5,7 @@ import mb.common.util.MapView;
 import mb.spoofax.core.Coordinate;
 import mb.spoofax.core.CoordinateRequirement;
 import mb.spoofax.core.language.LanguageComponent;
+import mb.spoofax.core.resource.ResourcesComponent;
 
 import java.util.LinkedHashMap;
 import java.util.stream.Stream;
@@ -60,6 +61,20 @@ public class CompositeComponentManager implements ComponentManager {
         componentGroups.putAll(baseComponentGroups.asUnmodifiable());
         componentGroups.putAll(extendComponentGroups.asUnmodifiable());
         return MapView.of(componentGroups);
+    }
+
+
+    @Override
+    public Option<ResourcesComponent> getResourcesComponent(Coordinate coordinate) {
+        return baseComponentManager.getResourcesComponent(coordinate)
+            .mapOrElse(Option::ofSome, () -> extendComponentManager.getResourcesComponent(coordinate));
+    }
+
+    @Override
+    public Stream<ResourcesComponent> getResourcesComponents(CoordinateRequirement coordinateRequirement) {
+        final Stream<ResourcesComponent> baseComponents = baseComponentManager.getResourcesComponents(coordinateRequirement);
+        final Stream<ResourcesComponent> extendComponents = extendComponentManager.getResourcesComponents(coordinateRequirement);
+        return Stream.concat(baseComponents, extendComponents);
     }
 
 

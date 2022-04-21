@@ -73,6 +73,8 @@ import java.util.Set;
     }
 )
 public interface SpoofaxLwbCompilerComponent extends TaskDefsProvider, AutoCloseable {
+    SpoofaxLwbCompilerComponentManagerWrapper getSpoofaxLwbCompilerComponentManagerWrapper();
+
     LoggerComponent getLoggerComponent();
 
     ResourceServiceComponent getResourceServiceComponent();
