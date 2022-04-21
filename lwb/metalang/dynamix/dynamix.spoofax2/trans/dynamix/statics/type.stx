@@ -3,20 +3,20 @@ module dynamix/statics/type
 imports
   signatures/dynamix-sig
   dynamix/statics/names
-  
+
 // actual types
 signature
   sorts
     STYPE // source type (' prefix)
     MTYPE // meta type (no prefix)
     TTYPE // target type (@ prefix)
-  
+
   constructors
     // Source types
     SINT : STYPE // literal int
     SSTRING : STYPE // literal string
     SSORT : string * scope -> STYPE // reference to a sort, scope is the global scope (for injections)
-    
+
     // Meta types
     MSTYPE : STYPE -> MTYPE // '<stype>
     MTTYPE : TTYPE -> MTYPE // @<ttype>
@@ -25,16 +25,16 @@ signature
     MHOLY1 : MTYPE -> MTYPE // Holy(T)
     MAUTO : MTYPE -> MTYPE // automatic derivation of type, used for empty list literal
     MANYSOURCE : MTYPE // any source type, only used for properties
-    
+
     // Target types
     TVALUE : TTYPE // value
     TSTATEMENT : TTYPE // statement
-    
+
 // constructor management
 signature
   sorts
     SCONS
-    
+
   constructors
     // represents a defined constructor. note that we
     // use MTYPE instead of STYPE to prevent having to
@@ -47,7 +47,7 @@ signature
     //
     // Note that the second argument is always an SSORT
     SCONS : list(MTYPE) * STYPE -> SCONS
-    
+
 // source types are represented as a list of sorts and
 // constructors in the global scope. Each sort additionally
 // has a list of injections defined on it
@@ -56,84 +56,84 @@ signature
     sort : string -> STYPE // SSORT only
     constructor : string -> SCONS
     injection : MTYPE * STYPE // can convert the type to other type
-    
+
 rules
   constructorArgumentToType : scope * MConstructorArgument -> MTYPE
   constructorArgumentsToTypes maps constructorArgumentToType(*, list(*)) = list(*)
-  
+
   constructorArgumentToType(_, MConstructorArgumentString()) = MSTYPE(SSTRING()).
   constructorArgumentToType(_, MConstructorArgumentInt()) = MSTYPE(SINT()).
   constructorArgumentToType(s, MConstructorArgumentList(el)) = MLIST(constructorArgumentToType(s, el)).
   constructorArgumentToType(s, MConstructorArgumentSortID(sid)) = MSTYPE(resolveSort(s, sid)).
- 
+
 rules
   mTypeToMTYPE : scope * MType -> MTYPE
   mTypesToMTYPEs maps mTypeToMTYPE(*, list(*)) = list(*)
-  
+
   sourceTypeToSTYPE : scope * MSourceType -> STYPE
   targetTypeToTTYPE : scope * MTargetType -> TTYPE
-  
+
   mTypeToMTYPE(s, MTypeSourceType(st)) = MSTYPE(sourceTypeToSTYPE(s, st)).
   mTypeToMTYPE(s, MTypeTargetType(st)) = MTTYPE(targetTypeToTTYPE(s, st)).
   mTypeToMTYPE(s, MTypeList(el)) = MLIST(mTypeToMTYPE(s, el)).
   mTypeToMTYPE(s, MTypeHoly1(el)) = MHOLY1(mTypeToMTYPE(s, el)).
   mTypeToMTYPE(s, MTypeHoly0()) = MHOLY0().
-  
-  sourceTypeToSTYPE(s, MSourceTypeSortID(x)) = resolveSort(s, x). 
+
+  sourceTypeToSTYPE(s, MSourceTypeSortID(x)) = resolveSort(s, x).
   sourceTypeToSTYPE(s, MSourceTypeString()) = SSTRING().
   sourceTypeToSTYPE(s, MSourceTypeInt()) = SINT().
-  
+
   targetTypeToTTYPE(s, MTargetTypeValue()) = TVALUE().
   targetTypeToTTYPE(s, MTargetTypeCPSFinalized()) = TSTATEMENT().
-  
+
 rules
   composeTypes : MTYPE * MTYPE -> MTYPE
-  
+
   // holy + fin
   composeTypes(MHOLY1(_), MTTYPE(TSTATEMENT())) = MTTYPE(TSTATEMENT()).
   composeTypes(MHOLY0(), MTTYPE(TSTATEMENT())) = MTTYPE(TSTATEMENT()).
-  
+
   // holy + holy
   composeTypes(MHOLY1(_), MHOLY1(x)) = MHOLY1(x).
   composeTypes(MHOLY1(_), MHOLY0()) = MHOLY0().
   composeTypes(MHOLY0(), MHOLY1(x)) = MHOLY1(x).
   composeTypes(MHOLY0(), MHOLY0()) = MHOLY0().
-  
+
   // holy + value
   composeTypes(MHOLY1(_), MTTYPE(TVALUE())) = MHOLY1(MTTYPE(TVALUE())).
   composeTypes(MHOLY0(), MTTYPE(TVALUE())) = MHOLY1(MTTYPE(TVALUE())).
-  
+
   // holy + list (todo: check for non value list)
   composeTypes(MHOLY1(_), t@MLIST(MTTYPE(TVALUE()))) = MHOLY1(t).
   composeTypes(MHOLY0(), t@MLIST(MTTYPE(TVALUE()))) = MHOLY1(t).
-  
+
   // value + holy
   composeTypes(MTTYPE(TVALUE()), t@MHOLY1(_)) = t.
   composeTypes(MTTYPE(TVALUE()), t@MHOLY0()) = t.
-  
+
   // list + holy (todo: check for non-value lists)
   composeTypes(MLIST(MTTYPE(TVALUE())), t@MHOLY1(_)) = t.
   composeTypes(MLIST(MTTYPE(TVALUE())), t@MHOLY0()) = t.
-  
+
   // value/meta list + fin
   composeTypes(MTTYPE(TVALUE()), MTTYPE(TSTATEMENT())) = MTTYPE(TSTATEMENT()).
   composeTypes(MLIST(MTTYPE(TVALUE())), MTTYPE(TSTATEMENT())) = MTTYPE(TSTATEMENT()).
-  
+
   // direct replacements
   composeTypes(MTTYPE(TVALUE()), t@MTTYPE(TVALUE())) = t.
   composeTypes(MTTYPE(TVALUE()), t@MLIST(MTTYPE(TVALUE()))) = t.
   composeTypes(MLIST(MTTYPE(TVALUE())), t@MTTYPE(TVALUE())) = t.
   composeTypes(MLIST(MTTYPE(TVALUE())), t@MLIST(MTTYPE(TVALUE()))) = t.
-  
+
   composeTypes(A, B) = _ :-
     try { false } | error $[Cannot compose [A] and [B].],
     false.
- 
+
 rules
   // holds if we can convert the first type to the second
   typeCoercibleTo : MTYPE * MTYPE
   typesCoercibleTo maps typeCoercibleTo(list(*), list(*))
-  
+
   typeCoercibleTo(T, T).
   typeCoercibleTo(MSTYPE(_), MANYSOURCE()).
   typeCoercibleTo(MAUTO(A), B) :- A == B.
@@ -147,49 +147,53 @@ rules
   typeCoercibleTo(T, MSTYPE(TT@SSORT(_, s))) :-
     hasInjection(s, T, TT),
     try { false } | note $[Coercing [T] to [TT].].
-    
+  typeCoercibleTo(MSTYPE(T@SSORT(_, s)), TT@MLIST(MSTYPE(_))) :-
+    // : list(Exp) -> Parameters, allow parameters in a place where list(Exp) is expected
+    hasInjection(s, TT, T),
+    try { false } | note $[Coercing [T] to [TT].].
+
   // todo: better lub using injections?
   lub : list(MTYPE) -> MTYPE
   lub([T]) = T.
   lub([T, T|r]) = lub([T|r]).
-    
+
 rules
   lookupSort : scope * string -> list((path * (string * STYPE)))
   lookupSort(s, x) = ps :-
     query sort filter (P | I)* and { x' :- x == x' } min $ < P, $ < I and true in s |-> ps.
-    
+
   resolveSort : scope * string -> STYPE
   resolveSort(s, x) = T :- {x'}
     lookupSort(s, x) == [(_, (x', T))|_] | error $[Undefined sort [x].],
     @x.ref := x'.
-    
+
   declareSort : scope * string * STYPE
   declareSort(s, x, T) :- {ps}
     !sort[x, T] in s,
     // todo: does it make sense to make this e instead?
     query sort filter (I | P)* and { x' :- x' == x } min and false in s |-> ps,
     try { ps == [_] } | error $[Sort [x] is already declared in this module or an imported module.].
-    
+
   lookupConstructor : scope * string -> list((path * (string * SCONS)))
   lookupConstructor(s, x) = ps :-
     query constructor filter (P | I)* and { x' :- x == x' } min $ < P and true in s |-> ps.
-    
+
   resolveConstructor : scope * string -> SCONS
   resolveConstructor(s, x) = T :- {x'}
     lookupConstructor(s, x) == [(_, (x', T))|_] | error $[Undefined constructor [x].],
     @x.ref := x'.
-    
+
   declareConstructor : scope * string * SCONS
   declareConstructor(s, x, T) :- {ps}
     !constructor[x, T] in s,
     query constructor filter (I | P)* and { x' :- x' == x } min and false in s |-> ps,
     try { ps == [_] } | error $[Constructor [x] is already declared in this module or an imported module.].
-    
+
   // declare that the given type can be injected in the given type
   declareInjection : scope * MTYPE * STYPE
   declareInjection(s, from, to) :-
     !injection[from, to] in s.
-    
+
   hasInjection : scope * MTYPE * STYPE
   hasInjection(s, from, to) :- {ps}
     query injection filter (I | P)* and { (a, b) :- a == from, b == to } min and false in s |-> ps,

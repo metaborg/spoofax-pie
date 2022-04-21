@@ -1,0 +1,163 @@
+module dynamix/statics/rules
+
+imports
+  signatures/dynamix/common-sig
+
+  dynamix/statics/names
+  dynamix/statics/type
+
+signature
+  sorts MPatternOrdering
+  constructors
+    MPatternEqual : MPatternOrdering
+    MPatternLessSpecific : MPatternOrdering
+    MPatternMoreSpecific : MPatternOrdering
+    MPatternUncomparable : MPatternOrdering
+
+rules
+  // Go through all defined rules, and check whether the implementations do
+  // not have equal patterns.
+  assertNoEqualRuleImplementations : scope
+  assertNoEqualRuleImplementations(s) :- {ps}
+    // step one, find all rule declarations
+    query rule min and false in s |-> ps,
+    assertNoEqualRuleImplementationsForRules(s, ps).
+
+  // step two: for each rule declaration ensure things are sane
+  assertNoEqualRuleImplementationsForRule : scope * (path * (string * scope))
+  assertNoEqualRuleImplementationsForRules maps assertNoEqualRuleImplementationsForRule(*, list(*))
+
+  assertNoEqualRuleImplementationsForRule(s, (_, (name, _))) :- {ps pps}
+    // find all implementations
+    query ruleImpl filter ~0 and { x' :- x' == astId(name) } min and false in s |-> ps,
+    ruleImplScopeToDecls(ps) == pps,
+
+    // compare each implementation against each other implementation
+    assertRuleImplsNotEqualLeftRight(pps, pps).
+
+  ruleImplScopeToDecl : (path * (astId * scope)) -> (path * (astId * MRuleDecl))
+  ruleImplScopeToDecls maps ruleImplScopeToDecl(list(*)) = list(*)
+  ruleImplScopeToDecl((p, (a, s))) = (p, (a, d)) :-
+    query ruleImplOf filter e and true in s |-> [(_, d)].
+
+  // TODO: this evaluates each pair twice, once as (a, b) and once as (b, a).
+  // we can make this significantly faster by only doing it once (#14)
+  assertRuleImplsNotEqual : (path * (astId * MRuleDecl)) * (path * (astId * MRuleDecl))
+  assertRuleImplsNotEqualRight maps assertRuleImplsNotEqual(*, list(*))
+  assertRuleImplsNotEqualLeftRight maps assertRuleImplsNotEqualRight(list(*), *)
+
+  assertRuleImplsNotEqual((_, (_, MRuleDecl(aname, apats, _))), (_, (_, MRuleDecl(bname, bpats, _)))) :-
+    assertRuleImplsNotEqualHelper(aname, astId(aname), astId(bname), apats, bpats).
+
+  assertRuleImplsNotEqualHelper : string * astId * astId * list(MPattern) * list(MPattern)
+  assertRuleImplsNotEqualHelper(_, A, A, _, _). // should not report errors when we compare us to ourselves
+  assertRuleImplsNotEqualHelper(r, _, _, apats, bpats) :- {X}
+    // todo: keep track of module name for pattern and report it in the error for slightly better diagnostics?
+    try { comparePatterns(apats, bpats) != MPatternEqual() } | error $[This implementation is equally specific to at least one other implementation. To prevent ambiguity in matching order, each rule implementation must have a distinct set of values it can match.]@r.
+
+// CHANGES TO THE FOLLOWING SECTION SHOULD BE KEPT IN SYNC WITH
+// THE SAME COMPARISON LOGIC IN dynamix.runtime/dynamix/rules.str
+rules
+  // Compare the two patterns. If the left one is more specific than
+  // the right one, return more specific. Similarly, if it is less specific
+  // return less specific. If the two are exactly the same, return equal.
+  //
+  // In cases where the two are equally specific but matching different
+  // inputs (such as two different string or integer literals), return
+  // uncomparable.
+  //
+  // This expects that both patterns have been desugared.
+  comparePattern : MPattern * MPattern -> MPatternOrdering
+
+  // TODO: this is matched last since it is not very specific
+  comparePattern(A, A) = MPatternEqual().
+
+  // trivial case: bound (as) patterns delegate to their inner repr
+  comparePattern(MPatternBound(_, ip), b) = comparePattern(ip, b).
+  comparePattern(a, MPatternBound(_, ip)) = comparePattern(a, ip).
+
+  // wildcards are equally specific to other variables, and
+  // less specific compared to anything else
+  comparePattern(MPatternWildcard(), MPatternVariable(_)) = MPatternEqual().
+  comparePattern(MPatternWildcard(), MPatternWildcard()) = MPatternEqual().
+  comparePattern(MPatternWildcard(), _) = MPatternLessSpecific().
+
+  // variables are equally specific to other variables, wildcards
+  // and less specific compared to anything else
+  comparePattern(MPatternVariable(_), MPatternVariable(_)) = MPatternEqual().
+  comparePattern(MPatternVariable(_), MPatternWildcard()) = MPatternEqual().
+  comparePattern(MPatternVariable(_), _) = MPatternLessSpecific().
+
+  // constructor patterns are more specific than variables
+  // and incomparable with non-constructor patterns. with
+  // constructors, they are incomparable if the length or
+  // name of the constructor does not match, else their
+  // comparison result is the first of piecewise comparisons
+  // between arguments that does not return MPatternEqual
+  comparePattern(MPatternConstructor(_, _), MPatternWildcard()) = MPatternMoreSpecific().
+  comparePattern(MPatternConstructor(_, _), MPatternVariable(_)) = MPatternMoreSpecific().
+  // only compare patterns where the constructors are the same, others are uncomparable
+  comparePattern(MPatternConstructor(A, aa), MPatternConstructor(A, ba)) = comparePatterns(aa, ba).
+  comparePattern(MPatternConstructor(_, _), _) = MPatternUncomparable().
+
+  // literal (int, string) patterns are equal to themselves,
+  // more specific than variables, and uncomparable to anything
+  // else. Note that the equality case is handled above
+  comparePattern(MPatternString(_), MPatternWildcard()) = MPatternMoreSpecific().
+  comparePattern(MPatternString(_), MPatternVariable(_)) = MPatternMoreSpecific().
+  comparePattern(MPatternString(X), MPatternString(X)) = MPatternEqual().
+  comparePattern(MPatternString(_), _) = MPatternUncomparable().
+  comparePattern(MPatternInt(_), MPatternWildcard()) = MPatternMoreSpecific().
+  comparePattern(MPatternInt(_), MPatternVariable(_)) = MPatternMoreSpecific().
+  comparePattern(MPatternInt(X), MPatternInt(X)) = MPatternEqual().
+  comparePattern(MPatternInt(_), _) = MPatternUncomparable().
+
+  // cons list patterns compare their head pattern, then their tail pattern
+  // they compare uncomparable to anything else
+  comparePattern(MPatternListCons(_, _), MPatternWildcard()) = MPatternMoreSpecific().
+  comparePattern(MPatternListCons(_, _), MPatternVariable(_)) = MPatternMoreSpecific().
+  comparePattern(MPatternListCons([hd], tl), MPatternListCons([ohd], otl)) = comparePatterns([hd, tl], [ohd, otl]).
+  comparePattern(MPatternListCons(_, _), _) = MPatternUncomparable().
+
+  // nil list patterns are uncomparable to anything but themselves and variables
+  comparePattern(MPatternList([]), MPatternWildcard()) = MPatternMoreSpecific().
+  comparePattern(MPatternList([]), MPatternVariable(_)) = MPatternMoreSpecific().
+  comparePattern(MPatternList([]), MPatternList([])) = MPatternEqual().
+  comparePattern(MPatternList([]), _) = MPatternUncomparable().
+
+rules
+  // compare a list of patterns and return the first ordering
+  // for which the two are not equal, or return equal if they
+  // are all equal. Assumes that the patterns are of the same length
+  comparePatterns : list(MPattern) * list(MPattern) -> MPatternOrdering
+  comparePatterns([], []) = MPatternEqual().
+  comparePatterns([ahd|atl], [bhd|btl]) = comparePatternsHelper(comparePattern(ahd, bhd), atl, btl).
+
+  comparePatternsHelper : MPatternOrdering * list(MPattern) * list(MPattern) -> MPatternOrdering
+  comparePatternsHelper(MPatternEqual(), a, b) = comparePatterns(a, b). // if equal, try next
+  comparePatternsHelper(x, _, _) = x. // if not equal, return value
+
+rules
+  // TODO: maybe rewrite above logic so that we don't
+  // have to rely on desugared patterns
+  desugarPattern : MPattern -> MPattern
+  desugarPatterns maps desugarPattern(list(*)) = list(*)
+
+  desugarPattern(a@MPatternWildcard()) = a.
+  desugarPattern(a@MPatternVariable(_)) = a.
+  desugarPattern(a@MPatternString(_)) = a.
+  desugarPattern(a@MPatternInt(_)) = a.
+  desugarPattern(MPatternBound(a, b)) = MPatternBound(a, desugarPattern(b)).
+  desugarPattern(MPatternConstructor(a, b)) = MPatternConstructor(a, desugarPatterns(b)).
+
+  // [] -> [] (nil case)
+  desugarPattern(a@MPatternList([])) = a.
+
+  // [a, ...rest] -> [a|[...rest]]
+  desugarPattern(MPatternList([hd|tl])) = MPatternListCons([desugarPattern(hd)], desugarPattern(MPatternList(tl))).
+
+  // [a, b, ...rest|x] -> [a|[b, ...rest]|x]
+  desugarPattern(MPatternListCons([pat, nextpat|rest], x)) = MPatternListCons([desugarPattern(pat)], desugarPattern(MPatternListCons([nextpat|rest], x))).
+
+  // normal desugar for list cons already in normal form
+  desugarPattern(MPatternListCons([a], x)) = MPatternListCons([desugarPattern(a)], desugarPattern(x)).

@@ -3,147 +3,175 @@ module dynamix/statics/names
 imports
   signatures/dynamix/common-sig
   dynamix/statics/type
-  
+
 signature
   name-resolution labels
     P // parent-child, only used in rules
     I // import
-    
+
   relations
-    rule : string -> MRULE
-    primitive : string -> MPRIMITIVE
-    var : string -> MTYPE
-    global : string -> MTYPE
-    mod : string -> scope // module
-    curmod : -> string // name of current module
+    rule : string -> scope
+    ruleOf : MRULE
     
+    primitive : string -> scope
+    primitiveOf : MPRIMITIVE
+    
+    var : string -> scope
+    global : string -> scope
+    typeOf : MTYPE
+    
+    mod : string -> scope // module
+    modOf : scope
+    
+    curmod : string // name of current module
+
+    ruleImpl : astId -> scope
+    ruleImplOf : MRuleDecl // implementation of a rule, key is the astid of the rule declaration
+
   sorts MRULE MPRIMITIVE
   constructors
-    //      arguments     return type
+    // arguments, return type
     MRULE : list(MTYPE) * MTYPE -> MRULE
-    
+
     MPRIMITIVEEXPR : list(MTYPE) -> MPRIMITIVE
     MPRIMITIVESTMT : list(MTYPE) -> MPRIMITIVE
     MPRIMITIVECOND : list(MTYPE) -> MPRIMITIVE
-    
+
+rules
+  withType : MTYPE -> scope
+  typeOf   : scope -> MTYPE
+  
+  withRule : MRULE -> scope
+  ruleOf   : scope -> MRULE
+  
+  withMod : scope -> scope
+  modOf   : scope -> scope
+  
+  withPrimitive : MPRIMITIVE -> scope
+  primitiveOf   : scope -> MPRIMITIVE
+  
+  withType(T) = s :- new s, !typeOf[T] in s.
+  typeOf(s) = T :- query typeOf filter e in s |-> [(_, T)].
+  
+  withRule(T) = s :- new s, !ruleOf[T] in s.
+  ruleOf(s) = T :- query ruleOf filter e in s |-> [(_, T)].
+  
+  withMod(T) = s :- new s, !modOf[T] in s.
+  modOf(s) = T :- query modOf filter e in s |-> [(_, T)].
+  
+  withPrimitive(T) = s :- new s, !primitiveOf[T] in s.
+  primitiveOf(s) = T :- query primitiveOf filter e in s |-> [(_, T)].
+
 rules
   // lookup var in current scope or parent scopes
-  lookupVar : scope * string -> list((path * (string * MTYPE)))
+  lookupVar : scope * string -> list((path * (string * scope)))
   lookupVar(s, x) = ps :-
     query var filter P* and { x' :- x == x' } min $ < P and true in s |-> ps.
-    
+
   // resolve var to the given ID
   resolveVar : scope * string -> MTYPE
-  resolveVar(s, x) = T :- {x'}
+  resolveVar(s, x) = typeOf(T) :- {x'}
     lookupVar(s, x) == [(_, (x', T))|_] | error $[Undefined variable [x].]@x,
     @x.ref := x'.
-    
+
   // declare new var, assert it is not shadowed in the current scope
   declareVar : scope * string * MTYPE
   declareVar(s, x, T) :- {ps}
-    !var[x, T] in s,
+    !var[x, withType(T)] in s,
     query var filter e and { x' :- x' == x } min and false in s |-> ps,
     try { ps == [_] } | error $[Duplicate declaration of [x] in the same scope.]@x,
     @x.type := T.
-    
+
 rules
   // lookup global in current scope or parent scopes
-  lookupGlobal : scope * string -> list((path * (string * MTYPE)))
+  lookupGlobal : scope * string -> list((path * (string * scope)))
   lookupGlobal(s, x) = ps :-
-    query global filter P* and { x' :- x == x' } min $ < P and true in s |-> ps.
-    
+    query global filter (P | I)* and { x' :- x == x' } min $ < P and true in s |-> ps.
+
   // resolve global to the given ID
   resolveGlobal : scope * string -> MTYPE
-  resolveGlobal(s, x) = T :- {x'}
+  resolveGlobal(s, x) = typeOf(T) :- {x'}
     lookupGlobal(s, x) == [(_, (x', T))|_] | error $[Undefined global variable [x].]@x,
     @x.ref := x'.
-    
+
   // declare new global, assert it is not shadowed in the current scope
   declareGlobal : scope * string * MTYPE
   declareGlobal(s, x, T) :- {ps}
-    !global[x, T] in s,
+    !global[x, withType(T)] in s,
     // allow shadowing by only checking current scope
     query global filter e and { x' :- x' == x } min and false in s |-> ps,
     try { ps == [_] } | error $[Duplicate declaration of [x] in this module.]@x,
     @x.type := T.
-    
+
 rules
   // lookup module in scope, must be global scope
   lookupModule : scope * string -> list((path * (string * scope)))
   lookupModule(s, x) = ps :-
     query mod filter e and { x' :- x == x' } min $ < P and true in s |-> ps.
-    
+
   // resolve module to its top-level scope
   resolveModule : scope * string -> scope
-  resolveModule(s, x) = T :- {x'}
+  resolveModule(s, x) = modOf(T) :- {x'}
     lookupModule(s, x) == [(_, (x', T))|_] | error $[Undefined module [x].]@x,
     @x.ref := x'.
-    
+
   // declare new module, assert it is unique
   declareModule : scope * string * scope
   declareModule(s, x, ms) :- {ps}
-    !mod[x, ms] in s,
+    !mod[x, withMod(ms)] in s,
     query mod filter e and { x' :- x' == x } min and false in s |-> ps,
     try { ps == [_] } | error $[Duplicate declaration of module [x].]@x.
-    
+
 rules
   // insert current module name in scope
   insertModuleName : scope * string
   insertModuleName(s, x) :-
     !curmod[x] in s.
-  
+
   // lookup module in scope, must be global scope
   assignModuleName : scope * astId
   assignModuleName(s, node) :- {modname}
     query curmod filter P* and true min and true in s |-> [(_, modname)],
     @node.declaringModule := modname.
-    
+
 rules
   // lookup rule in current scope or parent scopes
-  lookupRule : scope * string -> list((path * (string * MRULE)))
+  lookupRule : scope * string -> list((path * (string * scope)))
   lookupRule(s, x) = ps :-
-    // go through any number of P/I, prefer closer declarations
-    query rule filter (P | I)* and { x' :- x == x' } min $ < P, $ < I and true in s |-> ps.
-    
+    // go through any number of P, followed by at most one I
+    query rule filter P* I? and { x' :- x == x' } min $ < I, I < P and true in s |-> ps.
+
   // resolve rule to the given ID
-  resolveRule : scope * string -> MRULE
-  resolveRule(s, x) = T :- {x'}
-    lookupRule(s, x) == [(_, (x', T))|_] | error $[Undeclared rule [x].]@x,
+  resolveRule : scope * string -> (astId * MRULE)
+  resolveRule(s, x) = (astId(x'), ruleOf(T)) :- {R}
+    lookupRule(s, x) == [(_, (x', T))|R] | error $[Undeclared rule [x].]@x,
+    try { R == [] } | error $[Ambiguous reference to rule [x].]@x,
     @x.ref := x'.
-    
+
   // declare new rule, assert it is not shadowed in the current scope
   declareRule : scope * string * MRULE
   declareRule(s, x, T) :- {ps}
-    !rule[x, T] in s,
+    !rule[x, withRule(T)] in s,
     // allow shadowing by only checking for duplicate declarations in the current program scope
     query rule filter e and { x' :- x' == x } min and false in s |-> ps,
     try { ps == [_] } | error $[Duplicate declaration of rule [x].]@x.
-    
-  // raises an error if a user attempts to declare a new rule for
-  // something declared in an imported module. doing so ensures
-  // that we always have a consistent order in which patterns 
-  // should be attempted
-  assertRuleDefinedInLocalModule : scope * string
-  assertRuleDefinedInLocalModule(s, x) :- {ps}
-    query rule filter P* and { x' :- x' == x } min and false in s |-> ps,
-    try { ps == [_] } | error $[New implementations may not be added to the imported rule [x].].
-    
+
 rules
   // lookup primitive in current scope or parent scopes
-  lookupPrimitive : scope * string -> list((path * (string * MPRIMITIVE)))
+  lookupPrimitive : scope * string -> list((path * (string * scope)))
   lookupPrimitive(s, x) = ps :-
     query primitive filter (P | I)* and { x' :- x == x' } min $ < P and true in s |-> ps.
-    
+
   // resolve primitive to the given ID
   resolvePrimitive : scope * string -> MPRIMITIVE
-  resolvePrimitive(s, x) = T :- {x'}
+  resolvePrimitive(s, x) = primitiveOf(T) :- {x'}
     lookupPrimitive(s, x) == [(_, (x', T))|_] | error $[Undeclared primitive [x].]@x,
     @x.ref := x'.
-    
+
   // declare new primitive, assert it is not shadowed in the current scope
   declarePrimitive : scope * string * MPRIMITIVE
   declarePrimitive(s, x, T) :- {ps}
-    !primitive[x, T] in s,
+    !primitive[x, withPrimitive(T)] in s,
     // do not allow primitive shadowing as there's no good use for doing so
     query primitive filter (P | I)* and { x' :- x' == x } min and false in s |-> ps,
     try { ps == [_] } | error $[Duplicate declaration of primitive [x].]@x.
