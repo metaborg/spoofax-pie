@@ -27,33 +27,41 @@ rules
   assertNoEqualRuleImplementationsForRule : scope * (path * (string * scope))
   assertNoEqualRuleImplementationsForRules maps assertNoEqualRuleImplementationsForRule(*, list(*))
 
-  assertNoEqualRuleImplementationsForRule(s, (_, (name, _))) :- {ps pps}
+  assertNoEqualRuleImplementationsForRule(s, (_, (name, _))) :- {ps pps ppstl}
     // find all implementations
     query ruleImpl filter ~0 and { x' :- x' == astId(name) } min and false in s |-> ps,
-    ruleImplScopeToDecls(ps) == pps,
-
+    ruleImplScopeToDecls(ps) == pps@[_|ppstl],
+        
     // compare each implementation against each other implementation
-    assertRuleImplsNotEqualLeftRight(pps, pps).
+    assertRuleImplsNotEqual(pps, ppstl).
 
   ruleImplScopeToDecl : (path * (astId * scope)) -> (path * (astId * MRuleDecl))
   ruleImplScopeToDecls maps ruleImplScopeToDecl(list(*)) = list(*)
   ruleImplScopeToDecl((p, (a, s))) = (p, (a, d)) :-
     query ruleImplOf filter e and true in s |-> [(_, d)].
 
-  // TODO: this evaluates each pair twice, once as (a, b) and once as (b, a).
-  // we can make this significantly faster by only doing it once (#14)
-  assertRuleImplsNotEqual : (path * (astId * MRuleDecl)) * (path * (astId * MRuleDecl))
-  assertRuleImplsNotEqualRight maps assertRuleImplsNotEqual(*, list(*))
-  assertRuleImplsNotEqualLeftRight maps assertRuleImplsNotEqualRight(list(*), *)
-
-  assertRuleImplsNotEqual((_, (_, MRuleDecl(aname, apats, _))), (_, (_, MRuleDecl(bname, bpats, _)))) :-
-    assertRuleImplsNotEqualHelper(aname, astId(aname), astId(bname), apats, bpats).
-
-  assertRuleImplsNotEqualHelper : string * astId * astId * list(MPattern) * list(MPattern)
-  assertRuleImplsNotEqualHelper(_, A, A, _, _). // should not report errors when we compare us to ourselves
-  assertRuleImplsNotEqualHelper(r, _, _, apats, bpats) :- {X}
-    // todo: keep track of module name for pattern and report it in the error for slightly better diagnostics?
-    try { comparePatterns(apats, bpats) != MPatternEqual() } | error $[This implementation is equally specific to at least one other implementation. To prevent ambiguity in matching order, each rule implementation must have a distinct set of values it can match.]@r.
+  // in order to prevent checking every rule pair as both (a, b) and (b, a)
+  // we use the following rule. This is roughly equivalent to the following
+  // procedural approach:
+  // for (int i = 0; i < ruleCount; i++)
+  //   for (int j = i + 1; j < ruleCount; j++)
+  //      compare(rules[i], rules[j])
+  //
+  //                        "i array", currently comparing head  items to compare head against
+  assertRuleImplsNotEqual : list((path * (astId * MRuleDecl))) * list((path * (astId * MRuleDecl)))
+  assertRuleImplsNotEqual([], []). // done
+  assertRuleImplsNotEqual([_], []). // done
+  assertRuleImplsNotEqual([_, _], []). // done 
+  assertRuleImplsNotEqual([_|tl@[_|ttl]], []) :- assertRuleImplsNotEqual(tl, ttl). // compare tl with all elements after tl's head
+  assertRuleImplsNotEqual(els@[hd|_], [cmphd|cmptl]) :-
+    assertRuleImplNotEqual(hd, cmphd),
+    assertRuleImplsNotEqual(els, cmptl). // recurse
+    
+  assertRuleImplNotEqual : (path * (astId * MRuleDecl)) * (path * (astId * MRuleDecl))
+  assertRuleImplNotEqual((_, (_, MRuleDecl(aname, apats, _))), (_, (_, MRuleDecl(bname, bpats, _)))) :-
+    try { false } | note $[Comparing [apats] and [bpats]],
+    try { comparePatterns(apats, bpats) != MPatternEqual() } | error $[This implementation is equally specific to at least one other implementation. To prevent ambiguity in matching order, each rule implementation must have a distinct set of values it can match.]@aname,
+    try { comparePatterns(apats, bpats) != MPatternEqual() } | error $[This implementation is equally specific to at least one other implementation. To prevent ambiguity in matching order, each rule implementation must have a distinct set of values it can match.]@bname.
 
 // CHANGES TO THE FOLLOWING SECTION SHOULD BE KEPT IN SYNC WITH
 // THE SAME COMPARISON LOGIC IN dynamix.runtime/dynamix/rules.str
