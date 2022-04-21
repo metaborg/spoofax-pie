@@ -1,0 +1,171 @@
+module dynamix/rules
+
+imports
+  // strategolib
+  libstratego-lib
+
+  signatures/dynamix-sig
+  signatures/dynamix-ext-sig
+  signatures/dynamix/common-sig
+  signatures/dynamix/source-sig
+  signatures/dynamix/meta-sig
+
+signature
+  sorts MPatternOrdering
+  constructors
+    MPatternEqual : MPatternOrdering
+    MPatternLessSpecific : MPatternOrdering
+    MPatternMoreSpecific : MPatternOrdering
+    MPatternUncomparable : MPatternOrdering
+
+rules
+  // Initialize rule collection
+  // dx--rules-init :: ? -> ?
+  dx--rules-init: a -> a
+    with
+      new-hashtable => ht;
+      rules(MRules := ht)
+
+  // Finalize rule collection and sort all registered rules
+  // in order of specificity
+  // dx--rules-finalize :: TP
+  dx--rules-finalize: a -> a
+    with
+      MRules => ht;
+      <hashtable-getlist; map({ k, vs:
+        ?(k, vs);
+        <hashtable-put(|k, <dx--sort-rule-decls> vs)> ht
+      })> ht
+
+  // Declare the given rule in the rule collection
+  // dx--declare-rule(|string) :: MQualifiedRuleDecl -> MQualifiedRuleDecl
+  dx--declare-rule(|name): decl -> decl
+    with
+      MRules => ht;
+      existing := <hashtable-get(|name) <+ ![]> ht;
+      <hashtable-put(|name, [decl|existing])> ht
+
+  // Lookup all rules with the given name, and return a
+  // list of declarations in order of specicifity (more
+  // specific rules are returned first)
+  // dx--lookup-rule(|string) :: ? -> list(MQualifiedRuleDecl)
+  dx--lookup-rule(|name) = MRules => ht; (hashtable-get(|name) <+ ![])
+
+rules
+  // Sort the given rule decls based on their specificity. More
+  // specific patterns will be placed before less specific
+  // patterns. The order of patterns that are disjoint with each
+  // other is not defined, but they are guaranteed to be placed
+  // before patterns that may match both (e.g. wildcards).
+  //
+  // This will desugar the patterns before applying sorting.
+  // dx--sort-rule-decls :: list(MQualifiedRuleDecl) -> list(MQualifiedRuleDecl)
+  dx--sort-rule-decls = dx--desugar-patterns; qsort({ ap, bp:
+    ?(MQualifiedRuleDecl(_, _, ap, _), MQualifiedRuleDecl(_, _, bp, _));
+    !(ap, bp);
+    dx--compare-patterns;
+    ?MPatternMoreSpecific() // qsort should succeed if first argument is lt second argument
+  })
+
+// CHANGES TO THE FOLLOWING SECTION SHOULD BE KEPT IN SYNC WITH
+// THE SAME COMPARISON LOGIC IN dynamix/trans/dynamix/statics/rules.stx
+rules
+  // Compare the two patterns. If the left one is more specific than
+  // the right one, return more specific. Similarly, if it is less specific
+  // return less specific. If the two are exactly the same, return equal.
+  //
+  // In cases where the two are equally specific but matching different
+  // inputs (such as two different string or integer literals), return
+  // uncomparable.
+  //
+  // This expects desugared patterns.
+  // dx--compare-pattern :: MPattern * MPattern -> MPatternOrdering
+
+  // trivial case: the two patterns are exactly equal
+  dx--compare-pattern: (a, b) -> MPatternEqual()
+    where <strip-annos; eq> (a, b)
+
+  // trivial case: bound (as) patterns delegate to their inner repr
+  dx--compare-pattern: (MPatternBound(_, ip), b) -> <dx--compare-pattern> (ip, b)
+  dx--compare-pattern: (a, MPatternBound(_, ip)) -> <dx--compare-pattern> (a, ip)
+
+  // wildcards are equally specific to other variables, and
+  // less specific compared to anything else
+  dx--compare-pattern: (MPatternWildcard(), MPatternVariable(_)) -> MPatternEqual()
+  dx--compare-pattern: (MPatternWildcard(), _) -> MPatternLessSpecific()
+
+  // variables are equally specific to other variables, wildcards
+  // and less specific compared to anything else
+  dx--compare-pattern: (MPatternVariable(_), MPatternVariable(_)) -> MPatternEqual()
+  dx--compare-pattern: (MPatternVariable(_), MPatternWildcard()) -> MPatternEqual()
+  dx--compare-pattern: (MPatternVariable(_), _) -> MPatternLessSpecific()
+
+  // constructor patterns are more specific than variables
+  // and incomparable with non-constructor patterns. with
+  // constructors, they are incomparable if the length or
+  // name of the constructor does not match, else their
+  // comparison result is the first of piecewise comparisons
+  // between arguments that does not return MPatternEqual
+  dx--compare-pattern: (MPatternConstructor(_, _), MPatternWildcard()) -> MPatternMoreSpecific()
+  dx--compare-pattern: (MPatternConstructor(_, _), MPatternVariable(_)) -> MPatternMoreSpecific()
+  dx--compare-pattern: (MPatternConstructor(an, aa), MPatternConstructor(bn, ba)) -> MPatternUncomparable()
+    where (!(an, bn); not(eq)) <+ (!(<length> aa, <length> ba); not(eq))
+  dx--compare-pattern: (MPatternConstructor(_, aa), MPatternConstructor(_, ba)) -> res
+    where res := <dx--compare-patterns> (aa, ba)
+  dx--compare-pattern: (MPatternConstructor(_, _), _) -> MPatternUncomparable()
+
+  // literal (int, string) patterns are equal to themselves,
+  // more specific than variables, and uncomparable to anything
+  // else. Note that the equality case is handled above
+  dx--compare-pattern: (MPatternString(_), MPatternWildcard()) -> MPatternMoreSpecific()
+  dx--compare-pattern: (MPatternString(_), MPatternVariable(_)) -> MPatternMoreSpecific()
+  dx--compare-pattern: (MPatternString(_), _) -> MPatternUncomparable()
+  dx--compare-pattern: (MPatternInt(_), MPatternWildcard()) -> MPatternMoreSpecific()
+  dx--compare-pattern: (MPatternInt(_), MPatternVariable(_)) -> MPatternMoreSpecific()
+  dx--compare-pattern: (MPatternInt(_), _) -> MPatternUncomparable()
+
+  // cons list patterns compare their head pattern, then their tail pattern
+  // they compare uncomparable to anything else
+  dx--compare-pattern: (MPatternListCons(_, _), MPatternWildcard()) -> MPatternMoreSpecific()
+  dx--compare-pattern: (MPatternListCons(_, _), MPatternVariable(_)) -> MPatternMoreSpecific()
+  dx--compare-pattern: (MPatternListCons([hd], tl), MPatternListCons([ohd], otl)) -> out
+    with
+      hdcmp := <dx--compare-pattern> (hd, ohd);
+      if <?MPatternEqual()> hdcmp then
+        out := <dx--compare-pattern> (tl, otl)
+      else
+        out := hdcmp
+      end
+  dx--compare-pattern: (MPatternListCons(_, _), _) -> MPatternUncomparable()
+
+  // nil list patterns are uncomparable to anything but themselves and variables
+  dx--compare-pattern: (MPatternList([]), MPatternWildcard()) -> MPatternMoreSpecific()
+  dx--compare-pattern: (MPatternList([]), MPatternVariable(_)) -> MPatternMoreSpecific()
+  dx--compare-pattern: (MPatternList([]), _) -> MPatternUncomparable()
+
+rules
+  // compare a list of patterns and return the first ordering
+  // for which the two are not equal, or return equal if they
+  // are all equal. Assumes that the patterns are of the same length
+  // dx--compare-patterns :: List(MPattern) * List(MPattern) -> MPatternOrdering
+  dx--compare-patterns = zip; getfirst(dx--compare-pattern; not(?MPatternEqual())) <+ !MPatternEqual()
+
+rules
+  // Desugar the given pattern, turning any list patterns into
+  // list cons patterns with empty lists. This ensures that list
+  // patterns have a consistent form.
+  //
+  // For list patterns, after this transformation it is guaranteed
+  // that MPatternLists are always empty (Nil) and that MPatternListCons
+  // heads are always composed of a single element.
+  //
+  // e.g. [a, b, c|d] is transformed into [a|[b|[c|d]]] and
+  // [a, b, c, d] is transformed into [a|[b|[c|[d|[]]]]]
+  // dx--desugar-patterns :: TP
+  dx--desugar-patterns = outermost(dx--desugar-list-pattern)
+
+  // [a, ...rest] -> [a|[...rest]]
+  dx--desugar-list-pattern: MPatternList([pat|rest]) -> MPatternListCons([pat], MPatternList(rest))
+
+  // [a, b, ...rest|x] -> [a|[b, ...rest]|x]
+  dx--desugar-list-pattern: MPatternListCons([pat, nextpat|rest], x) -> MPatternListCons([pat], MPatternListCons([nextpat|rest], x))
