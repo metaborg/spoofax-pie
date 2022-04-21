@@ -1,7 +1,13 @@
 module signatures/dynamix-ext-sig
 
+imports
+  signatures/dynamix-sig
+
 // inserted during compilation/merging
 signature
   constructors
     // get the given named property for the given expression
     MExprConstraintAnalyzerProperty : MExpr * string -> MExpr
+
+    // MRuleDecl with extra string declaring the position and a fully qualified name
+    MQualifiedRuleDecl : RID * string * list(MPattern) * MExpr -> MRuleDecl

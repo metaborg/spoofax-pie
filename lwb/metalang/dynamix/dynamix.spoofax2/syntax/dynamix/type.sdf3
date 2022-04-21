@@ -3,13 +3,13 @@ module dynamix/type
 imports
   dynamix/common
   dynamix/source
-  
+
 context-free sorts MSourceType
 context-free syntax
   MSourceType.MSourceTypeSortID = [[UID]]
   MSourceType.MSourceTypeString = [string]
   MSourceType.MSourceTypeInt = [int]
-  
+
 // these differ from MSourceType in that they mirror
 // the exact syntax of the stratego generated signatures
 //
@@ -30,8 +30,8 @@ context-free syntax
   MType.MTypeSourceType = <'<MSourceType>>
   MType.MTypeTargetType = <@<MTargetType>>
   // todo: this currently doesn't align with the interpreter
-  // as the interpreter only supports lists of CPS values
-  MType.MTypeList = <List(<MType>)> 
+  // as the interpreter only supports lists of CPS values (#6)
+  MType.MTypeList = <List(<MType>)>
 
   // the type argument represents the type of the variable used
   // when bound within a body using the <- operator, and does not
@@ -39,13 +39,13 @@ context-free syntax
   // contains the hole
   MType.MTypeHoly1 = <Holy(<MType>)>
   MType.MTypeHoly0 = <Holy>
-  
+
 context-free sorts MTargetType
 context-free syntax
   MTargetType.MTargetTypeValue = <value>
   // represents a finalized AST node (aka tail calling)
   MTargetType.MTargetTypeCPSFinalized = <statement>
-  
+
 context-free sorts MRuleSignature
 context-free syntax
   MRuleSignature.MRuleSignature = [[{MType " * "}+] -> [MType]]

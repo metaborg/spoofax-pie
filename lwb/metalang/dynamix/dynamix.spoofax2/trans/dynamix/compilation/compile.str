@@ -7,6 +7,8 @@ imports
 
   statix/api
 
+  libspoofax/term/origin
+
 rules
   // during compilation, we fully qualify all references to rules by prefixing
   // them with "<modname>!" (e.g. exprs!compileExpr). This allows us to merge
@@ -15,19 +17,29 @@ rules
   dx--generate-aterm: (_, _, p@DynamixProgram(mid, _), path, project-path) -> ($[[mid].aterm], p')
     where
       p' := <dx--qualify-module(|mid); strip-annos> p
+  // for testing purposes only
+  dx--generate-aterm: (_, _, p@DynamixMultiProgram(programs), path, project-path) -> ($[[mid].aterm], p')
+    where
+      [DynamixProgram(mid, _)|_] := p; // hack: use first module in file as name of output
+      p' := <dx--to-merged; strip-annos> p
 
   dx--qualify-module(|mid) = topdown(try(dx--fully-qualify(|mid)))
   dx--fully-qualify(|mid): MRuleDeclSignature(name, sig) -> MRuleDeclSignature($[[mid]![name]], sig)
   dx--fully-qualify(|mid): MRuleDeclGlobal(name, sig) -> MRuleDeclGlobal($[[mid]![name]], sig)
-  dx--fully-qualify(|mid): MRuleDecl(name, pats, body) -> MRuleDecl($[[mid]![name]], pats, body)
+  // need to look up the declaration here since rules can be implemented across multiple modules
+  dx--fully-qualify(|_): m@MRuleDecl(name, pats, body) -> MQualifiedRuleDecl(<dx--qualify-ast-name> name, loc, pats, body)
+    with
+      file := <origin-file> name;
+      line := <origin-line> name;
+      loc := $[[file]:[line]]
 
-  dx--fully-qualify(|mid): MExprGlobal(name) -> MExprGlobal(<dx--qualify-ast-name> name)
-  dx--fully-qualify(|mid): MScopedGlobalBinding(name, exp) -> MScopedGlobalBinding(<dx--qualify-ast-name> name, exp)
+  dx--fully-qualify(|_): MExprGlobal(name) -> MExprGlobal(<dx--qualify-ast-name> name)
+  dx--fully-qualify(|_): MScopedGlobalBinding(name, exp) -> MScopedGlobalBinding(<dx--qualify-ast-name> name, exp)
 
   // convert call to either constraint analyzer or qualified call depending on which one it was
-  dx--fully-qualify(|mid): MExprCall(name, [arg]) -> MExprConstraintAnalyzerProperty(name, arg)
+  dx--fully-qualify(|_): MExprCall(name, [arg]) -> MExprConstraintAnalyzerProperty(name, arg)
     where <dx--get-ref; dx--get-prop(|"isConstraintProperty")> name
-  dx--fully-qualify(|mid): MExprCall(name, args) -> MExprCall(<dx--qualify-ast-name> name, args)
+  dx--fully-qualify(|_): MExprCall(name, args) -> MExprCall(<dx--qualify-ast-name> name, args)
 
   // merging simply combines together all of the rule sections
   // from the input asts. it is assumed that each of the specs
@@ -46,7 +58,7 @@ rules
   // with that declaration having a "declaringModule" statix prop,
   // and returns the name with that mod name prefixed to it
   dx--qualify-ast-name: name -> $[[refMod]![name]]
-    where
+    with
       ref := <dx--get-ref> name;
       refMod := <dx--get-prop(|"declaringModule")> ref
 

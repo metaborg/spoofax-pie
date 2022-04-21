@@ -103,7 +103,7 @@ context-free syntax
     {
       <{MStatement "\n"}+>
     }
-  > // TODO: force newlines between statements?
+  > // TODO: force newlines between statements? (#4)
   MExpr.MExprLabeled1 = <
     <MExpr>
     label <LID>/1:
@@ -168,6 +168,7 @@ template options
   UID = keyword {reject}
   ID = keyword {reject}
   PID = keyword {reject}
+  MID = keyword {reject}
 
 context-free priorities
   MExpr.MExprContinueAt > MExpr.MExprTLet

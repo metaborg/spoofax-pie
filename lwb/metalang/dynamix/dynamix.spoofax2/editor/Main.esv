@@ -10,7 +10,7 @@ imports
 
 language
   extensions : dx
-  provider : target/metaborg/stratego.jar
+  provider : target/metaborg/stratego.ctree
 
 menus
   menu: "Debug" (openeditor)

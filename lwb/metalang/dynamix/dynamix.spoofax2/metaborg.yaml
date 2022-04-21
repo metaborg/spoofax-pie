@@ -15,6 +15,9 @@ pardonedLanguages:
 - EditorService
 - Stratego-Sugar
 - SDF
+runtime:
+  statix:
+    message-term-depth: 10
 language:
   sdf:
     pretty-print: dynamix
@@ -22,6 +25,7 @@ language:
     placeholder:
       prefix: "$"
   stratego:
+    format: ctree
     args:
     - -la
     - stratego-lib
