@@ -153,6 +153,8 @@ rules // Dynamix section and options
 
   dynamixOptionOk(s, DynamixSource(source)) :-
     dynamixSourceOk(s, source).
+  dynamixOptionOk(s, DynamixMainRuleName(e)) :-
+    typeOfExpr(s, e) == STRING() | error $[Expected string]@e.
 
   dynamixSourceOk : scope * DynamixSource
   dynamixSourceOk(s, DynamixFiles(options)) :- dynamixFilesOptionsOk(s, options).

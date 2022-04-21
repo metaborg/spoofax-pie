@@ -124,6 +124,7 @@ context-free syntax
   <{DynamixOption "\n"}*>
 }>
   DynamixOption.DynamixSource = <source = <DynamixSource>>
+  DynamixOption.DynamixMainRuleName = <main-rule-name = <Expr>>
 
   DynamixSource.DynamixFiles  = <files {
   <{DynamixFilesOption "\n"}*>

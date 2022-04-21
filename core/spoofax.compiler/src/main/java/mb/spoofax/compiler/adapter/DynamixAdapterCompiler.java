@@ -72,6 +72,12 @@ public class DynamixAdapterCompiler {
             return new DynamixAdapterCompiler.Input.Builder();
         }
 
+        /// Configuration
+
+        @Value.Default default String mainRuleName() {
+            return "main!compileFile";
+        }
+
         /// Kinds of classes (generated/extended/manual)
 
         @Value.Default default ClassKind classKind() {

@@ -97,8 +97,7 @@ public class {{baseExecuteDynamixSpecification.id}} implements TaskDef<{{baseExe
     }
 
     private DynamixRuntimeConfig createDynamixRuntimeConfig() {
-        // TODO
-    	return new DynamixRuntimeConfig("main!evalProgram");
+    	return new DynamixRuntimeConfig("{{mainRuleName}}");
     }
 
     private static final class AnalysisResultToAstMapper extends StatelessSerializableFunction<Result<ConstraintAnalyzeFile.Output, ?>, Result<IStrategoTerm, ?>> {

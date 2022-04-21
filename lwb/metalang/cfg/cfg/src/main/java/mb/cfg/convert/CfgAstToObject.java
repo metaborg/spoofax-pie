@@ -404,6 +404,7 @@ public class CfgAstToObject {
         });
         parts.getAllSubTermsInListAsParts("DynamixSection").ifSome(subParts -> {
             final DynamixAdapterCompiler.Input.Builder adapter = adapterBuilder.withDynamix();
+            subParts.forOneSubtermAsString("DynamixMainRuleName", adapter::mainRuleName);
         });
         parts.getAllSubTermsInListAsParts("ReferenceResolutionSection").ifSome(subParts -> {
             final ReferenceResolutionAdapterCompiler.Input.Builder builder = adapterBuilder.withReferenceResolution();
