@@ -3,43 +3,43 @@ module tim/exps
 imports
   signatures/tim/common-sig
   signatures/tim/exp-sig
-  
+
   tim/names
   tim/types
-  
+
 rules
   typeOfTValue : scope * TValue -> TYPE
   typesOfTValues maps typeOfTValue(*, list(*)) = list(*)
-  
+
   typeOfTValue(_, TValue-Plhdr()) = _.
   typeOfTValue(_, t@TValueInt(_)) = INT() :- @t.type := INT().
   typeOfTValue(_, t@TValueString(_)) = STRING() :- @t.type := INT().
   typeOfTValue(s, t@TValueVar(v)) = T :- resolveVar(s, v) == T, @t.type := T.
-  
+
 rules
   texpOk : scope * TExp
   texpsOk maps texpOk(*, list(*))
-  
+
   texpOk(_, TExp-Plhdr()).
-  
+
   texpOk(s, TExpApp(target, args)) :- {T givenArgTys expectedArgTys}
     typeOfTValue(s, target) == T,
     T == FUNCTION(expectedArgTys) | error $[The target of a function application must be a function, [T] given.],
     typesOfTValues(s, args) == givenArgTys,
     typesCoercibleTo(givenArgTys, expectedArgTys) | error $[Incompatible arguments passed to function application.].
-    
+
   texpOk(s, TExpFix(funs, body)) :- {funS bodyS}
     new funS, funS -P-> s,
     declareFuns(funS, funs),
     new bodyS, bodyS -P-> funS,
     texpOk(bodyS, body).
-    
+
   texpOk(s, TExpLet(binds, body)) :- {bindS bodyS}
     new bindS, bindS -P-> s,
     declareBinds(s, bindS, binds),
     new bodyS, bodyS -P-> bindS,
     texpOk(bodyS, body).
-    
+
   texpOk(s, TExpPrimOp(op, args, x, rest)) :- {T argTys s'}
     new s', s' -P-> s,
     typesOfTValues(s, args) == argTys,
@@ -47,21 +47,21 @@ rules
     declareVar(s', x, T),
     texpOk(s', rest),
     @x.type := T.
-    
+
   texpOk(s, TExpTerminatingPrimOp(op, args)) :- {argTys}
     typesOfTValues(s, args) == argTys,
     terminatingPrimOpOk(op, argTys) | error $[Illegal primitive operation.].
-    
+
   texpOk(s, TExpConditionalPrimOp(op, args, then, else)) :- {argTys}
     typesOfTValues(s, args) == argTys,
     conditionalPrimOpOk(op, argTys) | error $[Illegal primitive operation.],
     texpOk(s, then),
     texpOk(s, else).
-    
+
 rules
   declareFun : scope * TFun
   declareFuns maps declareFun(*, list(*))
-  
+
   declareFun(s, fn@TFun(name, argNames, body)) :- {argS argTys fnTy}
     new argS, argS -P-> s,
     declareFunArgs(argS, argNames) == argTys,
@@ -69,28 +69,28 @@ rules
     @fn.type := fnTy,
     declareVar(s, name, fnTy),
     texpOk(argS, body).
-    
+
   declareFunArg : scope * TID -> TYPE
   declareFunArgs maps declareFunArg(*, list(*)) = list(*)
-  
+
   declareFunArg(s, name) = T :-
     @name.type := T,
     declareVar(s, name, T). // intentional ungrounded variable here
-    
+
 rules
   declareBind : scope * scope * TBind
   declareBinds maps declareBind(*, *, list(*))
-  
+
   declareBind(s, dS, TBind(name, val)) :- {T}
     typeOfTValue(s, val) == T,
     declareVar(dS, name, T),
     @name.type := T.
-    
+
 rules
   conditionalPrimOpOk : TPRIM * list(TYPE)
   terminatingPrimOpOk : TPRIM * list(TYPE)
   typeOfPrimOp : TPRIM * list(TYPE) -> TYPE
-  
+
   terminatingPrimOpOk("exit", []).
 
   conditionalPrimOpOk("int-eq", [INT(), INT()]).
@@ -99,10 +99,10 @@ rules
   conditionalPrimOpOk("int-geq", [INT(), INT()]).
   conditionalPrimOpOk("int-gt", [INT(), INT()]).
   conditionalPrimOpOk("int-lt", [INT(), INT()]).
-  
+
   conditionalPrimOpOk("str-eq", [STRING(), STRING()]).
   conditionalPrimOpOk("str-neq", [STRING(), STRING()]).
-  
+
   typeOfPrimOp("print", [x]) = x.
   typeOfPrimOp("int-neg", [INT()]) = INT().
   typeOfPrimOp("int-add", [INT(), INT()]) = INT().
@@ -111,11 +111,12 @@ rules
   typeOfPrimOp("int-div", [INT(), INT()]) = INT().
   typeOfPrimOp("ref-new", [T]) = REF(T).
   typeOfPrimOp("array-new", _) = ARRAY().
+  typeOfPrimOp("array-write", [ARRAY(), INT(), T]) = T.
   typeOfPrimOp("record-new", _) = RECORD().
   typeOfPrimOp("record-write", [RECORD(), STRING(), T]) = T.
   typeOfPrimOp("ref-fetch", [REF(T)]) = T.
   typeOfPrimOp("ref-store", [REF(T), T']) = T' :-
     typeCoercibleTo(T', T) | error $[The type [T'] is not assignable to a reference of type [T].].
-  
+
   typeOfPrimOp("array-read", [ARRAY(), INT()]) = _. // intentionally unbound
   typeOfPrimOp("record-read", [RECORD(), STRING()]) = _. // intentionally unbound
