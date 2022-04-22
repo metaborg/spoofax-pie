@@ -4,7 +4,9 @@ import mb.cfg.task.CfgRootDirectoryToObjectException;
 import mb.common.util.ADT;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.lwb.compiler.definition.ResolveDependenciesException;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3ConfigureException;
+import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3ConfigureExceptions;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -20,6 +22,8 @@ public abstract class SpoofaxEsvConfigureException extends Exception {
         R mainFileFail(ResourceKey mainFile);
 
         R includeDirectoryFail(ResourcePath includeDirectory);
+
+        R resolveIncludeFail(ResolveDependenciesException resolveDependenciesException);
 
         R sdf3ConfigureFail(SpoofaxSdf3ConfigureException spoofaxSdf3ConfigureException);
     }
@@ -38,6 +42,10 @@ public abstract class SpoofaxEsvConfigureException extends Exception {
 
     public static SpoofaxEsvConfigureException includeDirectoryFail(ResourcePath includeDirectory) {
         return SpoofaxEsvConfigureExceptions.includeDirectoryFail(includeDirectory);
+    }
+
+    public static SpoofaxEsvConfigureException resolveIncludeFail(ResolveDependenciesException cause) {
+        return withCause(SpoofaxEsvConfigureExceptions.resolveIncludeFail(cause), cause);
     }
 
     public static SpoofaxEsvConfigureException sdf3ConfigureFail(SpoofaxSdf3ConfigureException spoofaxSdf3ConfigureException) {
@@ -67,6 +75,7 @@ public abstract class SpoofaxEsvConfigureException extends Exception {
             .mainSourceDirectoryFail((mainSourceDirectory) -> "ESV main source directory '" + mainSourceDirectory + "' does not exist or is not a directory")
             .mainFileFail((mainFile) -> "ESV main file '" + mainFile + "' does not exist or is not a file")
             .includeDirectoryFail((includeDirectory) -> "ESV include directory '" + includeDirectory + "' does not exist or is not a directory")
+            .resolveIncludeFail(cause -> "Resolving compile-time dependency to ESV imports failed")
             .sdf3ConfigureFail((cause) -> "Failed to configure SDF3")
             ;
     }

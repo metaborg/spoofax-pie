@@ -24,18 +24,15 @@ import java.util.HashSet;
 
 public abstract class EsvVisitor {
     private final EsvParseWrapper parse;
-    //    private final ListView<? extends Supplier<?>> sourceFileOrigins;
     private final ListView<Supplier<Result<ResourcePath, ?>>> includeDirectorySuppliers;
     private final ListView<Supplier<Result<IStrategoTerm, ?>>> includeAstSuppliers;
 
     protected EsvVisitor(
         EsvParseWrapper parse,
-//        ListView<? extends Supplier<?>> sourceFileOrigins,
         ListView<Supplier<Result<ResourcePath, ?>>> includeDirectorySuppliers,
         ListView<Supplier<Result<IStrategoTerm, ?>>> includeAstSuppliers
     ) {
         this.parse = parse;
-//        this.sourceFileOrigins = sourceFileOrigins;
         this.includeDirectorySuppliers = includeDirectorySuppliers;
         this.includeAstSuppliers = includeAstSuppliers;
     }
@@ -98,7 +95,7 @@ public abstract class EsvVisitor {
                 continue;
             }
             final ResourcePath includeDirectory = result.get();
-            final ResourcePath esvFile = includeDirectory.appendRelativePath(importName).ensureLeafExtension("esv").getNormalized();
+            final ResourcePath esvFile = includeDirectory.appendRelativePath(importName).ensureLeafExtension(EsvUtil.fileExtension).getNormalized();
             try {
                 final ReadableResource resource = context.require(esvFile, ResourceStampers.<ReadableResource>exists());
                 if(!resource.exists()) continue;

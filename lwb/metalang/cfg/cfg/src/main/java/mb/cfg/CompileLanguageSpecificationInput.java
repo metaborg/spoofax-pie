@@ -55,13 +55,19 @@ public interface CompileLanguageSpecificationInput extends Serializable {
         stratego().ifPresent(c -> {
             dependencies.add(createDependency.apply("strategolib"));
             dependencies.add(createDependency.apply("gpp"));
-            if(c.source().getFiles().includeLibSpoofax2Exports()) {
-                dependencies.add(createDependency.apply("libspoofax2"));
-            }
-            if(c.source().getFiles().includeLibStatixExports()) {
-                dependencies.add(createDependency.apply("libstatix"));
-            }
         });
+        final boolean dependOnLibSpoofax2 = stratego()
+            .map(c -> c.source().getFiles().includeLibSpoofax2Exports())
+            .orElseGet(() -> esv().isPresent());
+        if(dependOnLibSpoofax2) {
+            dependencies.add(createDependency.apply("libspoofax2"));
+        }
+        final boolean dependOnLibStatix = stratego()
+            .map(s -> s.source().getFiles().includeLibStatixExports())
+            .orElse(false);
+        if(dependOnLibStatix) {
+            dependencies.add(createDependency.apply("libstatix"));
+        }
         return dependencies;
     }
 

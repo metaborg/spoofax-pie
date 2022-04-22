@@ -38,6 +38,10 @@ public abstract class CfgEsvSource implements Serializable {
 
         List<String> exportDirectories();
 
+        default ResourcePath unarchiveDirectory() {
+            return compileLanguageShared().unarchiveDirectory();
+        }
+
         @Value.Default default boolean includeLibSpoofax2Exports() {
             return compileLanguageShared().includeLibSpoofax2Exports();
         }

@@ -34,7 +34,7 @@ languageAdapterProject {
     project.configureCompilerInput()
     withExports().run {
       addDirectoryExport("Stratego", "trans")
-      addDirectoryExport("Esv", "editor")
+      addDirectoryExport("ESV", "editor")
     }
   }
 }
