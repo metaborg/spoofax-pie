@@ -94,10 +94,19 @@ public class Sdf3CheckSpec implements TaskDef<Sdf3SpecConfig, KeyedMessages> {
             .orElseThrow(() -> new InvalidAstShapeException("constructor application as first subterm", ast));
         final String moduleName = SeparatorUtil.convertCurrentToUnixSeparator(TermUtils.asJavaStringAt(moduleNameTerm, 0)
             .orElseThrow(() -> new InvalidAstShapeException("module name string as first subterm", moduleNameTerm)));
-        final String relativePath = SeparatorUtil.convertCurrentToUnixSeparator(input.mainSourceDirectory.relativize(file.removeLeafExtension()));
-        if(!moduleName.equals(relativePath)) {
-            messagesBuilder.addMessage("Module name '" + moduleName + "' does not agree with relative file path '" +
-                relativePath + "'. Either change the module name or move/rename the file", Severity.Error, file, TermTracer.getRegion(moduleNameTerm));
+        final String relativeToMainSourcePath = SeparatorUtil.convertCurrentToUnixSeparator(input.mainSourceDirectory.relativize(file.removeLeafExtension()));
+        if(!moduleName.equals(relativeToMainSourcePath)) {
+            boolean relativeToInclude = false;
+            for(ResourcePath includeDirectory : input.includeDirectories) {
+                final String relativePath = SeparatorUtil.convertCurrentToUnixSeparator(includeDirectory.relativize(file.removeLeafExtension()));
+                if(moduleName.equals(relativePath)) {
+                    relativeToInclude = true;
+                }
+            }
+            if(!relativeToInclude) {
+                messagesBuilder.addMessage("Module name '" + moduleName + "' does not agree with relative file path '" +
+                    relativeToMainSourcePath + "'. Either change the module name or move/rename the file", Severity.Error, file, TermTracer.getRegion(moduleNameTerm));
+            }
         }
     }
 
