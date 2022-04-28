@@ -155,11 +155,11 @@ rules
   declarePattern(_, ds, p@MPatternVariable(name), ty) = ty :-
     declareVar(ds, name, ty),
     @p.type := ty.
-  declarePattern(s, ds, MPatternList(pats), ty) = ty :- {ET}
-    ty == MLIST(ET) | error $[Cannot list-pattern match on a non-list type [ty].],
+  declarePattern(s, ds, MPatternList(pats), ty) = MLIST(ET) :-
+    listCoercibleTo(ty, MLIST(ET)) | error $[Cannot list-pattern match on a non-list type [ty].],
     declarePatterns(s, ds, pats, ET) == _.
-  declarePattern(s, ds, MPatternListCons(pats, retpat), ty) = ty :- {ET}
-    ty == MLIST(ET) | error $[Cannot list-pattern match on a non-list type [ty].],
+  declarePattern(s, ds, MPatternListCons(pats, retpat), ty) = MLIST(ET) :-
+    listCoercibleTo(ty, MLIST(ET)) | error $[Cannot list-pattern match on a non-list type [ty].],
     declarePatterns(s, ds, pats, ET) == _,
     declarePattern(s, ds, retpat, ty) == _.
   declarePattern(s, ds, MPatternConstructor(name, argpats), ty) = MSTYPE(ST) :- {sn AT}

@@ -152,6 +152,19 @@ rules
     hasInjection(s, TT, T),
     try { false } | note $[Coercing [T] to [TT].].
 
+  // specific helper for list coercions in patterns
+  // unlike typeCoercibleTo, the target/expected type
+  // is the first argument here
+  listCoercibleTo : MTYPE * MTYPE
+  listCoercibleTo(MLIST(A), MLIST(B)) :- A == B.
+  listCoercibleTo(MSTYPE(TT@SSORT(_, s)), T@MLIST(_)) :-
+    hasListInjection(s, T, TT),
+    try { false } | note $[List coercing [T] to [TT].].
+  listCoercibleTo(MSTYPE(TT@SSORT(_, s)), T) :-
+    hasInjection(s, T, TT),
+    try { false } | note $[Coercing [T] to [TT].].
+  listCoercibleTo(A, B) :- typeCoercibleTo(B, A).
+
   // todo: better lub using injections?
   lub : list(MTYPE) -> MTYPE
   lub([T]) = T.
@@ -196,5 +209,15 @@ rules
 
   hasInjection : scope * MTYPE * STYPE
   hasInjection(s, from, to) :- {ps}
-    query injection filter (I | P)* and { (a, b) :- a == from, b == to } min and false in s |-> ps,
-    ps != [].
+    query injection filter (I | P)* and { (a, b) :- b == to } min and false in s |-> ps,
+    try { false } | note $[checkValidInjectionCandidate([ps], [from])],
+    checkValidInjectionCandidate(ps, from).
+
+  hasListInjection : scope * MTYPE * STYPE
+  hasListInjection(s, T, to) :- {ps}
+    query injection filter (I | P)* and { (a, b) :- a == MLIST(_), b == to } min and false in s |-> ps,
+    ps == [(_, (T, _))|_].
+
+  checkValidInjectionCandidate : list((path * (MTYPE * STYPE))) * MTYPE
+  checkValidInjectionCandidate([(_, (A, _))|_], A).
+  checkValidInjectionCandidate([_|tl], A) :- checkValidInjectionCandidate(tl, A).

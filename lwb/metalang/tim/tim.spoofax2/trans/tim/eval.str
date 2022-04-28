@@ -66,12 +66,17 @@ rules
   tim-eval-texp(io|s) = tim-eval-texp-(io|s)
 
   // tim-eval-texp-(TIOAction -> ?|TScope) :: TExp -> TContinuation
-  tim-eval-texp-(io|scope): TExpApp(target, args) -> ret
+  tim-eval-texp-(io|scope): exp@TExpApp(target, args) -> ret
     with
       // evaluate fn and args
       TRuntimeFunction(fnScope, TFun(fnName, argNames, fnBody)) := <tim-eval-tvalue(io|scope)> target;
       argValues := <map(tim-eval-tvalue(io|scope))> args;
       fnScope' := <tim-box-get> fnScope;
+
+      // should error in statix, but sanity check just in case
+      if <where(not(zip))> (argNames, argValues) then
+        <tim-fail-msg(|"Inappropriate number of arguments in call: ")> exp
+      end;
 
       // create new scope for arg values and insert them
       argScope := <tim-scope-push> fnScope';
@@ -130,32 +135,54 @@ rules
 
   // tim-eval-tvalue-(|TScope) :: TValue -> TRuntimeValue
   tim-eval-tvalue-(io|scope): TValueInt(v) -> TRuntimeInt(<string-to-int> v)
-  tim-eval-tvalue-(io|scope): TValueString(v) -> TRuntimeString(<strip-annos> v)
+  tim-eval-tvalue-(io|scope): TValueString(v) -> TRuntimeString(<strip-annos; unquote(?'"')> v)
   tim-eval-tvalue-(io|scope): TValueVar(v) -> <tim-scope-get(|v) <+ tim-fail-msg(|$[Undeclared variable [v]])> scope
 
 rules // primops
   // tim-eval-primop-stmt(TIOAction -> ?) :: TPRIM * List(TRuntimeValue) -> TContinuation
   tim-eval-primop-stmt(io): ("exit", []) -> TTerminate()
+  tim-eval-primop-stmt(io): a -> <tim-fail-msg(|"Unsupported statement primitive: ")> a
 
   // tim-eval-primop-exp(TIOAction -> ?) :: TPRIM * List(TRuntimeValue) -> TRuntimeValue
   tim-eval-primop-exp(io): ("print", [v]) -> <tim-runtime-value-to-string; ![<id>, "\n"]; concat-strings; !TIOPrint(<id>); io> v
+
   tim-eval-primop-exp(io): ("int-neg", [TRuntimeInt(v)]) -> TRuntimeInt(<subti> (0, v))
   tim-eval-primop-exp(io): ("int-add", [TRuntimeInt(a), TRuntimeInt(b)]) -> TRuntimeInt(<addi> (a, b))
   tim-eval-primop-exp(io): ("int-sub", [TRuntimeInt(a), TRuntimeInt(b)]) -> TRuntimeInt(<subti> (a, b))
   tim-eval-primop-exp(io): ("int-mul", [TRuntimeInt(a), TRuntimeInt(b)]) -> TRuntimeInt(<muli> (a, b))
   tim-eval-primop-exp(io): ("int-div", [TRuntimeInt(a), TRuntimeInt(b)]) -> TRuntimeInt(<divi> (a, b))
+
+  tim-eval-primop-exp(io): ("str-add", [TRuntimeString(a), TRuntimeString(b)]) -> TRuntimeString($[[a][b]])
+  tim-eval-primop-exp(io): ("str-length", [TRuntimeString(a)]) -> TRuntimeInt(<string-length> a)
+  tim-eval-primop-exp(io): ("str-index", [TRuntimeString(a), TRuntimeInt(b)]) -> TRuntimeString(<explode-string; index(|<addi> (b, 1)); ![<id>]; implode-string> a)
+
   tim-eval-primop-exp(io): ("ref-new", [v]) -> TRuntimeReference(<tim-box-new(|v)>)
   tim-eval-primop-exp(io): ("ref-fetch", [TRuntimeReference(box)]) -> <tim-box-get> box
   tim-eval-primop-exp(io): ("ref-store", [TRuntimeReference(box), v]) -> <tim-box-set(|v); !v> box
-  tim-eval-primop-exp(io): ("array-new", vs) -> TRuntimeArray(<tim-box-new> vs)
+
+  tim-eval-primop-exp(io): ("array-new", vs) -> TRuntimeArray(<tim-box-new(|vs)>)
   tim-eval-primop-exp(io): ("array-read", [TRuntimeArray(vs), TRuntimeInt(idx)]) -> <tim-box-get; index(|<addi> (idx, 1))> vs
   tim-eval-primop-exp(io): ("array-write", [TRuntimeArray(vs), TRuntimeInt(idx), val]) -> val
     with
       oldv := <tim-box-get> vs;
       repl := <set-index> (idx, val, oldv);
       <tim-box-set(|repl)> vs
+  tim-eval-primop-exp(io): ("array-length", [TRuntimeArray(vs)]) -> TRuntimeInt(<tim-box-get; length> vs)
+  tim-eval-primop-exp(io): ("array-concat", [TRuntimeArray(va), TRuntimeArray(vb)]) -> TRuntimeArray(<tim-box-new(|out)>)
+    with
+      av := <tim-box-get> va;
+      bv := <tim-box-get> vb;
+      out := <conc> (av, bv)
+
   tim-eval-primop-exp(io): ("record-new", args) -> TRuntimeRecord(<tim-build-record(|<new-hashtable>)> args)
-  tim-eval-primop-exp(io): ("record-read", [TRuntimeRecord(h), TRuntimeString(x)]) -> <hashtable-get(|x)> h
+  tim-eval-primop-exp(io): ("record-read", [TRuntimeRecord(h), TRuntimeString(x)]) -> ret
+    with
+      ret := <hashtable-get(|x) <+ tim-fail-msg(|$[No property [x] in record])> h
+  tim-eval-primop-exp(io): ("record-write", [TRuntimeRecord(h), TRuntimeString(x), v]) -> v
+    with
+      <hashtable-put(|x, v)> h
+
+  tim-eval-primop-exp(io): a -> <tim-fail-msg(|"Unsupported expression primitive: ")> a
 
   // tim-eval-primop-condition(TIOAction -> ?) :: TPRIM * List(TRuntimeValue) -> int // 1 if branch taken, 0 otherwise
   tim-eval-primop-condition(io): ("int-eq", [TRuntimeInt(a), TRuntimeInt(b)]) -> <eq < !1 + !0> (a, b)
@@ -165,8 +192,14 @@ rules // primops
   tim-eval-primop-condition(io): ("int-gt", [TRuntimeInt(a), TRuntimeInt(b)]) -> <gt < !1 + !0> (a, b)
   tim-eval-primop-condition(io): ("int-lt", [TRuntimeInt(a), TRuntimeInt(b)]) -> <lt < !1 + !0> (a, b)
 
+  // checks underlying term representation is equal
+  // TODO: remove
+  tim-eval-primop-condition(io): ("term-eq", [a, b]) -> <strip-annos; debug(!"Checking for equality: "); eq < !1 + !0> (a, b)
+
   tim-eval-primop-condition(io): ("str-eq", [TRuntimeString(a), TRuntimeString(b)]) -> <eq < !1 + !0> (a, b)
   tim-eval-primop-condition(io): ("str-neq", [TRuntimeString(a), TRuntimeString(b)]) -> <eq < !0 + !1> (a, b)
+
+  tim-eval-primop-condition(io): a -> <tim-fail-msg(|"Unsupported conditional primitive: ")> a
 
   // tim-build-record(|Hashtable) :: List(TRuntimeValue) -> Hashtable
   tim-build-record(|h): [] -> h

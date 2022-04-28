@@ -214,8 +214,7 @@ rules
   dx--get-constraint-property(|prop): term -> val
     with
       a := <stx-get-ast-analysis <+ dx--fail-msg(|"Cannot get constraint-analyzer property on source term without analysis information.")> term;
-      val := <(stx-get-ast-property(|a, prop) <+ ![]); dx--to-list; dx--quoted-to-runtime> term;
-      <debug(!$[[prop] annotations on: ])> (term, <stx-get-ast-property(|a, prop) <+ !"error"> term)
+      val := <(stx-get-ast-property(|a, prop) <+ ![]); dx--to-list; dx--quoted-to-runtime> term
 
   // dx--to-list :: ? -> list(a)
   dx--to-list = ?x; (is-list < !x + ![x])

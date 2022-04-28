@@ -100,20 +100,33 @@ rules
   conditionalPrimOpOk("int-gt", [INT(), INT()]).
   conditionalPrimOpOk("int-lt", [INT(), INT()]).
 
+  // TODO: HACK, remove
+  conditionalPrimOpOk("term-eq", [_, _]).
+
   conditionalPrimOpOk("str-eq", [STRING(), STRING()]).
   conditionalPrimOpOk("str-neq", [STRING(), STRING()]).
 
   typeOfPrimOp("print", [x]) = x.
+
   typeOfPrimOp("int-neg", [INT()]) = INT().
   typeOfPrimOp("int-add", [INT(), INT()]) = INT().
   typeOfPrimOp("int-sub", [INT(), INT()]) = INT().
   typeOfPrimOp("int-mul", [INT(), INT()]) = INT().
   typeOfPrimOp("int-div", [INT(), INT()]) = INT().
-  typeOfPrimOp("ref-new", [T]) = REF(T).
+
+  typeOfPrimOp("str-add", [STRING(), STRING()]) = STRING().
+  typeOfPrimOp("str-length", [STRING()]) = INT().
+  typeOfPrimOp("str-index", [STRING(), INT()]) = STRING().
+
   typeOfPrimOp("array-new", _) = ARRAY().
   typeOfPrimOp("array-write", [ARRAY(), INT(), T]) = T.
+  typeOfPrimOp("array-length", [ARRAY()]) = INT().
+  typeOfPrimOp("array-concat", [ARRAY(), ARRAY()]) = ARRAY().
+
   typeOfPrimOp("record-new", _) = RECORD().
   typeOfPrimOp("record-write", [RECORD(), STRING(), T]) = T.
+
+  typeOfPrimOp("ref-new", [T]) = REF(T).
   typeOfPrimOp("ref-fetch", [REF(T)]) = T.
   typeOfPrimOp("ref-store", [REF(T), T']) = T' :-
     typeCoercibleTo(T', T) | error $[The type [T'] is not assignable to a reference of type [T].].
