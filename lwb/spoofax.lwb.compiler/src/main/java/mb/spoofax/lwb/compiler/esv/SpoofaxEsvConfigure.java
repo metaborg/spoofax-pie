@@ -144,6 +144,7 @@ public class SpoofaxEsvConfigure implements TaskDef<ResourcePath, Result<Option<
 
         // Gather include directories.
         final LinkedHashSet<Supplier<Result<ResourcePath, ?>>> includeDirectorySuppliers = new LinkedHashSet<>(); // LinkedHashSet to remove duplicates while keeping insertion order.
+        includeDirectorySuppliers.add(new ValueSupplier<>(Result.ofOk(mainSourceDirectory.getPath()))); // Add main source directory as an include directory.
         for(ResourcePath includeDirectory : files.includeDirectories()) {
             includeDirectorySuppliers.add(new ValueSupplier<>(Result.ofOk(includeDirectory)));
         }

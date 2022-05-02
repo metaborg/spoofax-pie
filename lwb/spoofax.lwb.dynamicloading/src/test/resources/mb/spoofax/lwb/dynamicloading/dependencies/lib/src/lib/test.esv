@@ -1,0 +1,5 @@
+module lib/test
+
+colorer
+
+  black = 0 0 0

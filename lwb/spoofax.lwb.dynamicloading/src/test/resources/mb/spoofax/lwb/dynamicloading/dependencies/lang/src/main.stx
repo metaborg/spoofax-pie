@@ -1,0 +1,11 @@
+module main
+
+imports
+
+  lib/test
+  signatures/lib/start-sig
+  
+rules
+
+  bla: Start
+  bla(s) :- test(s).

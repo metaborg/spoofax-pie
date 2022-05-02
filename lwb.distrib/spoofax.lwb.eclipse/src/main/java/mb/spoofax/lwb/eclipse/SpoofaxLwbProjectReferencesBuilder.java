@@ -110,16 +110,16 @@ public class SpoofaxLwbProjectReferencesBuilder extends SpoofaxLwbBuilderBase im
                 final ExceptionPrinter exceptionPrinter = new ExceptionPrinter();
                 exceptionPrinter.addCurrentDirectoryContext(rootDirectory);
                 final String message = exceptionPrinter.printExceptionToString(e);
-                logger.error(message);
-                throw new CoreException(new Status(IStatus.ERROR, SpoofaxLwbPlugin.id, IStatus.ERROR, message, null));
+                logger.warn(message);
+                throw new CoreException(new Status(IStatus.WARNING, SpoofaxLwbPlugin.id, IStatus.WARNING, message, null));
             } catch(InterruptedException e) {
                 // Ignore
             }
         }).ifNoneThrowing(() -> {
             // Log an error if we cannot get the dynamic projects.
             final String message = "Cannot get dynamic dependent projects of " + rootDirectory + "; another PIE session is already running and we cannot block the main thread";
-            logger.error(message);
-            throw new CoreException(new Status(IStatus.ERROR, SpoofaxLwbPlugin.id, IStatus.ERROR, message, null));
+            logger.warn(message);
+            throw new CoreException(new Status(IStatus.WARNING, SpoofaxLwbPlugin.id, IStatus.WARNING, message, null));
         });
         logger.debug("Dynamic dependent projects of {}: {}", rootDirectory, dependentProjects);
         return dependentProjects;

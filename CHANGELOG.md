@@ -3,6 +3,9 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+### Added
+- Preliminary support for SDF3, ESV, and Statix compile-time dependencies. That is, exports of source directories of those meta-languages and imports through dependencies.
+- Support for include directories for SDF3.
 
 
 ## [0.18.0] - 2022-04-04

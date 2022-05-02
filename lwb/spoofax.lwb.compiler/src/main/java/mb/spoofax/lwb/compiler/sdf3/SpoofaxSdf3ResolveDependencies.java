@@ -25,7 +25,6 @@ import mb.spoofax.lwb.compiler.SpoofaxLwbCompilerScope;
 import mb.spoofax.lwb.compiler.definition.LanguageDefinitionManager;
 import mb.spoofax.lwb.compiler.definition.ResolveDependencies;
 import mb.spoofax.lwb.compiler.definition.UnarchiveUtil;
-import mb.spoofax.lwb.compiler.stratego.SpoofaxStrategoConfigure;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -42,7 +41,7 @@ public class SpoofaxSdf3ResolveDependencies extends ResolveDependencies<Sdf3Reso
         LoggerFactory loggerFactory,
         ResourceService resourceService,
         UnarchiveFromJar unarchiveFromJar,
-        Provider<SpoofaxStrategoConfigure> configureTaskDefProvider
+        Provider<SpoofaxSdf3Configure> configureTaskDefProvider
     ) {
         super(
             cfgRootDirectoryToObject,

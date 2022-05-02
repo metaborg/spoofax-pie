@@ -1,6 +1,5 @@
 package mb.spoofax.lwb.compiler.statix;
 
-import mb.cfg.metalang.CfgSdf3Config;
 import mb.cfg.metalang.CfgStatixConfig;
 import mb.cfg.task.CfgRootDirectoryToObject;
 import mb.cfg.task.CfgRootDirectoryToObjectException;
@@ -17,7 +16,6 @@ import mb.pie.api.StatelessSerializableFunction;
 import mb.pie.task.archive.UnarchiveFromJar;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
-import mb.resource.hierarchical.match.path.string.ExtensionsPathStringMatcher;
 import mb.spoofax.core.language.Export;
 import mb.spoofax.core.language.ResourceExports;
 import mb.spoofax.core.resource.ResourcesComponent;
@@ -26,7 +24,6 @@ import mb.spoofax.lwb.compiler.SpoofaxLwbCompilerScope;
 import mb.spoofax.lwb.compiler.definition.LanguageDefinitionManager;
 import mb.spoofax.lwb.compiler.definition.ResolveDependencies;
 import mb.spoofax.lwb.compiler.definition.UnarchiveUtil;
-import mb.spoofax.lwb.compiler.stratego.SpoofaxStrategoConfigure;
 import mb.statix.util.StatixUtil;
 
 import javax.inject.Inject;
@@ -44,7 +41,7 @@ public class SpoofaxStatixResolveDependencies extends ResolveDependencies<Statix
         LoggerFactory loggerFactory,
         ResourceService resourceService,
         UnarchiveFromJar unarchiveFromJar,
-        Provider<SpoofaxStrategoConfigure> configureTaskDefProvider
+        Provider<SpoofaxStatixConfigure> configureTaskDefProvider
     ) {
         super(
             cfgRootDirectoryToObject,
