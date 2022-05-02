@@ -995,15 +995,15 @@ The <code class="highlight"><span class="nv">replace-worlds</span><span class="w
 <span class="w">  </span><span class=" -Punctuation">}</span><span class="w"></span>
 <span class=" -Punctuation">}</span><span class="w"></span>
 </code></pre></div>
-<p>This task extends <code class="highlight"><span class="n">AstStrategoTransformTaskDef</span></code> which is a convenient abstract class for creating tasks that run Stratego transformations by implementing a constructor and a couple of methods:</p>
+<p>This task extends <code class="highlight"><span class="n">AstStrategoTransformTaskDef</span><span class="w"></span></code> which is a convenient abstract class for creating tasks that run Stratego transformations by implementing a constructor and a couple of methods:</p>
 <ol>
-<li>The constructor should inject <code class="highlight"><span class="n">HelloWorldClassLoaderResources</span></code> which we again will use to create a self-dependency, and <code class="highlight"><span class="n">HelloWorldGetStrategoRuntimeProvider</span></code> which is a task that Spoofax generates for your language, which provides a Stratego runtime to execute strategies with.</li>
-<li>The <code class="highlight"><span class="n">HelloWorldGetStrategoRuntimeProvider</span></code> instance is provided to the superclass constructor, along with the strategy that we want this task to execute, which is <code class="highlight"><span class="s">&quot;replace-worlds&quot;</span></code>.</li>
-<li>We override <code class="highlight"><span class="n">getId</span></code> of <code class="highlight"><span class="n">TaskDef</span></code> again to give this task a unique identifier.</li>
-<li>We override <code class="highlight"><span class="n">createDependencies</span></code> of <code class="highlight"><span class="n">AstStrategoTransformTaskDef</span></code> to create a self-dependency.</li>
+<li>The constructor should inject <code class="highlight"><span class="n">HelloWorldClassLoaderResources</span><span class="w"></span></code> which we again will use to create a self-dependency, and <code class="highlight"><span class="n">HelloWorldGetStrategoRuntimeProvider</span><span class="w"></span></code> which is a task that Spoofax generates for your language, which provides a Stratego runtime to execute strategies with.</li>
+<li>The <code class="highlight"><span class="n">HelloWorldGetStrategoRuntimeProvider</span><span class="w"></span></code> instance is provided to the superclass constructor, along with the strategy that we want this task to execute, which is <code class="highlight"><span class="s">&quot;replace-worlds&quot;</span><span class="w"></span></code>.</li>
+<li>We override <code class="highlight"><span class="n">getId</span><span class="w"></span></code> of <code class="highlight"><span class="n">TaskDef</span><span class="w"></span></code> again to give this task a unique identifier.</li>
+<li>We override <code class="highlight"><span class="n">createDependencies</span><span class="w"></span></code> of <code class="highlight"><span class="n">AstStrategoTransformTaskDef</span><span class="w"></span></code> to create a self-dependency.</li>
 </ol>
 <p>Then create the <code>HelloWorldShowReplaceWorlds</code> class and replace the entire Java file with:</p>
-<table class="annotate highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<div class="annotate highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
 <span class="normal"> 3</span>
 <span class="normal"> 4</span>
@@ -1079,85 +1079,84 @@ The <code class="highlight"><span class="nv">replace-worlds</span><span class="w
 <span class="normal">74</span>
 <span class="normal">75</span>
 <span class="normal">76</span>
-<span class="normal">77</span></pre></div></td><td class="code"><div class="annotate highlight"><pre><span></span><code><span class="kn">package</span> <span class="nn">mb.helloworld.task</span><span class="p">;</span>
+<span class="normal">77</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">mb.helloworld.task</span><span class="p">;</span><span class="w"></span>
 
-<span class="kn">import</span> <span class="nn">java.io.Serializable</span><span class="p">;</span>
-<span class="kn">import</span> <span class="nn">java.util.Objects</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.io.Serializable</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Objects</span><span class="p">;</span><span class="w"></span>
 
-<span class="kn">import</span> <span class="nn">javax.inject.Inject</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">javax.inject.Inject</span><span class="p">;</span><span class="w"></span>
 
-<span class="kn">import</span> <span class="nn">org.checkerframework.checker.nullness.qual.Nullable</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.checkerframework.checker.nullness.qual.Nullable</span><span class="p">;</span><span class="w"></span>
 
-<span class="kn">import</span> <span class="nn">mb.helloworld.HelloWorldClassLoaderResources</span><span class="p">;</span>
-<span class="kn">import</span> <span class="nn">mb.helloworld.HelloWorldScope</span><span class="p">;</span>
-<span class="kn">import</span> <span class="nn">mb.pie.api.ExecContext</span><span class="p">;</span>
-<span class="kn">import</span> <span class="nn">mb.pie.api.TaskDef</span><span class="p">;</span>
-<span class="kn">import</span> <span class="nn">mb.pie.api.stamp.resource.ResourceStampers</span><span class="p">;</span>
-<span class="kn">import</span> <span class="nn">mb.resource.ResourceKey</span><span class="p">;</span>
-<span class="kn">import</span> <span class="nn">mb.spoofax.core.language.command.CommandFeedback</span><span class="p">;</span>
-<span class="kn">import</span> <span class="nn">mb.spoofax.core.language.command.ShowFeedback</span><span class="p">;</span>
-<span class="kn">import</span> <span class="nn">mb.aterm.common.TermToString</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">mb.helloworld.HelloWorldClassLoaderResources</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">mb.helloworld.HelloWorldScope</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">mb.pie.api.ExecContext</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">mb.pie.api.TaskDef</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">mb.pie.api.stamp.resource.ResourceStampers</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">mb.resource.ResourceKey</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">mb.spoofax.core.language.command.CommandFeedback</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">mb.spoofax.core.language.command.ShowFeedback</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">mb.aterm.common.TermToString</span><span class="p">;</span><span class="w"></span>
 
-<span class="nd">@HelloWorldScope</span>
-<span class="kd">public</span> <span class="kd">class</span> <span class="nc">HelloWorldShowReplaceWorlds</span> <span class="kd">implements</span> <span class="n">TaskDef</span><span class="o">&lt;</span><span class="n">HelloWorldShowReplaceWorlds</span><span class="p">.</span><span class="na">Args</span><span class="p">,</span> <span class="n">CommandFeedback</span><span class="o">&gt;</span> <span class="p">{</span>
-    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">Args</span> <span class="kd">implements</span> <span class="n">Serializable</span> <span class="p">{</span>
-        <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">long</span> <span class="n">serialVersionUID</span> <span class="o">=</span> <span class="mi">1L</span><span class="p">;</span>
+<span class="nd">@HelloWorldScope</span><span class="w"></span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">HelloWorldShowReplaceWorlds</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">TaskDef</span><span class="o">&lt;</span><span class="n">HelloWorldShowReplaceWorlds</span><span class="p">.</span><span class="na">Args</span><span class="p">,</span><span class="w"> </span><span class="n">CommandFeedback</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Args</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">Serializable</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">serialVersionUID</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1L</span><span class="p">;</span><span class="w"></span>
 
-        <span class="kd">public</span> <span class="kd">final</span> <span class="n">ResourceKey</span> <span class="n">file</span><span class="p">;</span>
+<span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">ResourceKey</span><span class="w"> </span><span class="n">file</span><span class="p">;</span><span class="w"></span>
 
-        <span class="kd">public</span> <span class="nf">Args</span><span class="p">(</span><span class="n">ResourceKey</span> <span class="n">file</span><span class="p">)</span> <span class="p">{</span>
-            <span class="k">this</span><span class="p">.</span><span class="na">file</span> <span class="o">=</span> <span class="n">file</span><span class="p">;</span>
-        <span class="p">}</span>
+<span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="nf">Args</span><span class="p">(</span><span class="n">ResourceKey</span><span class="w"> </span><span class="n">file</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="k">this</span><span class="p">.</span><span class="na">file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">file</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
 
-        <span class="nd">@Override</span>
-        <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">equals</span><span class="p">(</span><span class="nd">@Nullable</span> <span class="n">Object</span> <span class="n">o</span><span class="p">)</span> <span class="p">{</span>
-            <span class="k">if</span> <span class="p">(</span><span class="k">this</span> <span class="o">==</span> <span class="n">o</span><span class="p">)</span> <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">o</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">||</span> <span class="n">getClass</span><span class="p">()</span> <span class="o">!=</span> <span class="n">o</span><span class="p">.</span><span class="na">getClass</span><span class="p">())</span> <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
-            <span class="kd">final</span> <span class="n">Args</span> <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">Args</span><span class="p">)</span> <span class="n">o</span><span class="p">;</span>
-            <span class="k">return</span> <span class="n">file</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="na">file</span><span class="p">);</span>
-        <span class="p">}</span>
+<span class="w">        </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">equals</span><span class="p">(</span><span class="nd">@Nullable</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">o</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">this</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">o</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">o</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">getClass</span><span class="p">()</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="na">getClass</span><span class="p">())</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="kd">final</span><span class="w"> </span><span class="n">Args</span><span class="w"> </span><span class="n">args</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">Args</span><span class="p">)</span><span class="w"> </span><span class="n">o</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">file</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="na">file</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
 
-        <span class="nd">@Override</span>
-        <span class="kd">public</span> <span class="kt">int</span> <span class="nf">hashCode</span><span class="p">()</span> <span class="p">{</span>
-            <span class="k">return</span> <span class="n">Objects</span><span class="p">.</span><span class="na">hash</span><span class="p">(</span><span class="n">file</span><span class="p">);</span>
-        <span class="p">}</span>
+<span class="w">        </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">hashCode</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">Objects</span><span class="p">.</span><span class="na">hash</span><span class="p">(</span><span class="n">file</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
 
-        <span class="nd">@Override</span>
-        <span class="kd">public</span> <span class="n">String</span> <span class="nf">toString</span><span class="p">()</span> <span class="p">{</span>
-            <span class="k">return</span> <span class="s">&quot;Args{&quot;</span> <span class="o">+</span> <span class="s">&quot;file=&quot;</span> <span class="o">+</span> <span class="n">file</span> <span class="o">+</span> <span class="sc">&#39;}&#39;</span><span class="p">;</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
-
-
-    <span class="kd">private</span> <span class="kd">final</span> <span class="n">HelloWorldClassLoaderResources</span> <span class="n">classloaderResources</span><span class="p">;</span>
-    <span class="kd">private</span> <span class="kd">final</span> <span class="n">HelloWorldParse</span> <span class="n">parse</span><span class="p">;</span>
-    <span class="kd">private</span> <span class="kd">final</span> <span class="n">HelloWorldReplaceWorlds</span> <span class="n">replaceWorlds</span><span class="p">;</span>
-
-    <span class="nd">@Inject</span>
-    <span class="kd">public</span> <span class="nf">HelloWorldShowReplaceWorlds</span><span class="p">(</span><span class="n">HelloWorldClassLoaderResources</span> <span class="n">classloaderResources</span><span class="p">,</span> <span class="n">HelloWorldParse</span> <span class="n">parse</span><span class="p">,</span> <span class="n">HelloWorldReplaceWorlds</span> <span class="n">replaceWorlds</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">this</span><span class="p">.</span><span class="na">classloaderResources</span> <span class="o">=</span> <span class="n">classloaderResources</span><span class="p">;</span>
-        <span class="k">this</span><span class="p">.</span><span class="na">parse</span> <span class="o">=</span> <span class="n">parse</span><span class="p">;</span>
-        <span class="k">this</span><span class="p">.</span><span class="na">replaceWorlds</span> <span class="o">=</span> <span class="n">replaceWorlds</span><span class="p">;</span>
-    <span class="p">}</span>
+<span class="w">        </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">toString</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="s">&quot;Args{&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;file=&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="sc">&#39;}&#39;</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 
 
-    <span class="nd">@Override</span>
-    <span class="kd">public</span> <span class="n">CommandFeedback</span> <span class="nf">exec</span><span class="p">(</span><span class="n">ExecContext</span> <span class="n">context</span><span class="p">,</span> <span class="n">Args</span> <span class="n">args</span><span class="p">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="p">{</span>
-        <span class="n">context</span><span class="p">.</span><span class="na">require</span><span class="p">(</span><span class="n">classloaderResources</span><span class="p">.</span><span class="na">tryGetAsLocalResource</span><span class="p">(</span><span class="n">getClass</span><span class="p">()),</span> <span class="n">ResourceStampers</span><span class="p">.</span><span class="na">hashFile</span><span class="p">());</span>
-        <span class="kd">final</span> <span class="n">ResourceKey</span> <span class="n">file</span> <span class="o">=</span> <span class="n">args</span><span class="p">.</span><span class="na">file</span><span class="p">;</span>
-        <span class="k">return</span> <span class="n">context</span><span class="p">.</span><span class="na">require</span><span class="p">(</span><span class="n">replaceWorlds</span><span class="p">,</span> <span class="n">parse</span><span class="p">.</span><span class="na">inputBuilder</span><span class="p">().</span><span class="na">withFile</span><span class="p">(</span><span class="n">file</span><span class="p">).</span><span class="na">buildAstSupplier</span><span class="p">()).</span><span class="na">mapOrElse</span><span class="p">(</span>
-            <span class="n">ast</span> <span class="o">-&gt;</span> <span class="n">CommandFeedback</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">ShowFeedback</span><span class="p">.</span><span class="na">showText</span><span class="p">(</span><span class="n">TermToString</span><span class="p">.</span><span class="na">toString</span><span class="p">(</span><span class="n">ast</span><span class="p">),</span> <span class="s">&quot;Replaced World()s with Hello()s for &#39;&quot;</span> <span class="o">+</span> <span class="n">file</span> <span class="o">+</span> <span class="s">&quot;&#39;&quot;</span><span class="p">)),</span>
-            <span class="n">e</span> <span class="o">-&gt;</span> <span class="n">CommandFeedback</span><span class="p">.</span><span class="na">ofTryExtractMessagesFrom</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
-        <span class="p">);</span>
-    <span class="p">}</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">HelloWorldClassLoaderResources</span><span class="w"> </span><span class="n">classloaderResources</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">HelloWorldParse</span><span class="w"> </span><span class="n">parse</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">HelloWorldReplaceWorlds</span><span class="w"> </span><span class="n">replaceWorlds</span><span class="p">;</span><span class="w"></span>
 
-    <span class="nd">@Override</span>
-    <span class="kd">public</span> <span class="n">String</span> <span class="nf">getId</span><span class="p">()</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="n">getClass</span><span class="p">().</span><span class="na">getName</span><span class="p">();</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>
-</td></tr></table>
+<span class="w">    </span><span class="nd">@Inject</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">HelloWorldShowReplaceWorlds</span><span class="p">(</span><span class="n">HelloWorldClassLoaderResources</span><span class="w"> </span><span class="n">classloaderResources</span><span class="p">,</span><span class="w"> </span><span class="n">HelloWorldParse</span><span class="w"> </span><span class="n">parse</span><span class="p">,</span><span class="w"> </span><span class="n">HelloWorldReplaceWorlds</span><span class="w"> </span><span class="n">replaceWorlds</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">classloaderResources</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">classloaderResources</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">parse</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">parse</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">replaceWorlds</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">replaceWorlds</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">CommandFeedback</span><span class="w"> </span><span class="nf">exec</span><span class="p">(</span><span class="n">ExecContext</span><span class="w"> </span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">Args</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">Exception</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">context</span><span class="p">.</span><span class="na">require</span><span class="p">(</span><span class="n">classloaderResources</span><span class="p">.</span><span class="na">tryGetAsLocalResource</span><span class="p">(</span><span class="n">getClass</span><span class="p">()),</span><span class="w"> </span><span class="n">ResourceStampers</span><span class="p">.</span><span class="na">hashFile</span><span class="p">());</span><span class="w"></span>
+<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">ResourceKey</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">args</span><span class="p">.</span><span class="na">file</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">context</span><span class="p">.</span><span class="na">require</span><span class="p">(</span><span class="n">replaceWorlds</span><span class="p">,</span><span class="w"> </span><span class="n">parse</span><span class="p">.</span><span class="na">inputBuilder</span><span class="p">().</span><span class="na">withFile</span><span class="p">(</span><span class="n">file</span><span class="p">).</span><span class="na">buildAstSupplier</span><span class="p">()).</span><span class="na">mapOrElse</span><span class="p">(</span><span class="w"></span>
+<span class="w">            </span><span class="n">ast</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">CommandFeedback</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">ShowFeedback</span><span class="p">.</span><span class="na">showText</span><span class="p">(</span><span class="n">TermToString</span><span class="p">.</span><span class="na">toString</span><span class="p">(</span><span class="n">ast</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;Replaced World()s with Hello()s for &#39;&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;&#39;&quot;</span><span class="p">)),</span><span class="w"></span>
+<span class="w">            </span><span class="n">e</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">CommandFeedback</span><span class="p">.</span><span class="na">ofTryExtractMessagesFrom</span><span class="p">(</span><span class="n">e</span><span class="p">,</span><span class="w"> </span><span class="n">file</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">getId</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">getClass</span><span class="p">().</span><span class="na">getName</span><span class="p">();</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div></td></tr></table></div>
 <p>This class very similar to <code>HelloWorldShowParsedAst</code>, but runs the <code>HelloWorldReplaceWorlds</code> task on the parsed AST, transforming the AST.</p>
 <p>Now open <code>helloworld/spoofax.cfg</code> again and register the tasks by adding:</p>
 <div class="highlight"><pre><span></span><code><span class="na">task-def mb.helloworld.task.HelloWorldReplaceWorlds</span><span class="w"></span>
