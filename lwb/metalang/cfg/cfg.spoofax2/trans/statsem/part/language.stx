@@ -189,9 +189,12 @@ rules
   dependencyOk : scope * Dependency
   dependenciesOk maps dependencyOk(*, list(*))
 
-  dependencyOk(s, Dependency(e, kind)) :-
+  dependencyOk(s, DefaultDependency(e)) :-
+    dependencyExprOk(s, e).
+
+  dependencyOk(s, ConfiguredDependency(e, options)) :-
     dependencyExprOk(s, e),
-    dependencyKindOk(s, kind).
+    dependencyOptionsOk(s, options).
 
 
   dependencyExprOk : scope * Expr
@@ -201,7 +204,15 @@ rules
     typeOfExpr(s, e) == T,
     bOr(bOr(bOr(typeEq(T, STRING()), typeEq(T, COORDINATE())), typeEq(T, COORDINATE_REQUIREMENT())), typeEq(T, PATH())) == TRUE() | error $[Expected string, coordinate, coordinate requirement, or path]@e.
 
+
+  dependencyOptionOk : scope * DependencyOption
+  dependencyOptionsOk maps dependencyOptionOk(*, list(*))
+  dependencyOptionOk(s, DependencyKinds(kinds)) :-
+    dependencyKindsOk(s, kinds).
+
+
   dependencyKindOk : scope * DependencyKind
   dependencyKindsOk maps dependencyKindOk(*, list(*))
 
-  dependencyKindOk(s, CompileTimeDependency()).
+  dependencyKindOk(s, BuildDependencyKind()).
+  dependencyKindOk(s, RunDependencyKind()).

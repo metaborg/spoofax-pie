@@ -17,4 +17,6 @@ lexical syntax
   
 lexical restrictions
 
-  IdChars -/- [a-zA-Z0-9\_\$]
+  // NOTE: the `.` in the restriction here ensures that coordinates, which start with a group ID, which typically
+  //       contain a `.`, are not parsed as two separate identifiers, but instead as one coordinate.
+  IdChars -/- [a-zA-Z0-9\_\$\.]

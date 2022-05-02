@@ -143,7 +143,7 @@ context-free syntax
 
 context-free sorts
 
-  DependencyKind Dependency
+  Dependency DependencyOption DependencyKind
 
 context-free syntax
 
@@ -151,10 +151,18 @@ context-free syntax
   <{Dependency "\n"}*>
 ]>
 
-  Dependency.Dependency = <<Expr> = <DependencyKind>>
-  DependencyKind.CompileTimeDependency = <compile-time>
+  Dependency.DefaultDependency = <<Expr>>
+  Dependency.ConfiguredDependency = <<Expr> {
+    <{DependencyOption "\n"}*>
+  }>
+  DependencyOption.DependencyKinds = <kinds = [
+    <{DependencyKind "\n"}*>
+  ]>
+  DependencyKind.BuildDependencyKind = <Build>
+  DependencyKind.RunDependencyKind = <Run>
 
 lexical syntax
 
   Keyword = "dependencies"
-  Keyword = "compile-time"
+  Keyword = "Build"
+  Keyword = "Run"

@@ -292,65 +292,31 @@ public class CfgAstToObject {
             subParts.forOneSubtermAsString("StrategoLanguageStrategyAffix", builder::languageStrategyAffix);
             subParts.forOneSubtermAsString("StrategoOutputJavaPackageId", builder::outputJavaPackageId);
         });
-        parts.getAllSubTermsInListAsParts("Dependencies").ifSome(subParts -> {
-            subParts.forAll("Dependency", 2, dependencyTerm -> {
-                final IStrategoAppl exprTerm = TermUtils.asApplAt(dependencyTerm, 0)
-                    .orElseThrow(() -> new InvalidAstShapeException("constructor application as first subterm", dependencyTerm));
-                final DependencySource dependencySource;
-                switch(exprTerm.getConstructor().getName()) {
-                    case "CoordinateRequirement": {
-                        final String groupIdString = TermUtils.asJavaStringAt(exprTerm, 0)
-                            .orElseThrow(() -> new InvalidAstShapeException("string as first subterm", exprTerm));
-                        final String artifactId = TermUtils.asJavaStringAt(exprTerm, 1)
-                            .orElseThrow(() -> new InvalidAstShapeException("string as second subterm", exprTerm));
-                        final String versionString = TermUtils.asJavaStringAt(exprTerm, 2)
-                            .orElseThrow(() -> new InvalidAstShapeException("string as third subterm", exprTerm));
-                        dependencySource = DependencySource.coordinateRequirement(new CoordinateRequirement(
-                            groupIdString,
-                            artifactId,
-                            versionString.equals("*") ? null : Version.parse(versionString)
-                        ));
-                        break;
-                    }
-                    case "Coordinate": {
-                        final String groupId = TermUtils.asJavaStringAt(exprTerm, 0)
-                            .orElseThrow(() -> new InvalidAstShapeException("string as first subterm", exprTerm));
-                        final String artifactId = TermUtils.asJavaStringAt(exprTerm, 1)
-                            .orElseThrow(() -> new InvalidAstShapeException("string as second subterm", exprTerm));
-                        final String version = TermUtils.asJavaStringAt(exprTerm, 2)
-                            .orElseThrow(() -> new InvalidAstShapeException("string as third subterm", exprTerm));
-                        dependencySource = DependencySource.coordinate(new Coordinate(
-                            groupId,
-                            artifactId,
-                            Version.parse(version)
-                        ));
-                        break;
-                    }
-                    case "Path": {
-                        final String path = TermUtils.asJavaStringAt(exprTerm, 0)
-                            .orElseThrow(() -> new InvalidAstShapeException("string as first subterm", exprTerm));
-                        dependencySource = DependencySource.path(path);
-                        break;
-                    }
-                    default:
-                        throw new InvalidAstShapeException("Dependency expression", exprTerm);
-                }
-                final LinkedHashSet<DependencyKind> dependencyKinds = new LinkedHashSet<>();
-                final IStrategoAppl kindTerm = TermUtils.asApplAt(dependencyTerm, 1) // TODO: go over list once this becomes a list of kinds.
-                    .orElseThrow(() -> new InvalidAstShapeException("constructor application as second subterm", dependencyTerm));
-                switch(kindTerm.getConstructor().getName()) {
-                    case "CompileTimeDependency":
-                        dependencyKinds.add(DependencyKind.CompileTime);
-                        break;
-                    case "RunTimeDependency":
-                        dependencyKinds.add(DependencyKind.RunTime);
-                        break;
-                    default:
-                        throw new InvalidAstShapeException("Dependency kind", kindTerm);
-                }
-                languageCompilerInputBuilder.compileLanguage.addDependencies(new Dependency(dependencySource, SetView.of(dependencyKinds)));
-            });
+        parts.forAllSubTermsInList("Dependencies", dependencyTerm -> {
+            final Dependency dependency;
+            if(TermUtils.isAppl(dependencyTerm, "DefaultDependency", 1)) {
+                final IStrategoAppl sourceTermAppl = TermUtils.asApplAt(dependencyTerm, 0)
+                    .orElseThrow(() -> new InvalidAstShapeException("term application as first subterm", dependencyTerm));
+                final DependencySource source = toDependencySource(sourceTermAppl);
+                dependency = new Dependency(source, DependencyKind.all);
+            } else if(TermUtils.isAppl(dependencyTerm, "ConfiguredDependency", 2)) {
+                final IStrategoAppl sourceTermAppl = TermUtils.asApplAt(dependencyTerm, 0)
+                    .orElseThrow(() -> new InvalidAstShapeException("term application as first subterm", dependencyTerm));
+                final DependencySource source = toDependencySource(sourceTermAppl);
+                final LinkedHashSet<DependencyKind> kinds = new LinkedHashSet<>();
+                final Parts options = parts.subParts(dependencyTerm.getSubterm(1));
+                options.forAllSubTermsInList("DependencyKinds", kindTerm -> {
+                    final IStrategoAppl kindTermAppl = TermUtils.asAppl(kindTerm)
+                        .orElseThrow(() -> new InvalidAstShapeException("term application", kindTerm));
+                    kinds.add(toDependencyKind(kindTermAppl));
+                });
+                dependency = new Dependency(source, SetView.of(kinds));
+            } else {
+                throw new InvalidAstShapeException("Dependency", dependencyTerm);
+            }
+            languageCompilerInputBuilder.compileLanguage.addDependencies(dependency);
         });
+
         customizer.customize(languageCompilerInputBuilder);
         final CompileLanguageSpecificationInput languageCompilerInput = languageCompilerInputBuilder.build(properties, shared, languageShared);
         languageCompilerInput.syncTo(baseBuilder);
@@ -623,6 +589,65 @@ public class CfgAstToObject {
 
     private static Option<String> getCommandDefDescription(Parts commandDefParts) {
         return commandDefParts.getOneSubtermAsString("CommandDefDescription");
+    }
+
+    private static DependencySource toDependencySource(IStrategoAppl sourceTerm) {
+        switch(sourceTerm.getConstructor().getName()) {
+            case "CoordinateRequirement": {
+                final String groupIdString = TermUtils.asJavaStringAt(sourceTerm, 0)
+                    .orElseThrow(() -> new InvalidAstShapeException("string as first subterm", sourceTerm));
+                final String artifactId = TermUtils.asJavaStringAt(sourceTerm, 1)
+                    .orElseThrow(() -> new InvalidAstShapeException("string as second subterm", sourceTerm));
+                final String versionString = TermUtils.asJavaStringAt(sourceTerm, 2)
+                    .orElseThrow(() -> new InvalidAstShapeException("string as third subterm", sourceTerm));
+                return DependencySource.coordinateRequirement(new CoordinateRequirement(
+                    groupIdString,
+                    artifactId,
+                    versionString.equals("*") ? null : Version.parse(versionString)
+                ));
+            }
+            case "Coordinate": {
+                final String groupId = TermUtils.asJavaStringAt(sourceTerm, 0)
+                    .orElseThrow(() -> new InvalidAstShapeException("string as first subterm", sourceTerm));
+                final String artifactId = TermUtils.asJavaStringAt(sourceTerm, 1)
+                    .orElseThrow(() -> new InvalidAstShapeException("string as second subterm", sourceTerm));
+                final String version = TermUtils.asJavaStringAt(sourceTerm, 2)
+                    .orElseThrow(() -> new InvalidAstShapeException("string as third subterm", sourceTerm));
+                return DependencySource.coordinate(new Coordinate(
+                    groupId,
+                    artifactId,
+                    Version.parse(version)
+                ));
+            }
+            case "Path": {
+                final String path = TermUtils.asJavaStringAt(sourceTerm, 0)
+                    .orElseThrow(() -> new InvalidAstShapeException("string as first subterm", sourceTerm));
+                return DependencySource.path(path);
+            }
+            default:
+                throw new InvalidAstShapeException("Dependency source expression", sourceTerm);
+        }
+    }
+
+    private static DependencyKind toDependencyKind(IStrategoAppl kindTerm) {
+        switch(kindTerm.getConstructor().getName()) {
+            case "BuildDependencyKind":
+                return DependencyKind.Build;
+            case "RunDependencyKind":
+                return DependencyKind.Run;
+            default:
+                throw new InvalidAstShapeException("Dependency kind", kindTerm);
+        }
+    }
+
+    private static LinkedHashSet<DependencyKind> toDependencyKinds(IStrategoTerm kindsTerm) {
+        final LinkedHashSet<DependencyKind> kinds = new LinkedHashSet<>();
+        for(IStrategoTerm kindTerm : kindsTerm) {
+            final IStrategoAppl kindTermAppl = TermUtils.asAppl(kindTerm)
+                .orElseThrow(() -> new InvalidAstShapeException("constructor application", kindTerm));
+            kinds.add(toDependencyKind(kindTermAppl));
+        }
+        return kinds;
     }
 
     private static CommandExecutionType toCommandExecutionType(IStrategoTerm term) {

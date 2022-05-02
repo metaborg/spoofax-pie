@@ -135,7 +135,7 @@ public class SpoofaxLwbProjectReferencesBuilder extends SpoofaxLwbBuilderBase im
         result.ifOk(output -> {
             final List<Dependency> dependencies = output.compileLanguageInput.compileLanguageSpecificationInput().dependencies();
             for(Dependency dependency : dependencies) {
-                if(!dependency.kinds.contains(DependencyKind.CompileTime)) continue;
+                if(!dependency.kinds.contains(DependencyKind.Build)) continue;
                 final Optional<String> relativePath = dependency.source.caseOf()
                     .path(p -> p)
                     .otherwiseEmpty();

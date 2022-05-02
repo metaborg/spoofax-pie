@@ -105,7 +105,7 @@ public abstract class ResolveDependencies<T extends Serializable> implements Tas
     private Result<ListView<T>, ResolveDependenciesException> resolve(ExecContext context, Input input, ListView<Dependency> dependencies) {
         final ArrayList<T> resolved = new ArrayList<>();
         for(Dependency dependency : dependencies) {
-            if(!dependency.kinds.contains(DependencyKind.CompileTime)) continue;
+            if(!dependency.kinds.contains(DependencyKind.Build)) continue;
             final Result<ListView<T>, ResolveDependenciesException> result = resolve(context, input, dependency.source);
             if(result.isErr()) {
                 return result.ignoreValueIfErr();

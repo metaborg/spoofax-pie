@@ -50,23 +50,23 @@ public interface CompileLanguageSpecificationInput extends Serializable {
 
     default List<Dependency> allDependencies() {
         final ArrayList<Dependency> dependencies = new ArrayList<>(dependencies());
-        final Function<String, Dependency> createDependency = (artifactId) ->
-            new Dependency(DependencySource.coordinateRequirement(new CoordinateRequirement("org.metaborg", artifactId, shared().spoofax3Version())), SetView.of(DependencyKind.CompileTime));
+        final Function<String, Dependency> createBuildDependency = (artifactId) ->
+            new Dependency(DependencySource.coordinateRequirement(new CoordinateRequirement("org.metaborg", artifactId, shared().spoofax3Version())), SetView.of(DependencyKind.Build));
         stratego().ifPresent(c -> {
-            dependencies.add(createDependency.apply("strategolib"));
-            dependencies.add(createDependency.apply("gpp"));
+            dependencies.add(createBuildDependency.apply("strategolib"));
+            dependencies.add(createBuildDependency.apply("gpp"));
         });
         final boolean dependOnLibSpoofax2 = stratego()
             .map(c -> c.source().getFiles().includeLibSpoofax2Exports())
             .orElseGet(() -> esv().isPresent());
         if(dependOnLibSpoofax2) {
-            dependencies.add(createDependency.apply("libspoofax2"));
+            dependencies.add(createBuildDependency.apply("libspoofax2"));
         }
         final boolean dependOnLibStatix = stratego()
             .map(s -> s.source().getFiles().includeLibStatixExports())
             .orElse(false);
         if(dependOnLibStatix) {
-            dependencies.add(createDependency.apply("libstatix"));
+            dependencies.add(createBuildDependency.apply("libstatix"));
         }
         return dependencies;
     }

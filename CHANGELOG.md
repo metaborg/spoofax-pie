@@ -3,15 +3,19 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+### Fixed
+- ESV imports not resolving to modules in the main source directory.
+
+### Changed
+- Dependency syntax to be less verbose and more configurable.
+- Dependency kinds into `Build` for dependencies that are needed when building the language, and `Run` for dependencies that are needed when running the language.
+
 ### Added
 - Preliminary support for SDF3, ESV, and Statix compile-time dependencies. That is, exports of source directories of those meta-languages and imports through dependencies.
 - Support for include directories for SDF3.
 
 
 ## [0.18.0] - 2022-04-04
-### Added
-- Preliminary support for Stratego compile-time dependencies.
-
 ### Fixed
 - Ensure that `strategolib.eclipse` and `gpp.eclipse` are published, as they are required by Eclipse plugins of languages.
 - Exception in `DynamicLoad` when a classpath directory did not exist.
@@ -22,6 +26,9 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `resource` requirement to `0.14.0`.
 - `pie` requirement to `0.20.0`.
 - `releng` (devenv-release) requirement to `0.1.30`.
+
+### Added
+- Preliminary support for Stratego compile-time dependencies.
 
 
 ## [0.17.0] - 2022-03-09
