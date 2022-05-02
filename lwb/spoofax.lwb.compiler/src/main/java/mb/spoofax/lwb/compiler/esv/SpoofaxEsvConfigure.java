@@ -24,10 +24,10 @@ import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.sdf3.task.Sdf3ToCompletionColorer;
+import mb.spoofax.lwb.compiler.definition.ResolveDependencies;
 import mb.spoofax.lwb.compiler.definition.ResolveDependenciesException;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3ConfigureException;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3GenerationUtil;
-import mb.spoofax.lwb.compiler.stratego.SpoofaxStrategoResolveDependencies;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -150,7 +150,7 @@ public class SpoofaxEsvConfigure implements TaskDef<ResourcePath, Result<Option<
         }
 
         final Task<Result<ListView<EsvResolvedDependency>, ResolveDependenciesException>> resolveDependenciesTask =
-            resolveDependencies.createTask(new SpoofaxStrategoResolveDependencies.Input(rootDirectory, files.unarchiveDirectory()));
+            resolveDependencies.createTask(new ResolveDependencies.Input(rootDirectory, files.unarchiveDirectory()));
         sourceFileOrigins.add(resolveDependenciesTask.toSupplier());
         final Result<ListView<EsvResolvedDependency>, ResolveDependenciesException> result =
             context.require(resolveDependenciesTask);

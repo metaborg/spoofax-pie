@@ -196,7 +196,7 @@ public abstract class ResolveDependencies<T extends Serializable> implements Tas
         DependencySource source,
         ResourcePath rootDirectory
     ) throws ResolveDependenciesException {
-        // Require Stratego configure so that this task depends on all tasks that generate Stratego code.
+        // Require configure task so that this task depends on all tasks that generate code.
         context.require(configureTaskDefProvider.get().createTask(rootDirectory), OutputStampers.inconsequential())
             .mapErr(e -> ResolveDependenciesException.configureFail(source, rootDirectory, metaLanguageName, e))
             .throwIfError();

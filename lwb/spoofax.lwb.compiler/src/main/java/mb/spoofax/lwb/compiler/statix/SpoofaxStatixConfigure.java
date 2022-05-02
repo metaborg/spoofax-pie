@@ -21,11 +21,10 @@ import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.sdf3.task.spec.Sdf3SpecConfig;
 import mb.sdf3_ext_statix.task.Sdf3ExtStatixGenerateStatix;
+import mb.spoofax.lwb.compiler.definition.ResolveDependencies;
 import mb.spoofax.lwb.compiler.definition.ResolveDependenciesException;
-import mb.spoofax.lwb.compiler.sdf3.Sdf3ResolvedDependency;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3ConfigureException;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3GenerationUtil;
-import mb.spoofax.lwb.compiler.stratego.SpoofaxStrategoResolveDependencies;
 import mb.statix.task.StatixConfig;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -138,7 +137,7 @@ public class SpoofaxStatixConfigure implements TaskDef<ResourcePath, Result<Opti
         allIncludeDirectories.addAll(files.includeDirectories());
 
         final Task<Result<ListView<StatixResolvedDependency>, ResolveDependenciesException>> resolveDependenciesTask =
-            resolveDependencies.createTask(new SpoofaxStrategoResolveDependencies.Input(rootDirectory, files.unarchiveDirectory()));
+            resolveDependencies.createTask(new ResolveDependencies.Input(rootDirectory, files.unarchiveDirectory()));
         sourceFileOrigins.add(resolveDependenciesTask.toSupplier());
         final Result<ListView<StatixResolvedDependency>, ResolveDependenciesException> result =
             context.require(resolveDependenciesTask);

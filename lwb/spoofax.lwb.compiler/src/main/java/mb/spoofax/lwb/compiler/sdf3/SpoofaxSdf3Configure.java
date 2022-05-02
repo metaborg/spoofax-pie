@@ -19,8 +19,8 @@ import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.sdf3.task.spec.Sdf3SpecConfig;
+import mb.spoofax.lwb.compiler.definition.ResolveDependencies;
 import mb.spoofax.lwb.compiler.definition.ResolveDependenciesException;
-import mb.spoofax.lwb.compiler.stratego.SpoofaxStrategoResolveDependencies;
 import org.metaborg.sdf2table.parsetable.ParseTableConfiguration;
 
 import javax.inject.Inject;
@@ -120,7 +120,7 @@ public class SpoofaxSdf3Configure implements TaskDef<ResourcePath, Result<Option
         allIncludeDirectories.addAll(files.includeDirectories());
 
         final Task<Result<ListView<Sdf3ResolvedDependency>, ResolveDependenciesException>> resolveDependenciesTask =
-            resolveDependencies.createTask(new SpoofaxStrategoResolveDependencies.Input(rootDirectory, files.unarchiveDirectory()));
+            resolveDependencies.createTask(new ResolveDependencies.Input(rootDirectory, files.unarchiveDirectory()));
         sourceFileOrigins.add(resolveDependenciesTask.toSupplier());
         final Result<ListView<Sdf3ResolvedDependency>, ResolveDependenciesException> result =
             context.require(resolveDependenciesTask);

@@ -28,6 +28,7 @@ import mb.sdf3.task.spec.Sdf3SpecToParseTable;
 import mb.sdf3_ext_statix.task.Sdf3ExtStatixGenerateStratego;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
+import mb.spoofax.lwb.compiler.definition.ResolveDependencies;
 import mb.spoofax.lwb.compiler.definition.ResolveDependenciesException;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3ConfigureException;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3GenerationUtil;
@@ -155,7 +156,7 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
         final LinkedHashSet<File> allJavaClassPaths = new LinkedHashSet<>();
 
         final Task<Result<ListView<StrategoResolvedDependency>, ResolveDependenciesException>> resolveDependenciesTask =
-            resolveDependencies.createTask(new SpoofaxStrategoResolveDependencies.Input(rootDirectory, sourceFiles.unarchiveDirectory()));
+            resolveDependencies.createTask(new ResolveDependencies.Input(rootDirectory, sourceFiles.unarchiveDirectory()));
         sourceFileOrigins.add(resolveDependenciesTask.toSupplier());
         final Result<ListView<StrategoResolvedDependency>, ResolveDependenciesException> result =
             context.require(resolveDependenciesTask);
