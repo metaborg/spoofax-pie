@@ -111,22 +111,30 @@ rules
 
   // convert a production into a dynamix constructor
   // gendx-production-to-cons :: SDF3.SDFProduction -> MConstructorDecl
-  gendx-production-to-cons: SdfProduction(SortDef(name), args, _) -> ret
+  gendx-production-to-cons: SdfProduction(SortDef(name), args, attrs) -> ret
+    where <not(gendx-has-bracket-attr)> attrs
     with
       args' := <gendx-collect-args> args;
       ret := <gendx-to-inj(|name)> args'
-  gendx-production-to-cons: TemplateProduction(SortDef(name), args, _) -> ret
+  gendx-production-to-cons: TemplateProduction(SortDef(name), args, attrs) -> ret
+    where <not(gendx-has-bracket-attr)> attrs
     with
       args' := <gendx-collect-args> args;
       ret := <gendx-to-inj(|name)> args'
-  gendx-production-to-cons: SdfProductionWithCons(SortCons(SortDef(sortName), Constructor(consName)), args, _) -> ret
+  gendx-production-to-cons: SdfProductionWithCons(SortCons(SortDef(sortName), Constructor(consName)), args, attrs) -> ret
+    where <not(gendx-has-bracket-attr)> attrs
     with
       args' := <gendx-collect-args> args;
       ret := <gendx-to-decl(|sortName, consName)> args'
-  gendx-production-to-cons: TemplateProductionWithCons(SortCons(SortDef(sortName), Constructor(consName)), args, _) -> ret
+  gendx-production-to-cons: TemplateProductionWithCons(SortCons(SortDef(sortName), Constructor(consName)), args, attrs) -> ret
+    where <not(gendx-has-bracket-attr)> attrs
     with
       args' := <gendx-collect-args> args;
       ret := <gendx-to-decl(|sortName, consName)> args'
+
+  // gendx-has-bracket-attr :: TP
+  gendx-has-bracket-attr: t@Attrs(x) -> t
+    where <member> (Bracket(), x)
 
   // gendx-to-inj(|string): List(MConstructorArgument) -> MConstructorDecl
   gendx-to-inj(|sortName): [a] -> MConstructorDeclInjection(a, sortName)

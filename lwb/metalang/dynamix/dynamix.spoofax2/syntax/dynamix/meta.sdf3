@@ -57,7 +57,7 @@ context-free syntax
 
   MSignatureDecl.MSignatureConstructorsDecl = <
     constructors
-      <{MConstructorDecl "\n\n"}*>
+      <{MConstructorDecl "\n"}*>
   >
 
 context-free sorts MConstructorDecl
@@ -91,7 +91,7 @@ context-free syntax
   MPattern.MPatternListCons = <[<{MPattern ", "}*>|<MPattern>]>
   MPattern.MPatternBound = <<LID>@<MPattern>>
 
-context-free sorts MExpr MStatement MTFun MScopedGlobalBinding
+context-free sorts MExpr MStatement MScopedGlobalBinding
 context-free syntax
   // source language operations
   MExpr.MExprQuote = <'<STerm>>
@@ -99,9 +99,12 @@ context-free syntax
   // meta language operations
   MExpr.MExprVar = <<LID>>
   MExpr.MExprGlobal = <<GID>>
+  // a block requires at least one statement, but we
+  // enforce this during static type checking to ensure
+  // that it at least parses (little bit more ergonomic)
   MExpr.MExprBlock = <
     {
-      <{MStatement "\n"}+>
+      <{MStatement "\n"}*>
     }
   > // TODO: force newlines between statements? (#4)
   MExpr.MExprLabeled1 = <
@@ -118,6 +121,7 @@ context-free syntax
   MExpr.MExprSourceVarToTargetVar = <var(<MExpr>)>
   MExpr.MExprConcatenateStr = <<MExpr> + <MExpr>>
   MExpr.MExprFreshNamedTargetVar = <fresh-var(<ID>)>
+  MExpr.MExprNameOfFun = <nameof(<MExpr>)>
   MExpr.MExprContinueAt = <<MExpr>@(<MExpr>)>
   MExpr.MExprScopedGlobals = <
     with <{MScopedGlobalBinding ", "}+> do
@@ -147,13 +151,13 @@ context-free syntax
 
   MExpr.MExprHole = [hole]
 
-  MTFun.MTFun = <
+  MExpr.MExprTFun = <
     fun <MExpr>(<MExpr>) =
       <MExpr>
   >
   MExpr.MExprTFix = [
     fix {
-      [{MTFun "\n"}+]
+      [{MExpr "\n"}+]
     }
   ]
   MExpr.MExprConditionalPrimitive = [

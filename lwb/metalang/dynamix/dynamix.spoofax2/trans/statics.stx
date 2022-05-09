@@ -120,8 +120,6 @@ rules
   ruleDeclOk(s, MRuleDeclGlobal(name, ty)) :- {T}
     mTypeToMTYPE(s, ty) == T,
     declareGlobal(s, name, T),
-    T != MHOLY0() | error $[Globals may not be holy values.],
-    T != MHOLY1(_) | error $[Globals may not be holy values.],
     assignModuleName(s, astId(name)).
   ruleDeclOk(s, MRuleDeclSignature(name, sig)) :-
     declareRule(s, name, ruleSignatureToMRULE(s, sig)),
@@ -238,8 +236,11 @@ rules
     typeOfExp(s, val) == MTTYPE(TVALUE()) | error $[`let` value must be a @value.]@val,
     RT == composeTypes(MHOLY0(), typeOfExp(s, body)).
   typeOfExp_(s, MExprHole()) = MHOLY0().
-  typeOfExp_(s, MExprTFix(funs)) = MHOLY0() :-
-    funDefsOk(s, funs).
+  typeOfExp_(s, MExprNameOfFun(e)) = MTTYPE(TVALUE()) :-
+    typeCoercibleTo(typeOfExp(s, e), MTTYPE(TFUN())) | error $[Expected @fun value as argument to nameof operator.].
+  typeOfExp_(s, MExprTFix(funs)) = MHOLY0() :- {Ts}
+    typesOfExps(s, funs) == Ts,
+    try { validTFixMembers(Ts) } | error $[Expressions within a fix block must be of type @fun or List(@fun).].
   typeOfExp_(s, MExprConcatenateStr(left, right)) = MSTYPE(SSTRING()) :-
     typeCoercibleTo(MSTYPE(SSTRING()), typeOfExp(s, left)) | error $[The left-hand side of the `+` operator must be a source string. Runtime addition is done through primitives, not the + operator.]@left,
     typeCoercibleTo(MSTYPE(SSTRING()), typeOfExp(s, right)) | error $[The right-hand side of the `+` operator must be a source string. Runtime addition is done through primitives, not the + operator.]@right.
@@ -247,11 +248,22 @@ rules
     scopedGlobalBindingsOk(s, bindings).
   typeOfExp_(s, MExprQuoteTarget(_)) = MHOLY0() :-
     try { false } | warning $[Quoted target blocks are deprecated and will be removed.].
+  typeOfExp_(s, MExprTFun(name, args, body)) = MTTYPE(TFUN()) :- {s' RT}
+    typeCoercibleTo(typeOfExp(s, name), MTTYPE(TVALUE())) | error $[The name of a function must be a value.],
+    typeCoercibleTo(typeOfExp(s, args), MLIST(MTTYPE(TVALUE()))) | error $[The arguments of a function must be a list of values.],
+    new s', s' -P-> s,
+    typeOfExp(s', body) == RT,
+    try { RT == MTTYPE(TSTATEMENT()) } | error $[The body of a function definition must always result in a tail-call (value of type @statement).].
 
   coercibleToInt : MTYPE
   coercibleToInt(MSTYPE(SSTRING())).
   coercibleToInt(MSTYPE(SINT())).
   coercibleToInt(T) :- typeCoercibleTo(MSTYPE(SSTRING()), T).
+
+  validTFixMember : MTYPE
+  validTFixMembers maps validTFixMember(list(*))
+  validTFixMember(MLIST(MTTYPE(TFUN()))). // List(@fun)
+  validTFixMember(MTTYPE(TFUN())). // @fun
 
   scopedGlobalBindingOk : scope * MScopedGlobalBinding
   scopedGlobalBindingsOk maps scopedGlobalBindingOk(*, list(*))
@@ -265,7 +277,7 @@ rules
   primitiveArgumentsType(MPRIMITIVESTMT(A)) = A.
 
   primitiveReturnType : MPRIMITIVE -> MTYPE
-  primitiveReturnType(MPRIMITIVEEXPR(_)) = MTTYPE(TVALUE()).
+  primitiveReturnType(MPRIMITIVEEXPR(_)) = MHOLY1(MTTYPE(TVALUE())).
   primitiveReturnType(MPRIMITIVESTMT(_)) = MTTYPE(TSTATEMENT()).
 
   callTypesCompatible : list(MTYPE) * list(MTYPE)
@@ -275,14 +287,6 @@ rules
   callTypesCompatible([A|ar], [B|br]) :-
     typeCoercibleTo(A, B) | error $[The given parameter type [A] is not compatible with the expected parameter type [B].],
     callTypesCompatible(ar, br).
-
-  funDefOk : scope * MTFun
-  funDefsOk maps funDefOk(*, list(*))
-  funDefOk(s, MTFun(name, args, body)) :- {s'}
-    typeCoercibleTo(typeOfExp(s, name), MTTYPE(TVALUE())) | error $[The name of a function must be a value.],
-    typeCoercibleTo(typeOfExp(s, args), MLIST(MTTYPE(TVALUE()))) | error $[The arguments of a function must be a list of values.],
-    new s', s' -P-> s,
-    typeOfExp(s', body) == _.
 
 // quoted expressions
 rules
@@ -311,6 +315,7 @@ rules
 
 rules // statements and composition
   typeOfBlockStmts : scope * list(MStatement) -> MTYPE
+  typeOfBlockStmts(s, []) = _ :- false | error $[A block must contain at least one statement.].
   typeOfBlockStmts(s, [stmt]) = typeOfBlockStmt(s, stmt).
   typeOfBlockStmts(s, [stmt|rest@[_|_]]) = composeTypes(ST, RT) :-
     typeOfBlockStmt(s, stmt) == ST,
@@ -325,6 +330,7 @@ rules // statements and composition
   performAssignment : scope * string * MTYPE
   performAssignment(s, n, MHOLY1(x)) :- declareVar(s, n, x).
   performAssignment(s, n, x@MTTYPE(TVALUE())) :- declareVar(s, n, x).
+  performAssignment(s, n, x@MTTYPE(TFUN())) :- declareVar(s, n, x).
   performAssignment(s, n, x@MLIST(_)) :- declareVar(s, n, x).
   performAssignment(s, n, x@MSTYPE(_)) :- declareVar(s, n, x).
   performAssignment(s, n, x) :-

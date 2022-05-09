@@ -29,6 +29,7 @@ signature
     // Target types
     TVALUE : TTYPE // value
     TSTATEMENT : TTYPE // statement
+    TFUN : TTYPE // fun def (inside fix block)
 
 // constructor management
 signature
@@ -85,9 +86,15 @@ rules
 
   targetTypeToTTYPE(s, MTargetTypeValue()) = TVALUE().
   targetTypeToTTYPE(s, MTargetTypeCPSFinalized()) = TSTATEMENT().
+  targetTypeToTTYPE(s, MTargetTypeFun()) = TFUN().
 
 rules
   composeTypes : MTYPE * MTYPE -> MTYPE
+
+  composeTypes(MSTYPE(_), a) = a. // any source type is thrown away
+  composeTypes(MTTYPE(TSTATEMENT()), _) = _ :- false | error $[Values of type @statement must be the final expression and cannot be followed by anything else.].
+  composeTypes(MTTYPE(_), a) = a. // any other target type (expr, tfun) is thrown away
+  composeTypes(MLIST(_), a) = a. // any list is thrown away
 
   // holy + fin
   composeTypes(MHOLY1(_), MTTYPE(TSTATEMENT())) = MTTYPE(TSTATEMENT()).
@@ -100,30 +107,8 @@ rules
   composeTypes(MHOLY0(), MHOLY0()) = MHOLY0().
 
   // holy + value
-  composeTypes(MHOLY1(_), MTTYPE(TVALUE())) = MHOLY1(MTTYPE(TVALUE())).
-  composeTypes(MHOLY0(), MTTYPE(TVALUE())) = MHOLY1(MTTYPE(TVALUE())).
-
-  // holy + list (todo: check for non value list)
-  composeTypes(MHOLY1(_), t@MLIST(MTTYPE(TVALUE()))) = MHOLY1(t).
-  composeTypes(MHOLY0(), t@MLIST(MTTYPE(TVALUE()))) = MHOLY1(t).
-
-  // value + holy
-  composeTypes(MTTYPE(TVALUE()), t@MHOLY1(_)) = t.
-  composeTypes(MTTYPE(TVALUE()), t@MHOLY0()) = t.
-
-  // list + holy (todo: check for non-value lists)
-  composeTypes(MLIST(MTTYPE(TVALUE())), t@MHOLY1(_)) = t.
-  composeTypes(MLIST(MTTYPE(TVALUE())), t@MHOLY0()) = t.
-
-  // value/meta list + fin
-  composeTypes(MTTYPE(TVALUE()), MTTYPE(TSTATEMENT())) = MTTYPE(TSTATEMENT()).
-  composeTypes(MLIST(MTTYPE(TVALUE())), MTTYPE(TSTATEMENT())) = MTTYPE(TSTATEMENT()).
-
-  // direct replacements
-  composeTypes(MTTYPE(TVALUE()), t@MTTYPE(TVALUE())) = t.
-  composeTypes(MTTYPE(TVALUE()), t@MLIST(MTTYPE(TVALUE()))) = t.
-  composeTypes(MLIST(MTTYPE(TVALUE())), t@MTTYPE(TVALUE())) = t.
-  composeTypes(MLIST(MTTYPE(TVALUE())), t@MLIST(MTTYPE(TVALUE()))) = t.
+  composeTypes(MHOLY1(_), t) = MHOLY1(t).
+  composeTypes(MHOLY0(), t) = MHOLY1(t).
 
   composeTypes(A, B) = _ :-
     try { false } | error $[Cannot compose [A] and [B].],
@@ -145,12 +130,10 @@ rules
   typeCoercibleTo(MLIST(A), MLIST(B)) :-
     typeCoercibleTo(A, B).
   typeCoercibleTo(T, MSTYPE(TT@SSORT(_, s))) :-
-    hasInjection(s, T, TT),
-    try { false } | note $[Coercing [T] to [TT].].
+    hasInjection(s, T, TT).
   typeCoercibleTo(MSTYPE(T@SSORT(_, s)), TT@MLIST(MSTYPE(_))) :-
     // : list(Exp) -> Parameters, allow parameters in a place where list(Exp) is expected
-    hasInjection(s, TT, T),
-    try { false } | note $[Coercing [T] to [TT].].
+    hasInjection(s, TT, T).
 
   // specific helper for list coercions in patterns
   // unlike typeCoercibleTo, the target/expected type
@@ -158,11 +141,9 @@ rules
   listCoercibleTo : MTYPE * MTYPE
   listCoercibleTo(MLIST(A), MLIST(B)) :- A == B.
   listCoercibleTo(MSTYPE(TT@SSORT(_, s)), T@MLIST(_)) :-
-    hasListInjection(s, T, TT),
-    try { false } | note $[List coercing [T] to [TT].].
+    hasListInjection(s, T, TT).
   listCoercibleTo(MSTYPE(TT@SSORT(_, s)), T) :-
-    hasInjection(s, T, TT),
-    try { false } | note $[Coercing [T] to [TT].].
+    hasInjection(s, T, TT).
   listCoercibleTo(A, B) :- typeCoercibleTo(B, A).
 
   // todo: better lub using injections?
@@ -210,7 +191,6 @@ rules
   hasInjection : scope * MTYPE * STYPE
   hasInjection(s, from, to) :- {ps}
     query injection filter (I | P)* and { (a, b) :- b == to } min and false in s |-> ps,
-    try { false } | note $[checkValidInjectionCandidate([ps], [from])],
     checkValidInjectionCandidate(ps, from).
 
   hasListInjection : scope * MTYPE * STYPE

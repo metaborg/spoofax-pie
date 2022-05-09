@@ -45,6 +45,7 @@ context-free syntax
   MTargetType.MTargetTypeValue = <value>
   // represents a finalized AST node (aka tail calling)
   MTargetType.MTargetTypeCPSFinalized = <statement>
+  MTargetType.MTargetTypeFun = <fun>
 
 context-free sorts MRuleSignature
 context-free syntax
