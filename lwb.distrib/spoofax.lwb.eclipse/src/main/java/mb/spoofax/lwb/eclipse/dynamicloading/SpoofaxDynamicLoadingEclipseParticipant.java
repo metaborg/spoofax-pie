@@ -1,6 +1,7 @@
 package mb.spoofax.lwb.eclipse.dynamicloading;
 
 import mb.common.util.ListView;
+import mb.common.util.StringUtil;
 import mb.log.api.Level;
 import mb.pie.dagger.PieComponent;
 import mb.pie.dagger.RootPieModule;
@@ -36,6 +37,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.eclipse.core.runtime.IPath;
 
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public class SpoofaxDynamicLoadingEclipseParticipant extends DynamicLoadingParticipant<EclipseLoggerComponent, EclipseResourceServiceComponent, EclipsePlatformComponent> implements EclipseParticipant {
@@ -101,8 +103,24 @@ public class SpoofaxDynamicLoadingEclipseParticipant extends DynamicLoadingParti
             pieModule.withStoreFactory((serde, resourceService, loggerFactory) -> {
                 final IPath statePath = SpoofaxLwbPlugin.getPlugin().getStateLocation();
                 final FSResource stateDir = ResourceUtil.toFsResource(statePath);
+                final FSResource versionFile = stateDir.appendRelativePath("version");
+                final String version = SpoofaxLwbPlugin.getPlugin().getBundle().getVersion().toString().trim();
+                final FSResource pieStoreFile = stateDir.appendRelativePath("pieStore");
                 return SerializingStoreBuilder.ofInMemoryStore(serde)
-                    .withResourceStorage(stateDir.appendRelativePath("pieStore"))
+                    .withInputStreamSupplier(() -> {
+                        if(versionFile.exists() && versionFile.isFile()) {
+                            final String storedVersion = stateDir.appendRelativePath("version").readString().trim();
+                            if(!storedVersion.equals(version)) {
+                                component.getLoggerComponent().getLoggerFactory().create(getClass()).warn("Version of PIE store '{}' does not match current version '{}'; skipping deserialization and creating a clean store", storedVersion, version);
+                                return Optional.empty();
+                            }
+                        }
+                        return Optional.of(pieStoreFile.openReadBuffered());
+                    })
+                    .withOutputStreamSupplier(() -> {
+                        versionFile.ensureFileExists().writeString(version);
+                        return pieStoreFile.ensureFileExists().openWriteBuffered();
+                    })
                     .withLoggingDeserializeFailHandler(loggerFactory)
                     .build();
             });

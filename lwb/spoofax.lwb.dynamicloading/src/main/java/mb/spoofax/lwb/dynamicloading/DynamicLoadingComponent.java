@@ -30,6 +30,9 @@ public interface DynamicLoadingComponent extends TaskDefsProvider, AutoCloseable
     DynamicLoadGetBaseComponentManager getDynamicLoadGetBaseComponentManager();
 
 
+    LoggerComponent getLoggerComponent();
+
+
     @Override @DynamicLoadingQualifier Set<TaskDef<?, ?>> getTaskDefs();
 
     @Override default void close() {

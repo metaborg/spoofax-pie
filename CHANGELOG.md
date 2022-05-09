@@ -5,6 +5,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 ## [Unreleased]
 ### Fixed
 - ESV imports not resolving to modules in the main source directory.
+- Updating the Eclipse LWB plugin causing failures when no clean is performed. The PIE store is now automatically cleaned when the version changes. [#39](https://github.com/metaborg/spoofax-pie/issues/39#issuecomment-1120814670)
 
 ### Changed
 - Dependency syntax to be less verbose and more configurable.
