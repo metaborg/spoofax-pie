@@ -1,6 +1,6 @@
 package mb.spoofax.lwb.dynamicloading;
 
-import mb.cfg.CompileLanguageInput;
+import mb.cfg.CompileLanguageDefinitionInput;
 import mb.cfg.task.CfgRootDirectoryToObject;
 import mb.cfg.task.CfgRootDirectoryToObjectException;
 import mb.cfg.task.CfgToObject;
@@ -209,9 +209,9 @@ class TestBase {
         return session.require(dynamicLoadTask(rootDirectory)).getValue().unwrap();
     }
 
-    CompileLanguageInput requireCompileLanguageInput(Session session, ResourcePath rootDirectory) throws Exception {
+    CompileLanguageDefinitionInput requireCompileLanguageInput(Session session, ResourcePath rootDirectory) throws Exception {
         final Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result = session.require(cfgRootDirectoryToObject.createTask(rootDirectory));
-        return result.expect("Getting configuration for '" + rootDirectory + "' to succeed, but it failed").compileLanguageInput;
+        return result.expect("Getting configuration for '" + rootDirectory + "' to succeed, but it failed").compileLanguageDefinitionInput;
     }
 
     DynamicComponent getDynamicLoadOutput(TopDownSession session, ResourcePath rootDirectory) throws Exception {

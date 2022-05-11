@@ -7,8 +7,8 @@ import org.immutables.value.Value;
 import java.io.Serializable;
 
 @Value.Immutable
-public interface CompileLanguageSpecificationShared extends Serializable {
-    class Builder extends ImmutableCompileLanguageSpecificationShared.Builder {}
+public interface CompileMetaLanguageSourcesShared extends Serializable {
+    class Builder extends ImmutableCompileMetaLanguageSourcesShared.Builder {}
 
     static Builder builder() {
         return new Builder();

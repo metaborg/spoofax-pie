@@ -21,8 +21,8 @@ import java.util.Properties;
 import java.util.function.Function;
 
 @Value.Immutable
-public interface CompileLanguageSpecificationInput extends Serializable {
-    class Builder extends ImmutableCompileLanguageSpecificationInput.Builder {}
+public interface CompileMetaLanguageSourcesInput extends Serializable {
+    class Builder extends ImmutableCompileMetaLanguageSourcesInput.Builder {}
 
     static Builder builder() {return new Builder();}
 
@@ -31,7 +31,7 @@ public interface CompileLanguageSpecificationInput extends Serializable {
 
     Shared shared();
 
-    CompileLanguageSpecificationShared compileLanguageShared();
+    CompileMetaLanguageSourcesShared compileLanguageShared();
 
 
     /// Sub-inputs

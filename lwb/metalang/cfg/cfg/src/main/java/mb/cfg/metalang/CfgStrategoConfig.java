@@ -1,6 +1,6 @@
 package mb.cfg.metalang;
 
-import mb.cfg.CompileLanguageSpecificationShared;
+import mb.cfg.CompileMetaLanguageSourcesShared;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.adapter.ExportsCompiler;
 import mb.spoofax.compiler.language.StrategoRuntimeLanguageCompiler;
@@ -35,7 +35,7 @@ public interface CfgStrategoConfig extends Serializable {
 
     @Value.Default default CfgStrategoSource source() {
         return CfgStrategoSource.files(CfgStrategoSource.Files.builder()
-            .compileLanguageShared(compileLanguageShared())
+            .compileMetaLanguageSourcesShared(compileLanguageShared())
             .build()
         );
     }
@@ -85,7 +85,7 @@ public interface CfgStrategoConfig extends Serializable {
 
     /// Automatically provided sub-inputs
 
-    CompileLanguageSpecificationShared compileLanguageShared();
+    CompileMetaLanguageSourcesShared compileLanguageShared();
 
     Shared shared();
 

@@ -16,8 +16,8 @@ import java.util.Optional;
 import java.util.Properties;
 
 @Value.Immutable
-public interface CompileLanguageInput extends Serializable {
-    class Builder extends ImmutableCompileLanguageInput.Builder {}
+public interface CompileLanguageDefinitionInput extends Serializable {
+    class Builder extends ImmutableCompileLanguageDefinitionInput.Builder {}
 
     static Builder builder() {
         return new Builder();
@@ -30,7 +30,7 @@ public interface CompileLanguageInput extends Serializable {
 
     LanguageProjectCompiler.Input languageProjectInput();
 
-    CompileLanguageSpecificationInput compileLanguageSpecificationInput();
+    CompileMetaLanguageSourcesInput compileMetaLanguageSourcesInput();
 
     AdapterProjectCompiler.Input adapterProjectInput();
 
@@ -42,7 +42,7 @@ public interface CompileLanguageInput extends Serializable {
     default LinkedHashSet<ResourcePath> javaSourceFiles() { // LinkedHashSet to preserve insertion order.
         final LinkedHashSet<ResourcePath> javaSourceFiles = new LinkedHashSet<>();
         javaSourceFiles.addAll(languageProjectInput().javaSourceFiles());
-        javaSourceFiles.addAll(compileLanguageSpecificationInput().javaSourceFiles());
+        javaSourceFiles.addAll(compileMetaLanguageSourcesInput().javaSourceFiles());
         javaSourceFiles.addAll(adapterProjectInput().javaSourceFiles());
         eclipseProjectInput().ifPresent(i -> javaSourceFiles.addAll(i.javaSourceFiles()));
         return javaSourceFiles;
@@ -57,7 +57,7 @@ public interface CompileLanguageInput extends Serializable {
     default LinkedHashSet<ResourcePath> javaSourcePaths() { // LinkedHashSet to preserve insertion order.
         final LinkedHashSet<ResourcePath> javaSourcePath = new LinkedHashSet<>(userJavaSourcePaths());
         javaSourcePath.addAll(languageProjectInput().javaSourcePaths());
-        javaSourcePath.addAll(compileLanguageSpecificationInput().javaSourcePaths());
+        javaSourcePath.addAll(compileMetaLanguageSourcesInput().javaSourcePaths());
         javaSourcePath.addAll(adapterProjectInput().javaSourcePaths());
         eclipseProjectInput().ifPresent(i -> javaSourcePath.addAll(i.javaSourcePaths()));
         return javaSourcePath;
@@ -65,7 +65,7 @@ public interface CompileLanguageInput extends Serializable {
 
     default LinkedHashSet<ResourcePath> javaSourceDirectoryPaths() { // LinkedHashSet to preserve insertion order.
         final LinkedHashSet<ResourcePath> javaSourceDirectoryPath = new LinkedHashSet<>();
-        javaSourceDirectoryPath.addAll(compileLanguageSpecificationInput().javaSourceDirectoryPaths());
+        javaSourceDirectoryPath.addAll(compileMetaLanguageSourcesInput().javaSourceDirectoryPaths());
         return javaSourceDirectoryPath;
     }
 
@@ -90,7 +90,7 @@ public interface CompileLanguageInput extends Serializable {
 
     default LinkedHashSet<ResourcePath> resourcePaths() { // LinkedHashSet to preserve insertion order.
         final LinkedHashSet<ResourcePath> resourcePaths = new LinkedHashSet<>(userResourcePaths());
-        resourcePaths.addAll(compileLanguageSpecificationInput().resourcePaths());
+        resourcePaths.addAll(compileMetaLanguageSourcesInput().resourcePaths());
         eclipseProjectInput().ifPresent(i -> resourcePaths.addAll(i.resourcePaths()));
         return resourcePaths;
     }
@@ -98,6 +98,6 @@ public interface CompileLanguageInput extends Serializable {
 
     default void savePersistentProperties(Properties properties) {
         shared().savePersistentProperties(properties);
-        compileLanguageSpecificationInput().savePersistentProperties(properties);
+        compileMetaLanguageSourcesInput().savePersistentProperties(properties);
     }
 }

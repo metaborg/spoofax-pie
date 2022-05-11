@@ -1,6 +1,6 @@
 package mb.cfg.metalang;
 
-import mb.cfg.CompileLanguageSpecificationShared;
+import mb.cfg.CompileMetaLanguageSourcesShared;
 import mb.common.util.ADT;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -18,7 +18,7 @@ public abstract class CfgStrategoSource implements Serializable {
     @Value.Immutable
     public interface Files extends Serializable {
         class Builder extends ImmutableCfgStrategoSource.Files.Builder {
-            public static ResourcePath getDefaultMainSourceDirectory(CompileLanguageSpecificationShared shared) {
+            public static ResourcePath getDefaultMainSourceDirectory(CompileMetaLanguageSourcesShared shared) {
                 return shared.languageProject().project().srcDirectory();
             }
         }
@@ -27,7 +27,7 @@ public abstract class CfgStrategoSource implements Serializable {
 
 
         @Value.Default default ResourcePath mainSourceDirectory() {
-            return Builder.getDefaultMainSourceDirectory(compileLanguageShared());
+            return Builder.getDefaultMainSourceDirectory(compileMetaLanguageSourcesShared());
         }
 
         @Value.Default default ResourcePath mainFile() {
@@ -50,7 +50,7 @@ public abstract class CfgStrategoSource implements Serializable {
         }
 
         default ResourcePath unarchiveDirectory() {
-            return compileLanguageShared().unarchiveDirectory();
+            return compileMetaLanguageSourcesShared().unarchiveDirectory();
         }
 
         default ResourcePath strategoLibUnarchiveDirectory() {
@@ -62,32 +62,32 @@ public abstract class CfgStrategoSource implements Serializable {
         }
 
         @Value.Default default boolean includeLibSpoofax2Exports() {
-            return compileLanguageShared().includeLibSpoofax2Exports();
+            return compileMetaLanguageSourcesShared().includeLibSpoofax2Exports();
         }
 
         default ResourcePath libSpoofax2UnarchiveDirectory() {
-            return compileLanguageShared().libSpoofax2UnarchiveDirectory();
+            return compileMetaLanguageSourcesShared().libSpoofax2UnarchiveDirectory();
         }
 
         @Value.Default default boolean includeLibStatixExports() {
-            return compileLanguageShared().includeLibStatixExports();
+            return compileMetaLanguageSourcesShared().includeLibStatixExports();
         }
 
         default ResourcePath libStatixUnarchiveDirectory() {
-            return compileLanguageShared().libStatixUnarchiveDirectory();
+            return compileMetaLanguageSourcesShared().libStatixUnarchiveDirectory();
         }
 
         @Value.Default default ResourcePath generatedSourcesDirectory() {
-            return compileLanguageShared().generatedSourcesDirectory().appendRelativePath("stratego");
+            return compileMetaLanguageSourcesShared().generatedSourcesDirectory().appendRelativePath("stratego");
         }
 
         @Value.Default default ResourcePath cacheDirectory() {
-            return compileLanguageShared().languageProject().project().buildDirectory().appendRelativePath("stratego-cache");
+            return compileMetaLanguageSourcesShared().languageProject().project().buildDirectory().appendRelativePath("stratego-cache");
         }
 
         /// Automatically provided sub-inputs
 
-        CompileLanguageSpecificationShared compileLanguageShared();
+        CompileMetaLanguageSourcesShared compileMetaLanguageSourcesShared();
     }
 
     interface Cases<R> {

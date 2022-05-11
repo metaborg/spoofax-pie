@@ -1,6 +1,6 @@
 package mb.cfg.metalang;
 
-import mb.cfg.CompileLanguageSpecificationShared;
+import mb.cfg.CompileMetaLanguageSourcesShared;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.adapter.ExportsCompiler;
 import mb.spoofax.compiler.language.ParserLanguageCompiler;
@@ -17,7 +17,7 @@ public interface CfgSdf3Config extends Serializable {
 
 
     class Builder extends ImmutableCfgSdf3Config.Builder {
-        public static ResourcePath getDefaultMainSourceDirectory(CompileLanguageSpecificationShared shared) {
+        public static ResourcePath getDefaultMainSourceDirectory(CompileMetaLanguageSourcesShared shared) {
             return shared.languageProject().project().srcDirectory();
         }
 
@@ -31,7 +31,7 @@ public interface CfgSdf3Config extends Serializable {
 
     @Value.Default default CfgSdf3Source source() {
         return CfgSdf3Source.files(CfgSdf3Source.Files.builder()
-            .compileLanguageShared(compileLanguageShared())
+            .compileMetaLanguageSourcesShared(compileLanguageShared())
             .build()
         );
     }
@@ -86,7 +86,7 @@ public interface CfgSdf3Config extends Serializable {
 
     /// Automatically provided sub-inputs
 
-    CompileLanguageSpecificationShared compileLanguageShared();
+    CompileMetaLanguageSourcesShared compileLanguageShared();
 
 
     default void syncTo(ParserLanguageCompiler.Input.Builder builder) {

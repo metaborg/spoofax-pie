@@ -3,7 +3,7 @@ package mb.spoofax.lwb.compiler;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ElementsIntoSet;
-import mb.cfg.CompileLanguageInput;
+import mb.cfg.CompileLanguageDefinitionInput;
 import mb.pie.api.TaskDef;
 import mb.pie.task.archive.UnarchiveFromJar;
 import mb.pie.task.java.CompileJava;
@@ -39,14 +39,14 @@ import java.util.function.Function;
 @Module
 public class SpoofaxLwbCompilerModule {
     private final TemplateCompiler templateCompiler;
-    private Function<CompileLanguageInput, String> participantClassQualifiedIdSelector = input -> input.adapterProjectInput().participant().qualifiedId();
+    private Function<CompileLanguageDefinitionInput, String> participantClassQualifiedIdSelector = input -> input.adapterProjectInput().participant().qualifiedId();
 
     public SpoofaxLwbCompilerModule(TemplateCompiler templateCompiler) {
         this.templateCompiler = templateCompiler;
     }
 
 
-    public SpoofaxLwbCompilerModule setParticipantClassQualifiedIdSelector(Function<CompileLanguageInput, String> participantClassQualifiedIdSelector) {
+    public SpoofaxLwbCompilerModule setParticipantClassQualifiedIdSelector(Function<CompileLanguageDefinitionInput, String> participantClassQualifiedIdSelector) {
         this.participantClassQualifiedIdSelector = participantClassQualifiedIdSelector;
         return this;
     }
@@ -58,7 +58,7 @@ public class SpoofaxLwbCompilerModule {
     }
 
     @Provides @SpoofaxLwbCompilerScope
-    Function<CompileLanguageInput, String> provideParticipantClassQualifiedIdSelector() {
+    Function<CompileLanguageDefinitionInput, String> provideParticipantClassQualifiedIdSelector() {
         return participantClassQualifiedIdSelector;
     }
 

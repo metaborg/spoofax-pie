@@ -1,6 +1,6 @@
 package mb.cfg.metalang;
 
-import mb.cfg.CompileLanguageSpecificationShared;
+import mb.cfg.CompileMetaLanguageSourcesShared;
 import mb.common.util.ADT;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -18,7 +18,7 @@ public abstract class CfgDynamixSource implements Serializable {
     @Value.Immutable
     public interface Files extends Serializable {
         class Builder extends ImmutableCfgDynamixSource.Files.Builder {
-            public static ResourcePath getDefaultMainSourceDirectory(CompileLanguageSpecificationShared shared) {
+            public static ResourcePath getDefaultMainSourceDirectory(CompileMetaLanguageSourcesShared shared) {
                 return shared.languageProject().project().srcDirectory();
             }
         }
@@ -27,7 +27,7 @@ public abstract class CfgDynamixSource implements Serializable {
 
 
         @Value.Default default ResourcePath mainSourceDirectory() {
-            return Builder.getDefaultMainSourceDirectory(compileLanguageShared());
+            return Builder.getDefaultMainSourceDirectory(compileMetaLanguageSourcesShared());
         }
 
         @Value.Default default ResourcePath mainFile() {
@@ -35,14 +35,14 @@ public abstract class CfgDynamixSource implements Serializable {
         }
 
         @Value.Default default ResourcePath generatedSourcesDirectory() {
-            return compileLanguageShared().generatedSourcesDirectory().appendRelativePath("dynamix");
+            return compileMetaLanguageSourcesShared().generatedSourcesDirectory().appendRelativePath("dynamix");
         }
 
         List<ResourcePath> includeDirectories();
 
         /// Automatically provided sub-inputs
 
-        CompileLanguageSpecificationShared compileLanguageShared();
+        CompileMetaLanguageSourcesShared compileMetaLanguageSourcesShared();
     }
 
     interface Cases<R> {

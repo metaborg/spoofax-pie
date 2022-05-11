@@ -214,7 +214,7 @@ public class SpoofaxStatixConfigure implements TaskDef<ResourcePath, Result<Opti
     private static class StatixConfigMapper extends StatelessSerializableFunction<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>, Result<Option<CfgStatixConfig>, CfgRootDirectoryToObjectException>> {
         @Override
         public Result<Option<CfgStatixConfig>, CfgRootDirectoryToObjectException> apply(Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result) {
-            return result.map(o -> Option.ofOptional(o.compileLanguageInput.compileLanguageSpecificationInput().statix()));
+            return result.map(o -> Option.ofOptional(o.compileLanguageDefinitionInput.compileMetaLanguageSourcesInput().statix()));
         }
     }
 }

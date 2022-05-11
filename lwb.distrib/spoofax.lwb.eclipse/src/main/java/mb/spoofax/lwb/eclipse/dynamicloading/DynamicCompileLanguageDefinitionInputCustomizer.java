@@ -1,9 +1,9 @@
 package mb.spoofax.lwb.eclipse.dynamicloading;
 
-import mb.cfg.CompileLanguageInput;
-import mb.cfg.CompileLanguageInputCustomizer;
-import mb.cfg.CompileLanguageSpecificationInputBuilder;
-import mb.cfg.CompileLanguageSpecificationShared;
+import mb.cfg.CompileLanguageDefinitionInput;
+import mb.cfg.CompileLanguageDefinitionInputCustomizer;
+import mb.cfg.CompileMetaLanguageSourcesInputBuilder;
+import mb.cfg.CompileMetaLanguageSourcesShared;
 import mb.spoofax.compiler.adapter.AdapterProject;
 import mb.spoofax.compiler.adapter.AdapterProjectCompilerInputBuilder;
 import mb.spoofax.compiler.language.LanguageProject;
@@ -13,7 +13,7 @@ import mb.spoofax.compiler.util.Shared;
 
 import java.util.Optional;
 
-public class DynamicCompileLanguageInputCustomizer implements CompileLanguageInputCustomizer {
+public class DynamicCompileLanguageDefinitionInputCustomizer implements CompileLanguageDefinitionInputCustomizer {
     @Override public void customize(Shared.Builder builder) {
 
     }
@@ -26,11 +26,11 @@ public class DynamicCompileLanguageInputCustomizer implements CompileLanguageInp
 
     }
 
-    @Override public void customize(CompileLanguageSpecificationShared.Builder builder) {
+    @Override public void customize(CompileMetaLanguageSourcesShared.Builder builder) {
 
     }
 
-    @Override public void customize(CompileLanguageSpecificationInputBuilder languageCompilerInputBuilder) {
+    @Override public void customize(CompileMetaLanguageSourcesInputBuilder languageCompilerInputBuilder) {
 
     }
 
@@ -65,7 +65,7 @@ public class DynamicCompileLanguageInputCustomizer implements CompileLanguageInp
         return Optional.of(EclipseProjectCompiler.Input.builder());
     }
 
-    @Override public void customize(CompileLanguageInput.Builder builder) {
+    @Override public void customize(CompileLanguageDefinitionInput.Builder builder) {
 
     }
 }

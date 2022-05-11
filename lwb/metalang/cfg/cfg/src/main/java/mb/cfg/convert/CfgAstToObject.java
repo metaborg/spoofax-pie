@@ -1,11 +1,11 @@
 package mb.cfg.convert;
 
 import mb.aterm.common.InvalidAstShapeException;
-import mb.cfg.CompileLanguageInput;
-import mb.cfg.CompileLanguageInputCustomizer;
-import mb.cfg.CompileLanguageSpecificationInput;
-import mb.cfg.CompileLanguageSpecificationInputBuilder;
-import mb.cfg.CompileLanguageSpecificationShared;
+import mb.cfg.CompileLanguageDefinitionInput;
+import mb.cfg.CompileLanguageDefinitionInputCustomizer;
+import mb.cfg.CompileMetaLanguageSourcesInput;
+import mb.cfg.CompileMetaLanguageSourcesInputBuilder;
+import mb.cfg.CompileMetaLanguageSourcesShared;
 import mb.cfg.Dependency;
 import mb.cfg.DependencyKind;
 import mb.cfg.DependencySource;
@@ -80,18 +80,18 @@ import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
 /**
- * Converts a CFG AST into an {@link Output} containing messages, a {@link CompileLanguageInput} output object, and
- * properties that need to be written to a lockfile.
+ * Converts a CFG AST into an {@link Output} containing messages, a {@link CompileLanguageDefinitionInput} output
+ * object, and properties that need to be written to a lockfile.
  */
 public class CfgAstToObject {
     public static class Output {
         public final KeyedMessages messages;
-        public final CompileLanguageInput compileLanguageInput;
+        public final CompileLanguageDefinitionInput compileLanguageDefinitionInput;
         public final Properties properties;
 
-        public Output(KeyedMessages messages, CompileLanguageInput compileLanguageInput, Properties properties) {
+        public Output(KeyedMessages messages, CompileLanguageDefinitionInput compileLanguageDefinitionInput, Properties properties) {
             this.messages = messages;
-            this.compileLanguageInput = compileLanguageInput;
+            this.compileLanguageDefinitionInput = compileLanguageDefinitionInput;
             this.properties = properties;
         }
     }
@@ -102,7 +102,7 @@ public class CfgAstToObject {
         @Nullable ResourceKey cfgFile,
         IStrategoTerm normalizedAst,
         Properties properties,
-        CompileLanguageInputCustomizer customizer
+        CompileLanguageDefinitionInputCustomizer customizer
     ) throws InvalidAstShapeException, IllegalStateException {
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
         final IStrategoList taskDefList = TermUtils.asListAt(normalizedAst, 0).orElseThrow(() -> new InvalidAstShapeException("task definition list as first subterm", normalizedAst));
@@ -131,7 +131,7 @@ public class CfgAstToObject {
         final Shared shared = sharedBuilder.build();
 
         // CompileLanguageInput builder
-        final CompileLanguageInput.Builder compileLanguageInputBuilder = CompileLanguageInput.builder()
+        final CompileLanguageDefinitionInput.Builder compileLanguageInputBuilder = CompileLanguageDefinitionInput.builder()
             .shared(shared);
 
         // LanguageBaseShared & LanguageAdapterShared
@@ -146,25 +146,25 @@ public class CfgAstToObject {
         final AdapterProject languageAdapterShared = languageAdapterSharedBuilder.build();
 
         // LanguageShared
-        final CompileLanguageSpecificationShared.Builder languageSharedBuilder = CompileLanguageSpecificationShared.builder()
+        final CompileMetaLanguageSourcesShared.Builder languageSharedBuilder = CompileMetaLanguageSourcesShared.builder()
             .languageProject(languageBaseShared);
         // TODO: includeLibSpoofax2Exports
         // TODO: includeLibStatixExports
         customizer.customize(languageSharedBuilder);
-        final CompileLanguageSpecificationShared languageShared = languageSharedBuilder.build();
+        final CompileMetaLanguageSourcesShared languageShared = languageSharedBuilder.build();
 
         // Builders for LanguageBaseCompilerInput & LanguageCompilerInput
         final LanguageProjectCompilerInputBuilder baseBuilder = new LanguageProjectCompilerInputBuilder();
         final AdapterProjectCompilerInputBuilder adapterBuilder = new AdapterProjectCompilerInputBuilder();
 
         // LanguageCompilerInput
-        final CompileLanguageSpecificationInputBuilder languageCompilerInputBuilder = new CompileLanguageSpecificationInputBuilder();
+        final CompileMetaLanguageSourcesInputBuilder languageCompilerInputBuilder = new CompileMetaLanguageSourcesInputBuilder();
         parts.getAllSubTermsInListAsParts("Sdf3Section").ifSome(subParts -> {
             final CfgSdf3Config.Builder builder = languageCompilerInputBuilder.withSdf3();
             subParts.getOneSubterm("Sdf3Source").ifSome(source -> {
                 if(TermUtils.isAppl(source, "Sdf3Files", 1)) {
                     final Parts filesParts = subParts.subParts(source.getSubterm(0));
-                    final CfgSdf3Source.Files.Builder filesSourceBuilder = CfgSdf3Source.Files.builder().compileLanguageShared(languageShared);
+                    final CfgSdf3Source.Files.Builder filesSourceBuilder = CfgSdf3Source.Files.builder().compileMetaLanguageSourcesShared(languageShared);
                     final ResourcePath mainSourceDirectory = filesParts.getOneSubtermAsExistingDirectory("Sdf3FilesMainSourceDirectory", rootDirectory, "SDF3 main source directory")
                         .unwrapOrElse(() -> CfgSdf3Source.Files.Builder.getDefaultMainSourceDirectory(languageShared));
                     filesSourceBuilder.mainSourceDirectory(mainSourceDirectory);
@@ -204,7 +204,7 @@ public class CfgAstToObject {
             subParts.getOneSubterm("EsvSource").ifSome(source -> {
                 if(TermUtils.isAppl(source, "EsvFiles", 1)) {
                     final Parts filesParts = subParts.subParts(source.getSubterm(0));
-                    final CfgEsvSource.Files.Builder filesSourceBuilder = CfgEsvSource.Files.builder().compileLanguageShared(languageShared);
+                    final CfgEsvSource.Files.Builder filesSourceBuilder = CfgEsvSource.Files.builder().compileMetaLanguageSourcesShared(languageShared);
                     final ResourcePath mainSourceDirectory = filesParts.getOneSubtermAsExistingDirectory("EsvFilesMainSourceDirectory", rootDirectory, "ESV main source directory")
                         .unwrapOrElse(() -> CfgEsvSource.Files.Builder.getDefaultMainSourceDirectory(languageShared));
                     filesSourceBuilder.mainSourceDirectory(mainSourceDirectory);
@@ -229,7 +229,7 @@ public class CfgAstToObject {
             subParts.getOneSubterm("StatixSource").ifSome(source -> {
                 if(TermUtils.isAppl(source, "StatixFiles", 1)) {
                     final Parts filesParts = subParts.subParts(source.getSubterm(0));
-                    final CfgStatixSource.Files.Builder filesSourceBuilder = CfgStatixSource.Files.builder().compileLanguageShared(languageShared);
+                    final CfgStatixSource.Files.Builder filesSourceBuilder = CfgStatixSource.Files.builder().compileMetaLanguageSourcesShared(languageShared);
                     final ResourcePath mainSourceDirectory = filesParts.getOneSubtermAsExistingDirectory("StatixFilesMainSourceDirectory", rootDirectory, "Statix main source directory")
                         .unwrapOrElse(() -> CfgStatixSource.Files.Builder.getDefaultMainSourceDirectory(languageShared));
                     filesSourceBuilder.mainSourceDirectory(mainSourceDirectory);
@@ -254,7 +254,7 @@ public class CfgAstToObject {
             subParts.getOneSubterm("DynamixSource").ifSome(source -> {
                 if(TermUtils.isAppl(source, "DynamixFiles", 1)) {
                     final Parts filesParts = subParts.subParts(source.getSubterm(0));
-                    final CfgDynamixSource.Files.Builder filesSourceBuilder = CfgDynamixSource.Files.builder().compileLanguageShared(languageShared);
+                    final CfgDynamixSource.Files.Builder filesSourceBuilder = CfgDynamixSource.Files.builder().compileMetaLanguageSourcesShared(languageShared);
                     final ResourcePath mainSourceDirectory = filesParts.getOneSubtermAsExistingDirectory("DynamixFilesMainSourceDirectory", rootDirectory, "Dynamix main source directory")
                         .unwrapOrElse(() -> CfgDynamixSource.Files.Builder.getDefaultMainSourceDirectory(languageShared));
                     filesSourceBuilder.mainSourceDirectory(mainSourceDirectory);
@@ -276,7 +276,7 @@ public class CfgAstToObject {
             subParts.getOneSubterm("StrategoSource").ifSome(source -> {
                 if(TermUtils.isAppl(source, "StrategoFiles", 1)) {
                     final Parts filesParts = subParts.subParts(source.getSubterm(0));
-                    final CfgStrategoSource.Files.Builder filesSourceBuilder = CfgStrategoSource.Files.builder().compileLanguageShared(languageShared);
+                    final CfgStrategoSource.Files.Builder filesSourceBuilder = CfgStrategoSource.Files.builder().compileMetaLanguageSourcesShared(languageShared);
                     final ResourcePath mainSourceDirectory = filesParts.getOneSubtermAsExistingDirectory("StrategoFilesMainSourceDirectory", rootDirectory, "Stratego main source directory")
                         .unwrapOrElse(() -> CfgStrategoSource.Files.Builder.getDefaultMainSourceDirectory(languageShared));
                     filesSourceBuilder.mainSourceDirectory(mainSourceDirectory);
@@ -318,10 +318,10 @@ public class CfgAstToObject {
         });
 
         customizer.customize(languageCompilerInputBuilder);
-        final CompileLanguageSpecificationInput languageCompilerInput = languageCompilerInputBuilder.build(properties, shared, languageShared);
-        languageCompilerInput.syncTo(baseBuilder);
-        languageCompilerInput.syncTo(adapterBuilder);
-        compileLanguageInputBuilder.compileLanguageSpecificationInput(languageCompilerInput);
+        final CompileMetaLanguageSourcesInput compileMetaLanguageSourcesInput = languageCompilerInputBuilder.build(properties, shared, languageShared);
+        compileMetaLanguageSourcesInput.syncTo(baseBuilder);
+        compileMetaLanguageSourcesInput.syncTo(adapterBuilder);
+        compileLanguageInputBuilder.compileMetaLanguageSourcesInput(compileMetaLanguageSourcesInput);
 
         // LanguageBaseCompilerInput & LanguageAdapterCompilerInput
         parts.getAllSubTermsInListAsParts("ParserSection").ifSome(subParts -> {
@@ -545,12 +545,12 @@ public class CfgAstToObject {
 
         // Build compile language input object
         customizer.customize(compileLanguageInputBuilder);
-        final CompileLanguageInput compileLanguageInput = compileLanguageInputBuilder.build();
-        compileLanguageInput.savePersistentProperties(properties);
+        final CompileLanguageDefinitionInput compileLanguageDefinitionInput = compileLanguageInputBuilder.build();
+        compileLanguageDefinitionInput.savePersistentProperties(properties);
 
         // TODO: remove used parts and check to see that there are no leftover parts in the end? Or at least put warnings/errors on those?
 
-        final Output output = new Output(messagesBuilder.build(), compileLanguageInput, properties);
+        final Output output = new Output(messagesBuilder.build(), compileLanguageDefinitionInput, properties);
         return output;
     }
 

@@ -10,9 +10,9 @@ import mb.spoofax.compiler.util.Shared;
 import java.util.Optional;
 
 /**
- * {@link CompileLanguageInputCustomizer} implementation that does nothing.
+ * {@link CompileLanguageDefinitionInputCustomizer} implementation that does nothing.
  */
-public class NoopCompileLanguageInputCustomizer implements CompileLanguageInputCustomizer {
+public class NoopCompileLanguageDefinitionInputCustomizer implements CompileLanguageDefinitionInputCustomizer {
     @Override public void customize(Shared.Builder builder) {
 
     }
@@ -25,11 +25,11 @@ public class NoopCompileLanguageInputCustomizer implements CompileLanguageInputC
 
     }
 
-    @Override public void customize(CompileLanguageSpecificationShared.Builder builder) {
+    @Override public void customize(CompileMetaLanguageSourcesShared.Builder builder) {
 
     }
 
-    @Override public void customize(CompileLanguageSpecificationInputBuilder languageCompilerInputBuilder) {
+    @Override public void customize(CompileMetaLanguageSourcesInputBuilder languageCompilerInputBuilder) {
 
     }
 
@@ -49,7 +49,7 @@ public class NoopCompileLanguageInputCustomizer implements CompileLanguageInputC
         return Optional.empty();
     }
 
-    @Override public void customize(CompileLanguageInput.Builder builder) {
+    @Override public void customize(CompileLanguageDefinitionInput.Builder builder) {
 
     }
 }

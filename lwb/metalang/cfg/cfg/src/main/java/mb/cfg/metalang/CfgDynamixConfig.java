@@ -1,6 +1,6 @@
 package mb.cfg.metalang;
 
-import mb.cfg.CompileLanguageSpecificationShared;
+import mb.cfg.CompileMetaLanguageSourcesShared;
 import mb.resource.hierarchical.ResourcePath;
 import org.immutables.value.Value;
 
@@ -17,7 +17,7 @@ public interface CfgDynamixConfig extends Serializable {
 
     @Value.Default default CfgDynamixSource source() {
         return CfgDynamixSource.files(CfgDynamixSource.Files.builder()
-            .compileLanguageShared(compileLanguageShared())
+            .compileMetaLanguageSourcesShared(compileLanguageShared())
             .build()
         );
     }
@@ -32,5 +32,5 @@ public interface CfgDynamixConfig extends Serializable {
             ;
     }
 
-    CompileLanguageSpecificationShared compileLanguageShared();
+    CompileMetaLanguageSourcesShared compileLanguageShared();
 }

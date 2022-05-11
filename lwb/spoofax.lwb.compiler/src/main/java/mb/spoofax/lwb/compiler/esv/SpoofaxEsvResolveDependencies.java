@@ -105,7 +105,7 @@ public class SpoofaxEsvResolveDependencies extends ResolveDependencies<EsvResolv
 
         @Override
         public Result<Option<ListView<EsvResolvedDependency>>, CfgRootDirectoryToObjectException> apply(Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result) {
-            return result.map(o -> Option.ofOptional(o.compileLanguageInput.compileLanguageSpecificationInput().esv()).map(c -> resolve(o.rootDirectory, c)));
+            return result.map(o -> Option.ofOptional(o.compileLanguageDefinitionInput.compileMetaLanguageSourcesInput().esv()).map(c -> resolve(o.rootDirectory, c)));
         }
 
         private ListView<EsvResolvedDependency> resolve(ResourcePath rootDirectory, CfgEsvConfig config) {

@@ -1,6 +1,6 @@
 package mb.cfg.metalang;
 
-import mb.cfg.CompileLanguageSpecificationShared;
+import mb.cfg.CompileMetaLanguageSourcesShared;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.adapter.ExportsCompiler;
 import mb.spoofax.compiler.language.ConstraintAnalyzerLanguageCompiler;
@@ -23,7 +23,7 @@ public interface CfgStatixConfig extends Serializable {
 
     @Value.Default default CfgStatixSource source() {
         return CfgStatixSource.files(CfgStatixSource.Files.builder()
-            .compileLanguageShared(compileLanguageShared())
+            .compileMetaLanguageSourcesShared(compileLanguageShared())
             .build()
         );
     }
@@ -47,7 +47,7 @@ public interface CfgStatixConfig extends Serializable {
 
     /// Automatically provided sub-inputs
 
-    CompileLanguageSpecificationShared compileLanguageShared();
+    CompileMetaLanguageSourcesShared compileLanguageShared();
 
 
     default void syncTo(ConstraintAnalyzerLanguageCompiler.Input.Builder builder) {

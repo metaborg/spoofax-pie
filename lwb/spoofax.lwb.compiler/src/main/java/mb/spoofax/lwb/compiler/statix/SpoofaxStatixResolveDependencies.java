@@ -105,7 +105,7 @@ public class SpoofaxStatixResolveDependencies extends ResolveDependencies<Statix
 
         @Override
         public Result<Option<ListView<StatixResolvedDependency>>, CfgRootDirectoryToObjectException> apply(Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result) {
-            return result.map(o -> Option.ofOptional(o.compileLanguageInput.compileLanguageSpecificationInput().statix()).map(c -> resolve(o.rootDirectory, c)));
+            return result.map(o -> Option.ofOptional(o.compileLanguageDefinitionInput.compileMetaLanguageSourcesInput().statix()).map(c -> resolve(o.rootDirectory, c)));
         }
 
         private ListView<StatixResolvedDependency> resolve(ResourcePath rootDirectory, CfgStatixConfig config) {

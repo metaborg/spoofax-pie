@@ -133,7 +133,7 @@ public class SpoofaxLwbProjectReferencesBuilder extends SpoofaxLwbBuilderBase im
     private ArrayList<IProject> getProjectReferences(EclipseResourcePath rootDirectory, Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result) {
         final ArrayList<IProject> projectReferences = new ArrayList<>();
         result.ifOk(output -> {
-            final List<Dependency> dependencies = output.compileLanguageInput.compileLanguageSpecificationInput().dependencies();
+            final List<Dependency> dependencies = output.compileLanguageDefinitionInput.compileMetaLanguageSourcesInput().dependencies();
             for(Dependency dependency : dependencies) {
                 if(!dependency.kinds.contains(DependencyKind.Build)) continue;
                 final Optional<String> relativePath = dependency.source.caseOf()

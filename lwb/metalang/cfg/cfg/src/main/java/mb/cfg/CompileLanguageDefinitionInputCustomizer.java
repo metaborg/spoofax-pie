@@ -12,12 +12,12 @@ import mb.spoofax.compiler.util.Shared;
 import java.util.Optional;
 
 /**
- * Interface for customizing {@link CompileLanguageInput} objects, used in {@link CfgAstToObject} as part of {@link
- * CfgToObject}. An implementation is provided by {@link CfgCustomizerModule} which is then injected into the relevant
- * objects. Pass a {@link CfgCustomizerModule} object when building the {@link CfgComponent} via {@link
- * DaggerCfgComponent.Builder#cfgCustomizerModule(CfgCustomizerModule)}.
+ * Interface for customizing {@link CompileLanguageDefinitionInput} objects, used in {@link CfgAstToObject} as part of
+ * {@link CfgToObject}. An implementation is provided by {@link CfgCustomizerModule} which is then injected into the
+ * relevant objects. Pass a {@link CfgCustomizerModule} object when building the {@link CfgComponent} via
+ * {@link DaggerCfgComponent.Builder#cfgCustomizerModule(CfgCustomizerModule)}.
  */
-public interface CompileLanguageInputCustomizer {
+public interface CompileLanguageDefinitionInputCustomizer {
     void customize(Shared.Builder builder);
 
 
@@ -26,9 +26,9 @@ public interface CompileLanguageInputCustomizer {
     void customize(LanguageProjectCompilerInputBuilder baseBuilder);
 
 
-    void customize(CompileLanguageSpecificationShared.Builder builder);
+    void customize(CompileMetaLanguageSourcesShared.Builder builder);
 
-    void customize(CompileLanguageSpecificationInputBuilder languageCompilerInputBuilder);
+    void customize(CompileMetaLanguageSourcesInputBuilder languageCompilerInputBuilder);
 
 
     void customize(AdapterProject.Builder builder);
@@ -41,5 +41,5 @@ public interface CompileLanguageInputCustomizer {
     Optional<EclipseProjectCompiler.Input.Builder> getDefaultEclipseProjectInput();
 
 
-    void customize(CompileLanguageInput.Builder builder);
+    void customize(CompileLanguageDefinitionInput.Builder builder);
 }

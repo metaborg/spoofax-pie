@@ -172,7 +172,7 @@ public class SpoofaxSdf3Configure implements TaskDef<ResourcePath, Result<Option
     private static class Sdf3ConfigMapping extends StatelessSerializableFunction<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>, Result<Option<CfgSdf3Config>, CfgRootDirectoryToObjectException>> {
         @Override
         public Result<Option<CfgSdf3Config>, CfgRootDirectoryToObjectException> apply(Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result) {
-            return result.map(o -> Option.ofOptional(o.compileLanguageInput.compileLanguageSpecificationInput().sdf3()));
+            return result.map(o -> Option.ofOptional(o.compileLanguageDefinitionInput.compileMetaLanguageSourcesInput().sdf3()));
         }
     }
 }

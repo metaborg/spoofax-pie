@@ -2,8 +2,8 @@ package mb.cfg.task;
 
 import mb.aterm.common.InvalidAstShapeException;
 import mb.cfg.CfgScope;
-import mb.cfg.CompileLanguageInput;
-import mb.cfg.CompileLanguageInputCustomizer;
+import mb.cfg.CompileLanguageDefinitionInput;
+import mb.cfg.CompileLanguageDefinitionInputCustomizer;
 import mb.cfg.convert.CfgAstToObject;
 import mb.common.message.KeyedMessages;
 import mb.common.result.Result;
@@ -74,18 +74,18 @@ public class CfgToObject implements TaskDef<CfgToObject.Input, Result<CfgToObjec
     public static class Output implements Serializable {
         public final ResourcePath rootDirectory;
         public final KeyedMessages messages;
-        public final CompileLanguageInput compileLanguageInput;
+        public final CompileLanguageDefinitionInput compileLanguageDefinitionInput;
         public final Properties properties;
 
         public Output(
             ResourcePath rootDirectory,
             KeyedMessages messages,
-            CompileLanguageInput compileLanguageInput,
+            CompileLanguageDefinitionInput compileLanguageDefinitionInput,
             Properties properties
         ) {
             this.rootDirectory = rootDirectory;
             this.messages = messages;
-            this.compileLanguageInput = compileLanguageInput;
+            this.compileLanguageDefinitionInput = compileLanguageDefinitionInput;
             this.properties = properties;
         }
 
@@ -95,14 +95,14 @@ public class CfgToObject implements TaskDef<CfgToObject.Input, Result<CfgToObjec
             final Output output = (Output)o;
             if(!rootDirectory.equals(output.rootDirectory)) return false;
             if(!messages.equals(output.messages)) return false;
-            if(!compileLanguageInput.equals(output.compileLanguageInput)) return false;
+            if(!compileLanguageDefinitionInput.equals(output.compileLanguageDefinitionInput)) return false;
             return properties.equals(output.properties);
         }
 
         @Override public int hashCode() {
             int result = rootDirectory.hashCode();
             result = 31 * result + messages.hashCode();
-            result = 31 * result + compileLanguageInput.hashCode();
+            result = 31 * result + compileLanguageDefinitionInput.hashCode();
             result = 31 * result + properties.hashCode();
             return result;
         }
@@ -111,7 +111,7 @@ public class CfgToObject implements TaskDef<CfgToObject.Input, Result<CfgToObjec
             return "CfgToObject$Output{" +
                 "rootDirectory=" + rootDirectory +
                 ", messages=" + messages +
-                ", compileLanguageInput=" + compileLanguageInput +
+                ", compileLanguageInput=" + compileLanguageDefinitionInput +
                 ", properties=" + properties +
                 '}';
         }
@@ -119,11 +119,11 @@ public class CfgToObject implements TaskDef<CfgToObject.Input, Result<CfgToObjec
 
 
     private final CfgGetStrategoRuntimeProvider getStrategoRuntimeProvider;
-    private final CompileLanguageInputCustomizer customizer;
+    private final CompileLanguageDefinitionInputCustomizer customizer;
 
 
     @Inject
-    public CfgToObject(CfgGetStrategoRuntimeProvider getStrategoRuntimeProvider, CompileLanguageInputCustomizer customizer) {
+    public CfgToObject(CfgGetStrategoRuntimeProvider getStrategoRuntimeProvider, CompileLanguageDefinitionInputCustomizer customizer) {
         this.getStrategoRuntimeProvider = getStrategoRuntimeProvider;
         this.customizer = customizer;
     }
@@ -166,6 +166,6 @@ public class CfgToObject implements TaskDef<CfgToObject.Input, Result<CfgToObjec
         } catch(IllegalStateException e) {
             return Result.ofErr(CfgToObjectException.buildConfigObjectFail(e));
         }
-        return Result.ofOk(new Output(rootDirectory, output.messages, output.compileLanguageInput, output.properties));
+        return Result.ofOk(new Output(rootDirectory, output.messages, output.compileLanguageDefinitionInput, output.properties));
     }
 }

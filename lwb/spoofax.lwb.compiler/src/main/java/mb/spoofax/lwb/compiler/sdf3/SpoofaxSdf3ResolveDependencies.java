@@ -105,7 +105,7 @@ public class SpoofaxSdf3ResolveDependencies extends ResolveDependencies<Sdf3Reso
 
         @Override
         public Result<Option<ListView<Sdf3ResolvedDependency>>, CfgRootDirectoryToObjectException> apply(Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result) {
-            return result.map(o -> Option.ofOptional(o.compileLanguageInput.compileLanguageSpecificationInput().sdf3()).map(c -> resolve(o.rootDirectory, c)));
+            return result.map(o -> Option.ofOptional(o.compileLanguageDefinitionInput.compileMetaLanguageSourcesInput().sdf3()).map(c -> resolve(o.rootDirectory, c)));
         }
 
         private ListView<Sdf3ResolvedDependency> resolve(ResourcePath rootDirectory, CfgSdf3Config config) {

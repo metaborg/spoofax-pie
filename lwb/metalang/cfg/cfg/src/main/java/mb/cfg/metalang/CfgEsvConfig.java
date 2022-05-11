@@ -1,6 +1,6 @@
 package mb.cfg.metalang;
 
-import mb.cfg.CompileLanguageSpecificationShared;
+import mb.cfg.CompileMetaLanguageSourcesShared;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.adapter.ExportsCompiler;
 import mb.spoofax.compiler.language.StylerLanguageCompiler;
@@ -23,7 +23,7 @@ public interface CfgEsvConfig extends Serializable {
 
     @Value.Default default CfgEsvSource source() {
         return CfgEsvSource.files(CfgEsvSource.Files.builder()
-            .compileLanguageShared(compileLanguageShared())
+            .compileMetaLanguageSourcesShared(compileLanguageShared())
             .build()
         );
     }
@@ -43,7 +43,7 @@ public interface CfgEsvConfig extends Serializable {
 
     /// Automatically provided sub-inputs
 
-    CompileLanguageSpecificationShared compileLanguageShared();
+    CompileMetaLanguageSourcesShared compileLanguageShared();
 
 
     default void syncTo(StylerLanguageCompiler.Input.Builder builder) {

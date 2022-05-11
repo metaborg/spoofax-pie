@@ -11,6 +11,6 @@ public class DynamicCfgComponentCustomizer implements CfgComponentCustomizer {
     }
 
     @Override public void customize(DaggerCfgEclipseComponent.Builder builder) {
-        builder.cfgCustomizerModule(new CfgCustomizerModule(new DynamicCompileLanguageInputCustomizer()));
+        builder.cfgCustomizerModule(new CfgCustomizerModule(new DynamicCompileLanguageDefinitionInputCustomizer()));
     }
 }

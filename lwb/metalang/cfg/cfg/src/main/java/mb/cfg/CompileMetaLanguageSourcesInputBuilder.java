@@ -1,7 +1,6 @@
 package mb.cfg;
 
 import mb.cfg.metalang.CfgDynamixConfig;
-import mb.cfg.metalang.CfgDynamixSource;
 import mb.cfg.metalang.CfgEsvConfig;
 import mb.cfg.metalang.CfgSdf3Config;
 import mb.cfg.metalang.CfgStatixConfig;
@@ -11,9 +10,9 @@ import mb.spoofax.compiler.util.Shared;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * Facade for consistently building a {@link CompileLanguageSpecificationInput} instance.
+ * Facade for consistently building a {@link CompileMetaLanguageSourcesInput} instance.
  */
-public class CompileLanguageSpecificationInputBuilder {
+public class CompileMetaLanguageSourcesInputBuilder {
     private boolean sdf3Enabled = false;
     public CfgSdf3Config.Builder sdf3 = CfgSdf3Config.builder();
 
@@ -29,7 +28,7 @@ public class CompileLanguageSpecificationInputBuilder {
     private boolean strategoEnabled = false;
     public CfgStrategoConfig.Builder stratego = CfgStrategoConfig.builder();
 
-    public CompileLanguageSpecificationInput.Builder compileLanguage = CompileLanguageSpecificationInput.builder();
+    public CompileMetaLanguageSourcesInput.Builder compileLanguage = CompileMetaLanguageSourcesInput.builder();
 
 
     public CfgSdf3Config.Builder withSdf3() {
@@ -58,75 +57,75 @@ public class CompileLanguageSpecificationInputBuilder {
     }
 
 
-    public CompileLanguageSpecificationInput build(Properties persistentProperties, Shared shared, CompileLanguageSpecificationShared compileLanguageSpecificationShared) {
-        final @Nullable CfgSdf3Config sdf3 = buildSdf3(compileLanguageSpecificationShared);
+    public CompileMetaLanguageSourcesInput build(Properties persistentProperties, Shared shared, CompileMetaLanguageSourcesShared compileMetaLanguageSourcesShared) {
+        final @Nullable CfgSdf3Config sdf3 = buildSdf3(compileMetaLanguageSourcesShared);
         if(sdf3 != null) compileLanguage.sdf3(sdf3);
 
-        final @Nullable CfgEsvConfig esv = buildEsv(compileLanguageSpecificationShared);
+        final @Nullable CfgEsvConfig esv = buildEsv(compileMetaLanguageSourcesShared);
         if(esv != null) compileLanguage.esv(esv);
 
-        final @Nullable CfgStatixConfig statix = buildStatix(compileLanguageSpecificationShared);
+        final @Nullable CfgStatixConfig statix = buildStatix(compileMetaLanguageSourcesShared);
         if(statix != null) compileLanguage.statix(statix);
 
-        final @Nullable CfgDynamixConfig dynamix = buildDynamix(compileLanguageSpecificationShared);
+        final @Nullable CfgDynamixConfig dynamix = buildDynamix(compileMetaLanguageSourcesShared);
         if(dynamix != null) compileLanguage.dynamix(dynamix);
 
-        final @Nullable CfgStrategoConfig stratego = buildStratego(persistentProperties, shared, compileLanguageSpecificationShared);
+        final @Nullable CfgStrategoConfig stratego = buildStratego(persistentProperties, shared, compileMetaLanguageSourcesShared);
         if(stratego != null) compileLanguage.stratego(stratego);
 
         return compileLanguage
             .shared(shared)
-            .compileLanguageShared(compileLanguageSpecificationShared)
+            .compileLanguageShared(compileMetaLanguageSourcesShared)
             .build();
     }
 
 
     private @Nullable CfgSdf3Config buildSdf3(
-        CompileLanguageSpecificationShared compileLanguageSpecificationShared
+        CompileMetaLanguageSourcesShared compileMetaLanguageSourcesShared
     ) {
         if(!sdf3Enabled) return null;
         return sdf3
-            .compileLanguageShared(compileLanguageSpecificationShared)
+            .compileLanguageShared(compileMetaLanguageSourcesShared)
             .build();
     }
 
     private @Nullable CfgEsvConfig buildEsv(
-        CompileLanguageSpecificationShared compileLanguageSpecificationShared
+        CompileMetaLanguageSourcesShared compileMetaLanguageSourcesShared
     ) {
         if(!esvEnabled) return null;
         return esv
-            .compileLanguageShared(compileLanguageSpecificationShared)
+            .compileLanguageShared(compileMetaLanguageSourcesShared)
             .build();
     }
 
     private @Nullable CfgStatixConfig buildStatix(
-        CompileLanguageSpecificationShared compileLanguageSpecificationShared
+        CompileMetaLanguageSourcesShared compileMetaLanguageSourcesShared
     ) {
         if(!statixEnabled) return null;
         return statix
-            .compileLanguageShared(compileLanguageSpecificationShared)
+            .compileLanguageShared(compileMetaLanguageSourcesShared)
             .build();
     }
 
     private @Nullable CfgDynamixConfig buildDynamix(
-        CompileLanguageSpecificationShared compileLanguageSpecificationShared
+        CompileMetaLanguageSourcesShared compileMetaLanguageSourcesShared
     ) {
         if(!dynamixEnabled) return null;
         return dynamix
-            .compileLanguageShared(compileLanguageSpecificationShared)
+            .compileLanguageShared(compileMetaLanguageSourcesShared)
             .build();
     }
 
     private @Nullable CfgStrategoConfig buildStratego(
         Properties persistentProperties,
         Shared shared,
-        CompileLanguageSpecificationShared compileLanguageSpecificationShared
+        CompileMetaLanguageSourcesShared compileMetaLanguageSourcesShared
     ) {
         if(!strategoEnabled) return null;
         return stratego
             .withPersistentProperties(persistentProperties)
             .shared(shared)
-            .compileLanguageShared(compileLanguageSpecificationShared)
+            .compileLanguageShared(compileMetaLanguageSourcesShared)
             .build();
     }
 }

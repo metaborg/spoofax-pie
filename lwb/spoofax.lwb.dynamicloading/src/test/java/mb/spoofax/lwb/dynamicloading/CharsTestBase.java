@@ -1,6 +1,6 @@
 package mb.spoofax.lwb.dynamicloading;
 
-import mb.cfg.CompileLanguageInput;
+import mb.cfg.CompileLanguageDefinitionInput;
 import mb.cfg.metalang.CfgEsvSource;
 import mb.cfg.metalang.CfgSdf3Source;
 import mb.cfg.metalang.CfgStatixSource;
@@ -61,15 +61,15 @@ class CharsTestBase extends TestBase {
     }
 
 
-    boolean hasTokenizeTaskDefExecuted(MetricsTracer.Report report, CompileLanguageInput input) {
+    boolean hasTokenizeTaskDefExecuted(MetricsTracer.Report report, CompileLanguageDefinitionInput input) {
         return report.hasTaskDefExecuted(input.adapterProjectInput().parser().get().tokenizeTaskDef().qualifiedId());
     }
 
-    boolean hasParseTaskDefExecuted(MetricsTracer.Report report, CompileLanguageInput input) {
+    boolean hasParseTaskDefExecuted(MetricsTracer.Report report, CompileLanguageDefinitionInput input) {
         return report.hasTaskDefExecuted(input.adapterProjectInput().parser().get().parseTaskDef().qualifiedId());
     }
 
-    boolean hasStyleTaskDefExecuted(MetricsTracer.Report report, CompileLanguageInput input) {
+    boolean hasStyleTaskDefExecuted(MetricsTracer.Report report, CompileLanguageDefinitionInput input) {
         return report.hasTaskDefExecuted(input.adapterProjectInput().styler().get().styleTaskDef().qualifiedId());
     }
 
@@ -81,21 +81,21 @@ class CharsTestBase extends TestBase {
         return report.hasTaskDefExecuted("mb.chars.CharsDebugRemoveA");
     }
 
-    boolean hasConstraintAnalysisTaskExecuted(MetricsTracer.Report report, CompileLanguageInput input) {
+    boolean hasConstraintAnalysisTaskExecuted(MetricsTracer.Report report, CompileLanguageDefinitionInput input) {
         return report.hasTaskDefExecuted(input.adapterProjectInput().constraintAnalyzer().get().analyzeTaskDef().qualifiedId());
     }
 
-    boolean hasCheckTaskExecuted(MetricsTracer.Report report, CompileLanguageInput input) {
+    boolean hasCheckTaskExecuted(MetricsTracer.Report report, CompileLanguageDefinitionInput input) {
         return report.hasTaskDefExecuted(input.adapterProjectInput().checkTaskDef().qualifiedId());
     }
 
-    boolean hasHoverTaskExecuted(MetricsTracer.Report report, CompileLanguageInput input) {
+    boolean hasHoverTaskExecuted(MetricsTracer.Report report, CompileLanguageDefinitionInput input) {
         return report.hasTaskDefExecuted(input.adapterProjectInput().hover().get().hoverTaskDef().qualifiedId());
     }
 
 
-    TopDownSession modifyStyler(MixedSession session, CompileLanguageInput input) throws IOException, ExecException, InterruptedException {
-        final CfgEsvSource.Files files = input.compileLanguageSpecificationInput().esv().get().source().getFiles().orElseThrow(() -> new RuntimeException("Not using source files with ESV"));
+    TopDownSession modifyStyler(MixedSession session, CompileLanguageDefinitionInput input) throws IOException, ExecException, InterruptedException {
+        final CfgEsvSource.Files files = input.compileMetaLanguageSourcesInput().esv().get().source().getFiles().orElseThrow(() -> new RuntimeException("Not using source files with ESV"));
         final ResourcePath path = files.mainFile();
         final WritableResource file = resourceService.getWritableResource(path);
         final String text = file.readString().replace("0 0 150 bold", "255 255 0 italic");
@@ -103,8 +103,8 @@ class CharsTestBase extends TestBase {
         return session.updateAffectedBy(Collections.singleton(path));
     }
 
-    TopDownSession modifyParser(MixedSession session, CompileLanguageInput input) throws IOException, ExecException, InterruptedException {
-        final CfgSdf3Source.Files files = input.compileLanguageSpecificationInput().sdf3().get().source().getFiles().orElseThrow(() -> new RuntimeException("Not using source files with SDF3"));
+    TopDownSession modifyParser(MixedSession session, CompileLanguageDefinitionInput input) throws IOException, ExecException, InterruptedException {
+        final CfgSdf3Source.Files files = input.compileMetaLanguageSourcesInput().sdf3().get().source().getFiles().orElseThrow(() -> new RuntimeException("Not using source files with SDF3"));
         final ResourcePath path = files.mainFile();
         final WritableResource file = resourceService.getWritableResource(path);
         final String text = file.readString().replace("\\ ", "\\ \\t");
@@ -112,15 +112,15 @@ class CharsTestBase extends TestBase {
         return session.updateAffectedBy(Collections.singleton(path));
     }
 
-    TopDownSession modifyTransformation(MixedSession session, CompileLanguageInput input) throws IOException, ExecException, InterruptedException {
-        final ResourcePath path = input.compileLanguageSpecificationInput().stratego().get().source().getFiles().mainSourceDirectory().appendRelativePath("transform/remove-a.str2");
+    TopDownSession modifyTransformation(MixedSession session, CompileLanguageDefinitionInput input) throws IOException, ExecException, InterruptedException {
+        final ResourcePath path = input.compileMetaLanguageSourcesInput().stratego().get().source().getFiles().mainSourceDirectory().appendRelativePath("transform/remove-a.str2");
         final WritableResource file = resourceService.getWritableResource(path);
         final String text = file.readString().replace("string-replace(|\"a\", \"a\")", "string-replace(|\"a\", \"\")");
         file.writeString(text);
         return session.updateAffectedBy(Collections.singleton(path));
     }
 
-    TopDownSession modifyCommand(MixedSession session, CompileLanguageInput input) throws IOException, ExecException, InterruptedException {
+    TopDownSession modifyCommand(MixedSession session, CompileLanguageDefinitionInput input) throws IOException, ExecException, InterruptedException {
         final ResourcePath path = input.userJavaSourcePaths().get(0).appendRelativePath("mb/chars/CharsDebugRemoveA.java");
         final WritableResource file = resourceService.getWritableResource(path);
         final String text = file.readString().replace("A characters", "'A' characters");
@@ -128,8 +128,8 @@ class CharsTestBase extends TestBase {
         return session.updateAffectedBy(Collections.singleton(path));
     }
 
-    TopDownSession modifyAnalyzer(MixedSession session, CompileLanguageInput input) throws IOException, ExecException, InterruptedException {
-        final CfgStatixSource.Files files = input.compileLanguageSpecificationInput().statix().get().source().getFiles().orElseThrow(() -> new RuntimeException("Not using source files with Statix"));
+    TopDownSession modifyAnalyzer(MixedSession session, CompileLanguageDefinitionInput input) throws IOException, ExecException, InterruptedException {
+        final CfgStatixSource.Files files = input.compileMetaLanguageSourcesInput().statix().get().source().getFiles().orElseThrow(() -> new RuntimeException("Not using source files with Statix"));
         final ResourcePath path = files.mainFile();
         final WritableResource file = resourceService.getWritableResource(path);
         final String text = file.readString()

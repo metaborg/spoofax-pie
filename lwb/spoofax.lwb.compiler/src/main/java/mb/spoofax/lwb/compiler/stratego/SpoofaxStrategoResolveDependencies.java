@@ -183,7 +183,7 @@ public class SpoofaxStrategoResolveDependencies extends ResolveDependencies<Stra
 
         @Override
         public Result<Option<ListView<StrategoResolvedDependency>>, CfgRootDirectoryToObjectException> apply(Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result) {
-            return result.map(o -> Option.ofOptional(o.compileLanguageInput.compileLanguageSpecificationInput().stratego()).map(c -> resolve(o.rootDirectory, c)));
+            return result.map(o -> Option.ofOptional(o.compileLanguageDefinitionInput.compileMetaLanguageSourcesInput().stratego()).map(c -> resolve(o.rootDirectory, c)));
         }
 
         private ListView<StrategoResolvedDependency> resolve(ResourcePath rootDirectory, CfgStrategoConfig config) {

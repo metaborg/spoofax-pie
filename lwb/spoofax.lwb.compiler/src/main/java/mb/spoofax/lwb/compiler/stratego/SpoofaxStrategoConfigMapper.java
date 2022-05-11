@@ -12,7 +12,7 @@ class SpoofaxStrategoConfigMapper extends StatelessSerializableFunction<Result<C
 
     @Override
     public Result<Option<CfgStrategoConfig>, CfgRootDirectoryToObjectException> apply(Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result) {
-        return result.map(o -> Option.ofOptional(o.compileLanguageInput.compileLanguageSpecificationInput().stratego()));
+        return result.map(o -> Option.ofOptional(o.compileLanguageDefinitionInput.compileMetaLanguageSourcesInput().stratego()));
     }
 
     private SpoofaxStrategoConfigMapper() {}

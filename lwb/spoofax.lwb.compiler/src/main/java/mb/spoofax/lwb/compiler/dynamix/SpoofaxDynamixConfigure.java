@@ -178,7 +178,7 @@ public class SpoofaxDynamixConfigure implements TaskDef<ResourcePath, Result<Opt
     private static class DynamixConfigMapper extends StatelessSerializableFunction<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>, Result<Option<CfgDynamixConfig>, CfgRootDirectoryToObjectException>> {
         @Override
         public Result<Option<CfgDynamixConfig>, CfgRootDirectoryToObjectException> apply(Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result) {
-            return result.map(o -> Option.ofOptional(o.compileLanguageInput.compileLanguageSpecificationInput().dynamix()));
+            return result.map(o -> Option.ofOptional(o.compileLanguageDefinitionInput.compileMetaLanguageSourcesInput().dynamix()));
         }
     }
 }

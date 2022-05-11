@@ -1,6 +1,6 @@
 package mb.cfg.metalang;
 
-import mb.cfg.CompileLanguageSpecificationShared;
+import mb.cfg.CompileMetaLanguageSourcesShared;
 import mb.common.util.ADT;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -18,7 +18,7 @@ public abstract class CfgEsvSource implements Serializable {
     @Value.Immutable
     public interface Files extends Serializable {
         class Builder extends ImmutableCfgEsvSource.Files.Builder {
-            public static ResourcePath getDefaultMainSourceDirectory(CompileLanguageSpecificationShared shared) {
+            public static ResourcePath getDefaultMainSourceDirectory(CompileMetaLanguageSourcesShared shared) {
                 return shared.languageProject().project().srcDirectory();
             }
         }
@@ -27,7 +27,7 @@ public abstract class CfgEsvSource implements Serializable {
 
 
         @Value.Default default ResourcePath mainSourceDirectory() {
-            return Builder.getDefaultMainSourceDirectory(compileLanguageShared());
+            return Builder.getDefaultMainSourceDirectory(compileMetaLanguageSourcesShared());
         }
 
         @Value.Default default ResourcePath mainFile() {
@@ -39,20 +39,20 @@ public abstract class CfgEsvSource implements Serializable {
         List<String> exportDirectories();
 
         default ResourcePath unarchiveDirectory() {
-            return compileLanguageShared().unarchiveDirectory();
+            return compileMetaLanguageSourcesShared().unarchiveDirectory();
         }
 
         @Value.Default default boolean includeLibSpoofax2Exports() {
-            return compileLanguageShared().includeLibSpoofax2Exports();
+            return compileMetaLanguageSourcesShared().includeLibSpoofax2Exports();
         }
 
         @Value.Default default ResourcePath libSpoofax2UnarchiveDirectory() {
-            return compileLanguageShared().libSpoofax2UnarchiveDirectory();
+            return compileMetaLanguageSourcesShared().libSpoofax2UnarchiveDirectory();
         }
 
         /// Automatically provided sub-inputs
 
-        CompileLanguageSpecificationShared compileLanguageShared();
+        CompileMetaLanguageSourcesShared compileMetaLanguageSourcesShared();
     }
 
     interface Cases<R> {

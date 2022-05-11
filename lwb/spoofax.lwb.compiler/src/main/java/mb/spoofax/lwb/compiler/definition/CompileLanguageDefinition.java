@@ -1,6 +1,6 @@
 package mb.spoofax.lwb.compiler.definition;
 
-import mb.cfg.CompileLanguageInput;
+import mb.cfg.CompileLanguageDefinitionInput;
 import mb.cfg.task.CfgRootDirectoryToObject;
 import mb.cfg.task.CfgRootDirectoryToObjectException;
 import mb.cfg.task.CfgToObject;
@@ -38,8 +38,9 @@ import java.util.function.Function;
 
 /**
  * Fully compiles a language definition by running the {@link LanguageProjectCompiler language project compiler},
- * meta-language compilers, {@link AdapterProjectCompiler adapter project compiler}, and the {@link CompileJava Java
- * compiler}. This fully compiles a language from its sources to Java class files and corresponding resources.
+ * meta-language compilers, {@link AdapterProjectCompiler adapter project compiler}, and the
+ * {@link CompileJava Java compiler}. This fully compiles a language from its sources to Java class files and
+ * corresponding resources.
  *
  * Takes an {@link CompileLanguageDefinition.Args} as input, which contains the root directory that is used to find the
  * CFG file configuring the various compilers, and fields to add additional Java class and annotation processor paths.
@@ -87,7 +88,7 @@ public class CompileLanguageDefinition implements TaskDef<CompileLanguageDefinit
     private final AdapterProjectCompiler adapterProjectCompiler;
     private final EclipseProjectCompiler eclipseProjectCompiler;
     private final CompileJava compileJava;
-    private final Function<CompileLanguageInput, String> participantClassQualifiedIdSelector;
+    private final Function<CompileLanguageDefinitionInput, String> participantClassQualifiedIdSelector;
 
 
     @Inject public CompileLanguageDefinition(
@@ -98,7 +99,7 @@ public class CompileLanguageDefinition implements TaskDef<CompileLanguageDefinit
         AdapterProjectCompiler adapterProjectCompiler,
         EclipseProjectCompiler eclipseProjectCompiler,
         CompileJava compileJava,
-        Function<CompileLanguageInput, String> participantClassQualifiedIdSelector
+        Function<CompileLanguageDefinitionInput, String> participantClassQualifiedIdSelector
     ) {
         this.cfgRootDirectoryToObject = cfgRootDirectoryToObject;
         this.languageDefinitionManager = languageDefinitionManager;
@@ -130,10 +131,10 @@ public class CompileLanguageDefinition implements TaskDef<CompileLanguageDefinit
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
         @SuppressWarnings("ConstantConditions") final CfgToObject.Output cfgOutput = cfgResult.get();
         // noinspection ConstantConditions (value is present)
-        languageDefinitionManager.registerLanguageDefinition(cfgOutput.compileLanguageInput.adapterProjectInput().adapterProject().project().coordinate(), rootDirectory);
+        languageDefinitionManager.registerLanguageDefinition(cfgOutput.compileLanguageDefinitionInput.adapterProjectInput().adapterProject().project().coordinate(), rootDirectory);
         messagesBuilder.addMessages(cfgOutput.messages);
 
-        final CompileLanguageInput input = cfgOutput.compileLanguageInput;
+        final CompileLanguageDefinitionInput input = cfgOutput.compileLanguageDefinitionInput;
         final CompileJava.Input.Builder compileJavaInputBuilder = CompileJava.Input.builder().key(args.rootDirectory());
         final Output.Builder outputBuilder = Output.builder();
 
@@ -220,7 +221,7 @@ public class CompileLanguageDefinition implements TaskDef<CompileLanguageDefinit
         private static class LanguageProjectInputMapper extends StatelessSerializableFunction<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>, Result<LanguageProjectCompiler.Input, CfgRootDirectoryToObjectException>> {
             @Override
             public Result<LanguageProjectCompiler.Input, CfgRootDirectoryToObjectException> apply(Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result) {
-                return result.map(o -> o.compileLanguageInput.languageProjectInput());
+                return result.map(o -> o.compileLanguageDefinitionInput.languageProjectInput());
             }
         }
     }
@@ -237,7 +238,7 @@ public class CompileLanguageDefinition implements TaskDef<CompileLanguageDefinit
         private static class AdapterProjectInputMapper extends StatelessSerializableFunction<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>, Result<AdapterProjectCompiler.Input, CfgRootDirectoryToObjectException>> {
             @Override
             public Result<AdapterProjectCompiler.Input, CfgRootDirectoryToObjectException> apply(Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result) {
-                return result.map(o -> o.compileLanguageInput.adapterProjectInput());
+                return result.map(o -> o.compileLanguageDefinitionInput.adapterProjectInput());
             }
         }
     }
@@ -254,7 +255,7 @@ public class CompileLanguageDefinition implements TaskDef<CompileLanguageDefinit
         private static class EclipseProjectInputMapper extends StatelessSerializableFunction<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>, Result<Option<EclipseProjectCompiler.Input>, CfgRootDirectoryToObjectException>> {
             @Override
             public Result<Option<EclipseProjectCompiler.Input>, CfgRootDirectoryToObjectException> apply(Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result) {
-                return result.map(o -> Option.ofOptional(o.compileLanguageInput.eclipseProjectInput()));
+                return result.map(o -> Option.ofOptional(o.compileLanguageDefinitionInput.eclipseProjectInput()));
             }
         }
     }
@@ -290,10 +291,10 @@ public class CompileLanguageDefinition implements TaskDef<CompileLanguageDefinit
             @Override
             public Result<CompileJava.Sources, CfgRootDirectoryToObjectException> apply(Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result) {
                 return result.map(o -> CompileJava.Sources.builder()
-                    .addAllSourceFiles(o.compileLanguageInput.javaSourceFiles())
-                    .sourceFilesFromPaths(o.compileLanguageInput.userJavaSourcePaths())
-                    .sourcePaths(o.compileLanguageInput.javaSourcePaths())
-                    .packagePaths(o.compileLanguageInput.javaSourceDirectoryPaths())
+                    .addAllSourceFiles(o.compileLanguageDefinitionInput.javaSourceFiles())
+                    .sourceFilesFromPaths(o.compileLanguageDefinitionInput.userJavaSourcePaths())
+                    .sourcePaths(o.compileLanguageDefinitionInput.javaSourcePaths())
+                    .packagePaths(o.compileLanguageDefinitionInput.javaSourceDirectoryPaths())
                     .build()
                 );
             }
