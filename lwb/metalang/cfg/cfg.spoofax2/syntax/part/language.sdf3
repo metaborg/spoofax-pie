@@ -24,15 +24,7 @@ context-free syntax
   Sdf3FilesOption.Sdf3FilesMainFile            = <main-file = <Expr>>
   Sdf3FilesOption.Sdf3FilesIncludeDirectory    = <include-directory = <Expr>>
   Sdf3FilesOption.Sdf3FilesExportDirectory     = <export-directory = <Expr>>
-
-  Sdf3Source.Sdf3Prebuilt = <prebuilt {
-  <{Sdf3PrebuiltOption "\n"}*>
-}>
-  Sdf3PrebuiltOption.Sdf3PrebuiltParseTableAtermFile     = <parse-table-aterm-file = <Expr>>
-  Sdf3PrebuiltOption.Sdf3PrebuiltParseTablePersistedFile = <parse-table-persisted-file = <Expr>>
-
-  // TODO: move into source after CC lab.
-  Sdf3Option.Sdf3ParseTableGeneratorSection = <parse-table-generator {
+  Sdf3FilesOption.Sdf3ParseTableGeneratorSection = <parse-table-generator {
   <{Sdf3ParseTableGeneratorOption "\n"}*>
 }>
   Sdf3ParseTableGeneratorOption.Sdf3ParseTableGeneratorDynamic = <dynamic = <Expr>>
@@ -41,6 +33,12 @@ context-free syntax
   Sdf3ParseTableGeneratorOption.Sdf3ParseTableGeneratorSolveDeepConflicts = <solve-deep-conflicts = <Expr>>
   Sdf3ParseTableGeneratorOption.Sdf3ParseTableGeneratorCheckOverlap = <check-overlap = <Expr>>
   Sdf3ParseTableGeneratorOption.Sdf3ParseTableGeneratorCheckPriorities = <check-priorities = <Expr>>
+
+  Sdf3Source.Sdf3Prebuilt = <prebuilt {
+  <{Sdf3PrebuiltOption "\n"}*>
+}>
+  Sdf3PrebuiltOption.Sdf3PrebuiltParseTableAtermFile     = <parse-table-aterm-file = <Expr>>
+  Sdf3PrebuiltOption.Sdf3PrebuiltParseTablePersistedFile = <parse-table-persisted-file = <Expr>>
 
 context-free sorts
 
@@ -60,7 +58,6 @@ context-free syntax
   EsvFilesOption.EsvFilesMainFile                  = <main-file = <Expr>>
   EsvFilesOption.EsvFilesIncludeDirectory          = <include-directory = <Expr>>
   EsvFilesOption.EsvFilesExportDirectory           = <export-directory = <Expr>>
-  EsvFilesOption.EsvFilesIncludeLibspoofax2Exports = <include-libspoofax2-exports = <Expr>> // TODO: remove and replace with dependency
 
   EsvSource.EsvPrebuilt = <prebuilt {
   <{EsvPrebuiltOption "\n"}*>
@@ -85,14 +82,12 @@ context-free syntax
   StatixFilesOption.StatixFilesMainFile            = <main-file = <Expr>>
   StatixFilesOption.StatixFilesIncludeDirectory    = <include-directory = <Expr>>
   StatixFilesOption.StatixFilesExportDirectory     = <export-directory = <Expr>>
+  StatixFilesOption.StatixSdf3SignatureGen         = <sdf3-statix-signature-generation = <Expr>>
 
   StatixSource.StatixPrebuilt = <prebuilt {
   <{StatixPrebuiltOption "\n"}*>
 }>
   StatixPrebuiltOption.StatixPrebuiltSpecAtermDirectory = <spec-aterm-directory = <Expr>>
-
-  // TODO: move into source after CC lab.
-  StatixOption.StatixSdf3SignatureGen = <sdf3-statix-signature-generation = <Expr>>
 
 context-free sorts
 
@@ -112,11 +107,9 @@ context-free syntax
   StrategoFilesOption.StrategoFilesMainFile            = <main-file = <Expr>>
   StrategoFilesOption.StrategoFilesIncludeDirectory    = <include-directory = <Expr>>
   StrategoFilesOption.StrategoFilesExportDirectory     = <export-directory = <Expr>>
+  StrategoFilesOption.StrategoSdf3StatixExplicationGen = <sdf3-statix-explication-generation = <Expr>>
+  StrategoFilesOption.StrategoLanguageStrategyAffix    = <language-strategy-affix = <Expr>>
 
-  // TODO: move into source after CC lab.
-  StrategoOption.StrategoSdf3StatixExplicationGen = <sdf3-statix-explication-generation = <Expr>>
-
-  StrategoOption.StrategoLanguageStrategyAffix = <language-strategy-affix = <Expr>>
   StrategoOption.StrategoOutputJavaPackageId = <output-java-package = <Expr>>
 
 context-free sorts
@@ -143,7 +136,7 @@ context-free syntax
 
 context-free sorts
 
-  Dependency DependencyOption DependencyKind
+  Dependency BuildDependency DependencyOption DependencyKind
 
 context-free syntax
 
@@ -161,8 +154,15 @@ context-free syntax
   DependencyKind.BuildDependencyKind = <Build>
   DependencyKind.RunDependencyKind = <Run>
 
+  Part.BuildDependencies = <build-dependencies [
+  <{BuildDependency "\n"}*>
+]>
+  BuildDependency.DefaultBuildDependency = <<Expr>>
+
 lexical syntax
 
   Keyword = "dependencies"
+  Keyword = "build-dependencies"
+  Keyword = "build"
   Keyword = "Build"
   Keyword = "Run"

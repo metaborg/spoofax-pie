@@ -23,31 +23,26 @@ public interface CfgStatixConfig extends Serializable {
 
     @Value.Default default CfgStatixSource source() {
         return CfgStatixSource.files(CfgStatixSource.Files.builder()
-            .compileMetaLanguageSourcesShared(compileLanguageShared())
+            .compileMetaLanguageSourcesShared(compileMetaLanguageSourcesShared())
             .build()
         );
     }
 
-    @Value.Default default boolean enableSdf3SignatureGen() {
-        // TODO: move into source after CC lab.
-        return false;
-    }
-
     @Value.Default default ResourcePath generatedSourcesDirectory() {
-        return compileLanguageShared().generatedSourcesDirectory().appendRelativePath("statix");
+        return compileMetaLanguageSourcesShared().generatedSourcesDirectory().appendRelativePath("statix");
     }
 
 
     default ResourcePath outputSpecAtermDirectory() {
-        return compileLanguageShared().generatedResourcesDirectory() // Generated resources directory, so that Gradle includes the aterm format file in the JAR file.
-            .appendRelativePath(compileLanguageShared().languageProject().packagePath()) // Append package path to make location unique, enabling JAR files to be merged.
+        return compileMetaLanguageSourcesShared().generatedResourcesDirectory() // Generated resources directory, so that Gradle includes the aterm format file in the JAR file.
+            .appendRelativePath(compileMetaLanguageSourcesShared().languageProject().packagePath()) // Append package path to make location unique, enabling JAR files to be merged.
             ;
     }
 
 
     /// Automatically provided sub-inputs
 
-    CompileMetaLanguageSourcesShared compileLanguageShared();
+    CompileMetaLanguageSourcesShared compileMetaLanguageSourcesShared();
 
 
     default void syncTo(ConstraintAnalyzerLanguageCompiler.Input.Builder builder) {

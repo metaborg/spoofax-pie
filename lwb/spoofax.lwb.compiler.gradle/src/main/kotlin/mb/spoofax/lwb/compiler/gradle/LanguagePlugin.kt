@@ -155,8 +155,8 @@ class LanguagePluginInstance(
     }
     // Language compiler
     val languageSpecificationInput = compileLanguageDefinitionInput.compileMetaLanguageSourcesInput()
-    project.addMainResourceDirectory(languageSpecificationInput.compileLanguageShared().generatedResourcesDirectory(), resourceService)
-    project.addMainJavaSourceDirectory(languageSpecificationInput.compileLanguageShared().generatedJavaSourcesDirectory(), resourceService)
+    project.addMainResourceDirectory(languageSpecificationInput.compileMetaLanguageSourcesShared().generatedResourcesDirectory(), resourceService)
+    project.addMainJavaSourceDirectory(languageSpecificationInput.compileMetaLanguageSourcesShared().generatedJavaSourcesDirectory(), resourceService)
     // TODO: move this classpath functionality into the resources components of those libraries
     // HACK: add strategolib and gpp classpaths as dependencies, so that the Gradle Java compilation task does not fail.
     project.dependencies.add("implementation", project.files(strategoLibUtil.strategoLibJavaClassPaths))
@@ -234,12 +234,6 @@ class LanguagePluginInstance(
             files.includeDirectories().forEach { includeDirectory ->
               includeDirectory.tryAsLocal("ESV files in include directory") { dir ->
                 inputs.files(project.fileTree(dir) { include("**/*.esv") })
-              }
-            }
-            if(files.includeLibSpoofax2Exports()) {
-              // Output: libspoofax2 unarchive directory
-              files.libSpoofax2UnarchiveDirectory().tryAsLocal("libspoofax2 unarchive directory") { dir ->
-                outputs.dir(dir)
               }
             }
           }

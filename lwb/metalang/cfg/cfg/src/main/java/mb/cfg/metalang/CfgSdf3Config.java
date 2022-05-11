@@ -16,48 +16,16 @@ public interface CfgSdf3Config extends Serializable {
     String exportsId = "SDF3";
 
 
-    class Builder extends ImmutableCfgSdf3Config.Builder {
-        public static ResourcePath getDefaultMainSourceDirectory(CompileMetaLanguageSourcesShared shared) {
-            return shared.languageProject().project().srcDirectory();
-        }
-
-        public static ResourcePath getDefaultMainFile(ResourcePath mainSourceDirectory) {
-            return mainSourceDirectory.appendRelativePath("start.sdf3");
-        }
-    }
+    class Builder extends ImmutableCfgSdf3Config.Builder {}
 
     static Builder builder() {return new Builder();}
 
 
     @Value.Default default CfgSdf3Source source() {
         return CfgSdf3Source.files(CfgSdf3Source.Files.builder()
-            .compileMetaLanguageSourcesShared(compileLanguageShared())
+            .compileMetaLanguageSourcesShared(compileMetaLanguageSourcesShared())
             .build()
         );
-    }
-
-    @Value.Default default boolean createDynamicParseTable() {
-        return false;
-    }
-
-    @Value.Default default boolean createDataDependentParseTable() {
-        return false;
-    }
-
-    @Value.Default default boolean createLayoutSensitiveParseTable() {
-        return false;
-    }
-
-    @Value.Default default boolean solveDeepConflictsInParseTable() {
-        return true;
-    }
-
-    @Value.Default default boolean checkOverlapInParseTable() {
-        return false;
-    }
-
-    @Value.Default default boolean checkPrioritiesInParseTable() {
-        return false;
     }
 
 
@@ -66,8 +34,8 @@ public interface CfgSdf3Config extends Serializable {
     }
 
     default ResourcePath parseTableAtermOutputFile() {
-        return compileLanguageShared().generatedResourcesDirectory() // Generated resources directory, so that Gradle includes the parse table in the JAR file.
-            .appendRelativePath(compileLanguageShared().languageProject().packagePath()) // Append package path to make location unique, enabling JAR files to be merged.
+        return compileMetaLanguageSourcesShared().generatedResourcesDirectory() // Generated resources directory, so that Gradle includes the parse table in the JAR file.
+            .appendRelativePath(compileMetaLanguageSourcesShared().languageProject().packagePath()) // Append package path to make location unique, enabling JAR files to be merged.
             .appendRelativePath(parseTableAtermFileRelativePath()) // Append the relative path to the parse table.
             ;
     }
@@ -77,8 +45,8 @@ public interface CfgSdf3Config extends Serializable {
     }
 
     default ResourcePath parseTablePersistedOutputFile() {
-        return compileLanguageShared().generatedResourcesDirectory() // Generated resources directory, so that Gradle includes the parse table in the JAR file.
-            .appendRelativePath(compileLanguageShared().languageProject().packagePath()) // Append package path to make location unique, enabling JAR files to be merged.
+        return compileMetaLanguageSourcesShared().generatedResourcesDirectory() // Generated resources directory, so that Gradle includes the parse table in the JAR file.
+            .appendRelativePath(compileMetaLanguageSourcesShared().languageProject().packagePath()) // Append package path to make location unique, enabling JAR files to be merged.
             .appendRelativePath(parseTablePersistedFileRelativePath()) // Append the relative path to the parse table.
             ;
     }
@@ -86,7 +54,7 @@ public interface CfgSdf3Config extends Serializable {
 
     /// Automatically provided sub-inputs
 
-    CompileMetaLanguageSourcesShared compileLanguageShared();
+    CompileMetaLanguageSourcesShared compileMetaLanguageSourcesShared();
 
 
     default void syncTo(ParserLanguageCompiler.Input.Builder builder) {

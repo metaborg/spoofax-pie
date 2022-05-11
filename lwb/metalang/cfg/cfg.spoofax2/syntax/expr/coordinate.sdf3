@@ -11,5 +11,5 @@ context-free sorts
 
 context-free syntax
 
-  Expr.Coordinate            = <<CoordinateChars>:<CoordinateCharsMiddle>:<CoordinateChars>> {prefer}
-  Expr.CoordinateRequirement = <<CoordinateChars>:<CoordinateCharsMiddle>:<CoordinateRequirementChars>>
+  Expr.Coordinate            = <<CoordinateChars>:<CoordinateChars>:<CoordinateChars>> {prefer}
+  Expr.CoordinateRequirement = <<CoordinateChars>:<CoordinateChars>:<CoordinateRequirementChars>>

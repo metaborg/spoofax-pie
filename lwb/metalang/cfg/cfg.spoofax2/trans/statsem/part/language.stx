@@ -33,14 +33,7 @@ rules // Sdf3 section and options
   sdf3FilesOptionOk(s, Sdf3FilesExportDirectory(e)) :-
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
 
-  sdf3PrebuiltOptionOk : scope * Sdf3PrebuiltOption
-  sdf3PrebuiltOptionsOk maps sdf3PrebuiltOptionOk(*, list(*))
-  sdf3PrebuiltOptionOk(s, Sdf3PrebuiltParseTableAtermFile(e)) :-
-    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
-  sdf3PrebuiltOptionOk(s, Sdf3PrebuiltParseTablePersistedFile(e)) :-
-    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
-
-  sdf3OptionOk(s, Sdf3ParseTableGeneratorSection(options)) :-
+  sdf3FilesOptionOk(s, Sdf3ParseTableGeneratorSection(options)) :-
     sdf3ParseTableGeneratorOptionsOk(s, options).
 
   sdf3ParseTableGeneratorOptionOk : scope * Sdf3ParseTableGeneratorOption
@@ -58,6 +51,13 @@ rules // Sdf3 section and options
     typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
   sdf3ParseTableGeneratorOptionOk(s, Sdf3ParseTableGeneratorCheckPriorities(e)) :-
     typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
+
+  sdf3PrebuiltOptionOk : scope * Sdf3PrebuiltOption
+  sdf3PrebuiltOptionsOk maps sdf3PrebuiltOptionOk(*, list(*))
+  sdf3PrebuiltOptionOk(s, Sdf3PrebuiltParseTableAtermFile(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
+  sdf3PrebuiltOptionOk(s, Sdf3PrebuiltParseTablePersistedFile(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
 
 rules // Esv section and options
 
@@ -83,8 +83,6 @@ rules // Esv section and options
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
   esvFilesOptionOk(s, EsvFilesExportDirectory(e)) :-
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
-  esvFilesOptionOk(s, EsvFilesIncludeLibspoofax2Exports(e)) :-
-    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
 
   esvPrebuiltOptionOk : scope * EsvPrebuiltOption
   esvPrebuiltOptionsOk maps esvPrebuiltOptionOk(*, list(*))
@@ -115,14 +113,13 @@ rules // Statix section and options
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
   statixFilesOptionOk(s, StatixFilesExportDirectory(e)) :-
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
+  statixFilesOptionOk(s, StatixSdf3SignatureGen(e)) :-
+    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
 
   statixPrebuiltOptionOk : scope * StatixPrebuiltOption
   statixPrebuiltOptionsOk maps statixPrebuiltOptionOk(*, list(*))
   statixPrebuiltOptionOk(s, StatixPrebuiltSpecAtermDirectory(e)) :-
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
-
-  statixOptionOk(s, StatixSdf3SignatureGen(e)) :-
-    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
 
 rules // Stratego section and options
 
@@ -147,11 +144,11 @@ rules // Stratego section and options
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
   strategoFilesOptionOk(s, StrategoFilesExportDirectory(e)) :-
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
-    
-  strategoOptionOk(s, StrategoSdf3StatixExplicationGen(e)) :-
+  strategoFilesOptionOk(s, StrategoSdf3StatixExplicationGen(e)) :-
     typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
-  strategoOptionOk(s, StrategoLanguageStrategyAffix(e)) :-
+  strategoFilesOptionOk(s, StrategoLanguageStrategyAffix(e)) :-
     typeOfExpr(s, e) == STRATEGY() | error $[Expected Stratego strategy identifier]@e.
+
   strategoOptionOk(s, StrategoOutputJavaPackageId(e)) :-
     typeOfExpr(s, e) == STRING() | error $[Expected string]@e.
 
@@ -183,8 +180,8 @@ rules // Dynamix section and options
 
 rules
 
-  partOk(s, Dependencies(dependency_kinds)) :-
-    dependenciesOk(s, dependency_kinds).
+  partOk(s, Dependencies(dependencies)) :-
+    dependenciesOk(s, dependencies).
 
   dependencyOk : scope * Dependency
   dependenciesOk maps dependencyOk(*, list(*))
@@ -216,3 +213,13 @@ rules
 
   dependencyKindOk(s, BuildDependencyKind()).
   dependencyKindOk(s, RunDependencyKind()).
+
+
+  partOk(s, BuildDependencies(dependencies)) :-
+    buildDependenciesOk(s, dependencies).
+
+  buildDependencyOk : scope * BuildDependency
+  buildDependenciesOk maps buildDependencyOk(*, list(*))
+  
+  buildDependencyOk(s, DefaultBuildDependency(e)) :-
+    dependencyExprOk(s, e).

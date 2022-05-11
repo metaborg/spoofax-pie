@@ -4,3 +4,4 @@ shared.defaultGroupId=org.metaborg
 shared.defaultPackageId=mb.rv32im
 shared.defaultVersion=0.1.0
 stratego.languageStrategyAffix=rv32im
+stratego.source.files.languageStrategyAffix=rv32im

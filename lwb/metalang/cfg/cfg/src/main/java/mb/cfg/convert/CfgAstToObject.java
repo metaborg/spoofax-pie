@@ -157,10 +157,10 @@ public class CfgAstToObject {
         final LanguageProjectCompilerInputBuilder baseBuilder = new LanguageProjectCompilerInputBuilder();
         final AdapterProjectCompilerInputBuilder adapterBuilder = new AdapterProjectCompilerInputBuilder();
 
-        // LanguageCompilerInput
-        final CompileMetaLanguageSourcesInputBuilder languageCompilerInputBuilder = new CompileMetaLanguageSourcesInputBuilder();
+        // CompileMetaLanguageSourcesInput
+        final CompileMetaLanguageSourcesInputBuilder compileMetaLanguageSourcesInputBuilder = new CompileMetaLanguageSourcesInputBuilder();
         parts.getAllSubTermsInListAsParts("Sdf3Section").ifSome(subParts -> {
-            final CfgSdf3Config.Builder builder = languageCompilerInputBuilder.withSdf3();
+            final CfgSdf3Config.Builder builder = compileMetaLanguageSourcesInputBuilder.withSdf3();
             subParts.getOneSubterm("Sdf3Source").ifSome(source -> {
                 if(TermUtils.isAppl(source, "Sdf3Files", 1)) {
                     final Parts filesParts = subParts.subParts(source.getSubterm(0));
@@ -171,6 +171,14 @@ public class CfgAstToObject {
                     filesParts.forOneSubtermAsExistingFile("Sdf3FilesMainFile", mainSourceDirectory, "SDF3 main file", filesSourceBuilder::mainFile);
                     filesParts.forAllSubtermsAsExistingDirectories("Sdf3FilesIncludeDirectory", rootDirectory, "Stratego include directory", filesSourceBuilder::addIncludeDirectories);
                     filesParts.forAllSubtermsAsStrings("Sdf3FilesExportDirectory", filesSourceBuilder::addExportDirectories);
+                    filesParts.getAllSubTermsInListAsParts("Sdf3ParseTableGeneratorSection").ifSome(ptgParts -> {
+                        ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorDynamic", filesSourceBuilder::createDynamicParseTable);
+                        ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorDataDependent", filesSourceBuilder::createDataDependentParseTable);
+                        ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorLayoutSensitive", filesSourceBuilder::createLayoutSensitiveParseTable);
+                        ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorSolveDeepConflicts", filesSourceBuilder::solveDeepConflictsInParseTable);
+                        ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorCheckOverlap", filesSourceBuilder::checkOverlapInParseTable);
+                        ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorCheckPriorities", filesSourceBuilder::checkPrioritiesInParseTable);
+                    });
                     builder.source(CfgSdf3Source.files(filesSourceBuilder.build()));
                 } else if(TermUtils.isAppl(source, "Sdf3Prebuilt", 1)) {
                     final Parts prebuiltParts = subParts.subParts(source.getSubterm(0));
@@ -189,18 +197,9 @@ public class CfgAstToObject {
                     throw new InvalidAstShapeException("SDF3 source", source);
                 }
             });
-
-            subParts.getAllSubTermsInListAsParts("Sdf3ParseTableGeneratorSection").ifSome(ptgParts -> {
-                ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorDynamic", builder::createDynamicParseTable);
-                ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorDataDependent", builder::createDataDependentParseTable);
-                ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorLayoutSensitive", builder::createLayoutSensitiveParseTable);
-                ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorSolveDeepConflicts", builder::solveDeepConflictsInParseTable);
-                ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorCheckOverlap", builder::checkOverlapInParseTable);
-                ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorCheckPriorities", builder::checkPrioritiesInParseTable);
-            });
         });
         parts.getAllSubTermsInListAsParts("EsvSection").ifSome(subParts -> {
-            final CfgEsvConfig.Builder builder = languageCompilerInputBuilder.withEsv();
+            final CfgEsvConfig.Builder builder = compileMetaLanguageSourcesInputBuilder.withEsv();
             subParts.getOneSubterm("EsvSource").ifSome(source -> {
                 if(TermUtils.isAppl(source, "EsvFiles", 1)) {
                     final Parts filesParts = subParts.subParts(source.getSubterm(0));
@@ -211,7 +210,6 @@ public class CfgAstToObject {
                     filesParts.forOneSubtermAsExistingFile("EsvFilesMainFile", mainSourceDirectory, "ESV main file", filesSourceBuilder::mainFile);
                     filesParts.forAllSubtermsAsExistingDirectories("EsvFilesIncludeDirectory", rootDirectory, "ESV include directory", filesSourceBuilder::addIncludeDirectories);
                     filesParts.forAllSubtermsAsStrings("EsvFilesExportDirectory", filesSourceBuilder::addExportDirectories);
-                    filesParts.forOneSubtermAsBool("EsvFilesIncludeLibspoofax2Exports", filesSourceBuilder::includeLibSpoofax2Exports); // TODO: remove and use dependency
                     builder.source(CfgEsvSource.files(filesSourceBuilder.build()));
                 } else if(TermUtils.isAppl(source, "EsvPrebuilt", 1)) {
                     final Parts prebuiltParts = subParts.subParts(source.getSubterm(0));
@@ -225,7 +223,7 @@ public class CfgAstToObject {
             });
         });
         parts.getAllSubTermsInListAsParts("StatixSection").ifSome(subParts -> {
-            final CfgStatixConfig.Builder builder = languageCompilerInputBuilder.withStatix();
+            final CfgStatixConfig.Builder builder = compileMetaLanguageSourcesInputBuilder.withStatix();
             subParts.getOneSubterm("StatixSource").ifSome(source -> {
                 if(TermUtils.isAppl(source, "StatixFiles", 1)) {
                     final Parts filesParts = subParts.subParts(source.getSubterm(0));
@@ -236,6 +234,7 @@ public class CfgAstToObject {
                     filesParts.forOneSubtermAsExistingFile("StatixFilesMainFile", mainSourceDirectory, "Statix main file", filesSourceBuilder::mainFile);
                     filesParts.forAllSubtermsAsExistingDirectories("StatixFilesIncludeDirectory", rootDirectory, "Statix include directory", filesSourceBuilder::addIncludeDirectories);
                     filesParts.forAllSubtermsAsStrings("StatixFilesExportDirectory", filesSourceBuilder::addExportDirectories);
+                    filesParts.forOneSubtermAsBool("StatixSdf3SignatureGen", filesSourceBuilder::enableSdf3SignatureGen);
                     builder.source(CfgStatixSource.files(filesSourceBuilder.build()));
                 } else if(TermUtils.isAppl(source, "StatixPrebuilt", 1)) {
                     final Parts prebuiltParts = subParts.subParts(source.getSubterm(0));
@@ -247,10 +246,9 @@ public class CfgAstToObject {
                     throw new InvalidAstShapeException("Statix source", source);
                 }
             });
-            subParts.forOneSubtermAsBool("StatixSdf3SignatureGen", builder::enableSdf3SignatureGen);
         });
         parts.getAllSubTermsInListAsParts("DynamixSection").ifSome(subParts -> {
-            final CfgDynamixConfig.Builder builder = languageCompilerInputBuilder.withDynamix();
+            final CfgDynamixConfig.Builder builder = compileMetaLanguageSourcesInputBuilder.withDynamix();
             subParts.getOneSubterm("DynamixSource").ifSome(source -> {
                 if(TermUtils.isAppl(source, "DynamixFiles", 1)) {
                     final Parts filesParts = subParts.subParts(source.getSubterm(0));
@@ -272,24 +270,23 @@ public class CfgAstToObject {
             });
         });
         parts.getAllSubTermsInListAsParts("StrategoSection").ifSome(subParts -> {
-            final CfgStrategoConfig.Builder builder = languageCompilerInputBuilder.withStratego();
+            final CfgStrategoConfig.Builder builder = compileMetaLanguageSourcesInputBuilder.withStratego();
             subParts.getOneSubterm("StrategoSource").ifSome(source -> {
                 if(TermUtils.isAppl(source, "StrategoFiles", 1)) {
                     final Parts filesParts = subParts.subParts(source.getSubterm(0));
-                    final CfgStrategoSource.Files.Builder filesSourceBuilder = CfgStrategoSource.Files.builder().compileMetaLanguageSourcesShared(languageShared);
+                    final CfgStrategoSource.Files.Builder filesSourceBuilder = compileMetaLanguageSourcesInputBuilder.withStrategoFilesSource();
                     final ResourcePath mainSourceDirectory = filesParts.getOneSubtermAsExistingDirectory("StrategoFilesMainSourceDirectory", rootDirectory, "Stratego main source directory")
                         .unwrapOrElse(() -> CfgStrategoSource.Files.Builder.getDefaultMainSourceDirectory(languageShared));
                     filesSourceBuilder.mainSourceDirectory(mainSourceDirectory);
                     filesParts.forOneSubtermAsExistingFile("StrategoFilesMainFile", mainSourceDirectory, "Stratego main file", filesSourceBuilder::mainFile);
                     filesParts.forAllSubtermsAsExistingDirectories("StrategoFilesIncludeDirectory", rootDirectory, "Stratego include directory", filesSourceBuilder::addIncludeDirectories);
                     filesParts.forAllSubtermsAsStrings("StrategoFilesExportDirectory", filesSourceBuilder::addExportDirectories);
-                    builder.source(CfgStrategoSource.files(filesSourceBuilder.build()));
+                    filesParts.forOneSubtermAsBool("StrategoSdf3StatixExplicationGen", filesSourceBuilder::enableSdf3StatixExplicationGen);
+                    filesParts.forOneSubtermAsString("StrategoLanguageStrategyAffix", filesSourceBuilder::languageStrategyAffix);
                 } else {
                     throw new InvalidAstShapeException("Stratego source", source);
                 }
             });
-            subParts.forOneSubtermAsBool("StrategoSdf3StatixExplicationGen", builder::enableSdf3StatixExplicationGen);
-            subParts.forOneSubtermAsString("StrategoLanguageStrategyAffix", builder::languageStrategyAffix);
             subParts.forOneSubtermAsString("StrategoOutputJavaPackageId", builder::outputJavaPackageId);
         });
         parts.forAllSubTermsInList("Dependencies", dependencyTerm -> {
@@ -314,11 +311,23 @@ public class CfgAstToObject {
             } else {
                 throw new InvalidAstShapeException("Dependency", dependencyTerm);
             }
-            languageCompilerInputBuilder.compileLanguage.addDependencies(dependency);
+            compileMetaLanguageSourcesInputBuilder.compileMetaLanguageSources.addDependencies(dependency);
+        });
+        parts.forAllSubTermsInList("BuildDependencies", dependencyTerm -> {
+            final Dependency dependency;
+            if(TermUtils.isAppl(dependencyTerm, "DefaultBuildDependency", 1)) {
+                final IStrategoAppl sourceTermAppl = TermUtils.asApplAt(dependencyTerm, 0)
+                    .orElseThrow(() -> new InvalidAstShapeException("term application as first subterm", dependencyTerm));
+                final DependencySource source = toDependencySource(sourceTermAppl);
+                dependency = new Dependency(source, SetView.of(DependencyKind.Build));
+            } else {
+                throw new InvalidAstShapeException("Dependency", dependencyTerm);
+            }
+            compileMetaLanguageSourcesInputBuilder.compileMetaLanguageSources.addDependencies(dependency);
         });
 
-        customizer.customize(languageCompilerInputBuilder);
-        final CompileMetaLanguageSourcesInput compileMetaLanguageSourcesInput = languageCompilerInputBuilder.build(properties, shared, languageShared);
+        customizer.customize(compileMetaLanguageSourcesInputBuilder);
+        final CompileMetaLanguageSourcesInput compileMetaLanguageSourcesInput = compileMetaLanguageSourcesInputBuilder.build(properties, shared, languageShared);
         compileMetaLanguageSourcesInput.syncTo(baseBuilder);
         compileMetaLanguageSourcesInput.syncTo(adapterBuilder);
         compileLanguageInputBuilder.compileMetaLanguageSourcesInput(compileMetaLanguageSourcesInput);

@@ -190,7 +190,7 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
         // Compile each SDF3 source file (if SDF3 is enabled) to a Stratego signature, pretty-printer, completion
         // runtime, and injection explication (if enabled) module.
         final ResourcePath generatedSourcesDirectory = sourceFiles.generatedSourcesDirectory();
-        final String strategyAffix = cfgStrategoConfig.languageStrategyAffix();
+        final String strategyAffix = sourceFiles.languageStrategyAffix();
         try {
             spoofaxSdf3GenerationUtil.performSdf3GenerationIfEnabled(context, rootDirectory, new SpoofaxSdf3GenerationUtil.Callbacks<SpoofaxStrategoConfigureException>() {
                 @Override
@@ -210,7 +210,7 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
 //                    } catch(Exception e) {
 //                        throw StrategoConfigureException.sdf3CompletionRuntimeGenerateFail(e);
 //                    }
-                    if(cfgStrategoConfig.enableSdf3StatixExplicationGen()) {
+                    if(sourceFiles.enableSdf3StatixExplicationGen()) {
                         try {
                             sdf3ToStatixGenInj(context, strategyAffix, generatedSourcesDirectory, astSupplier);
                         } catch(RuntimeException | InterruptedException e) {
@@ -249,8 +249,8 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
                         map.put("name", strategyAffix);
                         map.put("ppName", strategyAffix);
                         map.put("sdf3MainModule", sdf3Config.getMainModuleName());
-                        completionTemplate.write(context, generatedSourcesDirectory.appendRelativePath("completion.str2"), cfgStrategoConfig, map);
-                        ppTemplate.write(context, generatedSourcesDirectory.appendRelativePath("pp.str2"), cfgStrategoConfig, map);
+                        completionTemplate.write(context, generatedSourcesDirectory.appendRelativePath("completion.str2"), map);
+                        ppTemplate.write(context, generatedSourcesDirectory.appendRelativePath("pp.str2"), map);
                     }
 
                     // Add generated sources directory as an include for Stratego imports.
@@ -282,7 +282,7 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
             ListView.copyOf(allStratego2LibInfos),
             new Arguments(), // TODO: add to input and configure
             ListView.of(sourceFileOrigins),
-            null, //strategoInput.cacheDirectory(), // TODO: settings this crashes the compiler, most likely due to the ## symbols in the path.
+            null, //strategoInput.cacheDirectory(), // TODO: setting this crashes the compiler, most likely due to the ## symbols in the path.
             cfgStrategoConfig.javaSourceFileOutputDirectory(),
             cfgStrategoConfig.javaClassFileOutputDirectory(),
             cfgStrategoConfig.outputJavaPackageId(),

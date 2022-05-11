@@ -7,13 +7,32 @@ All notable changes to this project are documented in this file, based on [Keep 
 - ESV imports not resolving to modules in the main source directory.
 - Updating the Eclipse LWB plugin causing failures when no clean is performed. The PIE store is now automatically cleaned when the version changes. [#39](https://github.com/metaborg/spoofax-pie/issues/39#issuecomment-1120814670)
 
+### Removed
+- `include-libspoofax2-exports` option in `esv` section of `spoofaxc.cfg`, this can now simply be replaced with a dependency to `org.metaborg:libspoofax2:*`.
+
 ### Changed
 - Dependency syntax to be less verbose and more configurable.
 - Dependency kinds into `Build` for dependencies that are needed when building the language, and `Run` for dependencies that are needed when running the language.
+- Generated meta-language files are now generated in `./build/generated/sources/metalang/<metalang>` instead of `./build/generated/sources/languageSpecification/<metalang>`.
+- Unarchived meta-language files are now unarchived into `./build/unarchive/<metalang>` instead of `./build/unarchive`.
+- `parse-table-generator` section in `sdf3` section is now part of `source = files { ... }` section.
+- `sdf3-statix-signature-generation` section in `statix` section is now part of `source = files { ... }` section.
+- `sdf3-statix-signature-generation` section in `stratego` section is now part of `source = files { ... }` section.
+- `language-strategy-affix` option in `stratego` section is now part `source = files { ... }` section. Also, the property in the lockfile corresponding to this option has been changed from `stratego.languageStrategyAffix` to `stratego.source.files.languageStrategyAffix`.
+- Default dependencies are now only added if no dependencies are specified in `spoofaxc.cfg`. When generating a new Spoofax 3 project, these default dependencies are added explicitly to the `spoofaxc.cfg` file. In the future, these default dependencies will be removed. It is recommended to add these dependencies to your `spoofax.cfg`:
+```
+build-dependencies [
+  org.metaborg:strategolib:*
+  org.metaborg:gpp:*
+  org.metaborg:libspoofax2:*
+  org.metaborg:libstatix:*
+]
+```
 
 ### Added
 - Preliminary support for SDF3, ESV, and Statix compile-time dependencies. That is, exports of source directories of those meta-languages and imports through dependencies.
 - Support for include directories for SDF3.
+- `build-dependencies [ ... ]` section for quickly specifying build dependencies without having to specify the kind for every dependency.
 
 
 ## [0.18.0] - 2022-04-04

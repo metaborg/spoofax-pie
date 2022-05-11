@@ -23,7 +23,7 @@ public interface CfgEsvConfig extends Serializable {
 
     @Value.Default default CfgEsvSource source() {
         return CfgEsvSource.files(CfgEsvSource.Files.builder()
-            .compileMetaLanguageSourcesShared(compileLanguageShared())
+            .compileMetaLanguageSourcesShared(compileMetaLanguageSourcesShared())
             .build()
         );
     }
@@ -34,8 +34,8 @@ public interface CfgEsvConfig extends Serializable {
     }
 
     default ResourcePath outputFile() {
-        return compileLanguageShared().generatedResourcesDirectory() // Generated resources directory, so that Gradle includes the aterm format file in the JAR file.
-            .appendRelativePath(compileLanguageShared().languageProject().packagePath()) // Append package path to make location unique, enabling JAR files to be merged.
+        return compileMetaLanguageSourcesShared().generatedResourcesDirectory() // Generated resources directory, so that Gradle includes the aterm format file in the JAR file.
+            .appendRelativePath(compileMetaLanguageSourcesShared().languageProject().packagePath()) // Append package path to make location unique, enabling JAR files to be merged.
             .appendRelativePath(outputFileName()) // Append the file name.
             ;
     }
@@ -43,7 +43,7 @@ public interface CfgEsvConfig extends Serializable {
 
     /// Automatically provided sub-inputs
 
-    CompileMetaLanguageSourcesShared compileLanguageShared();
+    CompileMetaLanguageSourcesShared compileMetaLanguageSourcesShared();
 
 
     default void syncTo(StylerLanguageCompiler.Input.Builder builder) {

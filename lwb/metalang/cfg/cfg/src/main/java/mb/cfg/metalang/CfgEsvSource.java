@@ -39,15 +39,7 @@ public abstract class CfgEsvSource implements Serializable {
         List<String> exportDirectories();
 
         default ResourcePath unarchiveDirectory() {
-            return compileMetaLanguageSourcesShared().unarchiveDirectory();
-        }
-
-        @Value.Default default boolean includeLibSpoofax2Exports() {
-            return compileMetaLanguageSourcesShared().includeLibSpoofax2Exports();
-        }
-
-        @Value.Default default ResourcePath libSpoofax2UnarchiveDirectory() {
-            return compileMetaLanguageSourcesShared().libSpoofax2UnarchiveDirectory();
+            return compileMetaLanguageSourcesShared().unarchiveDirectory().appendAsRelativePath("esv");
         }
 
         /// Automatically provided sub-inputs

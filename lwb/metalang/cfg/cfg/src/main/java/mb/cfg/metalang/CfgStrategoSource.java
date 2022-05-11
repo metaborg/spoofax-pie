@@ -3,12 +3,18 @@ package mb.cfg.metalang;
 import mb.cfg.CompileMetaLanguageSourcesShared;
 import mb.common.util.ADT;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.compiler.adapter.ExportsCompiler;
+import mb.spoofax.compiler.language.StrategoRuntimeLanguageCompiler;
+import mb.spoofax.compiler.util.BuilderBase;
+import mb.spoofax.compiler.util.Conversion;
+import mb.spoofax.compiler.util.Shared;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * Configuration for Stratego sources in the context of CFG.
@@ -17,7 +23,15 @@ import java.util.List;
 public abstract class CfgStrategoSource implements Serializable {
     @Value.Immutable
     public interface Files extends Serializable {
-        class Builder extends ImmutableCfgStrategoSource.Files.Builder {
+        class Builder extends ImmutableCfgStrategoSource.Files.Builder implements BuilderBase {
+            static final String propertiesPrefix = "stratego.source.files.";
+            static final String languageStrategyAffix = propertiesPrefix + "languageStrategyAffix";
+
+            public Builder withPersistentProperties(Properties properties) {
+                with(properties, languageStrategyAffix, this::languageStrategyAffix);
+                return this;
+            }
+
             public static ResourcePath getDefaultMainSourceDirectory(CompileMetaLanguageSourcesShared shared) {
                 return shared.languageProject().project().srcDirectory();
             }
@@ -49,32 +63,18 @@ public abstract class CfgStrategoSource implements Serializable {
             return strategoBuiltinLibs;
         }
 
+        @Value.Default default boolean enableSdf3StatixExplicationGen() {
+            return false;
+        }
+
+        @Value.Default default String languageStrategyAffix() {
+            // TODO: convert to Stratego ID instead of Java ID.
+            return Conversion.nameToJavaId(shared().name().toLowerCase());
+        }
+
+
         default ResourcePath unarchiveDirectory() {
-            return compileMetaLanguageSourcesShared().unarchiveDirectory();
-        }
-
-        default ResourcePath strategoLibUnarchiveDirectory() {
-            return unarchiveDirectory().appendRelativePath("strategoLib");
-        }
-
-        default ResourcePath gppUnarchiveDirectory() {
-            return unarchiveDirectory().appendRelativePath("gpp");
-        }
-
-        @Value.Default default boolean includeLibSpoofax2Exports() {
-            return compileMetaLanguageSourcesShared().includeLibSpoofax2Exports();
-        }
-
-        default ResourcePath libSpoofax2UnarchiveDirectory() {
-            return compileMetaLanguageSourcesShared().libSpoofax2UnarchiveDirectory();
-        }
-
-        @Value.Default default boolean includeLibStatixExports() {
-            return compileMetaLanguageSourcesShared().includeLibStatixExports();
-        }
-
-        default ResourcePath libStatixUnarchiveDirectory() {
-            return compileMetaLanguageSourcesShared().libStatixUnarchiveDirectory();
+            return compileMetaLanguageSourcesShared().unarchiveDirectory().appendAsRelativePath("stratego");
         }
 
         @Value.Default default ResourcePath generatedSourcesDirectory() {
@@ -82,12 +82,25 @@ public abstract class CfgStrategoSource implements Serializable {
         }
 
         @Value.Default default ResourcePath cacheDirectory() {
-            return compileMetaLanguageSourcesShared().languageProject().project().buildDirectory().appendRelativePath("stratego-cache");
+            return compileMetaLanguageSourcesShared().cacheDirectory().appendAsRelativePath("stratego");
         }
+
 
         /// Automatically provided sub-inputs
 
         CompileMetaLanguageSourcesShared compileMetaLanguageSourcesShared();
+
+        Shared shared();
+
+
+        default void savePersistentProperties(Properties properties) {
+            properties.setProperty(Builder.languageStrategyAffix, languageStrategyAffix());
+        }
+
+
+        default void syncTo(ExportsCompiler.Input.Builder builder) {
+            exportDirectories().forEach(exportDirectory -> builder.addDirectoryExport(CfgStrategoConfig.exportsId, exportDirectory));
+        }
     }
 
     interface Cases<R> {

@@ -138,12 +138,12 @@ public class SpoofaxSdf3Configure implements TaskDef<ResourcePath, Result<Option
         }
 
         final ParseTableConfiguration parseTableConfiguration = new ParseTableConfiguration(
-            cfgSdf3Config.createDynamicParseTable(),
-            cfgSdf3Config.createDataDependentParseTable(),
-            cfgSdf3Config.solveDeepConflictsInParseTable(),
-            cfgSdf3Config.checkOverlapInParseTable(),
-            cfgSdf3Config.checkPrioritiesInParseTable(),
-            cfgSdf3Config.createLayoutSensitiveParseTable()
+            files.createDynamicParseTable(),
+            files.createDataDependentParseTable(),
+            files.solveDeepConflictsInParseTable(),
+            files.checkOverlapInParseTable(),
+            files.checkPrioritiesInParseTable(),
+            files.createLayoutSensitiveParseTable()
         );
         final Sdf3SpecConfig sdf3SpecConfig = new Sdf3SpecConfig(
             rootDirectory,

@@ -5,6 +5,7 @@ import mb.cfg.metalang.CfgEsvConfig;
 import mb.cfg.metalang.CfgSdf3Config;
 import mb.cfg.metalang.CfgStatixConfig;
 import mb.cfg.metalang.CfgStrategoConfig;
+import mb.cfg.metalang.CfgStrategoSource;
 import mb.common.util.Properties;
 import mb.spoofax.compiler.util.Shared;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -27,8 +28,9 @@ public class CompileMetaLanguageSourcesInputBuilder {
 
     private boolean strategoEnabled = false;
     public CfgStrategoConfig.Builder stratego = CfgStrategoConfig.builder();
+    public CfgStrategoSource.Files.Builder strategoSourceFilesBuilder = CfgStrategoSource.Files.builder();
 
-    public CompileMetaLanguageSourcesInput.Builder compileLanguage = CompileMetaLanguageSourcesInput.builder();
+    public CompileMetaLanguageSourcesInput.Builder compileMetaLanguageSources = CompileMetaLanguageSourcesInput.builder();
 
 
     public CfgSdf3Config.Builder withSdf3() {
@@ -56,26 +58,31 @@ public class CompileMetaLanguageSourcesInputBuilder {
         return stratego;
     }
 
+    public CfgStrategoSource.Files.Builder withStrategoFilesSource() {
+        strategoEnabled = true;
+        return strategoSourceFilesBuilder;
+    }
+
 
     public CompileMetaLanguageSourcesInput build(Properties persistentProperties, Shared shared, CompileMetaLanguageSourcesShared compileMetaLanguageSourcesShared) {
         final @Nullable CfgSdf3Config sdf3 = buildSdf3(compileMetaLanguageSourcesShared);
-        if(sdf3 != null) compileLanguage.sdf3(sdf3);
+        if(sdf3 != null) compileMetaLanguageSources.sdf3(sdf3);
 
         final @Nullable CfgEsvConfig esv = buildEsv(compileMetaLanguageSourcesShared);
-        if(esv != null) compileLanguage.esv(esv);
+        if(esv != null) compileMetaLanguageSources.esv(esv);
 
         final @Nullable CfgStatixConfig statix = buildStatix(compileMetaLanguageSourcesShared);
-        if(statix != null) compileLanguage.statix(statix);
+        if(statix != null) compileMetaLanguageSources.statix(statix);
 
         final @Nullable CfgDynamixConfig dynamix = buildDynamix(compileMetaLanguageSourcesShared);
-        if(dynamix != null) compileLanguage.dynamix(dynamix);
+        if(dynamix != null) compileMetaLanguageSources.dynamix(dynamix);
 
         final @Nullable CfgStrategoConfig stratego = buildStratego(persistentProperties, shared, compileMetaLanguageSourcesShared);
-        if(stratego != null) compileLanguage.stratego(stratego);
+        if(stratego != null) compileMetaLanguageSources.stratego(stratego);
 
-        return compileLanguage
+        return compileMetaLanguageSources
             .shared(shared)
-            .compileLanguageShared(compileMetaLanguageSourcesShared)
+            .compileMetaLanguageSourcesShared(compileMetaLanguageSourcesShared)
             .build();
     }
 
@@ -85,7 +92,7 @@ public class CompileMetaLanguageSourcesInputBuilder {
     ) {
         if(!sdf3Enabled) return null;
         return sdf3
-            .compileLanguageShared(compileMetaLanguageSourcesShared)
+            .compileMetaLanguageSourcesShared(compileMetaLanguageSourcesShared)
             .build();
     }
 
@@ -94,7 +101,7 @@ public class CompileMetaLanguageSourcesInputBuilder {
     ) {
         if(!esvEnabled) return null;
         return esv
-            .compileLanguageShared(compileMetaLanguageSourcesShared)
+            .compileMetaLanguageSourcesShared(compileMetaLanguageSourcesShared)
             .build();
     }
 
@@ -103,7 +110,7 @@ public class CompileMetaLanguageSourcesInputBuilder {
     ) {
         if(!statixEnabled) return null;
         return statix
-            .compileLanguageShared(compileMetaLanguageSourcesShared)
+            .compileMetaLanguageSourcesShared(compileMetaLanguageSourcesShared)
             .build();
     }
 
@@ -122,10 +129,15 @@ public class CompileMetaLanguageSourcesInputBuilder {
         CompileMetaLanguageSourcesShared compileMetaLanguageSourcesShared
     ) {
         if(!strategoEnabled) return null;
-        return stratego
+        final CfgStrategoSource.Files files = strategoSourceFilesBuilder
             .withPersistentProperties(persistentProperties)
             .shared(shared)
-            .compileLanguageShared(compileMetaLanguageSourcesShared)
+            .compileMetaLanguageSourcesShared(compileMetaLanguageSourcesShared)
+            .build();
+        return stratego
+            .shared(shared)
+            .compileMetaLanguageSourcesShared(compileMetaLanguageSourcesShared)
+            .source(CfgStrategoSource.files(files))
             .build();
     }
 }

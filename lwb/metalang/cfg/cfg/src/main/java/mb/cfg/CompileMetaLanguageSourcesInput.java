@@ -31,7 +31,7 @@ public interface CompileMetaLanguageSourcesInput extends Serializable {
 
     Shared shared();
 
-    CompileMetaLanguageSourcesShared compileLanguageShared();
+    CompileMetaLanguageSourcesShared compileMetaLanguageSourcesShared();
 
 
     /// Sub-inputs
@@ -50,23 +50,20 @@ public interface CompileMetaLanguageSourcesInput extends Serializable {
 
     default List<Dependency> allDependencies() {
         final ArrayList<Dependency> dependencies = new ArrayList<>(dependencies());
+        final boolean noUserDependencies = dependencies.isEmpty();
         final Function<String, Dependency> createBuildDependency = (artifactId) ->
             new Dependency(DependencySource.coordinateRequirement(new CoordinateRequirement("org.metaborg", artifactId, shared().spoofax3Version())), SetView.of(DependencyKind.Build));
-        stratego().ifPresent(c -> {
-            dependencies.add(createBuildDependency.apply("strategolib"));
-            dependencies.add(createBuildDependency.apply("gpp"));
-        });
-        final boolean dependOnLibSpoofax2 = stratego()
-            .map(c -> c.source().getFiles().includeLibSpoofax2Exports())
-            .orElseGet(() -> esv().isPresent());
-        if(dependOnLibSpoofax2) {
-            dependencies.add(createBuildDependency.apply("libspoofax2"));
-        }
-        final boolean dependOnLibStatix = stratego()
-            .map(s -> s.source().getFiles().includeLibStatixExports())
-            .orElse(false);
-        if(dependOnLibStatix) {
-            dependencies.add(createBuildDependency.apply("libstatix"));
+        if(noUserDependencies) {
+            if(stratego().isPresent() || esv().isPresent()) {
+                dependencies.add(createBuildDependency.apply("libspoofax2"));
+            }
+            if(stratego().isPresent()) {
+                dependencies.add(createBuildDependency.apply("strategolib"));
+                dependencies.add(createBuildDependency.apply("gpp"));
+            }
+            if(statix().isPresent()) {
+                dependencies.add(createBuildDependency.apply("libstatix"));
+            }
         }
         return dependencies;
     }
@@ -84,7 +81,7 @@ public interface CompileMetaLanguageSourcesInput extends Serializable {
         // Add only as source directory path, as Java source files are directly passed from the Stratego compiler into
         // the Java compiler, to prevent hidden dependencies when Java source files are no longer provided. We still
         // need to add it as a source directory path so that the Java compiler can resolve packages (directories).
-        sourceDirectoryPaths.add(compileLanguageShared().generatedJavaSourcesDirectory());
+        sourceDirectoryPaths.add(compileMetaLanguageSourcesShared().generatedJavaSourcesDirectory());
         return sourceDirectoryPaths;
     }
 
@@ -97,7 +94,7 @@ public interface CompileMetaLanguageSourcesInput extends Serializable {
 
     default ArrayList<ResourcePath> resourcePaths() {
         final ArrayList<ResourcePath> resourcePaths = new ArrayList<>();
-        resourcePaths.add(compileLanguageShared().generatedResourcesDirectory());
+        resourcePaths.add(compileMetaLanguageSourcesShared().generatedResourcesDirectory());
         return resourcePaths;
     }
 

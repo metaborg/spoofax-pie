@@ -55,6 +55,8 @@ CFG has the following literals:
 | `task-def $JavaQIdLit` | `task-def foo.bar.Baz` | Qualified Java identifier that represents a task definition |
 | `sort [a-zA-Z0-9\-\_\$]+` | `sort Start` | SDF3 sort identifier |
 | `strategy [a-zA-Z0-9\-\_\$]+` | `strategy Start` | Stratego strategy identifier |
+| `$CoordinateChars:$CoordinateChars:$CoordinateChars` | `org.metaborg:strategolib:1.0.0` | Coordinate |
+| `$CoordinateChars:$CoordinateChars:$CoordinateRequirementChars` | `org.metaborg:strategolib:*` | Coordinate requirement |
 
 With the following syntax non-terminals:
 
@@ -62,6 +64,8 @@ With the following syntax non-terminals:
 | - | - |
 | `JavaIdChars` | `[a-zA-Z\_\$][a-zA-Z0-9\_\$]*` |
 | `JavaQIdLit` | `$JavaIdChars(\.$JavaIdChars)*` |
+| `CoordinateChars` | `(~[\"\:\;\,\*\$\{\}\[\]\n\r\\\ ]|\\~[\n\r])` |
+| `CoordinateRequirementChars` | `($CoordinateChars|\*)` |
 
 For Java, SDF3 sort, and Stratego strategy identifiers, the corresponding keywords of those languages are rejected as identifiers.
 
@@ -373,7 +377,6 @@ The following `Sdf3Option`s are supported:
 | Syntax | Required? | Description | Type |
 | - | - | - | - |
 | `source = $Sdf3Source` | no | The source of the SDF3 definition. Defaults to a `files` source with the top-level `source-directory` option as its main source directory, and `./start.sdf3` as its main file relative to the main source directory. | n/a |
-| `parse-table-generator { $ParseTableGeneratorOption* }` | no | Parse table generator options. | n/a |
 
 The following `$Sdf3Source`s are supported:
 
@@ -386,6 +389,7 @@ The following `Sdf3FilesOption`s are supported:
 | - | - | - | - |
 | `main-source-directory = $Expression` | no | The directory relative to the root directory that contains the main SDF3 file. Defaults to the value of the top-level `source-directory` option. | Path |
 | `main-file = $Expression` | no | The main SDF3 file relative to the `main-source-directory`. Defaults to `./start.sdf3`. | Path |
+| `parse-table-generator { $ParseTableGeneratorOption* }` | no | Parse table generator options. | n/a |
 
 The following `$Sdf3PrebuiltOption`s are supported:
 
@@ -473,8 +477,6 @@ The following `StrategoOption`s are supported:
 | Syntax | Required? | Description | Type |
 | - | - | - | - |
 | `source = $StrategoSource` | no | The source of the Statix definition. Defaults to a `files` source with the top-level `source-directory` option as its main source directory, and `./main.str2` as its main file relative to the main source directory. | n/a |
-| `sdf3-statix-explication-generation = $Expression` | no | Whether SDF3 to Statix injection explication/implication generation is enabled. When enabled, `statix { sdf3-statix-signature-generation = true }` must also be enabled. Defaults to `false`. | Boolean |
-| `language-strategy-affix = $Expression` | no | The affix that is used to make certain generated strategies unique to the language. This is used both as a prefix and suffix. Defaults to name of the language transformed to a Stratego strategy identifier. | Stratego strategy identifier |
 | `output-java-package = $Expression` | no | The Java package into which compiled Stratego Java files are generated. Defaults to the language's package, followed by `.strategies`. | String |
 
 The following `$StrategoSource`s are supported:
@@ -488,7 +490,39 @@ The following `$StrategoFilesOption`s are supported:
 | `main-source-directory = $Expression` | no | The directory relative to the root directory that contains the main Stratego file. Defaults to the value of the top-level `source-directory` option. | Path |
 | `main-file = $Expression` | no | The main Stratego file relative to the `main-source-directory`. Defaults to `./main.str2`. | Path |
 | `include-directory = $Expression` | no | Adds an include directory from which to resolve Stratego imports. May be given multiple times. | Path |
+| `sdf3-statix-explication-generation = $Expression` | no | Whether SDF3 to Statix injection explication/implication generation is enabled. When enabled, `statix { sdf3-statix-signature-generation = true }` must also be enabled. Defaults to `false`. | Boolean |
+| `language-strategy-affix = $Expression` | no | The affix that is used to make certain generated strategies unique to the language. This is used both as a prefix and suffix. Defaults to name of the language transformed to a Stratego strategy identifier. | Stratego strategy identifier |
 
+### Dependencies
+
+The `dependencies [ $Dependency* ]` section allows specifying dependencies to other language (library) projects.
+A dependency consists of a *dependency expression* (`$Exp`) that specifies the source of the dependency. The following expressions are supported:
+
+* `$Coordinate`: an exact coordinate to a project, such as `org.metaborg:strategolib:1.0.0`. Coordinates are resolved to a statically loaded language, or a dynamically loaded language definition.
+* `$CoordinateRequirement`: a coordinate to a project with an open version, such as `org.metaborg:strategolib:*`, resolved identically to  `$Coordinate` except that the latest available version will be chosen.
+* `$Path`: a relative path (relative to the directory `spoofaxc.cfg` is in) to a language definition.
+
+Dependencies can be of a certain kind (`$DependencyKind`):
+
+* `Build`: a dependency that is resolved at *build time*, meaning when the language definition is built, allowing the use of sources and binaries of the project the dependency points to.
+* `Run`: a dependency that is resolved at *run time*, meaning when the language is executed, allowing use of the classes and tasks of the project the dependency points to. Note: this kind of dependency has not yet been implemented.
+
+The following `Dependency`s are supported:
+
+| Syntax | Description |
+| - | - | - | - |
+| `$Exp` | A dependency to project defined by the expression, available at `Build` and `Run` time. |
+| `$Exp { $DependencyOption* }` | no | A dependency to project defined by the expression, with configuration options. |
+
+The following `DependencyOption`s are supported:
+
+* `kinds = [ $DependencyKind* ]`: set the kinds at which this dependency is resolved.
+
+Additionally, build time dependencies can be quickly defined with the `build-dependencies [ $BuildDependency* ]` section. The following `BuildDependency`s are supported:
+
+| Syntax | Description |
+| - | - | - | - |
+| `$Exp` | A dependency to project defined by the expression, available only at `Build` time. |
 
 ## spoofaxc.lock
 

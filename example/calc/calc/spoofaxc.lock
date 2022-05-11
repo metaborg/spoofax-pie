@@ -5,3 +5,4 @@ shared.defaultGroupId=org.metaborg
 shared.defaultPackageId=mb.calc
 shared.defaultVersion=0.1.0
 stratego.languageStrategyAffix=calc
+stratego.source.files.languageStrategyAffix=calc

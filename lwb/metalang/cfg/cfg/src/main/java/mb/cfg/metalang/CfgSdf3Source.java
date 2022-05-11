@@ -39,8 +39,34 @@ public abstract class CfgSdf3Source implements Serializable {
         List<String> exportDirectories();
 
         default ResourcePath unarchiveDirectory() {
-            return compileMetaLanguageSourcesShared().unarchiveDirectory();
+            return compileMetaLanguageSourcesShared().unarchiveDirectory().appendAsRelativePath("sdf3");
         }
+
+
+        @Value.Default default boolean createDynamicParseTable() {
+            return false;
+        }
+
+        @Value.Default default boolean createDataDependentParseTable() {
+            return false;
+        }
+
+        @Value.Default default boolean createLayoutSensitiveParseTable() {
+            return false;
+        }
+
+        @Value.Default default boolean solveDeepConflictsInParseTable() {
+            return true;
+        }
+
+        @Value.Default default boolean checkOverlapInParseTable() {
+            return false;
+        }
+
+        @Value.Default default boolean checkPrioritiesInParseTable() {
+            return false;
+        }
+
 
         /// Automatically provided sub-inputs
 

@@ -156,7 +156,7 @@ public class SpoofaxStatixConfigure implements TaskDef<ResourcePath, Result<Opti
 
         // Compile each SDF3 source file (if SDF3 is enabled) to a Statix signature module (if enabled).
         final ResourcePath generatedSourcesDirectory = cfgStatixConfig.generatedSourcesDirectory();
-        if(cfgStatixConfig.enableSdf3SignatureGen()) {
+        if(files.enableSdf3SignatureGen()) {
             try {
                 spoofaxSdf3GenerationUtil.performSdf3GenerationIfEnabled(context, rootDirectory, new SpoofaxSdf3GenerationUtil.Callbacks<SpoofaxStatixConfigureException>() {
                     @Override

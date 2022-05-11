@@ -6,13 +6,12 @@ imports
 
 lexical sorts
 
-  CoordinateChars CoordinateCharsMiddle CoordinateChar CoordinateRequirementChars
+  CoordinateChars CoordinateChar CoordinateRequirementChars
 
 lexical syntax
 
   CoordinateChars = CoordinateChar+
   CoordinateChars = Keyword {reject}
-  CoordinateCharsMiddle = CoordinateChar+
 
   CoordinateChar = ~[\"\:\;\,\*\$\{\}\[\]\n\r\\\ ]
   CoordinateChar = "\\" ~[\n\r]

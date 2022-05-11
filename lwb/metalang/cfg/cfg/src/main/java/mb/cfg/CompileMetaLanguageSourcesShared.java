@@ -15,25 +15,14 @@ public interface CompileMetaLanguageSourcesShared extends Serializable {
     }
 
 
-    /// Configuration
-
-    @Value.Default default boolean includeLibSpoofax2Exports() {
-        return true;
-    }
-
-    @Value.Default default boolean includeLibStatixExports() {
-        return true;
-    }
-
-
     /// Directories
 
     @Value.Default default ResourcePath generatedResourcesDirectory() {
-        return languageProject().project().buildGeneratedResourcesDirectory().appendRelativePath("languageSpecification");
+        return languageProject().project().buildGeneratedResourcesDirectory().appendRelativePath("metalang");
     }
 
     @Value.Default default ResourcePath generatedSourcesDirectory() {
-        return languageProject().project().buildGeneratedSourcesDirectory().appendRelativePath("languageSpecification");
+        return languageProject().project().buildGeneratedSourcesDirectory().appendRelativePath("metalang");
     }
 
     @Value.Default default ResourcePath generatedJavaSourcesDirectory() {
@@ -44,12 +33,8 @@ public interface CompileMetaLanguageSourcesShared extends Serializable {
         return languageProject().project().buildDirectory().appendRelativePath("unarchive");
     }
 
-    @Value.Default default ResourcePath libSpoofax2UnarchiveDirectory() {
-        return unarchiveDirectory().appendRelativePath("libspoofax2");
-    }
-
-    @Value.Default default ResourcePath libStatixUnarchiveDirectory() {
-        return unarchiveDirectory().appendRelativePath("libstatix");
+    @Value.Default default ResourcePath cacheDirectory() {
+        return languageProject().project().buildDirectory().appendRelativePath("cache");
     }
 
 

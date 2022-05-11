@@ -38,8 +38,12 @@ public abstract class CfgStatixSource implements Serializable {
 
         List<String> exportDirectories();
 
+        @Value.Default default boolean enableSdf3SignatureGen() {
+            return false;
+        }
+
         default ResourcePath unarchiveDirectory() {
-            return compileMetaLanguageSourcesShared().unarchiveDirectory();
+            return compileMetaLanguageSourcesShared().unarchiveDirectory().appendAsRelativePath("statix");
         }
 
         /// Automatically provided sub-inputs
