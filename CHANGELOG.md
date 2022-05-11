@@ -15,6 +15,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 - Dependency kinds into `Build` for dependencies that are needed when building the language, and `Run` for dependencies that are needed when running the language.
 - Generated meta-language files are now generated in `./build/generated/sources/metalang/<metalang>` instead of `./build/generated/sources/languageSpecification/<metalang>`.
 - Unarchived meta-language files are now unarchived into `./build/unarchive/<metalang>` instead of `./build/unarchive`.
+- `<Name> = parameter { <Options> }` into `<Name> = { <Options> }`. The old syntax is still supported but deprecated, and will be removed in the future.
 - `parse-table-generator` section in `sdf3` section is now part of `source = files { ... }` section.
 - `sdf3-statix-signature-generation` section in `statix` section is now part of `source = files { ... }` section.
 - `sdf3-statix-signature-generation` section in `stratego` section is now part of `source = files { ... }` section.

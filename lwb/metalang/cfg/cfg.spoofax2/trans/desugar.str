@@ -1,0 +1,14 @@
+module desugar
+
+imports
+
+  signatures/-
+  signatures/part/-
+
+strategies
+
+  desugar-all = topdown(try(desugar-parameter))
+
+rules
+
+  desugar-parameter: ParameterDeprecated(name, options) -> Parameter(name, options)

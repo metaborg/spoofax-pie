@@ -136,7 +136,7 @@ The following `ExecutionType`s are supported:
 * `Once` indicates a that this command supports being executed as a one-shot command.
 * `Continuous` indicates that this command supports being executed every time the source file changes.
 
-A `$Parameter` has the form `$Identifier = parameter { $ParameterOptions }` with the following options:
+A `$Parameter` has the form `$Identifier { $ParameterOptions }` with the following options:
 
 | Syntax | Required? | Description | Type |
 | - | - | - | - |

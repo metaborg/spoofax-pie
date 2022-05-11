@@ -5,10 +5,11 @@ imports
   statixruntime
   statix/api
   injections/-
+  desugar
 
 rules
 
-  pre-analyze  = explicate-injections-cfg-Start
+  pre-analyze  = explicate-injections-cfg-Start; desugar-all
   post-analyze = implicate-injections-cfg-Start
 
   editor-analyze = stx-editor-analyze(pre-analyze, post-analyze|"main", "startOk")

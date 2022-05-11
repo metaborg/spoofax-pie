@@ -53,6 +53,10 @@ rules // Parameter and properties
     parameterPropertiesOk(s, properties),
     hasParameterType(properties) == TRUE() | error $['type' property has not been set]@t. 
     // TODO: check for duplicate parameter names
+  parameterOk(s, t@ParameterDeprecated(id, properties)) :-
+    parameterPropertiesOk(s, properties),
+    hasParameterType(properties) == TRUE() | error $['type' property has not been set]@t. 
+    // TODO: check for duplicate parameter names
 
   parameterPropertyOk : scope * ParameterProperty
   parameterPropertiesOk maps parameterPropertyOk(*, list(*))
