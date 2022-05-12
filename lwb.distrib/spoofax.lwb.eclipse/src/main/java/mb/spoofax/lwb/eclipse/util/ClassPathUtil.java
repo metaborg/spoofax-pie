@@ -11,6 +11,7 @@ import mb.spoofax.compiler.eclipsebundle.SpoofaxCompilerEclipseBundle;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.lwb.eclipse.SpoofaxLwbPlugin;
 import mb.strategolib.eclipse.StrategoLibEclipseParticipant;
+import mb.tim_runtime.eclipse.TimRuntimeEclipseComponent;
 import mb.tooling.eclipsebundle.ToolingEclipseBundle;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.resources.IProjectNature;
@@ -50,6 +51,7 @@ public class ClassPathUtil {
             .addClassLoader(GppEclipseParticipant.class.getClassLoader())
             .addClassLoader(Rv32ImEclipseComponent.class.getClassLoader())
             .addClassLoader(DynamixRuntimeEclipseComponent.class.getClassLoader())
+            .addClassLoader(TimRuntimeEclipseComponent.class.getClassLoader())
 
             .addClassLoader(Generated.class.getClassLoader()) // Artifact: javax.annotation:jsr250-api:1.0
 

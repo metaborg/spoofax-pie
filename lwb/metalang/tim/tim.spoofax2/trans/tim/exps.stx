@@ -113,6 +113,7 @@ rules
   typeOfPrimOp("int-sub", [INT(), INT()]) = INT().
   typeOfPrimOp("int-mul", [INT(), INT()]) = INT().
   typeOfPrimOp("int-div", [INT(), INT()]) = INT().
+  typeOfPrimOp("int-to-string", [INT()]) = STRING().
 
   typeOfPrimOp("str-add", [STRING(), STRING()]) = STRING().
   typeOfPrimOp("str-length", [STRING()]) = INT().
@@ -122,6 +123,7 @@ rules
   typeOfPrimOp("array-write", [ARRAY(), INT(), T]) = T.
   typeOfPrimOp("array-length", [ARRAY()]) = INT().
   typeOfPrimOp("array-concat", [ARRAY(), ARRAY()]) = ARRAY().
+  typeOfPrimOp("array-tail", [ARRAY()]) = ARRAY().
 
   typeOfPrimOp("record-new", _) = RECORD().
   typeOfPrimOp("record-write", [RECORD(), STRING(), T]) = T.

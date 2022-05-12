@@ -1,5 +1,5 @@
 module tim/common
-  
+
 lexical sorts
   TID TINT TSTRING TPRIM
   TSTRING_CHAR TBACKSLASH_CHAR
@@ -7,7 +7,7 @@ lexical sorts
   TNEWLINE_EOF TEOF
 
 lexical syntax
-  TID               = [\$a-zA-Z\_] [a-zA-Z0-9\_]*
+  TID               = [\$a-zA-Z\_] [a-zA-Z0-9\_\-]*
   TPRIM             = [\+\-\*\/A-Za-z0-9\_]+ // primitive id
   TINT              = "-"? [0-9]+
   TSTRING           = "\"" TSTRING_CHAR* "\""
@@ -29,12 +29,12 @@ lexical restrictions
   // Ensure greedy matching for lexicals
   TCOMMENT_CHAR    -/- [\/]
   TINT             -/- [0-9]
-  TID              -/- [a-zA-Z0-9\_]
-  
+  TID              -/- [a-zA-Z0-9\_\-]
+
   // EOF may not be followed by any char
   TEOF             -/- ~[]
-  
-  // Backslash chars in strings may not be followed by " 
+
+  // Backslash chars in strings may not be followed by "
   TBACKSLASH_CHAR  -/- [\"]
 
 context-free restrictions

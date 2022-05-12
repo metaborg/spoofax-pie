@@ -9,9 +9,6 @@ imports
   pp
   outline
   analysis
-  
-  tim/pp
-  tim/api
 
 rules // Debugging
   
@@ -20,9 +17,3 @@ rules // Debugging
     with
       filename := <guarantee-extension(|"aterm")> path
     ; result   := node
-    
-  debug-eval-aterm:
-    (node, _, _, path, project-path) -> (filename, result)
-    with
-      filename := <guarantee-extension(|"out")> path
-    ; result   := <tim-eval-to-string> node

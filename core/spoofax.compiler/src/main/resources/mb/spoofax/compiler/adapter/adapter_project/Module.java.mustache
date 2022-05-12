@@ -195,6 +195,11 @@ public class {{baseModule.id}} {
         return taskDefs;
     }
 
+    @Provides @{{scope.id}} @{{qualifier.id}} @ElementsIntoSet
+    static Set<TaskDef<?, ?>> provideTimRuntimeTaskDefs(@mb.tim_runtime.TimRuntimeQualifier Set<TaskDef<?, ?>> taskDefs) {
+        return taskDefs;
+    }
+
 {{/dynamix}}
 {{#multilangAnalyzer}}
     @Provides @{{scope.id}}

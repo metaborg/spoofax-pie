@@ -59,7 +59,8 @@ public class DynamixAdapterCompiler {
 
     public ListView<GradleConfiguredDependency> getDependencies(Input input) {
         return ListView.of(
-            GradleConfiguredDependency.api(input.shared().dynamixRuntimeDep())
+            GradleConfiguredDependency.api(input.shared().dynamixRuntimeDep()),
+            GradleConfiguredDependency.api(input.shared().timRuntimeDep())
         );
     }
 

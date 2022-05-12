@@ -44,7 +44,8 @@ public class {{baseParticipant.id}}<L extends LoggerComponent, R extends Resourc
     public ListView<CoordinateRequirement> getDependencies() {
         return ListView.of(
             {{#dependOnRv32Im}}new CoordinateRequirement("org.metaborg", "rv32im"){{#dynamix}},{{/dynamix}}{{/dependOnRv32Im}}
-            {{#dynamix}}new CoordinateRequirement("org.metaborg", "dynamix_runtime"){{/dynamix}}
+            {{#dynamix}}new CoordinateRequirement("org.metaborg", "dynamix_runtime"),
+            new CoordinateRequirement("org.metaborg", "tim_runtime"){{/dynamix}}
         );
     }
 
@@ -213,6 +214,7 @@ public class {{baseParticipant.id}}<L extends LoggerComponent, R extends Resourc
                 .platformComponent(platformComponent)
                 {{#dependOnRv32Im}}.rv32ImComponent(dependencyResolver.getOneSubcomponent(mb.rv32im.Rv32ImComponent.class).unwrap()){{/dependOnRv32Im}}
                 {{#dynamix}}.dynamixRuntimeComponent(dependencyResolver.getOneSubcomponent(mb.dynamix_runtime.DynamixRuntimeComponent.class).unwrap()){{/dynamix}}
+                {{#dynamix}}.timRuntimeComponent(dependencyResolver.getOneSubcomponent(mb.tim_runtime.TimRuntimeComponent.class).unwrap()){{/dynamix}}
                 ;
             component = builder.build();
         }

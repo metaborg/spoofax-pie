@@ -174,6 +174,7 @@ public class EclipseProjectCompiler implements TaskDef<Supplier<Result<Option<Ec
         }
         if(input.adapterProjectCompilerInput().dynamix().isPresent()) {
             bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.dynamixRuntimeEclipseDep()));
+            bundleDependencies.add(GradleConfiguredBundleDependency.bundleApi(shared.timRuntimeEclipseDep()));
         }
         input.languageProjectDependency().ifSome(d -> bundleDependencies.add(GradleConfiguredBundleDependency.bundleEmbedApi(d)));
         input.adapterProjectDependency().ifSome(d -> bundleDependencies.add(GradleConfiguredBundleDependency.bundleEmbedApi(d)));

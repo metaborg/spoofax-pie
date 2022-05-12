@@ -116,6 +116,7 @@ public class {{baseParticipant.id}} extends {{adapterProjectCompilerInput.partic
                 .eclipsePlatformComponent(platformComponent)
                 {{#adapterProjectCompilerInput.dependOnRv32Im}}.rv32ImEclipseComponent(dependencyResolver.getOneSubcomponent(mb.rv32im.eclipse.Rv32ImEclipseComponent.class).unwrap()){{/adapterProjectCompilerInput.dependOnRv32Im}}
                 {{#adapterProjectCompilerInput.dynamix}}.dynamixRuntimeEclipseComponent(dependencyResolver.getOneSubcomponent(mb.dynamix_runtime.eclipse.DynamixRuntimeEclipseComponent.class).unwrap()){{/adapterProjectCompilerInput.dynamix}}
+                {{#adapterProjectCompilerInput.dynamix}}.timRuntimeEclipseComponent(dependencyResolver.getOneSubcomponent(mb.tim_runtime.eclipse.TimRuntimeEclipseComponent.class).unwrap()){{/adapterProjectCompilerInput.dynamix}}
                 ;
             getCustomizers(loggerComponent).forEach(c -> c.customize(builder));
             eclipseComponent = builder.build();

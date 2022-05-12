@@ -4,7 +4,7 @@ imports
   signatures/tim-sig
 
   tim/eval
-  
+
 rules
   // tim-eval-to-string :: TProgram -> string
   tim-eval-to-string: TProgram(exp) -> ret
@@ -12,7 +12,8 @@ rules
       <strip-annos; tim-eval-to-completion(tim--io-to-string)> exp;
       ret := <bagof-TEvalOutput; reverse; concat-strings> ""
     |}
-    
+
   // tim--io-to-string :: TIOAction -> ?
   tim--io-to-string: TIOPrint(s) -> ()
+    with <debug> s
     with rules(TEvalOutput :+ "" -> s)

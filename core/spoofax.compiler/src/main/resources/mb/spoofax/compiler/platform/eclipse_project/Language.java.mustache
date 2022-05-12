@@ -97,7 +97,8 @@ public class {{baseLanguage.id}} implements EclipseLifecycleParticipant {
                 .resourceServiceComponent(resourceServiceComponent)
                 .eclipsePlatformComponent(platformComponent){{#adapterProjectCompilerInput.dependOnRv32Im}}
                 .rv32ImEclipseComponent(mb.rv32im.eclipse.Rv32ImEclipseParticipantFactory.getParticipant().getComponent()){{/adapterProjectCompilerInput.dependOnRv32Im}}{{#adapterProjectCompilerInput.dynamix}}
-                .dynamixRuntimeEclipseComponent(mb.dynamix_runtime.eclipse.DynamixRuntimeEclipseParticipantFactory.getParticipant().getComponent()){{/adapterProjectCompilerInput.dynamix}}
+                .dynamixRuntimeEclipseComponent(mb.dynamix_runtime.eclipse.DynamixRuntimeEclipseParticipantFactory.getParticipant().getComponent())
+                .timRuntimeEclipseComponent(mb.tim_runtime.eclipse.TimRuntimeEclipseParticipantFactory.getParticipant().getComponent()){{/adapterProjectCompilerInput.dynamix}}
                 ;
             getCustomizers(loggerComponent).forEach(c -> c.customize(builder));
             component = builder.build();

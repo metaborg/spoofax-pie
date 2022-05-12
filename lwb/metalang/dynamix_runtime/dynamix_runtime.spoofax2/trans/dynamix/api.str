@@ -3,7 +3,9 @@ module dynamix/api
 imports
   dynamix/eval
   dynamix/scope
-  
+
+  signatures/tim-sig
+
 rules
   // Evaluate the given rule inside the given specification
   // using the given input term as only argument, and return
@@ -12,7 +14,7 @@ rules
   // The rule name must be the fully qualified name, i.e. the
   // name of the rule prefixed with the name of the module in
   // which it was defined (e.g. "main!evalProgram").
-  // 
-  // dx-run-spec(|DynamixProgram, string): ? -> TExp
-  dx-run-spec(|spec, rule): input -> out
+  //
+  // dx-run-spec(|DynamixProgram, string): ? -> TProgram
+  dx-run-spec(|spec, rule): input -> TProgram(out)
     with out := <dx--eval-program-rule(|rule)> (spec, input)

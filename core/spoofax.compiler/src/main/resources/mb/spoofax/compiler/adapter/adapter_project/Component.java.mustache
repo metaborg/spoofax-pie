@@ -32,7 +32,8 @@ import java.util.Set;
         PlatformComponent.class{{#isMultiLang}},
         MultiLangComponent.class{{/isMultiLang}}{{#dependOnRv32Im}},
         mb.rv32im.Rv32ImComponent.class{{/dependOnRv32Im}}{{#dynamix}},
-        mb.dynamix_runtime.DynamixRuntimeComponent.class{{/dynamix}}
+        mb.dynamix_runtime.DynamixRuntimeComponent.class,
+        mb.tim_runtime.TimRuntimeComponent.class{{/dynamix}}
     }
 )
 {{/addComponentAnnotationToBaseComponent}}

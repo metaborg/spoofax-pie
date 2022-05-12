@@ -1,0 +1,48 @@
+---
+id: org.metaborg:tim_runtime:0.1.0-SNAPSHOT
+name: TimRuntime
+dependencies:
+  compile:
+  - org.metaborg:org.metaborg.meta.lang.esv:${metaborgVersion}
+  - org.metaborg:statix.lang:${metaborgVersion}
+  source:
+  - org.metaborg:meta.lib.spoofax:${metaborgVersion}
+  - org.metaborg:statix.runtime:${metaborgVersion}
+  - org.metaborg:tim:0.1.0-SNAPSHOT
+pardonedLanguages:
+- EditorService
+- Stratego-Sugar
+- SDF
+language:
+  sdf:
+    enabled: false
+    pretty-print: TimRuntime
+    sdf2table: java
+    placeholder:
+      prefix: "$"
+  stratego:
+    enabled: true
+    args:
+    - -la
+    - stratego-lib
+    - -la
+    - stratego-gpp
+    - -la
+    - stratego-sglr
+    - -la
+    - stratego-xtc
+    - -la
+    - stratego-aterm
+    - -la
+    - stratego-sdf
+    - -la
+    - strc
+exports:
+# export all stratego files
+- language: Stratego-Sugar
+  directory: trans
+  includes: "**/*.str"
+- language: Stratego-Sugar
+  directory: src-gen
+  includes: "**/*.str"
+  excludes: "nabl2/**/*.str"
