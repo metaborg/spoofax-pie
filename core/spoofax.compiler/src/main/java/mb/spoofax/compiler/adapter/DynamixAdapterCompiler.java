@@ -10,7 +10,6 @@ import mb.spoofax.compiler.adapter.data.CommandActionRepr;
 import mb.spoofax.compiler.adapter.data.CommandDefRepr;
 import mb.spoofax.compiler.adapter.data.MenuItemRepr;
 import mb.spoofax.compiler.language.ClassLoaderResourcesCompiler;
-import mb.spoofax.compiler.language.ConstraintAnalyzerLanguageCompiler;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.MenuItemCollection;
@@ -35,14 +34,20 @@ import java.util.Optional;
 @Value.Enclosing
 public class DynamixAdapterCompiler {
     private final TemplateWriter executeDynamixSpecificationTemplate;
-    private final TemplateWriter executeDynamixSpecificationToFileTemplate;
+    private final TemplateWriter showExecuteDynamixSpecificationTemplate;
     private final TemplateWriter readDynamixSpecTemplate;
+    private final TemplateWriter executeAndRunDynamixSpecificationTemplate;
+    private final TemplateWriter showExecuteAndRunDynamixSpecificationTemplate;
 
     @Inject public DynamixAdapterCompiler(TemplateCompiler templateCompiler) {
         templateCompiler = templateCompiler.loadingFromClass(getClass());
 
         this.executeDynamixSpecificationTemplate = templateCompiler.getOrCompileToWriter("dynamix/ExecuteDynamixSpecificationTaskDef.java.mustache");
-        this.executeDynamixSpecificationToFileTemplate = templateCompiler.getOrCompileToWriter("dynamix/ExecuteDynamixSpecificationToFileTaskDef.java.mustache");
+        this.showExecuteDynamixSpecificationTemplate = templateCompiler.getOrCompileToWriter("dynamix/ShowExecuteDynamixSpecificationTaskDef.java.mustache");
+
+        this.executeAndRunDynamixSpecificationTemplate = templateCompiler.getOrCompileToWriter("dynamix/ExecuteAndRunDynamixSpecificationTaskDef.java.mustache");
+        this.showExecuteAndRunDynamixSpecificationTemplate = templateCompiler.getOrCompileToWriter("dynamix/ShowExecuteAndRunDynamixSpecificationTaskDef.java.mustache");
+
         this.readDynamixSpecTemplate = templateCompiler.getOrCompileToWriter("dynamix/ReadDynamixSpecTaskDef.java.mustache");
     }
 
@@ -51,7 +56,11 @@ public class DynamixAdapterCompiler {
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
 
         executeDynamixSpecificationTemplate.write(context, input.baseExecuteDynamixSpecification().file(generatedJavaSourcesDirectory), input);
-        executeDynamixSpecificationToFileTemplate.write(context, input.baseExecuteDynamixSpecificationToFile().file(generatedJavaSourcesDirectory), input);
+        showExecuteDynamixSpecificationTemplate.write(context, input.baseShowExecuteDynamixSpecification().file(generatedJavaSourcesDirectory), input);
+
+        executeAndRunDynamixSpecificationTemplate.write(context, input.baseExecuteAndRunDynamixSpecification().file(generatedJavaSourcesDirectory), input);
+        showExecuteAndRunDynamixSpecificationTemplate.write(context, input.baseShowExecuteAndRunDynamixSpecification().file(generatedJavaSourcesDirectory), input);
+
         readDynamixSpecTemplate.write(context, input.baseReadDynamixSpecTaskDef().file(generatedJavaSourcesDirectory), input);
 
         return None.instance;
@@ -118,26 +127,61 @@ public class DynamixAdapterCompiler {
 
         // Execute dynamix specification and write to .tim file task definition
 
-        @Value.Default default TypeInfo baseExecuteDynamixSpecificationToFile() {
-            return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "ExecuteDynamixSpecificationToFile");
+        @Value.Default default TypeInfo baseShowExecuteDynamixSpecification() {
+            return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "ShowExecuteDynamixSpecification");
         }
 
-        Optional<TypeInfo> extendExecuteDynamixSpecificationToFile();
+        Optional<TypeInfo> extendShowExecuteDynamixSpecification();
 
-        default TypeInfo executeDynamixSpecificationToFileTaskDef() {
-            return extendExecuteDynamixSpecificationToFile().orElseGet(this::baseExecuteDynamixSpecificationToFile);
+        default TypeInfo showExecuteDynamixSpecification() {
+            return extendShowExecuteDynamixSpecification().orElseGet(this::baseShowExecuteDynamixSpecification);
         }
 
-        // Command for running dynamix
+        // Execute dynamix specification into Tim AST, then execute Tim ast to string
 
-        @Value.Default default CommandDefRepr executeDynamixCommand() {
+        @Value.Default default TypeInfo baseExecuteAndRunDynamixSpecification() {
+            return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "ExecuteAndRunDynamixSpecification");
+        }
+
+        Optional<TypeInfo> extendExecuteAndRunDynamixSpecification();
+
+        default TypeInfo executeAndRunDynamixSpecification() {
+            return extendExecuteAndRunDynamixSpecification().orElseGet(this::baseExecuteAndRunDynamixSpecification);
+        }
+
+        // Execute dynamix specification to tim output, and show as feedback
+
+        @Value.Default default TypeInfo baseShowExecuteAndRunDynamixSpecification() {
+            return TypeInfo.of(adapterProject().taskPackageId(), shared().defaultClassPrefix() + "ShowExecuteAndRunDynamixSpecification");
+        }
+
+        Optional<TypeInfo> extendShowExecuteAndRunDynamixSpecification();
+
+        default TypeInfo showExecuteAndRunDynamixSpecification() {
+            return extendShowExecuteAndRunDynamixSpecification().orElseGet(this::baseShowExecuteAndRunDynamixSpecification);
+        }
+
+        // Command for running dynamix to AST
+        @Value.Default default CommandDefRepr showExecuteDynamixCommand() {
             return CommandDefRepr.builder()
-                .type(adapterProject().commandPackageId(), shared().defaultClassPrefix() + "ExecuteDynamixSpecificationCommand")
-                .taskDefType(executeDynamixSpecificationToFileTaskDef())
-                .displayName("Execute Dynamix Specification On File")
-                .description("Run the configured Dynamix specification on the analyzed AST of the current file.")
+                .type(adapterProject().commandPackageId(), shared().defaultClassPrefix() + "ShowExecuteDynamixSpecificationCommand")
+                .taskDefType(showExecuteDynamixSpecification())
+                .displayName("Compile using Dynamix")
+                .description("Execute the Dynamix specification on the current input file and produce a compiled Tim file.")
                 .addParams("rootDirectory", TypeInfo.of(ResourcePath.class), true, Optional.empty(), Collections.singletonList(ArgProviderRepr.enclosingContext(EnclosingCommandContextType.Project)))
                 .addParams("file", TypeInfo.of(ResourcePath.class), true, Optional.empty(), Collections.singletonList(ArgProviderRepr.context(CommandContextType.ReadableResource)))
+                .build();
+        }
+
+        // Command for executing dynamix and then running the resulting tim
+        @Value.Default default CommandDefRepr showExecuteAndRunDynamixCommand() {
+            return CommandDefRepr.builder()
+                .type(adapterProject().commandPackageId(), shared().defaultClassPrefix() + "ShowExecuteAndRunDynamixSpecificationCommand")
+                .taskDefType(showExecuteAndRunDynamixSpecification())
+                .displayName("Compile and execute using Dynamix")
+                .description("Execute the Dynamix specification on the current input file and execute the resulting Tim file.")
+                .addParams("rootDirectory", TypeInfo.of(ResourcePath.class), true, Optional.empty(), Collections.singletonList(ArgProviderRepr.enclosingContext(EnclosingCommandContextType.Project)))
+                .addParams("file", TypeInfo.of(ResourceKey.class), true, Optional.empty(), Collections.singletonList(ArgProviderRepr.context(CommandContextType.ReadableResource)))
                 .build();
         }
 
@@ -150,8 +194,12 @@ public class DynamixAdapterCompiler {
             final ResourcePath generatedJavaSourcesDirectory = generatedJavaSourcesDirectory();
             return ListView.of(
                 executeDynamixSpecificationTaskDef().file(generatedJavaSourcesDirectory),
-                readDynamixSpecTaskDef().file(generatedJavaSourcesDirectory),
-                executeDynamixSpecificationToFileTaskDef().file(generatedJavaSourcesDirectory)
+                showExecuteDynamixSpecification().file(generatedJavaSourcesDirectory),
+
+                executeAndRunDynamixSpecification().file(generatedJavaSourcesDirectory),
+                showExecuteAndRunDynamixSpecification().file(generatedJavaSourcesDirectory),
+
+                readDynamixSpecTaskDef().file(generatedJavaSourcesDirectory)
             );
         }
 
@@ -163,17 +211,55 @@ public class DynamixAdapterCompiler {
 
         @Value.Default default MenuItemRepr resourceContextMenu() {
             return MenuItemRepr.menu("Dynamix",
-                MenuItemRepr.commandAction(CommandActionRepr.builder().manualOnce(executeDynamixCommand()).addRequiredResourceTypes(HierarchicalResourceType.File).build())
+                MenuItemRepr.commandAction(CommandActionRepr.builder()
+                    .manualOnce(showExecuteDynamixCommand())
+                    .addRequiredResourceTypes(HierarchicalResourceType.File)
+                    .addRequiredEnclosingResourceTypes(EnclosingCommandContextType.Project)
+                    .build()),
                 // todo: does not actually work since showFile cancels it?
-                // MenuItemRepr.commandAction(CommandActionRepr.builder().manualContinuous(executeDynamixCommand()).addRequiredResourceTypes(HierarchicalResourceType.File).build())
+//                MenuItemRepr.commandAction(CommandActionRepr.builder()
+//                    .manualContinuous(showExecuteDynamixCommand())
+//                    .addRequiredResourceTypes(HierarchicalResourceType.File)
+//                    .addRequiredEnclosingResourceTypes(EnclosingCommandContextType.Project)
+//                    .build()),
+
+                MenuItemRepr.commandAction(CommandActionRepr.builder()
+                    .manualOnce(showExecuteAndRunDynamixCommand())
+                    .addRequiredResourceTypes(HierarchicalResourceType.File)
+                    .addRequiredEnclosingResourceTypes(EnclosingCommandContextType.Project)
+                    .build()),
+                MenuItemRepr.commandAction(CommandActionRepr.builder()
+                    .manualContinuous(showExecuteAndRunDynamixCommand())
+                    .addRequiredResourceTypes(HierarchicalResourceType.File)
+                    .addRequiredEnclosingResourceTypes(EnclosingCommandContextType.Project)
+                    .build())
             );
         }
 
         @Value.Default default MenuItemRepr editorContextMenu() {
             return MenuItemRepr.menu("Dynamix",
-                MenuItemRepr.commandAction(CommandActionRepr.builder().manualOnce(executeDynamixCommand()).addRequiredEditorFileTypes(EditorFileType.ReadableResource).build())
+                MenuItemRepr.commandAction(CommandActionRepr.builder()
+                    .manualOnce(showExecuteDynamixCommand())
+                    .addRequiredResourceTypes(HierarchicalResourceType.File)
+                    .addRequiredEnclosingResourceTypes(EnclosingCommandContextType.Project)
+                    .build()),
                 // todo: does not actually work since showFile cancels it?
-                // MenuItemRepr.commandAction(CommandActionRepr.builder().manualContinuous(executeDynamixCommand()).addRequiredEditorFileTypes(EditorFileType.ReadableResource).build())
+//                MenuItemRepr.commandAction(CommandActionRepr.builder()
+//                    .manualContinuous(showExecuteDynamixCommand())
+//                    .addRequiredResourceTypes(HierarchicalResourceType.File)
+//                    .addRequiredEnclosingResourceTypes(EnclosingCommandContextType.Project)
+//                    .build()),
+
+                MenuItemRepr.commandAction(CommandActionRepr.builder()
+                    .manualOnce(showExecuteAndRunDynamixCommand())
+                    .addRequiredResourceTypes(HierarchicalResourceType.File)
+                    .addRequiredEnclosingResourceTypes(EnclosingCommandContextType.Project)
+                    .build()),
+                MenuItemRepr.commandAction(CommandActionRepr.builder()
+                    .manualContinuous(showExecuteAndRunDynamixCommand())
+                    .addRequiredResourceTypes(HierarchicalResourceType.File)
+                    .addRequiredEnclosingResourceTypes(EnclosingCommandContextType.Project)
+                    .build())
             );
         }
 
@@ -181,12 +267,17 @@ public class DynamixAdapterCompiler {
 
         default void collectTaskDefs(TypeInfoCollection taskDefs) {
             taskDefs.add(executeDynamixSpecificationTaskDef(), baseExecuteDynamixSpecification());
-            taskDefs.add(executeDynamixSpecificationToFileTaskDef(), baseExecuteDynamixSpecificationToFile());
+            taskDefs.add(showExecuteDynamixSpecification(), baseShowExecuteDynamixSpecification());
+
+            taskDefs.add(executeAndRunDynamixSpecification(), baseExecuteAndRunDynamixSpecification());
+            taskDefs.add(showExecuteAndRunDynamixSpecification(), baseShowExecuteAndRunDynamixSpecification());
+
             taskDefs.add(readDynamixSpecTaskDef(), baseReadDynamixSpecTaskDef());
         }
 
         default void collectCommands(Collection<CommandDefRepr> commands) {
-            commands.add(executeDynamixCommand());
+            commands.add(showExecuteDynamixCommand());
+            commands.add(showExecuteAndRunDynamixCommand());
         }
 
         default void collectMenus(MenuItemCollection menuItems) {

@@ -1,0 +1,84 @@
+package {{baseShowExecuteAndRunDynamixSpecification.packageId}};
+
+import mb.common.result.Result;
+import mb.pie.api.ExecContext;
+import mb.pie.api.TaskDef;
+import mb.pie.api.stamp.resource.ResourceStampers;
+import mb.resource.ResourceKey;
+import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.core.language.command.CommandFeedback;
+import mb.spoofax.core.language.command.ShowFeedback;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import javax.inject.Inject;
+
+import java.io.Serializable;
+
+@{{adapterProject.scope.qualifiedId}}
+public class {{baseShowExecuteAndRunDynamixSpecification.id}} implements TaskDef<{{baseShowExecuteAndRunDynamixSpecification.id}}.Args, CommandFeedback> {
+    public static final class Args implements Serializable {
+        public final ResourcePath rootDirectory;
+        public final ResourceKey file;
+
+        public Args(ResourcePath rootDirectory, ResourceKey file) {
+            this.rootDirectory = rootDirectory;
+            this.file = file;
+        }
+
+        @Override public boolean equals(@Nullable Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            Args input = (Args)o;
+            if(!rootDirectory.equals(input.rootDirectory)) return false;
+            return file.equals(input.file);
+        }
+
+        @Override public int hashCode() {
+            int result = rootDirectory.hashCode();
+            result = 31 * result + file.hashCode();
+            return result;
+        }
+
+        @Override public String toString() {
+            return "{{baseShowExecuteAndRunDynamixSpecification.id}}.Args{" +
+                "rootDirectory=" + rootDirectory +
+                ", file=" + file +
+                '}';
+        }
+    }
+
+    private final {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources;
+    private final {{executeAndRunDynamixSpecification.qualifiedId}} executeAndRunDynamixSpecification;
+
+    @Inject public {{baseShowExecuteAndRunDynamixSpecification.id}}(
+        {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources,
+        {{executeAndRunDynamixSpecification.qualifiedId}} executeAndRunDynamixSpecification
+    ) {
+        this.classLoaderResources = classLoaderResources;
+        this.executeAndRunDynamixSpecification = executeAndRunDynamixSpecification;
+    }
+
+    @Override public String getId() {
+        return "{{baseShowExecuteAndRunDynamixSpecification.qualifiedId}}";
+    }
+
+    @Override
+    public CommandFeedback exec(ExecContext context, Args input) throws Exception {
+    	context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
+
+    	final Result<String, ?> executionResult = context.require(
+            executeAndRunDynamixSpecification,
+			new {{executeAndRunDynamixSpecification.qualifiedId}}.Input(input.rootDirectory, input.file)
+		);
+
+    	if(!executionResult.isOk()) {
+    		return CommandFeedback.ofTryExtractMessagesFrom(executionResult.getErr());
+    	}
+
+    	return CommandFeedback.of(
+			ShowFeedback.showText(executionResult.get(), "Execution result for '" + input.file + "'")
+		);
+    }
+}
+

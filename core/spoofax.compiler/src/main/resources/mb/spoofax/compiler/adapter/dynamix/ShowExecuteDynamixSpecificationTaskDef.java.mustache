@@ -1,4 +1,4 @@
-package {{baseExecuteDynamixSpecificationToFile.packageId}};
+package {{baseShowExecuteDynamixSpecification.packageId}};
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -20,7 +20,7 @@ import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
 
 @{{adapterProject.scope.qualifiedId}}
-public class {{baseExecuteDynamixSpecificationToFile.id}} implements TaskDef<{{baseExecuteDynamixSpecificationToFile.id}}.Args, CommandFeedback> {
+public class {{baseShowExecuteDynamixSpecification.id}} implements TaskDef<{{baseShowExecuteDynamixSpecification.id}}.Args, CommandFeedback> {
     public static final class Args implements Serializable {
         public final ResourcePath rootDirectory;
         public final ResourcePath file;
@@ -45,7 +45,7 @@ public class {{baseExecuteDynamixSpecificationToFile.id}} implements TaskDef<{{b
         }
 
         @Override public String toString() {
-            return "{{baseExecuteDynamixSpecificationToFile.id}}.Args{" +
+            return "{{baseShowExecuteDynamixSpecification.id}}.Args{" +
                 "rootDirectory=" + rootDirectory +
                 ", file=" + file +
                 '}';
@@ -56,7 +56,7 @@ public class {{baseExecuteDynamixSpecificationToFile.id}} implements TaskDef<{{b
     private final {{executeDynamixSpecificationTaskDef.qualifiedId}} executeDynamixSpec;
     private final DynamixRuntimePrettyPrint prettyPrint;
 
-    @Inject public {{baseExecuteDynamixSpecificationToFile.id}}(
+    @Inject public {{baseShowExecuteDynamixSpecification.id}}(
         {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources,
         {{executeDynamixSpecificationTaskDef.qualifiedId}} executeDynamixSpec,
         DynamixRuntimePrettyPrint prettyPrint
@@ -67,7 +67,7 @@ public class {{baseExecuteDynamixSpecificationToFile.id}} implements TaskDef<{{b
     }
 
     @Override public String getId() {
-        return "{{baseExecuteDynamixSpecificationToFile.qualifiedId}}";
+        return "{{baseShowExecuteDynamixSpecification.qualifiedId}}";
     }
 
     @Override
