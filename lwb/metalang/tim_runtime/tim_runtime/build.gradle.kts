@@ -28,6 +28,8 @@ languageProject {
     withStrategoRuntime().run {
       addNaBL2Primitives(true) // required for attribute lookup
       addStatixPrimitives(true) // required for attribute lookup
+      // addStrategyPackageIds("tim.runtime.strategies")
+      // addInteropRegisterersByReflection("tim.runtime.strategies.InteropRegisterer")
     }
   }
 }

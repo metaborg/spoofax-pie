@@ -44,6 +44,10 @@ signature
   constructors
     TIOPrint : string -> TIOAction
 
+// strategies
+//   external native-while(cond, body|)
+//   external ref-eq(|)
+
 // Evaluation
 rules
   // Evaluate the given term to completion, using the given print strategy
@@ -197,7 +201,8 @@ rules // primops
 
   // checks underlying term representation is equal
   // TODO: remove
-  tim-eval-primop-condition(io): ("term-eq", [a, b]) -> <strip-annos; debug(!"Checking for equality: "); eq < !1 + !0> (a, b)
+  tim-eval-primop-condition(io): ("term-eq", [a, b]) -> <strip-annos; eq < !1 + !0> (a, b)
+  // tim-eval-primop-condition(io): ("ref-eq", [a, b]) -> <ref-eq < !1 + !0> (a, b)
 
   tim-eval-primop-condition(io): ("str-eq", [TRuntimeString(a), TRuntimeString(b)]) -> <eq < !1 + !0> (a, b)
   tim-eval-primop-condition(io): ("str-neq", [TRuntimeString(a), TRuntimeString(b)]) -> <eq < !0 + !1> (a, b)
