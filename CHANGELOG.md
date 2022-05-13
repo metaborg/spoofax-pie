@@ -18,6 +18,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `common` requirement to `0.11.0`.
 - `pie` requirement to `0.21.0`.
 - `releng` (devenv-release) requirement to `0.1.31`.
+- `coronium` plugin requirement to `0.3.16`.
 - Dependency syntax to be less verbose and more configurable.
 - Dependency kinds into `Build` for dependencies that are needed when building the language, and `Run` for dependencies that are needed when running the language.
 - Generated meta-language files are now generated in `./build/generated/sources/metalang/<metalang>` instead of `./build/generated/sources/languageSpecification/<metalang>`.
