@@ -2384,18 +2384,51 @@ A dependency consists of a <em>dependency expression</em> (<code>$Exp</code>) th
 <li><code>Run</code>: a dependency that is resolved at <em>run time</em>, meaning when the language is executed, allowing use of the classes and tasks of the project the dependency points to. Note: this kind of dependency has not yet been implemented.</li>
 </ul>
 <p>The following <code>Dependency</code>s are supported:</p>
-<p>| Syntax | Description |
-| - | - | - | - |
-| <code>$Exp</code> | A dependency to project defined by the expression, available at <code>Build</code> and <code>Run</code> time. |
-| <code>$Exp { $DependencyOption* }</code> | no | A dependency to project defined by the expression, with configuration options. |</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>$Exp</code></td>
+<td>A dependency to project defined by the expression, available at <code>Build</code> and <code>Run</code> time.</td>
+</tr>
+<tr>
+<td><code>$Exp { $DependencyOption* }</code></td>
+<td>A dependency to project defined by the expression, with configuration options.</td>
+</tr>
+</tbody>
+</table>
 <p>The following <code>DependencyOption</code>s are supported:</p>
 <ul>
 <li><code>kinds = [ $DependencyKind* ]</code>: set the kinds at which this dependency is resolved.</li>
 </ul>
 <p>Additionally, build time dependencies can be quickly defined with the <code>build-dependencies [ $BuildDependency* ]</code> section. The following <code>BuildDependency</code>s are supported:</p>
-<p>| Syntax | Description |
-| - | - | - | - |
-| <code>$Exp</code> | A dependency to project defined by the expression, available only at <code>Build</code> time. |</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>$Exp</code></td>
+<td>A dependency to project defined by the expression, available only at <code>Build</code> time.</td>
+</tr>
+</tbody>
+</table>
+<p>For example, the following configuration adds build dependencies to common libraries shipped with Spoofax 3:</p>
+<div class="highlight"><pre><span></span><code><span class="na">build-dependencies [</span><span class="w"></span>
+<span class="w">  </span><span class="na">org.metaborg:strategolib:*</span><span class="w"></span>
+<span class="w">  </span><span class="na">org.metaborg:gpp:*</span><span class="w"></span>
+<span class="w">  </span><span class="na">org.metaborg:libspoofax2:*</span><span class="w"></span>
+<span class="w">  </span><span class="na">org.metaborg:libstatix:*</span><span class="w"></span>
+<span class="na">]</span><span class="w"></span>
+</code></pre></div>
 <h2 id="spoofaxclock">spoofaxc.lock<a class="headerlink" href="#spoofaxclock" title="Permanent link">&para;</a></h2>
 <p>The <code>spoofaxc.lock</code> file, which resides next to the <code>spoofaxc.cfg</code> file, contains values for several options that have defaults derived from other options, in order to keep these derived values stable even when the options they are derived from are changed.
 For example, when no <code>java-class-id-prefix</code> option is set in <code>spoofaxc.cfg</code>, it will be derived from the <code>name</code> option with some changes to make it compatible as a Java identifier, and is stored under <code>shared.defaultClassPrefix</code> in the <code>spoofaxc.lock</code> file.
