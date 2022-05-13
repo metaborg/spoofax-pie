@@ -1,12 +1,18 @@
 package mb.cfg.task;
 
+import mb.common.message.HasOptionalMessages;
+import mb.common.message.KeyedMessages;
 import mb.common.util.ADT;
 import mb.stratego.common.StrategoException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Optional;
+
 @ADT
-public abstract class CfgToObjectException extends Exception {
+public abstract class CfgToObjectException extends Exception implements HasOptionalMessages {
     public interface Cases<R> {
+        R analyzeFail(KeyedMessages messages);
+
         R analyzeExceptionalFail(Exception astSupplyException);
 
         R normalizationFail(StrategoException normalizationException);
@@ -14,6 +20,10 @@ public abstract class CfgToObjectException extends Exception {
         R propertiesSupplyFail(Exception propertiesSupplyException);
 
         R buildConfigObjectFail(IllegalStateException illegalStateException);
+    }
+
+    public static CfgToObjectException analyzeFail(KeyedMessages messages) {
+        return CfgToObjectExceptions.analyzeFail(messages);
     }
 
     public static CfgToObjectException analyzeExceptionalFail(Exception analysisOutputSupplyException) {
@@ -40,17 +50,18 @@ public abstract class CfgToObjectException extends Exception {
 
     public abstract <R> R match(Cases<R> cases);
 
-    public static CfgToObjectExceptions.CasesMatchers.TotalMatcher_AnalyzeExceptionalFail cases() {
+    public static CfgToObjectExceptions.CasesMatchers.TotalMatcher_AnalyzeFail cases() {
         return CfgToObjectExceptions.cases();
     }
 
-    public CfgToObjectExceptions.CaseOfMatchers.TotalMatcher_AnalyzeExceptionalFail caseOf() {
+    public CfgToObjectExceptions.CaseOfMatchers.TotalMatcher_AnalyzeFail caseOf() {
         return CfgToObjectExceptions.caseOf(this);
     }
 
 
     @Override public String getMessage() {
         return caseOf()
+            .analyzeFail((e) -> "Analysis produced errors")
             .analyzeExceptionalFail((e) -> "Analysis failed unexpectedly")
             .normalizationFail((e) -> "Normalization failed unexpectedly")
             .propertiesSupplyFail((e) -> "Failed to supply configuration properties")
@@ -60,6 +71,11 @@ public abstract class CfgToObjectException extends Exception {
 
     @Override public Throwable fillInStackTrace() {
         return this; // Do nothing so that no stack trace is created, saving memory and CPU time.
+    }
+
+
+    @Override public Optional<KeyedMessages> getOptionalMessages() {
+        return CfgToObjectExceptions.getMessages(this);
     }
 
 

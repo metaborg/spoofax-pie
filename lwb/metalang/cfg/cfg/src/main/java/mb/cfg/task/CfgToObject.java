@@ -150,6 +150,16 @@ public class CfgToObject implements TaskDef<CfgToObject.Input, Result<CfgToObjec
         CfgAnalyze.Output analysisOutput,
         Properties properties
     ) throws InvalidAstShapeException {
+        if(analysisOutput.result.messages.containsError()) {
+            final KeyedMessages keyedMessages;
+            if(cfgFile != null) {
+                keyedMessages = analysisOutput.result.messages.toKeyed(cfgFile);
+            } else {
+                keyedMessages = analysisOutput.result.messages.toKeyed();
+            }
+            return Result.ofErr(CfgToObjectException.analyzeFail(keyedMessages));
+        }
+
         final Provider<StrategoRuntime> strategoRuntimeProvider = context.require(getStrategoRuntimeProvider, None.instance).getValue();
         final IStrategoTerm ast;
         try {
