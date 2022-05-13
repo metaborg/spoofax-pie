@@ -8,7 +8,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 ## [0.19.0] - 2022-05-13
 ### Fixed
 - ESV imports not resolving to modules in the main source directory.
-- Updating the Eclipse LWB plugin causing failures when no clean is performed. The PIE store is now automatically cleaned when the version changes. [#39](https://github.com/metaborg/spoofax-pie/issues/39#issuecomment-1120814670)
+- Updating the Eclipse LWB plugin causing failures when no clean is performed. The PIE store is now automatically cleaned when the version changes. [#39](https://github.com/metaborg/spoofax-pie/issues/39)
+- UNIX JVMs embedded into Eclipse installations not working due to JVM not having the executable mode set. [#37](https://github.com/metaborg/spoofax-pie/issues/37)
 
 ### Removed
 - `include-libspoofax2-exports` option in `esv` section of `spoofaxc.cfg`, this can now simply be replaced with a dependency to `org.metaborg:libspoofax2:*`.

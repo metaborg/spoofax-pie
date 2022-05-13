@@ -512,7 +512,7 @@ The following `Dependency`s are supported:
 | Syntax | Description |
 | - | - |
 | `$Exp` | A dependency to project defined by the expression, available at `Build` and `Run` time. |
-| `$Exp { $DependencyOption* }` | no | A dependency to project defined by the expression, with configuration options. |
+| `$Exp { $DependencyOption* }` | A dependency to project defined by the expression, with configuration options. |
 
 The following `DependencyOption`s are supported:
 
