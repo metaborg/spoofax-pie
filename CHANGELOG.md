@@ -3,6 +3,9 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+
+
+## [0.19.0] - 2022-05-13
 ### Fixed
 - ESV imports not resolving to modules in the main source directory.
 - Updating the Eclipse LWB plugin causing failures when no clean is performed. The PIE store is now automatically cleaned when the version changes. [#39](https://github.com/metaborg/spoofax-pie/issues/39#issuecomment-1120814670)
@@ -11,6 +14,10 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `include-libspoofax2-exports` option in `esv` section of `spoofaxc.cfg`, this can now simply be replaced with a dependency to `org.metaborg:libspoofax2:*`.
 
 ### Changed
+- `resource` requirement to `0.14.1`.
+- `common` requirement to `0.11.0`.
+- `pie` requirement to `0.21.0`.
+- `releng` (devenv-release) requirement to `0.1.31`.
 - Dependency syntax to be less verbose and more configurable.
 - Dependency kinds into `Build` for dependencies that are needed when building the language, and `Run` for dependencies that are needed when running the language.
 - Generated meta-language files are now generated in `./build/generated/sources/metalang/<metalang>` instead of `./build/generated/sources/languageSpecification/<metalang>`.
@@ -489,7 +496,8 @@ build-dependencies [
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.18.0...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.0...HEAD
+[0.19.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.18.0...release-0.19.0
 [0.18.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.17.0...release-0.18.0
 [0.17.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.17...release-0.17.0
 [0.16.17]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.16...release-0.16.17
