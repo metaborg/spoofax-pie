@@ -510,7 +510,7 @@ Dependencies can be of a certain kind (`$DependencyKind`):
 The following `Dependency`s are supported:
 
 | Syntax | Description |
-| - | - | - | - |
+| - | - |
 | `$Exp` | A dependency to project defined by the expression, available at `Build` and `Run` time. |
 | `$Exp { $DependencyOption* }` | no | A dependency to project defined by the expression, with configuration options. |
 
@@ -521,8 +521,19 @@ The following `DependencyOption`s are supported:
 Additionally, build time dependencies can be quickly defined with the `build-dependencies [ $BuildDependency* ]` section. The following `BuildDependency`s are supported:
 
 | Syntax | Description |
-| - | - | - | - |
+| - | - |
 | `$Exp` | A dependency to project defined by the expression, available only at `Build` time. |
+
+For example, the following configuration adds build dependencies to common libraries shipped with Spoofax 3:
+
+```cfg
+build-dependencies [
+  org.metaborg:strategolib:*
+  org.metaborg:gpp:*
+  org.metaborg:libspoofax2:*
+  org.metaborg:libstatix:*
+]
+```
 
 ## spoofaxc.lock
 
