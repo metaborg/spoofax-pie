@@ -3,11 +3,11 @@ plugins {
   id("org.metaborg.gitonium") version "0.1.5"
 
   // Set versions for plugins to use, only applying them in subprojects (apply false here).
-  id("org.metaborg.devenv.spoofax.gradle.langspec") version "0.1.30" apply false
+  id("org.metaborg.devenv.spoofax.gradle.langspec") version "0.1.31" apply false
   id("de.set.ecj") version "1.4.1" apply false
-  id("org.metaborg.coronium.bundle") version "0.3.15" apply false
-  id("org.metaborg.coronium.feature") version "0.3.15" apply false
-  id("org.metaborg.coronium.repository") version "0.3.15" apply false
+  id("org.metaborg.coronium.bundle") version "0.3.16" apply false
+  id("org.metaborg.coronium.feature") version "0.3.16" apply false
+  id("org.metaborg.coronium.repository") version "0.3.16" apply false
   id("biz.aQute.bnd.builder") version "5.3.0" apply false
   id("org.jetbrains.intellij") version "1.4.0" apply false
 
