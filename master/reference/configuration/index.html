@@ -908,6 +908,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#dependencies" class="md-nav__link">
+    Dependencies
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1273,6 +1280,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#dependencies" class="md-nav__link">
+    Dependencies
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1398,6 +1412,16 @@ CFG has the following literals:</p>
 <td><code>strategy Start</code></td>
 <td>Stratego strategy identifier</td>
 </tr>
+<tr>
+<td><code>$CoordinateChars:$CoordinateChars:$CoordinateChars</code></td>
+<td><code>org.metaborg:strategolib:1.0.0</code></td>
+<td>Coordinate</td>
+</tr>
+<tr>
+<td><code>$CoordinateChars:$CoordinateChars:$CoordinateRequirementChars</code></td>
+<td><code>org.metaborg:strategolib:*</code></td>
+<td>Coordinate requirement</td>
+</tr>
 </tbody>
 </table>
 <p>With the following syntax non-terminals:</p>
@@ -1416,6 +1440,14 @@ CFG has the following literals:</p>
 <tr>
 <td><code>JavaQIdLit</code></td>
 <td><code>$JavaIdChars(\.$JavaIdChars)*</code></td>
+</tr>
+<tr>
+<td><code>CoordinateChars</code></td>
+<td><code>(~[\"\:\;\,\*\$\{\}\[\]\n\r\\\ ]|\\~[\n\r])</code></td>
+</tr>
+<tr>
+<td><code>CoordinateRequirementChars</code></td>
+<td><code>($CoordinateChars|\*)</code></td>
 </tr>
 </tbody>
 </table>
@@ -1572,7 +1604,7 @@ The command in turn is bound to <code>showParsedAstCommand</code>, assigned to t
 <li><code>Once</code> indicates a that this command supports being executed as a one-shot command.</li>
 <li><code>Continuous</code> indicates that this command supports being executed every time the source file changes.</li>
 </ul>
-<p>A <code>$Parameter</code> has the form <code>$Identifier = parameter { $ParameterOptions }</code> with the following options:</p>
+<p>A <code>$Parameter</code> has the form <code>$Identifier { $ParameterOptions }</code> with the following options:</p>
 <table>
 <thead>
 <tr>
@@ -1991,12 +2023,6 @@ The following <code>Sdf3Option</code>s are supported:</p>
 <td>The source of the SDF3 definition. Defaults to a <code>files</code> source with the top-level <code>source-directory</code> option as its main source directory, and <code>./start.sdf3</code> as its main file relative to the main source directory.</td>
 <td>n/a</td>
 </tr>
-<tr>
-<td><code>parse-table-generator { $ParseTableGeneratorOption* }</code></td>
-<td>no</td>
-<td>Parse table generator options.</td>
-<td>n/a</td>
-</tr>
 </tbody>
 </table>
 <p>The following <code>$Sdf3Source</code>s are supported:</p>
@@ -2026,6 +2052,12 @@ The following <code>Sdf3Option</code>s are supported:</p>
 <td>no</td>
 <td>The main SDF3 file relative to the <code>main-source-directory</code>. Defaults to <code>./start.sdf3</code>.</td>
 <td>Path</td>
+</tr>
+<tr>
+<td><code>parse-table-generator { $ParseTableGeneratorOption* }</code></td>
+<td>no</td>
+<td>Parse table generator options.</td>
+<td>n/a</td>
 </tr>
 </tbody>
 </table>
@@ -2284,18 +2316,6 @@ The following <code>StrategoOption</code>s are supported:</p>
 <td>n/a</td>
 </tr>
 <tr>
-<td><code>sdf3-statix-explication-generation = $Expression</code></td>
-<td>no</td>
-<td>Whether SDF3 to Statix injection explication/implication generation is enabled. When enabled, <code>statix { sdf3-statix-signature-generation = true }</code> must also be enabled. Defaults to <code>false</code>.</td>
-<td>Boolean</td>
-</tr>
-<tr>
-<td><code>language-strategy-affix = $Expression</code></td>
-<td>no</td>
-<td>The affix that is used to make certain generated strategies unique to the language. This is used both as a prefix and suffix. Defaults to name of the language transformed to a Stratego strategy identifier.</td>
-<td>Stratego strategy identifier</td>
-</tr>
-<tr>
 <td><code>output-java-package = $Expression</code></td>
 <td>no</td>
 <td>The Java package into which compiled Stratego Java files are generated. Defaults to the language's package, followed by <code>.strategies</code>.</td>
@@ -2336,8 +2356,46 @@ The following <code>StrategoOption</code>s are supported:</p>
 <td>Adds an include directory from which to resolve Stratego imports. May be given multiple times.</td>
 <td>Path</td>
 </tr>
+<tr>
+<td><code>sdf3-statix-explication-generation = $Expression</code></td>
+<td>no</td>
+<td>Whether SDF3 to Statix injection explication/implication generation is enabled. When enabled, <code>statix { sdf3-statix-signature-generation = true }</code> must also be enabled. Defaults to <code>false</code>.</td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td><code>language-strategy-affix = $Expression</code></td>
+<td>no</td>
+<td>The affix that is used to make certain generated strategies unique to the language. This is used both as a prefix and suffix. Defaults to name of the language transformed to a Stratego strategy identifier.</td>
+<td>Stratego strategy identifier</td>
+</tr>
 </tbody>
 </table>
+<h3 id="dependencies">Dependencies<a class="headerlink" href="#dependencies" title="Permanent link">&para;</a></h3>
+<p>The <code>dependencies [ $Dependency* ]</code> section allows specifying dependencies to other language (library) projects.
+A dependency consists of a <em>dependency expression</em> (<code>$Exp</code>) that specifies the source of the dependency. The following expressions are supported:</p>
+<ul>
+<li><code>$Coordinate</code>: an exact coordinate to a project, such as <code>org.metaborg:strategolib:1.0.0</code>. Coordinates are resolved to a statically loaded language, or a dynamically loaded language definition.</li>
+<li><code>$CoordinateRequirement</code>: a coordinate to a project with an open version, such as <code>org.metaborg:strategolib:*</code>, resolved identically to  <code>$Coordinate</code> except that the latest available version will be chosen.</li>
+<li><code>$Path</code>: a relative path (relative to the directory <code>spoofaxc.cfg</code> is in) to a language definition.</li>
+</ul>
+<p>Dependencies can be of a certain kind (<code>$DependencyKind</code>):</p>
+<ul>
+<li><code>Build</code>: a dependency that is resolved at <em>build time</em>, meaning when the language definition is built, allowing the use of sources and binaries of the project the dependency points to.</li>
+<li><code>Run</code>: a dependency that is resolved at <em>run time</em>, meaning when the language is executed, allowing use of the classes and tasks of the project the dependency points to. Note: this kind of dependency has not yet been implemented.</li>
+</ul>
+<p>The following <code>Dependency</code>s are supported:</p>
+<p>| Syntax | Description |
+| - | - | - | - |
+| <code>$Exp</code> | A dependency to project defined by the expression, available at <code>Build</code> and <code>Run</code> time. |
+| <code>$Exp { $DependencyOption* }</code> | no | A dependency to project defined by the expression, with configuration options. |</p>
+<p>The following <code>DependencyOption</code>s are supported:</p>
+<ul>
+<li><code>kinds = [ $DependencyKind* ]</code>: set the kinds at which this dependency is resolved.</li>
+</ul>
+<p>Additionally, build time dependencies can be quickly defined with the <code>build-dependencies [ $BuildDependency* ]</code> section. The following <code>BuildDependency</code>s are supported:</p>
+<p>| Syntax | Description |
+| - | - | - | - |
+| <code>$Exp</code> | A dependency to project defined by the expression, available only at <code>Build</code> time. |</p>
 <h2 id="spoofaxclock">spoofaxc.lock<a class="headerlink" href="#spoofaxclock" title="Permanent link">&para;</a></h2>
 <p>The <code>spoofaxc.lock</code> file, which resides next to the <code>spoofaxc.cfg</code> file, contains values for several options that have defaults derived from other options, in order to keep these derived values stable even when the options they are derived from are changed.
 For example, when no <code>java-class-id-prefix</code> option is set in <code>spoofaxc.cfg</code>, it will be derived from the <code>name</code> option with some changes to make it compatible as a Java identifier, and is stored under <code>shared.defaultClassPrefix</code> in the <code>spoofaxc.lock</code> file.
