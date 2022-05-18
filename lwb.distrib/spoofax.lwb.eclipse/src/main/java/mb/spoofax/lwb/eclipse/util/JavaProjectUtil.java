@@ -30,8 +30,8 @@ public class JavaProjectUtil {
         final IFolder buildGeneratedSourcesLanguage = getDerivedFolder(buildGeneratedSources, "language", monitor);
         final IFolder buildGeneratedSourcesAdapter = getDerivedFolder(buildGeneratedSources, "adapter", monitor);
         final IFolder buildGeneratedSourcesEclipse = getDerivedFolder(buildGeneratedSources, "eclipse", monitor);
-        final IFolder buildGeneratedSourcesLanguageSpecification = getDerivedFolder(buildGeneratedSources, "languageSpecification", monitor);
-        final IFolder buildGeneratedSourcesLanguageSpecificationJava = getDerivedFolder(buildGeneratedSourcesLanguageSpecification, "java", monitor);
+        final IFolder buildGeneratedSourcesMetaLang = getDerivedFolder(buildGeneratedSources, "metalang", monitor);
+        final IFolder buildGeneratedSourcesMetaLangJava = getDerivedFolder(buildGeneratedSourcesMetaLang, "java", monitor);
         final IFolder buildGeneratedSourcesAnnotationProcessor = getDerivedFolder(buildGeneratedSources, "annotationProcessor", monitor);
         final IFolder buildGeneratedSourcesAnnotationProcessorJava = getDerivedFolder(buildGeneratedSourcesAnnotationProcessor, "java", monitor);
         final IFolder buildGeneratedSourcesAnnotationProcessorJavaMain = getDerivedFolder(buildGeneratedSourcesAnnotationProcessorJava, "main", monitor);
@@ -47,7 +47,7 @@ public class JavaProjectUtil {
         classpathEntries.add(JavaCore.newSourceEntry(buildGeneratedSourcesLanguage.getFullPath(), emptyPaths, emptyPaths, null, derivedSourceAttributes));
         classpathEntries.add(JavaCore.newSourceEntry(buildGeneratedSourcesAdapter.getFullPath(), emptyPaths, emptyPaths, null, derivedSourceAttributes));
         classpathEntries.add(JavaCore.newSourceEntry(buildGeneratedSourcesEclipse.getFullPath(), emptyPaths, emptyPaths, null, derivedSourceAttributes));
-        classpathEntries.add(JavaCore.newSourceEntry(buildGeneratedSourcesLanguageSpecificationJava.getFullPath(), emptyPaths, emptyPaths, null, derivedSourceAttributes));
+        classpathEntries.add(JavaCore.newSourceEntry(buildGeneratedSourcesMetaLangJava.getFullPath(), emptyPaths, emptyPaths, null, derivedSourceAttributes));
         classpathEntries.add(JavaCore.newSourceEntry(buildGeneratedSourcesAnnotationProcessorJavaMain.getFullPath(), emptyPaths, emptyPaths, null, derivedSourceAttributes));
 
         // Add built-in class path entries to classpath.

@@ -7,6 +7,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 - CFG conversion being executed even if static analysis returned errors, resulting in runtime exceptions. Fixes [#109](https://github.com/metaborg/spoofax-pie/issues/109), [#94](https://github.com/metaborg/spoofax-pie/issues/94).
 - Value argument provider always causing runtime exceptions. Fixes [#102](https://github.com/metaborg/spoofax-pie/issues/102).
 - Absolute file paths in places where relative ones were expected always causing runtime exceptions. Fixes [#96](https://github.com/metaborg/spoofax-pie/issues/96).
+- Eclipse LWB plugin still generating the old `build/generated/sources/languageSpecification/java` directory.
 
 
 ## [0.19.0] - 2022-05-13
