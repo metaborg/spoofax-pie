@@ -711,7 +711,7 @@ public class CfgAstToObject {
         final IStrategoAppl appl = TermUtils.asAppl(term).orElseThrow(() -> new InvalidAstShapeException("a term application", term));
         switch(appl.getConstructor().getName()) {
             case "ValueArgumentProvider":
-                return ArgProviderRepr.value(TermUtils.asJavaStringAt(appl, 0).orElseThrow(() -> new InvalidAstShapeException("a string as first subterm", appl)));
+                return ArgProviderRepr.value(Parts.toJavaString(appl.getSubterm(0)));
             case "ContextArgumentProvider":
                 return ArgProviderRepr.context(toCommandContextType(appl.getSubterm(0)));
             case "EnclosingContextArgumentProvider":
