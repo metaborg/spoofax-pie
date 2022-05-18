@@ -32,7 +32,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `<Name> = parameter { <Options> }` into `<Name> = { <Options> }`. The old syntax is still supported but deprecated, and will be removed in the future.
 - `parse-table-generator` section in `sdf3` section is now part of `source = files { ... }` section.
 - `sdf3-statix-signature-generation` section in `statix` section is now part of `source = files { ... }` section.
-- `sdf3-statix-signature-generation` section in `stratego` section is now part of `source = files { ... }` section.
+- `sdf3-statix-explication-generation` section in `stratego` section is now part of `source = files { ... }` section.
 - `language-strategy-affix` option in `stratego` section is now part `source = files { ... }` section. Also, the property in the lockfile corresponding to this option has been changed from `stratego.languageStrategyAffix` to `stratego.source.files.languageStrategyAffix`.
 - Default dependencies are now only added if no dependencies are specified in `spoofaxc.cfg`. When generating a new Spoofax 3 project, these default dependencies are added explicitly to the `spoofaxc.cfg` file. In the future, these default dependencies will be removed. It is recommended to add these dependencies to your `spoofax.cfg`:
 ```
