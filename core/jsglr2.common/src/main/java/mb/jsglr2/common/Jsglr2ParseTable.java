@@ -13,14 +13,24 @@ import org.spoofax.terms.io.binary.TermReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.io.Serializable;
 
-public class Jsglr2ParseTable {
+public class Jsglr2ParseTable implements Serializable {
     final IParseTable parseTable;
 
-    private Jsglr2ParseTable(IParseTable parseTable) {
+    public Jsglr2ParseTable(IParseTable parseTable) {
         this.parseTable = parseTable;
     }
 
+    /**
+     * Create a JSGLR2 parse table from a parse table ATerm (.tbl file) stream or persisted (.bin file) stream. The
+     * persisted stream will be used when the parse table is layout sensitive, or dynamic.
+     *
+     * @param parseTableAtermStream     Input stream to the parse table ATerm format (.tbl file).
+     * @param parseTablePersistedStream Input stream to the parse table persisted format (.bin file).
+     * @return JSGLR2 parse table
+     * @throws Jsglr2ParseTableException when loading a parse table fails.
+     */
     public static Jsglr2ParseTable fromStream(
         InputStream parseTableAtermStream,
         InputStream parseTablePersistedStream
@@ -43,7 +53,25 @@ public class Jsglr2ParseTable {
         }
     }
 
-    public static Jsglr2ParseTable fromParseTable(IParseTable parseTable) {
-        return new Jsglr2ParseTable(parseTable);
+    /**
+     * Create a JSGLR2 parse table from a parse table ATerm (.tbl file) stream. This does not support layout-sensitive
+     * parse tables, nor dynamic parse tables.
+     *
+     * @param parseTableAtermStream Input stream to the parse table ATerm format (.tbl file).
+     * @return JSGLR2 parse table
+     * @throws Jsglr2ParseTableException when loading a parse table fails.
+     */
+    public static Jsglr2ParseTable fromStream(
+        InputStream parseTableAtermStream
+    ) throws Jsglr2ParseTableException {
+        final ITermFactory termFactory = new ImploderOriginTermFactory(new TermFactory());
+        final TermReader reader = new TermReader(termFactory);
+        try {
+            final IStrategoTerm parseTableTerm = reader.parseFromStream(parseTableAtermStream);
+            final IParseTable parseTable = new ParseTableReader().read(parseTableTerm);
+            return new Jsglr2ParseTable(parseTable);
+        } catch(IOException | ParseTableReadException e) {
+            throw new Jsglr2ParseTableException("Loading parse table from stream failed unexpectedly", e);
+        }
     }
 }

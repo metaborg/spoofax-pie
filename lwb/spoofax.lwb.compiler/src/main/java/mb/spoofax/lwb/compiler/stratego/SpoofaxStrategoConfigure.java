@@ -6,6 +6,7 @@ import mb.cfg.task.CfgRootDirectoryToObject;
 import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.common.util.ListView;
+import mb.common.util.MapView;
 import mb.constraint.pie.ConstraintAnalyzeMultiTaskDef;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Interactivity;
@@ -281,6 +282,7 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
             ListView.of(builtinLibraryIdentifiers),
             ListView.copyOf(allStratego2LibInfos),
             new Arguments(), // TODO: add to input and configure
+            MapView.of(),
             ListView.of(sourceFileOrigins),
             null, //strategoInput.cacheDirectory(), // TODO: setting this crashes the compiler, most likely due to the ## symbols in the path.
             cfgStrategoConfig.javaSourceFileOutputDirectory(),

@@ -9,7 +9,7 @@ import java.io.Serializable;
 public class {{baseParseTable.id}} implements Serializable {
     final {{parseTableType.qualifiedId}} parseTable;
 
-    private {{baseParseTable.id}}({{parseTableType.qualifiedId}} parseTable) {
+    public {{baseParseTable.id}}({{parseTableType.qualifiedId}} parseTable) {
         this.parseTable = parseTable;
     }
 

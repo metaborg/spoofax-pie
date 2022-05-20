@@ -3,12 +3,14 @@ package mb.str.incr;
 import mb.common.util.IOUtil;
 import mb.jsglr.common.JsglrParseException;
 import mb.jsglr.common.JsglrParseInput;
+import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceKeyString;
 import mb.resource.ResourceRuntimeException;
 import mb.resource.ResourceService;
 import mb.str.StrategoParser;
+import mb.str.StrategoParserSelector;
 import mb.str.StrategoScope;
 import mb.stratego.build.strincr.StrategoLanguage;
 import mb.stratego.build.strincr.data.GTEnvironment;
@@ -36,7 +38,7 @@ import java.util.Collection;
 @StrategoScope
 public class Spoofax3StrategoLanguage implements StrategoLanguage {
     private final ResourceService resourceService;
-    private final Provider<StrategoParser> parserProvider;
+    private final StrategoParserSelector parserSelector;
     private final Provider<StrategoRuntime> strategoRuntimeProvider;
     private final ITermFactory termFactory;
     private final StrIncrContext strContext;
@@ -45,12 +47,12 @@ public class Spoofax3StrategoLanguage implements StrategoLanguage {
     @Inject
     public Spoofax3StrategoLanguage(
         ResourceService resourceService,
-        Provider<StrategoParser> parserProvider,
+        StrategoParserSelector parserSelector,
         Provider<StrategoRuntime> strategoRuntimeProvider,
         StrIncrContext strContext
     ) {
         this.resourceService = resourceService;
-        this.parserProvider = parserProvider;
+        this.parserSelector = parserSelector;
         this.strategoRuntimeProvider = strategoRuntimeProvider;
         this.termFactory = strategoRuntimeProvider.get().getTermFactory();
         this.strContext = strContext;
@@ -58,8 +60,7 @@ public class Spoofax3StrategoLanguage implements StrategoLanguage {
 
 
     @Override
-    public IStrategoTerm parse(InputStream inputStream, Charset charset, @Nullable String path) throws JsglrParseException, IOException, InterruptedException {
-        final StrategoParser parser = parserProvider.get();
+    public IStrategoTerm parse(ExecContext context, InputStream inputStream, Charset charset, @Nullable String path) throws JsglrParseException, IOException, InterruptedException {
         final String text = new String(IOUtil.toByteArray(inputStream), charset);
 
         @Nullable ResourceKey resourceKey;
@@ -70,6 +71,8 @@ public class Spoofax3StrategoLanguage implements StrategoLanguage {
             resourceKey = null;
         }
 
+        // TODO: pass in root directory hint
+        final StrategoParser parser = parserSelector.getParserProvider(context, resourceKey, null).get();
         final IStrategoTerm ast = parser.parse(new JsglrParseInput(text, "Module", resourceKey)).ast;
 
         // Remove ambiguity that occurs in old table from sdf2table when using JSGLR2 parser

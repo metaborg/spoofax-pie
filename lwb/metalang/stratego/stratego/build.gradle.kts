@@ -143,6 +143,7 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
       ParamRepr.of("builtinLibs", TypeInfo.of("mb.common.util", "ListView"), false, ArgProviderRepr.value("mb.common.util.ListView.of()")),
       ParamRepr.of("str2libraries", TypeInfo.of("mb.common.util", "ListView"), false, ArgProviderRepr.value("mb.common.util.ListView.of()")),
       ParamRepr.of("extraCompilerArguments", TypeInfo.of("org.metaborg.util.cmd", "Arguments"), false, ArgProviderRepr.value("new org.metaborg.util.cmd.Arguments()")),
+      ParamRepr.of("alternativeParseTables", TypeInfo.of("mb.common.util", "MapView"), false, ArgProviderRepr.value("mb.common.util.MapView.of()")),
       ParamRepr.of("sourceFileOrigins", TypeInfo.of("mb.common.util", "ListView"), false, ArgProviderRepr.value("mb.common.util.ListView.of()")),
       ParamRepr.of("cacheDir", resourcePathType, false),
       ParamRepr.of("javaSourceFileOutputDir", resourcePathType, true),

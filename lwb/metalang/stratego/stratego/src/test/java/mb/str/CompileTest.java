@@ -4,6 +4,7 @@ import mb.common.message.KeyedMessages;
 import mb.common.result.MessagesException;
 import mb.common.result.Result;
 import mb.common.util.ListView;
+import mb.common.util.MapView;
 import mb.pie.api.MixedSession;
 import mb.pie.api.StatelessSerializableFunction;
 import mb.pie.api.Supplier;
@@ -74,6 +75,7 @@ class CompileTest extends TestBase {
                 ListView.of(),
                 ListView.copyOf(str2Libs),
                 new Arguments(),
+                MapView.of(),
                 ListView.of(),
                 null,
                 strategoJavaSourceFileOutputDir.getPath(),

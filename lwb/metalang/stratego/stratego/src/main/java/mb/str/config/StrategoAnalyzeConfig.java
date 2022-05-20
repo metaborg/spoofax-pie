@@ -1,6 +1,8 @@
 package mb.str.config;
 
+import mb.common.result.Result;
 import mb.common.util.ListView;
+import mb.common.util.MapView;
 import mb.pie.api.STask;
 import mb.pie.api.Supplier;
 import mb.resource.hierarchical.ResourcePath;
@@ -8,6 +10,7 @@ import mb.stratego.build.strincr.BuiltinLibraryIdentifier;
 import mb.stratego.build.strincr.ModuleIdentifier;
 import mb.stratego.build.strincr.Stratego2LibInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.metaborg.parsetable.IParseTable;
 
 import java.io.Serializable;
 
@@ -17,6 +20,7 @@ public class StrategoAnalyzeConfig implements Serializable {
     public final ListView<ResourcePath> includeDirs;
     public final ListView<BuiltinLibraryIdentifier> builtinLibs;
     public final ListView<Supplier<Stratego2LibInfo>> str2libraries;
+    public final MapView<String, Supplier<Result<IParseTable, ?>>> alternativeParseTables;
     public final ListView<STask<?>> sourceFileOrigins;
 
     public StrategoAnalyzeConfig(
@@ -25,6 +29,7 @@ public class StrategoAnalyzeConfig implements Serializable {
         ListView<ResourcePath> includeDirs,
         ListView<BuiltinLibraryIdentifier> builtinLibs,
         ListView<Supplier<Stratego2LibInfo>> str2libraries,
+        MapView<String, Supplier<Result<IParseTable, ?>>> alternativeParseTables,
         ListView<STask<?>> sourceFileOrigins
     ) {
         this.rootDirectory = rootDirectory;
@@ -32,6 +37,7 @@ public class StrategoAnalyzeConfig implements Serializable {
         this.includeDirs = includeDirs;
         this.builtinLibs = builtinLibs;
         this.str2libraries = str2libraries;
+        this.alternativeParseTables = alternativeParseTables;
         this.sourceFileOrigins = sourceFileOrigins;
     }
 
@@ -41,6 +47,7 @@ public class StrategoAnalyzeConfig implements Serializable {
         ListView<ResourcePath> includeDirs,
         ListView<BuiltinLibraryIdentifier> builtinLibs,
         ListView<Supplier<Stratego2LibInfo>> str2libraries,
+        MapView<String, Supplier<Result<IParseTable, ?>>> alternativeParseTables,
         ListView<STask<?>> sourceFileOrigins
     ) {
         this(
@@ -49,7 +56,7 @@ public class StrategoAnalyzeConfig implements Serializable {
             includeDirs,
             builtinLibs,
             str2libraries,
-            sourceFileOrigins
+            alternativeParseTables, sourceFileOrigins
         );
     }
 
@@ -60,6 +67,7 @@ public class StrategoAnalyzeConfig implements Serializable {
             ListView.of(),
             StrategoConfig.defaultBuiltinLibs(),
             ListView.of(),
+            MapView.of(),
             ListView.of()
         );
     }
@@ -73,6 +81,7 @@ public class StrategoAnalyzeConfig implements Serializable {
         if(!includeDirs.equals(that.includeDirs)) return false;
         if(!builtinLibs.equals(that.builtinLibs)) return false;
         if(!str2libraries.equals(that.str2libraries)) return false;
+        if(!alternativeParseTables.equals(that.alternativeParseTables)) return false;
         return sourceFileOrigins.equals(that.sourceFileOrigins);
     }
 
@@ -82,6 +91,7 @@ public class StrategoAnalyzeConfig implements Serializable {
         result = 31 * result + includeDirs.hashCode();
         result = 31 * result + builtinLibs.hashCode();
         result = 31 * result + str2libraries.hashCode();
+        result = 31 * result + alternativeParseTables.hashCode();
         result = 31 * result + sourceFileOrigins.hashCode();
         return result;
     }
@@ -93,6 +103,7 @@ public class StrategoAnalyzeConfig implements Serializable {
             ", includeDirs=" + includeDirs +
             ", builtinLibs=" + builtinLibs +
             ", str2libraries=" + str2libraries +
+            ", alternativeParseTables=" + alternativeParseTables +
             ", sourceFileOrigins=" + sourceFileOrigins +
             '}';
     }

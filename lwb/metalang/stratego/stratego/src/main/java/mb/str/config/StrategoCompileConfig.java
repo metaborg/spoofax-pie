@@ -1,6 +1,8 @@
 package mb.str.config;
 
+import mb.common.result.Result;
 import mb.common.util.ListView;
+import mb.common.util.MapView;
 import mb.pie.api.STask;
 import mb.pie.api.Supplier;
 import mb.resource.hierarchical.ResourcePath;
@@ -8,6 +10,7 @@ import mb.stratego.build.strincr.BuiltinLibraryIdentifier;
 import mb.stratego.build.strincr.ModuleIdentifier;
 import mb.stratego.build.strincr.Stratego2LibInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.metaborg.parsetable.IParseTable;
 import org.metaborg.util.cmd.Arguments;
 
 import java.io.File;
@@ -20,6 +23,7 @@ public class StrategoCompileConfig implements Serializable {
     public final ListView<BuiltinLibraryIdentifier> builtinLibs;
     public final ListView<Supplier<Stratego2LibInfo>> str2libraries;
     public final Arguments extraCompilerArguments;
+    public final MapView<String, Supplier<Result<IParseTable, ?>>> alternativeParseTables;
     public final ListView<STask<?>> sourceFileOrigins;
     public final @Nullable ResourcePath cacheDir;
     public final ResourcePath javaSourceFileOutputDir;
@@ -35,6 +39,7 @@ public class StrategoCompileConfig implements Serializable {
         ListView<BuiltinLibraryIdentifier> builtinLibs,
         ListView<Supplier<Stratego2LibInfo>> str2libraries,
         Arguments extraCompilerArguments,
+        MapView<String, Supplier<Result<IParseTable, ?>>> alternativeParseTables,
         ListView<STask<?>> sourceFileOrigins,
         @Nullable ResourcePath cacheDir,
         ResourcePath javaSourceFileOutputDir,
@@ -49,6 +54,7 @@ public class StrategoCompileConfig implements Serializable {
         this.builtinLibs = builtinLibs;
         this.str2libraries = str2libraries;
         this.extraCompilerArguments = extraCompilerArguments;
+        this.alternativeParseTables = alternativeParseTables;
         this.sourceFileOrigins = sourceFileOrigins;
         this.cacheDir = cacheDir;
         this.javaSourceFileOutputDir = javaSourceFileOutputDir;
@@ -65,6 +71,7 @@ public class StrategoCompileConfig implements Serializable {
         ListView<BuiltinLibraryIdentifier> builtinLibs,
         ListView<Supplier<Stratego2LibInfo>> str2libraries,
         Arguments extraCompilerArguments,
+        MapView<String, Supplier<Result<IParseTable, ?>>> alternativeParseTables,
         ListView<STask<?>> sourceFileOrigins,
         @Nullable ResourcePath cacheDir,
         ResourcePath javaSourceFileOutputDir,
@@ -80,6 +87,7 @@ public class StrategoCompileConfig implements Serializable {
             builtinLibs,
             str2libraries,
             extraCompilerArguments,
+            alternativeParseTables,
             sourceFileOrigins,
             cacheDir,
             javaSourceFileOutputDir,
@@ -104,6 +112,7 @@ public class StrategoCompileConfig implements Serializable {
             StrategoConfig.defaultBuiltinLibs(),
             ListView.of(),
             new Arguments(),
+            MapView.of(),
             ListView.of(),
             null,
             javaSourceFileOutputDir,
@@ -115,7 +124,7 @@ public class StrategoCompileConfig implements Serializable {
     }
 
     public StrategoAnalyzeConfig toAnalyzeConfig() {
-        return new StrategoAnalyzeConfig(rootDirectory, mainModule, includeDirs, builtinLibs, str2libraries, sourceFileOrigins);
+        return new StrategoAnalyzeConfig(rootDirectory, mainModule, includeDirs, builtinLibs, str2libraries, alternativeParseTables, sourceFileOrigins);
     }
 
     @Override public boolean equals(@Nullable Object o) {
@@ -128,6 +137,7 @@ public class StrategoCompileConfig implements Serializable {
         if(!builtinLibs.equals(that.builtinLibs)) return false;
         if(!str2libraries.equals(that.str2libraries)) return false;
         if(!extraCompilerArguments.equals(that.extraCompilerArguments)) return false;
+        if(!alternativeParseTables.equals(that.alternativeParseTables)) return false;
         if(!sourceFileOrigins.equals(that.sourceFileOrigins)) return false;
         if(cacheDir != null ? !cacheDir.equals(that.cacheDir) : that.cacheDir != null) return false;
         if(!javaSourceFileOutputDir.equals(that.javaSourceFileOutputDir)) return false;
@@ -144,6 +154,7 @@ public class StrategoCompileConfig implements Serializable {
         result = 31 * result + builtinLibs.hashCode();
         result = 31 * result + str2libraries.hashCode();
         result = 31 * result + extraCompilerArguments.hashCode();
+        result = 31 * result + alternativeParseTables.hashCode();
         result = 31 * result + sourceFileOrigins.hashCode();
         result = 31 * result + (cacheDir != null ? cacheDir.hashCode() : 0);
         result = 31 * result + javaSourceFileOutputDir.hashCode();
@@ -162,13 +173,14 @@ public class StrategoCompileConfig implements Serializable {
             ", builtinLibs=" + builtinLibs +
             ", str2libraries=" + str2libraries +
             ", extraCompilerArguments=" + extraCompilerArguments +
+            ", alternativeParseTables=" + alternativeParseTables +
             ", sourceFileOrigins=" + sourceFileOrigins +
             ", cacheDir=" + cacheDir +
             ", javaSourceFileOutputDir=" + javaSourceFileOutputDir +
             ", javaClassFileOutputDir=" + javaClassFileOutputDir +
             ", outputJavaPackageId='" + outputJavaPackageId + '\'' +
             ", outputLibraryName='" + outputLibraryName + '\'' +
-            ", javaClassPath=" + javaClassPaths +
+            ", javaClassPaths=" + javaClassPaths +
             '}';
     }
 }

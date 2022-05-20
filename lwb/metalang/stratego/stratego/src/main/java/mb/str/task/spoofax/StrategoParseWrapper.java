@@ -2,33 +2,43 @@ package mb.str.task.spoofax;
 
 import mb.common.option.Option;
 import mb.common.result.Result;
+import mb.common.text.Text;
 import mb.jsglr.common.JsglrParseException;
+import mb.jsglr.common.JsglrParseInput;
 import mb.jsglr.common.JsglrParseOutput;
+import mb.jsglr.pie.JsglrParseTaskDef;
 import mb.jsglr.pie.JsglrParseTaskInput;
 import mb.pie.api.ExecContext;
 import mb.pie.api.stamp.output.OutputStampers;
 import mb.pie.api.stamp.resource.ResourceStampers;
+import mb.resource.ResourceKey;
+import mb.resource.hierarchical.ResourcePath;
 import mb.str.StrategoClassLoaderResources;
+import mb.str.StrategoParseTable;
 import mb.str.StrategoParser;
+import mb.str.StrategoParserFactory;
+import mb.str.StrategoParserSelector;
 import mb.str.StrategoScope;
-import mb.str.task.StrategoParse;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import java.io.IOException;
 
 @StrategoScope
-public class StrategoParseWrapper extends StrategoParse {
+public class StrategoParseWrapper extends JsglrParseTaskDef {
     private final StrategoClassLoaderResources classLoaderResources;
     private final StrategoAnalyzeConfigFunctionWrapper configFunctionWrapper;
+    private final StrategoParserSelector strategoParserSelector;
 
     @Inject public StrategoParseWrapper(
         StrategoClassLoaderResources classLoaderResources,
-        Provider<StrategoParser> parserProvider,
-        StrategoAnalyzeConfigFunctionWrapper configFunctionWrapper
+        StrategoAnalyzeConfigFunctionWrapper configFunctionWrapper,
+        StrategoParserSelector strategoParserSelector
     ) {
-        super(classLoaderResources, parserProvider);
         this.classLoaderResources = classLoaderResources;
         this.configFunctionWrapper = configFunctionWrapper;
+        this.strategoParserSelector = strategoParserSelector;
     }
 
     @Override public String getId() {
@@ -52,5 +62,30 @@ public class StrategoParseWrapper extends StrategoParse {
             ),
             () -> super.exec(context, input) // No directory hint is given, cannot get configuration -> parse normally.
         );
+    }
+
+    @Override
+    protected Result<JsglrParseOutput, JsglrParseException> parse(
+        ExecContext context,
+        Text text,
+        @Nullable String startSymbol,
+        @Nullable ResourceKey fileHint,
+        @Nullable ResourcePath rootDirectoryHint
+    ) throws IOException, InterruptedException {
+        // Copied from `StrategoParse`, but uses a `Provider<StrategoParser>` provided by `strategoParserSelector`.
+        context.require(classLoaderResources.tryGetAsNativeDefinitionResource("target/metaborg/sdf.tbl"));
+        context.require(classLoaderResources.tryGetAsNativeDefinitionResource("target/metaborg/table.bin"));
+        context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(StrategoParser.class), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(StrategoParserFactory.class), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(StrategoParseTable.class), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(StrategoParserSelector.class), ResourceStampers.hashFile());
+        final Provider<StrategoParser> provider = strategoParserSelector.getParserProvider(context, fileHint, rootDirectoryHint);
+        final StrategoParser parser = provider.get();
+        try {
+            return Result.ofOk(parser.parse(new JsglrParseInput(text, startSymbol != null ? startSymbol : "Module", fileHint, rootDirectoryHint)));
+        } catch(JsglrParseException e) {
+            return Result.ofErr(e);
+        }
     }
 }
