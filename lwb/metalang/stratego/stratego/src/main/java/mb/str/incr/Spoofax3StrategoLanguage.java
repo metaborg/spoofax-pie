@@ -120,7 +120,7 @@ public class Spoofax3StrategoLanguage implements StrategoLanguage {
     }
 
     @Override
-    public Collection<? extends IStrategoAppl> toCongruenceAsts(Collection<? extends IStrategoAppl> asts, String projectPath) throws ExecException {
+    public Collection<? extends IStrategoAppl> toCongruenceAsts(Collection<IStrategoTerm> asts, String projectPath) throws ExecException {
         // TODO: reduce code duplication with Spoofax2StrategoLanguage.
         final IStrategoList result = TermUtils.toList(callStrategy(termFactory.makeList(asts), projectPath, "stratego2-mk-cong-defs"));
         final ArrayList<IStrategoAppl> congruences = new ArrayList<>(result.size());
@@ -136,6 +136,10 @@ public class Spoofax3StrategoLanguage implements StrategoLanguage {
 
     @Override public IStrategoTerm overlapCheck(IStrategoTerm ast, String projectPath) throws ExecException {
         return callStrategy(ast, projectPath, "stratego2-dyn-rule-overlap-check");
+    }
+
+    @Override public IStrategoTerm metaExplode(IStrategoTerm ast, String projectPath) throws ExecException {
+        return callStrategy(ast, projectPath, "MetaExplode");
     }
 
     private IStrategoTerm callStrategy(IStrategoTerm input, String rootDirectory, String strategyName) throws ExecException {
