@@ -3,6 +3,9 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+
+
+## [0.19.1] - 2022-05-24
 ### Fixed
 - CFG conversion being executed even if static analysis returned errors, resulting in runtime exceptions. Fixes [#109](https://github.com/metaborg/spoofax-pie/issues/109), [#94](https://github.com/metaborg/spoofax-pie/issues/94).
 - Value argument provider always causing runtime exceptions. Fixes [#102](https://github.com/metaborg/spoofax-pie/issues/102).
@@ -503,7 +506,8 @@ build-dependencies [
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.0...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.1...HEAD
+[0.19.1]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.0...release-0.19.1
 [0.19.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.18.0...release-0.19.0
 [0.18.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.17.0...release-0.18.0
 [0.17.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.17...release-0.17.0
