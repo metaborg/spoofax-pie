@@ -70,10 +70,11 @@ public class Sdf3GetSourceFilesWrapper implements TaskDef<ResourcePath, ListView
         ResourcePath mainFile,
         ArrayList<ResourcePath> sourceFiles
     ) throws IOException {
-        final HierarchicalResource directory = context.getHierarchicalResource(sourceDirectory);
+        final HierarchicalResource directory = context.require(sourceDirectory);
         if(!directory.exists() || !directory.isDirectory()) {
             throw new IOException("SDF3 source directory '" + directory + "' does not exist or is not a directory");
         }
+
         // NOTE: Require directories recursively, so we re-execute whenever a file is added/removed from
         // a directory. Also require each directory separately, to ensure that changes in directories
         // are properly detected in bottom-up builds.

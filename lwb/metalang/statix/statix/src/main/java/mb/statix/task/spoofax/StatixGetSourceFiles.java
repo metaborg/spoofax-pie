@@ -69,7 +69,7 @@ public class StatixGetSourceFiles implements TaskDef<ResourcePath, ListView<Reso
         ResourcePath mainFile,
         ArrayList<ResourcePath> sourceFiles
     ) throws IOException {
-        final HierarchicalResource directory = context.getHierarchicalResource(sourceDirectory);
+        final HierarchicalResource directory = context.require(sourceDirectory);
         if(!directory.exists() || !directory.isDirectory()) {
             throw new IOException("Statix source directory '" + directory + "' does not exist or is not a directory");
         }

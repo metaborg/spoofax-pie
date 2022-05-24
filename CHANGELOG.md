@@ -3,6 +3,9 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+### Fixed
+- New SDF3 and Statix source files not being detected.
+- Default SDF3 layout definition not including horizontal tabs.
 
 
 ## [0.19.1] - 2022-05-24
