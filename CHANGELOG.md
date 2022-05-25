@@ -2,10 +2,13 @@
 All notable changes to this project are documented in this file, based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
-## [Unreleased]
+## [0.19.2] - 2022-05-25
 ### Fixed
 - New SDF3 and Statix source files not being detected.
 - Default SDF3 layout definition not including horizontal tabs.
+
+### Changed
+- `releng` (devenv-release) requirement to `0.1.32`.
 
 
 ## [0.19.1] - 2022-05-24
@@ -509,7 +512,8 @@ build-dependencies [
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.1...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.2...HEAD
+[0.19.2]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.1...release-0.19.2
 [0.19.1]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.0...release-0.19.1
 [0.19.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.18.0...release-0.19.0
 [0.18.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.17.0...release-0.18.0
