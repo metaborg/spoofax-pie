@@ -1,5 +1,6 @@
 package mb.str;
 
+import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.common.util.MapView;
 import mb.jsglr2.common.Jsglr2ParseTable;
@@ -66,16 +67,17 @@ public class StrategoParserSelector {
     }
 
 
-    public Provider<StrategoParser> getParserProvider(
+    public Result<Provider<StrategoParser>, ?> getParserProvider(
         ExecContext context,
         @Nullable ResourceKey fileHint,
         @Nullable ResourcePath rootDirectoryHint
-    ) throws IOException {
+    ) throws IOException, InterruptedException {
         final @Nullable MapView<String, Supplier<Result<IParseTable, ?>>> alternativeParseTables;
         if(rootDirectoryHint != null) {
-            alternativeParseTables = configFunctionWrapper.get().apply(context, rootDirectoryHint)
-                .map(o -> o.map(c -> c.alternativeParseTables).get()).get();
-            // TODO: error handling
+            alternativeParseTables = configFunctionWrapper.get()
+                .apply(context, rootDirectoryHint)
+                .map(o -> o.map(c -> c.alternativeParseTables))
+                .mapOrElse(Option::get, () -> null);
         } else {
             alternativeParseTables = null;
         }
@@ -88,14 +90,22 @@ public class StrategoParserSelector {
             }
         }
 
-        return provideParser(context, parseTableId, alternativeParseTables);
+        try {
+            return Result.ofOk(provideParser(context, parseTableId, alternativeParseTables));
+        } catch(ParseError e) { // NOTE: ParseError is a RuntimeException, but really indicates an error.
+            return Result.ofErr(e);
+        } catch(RuntimeException | InterruptedException e) {
+            throw e;
+        } catch(Exception e) {
+            return Result.ofErr(e);
+        }
     }
 
     private @Nullable String getAlternativeParseTableIdFromFileComment(
         ExecContext context,
         ResourceKey filePath
     ) throws IOException {
-        final ReadableResource file = context.require(filePath); // TODO: error handling
+        final ReadableResource file = context.require(filePath);
         try(final BufferedReader reader = new BufferedReader(new InputStreamReader(file.openRead()))) {
             @Nullable String firstLine = reader.readLine();
             if(firstLine != null) {
@@ -111,7 +121,7 @@ public class StrategoParserSelector {
     private @Nullable String getAlternativeParseTableIdFromMetaFile(
         ExecContext context,
         ResourcePath filePath
-    ) throws IOException {
+    ) throws IOException, ParseError {
         final @Nullable String leafWithoutExtension = filePath.getLeafWithoutFileExtension();
         if(leafWithoutExtension == null) return null;
         final @Nullable ResourcePath parentPath = filePath.getParent();
@@ -123,16 +133,15 @@ public class StrategoParserSelector {
         final TermReader reader = new TermReader(termFactory);
         final IStrategoTerm metaTerm;
         try(final BufferedInputStream inputStream = metaFile.openReadBuffered()) {
-            metaTerm = reader.parseFromStream(inputStream); // TODO: error handling
-        } catch(ParseError e) {
-            return null; // TODO: error handling
+            metaTerm = reader.parseFromStream(inputStream);
         }
-        if(metaTerm.getSubtermCount() < 1) return null; // TODO: error handling?
+        if(metaTerm.getSubtermCount() < 1) return null; // TODO: errors should be shown on .meta file
         for(IStrategoTerm entry : metaTerm.getSubterm(0).getAllSubterms()) {
             if(!(entry instanceof IStrategoAppl)) continue;
             final String cons = ((IStrategoAppl)entry).getConstructor().getName();
             if(cons.equals("Syntax")) {
-                return TermUtils.asJavaStringAt(entry, 0).orElse(null); // TODO: error handling?
+                return TermUtils.asJavaStringAt(entry, 0)
+                    .orElse(null); // TODO: errors should be shown on .meta file
             }
         }
         return null;
@@ -142,11 +151,11 @@ public class StrategoParserSelector {
         ExecContext context,
         @Nullable String parseTableId,
         @Nullable MapView<String, Supplier<Result<IParseTable, ?>>> alternativeParseTables
-    ) {
+    ) throws Exception {
         if(parseTableId == null) return defaultParserProvider;
         final @Nullable Supplier<Result<StrategoParseTable, ?>> parseTableSupplier = getParseTableSupplier(parseTableId, alternativeParseTables);
         if(parseTableSupplier == null) return defaultParserProvider;
-        final StrategoParseTable parseTable = context.require(parseTableSupplier).unwrapUnchecked(); // TODO: error handling
+        final StrategoParseTable parseTable = context.require(parseTableSupplier).unwrap();
         return () -> new StrategoParser(parseTable);
     }
 

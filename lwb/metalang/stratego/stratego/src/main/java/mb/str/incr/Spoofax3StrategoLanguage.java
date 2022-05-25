@@ -60,7 +60,7 @@ public class Spoofax3StrategoLanguage implements StrategoLanguage {
 
 
     @Override
-    public IStrategoTerm parse(ExecContext context, InputStream inputStream, Charset charset, @Nullable String path) throws JsglrParseException, IOException, InterruptedException {
+    public IStrategoTerm parse(ExecContext context, InputStream inputStream, Charset charset, @Nullable String path) throws Exception {
         final String text = new String(IOUtil.toByteArray(inputStream), charset);
 
         @Nullable ResourceKey resourceKey;
@@ -72,7 +72,7 @@ public class Spoofax3StrategoLanguage implements StrategoLanguage {
         }
 
         // TODO: pass in root directory hint
-        final StrategoParser parser = parserSelector.getParserProvider(context, resourceKey, null).get();
+        final StrategoParser parser = parserSelector.getParserProvider(context, resourceKey, null).unwrap().get();
         final IStrategoTerm ast = parser.parse(new JsglrParseInput(text, "Module", resourceKey)).ast;
 
         // Remove ambiguity that occurs in old table from sdf2table when using JSGLR2 parser

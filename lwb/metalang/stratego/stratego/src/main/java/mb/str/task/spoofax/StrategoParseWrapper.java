@@ -80,12 +80,16 @@ public class StrategoParseWrapper extends JsglrParseTaskDef {
         context.require(classLoaderResources.tryGetAsNativeResource(StrategoParserFactory.class), ResourceStampers.hashFile());
         context.require(classLoaderResources.tryGetAsNativeResource(StrategoParseTable.class), ResourceStampers.hashFile());
         context.require(classLoaderResources.tryGetAsNativeResource(StrategoParserSelector.class), ResourceStampers.hashFile());
-        final Provider<StrategoParser> provider = strategoParserSelector.getParserProvider(context, fileHint, rootDirectoryHint);
-        final StrategoParser parser = provider.get();
+        final Result<Provider<StrategoParser>, ?> provider = strategoParserSelector.getParserProvider(context, fileHint, rootDirectoryHint);
         try {
+            final StrategoParser parser = provider.unwrap().get();
             return Result.ofOk(parser.parse(new JsglrParseInput(text, startSymbol != null ? startSymbol : "Module", fileHint, rootDirectoryHint)));
+        } catch(RuntimeException | InterruptedException e) {
+            throw e;
         } catch(JsglrParseException e) {
             return Result.ofErr(e);
+        } catch(Exception e) {
+            return Result.ofErr(JsglrParseException.otherFail(e, Option.ofNullable(startSymbol), Option.ofNullable(fileHint), Option.ofNullable(rootDirectoryHint)));
         }
     }
 }
