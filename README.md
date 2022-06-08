@@ -57,6 +57,8 @@ This repository is built with Gradle, which requires a JDK of at least version 8
 
 To build this repository, run `./gradlew buildAll` on Linux and macOS, or `gradlew.bat buildAll` on Windows.
 
+To build the documentation, see [docs/README.md](docs/README.md).
+
 ### Automated Builds
 
 This repository is built on:
