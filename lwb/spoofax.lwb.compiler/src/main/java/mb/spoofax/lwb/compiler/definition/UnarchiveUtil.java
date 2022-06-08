@@ -33,7 +33,7 @@ public class UnarchiveUtil {
         for(JarFileWithPath<FSResource> jarFileWithPath : locations.jarFiles) {
             final ResourcePath jarFilePath = jarFileWithPath.file.getPath();
             @SuppressWarnings("ConstantConditions") // JAR files always have leaves.
-            final ResourcePath unarchiveDirectory = unarchiveDirectoryBase.appendRelativePath(jarFilePath.getLeaf());
+            final ResourcePath unarchiveDirectory = unarchiveDirectoryBase.appendRelativePath(jarFilePath.getLeaf()).getNormalized();
             final Task<?> task = unarchiveFromJar.createTask(new UnarchiveFromJar.Input(jarFilePath, unarchiveDirectory, unarchiveMatcher, false, false));
             context.require(task);
             definitionLocations.add(unarchiveDirectory.appendAsRelativePath(jarFileWithPath.path));

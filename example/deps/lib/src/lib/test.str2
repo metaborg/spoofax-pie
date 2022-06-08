@@ -1,5 +1,0 @@
-module lib/test
-
-strategies
-
-  exported-test-strategy = id

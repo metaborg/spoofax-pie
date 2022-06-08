@@ -188,7 +188,7 @@ public abstract class ResolveDependencies<T extends Serializable> implements Tas
         ResourcePath dependencySourceContext,
         String path
     ) throws ResolveDependenciesException {
-        return resolveFromLanguageDefinition(context, source, dependencySourceContext.appendOrReplaceWithPath(path));
+        return resolveFromLanguageDefinition(context, source, dependencySourceContext.appendOrReplaceWithPath(path).getNormalized());
     }
 
     private ListView<T> resolveFromLanguageDefinition(

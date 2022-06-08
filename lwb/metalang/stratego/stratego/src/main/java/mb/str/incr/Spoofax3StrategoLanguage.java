@@ -1,17 +1,22 @@
 package mb.str.incr;
 
+import mb.common.result.Result;
 import mb.common.util.IOUtil;
 import mb.jsglr.common.JsglrParseException;
 import mb.jsglr.common.JsglrParseInput;
+import mb.jsglr.pie.JsglrParseTaskInput;
 import mb.pie.api.ExecContext;
 import mb.pie.api.ExecException;
+import mb.pie.api.Supplier;
 import mb.resource.ResourceKey;
 import mb.resource.ResourceKeyString;
 import mb.resource.ResourceRuntimeException;
 import mb.resource.ResourceService;
+import mb.resource.hierarchical.ResourcePath;
 import mb.str.StrategoParser;
 import mb.str.StrategoParserSelector;
 import mb.str.StrategoScope;
+import mb.str.task.spoofax.StrategoParseWrapper;
 import mb.stratego.build.strincr.StrategoLanguage;
 import mb.stratego.build.strincr.data.GTEnvironment;
 import mb.stratego.build.termvisitors.DisambiguateAsAnno;
@@ -39,6 +44,7 @@ import java.util.Collection;
 public class Spoofax3StrategoLanguage implements StrategoLanguage {
     private final ResourceService resourceService;
     private final StrategoParserSelector parserSelector;
+    private final StrategoParseWrapper parse;
     private final Provider<StrategoRuntime> strategoRuntimeProvider;
     private final ITermFactory termFactory;
     private final StrIncrContext strContext;
@@ -48,11 +54,13 @@ public class Spoofax3StrategoLanguage implements StrategoLanguage {
     public Spoofax3StrategoLanguage(
         ResourceService resourceService,
         StrategoParserSelector parserSelector,
+        StrategoParseWrapper parse,
         Provider<StrategoRuntime> strategoRuntimeProvider,
         StrIncrContext strContext
     ) {
         this.resourceService = resourceService;
         this.parserSelector = parserSelector;
+        this.parse = parse;
         this.strategoRuntimeProvider = strategoRuntimeProvider;
         this.termFactory = strategoRuntimeProvider.get().getTermFactory();
         this.strContext = strContext;
@@ -61,19 +69,40 @@ public class Spoofax3StrategoLanguage implements StrategoLanguage {
 
     @Override
     public IStrategoTerm parse(ExecContext context, InputStream inputStream, Charset charset, @Nullable String path) throws Exception {
-        final String text = new String(IOUtil.toByteArray(inputStream), charset);
-
-        @Nullable ResourceKey resourceKey;
-        try {
-            resourceKey = resourceService.getResourceKey(ResourceKeyString.parse(path));
-        } catch(ResourceRuntimeException e) {
-            // HACK: ignore exception and do not pass a resource key to the following parse method.
-            resourceKey = null;
+        @Nullable ResourceKey file = null;
+        @Nullable ResourcePath rootDirectoryHint = null;
+        if(path != null) {
+            try {
+                file = resourceService.getResourceKey(ResourceKeyString.parse(path));
+            } catch(ResourceRuntimeException e) {
+                // ignore exception and do not pass a file hint to the following parse method.
+            }
+            try {
+                @Nullable ResourcePath directory = resourceService.getResourcePath(ResourceKeyString.parse(path));
+                while(directory != null) {
+                    if(resourceService.getReadableResource(directory.appendRelativePath("spoofaxc.cfg")).exists()) {
+                        rootDirectoryHint = directory.getNormalized();
+                        break;
+                    }
+                    directory = directory.getParent();
+                }
+            } catch(ResourceRuntimeException | IOException e) {
+                // ignore exception and do not pass a root directory hint to the following parse method.
+            }
         }
 
-        // TODO: pass in root directory hint
-        final StrategoParser parser = parserSelector.getParserProvider(context, resourceKey, null).unwrap().get();
-        final IStrategoTerm ast = parser.parse(new JsglrParseInput(text, "Module", resourceKey)).ast;
+        final IStrategoTerm ast;
+        if(file != null) {
+            final Supplier<Result<IStrategoTerm, JsglrParseException>> supplier = JsglrParseTaskInput.builder(parse)
+                .withFile(file)
+                .rootDirectoryHintNullable(rootDirectoryHint)
+                .buildAstSupplier();
+            ast = context.require(supplier).unwrap();
+        } else {
+            final StrategoParser parser = parserSelector.getParserProvider(context, file, rootDirectoryHint).unwrap().get();
+            final String text = new String(IOUtil.toByteArray(inputStream), charset);
+            ast = parser.parse(new JsglrParseInput(text, "Module", rootDirectoryHint)).ast;
+        }
 
         // Remove ambiguity that occurs in old table from sdf2table when using JSGLR2 parser
         return new DisambiguateAsAnno(strContext).visit(ast);

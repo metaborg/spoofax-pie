@@ -1,6 +1,0 @@
-module lib/main
-
-imports
-
-  strategolib
-  lib/test

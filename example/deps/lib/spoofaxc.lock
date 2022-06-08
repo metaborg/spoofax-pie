@@ -1,7 +1,0 @@
-shared.defaultArtifactId=lib
-shared.defaultClassPrefix=Lib
-shared.defaultGroupId=org.metaborg
-shared.defaultPackageId=mb.lib
-shared.defaultVersion=0.1.0
-stratego.languageStrategyAffix=lib
-stratego.source.files.languageStrategyAffix=lib
