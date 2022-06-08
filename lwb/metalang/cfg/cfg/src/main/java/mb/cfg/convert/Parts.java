@@ -290,29 +290,29 @@ class Parts {
         return TermTracer.getResourceKey(term);
     }
 
-    private void createCfgMessage(String text, Severity severity, IStrategoTerm term) {
+    void createCfgMessage(String text, Severity severity, IStrategoTerm term) {
         messagesBuilder.addMessage(text, severity, getCfgFile(term), getRegion(term));
     }
 
-    private void createCfgMessage(String text, Throwable e, IStrategoTerm term) {
+    void createCfgMessage(String text, Throwable e, IStrategoTerm term) {
         messagesBuilder.addMessage(text, e, Severity.Error, getCfgFile(term), getRegion(term));
     }
 
 
-    private void createCfgError(String text, IStrategoTerm term) {
+    void createCfgError(String text, IStrategoTerm term) {
         createCfgMessage(text, Severity.Error, term);
     }
 
-    private void createCfgError(String text, Throwable e, IStrategoTerm term) {
+    void createCfgError(String text, Throwable e, IStrategoTerm term) {
         createCfgMessage(text, e, term);
     }
 
-    private void createCfgWarning(String text, IStrategoTerm term) {
+    void createCfgWarning(String text, IStrategoTerm term) {
         createCfgMessage(text, Severity.Warning, term);
     }
 
 
-    private String relativePathStringOfExistingFile(IStrategoTerm pathTerm, ResourcePath base, String errorSuffix) {
+    String relativePathStringOfExistingFile(IStrategoTerm pathTerm, ResourcePath base, String errorSuffix) {
         final String relativePath = Parts.toJavaString(pathTerm);
         final ResourcePath path;
         try {
@@ -334,12 +334,12 @@ class Parts {
         return relativePath;
     }
 
-    private ResourcePath pathAsExistingFile(IStrategoTerm pathTerm, ResourcePath base, String errorSuffix) {
+    ResourcePath pathAsExistingFile(IStrategoTerm pathTerm, ResourcePath base, String errorSuffix) {
         final String relativePath = relativePathStringOfExistingFile(pathTerm, base, errorSuffix);
         return base.appendRelativePath(relativePath).getNormalized();
     }
 
-    private String relativePathStringOfExistingDirectory(IStrategoTerm pathTerm, ResourcePath base, String errorSuffix) {
+    String relativePathStringOfExistingDirectory(IStrategoTerm pathTerm, ResourcePath base, String errorSuffix) {
         final String relativePath = Parts.toJavaString(pathTerm);
         final ResourcePath path;
         try {
@@ -361,7 +361,7 @@ class Parts {
         return relativePath;
     }
 
-    private ResourcePath pathAsExistingDirectory(IStrategoTerm pathTerm, ResourcePath base, String errorSuffix) {
+    ResourcePath pathAsExistingDirectory(IStrategoTerm pathTerm, ResourcePath base, String errorSuffix) {
         final String relativePath = relativePathStringOfExistingDirectory(pathTerm, base, errorSuffix);
         return base.appendRelativePath(relativePath).getNormalized();
     }

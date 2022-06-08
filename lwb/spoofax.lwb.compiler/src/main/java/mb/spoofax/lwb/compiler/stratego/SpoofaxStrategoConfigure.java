@@ -11,6 +11,7 @@ import mb.constraint.pie.ConstraintAnalyzeMultiTaskDef;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Interactivity;
 import mb.pie.api.None;
+import mb.pie.api.OutTransient;
 import mb.pie.api.STask;
 import mb.pie.api.Supplier;
 import mb.pie.api.SupplierWithOrigin;
@@ -20,6 +21,7 @@ import mb.pie.api.ValueSupplier;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
+import mb.sdf3.task.Sdf3ParseTableFromFile;
 import mb.sdf3.task.Sdf3ToCompletionRuntime;
 import mb.sdf3.task.Sdf3ToPrettyPrinter;
 import mb.sdf3.task.Sdf3ToSignature;
@@ -38,6 +40,7 @@ import mb.stratego.build.strincr.BuiltinLibraryIdentifier;
 import mb.stratego.build.strincr.ModuleIdentifier;
 import mb.stratego.build.strincr.Stratego2LibInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.metaborg.parsetable.IParseTable;
 import org.metaborg.sdf2table.parsetable.ParseTable;
 import org.metaborg.util.cmd.Arguments;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -48,6 +51,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -64,6 +68,7 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
     private final SpoofaxStrategoGenerationUtil spoofaxStrategoGenerationUtil;
 
     private final SpoofaxSdf3GenerationUtil spoofaxSdf3GenerationUtil;
+    private final Sdf3ParseTableFromFile sdf3ParseTableFromFile;
     private final Sdf3SpecToParseTable sdf3ToParseTable;
     private final Sdf3ToSignature sdf3ToSignature;
     private final Sdf3ToPrettyPrinter sdf3ToPrettyPrinter;
@@ -82,6 +87,7 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
         SpoofaxStrategoGenerationUtil spoofaxStrategoGenerationUtil,
 
         SpoofaxSdf3GenerationUtil spoofaxSdf3GenerationUtil,
+        Sdf3ParseTableFromFile sdf3ParseTableFromFile,
         Sdf3SpecToParseTable sdf3ToParseTable,
         Sdf3ToSignature sdf3ToSignature,
         Sdf3ToPrettyPrinter sdf3ToPrettyPrinter,
@@ -100,6 +106,7 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
         this.spoofaxStrategoGenerationUtil = spoofaxStrategoGenerationUtil;
 
         this.spoofaxSdf3GenerationUtil = spoofaxSdf3GenerationUtil;
+        this.sdf3ParseTableFromFile = sdf3ParseTableFromFile;
         this.sdf3ToParseTable = sdf3ToParseTable;
         this.sdf3ToSignature = sdf3ToSignature;
         this.sdf3ToPrettyPrinter = sdf3ToPrettyPrinter;
@@ -149,12 +156,17 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
         // Gather origins for provided Stratego files.
         final ArrayList<STask<?>> sourceFileOrigins = new ArrayList<>();
 
-        // Gather include directories, str2libs, and Java classpath.
+        // Gather configuration.
         final LinkedHashSet<ResourcePath> allIncludeDirectories = new LinkedHashSet<>(); // LinkedHashSet to remove duplicates while keeping insertion order.
         allIncludeDirectories.add(sourceFiles.mainSourceDirectory()); // Add main source directory as an include for imports.
         allIncludeDirectories.addAll(sourceFiles.includeDirectories());
         final LinkedHashSet<Supplier<Stratego2LibInfo>> allStratego2LibInfos = new LinkedHashSet<>(); // LinkedHashSet to remove duplicates while keeping insertion order.
         final LinkedHashSet<File> allJavaClassPaths = new LinkedHashSet<>();
+
+        final HashMap<String, Supplier<OutTransient<Result<IParseTable, ?>>>> concreteSyntaxExtensionParseTables = new HashMap<>();
+        for(Map.Entry<String, ResourcePath> entry : sourceFiles.concreteSyntaxExtensionParseTables().entrySet()) {
+            concreteSyntaxExtensionParseTables.put(entry.getKey(), sdf3ParseTableFromFile.createSupplier(entry.getValue()));
+        }
 
         final Task<Result<ListView<StrategoResolvedDependency>, ResolveDependenciesException>> resolveDependenciesTask =
             resolveDependencies.createTask(new ResolveDependencies.Input(rootDirectory, sourceFiles.unarchiveDirectory()));
@@ -282,7 +294,7 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
             ListView.of(builtinLibraryIdentifiers),
             ListView.copyOf(allStratego2LibInfos),
             new Arguments(), // TODO: add to input and configure
-            MapView.of(),
+            MapView.of(concreteSyntaxExtensionParseTables),
             ListView.of(sourceFileOrigins),
             null, //strategoInput.cacheDirectory(), // TODO: setting this crashes the compiler, most likely due to the ## symbols in the path.
             cfgStrategoConfig.javaSourceFileOutputDirectory(),

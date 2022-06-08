@@ -6,6 +6,7 @@ import mb.common.util.MapView;
 import mb.jsglr2.common.Jsglr2ParseTable;
 import mb.jsglr2.common.Jsglr2ParseTableException;
 import mb.pie.api.ExecContext;
+import mb.pie.api.OutTransient;
 import mb.pie.api.Supplier;
 import mb.pie.api.ValueSupplier;
 import mb.resource.ReadableResource;
@@ -72,11 +73,11 @@ public class StrategoParserSelector {
         @Nullable ResourceKey fileHint,
         @Nullable ResourcePath rootDirectoryHint
     ) throws IOException, InterruptedException {
-        final @Nullable MapView<String, Supplier<Result<IParseTable, ?>>> alternativeParseTables;
+        final @Nullable MapView<String, Supplier<OutTransient<Result<IParseTable, ?>>>> alternativeParseTables;
         if(rootDirectoryHint != null) {
             alternativeParseTables = configFunctionWrapper.get()
                 .apply(context, rootDirectoryHint)
-                .map(o -> o.map(c -> c.alternativeParseTables))
+                .map(o -> o.map(c -> c.concreteSyntaxExtensionParseTables))
                 .mapOrElse(Option::get, () -> null);
         } else {
             alternativeParseTables = null;
@@ -150,7 +151,7 @@ public class StrategoParserSelector {
     private Provider<StrategoParser> provideParser(
         ExecContext context,
         @Nullable String parseTableId,
-        @Nullable MapView<String, Supplier<Result<IParseTable, ?>>> alternativeParseTables
+        @Nullable MapView<String, Supplier<OutTransient<Result<IParseTable, ?>>>> alternativeParseTables
     ) throws Exception {
         if(parseTableId == null) return defaultParserProvider;
         final @Nullable Supplier<Result<StrategoParseTable, ?>> parseTableSupplier = getParseTableSupplier(parseTableId, alternativeParseTables);
@@ -161,12 +162,12 @@ public class StrategoParserSelector {
 
     private @Nullable Supplier<Result<StrategoParseTable, ?>> getParseTableSupplier(
         String parseTableId,
-        @Nullable MapView<String, Supplier<Result<IParseTable, ?>>> alternativeParseTables
+        @Nullable MapView<String, Supplier<OutTransient<Result<IParseTable, ?>>>> alternativeParseTables
     ) {
         if(alternativeParseTables != null) {
-            final @Nullable Supplier<Result<IParseTable, ?>> table = alternativeParseTables.get(parseTableId);
+            final @Nullable Supplier<OutTransient<Result<IParseTable, ?>>> table = alternativeParseTables.get(parseTableId);
             if(table != null) {
-                return table.map(r -> r.map(t -> new StrategoParseTable(new Jsglr2ParseTable(t))));
+                return table.map(o -> o.getValue().map(t -> new StrategoParseTable(new Jsglr2ParseTable(t))));
             }
         }
         final @Nullable StrategoParseTable builtinTable = builtinAlternativeParseTables.get(parseTableId);

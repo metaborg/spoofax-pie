@@ -13,9 +13,8 @@ import org.spoofax.terms.io.binary.TermReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
-import java.io.Serializable;
 
-public class Jsglr2ParseTable implements Serializable {
+public class Jsglr2ParseTable {
     final IParseTable parseTable;
 
     public Jsglr2ParseTable(IParseTable parseTable) {

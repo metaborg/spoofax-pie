@@ -103,12 +103,13 @@ context-free syntax
   StrategoSource.StrategoFiles  = <files {
   <{StrategoFilesOption "\n"}*>
 }>
-  StrategoFilesOption.StrategoFilesMainSourceDirectory = <main-source-directory = <Expr>>
-  StrategoFilesOption.StrategoFilesMainFile            = <main-file = <Expr>>
-  StrategoFilesOption.StrategoFilesIncludeDirectory    = <include-directory = <Expr>>
-  StrategoFilesOption.StrategoFilesExportDirectory     = <export-directory = <Expr>>
-  StrategoFilesOption.StrategoSdf3StatixExplicationGen = <sdf3-statix-explication-generation = <Expr>>
-  StrategoFilesOption.StrategoLanguageStrategyAffix    = <language-strategy-affix = <Expr>>
+  StrategoFilesOption.StrategoFilesMainSourceDirectory          = <main-source-directory = <Expr>>
+  StrategoFilesOption.StrategoFilesMainFile                     = <main-file = <Expr>>
+  StrategoFilesOption.StrategoFilesIncludeDirectory             = <include-directory = <Expr>>
+  StrategoFilesOption.StrategoFilesExportDirectory              = <export-directory = <Expr>>
+  StrategoFilesOption.StrategoSdf3StatixExplicationGen          = <sdf3-statix-explication-generation = <Expr>>
+  StrategoFilesOption.StrategoLanguageStrategyAffix             = <language-strategy-affix = <Expr>>
+  StrategoFilesOption.StrategoConcreteSyntaxExtensionParseTable = <concrete-syntax-extension-parse-table = <Expr>>
 
   StrategoOption.StrategoOutputJavaPackageId = <output-java-package = <Expr>>
 

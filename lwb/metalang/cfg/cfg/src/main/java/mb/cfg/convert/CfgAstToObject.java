@@ -283,6 +283,15 @@ public class CfgAstToObject {
                     filesParts.forAllSubtermsAsStrings("StrategoFilesExportDirectory", filesSourceBuilder::addExportDirectories);
                     filesParts.forOneSubtermAsBool("StrategoSdf3StatixExplicationGen", filesSourceBuilder::enableSdf3StatixExplicationGen);
                     filesParts.forOneSubtermAsString("StrategoLanguageStrategyAffix", filesSourceBuilder::languageStrategyAffix);
+                    filesParts.forOneSubterm("StrategoConcreteSyntaxExtensionParseTable", t -> {
+                        final ResourcePath path = filesParts.pathAsExistingFile(t, mainSourceDirectory, "Stratego concrete syntax extension parse table");
+                        final @Nullable String id = path.getLeafWithoutFileExtension();
+                        if(id != null) {
+                            filesSourceBuilder.putConcreteSyntaxExtensionParseTables(id, path);
+                        } else {
+                            filesParts.createCfgError("Cannot use concrete syntax extension parse table; path does not point to a file", t);
+                        }
+                    });
                 } else {
                     throw new InvalidAstShapeException("Stratego source", source);
                 }

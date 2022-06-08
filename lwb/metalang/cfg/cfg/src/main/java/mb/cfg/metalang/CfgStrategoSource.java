@@ -14,6 +14,7 @@ import org.immutables.value.Value;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -71,6 +72,8 @@ public abstract class CfgStrategoSource implements Serializable {
             // TODO: convert to Stratego ID instead of Java ID.
             return Conversion.nameToJavaId(shared().name().toLowerCase());
         }
+
+        Map<String, ResourcePath> concreteSyntaxExtensionParseTables();
 
 
         default ResourcePath unarchiveDirectory() {

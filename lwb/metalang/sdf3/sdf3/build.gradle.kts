@@ -161,6 +161,9 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
     showSpecParenthesizer
   )
 
+  // Additional tasks
+  addTaskDefs(TypeInfo.of(taskPackageId, "Sdf3ParseTableFromFile"))
+
   // Extend CheckMulti and GetSourceFiles, rename base tasks.
   isMultiFile(true)
   baseCheckTaskDef(spoofaxTaskPackageId, "BaseSdf3Check")
