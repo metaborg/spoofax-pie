@@ -1,6 +1,7 @@
 package mb.spoofax.lwb.compiler.stratego;
 
 import mb.cfg.metalang.CfgStrategoConfig;
+import mb.cfg.metalang.CfgStrategoSource;
 import mb.cfg.task.CfgRootDirectoryToObject;
 import mb.cfg.task.CfgRootDirectoryToObjectException;
 import mb.cfg.task.CfgToObject;
@@ -42,6 +43,7 @@ import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 
 @SpoofaxLwbCompilerScope
 public class SpoofaxStrategoResolveDependencies extends ResolveDependencies<StrategoResolvedDependency> {
@@ -187,11 +189,15 @@ public class SpoofaxStrategoResolveDependencies extends ResolveDependencies<Stra
         }
 
         private ListView<StrategoResolvedDependency> resolve(ResourcePath rootDirectory, CfgStrategoConfig config) {
-            final List<String> exportDirectories = config.source().getFiles().exportDirectories();
+            final CfgStrategoSource.Files files = config.source().getFiles();
+            final List<String> exportDirectories = files.exportDirectories();
             final ArrayList<StrategoResolvedDependency> resolved = new ArrayList<>(exportDirectories.size());
             for(String relativePath : exportDirectories) {
                 final ResourcePath directory = rootDirectory.appendAsRelativePath(relativePath);
                 resolved.add(StrategoResolvedDependency.sourceDirectory(directory));
+            }
+            for(Map.Entry<String, ResourcePath> entry : files.concreteSyntaxExtensionParseTables().entrySet()) {
+                resolved.add(StrategoResolvedDependency.concreteSyntaxExtensionParseTable(entry.getKey(), entry.getValue()));
             }
             return ListView.of(resolved);
         }

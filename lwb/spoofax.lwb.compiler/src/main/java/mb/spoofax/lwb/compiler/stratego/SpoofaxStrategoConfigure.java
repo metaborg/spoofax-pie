@@ -196,6 +196,10 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
                         javaClassPaths.addAllTo(allJavaClassPaths);
                         return None.instance;
                     })
+                    .concreteSyntaxExtensionParseTable((id, file) -> {
+                        concreteSyntaxExtensionParseTables.put(id, sdf3ParseTableFromFile.createSupplier(file));
+                        return None.instance;
+                    })
                 ;
             }
         }

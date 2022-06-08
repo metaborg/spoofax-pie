@@ -1,7 +1,6 @@
 package mb.spoofax.lwb.compiler.stratego;
 
 import mb.common.util.ADT;
-import mb.common.util.ListView;
 import mb.common.util.SetView;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -15,6 +14,8 @@ public abstract class StrategoResolvedDependency implements Serializable {
         R sourceDirectory(ResourcePath sourceDirectory);
 
         R compiledLibrary(ResourcePath str2libFile, SetView<File> javaClassPaths);
+
+        R concreteSyntaxExtensionParseTable(String id, ResourcePath file);
     }
 
     public static StrategoResolvedDependency sourceDirectory(ResourcePath sourceDirectory) {
@@ -23,6 +24,10 @@ public abstract class StrategoResolvedDependency implements Serializable {
 
     public static StrategoResolvedDependency compiledLibrary(ResourcePath str2libFile, SetView<File> javaClassPaths) {
         return StrategoResolvedDependencies.compiledLibrary(str2libFile, javaClassPaths);
+    }
+
+    public static StrategoResolvedDependency concreteSyntaxExtensionParseTable(String id, ResourcePath file) {
+        return StrategoResolvedDependencies.concreteSyntaxExtensionParseTable(id, file);
     }
 
 

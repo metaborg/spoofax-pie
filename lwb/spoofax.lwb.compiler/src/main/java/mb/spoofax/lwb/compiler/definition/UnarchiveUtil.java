@@ -50,7 +50,7 @@ public class UnarchiveUtil {
     ) {
         boolean found = false;
         for(ResourcePath definitionDirectory : unarchivedDefinitionLocations) {
-            final ResourcePath directoryPath = definitionDirectory.appendAsRelativePath(relativePath);
+            final ResourcePath directoryPath = definitionDirectory.appendAsRelativePath(relativePath).getNormalized();
             final HierarchicalResource directory = resourceService.getHierarchicalResource(directoryPath);
             try {
                 if(directory.exists() && directory.isDirectory()) {
@@ -62,7 +62,7 @@ public class UnarchiveUtil {
             }
         }
         if(!found) {
-            throw new UncheckedIOException(new IOException(metaLanguageDisplayName + "directory export '" + relativePath + "' was not found in any of its definition locations: " + unarchivedDefinitionLocations));
+            throw new UncheckedIOException(new IOException(metaLanguageDisplayName + " directory export '" + relativePath + "' was not found in any of its definition locations: " + unarchivedDefinitionLocations));
         }
     }
 }
