@@ -1,0 +1,1316 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Spoofax 3 documentation website">
+      
+      
+      
+      
+      <link rel="icon" href="../../assets/spoofax.png">
+      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-7.3.4">
+    
+    
+      
+        <title>A Spoofax tutorial implementing Programming Computable Functions (PCF) - Spoofax 3</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.db9e7362.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.3f5d1f46.min.css">
+        
+          
+          
+          <meta name="theme-color" content="#4051b5">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=:300,400,400i,700%7CJetBrains+Mono&display=fallback">
+        <style>:root{--md-text-font-family:"";--md-code-font-family:"JetBrains Mono"}</style>
+      
+    
+    
+    
+      <link rel="stylesheet" href="../../extra.css">
+    
+    
+      
+
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <script>function __prefix(e){return new URL("../..",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#a-spoofax-tutorial-implementing-programming-computable-functions-pcf" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      
+
+  
+
+<header class="md-header md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Spoofax 3" class="md-header__button md-logo" aria-label="Spoofax 3" data-md-component="logo">
+      
+  <img src="../../assets/spoofax.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Spoofax 3
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              A Spoofax tutorial implementing Programming Computable Functions (PCF)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        
+<a href="https://github.com/metaborg/spoofax-pie" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    metaborg/spoofax-pie
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../.." class="md-tabs__link">
+      Home
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../install/" class="md-tabs__link">
+        Tutorials
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../guide/ask_for_help/" class="md-tabs__link">
+        How-to Guides
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../reference/configuration/" class="md-tabs__link">
+        Reference
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../background/documentation/" class="md-tabs__link">
+        Background
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../release/download/" class="md-tabs__link">
+        Releases
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Spoofax 3" class="md-nav__button md-logo" aria-label="Spoofax 3" data-md-component="logo">
+      
+  <img src="../../assets/spoofax.svg" alt="logo">
+
+    </a>
+    Spoofax 3
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/metaborg/spoofax-pie" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    metaborg/spoofax-pie
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" data-md-state="indeterminate" type="checkbox" id="__nav_2" checked>
+      
+      
+      
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_2">
+          Tutorials
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Tutorials" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Tutorials
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../install/" class="md-nav__link">
+        Installing the Spoofax 3 language workbench
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../create_language_project/" class="md-nav__link">
+        Creating a language project
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../change_static_semantics/" class="md-nav__link">
+        Change static semantics
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" data-md-state="indeterminate" type="checkbox" id="__nav_3" checked>
+      
+      
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_3">
+          How-to Guides
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="How-to Guides" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          How-to Guides
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/ask_for_help/" class="md-nav__link">
+        Ask for help
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/report_a_bug/" class="md-nav__link">
+        Report a bug
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_3" data-md-state="indeterminate" type="checkbox" id="__nav_3_3" checked>
+      
+      
+      
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_3_3">
+          Eclipse LWB
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Eclipse LWB" data-md-level="2">
+        <label class="md-nav__title" for="__nav_3_3">
+          <span class="md-nav__icon md-icon"></span>
+          Eclipse LWB
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/eclipse_lwb/import/" class="md-nav__link">
+        Importing a Project
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/eclipse_lwb/update/" class="md-nav__link">
+        Updating & Downgrading
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/eclipse_lwb/troubleshooting/" class="md-nav__link">
+        Troubleshooting
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_4" data-md-state="indeterminate" type="checkbox" id="__nav_3_4" checked>
+      
+      
+      
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_3_4">
+          Static Semantics
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Static Semantics" data-md-level="2">
+        <label class="md-nav__title" for="__nav_3_4">
+          <span class="md-nav__icon md-icon"></span>
+          Static Semantics
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/static-semantics/code-completion/" class="md-nav__link">
+        Semantic Code Completion
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_5" data-md-state="indeterminate" type="checkbox" id="__nav_3_5" checked>
+      
+      
+      
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_3_5">
+          Development
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Development" data-md-level="2">
+        <label class="md-nav__title" for="__nav_3_5">
+          <span class="md-nav__icon md-icon"></span>
+          Development
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/development/troubleshooting/" class="md-nav__link">
+        Troubleshooting
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" data-md-state="indeterminate" type="checkbox" id="__nav_4" checked>
+      
+      
+      
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_4">
+          Reference
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Reference" data-md-level="1">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Reference
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/configuration/" class="md-nav__link">
+        Configuration
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" data-md-state="indeterminate" type="checkbox" id="__nav_5" checked>
+      
+      
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_5">
+          Background
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Background" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Background
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../background/documentation/" class="md-nav__link">
+        Documentation
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../background/motivation/" class="md-nav__link">
+        Motivation
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../background/key_ideas/" class="md-nav__link">
+        Key ideas
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../background/status/" class="md-nav__link">
+        Current Status
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" data-md-state="indeterminate" type="checkbox" id="__nav_6" checked>
+      
+      
+      
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_6">
+          Releases
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Releases" data-md-level="1">
+        <label class="md-nav__title" for="__nav_6">
+          <span class="md-nav__icon md-icon"></span>
+          Releases
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../release/download/" class="md-nav__link">
+        Downloads
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started" class="md-nav__link">
+    Getting started
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#source-material-for-pcf" class="md-nav__link">
+    Source material for PCF
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#grammar" class="md-nav__link">
+    Grammar
+  </a>
+  
+    <nav class="md-nav" aria-label="Grammar">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sdf3" class="md-nav__link">
+    SDF3
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#static-semantics" class="md-nav__link">
+    Static Semantics
+  </a>
+  
+    <nav class="md-nav" aria-label="Static Semantics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#statix" class="md-nav__link">
+    Statix
+  </a>
+  
+    <nav class="md-nav" aria-label="Statix">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scope-graphs" class="md-nav__link">
+    Scope Graphs
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-small-detour-on-editor-services" class="md-nav__link">
+    A Small Detour on Editor Services.
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#syntactic-sugar" class="md-nav__link">
+    Syntactic Sugar
+  </a>
+  
+    <nav class="md-nav" aria-label="Syntactic Sugar">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#stratego-2" class="md-nav__link">
+    Stratego 2
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    References
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/metaborg/spoofax-pie/edit/master/docs/tutorial/pcf_tutorial.md" title="Edit this page" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                <h1 id="a-spoofax-tutorial-implementing-programming-computable-functions-pcf">A Spoofax tutorial implementing Programming Computable Functions (PCF)<a class="headerlink" href="#a-spoofax-tutorial-implementing-programming-computable-functions-pcf" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>In computer science, Programming Computable Functions (PCF) is a typed functional language introduced by Gordon Plotkin in 1977, based on previous unpublished material by Dana Scott. It can be considered to be an extended version of the typed lambda calculus or a simplified version of modern typed functional languages such as ML or Haskell.</p>
+</blockquote>
+<p>-- <a href="https://en.wikipedia.org/wiki/Programming_Computable_Functions">https://en.wikipedia.org/wiki/Programming_Computable_Functions</a></p>
+<p>With this tutorial you will hopefully be able to define the programming language PCF in the <a href="https://www.spoofax.dev/spoofax-pie/develop/">Spoofax language workbench</a> in around one hour. In order to get started quickly, you should clone the <a href="https://github.com/MetaBorgCube/pcf-tutorial/">Git repository</a> connected to this tutorial. The <code>template</code> directory contains a minimal project setup that allows you to start implementing PCF. Based on this tutorial, you are hopefully able to implement the syntax and static semantics of PCF yourself. In case you get stuck, you can always peek at the example implementation in the <code>implementation</code> directory.</p>
+<h2 id="getting-started">Getting started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
+<p>You will need an installation of the Spoofax language workbench, you can find <a href="https://www.spoofax.dev/spoofax-pie/develop/tutorial/install/">the latest release here</a>. The recommended version to download is the one with embedded JVM. Note that on MacOS and Linux there are some extra instructions after unpacking.</p>
+<p>You can now import the project following the <a href="https://www.spoofax.dev/spoofax-pie/develop/guide/eclipse_lwb/import/">instructions on the website</a>, which come down to <code>File &gt; Import...</code>; <code>General &gt; Existing Projects into Workspace</code>; <code>Next &gt;</code>; tick <code>Select root directory:</code>; <code>Browse...</code> to the directory with the <code>spoofaxc.cfg</code> and press <code>Open</code>; <code>Finish</code>.</p>
+<p>Now you should <code>Project &gt; Build Project</code> after selecting the project in the <code>Package Explorer</code>.</p>
+<p>Within the project you will be working on files in the <code>src</code> and <code>test</code> directories.</p>
+<h2 id="source-material-for-pcf">Source material for PCF<a class="headerlink" href="#source-material-for-pcf" title="Permanent link">&para;</a></h2>
+<p>Since the original publications on PCF were more concerned with semantics than syntax, it is a bit difficult to trace the syntax of PCF. We will use the definition of PCF from a book by John C. Mitchell called "Foundation for Programming Languages" (Mitchell 1996). Note that you might also find a definition by Dowek and Levy (Dowek et al. 2011) called Mini-ML, or PCF, this is not the version that we will use here. Chapter 2 of Foundation for Programming Languages about the language PCF is <a href="https://theory.stanford.edu/~jcm/books/fpl-chap2.ps">freely available</a>.</p>
+<h2 id="grammar">Grammar<a class="headerlink" href="#grammar" title="Permanent link">&para;</a></h2>
+<p>This is a slightly massaged grammar of so-called "pure pcf" from section 2.2.6:</p>
+<div class="highlight"><pre><span></span><code>e ::= x                            (variable reference)
+  | if e then e else e             (if condition)
+  | \x : t. e                      (function abstraction)
+  | e e                            (function application)
+  | fix e                          (fixed point)
+  | true | false                   (boolean constants)
+  | Eq? e e                        (equality check)
+  | n                              (natural number constant)
+  | e + e                          (arithmetic operations)
+  | (e)                            (parenthesised expression)
+
+t ::= nat                          (natural number type)
+  | bool                           (boolean type)
+  | t -&gt; t                         (function type)
+  | (t)                            (parenthesised type)
+</code></pre></div>
+<p>As you can see, PCF is a small functional programming language. It is an expression based language where <code>e</code> is the expression sort, and <code>t</code> is the type sort. There are also lexical sorts in this grammar, namely <code>x</code> for names, and <code>n</code> for numeric constants. The other words and symbols are keywords and operators. We've replaced some of the non-ASCII notation from the book into an ASCII version to make it easier to type, but if you have a good input method for non-ascii symbols, feel free to use those in your grammar. We've also added parentheses to both sorts for grouping. We have excluded pairs from the grammar, to make the language a little smaller and hopefully make this tutorial completable in one hour.</p>
+<p>The grammar in the book is more type-directed, which constrains what programs the parser can parse to already be closer to the set of programs that are actually typed and therefore in the language. While this might seem advantageous, in practice it is nicer for a user to have a wide range of programs parse and be given highlighting. The type checker can give a much clearer explanation of why a program is not acceptable than a parser based on a grammar that encodes some type information.</p>
+<h3 id="sdf3">SDF3<a class="headerlink" href="#sdf3" title="Permanent link">&para;</a></h3>
+<p>With a context-free grammar available to us, we can start implementing the syntax of PCF in Spoofax. For this we use SDF3, the Syntax Definition Formalism version 3. You'll find that the <code>template</code> project already has some <code>.sdf3</code> files ready for you: <code>lex.sdf3</code>, <code>expr.sdf</code>, <code>type.sdf3</code> and <code>main.sdf3</code>.</p>
+<p>The main file defines the <code>start symbol</code> of the grammar which is used by the editor to know where to start parsing. Expressions go in <code>expr.sdf3</code>, types in <code>type.sdf3</code> and we have already provided you with a lexical syntax in <code>lex.sdf3</code>. Have a look, you will find the definition of lexical sorts <code>Name</code>, <code>Number</code> and <code>Keyword</code>, where <code>Name</code> and <code>Number</code> are defined as regular expressions, and <code>Keyword</code> is defined as a few options of literal strings that correspond with keywords from the grammar. Then <code>Name</code> is restricted by a rejection rule to not match anything that can be parsed as <code>Keyword</code>. The <code>lexical restrictions</code> make sure that names and numbers are matched greedily.</p>
+<p>Aside: Grammars in SDF3 define both lexical and context-free syntax, both of which are handled together by a character-level parsing algorithm called SGLR. This makes it hard to provide truly greedy regular expression by default, and instead we express that a name is not allowed to be directly followed by a letter or number, which can be handled better by a parser and still makes things greedy.</p>
+<p>At the end of the file you find a defining of <code>LAYOUT</code>, which is the white space (and possibly comments) that are allowed between parts of the context-free syntax that we'll specify together for expressions and types.</p>
+<p>In the files <code>expr.sdf3</code> and <code>type.sdf3</code> you will find the sort definitions for expressions and types with some but not all rules. As you can see, there is <a href="https://www.metaborg.org/en/latest/source/langdev/meta/lang/sdf3/reference.html#templates">template syntax</a> in SDF3 which is both a convenient way to write your syntax and a hint for how it might be formatted in a program.</p>
+<blockquote>
+<p>Exercise. Try writing the remaining part of the grammar yourself.</p>
+</blockquote>
+<p>Once you've built the project again, you can try out the newly added parts of a grammar. In <code>test/test.spt</code> file you will find test written in the <a href="https://www.metaborg.org/en/latest/source/langdev/meta/lang/spt/index.html">SPoofax Testing language SPT</a>. In this special language workbench testing language we can test many things on a high level. For now we can more <code>parse succeeds</code> and <code>parse fails</code> tests and see failing tests get an error marker in the editor immediately. You can also with a <code>parse to</code> test where you can specify the abstract syntax tree you expect.</p>
+<p>Of course you can also write your PCF programming language in its own editor. There is already an <code>example.pcf</code> file, where you can see the syntax highlighting derived from your grammar. You can also view the abstract syntax tree of this program through the menu <code>Spoofax &gt; Debug &gt; Show parsed AST</code>. The <code>(continuous)</code> version even updates as you update your program.</p>
+<p>You might find that writing a program <code>1 + 1 + 1</code> fails both expectations, because it is in our PCF language, but the parsing isn't entirely <em>successful</em>. Instead the result, which you can also write as an expectation, is <code>parse ambiguous</code>. We need to specify in the grammar what the associativity of the program is, whether it's <code>(1 + 1) + 1</code> or <code>1 + (1 + 1)</code>. Let's pick the former and use the <code>{left}</code> annotation on the <code>Expr.Add</code> rule. Now your double-add test should work. In fact we can now use the <code>parse to</code> test to specify that we expect <code>Add(Add(Num("1"), Num("1")), Num("1"))</code>. That is a little cumbersome to write though. What we can also do is write another program between double brackets: <code>[[(1 + 1) + 1]]</code>. Because the round brackets are not in the AST, this comes down to the same test.</p>
+<p>Now that we're familiar with ambiguities and testing for them, we should root out the other ones in our grammar. You'll find that most grammar productions in PCF are not ambiguous with themselves, but mostly with each other. This is a priority problem, which is specified in a <code>context-free priorities</code> section of the grammar. You can write <code>Expr.App &gt; Expr.Add</code> to specify that application binds tighter than addition. You can write out pairs of these with commas in between, or a longer chain of <code>&gt;</code>, which is more common and is a reminder that priority is transitive. You can also make groups of expressions of the same priority, like <code>{ Expr.If  Expr.Lam  Expr.Fix }</code>.</p>
+<blockquote>
+<p>Exercise. See if you can figure out a good set of priorities and write some tests for them. You can check your list against ours in the <code>implementation</code>.</p>
+</blockquote>
+<h2 id="static-semantics">Static Semantics<a class="headerlink" href="#static-semantics" title="Permanent link">&para;</a></h2>
+<p>PCF has a relatively simple type system, defined as follows:</p>
+<div class="highlight"><pre><span></span><code>---------------- [T-True]
+Γ |- true : bool
+
+----------------- [T-False]
+Γ |- false : bool
+
+------------ [T-Nat]
+Γ |- n : nat
+
+
+Γ |- e1 : nat
+Γ |- e2 : nat
+------------------ [T-Add]
+Γ |- e1 + e2 : nat
+
+Γ |- e1 : t
+Γ |- e2 : t
+--------------------- [T-Eq]
+Γ |- Eq? e1 e2 : bool
+
+Γ |- e : bool
+Γ |- e1 : t
+Γ |- e2 : t
+----------------------------- [T-If]
+Γ |- if e then e1 else e2 : t
+
+
+(x, t) ϵ Γ
+---------- [T-Var]
+Γ |- x : t
+
+(x, t); Γ |- e : t&#39;
+------------------------ [T-Abs]
+Γ |- \x : t. e : t -&gt; t&#39;
+
+Γ |- e1 : t&#39; -&gt; t
+Γ |- e2 : t&#39;
+----------------- [T-App]
+Γ |- e1 e2 : t
+
+
+Γ |- e : t -&gt; t
+--------------- [T-Fix]
+Γ |- fix e : t
+</code></pre></div>
+<p>In this type system, all constructs have monomorphic types. The equality operator accepts any operands, as long as the types of the left and right operand are equal. Similarly, the types of the then-branch and the else-branch of an if-expression should be equal. Variables are typed in a typing environment Γ, which is extended by lambda abstractions. This is all similar to the regular definition of the lambda calculus (see e.g. Pierce (2002), chap. 9). The typing rule for the fixpoint operator ensures its argument is an endofunction, and types it with the (co)domain of the function.</p>
+<h3 id="statix">Statix<a class="headerlink" href="#statix" title="Permanent link">&para;</a></h3>
+<p>Given this type system and a parser derived from the syntax specification, we can start defining our type-checker in Spoofax. We use the Statix meta-language for type system specification for this. In Statix, type-systems can be expressed in a declarative style, closely related to formal inference rules, such as given above. However, instead of typing environments, <em>scope graphs</em> are used for name binding. (Scope Graphs will be explained in more detail later in this tutorial.) The backend (often referred to as 'solver') interprets the specification applied to an AST of the object language (PCF in this case) as a constraint program, which yields an executable type checker.</p>
+<p>So let's get started. We will define our type-system in the <code>src/expr.stx</code> file. This file already imports <code>expr-sig</code> and <code>type-sig</code>, which makes the abstract syntax of the language, which is derived from the syntax definition, available. In addition, there is a declaration for a user-defined constraint <code>typeOfExpr</code>, which has type <code>scope * Expr -&gt; Type</code>. That means that the constraint accepts a <code>scope</code> and an expression, and returns a type for it. This can be read as <code>Γ |- e : t</code>, where the <code>scope</code> argument takes the role of the environment Γ. To test the type system, it is recommended to open the <code>example.pcf</code> and <code>test/test.spt</code> files as well.</p>
+<p>A lonely constraint declaration is useless: there are no ways a <code>typeOfExpr</code> constraint can be solved. We need to add <em>rules</em> for this constraint. Rules can be compared to <em>cases</em> in a functional language or, even better, inference rules as given above. Lets look at an example:</p>
+<div class="highlight"><pre><span></span><code>typeOfExpr(_, True()) = Bool().
+</code></pre></div>
+<p>This rule states the simple fact that a <code>true</code> constant has type <code>bool</code>. Do you see the similarity with our <code>T-True</code> rule?</p>
+<blockquote>
+<p>Exercise: Define the <code>T-False</code> and <code>T-Nat</code> rules in your Statix specification.</p>
+</blockquote>
+<p>That was not too hard. However, not all rules are that simple. Some of them have <em>premises</em>. In Statix, we encode them after a turnstile symbol <code>:-</code>. For example:</p>
+<div class="highlight"><pre><span></span><code>typeOfExpr(s, Eq(e1, e2)) = Bool() :- {T}
+  typeOfExpr(s, e1) == T,
+  typeOfExpr(s, e2) == T.
+</code></pre></div>
+<p>This rule is a bit more complicated, so lets break it down part by part. The meaning of the <em>rule head</em> (<code>typeOfExpr(s, Eq(e1, e2)) = Bool()</code>) should be familiar by now. An equality comparison in scope <code>s</code> has type <code>Bool()</code>. Then, after the turnstile, there is an <em>existential</em> constraint <code>{T}</code>, which introduced the unification variable <code>T</code>. One might read it as <code>∃ T. ...</code>. Then there are two <em>premises</em> of the rule that assert that <code>e1</code> and <code>e2</code> have the type <code>T</code>. As a unification variable can only have a single value, this effectively enforces both operands to have the same type.</p>
+<blockquote>
+<p>Exercise: Define the <code>T-Add</code> and <code>T-If</code> rules.</p>
+</blockquote>
+<p>It is also possible to use SPT to test your type system. To apply the type-checker in a test, use the <code>analysis succeeds</code> and <code>analysis fails</code> expectations. For example:</p>
+<div class="highlight"><pre><span></span><code>test cannot compare nat and bool [[
+  Eq? true 42
+]] analysis fails
+</code></pre></div>
+<blockquote>
+<p>Exercise: Define some SPT tests that cover all currently typed constructs.</p>
+</blockquote>
+<h4 id="scope-graphs">Scope Graphs<a class="headerlink" href="#scope-graphs" title="Permanent link">&para;</a></h4>
+<p>Now it is time to look add lambda abstractions and applications. In Statix, typing these constructs uses scope graphs. We will explore how scope graphs work using some example programs.</p>
+<p>The rule for lambda abstraction is already defined as follows:</p>
+<div class="highlight"><pre><span></span><code>typeOfExpr(s, Lam(x, T, e)) = Fun(T, T&#39;) :- {s_lam}
+  new s_lam,
+  s_lam -P-&gt; s,
+  !var[x, T] in s_lam,
+  typeOfExpr(s_lam, e) == T&#39;.
+</code></pre></div>
+<p>In this rule, a lambda expression gets the type <code>Fun(T, T')</code>. The input type <code>T</code> is explicitly provided by the syntax, while the result type <code>T'</code> is inferred from the lambda body. However, as can be seen in the <code>T-Abs</code> rule, the body is typed in an <em>extended context</em>. In Statix, that is encoded by the first three constraints. The <code>new s_lam</code> constraint generates a fresh node in the scope graph, and binds a reference to that node to the unification variable <code>s_lam</code>. That scope encodes the context of the body. To indicate that <code>s_lam</code> inherits all declarations from its parent context (Γ in the rule), the <code>s_lam -P-&gt; s</code> constraints asserts an <em>edge</em> from <code>s_lam</code> to <code>s</code>. This ensures that a query in <code>s_lam</code> (explained later) can reach declarations in <code>s</code>. The edge is labeled with an edge label <code>P</code>. In Statix all edges are labeled, and labels have to be introduced explicitly. In the stub, the label <code>P</code> was already predefined in the <code>signature</code> section above the rule for abstractions.
+Finally, we need to <em>extend</em> the <code>s_lam</code> context with our new variable. This is what the <code>!var[x, T] in s_lam</code> constraint does. This constraint, which is similar to the <code>(x, t);</code> in <code>T-Abs</code>, creates a declaration with name <code>x</code> and type <code>T</code> in <code>s_lam</code>. A declaration always uses a <em>relation</em>, which is <code>var</code> in this case. The <code>var</code> relation is also declared in the <code>signature</code> section above.</p>
+<p>To aid debugging, scope graph can be inspected. For example, open an <code>example.pcf</code> file, and add this program:</p>
+<div class="highlight"><pre><span></span><code>(\double: nat -&gt; nat. double 21) \x: nat. x + x
+</code></pre></div>
+<p>Now, open the menu <code>Spoofax &gt; Debug &gt; Show formatted scope graph (continuous)</code>. A new window should be opened with (approximately) this content:</p>
+<div class="highlight"><pre><span></span><code>scope graph
+  #-s_lam_20-4 {
+    relations {
+      expr!var : (&quot;double&quot;, Fun(Nat(), Nat()))
+    }
+    edges {
+      expr!P : #-s_glob_1-5
+    }
+  }
+  #-s_lam_10-2 {
+    relations {
+      expr!var : (&quot;x&quot;, Nat())
+    }
+    edges {
+      expr!P : #-s_glob_1-5
+    }
+  }
+</code></pre></div>
+<p>This file shows two scopes: <code>#-s_lam_20-4</code> and <code>#-s_lam_10-2</code>. These scopes correspond to the bodies of the first and second abstraction, respectively. Both scopes have a single declaration, shown in the <code>relations</code> block. The contents of the relations should not be surprising: they are the declarations we asserted using our <code>!var[x, T] in s_lam</code> constraint! Similarly, there are two <code>P</code>-labeled edges to <code>#s_glob_1-5</code>. This scope is the global scope, which does not have its own entry because it is empty. In fact, it corresponds to the empty top-level environment a regular typing derivation would start with.</p>
+<p>Now, we have seen how to extend a context, but how should we read it? Reading a context corresponds to doing a <em>query</em> in Statix. In PCF, the only time we use a query is when resolving a variable in the <code>T-Var</code> rule. In Statix, this rule is defined as follows:</p>
+<div class="highlight"><pre><span></span><code>typeOfExpr(s, Var(x)) = T :- {Ts}
+  query var
+    filter P* and { x&#39; :- x&#39; == x }
+       min $ &lt; P
+        in s |-&gt; Ts,
+  referenceTypeOk(x, T, Ts).
+</code></pre></div>
+<p>We ignore the <code>referenceTypeOk</code> constraint for now, as it is only there to ensure the error messages are easier to interpret. The interesting part is the <code>query</code> constraint. This constraint takes quite some parameters, which we will analyse one by one.</p>
+<p>First, there is the <code>var</code> parameter, which is the relation to query. In languages that, unlike PCF, have multiple relations, this argument ensures that the query will only find declarations under the <code>var</code> relation, such as the ones asserted by the <code>T-Abs</code> rule we've discussed earlier.
+Second, there is the <code>P*</code> argument. This is a regular expression that describes valid paths in the scope graph. In this case, it ensures that the query can resolve in the local context, and all parent contexts.</p>
+<blockquote>
+<p>Exercise. Change <code>P*</code> into <code>P+</code> and test the program <code>\x: nat. x</code>. Does it type correctly? Why (not)?</p>
+</blockquote>
+<p>Third, there is the <em>data well-formedness</em> condition <code>{ x' :- x' == x }</code>. This is an anonymous unary predicate that compares the name of a declaration (bound to <code>x'</code>) to the reference (<code>x</code>). Only declarations for which the constraint holds (i.e., <code>x' == x</code> can be solved) are returned in the query answer. This excludes reachable declarations with the wrong name.</p>
+<blockquote>
+<p>Exercise. Change <code>{ x' :- x' == x }</code> to <code>{ x' :- true }</code> and test the program <code>\x: nat. \y: bool. x + 1</code>. Does it type correctly? Why (not)?</p>
+</blockquote>
+<p>Fourth, there is the <code>$ &lt; P</code> argument. This argument indicates that the end-of-path label <code>$</code> <em>binds closer</em> than the <code>P</code> label. This means that shorter paths are preferred over longer paths, essentially modelling shadowing. This is best seen in action:</p>
+<blockquote>
+<p>Exercise. Remove <code>$ &lt; P</code> and test the program <code>\x: bool. \x: nat. x + 1</code>. Does it type correctly? Why (not)?</p>
+<p>Exercise. Add <code>P &lt; $</code> and test the program <code>\x: bool. \x: nat. x + 1</code>. Does it type correctly? Why (not)?</p>
+<p>Exercise: Define the <code>T-App</code> and <code>T-Fix</code> rules.</p>
+</blockquote>
+<p>Congratulations! You have now defined a fully functional frontend for PCF.</p>
+<h3 id="a-small-detour-on-editor-services">A Small Detour on Editor Services.<a class="headerlink" href="#a-small-detour-on-editor-services" title="Permanent link">&para;</a></h3>
+<p>Type information is often used for editor services and transformations. This is tightly integrated in the Spoofax language as well. For example, hover your mouse over a variable reference for a moment. After some time, a tooltip with (e.g.) the text <code>Type: Nat()</code> will show up. Or, even fancier, CTRL-Click (Cmd-Click on Mac) on a reference. Your cursor now should jump to the binder that introduced the variable.</p>
+<p>To understand this behaviour, we have to look into the second <code>referenceTypeOk</code> rule. This rule contains the following constraints:</p>
+<div class="highlight"><pre><span></span><code>@x.type := T,
+@x.ref := x&#39;
+</code></pre></div>
+<p>In this rule <code>x</code> is the reference, and <code>T</code> is the expected type. The constraint <code>@x.type := T</code> sets the value of the <code>type</code> <em>property</em> of <code>x</code> to <code>T</code>. The Spoofax editor will read such <code>type</code> properties and display them in a tooltip. That explains the tooltip we observed earlier.</p>
+<p>In addition, the <code>x'</code> variable is the name of the declaration. Unobservable to the user, this name has its position attached. By assigning it as the <code>ref</code> property of the reference <code>x</code>, the editor reference resolution knew where to put the cursor when <code>x</code> was CTRL-clicked!</p>
+<h2 id="syntactic-sugar">Syntactic Sugar<a class="headerlink" href="#syntactic-sugar" title="Permanent link">&para;</a></h2>
+<p>These are the syntactic extensions (syntactic sugar) found in the book we're following:</p>
+<div class="highlight"><pre><span></span><code>e ::= ...
+  | let x : t = e in e             (let binding)
+  | let x(x : t) : t = e in e      (let function binding)
+  | letrec x : t = e in e          (let recursive binding)
+  | letrec x(x : t) : t = e in e   (let recursive binding)
+</code></pre></div>
+<p>These extensions are defined as sugar, in that you can transform them into an equivalent program using only the "pure pcf" syntax. That's exactly how we will also implement this sugar.</p>
+<p>Let's first summarise the meaning of these extensions:</p>
+<div class="highlight"><pre><span></span><code>let x : t = e1 in e2
+  == (\x : t. e2) e1
+
+let x1(x2 : t1) : t2 = e1 in e2
+  == let x1 : t1 -&gt; t2 = \x2 : t1. e1 in e2
+  == (\x1 : t1 -&gt; t2. e2) (\x2 : t1. e1)
+
+letrec x : t = e1 in e2
+  == let x : t = fix \x : t. e1 in e2
+  == (x : t. e2) (fix \x : t. e1)
+
+letrec x1(x2 : t1) : t2 = e1 in e2
+  == letrec x1 : t1 -&gt; t2 = \x2 : t1. e1 in e2
+  == let x1 : t1 -&gt; t2 = fix \x1 : t1 -&gt; t2. \x2 : t1. e1 in e2
+  == (\x1 : t1 -&gt; t2. e2) (fix \x1 : t1 -&gt; t2. \x2 : t1. e1)
+</code></pre></div>
+<p>As you can see, we can use lambdas for binding variables in a <code>let</code>, and we can use <code>fix</code> for recursive definitions in <code>letrec</code>. Function definition syntax in <code>let</code> is of course also just sugar for lambdas.</p>
+<h3 id="stratego-2">Stratego 2<a class="headerlink" href="#stratego-2" title="Permanent link">&para;</a></h3>
+<p>Let's turn these equations into executable code. We will use the term-writing language Stratego 2 for this task. You can find code of this language in <code>.str2</code> files such as <code>main.str2</code> and <code>desugar.str2</code>. In the latter you will find a prewritten strategy <code>desugar</code>, defined as a type preserving transformation (<code>TP</code>) that traverses topdown and tries to apply the <code>desugar-let</code> rewrite rules. In the rewrite rules is <code>desugar-let</code>, also type preserving, but it currently fails. You can see an example rewrite rule that turns let bound functions into the applications of lambdas from our equations above, but this uses the <code>LetF</code> abstract syntax, which we have not defined yet. So before we start writing our rewrite rules, we should first define the appropriate syntax in <code>expr.sdf3</code>.</p>
+<blockquote>
+<p>Exercise: Define syntax for <code>let</code> and <code>letrec</code>, and don't forget the priority rules of the newly added syntax.</p>
+</blockquote>
+<p>With the syntax defined, we can now start writing our rewrite rules. As suggested by the example one for let-bound functions, we are writing the abstract syntax pattern of our sugar programs with variables, then an arrow <code>-&gt;</code>, and then the abstract syntax pattern of our final result. This way we only have to traverse our program once to apply the rules. We could go <code>topdown</code> or <code>bottomup</code> with this approach, either direction works.</p>
+<blockquote>
+<p>Exercise: Write the remaining rewrite rules.</p>
+</blockquote>
+<p>We <em>could</em> also write our desugaring differently, in the smaller steps of the equation, by repeatedly applying rewrite rules. Our strategy would then be <code>outermost</code> or <code>innermost</code>, and we could rewrite our <code>Let</code> as usual, but write our <code>Let(Rec)F</code> to <code>Let(Rec)</code> and our <code>LetRec</code> to <code>Let</code> with <code>Fix</code>.</p>
+<blockquote>
+<p>Exercise: Write the single step rewrite rules.
+(This is demonstrated in <code>desugar2</code> of the example <code>implementation</code>.)</p>
+</blockquote>
+<p>You can factor out the similarity of the function-binding <code>let</code> and <code>letrec</code> to their normal counterpart.</p>
+<blockquote>
+<p>Bonus Exercise: Define new constructors for <code>Let</code> and <code>LetF</code> that take an extra argument that marks if it is a normal or <code>letrec</code> version. Define a separate desugaring step to transform your program into these constructors. Now define the single step rewrite rules from before, combining the similar one into a single rule.
+(This is demonstrated in <code>desugar3</code> of the example <code>implementation</code>.)</p>
+</blockquote>
+<p>With your desugaring now complete, you can add a call to <code>desugar</code> to <code>pre-analyze</code> in <code>src/main.str2</code>. This will eliminate the <code>let</code> related constructors before you analyse your program, so you do not need to extend your Statix specification.</p>
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<ul>
+<li>(Mitchell 1996) Mitchell, John C. (1996). The Language PCF. In: Foundations for Programming Languages. <a href="https://theory.stanford.edu/~jcm/books/fpl-chap2.ps">https://theory.stanford.edu/~jcm/books/fpl-chap2.ps</a></li>
+<li>(Dowek et al. 2011) Dowek, G., Lévy, JJ. (2011). The Language PCF. In: Introduction to the Theory of Programming Languages. Undergraduate Topics in Computer Science. Springer, London. <a href="https://doi.org/10.1007/978-0-85729-076-2_2">https://doi.org/10.1007/978-0-85729-076-2_2</a></li>
+<li>(Pierce 2002) Pierce, Benjamin C. (2002). Types and Programming Languages. MIT Press, Cambridge, Massachusetts.</li>
+</ul>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+        
+          <a href="#" class="md-top md-icon" data-md-component="top" data-md-state="hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"/></svg>
+            Back to top
+          </a>
+        
+      </main>
+      
+        
+<footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        
+          Made with
+          <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+            Material for MkDocs
+          </a>
+        
+        
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.expand", "navigation.instant", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top"], "search": "../../assets/javascripts/workers/search.8397ff9e.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.1e84347e.min.js"></script>
+      
+    
+  </body>
+</html>
