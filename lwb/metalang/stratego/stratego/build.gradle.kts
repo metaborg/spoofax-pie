@@ -64,7 +64,13 @@ spoofax2BasedLanguageProject {
       copyCtree(false)
       copyClasses(true)
     }
-    project.languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:stratego.lang:${ext["spoofax2DevenvVersion"]}"))
+    project.run {
+      addAdditionalCopyResources(
+        "syntax/**/*.sdf3",
+        "src-gen/syntax/**/*.sdf3"
+      )
+      languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:stratego.lang:${ext["spoofax2DevenvVersion"]}"))
+    }
   }
 }
 
@@ -80,6 +86,10 @@ languageAdapterProject {
     }
     withStyler()
     withStrategoRuntime()
+    withExports().run {
+      addDirectoryExport("SDF3", "syntax")
+      addDirectoryExport("SDF3", "src-gen/syntax")
+    }
     project.configureCompilerInput()
   }
 }
