@@ -6,13 +6,11 @@ import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.sdf3.task.Sdf3GetStrategoRuntimeProvider;
-import mb.sdf3.task.Sdf3Parse;
+import mb.sdf3.task.spoofax.Sdf3ParseWrapper;
 import mb.spoofax.core.language.command.CommandFeedback;
-import mb.stratego.common.StrategoRuntime;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
-import javax.inject.Provider;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -43,12 +41,12 @@ public abstract class ShowTaskDef extends ProvideOutputShared implements TaskDef
         }
     }
 
-    private final Sdf3Parse parse;
+    private final Sdf3ParseWrapper parse;
     private final TaskDef<Supplier<? extends Result<IStrategoTerm, ?>>, Result<IStrategoTerm, ?>> desugar;
     private final TaskDef<Supplier<? extends Result<IStrategoTerm, ?>>, Result<IStrategoTerm, ?>> operation;
 
     public ShowTaskDef(
-        Sdf3Parse parse,
+        Sdf3ParseWrapper parse,
         TaskDef<Supplier<? extends Result<IStrategoTerm, ?>>, Result<IStrategoTerm, ?>> desugar,
         TaskDef<Supplier<? extends Result<IStrategoTerm, ?>>, Result<IStrategoTerm, ?>> operation,
         Sdf3GetStrategoRuntimeProvider getStrategoRuntimeProvider,

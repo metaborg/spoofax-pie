@@ -10,9 +10,9 @@ import mb.pie.api.Supplier;
 import mb.resource.hierarchical.ResourcePath;
 import mb.sdf3.task.Sdf3AnalyzeMulti;
 import mb.sdf3.task.Sdf3Desugar;
-import mb.sdf3.task.Sdf3Parse;
 import mb.sdf3.task.spec.Sdf3SpecConfig;
 import mb.sdf3.task.spoofax.Sdf3GetSourceFilesWrapper;
+import mb.sdf3.task.spoofax.Sdf3ParseWrapper;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
@@ -23,14 +23,14 @@ import java.io.IOException;
  */
 public class SpoofaxSdf3GenerationUtil {
     private final SpoofaxSdf3Configure configure;
-    private final Sdf3Parse parse;
+    private final Sdf3ParseWrapper parse;
     private final Sdf3GetSourceFilesWrapper getSourceFiles;
     private final Sdf3Desugar desugar;
     private final Sdf3AnalyzeMulti analyze;
 
     @Inject public SpoofaxSdf3GenerationUtil(
         SpoofaxSdf3Configure configure,
-        Sdf3Parse parse,
+        Sdf3ParseWrapper parse,
         Sdf3GetSourceFilesWrapper getSourceFiles,
         Sdf3Desugar desugar,
         Sdf3AnalyzeMulti analyze
@@ -60,10 +60,10 @@ public class SpoofaxSdf3GenerationUtil {
         final Option<SpoofaxSdf3Config> configureOption = configureResult.unwrap();
         if(configureOption.isSome()) {
             final SpoofaxSdf3Config spoofaxSdf3Config = configureOption.unwrap();
-            if(!spoofaxSdf3Config.getSdf3SpecConfig().isSome()) {
+            if(!spoofaxSdf3Config.getMainSdf3SpecConfig().isSome()) {
                 return; // Only generate when there are SDF3 source files (not prebuilt).
             }
-            final Sdf3SpecConfig config = spoofaxSdf3Config.getSdf3SpecConfig().unwrap();
+            final Sdf3SpecConfig config = spoofaxSdf3Config.getMainSdf3SpecConfig().unwrap();
             final JsglrParseTaskInput.Builder parseInputBuilder = parse.inputBuilder().rootDirectoryHint(rootDirectory);
             final Sdf3AnalyzeMulti.Input analyzeInput = new Sdf3AnalyzeMulti.Input(config.rootDirectory, parse.createRecoverableMultiAstSupplierFunction(getSourceFiles.createFunction()));
             for(ResourcePath file : context.require(getSourceFiles, rootDirectory)) {

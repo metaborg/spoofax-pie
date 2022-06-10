@@ -14,11 +14,11 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.sdf3.Sdf3ClassLoaderResources;
 import mb.sdf3.Sdf3Scope;
 import mb.sdf3.task.Sdf3Desugar;
-import mb.sdf3.task.Sdf3Parse;
 import mb.sdf3.task.Sdf3ToCompletion;
 import mb.sdf3.task.Sdf3ToNormalForm;
 import mb.sdf3.task.Sdf3ToPermissive;
 import mb.sdf3.task.spoofax.Sdf3GetSourceFilesWrapper;
+import mb.sdf3.task.spoofax.Sdf3ParseWrapper;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.sdf2table.grammar.NormGrammar;
 import org.metaborg.sdf2table.io.NormGrammarReader;
@@ -65,7 +65,7 @@ public class Sdf3SpecToParseTable implements TaskDef<Sdf3SpecToParseTable.Input,
     }
 
     private final Sdf3ClassLoaderResources classLoaderResources;
-    private final Sdf3Parse parse;
+    private final Sdf3ParseWrapper parse;
     private final Sdf3Desugar desugar;
     private final Sdf3GetSourceFilesWrapper getSourceFiles;
     private final Sdf3ToPermissive toPermissive;
@@ -74,7 +74,7 @@ public class Sdf3SpecToParseTable implements TaskDef<Sdf3SpecToParseTable.Input,
 
     @Inject public Sdf3SpecToParseTable(
         Sdf3ClassLoaderResources classLoaderResources,
-        Sdf3Parse parse,
+        Sdf3ParseWrapper parse,
         Sdf3Desugar desugar,
         Sdf3GetSourceFilesWrapper getSourceFiles,
         Sdf3ToPermissive toPermissive,

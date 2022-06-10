@@ -12,6 +12,7 @@ import mb.sdf3.task.Sdf3AnalyzeMulti;
 import mb.sdf3.task.Sdf3GetStrategoRuntimeProvider;
 import mb.sdf3.task.Sdf3Parse;
 import mb.sdf3.task.spoofax.Sdf3GetSourceFilesWrapper;
+import mb.sdf3.task.spoofax.Sdf3ParseWrapper;
 import mb.spoofax.core.language.command.CommandFeedback;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -48,14 +49,14 @@ public abstract class ShowAnalyzedTaskDef extends ProvideOutputShared implements
         }
     }
 
-    private final Sdf3Parse parse;
+    private final Sdf3ParseWrapper parse;
     private final Function<Supplier<? extends Result<IStrategoTerm, ?>>, Result<IStrategoTerm, ?>> desugar;
     private final Sdf3GetSourceFilesWrapper getSourceFiles;
     private final Sdf3AnalyzeMulti analyze;
     private final Function<Supplier<? extends Result<ConstraintAnalyzeMultiTaskDef.SingleFileOutput, ?>>, Result<IStrategoTerm, ?>> operation;
 
     public ShowAnalyzedTaskDef(
-        Sdf3Parse parse,
+        Sdf3ParseWrapper parse,
         Sdf3GetSourceFilesWrapper getSourceFiles,
         Function<Supplier<? extends Result<IStrategoTerm, ?>>, Result<IStrategoTerm, ?>> desugar,
         Sdf3AnalyzeMulti analyze,

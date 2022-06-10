@@ -21,6 +21,7 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.sdf3.task.spec.Sdf3SpecConfig;
 import mb.spoofax.lwb.compiler.definition.ResolveDependencies;
 import mb.spoofax.lwb.compiler.definition.ResolveDependenciesException;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.sdf2table.parsetable.ParseTableConfiguration;
 
 import javax.inject.Inject;
@@ -145,7 +146,9 @@ public class SpoofaxSdf3Configure implements TaskDef<ResourcePath, Result<Option
             files.checkPrioritiesInParseTable(),
             files.createLayoutSensitiveParseTable()
         );
-        final Sdf3SpecConfig sdf3SpecConfig = new Sdf3SpecConfig(
+
+        // Main parse table
+        final Sdf3SpecConfig mainSdf3SpecConfig = new Sdf3SpecConfig(
             rootDirectory,
             mainSourceDirectory.getPath(),
             mainFile.getPath(),
@@ -153,7 +156,34 @@ public class SpoofaxSdf3Configure implements TaskDef<ResourcePath, Result<Option
             ListView.of(sourceFileOrigins),
             parseTableConfiguration
         );
-        return Result.ofOk(SpoofaxSdf3Config.files(sdf3SpecConfig, cfgSdf3Config.parseTableAtermOutputFile(), cfgSdf3Config.parseTablePersistedOutputFile()));
+        final SpoofaxSdf3Config.BuildParseTable mainBuildParseTable = new SpoofaxSdf3Config.BuildParseTable(
+            mainSdf3SpecConfig,
+            cfgSdf3Config.parseTableAtermOutputFile(),
+            cfgSdf3Config.parseTablePersistedOutputFile()
+        );
+
+        // Stratego concrete syntax extension parse tables
+        final ArrayList<SpoofaxSdf3Config.BuildParseTable> otherBuildParseTables = new ArrayList<>();
+        for(ResourcePath extensionMainFile : files.strategoConcreteSyntaxExtensionMainFiles()) {
+            final @Nullable String module = extensionMainFile.getLeafWithoutFileExtension();
+            if(module == null) continue; // TODO: report error?
+            final Sdf3SpecConfig sdf3SpecConfig = new Sdf3SpecConfig(
+                mainSdf3SpecConfig.rootDirectory,
+                mainSdf3SpecConfig.mainSourceDirectory,
+                extensionMainFile, // Replace main file
+                mainSdf3SpecConfig.includeDirectories,
+                mainSdf3SpecConfig.sourceFileOrigins,
+                mainSdf3SpecConfig.parseTableConfig
+            );
+            final SpoofaxSdf3Config.BuildParseTable buildParseTable = new SpoofaxSdf3Config.BuildParseTable(
+                sdf3SpecConfig,
+                cfgSdf3Config.parseTableOutputDirectory().appendRelativePath(module + ".tbl"),
+                cfgSdf3Config.parseTableOutputDirectory().appendRelativePath(module + ".bin")
+            );
+            otherBuildParseTables.add(buildParseTable);
+        }
+
+        return Result.ofOk(SpoofaxSdf3Config.files(mainBuildParseTable, ListView.of(otherBuildParseTables)));
     }
 
     public Result<SpoofaxSdf3Config, SpoofaxSdf3ConfigureException> configurePrebuilt(

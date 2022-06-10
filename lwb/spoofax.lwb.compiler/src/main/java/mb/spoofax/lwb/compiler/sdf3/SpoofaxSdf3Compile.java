@@ -2,6 +2,7 @@ package mb.spoofax.lwb.compiler.sdf3;
 
 import mb.cfg.task.CfgRootDirectoryToObject;
 import mb.common.message.KeyedMessages;
+import mb.common.message.KeyedMessagesBuilder;
 import mb.common.result.Result;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Interactivity;
@@ -71,7 +72,26 @@ public class SpoofaxSdf3Compile implements TaskDef<ResourcePath, Result<KeyedMes
 
     public Result<KeyedMessages, SpoofaxSdf3CompileException> compile(ExecContext context, SpoofaxSdf3Config config) {
         return config.caseOf()
-            .files((sdf3SpecConfig, outputParseTableAtermFile, outputParseTablePersistedFile) -> compileFromSourceFiles(context, sdf3SpecConfig, outputParseTableAtermFile, outputParseTablePersistedFile))
+            .files((mainBuildParseTable, otherBuildParseTable) -> {
+                final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
+                final Result<KeyedMessages, SpoofaxSdf3CompileException> mainResult = compileFromSourceFiles(context, mainBuildParseTable.sdf3SpecConfig, mainBuildParseTable.outputParseTableAtermFile, mainBuildParseTable.outputParseTablePersistedFile);
+                if(mainResult.isErr()) {
+                    return mainResult;
+                } else {
+                    //noinspection ConstantConditions (value is present)
+                    messagesBuilder.addMessages(mainResult.get());
+                }
+                for(SpoofaxSdf3Config.BuildParseTable buildParseTable : otherBuildParseTable) {
+                    final Result<KeyedMessages, SpoofaxSdf3CompileException> result = compileFromSourceFiles(context, buildParseTable.sdf3SpecConfig, buildParseTable.outputParseTableAtermFile, buildParseTable.outputParseTablePersistedFile);
+                    if(result.isErr()) {
+                        return result;
+                    } else {
+                        //noinspection ConstantConditions (value is present)
+                        messagesBuilder.addMessages(result.get());
+                    }
+                }
+                return Result.<KeyedMessages, SpoofaxSdf3CompileException>ofOk(messagesBuilder.build());
+            })
             .prebuilt((inputParseTableAtermFile, inputParseTablePersistedFile, outputParseTableAtermFile, outputParseTablePersistedFile) -> copyPrebuilt(context, inputParseTableAtermFile, inputParseTablePersistedFile, outputParseTableAtermFile, outputParseTablePersistedFile))
             ;
     }

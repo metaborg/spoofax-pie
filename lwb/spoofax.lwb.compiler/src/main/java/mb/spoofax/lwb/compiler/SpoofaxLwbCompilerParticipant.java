@@ -159,7 +159,7 @@ public class SpoofaxLwbCompilerParticipant<L extends LoggerComponent, R extends 
             new StatelessSerializableFunction<Result<Option<SpoofaxSdf3Config>, SpoofaxSdf3ConfigureException>, Result<Option<Sdf3SpecConfig>, SpoofaxSdf3ConfigureException>>() {
                 @Override
                 public Result<Option<Sdf3SpecConfig>, SpoofaxSdf3ConfigureException> apply(Result<Option<SpoofaxSdf3Config>, SpoofaxSdf3ConfigureException> r) {
-                    return r.map(o -> o.flatMap(SpoofaxSdf3Config::getSdf3SpecConfig));
+                    return r.map(o -> o.flatMap(SpoofaxSdf3Config::getMainSdf3SpecConfig));
                 }
             }
         ));

@@ -42,6 +42,8 @@ public abstract class CfgSdf3Source implements Serializable {
             return compileMetaLanguageSourcesShared().unarchiveDirectory().appendAsRelativePath("sdf3");
         }
 
+        List<ResourcePath> strategoConcreteSyntaxExtensionMainFiles();
+
 
         @Value.Default default boolean createDynamicParseTable() {
             return false;

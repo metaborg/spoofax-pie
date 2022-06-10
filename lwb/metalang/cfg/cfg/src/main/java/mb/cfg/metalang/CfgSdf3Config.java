@@ -33,10 +33,14 @@ public interface CfgSdf3Config extends Serializable {
         return "sdf.tbl";
     }
 
-    default ResourcePath parseTableAtermOutputFile() {
+    default ResourcePath parseTableOutputDirectory() {
         return compileMetaLanguageSourcesShared().generatedResourcesDirectory() // Generated resources directory, so that Gradle includes the parse table in the JAR file.
-            .appendRelativePath(compileMetaLanguageSourcesShared().languageProject().packagePath()) // Append package path to make location unique, enabling JAR files to be merged.
-            .appendRelativePath(parseTableAtermFileRelativePath()) // Append the relative path to the parse table.
+            .appendRelativePath(compileMetaLanguageSourcesShared().languageProject().packagePath()); // Append package path to make location unique, enabling JAR files to be merged.
+    }
+
+    default ResourcePath parseTableAtermOutputFile() {
+        return parseTableOutputDirectory()
+            .appendRelativePath(parseTableAtermFileRelativePath())
             ;
     }
 
@@ -45,9 +49,8 @@ public interface CfgSdf3Config extends Serializable {
     }
 
     default ResourcePath parseTablePersistedOutputFile() {
-        return compileMetaLanguageSourcesShared().generatedResourcesDirectory() // Generated resources directory, so that Gradle includes the parse table in the JAR file.
-            .appendRelativePath(compileMetaLanguageSourcesShared().languageProject().packagePath()) // Append package path to make location unique, enabling JAR files to be merged.
-            .appendRelativePath(parseTablePersistedFileRelativePath()) // Append the relative path to the parse table.
+        return parseTableOutputDirectory()
+            .appendRelativePath(parseTablePersistedFileRelativePath())
             ;
     }
 

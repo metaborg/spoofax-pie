@@ -27,6 +27,8 @@ context-free syntax
   Sdf3FilesOption.Sdf3ParseTableGeneratorSection = <parse-table-generator {
   <{Sdf3ParseTableGeneratorOption "\n"}*>
 }>
+  Sdf3FilesOption.Sdf3StrategoConcreteSyntaxExtensionMainFile = <stratego-concrete-syntax-extension-main-file = <Expr>>
+  
   Sdf3ParseTableGeneratorOption.Sdf3ParseTableGeneratorDynamic = <dynamic = <Expr>>
   Sdf3ParseTableGeneratorOption.Sdf3ParseTableGeneratorDataDependent = <data-dependent = <Expr>>
   Sdf3ParseTableGeneratorOption.Sdf3ParseTableGeneratorLayoutSensitive = <layout-sensitive = <Expr>>

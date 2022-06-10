@@ -75,7 +75,10 @@ val spoofaxTaskPackageId = "$taskPackageId.spoofax"
 
 languageAdapterProject {
   compilerInput {
-    withParser()
+    withParser().run {
+      // Wrap Parse task
+      extendParseTaskDef(spoofaxTaskPackageId, "Sdf3ParseWrapper")
+    }
     withStyler()
     withStrategoRuntime()
     withConstraintAnalyzer()

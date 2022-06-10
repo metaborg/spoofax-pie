@@ -42,5 +42,5 @@ lexical syntax // Keywords
   Keyword = "true"
   Keyword = "false"
   Keyword = "java"
-  Keyword = "sdf3"
-  Keyword = "stratego"
+  Keyword = "sort"
+  Keyword = "strategy"

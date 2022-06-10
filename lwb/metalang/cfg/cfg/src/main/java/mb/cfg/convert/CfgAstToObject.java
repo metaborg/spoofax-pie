@@ -169,7 +169,7 @@ public class CfgAstToObject {
                         .unwrapOrElse(() -> CfgSdf3Source.Files.Builder.getDefaultMainSourceDirectory(languageShared));
                     filesSourceBuilder.mainSourceDirectory(mainSourceDirectory);
                     filesParts.forOneSubtermAsExistingFile("Sdf3FilesMainFile", mainSourceDirectory, "SDF3 main file", filesSourceBuilder::mainFile);
-                    filesParts.forAllSubtermsAsExistingDirectories("Sdf3FilesIncludeDirectory", rootDirectory, "Stratego include directory", filesSourceBuilder::addIncludeDirectories);
+                    filesParts.forAllSubtermsAsExistingDirectories("Sdf3FilesIncludeDirectory", rootDirectory, "SDF3 include directory", filesSourceBuilder::addIncludeDirectories);
                     filesParts.forAllSubtermsAsStrings("Sdf3FilesExportDirectory", filesSourceBuilder::addExportDirectories);
                     filesParts.getAllSubTermsInListAsParts("Sdf3ParseTableGeneratorSection").ifSome(ptgParts -> {
                         ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorDynamic", filesSourceBuilder::createDynamicParseTable);
@@ -179,6 +179,7 @@ public class CfgAstToObject {
                         ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorCheckOverlap", filesSourceBuilder::checkOverlapInParseTable);
                         ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorCheckPriorities", filesSourceBuilder::checkPrioritiesInParseTable);
                     });
+                    filesParts.forAllSubtermsAsExistingFiles("Sdf3StrategoConcreteSyntaxExtensionMainFile", mainSourceDirectory, "SDF3 Stratego concrete syntax extension main file", filesSourceBuilder::addStrategoConcreteSyntaxExtensionMainFiles);
                     builder.source(CfgSdf3Source.files(filesSourceBuilder.build()));
                 } else if(TermUtils.isAppl(source, "Sdf3Prebuilt", 1)) {
                     final Parts prebuiltParts = subParts.subParts(source.getSubterm(0));
