@@ -23,6 +23,7 @@ import mb.sdf3.task.spec.Sdf3SpecConfig;
 import mb.sdf3_ext_statix.task.Sdf3ExtStatixGenerateStatix;
 import mb.spoofax.lwb.compiler.definition.ResolveDependencies;
 import mb.spoofax.lwb.compiler.definition.ResolveDependenciesException;
+import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3Config;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3ConfigureException;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3GenerationUtil;
 import mb.statix.task.StatixConfig;
@@ -171,7 +172,7 @@ public class SpoofaxStatixConfigure implements TaskDef<ResourcePath, Result<Opti
                     }
 
                     @Override
-                    public void generateFromConfig(ExecContext context, Sdf3SpecConfig sdf3Config) {
+                    public void generateFromMainBuildParseTable(ExecContext context, SpoofaxSdf3Config.BuildParseTable buildParseTable) {
                         // Add generated sources directory as an include Statix imports.
                         allIncludeDirectories.add(generatedSourcesDirectory);
                         // Add this as an origin, as this task provides the Statix files (in statixGenerationUtil.writePrettyPrintedFile).

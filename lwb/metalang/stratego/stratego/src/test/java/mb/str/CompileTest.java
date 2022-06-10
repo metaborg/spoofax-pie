@@ -76,6 +76,7 @@ class CompileTest extends TestBase {
                 ListView.copyOf(str2Libs),
                 new Arguments(),
                 MapView.of(),
+                MapView.of(),
                 ListView.of(),
                 null,
                 strategoJavaSourceFileOutputDir.getPath(),

@@ -24,7 +24,8 @@ public class StrategoCompileConfig implements Serializable {
     public final ListView<BuiltinLibraryIdentifier> builtinLibs;
     public final ListView<Supplier<Stratego2LibInfo>> str2libraries;
     public final Arguments extraCompilerArguments;
-    public final MapView<String, Supplier<OutTransient<Result<IParseTable, ?>>>> concreteSyntaxExtensionParseTables;
+    public final MapView<String, Supplier<? extends Result<? extends IParseTable, ?>>> concreteSyntaxExtensionParseTables;
+    public final MapView<String, Supplier<OutTransient<Result<IParseTable, ?>>>> concreteSyntaxExtensionTransientParseTables;
     public final ListView<STask<?>> sourceFileOrigins;
     public final @Nullable ResourcePath cacheDir;
     public final ResourcePath javaSourceFileOutputDir;
@@ -40,7 +41,8 @@ public class StrategoCompileConfig implements Serializable {
         ListView<BuiltinLibraryIdentifier> builtinLibs,
         ListView<Supplier<Stratego2LibInfo>> str2libraries,
         Arguments extraCompilerArguments,
-        MapView<String, Supplier<OutTransient<Result<IParseTable, ?>>>> concreteSyntaxExtensionParseTables,
+        MapView<String, Supplier<? extends Result<? extends IParseTable, ?>>> concreteSyntaxExtensionParseTables,
+        MapView<String, Supplier<OutTransient<Result<IParseTable, ?>>>> concreteSyntaxExtensionTransientParseTables,
         ListView<STask<?>> sourceFileOrigins,
         @Nullable ResourcePath cacheDir,
         ResourcePath javaSourceFileOutputDir,
@@ -56,6 +58,7 @@ public class StrategoCompileConfig implements Serializable {
         this.str2libraries = str2libraries;
         this.extraCompilerArguments = extraCompilerArguments;
         this.concreteSyntaxExtensionParseTables = concreteSyntaxExtensionParseTables;
+        this.concreteSyntaxExtensionTransientParseTables = concreteSyntaxExtensionTransientParseTables;
         this.sourceFileOrigins = sourceFileOrigins;
         this.cacheDir = cacheDir;
         this.javaSourceFileOutputDir = javaSourceFileOutputDir;
@@ -72,7 +75,8 @@ public class StrategoCompileConfig implements Serializable {
         ListView<BuiltinLibraryIdentifier> builtinLibs,
         ListView<Supplier<Stratego2LibInfo>> str2libraries,
         Arguments extraCompilerArguments,
-        MapView<String, Supplier<OutTransient<Result<IParseTable, ?>>>> concreteSyntaxExtensionParseTables,
+        MapView<String, Supplier<? extends Result<? extends IParseTable, ?>>> concreteSyntaxExtensionParseTables,
+        MapView<String, Supplier<OutTransient<Result<IParseTable, ?>>>> concreteSyntaxExtensionTransientParseTables,
         ListView<STask<?>> sourceFileOrigins,
         @Nullable ResourcePath cacheDir,
         ResourcePath javaSourceFileOutputDir,
@@ -89,6 +93,7 @@ public class StrategoCompileConfig implements Serializable {
             str2libraries,
             extraCompilerArguments,
             concreteSyntaxExtensionParseTables,
+            concreteSyntaxExtensionTransientParseTables,
             sourceFileOrigins,
             cacheDir,
             javaSourceFileOutputDir,
@@ -114,6 +119,7 @@ public class StrategoCompileConfig implements Serializable {
             ListView.of(),
             new Arguments(),
             MapView.of(),
+            MapView.of(),
             ListView.of(),
             null,
             javaSourceFileOutputDir,
@@ -125,7 +131,16 @@ public class StrategoCompileConfig implements Serializable {
     }
 
     public StrategoAnalyzeConfig toAnalyzeConfig() {
-        return new StrategoAnalyzeConfig(rootDirectory, mainModule, includeDirs, builtinLibs, str2libraries, concreteSyntaxExtensionParseTables, sourceFileOrigins);
+        return new StrategoAnalyzeConfig(
+            rootDirectory,
+            mainModule,
+            includeDirs,
+            builtinLibs,
+            str2libraries,
+            concreteSyntaxExtensionParseTables,
+            concreteSyntaxExtensionTransientParseTables,
+            sourceFileOrigins
+        );
     }
 
     @Override public boolean equals(@Nullable Object o) {
@@ -139,6 +154,8 @@ public class StrategoCompileConfig implements Serializable {
         if(!str2libraries.equals(that.str2libraries)) return false;
         if(!extraCompilerArguments.equals(that.extraCompilerArguments)) return false;
         if(!concreteSyntaxExtensionParseTables.equals(that.concreteSyntaxExtensionParseTables)) return false;
+        if(!concreteSyntaxExtensionTransientParseTables.equals(that.concreteSyntaxExtensionTransientParseTables))
+            return false;
         if(!sourceFileOrigins.equals(that.sourceFileOrigins)) return false;
         if(cacheDir != null ? !cacheDir.equals(that.cacheDir) : that.cacheDir != null) return false;
         if(!javaSourceFileOutputDir.equals(that.javaSourceFileOutputDir)) return false;
@@ -156,6 +173,7 @@ public class StrategoCompileConfig implements Serializable {
         result = 31 * result + str2libraries.hashCode();
         result = 31 * result + extraCompilerArguments.hashCode();
         result = 31 * result + concreteSyntaxExtensionParseTables.hashCode();
+        result = 31 * result + concreteSyntaxExtensionTransientParseTables.hashCode();
         result = 31 * result + sourceFileOrigins.hashCode();
         result = 31 * result + (cacheDir != null ? cacheDir.hashCode() : 0);
         result = 31 * result + javaSourceFileOutputDir.hashCode();
@@ -175,6 +193,7 @@ public class StrategoCompileConfig implements Serializable {
             ", str2libraries=" + str2libraries +
             ", extraCompilerArguments=" + extraCompilerArguments +
             ", concreteSyntaxExtensionParseTables=" + concreteSyntaxExtensionParseTables +
+            ", concreteSyntaxExtensionTransientParseTables=" + concreteSyntaxExtensionTransientParseTables +
             ", sourceFileOrigins=" + sourceFileOrigins +
             ", cacheDir=" + cacheDir +
             ", javaSourceFileOutputDir=" + javaSourceFileOutputDir +

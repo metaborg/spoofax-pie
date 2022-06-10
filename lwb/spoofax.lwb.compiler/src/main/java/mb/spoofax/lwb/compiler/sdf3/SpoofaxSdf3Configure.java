@@ -165,8 +165,6 @@ public class SpoofaxSdf3Configure implements TaskDef<ResourcePath, Result<Option
         // Stratego concrete syntax extension parse tables
         final ArrayList<SpoofaxSdf3Config.BuildParseTable> otherBuildParseTables = new ArrayList<>();
         for(ResourcePath extensionMainFile : files.strategoConcreteSyntaxExtensionMainFiles()) {
-            final @Nullable String module = extensionMainFile.getLeafWithoutFileExtension();
-            if(module == null) continue; // TODO: report error?
             final Sdf3SpecConfig sdf3SpecConfig = new Sdf3SpecConfig(
                 mainSdf3SpecConfig.rootDirectory,
                 mainSdf3SpecConfig.mainSourceDirectory,
@@ -175,10 +173,11 @@ public class SpoofaxSdf3Configure implements TaskDef<ResourcePath, Result<Option
                 mainSdf3SpecConfig.sourceFileOrigins,
                 mainSdf3SpecConfig.parseTableConfig
             );
+            final String moduleName = sdf3SpecConfig.getMainModuleName();
             final SpoofaxSdf3Config.BuildParseTable buildParseTable = new SpoofaxSdf3Config.BuildParseTable(
                 sdf3SpecConfig,
-                cfgSdf3Config.parseTableOutputDirectory().appendRelativePath(module + ".tbl"),
-                cfgSdf3Config.parseTableOutputDirectory().appendRelativePath(module + ".bin")
+                cfgSdf3Config.parseTableOutputDirectory().appendRelativePath(moduleName + ".tbl"),
+                cfgSdf3Config.parseTableOutputDirectory().appendRelativePath(moduleName + ".bin")
             );
             otherBuildParseTables.add(buildParseTable);
         }

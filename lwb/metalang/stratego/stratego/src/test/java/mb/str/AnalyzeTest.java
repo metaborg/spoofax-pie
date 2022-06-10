@@ -29,6 +29,7 @@ class AnalyzeTest extends TestBase {
                 ListView.of(BuiltinLibraryIdentifier.StrategoLib),
                 ListView.of(),
                 MapView.of(),
+                MapView.of(),
                 ListView.of()
             );
             final KeyedMessages messages = session.require(check.createTask(config));

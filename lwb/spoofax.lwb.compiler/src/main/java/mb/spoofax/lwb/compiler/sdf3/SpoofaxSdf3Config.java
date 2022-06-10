@@ -80,6 +80,10 @@ public abstract class SpoofaxSdf3Config implements Serializable {
         return Option.ofOptional(SpoofaxSdf3Configs.getMainBuildParseTable(this));
     }
 
+    public Option<ListView<BuildParseTable>> getOtherBuildParseTables() {
+        return Option.ofOptional(SpoofaxSdf3Configs.getOtherBuildParseTables(this));
+    }
+
     public Option<Sdf3SpecConfig> getMainSdf3SpecConfig() {
         return getMainBuildParseTable().map(b -> b.sdf3SpecConfig);
     }

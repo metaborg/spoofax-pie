@@ -33,6 +33,7 @@ import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.lwb.compiler.definition.ResolveDependencies;
 import mb.spoofax.lwb.compiler.definition.ResolveDependenciesException;
+import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3Config;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3ConfigureException;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3GenerationUtil;
 import mb.str.config.StrategoCompileConfig;
@@ -163,9 +164,10 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
         final LinkedHashSet<Supplier<Stratego2LibInfo>> allStratego2LibInfos = new LinkedHashSet<>(); // LinkedHashSet to remove duplicates while keeping insertion order.
         final LinkedHashSet<File> allJavaClassPaths = new LinkedHashSet<>();
 
-        final HashMap<String, Supplier<OutTransient<Result<IParseTable, ?>>>> concreteSyntaxExtensionParseTables = new HashMap<>();
+        final HashMap<String, Supplier<? extends Result<? extends IParseTable, ?>>> concreteSyntaxExtensionParseTables = new HashMap<>();
+        final HashMap<String, Supplier<OutTransient<Result<IParseTable, ?>>>> concreteSyntaxExtensionTransientParseTables = new HashMap<>();
         for(Map.Entry<String, ResourcePath> entry : sourceFiles.concreteSyntaxExtensionParseTables().entrySet()) {
-            concreteSyntaxExtensionParseTables.put(entry.getKey(), sdf3ParseTableFromFile.createSupplier(entry.getValue()));
+            concreteSyntaxExtensionTransientParseTables.put(entry.getKey(), sdf3ParseTableFromFile.createSupplier(entry.getValue()));
         }
 
         final Task<Result<ListView<StrategoResolvedDependency>, ResolveDependenciesException>> resolveDependenciesTask =
@@ -197,7 +199,7 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
                         return None.instance;
                     })
                     .concreteSyntaxExtensionParseTable((id, file) -> {
-                        concreteSyntaxExtensionParseTables.put(id, sdf3ParseTableFromFile.createSupplier(file));
+                        concreteSyntaxExtensionTransientParseTables.put(id, sdf3ParseTableFromFile.createSupplier(file));
                         return None.instance;
                     })
                 ;
@@ -250,7 +252,9 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
                 }
 
                 @Override
-                public void generateFromConfig(ExecContext context, Sdf3SpecConfig sdf3Config) throws SpoofaxStrategoConfigureException, IOException, InterruptedException {
+                public void generateFromMainBuildParseTable(ExecContext context, SpoofaxSdf3Config.BuildParseTable buildParseTable) throws SpoofaxStrategoConfigureException, IOException, InterruptedException {
+                    final Sdf3SpecConfig sdf3Config = buildParseTable.sdf3SpecConfig;
+
                     // Compile SDF3 specification to a Stratego parenthesizer.
                     try {
                         final STask<Result<ParseTable, ?>> parseTableSupplier = sdf3ToParseTable.createSupplier(new Sdf3SpecToParseTable.Input(sdf3Config, false));
@@ -274,6 +278,13 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
                     allIncludeDirectories.add(generatedSourcesDirectory);
                     // Add this as an origin, as this task provides the Stratego files (in strategoGenerationUtil.writePrettyPrintedFile).
                     sourceFileOrigins.add(createSupplier(rootDirectory));
+                }
+
+                @Override
+                public void generateFromOtherBuildParseTable(ExecContext context, SpoofaxSdf3Config.BuildParseTable buildParseTable) throws SpoofaxStrategoConfigureException, IOException, InterruptedException {
+                    final Sdf3SpecConfig sdf3Config = buildParseTable.sdf3SpecConfig;
+                    final STask<Result<ParseTable, ?>> parseTableSupplier = sdf3ToParseTable.createSupplier(new Sdf3SpecToParseTable.Input(sdf3Config, false));
+                    concreteSyntaxExtensionParseTables.put(sdf3Config.getMainModuleName(), parseTableSupplier);
                 }
             });
         } catch(SpoofaxStrategoConfigureException e) {
@@ -299,6 +310,7 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
             ListView.copyOf(allStratego2LibInfos),
             new Arguments(), // TODO: add to input and configure
             MapView.of(concreteSyntaxExtensionParseTables),
+            MapView.of(concreteSyntaxExtensionTransientParseTables),
             ListView.of(sourceFileOrigins),
             null, //strategoInput.cacheDirectory(), // TODO: setting this crashes the compiler, most likely due to the ## symbols in the path.
             cfgStrategoConfig.javaSourceFileOutputDirectory(),
