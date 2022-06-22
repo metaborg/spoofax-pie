@@ -72,7 +72,7 @@ public class SpoofaxSdf3Compile implements TaskDef<ResourcePath, Result<KeyedMes
 
     public Result<KeyedMessages, SpoofaxSdf3CompileException> compile(ExecContext context, SpoofaxSdf3Config config) {
         return config.caseOf()
-            .files((mainBuildParseTable, otherBuildParseTable) -> {
+            .files((mainBuildParseTable, strategoConcreteSyntaxExtensions) -> {
                 final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
                 final Result<KeyedMessages, SpoofaxSdf3CompileException> mainResult = compileFromSourceFiles(context, mainBuildParseTable.sdf3SpecConfig, mainBuildParseTable.outputParseTableAtermFile, mainBuildParseTable.outputParseTablePersistedFile);
                 if(mainResult.isErr()) {
@@ -81,13 +81,11 @@ public class SpoofaxSdf3Compile implements TaskDef<ResourcePath, Result<KeyedMes
                     //noinspection ConstantConditions (value is present)
                     messagesBuilder.addMessages(mainResult.get());
                 }
-                for(SpoofaxSdf3Config.BuildParseTable buildParseTable : otherBuildParseTable) {
-                    final Result<KeyedMessages, SpoofaxSdf3CompileException> result = compileFromSourceFiles(context, buildParseTable.sdf3SpecConfig, buildParseTable.outputParseTableAtermFile, buildParseTable.outputParseTablePersistedFile);
+                for(Sdf3SpecConfig strategoConcreteSyntaxExtension : strategoConcreteSyntaxExtensions) {
+                    final Result<ParseTable, ?> result = compileStrategoConcreteSyntaxExtension(context, strategoConcreteSyntaxExtension);
                     if(result.isErr()) {
-                        return result;
-                    } else {
-                        //noinspection ConstantConditions (value is present)
-                        messagesBuilder.addMessages(result.get());
+                        //noinspection ConstantConditions (err is present)
+                        return Result.<KeyedMessages, SpoofaxSdf3CompileException>ofErr(SpoofaxSdf3CompileException.strategoConcreteSyntaxExtensionCompileFail(result.getErr()));
                     }
                 }
                 return Result.<KeyedMessages, SpoofaxSdf3CompileException>ofOk(messagesBuilder.build());
@@ -118,6 +116,13 @@ public class SpoofaxSdf3Compile implements TaskDef<ResourcePath, Result<KeyedMes
         }
 
         return Result.ofOk(messages);
+    }
+
+    public Result<ParseTable, ?> compileStrategoConcreteSyntaxExtension(
+        ExecContext context,
+        Sdf3SpecConfig config
+    ) {
+        return context.require(toParseTable, new Sdf3SpecToParseTable.Input(config, false));
     }
 
     public Result<KeyedMessages, SpoofaxSdf3CompileException> copyPrebuilt(

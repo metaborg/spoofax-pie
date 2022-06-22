@@ -10,6 +10,7 @@ import mb.pie.api.Supplier;
 import mb.resource.hierarchical.ResourcePath;
 import mb.sdf3.task.Sdf3AnalyzeMulti;
 import mb.sdf3.task.Sdf3Desugar;
+import mb.sdf3.task.spec.Sdf3SpecConfig;
 import mb.sdf3.task.spoofax.Sdf3GetSourceFilesWrapper;
 import mb.sdf3.task.spoofax.Sdf3ParseWrapper;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -49,7 +50,7 @@ public class SpoofaxSdf3GenerationUtil {
 
         default void generateFromMainBuildParseTable(ExecContext context, SpoofaxSdf3Config.BuildParseTable buildParseTable) throws E, IOException, InterruptedException {}
 
-        default void generateFromOtherBuildParseTable(ExecContext context, SpoofaxSdf3Config.BuildParseTable buildParseTable) throws E, IOException, InterruptedException {}
+        default void generateFromStrategoConcreteSyntaxExtension(ExecContext context, Sdf3SpecConfig strategoConcreteSyntaxExtension) throws E, IOException, InterruptedException {}
     }
 
     public <E extends Exception> void performSdf3GenerationIfEnabled(
@@ -74,8 +75,8 @@ public class SpoofaxSdf3GenerationUtil {
                 callbacks.generateFromAst(context, astSupplier);
             }
             callbacks.generateFromMainBuildParseTable(context, buildParseTable);
-            for(SpoofaxSdf3Config.BuildParseTable buildOtherParseTable : spoofaxSdf3Config.getOtherBuildParseTables().unwrap()) {
-                callbacks.generateFromOtherBuildParseTable(context, buildOtherParseTable);
+            for(Sdf3SpecConfig strategoConcreteSyntaxExtension : spoofaxSdf3Config.getStrategoConcreteSyntaxExtensions().unwrap()) {
+                callbacks.generateFromStrategoConcreteSyntaxExtension(context, strategoConcreteSyntaxExtension);
             }
         }
     }

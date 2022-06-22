@@ -1,9 +1,13 @@
 package mb.spoofax.lwb.compiler.stratego;
 
+import mb.common.result.Result;
 import mb.common.util.ADT;
 import mb.common.util.SetView;
+import mb.pie.api.OutTransient;
+import mb.pie.api.Supplier;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.metaborg.parsetable.IParseTable;
 
 import java.io.File;
 import java.io.Serializable;
@@ -15,7 +19,9 @@ public abstract class StrategoResolvedDependency implements Serializable {
 
         R compiledLibrary(ResourcePath str2libFile, SetView<File> javaClassPaths);
 
-        R concreteSyntaxExtensionParseTable(String id, ResourcePath file);
+        R concreteSyntaxExtensionParseTable(String id, Supplier<? extends Result<? extends IParseTable, ?>> parseTableSupplier);
+
+        R concreteSyntaxExtensionTransientParseTable(String id, Supplier<OutTransient<Result<IParseTable, ?>>> transientParseTableSupplier);
     }
 
     public static StrategoResolvedDependency sourceDirectory(ResourcePath sourceDirectory) {
@@ -26,8 +32,12 @@ public abstract class StrategoResolvedDependency implements Serializable {
         return StrategoResolvedDependencies.compiledLibrary(str2libFile, javaClassPaths);
     }
 
-    public static StrategoResolvedDependency concreteSyntaxExtensionParseTable(String id, ResourcePath file) {
-        return StrategoResolvedDependencies.concreteSyntaxExtensionParseTable(id, file);
+    public static StrategoResolvedDependency concreteSyntaxExtensionParseTable(String id, Supplier<? extends Result<? extends IParseTable, ?>> parseTableSupplier) {
+        return StrategoResolvedDependencies.concreteSyntaxExtensionParseTable(id, parseTableSupplier);
+    }
+
+    public static StrategoResolvedDependency concreteSyntaxExtensionTransientParseTable(String id, Supplier<OutTransient<Result<IParseTable, ?>>> transientParseTableSupplier) {
+        return StrategoResolvedDependencies.concreteSyntaxExtensionTransientParseTable(id, transientParseTableSupplier);
     }
 
 

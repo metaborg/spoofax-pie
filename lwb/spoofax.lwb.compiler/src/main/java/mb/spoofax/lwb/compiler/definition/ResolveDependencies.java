@@ -13,7 +13,6 @@ import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.SerializableFunction;
 import mb.pie.api.TaskDef;
-import mb.pie.api.stamp.output.OutputStampers;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.Coordinate;
 import mb.spoofax.core.CoordinateRequirement;
@@ -30,7 +29,7 @@ import java.io.Serializable;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 
-public abstract class ResolveDependencies<T extends Serializable> implements TaskDef<ResolveDependencies.Input, Result<ListView<T>, ResolveDependenciesException>> {
+public abstract class ResolveDependencies<T extends Serializable, C extends Serializable, CE extends Exception> implements TaskDef<ResolveDependencies.Input, Result<ListView<T>, ResolveDependenciesException>> {
     public static class Input implements Serializable {
         public final ResourcePath rootDirectory;
         public final ResourcePath unarchiveDirectoryBase;
@@ -69,7 +68,8 @@ public abstract class ResolveDependencies<T extends Serializable> implements Tas
     private final LanguageDefinitionManager languageDefinitionManager;
     private final SpoofaxLwbCompilerComponentManagerWrapper componentManagerWrapper;
     private final Function4Throwing1<ResourceExports, ResourcesComponent, ExecContext, ResourcePath, ListView<T>, IOException> resolveFromComponent;
-    private final Provider<? extends TaskDef<ResourcePath, ? extends Result<?, ?>>> configureTaskDefProvider;
+    private final Provider<? extends TaskDef<ResourcePath, Result<C, CE>>> configureTaskDefProvider;
+    private final SerializableFunction<Result<C, CE>, Result<Option<ListView<T>>, CE>> resolveFromConfiguredLanguageDefinition;
     private final SerializableFunction<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>, Result<Option<ListView<T>>, CfgRootDirectoryToObjectException>> resolveFromLanguageDefinition;
     private final String metaLanguageName;
 
@@ -78,7 +78,8 @@ public abstract class ResolveDependencies<T extends Serializable> implements Tas
         LanguageDefinitionManager languageDefinitionManager,
         SpoofaxLwbCompilerComponentManagerWrapper componentManagerWrapper,
         Function4Throwing1<ResourceExports, ResourcesComponent, ExecContext, ResourcePath, ListView<T>, IOException> resolveFromComponent,
-        Provider<? extends TaskDef<ResourcePath, ? extends Result<?, ?>>> configureTaskDefProvider,
+        Provider<? extends TaskDef<ResourcePath, Result<C, CE>>> configureTaskDefProvider,
+        SerializableFunction<Result<C, CE>, Result<Option<ListView<T>>, CE>> resolveFromConfiguredLanguageDefinition,
         SerializableFunction<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>, Result<Option<ListView<T>>, CfgRootDirectoryToObjectException>> resolveFromLanguageDefinition,
         String metaLanguageName
     ) {
@@ -87,6 +88,7 @@ public abstract class ResolveDependencies<T extends Serializable> implements Tas
         this.componentManagerWrapper = componentManagerWrapper;
         this.resolveFromComponent = resolveFromComponent;
         this.configureTaskDefProvider = configureTaskDefProvider;
+        this.resolveFromConfiguredLanguageDefinition = resolveFromConfiguredLanguageDefinition;
         this.resolveFromLanguageDefinition = resolveFromLanguageDefinition;
         this.metaLanguageName = metaLanguageName;
     }
@@ -196,13 +198,17 @@ public abstract class ResolveDependencies<T extends Serializable> implements Tas
         DependencySource source,
         ResourcePath rootDirectory
     ) throws ResolveDependenciesException {
-        // Require configure task so that this task depends on all tasks that generate code.
-        context.require(configureTaskDefProvider.get().createTask(rootDirectory), OutputStampers.inconsequential())
+        final ArrayList<T> resolved = new ArrayList<>();
+        context.requireMapping(configureTaskDefProvider.get().createTask(rootDirectory), resolveFromConfiguredLanguageDefinition)
             .mapErr(e -> ResolveDependenciesException.configureFail(source, rootDirectory, metaLanguageName, e))
-            .throwIfError();
-        return context.requireMapping(cfgRootDirectoryToObject, rootDirectory, resolveFromLanguageDefinition)
+            .mapThrowing(o -> o.unwrapOrElseThrow(() -> ResolveDependenciesException.noConfigurationFail(source, rootDirectory, metaLanguageName)))
+            .unwrap()
+            .addAllTo(resolved);
+        context.requireMapping(cfgRootDirectoryToObject, rootDirectory, resolveFromLanguageDefinition)
             .mapErr(e -> ResolveDependenciesException.getConfigurationFail(rootDirectory, e))
             .mapThrowing(o -> o.unwrapOrElseThrow(() -> ResolveDependenciesException.noConfigurationFail(source, rootDirectory, metaLanguageName)))
-            .unwrap();
+            .unwrap()
+            .addAllTo(resolved);
+        return ListView.of(resolved);
     }
 }

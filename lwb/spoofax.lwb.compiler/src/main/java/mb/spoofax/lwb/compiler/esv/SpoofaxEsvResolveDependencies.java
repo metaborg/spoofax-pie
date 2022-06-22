@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 
 @SpoofaxLwbCompilerScope
-public class SpoofaxEsvResolveDependencies extends ResolveDependencies<EsvResolvedDependency> {
+public class SpoofaxEsvResolveDependencies extends ResolveDependencies<EsvResolvedDependency, Option<SpoofaxEsvConfig>, SpoofaxEsvConfigureException> {
     @Inject public SpoofaxEsvResolveDependencies(
         CfgRootDirectoryToObject cfgRootDirectoryToObject,
         LanguageDefinitionManager languageDefinitionManager,
@@ -49,6 +49,7 @@ public class SpoofaxEsvResolveDependencies extends ResolveDependencies<EsvResolv
             componentManagerWrapper,
             new FromComponent(loggerFactory, resourceService, unarchiveFromJar),
             configureTaskDefProvider,
+            FromConfiguredLanguageDefinition.instance,
             FromLanguageDefinition.instance,
             EsvUtil.displayName
         );
@@ -98,6 +99,23 @@ public class SpoofaxEsvResolveDependencies extends ResolveDependencies<EsvResolv
             }
             return ListView.of(resolved);
         }
+    }
+
+    static class FromConfiguredLanguageDefinition extends StatelessSerializableFunction<Result<Option<SpoofaxEsvConfig>, SpoofaxEsvConfigureException>, Result<Option<ListView<EsvResolvedDependency>>, SpoofaxEsvConfigureException>> {
+        public static final SpoofaxEsvResolveDependencies.FromConfiguredLanguageDefinition instance = new SpoofaxEsvResolveDependencies.FromConfiguredLanguageDefinition();
+
+        @Override
+        public Result<Option<ListView<EsvResolvedDependency>>, SpoofaxEsvConfigureException> apply(Result<Option<SpoofaxEsvConfig>, SpoofaxEsvConfigureException> result) {
+            return result.map(o -> o.map(this::resolve));
+        }
+
+        private ListView<EsvResolvedDependency> resolve(SpoofaxEsvConfig config) {
+            return ListView.of();
+        }
+
+        private FromConfiguredLanguageDefinition() {}
+
+        private Object readResolve() {return instance;}
     }
 
     static class FromLanguageDefinition extends StatelessSerializableFunction<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>, Result<Option<ListView<EsvResolvedDependency>>, CfgRootDirectoryToObjectException>> {

@@ -198,8 +198,12 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
                         javaClassPaths.addAllTo(allJavaClassPaths);
                         return None.instance;
                     })
-                    .concreteSyntaxExtensionParseTable((id, file) -> {
-                        concreteSyntaxExtensionTransientParseTables.put(id, sdf3ParseTableFromFile.createSupplier(file));
+                    .concreteSyntaxExtensionParseTable((id, supplier) -> {
+                        concreteSyntaxExtensionParseTables.put(id, supplier);
+                        return None.instance;
+                    })
+                    .concreteSyntaxExtensionTransientParseTable((id, supplier) -> {
+                        concreteSyntaxExtensionTransientParseTables.put(id, supplier);
                         return None.instance;
                     })
                 ;
@@ -281,10 +285,9 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
                 }
 
                 @Override
-                public void generateFromOtherBuildParseTable(ExecContext context, SpoofaxSdf3Config.BuildParseTable buildParseTable) throws SpoofaxStrategoConfigureException, IOException, InterruptedException {
-                    final Sdf3SpecConfig sdf3Config = buildParseTable.sdf3SpecConfig;
-                    final STask<Result<ParseTable, ?>> parseTableSupplier = sdf3ToParseTable.createSupplier(new Sdf3SpecToParseTable.Input(sdf3Config, false));
-                    concreteSyntaxExtensionParseTables.put(sdf3Config.getMainModuleName(), parseTableSupplier);
+                public void generateFromStrategoConcreteSyntaxExtension(ExecContext context, Sdf3SpecConfig strategoConcreteSyntaxExtension) throws SpoofaxStrategoConfigureException, IOException, InterruptedException {
+                    final STask<Result<ParseTable, ?>> parseTableSupplier = sdf3ToParseTable.createSupplier(new Sdf3SpecToParseTable.Input(strategoConcreteSyntaxExtension, false));
+                    concreteSyntaxExtensionParseTables.put(strategoConcreteSyntaxExtension.getMainModuleName(), parseTableSupplier);
                 }
             });
         } catch(SpoofaxStrategoConfigureException e) {

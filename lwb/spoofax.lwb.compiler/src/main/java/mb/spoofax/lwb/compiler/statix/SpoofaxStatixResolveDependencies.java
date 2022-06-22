@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 
 @SpoofaxLwbCompilerScope
-public class SpoofaxStatixResolveDependencies extends ResolveDependencies<StatixResolvedDependency> {
+public class SpoofaxStatixResolveDependencies extends ResolveDependencies<StatixResolvedDependency, Option<SpoofaxStatixConfig>, SpoofaxStatixConfigureException> {
     @Inject public SpoofaxStatixResolveDependencies(
         CfgRootDirectoryToObject cfgRootDirectoryToObject,
         LanguageDefinitionManager languageDefinitionManager,
@@ -49,6 +49,7 @@ public class SpoofaxStatixResolveDependencies extends ResolveDependencies<Statix
             componentManagerWrapper,
             new FromComponent(loggerFactory, resourceService, unarchiveFromJar),
             configureTaskDefProvider,
+            FromConfiguredLanguageDefinition.instance,
             FromLanguageDefinition.instance,
             StatixUtil.displayName
         );
@@ -98,6 +99,23 @@ public class SpoofaxStatixResolveDependencies extends ResolveDependencies<Statix
             }
             return ListView.of(resolved);
         }
+    }
+
+    static class FromConfiguredLanguageDefinition extends StatelessSerializableFunction<Result<Option<SpoofaxStatixConfig>, SpoofaxStatixConfigureException>, Result<Option<ListView<StatixResolvedDependency>>, SpoofaxStatixConfigureException>> {
+        public static final SpoofaxStatixResolveDependencies.FromConfiguredLanguageDefinition instance = new SpoofaxStatixResolveDependencies.FromConfiguredLanguageDefinition();
+
+        @Override
+        public Result<Option<ListView<StatixResolvedDependency>>, SpoofaxStatixConfigureException> apply(Result<Option<SpoofaxStatixConfig>, SpoofaxStatixConfigureException> result) {
+            return result.map(o -> o.map(this::resolve));
+        }
+
+        private ListView<StatixResolvedDependency> resolve(SpoofaxStatixConfig config) {
+            return ListView.of();
+        }
+
+        private FromConfiguredLanguageDefinition() {}
+
+        private Object readResolve() {return instance;}
     }
 
     static class FromLanguageDefinition extends StatelessSerializableFunction<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>, Result<Option<ListView<StatixResolvedDependency>>, CfgRootDirectoryToObjectException>> {

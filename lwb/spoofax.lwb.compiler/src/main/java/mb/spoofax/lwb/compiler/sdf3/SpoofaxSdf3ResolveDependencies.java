@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 
 @SpoofaxLwbCompilerScope
-public class SpoofaxSdf3ResolveDependencies extends ResolveDependencies<Sdf3ResolvedDependency> {
+public class SpoofaxSdf3ResolveDependencies extends ResolveDependencies<Sdf3ResolvedDependency, Option<SpoofaxSdf3Config>, SpoofaxSdf3ConfigureException> {
     @Inject public SpoofaxSdf3ResolveDependencies(
         CfgRootDirectoryToObject cfgRootDirectoryToObject,
         LanguageDefinitionManager languageDefinitionManager,
@@ -49,6 +49,7 @@ public class SpoofaxSdf3ResolveDependencies extends ResolveDependencies<Sdf3Reso
             componentManagerWrapper,
             new FromComponent(loggerFactory, resourceService, unarchiveFromJar),
             configureTaskDefProvider,
+            FromConfiguredLanguageDefinition.instance,
             FromLanguageDefinition.instance,
             Sdf3Util.displayName
         );
@@ -98,6 +99,23 @@ public class SpoofaxSdf3ResolveDependencies extends ResolveDependencies<Sdf3Reso
             }
             return ListView.of(resolved);
         }
+    }
+
+    static class FromConfiguredLanguageDefinition extends StatelessSerializableFunction<Result<Option<SpoofaxSdf3Config>, SpoofaxSdf3ConfigureException>, Result<Option<ListView<Sdf3ResolvedDependency>>, SpoofaxSdf3ConfigureException>> {
+        public static final SpoofaxSdf3ResolveDependencies.FromConfiguredLanguageDefinition instance = new SpoofaxSdf3ResolveDependencies.FromConfiguredLanguageDefinition();
+
+        @Override
+        public Result<Option<ListView<Sdf3ResolvedDependency>>, SpoofaxSdf3ConfigureException> apply(Result<Option<SpoofaxSdf3Config>, SpoofaxSdf3ConfigureException> result) {
+            return result.map(o -> o.map(this::resolve));
+        }
+
+        private ListView<Sdf3ResolvedDependency> resolve(SpoofaxSdf3Config config) {
+            return ListView.of();
+        }
+
+        private FromConfiguredLanguageDefinition() {}
+
+        private Object readResolve() {return instance;}
     }
 
     static class FromLanguageDefinition extends StatelessSerializableFunction<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>, Result<Option<ListView<Sdf3ResolvedDependency>>, CfgRootDirectoryToObjectException>> {

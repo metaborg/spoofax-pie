@@ -14,7 +14,9 @@ import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.pie.api.ExecContext;
 import mb.pie.api.None;
+import mb.pie.api.OutTransient;
 import mb.pie.api.StatelessSerializableFunction;
+import mb.pie.api.Supplier;
 import mb.pie.task.archive.UnarchiveFromJar;
 import mb.resource.ResourceService;
 import mb.resource.classloader.ClassLoaderResourceLocations;
@@ -33,7 +35,9 @@ import mb.spoofax.lwb.compiler.definition.LanguageDefinitionManager;
 import mb.spoofax.lwb.compiler.definition.ResolveDependencies;
 import mb.spoofax.lwb.compiler.definition.UnarchiveUtil;
 import mb.spoofax.resource.ClassLoaderResources;
+import mb.str.config.StrategoCompileConfig;
 import mb.str.util.StrategoUtil;
+import org.metaborg.parsetable.IParseTable;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -46,7 +50,7 @@ import java.util.List;
 import java.util.Map;
 
 @SpoofaxLwbCompilerScope
-public class SpoofaxStrategoResolveDependencies extends ResolveDependencies<StrategoResolvedDependency> {
+public class SpoofaxStrategoResolveDependencies extends ResolveDependencies<StrategoResolvedDependency, Option<StrategoCompileConfig>, SpoofaxStrategoConfigureException> {
     @Inject public SpoofaxStrategoResolveDependencies(
         CfgRootDirectoryToObject cfgRootDirectoryToObject,
         LanguageDefinitionManager languageDefinitionManager,
@@ -62,6 +66,7 @@ public class SpoofaxStrategoResolveDependencies extends ResolveDependencies<Stra
             componentManagerWrapper,
             new FromComponent(loggerFactory, resourceService, unarchiveFromJar),
             configureTaskDefProvider,
+            FromConfiguredLanguageDefinition.instance,
             FromLanguageDefinition.instance,
             StrategoUtil.displayName
         );
@@ -180,6 +185,30 @@ public class SpoofaxStrategoResolveDependencies extends ResolveDependencies<Stra
         }
     }
 
+    static class FromConfiguredLanguageDefinition extends StatelessSerializableFunction<Result<Option<StrategoCompileConfig>, SpoofaxStrategoConfigureException>, Result<Option<ListView<StrategoResolvedDependency>>, SpoofaxStrategoConfigureException>> {
+        public static final FromConfiguredLanguageDefinition instance = new FromConfiguredLanguageDefinition();
+
+        @Override
+        public Result<Option<ListView<StrategoResolvedDependency>>, SpoofaxStrategoConfigureException> apply(Result<Option<StrategoCompileConfig>, SpoofaxStrategoConfigureException> result) {
+            return result.map(o -> o.map(this::resolve));
+        }
+
+        private ListView<StrategoResolvedDependency> resolve(StrategoCompileConfig config) {
+            final ArrayList<StrategoResolvedDependency> resolved = new ArrayList<>();
+            for(Map.Entry<String, Supplier<? extends Result<? extends IParseTable, ?>>> entry : config.concreteSyntaxExtensionParseTables.entrySet()) {
+                resolved.add(StrategoResolvedDependency.concreteSyntaxExtensionParseTable(entry.getKey(), entry.getValue()));
+            }
+            for(Map.Entry<String, Supplier<OutTransient<Result<IParseTable, ?>>>> entry : config.concreteSyntaxExtensionTransientParseTables.entrySet()) {
+                resolved.add(StrategoResolvedDependency.concreteSyntaxExtensionTransientParseTable(entry.getKey(), entry.getValue()));
+            }
+            return ListView.of(resolved);
+        }
+
+        private FromConfiguredLanguageDefinition() {}
+
+        private Object readResolve() {return instance;}
+    }
+
     static class FromLanguageDefinition extends StatelessSerializableFunction<Result<CfgToObject.Output, CfgRootDirectoryToObjectException>, Result<Option<ListView<StrategoResolvedDependency>>, CfgRootDirectoryToObjectException>> {
         public static final FromLanguageDefinition instance = new FromLanguageDefinition();
 
@@ -195,9 +224,6 @@ public class SpoofaxStrategoResolveDependencies extends ResolveDependencies<Stra
             for(String relativePath : exportDirectories) {
                 final ResourcePath directory = rootDirectory.appendAsRelativePath(relativePath);
                 resolved.add(StrategoResolvedDependency.sourceDirectory(directory));
-            }
-            for(Map.Entry<String, ResourcePath> entry : files.concreteSyntaxExtensionParseTables().entrySet()) {
-                resolved.add(StrategoResolvedDependency.concreteSyntaxExtensionParseTable(entry.getKey(), entry.getValue()));
             }
             return ListView.of(resolved);
         }

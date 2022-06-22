@@ -51,13 +51,13 @@ public abstract class SpoofaxSdf3Config implements Serializable {
     }
 
     public interface Cases<R> {
-        R files(BuildParseTable mainBuildParseTable, ListView<BuildParseTable> otherBuildParseTables);
+        R files(BuildParseTable mainBuildParseTable, ListView<Sdf3SpecConfig> strategoConcreteSyntaxExtensions);
 
         R prebuilt(ResourcePath inputParseTableAtermFile, ResourcePath inputParseTablePersistedFile, ResourcePath outputParseTableAtermFile, ResourcePath outputParseTablePersistedFile);
     }
 
-    public static SpoofaxSdf3Config files(BuildParseTable mainBuildParseTable, ListView<BuildParseTable> otherBuildParseTables) {
-        return SpoofaxSdf3Configs.files(mainBuildParseTable, otherBuildParseTables);
+    public static SpoofaxSdf3Config files(BuildParseTable mainBuildParseTable, ListView<Sdf3SpecConfig> strategoConcreteSyntaxExtensions) {
+        return SpoofaxSdf3Configs.files(mainBuildParseTable, strategoConcreteSyntaxExtensions);
     }
 
     public static SpoofaxSdf3Config prebuilt(ResourcePath inputParseTableAtermFile, ResourcePath inputParseTablePersistedFile, ResourcePath outputParseTableAtermFile, ResourcePath outputParseTablePersistedFile) {
@@ -80,12 +80,12 @@ public abstract class SpoofaxSdf3Config implements Serializable {
         return Option.ofOptional(SpoofaxSdf3Configs.getMainBuildParseTable(this));
     }
 
-    public Option<ListView<BuildParseTable>> getOtherBuildParseTables() {
-        return Option.ofOptional(SpoofaxSdf3Configs.getOtherBuildParseTables(this));
-    }
-
     public Option<Sdf3SpecConfig> getMainSdf3SpecConfig() {
         return getMainBuildParseTable().map(b -> b.sdf3SpecConfig);
+    }
+
+    public Option<ListView<Sdf3SpecConfig>> getStrategoConcreteSyntaxExtensions() {
+        return Option.ofOptional(SpoofaxSdf3Configs.getStrategoConcreteSyntaxExtensions(this));
     }
 
 

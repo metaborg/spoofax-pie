@@ -21,7 +21,6 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.sdf3.task.spec.Sdf3SpecConfig;
 import mb.spoofax.lwb.compiler.definition.ResolveDependencies;
 import mb.spoofax.lwb.compiler.definition.ResolveDependenciesException;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.sdf2table.parsetable.ParseTableConfiguration;
 
 import javax.inject.Inject;
@@ -162,8 +161,8 @@ public class SpoofaxSdf3Configure implements TaskDef<ResourcePath, Result<Option
             cfgSdf3Config.parseTablePersistedOutputFile()
         );
 
-        // Stratego concrete syntax extension parse tables
-        final ArrayList<SpoofaxSdf3Config.BuildParseTable> otherBuildParseTables = new ArrayList<>();
+        // Stratego concrete syntax extensions.
+        final ArrayList<Sdf3SpecConfig> strategoConcreteSyntaxExtensions = new ArrayList<>();
         for(ResourcePath extensionMainFile : files.strategoConcreteSyntaxExtensionMainFiles()) {
             final Sdf3SpecConfig sdf3SpecConfig = new Sdf3SpecConfig(
                 mainSdf3SpecConfig.rootDirectory,
@@ -173,16 +172,10 @@ public class SpoofaxSdf3Configure implements TaskDef<ResourcePath, Result<Option
                 mainSdf3SpecConfig.sourceFileOrigins,
                 mainSdf3SpecConfig.parseTableConfig
             );
-            final String moduleName = sdf3SpecConfig.getMainModuleName();
-            final SpoofaxSdf3Config.BuildParseTable buildParseTable = new SpoofaxSdf3Config.BuildParseTable(
-                sdf3SpecConfig,
-                cfgSdf3Config.parseTableOutputDirectory().appendRelativePath(moduleName + ".tbl"),
-                cfgSdf3Config.parseTableOutputDirectory().appendRelativePath(moduleName + ".bin")
-            );
-            otherBuildParseTables.add(buildParseTable);
+            strategoConcreteSyntaxExtensions.add(sdf3SpecConfig);
         }
 
-        return Result.ofOk(SpoofaxSdf3Config.files(mainBuildParseTable, ListView.of(otherBuildParseTables)));
+        return Result.ofOk(SpoofaxSdf3Config.files(mainBuildParseTable, ListView.of(strategoConcreteSyntaxExtensions)));
     }
 
     public Result<SpoofaxSdf3Config, SpoofaxSdf3ConfigureException> configurePrebuilt(
