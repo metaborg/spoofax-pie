@@ -28,4 +28,5 @@ rules
   declareVar(s, x, T) :- {ps}
     !type[x, T] in s,
     query type filter e and { x' :- x' == x } min and false in s |-> ps,
-    try { ps == [_] } | error $[Duplicate declaration of [x] in the same scope.]@x.
+    try { ps == [_] } | error $[Duplicate declaration of [x] in the same scope.]@x,
+    @x.decl := x.
