@@ -5,3 +5,4 @@ menus
   menu: "Refactoring"
 
   action: "Rename" = rename-menu-action
+  action: "Convert Closures" = debug-convert-closures (openeditor)
