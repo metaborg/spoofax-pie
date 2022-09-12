@@ -1,0 +1,8 @@
+module Compile
+
+menus
+
+  menu: "Compilation"
+
+  action: "Convert Closures" = debug-convert-closures (source) (openeditor)
+  action: "Inline functions" = debug-inline-funs (source) (openeditor)

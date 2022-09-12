@@ -1,0 +1,21 @@
+module compile/inlinefuns
+
+imports
+
+  signatures/tim-sig
+  signatures/tim/-
+  pp
+  compile/uniquify
+
+rules
+
+  debug-inline-funs :
+    (node, _, ast, path, project-path) -> (filename, result)
+    with
+      ext      := <get-extension> path
+    ; filename := <guarantee-extension(|$[il.[ext]])> path
+    ; result   := <inline-funs; pp-debug> node
+
+  inline-funs = uniquify
+  
+//  count-uses(|x) : 

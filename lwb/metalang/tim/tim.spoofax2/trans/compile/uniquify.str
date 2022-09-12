@@ -1,0 +1,38 @@
+module compile/uniquify
+
+imports
+
+  signatures/tim-sig
+  signatures/tim/-
+  pp
+
+rules
+
+  uniquify = bottomup(uniquify-bindings)
+
+  uniquify-bindings : TExpPrimOp(op, vals, x, cont) -> TExpPrimOp(op, vals, x', cont')
+  with
+    x' := <newname> x
+  ; cont' := <replace-var(|x, x')> cont
+  uniquify-bindings : TFun(name, args, exp) -> TFun(name, args', exp')
+  with
+    args' := <map(newname)> args
+  ; exp' := <zip ; foldr(!exp, \((src, target), e) -> <replace-var(|src, target)> e\)> (args, args')
+  uniquify-bindings : TExpLet(bindings, exp) -> TExpLet(bindings, exp)
+  with
+    bindings' := <map(TBind(newname, id))> bindings
+  ; names := <map(?TBind(<id>, _))> bindings
+  ; names' := <map(?TBind(<id>, _))> bindings'
+  ; exp' := <zip ; foldr(!exp, \((src, target), e) -> <replace-var(|src, target)> e\)> (names, names')
+  uniquify-bindings : TExpFix(funs, exp) -> TExpFix(funs'', exp')
+  with
+    funs' := <map(TFun(newname, id, id))> funs
+  ; names := <map(?TFun(<id>, _, _))> funs
+  ; names' := <map(?TFun(<id>, _, _))> funs'
+  ; funs'' := <zip ; foldr(!funs', \((src, target), e) -> <replace-var(|src, target)> e\)> (names, names')
+  ; exp' := <zip ; foldr(!exp, \((src, target), e) -> <replace-var(|src, target)> e\)> (names, names')
+  uniquify-bindings : x -> x
+
+  replace-var(|src, target) = topdown(replace-var-once(|src, target))
+  replace-var-once(|src, target) : TValueVar(src) -> TValueVar(target)
+  replace-var-once(|_, _) : x -> x

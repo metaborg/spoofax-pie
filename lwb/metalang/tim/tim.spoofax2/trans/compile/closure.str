@@ -1,0 +1,105 @@
+module compile/closure
+
+imports
+
+  signatures/tim-sig
+  signatures/tim/-
+  pp
+
+rules
+
+  debug-convert-closures :
+    (node, _, ast, path, project-path) -> (filename, result)
+    with
+      ext      := <get-extension> path
+    ; filename := <guarantee-extension(|$[cc.[ext]])> path
+    ; result   := <convert-closures; pp-debug> node
+
+  convert-closures =
+    bottomup(try(convert-closure))
+  ; bottomup(try(convert-calls))
+  ; extract-closures
+  
+  convert-closure : TExpFix(funs, exp) -> TExpFix(funs', exp'')
+    with {| LateInit
+    : (funs', args) := <convert-funs ; unzip> funs
+    ; lateInits := <(bagof-LateInit <+ ![])> ()
+    ; exp' := <foldr(!exp, \((params, name), exp) -> TExpPrimOp("array-write", params, name, exp)\)> lateInits
+    ; exp'' := <foldr(!exp', \((params, name), exp) -> TExpPrimOp("array-new", params, name, exp)\)> args
+    |}
+  convert-closure : TExpFix([], exp) -> TExpFix([], exp)
+
+  convert-calls : TExpApp(TValueVar(x), vals) ->
+    TExpPrimOp("array-read", [TValueVar(x), TValueInt("0")], x', TExpApp(TValueVar(x'), vals'))
+    with
+      x' := <newname> x
+    ; vals' := [TValueVar(x)|vals]
+
+  convert-funs : [fun|funs] -> [fun'|funs']
+    with
+      lateNames := <map(\TFun(name, _, _) -> name\)> funs
+    ; fun' := <convert-fun(|lateNames)> fun
+    ; funs' := <convert-funs> funs
+  convert-funs : [] -> []
+  
+  convert-fun(|lateNames) : TFun(name, args, exp1) -> (TFun(newName, args', exp1'), (params, name))
+    with
+      args' := [name|args]
+    ; freevars := <find-free-vars(|args') ; make-set> exp1
+    ; newName := <newname> name
+    ; exp1' := <convert-fun-body(|name, "1")> (freevars, exp1)
+    ; params := <map(!TValueVar(<id>)) ; map-with-index(extract-late-name(|name, lateNames))> [newName|freevars]
+
+  convert-fun-body(|argname, index) : ([v|vars], exp) ->
+    TExpPrimOp("array-read", [TValueVar(argname), TValueInt(index)], v,
+      <convert-fun-body(|argname, index')> (vars, exp))
+    with
+      index' := <addS> (index, "1")
+  convert-fun-body(|argname, index) : ([], exp) -> exp
+  
+  extract-late-name(|closure, lateNames) : (n, var@TValueVar(x)) -> TValueInt("0")
+    where
+      <elem> (x, lateNames)
+    ; n' := <subt; int-to-string> (n, 1)
+    ; rules(LateInit :+ _ -> ([TValueVar(closure), TValueInt(n'), var], <newname>))
+  extract-late-name(|closure, lateNames) : (n, v) -> v
+  
+  find-free-vars(|usedVars) : TValueInt(_) -> []
+  find-free-vars(|usedVars) : TValueString(_) -> []
+  find-free-vars(|usedVars) : TValueVar(x) -> []
+    where <elem> (x, usedVars)
+  find-free-vars(|usedVars) : TValueVar(x) -> [x]
+  find-free-vars(|usedVars) : THole() -> []
+  find-free-vars(|usedVars) : TExpApp(v, vs) -> <flatten-list> [a, b]
+    with
+      a := <find-free-vars(|usedVars)> v
+    ; b := <map(find-free-vars(|usedVars))> vs
+  find-free-vars(|usedVars) : TExpFix(funs, exp) -> freeVars
+    with
+      newVars := <map(\TFun(x, _, _) -> x\)> funs
+    ; usedVars' := <conc> (usedVars, newVars)
+    ; freeVars := <find-free-vars(|usedVars')> exp
+  find-free-vars(|usedVars) : TExpPrimOp(_, vals, newVar, exp) -> <flatten-list> [a, b]
+    with
+      a := <map(find-free-vars(|usedVars))> vals
+    ; b := <find-free-vars(|[newVar|usedVars])> exp
+  find-free-vars(|usedVars) : TExpTerminatingPrimOp(_, vals) ->
+    <with(map(find-free-vars(|usedVars)))> vals
+  find-free-vars(|usedVars) : TExpConditionalPrimOp(_, vals, exp1, exp2) -> <flatten-list> [a, b, c]
+    with
+      a := <map(find-free-vars(|usedVars))> vals
+    ; b := <find-free-vars(|usedVars)> exp1
+    ; c := <find-free-vars(|usedVars)> exp2
+  find-free-vars(|usedVars) : TExpLet(binds, exp) -> <find-free-vars(|newVars)> exp
+    with
+      extraVars := <map(\TBind(x, _) -> x\)> binds
+    ; newVars := <conc> (usedVars, extraVars)
+
+  extract-closures : TProgram(exp) -> TProgram(TExpFix(funs, exp'))
+    with {| Closures
+    : exp' := <bottomup(try(collect-closures))> exp
+    ; funs := <(bagof-Closures <+ ![])> ()
+    |}
+  
+  collect-closures : fix@TExpFix(funs, exp) -> exp
+    with <map(\x -> x with rules(Closures :+ _ -> x)\)> funs

@@ -5,6 +5,7 @@ imports
   Syntax
   Analysis
   Refactoring
+  Compile
   
   tim/colors
 
