@@ -1,0 +1,26 @@
+module compile/conclude
+
+imports
+
+  signatures/tim/-
+  signatures/tim-sig
+
+rules
+
+  conclude : input ->
+$<
+@.int_fmt = private unnamed_addr constant [5 x i8] c"%ld\0A\00"
+@.str_fmt = private unnamed_addr constant [4 x i8] c"%s\0A\00"
+
+declare ptr @malloc(i32) nounwind
+declare void @free(ptr) nounwind
+declare i32 @puts(ptr nocapture) nounwind
+declare void @exit(i32) noreturn nounwind
+declare i32 @printf(ptr nocapture, ...) nounwind
+
+define i32 @main() {
+  call tailcc void @start()
+  ret i32 0
+}
+<input>
+>

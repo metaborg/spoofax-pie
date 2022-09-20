@@ -1,0 +1,107 @@
+module compile/select-instructions
+
+imports
+
+  signatures/tim/-
+  signatures/tim-sig
+  compile/explicate-globals
+
+rules
+
+  select-instructions : TProgram(TExpFix(funs, body)) ->
+  $[[<map(select-function)> funs]
+    [<select-function> TFun("start", [], body)]
+  ]
+  select-instructions : TProgram(body) -> 
+    <select-function> TFun("start", [], body)
+  
+  select-function : TFun(name, args, body) ->
+  $[define tailcc void @[name]([<select-args> args]) nounwind {
+    [<select-exp> body]
+  }
+  ]
+
+  select-args : [arg] -> $[i64 %[arg]]
+  select-args : [arg|args] -> $[i64 %[arg], [<select-args> args]]
+  where <not(eq)> (args, [])
+  select-args : [] -> $[]
+
+  select-call-args : [arg] -> $[i64 [<select-value> arg]]
+  select-call-args : [arg|args] -> $[i64 [<select-value> arg], [<select-call-args> args]]
+  where <not(eq)> (args, [])
+  select-call-args : [] -> $[]
+
+  select-exp : TExpPrimOp(op, args, result, cont) ->
+  $[[<select-primop(|result)> (op, args)]
+    [<select-exp> cont]]
+  
+  select-exp : TExpTerminatingPrimOp(op, args) ->
+  $[[<select-primop(|<newname>)> (op, args)]
+    ret void
+  ]
+  
+  select-exp : TExpConditionalPrimOp(op, [a1, a2], b1, b2) ->
+  $[%[tmp] = icmp [cond] i64 [<select-value> a1], [<select-value> a2]
+  br i1 %[tmp], label %[l1], label %[l2]
+  [l1]:
+  [<select-exp> b1]
+  [l2]:
+  [<select-exp> b2]]
+  where cond := <select-int-condition> op
+  with
+    tmp := <newname> "result"
+  ; l1 := <newname> "If"
+  ; l2 := <newname> "Else"
+  select-exp : TExpConditionalPrimOp(op, args, b1, b2) -> $[]
+  where with(fail|"String comparison not yet implemented")  // TODO
+  
+  select-exp : TExpApp(TValueVar(x), args) ->
+  $[%[tmp] = inttoptr i64 %[x] to ptr
+  musttail call tailcc void %[tmp]([<select-call-args> args])
+  ret void]
+  with tmp := <newname> "ptr"
+  select-exp : TExpApp(TValueGlobal(x), args) ->
+  $[musttail call tailcc void @[x]([<select-call-args> args])
+  ret void]
+  with tmp := <newname> "ptr"
+  
+  select-exp = {e : ?e ; with(fail|$[unsupported exp [e]]) }
+
+  select-int-condition : "int-eq" -> "eq"
+  select-int-condition : "int-neq" -> "ne"
+  select-int-condition : "int-leq" -> "sle"
+  select-int-condition : "int-geq" -> "sge"
+  select-int-condition : "int-lt" -> "slt"
+  select-int-condition : "int-gt" -> "sgt"
+
+  // Integer primops
+  select-primop(|result) : ("int-neg", [a]) ->
+  $[%[result] = sub nsw i64 0, [<select-value> a]]
+  select-primop(|result) : ("int-add", [a, b]) ->
+  $[%[result] = add nsw i64 [<select-value> a], [<select-value> b]]
+  select-primop(|result) : ("int-sub", [a, b]) ->
+  $[%[result] = sub nsw i64 [<select-value> a], [<select-value> b]]
+  select-primop(|result) : ("int-mul", [a, b]) ->
+  $[%[result] = mul nsw i64 [<select-value> a], [<select-value> b]]
+  select-primop(|result) : ("int-div", [a, b]) ->
+  $[%[result] = sdiv i64 [<select-value> a], [<select-value> b]]
+  
+  // Arrays
+  
+  // Print
+  select-primop(|result) : ("print", [a]) ->
+  $[call i32 @printf(ptr @.int_fmt, i64 [a'])
+    %[result] = add i64 [a'], 0]
+  with a' := <select-value> a
+  // Exit
+  select-primop(|_) : ("exit", []) -> 
+  $[call void @exit(i32 0) noreturn
+    unreachable]
+  
+  select-value : TValueVar(x) -> $[%[x]]
+  select-value : TValueGlobal(x) -> $[@[x]]
+  select-value : TValueInt(x) -> x
+  select-value : TValueString(_) -> $[]
+  where with(fail|"Strings not yet implemented")
+
+  get-type : TValueVar(_) -> $[i64]  // TODO

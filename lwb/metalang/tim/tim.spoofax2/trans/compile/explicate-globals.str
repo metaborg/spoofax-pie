@@ -1,0 +1,25 @@
+module compile/explicate-globals
+
+imports
+
+  signatures/tim/-
+  signatures/tim-sig
+
+signature
+
+  constructors
+
+    TValueGlobal : string -> TValue
+
+rules
+
+  // TODO move strings to global variables
+
+  explicate-globals = {|
+    GlobalNames
+  : topdown(try(collect-global))
+  ; topdown(try(GlobalNames))
+  |}
+  
+  collect-global : t@TFun(name, _, _) -> t
+  with rules(GlobalNames : TValueVar(name) -> TValueGlobal(name))

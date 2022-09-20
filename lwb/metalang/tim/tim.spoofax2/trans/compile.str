@@ -6,4 +6,17 @@ imports
 
 rules
 
-  compile-tim = inline-funs ; convert-closures
+  debug-compile-tim :
+    (node, _, ast, path, project-path) -> (filename, result)
+    with
+      ext      := <get-extension> path
+    ; filename := <guarantee-extension(|$[ll])> path
+    ; result   := <compile-tim> node
+
+  compile-tim =
+    uniquify
+  ; explicate-globals
+//  ; inline-funs
+  ; convert-closures
+  ; select-instructions
+  ; conclude

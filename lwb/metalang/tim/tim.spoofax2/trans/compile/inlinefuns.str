@@ -16,7 +16,7 @@ rules
     ; filename := <guarantee-extension(|$[il.[ext]])> path
     ; result   := <inline-funs; pp-debug> node
 
-  inline-funs = uniquify ; bottomup(try(inline-fun)) ; bottomup(try(cleanup-bindings))
+  inline-funs = bottomup(try(inline-fun)) ; bottomup(try(cleanup-bindings))
   
   inline-fun : TExpFix(funs, exp) -> TExpFix(<reverse> funs', exp')
   with
