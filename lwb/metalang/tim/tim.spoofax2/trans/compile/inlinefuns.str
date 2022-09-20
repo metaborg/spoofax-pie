@@ -16,6 +16,28 @@ rules
     ; filename := <guarantee-extension(|$[il.[ext]])> path
     ; result   := <inline-funs; pp-debug> node
 
-  inline-funs = uniquify
+  inline-funs = uniquify ; bottomup(try(inline-fun)) ; bottomup(try(cleanup-bindings))
   
-//  count-uses(|x) : 
+  inline-fun : TExpFix(funs, exp) -> TExpFix(<reverse> funs', exp')
+  with
+    ([], funs', exp') := <repeat(inline-fun')> (funs, [], exp)
+  
+  inline-fun' : ([fun@TFun(x, args, body)|nextFuns], prevFuns, exp) -> (nextFuns', prevFuns', exp')
+    where <can-inline> (fun, <conc> (nextFuns, prevFuns), exp)
+    with
+      (nextFuns', prevFuns', exp') := <bottomup(try(inline-application(|x, args, body))) <+ id> (nextFuns, prevFuns, exp)
+  inline-fun' : ([fun|nextFuns], prevFuns, exp) -> (nextFuns, [fun|prevFuns], exp)
+  
+  inline-application(|name, argnames, body) : TExpApp(TValueVar(fun), args) -> TExpLet(bindings, body)
+    where <eq> (fun, name)
+    with
+      bindings := <zip ; map(\(a, b) -> TBind(a, b)\)> (argnames, args)
+
+  can-inline : (TFun(x, args, body), funs, exp) -> ()
+    where
+      not(<oncetd(?TValueVar(x))> body)  // Reject inlining recursive functions
+    ; <count-bottomup(?TValueVar(x)) ; ?(_, <id>) ; !(<id>, 1) ; eq> (funs, exp)  // Only inline if it occurs once
+    ; <oncetd(?TExpApp(TValueVar(x), _))> (funs, exp)  // Only inline if it occurs as a function application
+
+  cleanup-bindings : TExpLet([], e) -> e
+  cleanup-bindings : TExpFix([], e) -> e
