@@ -15,8 +15,8 @@ rules
 
   compile-tim =
     uniquify
-  ; explicate-globals
 //  ; inline-funs
   ; convert-closures
+  ; explicate-globals
   ; select-instructions
   ; conclude

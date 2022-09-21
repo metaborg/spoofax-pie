@@ -87,7 +87,46 @@ rules
   $[%[result] = sdiv i64 [<select-value> a], [<select-value> b]]
   
   // Arrays
+  select-primop(|result) : ("array-new", args) ->
+  $[%[sizepvar] = getelementptr i64, ptr null, i64 [n]
+  %[sizevar] = ptrtoint ptr %[sizepvar] to i64
+  %[tmp] = call ptr @malloc(i64 %[sizevar])
+  [stores]
+  %[result] = ptrtoint ptr %[tmp] to i64
+  ]
+  with
+    n := <length> args
+  ; sizepvar := <newname> "sizep"
+  ; sizevar := <newname> "size"
+  ; tmp := <newname> result
+  ; let apply(|i) = array-new-store(|tmp, i) in
+      stores := <nmap(apply|0) ; concat-strings> args
+    end
+
+  array-new-store(|arr, i) : v ->
+  $[%[offset] = getelementptr i64, ptr %[arr], i64 [i]
+  store i64 [<select-value> v], ptr %[offset]
+  ]
+  with offset := <newname> "offset"
   
+  select-primop(|result) : ("array-read", [arr, index]) ->
+  $[%[tmpvar] = inttoptr i64 [<select-value> arr] to ptr
+  %[offset] = getelementptr i64, ptr %[tmpvar], i64 [<select-value> index]
+  %[result] = load i64, ptr %[offset]
+  ]
+  with
+    tmpvar := <newname>
+  ; offset := <newname> "offset"
+  
+  select-primop(|result) : ("array-write", [arr, index, value]) ->
+  $[%[tmpvar] = inttoptr i64 [<select-value> arr] to ptr
+  %[offset] = getelementptr i64, ptr %[tmpvar], i64 [<select-value> index]
+  store i64 [<select-value> value], ptr %[offset]
+  ]
+  with
+    tmpvar := <newname>
+  ; offset := <newname> "offset"
+
   // Print
   select-primop(|result) : ("print", [a]) ->
   $[call i32 @printf(ptr @.int_fmt, i64 [a'])
@@ -97,9 +136,9 @@ rules
   select-primop(|_) : ("exit", []) -> 
   $[call void @exit(i32 0) noreturn
     unreachable]
-  
+
   select-value : TValueVar(x) -> $[%[x]]
-  select-value : TValueGlobal(x) -> $[@[x]]
+  select-value : TValueGlobal(x) -> $[ptrtoint (ptr @[x] to i64)]
   select-value : TValueInt(x) -> x
   select-value : TValueString(_) -> $[]
   where with(fail|"Strings not yet implemented")
