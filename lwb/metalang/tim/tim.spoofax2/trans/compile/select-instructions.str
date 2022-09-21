@@ -85,6 +85,25 @@ rules
   $[%[result] = mul nsw i64 [<select-value> a], [<select-value> b]]
   select-primop(|result) : ("int-div", [a, b]) ->
   $[%[result] = sdiv i64 [<select-value> a], [<select-value> b]]
+
+  // References
+  select-primop(|result) : ("ref-new", [v]) ->
+  $[%[tmp] = call ptr @malloc(i64 8)
+  store i64 [<select-value> v], ptr %[tmp]
+  %[result] = ptrtoint ptr %[tmp] to i64]
+  with
+    tmp := <newname> result
+  select-primop(|result) : ("ref-fetch", [ref]) ->
+  $[%[tmp] = inttoptr i64 [<select-value> ref] to ptr
+  %[result] = load i64, ptr %[tmp]]
+  with
+    tmp := <newname> "ptr"
+  select-primop(|result) : ("ref-store", [ref, v]) ->
+  $[%[tmp] = inttoptr i64 [<select-value> ref] to ptr
+  store i64 [<select-value> v], ptr %[tmp]
+  %[result] = add i64 [<select-value> v], 0]
+  with
+    tmp := <newname> "ptr"
   
   // Arrays
   select-primop(|result) : ("array-new", args) ->
@@ -122,6 +141,7 @@ rules
   $[%[tmpvar] = inttoptr i64 [<select-value> arr] to ptr
   %[offset] = getelementptr i64, ptr %[tmpvar], i64 [<select-value> index]
   store i64 [<select-value> value], ptr %[offset]
+  %[result] = add i64 [<select-value> value], 0
   ]
   with
     tmpvar := <newname>
