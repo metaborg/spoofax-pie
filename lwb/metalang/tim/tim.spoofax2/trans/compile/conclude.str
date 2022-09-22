@@ -25,7 +25,7 @@ declare i64 @record_read(i64, i64) nounwind
 declare void @record_delete(i64) nounwind
 
 declare void @gc_init() nounwind
-declare ptr @gc_alloc(i64) nounwind
+declare ptr @gc_alloc(i64) nounwind inaccessiblememonly allockind("alloc,uninitialized") allocsize(0) "alloc-family"="malloc"
 declare void @gc_collect() nounwind
 
 define i32 @main() {

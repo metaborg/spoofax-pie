@@ -95,7 +95,7 @@ rules
 
   // References
   select-primop(|result) : ("ref-new", [v]) ->
-  $[%[tmp] = call ptr @malloc(i64 8)
+  $[%[tmp] = call ptr @gc_alloc(i64 8)
   store i64 [<select-value> v], ptr %[tmp]
   %[result] = ptrtoint ptr %[tmp] to i64]
   with
@@ -111,12 +111,20 @@ rules
   %[result] = add i64 [<select-value> v], 0]
   with
     tmp := <newname> "ptr"
+
+  // Records
+  select-primop(|result) : ("record-new", []) ->
+  $[%[result] = call i64 @record_new()]
+  select-primop(|result) : ("record-write", [ptr, key, val]) ->
+  $[%[result] = call i64 @record_write(i64 [<select-value> ptr], i64 [<select-value> key], i64 [<select-value> val])]
+  select-primop(|result) : ("record-read", [ptr, key]) ->
+  $[%[result] = call i64 @record_read(i64 [<select-value> ptr], i64 [<select-value> key])]
   
   // Arrays
   select-primop(|result) : ("array-new", args) ->
   $[%[sizepvar] = getelementptr i64, ptr null, i64 [n]
   %[sizevar] = ptrtoint ptr %[sizepvar] to i64
-  %[tmp] = call ptr @malloc(i64 %[sizevar])
+  %[tmp] = call ptr @gc_alloc(i64 %[sizevar])
   [stores]
   %[result] = ptrtoint ptr %[tmp] to i64
   ]
@@ -156,7 +164,7 @@ rules
 
   // Print
   select-primop(|result) : ("print", [a]) ->
-  $[call i32 @printf(ptr @.str_fmt, i64 [a'])
+  $[call i32 (ptr, ...) @printf(ptr @.str_fmt, i64 [a'])
     %[result] = add i64 [a'], 0]
   with a' := <select-value> a
   // Exit
