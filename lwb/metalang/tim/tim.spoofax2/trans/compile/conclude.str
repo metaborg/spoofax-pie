@@ -19,7 +19,7 @@ declare void @exit(i32) noreturn nounwind
 declare i32 @printf(ptr nocapture, ...) nounwind
 
 ; tim runtime library
-declare i64 @record_new() nounwind
+declare i64 @record_new(i64, ...) nounwind
 declare i64 @record_write(i64, i64, i64) nounwind
 declare i64 @record_read(i64, i64) nounwind
 declare void @record_delete(i64) nounwind

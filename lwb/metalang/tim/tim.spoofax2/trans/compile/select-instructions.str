@@ -114,7 +114,10 @@ rules
 
   // Records
   select-primop(|result) : ("record-new", []) ->
-  $[%[result] = call i64 @record_new()]
+  $[%[result] = call i64 (i64, ...) @record_new(i64 0)]
+  select-primop(|result) : ("record-new", args) ->
+  $[%[result] = call i64 (i64, ...) @record_new(i64 [count], [<select-call-args> args])]
+  with count := <divi> (<length> args, 2)
   select-primop(|result) : ("record-write", [ptr, key, val]) ->
   $[%[result] = call i64 @record_write(i64 [<select-value> ptr], i64 [<select-value> key], i64 [<select-value> val])]
   select-primop(|result) : ("record-read", [ptr, key]) ->
