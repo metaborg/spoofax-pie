@@ -5,15 +5,22 @@ imports
   signatures/tim/-
   signatures/tim-sig
   compile/explicate-globals
+  compile/string
 
 rules
 
-  select-instructions : TProgram(TExpFix(funs, body)) ->
-  $[[<map(select-function)> funs]
+  select-instructions : TProgram(TExpLet(globals, TExpFix(funs, body))) ->
+  $[[<map(select-constant)> globals]
+    [<map(select-function)> funs]
     [<select-function> TFun("start", [], body)]
-  ]
+    ]
   select-instructions : TProgram(body) -> 
     <select-function> TFun("start", [], body)
+  
+  select-constant : TBind(var, TValueString(value)) ->
+  $<@<var> = private unnamed_addr constant [<length> x i8] c"<str>"
+  >
+  with (length, str) := <process-string> value
   
   select-function : TFun(name, args, body) ->
   $[define tailcc void @[name]([<select-args> args]) nounwind {
@@ -149,7 +156,7 @@ rules
 
   // Print
   select-primop(|result) : ("print", [a]) ->
-  $[call i32 @printf(ptr @.int_fmt, i64 [a'])
+  $[call i32 @printf(ptr @.str_fmt, i64 [a'])
     %[result] = add i64 [a'], 0]
   with a' := <select-value> a
   // Exit

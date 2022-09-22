@@ -16,10 +16,23 @@ rules
   // TODO move strings to global variables
 
   explicate-globals = {|
-    GlobalNames
+    GlobalNames, Strings
   : topdown(try(collect-global))
   ; topdown(try(GlobalNames))
+  ; store-strings
   |}
-  
+
   collect-global : t@TFun(name, _, _) -> t
   with rules(GlobalNames : TValueVar(name) -> TValueGlobal(name))
+
+  collect-global : t@TValueString(v) -> t
+  where not(<GlobalNames> t)
+  with
+    varName := <newname> "str"
+  ; rules(GlobalNames : t -> TValueGlobal(varName))
+  ; rules(Strings :+ _ -> TBind(varName, t))
+  
+  store-strings : TProgram(e) -> TProgram(TExpLet(globals, e))
+  with
+    globals := <bagof-Strings <+ ![]> ()
+  

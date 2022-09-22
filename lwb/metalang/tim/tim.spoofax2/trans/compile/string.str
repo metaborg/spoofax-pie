@@ -1,0 +1,68 @@
+module compile/string
+
+imports
+
+  signatures/tim-sig
+  signatures/tim/-
+
+rules
+
+  process-string : s -> (length, s')
+  with chars := < explode-string
+                ; try(un-double-quote-chars <+ un-single-quote-chars)
+                ; process-chars> s
+  ; charszero := <conc> (chars, [['\', '0', '0']])
+  ; length := <length> charszero
+  ; s' := <flatten-list ; implode-string> charszero
+  
+  process-chars : ['\', '"'|rest] ->
+    [['\', '2', '2']|<process-chars> rest]
+  process-chars : ['\', 'n'|rest] ->
+    [['\', '0', 'A']|<process-chars> rest]
+  process-chars : ['\', '\'|rest] ->
+    [['\', '\']|<process-chars> rest]
+  process-chars : ['\', 'x', a, b|rest] ->
+    [['\', a, b]|<process-chars> rest]
+  where
+    <is-hexnum> a
+  ; <is-hexnum> b
+  process-chars : [c|rest] ->
+    [c* | <process-chars> rest]
+  where <geq> (c, 128)
+  with
+    c* := <utf8-encode> c
+  process-chars : [c|rest] -> [c | <process-chars> rest]
+  process-chars : [] -> []
+
+  utf8-encode : c -> [c]
+  where <lt> (c, 128)
+  utf8-encode : c -> <map(escape-big-char)> [c1, c2]
+  where <lt> (c, 2048)
+  with
+    c1 := <iori> (<andi> (<shri> (c, 6), 31), 192)
+  ; c2 := <iori> (<andi> (<shri> (c, 0), 63), 128)
+  utf8-encode : c -> <map(escape-big-char)> [c1, c2, c3]
+  where <lt> (c, 65536)
+  with
+    c1 := <iori> (<andi> (<shri> (c, 12), 15), 224)
+  ; c2 := <iori> (<andi> (<shri> (c, 6), 63), 128)
+  ; c3 := <iori> (<andi> (<shri> (c, 0), 63), 128)
+  utf8-encode : c -> <map(escape-big-char)> [c1, c2, c3, c4]
+  where <lt> (c, 1114112)
+  with
+    c1 := <iori> (<andi> (<shri> (c, 18), 7), 240)
+  ; c2 := <iori> (<andi> (<shri> (c, 12), 63), 128)
+  ; c3 := <iori> (<andi> (<shri> (c, 6), 63), 128)
+  ; c4 := <iori> (<andi> (<shri> (c, 0), 63), 128)
+  
+  escape-big-char : c -> ['\', a, b]
+  where <geq> (c, 128)
+  with
+    a := <divi; digit-to-char> (c, 16)
+  ; b := <modi; digit-to-char> (c, 16)
+  escape-big-char : c -> c
+  
+  digit-to-char : x -> c
+  where <gt> (x, 9)
+  with c := <addi> (<subti> ('A', 10), x)
+  digit-to-char : x -> <addi> ('0', x)
