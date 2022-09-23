@@ -13,7 +13,7 @@ rules
     with
       ext      := <get-extension> path
     ; filename := <guarantee-extension(|$[cc.[ext]])> path
-    ; result   := <convert-closures; pp-debug> node
+    ; result   := <convert-closures; pp-debug> ast
 
   convert-closures =
     bottomup(try(convert-closure))
@@ -21,48 +21,44 @@ rules
   ; extract-closures
   
   convert-closure : TExpFix(funs, exp) -> TExpFix(funs', exp'')
-    with {| LateInit
-    : (funs', args) := <convert-funs ; unzip> funs
-    ; lateInits := <(bagof-LateInit <+ ![])> ()
-    ; exp' := <foldr(!exp, \((params, name), exp) -> TExpPrimOp("array-write", params, name, exp)\)> lateInits
-    ; exp'' := <foldr(!exp', \((params, name), exp) -> TExpPrimOp("array-new", params, name, exp)\)> args
-    |}
-  convert-closure : TExpFix([], exp) -> TExpFix([], exp)
+    with
+      funnames@[firstname|restnames] := <map(\TFun(name, _, _) -> name\)> funs
+    ; freevars := <foldr(![], union, \TFun(name, args, body) -> <find-free-vars(|<conc> (funnames, args))> body\)> funs
+    ; closure := <newname> "closure"
+    ; let var-to-read-exp = var-to-read-op(|funnames, freevars) in
+        (names', funs') := <map(convert-fun(var-to-read-exp)) ; unzip> funs
+      ; exp' := <foldr(!exp, \(name, c)-> <var-to-read-exp> (firstname, name, c)\)> restnames
+      end
+    ; exp'' := TExpPrimOp("closure-new", <conc ; map(!TValueVar(<id>))> (names', freevars), firstname, exp')
 
   convert-calls : TExpApp(TValueVar(x), vals) ->
-    TExpPrimOp("array-read", [TValueVar(x), TValueInt("0")], x', TExpApp(TValueVar(x'), vals'))
+    TExpPrimOp("closure-read", [TValueVar(x), TValueInt("0")], x', TExpApp(TValueVar(x'), vals'))
     with
       x' := <newname> x
     ; vals' := [TValueVar(x)|vals]
 
-  convert-funs : [fun|funs] -> [fun'|funs']
-    with
-      lateNames := <map(\TFun(name, _, _) -> name\)> funs
-    ; fun' := <convert-fun(|lateNames)> fun
-    ; funs' := <convert-funs> funs
-  convert-funs : [] -> []
-  
-  convert-fun(|lateNames) : TFun(name, args, exp1) -> (TFun(newName, args', exp1'), (params, name))
-    with
-      args' := [name|args]
-    ; freevars := <find-free-vars(|args') ; make-set> exp1
-    ; newName := <newname> name
-    ; exp1' := <convert-fun-body(|name, "1")> (freevars, exp1)
-    ; params := <map(!TValueVar(<id>)) ; map-with-index(extract-late-name(|name, lateNames))> [newName|freevars]
+  convert-fun(var-to-read-exp|) : TFun(name, args, body) -> (name', TFun(name', args', body'))
+  with
+    name' := <newname> name
+  ; args' := [name|args]
+  ; freevars := <find-free-vars(|args')> body
+  ; body' := <foldr(!body, \(v, c) -> <var-to-read-exp> (name, v, c)\)> freevars
 
-  convert-fun-body(|argname, index) : ([v|vars], exp) ->
-    TExpPrimOp("array-read", [TValueVar(argname), TValueInt(index)], v,
-      <convert-fun-body(|argname, index')> (vars, exp))
-    with
-      index' := <addS> (index, "1")
-  convert-fun-body(|argname, index) : ([], exp) -> exp
+  var-to-read-op(|funs, vars) : (name, v, c) -> TExpPrimOp("closure-offset", [TValueVar(name), n], v, c)
+  where idx := <fun-get-index(|funs)> v
+  with
+    offset := <fun-get-index(|funs)> name
+  ; n := TValueInt(<subti ; int-to-string> (idx, offset))
+  var-to-read-op(|funs, vars) : (name, v, c) -> TExpPrimOp("closure-read", [TValueVar(name), n], v, c)
+  where idx := <var-get-index(|funs, vars)> v
+  with
+    offset := <fun-get-index(|funs)> name
+  ; n := TValueInt(<subti ; int-to-string> (idx, offset))
   
-  extract-late-name(|closure, lateNames) : (n, var@TValueVar(x)) -> TValueInt("0")
-    where
-      <elem> (x, lateNames)
-    ; n' := <subt; int-to-string> (n, 1)
-    ; rules(LateInit :+ _ -> ([TValueVar(closure), TValueInt(n'), var], <newname>))
-  extract-late-name(|closure, lateNames) : (n, v) -> v
+  fun-get-index(|funs) : v -> n
+  where n := <subti> (<get-index> (v, funs), 1)
+  var-get-index(|funs, vars) : v -> n
+  where n := <subti> (<addi> (<length> funs, <get-index> (v, vars)), 1)
   
   find-free-vars(|usedVars) : TValueInt(_) -> []
   find-free-vars(|usedVars) : TValueString(_) -> []
@@ -70,26 +66,21 @@ rules
     where <elem> (x, usedVars)
   find-free-vars(|usedVars) : TValueVar(x) -> [x]
   find-free-vars(|usedVars) : THole() -> []
-  find-free-vars(|usedVars) : TExpApp(v, vs) -> <flatten-list> [a, b]
-    with
-      a := <find-free-vars(|usedVars)> v
-    ; b := <map(find-free-vars(|usedVars))> vs
+  find-free-vars(|usedVars) : TExpApp(v, vs) ->
+    <foldr(![], union, find-free-vars(|usedVars))> [v|vs]
   find-free-vars(|usedVars) : TExpFix(funs, exp) -> freeVars
     with
       newVars := <map(\TFun(x, _, _) -> x\)> funs
     ; usedVars' := <conc> (usedVars, newVars)
     ; freeVars := <find-free-vars(|usedVars')> exp
-  find-free-vars(|usedVars) : TExpPrimOp(_, vals, newVar, exp) -> <flatten-list> [a, b]
+  find-free-vars(|usedVars) : TExpPrimOp(_, vals, newVar, exp) -> <union> (a, b)
     with
-      a := <map(find-free-vars(|usedVars))> vals
+      a := <foldr(![], union, find-free-vars(|usedVars))> vals
     ; b := <find-free-vars(|[newVar|usedVars])> exp
   find-free-vars(|usedVars) : TExpTerminatingPrimOp(_, vals) ->
-    <with(map(find-free-vars(|usedVars)))> vals
-  find-free-vars(|usedVars) : TExpConditionalPrimOp(_, vals, exp1, exp2) -> <flatten-list> [a, b, c]
-    with
-      a := <map(find-free-vars(|usedVars))> vals
-    ; b := <find-free-vars(|usedVars)> exp1
-    ; c := <find-free-vars(|usedVars)> exp2
+    <foldr(![], union, find-free-vars(|usedVars))> vals
+  find-free-vars(|usedVars) : TExpConditionalPrimOp(_, vals, exp1, exp2) ->
+    <foldr(![], union, find-free-vars(|usedVars))> [exp1, exp2|vals]
   find-free-vars(|usedVars) : TExpLet(binds, exp) -> <find-free-vars(|newVars)> exp
     with
       extraVars := <map(\TBind(x, _) -> x\)> binds

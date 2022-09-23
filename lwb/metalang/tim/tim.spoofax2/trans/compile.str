@@ -11,7 +11,7 @@ rules
     with
       ext      := <get-extension> path
     ; filename := <guarantee-extension(|$[ll])> path
-    ; result   := <compile-tim> node
+    ; result   := <compile-tim> ast
 
   compile-tim =
     uniquify
