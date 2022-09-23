@@ -133,5 +133,9 @@ rules
   typeOfPrimOp("ref-store", [REF(T), T']) = T' :-
     typeCoercibleTo(T', T) | error $[The type [T'] is not assignable to a reference of type [T].].
 
+  typeOfPrimOp("closure-new", _) = CLOSURE().
+  typeOfPrimOp("closure-offset", [CLOSURE(), INT()]) = CLOSURE().
+
   typeOfPrimOp("array-read", [ARRAY(), INT()]) = _. // intentionally unbound
   typeOfPrimOp("record-read", [RECORD(), STRING()]) = _. // intentionally unbound
+  typeOfPrimOp("closure-read", [CLOSURE(), INT()]) = _. // intentionally unbound

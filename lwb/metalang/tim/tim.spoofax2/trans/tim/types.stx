@@ -12,6 +12,7 @@ signature
     REF : TYPE -> TYPE
     ARRAY : TYPE
     RECORD : TYPE
+    CLOSURE : TYPE
     
 rules
   // whether first argument is compatible in a context where a second
