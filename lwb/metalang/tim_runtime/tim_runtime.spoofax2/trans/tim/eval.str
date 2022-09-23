@@ -22,7 +22,7 @@ signature
     TRuntimeFunction : TBox * TFun -> TRuntimeValue
     TRuntimeReference : TBox -> TRuntimeValue
     TRuntimeArray : TBox -> TRuntimeValue // box of List(TRuntimeValue)
-    TRuntimeClosure : List(TRuntimeValue) -> TRuntimeValue
+    TRuntimeClosure : List(TRuntimeValue) * int -> TRuntimeValue
     TRuntimeRecord : Hashtable -> TRuntimeValue
     TRuntimeVoid : TRuntimeValue
 
@@ -190,13 +190,9 @@ rules // primops
     with
       <hashtable-put(|x, v)> h
 
-  tim-eval-primop-exp(io): ("closure-new", vs) -> TRuntimeClosure(vs)
-  tim-eval-primop-exp(io): ("closure-read", [TRuntimeClosure(vs), TRuntimeInt(idx)]) -> <index(|<addi> (idx, 1))> vs
-  tim-eval-primop-exp(io): ("closure-offset", [TRuntimeClosure(vs), TRuntimeInt(idx)]) -> TRuntimeClosure(vs')
-    with
-      let sublist = \(0, l) -> l\ <+ \(n, [h|t]) -> (<subti> (n, 1), t)\ in
-        vs' := <sublist> (idx, vs)
-      end
+  tim-eval-primop-exp(io): ("closure-new", vs) -> TRuntimeClosure(vs, 1)
+  tim-eval-primop-exp(io): ("closure-read", [TRuntimeClosure(vs, offset), TRuntimeInt(idx)]) -> <index(|<addi> (idx, offset))> vs
+  tim-eval-primop-exp(io): ("closure-offset", [TRuntimeClosure(vs, offset), TRuntimeInt(idx)]) -> TRuntimeClosure(vs, <addi> (idx, offset))
 
   tim-eval-primop-exp(io): a -> <tim-fail-msg(|"Unsupported expression primitive: ")> a
 
