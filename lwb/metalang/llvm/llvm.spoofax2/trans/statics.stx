@@ -1,0 +1,23 @@
+module statics
+
+
+rules // single-file entry point
+
+  programOk : Start
+
+  programOk(_).
+
+rules // multi-file entry point
+
+  projectOk : scope
+
+  projectOk(s).
+
+  fileOk : scope * Start
+
+  fileOk(s, _).
+
+signature
+
+  sorts Start constructors
+    Empty : Start

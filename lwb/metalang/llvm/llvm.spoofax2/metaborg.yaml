@@ -1,0 +1,46 @@
+---
+id: org.metaborg:llvm:0.1.0-SNAPSHOT
+name: llvm
+dependencies:
+  compile:
+  - org.metaborg:org.metaborg.meta.lang.esv:${metaborgVersion}
+  - org.metaborg:org.metaborg.meta.lang.template:${metaborgVersion}
+  - org.metaborg:statix.lang:${metaborgVersion}
+  - org.metaborg:sdf3.ext.statix:${metaborgVersion}
+  source:
+  - org.metaborg:meta.lib.spoofax:${metaborgVersion}
+  - org.metaborg:statix.runtime:${metaborgVersion}
+pardonedLanguages:
+- EditorService
+- Stratego-Sugar
+- SDF
+language:
+  sdf:
+    enabled: true
+    pretty-print: llvm
+    sdf2table: java
+    placeholder:
+      prefix: "$"
+  stratego:
+    enabled: true
+    format: jar
+    args:
+    - -la
+    - stratego-lib
+    - -la
+    - stratego-gpp
+    - -la
+    - stratego-sglr
+    - -la
+    - stratego-xtc
+    - -la
+    - stratego-aterm
+    - -la
+    - stratego-sdf
+    - -la
+    - strc
+  statix:
+    mode: traditional
+exports:
+- language: ATerm
+  directory: src-gen/statix

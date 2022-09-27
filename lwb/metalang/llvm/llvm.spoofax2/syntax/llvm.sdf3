@@ -1,0 +1,17 @@
+module llvm
+
+imports
+  
+  Common
+
+context-free start-symbols
+  
+  Start
+
+context-free sorts
+
+  Start
+
+context-free syntax
+  
+  Start.LLVMEmpty = <>
