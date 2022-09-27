@@ -18,7 +18,7 @@ rules
   with
     args' := <map(newname)> args
   ; exp' := <zip ; foldr(!exp, \((src, target), e) -> <replace-var(|src, target)> e\)> (args, args')
-  uniquify-bindings : TExpLet(bindings, exp) -> TExpLet(bindings, exp)
+  uniquify-bindings : TExpLet(bindings, exp) -> TExpLet(bindings', exp')
   with
     bindings' := <map(TBind(newname, id))> bindings
   ; names := <map(?TBind(<id>, _))> bindings
