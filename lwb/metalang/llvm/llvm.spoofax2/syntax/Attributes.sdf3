@@ -35,6 +35,7 @@ context-free syntax
 
   FunctionAttribute.NoUnwind = <nounwind>
   FunctionAttribute.NoReturn = <noreturn>
+  FunctionAttribute.NoFreeFun = <nofree>
   FunctionAttribute.InaccessibleMemOnly = <inaccessiblememonly>
   FunctionAttribute.AllocKind = <allockind(<STRING>)>
   FunctionAttribute.AllocSize = <allocsize(<INT>)>

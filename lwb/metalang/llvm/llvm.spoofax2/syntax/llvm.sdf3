@@ -22,9 +22,9 @@ context-free syntax
   
   Definition.TargetTriple = <target triple = <STRING>>
   Definition.GlobalDef = <<Constant> = <Linkage> <GlobalAttribute*> <Type> <Literal>>
-  Definition.FunDecl = <declare <Linkage> <Type> <CallConv> <Constant>(<{Parameter ", "}*>) <FunctionAttribute*>>
+  Definition.FunDecl = <declare <Linkage> <CallConv> <Type> <Constant>(<{Parameter ", "}*>) <FunctionAttribute*>>
   Definition.FunDef = <
-define <Linkage> <Type> <CallConv> <Constant>(<{Parameter ", "}*>) <FunctionAttribute*> {
+define <Linkage> <CallConv> <Type> <Constant>(<{Parameter ", "}*>) <FunctionAttribute*> {
   <blks:Block*>
 }> {layout(pp-align-list blks)}
 

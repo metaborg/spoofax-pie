@@ -41,7 +41,7 @@ context-free syntax
   Expression.ICmp = <icmp <Condition> <Type> <Atom>, <Atom>>
   Expression.IntToPtr = <inttoptr <TypedAtom> to <Type>>
   Expression.PtrToInt = <ptrtoint <TypedAtom> to <Type>>
-  Expression.Call = <<TailAttribute> call <Type> <CallConv> <Constant>(<{TypedAtom ", "}*>)>
+  Expression.Call = <<TailAttribute> call <CallConv> <Type> <Constant>(<{TypedAtom ", "}*>) <FunctionAttribute*>>
   Expression.Load = <load <Type>, <TypedAtom>>
   Expression.Store = <store <TypedAtom>, <TypedAtom>>
   Expression.GetElementPtr = <getelementptr <Type>, <{TypedAtom ", "}*>>

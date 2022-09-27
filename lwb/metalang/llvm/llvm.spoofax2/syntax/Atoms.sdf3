@@ -22,6 +22,7 @@ context-free syntax
   Parameter.Vararg = <...>
 
   Type.Int64 = <i64>
+  Type.Int32 = <i32>
   Type.Int8 = <i8>
   Type.Bool = <i1>
   Type.Pointer = <ptr>
