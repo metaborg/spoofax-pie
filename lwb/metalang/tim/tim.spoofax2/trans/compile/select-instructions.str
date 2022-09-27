@@ -4,6 +4,7 @@ imports
 
   signatures/tim/-
   signatures/tim-sig
+  signatures/llvm-sig
   compile/explicate-globals
   compile/string
 

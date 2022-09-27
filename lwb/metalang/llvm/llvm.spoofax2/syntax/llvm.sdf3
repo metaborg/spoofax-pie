@@ -3,6 +3,9 @@ module llvm
 imports
   
   Common
+  Attributes
+  Statements
+  Atoms
 
 context-free start-symbols
   
@@ -11,7 +14,22 @@ context-free start-symbols
 context-free sorts
 
   Start
+  Definition
 
 context-free syntax
   
-  Start.LLVMEmpty = <>
+  Start.LLVMProgram = <<defs:Definition*>> {layout(pp-align-list defs)}
+  
+  Definition.TargetTriple = <target triple = <STRING>>
+  Definition.GlobalDef = <<Constant> = <Linkage> <GlobalAttribute*> <Type> <Literal>>
+  Definition.FunDecl = <declare <Linkage> <Type> <CallConv> <Constant>(<{Parameter ", "}*>) <FunctionAttribute*>>
+  Definition.FunDef = <
+define <Linkage> <Type> <CallConv> <Constant>(<{Parameter ", "}*>) <FunctionAttribute*> {
+  <blks:Block*>
+}> {layout(pp-align-list blks)}
+
+template options
+
+  keyword -/- [a-zA-Z0-9\_]
+  ID = keyword {reject}
+

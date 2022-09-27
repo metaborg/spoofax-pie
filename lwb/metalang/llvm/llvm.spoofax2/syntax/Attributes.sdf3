@@ -1,0 +1,54 @@
+module Attributes
+
+imports
+
+  Common
+
+context-free sorts
+
+  ParameterAttribute
+  Linkage
+  CallConv
+  GlobalAttribute
+  FunctionAttribute
+  ArithAttribute
+  TailAttribute
+
+context-free syntax
+
+  ParameterAttribute.NoCapture = <nocapture>
+  ParameterAttribute.NoFree = <nofree>
+  ParameterAttribute.ZeroExt = <zeroext>
+  ParameterAttribute.SignExt = <signext>
+
+  CallConv.DefaultCConv = <>
+  CallConv.CCConv = <ccc>
+  CallConv.TailCConv = <tailcc>
+
+  Linkage.Private = <private>
+  Linkage.Weak = <weak>
+  Linkage.DefaultLinkage = <>
+
+  GlobalAttribute.UnnamedAddr = <unnamed_addr>
+  GlobalAttribute.Global = <global>
+  GlobalAttribute.Constant = <constant>
+
+  FunctionAttribute.NoUnwind = <nounwind>
+  FunctionAttribute.NoReturn = <noreturn>
+  FunctionAttribute.InaccessibleMemOnly = <inaccessiblememonly>
+  FunctionAttribute.AllocKind = <allockind(<STRING>)>
+  FunctionAttribute.AllocSize = <allocsize(<INT>)>
+  FunctionAttribute.AllocFamily = <"alloc-family"=<STRING>>
+
+  ArithAttribute.NoSignedWrap = <nsw>
+  ArithAttribute.Exact = <exact>
+  
+  TailAttribute.Tail = <tail>
+  TailAttribute.MustTail = <musttail>
+  TailAttribute.NoTail = <notail>
+  TailAttribute.DefaultTail = <>
+
+template options
+
+  keyword -/- [a-zA-Z]
+  ID = keyword {reject}

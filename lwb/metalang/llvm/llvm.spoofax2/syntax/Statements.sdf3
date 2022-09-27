@@ -1,0 +1,64 @@
+module Statements
+
+imports
+
+  Common
+  Attributes
+  Atoms
+
+context-free sorts
+
+  Block
+  Label
+  Terminator
+  Statement
+  Expression
+  Operation
+  Condition
+
+context-free syntax
+
+  Block.Block = <
+<lbl:Label>
+  <stmts:Statement*>
+  <end:Terminator>> {layout(pp-indent lbl stmts && pp-align-list stmts && pp-align stmts end)}
+
+  Label.Label = <<ID>:>
+  Label.NoLabel = <>
+  Statement.Hello = <hello>
+
+  Terminator.Ret = <ret <TypedAtom>>
+  Terminator.RetVoid = <ret void>
+  Terminator.BrCond = <br <TypedAtom>, label <Atom>, label <Atom>>
+  Terminator.Br = <br label <Atom>>
+  Terminator.Switch = <switch <TypedAtom>, <TypedAtom> [<{TypedAtom ", "}*>]>
+  Terminator.Unreachable = <unreachable>
+  
+  Statement.Assign = <<Variable> = <Expression>>
+  Statement.Expression = <<Expression>>
+
+  Expression.BinaryOp = <<Operation> <ArithAttribute*> <Type> <Atom>, <Atom>>
+  Expression.ICmp = <icmp <Condition> <Type> <Atom>, <Atom>>
+  Expression.IntToPtr = <inttoptr <TypedAtom> to <Type>>
+  Expression.PtrToInt = <ptrtoint <TypedAtom> to <Type>>
+  Expression.Call = <<TailAttribute> call <Type> <CallConv> <Constant>(<{TypedAtom ", "}*>)>
+  Expression.Load = <load <Type>, <TypedAtom>>
+  Expression.Store = <store <TypedAtom>, <TypedAtom>>
+  Expression.GetElementPtr = <getelementptr <Type>, <{TypedAtom ", "}*>>
+
+  Operation.Add = <add>
+  Operation.Sub = <sub>
+  Operation.Mul = <mul>
+  Operation.SDiv = <sdiv>
+  
+  Condition.Equal = <eq>
+  Condition.NotEqual = <neq>
+  Contition.SignedGreaterThan = <sgt>
+  Contition.SignedGreaterEqual = <sge>
+  Contition.SignedLessThan = <slt>
+  Contition.SignedLessEqual = <sle>
+
+template options
+
+  keyword -/- [a-zA-Z0-9\_]
+  ID = keyword {reject}

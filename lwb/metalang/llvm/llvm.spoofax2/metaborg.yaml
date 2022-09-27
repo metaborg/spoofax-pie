@@ -42,5 +42,49 @@ language:
   statix:
     mode: traditional
 exports:
+# syntax
+- language: ATerm
+  directory: src-gen/syntax
+- language: TemplateLang
+  directory: syntax
+  includes: "**/*.sdf3"
+- language: SDF
+  directory: src-gen/syntax
+  includes: "**/*.sdf"
+# stratego injections (needed for syntax)
+- language: Stratego-Sugar
+  directory: src-gen
+  includes: "injections/llvm/**/*.str"
+# stratego pretty-printer (needed for syntax)
+- language: Stratego-Sugar
+  directory: src-gen
+  includes: "pp/**/*.str"
+# stratego completion (needed for syntax)
+- language: Stratego-Sugar
+  directory: src-gen
+  includes: "completion/llvm/**/*.str"
+# stratego signatures
+- language: Stratego-Sugar
+  directory: src-gen
+  includes: "signatures/llvm/**/*.str"
+- language: Stratego-Sugar
+  directory: src-gen
+  includes: "signatures/llvm-sig.str"
+- language: Stratego-Sugar
+  directory: src-gen
+  includes: "signatures/permissive-water-sig.str"
+# esv (colors)
+- language: EditorService
+  directory: editor
+  includes: "editor/llvm/**/*.esv"
+# statix signatures
+# todo: disabled due to lack of re-exporting of statix specs, manually copied TExp signature
+# - language: StatixLang
+#   directory: src-gen/statix
+#  includes: "signatures/**/*.stx"
 - language: ATerm
   directory: src-gen/statix
+# pretty printing helper
+- language: Stratego-Sugar
+  directory: trans
+  includes: "llvm/pp.str"
