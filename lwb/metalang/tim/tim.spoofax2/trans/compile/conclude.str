@@ -2,36 +2,138 @@ module compile/conclude
 
 imports
 
-  signatures/tim/-
-  signatures/tim-sig
+  signatures/llvm/-
+  signatures/llvm-sig
 
 rules
   // TODO: make target triple depend on host
-  conclude : input ->
-$<target triple = "x86_64-unknown-linux-gnu"
-@.int_fmt = private unnamed_addr constant [5 x i8] c"%ld\0A\00"
-@.str_fmt = private unnamed_addr constant [4 x i8] c"%s\0A\00"
-
-declare ptr @malloc(i64) nounwind
-declare void @free(ptr) nounwind
-declare i32 @puts(ptr nocapture) nounwind
-declare void @exit(i32) noreturn nounwind
-declare i32 @printf(ptr nocapture, ...) nounwind
-
-; tim runtime library
-declare i64 @record_new(i64, ...) nounwind
-declare i64 @record_write(i64, i64, i64) nounwind
-declare i64 @record_read(i64, i64) nounwind
-declare void @record_delete(i64) nounwind
-
-declare void @gc_init() nounwind
-declare ptr @gc_alloc(i64) nounwind inaccessiblememonly allockind("alloc,uninitialized") allocsize(0) "alloc-family"="malloc"
-declare void @gc_collect() nounwind
-
-define i32 @main() {
-  call tailcc void @start()
-  ret i32 0
-}
-
-<input>
->
+  conclude : LLVMProgram(input) -> LLVMProgram(<conc> (prelude, input))
+  with prelude :=
+  [ TargetTriple("\"x86_64-unknown-linux-gnu\"")
+  , GlobalDef(
+      Constant(".int_fmt")
+    , Private()
+    , [UnnamedAddr(), Constant()]
+    , Array("5", Int8())
+    , String("\"%ld\\0A\\00\"")
+    )
+  , GlobalDef(
+      Constant(".str_fmt")
+    , Private()
+    , [UnnamedAddr(), Constant()]
+    , Array("4", Int8())
+    , String("\"%s\\0A\\00\"")
+    )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , Pointer()
+    , Constant("malloc")
+    , [ParamUnnamed(Int64(), [])]
+    , [NoUnwind()]
+    )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , Void()
+    , Constant("free")
+    , [ParamUnnamed(Pointer(), [])]
+    , [NoUnwind()]
+    )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , Int32()
+    , Constant("puts")
+    , [ParamUnnamed(Pointer(), [NoCapture()])]
+    , [NoUnwind()]
+    )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , Void()
+    , Constant("exit")
+    , [ParamUnnamed(Int32(), [])]
+    , [NoReturn(), NoUnwind()]
+    )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , Int32()
+    , Constant("printf")
+    , [ParamUnnamed(Pointer(), [NoCapture()]), Vararg()]
+    , [NoUnwind()]
+    )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , Int64()
+    , Constant("record_new")
+    , [ParamUnnamed(Int64(), []), Vararg()]
+    , [NoUnwind()]
+    )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , Int64()
+    , Constant("record_write")
+    , [ParamUnnamed(Int64(), []), ParamUnnamed(Int64(), []), ParamUnnamed(Int64(), [])]
+    , [NoUnwind()]
+    )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , Int64()
+    , Constant("record_read")
+    , [ParamUnnamed(Int64(), []), ParamUnnamed(Int64(), [])]
+    , [NoUnwind()]
+    )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , Void()
+    , Constant("record_delete")
+    , [ParamUnnamed(Int64(), [])]
+    , [NoUnwind()]
+    )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , Void()
+    , Constant("gc_init")
+    , []
+    , [NoUnwind()]
+    )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , Pointer()
+    , Constant("gc_alloc")
+    , [ParamUnnamed(Int64(), [])]
+    , [NoUnwind(), InaccessibleMemOnly(), AllocKind("\"alloc,uninitialized\""), AllocSize("0"), AllocFamily("\"malloc\"")]
+    )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , Void()
+    , Constant("gc_collect")
+    , []
+    , [NoUnwind()]
+    )
+  , FunDef(
+      DefaultLinkage()
+    , DefaultCConv()
+    , Int32()
+    , Constant("main")
+    , []
+    , []
+    , [ Block(
+          NoLabel()
+        , [Expression(
+             Call(DefaultTail(), TailCConv(), Void(), ConstAtom(Constant("start")), [], [])
+           )]
+        , Ret(TypedAtom(Int32(), Literal(Int("0"))))
+        )
+      ]
+    )
+  ]

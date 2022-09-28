@@ -3,6 +3,7 @@ module compile
 imports
 
   compile/-
+  llvm/pp
 
 rules
 
@@ -20,3 +21,4 @@ rules
   ; explicate-globals
   ; select-instructions
   ; conclude
+  ; pp-llvm-string

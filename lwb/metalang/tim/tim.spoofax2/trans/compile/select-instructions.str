@@ -4,6 +4,7 @@ imports
 
   signatures/tim/-
   signatures/tim-sig
+  signatures/llvm/-
   signatures/llvm-sig
   compile/explicate-globals
   compile/string
@@ -11,216 +12,288 @@ imports
 rules
 
   select-instructions : TProgram(TExpLet(globals, TExpFix(funs, body))) ->
-  $[[<map(select-constant)> globals]
-    [<map(select-function)> funs]
-    [<select-function> TFun("start", [], body)]
-    ]
+    LLVMProgram(<concat> [
+      <map(select-constant)> globals
+    , <map(select-function)> funs
+    , [<select-function> TFun("start", [], body)]
+    ])
   select-instructions : TProgram(body) -> 
     <select-function> TFun("start", [], body)
   
   select-constant : TBind(var, TValueString(value)) ->
-  $<@<var> = private unnamed_addr constant [<length> x i8] c"<str>"
-  >
-  with (length, str) := <process-string> value
+    GlobalDef(Constant(var), Private(), [UnnamedAddr(), Constant()], type, String(str))
+  with
+    (length, str) := <process-string> value
+  ; type := Array(<int-to-string> length, Int8())
   
   select-function : TFun(name, args, body) ->
-  $[define tailcc void @[name]([<select-args> args]) nounwind {
-    [<select-exp> body]
-  }
-  ]
+    FunDef(Private(), TailCConv(), Void(), Constant(name), args', [NoUnwind()], blocks)
+  with {| Blocks
+  : args' := <select-args> args
+  ; (stmts, term) := <select-exp> body
+  ; mainblock := Block(NoLabel(), stmts, term)
+  ; otherblocks := <bagof-Blocks> ()
+  ; blocks := [mainblock|otherblocks]
+  |}
 
-  select-args : [arg] -> $[i64 %[arg]]
-  select-args : [arg|args] -> $[i64 %[arg], [<select-args> args]]
-  where <not(eq)> (args, [])
-  select-args : [] -> $[]
+  select-args = map(\arg -> ParamNamed(Int64(), Variable(arg), [])\)
 
-  select-call-args : [arg] -> $[i64 [<select-value> arg]]
-  select-call-args : [arg|args] -> $[i64 [<select-value> arg], [<select-call-args> args]]
-  where <not(eq)> (args, [])
-  select-call-args : [] -> $[]
+  select-call-args = map(\arg -> TypedAtom(Int64(), <select-value> arg)\)
+
+  create-block(|label) : body -> ()
+  with
+    (stmts, term) := <select-exp> body
+  ; rules(Blocks :+ () -> Block(label, stmts, term))
 
   select-exp : TExpPrimOp(op, args, result, cont) ->
-  $[[<select-primop(|result)> (op, args)]
-    [<select-exp> cont]]
+    (<conc> (stmts1, stmts2), term)
+  with
+    stmts1 := <select-primop(|Variable(result))> (op, args)
+  ; (stmts2, term) := <select-exp> cont
   
   select-exp : TExpTerminatingPrimOp(op, args) ->
-  $[[<select-primop(|<newname>)> (op, args)]
-    ret void
-  ]
+    <select-terminating-primop> (op, args)
   
   select-exp : TExpConditionalPrimOp(op, [a1, a2], b1, b2) ->
-  $[%[tmp] = icmp [cond] i64 [<select-value> a1], [<select-value> a2]
-  br i1 %[tmp], label %[l1], label %[l2]
-  [l1]:
-  [<select-exp> b1]
-  [l2]:
-  [<select-exp> b2]]
+    ( [Assign(tmp, ICmp(cond, Int64(), <select-value> a1, <select-value> a2))]
+    , BrCond(TypedAtom(Bool(), VarAtom(tmp)), VarAtom(Variable(l1)), VarAtom(Variable(l2)))
+    )
   where cond := <select-int-condition> op
   with
-    tmp := <newname> "result"
+    tmp := Variable(<newname> "result")
   ; l1 := <newname> "If"
   ; l2 := <newname> "Else"
-  select-exp : TExpConditionalPrimOp(op, args, b1, b2) -> $[]
+  ; <create-block(|Label(l1))> b1
+  ; <create-block(|Label(l2))> b2
+  select-exp : TExpConditionalPrimOp(op, args, b1, b2) -> ()
   where with(fail|"String comparison not yet implemented")  // TODO
   
   select-exp : TExpApp(TValueVar(x), args) ->
-  $[%[tmp] = inttoptr i64 %[x] to ptr
-  musttail call tailcc void %[tmp]([<select-call-args> args])
-  ret void]
-  with tmp := <newname> "ptr"
+    ( [ Assign(tmp, IntToPtr(TypedAtom(Int64(), VarAtom(Variable(x))), Pointer()))
+      , Expression(Call(MustTail(), TailCConv(), Void(), VarAtom(tmp), <select-call-args> args, []))
+      ]
+    , RetVoid()
+    )
+  with tmp := Variable(<newname> "ptr")
   select-exp : TExpApp(TValueGlobal(x), args) ->
-  $[musttail call tailcc void @[x]([<select-call-args> args])
-  ret void]
-  with tmp := <newname> "ptr"
+    ( [Expression(Call(MustTail(), TailCConv(), Void(), ConstAtom(Constant(x)), <select-call-args> args, []))]
+    , RetVoid()
+    )
   
-  select-exp = {e : ?e ; with(fail|$[unsupported exp [e]]) }
+  select-exp = with(fail|$[unsupported exp])
 
-  select-int-condition : "int-eq" -> "eq"
-  select-int-condition : "int-neq" -> "ne"
-  select-int-condition : "int-leq" -> "sle"
-  select-int-condition : "int-geq" -> "sge"
-  select-int-condition : "int-lt" -> "slt"
-  select-int-condition : "int-gt" -> "sgt"
+  select-int-condition : "int-eq" -> Equal()
+  select-int-condition : "int-neq" -> NotEqual()
+  select-int-condition : "int-leq" -> SignedLessEqual()
+  select-int-condition : "int-geq" -> SignedGreaterEqual()
+  select-int-condition : "int-lt" -> SignedLessThan()
+  select-int-condition : "int-gt" -> SignedGreaterThan()
 
   // Integer primops
   select-primop(|result) : ("int-neg", [a]) ->
-  $[%[result] = sub nsw i64 0, [<select-value> a]]
+    [Assign(result, BinaryOp(Sub(), [NoSignedWrap()], Int64(), Literal(Int("0")), <select-value> a))]
   select-primop(|result) : ("int-add", [a, b]) ->
-  $[%[result] = add nsw i64 [<select-value> a], [<select-value> b]]
+    [Assign(result, BinaryOp(Add(), [NoSignedWrap()], Int64(), <select-value> a, <select-value> b))]
   select-primop(|result) : ("int-sub", [a, b]) ->
-  $[%[result] = sub nsw i64 [<select-value> a], [<select-value> b]]
+    [Assign(result, BinaryOp(Sub(), [NoSignedWrap()], Int64(), <select-value> a, <select-value> b))]
   select-primop(|result) : ("int-mul", [a, b]) ->
-  $[%[result] = mul nsw i64 [<select-value> a], [<select-value> b]]
+    [Assign(result, BinaryOp(Mul(), [NoSignedWrap()], Int64(), <select-value> a, <select-value> b))]
   select-primop(|result) : ("int-div", [a, b]) ->
-  $[%[result] = sdiv i64 [<select-value> a], [<select-value> b]]
+    [Assign(result, BinaryOp(SDiv(), [], Int64(), <select-value> a, <select-value> b))]
 
   // References
   select-primop(|result) : ("ref-new", [v]) ->
-  $[%[tmp] = call ptr @gc_alloc(i64 8)
-  store i64 [<select-value> v], ptr %[tmp]
-  %[result] = ptrtoint ptr %[tmp] to i64]
+    [ Assign(tmp, Call(DefaultTail(), DefaultCConv(), Pointer(), ConstAtom(Constant("gc_alloc")), [TypedAtom(Int64(), Literal(Int("8")))], []))
+    , Expression(Store(TypedAtom(Int64(), <select-value> v), TypedAtom(Pointer(), VarAtom(tmp))))
+    , Assign(result, PtrToInt(TypedAtom(Pointer(), VarAtom(tmp)), Int64()))
+    ]
   with
-    tmp := <newname> result
+    tmp := Variable(<newname> "ptr")
   select-primop(|result) : ("ref-fetch", [ref]) ->
-  $[%[tmp] = inttoptr i64 [<select-value> ref] to ptr
-  %[result] = load i64, ptr %[tmp]]
+    [ Assign(tmp, IntToPtr(TypedAtom(Int64(), <select-value> ref), Pointer()))
+    , Assign(result, Load(Int64(), TypedAtom(Pointer(), VarAtom(tmp))))
+    ]
   with
-    tmp := <newname> "ptr"
+    tmp := Variable(<newname> "ptr")
   select-primop(|result) : ("ref-store", [ref, v]) ->
-  $[%[tmp] = inttoptr i64 [<select-value> ref] to ptr
-  store i64 [<select-value> v], ptr %[tmp]
-  %[result] = add i64 [<select-value> v], 0]
+    [ Assign(tmp, IntToPtr(TypedAtom(Int64(), <select-value> ref), Pointer()))
+    , Expression(Store(TypedAtom(Int64(), <select-value> v), TypedAtom(Pointer(), VarAtom(tmp))))
+    , Assign(result, BinaryOp(Add(), [], Int64(), <select-value> v, Literal(Int("0"))))
+    ]
   with
-    tmp := <newname> "ptr"
+    tmp := Variable(<newname> "ptr")
 
   // Records
-  select-primop(|result) : ("record-new", []) ->
-  $[%[result] = call i64 (i64, ...) @record_new(i64 0)]
   select-primop(|result) : ("record-new", args) ->
-  $[%[result] = call i64 (i64, ...) @record_new(i64 [count], [<select-call-args> args])]
-  with count := <divi> (<length> args, 2)
-  select-primop(|result) : ("record-write", [ptr, key, val]) ->
-  $[%[result] = call i64 @record_write(i64 [<select-value> ptr], i64 [<select-value> key], i64 [<select-value> val])]
-  select-primop(|result) : ("record-read", [ptr, key]) ->
-  $[%[result] = call i64 @record_read(i64 [<select-value> ptr], i64 [<select-value> key])]
+    [Assign(
+       result
+     , Call(
+         DefaultTail()
+       , DefaultCConv()
+       , Function(Int64(), [ParamUnnamed(Int64(), []), Vararg()])
+       , ConstAtom(Constant("record_new"))
+       , [TypedAtom(Int64(), Literal(Int(count)))|<select-call-args> args]
+       , []
+       )
+     )]
+  with count := <divi ; int-to-string> (<length> args, 2)
+  select-primop(|result) : ("record-write", args) ->
+    [Assign(
+       result
+     , Call(
+         DefaultTail()
+       , DefaultCConv()
+       , Function(Int64(), [ParamUnnamed(Int64(), []), Vararg()])
+       , ConstAtom(Constant("record_write"))
+       , <select-call-args> args
+       , []
+       )
+     )]
+  select-primop(|result) : ("record-read", args) ->
+    [Assign(
+       result
+     , Call(
+         DefaultTail()
+       , DefaultCConv()
+       , Function(Int64(), [ParamUnnamed(Int64(), []), Vararg()])
+       , ConstAtom(Constant("record_read"))
+       , <select-call-args> args
+       , []
+       )
+     )]
   
   // Arrays
   select-primop(|result) : ("array-new", args) ->
-  $[%[sizepvar] = getelementptr i64, ptr null, i64 [n]
-  %[sizevar] = ptrtoint ptr %[sizepvar] to i64
-  %[tmp] = call ptr @gc_alloc(i64 %[sizevar])
-  [stores]
-  %[result] = ptrtoint ptr %[tmp] to i64
-  ]
+    <concat> [
+      [ Assign(sizepvar, GetElementPtr(Int64(), [TypedAtom(Pointer(), Literal(Null())), n]))
+      , Assign(sizevar, PtrToInt(TypedAtom(Pointer(), VarAtom(sizepvar)), Int64()))
+      , Assign(tmp, Call(
+          DefaultTail()
+        , DefaultCConv()
+        , Pointer()
+        , ConstAtom(Constant("gc_alloc"))
+        , [TypedAtom(Int64(), VarAtom(sizevar))]
+        , []
+        ))
+      ]
+    , stores
+    , [ Assign(result, PtrToInt(TypedAtom(Pointer(), VarAtom(tmp)), Int64()))]
+    ]
   with
-    n := <length> args
-  ; sizepvar := <newname> "sizep"
-  ; sizevar := <newname> "size"
-  ; tmp := <newname> result
+    n := TypedAtom(Int64(), Literal(Int(<length ; int-to-string> args)))
+  ; sizepvar := Variable(<newname> "sizep")
+  ; sizevar := Variable(<newname> "size")
+  ; tmp := Variable(<newname> result)
   ; let apply(|i) = array-new-store(|tmp, i) in
-      stores := <nmap(apply|0) ; concat-strings> args
+      stores := <nmap(apply|0) ; concat> args
     end
 
   array-new-store(|arr, i) : v ->
-  $[%[offset] = getelementptr i64, ptr %[arr], i64 [i]
-  store i64 [<select-value> v], ptr %[offset]
-  ]
-  with offset := <newname> "offset"
+    [ Assign(offset, GetElementPtr(Int64(), [arr', i']))
+    , Expression(Store(TypedAtom(Int64(), <select-value> v), TypedAtom(Pointer(), VarAtom(offset))))
+    ]
+  with
+    offset := Variable(<newname> "offset")
+  ; arr' := TypedAtom(Pointer(), VarAtom(arr))
+  ; i' := TypedAtom(Int64(), Literal(Int(<int-to-string> i)))
   
   select-primop(|result) : ("array-read", [arr, index]) ->
-  $[%[tmpvar] = inttoptr i64 [<select-value> arr] to ptr
-  %[offset] = getelementptr i64, ptr %[tmpvar], i64 [<select-value> index]
-  %[result] = load i64, ptr %[offset]
-  ]
+    [ Assign(tmpvar, IntToPtr(TypedAtom(Int64(), <select-value> arr), Pointer()))
+    , Assign(offset, GetElementPtr(Int64(), [TypedAtom(Pointer(), VarAtom(tmpvar)), TypedAtom(Int64(), <select-value> index)]))
+    , Assign(result, Load(Int64(), TypedAtom(Pointer(), VarAtom(offset))))
+    ]
   with
-    tmpvar := <newname>
-  ; offset := <newname> "offset"
+    tmpvar := Variable(<newname> "ptr")
+  ; offset := Variable(<newname> "offset")
   
   select-primop(|result) : ("array-write", [arr, index, value]) ->
-  $[%[tmpvar] = inttoptr i64 [<select-value> arr] to ptr
-  %[offset] = getelementptr i64, ptr %[tmpvar], i64 [<select-value> index]
-  store i64 [<select-value> value], ptr %[offset]
-  %[result] = add i64 [<select-value> value], 0
-  ]
+    [ Assign(tmpvar, IntToPtr(TypedAtom(Int64(), <select-value> arr), Pointer()))
+    , Assign(offset, GetElementPtr(Int64(), [TypedAtom(Pointer(), VarAtom(tmpvar)), TypedAtom(Int64(), <select-value> index)]))
+    , Expression(Store(TypedAtom(Int64(), <select-value> value), TypedAtom(Pointer(), VarAtom(offset))))
+    , Assign(result, BinaryOp(Add(), [], Int64(), <select-value> value, Literal(Int("0"))))
+    ]
   with
-    tmpvar := <newname>
-  ; offset := <newname> "offset"
+    tmpvar := Variable(<newname> "ptr")
+  ; offset := Variable(<newname> "offset")
 
   // Closures
   select-primop(|result) : ("closure-new", args) ->
-  $[%[sizepvar] = getelementptr i64, ptr null, i64 [n]
-  %[sizevar] = ptrtoint ptr %[sizepvar] to i64
-  %[tmp] = call ptr @gc_alloc(i64 %[sizevar])
-  [stores]
-  %[result] = ptrtoint ptr %[tmp] to i64
-  ]
+    <concat> [
+      [ Assign(sizepvar, GetElementPtr(Int64(), [TypedAtom(Pointer(), Literal(Null())), n]))
+      , Assign(sizevar, PtrToInt(TypedAtom(Pointer(), VarAtom(sizepvar)), Int64()))
+      , Assign(tmp, Call(
+          DefaultTail()
+        , DefaultCConv()
+        , Pointer()
+        , ConstAtom(Constant("gc_alloc"))
+        , [TypedAtom(Int64(), VarAtom(sizevar))]
+        , []
+        ))
+      ]
+    , stores
+    , [ Assign(result, PtrToInt(TypedAtom(Pointer(), VarAtom(tmp)), Int64()))]
+    ]
   with
-    n := <length> args
-  ; sizepvar := <newname> "sizep"
-  ; sizevar := <newname> "size"
-  ; tmp := <newname> result
-  ; let apply(|i) = closure-new-store(|tmp, i) in
-      stores := <nmap(apply|0) ; concat-strings> args
+    n := TypedAtom(Int64(), Literal(Int(<length ; int-to-string> args)))
+  ; sizepvar := Variable(<newname> "sizep")
+  ; sizevar := Variable(<newname> "size")
+  ; tmp := Variable(<newname> result)
+  ; let apply(|i) = array-new-store(|tmp, i) in
+      stores := <nmap(apply|0) ; concat> args
     end
 
   closure-new-store(|arr, i) : v ->
-  $[%[offset] = getelementptr i64, ptr %[arr], i64 [i]
-  store i64 [<select-value> v], ptr %[offset]
-  ]
-  with offset := <newname> "offset"
+    [ Assign(offset, GetElementPtr(Int64(), [arr', i']))
+    , Expression(Store(TypedAtom(Int64(), <select-value> v), TypedAtom(Pointer(), VarAtom(offset))))
+    ]
+  with
+    offset := Variable(<newname> "offset")
+  ; arr' := TypedAtom(Pointer(), VarAtom(arr))
+  ; i' := TypedAtom(Int64(), Literal(Int(<int-to-string> i)))
   
   select-primop(|result) : ("closure-read", [arr, index]) ->
-  $[%[tmpvar] = inttoptr i64 [<select-value> arr] to ptr
-  %[offset] = getelementptr i64, ptr %[tmpvar], i64 [<select-value> index]
-  %[result] = load i64, ptr %[offset]
-  ]
+    [ Assign(tmpvar, IntToPtr(TypedAtom(Int64(), <select-value> arr), Pointer()))
+    , Assign(offset, GetElementPtr(Int64(), [TypedAtom(Pointer(), VarAtom(tmpvar)), TypedAtom(Int64(), <select-value> index)]))
+    , Assign(result, Load(Int64(), TypedAtom(Pointer(), VarAtom(offset))))
+    ]
   with
-    tmpvar := <newname>
-  ; offset := <newname> "offset"
+    tmpvar := Variable(<newname> "ptr")
+  ; offset := Variable(<newname> "offset")
   
   select-primop(|result) : ("closure-offset", [arr, index]) ->
-  $[%[tmpvar] = inttoptr i64 [<select-value> arr] to ptr
-  %[offset] = getelementptr i64, ptr %[tmpvar], i64 [<select-value> index]
-  %[result] = ptrtoint ptr %[offset] to i64
-  ]
+    [ Assign(tmpvar, IntToPtr(TypedAtom(Int64(), <select-value> arr), Pointer()))
+    , Assign(offset, GetElementPtr(Int64(), [TypedAtom(Pointer(), VarAtom(tmpvar)), TypedAtom(Int64(), <select-value> index)]))
+    , Assign(result, PtrToInt(TypedAtom(Pointer(), VarAtom(offset)), Int64()))
+    ]
   with
-    tmpvar := <newname>
-  ; offset := <newname> "offset"
+    tmpvar := Variable(<newname> "ptr")
+  ; offset := Variable(<newname> "offset")
 
   // Print
   select-primop(|result) : ("print", [a]) ->
-  $[call i32 (ptr, ...) @printf(ptr @.str_fmt, i64 [a'])
-    %[result] = add i64 [a'], 0]
-  with a' := <select-value> a
+    [ Expression(
+        Call(
+          DefaultTail()
+        , DefaultCConv()
+        , Function(Int32(), [ParamUnnamed(Pointer(), []), Vararg()])
+        , ConstAtom(Constant("printf"))
+        , [ TypedAtom(Pointer(), ConstAtom(Constant(".str_fmt")))
+          , TypedAtom(Int64(), <select-value> a)
+          ]
+        , []
+        )
+      )
+    , Assign(result, BinaryOp(Add(), [], Int64(), <select-value> a, Literal(Int("0"))))
+    ]
   // Exit
-  select-primop(|_) : ("exit", []) -> 
-  $[call void @exit(i32 0) noreturn
-    unreachable]
+  select-terminating-primop : ("exit", []) -> 
+    ( [Expression(Call(DefaultTail(), DefaultCConv(), Void(), ConstAtom(Constant("exit")), [], [NoReturn()]))]
+    , Unreachable()
+    )
 
-  select-value : TValueVar(x) -> $[%[x]]
-  select-value : TValueGlobal(x) -> $[ptrtoint (ptr @[x] to i64)]
-  select-value : TValueInt(x) -> x
-  select-value : TValueString(_) -> $[]
-  where with(fail|"Strings not yet implemented")
+  select-value : TValueVar(x) -> VarAtom(Variable(x))
+  select-value : TValueGlobal(x) -> PtrToInt(Constant(x), Int64())
+  select-value : TValueInt(x) -> Literal(Int(x))
+  select-value : TValueString(x) -> Literal(String(x))
 
-  get-type : TValueVar(_) -> $[i64]  // TODO
+  get-type : TValueVar(_) -> Int64()  // TODO
