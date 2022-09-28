@@ -6,4 +6,4 @@ menus
 
   action: "Convert Closures" = debug-convert-closures (source) (openeditor)
   action: "Inline functions" = debug-inline-funs (source) (openeditor)
-  action: "Compile" = debug-compile-tim (source) (openeditor)
+  action: "Compile" = debug-compile-tim (openeditor)

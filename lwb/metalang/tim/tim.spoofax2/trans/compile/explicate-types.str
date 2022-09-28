@@ -1,0 +1,34 @@
+module compile/explicate-types
+
+imports
+
+  statix/api
+  signatures/tim/-
+  signatures/tim-sig
+
+signature
+  sorts TYPE
+  constructors
+    INT : TYPE
+    STRING : TYPE
+    FUNCTION : list(TYPE) -> TYPE
+    REF : TYPE -> TYPE
+    ARRAY : TYPE
+    RECORD : TYPE
+    CLOSURE : TYPE
+
+rules
+
+  explicate-types : program -> program'
+  with
+    analysis := <stx-get-ast-analysis> program
+  ; program' := <bottomup(try(explicate-type(|analysis)))> program
+
+  explicate-type(|analysis) : TExpPrimOp("print", [v], result, cont) ->
+    TExpPrimOp(print, [v], result, cont)
+  with
+    type := <stx-get-ast-type(|analysis)> v
+  ; print := <print-for-type> type
+
+  print-for-type : INT() -> "print-int"
+  print-for-type : STRING() -> "print-string"

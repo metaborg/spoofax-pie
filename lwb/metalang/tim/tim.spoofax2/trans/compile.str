@@ -15,7 +15,9 @@ rules
     ; result   := <compile-tim> ast
 
   compile-tim =
-    uniquify
+    explicate-types
+  ; strip-annos
+  ; uniquify
 //  ; inline-funs
   ; convert-closures
   ; explicate-globals

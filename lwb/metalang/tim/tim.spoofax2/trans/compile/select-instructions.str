@@ -270,7 +270,22 @@ rules
   ; offset := Variable(<newname> "offset")
 
   // Print
-  select-primop(|result) : ("print", [a]) ->
+  select-primop(|result) : ("print-int", [a]) ->
+    [ Expression(
+        Call(
+          DefaultTail()
+        , DefaultCConv()
+        , Function(Int32(), [ParamUnnamed(Pointer(), []), Vararg()])
+        , ConstAtom(Constant("printf"))
+        , [ TypedAtom(Pointer(), ConstAtom(Constant(".int_fmt")))
+          , TypedAtom(Int64(), <select-value> a)
+          ]
+        , []
+        )
+      )
+    , Assign(result, BinaryOp(Add(), [], Int64(), <select-value> a, Literal(Int("0"))))
+    ]
+  select-primop(|result) : ("print-string", [a]) ->
     [ Expression(
         Call(
           DefaultTail()
@@ -285,6 +300,8 @@ rules
       )
     , Assign(result, BinaryOp(Add(), [], Int64(), <select-value> a, Literal(Int("0"))))
     ]
+  select-primop(|result) : ("print", [a]) ->
+    <with(fail|"Could not determine print type at compile time")>
   // Exit
   select-terminating-primop : ("exit", []) -> 
     ( [Expression(Call(DefaultTail(), DefaultCConv(), Void(), ConstAtom(Constant("exit")), [], [NoReturn()]))]

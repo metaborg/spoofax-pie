@@ -13,7 +13,7 @@ rules
                 ; process-chars> s
   ; charszero := <conc> (chars, [['\', '0', '0']])
   ; length := <length> charszero
-  ; s' := <flatten-list ; implode-string> charszero
+  ; s' := <flatten-list ; implode-string ; double-quote> charszero
   
   process-chars : ['\', '"'|rest] ->
     [['\', '2', '2']|<process-chars> rest]
