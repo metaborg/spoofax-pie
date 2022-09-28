@@ -2,10 +2,10 @@ module llvm
 
 imports
   
-  Common
-  Attributes
-  Statements
-  Atoms
+  llvm/Atoms
+  llvm/Attributes
+  llvm/Statements
+  llvm/Common
 
 context-free start-symbols
   
@@ -32,4 +32,5 @@ template options
 
   keyword -/- [a-zA-Z0-9\_]
   ID = keyword {reject}
+  tokenize : "("
 

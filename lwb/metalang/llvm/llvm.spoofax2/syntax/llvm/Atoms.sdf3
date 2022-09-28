@@ -1,9 +1,9 @@
-module Atoms
+module llvm/Atoms
 
 imports
 
-  Common
-  Attributes
+  llvm/Common
+  llvm/Attributes
 
 context-free sorts
 
@@ -38,6 +38,7 @@ context-free syntax
   
   Literal.Int = <<INT>>
   Literal.String = <c<STRING>>
+  Literal.Null = <null>
   
   TypedAtom.TypedAtom = <<Type> <Atom>>
 
@@ -50,3 +51,4 @@ template options
 
   keyword -/- [a-zA-Z0-9\_]
   ID = keyword {reject}
+  tokenize : "("

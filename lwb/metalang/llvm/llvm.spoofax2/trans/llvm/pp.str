@@ -1,0 +1,32 @@
+module llvm/pp
+
+imports
+  libstratego-lib
+
+imports
+
+  libstratego-gpp
+  libspoofax/sdf/pp
+  libspoofax/editor/refactoring/-
+  pp/llvm-parenthesize
+  pp/llvm-pp
+
+rules
+  
+  pp-llvm-string =
+    parenthesize-llvm
+    ; prettyprint-llvm-start-symbols
+    ; !V([], <id>)
+    ; box2text-string(|120)
+      
+  pp-partial-llvm-string =
+    parenthesize-llvm
+    ; prettyprint-llvm
+    ; !V([], <id>)
+    ; box2text-string(|120)
+    
+  pp-partial-llvm-string(|sort) =
+    parenthesize-llvm
+    ; prettyprint-llvm(|sort)
+    ; !V([], <id>)
+    ; box2text-string(|120)

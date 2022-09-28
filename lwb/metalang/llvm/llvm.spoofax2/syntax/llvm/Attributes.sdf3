@@ -1,8 +1,8 @@
-module Attributes
+module llvm/Attributes
 
 imports
 
-  Common
+  llvm/Common
 
 context-free sorts
 
@@ -53,3 +53,4 @@ template options
 
   keyword -/- [a-zA-Z]
   ID = keyword {reject}
+  tokenize : "("

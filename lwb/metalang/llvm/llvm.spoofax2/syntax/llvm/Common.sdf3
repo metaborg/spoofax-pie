@@ -1,4 +1,4 @@
-module Common
+module llvm/Common
 
 lexical sorts
   ID INT POSINT STRING
