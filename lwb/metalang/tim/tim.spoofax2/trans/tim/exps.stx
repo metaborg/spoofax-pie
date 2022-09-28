@@ -13,7 +13,7 @@ rules
 
   typeOfTValue(_, TValue-Plhdr()) = _.
   typeOfTValue(_, t@TValueInt(_)) = INT() :- @t.type := INT().
-  typeOfTValue(_, t@TValueString(_)) = STRING() :- @t.type := INT().
+  typeOfTValue(_, t@TValueString(_)) = STRING() :- @t.type := STRING().
   typeOfTValue(s, t@TValueVar(v)) = T :- resolveVar(s, v) == T, @t.type := T.
 
 rules
