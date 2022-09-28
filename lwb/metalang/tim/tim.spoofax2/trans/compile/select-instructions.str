@@ -348,7 +348,7 @@ rules
     )
 
   select-value : TValueVar(x) -> VarAtom(Variable(x))
-  select-value : TValueGlobal(x) -> PtrToInt(Constant(x), Int64())
+  select-value : TValueGlobal(x) -> PtrToIntAtom(Constant(x), Int64())
   select-value : TValueInt(x) -> Literal(Int(x))
   select-value : TValueString(x) -> Literal(String(x))
 

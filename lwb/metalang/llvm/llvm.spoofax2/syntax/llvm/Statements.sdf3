@@ -53,10 +53,10 @@ context-free syntax
   
   Condition.Equal = <eq>
   Condition.NotEqual = <neq>
-  Contition.SignedGreaterThan = <sgt>
-  Contition.SignedGreaterEqual = <sge>
-  Contition.SignedLessThan = <slt>
-  Contition.SignedLessEqual = <sle>
+  Condition.SignedGreaterThan = <sgt>
+  Condition.SignedGreaterEqual = <sge>
+  Condition.SignedLessThan = <slt>
+  Condition.SignedLessEqual = <sle>
 
 template options
 

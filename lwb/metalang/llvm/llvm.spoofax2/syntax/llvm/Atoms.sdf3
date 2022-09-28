@@ -34,7 +34,7 @@ context-free syntax
   Atom.Literal = <<Literal>>
   Atom.ConstAtom = <<Constant>>
   Atom.VarAtom = <<Variable>>
-  Atom.PtrToInt = <ptrtoint (ptr <Constant> to <Type>)>
+  Atom.PtrToIntAtom = <ptrtoint (ptr <Constant> to <Type>)>
   
   Literal.Int = <<INT>>
   Literal.String = <c<STRING>>
