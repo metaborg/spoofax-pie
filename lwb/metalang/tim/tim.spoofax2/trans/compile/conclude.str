@@ -99,6 +99,30 @@ rules
   , FunDecl(
       DefaultLinkage()
     , DefaultCConv()
+    , Int64()
+    , Constant("array_concat")
+    , [ParamUnnamed(Int64(), []), ParamUnnamed(Int64(), [])]
+    , [NoUnwind()]
+    )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , Int64()
+    , Constant("array_tail")
+    , [ParamUnnamed(Int64(), [])]
+    , [NoUnwind()]
+    )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , Int64()
+    , Constant("string_concat")
+    , [ParamUnnamed(Int64(), []), ParamUnnamed(Int64(), [])]
+    , [NoUnwind()]
+    )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
     , Void()
     , Constant("gc_init")
     , []

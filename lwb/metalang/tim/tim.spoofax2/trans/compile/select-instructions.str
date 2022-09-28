@@ -165,9 +165,9 @@ rules
   // Arrays
   select-primop(|result) : ("array-new", args) ->
     <concat> [
-      [ Assign(sizepvar, GetElementPtr(Int64(), [TypedAtom(Pointer(), Literal(Null())), n]))
+      [ Assign(sizepvar, GetElementPtr(Int64(), [TypedAtom(Pointer(), Literal(Null())), allocLen]))
       , Assign(sizevar, PtrToInt(TypedAtom(Pointer(), VarAtom(sizepvar)), Int64()))
-      , Assign(tmp, Call(
+      , Assign(tmp1, Call(
           DefaultTail()
         , DefaultCConv()
         , Pointer()
@@ -175,16 +175,22 @@ rules
         , [TypedAtom(Int64(), VarAtom(sizevar))]
         , []
         ))
+      , Expression(Store(arrLen, TypedAtom(Pointer(), VarAtom(tmp1))))
+      , Assign(tmp2, GetElementPtr(Int64(), [TypedAtom(Pointer(), VarAtom(tmp1)), TypedAtom(Int64(), Literal(Int("1")))]))
       ]
     , stores
-    , [ Assign(result, PtrToInt(TypedAtom(Pointer(), VarAtom(tmp)), Int64()))]
+    , [ Assign(result, PtrToInt(TypedAtom(Pointer(), VarAtom(tmp2)), Int64()))]
     ]
   with
-    n := TypedAtom(Int64(), Literal(Int(<length ; int-to-string> args)))
+    len := <length> args
+  ; fulllen := <addi> (len, 1)
+  ; allocLen := TypedAtom(Int64(), Literal(Int(<int-to-string> fulllen)))
+  ; arrLen := TypedAtom(Int64(), Literal(Int(<int-to-string> len)))
   ; sizepvar := Variable(<newname> "sizep")
   ; sizevar := Variable(<newname> "size")
-  ; tmp := Variable(<newname> result)
-  ; let apply(|i) = array-new-store(|tmp, i) in
+  ; tmp1 := Variable(<newname> "ptr")
+  ; tmp2 := Variable(<newname> "ptr")
+  ; let apply(|i) = array-new-store(|tmp2, i) in
       stores := <nmap(apply|0) ; concat> args
     end
 
@@ -215,6 +221,39 @@ rules
   with
     tmpvar := Variable(<newname> "ptr")
   ; offset := Variable(<newname> "offset")
+  
+  select-primop(|result) : ("array-length", [arr]) ->
+    [ Assign(tmpvar, IntToPtr(TypedAtom(Int64(), <select-value> arr), Pointer()))
+    , Assign(offset, GetElementPtr(Int64(), [TypedAtom(Pointer(), VarAtom(tmpvar)), TypedAtom(Int64(), Literal(Int("-1")))]))
+    , Assign(result, Load(Int64(), TypedAtom(Pointer(), VarAtom(offset))))
+    ]
+  with
+    tmpvar := Variable(<newname> "ptr")
+  ; offset := Variable(<newname> "offset")
+  select-primop(|result) : ("array-tail", args) ->
+    [Assign(
+       result
+     , Call(
+         DefaultTail()
+       , DefaultCConv()
+       , Function(Int64(), [ParamUnnamed(Int64(), []), Vararg()])
+       , ConstAtom(Constant("array_tail"))
+       , <select-call-args> args
+       , []
+       )
+     )]
+  select-primop(|result) : ("array-concat", args) ->
+    [Assign(
+       result
+     , Call(
+         DefaultTail()
+       , DefaultCConv()
+       , Function(Int64(), [ParamUnnamed(Int64(), []), Vararg()])
+       , ConstAtom(Constant("array_concat"))
+       , <select-call-args> args
+       , []
+       )
+     )]
 
   // Closures
   select-primop(|result) : ("closure-new", args) ->
