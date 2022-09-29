@@ -137,30 +137,9 @@ rules
        )
      )]
   with count := <divi ; int-to-string> (<length> args, 2)
-  select-primop(|result) : ("record-write", args) ->
-    [Assign(
-       result
-     , Call(
-         DefaultTail()
-       , DefaultCConv()
-       , Function(Int64(), [ParamUnnamed(Int64(), []), Vararg()])
-       , ConstAtom(Constant("record_write"))
-       , <select-call-args> args
-       , []
-       )
-     )]
-  select-primop(|result) : ("record-read", args) ->
-    [Assign(
-       result
-     , Call(
-         DefaultTail()
-       , DefaultCConv()
-       , Function(Int64(), [ParamUnnamed(Int64(), []), Vararg()])
-       , ConstAtom(Constant("record_read"))
-       , <select-call-args> args
-       , []
-       )
-     )]
+
+  select-funcall-primop : "record-write" -> "record_write"
+  select-funcall-primop : "record-read" -> "record_read"
   
   // Arrays
   select-primop(|result) : ("array-new", args) ->
@@ -230,30 +209,9 @@ rules
   with
     tmpvar := Variable(<newname> "ptr")
   ; offset := Variable(<newname> "offset")
-  select-primop(|result) : ("array-tail", args) ->
-    [Assign(
-       result
-     , Call(
-         DefaultTail()
-       , DefaultCConv()
-       , Function(Int64(), [ParamUnnamed(Int64(), []), Vararg()])
-       , ConstAtom(Constant("array_tail"))
-       , <select-call-args> args
-       , []
-       )
-     )]
-  select-primop(|result) : ("array-concat", args) ->
-    [Assign(
-       result
-     , Call(
-         DefaultTail()
-       , DefaultCConv()
-       , Function(Int64(), [ParamUnnamed(Int64(), []), Vararg()])
-       , ConstAtom(Constant("array_concat"))
-       , <select-call-args> args
-       , []
-       )
-     )]
+
+  select-funcall-primop : "array-concat" -> "array_concat"
+  select-funcall-primop : "array-tail" -> "array_tail"
 
   // Closures
   select-primop(|result) : ("closure-new", args) ->
@@ -341,6 +299,40 @@ rules
     ]
   select-primop(|result) : ("print", [a]) ->
     <with(fail|"Could not determine print type at compile time")>
+
+  // Strings
+  select-primop(|result) : ("str-length", [str]) ->
+    [ Assign(tmp, IntToPtr(TypedAtom(Int64(), <select-value> str), Pointer()))
+    , Assign(result, Call(
+        DefaultTail()
+      , DefaultCConv()
+      , Int64()
+      , ConstAtom(Constant("strlen"))
+      , [TypedAtom(Pointer(), VarAtom(tmp))]
+      , []
+      ))
+    ]
+  with
+    tmp := Variable(<newname> "ptr")
+  select-funcall-primop : "str-add" -> "string_concat"
+  select-funcall-primop : "str-index" -> "string_index"
+  select-funcall-primop : "int-to-string" -> "int_to_string"
+
+  // Generic function call primops
+  select-primop(|result) : (func, args) -> 
+    [Assign(
+       result
+     , Call(
+         DefaultTail()
+       , DefaultCConv()
+       , Int64()
+       , ConstAtom(Constant(func'))
+       , <select-call-args> args
+       , []
+       )
+     )]
+  where func' := <select-funcall-primop> func
+
   // Exit
   select-terminating-primop : ("exit", []) -> 
     ( [Expression(Call(DefaultTail(), DefaultCConv(), Void(), ConstAtom(Constant("exit")), [], [NoReturn()]))]
