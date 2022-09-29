@@ -22,21 +22,25 @@ dependencies {
 
   compileOnly("org.checkerframework:checker-qual-android")
 
+  // Annotation processing
   annotationProcessor("org.immutables:value")
+  annotationProcessor("org.immutables:serial")
   testAnnotationProcessor("org.immutables:value")
+  testAnnotationProcessor("org.immutables:serial")
+  compileOnly("org.immutables:value")
+  compileOnly("org.immutables:serial")
+  compileOnly("javax.annotation:javax.annotation-api")
+  testCompileOnly("org.immutables:value")
+  testCompileOnly("org.immutables:serial")
+  testCompileOnly("javax.annotation:javax.annotation-api")
 
   testCompileOnly("org.checkerframework:checker-qual-android")
   testImplementation("nl.jqno.equalsverifier:equalsverifier")
   testImplementation("org.metaborg:log.backend.slf4j")
   testImplementation("org.slf4j:slf4j-simple:1.7.10")
-  testCompileOnly("org.immutables:value")
   testCompileOnly("javax.annotation:javax.annotation-api")
 
   testImplementation("com.opencsv:opencsv:4.1")
-
-  // Immutables
-  testCompileOnly("org.immutables:value")
-  testAnnotationProcessor("org.immutables:value")
 }
 
 tasks.test {
