@@ -1,0 +1,56 @@
+package {{baseReferenceRetentionTaskDef.packageId}};
+
+import mb.common.referenceretention.ReferenceRetentionResult;
+import mb.common.result.Result;
+import mb.log.api.LoggerFactory;
+import mb.nabl2.terms.stratego.StrategoTerms;
+import mb.pie.api.ExecContext;
+import mb.pie.api.stamp.resource.ResourceStampers;
+import mb.statix.referenceretention.pie.ReferenceRetentionTaskDef;
+import mb.tego.strategies.runtime.TegoRuntime;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import javax.inject.Inject;
+
+@{{adapterProject.scope.qualifiedId}}
+public class {{baseReferenceRetentionTaskDef.id}} extends ReferenceRetentionTaskDef {
+
+    private final {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources;
+
+    @Inject
+    public {{baseReferenceRetentionTaskDef.id}}(
+        {{parserInput.parseTaskDef.qualifiedId}} parseTask,
+        {{constraintAnalyzerInput.analyzeFileTaskDef.qualifiedId}} analyzeFileTask,
+        {{strategoRuntimeInput.getStrategoRuntimeProviderTaskDef.qualifiedId}} getStrategoRuntimeProviderTask,
+        TegoRuntime tegoRuntime,
+        StrategoTerms strategoTerms,
+        LoggerFactory loggerFactory,
+        {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources
+    ) {
+        super(
+            parseTask,
+            analyzeFileTask,
+            getStrategoRuntimeProviderTask,
+            tegoRuntime,
+            strategoTerms,
+            loggerFactory,
+            () -> null,
+        );
+
+        this.classLoaderResources = classLoaderResources;
+    }
+
+    @Override
+    public String getId() {
+        return "{{baseReferenceRetentionTaskDef.id}}";
+    }
+
+    @Override
+    public @Nullable Result<ReferenceRetentionResult, ?> exec(ExecContext context, ReferenceRetentionTaskDef.Input input) throws Exception {
+        context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
+        context.require(classLoaderResources.tryGetAsNativeResource(ReferenceRetentionTaskDef.Input.class), ResourceStampers.hashFile());
+
+        return super.exec(context, input);
+    }
+
+}

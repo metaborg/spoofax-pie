@@ -233,6 +233,14 @@ public interface Shared extends Serializable {
         return GradleDependency.module(new CoordinateRequirement("org.metaborg", "statix.codecompletion.pie", spoofax3Version()));
     }
 
+    @Value.Default default GradleDependency statixReferenceRetentionDep() {
+        return GradleDependency.module(new CoordinateRequirement("org.metaborg", "statix.referenceretention", spoofax3Version()));
+    }
+
+    @Value.Default default GradleDependency statixReferenceRetentionPieDep() {
+        return GradleDependency.module(new CoordinateRequirement("org.metaborg", "statix.referenceretention.pie", spoofax3Version()));
+    }
+
     @Value.Default default GradleDependency jsglrCommonDep() {
         return GradleDependency.module(new CoordinateRequirement("org.metaborg", "jsglr.common", spoofax3Version()));
     }
