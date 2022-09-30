@@ -21,7 +21,7 @@ rules
     topdown(try(mark-non-escaping))
   ; topdown(try(convert-non-escaping))
   ; bottomup(try(convert-closure))
-  ; bottomup(try(convert-default-call))
+  ; bottomup(try(convert-closure-call))
   ; extract-funs
   
   mark-non-escaping : t@TExpFix(funs, body) -> t'
@@ -60,17 +60,20 @@ rules
   ; args' := <conc> (args, freevars)
   ; nonescaping-call(|name, freevars)
   
-  convert-closure : t@TExpFix(funs, exp) -> TExpFix(funs', exp'')
+  convert-closure : t@TExpFix(funs, exp) -> t'
     where <not(fix-is-non-escaping)> t
     with
-      funnames@[firstname|restnames] := <map(\TFun(name, _, _) -> name\)> funs
-    ; freevars := <foldr(![], union, \TFun(name, args, body) -> <find-free-vars(|<conc> (funnames, args))> body\)> funs
-    ; closure := <newname> "closure"
-    ; let var-to-read-exp = var-to-read-op(|funnames, freevars) in
-        (names', funs') := <map(convert-fun(var-to-read-exp)) ; unzip> funs
-      ; exp' := <foldr(!exp, \(name, c)-> <var-to-read-exp> (firstname, name, c)\)> restnames
-      end
-    ; exp'' := TExpPrimOp("closure-new", <conc ; map(!TValueVar(<id>))> (names', freevars), firstname, exp')
+      {| ConvertCall
+      : funnames@[firstname|restnames] := <map(\TFun(name, _, _) -> name\)> funs
+      ; freevars := <foldr(![], union, \TFun(name, args, body) -> <find-free-vars(|<conc> (funnames, args))> body\)> funs
+      ; closure := <newname> "closure"
+      ; let var-to-read-exp = var-to-read-op(|funnames, freevars) in
+          (names', funs') := <map(convert-fun(var-to-read-exp)) ; unzip> funs
+        ; exp' := <foldr(!exp, \(name, c)-> <var-to-read-exp> (firstname, name, c)\)> restnames
+        end
+      ; exp'' := TExpPrimOp("closure-new", <conc ; map(!TValueVar(<id>))> (names', freevars), firstname, exp')
+      ; t' := <topdown(try(ConvertCall))> TExpFix(funs', exp'')
+      |}
   
   nonescaping-call(|x, freevars) = rules(
     ConvertCall : TExpApp(TValueGlobal(x), vals) -> TExpApp(TValueGlobal(x), <conc> (vals, freevars'))
@@ -78,7 +81,7 @@ rules
       freevars' := <map(!TValueVar(<id>))> freevars
   )
 
-  convert-default-call : TExpApp(TValueVar(x), vals) ->
+  convert-closure-call : TExpApp(TValueVar(x), vals) ->
     TExpPrimOp("closure-read", [TValueVar(x), TValueInt("0")], x', TExpApp(TValueVar(x'), vals'))
   with
     x' := <newname> x
@@ -90,6 +93,9 @@ rules
   ; args' := [name|args]
   ; freevars := <find-free-vars(|args')> body
   ; body' := <foldr(!body, \(v, c) -> <var-to-read-exp> (name, v, c)\)> freevars
+  ; rules(
+      ConvertCall : TExpApp(v@TValueVar(name), vals) -> TExpApp(TValueGlobal(name'), [v|vals])
+    )
 
   var-to-read-op(|funs, vars) : (name, v, c) -> TExpPrimOp("closure-offset", [TValueVar(name), n], v, c)
   where idx := <fun-get-index(|funs)> v
