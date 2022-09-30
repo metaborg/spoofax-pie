@@ -6,6 +6,5 @@ set(CMAKE_C_COMPILER clang)
 set(CMAKE_CXX_COMPILER clang++)
 
 add_library(tim_runtime STATIC src/record.cpp include/record.h src/gc.cpp include/gc.h src/array.cpp include/array.h src/string.cpp include/string.h)
-#target_include_directories(tim_runtime PUBLIC include)
-target_compile_options(tim_runtime PUBLIC -iquote ${CMAKE_SOURCE_DIR}/include)
-#target_link_options(tim_runtime PUBLIC -flto)
+target_compile_options(tim_runtime PUBLIC -O3 -iquote ${CMAKE_SOURCE_DIR}/include -flto)
+target_link_options(tim_runtime PUBLIC -flto)
