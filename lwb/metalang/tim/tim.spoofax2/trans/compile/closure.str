@@ -5,6 +5,7 @@ imports
   signatures/tim-sig
   signatures/tim/-
   compile/uniquify
+  compile/explicate-globals
   pp
 
 rules
@@ -14,22 +15,30 @@ rules
     with
       ext      := <get-extension> path
     ; filename := <guarantee-extension(|$[cc.[ext]])> path
-    ; result   := <strip-annos; uniquify; convert-closures; pp-debug> ast
+    ; result   := <strip-annos; uniquify; convert-closures; topdown(try(\TValueGlobal(x) -> TValueVar(x)\)); pp-debug> ast
 
   convert-closures =
-  {| ConvertNonescapingCall
-  : bottomup(try(convert-fix))
-  ; bottomup(try(ConvertNonescapingCall <+ convert-default-call))
+    topdown(try(mark-non-escaping))
+  ; topdown(try(convert-non-escaping))
+  ; bottomup(try(convert-closure))
+  ; bottomup(try(convert-default-call))
   ; extract-funs
-  |}
-
-  convert-fix : t@TExpFix(_, _) -> t'
+  
+  mark-non-escaping : t@TExpFix(funs, body) -> t'
+  where <fix-is-non-escaping> t
   with
-    if <fix-is-non-escaping> t then
-      t' := <convert-non-escaping> t
-    else
-      t' := <convert-closure> t
-    end
+    {| Remap
+    : <map({name : ?TFun(name, _, _) ; rules(Remap : TValueVar(name) -> TValueGlobal(name))})> funs
+    ; t' := <topdown(try(Remap))> t
+    |}
+
+//  convert-fix : t@TExpFix(_, _) -> t'
+//  with
+//    if <fix-is-non-escaping> t then
+//      t' := <convert-non-escaping> t
+//    else
+//      t' := <convert-closure> t
+//    end
   
   fix-is-non-escaping : t@TExpFix(funs, e) -> ()
   where <map(\TFun(name, _, _) -> (name, t)\ ; fun-is-non-escaping)> funs
@@ -37,8 +46,13 @@ rules
   fun-is-non-escaping : (name, body) -> ()
   where not(oncetd(not(?TExpApp(TValueVar(name), _)) ; one(?TValueVar(name))))
   
-  convert-non-escaping : TExpFix(funs, exp) -> TExpFix(funs', exp)
-  with funs' := <map(convert-non-escaping-fun)> funs
+  convert-non-escaping : t@TExpFix(funs, exp) -> t'
+  where <fix-is-non-escaping> t
+  with
+    {| ConvertCall
+    : funs' := <map(convert-non-escaping-fun)> funs
+    ; t' := <topdown(try(ConvertCall))> TExpFix(funs', exp)
+    |}
 
   convert-non-escaping-fun : TFun(name, args, body) -> TFun(name, args', body)
   with
@@ -46,7 +60,8 @@ rules
   ; args' := <conc> (args, freevars)
   ; nonescaping-call(|name, freevars)
   
-  convert-closure : TExpFix(funs, exp) -> TExpFix(funs', exp'')
+  convert-closure : t@TExpFix(funs, exp) -> TExpFix(funs', exp'')
+    where <not(fix-is-non-escaping)> t
     with
       funnames@[firstname|restnames] := <map(\TFun(name, _, _) -> name\)> funs
     ; freevars := <foldr(![], union, \TFun(name, args, body) -> <find-free-vars(|<conc> (funnames, args))> body\)> funs
@@ -58,7 +73,7 @@ rules
     ; exp'' := TExpPrimOp("closure-new", <conc ; map(!TValueVar(<id>))> (names', freevars), firstname, exp')
   
   nonescaping-call(|x, freevars) = rules(
-    ConvertNonescapingCall : TExpApp(TValueVar(x), vals) -> TExpApp(TValueVar(x), <conc> (vals, freevars'))
+    ConvertCall : TExpApp(TValueGlobal(x), vals) -> TExpApp(TValueGlobal(x), <conc> (vals, freevars'))
     with
       freevars' := <map(!TValueVar(<id>))> freevars
   )
@@ -94,6 +109,7 @@ rules
   
   find-free-vars(|usedVars) : TValueInt(_) -> []
   find-free-vars(|usedVars) : TValueString(_) -> []
+  find-free-vars(|usedVars) : TValueGlobal(_) -> []
   find-free-vars(|usedVars) : TValueVar(x) -> []
     where <elem> (x, usedVars)
   find-free-vars(|usedVars) : TValueVar(x) -> [x]
@@ -104,7 +120,11 @@ rules
     with
       newVars := <map(\TFun(x, _, _) -> x\)> funs
     ; usedVars' := <conc> (usedVars, newVars)
-    ; freeVars := <find-free-vars(|usedVars')> exp
+    ; freeVars := <foldr(![], union, find-free-vars(|usedVars'))> [exp|funs]
+  find-free-vars(|usedVars) : TFun(name, args, body) -> freeVars
+    with
+      usedVars' := <conc> ([name|args], usedVars)
+    ; freeVars := <find-free-vars(|usedVars')> body
   find-free-vars(|usedVars) : TExpPrimOp(_, vals, newVar, exp) -> <union> (a, b)
     with
       a := <foldr(![], union, find-free-vars(|usedVars))> vals

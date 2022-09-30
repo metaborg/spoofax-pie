@@ -13,8 +13,6 @@ signature
 
 rules
 
-  // TODO move strings to global variables
-
   explicate-globals = {|
     GlobalNames, Strings
   : topdown(try(collect-global))
