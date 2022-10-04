@@ -27,7 +27,7 @@ rules
   ; type := Array(<int-to-string> length, Int8())
   
   select-function : TFun(name, args, body) ->
-    FunDef(Private(), TailCConv(), Void(), Constant(name), args', [NoUnwind()], blocks)
+    FunDef(Private(), TailCConv(), Void(), Constant(name), args', [GC("\"statepoint-example\""), NoUnwind()], blocks)
   with {| Blocks
   : args' := <select-args> args
   ; (stmts, term) := <select-exp> body
@@ -70,13 +70,13 @@ rules
   
   select-exp : TExpApp(TValueVar(x), args) ->
     ( [ Assign(tmp, IntToPtr(TypedAtom(Int64(), VarAtom(Variable(x))), Pointer()))
-      , Expression(Call(MustTail(), TailCConv(), Void(), VarAtom(tmp), <select-call-args> args, []))
+      , Expression(Call(MustTail(), TailCConv(), Void(), VarAtom(tmp), <select-call-args> args, [], NoOperandBundles()))
       ]
     , RetVoid()
     )
   with tmp := Variable(<newname> "ptr")
   select-exp : TExpApp(TValueGlobal(x), args) ->
-    ( [Expression(Call(MustTail(), TailCConv(), Void(), ConstAtom(Constant(x)), <select-call-args> args, []))]
+    ( [Expression(Call(MustTail(), TailCConv(), Void(), ConstAtom(Constant(x)), <select-call-args> args, [], NoOperandBundles()))]
     , RetVoid()
     )
   
@@ -103,7 +103,7 @@ rules
 
   // References
   select-primop(|result) : ("ref-new", [v]) ->
-    [ Assign(tmp, Call(DefaultTail(), DefaultCConv(), Pointer(), ConstAtom(Constant("gc_alloc")), [TypedAtom(Int64(), Literal(Int("8")))], []))
+    [ Assign(tmp, Call(DefaultTail(), DefaultCConv(), Pointer(), ConstAtom(Constant("gc_alloc")), [TypedAtom(Int64(), Literal(Int("8")))], [], NoOperandBundles()))
     , Expression(Store(TypedAtom(Int64(), <select-value> v), TypedAtom(Pointer(), VarAtom(tmp))))
     , Assign(result, PtrToInt(TypedAtom(Pointer(), VarAtom(tmp)), Int64()))
     ]
@@ -134,6 +134,7 @@ rules
        , ConstAtom(Constant("record_new"))
        , [TypedAtom(Int64(), Literal(Int(count)))|<select-call-args> args]
        , []
+       , NoOperandBundles()
        )
      )]
   with count := <divi ; int-to-string> (<length> args, 2)
@@ -153,6 +154,7 @@ rules
         , ConstAtom(Constant("gc_alloc"))
         , [TypedAtom(Int64(), VarAtom(sizevar))]
         , []
+        , NoOperandBundles()
         ))
       , Expression(Store(arrLen, TypedAtom(Pointer(), VarAtom(tmp1))))
       , Assign(tmp2, GetElementPtr(Int64(), [TypedAtom(Pointer(), VarAtom(tmp1)), TypedAtom(Int64(), Literal(Int("1")))]))
@@ -225,6 +227,7 @@ rules
         , ConstAtom(Constant("gc_alloc"))
         , [TypedAtom(Int64(), VarAtom(sizevar))]
         , []
+        , NoOperandBundles()
         ))
       ]
     , stores
@@ -278,6 +281,7 @@ rules
           , TypedAtom(Int64(), <select-value> a)
           ]
         , []
+        , NoOperandBundles()
         )
       )
     , Assign(result, BinaryOp(Add(), [], Int64(), <select-value> a, Literal(Int("0"))))
@@ -293,6 +297,7 @@ rules
           , TypedAtom(Int64(), <select-value> a)
           ]
         , []
+        , NoOperandBundles()
         )
       )
     , Assign(result, BinaryOp(Add(), [], Int64(), <select-value> a, Literal(Int("0"))))
@@ -310,6 +315,7 @@ rules
       , ConstAtom(Constant("strlen"))
       , [TypedAtom(Pointer(), VarAtom(tmp))]
       , []
+      , NoOperandBundles()
       ))
     ]
   with
@@ -329,13 +335,14 @@ rules
        , ConstAtom(Constant(func'))
        , <select-call-args> args
        , []
+       , NoOperandBundles()
        )
      )]
   where func' := <select-funcall-primop> func
 
   // Exit
   select-terminating-primop : ("exit", []) -> 
-    ( [Expression(Call(DefaultTail(), DefaultCConv(), Void(), ConstAtom(Constant("exit")), [], [NoReturn()]))]
+    ( [Expression(Call(DefaultTail(), DefaultCConv(), Void(), ConstAtom(Constant("exit")), [], [NoReturn()], NoOperandBundles()))]
     , Unreachable()
     )
 

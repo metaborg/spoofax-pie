@@ -3,6 +3,7 @@ module llvm/Attributes
 imports
 
   llvm/Common
+  llvm/Atoms
 
 context-free sorts
 
@@ -11,6 +12,8 @@ context-free sorts
   CallConv
   GlobalAttribute
   FunctionAttribute
+  OperandBundles
+  OperandBundle
   ArithAttribute
   TailAttribute
 
@@ -33,6 +36,7 @@ context-free syntax
   GlobalAttribute.Global = <global>
   GlobalAttribute.Constant = <constant>
 
+  FunctionAttribute.GC = <gc <STRING>>
   FunctionAttribute.NoUnwind = <nounwind>
   FunctionAttribute.NoReturn = <noreturn>
   FunctionAttribute.NoFreeFun = <nofree>
@@ -40,6 +44,10 @@ context-free syntax
   FunctionAttribute.AllocKind = <allockind(<STRING>)>
   FunctionAttribute.AllocSize = <allocsize(<INT>)>
   FunctionAttribute.AllocFamily = <"alloc-family"=<STRING>>
+  
+  OperandBundles.NoOperandBundles = <>
+  OperandBundles.OperandBundles = <[<OperandBundle*>]>
+  OperandBundle.OperandBundle = <<STRING>(<{TypedAtom ", "}*>)>
 
   ArithAttribute.NoSignedWrap = <nsw>
   ArithAttribute.Exact = <exact>

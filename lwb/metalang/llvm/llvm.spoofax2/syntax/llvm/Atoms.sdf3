@@ -26,6 +26,7 @@ context-free syntax
   Type.Int8 = <i8>
   Type.Bool = <i1>
   Type.Pointer = <ptr>
+  Type.PointerAddrSpace = <ptr addrspace(<INT>)>
   Type.Array = <[<POSINT> x <Type>]>
   Type.Label = <label>
   Type.Void = <void>

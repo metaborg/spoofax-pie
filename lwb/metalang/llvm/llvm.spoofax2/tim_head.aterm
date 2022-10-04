@@ -1,14 +1,4 @@
-module compile/conclude
-
-imports
-
-  signatures/llvm/-
-  signatures/llvm-sig
-
-rules
-  // TODO: make target triple depend on host
-  conclude : LLVMProgram(input) -> LLVMProgram(<conc> (prelude, input))
-  with prelude :=
+LLVMProgram(
   [ TargetTriple("\"x86_64-unknown-linux-gnu\"")
   , GlobalDef(
       Constant(".int_fmt")
@@ -24,7 +14,6 @@ rules
     , Array("4", Int8())
     , String("\"%s\\0A\\00\"")
     )
-// Built in functions
   , FunDecl(
       DefaultLinkage()
     , DefaultCConv()
@@ -73,8 +62,6 @@ rules
     , [ParamUnnamed(Pointer(), [])]
     , [NoUnwind()]
     )
-// TIM runtime library
-// Records
   , FunDecl(
       DefaultLinkage()
     , DefaultCConv()
@@ -107,7 +94,6 @@ rules
     , [ParamUnnamed(Int64(), [])]
     , [NoUnwind()]
     )
-// Arrays
   , FunDecl(
       DefaultLinkage()
     , DefaultCConv()
@@ -124,7 +110,6 @@ rules
     , [ParamUnnamed(Int64(), [])]
     , [NoUnwind()]
     )
-// Strings
   , FunDecl(
       DefaultLinkage()
     , DefaultCConv()
@@ -149,7 +134,30 @@ rules
     , [ParamUnnamed(Int64(), [])]
     , [NoUnwind()]
     )
-// Garbage collection
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , Void()
+    , Constant("gc_init")
+    , []
+    , [NoUnwind()]
+    )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , Pointer()
+    , Constant("gc_alloc")
+    , [ParamUnnamed(Int64(), [])]
+    , [NoUnwind(), InaccessibleMemOnly(), AllocKind("\"alloc,uninitialized\""), AllocSize("0"), AllocFamily("\"malloc\"")]
+    )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , Void()
+    , Constant("gc_collect")
+    , []
+    , [NoUnwind()]
+    )
   , FunDecl(
       DefaultLinkage()
     , DefaultCConv()
@@ -183,11 +191,21 @@ rules
     , []
     , [ Block(
           NoLabel()
-        , [Expression(
-             Call(DefaultTail(), TailCConv(), Void(), ConstAtom(Constant("start")), [], [], NoOperandBundles())
-           )]
+        , [ Expression(
+              Call(
+                DefaultTail()
+              , TailCConv()
+              , Void()
+              , ConstAtom(Constant("start"))
+              , []
+              , []
+              , NoOperandBundles()
+              )
+            )
+          ]
         , Ret(TypedAtom(Int32(), Literal(Int("0"))))
         )
       ]
     )
   ]
+)
