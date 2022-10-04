@@ -1,0 +1,16 @@
+module compile/inline-lets
+
+imports
+
+  signatures/tim-sig
+  signatures/tim/-
+
+rules
+
+  inline-lets = topdown(try(inline-let))
+
+  inline-let : TExpLet(binds, body) -> body'
+  with body' := <foldl(inline-bind)> (binds, body)
+
+  inline-bind : (TBind(var, val), body) -> body'
+  with body' := <topdown(try(?TValueVar(var) ; !val))> body
