@@ -16,6 +16,7 @@ import mb.nabl2.terms.unification.RigidException;
 import mb.nabl2.terms.unification.u.IUnifier;
 import mb.nabl2.terms.unification.ud.IUniDisunifier;
 import mb.scopegraph.oopsla20.reference.DataLeq;
+import mb.scopegraph.oopsla20.reference.DataWF;
 import mb.scopegraph.oopsla20.reference.EdgeOrData;
 import mb.scopegraph.oopsla20.reference.Env;
 import mb.scopegraph.oopsla20.reference.FastNameResolution;
@@ -25,16 +26,18 @@ import mb.scopegraph.oopsla20.reference.LabelWF;
 import mb.scopegraph.oopsla20.reference.RegExpLabelWF;
 import mb.scopegraph.oopsla20.reference.RelationLabelOrder;
 import mb.scopegraph.oopsla20.reference.ResolutionException;
+import mb.scopegraph.oopsla20.reference.ResolutionInterpreter;
 import mb.scopegraph.oopsla20.terms.newPath.ResolutionPath;
+import mb.scopegraph.resolution.StateMachine;
 import mb.statix.codecompletion.CCSolverState;
 import mb.statix.codecompletion.SelectedConstraintCCSolverState;
 import mb.statix.codecompletion.SolverContext;
-import mb.statix.codecompletion.SolverState;
 import mb.statix.constraints.CAstId;
+import mb.statix.constraints.CCompiledQuery;
 import mb.statix.constraints.CEqual;
 import mb.statix.constraints.CInequal;
 import mb.statix.constraints.CResolveQuery;
-import mb.statix.generator.scopegraph.DataWF;
+import mb.statix.constraints.IResolveQuery;
 import mb.statix.generator.scopegraph.Match;
 import mb.statix.generator.scopegraph.NameResolution;
 import mb.statix.generator.strategy.ResolveDataWF;
@@ -88,7 +91,7 @@ import static mb.nabl2.terms.matching.TermMatch.M;
  * Expands the selected query.
  */
 @SuppressWarnings("UnstableApiUsage")
-public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITermVar, SelectedConstraintCCSolverState<CResolveQuery>, Seq<CCSolverState>> {
+public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITermVar, SelectedConstraintCCSolverState<IResolveQuery>, Seq<CCSolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final ExpandQueryStrategy instance = new ExpandQueryStrategy();
@@ -117,7 +120,7 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
         TegoEngine engine,
         SolverContext ctx,
         ITermVar v,
-        SelectedConstraintCCSolverState<CResolveQuery> input
+        SelectedConstraintCCSolverState<IResolveQuery> input
     ) {
         return eval(engine, ctx, v, input);
     }
@@ -135,10 +138,10 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
         TegoEngine engine,
         SolverContext ctx,
         ITermVar v,
-        SelectedConstraintCCSolverState<CResolveQuery> input
+        SelectedConstraintCCSolverState<IResolveQuery> input
     ) {
         // Get the query to expand
-        final CResolveQuery query = input.getSelected();
+        final IResolveQuery query = input.getSelected();
         final IState.Immutable state = input.getState();
         final IUniDisunifier.Immutable unifier = state.unifier();
         engine.log(instance, "Expand query: {}", query);
@@ -181,6 +184,7 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
     private static int uncached = 0;
 
     // Old algorithm
+    /*
     private static List<CCSolverState> expandQuerySlow(
         CResolveQuery query,
         IUniDisunifier.Immutable unifier,
@@ -231,16 +235,17 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
         engine.log(instance, "▶ expanded {} declarations into {} possible states", declarationCount, output.size());
         return output;
     }
+     */
 
     // New algorithm
     private static List<CCSolverState> expandQueryFast(
-        CResolveQuery query,
+        IResolveQuery query,
         IUniDisunifier.Immutable unifier,
         IState.Immutable state,
         @Nullable Boolean isAlways,
         Scope scope,
         TegoEngine engine,
-        SelectedConstraintCCSolverState<CResolveQuery> input
+        SelectedConstraintCCSolverState<IResolveQuery> input
     ) {
 
         final ICompleteness.Immutable completeness = input.getCompleteness();
@@ -254,78 +259,99 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
 
         final HashMap<ITerm, Optional<SolverResult>> cache = new HashMap<>();
 
-        final FastNameResolution<Scope, ITerm, ITerm> nameResolution = FastNameResolution.<Scope, ITerm, ITerm>builder()
-            .withLabelWF(labelWF)
-            .withLabelOrder(labelOrd)
-            .withDataWF(t ->
-                // Assert that we can apply the dataWF to the input
-                applyDataWFCached(cache, query.filter().getDataWF(), t, state, unifier, completeness, input.getSpec()).isPresent()
-            )
-            .withDataEquiv(new DataLeq<ITerm>() {
-                @Override public boolean leq(ITerm d1, ITerm d2)throws ResolutionException, InterruptedException {
-                    // Apply the dataWF to each of the inputs. This should result in two solver results
-                    // If this is not the case, this would already have failed the lambda in withDataWF().
-                    final SolverResult result1 = applyDataWFCached(cache, query.filter().getDataWF(), d1, state, unifier,  completeness, input.getSpec() ).get();
-                    final SolverResult result2 = applyDataWFCached(cache, query.filter().getDataWF(), d2, state, unifier,  completeness, input.getSpec() ).get();
+        final DataWF<ITerm> dataWF = t ->
+            // Assert that we can apply the dataWF to the input
+            applyDataWFCached(cache, query.filter().getDataWF(), t, state, unifier, completeness, input.getSpec()).isPresent();
+        final DataLeq<ITerm> dataEq = new DataLeq<ITerm>() {
+            @Override public boolean leq(ITerm d1, ITerm d2)throws ResolutionException, InterruptedException {
+                // Apply the dataWF to each of the inputs. This should result in two solver results
+                // If this is not the case, this would already have failed the lambda in withDataWF().
+                final SolverResult result1 = applyDataWFCached(cache, query.filter().getDataWF(), d1, state, unifier,  completeness, input.getSpec() ).get();
+                final SolverResult result2 = applyDataWFCached(cache, query.filter().getDataWF(), d2, state, unifier,  completeness, input.getSpec() ).get();
 
-                    // For each free variable in the query body...
-                    final Set.Immutable<ITermVar> varsToCompare = query.filter().getDataWF().body().freeVars();
-                    boolean maybeShadowing = true;
-                    for (ITermVar v : varsToCompare) {
-                        // Compare the values given to them in the respective dataWF applications
-                        final ITerm t1 = result1.state().unifier().findRecursive(v);
-                        final ITerm t2 = result2.state().unifier().findRecursive(v);
-                        try {
-                            // Attempt to unify the two terms, given the current unifier
-                            final Optional<IUniDisunifier.Result<IUnifier.Immutable>> unify = unifier.unify(t1, t2, rv -> state.vars().contains(rv));
-                            if (unify.isPresent()) {
-                                // The two unifiers unify, meaning that they have the same values for their variables
-                                // This means that they could normally have shadowed each other.
-                                // So we might apply shadowing.
-                                maybeShadowing = true;
-                            } else {
-                                // The two unifiers don't unify, meaning that they have different values for their variables
-                                // This means that they would normally not have shadowed each other.
-                                // So we apply definitely no shadowing.
-                                maybeShadowing = false;
-                                break;
-                            }
-                        } catch (OccursException e) {
-                            throw new RuntimeException(e);
-                        } catch (RigidException e) {
-                            // We might apply shadowing?
-                            // When the variable is rigid, we could not unify.
-                            // Therefore, we don't know whether we are shadowing or not.
+                // For each free variable in the query body...
+                final Set.Immutable<ITermVar> varsToCompare = query.filter().getDataWF().body().freeVars();
+                boolean maybeShadowing = true;
+                for (ITermVar v : varsToCompare) {
+                    // Compare the values given to them in the respective dataWF applications
+                    final ITerm t1 = result1.state().unifier().findRecursive(v);
+                    final ITerm t2 = result2.state().unifier().findRecursive(v);
+                    try {
+                        // Attempt to unify the two terms, given the current unifier
+                        final Optional<IUniDisunifier.Result<IUnifier.Immutable>> unify = unifier.unify(t1, t2, rv -> state.vars().contains(rv));
+                        if (unify.isPresent()) {
+                            // The two unifiers unify, meaning that they have the same values for their variables
+                            // This means that they could normally have shadowed each other.
+                            // So we might apply shadowing.
                             maybeShadowing = true;
-                            // FIXME: is this correct?
-                            engine.log(instance, "Rigid!! " + e.getMessage());
-                            engine.log(instance, "When expanding: " + query);
+                        } else {
+                            // The two unifiers don't unify, meaning that they have different values for their variables
+                            // This means that they would normally not have shadowed each other.
+                            // So we apply definitely no shadowing.
+                            maybeShadowing = false;
+                            break;
                         }
-                    }
-
-                    if (maybeShadowing) {
-                        // We apply shadowing by checking the dataEquiv:
-                        final DataLeq<ITerm> leq = constraintQueries.getDataEquiv(query.min().getDataEquiv());
-                        return leq.leq(d1, d2);
-                    } else {
-                        // No shadowing.
-                        return false;
+                    } catch (OccursException e) {
+                        throw new RuntimeException(e);
+                    } catch (RigidException e) {
+                        // We might apply shadowing?
+                        // When the variable is rigid, we could not unify.
+                        // Therefore, we don't know whether we are shadowing or not.
+                        maybeShadowing = true;
+                        // FIXME: is this correct?
+                        engine.log(instance, "Rigid!! " + e.getMessage());
+                        engine.log(instance, "When expanding: " + query);
                     }
                 }
 
-                @Override public boolean alwaysTrue() throws InterruptedException {
-                    // Definitely not always true.
+                if (maybeShadowing) {
+                    // We apply shadowing by checking the dataEquiv:
+                    final DataLeq<ITerm> leq = constraintQueries.getDataEquiv(query.min().getDataEquiv());
+                    return leq.leq(d1, d2);
+                } else {
+                    // No shadowing.
                     return false;
                 }
-            })
-            .withIsComplete(isComplete2)
-            .build(state.scopeGraph(),input.getSpec().allLabels() );
+            }
+
+            @Override public boolean alwaysTrue() throws InterruptedException {
+                // Definitely not always true.
+                return false;
+            }
+        };
+
+        final F1<Scope, Env<Scope, ITerm, ITerm>> resolveFn = query.match(new IResolveQuery.Cases<F1<Scope, Env<Scope, ITerm, ITerm>>>()  {
+            @Override
+            public F1<Scope, Env<Scope, ITerm, ITerm>> caseResolveQuery(CResolveQuery q) {
+                final FastNameResolution<Scope, ITerm, ITerm> nameResolution = FastNameResolution.<Scope, ITerm, ITerm>builder()
+                    .withLabelWF(labelWF)
+                    .withLabelOrder(labelOrd)
+                    .withDataWF(dataWF)
+                    .withDataEquiv(dataEq)
+                    .withIsComplete(isComplete2)
+                    .build(state.scopeGraph(),input.getSpec().allLabels() );
+                return s -> nameResolution.resolve(scope, new NullCancel());
+            }
+
+            @Override
+            public F1<Scope, Env<Scope, ITerm, ITerm>> caseCompiledQuery(CCompiledQuery q) {
+                final StateMachine<ITerm> stateMachine = q.stateMachine();
+
+                final ResolutionInterpreter<Scope, ITerm, ITerm> resolutionInterpreter = new ResolutionInterpreter<>(
+                    state.scopeGraph(),
+                    dataWF,
+                    dataEq,
+                    stateMachine,
+                    isComplete2);
+                return s -> resolutionInterpreter.resolve(scope, new NullCancel());
+            }
+        });
 
         // Now, if we apply this name resolution,
         // we will end up with an environment with _all_ possible resolution paths.
         final Env<Scope, ITerm, ITerm> env;
         try {
-            env = nameResolution.resolve(scope, new NullCancel());
+            env = resolveFn.apply(scope);
         } catch(IncompleteException e) {
             // Delay
             final Delay delay = Delay.ofVars(unifier.getVars(query.scopeTerm()));
@@ -548,7 +574,7 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
     private static List<CCSolverState> expandResolution(
         TegoEngine engine,
         Spec spec,
-        CResolveQuery query,
+        IResolveQuery query,
         CCSolverState inputState,
         IUniDisunifier unifier,
         NameResolution<Scope, ITerm, ITerm, CEqual> nameResolution,
@@ -699,7 +725,7 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
     private static List<CCSolverState> expandResolutionSets(
         TegoEngine engine,
         Spec spec,
-        CResolveQuery query,
+        IResolveQuery query,
         CCSolverState state,
         Range<Integer> sizes,
         Collection<Match<Scope, ITerm, ITerm, CEqual>> optMatches,
@@ -744,7 +770,7 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
     private static CCSolverState updateSolverState(
         Iterable<ResolutionPath<Scope, ITerm, ITerm>> paths,
         Spec spec,
-        CResolveQuery query,
+        IResolveQuery query,
         CCSolverState state,
         IUniDisunifier.Immutable unifier, ICompleteness.Immutable completeness,
         HashMap<ITerm, Optional<SolverResult>> cache
@@ -784,7 +810,7 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
      */
     private static CCSolverState updateSolverStateOld(
         Spec spec,
-        CResolveQuery query,
+        IResolveQuery query,
         CCSolverState state,
         Collection<Match<Scope, ITerm, ITerm, CEqual>> optMatches,
         Collection<Match<Scope, ITerm, ITerm, CEqual>> optRejects,
@@ -876,6 +902,12 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
             (m, var) -> Range.closed(min.get(), declarationCount)
         )).match(result, unifier).orElse(Range.closed(0, declarationCount));
         // @formatter:on
+    }
+
+
+    @FunctionalInterface
+    interface F1<A0, R> {
+        R apply(A0 a0) throws ResolutionException, InterruptedException;
     }
 
 }

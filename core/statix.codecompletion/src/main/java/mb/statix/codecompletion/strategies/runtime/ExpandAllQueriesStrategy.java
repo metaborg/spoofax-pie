@@ -6,6 +6,7 @@ import mb.statix.codecompletion.CCSolverState;
 import mb.statix.codecompletion.SolverContext;
 import mb.statix.codecompletion.SolverState;
 import mb.statix.constraints.CResolveQuery;
+import mb.statix.constraints.IResolveQuery;
 import mb.tego.sequences.Seq;
 import mb.tego.strategies.NamedStrategy2;
 import mb.tego.strategies.Strategy;
@@ -55,7 +56,7 @@ public final class ExpandAllQueriesStrategy extends NamedStrategy2<SolverContext
         //     )))
         final Strategy<CCSolverState, Seq<CCSolverState>> s = distinct(or(ntl(id()), fixSet(
             if_(
-                limit(1, select(CResolveQuery.class, lam((CResolveQuery constraint)
+                limit(1, select(IResolveQuery.class, lam((IResolveQuery constraint)
                     -> where(let(seq(fun(CCSolverState::project).apply(v)).$(fun(ITerm::getVars)).$(), vars ->
                         containsAnyVar(vars, constraint)
                     ))
