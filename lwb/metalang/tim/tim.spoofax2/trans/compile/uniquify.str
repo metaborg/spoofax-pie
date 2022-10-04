@@ -11,7 +11,7 @@ rules
 
   uniquify = bottomup(uniquify-bindings)
 
-  uniquify-bindings : TExpPrimOp(op, vals, x, cont) -> TExpPrimOp(op, vals, x', cont')
+  uniquify-bindings : TExpPrimOp(op, t, vals, x, cont) -> TExpPrimOp(op, t, vals, x', cont')
   with
     x' := <newname> x
   ; cont' := <replace-var(|x, x')> cont

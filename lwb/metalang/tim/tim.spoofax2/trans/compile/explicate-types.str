@@ -13,12 +13,6 @@ rules
   with
     analysis := <stx-get-ast-analysis> program
   ; program' := <bottomup(try(preserve-annos(explicate-type(|analysis))))> program
-
-  explicate-type(|analysis) : TExpPrimOp("print", [v], result, cont) ->
-    TExpPrimOp(print, [v], result, cont)
-  with
-    type := <stx-get-ast-type(|analysis)> v
-  ; print := <print-for-type> type
   
   explicate-type(|analysis) : t@TValueVar(x) -> TValueVar(x, type)
   with
@@ -27,6 +21,14 @@ rules
   explicate-type(|analysis) : f@TFun(x, args, body) -> TFun(x, type, args, body)
   with
     type := <stx-get-ast-type(|analysis)> f
+
+  explicate-type(|analysis) : f@TFun(x, args, body) -> TFun(x, type, args, body)
+  with
+    type := <stx-get-ast-type(|analysis)> f
+
+  explicate-type(|analysis) : TExpPrimOp(name, args, result, body) -> TExpPrimOp(name, type, args, result, body)
+  with
+    type := <stx-get-ast-type(|analysis)> result
 
   print-for-type : INT() -> "print-int"
   print-for-type : STRING() -> "print-string"

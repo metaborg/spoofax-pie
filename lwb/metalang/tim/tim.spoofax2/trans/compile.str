@@ -9,17 +9,18 @@ imports
 rules
 
   debug-compile-tim :
-    (node, _, ast, path, project-path) -> (filename, result)
+    (node, _, ast, path, project-path) -> (path', result)
     with
       ext      := <get-extension> path
-    ; filename := <guarantee-extension(|$[ll])> path
+    ; folder   := <dirname> path
+    ; filename := <base-filename ; guarantee-extension(|$[ll])> path
+    ; path'    := $[[folder]/output/[filename]]
     ; result   := <compile-tim> ast
 
   compile-tim =
     explicate-types
   ; strip-annos
   ; uniquify
-//  ; inline-funs
   ; convert-closures
   ; inline-lets
   ; explicate-globals

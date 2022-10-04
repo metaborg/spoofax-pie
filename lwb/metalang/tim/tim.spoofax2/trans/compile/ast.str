@@ -23,3 +23,4 @@ signature
     TValueGlobal : string * TYPE -> TValue
     TValueVar : string * TYPE -> TValue
     TFun      : TID  * TYPE * List(TID) * TExp -> TFun
+    TExpPrimOp : TPRIM * TYPE * List(TValue) * TID * TExp -> TExp
