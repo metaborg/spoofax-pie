@@ -1,6 +1,7 @@
 package mb.statix.codecompletion.strategies.runtime;
 
 import mb.nabl2.terms.ITermVar;
+import mb.statix.codecompletion.CCSolverState;
 import mb.statix.codecompletion.SolverContext;
 import mb.statix.codecompletion.SolverState;
 import mb.tego.strategies.NamedStrategy2;
@@ -11,7 +12,7 @@ import mb.tego.strategies.runtime.TegoEngine;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 @SuppressWarnings("RedundantSuppression")
-public final class AssertValidStrategy extends NamedStrategy2<SolverContext, ITermVar, SolverState, @Nullable SolverState> {
+public final class AssertValidStrategy extends NamedStrategy2<SolverContext, ITermVar, CCSolverState, @Nullable CCSolverState> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final AssertValidStrategy instance = new AssertValidStrategy();
@@ -22,21 +23,21 @@ public final class AssertValidStrategy extends NamedStrategy2<SolverContext, ITe
 
     @SuppressWarnings("UnnecessaryLocalVariable")
     @Override
-    public @Nullable SolverState evalInternal(
+    public @Nullable CCSolverState evalInternal(
         TegoEngine engine,
         SolverContext ctx,
         ITermVar v,
-        SolverState input
+        CCSolverState input
     ) {
         return eval(engine, ctx, v, input);
     }
 
     @SuppressWarnings({"UnnecessaryLocalVariable", "RedundantIfStatement"})
-    public static @Nullable SolverState eval(
+    public static @Nullable CCSolverState eval(
         TegoEngine engine,
         SolverContext ctx,
         ITermVar v,
-        SolverState input
+        CCSolverState input
     ) {
         // Tego:
         // def assertValid(allowedErrors: Collection<Map.Entry<IConstraint, IMessage>>, v: ITermVar): SolverState -> SolverState =
@@ -46,14 +47,14 @@ public final class AssertValidStrategy extends NamedStrategy2<SolverContext, ITe
 
         final InferStrategy infer = InferStrategy.getInstance();
 //        final DelayStuckQueriesStrategy delayStuckQueries = DelayStuckQueriesStrategy.getInstance();
-        final NotStrategy<SolverState, SolverState> not = NotStrategy.getInstance();
+        final NotStrategy<CCSolverState, CCSolverState> not = NotStrategy.getInstance();
 
-        final @Nullable SolverState r1 = engine.eval(infer, input);
+        final @Nullable CCSolverState r1 = engine.eval(infer, input);
         if (r1 == null) return null;
 
-        final Strategy<SolverState, @Nullable SolverState> s2 = StrategyExt.pred(SolverState::hasSeriousErrors).apply(ctx.getAllowedErrors());
-        final Strategy<SolverState, @Nullable SolverState> s3 = not.apply(s2);
-        final @Nullable SolverState r3 = engine.eval(s3, r1);
+        final Strategy<CCSolverState, @Nullable CCSolverState> s2 = StrategyExt.pred(CCSolverState::hasSeriousErrors).apply(ctx.getAllowedErrors());
+        final Strategy<CCSolverState, @Nullable CCSolverState> s3 = not.apply(s2);
+        final @Nullable CCSolverState r3 = engine.eval(s3, r1);
         if (r3 == null) return null;
         return r3;
 

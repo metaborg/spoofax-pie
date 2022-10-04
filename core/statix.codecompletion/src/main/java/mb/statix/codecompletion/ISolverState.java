@@ -90,30 +90,30 @@ public interface ISolverState {
      * @return the completeness
      */
     ICompleteness.Immutable getCompleteness();
-
-    /**
-     * The set of names of expanded predicate constraints, used to detect when we are trying to expand
-     * a constraint that we've expanded before but which was reintroduced.
-     *
-     * @return a set of names of predicate constraints
-     */
-    Set.Immutable<String> getExpanded();
-
-    /**
-     * The meta data about the solution.
-     *
-     * @return the meta data
-     */
-    SolutionMeta getMeta();
-
-    /**
-     * Creates a copy of this {@link ISolverState} with the specified
-     * set of names of expanded predicate constraints.
-     *
-     * @param newExpanded the new set of names of expanded predicate constraints
-     * @return the modified copy of the {@link ISolverState}
-     */
-    ISolverState withExpanded(Set.Immutable<String> newExpanded);
+//
+//    /**
+//     * The set of names of expanded predicate constraints, used to detect when we are trying to expand
+//     * a constraint that we've expanded before but which was reintroduced.
+//     *
+//     * @return a set of names of predicate constraints
+//     */
+//    Set.Immutable<String> getExpanded();
+//
+//    /**
+//     * The meta data about the solution.
+//     *
+//     * @return the meta data
+//     */
+//    SolutionMeta getMeta();
+//
+//    /**
+//     * Creates a copy of this {@link ISolverState} with the specified
+//     * set of names of expanded predicate constraints.
+//     *
+//     * @param newExpanded the new set of names of expanded predicate constraints
+//     * @return the modified copy of the {@link ISolverState}
+//     */
+//    ISolverState withExpanded(Set.Immutable<String> newExpanded);
 
     /**
      * Creates a copy of this {@link ISolverState} that tracks the specified
@@ -158,6 +158,17 @@ public interface ISolverState {
     ISolverState withApplyResult(ApplyResult result, @Nullable IConstraint focus);
 
     /**
+     * Creates a copy of this {@link ISolverState} in which the specified constraints are added and removed.
+     *
+     * This updates the constraints, completeness, and delays.
+     *
+     * @param addConstraints the constraints to add
+     * @param removeConstraints the constraints to remove
+     * @return the modified copy of the {@link ISolverState}
+     */
+    SolverState withUpdatedConstraints(java.util.Set<IConstraint> addConstraints, java.util.Set<IConstraint> removeConstraints);
+
+    /**
      * Creates a copy of this {@link ISolverState} with the specified {@link IState}.
      *
      * @param newState the new {@link IState}
@@ -195,28 +206,28 @@ public interface ISolverState {
      */
     ISolverState withDelay(IConstraint constraint, Delay delay);
 
-    /**
-     * Creates a copy of this {@link ISolverState} with the specified meta data.
-     *
-     * @param newMeta the new meta data
-     * @return the modified copy of the {@link ISolverState}
-     */
-    ISolverState withMeta(SolutionMeta newMeta);
+//    /**
+//     * Creates a copy of this {@link ISolverState} with the specified meta data.
+//     *
+//     * @param newMeta the new meta data
+//     * @return the modified copy of the {@link ISolverState}
+//     */
+//    ISolverState withMeta(SolutionMeta newMeta);
 
-    /**
-     * Creates a copy of this {@link ISolverState} with the specified selection.
-     *
-     * @param constraint the constraint that was selected
-     * @return the modified copy, a {@link ISelectedConstraintSolverState}
-     */
-    <C extends IConstraint> ISelectedConstraintSolverState<C> withSelected(C constraint);
-
-    /**
-     * Creates a copy of this {@link ISolverState} without a selection.
-     *
-     * @return the modified copy of the {@link ISolverState}
-     */
-    ISolverState withoutSelected();
+//    /**
+//     * Creates a copy of this {@link ISolverState} with the specified selection.
+//     *
+//     * @param constraint the constraint that was selected
+//     * @return the modified copy, a {@link ISelectedConstraintSolverState}
+//     */
+//    <C extends IConstraint> ISelectedConstraintSolverState<C> withSelected(C constraint);
+//
+//    /**
+//     * Creates a copy of this {@link ISolverState} without a selection.
+//     *
+//     * @return the modified copy of the {@link ISolverState}
+//     */
+//    ISolverState withoutSelected();
 
     /**
      * Projects the specified term variable to a term value (which may be a term variable).

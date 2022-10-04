@@ -32,7 +32,7 @@ public interface ISelectedConstraintSolverState<C extends IConstraint> extends I
      */
     Set<IConstraint> getUnselected();
 
-    @Override ISelectedConstraintSolverState<C> withExpanded(Set.Immutable<String> newExpanded);
+//    @Override ISelectedConstraintSolverState<C> withExpanded(Set.Immutable<String> newExpanded);
 
     @Override ISelectedConstraintSolverState<C> withExistentials(Iterable<ITermVar> existentials);
 
@@ -50,7 +50,7 @@ public interface ISelectedConstraintSolverState<C extends IConstraint> extends I
 
     @Override ISelectedConstraintSolverState<C> withDelay(IConstraint constraint, Delay delay);
 
-    @Override ISelectedConstraintSolverState<C> withMeta(SolutionMeta newMeta);
+//    @Override ISelectedConstraintSolverState<C> withMeta(SolutionMeta newMeta);
 
 
 }

@@ -2,6 +2,7 @@ package mb.statix.codecompletion.strategies.runtime;
 
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
+import mb.statix.codecompletion.CCSolverState;
 import mb.statix.codecompletion.SolverContext;
 import mb.statix.codecompletion.SolverState;
 import mb.statix.constraints.CResolveQuery;
@@ -14,7 +15,7 @@ import static mb.statix.codecompletion.strategies.runtime.SearchStrategies.*;
 import static mb.tego.strategies.StrategyExt.*;
 import static mb.tego.strategies.runtime.Strategies.*;
 
-public final class ExpandAllQueriesStrategy extends NamedStrategy2<SolverContext, ITermVar, SolverState, Seq<SolverState>> {
+public final class ExpandAllQueriesStrategy extends NamedStrategy2<SolverContext, ITermVar, CCSolverState, Seq<CCSolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final ExpandAllQueriesStrategy instance = new ExpandAllQueriesStrategy();
@@ -24,20 +25,20 @@ public final class ExpandAllQueriesStrategy extends NamedStrategy2<SolverContext
     private ExpandAllQueriesStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
     @Override
-    public Seq<SolverState> evalInternal(
+    public Seq<CCSolverState> evalInternal(
         TegoEngine engine,
         SolverContext ctx,
         ITermVar v,
-        SolverState input
+        CCSolverState input
     ) {
         return eval(engine, ctx, v, input);
     }
 
-    public static Seq<SolverState> eval(
+    public static Seq<CCSolverState> eval(
         TegoEngine engine,
         SolverContext ctx,
         ITermVar v,
-        SolverState input
+        CCSolverState input
     ) {
         // Tego:
         // def expandAllQueries(v: ITermVar) =
@@ -52,10 +53,10 @@ public final class ExpandAllQueriesStrategy extends NamedStrategy2<SolverContext
         //         id
         //       )
         //     )))
-        final Strategy<SolverState, Seq<SolverState>> s = distinct(or(ntl(id()), fixSet(
+        final Strategy<CCSolverState, Seq<CCSolverState>> s = distinct(or(ntl(id()), fixSet(
             if_(
                 limit(1, select(CResolveQuery.class, lam((CResolveQuery constraint)
-                    -> where(let(seq(fun(SolverState::project).apply(v)).$(fun(ITerm::getVars)).$(), vars ->
+                    -> where(let(seq(fun(CCSolverState::project).apply(v)).$(fun(ITerm::getVars)).$(), vars ->
                         containsAnyVar(vars, constraint)
                     ))
                 ))),

@@ -26,7 +26,8 @@ import mb.scopegraph.oopsla20.reference.RegExpLabelWF;
 import mb.scopegraph.oopsla20.reference.RelationLabelOrder;
 import mb.scopegraph.oopsla20.reference.ResolutionException;
 import mb.scopegraph.oopsla20.terms.newPath.ResolutionPath;
-import mb.statix.codecompletion.SelectedConstraintSolverState;
+import mb.statix.codecompletion.CCSolverState;
+import mb.statix.codecompletion.SelectedConstraintCCSolverState;
 import mb.statix.codecompletion.SolverContext;
 import mb.statix.codecompletion.SolverState;
 import mb.statix.constraints.CAstId;
@@ -41,7 +42,6 @@ import mb.statix.scopegraph.Scope;
 import mb.statix.solver.Delay;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.IState;
-import mb.statix.solver.completeness.Completeness;
 import mb.statix.solver.completeness.ICompleteness;
 import mb.statix.solver.completeness.IsComplete;
 import mb.statix.solver.log.NullDebugContext;
@@ -66,7 +66,6 @@ import org.metaborg.util.optionals.Optionals;
 import org.metaborg.util.task.NullCancel;
 import org.metaborg.util.task.NullProgress;
 
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -89,7 +88,7 @@ import static mb.nabl2.terms.matching.TermMatch.M;
  * Expands the selected query.
  */
 @SuppressWarnings("UnstableApiUsage")
-public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITermVar, SelectedConstraintSolverState<CResolveQuery>, Seq<SolverState>> {
+public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITermVar, SelectedConstraintCCSolverState<CResolveQuery>, Seq<CCSolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final ExpandQueryStrategy instance = new ExpandQueryStrategy();
@@ -114,11 +113,11 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
     }
 
     @Override
-    public Seq<SolverState> evalInternal(
+    public Seq<CCSolverState> evalInternal(
         TegoEngine engine,
         SolverContext ctx,
         ITermVar v,
-        SelectedConstraintSolverState<CResolveQuery> input
+        SelectedConstraintCCSolverState<CResolveQuery> input
     ) {
         return eval(engine, ctx, v, input);
     }
@@ -132,11 +131,11 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
      * @param input the input state
      * @return the resulting sequence of states
      */
-    public static Seq<SolverState> eval(
+    public static Seq<CCSolverState> eval(
         TegoEngine engine,
         SolverContext ctx,
         ITermVar v,
-        SelectedConstraintSolverState<CResolveQuery> input
+        SelectedConstraintCCSolverState<CResolveQuery> input
     ) {
         // Get the query to expand
         final CResolveQuery query = input.getSelected();
@@ -166,11 +165,11 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
         }
 
         //final List<SolverState> output = expandQuerySlow(query, unifier, state, isAlways, scope, engine, input);
-        final List<SolverState> output = expandQueryFast(query, unifier, state, isAlways, scope, engine, input);
+        final List<CCSolverState> output = expandQueryFast(query, unifier, state, isAlways, scope, engine, input);
 
         @Nullable final ITermVar focusVar = ctx.getFocusVar();
         if (focusVar != null && engine.isLogEnabled(instance)) {
-            for(SolverState s : output) {
+            for(CCSolverState s : output) {
                 engine.log(instance, "- {}", s.project(focusVar));
             }
         }
@@ -182,14 +181,14 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
     private static int uncached = 0;
 
     // Old algorithm
-    private static List<SolverState> expandQuerySlow(
+    private static List<CCSolverState> expandQuerySlow(
         CResolveQuery query,
         IUniDisunifier.Immutable unifier,
         IState.Immutable state,
         @Nullable Boolean isAlways,
         Scope scope,
         TegoEngine engine,
-        SelectedConstraintSolverState<CResolveQuery> input
+        SelectedConstraintCCSolverState<CResolveQuery> input
     ) {
 
         final ICompleteness.Immutable completeness = input.getCompleteness();
@@ -222,9 +221,9 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
         }
 
         // For each declaration:
-        final ArrayList<SolverState> output = new ArrayList<>();
+        final ArrayList<CCSolverState> output = new ArrayList<>();
         for (int i = 0; i < declarationCount; i++) {
-            final List<SolverState> newStates = expandResolution(engine, input.getSpec(), query, input.withoutSelected(),
+            final List<CCSolverState> newStates = expandResolution(engine, input.getSpec(), query, input.withoutSelected(),
                 unifier, nameResolution, scope, i);
             engine.log(instance, "  ▶ added {} possible states", newStates.size());
             output.addAll(newStates);
@@ -234,14 +233,14 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
     }
 
     // New algorithm
-    private static List<SolverState> expandQueryFast(
+    private static List<CCSolverState> expandQueryFast(
         CResolveQuery query,
         IUniDisunifier.Immutable unifier,
         IState.Immutable state,
         @Nullable Boolean isAlways,
         Scope scope,
         TegoEngine engine,
-        SelectedConstraintSolverState<CResolveQuery> input
+        SelectedConstraintCCSolverState<CResolveQuery> input
     ) {
 
         final ICompleteness.Immutable completeness = input.getCompleteness();
@@ -353,9 +352,9 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
         engine.log(instance, "  ▶ found {} declarations", declarationCount);
 
         // For each declaration:
-        final ArrayList<SolverState> output = new ArrayList<>();
+        final ArrayList<CCSolverState> output = new ArrayList<>();
         for(ResolutionPath<Scope, ITerm, ITerm> path : env) {
-            final SolverState newState = updateSolverState(
+            final CCSolverState newState = updateSolverState(
                 Collections.singletonList(path),
                 input.getSpec(),
                 query,
@@ -546,11 +545,11 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
      * @param index the zero-based index of the resolution
      * @return the list of new solver states
      */
-    private static List<SolverState> expandResolution(
+    private static List<CCSolverState> expandResolution(
         TegoEngine engine,
         Spec spec,
         CResolveQuery query,
-        SolverState inputState,
+        CCSolverState inputState,
         IUniDisunifier unifier,
         NameResolution<Scope, ITerm, ITerm, CEqual> nameResolution,
         Scope scope,
@@ -581,7 +580,7 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
         // Group the conditional matches into groups that can be applied together
         final List<List<Match<Scope, ITerm, ITerm, CEqual>>> optMatchGroups = groupByCondition(optMatches);
 
-        final List<SolverState> newStates = new ArrayList<>();
+        final List<CCSolverState> newStates = new ArrayList<>();
         for (List<Match<Scope, ITerm, ITerm, CEqual>> optMatchGroup : optMatchGroups) {
             engine.log(instance, "  ▶ ▶ ▶ match group {}", optMatchGroup);
             // Determine the range of sizes the query result set can be
@@ -590,7 +589,7 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
             engine.log(instance, "  ▶ ▶ ▶ sizes {}", sizes);
 
             // For each possible size:
-            final List<SolverState> states = expandResolutionSets(
+            final List<CCSolverState> states = expandResolutionSets(
                 engine,
                 spec, query, inputState, sizes,
                 optMatchGroup, reqMatches, reqRejects
@@ -697,11 +696,11 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
      * @param reqRejects the required rejects
      * @return a list of new solver states
      */
-    private static List<SolverState> expandResolutionSets(
+    private static List<CCSolverState> expandResolutionSets(
         TegoEngine engine,
         Spec spec,
         CResolveQuery query,
-        SolverState state,
+        CCSolverState state,
         Range<Integer> sizes,
         Collection<Match<Scope, ITerm, ITerm, CEqual>> optMatches,
         Collection<Match<Scope, ITerm, ITerm, CEqual>> reqMatches,
@@ -742,11 +741,11 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
      * @param cache
      * @return the new solver state
      */
-    private static SolverState updateSolverState(
+    private static CCSolverState updateSolverState(
         Iterable<ResolutionPath<Scope, ITerm, ITerm>> paths,
         Spec spec,
         CResolveQuery query,
-        SolverState state,
+        CCSolverState state,
         IUniDisunifier.Immutable unifier, ICompleteness.Immutable completeness,
         HashMap<ITerm, Optional<SolverResult>> cache
     ) {
@@ -783,10 +782,10 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
      * @param reqRejects the required rejects
      * @return the new solver state
      */
-    private static SolverState updateSolverStateOld(
+    private static CCSolverState updateSolverStateOld(
         Spec spec,
         CResolveQuery query,
-        SolverState state,
+        CCSolverState state,
         Collection<Match<Scope, ITerm, ITerm, CEqual>> optMatches,
         Collection<Match<Scope, ITerm, ITerm, CEqual>> optRejects,
         Collection<Match<Scope, ITerm, ITerm, CEqual>> reqMatches,

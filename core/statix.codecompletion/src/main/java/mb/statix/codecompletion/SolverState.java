@@ -38,6 +38,7 @@ import org.metaborg.util.tuple.Tuple2;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -64,15 +65,13 @@ public class SolverState implements ISolverState {
     public static SolverState of(
         Spec spec,
         IState.Immutable state,
-        Iterable<? extends IConstraint> constraints,
-        Set.Immutable<String> expanded,
-        SolutionMeta meta
+        Iterable<? extends IConstraint> constraints
     ) {
         final ICompleteness.Transient completeness = Completeness.Transient.of();
         completeness.addAll(constraints, spec, state.unifier());
 
         return new SolverState(spec, state, Map.Immutable.of(), CapsuleUtil.toSet(constraints), Map.Immutable.of(),
-            null, completeness.freeze(), expanded, meta);
+            null, completeness.freeze());
     }
 
     /**
@@ -81,15 +80,11 @@ public class SolverState implements ISolverState {
      * @param result the result of inference by the solver
      * @param existentials the new map relating existentially quantified variables with their fresh variable;
      * or {@code null} to use the existing map from the solver result
-     * @param expanded the new set of names of expanded rules
-     * @param meta the new meta data
      * @return the resulting search state
      */
     public static SolverState fromSolverResult(
         SolverResult result,
-        @Nullable ImmutableMap<ITermVar, ITermVar> existentials,
-        Set.Immutable<String> expanded,
-        SolutionMeta meta
+        @Nullable ImmutableMap<ITermVar, ITermVar> existentials
     ) {
         final Set.Transient<IConstraint> constraints = Set.Transient.of();
         final Map.Transient<IConstraint, Delay> delays = Map.Transient.of();
@@ -105,7 +100,7 @@ public class SolverState implements ISolverState {
             existentials == null ? result.existentials() : existentials;
         return new SolverState(result.spec(), result.state(), CapsuleUtil.toMap(result.messages()),
             constraints.freeze(), delays.freeze(), newExistentials,
-            result.completeness(), expanded, meta);
+            result.completeness());
     }
 
     protected final Spec spec;
@@ -115,8 +110,6 @@ public class SolverState implements ISolverState {
     @Nullable protected final ImmutableMap<ITermVar, ITermVar> existentials;
     protected final ICompleteness.Immutable completeness;
     protected final Map.Immutable<IConstraint, IMessage> messages;
-    protected final Set.Immutable<String> expanded;
-    protected final SolutionMeta meta;
 
     /**
      * Initializes a new instance of the {@link SolverState} class.
@@ -128,8 +121,6 @@ public class SolverState implements ISolverState {
      * @param delays the delays
      * @param existentials the existentials; or {@code null}
      * @param completeness the completeness
-     * @param expanded the names of expanded rules
-     * @param meta the meta data
      */
     protected SolverState(
         Spec spec,
@@ -138,9 +129,7 @@ public class SolverState implements ISolverState {
         Set.Immutable<IConstraint> constraints,
         Map.Immutable<IConstraint, Delay> delays,
         @Nullable ImmutableMap<ITermVar, ITermVar> existentials,
-        ICompleteness.Immutable completeness,
-        Set.Immutable<String> expanded,
-        SolutionMeta meta
+        ICompleteness.Immutable completeness
     ) {
         this.spec = spec;
         this.state = state;
@@ -149,8 +138,6 @@ public class SolverState implements ISolverState {
         this.delays = delays;
         this.existentials = existentials;
         this.completeness = completeness;
-        this.expanded = expanded;
-        this.meta = meta;
     }
 
     @Override public Spec getSpec() {
@@ -181,19 +168,6 @@ public class SolverState implements ISolverState {
         return this.completeness;
     }
 
-    @Override public Set.Immutable<String> getExpanded() {
-        return this.expanded;
-    }
-
-    @Override public SolutionMeta getMeta() {
-        return this.meta;
-    }
-
-    @Override public SolverState withExpanded(Set.Immutable<String> newExpanded) {
-        return copy(this.spec, this.state, this.messages, this.constraints, this.delays,
-            this.existentials, this.completeness, newExpanded, this.meta);
-    }
-
     @Override public SolverState withExistentials(Iterable<ITermVar> existentials) {
         // We wrap all constraints in a conjunction,
         // and wrap the result in an existential constraint.
@@ -211,7 +185,7 @@ public class SolverState implements ISolverState {
         completeness.addAll(result._2(), state.unifier());
         return copy(this.spec, this.state, this.messages, Set.Immutable.of(newConstraint), this.delays,
             // NOTE: we discard any previous existentials
-            null, completeness.freeze(), this.expanded, meta);
+            null, completeness.freeze());
     }
 
     @Override public SolverState withSingleConstraint() {
@@ -223,7 +197,7 @@ public class SolverState implements ISolverState {
             newConstraint = new CConj(newConstraint, iterator.next());
         }
         return copy(this.spec, this.state, this.messages, Set.Immutable.of(newConstraint), this.delays,
-            this.existentials, this.completeness, this.expanded, meta);
+            this.existentials, this.completeness);
     }
 
     @Override public SolverState withPrecomputedCriticalEdges() {
@@ -240,31 +214,42 @@ public class SolverState implements ISolverState {
         ICompleteness.Transient completeness = this.completeness.melt();
         completeness.addAll(result._2(), state.unifier());
         return copy(this.spec, this.state, this.messages, Set.Immutable.of(newConstraint), this.delays,
-            this.existentials, completeness.freeze(), this.expanded, meta);
+            this.existentials, completeness.freeze());
     }
 
     @Override public SolverState withApplyResult(ApplyResult result, @Nullable IConstraint focus) {
-        final IConstraint applyConstraint = result.body();
-        if (INCREMENTAL_CRITICAL_EDGES && applyConstraint instanceof CExists && !applyConstraint.bodyCriticalEdges().isPresent()) {
-            throw new IllegalArgumentException(
-                "Exists-constraint has no pre-computed critical edges: " + applyConstraint);
+       return withUpdatedConstraints(
+           Collections.singleton(result.body()),
+           (focus == null) ? this.constraints : Collections.singleton(focus)
+       );
+    }
+
+    @Override public SolverState withUpdatedConstraints(
+        java.util.Set<IConstraint> addConstraints,
+        java.util.Set<IConstraint> removeConstraints
+    ) {
+        // Preconditions
+        for (IConstraint addConstraint : addConstraints) {
+            if(INCREMENTAL_CRITICAL_EDGES && addConstraint instanceof CExists && !addConstraint.bodyCriticalEdges().isPresent()) {
+                throw new IllegalArgumentException("Exists-constraint has no pre-computed critical edges: " + addConstraint);
+            }
+            if (removeConstraints.contains(addConstraint)) {
+                throw new IllegalArgumentException("Added constraint also part of removed constraint: " + addConstraint);
+            }
         }
+
         final IState.Immutable applyState = this.state;
         final IUniDisunifier.Immutable applyUnifier = applyState.unifier();
 
         // Update constraints
         final Set.Transient<IConstraint> constraints = this.getConstraints().asTransient();
-        constraints.__insert(applyConstraint);
-        if (focus != null) constraints.__remove(focus);
+        constraints.__removeAll(removeConstraints);
+        constraints.__insertAll(addConstraints);
 
         // Update completeness
         final ICompleteness.Transient completeness = this.getCompleteness().melt();
-        completeness.add(applyConstraint, spec, applyUnifier);
-        final java.util.Set<CriticalEdge> removedEdges;
-        if (focus != null)
-            removedEdges = completeness.remove(focus, spec, applyUnifier);
-        else
-            removedEdges = Collections.emptySet();
+        completeness.addAll(addConstraints, spec, applyUnifier);
+        final java.util.Set<CriticalEdge> removedEdges = completeness.removeAll(removeConstraints, spec, applyUnifier);
 
         // Update delays
         final Map.Transient<IConstraint, Delay> delays = Map.Transient.of();
@@ -276,13 +261,19 @@ public class SolverState implements ISolverState {
             }
         });
 
-        return copy(this.spec, applyState, this.messages, constraints.freeze(), delays.freeze(),
-            this.existentials, completeness.freeze(), expanded, meta);
+        return copy(this.spec,
+            applyState,
+            this.messages,
+            constraints.freeze(),
+            delays.freeze(),
+            this.existentials,
+            completeness.freeze()
+        );
     }
 
     @Override public SolverState withState(IState.Immutable newState) {
         return copy(this.spec, newState, this.messages, this.constraints, this.delays,
-            this.existentials, this.completeness, this.expanded, this.meta);
+            this.existentials, this.completeness);
     }
 
     @Override public SolverState withUpdatedConstraints(Iterable<IConstraint> add, Iterable<IConstraint> remove) {
@@ -308,7 +299,7 @@ public class SolverState implements ISolverState {
             }
         });
         return copy(this.spec, this.state, this.messages, constraints.freeze(), delays.freeze(),
-            this.existentials, completeness.freeze(), this.expanded, this.meta);
+            this.existentials, completeness.freeze());
     }
 
     @Override public SolverState withDelays(Iterable<? extends java.util.Map.Entry<IConstraint, Delay>> delays) {
@@ -322,42 +313,20 @@ public class SolverState implements ISolverState {
             }
         });
         return copy(this.spec, this.state, this.messages, constraints.freeze(), newDelays.freeze(),
-            this.existentials, this.completeness, this.expanded, this.meta);
+            this.existentials, this.completeness);
     }
 
     @Override public SolverState withDelay(IConstraint constraint, Delay delay) {
         return withDelays(Collections.singletonList(new AbstractMap.SimpleEntry<>(constraint, delay)));
     }
 
-    @Override public SolverState withMeta(SolutionMeta newMeta) {
-        return copy(this.spec, this.state, this.messages, this.constraints, this.delays,
-            this.existentials, this.completeness, this.expanded, newMeta);
-    }
-
-    @Override public <C extends IConstraint> SelectedConstraintSolverState<C> withSelected(C selection) {
-        return SelectedConstraintSolverState.of(selection, this);
-    }
-
-    @Override public SolverState withoutSelected() {
-        return this;
-    }
-
     /**
      * Creates a copy of this {@link SolverState} with the specified values.
-     *
+     * <p>
      * This method should only invoke the constructor.
-     *
+     * <p>
      * This method can be overridden in subclasses to invoke the subclass constructor instead.
      *
-     * @param newSpec the new {@link Spec}
-     * @param newState the new {@link IState}
-     * @param newMessages the new messages
-     * @param newConstraints the new constraints
-     * @param newDelays the new delays
-     * @param newExistentials the new existentials
-     * @param newCompleteness the new completness
-     * @param newExpanded the new names of expanded rules
-     * @param newMeta the new meta data
      * @return the modified copy of the {@link SolverState}
      */
     protected SolverState copy(
@@ -367,12 +336,10 @@ public class SolverState implements ISolverState {
         Set.Immutable<IConstraint> newConstraints,
         Map.Immutable<IConstraint, Delay> newDelays,
         @Nullable ImmutableMap<ITermVar, ITermVar> newExistentials,
-        ICompleteness.Immutable newCompleteness,
-        Set.Immutable<String> newExpanded,
-        SolutionMeta newMeta
+        ICompleteness.Immutable newCompleteness
     ) {
         return new SolverState(newSpec, newState, newMessages, newConstraints, newDelays,
-            newExistentials, newCompleteness, newExpanded, newMeta);
+            newExistentials, newCompleteness);
     }
 
 
@@ -385,7 +352,7 @@ public class SolverState implements ISolverState {
 
     /**
      * Compares this object to the specified object for equality.
-     *
+     * <p>
      * This method assumes that the argument is non-null and of the correct type.
      *
      * @param that the other object to compare
@@ -393,7 +360,6 @@ public class SolverState implements ISolverState {
      * otherwise, {@code false}
      */
     protected boolean safeEquals(SolverState that) {
-        // NOTE: For the purposes of equality, we ignore the metadata
         // @formatter:off
         return Objects.equals(this.spec, that.spec)
             && Objects.equals(this.state, that.state)
@@ -401,14 +367,12 @@ public class SolverState implements ISolverState {
             && Objects.equals(this.delays, that.delays)
             && Objects.equals(this.existentials, that.existentials)
             && Objects.equals(this.completeness, that.completeness)
-            && Objects.equals(this.messages, that.messages)
-            && Objects.equals(this.expanded, that.expanded);
+            && Objects.equals(this.messages, that.messages);
         // @formatter:on
     }
 
     @Override
     public int hashCode() {
-        // NOTE: For the purposes of equality, we ignore the metadata
         return Objects.hash(
             this.spec,
             this.state,
@@ -416,8 +380,7 @@ public class SolverState implements ISolverState {
             this.delays,
             this.existentials,
             this.completeness,
-            this.messages,
-            this.expanded
+            this.messages
         );
     }
 
@@ -466,10 +429,6 @@ public class SolverState implements ISolverState {
             }
         }
 
-        sb.append(linePrefix).appendln("meta:");
-        sb.append(linePrefix).append("  expandedQueries: ").appendln(meta.getExpandedQueries());
-        sb.append(linePrefix).append("  expandedRules: ").appendln(meta.getExpandedRules());
-
         writeMessages(sb, linePrefix, prettyPrinter);
     }
 
@@ -481,7 +440,7 @@ public class SolverState implements ISolverState {
      * @param prettyPrinter a function that, given a term and a unifier-disunifier,
      *                      produces a string representation of the term.
      */
-    private void writeMessages(TextStringBuilder sb, String linePrefix, Function2<ITerm, IUniDisunifier, String> prettyPrinter) {
+    protected void writeMessages(TextStringBuilder sb, String linePrefix, Function2<ITerm, IUniDisunifier, String> prettyPrinter) {
         final IUniDisunifier unifier = state.unifier();
 
         final Function0<String> defaultMessage = () -> "<empty>";
