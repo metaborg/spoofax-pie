@@ -38,6 +38,8 @@ dependencies {
     api(project(":nabl2.common"))
     api(project(":statix.codecompletion"))
     api(project(":statix.codecompletion.pie"))
+    api(project(":statix.referenceretention"))
+    api(project(":statix.referenceretention.pie"))
     api(project(":statix.common"))
     api(project(":statix.pie"))
     api(project(":statix.multilang"))
@@ -115,6 +117,7 @@ dependencies {
     api("org.derive4j:derive4j:$derive4jVersion")
     api("org.derive4j:derive4j-annotation:$derive4jVersion")
     /// org.immutables
+    api("org.immutables:serial:$immutablesVersion")
     api("org.immutables:value:$immutablesVersion")
     api("org.immutables:value-annotations:$immutablesVersion")
     // Yaml
