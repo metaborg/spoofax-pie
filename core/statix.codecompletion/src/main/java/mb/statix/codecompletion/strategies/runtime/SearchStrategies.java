@@ -7,6 +7,7 @@ import mb.statix.codecompletion.SolverContext;
 import mb.statix.codecompletion.SolverState;
 import mb.statix.constraints.CResolveQuery;
 import mb.statix.constraints.CUser;
+import mb.statix.constraints.IResolveQuery;
 import mb.tego.sequences.Seq;
 import mb.statix.solver.IConstraint;
 import mb.tego.strategies.Strategy;
@@ -64,7 +65,7 @@ public final class SearchStrategies {
         return ExpandPredicateStrategy.getInstance().apply(ctx, v);
     }
 
-    public static Strategy<SelectedConstraintCCSolverState<CResolveQuery>, Seq<CCSolverState>> expandQuery(SolverContext ctx, ITermVar v) {
+    public static Strategy<SelectedConstraintCCSolverState<IResolveQuery>, Seq<CCSolverState>> expandQuery(SolverContext ctx, ITermVar v) {
         return ExpandQueryStrategy.getInstance().apply(ctx, v);
     }
 
