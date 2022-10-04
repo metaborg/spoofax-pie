@@ -1,31 +1,20 @@
 package mb.statix.referenceretention.strategies.runtime;
 
 import mb.nabl2.terms.IApplTerm;
-import mb.nabl2.terms.IAttachments;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
-import mb.nabl2.terms.build.AbstractTerm;
-import mb.statix.concurrent.SolverState;
+import mb.statix.codecompletion.SolverState;
+import mb.statix.constraints.CEqual;
 import mb.tego.sequences.Seq;
 import mb.tego.strategies.NamedStrategy1;
-import mb.tego.strategies.NamedStrategy2;
 import mb.tego.strategies.NamedStrategy3;
+import mb.tego.strategies.Strategy1;
 import mb.tego.strategies.runtime.TegoEngine;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.metaborg.util.functions.Action1;
 
-import org.immutables.serial.Serial;
-import org.immutables.value.Value;
+import java.util.Collections;
 
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-
-interface SolverContext {
-
-}
-
-public final class FixReferenceStrategy extends NamedStrategy3<SolverContext, ITermVar, ReferenceRetentionPlaceholderDescriptor, SolverState, Seq<SolverState>> {
+public final class FixReferenceStrategy extends NamedStrategy3<ReferenceRetentionContext, ITermVar, ReferenceRetentionPlaceholderDescriptor, SolverState, Seq<SolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final FixReferenceStrategy instance = new FixReferenceStrategy();
@@ -53,7 +42,7 @@ public final class FixReferenceStrategy extends NamedStrategy3<SolverContext, IT
     @Override
     public Seq<SolverState> evalInternal(
         TegoEngine engine,
-        SolverContext ctx,
+        ReferenceRetentionContext ctx,
         ITermVar v,
         ReferenceRetentionPlaceholderDescriptor descriptor,
         SolverState input
@@ -73,7 +62,7 @@ public final class FixReferenceStrategy extends NamedStrategy3<SolverContext, IT
      */
     public static Seq<SolverState> eval(
         TegoEngine engine,
-        SolverContext ctx,
+        ReferenceRetentionContext ctx,
         ITermVar v,
         ReferenceRetentionPlaceholderDescriptor descriptor,
         SolverState input
@@ -103,9 +92,38 @@ public final class FixReferenceStrategy extends NamedStrategy3<SolverContext, IT
             TODO()
          */
         // Get all the strategies at the start
-        final QualifyReferenceStrategy qualifyReference = QualifyReferenceStrategy.getInstance();
+        final Strategy1<ITerm, ITerm, @Nullable ITerm> qualifyReference = ctx.getQualifyReferenceStrategy();
 
-//        final ALockedReference reference = descriptor.ast().getAttachment(LockedReference.class);
+        final ITerm ast = descriptor.getAst();
+        final @Nullable LockedReference reference = (ast instanceof LockedReference ? (LockedReference)ast : null);
+        if (reference != null) {
+            // TODO: Use apply()
+            final @Nullable ITerm qreference = qualifyReference.evalInternal(engine, descriptor.getContext(), reference.getTerm());
+            if (qreference == null) throw new IllegalStateException("qualifyReference returned null");   // TODO: Handle this case, return null?
+            // Try the qualified reference and, if it succeeds, get its declaration
+            // Compare the declaration to the expected declaration
+            // Otherwise, if this comparison fails,
+            // Try the unqualified reference and, if it succeeds, get its declaration
+            // Compare the declaration to the expected declaration
+            // Otherwise, if this comparison fails,
+            // Fail.
+            // TODO
+        } else {
+            // Unwrap
+            final @Nullable IApplTerm applTerm = (ast instanceof IApplTerm ? (IApplTerm)ast : null);
+            if (applTerm != null) {
+                // Replace the subterms of applTerm with placeholders
+                // and union v |-> applTerm (with the placeholders)
+                // and store the placeholder mapping
+                // TODO
+            } else {
+                // Union v |-> ast and be done
+                final SolverState newState = input.withUpdatedConstraints(
+                    Collections.singleton(new CEqual(v, ast)),
+                    Collections.emptySet()
+                );
+            }
+        }
         // TODO
 
         throw new IllegalStateException("Not implemented yet");
@@ -113,6 +131,8 @@ public final class FixReferenceStrategy extends NamedStrategy3<SolverContext, IT
 
 }
 
+
+// Not used, replaced with ReferenceRetentionContext.qualifyReferenceStrategy
 final class QualifyReferenceStrategy extends NamedStrategy1<ITerm, ITerm, @Nullable ITerm> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
