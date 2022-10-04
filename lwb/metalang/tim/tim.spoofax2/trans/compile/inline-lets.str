@@ -4,6 +4,7 @@ imports
 
   signatures/tim-sig
   signatures/tim/-
+  compile/ast
 
 rules
 
@@ -13,4 +14,4 @@ rules
   with body' := <foldl(inline-bind)> (binds, body)
 
   inline-bind : (TBind(var, val), body) -> body'
-  with body' := <topdown(try(?TValueVar(var) ; !val))> body
+  with body' := <topdown(try(?TValueVar(var, _) ; !val))> body

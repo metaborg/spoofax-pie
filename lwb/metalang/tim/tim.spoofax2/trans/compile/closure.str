@@ -5,7 +5,8 @@ imports
   signatures/tim-sig
   signatures/tim/-
   compile/uniquify
-  compile/explicate-globals
+  compile/ast
+  compile/debug
   pp
 
 rules
@@ -15,7 +16,7 @@ rules
     with
       ext      := <get-extension> path
     ; filename := <guarantee-extension(|$[cc.[ext]])> path
-    ; result   := <strip-annos; uniquify; convert-closures; topdown(try(\TValueGlobal(x) -> TValueVar(x)\)); pp-debug> ast
+    ; result   := <strip-annos; uniquify; convert-closures; fix-invalid-ast; pp-debug> ast
 
   convert-closures =
     topdown(try(mark-non-escaping))
@@ -28,7 +29,7 @@ rules
   where <fix-is-non-escaping> t
   with
     {| Remap
-    : <map({name : ?TFun(name, _, _) ; rules(Remap : TValueVar(name) -> TValueGlobal(name))})> funs
+    : <map({name : ?TFun(name, _, _, _) ; rules(Remap : TValueVar(name, type) -> TValueGlobal(name, type))})> funs
     ; t' := <topdown(try(Remap))> t
     |}
 
@@ -41,10 +42,10 @@ rules
 //    end
   
   fix-is-non-escaping : t@TExpFix(funs, e) -> ()
-  where <map(\TFun(name, _, _) -> (name, t)\ ; fun-is-non-escaping)> funs
+  where <map(\TFun(name, _, _, _) -> (name, t)\ ; fun-is-non-escaping)> funs
   
   fun-is-non-escaping : (name, body) -> ()
-  where not(oncetd(not(?TExpApp(TValueVar(name), _)) ; one(?TValueVar(name))))
+  where not(oncetd(not(?TExpApp(TValueVar(name, type), _)) ; one(?TValueVar(name, type))))
   
   convert-non-escaping : t@TExpFix(funs, exp) -> t'
   where <fix-is-non-escaping> t
@@ -54,55 +55,58 @@ rules
     ; t' := <topdown(try(ConvertCall))> TExpFix(funs', exp)
     |}
 
-  convert-non-escaping-fun : TFun(name, args, body) -> TFun(name, args', body)
+  convert-non-escaping-fun : TFun(name, FUNCTION(types), args, body) -> TFun(name, FUNCTION(types'), args', body)
   with
     freevars := <find-free-vars(|[name|args])> body
-  ; args' := <conc> (args, freevars)
-  ; nonescaping-call(|name, freevars)
+  ; (freenames, freetypes) := <map(\TValueVar(n, t) -> (n, t)\); unzip> freevars
+  ; args' := <conc> (args, freenames)
+  ; types' := <conc> (types, freetypes)
+  ; nonescaping-call(|name, FUNCTION(types'), freevars)
   
   convert-closure : t@TExpFix(funs, exp) -> t'
     where <not(fix-is-non-escaping)> t
     with
       {| ConvertCall
-      : funnames@[firstname|restnames] := <map(\TFun(name, _, _) -> name\)> funs
-      ; freevars := <foldr(![], union, \TFun(name, args, body) -> <find-free-vars(|<conc> (funnames, args))> body\)> funs
+      : funnames@[firstname|restnames] := <map(\TFun(name, _, _, _) -> name\)> funs
+      ; freevars := <foldr(![], union, \TFun(name, _, args, body) -> <find-free-vars(|<conc> (funnames, args))> body\)> funs
+      ; (freenames, freetypes) := <map(\TValueVar(n, t) -> (n, t)\); unzip> freevars
       ; closure := <newname> "closure"
-      ; let var-to-read-exp = var-to-read-op(|funnames, freevars) in
-          (names', funs') := <map(convert-fun(var-to-read-exp)) ; unzip> funs
+      ; let var-to-read-exp = var-to-read-op(|funnames, freenames) in
+          (funvars, funs') := <map(convert-fun(var-to-read-exp)) ; unzip> funs
         ; exp' := <foldr(!exp, \(name, c)-> <var-to-read-exp> (firstname, name, c)\)> restnames
         end
-      ; exp'' := TExpPrimOp("closure-new", <conc ; map(!TValueVar(<id>))> (names', freevars), firstname, exp')
+      ; exp'' := TExpPrimOp("closure-new", <conc> (funvars, freevars), firstname, exp')
       ; t' := <topdown(try(ConvertCall))> TExpFix(funs', exp'')
       |}
   
-  nonescaping-call(|x, freevars) = rules(
-    ConvertCall : TExpApp(TValueGlobal(x), vals) -> TExpApp(TValueGlobal(x), <conc> (vals, freevars'))
-    with
-      freevars' := <map(!TValueVar(<id>))> freevars
+  nonescaping-call(|x, t', freevars) = rules(
+    ConvertCall : TExpApp(TValueGlobal(x, t), vals) -> TExpApp(TValueGlobal(x, t'), <conc> (vals, freevars))
   )
 
-  convert-closure-call : TExpApp(TValueVar(x), vals) ->
-    TExpPrimOp("closure-read", [TValueVar(x), TValueInt("0")], x', TExpApp(TValueVar(x'), vals'))
+  convert-closure-call : TExpApp(TValueVar(x, t), vals) ->
+    TExpPrimOp("closure-read", [TValueVar(x, CLOSURE()), TValueInt("0")], x', TExpApp(TValueVar(x', t), vals'))
   with
     x' := <newname> x
-  ; vals' := [TValueVar(x)|vals]
+  ; vals' := [TValueVar(x, CLOSURE())|vals]
 
-  convert-fun(var-to-read-exp|) : TFun(name, args, body) -> (name', TFun(name', args', body'))
+  convert-fun(var-to-read-exp|) : TFun(name, t, args, body) -> (TValueGlobal(name', t'), TFun(name', t', args', body'))
   with
     name' := <newname> name
   ; args' := [name|args]
   ; freevars := <find-free-vars(|args')> body
-  ; body' := <foldr(!body, \(v, c) -> <var-to-read-exp> (name, v, c)\)> freevars
+  ; (freenames, freetypes) := <map(\TValueVar(n, t) -> (n, t)\); unzip> freevars
+  ; body' := <foldr(!body, \(v, c) -> <var-to-read-exp> (name, v, c)\)> freenames
+  ; t' := <\FUNCTION(x) -> FUNCTION([CLOSURE()|x])\> t
   ; rules(
-      ConvertCall : TExpApp(v@TValueVar(name), vals) -> TExpApp(TValueGlobal(name'), [v|vals])
+      ConvertCall : TExpApp(v@TValueVar(name, type), vals) -> TExpApp(TValueGlobal(name', t'), [v|vals])
     )
 
-  var-to-read-op(|funs, vars) : (name, v, c) -> TExpPrimOp("closure-offset", [TValueVar(name), n], v, c)
+  var-to-read-op(|funs, vars) : (name, v, c) -> TExpPrimOp("closure-offset", [TValueVar(name, CLOSURE()), n], v, c)
   where idx := <fun-get-index(|funs)> v
   with
     offset := <fun-get-index(|funs)> name
   ; n := TValueInt(<subti ; int-to-string> (idx, offset))
-  var-to-read-op(|funs, vars) : (name, v, c) -> TExpPrimOp("closure-read", [TValueVar(name), n], v, c)
+  var-to-read-op(|funs, vars) : (name, v, c) -> TExpPrimOp("closure-read", [TValueVar(name, CLOSURE()), n], v, c)
   where idx := <var-get-index(|funs, vars)> v
   with
     offset := <fun-get-index(|funs)> name
@@ -115,19 +119,19 @@ rules
   
   find-free-vars(|usedVars) : TValueInt(_) -> []
   find-free-vars(|usedVars) : TValueString(_) -> []
-  find-free-vars(|usedVars) : TValueGlobal(_) -> []
-  find-free-vars(|usedVars) : TValueVar(x) -> []
+  find-free-vars(|usedVars) : TValueGlobal(_, _) -> []
+  find-free-vars(|usedVars) : TValueVar(x, _) -> []
     where <elem> (x, usedVars)
-  find-free-vars(|usedVars) : TValueVar(x) -> [x]
+  find-free-vars(|usedVars) : t@TValueVar(x, _) -> [t]
   find-free-vars(|usedVars) : THole() -> []
   find-free-vars(|usedVars) : TExpApp(v, vs) ->
     <foldr(![], union, find-free-vars(|usedVars))> [v|vs]
   find-free-vars(|usedVars) : TExpFix(funs, exp) -> freeVars
     with
-      newVars := <map(\TFun(x, _, _) -> x\)> funs
+      newVars := <map(\TFun(x, _, _, _) -> x\)> funs
     ; usedVars' := <conc> (usedVars, newVars)
     ; freeVars := <foldr(![], union, find-free-vars(|usedVars'))> [exp|funs]
-  find-free-vars(|usedVars) : TFun(name, args, body) -> freeVars
+  find-free-vars(|usedVars) : TFun(name, _, args, body) -> freeVars
     with
       usedVars' := <conc> ([name|args], usedVars)
     ; freeVars := <find-free-vars(|usedVars')> body

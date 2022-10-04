@@ -4,12 +4,7 @@ imports
 
   signatures/tim/-
   signatures/tim-sig
-
-signature
-
-  constructors
-
-    TValueGlobal : string -> TValue
+  compile/ast
 
 rules
 
@@ -20,14 +15,14 @@ rules
   ; store-strings
   |}
 
-  collect-global : t@TFun(name, _, _) -> t
-  with rules(GlobalNames : TValueVar(name) -> TValueGlobal(name))
+  collect-global : t@TFun(name, _, _, _) -> t
+  with rules(GlobalNames : TValueVar(name, t) -> TValueGlobal(name, t))
 
   collect-global : t@TValueString(v) -> t
   where not(<GlobalNames> t)
   with
     varName := <newname> "str"
-  ; rules(GlobalNames : t -> TValueGlobal(varName))
+  ; rules(GlobalNames : t -> TValueGlobal(varName, STRING()))
   ; rules(Strings :+ _ -> TBind(varName, t))
   
   store-strings : TProgram(e) -> TProgram(TExpLet(globals, e))

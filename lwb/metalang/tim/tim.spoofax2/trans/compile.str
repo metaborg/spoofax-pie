@@ -3,6 +3,7 @@ module compile
 imports
 
   compile/-
+  pp
   llvm/pp
 
 rules
@@ -22,6 +23,8 @@ rules
   ; convert-closures
   ; inline-lets
   ; explicate-globals
+//  ; fix-invalid-ast
+//  ; pp-debug
   ; select-instructions
   ; conclude
   ; pp-llvm-string

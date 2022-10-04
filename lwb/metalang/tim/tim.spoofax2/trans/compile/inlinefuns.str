@@ -6,6 +6,7 @@ imports
   signatures/tim/-
   pp
   compile/uniquify
+  compile/ast
 
 rules
 
@@ -28,16 +29,16 @@ rules
       (nextFuns', prevFuns', exp') := <bottomup(try(inline-application(|x, args, body))) <+ id> (nextFuns, prevFuns, exp)
   inline-fun' : ([fun|nextFuns], prevFuns, exp) -> (nextFuns, [fun|prevFuns], exp)
   
-  inline-application(|name, argnames, body) : TExpApp(TValueVar(fun), args) -> TExpLet(bindings, body)
+  inline-application(|name, argnames, body) : TExpApp(TValueVar(fun, _), args) -> TExpLet(bindings, body)
     where <eq> (fun, name)
     with
       bindings := <zip ; map(\(a, b) -> TBind(a, b)\)> (argnames, args)
 
   can-inline : (TFun(x, args, body), funs, exp) -> ()
     where
-      not(<oncetd(?TValueVar(x))> body)  // Reject inlining recursive functions
-    ; <count-bottomup(?TValueVar(x)) ; ?(_, <id>) ; !(<id>, 1) ; eq> (funs, exp)  // Only inline if it occurs once
-    ; <oncetd(?TExpApp(TValueVar(x), _))> (funs, exp)  // Only inline if it occurs as a function application
+      not(<oncetd(?TValueVar(x, _))> body)  // Reject inlining recursive functions
+    ; <count-bottomup(?TValueVar(x, _)) ; ?(_, <id>) ; !(<id>, 1) ; eq> (funs, exp)  // Only inline if it occurs once
+    ; <oncetd(?TExpApp(TValueVar(x, _), _))> (funs, exp)  // Only inline if it occurs as a function application
 
   cleanup-bindings : TExpLet([], e) -> e
   cleanup-bindings : TExpFix([], e) -> e

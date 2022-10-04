@@ -1,0 +1,25 @@
+module compile/ast
+
+imports
+
+  signatures/tim-sig
+  signatures/tim/-
+
+signature
+  sorts TYPE
+  constructors
+    INT : TYPE
+    STRING : TYPE
+    FUNCTION : list(TYPE) -> TYPE
+    REF : TYPE -> TYPE
+    ARRAY : TYPE
+    RECORD : TYPE
+    CLOSURE : TYPE
+
+signature
+
+  constructors
+
+    TValueGlobal : string * TYPE -> TValue
+    TValueVar : string * TYPE -> TValue
+    TFun      : TID  * TYPE * List(TID) * TExp -> TFun

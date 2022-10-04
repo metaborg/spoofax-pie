@@ -6,7 +6,7 @@ imports
   signatures/tim-sig
   signatures/llvm/-
   signatures/llvm-sig
-  compile/explicate-globals
+  compile/ast
   compile/string
 
 rules
@@ -15,10 +15,10 @@ rules
     LLVMProgram(<concat> [
       <map(select-constant)> globals
     , <map(select-function)> funs
-    , [<select-function> TFun("start", [], body)]
+    , [<select-function> TFun("start", FUNCTION([]), [], body)]
     ])
   select-instructions : TProgram(body) -> 
-    <select-function> TFun("start", [], body)
+    <select-function> TFun("start", FUNCTION([]), [], body)
   
   select-constant : TBind(var, TValueString(value)) ->
     GlobalDef(Constant(var), Private(), [UnnamedAddr(), Constant()], type, String(str))
@@ -26,7 +26,7 @@ rules
     (length, str) := <process-string> value
   ; type := Array(<int-to-string> length, Int8())
   
-  select-function : TFun(name, args, body) ->
+  select-function : TFun(name, _, args, body) ->
     FunDef(Private(), TailCConv(), Void(), Constant(name), args', [GC("\"statepoint-example\""), NoUnwind()], blocks)
   with {| Blocks
   : args' := <select-args> args
@@ -68,14 +68,14 @@ rules
   select-exp : TExpConditionalPrimOp(op, args, b1, b2) -> ()
   where with(fail|"String comparison not yet implemented")  // TODO
   
-  select-exp : TExpApp(TValueVar(x), args) ->
+  select-exp : TExpApp(TValueVar(x, _), args) ->
     ( [ Assign(tmp, IntToPtr(TypedAtom(Int64(), VarAtom(Variable(x))), Pointer()))
       , Expression(Call(MustTail(), TailCConv(), Void(), VarAtom(tmp), <select-call-args> args, [], NoOperandBundles()))
       ]
     , RetVoid()
     )
   with tmp := Variable(<newname> "ptr")
-  select-exp : TExpApp(TValueGlobal(x), args) ->
+  select-exp : TExpApp(TValueGlobal(x, _), args) ->
     ( [Expression(Call(MustTail(), TailCConv(), Void(), ConstAtom(Constant(x)), <select-call-args> args, [], NoOperandBundles()))]
     , RetVoid()
     )
@@ -346,9 +346,9 @@ rules
     , Unreachable()
     )
 
-  select-value : TValueVar(x) -> VarAtom(Variable(x))
-  select-value : TValueGlobal(x) -> PtrToIntAtom(Constant(x), Int64())
+  select-value : TValueVar(x, _) -> VarAtom(Variable(x))
+  select-value : TValueGlobal(x, _) -> PtrToIntAtom(Constant(x), Int64())
   select-value : TValueInt(x) -> Literal(Int(x))
   select-value : TValueString(x) -> Literal(String(x))
 
-  get-type : TValueVar(_) -> Int64()  // TODO
+  get-type : TValueVar(_, _) -> Int64()  // TODO

@@ -1,0 +1,28 @@
+module compile/debug
+
+imports
+
+  signatures/tim-sig
+  signatures/tim/-
+  compile/ast
+
+rules
+
+  fix-invalid-ast = topdown(try(fix-invalid-elem))
+
+  fix-invalid-elem : TValueGlobal(x, t) -> TValueVar($[global_[x]_[<pp-type> t]])
+  
+  fix-invalid-elem : TValueVar(x, t) -> TValueVar($[[x]_[<pp-type> t]])
+  
+  fix-invalid-elem : TExpLet([], b) -> b
+  fix-invalid-elem : TExpFix([], b) -> b
+  
+  fix-invalid-elem : TFun(name, FUNCTION(types), args, body) -> TFun($[global_[name]_fun], args', body)
+  with
+    args' := <zipPad(id, !"eek"); map(\(arg, type) -> $[[arg]_[<pp-type> type]] \)> (args, types)
+  
+  pp-type : INT() -> "int"
+  pp-type : STRING() -> "str"
+  pp-type : FUNCTION(_) -> "fun"
+  pp-type : CLOSURE() -> "clos"
+  pp-type : _ -> "ptr"

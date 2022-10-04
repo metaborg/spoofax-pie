@@ -4,6 +4,7 @@ imports
 
   signatures/tim-sig
   signatures/tim/-
+  compile/ast
   pp
 
 rules
@@ -14,7 +15,7 @@ rules
   with
     x' := <newname> x
   ; cont' := <replace-var(|x, x')> cont
-  uniquify-bindings : TFun(name, args, exp) -> TFun(name, args', exp')
+  uniquify-bindings : TFun(name, type, args, exp) -> TFun(name, type, args', exp')
   with
     args' := <map(newname)> args
   ; exp' := <zip ; foldr(!exp, \((src, target), e) -> <replace-var(|src, target)> e\)> (args, args')
@@ -26,13 +27,13 @@ rules
   ; exp' := <zip ; foldr(!exp, \((src, target), e) -> <replace-var(|src, target)> e\)> (names, names')
   uniquify-bindings : TExpFix(funs, exp) -> TExpFix(funs'', exp')
   with
-    funs' := <map(TFun(newname, id, id))> funs
-  ; names := <map(?TFun(<id>, _, _))> funs
-  ; names' := <map(?TFun(<id>, _, _))> funs'
+    funs' := <map(TFun(newname, id, id, id))> funs
+  ; names := <map(?TFun(<id>, _, _, _))> funs
+  ; names' := <map(?TFun(<id>, _, _, _))> funs'
   ; funs'' := <zip ; foldr(!funs', \((src, target), e) -> <replace-var(|src, target)> e\)> (names, names')
   ; exp' := <zip ; foldr(!exp, \((src, target), e) -> <replace-var(|src, target)> e\)> (names, names')
   uniquify-bindings : x -> x
 
   replace-var(|src, target) = topdown(replace-var-once(|src, target))
-  replace-var-once(|src, target) : TValueVar(src) -> TValueVar(target)
+  replace-var-once(|src, target) : TValueVar(src, t) -> TValueVar(target, t)
   replace-var-once(|_, _) : x -> x
