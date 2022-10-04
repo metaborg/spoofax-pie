@@ -2,6 +2,7 @@ package mb.statix.codecompletion.strategies.runtime;
 
 import com.google.common.collect.ImmutableMap;
 import mb.nabl2.terms.ITermVar;
+import mb.statix.codecompletion.CCSolverState;
 import mb.statix.codecompletion.SolverState;
 import mb.statix.solver.IConstraint;
 import mb.tego.strategies.NamedStrategy2;
@@ -13,7 +14,7 @@ import java.util.Collection;
 
 import static mb.tego.utils.CollectionUtils.containsAny;
 
-public final class ContainsAnyVarStrategy extends NamedStrategy2<Collection<ITermVar>, IConstraint, SolverState, @Nullable SolverState> {
+public final class ContainsAnyVarStrategy extends NamedStrategy2<Collection<ITermVar>, IConstraint, CCSolverState, @Nullable CCSolverState> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final ContainsAnyVarStrategy instance = new ContainsAnyVarStrategy();
@@ -24,26 +25,26 @@ public final class ContainsAnyVarStrategy extends NamedStrategy2<Collection<ITer
 
     @SuppressWarnings("UnnecessaryLocalVariable")
     @Override
-    public @Nullable SolverState evalInternal(
+    public @Nullable CCSolverState evalInternal(
         TegoEngine engine,
         Collection<ITermVar> vars,
         IConstraint constraint,
-        SolverState input
+        CCSolverState input
     ) {
         return eval(engine, vars, constraint, input);
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
-    public static @Nullable SolverState eval(
+    public static @Nullable CCSolverState eval(
         TegoEngine engine,
         Collection<ITermVar> vars,
         IConstraint constraint,
-        SolverState input
+        CCSolverState input
     ) {
         return containsAnyVar(vars, constraint, input) ? input : null;
     }
 
-    private static boolean containsAnyVar(Collection<ITermVar> vars, IConstraint constraint, SolverState state) {
+    private static boolean containsAnyVar(Collection<ITermVar> vars, IConstraint constraint, CCSolverState state) {
         @Nullable final ImmutableMap<ITermVar, ITermVar> existentials = state.getExistentials();
         final ArrayList<ITermVar> projectedVars = new ArrayList<>(vars.size());
         if(existentials != null) {

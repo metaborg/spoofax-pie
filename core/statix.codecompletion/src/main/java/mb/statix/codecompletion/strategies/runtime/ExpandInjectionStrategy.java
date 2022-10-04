@@ -3,6 +3,7 @@ package mb.statix.codecompletion.strategies.runtime;
 import mb.nabl2.terms.IApplTerm;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
+import mb.statix.codecompletion.CCSolverState;
 import mb.statix.codecompletion.SolverContext;
 import mb.statix.codecompletion.SolverState;
 import mb.tego.sequences.Seq;
@@ -15,7 +16,7 @@ import java.util.Deque;
 import java.util.HashSet;
 import java.util.Set;
 
-public final class ExpandInjectionStrategy extends NamedStrategy3<SolverContext, ITermVar, Set<String>, SolverState, Seq<SolverState>> {
+public final class ExpandInjectionStrategy extends NamedStrategy3<SolverContext, ITermVar, Set<String>, CCSolverState, Seq<CCSolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final ExpandInjectionStrategy instance = new ExpandInjectionStrategy();
@@ -25,22 +26,22 @@ public final class ExpandInjectionStrategy extends NamedStrategy3<SolverContext,
     private ExpandInjectionStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
     @Override
-    public Seq<SolverState> evalInternal(
+    public Seq<CCSolverState> evalInternal(
         TegoEngine engine,
         SolverContext ctx,
         ITermVar v,
         Set<String> visitedInjections,
-        SolverState input
+        CCSolverState input
     ) {
         return eval(engine, ctx, v, visitedInjections, input);
     }
 
-    public static Seq<SolverState> eval(
+    public static Seq<CCSolverState> eval(
         TegoEngine engine,
         SolverContext ctx,
         ITermVar v,
         Set<String> visitedInjections,
-        SolverState input
+        CCSolverState input
     ) {
         final CompleteStrategy complete = CompleteStrategy.getInstance();
 

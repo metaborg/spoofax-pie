@@ -9,8 +9,9 @@ import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
 import mb.nabl2.terms.ListTerms;
 import mb.nabl2.terms.unification.ud.IUniDisunifier;
+import mb.statix.codecompletion.CCSolverState;
 import mb.tego.sequences.Seq;
-import mb.statix.codecompletion.SelectedConstraintSolverState;
+import mb.statix.codecompletion.SelectedConstraintCCSolverState;
 import mb.statix.codecompletion.SolverContext;
 import mb.statix.codecompletion.SolverState;
 import mb.statix.constraints.CAstId;
@@ -61,7 +62,7 @@ import static mb.nabl2.terms.matching.TermMatch.M;
  * Expands the selected query.
  */
 @SuppressWarnings("UnstableApiUsage")
-public final class ExpandQueryStrategyOld extends NamedStrategy2<SolverContext, ITermVar, SelectedConstraintSolverState<CResolveQuery>, Seq<SolverState>> {
+public final class ExpandQueryStrategyOld extends NamedStrategy2<SolverContext, ITermVar, SelectedConstraintCCSolverState<CResolveQuery>, Seq<CCSolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final ExpandQueryStrategyOld instance = new ExpandQueryStrategyOld();
@@ -86,20 +87,20 @@ public final class ExpandQueryStrategyOld extends NamedStrategy2<SolverContext, 
     }
 
     @Override
-    public Seq<SolverState> evalInternal(
+    public Seq<CCSolverState> evalInternal(
         TegoEngine engine,
         SolverContext ctx,
         ITermVar v,
-        SelectedConstraintSolverState<CResolveQuery> input
+        SelectedConstraintCCSolverState<CResolveQuery> input
     ) {
         return eval(engine, ctx, v, input);
     }
 
-    public static Seq<SolverState> eval(
+    public static Seq<CCSolverState> eval(
         TegoEngine engine,
         SolverContext ctx,
         ITermVar v,
-        SelectedConstraintSolverState<CResolveQuery> input
+        SelectedConstraintCCSolverState<CResolveQuery> input
     ) {
         final CResolveQuery query = input.getSelected();
 
@@ -146,9 +147,9 @@ public final class ExpandQueryStrategyOld extends NamedStrategy2<SolverContext, 
         engine.log(instance, "  ▶ found {} declarations", declarationCount);
 
         // For each declaration:
-        final ArrayList<SolverState> output = new ArrayList<>();
+        final ArrayList<CCSolverState> output = new ArrayList<>();
         for (int i = 0; i < declarationCount; i++) {
-            final List<SolverState> newStates = expandResolution(engine, input.getSpec(), query, input.withoutSelected(),
+            final List<CCSolverState> newStates = expandResolution(engine, input.getSpec(), query, input.withoutSelected(),
                 unifier, nameResolution, scope, i);
             engine.log(instance, "  ▶ added {} possible states", newStates.size());
             output.addAll(newStates);
@@ -157,7 +158,7 @@ public final class ExpandQueryStrategyOld extends NamedStrategy2<SolverContext, 
 
         @Nullable final ITermVar focusVar = ctx.getFocusVar();
         if (focusVar != null && engine.isLogEnabled(instance)) {
-            for(SolverState s : output) {
+            for(CCSolverState s : output) {
                 engine.log(instance, "- {}", s.project(focusVar));
             }
         }
@@ -177,11 +178,11 @@ public final class ExpandQueryStrategyOld extends NamedStrategy2<SolverContext, 
      * @param index the zero-based index of the resolution
      * @return the list of new solver states
      */
-    private static List<SolverState> expandResolution(
+    private static List<CCSolverState> expandResolution(
         TegoEngine engine,
         Spec spec,
         CResolveQuery query,
-        SolverState inputState,
+        CCSolverState inputState,
         IUniDisunifier unifier,
         NameResolution<Scope, ITerm, ITerm, CEqual> nameResolution,
         Scope scope,
@@ -212,7 +213,7 @@ public final class ExpandQueryStrategyOld extends NamedStrategy2<SolverContext, 
         // Group the conditional matches into groups that can be applied together
         final List<List<Match<Scope, ITerm, ITerm, CEqual>>> optMatchGroups = groupByCondition(optMatches);
 
-        final List<SolverState> newStates = new ArrayList<>();
+        final List<CCSolverState> newStates = new ArrayList<>();
         for (List<Match<Scope, ITerm, ITerm, CEqual>> optMatchGroup : optMatchGroups) {
             engine.log(instance, "  ▶ ▶ ▶ match group {}", optMatchGroup);
             // Determine the range of sizes the query result set can be
@@ -221,7 +222,7 @@ public final class ExpandQueryStrategyOld extends NamedStrategy2<SolverContext, 
             engine.log(instance, "  ▶ ▶ ▶ sizes {}", sizes);
 
             // For each possible size:
-            final List<SolverState> states = expandResolutionSets(
+            final List<CCSolverState> states = expandResolutionSets(
                 engine,
                 spec, query, inputState, sizes,
                 optMatchGroup, reqMatches, reqRejects
@@ -326,11 +327,11 @@ public final class ExpandQueryStrategyOld extends NamedStrategy2<SolverContext, 
      * @param reqRejects the required rejects
      * @return a list of new solver states
      */
-    private static List<SolverState> expandResolutionSets(
+    private static List<CCSolverState> expandResolutionSets(
         TegoEngine engine,
         Spec spec,
         CResolveQuery query,
-        SolverState state,
+        CCSolverState state,
         Range<Integer> sizes,
         Collection<Match<Scope, ITerm, ITerm, CEqual>> optMatches,
         Collection<Match<Scope, ITerm, ITerm, CEqual>> reqMatches,
@@ -371,10 +372,10 @@ public final class ExpandQueryStrategyOld extends NamedStrategy2<SolverContext, 
      * @param reqRejects the required rejects
      * @return the new solver state
      */
-    private static SolverState updateSolverState(
+    private static CCSolverState updateSolverState(
         Spec spec,
         CResolveQuery query,
-        SolverState state,
+        CCSolverState state,
         Collection<Match<Scope, ITerm, ITerm, CEqual>> optMatches,
         Collection<Match<Scope, ITerm, ITerm, CEqual>> optRejects,
         Collection<Match<Scope, ITerm, ITerm, CEqual>> reqMatches,

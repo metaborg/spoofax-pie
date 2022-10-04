@@ -1,6 +1,7 @@
 package mb.statix.codecompletion.strategies.runtime;
 
 import mb.nabl2.terms.ITermVar;
+import mb.statix.codecompletion.CCSolverState;
 import mb.statix.codecompletion.SolverContext;
 import mb.statix.codecompletion.SolverState;
 import mb.tego.sequences.Seq;
@@ -15,7 +16,7 @@ import java.util.Set;
 /**
  * The main entry point strategy for code completion.
  */
-public final class CompleteStrategy extends NamedStrategy3<SolverContext, ITermVar, Set<String>, SolverState, Seq<SolverState>> {
+public final class CompleteStrategy extends NamedStrategy3<SolverContext, ITermVar, Set<String>, CCSolverState, Seq<CCSolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final CompleteStrategy instance = new CompleteStrategy();
@@ -24,25 +25,25 @@ public final class CompleteStrategy extends NamedStrategy3<SolverContext, ITermV
 
     private CompleteStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    @SuppressWarnings("UnnecessaryLocalVariable")
+//    @SuppressWarnings("UnnecessaryLocalVariable")
     @Override
-    public Seq<SolverState> evalInternal(
+    public Seq<CCSolverState> evalInternal(
         TegoEngine engine,
         SolverContext ctx,
         ITermVar v,
         Set<String> visitedInjections,
-        SolverState input
+        CCSolverState input
     ) {
         return eval(engine, ctx, v, visitedInjections, input);
     }
 
-    @SuppressWarnings("UnnecessaryLocalVariable")
-    public static Seq<SolverState> eval(
+//    @SuppressWarnings("UnnecessaryLocalVariable")
+    public static Seq<CCSolverState> eval(
         TegoEngine engine,
         SolverContext ctx,
         ITermVar v,
         Set<String> visitedInjections,
-        SolverState input
+        CCSolverState input
     ) {
         // Tego:
         // def complete(v: ITermVar, visitedInjections: Set<String>): SolverState -> [SolverState] =
@@ -101,24 +102,24 @@ public final class CompleteStrategy extends NamedStrategy3<SolverContext, ITermV
         final ExpandAllInjectionsStrategy expandAllInjections = ExpandAllInjectionsStrategy.getInstance();
         final ExpandAllQueriesStrategy expandAllQueries = ExpandAllQueriesStrategy.getInstance();
         final ExpandDeterministicStrategy expandDeterministic = ExpandDeterministicStrategy.getInstance();
-        final FlatMapStrategy<SolverState, SolverState> flatMap = FlatMapStrategy.getInstance();
+        final FlatMapStrategy<CCSolverState, CCSolverState> flatMap = FlatMapStrategy.getInstance();
 
         // NOTE: Here we optimize by merging the application and the evaluation.
         // It saves a method call and an object creation by combining the application and the evaluation in one call.
-        final @Nullable Seq<SolverState> r1 = engine.eval(expandAllPredicates, ctx, v, input);
+        final @Nullable Seq<CCSolverState> r1 = engine.eval(expandAllPredicates, ctx, v, input);
         if (r1 == null) return Seq.of();
 
-        final Strategy<SolverState, Seq<SolverState>> s2 = expandAllInjections.apply(ctx, v, visitedInjections);
-        final @Nullable Seq<SolverState> r2 = engine.eval(flatMap, s2, r1);
+        final Strategy<CCSolverState, Seq<CCSolverState>> s2 = expandAllInjections.apply(ctx, v, visitedInjections);
+        final @Nullable Seq<CCSolverState> r2 = engine.eval(flatMap, s2, r1);
         if (r2 == null) return Seq.of();
 
-        final Strategy<SolverState, Seq<SolverState>> s3 = expandAllQueries.apply(ctx, v);
-        final @Nullable Seq<SolverState> r3 = engine.eval(flatMap, s3, r2);
+        final Strategy<CCSolverState, Seq<CCSolverState>> s3 = expandAllQueries.apply(ctx, v);
+        final @Nullable Seq<CCSolverState> r3 = engine.eval(flatMap, s3, r2);
         if (r3 == null) return Seq.of();
 
-        final @Nullable Seq<SolverState> r4;
+        final @Nullable Seq<CCSolverState> r4;
         if (ctx.isCompleteDeterministic()) {
-            final Strategy<SolverState, Seq<SolverState>> s4 = expandDeterministic.apply(ctx, v);
+            final Strategy<CCSolverState, Seq<CCSolverState>> s4 = expandDeterministic.apply(ctx, v);
             r4 = engine.eval(flatMap, s4, r3);
             if(r4 == null) return Seq.of();
         } else {

@@ -1,5 +1,6 @@
 package mb.statix.codecompletion.strategies.runtime;
 
+import mb.statix.codecompletion.CCSolverState;
 import mb.statix.codecompletion.SolverState;
 import mb.statix.solver.completeness.IsComplete;
 import mb.statix.solver.log.NullDebugContext;
@@ -15,7 +16,7 @@ import static mb.statix.solver.persistent.Solver.RETURN_ON_FIRST_ERROR;
 /**
  * Delays stuck queries.
  */
-public final class InferStrategy extends NamedStrategy<SolverState, SolverState> {
+public final class InferStrategy extends NamedStrategy<CCSolverState, CCSolverState> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final InferStrategy instance = new InferStrategy();
@@ -38,11 +39,11 @@ public final class InferStrategy extends NamedStrategy<SolverState, SolverState>
     }
 
     @Override
-    public SolverState evalInternal(TegoEngine engine, SolverState input) {
+    public CCSolverState evalInternal(TegoEngine engine, CCSolverState input) {
         return eval(engine, input);
     }
 
-    public static SolverState eval(TegoEngine engine, SolverState input) {
+    public static CCSolverState eval(TegoEngine engine, CCSolverState input) {
         try {
             final SolverResult result = Solver.solve(
                 input.getSpec(),
@@ -59,7 +60,7 @@ public final class InferStrategy extends NamedStrategy<SolverState, SolverState>
 
             // NOTE: Call the isSuccessful() strategy on this result to ensure it has no errors.
 
-            return SolverState.fromSolverResult(result, input.getExistentials(), input.getExpanded(), input.getMeta());
+            return CCSolverState.fromSolverResult(result, input.getExistentials(), input.getExpanded(), input.getMeta());
         } catch(InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);

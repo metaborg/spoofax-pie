@@ -18,7 +18,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.functions.Function2;
 
 import java.util.AbstractMap;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Objects;
 
@@ -27,7 +26,7 @@ import java.util.Objects;
  *
  * @param <C> the type of selected constraint
  */
-public final class SelectedConstraintSolverState<C extends IConstraint> extends SolverState implements ISelectedConstraintSolverState<C> {
+public final class SelectedConstraintCCSolverState<C extends IConstraint> extends CCSolverState implements ISelectedConstraintSolverState<C> {
 
     /**
      * Creates a new {@link SolverState} from the given specification, solver state, and constraints.
@@ -36,11 +35,11 @@ public final class SelectedConstraintSolverState<C extends IConstraint> extends 
      * @param state the solver state
      * @return the resulting search state
      */
-    public static <C extends IConstraint> SelectedConstraintSolverState<C> of(
+    public static <C extends IConstraint> SelectedConstraintCCSolverState<C> of(
         C selection,
-        SolverState state
+        CCSolverState state
     ) {
-        return new SelectedConstraintSolverState<C>(selection,
+        return new SelectedConstraintCCSolverState<C>(selection,
             state.spec, state.state, state.messages, state.constraints, state.delays,
             state.existentials, state.completeness, state.expanded, state.meta
         );
@@ -63,7 +62,7 @@ public final class SelectedConstraintSolverState<C extends IConstraint> extends 
      * @param expanded the names of expanded rules
      * @param meta the meta data
      */
-    private SelectedConstraintSolverState(
+    private SelectedConstraintCCSolverState(
         C selected,
         Spec spec,
         IState.Immutable state,
@@ -92,72 +91,72 @@ public final class SelectedConstraintSolverState<C extends IConstraint> extends 
         return unselected;
     }
 
-    @Override public <C extends IConstraint> SelectedConstraintSolverState<C> withSelected(C newSelection) {
-        return new SelectedConstraintSolverState<>(newSelection,
+    @Override public <C extends IConstraint> SelectedConstraintCCSolverState<C> withSelected(C newSelection) {
+        return new SelectedConstraintCCSolverState<>(newSelection,
             this.spec, this.state, this.messages, this.constraints, this.delays,
             this.existentials, this.completeness, this.expanded, this.meta
         );
     }
 
-    @Override public SolverState withoutSelected() {
-        return new SolverState(
+    @Override public CCSolverState withoutSelected() {
+        return new CCSolverState(
             this.spec, this.state, this.messages, this.constraints, this.delays,
             this.existentials, this.completeness, this.expanded, this.meta
         );
     }
 
     @SuppressWarnings("unchecked")
-    @Override public SelectedConstraintSolverState<C> withExpanded(Set.Immutable<String> newExpanded) {
-        return (SelectedConstraintSolverState<C>)super.withExpanded(newExpanded);
+    @Override public SelectedConstraintCCSolverState<C> withExpanded(Set.Immutable<String> newExpanded) {
+        return (SelectedConstraintCCSolverState<C>)super.withExpanded(newExpanded);
     }
 
     @SuppressWarnings("unchecked")
-    @Override public SelectedConstraintSolverState<C> withExistentials(Iterable<ITermVar> newExistentials) {
-        return (SelectedConstraintSolverState<C>)super.withExistentials(newExistentials);
+    @Override public SelectedConstraintCCSolverState<C> withExistentials(Iterable<ITermVar> newExistentials) {
+        return (SelectedConstraintCCSolverState<C>)super.withExistentials(newExistentials);
     }
 
     @SuppressWarnings("unchecked")
-    @Override public SelectedConstraintSolverState<C> withSingleConstraint() {
-        return (SelectedConstraintSolverState<C>)super.withSingleConstraint();
+    @Override public SelectedConstraintCCSolverState<C> withSingleConstraint() {
+        return (SelectedConstraintCCSolverState<C>)super.withSingleConstraint();
     }
 
     @SuppressWarnings("unchecked")
-    @Override public SelectedConstraintSolverState<C> withPrecomputedCriticalEdges() {
-        return (SelectedConstraintSolverState<C>)super.withPrecomputedCriticalEdges();
+    @Override public SelectedConstraintCCSolverState<C> withPrecomputedCriticalEdges() {
+        return (SelectedConstraintCCSolverState<C>)super.withPrecomputedCriticalEdges();
     }
 
     @SuppressWarnings("unchecked")
-    @Override public SelectedConstraintSolverState<C> withApplyResult(ApplyResult result, @Nullable IConstraint focus) {
-        return (SelectedConstraintSolverState<C>)super.withApplyResult(result, focus);
+    @Override public SelectedConstraintCCSolverState<C> withApplyResult(ApplyResult result, @Nullable IConstraint focus) {
+        return (SelectedConstraintCCSolverState<C>)super.withApplyResult(result, focus);
     }
 
     @SuppressWarnings("unchecked")
-    @Override public SelectedConstraintSolverState<C> withState(IState.Immutable newState) {
-        return (SelectedConstraintSolverState<C>)super.withState(newState);
+    @Override public SelectedConstraintCCSolverState<C> withState(IState.Immutable newState) {
+        return (SelectedConstraintCCSolverState<C>)super.withState(newState);
     }
 
     @SuppressWarnings("unchecked")
-    @Override public SelectedConstraintSolverState<C> withUpdatedConstraints(Iterable<IConstraint> add, Iterable<IConstraint> remove) {
-        return (SelectedConstraintSolverState<C>)super.withUpdatedConstraints(add, remove);
+    @Override public SelectedConstraintCCSolverState<C> withUpdatedConstraints(Iterable<IConstraint> add, Iterable<IConstraint> remove) {
+        return (SelectedConstraintCCSolverState<C>)super.withUpdatedConstraints(add, remove);
     }
 
     @SuppressWarnings("unchecked")
-    @Override public SelectedConstraintSolverState<C> withDelays(Iterable<? extends java.util.Map.Entry<IConstraint, Delay>> delays) {
-        return (SelectedConstraintSolverState<C>)super.withDelays(delays);
+    @Override public SelectedConstraintCCSolverState<C> withDelays(Iterable<? extends java.util.Map.Entry<IConstraint, Delay>> delays) {
+        return (SelectedConstraintCCSolverState<C>)super.withDelays(delays);
     }
 
     @SuppressWarnings("unchecked")
-    @Override public SelectedConstraintSolverState<C> withDelay(IConstraint constraint, Delay delay) {
-        return (SelectedConstraintSolverState<C>)super.withDelays(Collections.singletonList(new AbstractMap.SimpleEntry<>(constraint, delay)));
+    @Override public SelectedConstraintCCSolverState<C> withDelay(IConstraint constraint, Delay delay) {
+        return (SelectedConstraintCCSolverState<C>)super.withDelays(Collections.singletonList(new AbstractMap.SimpleEntry<>(constraint, delay)));
     }
 
     @SuppressWarnings("unchecked")
-    @Override public SelectedConstraintSolverState<C> withMeta(SolutionMeta newMeta) {
-        return (SelectedConstraintSolverState<C>)super.withMeta(newMeta);
+    @Override public SelectedConstraintCCSolverState<C> withMeta(SolutionMeta newMeta) {
+        return (SelectedConstraintCCSolverState<C>)super.withMeta(newMeta);
     }
 
     /**
-     * Creates a copy of this {@link SelectedConstraintSolverState} with the specified values.
+     * Creates a copy of this {@link SelectedConstraintCCSolverState} with the specified values.
      *
      * This method should only invoke the constructor.
      *
@@ -175,7 +174,7 @@ public final class SelectedConstraintSolverState<C extends IConstraint> extends 
      * @param newMeta the new meta data
      * @return the modified copy of the {@link SolverState}
      */
-    private SolverState copy(
+    private SelectedConstraintCCSolverState<C> copy(
         C newSelection,
         Spec newSpec,
         IState.Immutable newState,
@@ -187,11 +186,11 @@ public final class SelectedConstraintSolverState<C extends IConstraint> extends 
         Set.Immutable<String> newExpanded,
         SolutionMeta newMeta
     ) {
-        return new SelectedConstraintSolverState<>(newSelection, newSpec, newState, newMessages, newConstraints, newDelays,
+        return new SelectedConstraintCCSolverState<>(newSelection, newSpec, newState, newMessages, newConstraints, newDelays,
             newExistentials, newCompleteness, newExpanded, newMeta);
     }
 
-    @Override protected SolverState copy(
+    @Override protected SelectedConstraintCCSolverState<C> copy(
         Spec newSpec,
         IState.Immutable newState,
         Map.Immutable<IConstraint, IMessage> newMessages,
@@ -210,7 +209,7 @@ public final class SelectedConstraintSolverState<C extends IConstraint> extends 
     @Override public boolean equals(@Nullable Object o) {
         if(this == o) return true;
         if(o == null ||  getClass() != o.getClass()) return false;
-        final SelectedConstraintSolverState<C> that = (SelectedConstraintSolverState<C>)o;
+        final SelectedConstraintCCSolverState<C> that = (SelectedConstraintCCSolverState<C>)o;
         // @formatter:off
         return Objects.equals(this.selected, that.selected)
             && this.safeEquals(that);
@@ -226,7 +225,7 @@ public final class SelectedConstraintSolverState<C extends IConstraint> extends 
      * @return {@code true} when this object and the specified object are equal;
      * otherwise, {@code false}
      */
-    private boolean equalsSafe(SelectedConstraintSolverState<C> that) {
+    private boolean equalsSafe(SelectedConstraintCCSolverState<C> that) {
         // @formatter:off
         return Objects.equals(this.selected, that.selected)
             && super.safeEquals(that);

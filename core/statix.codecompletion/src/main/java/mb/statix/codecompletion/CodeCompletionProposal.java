@@ -6,7 +6,7 @@ import mb.nabl2.terms.ITerm;
  * A code completion proposal.
  */
 public final class CodeCompletionProposal {
-    private final SolverState state;
+    private final CCSolverState state;
     private final ITerm term;
 
     /**
@@ -15,7 +15,7 @@ public final class CodeCompletionProposal {
      * @param state the state of the proposal
      * @param term the term of the proposal
      */
-    public CodeCompletionProposal(SolverState state, ITerm term) {
+    public CodeCompletionProposal(CCSolverState state, ITerm term) {
         this.state = state;
         this.term = term;
     }
@@ -25,7 +25,7 @@ public final class CodeCompletionProposal {
      *
      * @return the state of the proposal
      */
-    public SolverState getState() {
+    public CCSolverState getState() {
         return state;
     }
 

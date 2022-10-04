@@ -2,6 +2,7 @@ package mb.statix.codecompletion.strategies.runtime;
 
 import io.usethesource.capsule.Set;
 import mb.nabl2.terms.ITermVar;
+import mb.statix.codecompletion.CCSolverState;
 import mb.statix.codecompletion.SolverContext;
 import mb.statix.codecompletion.SolverState;
 import mb.statix.constraints.CUser;
@@ -16,7 +17,7 @@ import static mb.statix.codecompletion.strategies.runtime.SearchStrategies.*;
 import static mb.tego.strategies.StrategyExt.*;
 import static mb.tego.strategies.runtime.Strategies.*;
 
-public final class ExpandAllPredicatesStrategy extends NamedStrategy2<SolverContext, ITermVar, SolverState, Seq<SolverState>> {
+public final class ExpandAllPredicatesStrategy extends NamedStrategy2<SolverContext, ITermVar, CCSolverState, Seq<CCSolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final ExpandAllPredicatesStrategy instance = new ExpandAllPredicatesStrategy();
@@ -26,20 +27,20 @@ public final class ExpandAllPredicatesStrategy extends NamedStrategy2<SolverCont
     private ExpandAllPredicatesStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
     @Override
-    public Seq<SolverState> evalInternal(
+    public Seq<CCSolverState> evalInternal(
         TegoEngine engine,
         SolverContext ctx,
         ITermVar v,
-        SolverState input
+        CCSolverState input
     ) {
         return eval(engine, ctx, v, input);
     }
 
-    public static Seq<SolverState> eval(
+    public static Seq<CCSolverState> eval(
         TegoEngine engine,
         SolverContext ctx,
         ITermVar v,
-        SolverState input
+        CCSolverState input
     ) {
         // Tego:
         // import io/usethesource/capsule::Set.Immutable
@@ -61,13 +62,13 @@ public final class ExpandAllPredicatesStrategy extends NamedStrategy2<SolverCont
         // An example where this happens is in this program, on the $Type placeholder:
         //   let function $ID(): $Type = $Exp in 3 end
         //   debugState(v,
-        final Strategy1<Set.Immutable<String>, SolverState, SolverState> SolverState$withExpanded
-            = StrategyExt.def("SolverState#withExpanded", "x", fun(SolverState::withExpanded));
+        final Strategy1<Set.Immutable<String>, CCSolverState, CCSolverState> CCSolverState$withExpanded
+            = StrategyExt.def("CCSolverState#withExpanded", "x", fun(CCSolverState::withExpanded));
 
         // @formatter:off
-        final Strategy<SolverState, Seq<SolverState>> s =
+        final Strategy<CCSolverState, Seq<CCSolverState>> s =
             // Empty the set of expanded things
-            seq(SolverState$withExpanded.apply(Set.Immutable.of()))
+            seq(CCSolverState$withExpanded.apply(Set.Immutable.of()))
             .$(repeat(
                 seq(limit(1, select(CUser.class, lam((constraint) -> seq(containsVar(v, constraint)).$(notYetExpanded(constraint)).$()))))
                 // Expand the focussed rule
