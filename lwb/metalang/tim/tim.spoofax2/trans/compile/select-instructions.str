@@ -69,9 +69,10 @@ rules
   where with(fail|"String comparison not yet implemented")  // TODO
   
   select-exp : TExpApp(x, args) ->
-    ( [ Expression(Call(MustTail(), TailCConv(), Void(), <select-value> x, <select-call-args> args, [], NoOperandBundles()))]
+    ( [ Expression(Call(DefaultTail(), TailCConv(), Void(), <select-value> x, <select-call-args> args, [], NoOperandBundles()))]
     , RetVoid()
     )
+    // TODO: restore tail calling
   
   select-exp = with(fail|$[unsupported exp])
 
@@ -112,23 +113,40 @@ rules
     [ Expression(Store(<select-typed-value> v, <select-typed-value> ref)) ]
 
   // Records
-  select-primop(|result) : ("record-new", t, args) ->
+  // TODO: restore functionality of arguments to record-new
+  select-primop(|result) : ("record-new", t, []) ->
     [Assign(
        result
      , Call(
          DefaultTail()
        , DefaultCConv()
-       , Function(<get-type> t, [ParamUnnamed(Int64(), []), Vararg()])
+       , Function(<get-type> t, [ParamUnnamed(Int64(), [])])
        , ConstAtom(Constant("record_new"))
-       , [TypedAtom(Int64(), Literal(Int(count)))|<select-call-args> args]
+       , [TypedAtom(Int64(), Literal(Int("0")))]
        , []
        , NoOperandBundles()
        )
      )]
-  with count := <divi ; int-to-string> (<length> args, 2)
+//  select-primop(|result) : ("record-new", t, args) ->
+//    [Assign(
+//       result
+//     , Call(
+//         DefaultTail()
+//       , DefaultCConv()
+//       , Function(<get-type> t, [ParamUnnamed(Int64(), []), Vararg()])
+//       , ConstAtom(Constant("record_new"))
+//       , [TypedAtom(Int64(), Literal(Int(count)))|<select-call-args> args]
+//       , []
+//       , NoOperandBundles()
+//       )
+//     )]
+//  with count := <divi ; int-to-string> (<length> args, 2)
 
-  select-funcall-primop : "record-write" -> "record_write"
-  select-funcall-primop : "record-read" -> "record_read"
+  select-funcall-primop : ("record-write", INT()) -> ("record_write", Void())
+  select-funcall-primop : ("record-read", t@INT()) -> ("record_read", <get-type> t)
+  
+  select-funcall-primop : ("record-write", _) -> ("record_write_ptr", Void())
+  select-funcall-primop : ("record-read", t) -> ("record_read_ptr", <get-type> t)
   
   // Arrays
   select-primop(|result) : ("array-new", t, args) ->
@@ -191,8 +209,8 @@ rules
   with
     offset := Variable(<newname> "offset")
 
-  select-funcall-primop : "array-concat" -> "array_concat"
-  select-funcall-primop : "array-tail" -> "array_tail"
+  select-funcall-primop : ("array-concat", t) -> ("array_concat", <get-type> t)
+  select-funcall-primop : ("array-tail", t) -> ("array_tail", <get-type> t)
 
   // Closures
   select-primop(|result) : ("closure-new", _, args) ->
@@ -289,25 +307,38 @@ rules
     ]
   with
     tmp := Variable(<newname> "ptr")
-  select-funcall-primop : "str-add" -> "string_concat"
-  select-funcall-primop : "str-index" -> "string_index"
-  select-funcall-primop : "int-to-string" -> "int_to_string"
+  select-funcall-primop : ("str-add", t) -> ("string_concat", <get-type> t)
+  select-funcall-primop : ("str-index", t) -> ("string_index", <get-type> t)
+  select-funcall-primop : ("int-to-string", t) -> ("int_to_string", <get-type> t)
 
   // Generic function call primops
   select-primop(|result) : (func, t, args) -> 
-    [Assign(
-       result
-     , Call(
+    [Expression(
+       Call(
          DefaultTail()
        , DefaultCConv()
-       , <get-type> t
+       , t'
        , ConstAtom(Constant(func'))
        , <select-call-args> args
        , []
        , NoOperandBundles()
        )
      )]
-  where func' := <select-funcall-primop> func
+  where (func', t'@Void()) := <select-funcall-primop> (func, t)
+  select-primop(|result) : (func, t, args) -> 
+    [Assign(
+       result
+     , Call(
+         DefaultTail()
+       , DefaultCConv()
+       , t'
+       , ConstAtom(Constant(func'))
+       , <select-call-args> args
+       , []
+       , NoOperandBundles()
+       )
+     )]
+  where (func', t') := <select-funcall-primop> (func, t)
 
   // Exit
   select-terminating-primop : ("exit", []) -> 

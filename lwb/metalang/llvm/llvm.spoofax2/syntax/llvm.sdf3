@@ -21,6 +21,7 @@ context-free syntax
   Start.LLVMProgram = <<defs:Definition*>> {layout(pp-align-list defs)}
   
   Definition.TargetTriple = <target triple = <STRING>>
+  Definition.ModuleAsm = <module asm <STRING>>
   Definition.GlobalDef = <<Constant> = <Linkage> <GlobalAttribute*> <Type> <Literal>>
   Definition.FunDecl = <declare <Linkage> <CallConv> <Type> <Constant>(<{Parameter ", "}*>) <FunctionAttribute*>>
   Definition.FunDef = <

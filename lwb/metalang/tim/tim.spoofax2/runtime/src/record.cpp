@@ -19,10 +19,9 @@ void* record_new(uint64_t pair_count, ...) {
     return record;
 }
 
-int64_t record_write(void *record_ptr, const char *text, int64_t value) {
+void record_write(void *record_ptr, const char *text, int64_t value) {
     Record &record = *static_cast<Record*>(record_ptr);
     record[text] = value;
-    return value;
 }
 
 int64_t record_read(void *record_ptr, const char *text) {
@@ -33,6 +32,21 @@ int64_t record_read(void *record_ptr, const char *text) {
         exit(-1);
     }
     return search->second;
+}
+
+void record_write_ptr(void *record_ptr, const char *text, void* value) {
+    Record &record = *static_cast<Record*>(record_ptr);
+    record[text] = reinterpret_cast<int64_t>(value);
+}
+
+void* record_read_ptr(void *record_ptr, const char *text) {
+    auto &record = *static_cast<Record *>(record_ptr);
+    auto search = record.find(text);
+    if (search == record.end()) {
+        printf("Invalid record read %s\n", text);
+        exit(-1);
+    }
+    return reinterpret_cast<void *>(search->second);
 }
 
 void record_delete(void *record_ptr) {
