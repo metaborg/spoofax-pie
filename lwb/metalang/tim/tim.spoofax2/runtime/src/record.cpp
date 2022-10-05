@@ -1,5 +1,6 @@
 #include <map>
 #include <string>
+#include <iostream>
 #include "gc.h"
 #include "record.h"
 
@@ -7,6 +8,7 @@ using Record = std::map<std::string, int64_t>;
 
 void* record_new(uint64_t pair_count, ...) {
     auto* fp = get_frame_pointer();
+    std::cerr << "RECORD_NEW" << std::endl;
     auto *record = static_cast<Record *>(gc_alloc_fp(sizeof(Record), fp));
     new(record) Record;
     va_list args;
