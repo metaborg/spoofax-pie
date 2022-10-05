@@ -28,30 +28,6 @@ rules
   , FunDecl(
       DefaultLinkage()
     , DefaultCConv()
-    , Pointer()
-    , Constant("malloc")
-    , [ParamUnnamed(Int64(), [])]
-    , [NoUnwind()]
-    )
-  , FunDecl(
-      DefaultLinkage()
-    , DefaultCConv()
-    , Void()
-    , Constant("free")
-    , [ParamUnnamed(Pointer(), [])]
-    , [NoUnwind()]
-    )
-  , FunDecl(
-      DefaultLinkage()
-    , DefaultCConv()
-    , Int32()
-    , Constant("puts")
-    , [ParamUnnamed(Pointer(), [NoCapture()])]
-    , [NoUnwind()]
-    )
-  , FunDecl(
-      DefaultLinkage()
-    , DefaultCConv()
     , Void()
     , Constant("exit")
     , [ParamUnnamed(Int32(), [])]
@@ -73,12 +49,20 @@ rules
     , [ParamUnnamed(Pointer(), [])]
     , [NoUnwind()]
     )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , Int64()
+    , Constant("strcmp")
+    , [ParamUnnamed(Pointer(), []), ParamUnnamed(Pointer(), [])]
+    , [NoUnwind()]
+    )
 // TIM runtime library
 // Records
   , FunDecl(
       DefaultLinkage()
     , DefaultCConv()
-    , Int64()
+    , PointerAddrSpace("1")
     , Constant("record_new")
     , [ParamUnnamed(Int64(), []), Vararg()]
     , [NoUnwind()]
@@ -86,9 +70,12 @@ rules
   , FunDecl(
       DefaultLinkage()
     , DefaultCConv()
-    , Int64()
+    , Void()
     , Constant("record_write")
-    , [ParamUnnamed(Int64(), []), ParamUnnamed(Int64(), []), ParamUnnamed(Int64(), [])]
+    , [ ParamUnnamed(PointerAddrSpace("1"), [])
+      , ParamUnnamed(PointerAddrSpace("1"), [])
+      , ParamUnnamed(Int64(), [])
+      ]
     , [NoUnwind()]
     )
   , FunDecl(
@@ -96,7 +83,7 @@ rules
     , DefaultCConv()
     , Int64()
     , Constant("record_read")
-    , [ParamUnnamed(Int64(), []), ParamUnnamed(Int64(), [])]
+    , [ParamUnnamed(PointerAddrSpace("1"), []), ParamUnnamed(PointerAddrSpace("1"), [])]
     , [NoUnwind()]
     )
   , FunDecl(
@@ -104,47 +91,47 @@ rules
     , DefaultCConv()
     , Void()
     , Constant("record_delete")
-    , [ParamUnnamed(Int64(), [])]
+    , [ParamUnnamed(PointerAddrSpace("1"), [])]
     , [NoUnwind()]
     )
 // Arrays
   , FunDecl(
       DefaultLinkage()
     , DefaultCConv()
-    , Int64()
+    , PointerAddrSpace("1")
     , Constant("array_concat")
-    , [ParamUnnamed(Int64(), []), ParamUnnamed(Int64(), [])]
+    , [ParamUnnamed(PointerAddrSpace("1"), []), ParamUnnamed(PointerAddrSpace("1"), [])]
     , [NoUnwind()]
     )
   , FunDecl(
       DefaultLinkage()
     , DefaultCConv()
-    , Int64()
+    , PointerAddrSpace("1")
     , Constant("array_tail")
-    , [ParamUnnamed(Int64(), [])]
+    , [ParamUnnamed(PointerAddrSpace("1"), [])]
     , [NoUnwind()]
     )
 // Strings
   , FunDecl(
       DefaultLinkage()
     , DefaultCConv()
-    , Int64()
+    , PointerAddrSpace("1")
     , Constant("string_concat")
-    , [ParamUnnamed(Int64(), []), ParamUnnamed(Int64(), [])]
+    , [ParamUnnamed(PointerAddrSpace("1"), []), ParamUnnamed(PointerAddrSpace("1"), [])]
     , [NoUnwind()]
     )
   , FunDecl(
       DefaultLinkage()
     , DefaultCConv()
-    , Int64()
+    , PointerAddrSpace("1")
     , Constant("string_index")
-    , [ParamUnnamed(Int64(), []), ParamUnnamed(Int64(), [])]
+    , [ParamUnnamed(PointerAddrSpace("1"), []), ParamUnnamed(Int64(), [])]
     , [NoUnwind()]
     )
   , FunDecl(
       DefaultLinkage()
     , DefaultCConv()
-    , Int64()
+    , PointerAddrSpace("1")
     , Constant("int_to_string")
     , [ParamUnnamed(Int64(), [])]
     , [NoUnwind()]
@@ -161,7 +148,7 @@ rules
   , FunDecl(
       DefaultLinkage()
     , DefaultCConv()
-    , Pointer()
+    , PointerAddrSpace("1")
     , Constant("gc_alloc")
     , [ParamUnnamed(Int64(), [])]
     , [NoUnwind(), InaccessibleMemOnly(), AllocKind("\"alloc,uninitialized\""), AllocSize("0"), AllocFamily("\"malloc\"")]
@@ -183,9 +170,18 @@ rules
     , []
     , [ Block(
           NoLabel()
-        , [Expression(
-             Call(DefaultTail(), TailCConv(), Void(), ConstAtom(Constant("start")), [], [], NoOperandBundles())
-           )]
+        , [ Expression(
+              Call(
+                DefaultTail()
+              , TailCConv()
+              , Void()
+              , ConstAtom(Constant("start"))
+              , []
+              , []
+              , NoOperandBundles()
+              )
+            )
+          ]
         , Ret(TypedAtom(Int32(), Literal(Int("0"))))
         )
       ]

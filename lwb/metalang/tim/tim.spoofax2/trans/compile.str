@@ -17,15 +17,34 @@ rules
     ; path'    := $[[folder]/output/[filename]]
     ; result   := <compile-tim> ast
 
+  debug-typed-tim :
+    (node, _, ast, path, project-path) -> (path', result)
+    with
+      ext      := <get-extension> path
+    ; folder   := <dirname> path
+    ; filename := <base-filename ; guarantee-extension(|$[typed.tim])> path
+    ; path'    := $[[folder]/output/[filename]]
+    ; result   := <typed-tim> ast
+
   compile-tim =
     explicate-types
   ; strip-annos
   ; uniquify
-  ; convert-closures
+  ; merge-equals
   ; inline-lets
+  ; convert-closures
   ; explicate-globals
-//  ; fix-invalid-ast
-//  ; pp-debug
   ; select-instructions
   ; conclude
   ; pp-llvm-string
+
+  typed-tim =
+    explicate-types
+  ; strip-annos
+  ; uniquify
+  ; merge-equals
+  ; convert-closures
+  ; inline-lets
+  ; explicate-globals
+  ; fix-invalid-ast
+  ; pp-debug

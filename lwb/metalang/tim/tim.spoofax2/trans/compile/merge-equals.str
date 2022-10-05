@@ -1,0 +1,23 @@
+module compile/merge-equals
+
+imports
+
+  signatures/tim-sig
+  signatures/tim/-
+  compile/ast
+
+rules
+
+  merge-equals = {| Mapping : topdown(try(merge-equal) ; try(Mapping)) |}
+
+  merge-equal : t@TExpPrimOp("print", _, [arg], result, next) -> t
+  with rules(Mapping : TValueVar(result, _) -> arg)
+  
+  merge-equal : t@TExpPrimOp("ref-store", _, [_, arg], result, next) -> t
+  with rules(Mapping : TValueVar(result, _) -> arg)
+  
+  merge-equal : t@TExpPrimOp("record-write", _, [_, _, arg], result, next) -> t
+  with rules(Mapping : TValueVar(result, _) -> arg)
+  
+  merge-equal : t@TExpPrimOp("array-write", _, [_, _, arg], result, next) -> t
+  with rules(Mapping : TValueVar(result, _) -> arg)

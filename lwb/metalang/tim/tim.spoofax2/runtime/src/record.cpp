@@ -1,11 +1,13 @@
 #include <map>
+#include <string>
 #include "gc.h"
 #include "record.h"
 
 using Record = std::map<std::string, int64_t>;
 
-int64_t record_new(uint64_t pair_count, ...) {
-    auto *record = static_cast<Record *>(gc_alloc(sizeof(Record)));
+void* record_new(uint64_t pair_count, ...) {
+    auto* fp = get_frame_pointer();
+    auto *record = static_cast<Record *>(gc_alloc_fp(sizeof(Record), fp));
     new(record) Record;
     va_list args;
     va_start(args, pair_count);
@@ -14,19 +16,17 @@ int64_t record_new(uint64_t pair_count, ...) {
         int64_t value = va_arg(args, int64_t);
         (*record)[key] = value;
     }
-    return reinterpret_cast<int64_t>(record);
+    return record;
 }
 
-int64_t record_write(int64_t record_ptr, int64_t str_ptr, int64_t value) {
-    auto &record = *reinterpret_cast<Record *>(record_ptr);
-    const char *text = reinterpret_cast<const char *>(str_ptr);
+int64_t record_write(void *record_ptr, const char *text, int64_t value) {
+    Record &record = *static_cast<Record*>(record_ptr);
     record[text] = value;
     return value;
 }
 
-int64_t record_read(int64_t record_ptr, int64_t str_ptr) {
-    auto &record = *reinterpret_cast<Record *>(record_ptr);
-    const char *text = reinterpret_cast<const char *>(str_ptr);
+int64_t record_read(void *record_ptr, const char *text) {
+    auto &record = *static_cast<Record *>(record_ptr);
     auto search = record.find(text);
     if (search == record.end()) {
         printf("Invalid record read %s\n", text);
@@ -35,7 +35,7 @@ int64_t record_read(int64_t record_ptr, int64_t str_ptr) {
     return search->second;
 }
 
-void record_delete(int64_t record_ptr) {
-    auto &record = *reinterpret_cast<Record *>(record_ptr);
+void record_delete(void *record_ptr) {
+    auto &record = *static_cast<Record *>(record_ptr);
     record.~Record();
 }

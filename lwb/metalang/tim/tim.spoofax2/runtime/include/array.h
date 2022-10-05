@@ -6,8 +6,8 @@ extern "C" {
 
 #include <stdint.h>
 
-int64_t array_concat(int64_t a, int64_t b);
-int64_t array_tail(int64_t a);
+uint64_t * array_concat(uint64_t *a, uint64_t *b);
+uint64_t * array_tail(uint64_t *a);
 
 #ifdef __cplusplus
 }

@@ -4,30 +4,30 @@
 #include "string.h" // NOLINT(modernize-deprecated-headers)
 #include "gc.h"
 
-int64_t string_concat(int64_t a_ptr, int64_t b_ptr) {
-    auto *a = reinterpret_cast<const char *>(a_ptr);
-    auto *b = reinterpret_cast<const char *>(b_ptr);
+const char * string_concat(const char *a, const char *b) {
+    auto* fp = get_frame_pointer();
     uint64_t a_length = strlen(a);
     uint64_t b_length = strlen(b);
     uint64_t new_length = a_length + b_length + 1;
-    auto *result = static_cast<char *>(malloc(new_length * sizeof(char)));
+    auto *result = static_cast<char *>(gc_alloc_fp(new_length * sizeof(char), fp));
     strcpy(result, a);
     strcpy(result + a_length, b);
-    return reinterpret_cast<int64_t>(result);
+    return result;
 }
 
-int64_t string_index(int64_t str_ptr, int64_t index) {
-    auto *str = reinterpret_cast<const char*>(str_ptr);
-    auto *result = static_cast<char *>(malloc(2 * sizeof(char)));
+const char * string_index(const char *str, int64_t index) {
+    auto* fp = get_frame_pointer();
+    auto *result = static_cast<char *>(gc_alloc_fp(2 * sizeof(char), fp));
     result[0] = str[index];
     result[1] = 0;
-    return reinterpret_cast<int64_t>(result);
+    return result;
 }
 
-int64_t int_to_string(int64_t num) {
+const char * int_to_string(int64_t num) {
+    auto* fp = get_frame_pointer();
     char buffer[256];
     size_t size = snprintf(buffer, sizeof(buffer), "%ld", num) + 1;
-    char* result = static_cast<char *>(gc_alloc(size * sizeof(char)));
+    char* result = static_cast<char *>(gc_alloc_fp(size * sizeof(char), fp));
     strcpy(result, buffer);
-    return reinterpret_cast<int64_t>(result);
+    return result;
 }
