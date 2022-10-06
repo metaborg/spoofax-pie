@@ -1,7 +1,12 @@
-DIR := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
+DIR := $(patsubst %/,%,$(dir $(abspath $(lastword ${MAKEFILE_LIST}))))
 
-ROOT         ?= $(DIR)/..
-DOCKERFILE   ?= $(ROOT)/docs/Dockerfile
+# The directory where mkdocs.yml lives
+ROOT         ?= ${DIR}/..
+# The path to the Dockerfile
+DOCKERFILE   ?= ${ROOT}/docs/Dockerfile
+# The port on which to serve the documentation on localhost
 PORT         ?= 8000
-
-include $(ROOT)/docs/Makefile.inc
+# The path to the mkdocs_requirements.txt file, relative to ${ROOT}
+REQUIREMENTS ?= mkdocs_requirements.txt
+# The path where Makefile.inc lives
+include ${ROOT}/docs/Makefile.inc
