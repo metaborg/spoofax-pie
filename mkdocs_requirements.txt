@@ -1,6 +1,7 @@
 # Pin jinja2 to 3.0.0 because mkdocs does not pin it and thus upgrades to all newer versions, suddenly breaking for everyone, thanks :D
 jinja2==3.0.0
-mkdocs-material==7.3.4
-mkdocs-macros-plugin==0.6.0
-mkdocs-git-revision-date-plugin==0.3.1
+mkdocs==1.4.0
+mkdocs-material==8.5.6
+mkdocs-macros-plugin==0.7.0
+mkdocs-git-revision-date-plugin==0.3.2
 git+https://github.com/metaborg/metaborg-pygments#egg=metaborg-pygments
