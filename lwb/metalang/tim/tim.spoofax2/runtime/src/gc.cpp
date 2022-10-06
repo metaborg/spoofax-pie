@@ -98,7 +98,7 @@ static void gc_scan_stack(void *fp) {
     uint32_t offset = 3 + record.getLocation(2).getSmallConstant();
     void **caller_sp = static_cast<void **>(fp) + 2;
     for (uint32_t i = offset; i < record.getNumLocations(); i += 2) {
-        auto base_loc = record.getLocation(i + 1);  // Only interested in the derived pointer for now
+        auto base_loc = record.getLocation(i);  // Only interested in the derived pointer for now
         auto der_loc = record.getLocation(i + 1);  // Only interested in the derived pointer for now
         assert(base_loc.getDwarfRegNum() == 7);
         assert(der_loc.getDwarfRegNum() == 7);
