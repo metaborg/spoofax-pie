@@ -1,11 +1,7 @@
-//
-// Created by ruben on 7-10-22.
-//
-
 #include <iostream>
 #include "GarbageCollector.h"
 
-extern uint8_t __LLVM_StackMaps[];
+extern uint8_t __LLVM_StackMaps[]; // NOLINT(bugprone-reserved-identifier)
 
 GarbageCollector::GarbageCollector(size_t mem_size) :
         parser(StackMapParser(llvm::ArrayRef<uint8_t>(__LLVM_StackMaps, SIZE_MAX))),
@@ -121,7 +117,6 @@ void GarbageCollector::visitor(uint8_t *&pointer) {
 }
 
 GcSpace::GcSpace(size_t size) {
-
     start = free_ptr = new uint8_t[size];
     end = start + size;
     std::cerr << "Creating new gc space: " << (void *) start << " to " << (void *) end << std::endl;

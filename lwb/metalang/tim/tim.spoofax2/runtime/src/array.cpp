@@ -1,7 +1,6 @@
 #include <cstring>
 #include <iostream>
 #include "array.h"
-#include "gc.h"
 #include "GarbageCollector.h"
 
 uint64_t *array_concat(uint64_t *a, uint64_t *b) {

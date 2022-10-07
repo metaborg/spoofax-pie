@@ -1,9 +1,7 @@
 #include <cstring>
-#include <cstdlib>
 #include <cstdio>
 #include <iostream>
 #include "string.h" // NOLINT(modernize-deprecated-headers)
-#include "gc.h"
 #include "GarbageCollector.h"
 
 const char * string_concat(const char *a, const char *b) {
