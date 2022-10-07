@@ -45,6 +45,7 @@ context-free syntax
   FunctionAttribute.AllocKind = <allockind(<STRING>)>
   FunctionAttribute.AllocSize = <allocsize(<INT>)>
   FunctionAttribute.AllocFamily = <"alloc-family"=<STRING>>
+  FunctionAttribute.GCLeafFunction = <"gc-leaf-function"="true">
 
   OperandBundles.NoOperandBundles = <>
   OperandBundles.OperandBundles = <[<OperandBundle*>]>

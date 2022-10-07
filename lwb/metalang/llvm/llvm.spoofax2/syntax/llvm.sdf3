@@ -23,6 +23,7 @@ context-free syntax
   Definition.TargetTriple = <target triple = <STRING>>
   Definition.ModuleAsm = <module asm <STRING>>
   Definition.GlobalDef = <<Constant> = <Linkage> <GlobalAttribute*> <Type> <Literal>>
+  Definition.TypeDef = <<Variable> = type <Type>>
   Definition.FunDecl = <declare <Linkage> <CallConv> <Type> <Constant>(<{Parameter ", "}*>) <FunctionAttribute*>>
   Definition.FunDef = <
 define <Linkage> <CallConv> <Type> <Constant>(<{Parameter ", "}*>) <FunctionAttribute*> {

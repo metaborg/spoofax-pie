@@ -14,6 +14,10 @@ LLVMProgram(
     , Array("4", Int8())
     , String("\"%s\\0A\\00\"")
     )
+  , TypeDef(
+      Variable(".array_type")
+    , Struct([Int64(), Array("0", Int64())])
+    )
   , ModuleAsm("\".globl __LLVM_StackMaps\"")
   , FunDecl(
       DefaultLinkage()
@@ -64,7 +68,7 @@ LLVMProgram(
       , ParamUnnamed(PointerAddrSpace("1"), [])
       , ParamUnnamed(Int64(), [])
       ]
-    , [NoUnwind()]
+    , [NoUnwind(), GCLeafFunction()]
     )
   , FunDecl(
       DefaultLinkage()
@@ -72,7 +76,7 @@ LLVMProgram(
     , Int64()
     , Constant("record_read")
     , [ParamUnnamed(PointerAddrSpace("1"), []), ParamUnnamed(PointerAddrSpace("1"), [])]
-    , [NoUnwind()]
+    , [NoUnwind(), GCLeafFunction()]
     )
   , FunDecl(
       DefaultLinkage()
@@ -83,7 +87,7 @@ LLVMProgram(
       , ParamUnnamed(PointerAddrSpace("1"), [])
       , ParamUnnamed(PointerAddrSpace("1"), [])
       ]
-    , [NoUnwind()]
+    , [NoUnwind(), GCLeafFunction()]
     )
   , FunDecl(
       DefaultLinkage()
@@ -91,15 +95,7 @@ LLVMProgram(
     , PointerAddrSpace("1")
     , Constant("record_read_ptr")
     , [ParamUnnamed(PointerAddrSpace("1"), []), ParamUnnamed(PointerAddrSpace("1"), [])]
-    , [NoUnwind()]
-    )
-  , FunDecl(
-      DefaultLinkage()
-    , DefaultCConv()
-    , Void()
-    , Constant("record_delete")
-    , [ParamUnnamed(PointerAddrSpace("1"), [])]
-    , [NoUnwind()]
+    , [NoUnwind(), GCLeafFunction()]
     )
   , FunDecl(
       DefaultLinkage()

@@ -69,10 +69,9 @@ rules
   where with(fail|"String comparison not yet implemented")  // TODO
   
   select-exp : TExpApp(x, args) ->
-    ( [ Expression(Call(DefaultTail(), TailCConv(), Void(), <select-value> x, <select-call-args> args, [], NoOperandBundles()))]
+    ( [ Expression(Call(MustTail(), TailCConv(), Void(), <select-value> x, <select-call-args> args, [], NoOperandBundles()))]
     , RetVoid()
     )
-    // TODO: restore tail calling
   
   select-exp = with(fail|$[unsupported exp])
 
@@ -187,22 +186,25 @@ rules
   ; i' := TypedAtom(Int64(), Literal(Int(<int-to-string> i)))
   
   select-primop(|result) : ("array-read", t, [arr, index]) ->
-    [ Assign(offset, GetElementPtr(Struct([Int64(), Array("0", <get-type> t)]), [<select-typed-value> arr, TypedAtom(Int32(), Literal(Int("0"))), TypedAtom(Int32(), Literal(Int("1"))), <select-typed-value> index]))
+    [ Assign(offset, GetElementPtr(VarType(Variable(".array_type")), [<select-typed-value> arr, TypedAtom(Int32(), Literal(Int("0"))), TypedAtom(Int32(), Literal(Int("1"))), <select-typed-value> index]))
     , Assign(result, Load(<get-type> t, TypedAtom(PointerAddrSpace("1"), VarAtom(offset))))
     ]
   with
     offset := Variable(<newname> "offset")
   
   select-primop(|result) : ("array-write", _, [arr, index, value]) ->
-    [ Assign(offset, GetElementPtr(Struct([Int64(), Array("0", <get-type> value)]), [<select-typed-value> arr, TypedAtom(Int32(), Literal(Int("0"))), TypedAtom(Int32(), Literal(Int("1"))), <select-typed-value> index]))
+    [ Assign(offset, GetElementPtr(VarType(Variable(".array_type")), [<select-typed-value> arr, TypedAtom(Int32(), Literal(Int("0"))), TypedAtom(Int32(), Literal(Int("1"))), <select-typed-value> index]))
     , Expression(Store(<select-typed-value> value, TypedAtom(PointerAddrSpace("1"), VarAtom(offset))))
     ]
   with
     offset := Variable(<newname> "offset")
   
   select-primop(|result) : ("array-length", _, [arr]) ->
-    [ Assign(result, Load(Int64(), <select-typed-value> arr))
+    [ Assign(offset, GetElementPtr(VarType(Variable(".array_type")), [<select-typed-value> arr, TypedAtom(Int32(), Literal(Int("0"))), TypedAtom(Int32(), Literal(Int("0")))]))
+    , Assign(result, Load(Int64(), TypedAtom(PointerAddrSpace("1"), VarAtom(offset))))
     ]
+  with
+    offset := Variable(<newname> "offset")
 
   select-funcall-primop : ("array-concat", t) -> ("array_concat", <get-type> t)
   select-funcall-primop : ("array-tail", t) -> ("array_tail", <get-type> t)

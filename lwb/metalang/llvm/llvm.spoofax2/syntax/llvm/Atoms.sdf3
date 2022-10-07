@@ -28,9 +28,12 @@ context-free syntax
   Type.Pointer = <ptr>
   Type.PointerAddrSpace = <ptr addrspace(<INT>)>
   Type.Array = <[<POSINT> x <Type>]>
+  Type.Struct = <{<{Type ", "}*>}>
+  Type.PackedStruct = [<{[{Type ", "}*]}>]
   Type.Label = <label>
   Type.Void = <void>
   Type.Function = <<Type> (<{Parameter ", "}*>)>
+  Type.VarType = <<Variable>>
   
   Atom.Literal = <<Literal>>
   Atom.ConstAtom = <<Constant>>
