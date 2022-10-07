@@ -3,13 +3,13 @@
 #include <iostream>
 #include "gc.h"
 #include "record.h"
+#include "GarbageCollector.h"
 
 using Record = std::map<std::string, int64_t>;
 
 void* record_new(uint64_t pair_count, ...) {
-    auto* fp = get_frame_pointer();
     std::cerr << "RECORD_NEW" << std::endl;
-    auto *record = static_cast<Record *>(gc_alloc_fp(sizeof(Record), fp));
+    auto *record = static_cast<Record *>(garbageCollector.allocate(sizeof(Record)));
     new(record) Record;
     va_list args;
     va_start(args, pair_count);
@@ -51,6 +51,7 @@ void* record_read_ptr(void *record_ptr, const char *text) {
     return reinterpret_cast<void *>(search->second);
 }
 
+// TODO: Record destructor call
 void record_delete(void *record_ptr) {
     auto &record = *static_cast<Record *>(record_ptr);
     record.~Record();
