@@ -69,7 +69,7 @@ rules
   where with(fail|"String comparison not yet implemented")  // TODO
   
   select-exp : TExpApp(x, args) ->
-    ( [ Expression(Call(MustTail(), TailCConv(), Void(), <select-value> x, <select-call-args> args, [], NoOperandBundles()))]
+    ( [ Expression(Call(MustTail(), TailCConv(), Void(), <select-value> x, <select-call-args> args, [GCLeafFunction()], NoOperandBundles()))]
     , RetVoid()
     )
   
