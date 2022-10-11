@@ -10,7 +10,7 @@ GarbageCollector::GarbageCollector(size_t mem_size) :
 }
 
 GarbageCollector::~GarbageCollector() {
-//    collect();
+    collect(nullptr);
     assert(old_space.free_ptr == old_space.start);
 }
 
@@ -36,8 +36,11 @@ void *GarbageCollector::allocate_no_collect(size_t size, ObjectTag tag) {
 
 void GarbageCollector::collect(void *fp) {
     swap_spaces();
-    scan_stack(fp);
+    if (fp != nullptr) {
+        scan_stack(fp);
+    }
     visit_heap(active_space);
+    update_finalizers(old_space);
     old_space.free_ptr = old_space.start;
 }
 
@@ -154,6 +157,33 @@ void GarbageCollector::visit_heap(GcSpace &space) {
             case FORWARDED_FLAG:
             default:
                 assert(false);
+        }
+    }
+}
+
+void GarbageCollector::register_finalizer(void *object, FinalizerEntry::FinalizerFunction const &finalizer) {
+    auto *metadata = static_cast<ObjectMetadata *>(object) - 1;
+    finalizers.emplace_back(metadata, finalizer);
+}
+
+void GarbageCollector::update_finalizers(GcSpace &oldSpace) {
+    auto iter = finalizers.begin();
+    auto end = finalizers.end();
+    while (iter != end) {
+        auto &finalizer = *iter;
+        if (finalizer.object_metadata->is_forwarded()) {
+            std::cerr << "Updating reference from " << (void *) finalizer.object_metadata << " to "
+                      << (void *) finalizer.object_metadata->forwarded_pointer << std::endl;
+            finalizer.object_metadata = reinterpret_cast<ObjectMetadata *>(finalizer.object_metadata->forwarded_pointer);
+        }
+        if (finalizer.is_in_space(oldSpace)) {
+            std::cerr << "Object abandoned in old space, finalizing" << std::endl;
+            void *object = static_cast<void *>(finalizer.object_metadata + 1);
+            finalizer.finalizer(object);
+            iter = finalizers.erase(iter);
+            end = finalizers.end();
+        } else {
+            iter++;
         }
     }
 }

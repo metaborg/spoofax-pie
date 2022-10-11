@@ -11,6 +11,7 @@ void* record_new(uint64_t pair_count, ...) {
     std::cerr << "RECORD_NEW" << std::endl;
     auto *record = static_cast<Record *>(garbageCollector.allocate(sizeof(Record), RECORD));
     new(record) Record;
+    garbageCollector.register_finalizer(record, record_delete);
     va_list args;
     va_start(args, pair_count);
     for (uint64_t i = 0; i < pair_count; i++) {
@@ -51,7 +52,6 @@ void* record_read_ptr(void *record_ptr, const char *text) {
     return reinterpret_cast<void *>(search->second);
 }
 
-// TODO: Record destructor call
 void record_delete(void *record_ptr) {
     auto &record = *static_cast<Record *>(record_ptr);
     record.~Record();

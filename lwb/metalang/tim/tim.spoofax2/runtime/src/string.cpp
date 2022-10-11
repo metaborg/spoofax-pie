@@ -26,7 +26,8 @@ const char * string_index(const char *str, int64_t index) {
 const char * int_to_string(int64_t num) {
     std::cerr << "INT_TO_STRING" << std::endl;
     char buffer[256];
-    size_t size = snprintf(buffer, sizeof(buffer), "%ld", num) + 1;
+    long long number = num;
+    size_t size = snprintf(buffer, sizeof(buffer), "%lld", number) + 1;
     char *result = static_cast<char *>(garbageCollector.allocate(size * sizeof(char), STRING));
     strcpy(result, buffer);
     return result;
