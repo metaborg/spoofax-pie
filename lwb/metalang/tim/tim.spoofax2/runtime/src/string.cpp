@@ -4,6 +4,7 @@
 #include "string.h" // NOLINT(modernize-deprecated-headers)
 #include "GarbageCollector.h"
 
+[[maybe_unused]]
 const char * string_concat(const char *a, const char *b) {
     std::cerr << "STRING_CONCAT" << std::endl;
     uint64_t a_length = strlen(a);
@@ -15,6 +16,7 @@ const char * string_concat(const char *a, const char *b) {
     return result;
 }
 
+[[maybe_unused]]
 const char * string_index(const char *str, int64_t index) {
     std::cerr << "STRING_INDEX" << std::endl;
     auto *result = static_cast<char *>(garbageCollector.allocate(2 * sizeof(char), STRING));
@@ -23,6 +25,7 @@ const char * string_index(const char *str, int64_t index) {
     return result;
 }
 
+[[maybe_unused]]
 const char * int_to_string(int64_t num) {
     std::cerr << "INT_TO_STRING" << std::endl;
     char buffer[256];

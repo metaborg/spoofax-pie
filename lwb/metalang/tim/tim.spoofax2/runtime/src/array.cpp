@@ -3,6 +3,7 @@
 #include "array.h"
 #include "GarbageCollector.h"
 
+[[maybe_unused]]
 uint64_t *array_concat(uint64_t *a, uint64_t *b) {
     std::cerr << "ARRAY_CONCAT" << std::endl;
     uint64_t a_length = a[0];
@@ -16,6 +17,7 @@ uint64_t *array_concat(uint64_t *a, uint64_t *b) {
     return result;
 }
 
+[[maybe_unused]]
 uint64_t *array_tail(uint64_t *a) {
     std::cerr << "ARRAY_TAIL" << std::endl;
     uint64_t new_length = a[0] - 1;

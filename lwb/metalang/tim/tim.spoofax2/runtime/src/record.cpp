@@ -7,6 +7,7 @@
 
 using Record = std::map<std::string, int64_t>;
 
+[[maybe_unused]]
 void* record_new(uint64_t pair_count, ...) {
     std::cerr << "RECORD_NEW" << std::endl;
     auto *record = static_cast<Record *>(garbageCollector.allocate(sizeof(Record), RECORD));
@@ -22,11 +23,13 @@ void* record_new(uint64_t pair_count, ...) {
     return record;
 }
 
+[[maybe_unused]]
 void record_write(void *record_ptr, const char *text, int64_t value) {
     Record &record = *static_cast<Record*>(record_ptr);
     record[text] = value;
 }
 
+[[maybe_unused]]
 int64_t record_read(void *record_ptr, const char *text) {
     auto &record = *static_cast<Record *>(record_ptr);
     auto search = record.find(text);
@@ -37,11 +40,13 @@ int64_t record_read(void *record_ptr, const char *text) {
     return search->second;
 }
 
+[[maybe_unused]]
 void record_write_ptr(void *record_ptr, const char *text, void* value) {
     Record &record = *static_cast<Record*>(record_ptr);
     record[text] = reinterpret_cast<int64_t>(value);
 }
 
+[[maybe_unused]]
 void* record_read_ptr(void *record_ptr, const char *text) {
     auto &record = *static_cast<Record *>(record_ptr);
     auto search = record.find(text);
