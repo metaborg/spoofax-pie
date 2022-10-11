@@ -9,7 +9,7 @@ using Record = std::map<std::string, int64_t>;
 
 void* record_new(uint64_t pair_count, ...) {
     std::cerr << "RECORD_NEW" << std::endl;
-    auto *record = static_cast<Record *>(garbageCollector.allocate(sizeof(Record)));
+    auto *record = static_cast<Record *>(garbageCollector.allocate(sizeof(Record), RECORD));
     new(record) Record;
     va_list args;
     va_start(args, pair_count);

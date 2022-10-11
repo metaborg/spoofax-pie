@@ -8,7 +8,7 @@ void gc_init() {
 
 void *gc_alloc(uint64_t size) {
     std::cerr << "GC_ALLOC" << std::endl;
-    return garbageCollector.allocate(size);
+    return garbageCollector.allocate(size, PLACEHOLDER);
 }
 
 void gc_collect() {
