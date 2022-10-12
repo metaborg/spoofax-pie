@@ -15,18 +15,18 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public final class FixReferenceStrategy extends NamedStrategy3<RRContext, ITermVar, RRPlaceholderDescriptor, RRSolverState, Seq<RRSolverState>> {
+public final class UnwrapOrFixReferenceStrategy extends NamedStrategy3<RRContext, ITermVar, RRPlaceholderDescriptor, RRSolverState, Seq<RRSolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
-    private static final FixReferenceStrategy instance = new FixReferenceStrategy();
+    private static final UnwrapOrFixReferenceStrategy instance = new UnwrapOrFixReferenceStrategy();
     @SuppressWarnings({"unchecked", "unused", "RedundantCast", "RedundantSuppression"})
-    public static FixReferenceStrategy getInstance() { return (FixReferenceStrategy)instance; }
+    public static UnwrapOrFixReferenceStrategy getInstance() { return (UnwrapOrFixReferenceStrategy)instance; }
 
-    private FixReferenceStrategy() { /* Prevent instantiation. Use getInstance(). */ }
+    private UnwrapOrFixReferenceStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
     @Override
     public String getName() {
-        return "fixReference";
+        return "unwrapOrFixReference";
     }
 
     @SuppressWarnings({"SwitchStatementWithTooFewBranches", "RedundantSuppression"})
