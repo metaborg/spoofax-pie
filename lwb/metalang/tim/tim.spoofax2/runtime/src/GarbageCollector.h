@@ -113,21 +113,46 @@ private:
 
     void update_finalizers(GcSpace &oldSpace);
 
+
+    template<typename... Ts>
+    inline void scan_roots(void *&root, Ts &... roots) {
+        relocate(reinterpret_cast<uint8_t *&>(root));
+        scan_roots(roots...);
+    }
+
+    inline void scan_roots() {}  // Noop
+
 public:
     explicit GarbageCollector(size_t mem_size);
 
     ~GarbageCollector();
 
-    void *allocate(size_t size, ObjectTag tag, void *fp);
-
-    void collect(void *fp);
-
-    inline void *allocate(size_t size, ObjectTag tag) {
-        return allocate(size, tag, get_frame_pointer());
+    template<typename... Ts>
+    void *allocate_fp(size_t size, ObjectTag tag, void *fp, Ts &... roots) {
+        collect_fp(fp, roots...);
+        return allocate_no_collect(size, tag);
     }
 
-    inline void collect() {
-        return collect(get_frame_pointer());
+    template<typename... Ts>
+    void collect_fp(void *fp, Ts &... roots) {
+        swap_spaces();
+        scan_roots(roots...);
+        if (fp != nullptr) {
+            scan_stack(fp);
+        }
+        visit_heap(active_space);
+        update_finalizers(old_space);
+        old_space.free_ptr = old_space.start;
+    }
+
+    template<typename... Ts>
+    inline void *allocate(size_t size, ObjectTag tag, Ts &... roots) {
+        return allocate_fp(size, tag, get_frame_pointer(), roots...);
+    }
+
+    template<typename... Ts>
+    inline void collect(Ts &... roots) {
+        return collect_fp(get_frame_pointer(), roots...);
     }
 
     void register_finalizer(void *object, FinalizerEntry::FinalizerFunction const &finalizer);

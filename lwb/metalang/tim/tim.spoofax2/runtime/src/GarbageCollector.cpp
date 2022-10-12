@@ -10,13 +10,8 @@ GarbageCollector::GarbageCollector(size_t mem_size) :
 }
 
 GarbageCollector::~GarbageCollector() {
-    collect(nullptr);
+    collect_fp(nullptr);
     assert(old_space.free_ptr == old_space.start);
-}
-
-void *GarbageCollector::allocate(size_t size, ObjectTag tag, void *fp) {
-    collect(fp);
-    return allocate_no_collect(size, tag);
 }
 
 void *GarbageCollector::allocate_no_collect(size_t size, ObjectTag tag) {
@@ -32,16 +27,6 @@ void *GarbageCollector::allocate_no_collect(size_t size, ObjectTag tag) {
     active_space.free_ptr += total_size;
     void *user_space = new_space + 1;
     return user_space;
-}
-
-void GarbageCollector::collect(void *fp) {
-    swap_spaces();
-    if (fp != nullptr) {
-        scan_stack(fp);
-    }
-    visit_heap(active_space);
-    update_finalizers(old_space);
-    old_space.free_ptr = old_space.start;
 }
 
 void GarbageCollector::swap_spaces() {
@@ -82,6 +67,7 @@ Optional<const StackRecord> GarbageCollector::find_record(uint64_t ret_addr) {
 }
 
 void GarbageCollector::scan_stack(void *fp) {
+    std::cerr << "  Stack:" << std::endl;
     uint64_t ret_addr = static_cast<uint64_t *>(fp)[1];
     auto recordOpt = find_record(ret_addr);
     if (!recordOpt.has_value()) {
@@ -124,12 +110,14 @@ void GarbageCollector::relocate(uint8_t *&pointer) {
         memcpy(new_pointer, pointer, metadata->size - sizeof(ObjectMetadata));
         std::cerr << "\tRelocating " << (void *) pointer << " to " << (void *) new_pointer << std::endl;
         pointer = new_pointer;
+        metadata->forwarded_pointer = new_pointer;
     } else {
         std::cerr << "\tNot relocating " << (void *) pointer << std::endl;
     }
 }
 
 void GarbageCollector::visit_heap(GcSpace &space) {
+    std::cerr << "  Heap:" << std::endl;
     // Cheney algorithm
     uint8_t *scan_ptr = space.start;
     while (scan_ptr < space.free_ptr) {
