@@ -17,6 +17,9 @@ rules
 
   collect-global : t@TFun(name, _, _, _) -> t
   with rules(GlobalNames : TValueVar(name, t) -> TValueGlobal(name, t))
+  
+  collect-global : t@TFunOffset(name, _, _, _, _) -> t
+  with rules(GlobalNames : TValueVar(name, t) -> TValueGlobal(name, t))
 
   collect-global : t@TValueString(v) -> t
   where not(<GlobalNames> t)

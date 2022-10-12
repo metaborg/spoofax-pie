@@ -3,6 +3,8 @@
 #include "GarbageCollector.h"
 
 extern uint8_t __LLVM_StackMaps[]; // NOLINT(bugprone-reserved-identifier)
+extern "C" void *_start;
+extern "C" void *etext;
 
 GarbageCollector::GarbageCollector(size_t mem_size) :
         parser(StackMapParser(llvm::ArrayRef<uint8_t>(__LLVM_StackMaps, SIZE_MAX))),
@@ -96,25 +98,44 @@ void GarbageCollector::scan_stack(void *fp) {
     }
 }
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "UnreachableCode"
+
 void GarbageCollector::relocate(uint8_t *&pointer) {
     if (old_space.contains(pointer)) {
-        auto *metadata = reinterpret_cast<ObjectMetadata *>(pointer) - 1;
+        uint8_t *base_pointer = pointer;
+        uint64_t offset = 0;
+        {
+            uint64_t value = *reinterpret_cast<uint64_t *>(pointer);
+            std::cerr << "Value is " << (void *) value << std::endl;
+            std::cerr << "Checking between " << &_start << " and " << &etext << std::endl;
+            if (value >= reinterpret_cast<uint64_t>(&_start) && value < reinterpret_cast<uint64_t>(&etext)) {
+                offset = sizeof(void *) * (*(reinterpret_cast<uint64_t *>(value) - 1));
+                std::cerr << "Function pointer detected, is a closure, offset: " << offset << std::endl;
+                base_pointer = pointer - offset;
+            }
+        }
+        auto *metadata = reinterpret_cast<ObjectMetadata *>(base_pointer) - 1;
         if (metadata->is_forwarded()) {
-            std::cerr << "\tAlready relocated " << (void *) pointer << " to " << (void *) metadata->forwarded_pointer
+            std::cerr << "\tAlready relocated " << (void *) base_pointer << " to "
+                      << (void *) metadata->forwarded_pointer
                       << std::endl;
-            pointer = metadata->forwarded_pointer;
+            pointer = metadata->forwarded_pointer + offset;
             return;
         }
         auto *new_pointer = static_cast<uint8_t *>(allocate_no_collect(metadata->size - sizeof(ObjectMetadata),
                                                                        metadata->tag));
-        memcpy(new_pointer, pointer, metadata->size - sizeof(ObjectMetadata));
-        std::cerr << "\tRelocating " << (void *) pointer << " to " << (void *) new_pointer << std::endl;
-        pointer = new_pointer;
+        memcpy(new_pointer, base_pointer, metadata->size - sizeof(ObjectMetadata));
+        std::cerr << "\tRelocating " << (void *) base_pointer << " to " << (void *) new_pointer << std::endl;
+        base_pointer = new_pointer;
+        pointer = base_pointer + offset;
         metadata->forwarded_pointer = new_pointer;
     } else {
         std::cerr << "\tNot relocating " << (void *) pointer << std::endl;
     }
 }
+
+#pragma clang diagnostic pop
 
 void GarbageCollector::visit_heap(GcSpace &space) {
     std::cerr << "  Heap:" << std::endl;

@@ -22,6 +22,9 @@ rules
   fix-invalid-elem : TFun(name, FUNCTION(types), args, body) -> TFun($[glb_[name]_fun], args', body)
   with
     args' := <zip; map(\(arg, type) -> $[[arg]_[<pp-type> type]] \)> (args, types)
+  fix-invalid-elem : TFunOffset(name, i, FUNCTION(types), args, body) -> TFun($[glb_[name]_fun], args', body)
+  with
+    args' := <zip; map(\(arg, type) -> $[[arg]_[<pp-type> type]] \)> (args, types)
   
   fix-invalid-elem : TExpPrimOp(op, type, args, result, next) -> TExpPrimOp(op, args, $[[result]_[<pp-type> type]], next)
   

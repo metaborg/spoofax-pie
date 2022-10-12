@@ -24,6 +24,7 @@ rules
   ; bottomup(try(convert-closure))
   ; replace-all-funtypes
   ; bottomup(try(convert-closure-call))
+  ; bottomup(try(annotate-offsets))
   ; extract-funs
   
   mark-non-escaping : t@TExpFix(funs, body) -> t'
@@ -164,3 +165,10 @@ rules
      \TExpApp(fun, args) -> TExpApp(fun, <x> args)\
   <+ \TValueVar(v, FUNCTION(_)) -> TValueVar(v, CLOSURE())\
   )))
+  
+  annotate-offsets : TExpFix(funs, body) -> TExpFix(funs', body)
+  with
+    let annotate-offset(|i) = \TFun(x, type, args, body) -> TFunOffset(x, <int-to-string> i, type, args, body)\ in
+      funs' := <nmap(annotate-offset|0)> funs
+    end
+

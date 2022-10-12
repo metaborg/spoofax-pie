@@ -35,6 +35,16 @@ rules
   ; otherblocks := <bagof-Blocks> ()
   ; blocks := [mainblock|otherblocks]
   |}
+  
+  select-function : TFunOffset(name, offset, FUNCTION(argTypes), args, body) ->
+    FunDef(Private(), TailCConv(), Void(), Constant(name), args', [NoUnwind(), GCLeafFunction(), GC("\"statepoint-example\""), Prefix(TypedAtom(Int64(), Literal(Int(offset))))], blocks)
+  with {| Blocks
+  : args' := <select-args> (argTypes, args)
+  ; (stmts, term) := <select-exp> body
+  ; mainblock := Block(NoLabel(), stmts, term)
+  ; otherblocks := <bagof-Blocks> ()
+  ; blocks := [mainblock|otherblocks]
+  |}
 
   select-args = zip ; map(\(type, arg) -> ParamNamed(<get-type> type, Variable(arg), [])\)
 
