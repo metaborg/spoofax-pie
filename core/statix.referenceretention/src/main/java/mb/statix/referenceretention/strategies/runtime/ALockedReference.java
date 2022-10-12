@@ -59,7 +59,7 @@ public abstract class ALockedReference extends AbstractApplTerm {
     }
 
     @Override public String toString() {
-        return super.toString();
+        return "\uD83D\uDD12" + super.toString();
     }
 
 }

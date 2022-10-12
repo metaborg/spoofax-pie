@@ -82,6 +82,25 @@ public interface Seq<T> extends AutoCloseable {
     }
 
     /**
+     * Returns a lazy sequence with the specified elements that are not null.
+     *
+     * This is an initial operation.
+     *
+     * @param elements the elements in the sequence, each of which may be {@code null}
+     * @param <T> the type of values in the sequence (covariant)
+     * @return the sequence, excluding the elements that were {@code null}
+     */
+    @SafeVarargs static <T> Seq<T> ofNotNull(@Nullable T... elements) {
+        Objects.requireNonNull(elements, "'elements' must not be null.");
+        final ArrayList<T> nonNullElements = new ArrayList<>(elements.length);
+        for (T element : elements) {
+            if (element != null) nonNullElements.add(element);
+        }
+        //noinspection unchecked
+        return Seq.<T>of(nonNullElements.toArray((T[]) new Object[0]));
+    }
+
+    /**
      * Returns a lazy sequence that returns a sequence from an iterable.
      *
      * This is an initial operation.

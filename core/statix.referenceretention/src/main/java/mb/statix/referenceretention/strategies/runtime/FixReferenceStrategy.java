@@ -3,18 +3,19 @@ package mb.statix.referenceretention.strategies.runtime;
 import mb.nabl2.terms.IApplTerm;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
-import mb.statix.codecompletion.SolverState;
+import mb.nabl2.terms.build.TermBuild;
 import mb.statix.constraints.CEqual;
 import mb.tego.sequences.Seq;
-import mb.tego.strategies.NamedStrategy1;
 import mb.tego.strategies.NamedStrategy3;
 import mb.tego.strategies.Strategy1;
 import mb.tego.strategies.runtime.TegoEngine;
+import mb.tego.tuples.Pair;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collections;
 
-public final class FixReferenceStrategy extends NamedStrategy3<ReferenceRetentionContext, ITermVar, ReferenceRetentionPlaceholderDescriptor, SolverState, Seq<SolverState>> {
+public final class FixReferenceStrategy extends NamedStrategy3<RRContext, ITermVar, RRPlaceholderDescriptor, RRSolverState, Seq<RRSolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final FixReferenceStrategy instance = new FixReferenceStrategy();
@@ -32,20 +33,20 @@ public final class FixReferenceStrategy extends NamedStrategy3<ReferenceRetentio
     @Override
     public String getParamName(int index) {
         switch (index) {
-            case 0: return "v";
-            case 1: return "visitedInjections";
+            case 0: return "ctx";
+            case 1: return "v";
             case 2: return "descriptor";
             default: return super.getParamName(index);
         }
     }
 
     @Override
-    public Seq<SolverState> evalInternal(
+    public Seq<RRSolverState> evalInternal(
         TegoEngine engine,
-        ReferenceRetentionContext ctx,
+        RRContext ctx,
         ITermVar v,
-        ReferenceRetentionPlaceholderDescriptor descriptor,
-        SolverState input
+        RRPlaceholderDescriptor descriptor,
+        RRSolverState input
     ) {
         return eval(engine, ctx, v, descriptor, input);
     }
@@ -60,165 +61,102 @@ public final class FixReferenceStrategy extends NamedStrategy3<ReferenceRetentio
      * @param input the input solver state
      * @return a lazy sequence of solver states
      */
-    public static Seq<SolverState> eval(
+    public static Seq<RRSolverState> eval(
         TegoEngine engine,
-        ReferenceRetentionContext ctx,
+        RRContext ctx,
         ITermVar v,
-        ReferenceRetentionPlaceholderDescriptor descriptor,
-        SolverState input
+        RRPlaceholderDescriptor descriptor,
+        RRSolverState input
     ) {
-        /*
-        let subterm: ITerm = descriptor.ast in
-        let reference: LockedReference? = <as[LockedReference]> subterm in  // TODO: Get reference if it is a LockedReference
-        if reference then
-            // Try to fix the reference, first by trying a qualified reference
-            let qreference: ITerm = qualifyReference(reference, descriptor.context) in
-            <first> (
-                // Either try the qualified reference,
-                let newAst = input.union(v to qreference) in
-                let newState = <solve> newAst in
-                let newDeclaration = <get-declaration(newState)> qreference in
-                newDeclaration; ?reference.declaration
-            ,
-                // Or try the unqualified reference,
-                // and pick the first that succeeds
-                let newAst = input.union(v to reference) in
-                let newState = <solve> newAst in
-                let newDeclaration = <get-declaration(newState)> qreference in
-                newDeclaration; ?reference.declaration
-            )
-        else
-            // Unwrap
-            TODO()
-         */
         // Get all the strategies at the start
-        final Strategy1<ITerm, ITerm, @Nullable ITerm> qualifyReference = ctx.getQualifyReferenceStrategy();
+        final NewPlaceholderStrategy newPlaceholder = NewPlaceholderStrategy.getInstance();
+        final Strategy1<ITerm, LockedReference, @Nullable ITerm> qualifyReference = ctx.getQualifyReferenceStrategy();
 
-        final ITerm ast = descriptor.getAst();
-        final @Nullable LockedReference reference = (ast instanceof LockedReference ? (LockedReference)ast : null);
-        if (reference != null) {
-            // TODO: Use apply()
-            final @Nullable ITerm qreference = qualifyReference.evalInternal(engine, descriptor.getContext(), reference.getTerm());
-            if (qreference == null) throw new IllegalStateException("qualifyReference returned null");   // TODO: Handle this case, return null?
-            // Try the qualified reference and, if it succeeds, get its declaration
-            // Compare the declaration to the expected declaration
-            // Otherwise, if this comparison fails,
-            // Try the unqualified reference and, if it succeeds, get its declaration
-            // Compare the declaration to the expected declaration
-            // Otherwise, if this comparison fails,
-            // Fail.
-            // TODO
-        } else {
-            // Unwrap
-            final @Nullable IApplTerm applTerm = (ast instanceof IApplTerm ? (IApplTerm)ast : null);
-            if (applTerm != null) {
-                // Replace the subterms of applTerm with placeholders
-                // and union v |-> applTerm (with the placeholders)
-                // and store the placeholder mapping
-                // TODO
+        // (term, context) <- descriptor,
+        final ITerm term = descriptor.getTerm();
+        final @Nullable ITerm context = descriptor.getContext();
+        if (term instanceof LockedReference) {
+            if (context != null) {
+                // The term is a locked reference with a context,
+                // so we try both the qualified and unqualified reference.
+                // "[[ r | c ]]" = { "x.[[ r |]]" , "[[ r |]]" }
+                final @Nullable LockedReference reference = (LockedReference)term;
+                final @Nullable ITerm qreference = engine.eval(qualifyReference, descriptor.getContext(), reference);
+                @Nullable RRSolverState newStateQ = null;    // The state for the qualified reference "x.[[r |]]"; or `null` when it could not be constructed
+                if (qreference != null) {
+                    final Pair<IApplTerm, RRSolverState> newApplTermAndState = unwrap(engine, (IApplTerm)term, context, input);
+                    final IApplTerm newApplTerm = newApplTermAndState.component1();
+                    newStateQ = newApplTermAndState.component2();
+                    newStateQ = newStateQ.withUpdatedConstraints(
+                        Collections.singleton(new CEqual(v, newApplTerm)),
+                        Collections.emptySet()
+                    );
+                }
+                RRSolverState newStateUQ;            // The state for the unqualified reference "[[ r |]]"
+                {
+                    @Nullable final Pair<ITermVar, RRSolverState> newVarAndState = engine.eval(newPlaceholder, new RRPlaceholderDescriptor(reference, null /* No context */), input);
+                    final ITermVar newVar = newVarAndState.component1();
+                    final RRSolverState newState = newVarAndState.component2();
+                    newStateUQ = newState.withUpdatedConstraints(
+                        Collections.singleton(new CEqual(v, newVar)),
+                        Collections.emptySet()
+                    );
+                }
+                return Seq.ofNotNull(newStateQ, newStateUQ);
             } else {
-                // Union v |-> ast and be done
-                final SolverState newState = input.withUpdatedConstraints(
-                    Collections.singleton(new CEqual(v, ast)),
-                    Collections.emptySet()
-                );
+                // The term is a locked reference without a context.
+                // so we check whether it resolves correctly.
+                // "[[ r |]]" = "r" if r still resolves to the same declaration
+                throw new IllegalStateException("Not yet implemented!");
             }
+        } else if (term instanceof IApplTerm) {
+            // The term is a term application, so we unwrap it once
+            // "[[ T(a0, a1, .., an) | c ]]" -> "T( [[ a0 | c ]], [[ a1 | c ]], .., [[ an | c ]] )"
+            final Pair<IApplTerm, RRSolverState> newApplTermAndState = unwrap(engine, (IApplTerm)term, context, input);
+            final IApplTerm newApplTerm = newApplTermAndState.component1();
+            final RRSolverState newState = newApplTermAndState.component2();
+            final RRSolverState finalState = newState.withUpdatedConstraints(
+                Collections.singleton(new CEqual(v, newApplTerm)),
+                Collections.emptySet()
+            );
+            return Seq.of(finalState);
+        } else {
+            // The term is not a term application and not a locked reference
+            // "[[ t | _ ]]" -> "t"
+            final RRSolverState newState = input.withUpdatedConstraints(
+                Collections.singleton(new CEqual(v, term)),
+                Collections.emptySet()
+            );
+            return Seq.of(newState);
         }
-        // TODO
 
-        throw new IllegalStateException("Not implemented yet");
-    }
-
-}
-
-
-// Not used, replaced with ReferenceRetentionContext.qualifyReferenceStrategy
-final class QualifyReferenceStrategy extends NamedStrategy1<ITerm, ITerm, @Nullable ITerm> {
-
-    @SuppressWarnings({"rawtypes", "RedundantSuppression"})
-    private static final QualifyReferenceStrategy instance = new QualifyReferenceStrategy();
-    @SuppressWarnings({"unchecked", "unused", "RedundantCast", "RedundantSuppression"})
-    public static QualifyReferenceStrategy getInstance() { return (QualifyReferenceStrategy)instance; }
-
-    private QualifyReferenceStrategy() { /* Prevent instantiation. Use getInstance(). */ }
-
-    @Override
-    public String getName() {
-        return "qualifyReference";
-    }
-
-    @SuppressWarnings({"SwitchStatementWithTooFewBranches", "RedundantSuppression"})
-    @Override
-    public String getParamName(int index) {
-        switch (index) {
-            case 0: return "referenceContext";
-            default: return super.getParamName(index);
-        }
-    }
-
-    @Override
-    public @Nullable ITerm evalInternal(
-        TegoEngine engine,
-        ITerm referenceContext,
-        ITerm input
-    ) {
-        return eval(engine, referenceContext, input);
+        // Done!
     }
 
     /**
-     * Qualifies a reference.
+     * Takes a term application and unwraps it by recreating the term application
+     * but with placeholders for the subterms, and adds placeholder descriptors to
+     * the state for each subterm placeholder.
      *
      * @param engine the Tego engine
-     * @param referenceContext the context to qualify the reference with
-     * @param input the reference to qualify
-     * @return the qualified reference; or {@code null} when the reference cannot be qualified
+     * @param term the term application to unwrap
+     * @param state the starting state
+     * @return a tuple of the new term application and the new state
      */
-    public static @Nullable ITerm eval(
-        TegoEngine engine,
-        ITerm referenceContext,
-        ITerm input
-    ) {
-        throw new IllegalStateException("Not implemented.");
+    private static Pair<IApplTerm, RRSolverState> unwrap(TegoEngine engine, IApplTerm term, @Nullable ITerm context, RRSolverState state) {
+        final NewPlaceholderStrategy newPlaceholder = NewPlaceholderStrategy.getInstance();
+        RRSolverState newState = state;
+        final ArrayList<ITermVar> newSubterms = new ArrayList<>();
+        for (ITerm a: term.getArgs()) {
+            // fold(newPlaceholder) over the arguments
+            @Nullable final Pair<ITermVar, RRSolverState> newVarAndState = engine.eval(newPlaceholder, new RRPlaceholderDescriptor(a, context), newState);
+            final ITermVar newVar = newVarAndState.component1();
+            newState = newVarAndState.component2();
+            newSubterms.add(newVar);
+        }
+        final IApplTerm newApplTerm = TermBuild.B.newAppl(term.getOp(), newSubterms);
+        return Pair.of(newApplTerm, newState);
     }
+
 }
 
-
-
-
-
-/*
-Fix references
-==============
-
-Input: an AST with metavariables instead of placeholders,
-and for each placeholder, a ReferenceRetentionPlaceholderDescriptor
-describing the placeholder.
-
-Output: an AST with metavariables replaced by placeholders,
-but likely less metavariables than before and most (all?) placeholders fixed.
-
-Algorithm:
-
-// Stratego strategies:
-@Stratego("qualify-reference")
-external def qualifyReference(reference: ITerm, context: ITerm): ITerm
-
-external def as[T](term: ITerm): T?
-
-def T.try[T](f: T.() -> T?): T = f <+ id
-
-def fixReferences(ast: ITerm, descriptors: Map<ITermVar, ReferenceRetentionPlaceholderDescriptor>): ITerm =
-
-    let ast' = fixReferences(ast, descriptors) in
-    let ast'' = fixReferences(ast', descriptors) in
-    ast''
-
-/// Fix a placeholder reference.
-///
-/// @param v the placeholder variable
-/// @param descriptor the descriptor for the placeholder
-/// @return the fixed reference; or `null` if it could not be fixed
-def fixReference(input: SolverState, v: ITermVar, descriptor: ReferenceRetentionPlaceholderDescriptor): ITerm? =
-
-
- */
