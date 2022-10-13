@@ -12,6 +12,7 @@ GarbageCollector::GarbageCollector(size_t mem_size) :
 }
 
 GarbageCollector::~GarbageCollector() {
+    std::cerr << "Last collection" << std::endl;
     collect_fp(nullptr);
     assert(old_space.free_ptr == old_space.start);
 }
@@ -107,8 +108,6 @@ void GarbageCollector::relocate(uint8_t *&pointer) {
         uint64_t offset = 0;
         {
             uint64_t value = *reinterpret_cast<uint64_t *>(pointer);
-            std::cerr << "Value is " << (void *) value << std::endl;
-            std::cerr << "Checking between " << &_start << " and " << &etext << std::endl;
             if (value >= reinterpret_cast<uint64_t>(&_start) && value < reinterpret_cast<uint64_t>(&etext)) {
                 offset = sizeof(void *) * (*(reinterpret_cast<uint64_t *>(value) - 1));
                 std::cerr << "Function pointer detected, is a closure, offset: " << offset << std::endl;
@@ -155,7 +154,7 @@ void GarbageCollector::visit_heap(GcSpace &space) {
                 break;
             }
             case RECORD: {
-                auto &map = *reinterpret_cast<std::map<std::string, int64_t> *>(metadata + 1);
+                auto &map = **reinterpret_cast<std::map<std::string, int64_t> **>(metadata + 1);
                 for (auto &item: map) {
                     relocate(reinterpret_cast<uint8_t *&>(item.second));
                 }
@@ -183,7 +182,8 @@ void GarbageCollector::update_finalizers(GcSpace &oldSpace) {
         if (finalizer.object_metadata->is_forwarded()) {
             std::cerr << "Updating reference from " << (void *) finalizer.object_metadata << " to "
                       << (void *) finalizer.object_metadata->forwarded_pointer << std::endl;
-            finalizer.object_metadata = reinterpret_cast<ObjectMetadata *>(finalizer.object_metadata->forwarded_pointer);
+            finalizer.object_metadata =
+                    reinterpret_cast<ObjectMetadata *>(finalizer.object_metadata->forwarded_pointer) - 1;
         }
         if (finalizer.is_in_space(oldSpace)) {
             std::cerr << "Object abandoned in old space, finalizing" << std::endl;

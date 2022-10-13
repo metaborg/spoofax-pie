@@ -26,7 +26,7 @@ rules
   ; bottomup(try(convert-closure-call))
   ; bottomup(try(annotate-offsets))
   ; extract-funs
-  
+
   mark-non-escaping : t@TExpFix(funs, body) -> t'
   where <fix-is-non-escaping> t
   with
@@ -42,13 +42,13 @@ rules
 //    else
 //      t' := <convert-closure> t
 //    end
-  
+
   fix-is-non-escaping : t@TExpFix(funs, e) -> ()
   where <map(\TFun(name, _, _, _) -> (name, t)\ ; fun-is-non-escaping)> funs
-  
+
   fun-is-non-escaping : (name, body) -> ()
   where not(oncetd(not(?TExpApp(TValueVar(name, type), _)) ; one(?TValueVar(name, type))))
-  
+
   convert-non-escaping : t@TExpFix(funs, exp) -> t'
   where <fix-is-non-escaping> t
   with
@@ -64,7 +64,7 @@ rules
   ; args' := <conc> (args, freenames)
   ; types' := <conc; map(try(replace-funtype-by-closure))> (types, freetypes)
   ; nonescaping-call(|name, FUNCTION(types'), freevars)
-  
+
   convert-closure : t@TExpFix(funs, exp) -> t'
     where <not(fix-is-non-escaping)> t
     with
@@ -80,7 +80,7 @@ rules
       ; exp'' := TExpPrimOp("closure-new", CLOSURE(), <conc> (funvars, freevars), firstname, exp')
       ; t' := <topdown(try(ConvertCall))> TExpFix(funs', exp'')
       |}
-  
+
   nonescaping-call(|x, t', freevars) = rules(
     ConvertCall : TExpApp(TValueGlobal(x, t), vals) -> TExpApp(TValueGlobal(x, t'), <conc> (vals, freevars))
   )
@@ -114,12 +114,12 @@ rules
   with
     offset := <fun-get-index(|funs)> name
   ; n := TValueInt(<subti ; int-to-string> (idx, offset))
-  
+
   fun-get-index(|funs) : v -> n
   where n := <get-index0(?v)> funs
   var-get-index-type(|funs, vars) : v -> (n, <try(replace-funtype-by-closure)> type)
   where n := <addi> (<length> funs, <get-index0(?TValueVar(v, type))> vars)
-  
+
   find-free-vars(|usedVars) : TValueInt(_) -> []
   find-free-vars(|usedVars) : TValueString(_) -> []
   find-free-vars(|usedVars) : TValueGlobal(_, _) -> []
@@ -156,7 +156,7 @@ rules
     : exp' := <bottomup(try(collect-funs))> exp
     ; funs := <(bagof-Functions <+ ![])> ()
     |}
-  
+
   collect-funs : fix@TExpFix(funs, exp) -> exp
     with <map(\x -> x with rules(Functions :+ _ -> x)\)> funs
 
@@ -164,8 +164,9 @@ rules
   replace-all-funtypes = rec x(try(sometd(
      \TExpApp(fun, args) -> TExpApp(fun, <x> args)\
   <+ \TValueVar(v, FUNCTION(_)) -> TValueVar(v, CLOSURE())\
+  <+ \TExpPrimOp(name, FUNCTION(_), args, result, body) -> TExpPrimOp(name, CLOSURE(), <x> args, result, <x> body)\
   )))
-  
+
   annotate-offsets : TExpFix(funs, body) -> TExpFix(funs', body)
   with
     let annotate-offset(|i) = \TFun(x, type, args, body) -> TFunOffset(x, <int-to-string> i, type, args, body)\ in
