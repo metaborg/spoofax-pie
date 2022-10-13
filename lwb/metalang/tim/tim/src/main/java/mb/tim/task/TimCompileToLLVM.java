@@ -71,7 +71,8 @@ public class TimCompileToLLVM implements TaskDef<TimCompileToLLVM.Args, CommandF
                     final ResourcePath outputFilePath = file.appendToLeafExtension("ll");
                     final WritableResource outputFile = context.getWritableResource(outputFilePath);
                     outputFile.writeString(((IStrategoString)result).stringValue());
-                    context.provide(outputFile);
+//                    context.provide(outputFile);
+                    // TODO: Figure out how to get rid of the "hidden dependency" error
                     return CommandFeedback.of(ShowFeedback.showFile(outputFilePath));
                 } catch(StrategoException e) {
                     final StringBuilder errorSB = new StringBuilder();
