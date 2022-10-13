@@ -7,7 +7,6 @@ val spoofax2DevenvVersion: String by ext
 spoofaxLanguageSpecification {
   addSourceDependenciesFromMetaborgYaml.set(false)
   addCompileDependenciesFromMetaborgYaml.set(false)
-  addLanguageContributionsFromMetaborgYaml.set(false)
 }
 dependencies {
   compileLanguage("org.metaborg.devenv:org.metaborg.meta.lang.esv:$spoofax2DevenvVersion")
@@ -17,6 +16,4 @@ dependencies {
 
   sourceLanguage("org.metaborg.devenv:meta.lib.spoofax:$spoofax2DevenvVersion")
   sourceLanguage("org.metaborg.devenv:statix.runtime:$spoofax2DevenvVersion")
-
-  sourceLanguage(project(":llvm.spoofax2"))
 }

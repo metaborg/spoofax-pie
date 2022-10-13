@@ -1,0 +1,5 @@
+shared.defaultArtifactId=llvm
+shared.defaultClassPrefix=LLVM
+shared.defaultGroupId=org.metaborg
+shared.defaultPackageId=mb.llvm
+shared.defaultVersion=0.1.0

@@ -101,7 +101,8 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   isMultiFile(false)
 
   val showEvaluated = TypeInfo.of(taskPackageId, "TimShowEvaluated")
-  addTaskDefs(showEvaluated)
+  val compileToLLVM = TypeInfo.of(taskPackageId, "TimCompileToLLVM")
+  addTaskDefs(showEvaluated, compileToLLVM)
 
   val showEvaluatedCommand = CommandDefRepr.builder()
     .type(commandPackageId, showEvaluated.id() + "Command")
@@ -121,13 +122,32 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
     .enclosingProjectRequired()
     .buildItem()
 
+  val compileToLLVMCommand = CommandDefRepr.builder()
+    .type(commandPackageId, compileToLLVM.id() + "Command")
+    .taskDefType(compileToLLVM)
+    .argType(compileToLLVM.appendToId(".Args"))
+    .displayName("Compile file to LLVM")
+    .description("Compile the Tim file to LLVM IR.")
+    .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous)
+    .addAllParams(listOf(
+      ParamRepr.of("rootDirectory", TypeInfo.of("mb.resource.hierarchical", "ResourcePath"), true, ArgProviderRepr.enclosingContext(EnclosingCommandContextType.Project)),
+      ParamRepr.of("file", TypeInfo.of("mb.resource.hierarchical", "ResourcePath"), true, ArgProviderRepr.context(CommandContextType.File))
+    ))
+    .build()
+  val compileToLLVMCommandMenuItem = CommandActionRepr.builder()
+    .manualOnce(compileToLLVMCommand)
+    .fileRequired()
+    .enclosingProjectRequired()
+    .buildItem()
+
   val commands = listOf(
-    showEvaluatedCommand
+    showEvaluatedCommand,
+    compileToLLVMCommand
   )
   addAllCommandDefs(commands)
 
   val menuItems = listOf(
-    MenuItemRepr.menu("Run", listOf(showEvaluatedCommandMenuItem))
+    MenuItemRepr.menu("Run", listOf(showEvaluatedCommandMenuItem, compileToLLVMCommandMenuItem))
   )
   addAllMainMenuItems(menuItems)
   addAllEditorContextMenuItems(menuItems)

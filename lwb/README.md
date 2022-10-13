@@ -10,13 +10,19 @@ included build, as Gradle plugins are only available through included builds.
 .
 ├── metalang                      # Meta-languages
 │   ├── cfg                          # Compiler configuration meta-DSL
+|   ├── dynamix                      # Dynamix DSL
+|   ├── dynamix_runtime              # Runtime strategies for Dynamix
 │   ├── esv                          # Wrapper around Spoofax 2's ESV
+|   ├── llvm                         # Spoofax implementation of LLVM IR (target language of dynamix)
 │   ├── sdf3                         # Wrapper around Spoofax 2's SDF3
+|   ├── sdf3_ext_dynamix             # Signature generation for dynamix
 │   ├── sdf3_ext_statix              # Wrapper around Spoofax 2's sdf3.ext.statix, implementing Statix
 │                                      signature and injection implication/explication generation
 │   ├── spt                          # Wrapper around Spoofax 2's SPT
 │   ├── statix                       # Wrapper around Spoofax 2's Statix
 │   ├── stratego                     # Wrapper around Spoofax 2's Stratego 2 and incremental compiler
+|   ├── tim                          # Target intermediate language for Dynamix
+|   ├── tim_runtime                  # Runtime strategies for Tim
 ├── metalib                        # Meta-libraries (mimicking source dependencies)
 │   ├── libspoofax2                  # Wrapper around Spoofax 2's meta.lib.spoofax
 │   ├── libstatix                    # Wrapper around Spoofax 2's statix.runtime

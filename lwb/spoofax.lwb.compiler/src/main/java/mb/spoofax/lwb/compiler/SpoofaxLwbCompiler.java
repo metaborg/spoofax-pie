@@ -6,6 +6,7 @@ import mb.esv.EsvParticipant;
 import mb.gpp.GppParticipant;
 import mb.libspoofax2.LibSpoofax2Participant;
 import mb.libstatix.LibStatixParticipant;
+import mb.llvm.LLVMParticipant;
 import mb.log.dagger.LoggerComponent;
 import mb.pie.api.PieBuilder;
 import mb.pie.dagger.PieComponent;
@@ -138,6 +139,7 @@ public class SpoofaxLwbCompiler implements AutoCloseable {
         builder.registerParticipant(new StatixParticipant<>());
         builder.registerParticipant(new TimParticipant<>());
         builder.registerParticipant(new DynamixParticipant<>());
+        builder.registerParticipant(new LLVMParticipant<>());
 
         builder.registerParticipant(new Sdf3ExtStatixParticipant<>());
         builder.registerParticipant(new Sdf3ExtDynamixParticipant<>());

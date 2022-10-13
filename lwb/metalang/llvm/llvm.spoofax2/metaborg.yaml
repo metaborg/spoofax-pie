@@ -22,8 +22,6 @@ language:
     placeholder:
       prefix: "$"
   stratego:
-    enabled: true
-    format: jar
     args:
     - -la
     - stratego-lib

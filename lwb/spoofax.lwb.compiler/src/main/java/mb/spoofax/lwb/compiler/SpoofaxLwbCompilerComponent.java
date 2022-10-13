@@ -10,6 +10,7 @@ import mb.libspoofax2.LibSpoofax2Component;
 import mb.libspoofax2.LibSpoofax2ResourcesComponent;
 import mb.libstatix.LibStatixComponent;
 import mb.libstatix.LibStatixResourcesComponent;
+import mb.llvm.LLVMComponent;
 import mb.log.dagger.LoggerComponent;
 import mb.pie.api.TaskDef;
 import mb.pie.dagger.TaskDefsProvider;
@@ -57,6 +58,7 @@ import java.util.Set;
         StatixComponent.class,
         TimComponent.class,
         DynamixComponent.class,
+        LLVMComponent.class,
 
         Sdf3ExtStatixComponent.class,
         Sdf3ExtDynamixComponent.class,
@@ -94,6 +96,7 @@ public interface SpoofaxLwbCompilerComponent extends TaskDefsProvider, AutoClose
 
     DynamixComponent getDynamixComponent();
 
+    LLVMComponent getLLVMComponent();
 
     Sdf3ExtStatixComponent getSdf3ExtStatixComponent();
 

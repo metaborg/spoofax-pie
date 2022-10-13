@@ -32,6 +32,7 @@ dependencies {
   bundleImplementation(compositeBuild("dynamix_runtime.eclipse"))
   bundleImplementation(compositeBuild("tim.eclipse"))
   bundleImplementation(compositeBuild("tim_runtime.eclipse"))
+  bundleImplementation(compositeBuild("llvm.eclipse"))
   bundleImplementation(compositeBuild("sdf3_ext_statix.eclipse"))
   bundleImplementation(compositeBuild("sdf3_ext_dynamix.eclipse"))
   bundleImplementation(compositeBuild("spt.eclipse"))

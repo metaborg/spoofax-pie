@@ -1,4 +1,4 @@
-package llvm.spoofax2.strategies;
+package llvm.strategies;
 
 import org.strategoxt.lang.JavaInteropRegisterer;
 import org.strategoxt.lang.Strategy;

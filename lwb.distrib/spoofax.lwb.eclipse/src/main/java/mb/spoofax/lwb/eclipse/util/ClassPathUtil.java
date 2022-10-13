@@ -4,6 +4,7 @@ import io.github.classgraph.ClassGraph;
 import mb.common.util.ListView;
 import mb.dynamix_runtime.eclipse.DynamixRuntimeEclipseComponent;
 import mb.gpp.eclipse.GppEclipseParticipant;
+import mb.llvm.eclipse.LLVMEclipseComponent;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
 import mb.rv32im.eclipse.Rv32ImEclipseComponent;
@@ -52,6 +53,7 @@ public class ClassPathUtil {
             .addClassLoader(Rv32ImEclipseComponent.class.getClassLoader())
             .addClassLoader(DynamixRuntimeEclipseComponent.class.getClassLoader())
             .addClassLoader(TimRuntimeEclipseComponent.class.getClassLoader())
+            .addClassLoader(LLVMEclipseComponent.class.getClassLoader())
 
             .addClassLoader(Generated.class.getClassLoader()) // Artifact: javax.annotation:jsr250-api:1.0
 

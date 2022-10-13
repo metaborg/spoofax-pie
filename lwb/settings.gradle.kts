@@ -104,6 +104,11 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
   includeProject("tim_runtime.eclipse")
   includeProject("tim_runtime.spoofax2")
 }
+"metalang/llvm".run {
+  includeProject("llvm")
+  includeProject("llvm.eclipse")
+  includeProject("llvm.spoofax2")
+}
 "metalib/libspoofax2".run {
   includeProject("libspoofax2")
   includeProject("libspoofax2.eclipse")

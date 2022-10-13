@@ -1,6 +1,6 @@
 module Syntax
 
-imports 
+imports
 
   libspoofax/color/default
   completion/colorer/llvm-cc-esv
@@ -10,18 +10,17 @@ language
   table         : target/metaborg/sdf.tbl
   start symbols : Start
 
-  line comment  : "//"
-  block comment : "/*" * "*/"
+  line comment  : ";"
   fences        : [ ] ( ) { }
 
 menus
-  
+
   menu: "Syntax" (openeditor)
-    
+
     action: "Format"          = editor-format (source)
     action: "Show parsed AST" = debug-show-aterm (source)
 
 views
-  
+
   outline view: editor-outline (source)
     expand to level: 3
