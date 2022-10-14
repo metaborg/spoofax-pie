@@ -22,6 +22,7 @@ language:
     placeholder:
       prefix: "$"
   stratego:
+    enabled: true
     args:
     - -la
     - stratego-lib

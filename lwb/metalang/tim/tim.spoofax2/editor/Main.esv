@@ -12,4 +12,4 @@ imports
 language
 
   extensions : tim
-  provider : target/metaborg/stratego.jar
+  provider : target/metaborg/stratego.ctree
