@@ -10,26 +10,37 @@ rules
 
   fix-invalid-ast = bottomup(try(fix-invalid-elem))
 
-  fix-invalid-elem : TValueGlobal(x, t) -> TValueVar($[glb_[x]_[<pp-type> t]])
+  fix-invalid-elem : TValueGlobal(x, t) -> TValueVar($[glb_[x]])
   
-  fix-invalid-elem : TValueVar(x, t) -> TValueVar($[[x]_[<pp-type> t]])
+  fix-invalid-elem : TValueVar(x, t) -> TValueVar(x)
   
   fix-invalid-elem : TExpLet([], b) -> b
   fix-invalid-elem : TExpFix([], b) -> b
   
-  fix-invalid-elem : TBind(name, str) -> TBind($[glb_[name]_str], str)
+  fix-invalid-elem : TBind(name, str) -> TBind($[glb_[name]], str)
   
-  fix-invalid-elem : TFun(name, FUNCTION(types), args, body) -> TFun($[glb_[name]_fun], args', body)
+  fix-invalid-elem : TFun(name, FUNCTION(types), args, body) -> TTypedFun($[glb_[name]], types', args, body)
   with
-    args' := <zip; map(\(arg, type) -> $[[arg]_[<pp-type> type]] \)> (args, types)
-  fix-invalid-elem : TFunOffset(name, i, FUNCTION(types), args, body) -> TFun($[glb_[name]_fun], args', body)
+    types' := <map(type-to-ast)> types
+  fix-invalid-elem : TFunOffset(name, i, FUNCTION(types), args, body) -> TTypedFun($[glb_[name]], types', args, body)
   with
-    args' := <zip; map(\(arg, type) -> $[[arg]_[<pp-type> type]] \)> (args, types)
+    types' := <map(type-to-ast)> types
   
-  fix-invalid-elem : TExpPrimOp(op, type, args, result, next) -> TExpPrimOp(op, args, $[[result]_[<pp-type> type]], next)
+  fix-invalid-elem : TExpPrimOp(op, type, args, result, next) -> TExpTypedPrimOp(op, type', args, $[[result]], next)
+  with
+    type' := <type-to-ast> type
   
   pp-type : INT() -> "int"
   pp-type : STRING() -> "str"
   pp-type : FUNCTION(_) -> "fun"
   pp-type : CLOSURE() -> "clos"
   pp-type : _ -> "ptr"
+  
+  type-to-ast : INT() -> TIntT()
+  type-to-ast : STRING() -> TStringT()
+  type-to-ast : FUNCTION(ts) -> TFunctionT(<map(type-to-ast)> ts)
+  type-to-ast : REF(t) -> TRefT(<type-to-ast> t)
+  type-to-ast : ARRAY(t) -> TArrayT(<type-to-ast> t)
+  type-to-ast : RECORD(t) -> TRecordT(<type-to-ast> t)
+  type-to-ast : CLOSURE() -> TClosureT()
+  type-to-ast : ANY() -> TAnyT()

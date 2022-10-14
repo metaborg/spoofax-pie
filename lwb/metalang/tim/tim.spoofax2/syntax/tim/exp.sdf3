@@ -29,6 +29,11 @@ context-free syntax
     fun [TID]([{TID ", "}*]) =
       [TExp]
   ]
+  
+  TFun.TTypedFun = [
+    fun [TID]<[{TType ", "}*]>([{TID ", "}*]) =
+      [TExp]
+  ]
     
 context-free syntax // primitive operations
   TExp.TExpPrimOp = [

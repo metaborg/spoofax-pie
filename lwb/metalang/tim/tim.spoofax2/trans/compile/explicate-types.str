@@ -27,6 +27,10 @@ rules
   with
     type := <stx-get-ast-type(|analysis)> f
 
+  explicate-type(|analysis) : f@TTypedFun(x, _, args, body) -> TFun(x, type, args, body)
+  with
+    type := <stx-get-ast-type(|analysis)> f
+
   explicate-type(|analysis) : TExpPrimOp(name, args, result, body) -> TExpPrimOp(name, type, args, result, body)
   with
     type := <stx-get-ast-type(|analysis)> result

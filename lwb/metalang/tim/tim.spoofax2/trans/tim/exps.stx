@@ -85,6 +85,15 @@ rules
     declareVar(s, name, fnTy),
     texpOk(argS, body).
 
+  declareFun(s, fn@TTypedFun(name, Ts, argNames, body)) :- {argS argTys fnTy}
+    new argS, argS -P-> s,
+    typesOfTypes(Ts) == argTys,
+    declareFunArgs(argS, argNames) == argTys,
+    FUNCTION(argTys) == fnTy,
+    @fn.type := fnTy,
+    declareVar(s, name, fnTy),
+    texpOk(argS, body).
+
   declareFunArg : scope * TID -> TYPE
   declareFunArgs maps declareFunArg(*, list(*)) = list(*)
 
