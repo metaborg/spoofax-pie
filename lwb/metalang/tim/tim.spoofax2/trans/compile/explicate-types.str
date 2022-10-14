@@ -12,6 +12,7 @@ rules
   explicate-types : program -> program'
   with
     analysis := <stx-get-ast-analysis> program
+  ; <with(not(stx-analysis-has-errors)|"Analysis has errors")> analysis
   ; program' := <bottomup(try(preserve-annos(explicate-type(|analysis))))> program
   
   explicate-type(|analysis) : t@TValueVar(x) -> TValueVar(x, type)
@@ -27,6 +28,10 @@ rules
     type := <stx-get-ast-type(|analysis)> f
 
   explicate-type(|analysis) : TExpPrimOp(name, args, result, body) -> TExpPrimOp(name, type, args, result, body)
+  with
+    type := <stx-get-ast-type(|analysis)> result
+
+  explicate-type(|analysis) : TExpTypedPrimOp(name, _, args, result, body) -> TExpPrimOp(name, type, args, result, body)
   with
     type := <stx-get-ast-type(|analysis)> result
 

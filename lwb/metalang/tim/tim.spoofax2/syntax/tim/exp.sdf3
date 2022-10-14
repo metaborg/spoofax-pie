@@ -2,6 +2,7 @@ module tim/exp
 
 imports
   tim/common
+  tim/type
   
 context-free sorts TValue
 context-free syntax
@@ -35,6 +36,11 @@ context-free syntax // primitive operations
     [TExp]
   ]
   
+  TExp.TExpTypedPrimOp = [
+    #[TPRIM]<[TType]>([{TValue ", "}*]) => [TID];
+    [TExp]
+  ]
+  
   // does not produce a value and tail-calls (or terminates)
   TExp.TExpTerminatingPrimOp = [
     #[TPRIM]([{TValue ", "}*])
@@ -59,3 +65,4 @@ context-free syntax // sugar
 template options
   TID = keyword {reject} // ensure print and friends are parsed as primops and not calls
   TPRIM = keyword {reject}
+  tokenize : "<("

@@ -12,9 +12,10 @@ signature
     STRING : TYPE
     FUNCTION : list(TYPE) -> TYPE
     REF : TYPE -> TYPE
-    ARRAY : TYPE
-    RECORD : TYPE
+    ARRAY : TYPE -> TYPE
+    RECORD : TYPE -> TYPE
     CLOSURE : TYPE
+    ANY : TYPE
 
 signature
 

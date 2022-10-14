@@ -26,7 +26,7 @@ rules
     typeOfTValue(s, target) == T,
     T == FUNCTION(expectedArgTys) | error $[The target of a function application must be a function, [T] given.],
     typesOfTValues(s, args) == givenArgTys,
-    typesCoercibleTo(givenArgTys, expectedArgTys) | error $[Incompatible arguments passed to function application.].
+    typesCoercibleTo(givenArgTys, expectedArgTys) | error $[Incompatible arguments passed to function application.].  // TODO: bring back type coercion to functions, if somehow possible 
 
   texpOk(s, TExpFix(funs, body)) :- {funS bodyS}
     new funS, funS -P-> s,
@@ -40,8 +40,23 @@ rules
     new bodyS, bodyS -P-> bindS,
     texpOk(bodyS, body).
 
+  texpOk(s, TExpPrimOp(op@"array-new", args, x, rest)) :-
+    texpOk(s, TExpTypedPrimOp(op, TArrayT(TAnyT()), args, x, rest)).
+  texpOk(s, TExpPrimOp(op@"record-new", args, x, rest)) :-
+    texpOk(s, TExpTypedPrimOp(op, TRecordT(TAnyT()), args, x, rest)).
+  texpOk(s, TExpPrimOp(op@"ref-new", args, x, rest)) :-
+    texpOk(s, TExpTypedPrimOp(op, TRefT(TAnyT()), args, x, rest)).
   texpOk(s, TExpPrimOp(op, args, x, rest)) :- {T argTys s'}
     new s', s' -P-> s,
+    typesOfTValues(s, args) == argTys,
+    typeOfPrimOp(op, argTys) == T | error $[Illegal primitive operation.],
+    declareVar(s', x, T),
+    texpOk(s', rest),
+    @x.type := T.
+
+  texpOk(s, TExpTypedPrimOp(op, type, args, x, rest)) :- {T argTys s'}
+    new s', s' -P-> s,
+    typeOfType(type) == T,
     typesOfTValues(s, args) == argTys,
     typeOfPrimOp(op, argTys) == T | error $[Illegal primitive operation.],
     declareVar(s', x, T),
@@ -75,6 +90,7 @@ rules
 
   declareFunArg(s, name) = T :-
     @name.type := T,
+    T != ANY(),
     declareVar(s, name, T). // intentional ungrounded variable here
 
 rules
@@ -106,7 +122,8 @@ rules
   conditionalPrimOpOk("str-eq", [STRING(), STRING()]).
   conditionalPrimOpOk("str-neq", [STRING(), STRING()]).
 
-  typeOfPrimOp("print", [x]) = x.
+  typeOfPrimOp("print", [T]) = T :-
+    printable(T).
 
   typeOfPrimOp("int-neg", [INT()]) = INT().
   typeOfPrimOp("int-add", [INT(), INT()]) = INT().
@@ -119,23 +136,40 @@ rules
   typeOfPrimOp("str-length", [STRING()]) = INT().
   typeOfPrimOp("str-index", [STRING(), INT()]) = STRING().
 
-  typeOfPrimOp("array-new", _) = ARRAY().
-  typeOfPrimOp("array-write", [ARRAY(), INT(), T]) = T.
-  typeOfPrimOp("array-length", [ARRAY()]) = INT().
-  typeOfPrimOp("array-concat", [ARRAY(), ARRAY()]) = ARRAY().
-  typeOfPrimOp("array-tail", [ARRAY()]) = ARRAY().
+  typeOfPrimOp("array-new", Ts) = ARRAY(T) :-
+    typesCoercibleToOne(Ts, T) | error $[Types [Ts] do not match with array type [T]].
+  typeOfPrimOp("array-write", [ARRAY(T1), INT(), T2]) = T2 :-
+    typeCoercibleTo(T2, T1) | error $[The type [T2] is not assignable to an array of type [T1].].
+  typeOfPrimOp("array-length", [ARRAY(_)]) = INT().
+  typeOfPrimOp("array-concat", [ARRAY(T), ARRAY(T)]) = ARRAY(T).
+  typeOfPrimOp("array-concat", [ARRAY(INT()), ARRAY(T)]) = ARRAY(INT()) :-
+    T == INT() | error $[Cannot concat raw integer array with other array type].
+  typeOfPrimOp("array-concat", [ARRAY(T), ARRAY(INT())]) = ARRAY(INT()) :-
+    T == INT() | error $[Cannot concat raw integer array with other array type].
+  typeOfPrimOp("array-concat", [ARRAY(_), ARRAY(_)]) = ARRAY(ANY()).
+  typeOfPrimOp("array-tail", [ARRAY(T)]) = ARRAY(T).
 
-  typeOfPrimOp("record-new", _) = RECORD().
-  typeOfPrimOp("record-write", [RECORD(), STRING(), T]) = T.
+  typeOfPrimOp("record-new", _) = RECORD(_).
+  typeOfPrimOp("record-write", [RECORD(T1), STRING(), T2]) = T2 :-
+    typeCoercibleTo(T2, T1) | error $[The type [T2] is not assignable to a record of type [T1].].
 
-  typeOfPrimOp("ref-new", [T]) = REF(T).
-  typeOfPrimOp("ref-fetch", [REF(T)]) = T.
+  typeOfPrimOp("ref-new", [T1]) = REF(T2) :-
+    typeCoercibleTo(T1, T2) | error $[The type [T1] is not assignable to a reference of type [T2]].
+  typeOfPrimOp("ref-fetch", [REF(T1)]) = T2 :-
+    typeCoercibleTo(T1, T2) | error $[The type [T2] is not retrievable from a reference of type [T1]],
+    T2 != ANY().
   typeOfPrimOp("ref-store", [REF(T), T']) = T' :-
     typeCoercibleTo(T', T) | error $[The type [T'] is not assignable to a reference of type [T].].
 
   typeOfPrimOp("closure-new", _) = CLOSURE().
   typeOfPrimOp("closure-offset", [CLOSURE(), INT()]) = CLOSURE().
 
-  typeOfPrimOp("array-read", [ARRAY(), INT()]) = _. // intentionally unbound
-  typeOfPrimOp("record-read", [RECORD(), STRING()]) = _. // intentionally unbound
+//  typeOfPrimOp("array-read", [ARRAY(ANY()), INT()]) = _. // intentionally unbound
+  typeOfPrimOp("array-read", [ARRAY(T1), INT()]) = T2 :-
+    typeCoercibleTo(T1, T2),
+    T2 != ANY().
+//  typeOfPrimOp("record-read", [RECORD(ANY()), STRING()]) = _. // intentionally unbound
+  typeOfPrimOp("record-read", [RECORD(T1), STRING()]) = T2 :-
+    typeCoercibleTo(T1, T2),
+    T2 != ANY().
   typeOfPrimOp("closure-read", [CLOSURE(), INT()]) = _. // intentionally unbound

@@ -1,0 +1,18 @@
+module tim/type
+
+context-free sorts TType
+context-free syntax
+
+  TType.TIntT = <int>
+  TType.TStringT = <string>
+  TType.TFunctionT = [function<[{TType ", "}*]>]
+  TType.TRefT = [ref<[TType]>]
+  TType.TArrayT = [array<[TType]>]
+  TType.TRecordT = [record<[TType]>]
+  TType.TClosureT = [closure]
+  TType.TAnyT = <any>
+
+template options
+  TID = keyword {reject}
+  TPRIM = keyword {reject}
+  tokenize : "<"

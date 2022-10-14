@@ -2,6 +2,7 @@ module tim/types
 
 imports
   signatures/tim/common-sig
+  signatures/tim/type-sig
   
 signature
   sorts TYPE
@@ -10,15 +11,57 @@ signature
     STRING : TYPE
     FUNCTION : list(TYPE) -> TYPE
     REF : TYPE -> TYPE
-    ARRAY : TYPE
-    RECORD : TYPE
+    ARRAY : TYPE -> TYPE
+    RECORD : TYPE -> TYPE
     CLOSURE : TYPE
+    ANY : TYPE
     
 rules
+  typeOfType : TType -> TYPE
+  typesOfTypes maps typeOfType(list(*)) = list(*)
+  
+  typeOfType(TIntT()) = INT().
+  typeOfType(TStringT()) = STRING().
+  typeOfType(TFunctionT(Ts)) = FUNCTION(Ts') :-
+    Ts' == typesOfTypes(Ts).
+  typeOfType(TRefT(T)) = REF(T') :-
+    T' == typeOfType(T).
+  typeOfType(TArrayT(T)) = ARRAY(T') :-
+    T' == typeOfType(T).
+  typeOfType(TRecordT(T)) = RECORD(T') :-
+    T' == typeOfType(T).
+  typeOfType(TClosureT()) = CLOSURE().
+  typeOfType(TAnyT()) = ANY().
+  
+  typeNotAny : TYPE
+  typesNotAny maps typeNotAny(list(*))
+  typeNotAny(T) :- T != ANY().
+  
+  printable : TYPE
+  printable(INT()).
+  printable(STRING()).
+
   // whether first argument is compatible in a context where a second
   // argument is expected
   typeCoercibleTo : TYPE * TYPE
   typesCoercibleTo maps typeCoercibleTo(list(*), list(*))
+  typesCoercibleToOne maps typeCoercibleTo(list(*), *)
   
-  // todo
   typeCoercibleTo(T, T).
+//  typeCoercibleTo(REF(T1), REF(T2)) :- 
+//    elementCoercibleTo(T1, T2).
+//  typeCoercibleTo(ARRAY(T1), ARRAY(T2)) :- 
+//    elementCoercibleTo(T1, T2).
+//  typeCoercibleTo(RECORD(T1), RECORD(T2)) :- 
+//    elementCoercibleTo(T1, T2).
+  typeCoercibleTo(INT(), ANY()) :-
+    try { false } | note $[Boxing an integer].
+  typeCoercibleTo(ANY(), INT()) :-
+    try { false } | note $[Unboxing an integer].
+  typeCoercibleTo(T, ANY()).
+  typeCoercibleTo(ANY(), T).
+  
+  elementCoercibleTo : TYPE * TYPE
+  elementCoercibleTo(T, T).
+  elementCoercibleTo(T, ANY()) :-
+    T != INT().
