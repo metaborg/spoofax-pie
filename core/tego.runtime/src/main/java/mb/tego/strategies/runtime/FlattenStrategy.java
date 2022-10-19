@@ -2,31 +2,30 @@ package mb.tego.strategies.runtime;
 
 import mb.tego.sequences.Seq;
 import mb.tego.sequences.SeqBase;
+import mb.tego.strategies.NamedStrategy;
 import mb.tego.strategies.NamedStrategy1;
-import mb.tego.strategies.NamedStrategy2;
 import mb.tego.strategies.Strategy;
 import mb.tego.utils.ExcludeFromJacocoGeneratedReport;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * FlatMap strategy.
+ * Flatten strategy.
  * <p>
- * This wraps a strategy such that it can accept a sequence of values,
- * and flat-maps the results.
+ * This wraps a strategy and flattens the resulting sequence.
  *
  * @param <T> the type of input (contravariant)
  * @param <R> the type of output (covariant)
  */
-public final class FlatMapStrategy<T, R> extends NamedStrategy1<Strategy<T, Seq<R>>, Seq<T>, Seq<R>> {
+public final class FlattenStrategy<T, R> extends NamedStrategy1<Strategy<T, Seq<Seq<R>>>, T, Seq<R>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
-    private static final FlatMapStrategy instance = new FlatMapStrategy();
+    private static final FlattenStrategy instance = new FlattenStrategy();
     @SuppressWarnings({"unchecked", "unused", "RedundantCast", "RedundantSuppression"})
-    public static <T, R> FlatMapStrategy<T, R> getInstance() { return (FlatMapStrategy<T, R>)instance; }
+    public static <T, R> FlattenStrategy<T, R> getInstance() { return (FlattenStrategy<T, R>)instance; }
 
-    private FlatMapStrategy() { /* Prevent instantiation. Use getInstance(). */ }
+    private FlattenStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    public static <T, U, R> Seq<R> eval(TegoEngine engine, Strategy<T, Seq<R>> s, Seq<T> input) {
+    public static <T, U, R> Seq<R> eval(TegoEngine engine, Strategy<T, Seq<Seq<R>>> s, T input) {
         return new SeqBase<R>() {
 
             // Implementation if `yield` and `yieldBreak` could actually suspend computation
@@ -35,26 +34,28 @@ public final class FlatMapStrategy<T, R> extends NamedStrategy1<Strategy<T, Seq<
             private void computeNextCoroutine() throws InterruptedException {
                 // 0:
                 // 1:
-                while (input.next()) {
-                    // 2:
-                    final T t = input.getCurrent();
-                    final @Nullable Seq<R> rs = engine.eval(s, t);
+                final @Nullable Seq<Seq<R>> rss = engine.eval(s, input);
+                // 2:
+                while (rss != null && rss.next()) {
                     // 3:
+                    final @Nullable Seq<R> rs = rss.getCurrent();
+                    // 4:
                     while (rs != null && rs.next()) {
-                        // 4:
+                        // 5:
                         final R r = rs.getCurrent();
                         this.yield(r);
-                        // 5:
+                        // 6:
                     }
-                    // 6:
+                    // 7:
                 }
-                // 7:
+                // 8:
                 yieldBreak();
             }
 
             // STATE MACHINE
             private int state = 0;
             // LOCAL VARIABLES
+            private @Nullable Seq<Seq<R>> rss;
             private @Nullable Seq<R> rs;
 
             @Override
@@ -65,37 +66,40 @@ public final class FlatMapStrategy<T, R> extends NamedStrategy1<Strategy<T, Seq<
                             this.state = 1;
                             continue;
                         case 1:
-                            if (!input.next()) {
-                                this.state = 7;
-                                continue;
-                            }
+                            rss = engine.eval(s, input);
                             this.state = 2;
                             continue;
                         case 2:
-                            final T t = input.getCurrent();
-                            rs = engine.eval(s, t);
+                            if (rss == null || !rss.next()) {
+                                this.state = 8;
+                                continue;
+                            }
                             this.state = 3;
                             continue;
                         case 3:
-                            if (rs == null || !rs.next()) {
-                                this.state = 6;
-                                continue;
-                            }
+                            rs = rss.getCurrent();
                             this.state = 4;
                             continue;
                         case 4:
+                            if (rs == null || !rs.next()) {
+                                this.state = 7;
+                                continue;
+                            }
+                            this.state = 5;
+                            continue;
+                        case 5:
                             //noinspection ConstantConditions
                             final R r = rs.getCurrent();
                             this.yield(r);
-                            this.state = 5;
+                            this.state = 6;
                             return;
-                        case 5:
-                            this.state = 3;
-                            continue;
                         case 6:
-                            this.state = 1;
+                            this.state = 4;
                             continue;
                         case 7:
+                            this.state = 2;
+                            continue;
+                        case 8:
                             yieldBreak();
                             this.state = -1;
                             return;
@@ -108,13 +112,13 @@ public final class FlatMapStrategy<T, R> extends NamedStrategy1<Strategy<T, Seq<
     }
 
     @Override
-    public Seq<R> evalInternal(TegoEngine engine, Strategy<T, Seq<R>> s, Seq<T> input) {
+    public Seq<R> evalInternal(TegoEngine engine, Strategy<T, Seq<Seq<R>>> s, T input) {
         return eval(engine, s, input);
     }
 
     @Override
     public String getName() {
-        return "flatMap";
+        return "flatten";
     }
 
     @SuppressWarnings("SwitchStatementWithTooFewBranches") @Override

@@ -42,6 +42,12 @@ public final class Strategies {
         return FlatMapStrategy.<I, O>getInstance().apply(s);
     }
 
+    public static <I, O> Strategy<I, Seq<O>> flatten(
+        Strategy<I, Seq<Seq<O>>> s
+    ) {
+        return FlattenStrategy.<I, O>getInstance().apply(s);
+    }
+
     public static <I, O> Strategy<I, Seq<O>> single(
         Strategy<I, Seq<O>> s
     ) {
@@ -78,6 +84,24 @@ public final class Strategies {
         Strategy<T, Seq<T>> s
     ) {
         return FixSetStrategy.<T>getInstance().apply(s);
+    }
+
+    /**
+     * For each element {@code a} in {@code as}, executes the strategy {@code s(a)} on the input and returns a sequence of results,
+     * excluding those that returned {@code null}.
+     *
+     * @param as the elements
+     * @param s the strategy
+     * @return the sequence of results
+     * @param <A> the type of elements
+     * @param <T> the type of input
+     * @param <R> the type of results
+     */
+    public static <A, T, R> Strategy<T, Seq<R>> forEach(
+        Seq<A> as,
+        Strategy1<A, T, R> s
+    ) {
+        return ForEachStrategy.<A, T, R>getInstance().apply(as, s);
     }
 
     public static <T, R> Strategy<T, Seq<R>> ntl(
