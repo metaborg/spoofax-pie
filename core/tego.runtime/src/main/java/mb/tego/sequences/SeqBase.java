@@ -53,7 +53,7 @@ public abstract class SeqBase<T> implements Seq<T> {
 
     /**
      * Computes the next element for the sequence.
-     *
+     * <p>
      * This method should call either {@link #yield} to yield the next element,
      * or {@link #yieldBreak} to indicate the end of the sequence.
      */
@@ -61,10 +61,10 @@ public abstract class SeqBase<T> implements Seq<T> {
 
     /**
      * Indicates what the next element will be.
-     *
+     * <p>
      * Only one element can be the next element.
      * The caller must return from the method.
-     *
+     * <p>
      * NOTE: To call this function, you need to prefix it with {@code this}, thus {@code this.yield()}.
      * Unfortunately, calling just {@code yield()} is not allowed.
      *
@@ -78,7 +78,7 @@ public abstract class SeqBase<T> implements Seq<T> {
 
     /**
      * Indicates that the iterator is done.
-     *
+     * <p>
      * The iterator can only finish once.
      * The caller must return from the method.
      */

@@ -9,7 +9,7 @@ public final class CollectionUtils {
 
     /**
      * Returns a list for the given iterable.
-     *
+     * <p>
      * This casts the iterable to a list, if possible.
      * Otherwise, this adds the elements from the iterable
      * to a new list.

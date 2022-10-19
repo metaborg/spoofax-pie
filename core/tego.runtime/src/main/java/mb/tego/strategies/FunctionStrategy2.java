@@ -6,7 +6,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * A function strategy that can be used to adapt a function call with three arguments as a strategy.
- *
+ * <p>
  * Use {@link StrategyExt#fun}.
  *
  * @param <A1> the type of the first argument (contravariant)

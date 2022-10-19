@@ -5,7 +5,7 @@ import java.util.function.Predicate;
 /**
  * A predicate functional interface that can be interrupted
  * (and throws an {@link InterruptedException} in this case).
- *
+ * <p>
  * To write a predicate that is always true, write {@code x -> true}.
  * To write a predicate that is always false, write {@code x -> false}.
  *

@@ -6,7 +6,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * where() strategy.
- *
+ * <p>
  * This returns the original input if the inner strategy succeeds; or {@code null} if the inner strategy failed.
  *
  * @param <T> the type of input and output (invariant)

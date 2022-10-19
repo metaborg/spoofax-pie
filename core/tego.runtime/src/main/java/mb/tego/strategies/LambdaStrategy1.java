@@ -5,7 +5,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * A lambda strategy that can be used to adapt a strategy with one argument.
- *
+ * <p>
  * Use {@link StrategyExt#lam}.
  *
  * @param <A1> the type of the first argument (contravariant)

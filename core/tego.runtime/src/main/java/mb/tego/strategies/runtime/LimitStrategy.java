@@ -9,7 +9,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Limiting strategy.
- *
+ * <p>
  * This returns at most the number of elements specified in the limit.
  *
  * @param <T> the type of input (contravariant)

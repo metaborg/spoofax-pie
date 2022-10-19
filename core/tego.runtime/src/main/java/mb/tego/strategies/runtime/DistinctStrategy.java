@@ -11,7 +11,7 @@ import java.util.HashSet;
 
 /**
  * Distinct strategy.
- *
+ * <p>
  * This strategy returns a lazy sequence that skips any elements it returned previously.
  *
  * @param <T> the type of input (contravariant)

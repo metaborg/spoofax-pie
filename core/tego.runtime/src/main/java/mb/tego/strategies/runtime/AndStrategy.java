@@ -9,7 +9,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Conjunction strategy.
- *
+ * <p>
  * This evaluates two strategies on the input, and returns the elements of the first sequence
  * and then the elements of the second sequence, but only if both succeed.
  *

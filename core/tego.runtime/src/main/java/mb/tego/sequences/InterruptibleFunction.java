@@ -5,7 +5,7 @@ import java.util.function.Function;
 /**
  * A function that accepts one argument and produces a result,
  * optionally throwing an {@link InterruptedException}.
- *
+ * <p>
  * To write a function that is identity, write {@code x -> x}.
  *
  * @param <T> the type of the argument to this function

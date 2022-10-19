@@ -37,7 +37,7 @@ public final class StrategyExt {
 
     /**
      * Creates a lambda strategy.
-     *
+     * <p>
      * This is a convenience method for using a {@link LambdaStrategy1} in place of a {@link Strategy1}.
      *
      * @param s the lambda strategy definition
@@ -52,7 +52,7 @@ public final class StrategyExt {
 
     /**
      * Creates a lambda strategy.
-     *
+     * <p>
      * This is a convenience method for using a {@link LambdaStrategy2} in place of a {@link Strategy2}.
      *
      * @param s the lambda strategy definition
@@ -68,7 +68,7 @@ public final class StrategyExt {
 
     /**
      * Creates a lambda strategy.
-     *
+     * <p>
      * This is a convenience method for using a {@link LambdaStrategy3} in place of a {@link Strategy3}.
      *
      * @param s the lambda strategy definition
@@ -85,7 +85,7 @@ public final class StrategyExt {
 
     /**
      * Creates a predicate strategy.
-     *
+     * <p>
      * This is a convenience method for using a {@link PredicateStrategy} in place of a {@link Strategy}.
      *
      * @param s the predicate strategy definition
@@ -98,7 +98,7 @@ public final class StrategyExt {
 
     /**
      * Creates a predicate strategy.
-     *
+     * <p>
      * This is a convenience method for using a {@link PredicateStrategy1} in place of a {@link Strategy1}.
      *
      * @param s the predicate strategy definition
@@ -112,7 +112,7 @@ public final class StrategyExt {
 
     /**
      * Creates a predicate strategy.
-     *
+     * <p>
      * This is a convenience method for using a {@link PredicateStrategy2} in place of a {@link Strategy2}.
      *
      * @param s the predicate strategy definition
@@ -127,7 +127,7 @@ public final class StrategyExt {
 
     /**
      * Creates a predicate strategy.
-     *
+     * <p>
      * This is a convenience method for using a {@link PredicateStrategy3} in place of a {@link Strategy3}.
      *
      * @param s the predicate strategy definition
@@ -143,7 +143,7 @@ public final class StrategyExt {
 
     /**
      * Creates a function call strategy.
-     *
+     * <p>
      * This is a convenience method for using a {@link FunctionStrategy} in place of a {@link Strategy}.
      *
      * @param s the predicate strategy definition
@@ -157,7 +157,7 @@ public final class StrategyExt {
 
     /**
      * Creates a function call strategy.
-     *
+     * <p>
      * This is a convenience method for using a {@link FunctionStrategy1} in place of a {@link Strategy1}.
      *
      * @param s the predicate strategy definition
@@ -172,7 +172,7 @@ public final class StrategyExt {
 
     /**
      * Creates a function call strategy.
-     *
+     * <p>
      * This is a convenience method for using a {@link FunctionStrategy2} in place of a {@link Strategy2}.
      *
      * @param s the predicate strategy definition
@@ -188,7 +188,7 @@ public final class StrategyExt {
 
     /**
      * Creates a function call strategy.
-     *
+     * <p>
      * This is a convenience method for using a {@link FunctionStrategy3} in place of a {@link Strategy3}.
      *
      * @param s the predicate strategy definition

@@ -22,7 +22,7 @@ public final class StreamUtils {
 
     /**
      * Performs a transformation on the whole contents of the stream.
-     *
+     * <p>
      * This is an intermediate terminating operation,
      * meaning that it evaluates the whole chain
      * and recreates a stream out of the result.
@@ -41,7 +41,7 @@ public final class StreamUtils {
 
     /**
      * Returns all subsets of the given size.
-     *
+     * <p>
      * This is an intermediate terminating operation,
      * meaning that it evaluates the whole chain
      * and recreates a stream out of the result.

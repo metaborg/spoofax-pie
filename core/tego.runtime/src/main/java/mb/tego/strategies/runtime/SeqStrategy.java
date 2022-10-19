@@ -9,7 +9,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Sequence strategy.
- *
+ * <p>
  * This evaluates one strategy on the input, and another on the results of the first.
  *
  * @param <T> the type of input (contravariant)

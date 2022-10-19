@@ -30,7 +30,7 @@ public final class Pair<T1, T2> implements Tuple, Map.Entry<T1, T2>, Serializabl
 
     /**
      * Creates a tuple from the specified iterable.
-     *
+     * <p>
      * This shadows the {@link Tuple#from} method.
      *
      * @param components the components in the tuple
@@ -75,7 +75,7 @@ public final class Pair<T1, T2> implements Tuple, Map.Entry<T1, T2>, Serializabl
 
     /**
      * Gets the first component in the tuple.
-     *
+     * <p>
      * This method is provided for compatibility with Kotlin destructuring declarations.
      *
      * @return the first component in the tuple (which may be {@code null})
@@ -86,7 +86,7 @@ public final class Pair<T1, T2> implements Tuple, Map.Entry<T1, T2>, Serializabl
 
     /**
      * Gets the second component in the tuple.
-     *
+     * <p>
      * This method is provided for compatibility with Kotlin destructuring declarations.
      *
      * @return the second component in the tuple (which may be {@code null})

@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 /**
  * A consumer functional interface that can be interrupted
  * (and throws an {@link InterruptedException} in this case).
- *
+ * <p>
  * To write a consumer that does nothing, write {@code x -> {}}.
  *
  * @param <T> the type of the argument to this function

@@ -7,7 +7,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * A strategy.
- *
+ * <p>
  * The {@link #evalInternal} method can be executed at any time, but no actual evaluations should take place.
  * The {@link Seq} returned by the {@link #evalInternal} method is a lazy sequence that, when iterated, will
  * compute its results. Multiple iterations will cause multiple computations, but all implementations
@@ -24,7 +24,7 @@ public interface Strategy<T, R> extends StrategyDecl, PrintableStrategy {
 
     /**
      * Evaluates the strategy.
-     *
+     * <p>
      * Typically, do <i>not</i> call this method directly.
      * This method is intended for use by a {@link TegoRuntime} implementation.
      * Instead, obtain a {@link TegoRuntime} implementation and call the

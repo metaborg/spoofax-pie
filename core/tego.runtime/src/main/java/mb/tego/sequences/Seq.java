@@ -14,14 +14,14 @@ import java.util.stream.Collectors;
 
 /**
  * A lazy sequence is a lazy computation of multiple values.
- *
+ * <p>
  * The values in a sequence can be {@code null}.
  * The sequence can only be iterated <i>once</i>.
- *
+ * <p>
  * The iterator is initially positioned <i>before</i> the first element,
  * and will be positioned <i>after</i> the last element once all elements
  * have been iterated.
- *
+ * <p>
  * The iterator should be closed when done, to release any resources it holds.
  *
  * @param <T> the type of values in the sequence (covariant)
@@ -30,11 +30,11 @@ public interface Seq<T> extends AutoCloseable {
 
     /**
      * Gets the current element in the iterator.
-     *
+     * <p>
      * Note that the behavior is undefined when the iterator is not positioned
      * on a valid element. In this case, this method may return {@code null},
      * may return another value, may return an old value, or throw an exception.
-     *
+     * <p>
      * Initially the iterator is positioned <i>before</i> the first element.
      *
      * @return the current element
@@ -43,7 +43,7 @@ public interface Seq<T> extends AutoCloseable {
 
     /**
      * Moves to the next element in the iterator, if any.
-     *
+     * <p>
      * If an exception occurs, the iterator is not positioned at a valid element.
      *
      * @return {@code true} when the iterator is now on a valid element;
@@ -54,7 +54,7 @@ public interface Seq<T> extends AutoCloseable {
 
     /**
      * Returns an empty lazy sequence.
-     *
+     * <p>
      * This is an initial operation.
      *
      * @param <T> the type of values in the sequence (covariant)
@@ -67,7 +67,7 @@ public interface Seq<T> extends AutoCloseable {
 
     /**
      * Returns a lazy sequence with the specified elements.
-     *
+     * <p>
      * This is an initial operation.
      *
      * @param elements the elements in the sequence
@@ -83,7 +83,7 @@ public interface Seq<T> extends AutoCloseable {
 
     /**
      * Returns a lazy sequence with the specified elements that are not null.
-     *
+     * <p>
      * This is an initial operation.
      *
      * @param elements the elements in the sequence, each of which may be {@code null}
@@ -102,14 +102,14 @@ public interface Seq<T> extends AutoCloseable {
 
     /**
      * Returns a lazy sequence that returns a sequence from an iterable.
-     *
+     * <p>
      * This is an initial operation.
-     *
+     * <p>
      * The returned sequence will not try to instantiate the iterable's iterator
      * until it is called for the first time. Note that while the sequence
      * is iterating, many collections do not allow modifications or the
      * sequence iterator will fail.
-     *
+     * <p>
      * To create a lazy sequence from the current state of the iterable,
      * call {@code asSeq(iterable.iterator())} instead.
      *
@@ -125,9 +125,9 @@ public interface Seq<T> extends AutoCloseable {
 
     /**
      * Returns a lazy sequence that returns a (possibly infinite) sequence by calling the given supplier.
-     *
+     * <p>
      * This is an initial operation.
-     *
+     * <p>
      * The sequence returns elements until the supplier throws an exception.
      * The thrown exception is propagated to the caller.
      * If the supplier throws {@link NoSuchElementException},
@@ -145,9 +145,9 @@ public interface Seq<T> extends AutoCloseable {
 
     /**
      * Returns a lazy sequence of at most one element that results from calling the given supplier once.
-     *
+     * <p>
      * This is an initial operation.
-     *
+     * <p>
      * The sequence returns one element unless the supplier throws an exception.
      * The thrown exception is propagated to the caller.
      * If the supplier throws {@link NoSuchElementException},
@@ -165,7 +165,7 @@ public interface Seq<T> extends AutoCloseable {
 
     /**
      * Turns an iterator into a lazy sequence.
-     *
+     * <p>
      * This is an intermediate operation.
      *
      * @param iterator the iterator to wrap
@@ -186,9 +186,9 @@ public interface Seq<T> extends AutoCloseable {
 
     /**
      * Turns a lazy sequence into an iterator.
-     *
+     * <p>
      * This is an intermediate operation.
-     *
+     * <p>
      * Note that any {@link InterruptedException} thrown in the unwrapped iterator
      * cause the thread's {@link Thread#isInterrupted()} to be set,
      * and throw a {@link RuntimeException}.
@@ -211,9 +211,9 @@ public interface Seq<T> extends AutoCloseable {
 
     /**
      * Collects the remaining elements of the sequence into a list.
-     *
+     * <p>
      * This is a terminal operation.
-     *
+     * <p>
      * Note that if this sequence has been (partially) iterated,
      * the resulting list starts at that point in this sequence.
      *
@@ -225,9 +225,9 @@ public interface Seq<T> extends AutoCloseable {
 
     /**
      * Collects the remaining elements of the sequence.
-     *
+     * <p>
      * This is a terminal operation.
-     *
+     * <p>
      * Note that if this sequence has been (partially) iterated,
      * the resulting sequence starts at that point in this sequence.
      * If this sequence is being iterated in between calls
@@ -250,9 +250,9 @@ public interface Seq<T> extends AutoCloseable {
 
     /**
      * Returns a sequence that contains only those elements that match the given predicate.
-     *
+     * <p>
      * This is an intermediate operation.
-     *
+     * <p>
      * Note that if this sequence has been (partially) iterated,
      * the resulting sequence starts at that point in this sequence.
      * If this sequence is being iterated in between calls
@@ -269,9 +269,9 @@ public interface Seq<T> extends AutoCloseable {
 
     /**
      * Returns a sequence that contains only those elements that match the given type.
-     *
+     * <p>
      * This is an intermediate operation.
-     *
+     * <p>
      * Note that if this sequence has been (partially) iterated,
      * the resulting sequence starts at that point in this sequence.
      * If this sequence is being iterated in between calls
@@ -288,9 +288,9 @@ public interface Seq<T> extends AutoCloseable {
 
     /**
      * Performs the given action on each element.
-     *
+     * <p>
      * This is a terminal operation.
-     *
+     * <p>
      * Note that if this sequence has been (partially) iterated,
      * the resulting sequence starts at that point in this sequence.
      * If this sequence is being iterated in between calls
@@ -308,9 +308,9 @@ public interface Seq<T> extends AutoCloseable {
 
     /**
      * Returns a sequence with the results from applying a transform function to each of the original elements.
-     *
+     * <p>
      * This is an intermediate operation.
-     *
+     * <p>
      * Note that if this sequence has been (partially) iterated,
      * the resulting sequence starts at that point in this sequence.
      * If this sequence is being iterated in between calls
@@ -329,9 +329,9 @@ public interface Seq<T> extends AutoCloseable {
     /**
      * Returns a sequence with the results from applying a transform function to each of the original elements,
      * returning only those elements that are not {@code null}.
-     *
+     * <p>
      * This is an intermediate operation.
-     *
+     * <p>
      * Note that if this sequence has been (partially) iterated,
      * the resulting sequence starts at that point in this sequence.
      * If this sequence is being iterated in between calls
@@ -350,9 +350,9 @@ public interface Seq<T> extends AutoCloseable {
     /**
      * Returns a sequence with the results from applying a transform function to each of the original elements,
      * returning only those elements that are present.
-     *
+     * <p>
      * This is an intermediate operation.
-     *
+     * <p>
      * Note that if this sequence has been (partially) iterated,
      * the resulting sequence starts at that point in this sequence.
      * If this sequence is being iterated in between calls
@@ -373,9 +373,9 @@ public interface Seq<T> extends AutoCloseable {
 
     /**
      * Returns up to a specified number of elements from this sequence.
-     *
+     * <p>
      * This is an intermediate operation.
-     *
+     * <p>
      * Note that if this sequence has been (partially) iterated,
      * the resulting sequence starts at that point in this sequence.
      * If this sequence is being iterated in between calls
@@ -393,9 +393,9 @@ public interface Seq<T> extends AutoCloseable {
     /**
      * Takes the last element from this sequence,
      * or throws an exception if there is none or if it is not the last element.
-     *
+     * <p>
      * This is a terminal operation.
-     *
+     * <p>
      * Note that if this sequence has been (partially) iterated,
      * the resulting sequence starts at that point in this sequence.
      * If this sequence is being iterated in between calls
@@ -414,7 +414,7 @@ public interface Seq<T> extends AutoCloseable {
 
     /**
      * Allows peeking to see if there is a next element.
-     *
+     * <p>
      * This is an intermediate operation.
      *
      * @return the peekable sequence
@@ -665,7 +665,7 @@ final class SuppliedSeq<T> extends SeqBase<T> {
 
 /**
  * Returns up to a specified number of elements from the given sequence.
- *
+ * <p>
  * Note that if the given sequence has been (partially) iterated,
  * this sequence starts at that point in the given sequence.
  * If the given sequence is being iterated in between calls to this sequence,
@@ -753,11 +753,11 @@ final class IterableSeq<T> extends SeqBase<T> {
 
 /**
  * Iterator wrapping a {@link Seq}.
- *
+ * <p>
  * Note that any {@link InterruptedException} thrown in the unwrapped sequence
  * cause the thread's {@link Thread#isInterrupted()} to be set,
  * and throw a {@link RuntimeException}.
- *
+ * <p>
  * The iterator should be closed when done, to release any resources it holds.
  *
  * @param <T> the type of values in the sequence (covariant)
@@ -819,7 +819,7 @@ final class BufferSeq<T> implements Seq<T>, PeekableSeq<T> {
 
     /**
      * Initializes a new instance of the {@link BufferSeq} class.
-     *
+     * <p>
      * Note that a maximum buffer size of 0
      * will cause only the current element to be buffered.
      *

@@ -2,7 +2,7 @@ package mb.tego.sequences;
 
 /**
  * A continuation.
- *
+ * <p>
  * This represents a state and computation, which may or may not be resumed.
  *
  * @param <T> the type of return value (contravariant)
@@ -11,7 +11,7 @@ public interface Continuation<T> {
 
     /**
      * Resumes the continuation with the given successful or failed result.
-     *
+     * <p>
      * A continuation cannot be resumed more than once.
      *
      * @param result the result to pass in
@@ -20,7 +20,7 @@ public interface Continuation<T> {
 
     /**
      * Resumes the continuation with the given result.
-     *
+     * <p>
      * A continuation cannot be resumed more than once.
      *
      * @param value the result to pass in
@@ -31,7 +31,7 @@ public interface Continuation<T> {
 
     /**
      * Resumes the continuation with the given exception.
-     *
+     * <p>
      * A continuation cannot be resumed more than once.
      *
      * @param exception the exception to pass in

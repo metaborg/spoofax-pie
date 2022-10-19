@@ -4,7 +4,7 @@ import mb.tego.strategies.StrategyDecl;
 
 /**
  * The Tego engine.
- *
+ * <p>
  * The methods in this interface are called by strategy implementations.
  */
 public interface TegoEngine extends TegoRuntime {

@@ -25,7 +25,7 @@ public interface PrintableStrategy extends StrategyDecl, Writable {
 
     /**
      * Gets the arity of the strategy.
-     *
+     * <p>
      * The arity of a basic strategy {@code T -> R} is 0.
      *
      * @return the arity of the strategy, excluding the input argument

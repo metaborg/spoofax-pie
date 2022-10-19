@@ -7,7 +7,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Try strategy.
- *
+ * <p>
  * This returns the results of the strategy, or the input if the strategy failed.
  *
  * @param <T> the type of input and output (invariant)

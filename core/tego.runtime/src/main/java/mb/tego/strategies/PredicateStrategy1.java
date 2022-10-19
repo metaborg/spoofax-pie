@@ -6,7 +6,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 /**
  * A predicate strategy that can be used to adapt a predicate call with two arguments as a strategy.
  * The strategy returns the input if the predicate succeeds; otherwise, the strategy fails.
- *
+ * <p>
  * Use {@link StrategyExt#pred}.
  *
  * @param <A1> the type of the first argument (contravariant)

@@ -10,7 +10,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * FlatMap strategy.
- *
+ * <p>
  * This wraps a strategy such that it can accept a sequence of values,
  * and flat-maps the results.
  *

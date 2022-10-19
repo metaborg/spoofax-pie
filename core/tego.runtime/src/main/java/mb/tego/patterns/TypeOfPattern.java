@@ -4,7 +4,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * A pattern that matches a particular type.
- *
+ * <p>
  * Note: due to Java type erasure, this cannot deal with generics.
  * Therefore, {@code List<Integer>} and {@code List<String>} are considered the same.
  *

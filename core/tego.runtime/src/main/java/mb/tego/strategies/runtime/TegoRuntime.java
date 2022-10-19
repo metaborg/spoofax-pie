@@ -10,7 +10,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * The Tego runtime.
- *
+ * <p>
  * The methods in this interface enable the evaluation of strategies.
  */
 public interface TegoRuntime {
@@ -27,7 +27,7 @@ public interface TegoRuntime {
 
     /**
      * Evaluates the strategy.
-     *
+     * <p>
      * This is a trampoline method.
      *
      * @param strategy the strategy

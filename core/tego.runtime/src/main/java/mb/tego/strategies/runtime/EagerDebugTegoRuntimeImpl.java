@@ -17,7 +17,7 @@ import javax.inject.Inject;
 
 /**
  * Implements the {@link TegoRuntime}.
- *
+ * <p>
  * This is used for debugging.
  */
 public final class EagerDebugTegoRuntimeImpl implements TegoRuntime, TegoEngine {

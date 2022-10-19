@@ -41,7 +41,7 @@ public interface Strategy3<A1, A2, A3, T, R> extends StrategyDecl, PrintableStra
 
     /**
      * Partially applies the strategy, providing the first argument.
-     *
+     * <p>
      * As an optimization, partially applying the returned strategy
      * will not wrap the strategy twice.
      *

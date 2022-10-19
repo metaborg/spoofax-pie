@@ -13,9 +13,9 @@ import java.util.HashSet;
 
 /**
  * Fix-set strategy.
- *
+ * <p>
  * This repeats applying the strategy, until the strategy fails or the resulting set no longer changes.
- *
+ * <p>
  * Implementation: note that we don't have to compute the whole set in advance. Given a value X,
  * if {@code <s> X} fails, X is returned. Otherwise, if {@code <s> X} returns X among its results,
  * it is returned. In both cases, the strategy is no longer applied to any future X.

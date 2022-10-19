@@ -6,10 +6,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Abstract class for a named strategy.
- *
+ * <p>
  * If the strategy is named, create a class extending {@link NamedStrategy}.
  * If the strategy is anonymous, create a lambda implementing {@link Strategy}.
- *
+ * <p>
  * Use {@link StrategyExt#def}.
  *
  * @param <A1> the type of the first argument (contravariant)

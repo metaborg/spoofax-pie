@@ -12,7 +12,7 @@ import java.util.ArrayDeque;
 
 /**
  * Repeat strategy.
- *
+ * <p>
  * This repeats applying the strategy, until the strategy fails.
  *
  * @param <T> the type of input and output (invariant)

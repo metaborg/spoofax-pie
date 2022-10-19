@@ -12,7 +12,7 @@ public interface StrategyDecl {
 
     /**
      * Gets the name of the strategy.
-     *
+     * <p>
      * When the strategy is anonymous,
      * the return value of {@link #getName()} may not be human-readable.
      *
@@ -31,7 +31,7 @@ public interface StrategyDecl {
 
     /**
      * Gets the arity of the strategy.
-     *
+     * <p>
      * The arity of a basic strategy {@code T -> R} is 0.
      *
      * @return the arity of the strategy, excluding the input argument
@@ -40,7 +40,7 @@ public interface StrategyDecl {
 
     /**
      * Gets whether this strategy is anonymous.
-     *
+     * <p>
      * A strategy is anonymous when it was created from a lambda or closure,
      * or when it is the application of a strategy.
      *
@@ -51,9 +51,9 @@ public interface StrategyDecl {
 
     /**
      * Evaluates the strategy.
-     *
+     * <p>
      * This is a trampoline method.
-     *
+     * <p>
      * Do <i>not</i> call this method directly.
      * This method is intended for use
      * when a more specific and type-safe method cannot be found.

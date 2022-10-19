@@ -9,7 +9,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * single(s) strategy.
- *
+ * <p>
  * This returns the results of the strategy if it returns exactly one result, otherwise the strategy fails.
  *
  * @param <T> the type of input (contravariant)
