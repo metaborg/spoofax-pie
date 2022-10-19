@@ -17,6 +17,11 @@ rules
   
   get-target-type : INT() -> Int64()
   get-target-type : FUNCTION(_) -> Pointer()
-  get-target-type : _ -> PointerAddrSpace("1")
   get-target-type : v -> t
   where t := <get-source-type ; get-target-type> v
+  get-target-type : _ -> PointerAddrSpace("1")
+  
+  get-target-elem-type : CLOSURE(types) -> Struct(<map(get-target-type)> types)
+  get-target-elem-type : ANONCLOSURE() -> Array("1", Pointer())
+  get-target-elem-type : v -> t
+  where t := <get-source-type ; get-target-elem-type> v

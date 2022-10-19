@@ -26,7 +26,8 @@ rules
     typeOfTValue(s, target) == T,
     T == FUNCTION(expectedArgTys) | error $[The target of a function application must be a function, [T] given.],
     typesOfTValues(s, args) == givenArgTys,
-    typesCoercibleTo(givenArgTys, expectedArgTys) | error $[Incompatible arguments passed to function application.].  // TODO: bring back type coercion to functions, if somehow possible 
+    typesCoercibleTo(givenArgTys, expectedArgTys) | error $[Incompatible arguments passed to function application.],
+    areNotAny(expectedArgTys). 
 
   texpOk(s, TExpFix(funs, body)) :- {funS bodyS}
     new funS, funS -P-> s,
@@ -188,6 +189,10 @@ rules
   typeOfPrimOp("record-read", [RECORD(T1), STRING()]) = T2 :-
     typeCoercibleTo(T1, T2),
     T2 != ANY().
-  typeOfPrimOp("closure-read", [ANONCLOSURE(), INT()]) = _ :-
-    try {false} | error $[Reading from an untyped closure is not allowed].
+  typeOfPrimOp("closure-read", [ANONCLOSURE(), INT()]) = _. // intentionally unbound
   typeOfPrimOp("closure-read", [CLOSURE(Ts), INT()]) = _. // intentionally unbound
+  
+  isNotAny : TYPE
+  areNotAny maps isNotAny(list(*))
+  isNotAny(T) :-
+    T != ANY().
