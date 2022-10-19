@@ -1,0 +1,14 @@
+module compile/util/bitfield
+
+imports
+
+  compile/ast
+
+rules
+
+  gen-bitfield(cond) : args -> value
+  with
+    bitarray := <map(cond < !1 + !0)> args
+  ; value := <bitarray-to-bitfield> bitarray
+  
+  bitarray-to-bitfield = foldr(!0, \(bit, value) -> <iori> (bit, <shli> (value, 1))\)

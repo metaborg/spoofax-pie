@@ -31,11 +31,11 @@ rules
     type' := <type-to-ast> type
   
   type-to-ast : INT() -> TIntT()
-  type-to-ast : BOXED(t) -> TBoxedT([<type-to-ast> t])
   type-to-ast : STRING() -> TStringT()
   type-to-ast : FUNCTION(ts) -> TFunctionT(<map(type-to-ast)> ts)
   type-to-ast : REF(t) -> TRefT(<type-to-ast> t)
   type-to-ast : ARRAY(t) -> TArrayT(<type-to-ast> t)
   type-to-ast : RECORD(t) -> TRecordT(<type-to-ast> t)
-  type-to-ast : CLOSURE() -> TClosureT()
+  type-to-ast : ANONCLOSURE() -> TAnonClosureT()
+  type-to-ast : CLOSURE(ts) -> TClosureT(<map(type-to-ast)> ts)
   type-to-ast : ANY() -> TAnyT()

@@ -13,7 +13,8 @@ signature
     REF : TYPE -> TYPE
     ARRAY : TYPE -> TYPE
     RECORD : TYPE -> TYPE
-    CLOSURE : TYPE
+    CLOSURE : list(TYPE) -> TYPE
+    ANONCLOSURE : TYPE
     ANY : TYPE
     
 rules
@@ -30,7 +31,9 @@ rules
     T' == typeOfType(T).
   typeOfType(TRecordT(T)) = RECORD(T') :-
     T' == typeOfType(T).
-  typeOfType(TClosureT()) = CLOSURE().
+  typeOfType(TAnonClosureT()) = ANONCLOSURE().
+  typeOfType(TClosureT(Ts)) = CLOSURE(Ts') :-
+    Ts' == typesOfTypes(Ts).
   typeOfType(TAnyT()) = ANY().
   
   typeNotAny : TYPE

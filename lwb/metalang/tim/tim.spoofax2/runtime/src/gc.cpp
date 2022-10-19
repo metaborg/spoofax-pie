@@ -13,8 +13,9 @@ void *gc_alloc(uint64_t size) {
     return garbageCollector.allocate(size, NOT_FORWARDED_FLAG);
 }
 
+[[maybe_unused]]
 void *gc_alloc_bitfield(uint64_t size, uint64_t bitfield) {
-    std::cerr << "GC_ALLOC" << std::endl;
+    std::cerr << "GC_ALLOC_BITFIELD" << std::endl;
     return garbageCollector.allocate_bitfield(size, bitfield);
 }
 

@@ -13,7 +13,8 @@ context-free syntax
   TType.TRefT = [ref<[TType]>]
   TType.TArrayT = [array<[TType]>]
   TType.TRecordT = [record<[TType]>]
-  TType.TClosureT = [closure]
+  TType.TAnonClosureT = [closure]
+  TType.TClosureT = [closure<[{TType ", "}*]>]
   TType.TAnyT = <any>
   TType.TBoxedT = [boxed<[TType]>]
   TType.TStructT = [{[{TStructMember ", "}*]}]

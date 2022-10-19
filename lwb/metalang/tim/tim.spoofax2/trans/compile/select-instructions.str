@@ -8,6 +8,8 @@ imports
   signatures/llvm-sig
   compile/ast
   compile/string
+  compile/util/bitfield
+  compile/util/type
 
 rules
 
@@ -46,9 +48,9 @@ rules
   ; blocks := [mainblock|otherblocks]
   |}
 
-  select-args = zip ; map(\(type, arg) -> ParamNamed(<get-type> type, Variable(arg), [])\)
+  select-args = zip ; map(\(type, arg) -> ParamNamed(<get-target-type> type, Variable(arg), [])\)
 
-  select-call-args = map(\arg -> TypedAtom(<get-type> arg, <select-value> arg)\)
+  select-call-args = map(\arg -> TypedAtom(<get-target-type> arg, <select-value> arg)\)
 
   create-block(|label) : body -> ()
   with
@@ -106,38 +108,44 @@ rules
 
   // References
   select-primop(|result) : ("ref-new", REF(t), [v]) ->
-    [ Assign(result, Call(
-        DefaultTail()
-      , DefaultCConv()
-      , <get-type> t
-      , ConstAtom(Constant("gc_alloc"))
-      , [TypedAtom(Int64(), Literal(Int("8")))]
-      , [], NoOperandBundles())
-      )
-    , Expression(Store(<select-typed-value> v, TypedAtom(<get-type> t, VarAtom(result))))
+    <concat>
+    [ 
+      [ Assign(result, Call(
+          DefaultTail()
+        , DefaultCConv()
+        , <get-target-type> REF(t)
+        , ConstAtom(Constant("gc_alloc"))
+        , [TypedAtom(Int64(), Literal(Int("8")))]
+        , [], NoOperandBundles())
+        )
+      , Expression(Store(<select-typed-value> v, TypedAtom(<get-target-type> REF(t), VarAtom(result))))
+      ]
     , markPointers
     ]
   with markPointers := <select-mark-pointer-call <+ ![]> (t, result)
   select-primop(|result) : ("ref-fetch", t, [ref]) ->
-    [ Assign(result, Load(<get-type> t, <select-typed-value> ref)) ]
+    [ Assign(result, Load(<get-target-type> t, <select-typed-value> ref)) ]
   select-primop(|result) : ("ref-store", t, [ref, v]) ->
     [ Expression(Store(<select-typed-value> v, <select-typed-value> ref)) ]
 
   // Records
   // TODO: restore functionality of arguments to record-new
   select-primop(|result) : ("record-new", RECORD(t), []) ->
-    [Assign(
-         result
-       , Call(
-           DefaultTail()
-         , DefaultCConv()
-         , Function(<get-type> t, [ParamUnnamed(Int64(), [])])
-         , ConstAtom(Constant("record_new"))
-         , [TypedAtom(Int64(), Literal(Int("0")))]
-         , []
-         , NoOperandBundles()
+    <concat>
+    [
+       [ Assign(
+           result
+         , Call(
+             DefaultTail()
+           , DefaultCConv()
+           , Function(<get-target-type> RECORD(t), [ParamUnnamed(Int64(), [])])
+           , ConstAtom(Constant("record_new"))
+           , [TypedAtom(Int64(), Literal(Int("0")))]
+           , []
+           , NoOperandBundles()
+           )
          )
-       )
+       ]
      , markPointers
      ]
   with markPointers := <select-mark-pointer-call <+ ![]> (t, result)
@@ -147,7 +155,7 @@ rules
 //     , Call(
 //         DefaultTail()
 //       , DefaultCConv()
-//       , Function(<get-type> t, [ParamUnnamed(Int64(), []), Vararg()])
+//       , Function(<get-target-type> t, [ParamUnnamed(Int64(), []), Vararg()])
 //       , ConstAtom(Constant("record_new"))
 //       , [TypedAtom(Int64(), Literal(Int(count)))|<select-call-args> args]
 //       , []
@@ -157,10 +165,10 @@ rules
 //  with count := <divi ; int-to-string> (<length> args, 2)
 
   select-funcall-primop : ("record-write", INT()) -> ("record_write", Void())
-  select-funcall-primop : ("record-read", t@INT()) -> ("record_read", <get-type> t)
+  select-funcall-primop : ("record-read", t@INT()) -> ("record_read", <get-target-type> t)
   
   select-funcall-primop : ("record-write", _) -> ("record_write_ptr", Void())
-  select-funcall-primop : ("record-read", t) -> ("record_read_ptr", <get-type> t)
+  select-funcall-primop : ("record-read", t) -> ("record_read_ptr", <get-target-type> t)
   
   // Arrays
   select-primop(|result) : ("array-new", ARRAY(t), args) ->
@@ -170,7 +178,7 @@ rules
       , Assign(result, Call(
           DefaultTail()
         , DefaultCConv()
-        , <get-type> t
+        , <get-target-type> ARRAY(t)
         , ConstAtom(Constant("gc_alloc"))
         , [TypedAtom(Int64(), VarAtom(sizevar))]
         , []
@@ -204,7 +212,7 @@ rules
   
   select-primop(|result) : ("array-read", t, [arr, index]) ->
     [ Assign(offset, GetElementPtr(VarType(Variable(".array_type")), [<select-typed-value> arr, TypedAtom(Int32(), Literal(Int("0"))), TypedAtom(Int32(), Literal(Int("1"))), <select-typed-value> index]))
-    , Assign(result, Load(<get-type> t, TypedAtom(PointerAddrSpace("1"), VarAtom(offset))))
+    , Assign(result, Load(<get-target-type> t, TypedAtom(PointerAddrSpace("1"), VarAtom(offset))))
     ]
   with
     offset := Variable(<newname> "offset")
@@ -223,8 +231,8 @@ rules
   with
     offset := Variable(<newname> "offset")
 
-  select-funcall-primop : ("array-concat", t) -> ("array_concat", <get-type> t)
-  select-funcall-primop : ("array-tail", t) -> ("array_tail", <get-type> t)
+  select-funcall-primop : ("array-concat", t) -> ("array_concat", <get-target-type> t)
+  select-funcall-primop : ("array-tail", t) -> ("array_tail", <get-target-type> t)
 
   // Closures
   select-primop(|result) : ("closure-new", _, args) ->
@@ -235,8 +243,8 @@ rules
           DefaultTail()
         , DefaultCConv()
         , PointerAddrSpace("1")
-        , ConstAtom(Constant("gc_alloc"))
-        , [TypedAtom(Int64(), VarAtom(sizevar))]
+        , ConstAtom(Constant("gc_alloc_bitfield"))
+        , [TypedAtom(Int64(), VarAtom(sizevar)), TypedAtom(Int64(), Literal(Int(bitfield)))]
         , []
         , NoOperandBundles()
         ))
@@ -250,6 +258,7 @@ rules
   ; let apply(|i) = array-new-store(|result, i) in
       stores := <nmap(apply|0) ; concat> args
     end
+  ; bitfield := <gen-bitfield(get-target-type ; ?PointerAddrSpace("1")) ; int-to-string> args
 
   closure-new-store(|arr, i) : v ->
     [ Assign(offset, GetElementPtr(Int64(), [arr', i']))
@@ -261,8 +270,8 @@ rules
   ; i' := TypedAtom(Int64(), Literal(Int(<int-to-string> i)))
   
   select-primop(|result) : ("closure-read", t, [arr, index]) ->
-    [ Assign(offset, GetElementPtr(Int64(), [<select-typed-value> arr, <select-typed-value> index]))
-    , Assign(result, Load(<get-type> t, TypedAtom(PointerAddrSpace("1"), VarAtom(offset))))
+    [ Assign(offset, GetElementPtr(Struct([Int64()]), [<select-typed-value> arr, <select-typed-value> index, TypedAtom(Int32(), Literal(Int("0")))]))
+    , Assign(result, Load(<get-target-type> t, TypedAtom(PointerAddrSpace("1"), VarAtom(offset))))
     ]
   with
     offset := Variable(<newname> "offset")
@@ -321,9 +330,9 @@ rules
     ]
   with
     tmp := Variable(<newname> "ptr")
-  select-funcall-primop : ("str-add", t) -> ("string_concat", <get-type> t)
-  select-funcall-primop : ("str-index", t) -> ("string_index", <get-type> t)
-  select-funcall-primop : ("int-to-string", t) -> ("int_to_string", <get-type> t)
+  select-funcall-primop : ("str-add", t) -> ("string_concat", <get-target-type> t)
+  select-funcall-primop : ("str-index", t) -> ("string_index", <get-target-type> t)
+  select-funcall-primop : ("int-to-string", t) -> ("int_to_string", <get-target-type> t)
 
   // Generic function call primops
   select-primop(|result) : (func, t, args) -> 
@@ -374,21 +383,12 @@ rules
 
   select-typed-value : x -> TypedAtom(type, atom)
   with
-    type := <get-type> x
+    type := <get-target-type> x
   ; atom := <select-value> x
 
   select-value : TValueVar(x, _) -> VarAtom(Variable(x))
   select-value : TValueGlobal(x, _) -> ConstAtom(Constant(x))
   select-value : TValueInt(x) -> Literal(Int(x))
   select-value : TValueString(x) -> Literal(String(x))
-
-  get-type : TValueVar(_, t) -> <get-type> t
-  get-type : TValueGlobal(_, t) -> <get-type> t
-  get-type : TValueInt(_) -> Int64()
-  get-type : TValueString(_) -> PointerAddrSpace("1")
-  
-  get-type : INT() -> Int64()
-  get-type : FUNCTION(_) -> Pointer()
-  get-type : _ -> PointerAddrSpace("1")
 
   type-is-gc-pointer = not(?INT()) ; not(?FUNCTION(_))

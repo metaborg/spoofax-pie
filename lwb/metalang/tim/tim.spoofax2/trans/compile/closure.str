@@ -7,6 +7,7 @@ imports
   compile/uniquify
   compile/ast
   compile/debug
+  compile/util/type
   pp
 
 rules
@@ -75,9 +76,11 @@ rules
       ; closure := <newname> "closure"
       ; let var-to-read-exp = var-to-read-op(|funnames, freevars) in
           (funvars, funs') := <map(convert-fun(var-to-read-exp)) ; unzip> funs
-        ; exp' := <foldr(!exp, \(name, c)-> <var-to-read-exp> (firstname, name, c)\)> restnames
+        ; exp' := <foldr(!exp, \(name, c)-> <var-to-read-exp> (firstname, name, c)\)> funnames
         end
-      ; exp'' := TExpPrimOp("closure-new", CLOSURE(), <conc> (funvars, freevars), firstname, exp')
+      ; elements := <conc> (funvars, freevars)
+      ; elemtypes := <map(get-source-type)> elements
+      ; exp'' := TExpPrimOp("closure-new", CLOSURE(elemtypes), elements, firstname, exp')
       ; t' := <topdown(try(ConvertCall))> TExpFix(funs', exp'')
       |}
 
@@ -86,11 +89,11 @@ rules
   )
 
   convert-closure-call : TExpApp(TValueVar(x, FUNCTION(t)), vals) ->
-    TExpPrimOp("closure-read", funtype, [TValueVar(x, CLOSURE()), TValueInt("0")], x', TExpApp(TValueVar(x', funtype), vals'))
+    TExpPrimOp("closure-read", funtype, [TValueVar(x, ANONCLOSURE()), TValueInt("0")], x', TExpApp(TValueVar(x', funtype), vals'))
   with
     x' := <newname> x
-  ; funtype := FUNCTION(<map(try(replace-funtype-by-closure))> [CLOSURE()|t])
-  ; vals' := [TValueVar(x, CLOSURE())|vals]
+  ; funtype := FUNCTION(<map(try(replace-funtype-by-closure))> [ANONCLOSURE()|t])
+  ; vals' := [TValueVar(x, ANONCLOSURE())|vals]
 
   convert-fun(var-to-read-exp|) : TFun(name, t, args, body) -> (TValueGlobal(name', t'), TFun(name', t', args', body'))
   with
@@ -99,17 +102,17 @@ rules
   ; freevars := <find-free-vars(|args')> body
   ; (freenames, freetypes) := <map(\TValueVar(n, t) -> (n, t)\); unzip> freevars
   ; body' := <foldr(!body, \(v, c) -> <var-to-read-exp> (name, v, c)\)> freenames
-  ; t' := <\FUNCTION(x) -> FUNCTION(<map(try(replace-funtype-by-closure))> [CLOSURE()|x])\> t
+  ; t' := <\FUNCTION(x) -> FUNCTION(<map(try(replace-funtype-by-closure))> [ANONCLOSURE()|x])\> t
   ; rules(
       ConvertCall : TExpApp(v@TValueVar(name, type), vals) -> TExpApp(TValueGlobal(name', t'), [v|vals])
     )
 
-  var-to-read-op(|funs, vars) : (name, v, c) -> TExpPrimOp("closure-offset", CLOSURE(), [TValueVar(name, CLOSURE()), n], v, c)
+  var-to-read-op(|funs, vars) : (name, v, c) -> TExpPrimOp("closure-offset", ANONCLOSURE(), [TValueVar(name, ANONCLOSURE()), n], v, c)
   where idx := <fun-get-index(|funs)> v
   with
     offset := <fun-get-index(|funs)> name
   ; n := TValueInt(<subti ; int-to-string> (idx, offset))
-  var-to-read-op(|funs, vars) : (name, v, c) -> TExpPrimOp("closure-read", type, [TValueVar(name, CLOSURE()), n], v, c)
+  var-to-read-op(|funs, vars) : (name, v, c) -> TExpPrimOp("closure-read", type, [TValueVar(name, ANONCLOSURE()), n], v, c)
   where (idx, type) := <var-get-index-type(|funs, vars)> v
   with
     offset := <fun-get-index(|funs)> name
@@ -160,11 +163,11 @@ rules
   collect-funs : fix@TExpFix(funs, exp) -> exp
     with <map(\x -> x with rules(Functions :+ _ -> x)\)> funs
 
-  replace-funtype-by-closure : FUNCTION(_) -> CLOSURE()
+  replace-funtype-by-closure : FUNCTION(_) -> ANONCLOSURE()
   replace-all-funtypes = rec x(try(sometd(
      \TExpApp(fun, args) -> TExpApp(fun, <x> args)\
-  <+ \TValueVar(v, FUNCTION(_)) -> TValueVar(v, CLOSURE())\
-  <+ \TExpPrimOp(name, FUNCTION(_), args, result, body) -> TExpPrimOp(name, CLOSURE(), <x> args, result, <x> body)\
+  <+ \TValueVar(v, FUNCTION(_)) -> TValueVar(v, ANONCLOSURE())\
+  <+ \TExpPrimOp(name, FUNCTION(_), args, result, body) -> TExpPrimOp(name, ANONCLOSURE(), <x> args, result, <x> body)\
   )))
 
   annotate-offsets : TExpFix(funs, body) -> TExpFix(funs', body)

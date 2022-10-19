@@ -176,8 +176,9 @@ rules
   typeOfPrimOp("ref-store", [REF(T), T']) = T' :-
     typeCoercibleTo(T', T) | error $[The type [T'] is not assignable to a reference of type [T].].
 
-  typeOfPrimOp("closure-new", _) = CLOSURE().
-  typeOfPrimOp("closure-offset", [CLOSURE(), INT()]) = CLOSURE().
+  typeOfPrimOp("closure-new", Ts) = CLOSURE(Ts).
+  typeOfPrimOp("closure-offset", [CLOSURE(_), INT()]) = ANONCLOSURE().
+  typeOfPrimOp("closure-offset", [ANONCLOSURE(), INT()]) = CLOSURE(_).
 
 //  typeOfPrimOp("array-read", [ARRAY(ANY()), INT()]) = _. // intentionally unbound
   typeOfPrimOp("array-read", [ARRAY(T1), INT()]) = T2 :-
@@ -187,4 +188,6 @@ rules
   typeOfPrimOp("record-read", [RECORD(T1), STRING()]) = T2 :-
     typeCoercibleTo(T1, T2),
     T2 != ANY().
-  typeOfPrimOp("closure-read", [CLOSURE(), INT()]) = _. // intentionally unbound
+  typeOfPrimOp("closure-read", [ANONCLOSURE(), INT()]) = _ :-
+    try {false} | error $[Reading from an untyped closure is not allowed].
+  typeOfPrimOp("closure-read", [CLOSURE(Ts), INT()]) = _. // intentionally unbound

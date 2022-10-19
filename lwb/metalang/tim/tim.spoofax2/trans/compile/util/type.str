@@ -1,0 +1,22 @@
+module compile/util/type
+
+imports
+
+  compile/ast
+  signatures/tim-sig
+  signatures/tim/-
+  signatures/llvm-sig
+  signatures/llvm/-
+
+rules
+
+  get-source-type : TValueVar(_, t) -> t
+  get-source-type : TValueGlobal(_, t) -> t
+  get-source-type : TValueInt(_) -> INT()
+  get-source-type : TValueString(_) -> STRING()
+  
+  get-target-type : INT() -> Int64()
+  get-target-type : FUNCTION(_) -> Pointer()
+  get-target-type : _ -> PointerAddrSpace("1")
+  get-target-type : v -> t
+  where t := <get-source-type ; get-target-type> v

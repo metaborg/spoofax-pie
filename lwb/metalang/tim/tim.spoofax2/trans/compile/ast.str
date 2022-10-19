@@ -14,7 +14,8 @@ signature
     REF : TYPE -> TYPE
     ARRAY : TYPE -> TYPE
     RECORD : TYPE -> TYPE
-    CLOSURE : TYPE
+    CLOSURE : list(TYPE) -> TYPE
+    ANONCLOSURE : TYPE
     ANY : TYPE
 
 signature

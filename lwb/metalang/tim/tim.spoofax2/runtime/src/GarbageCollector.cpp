@@ -139,9 +139,17 @@ void GarbageCollector::relocate(uint8_t *&pointer) {
             pointer = metadata->forwarded_pointer + offset;
             return;
         }
-        auto *new_pointer = static_cast<uint8_t *>(allocate_no_collect(metadata->size - sizeof(ObjectMetadata),
-                                                                       metadata->tag));
-        memcpy(new_pointer, base_pointer, metadata->size - sizeof(ObjectMetadata));
+        uint8_t *new_pointer;
+        if (metadata->has_flags(BITFIELD_FLAG)) {
+            uint32_t size;
+            size = metadata->get_bitfield_size();
+            new_pointer = static_cast<uint8_t *>(allocate_bitfield_no_collect(size, metadata->get_ptr_bitfield()));
+            memcpy(new_pointer, base_pointer, size);
+        } else {
+            new_pointer = static_cast<uint8_t *>(allocate_no_collect(metadata->size - sizeof(ObjectMetadata),
+                                                                     metadata->tag));
+            memcpy(new_pointer, base_pointer, metadata->size - sizeof(ObjectMetadata));
+        }
         std::cerr << "\tRelocating " << (void *) base_pointer << " to " << (void *) new_pointer << std::endl;
         base_pointer = new_pointer;
         pointer = base_pointer + offset;
@@ -159,36 +167,39 @@ void GarbageCollector::visit_heap(GcSpace &space) {
     uint8_t *scan_ptr = space.start;
     while (scan_ptr < space.free_ptr) {
         auto *metadata = reinterpret_cast<ObjectMetadata *>(scan_ptr);
-        if (~metadata->tag & NOT_FORWARDED_FLAG) {
+        if (!metadata->has_flags(NOT_FORWARDED_FLAG)) {
             assert(false);
         }
-        if (metadata->tag & BITFIELD_FLAG) {
-            scan_ptr += metadata->get_bitfield_size();
+        if (metadata->has_flags(BITFIELD_FLAG)) {
+            scan_ptr += metadata->get_bitfield_size() + sizeof(ObjectMetadata);
             uint64_t bitfield = metadata->get_ptr_bitfield();
-
+            std::cerr << "\tBitfield object" << std::endl;
             auto **pointers = reinterpret_cast<uint8_t **>(metadata + 1);
             for (; reinterpret_cast<uint8_t *>(pointers) < scan_ptr; pointers++) {
                 if (bitfield & 1) {
+                    std::cerr << "\t\tPointer object" << std::endl;
                     relocate(*pointers);
+                } else {
+                    std::cerr << "\t\tIgnoring non-pointer object" << std::endl;
                 }
                 bitfield >>= 1;
             }
         } else {
             scan_ptr += metadata->size;
-            if (metadata->tag & (RECORD_FLAG | POINTER_FLAG)) {
+            if (metadata->has_flags(RECORD_FLAG, POINTER_FLAG)) {
+                std::cerr << "\tPointerful record" << std::endl;
                 auto &map = **reinterpret_cast<std::map<std::string, int64_t> **>(metadata + 1);
                 for (auto &item: map) {
                     relocate(reinterpret_cast<uint8_t *&>(item.second));
                 }
-                std::cerr << "Pointerfull record" << std::endl;
-            } else if (metadata->tag & POINTER_FLAG) {
+            } else if (metadata->has_flags(POINTER_FLAG)) {
+                std::cerr << "\tPointerfull object" << std::endl;
                 auto **pointers = reinterpret_cast<uint8_t **>(metadata + 1);
                 for (; reinterpret_cast<uint8_t *>(pointers) < scan_ptr; pointers++) {
                     relocate(*pointers);
                 }
-                std::cerr << "Pointerfull object" << std::endl;
             } else {
-                std::cerr << "Pointerless object" << std::endl;
+                std::cerr << "\tPointerless object" << std::endl;
             }
         }
     }
@@ -252,4 +263,4 @@ void swap(GcSpace &one, GcSpace &other) {
     std::swap(one.free_ptr, other.free_ptr);
 }
 
-GarbageCollector garbageCollector = GarbageCollector(256);
+GarbageCollector garbageCollector = GarbageCollector(1024);

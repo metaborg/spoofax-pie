@@ -97,6 +97,17 @@ struct ObjectMetadata {
     inline uint64_t get_ptr_bitfield() const {
         return bitfield >> 8;
     }
+
+    template<typename... Ts>
+    [[nodiscard]]
+    inline bool has_flags(ObjectTag flag, Ts... args) {
+        return has_flags(flag) && has_flags(args...);
+    }
+
+    [[nodiscard]]
+    inline bool has_flags(ObjectTag flag) {
+        return bool(tag & flag);
+    }
 };
 
 struct FinalizerEntry {
@@ -206,7 +217,7 @@ public:
     [[nodiscard]]
     bool get_has_pointers(void *ptr) {
         auto *object = reinterpret_cast<ObjectMetadata *>(ptr) - 1;
-        return (object->tag & POINTER_FLAG) != 0;
+        return (object->has_flags(POINTER_FLAG)) != 0;
     }
 };
 
