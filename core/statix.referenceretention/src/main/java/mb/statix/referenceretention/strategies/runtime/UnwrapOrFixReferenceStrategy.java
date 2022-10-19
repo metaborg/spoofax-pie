@@ -15,6 +15,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 
+/**
+ * If the placeholder is a locked reference and has no context, this verifies that the reference still resolves
+ * to the locked reference's declaration. Otherwise, if the placeholder is a locked reference with a context,
+ * this creates alternatives where the name is qualified and unqualified and the placeholder has no context.
+ * Otherwise, if the placeholder is a term, this unwraps the term.
+ */
 public final class UnwrapOrFixReferenceStrategy extends NamedStrategy3<RRContext, ITermVar, RRPlaceholderDescriptor, RRSolverState, Seq<RRSolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
@@ -76,11 +82,11 @@ public final class UnwrapOrFixReferenceStrategy extends NamedStrategy3<RRContext
         final ITerm term = descriptor.getTerm();
         final @Nullable ITerm context = descriptor.getContext();
         if (term instanceof LockedReference) {
+            final @Nullable LockedReference reference = (LockedReference)term;
             if (context != null) {
                 // The term is a locked reference with a context,
                 // so we try both the qualified and unqualified reference.
                 // "[[ r | c ]]" = { "x.[[ r |]]" , "[[ r |]]" }
-                final @Nullable LockedReference reference = (LockedReference)term;
                 final @Nullable ITerm qreference = engine.eval(qualifyReference, descriptor.getContext(), reference);
                 @Nullable RRSolverState newStateQ = null;    // The state for the qualified reference "x.[[r |]]"; or `null` when it could not be constructed
                 if (qreference != null) {
@@ -105,9 +111,15 @@ public final class UnwrapOrFixReferenceStrategy extends NamedStrategy3<RRContext
                 return Seq.ofNotNull(newStateQ, newStateUQ);
             } else {
                 // The term is a locked reference without a context.
-                // so we check whether it resolves correctly.
-                // "[[ r |]]" = "r" if r still resolves to the same declaration
-                throw new IllegalStateException("Not yet implemented!");
+                // TODO: check whether it resolves correctly.
+                //  "[[ r |]]" = "r" if r still resolves to the same declaration
+                // FIXME: For now we just construct the reference and check if it resolves at all (resolves anywhere)
+                final RRSolverState finalState = input.withUpdatedConstraints(
+                    Collections.singleton(new CEqual(v, reference.getTerm())),
+                    Collections.emptySet()
+                );
+                // TODO: Can I add a constraint that says where the query should resolve to?
+                return Seq.of(finalState);
             }
         } else if (term instanceof IApplTerm) {
             // The term is a term application, so we unwrap it once
