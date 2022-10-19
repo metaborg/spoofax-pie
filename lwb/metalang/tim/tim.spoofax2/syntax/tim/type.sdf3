@@ -1,6 +1,10 @@
 module tim/type
 
-context-free sorts TType
+imports
+
+  tim/common
+
+context-free sorts TType TStructMember
 context-free syntax
 
   TType.TIntT = <int>
@@ -11,6 +15,10 @@ context-free syntax
   TType.TRecordT = [record<[TType]>]
   TType.TClosureT = [closure]
   TType.TAnyT = <any>
+  TType.TBoxedT = [boxed<[TType]>]
+  TType.TStructT = [{[{TStructMember ", "}*]}]
+  
+  TStructMember.TStructMember = <<TID>: <TType>>
 
 template options
   TID = keyword {reject}

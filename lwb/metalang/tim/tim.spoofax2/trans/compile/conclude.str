@@ -173,6 +173,22 @@ rules
   , FunDecl(
       DefaultLinkage()
     , DefaultCConv()
+    , PointerAddrSpace("1")
+    , Constant("gc_alloc_bitfield")
+    , [ParamUnnamed(Int64(), []), ParamUnnamed(Int64(), [])]
+    , [NoUnwind(), InaccessibleMemOnly(), AllocKind("\"alloc,uninitialized\""), AllocSize("0"), AllocFamily("\"malloc\"")]
+    )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , Void()
+    , Constant("gc_mark_has_pointers")
+    , [ParamUnnamed(PointerAddrSpace("1"), [])]
+    , [NoUnwind()]
+    )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
     , Void()
     , Constant("gc_collect")
     , []

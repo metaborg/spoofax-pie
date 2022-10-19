@@ -32,6 +32,7 @@ rules
   ; uniquify
   ; merge-equals
   ; inline-lets
+  ; box-values
   ; convert-closures
   ; explicate-globals
   ; select-instructions
@@ -43,6 +44,7 @@ rules
   ; strip-annos
   ; uniquify
   ; merge-equals
+  ; box-values
   ; convert-closures
   ; inline-lets
   ; explicate-globals

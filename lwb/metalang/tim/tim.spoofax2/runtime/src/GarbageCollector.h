@@ -40,14 +40,28 @@ struct GcSpace {
     ~GcSpace();
 };
 
+/* Types:
+ * Forwarded pointer 0x0
+ * Array (with or without pointers)
+ * Record/hashmap (with or without pointers)
+ * Closure (with bitmap encoding pointers, 2 bits tag, 6 bits size, 56 bits pointer field)
+ * bit 0: ~forward
+ * bit 1: bitfield encoding
+ * bit 2: Record
+ * bit 3: Contains pointers
+ */
 enum ObjectTag : uint32_t {
-    FORWARDED_FLAG = 1,
-    ARRAY = 0x03,
-    CLOSURE = 0x05,
-    STRING = 0x07,
-    RECORD = 0x09,
-    REF = 0x11,
-    PLACEHOLDER = 0x3
+    NOT_FORWARDED_FLAG = 0x01,
+    BITFIELD_FLAG = 0x02,
+    RECORD_FLAG = 0x04,
+    POINTER_FLAG = 0x08,
+    CLOSURE = NOT_FORWARDED_FLAG | BITFIELD_FLAG,
+    STRUCT = NOT_FORWARDED_FLAG | BITFIELD_FLAG,
+    ARRAY = NOT_FORWARDED_FLAG | POINTER_FLAG,
+    INT_ARRAY = NOT_FORWARDED_FLAG,
+    STRING = NOT_FORWARDED_FLAG,
+    RECORD = NOT_FORWARDED_FLAG | RECORD_FLAG | POINTER_FLAG,
+    INT_RECORD = NOT_FORWARDED_FLAG | RECORD_FLAG,
 };
 
 struct ObjectMetadata {
@@ -63,12 +77,25 @@ struct ObjectMetadata {
             ObjectTag tag;
 #endif
         };
+        struct {
+            uint64_t bitfield;
+        };
         uint8_t *forwarded_pointer;
     };
 
     [[nodiscard]]
     inline bool is_forwarded() const {
-        return !(tag & FORWARDED_FLAG);
+        return !(tag & NOT_FORWARDED_FLAG);
+    }
+
+    [[nodiscard]]
+    inline size_t get_bitfield_size() const {
+        return ((bitfield >> 2) & 0x3F) * sizeof(uint64_t);
+    }
+
+    [[nodiscard]]
+    inline uint64_t get_ptr_bitfield() const {
+        return bitfield >> 8;
     }
 };
 
@@ -111,6 +138,8 @@ private:
 
     void *allocate_no_collect(size_t size, ObjectTag tag);
 
+    void *allocate_bitfield_no_collect(size_t size, uint64_t bitfield);
+
     void update_finalizers(GcSpace &oldSpace);
 
 
@@ -134,6 +163,13 @@ public:
     }
 
     template<typename... Ts>
+    void *allocate_bitfield_fp(size_t size, uint64_t bitfield, void *fp, Ts &... roots) {
+        collect_fp(fp, roots...);
+        void *result = allocate_bitfield_no_collect(size, bitfield);
+        return result;
+    }
+
+    template<typename... Ts>
     void collect_fp(void *fp, Ts &... roots) {
         swap_spaces();
         scan_roots(roots...);
@@ -151,11 +187,27 @@ public:
     }
 
     template<typename... Ts>
+    inline void *allocate_bitfield(size_t size, uint64_t bitfield, Ts &... roots) {
+        return allocate_bitfield_fp(size, bitfield, get_frame_pointer(), roots...);
+    }
+
+    template<typename... Ts>
     inline void collect(Ts &... roots) {
         return collect_fp(get_frame_pointer(), roots...);
     }
 
     void register_finalizer(void *object, FinalizerEntry::FinalizerFunction const &finalizer);
+
+    void mark_has_pointers(void *ptr) {
+        auto *object = reinterpret_cast<ObjectMetadata *>(ptr) - 1;
+        object->tag = static_cast<ObjectTag>(object->tag | POINTER_FLAG);
+    }
+
+    [[nodiscard]]
+    bool get_has_pointers(void *ptr) {
+        auto *object = reinterpret_cast<ObjectMetadata *>(ptr) - 1;
+        return (object->tag & POINTER_FLAG) != 0;
+    }
 };
 
 extern GarbageCollector garbageCollector;

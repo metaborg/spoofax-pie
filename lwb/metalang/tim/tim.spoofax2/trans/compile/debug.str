@@ -30,13 +30,8 @@ rules
   with
     type' := <type-to-ast> type
   
-  pp-type : INT() -> "int"
-  pp-type : STRING() -> "str"
-  pp-type : FUNCTION(_) -> "fun"
-  pp-type : CLOSURE() -> "clos"
-  pp-type : _ -> "ptr"
-  
   type-to-ast : INT() -> TIntT()
+  type-to-ast : BOXED(t) -> TBoxedT([<type-to-ast> t])
   type-to-ast : STRING() -> TStringT()
   type-to-ast : FUNCTION(ts) -> TFunctionT(<map(type-to-ast)> ts)
   type-to-ast : REF(t) -> TRefT(<type-to-ast> t)

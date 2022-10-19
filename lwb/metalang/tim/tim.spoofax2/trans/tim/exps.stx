@@ -44,8 +44,14 @@ rules
     texpOk(s, TExpTypedPrimOp(op, TArrayT(TAnyT()), args, x, rest)).
   texpOk(s, TExpPrimOp(op@"record-new", args, x, rest)) :-
     texpOk(s, TExpTypedPrimOp(op, TRecordT(TAnyT()), args, x, rest)).
-  texpOk(s, TExpPrimOp(op@"ref-new", args, x, rest)) :-
-    texpOk(s, TExpTypedPrimOp(op, TRefT(TAnyT()), args, x, rest)).
+  texpOk(s, TExpPrimOp(op@"ref-new", [arg], x, rest)) :- {T argTy s'}
+    new s', s' -P-> s,
+    typeOfTValue(s, arg) == argTy,
+    typeOfPrimOp(op, [argTy]) == T | error $[Illegal primitive operation.],
+    REF(argTy) == T,
+    declareVar(s', x, T),
+    texpOk(s', rest),
+    @x.type := T.
   texpOk(s, TExpPrimOp(op, args, x, rest)) :- {T argTys s'}
     new s', s' -P-> s,
     typesOfTValues(s, args) == argTys,

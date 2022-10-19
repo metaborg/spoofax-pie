@@ -105,7 +105,7 @@ rules
     [Assign(result, BinaryOp(SDiv(), [], Int64(), <select-value> a, <select-value> b))]
 
   // References
-  select-primop(|result) : ("ref-new", t, [v]) ->
+  select-primop(|result) : ("ref-new", REF(t), [v]) ->
     [ Assign(result, Call(
         DefaultTail()
       , DefaultCConv()
@@ -115,7 +115,9 @@ rules
       , [], NoOperandBundles())
       )
     , Expression(Store(<select-typed-value> v, TypedAtom(<get-type> t, VarAtom(result))))
+    , markPointers
     ]
+  with markPointers := <select-mark-pointer-call <+ ![]> (t, result)
   select-primop(|result) : ("ref-fetch", t, [ref]) ->
     [ Assign(result, Load(<get-type> t, <select-typed-value> ref)) ]
   select-primop(|result) : ("ref-store", t, [ref, v]) ->
@@ -123,19 +125,22 @@ rules
 
   // Records
   // TODO: restore functionality of arguments to record-new
-  select-primop(|result) : ("record-new", t, []) ->
+  select-primop(|result) : ("record-new", RECORD(t), []) ->
     [Assign(
-       result
-     , Call(
-         DefaultTail()
-       , DefaultCConv()
-       , Function(<get-type> t, [ParamUnnamed(Int64(), [])])
-       , ConstAtom(Constant("record_new"))
-       , [TypedAtom(Int64(), Literal(Int("0")))]
-       , []
-       , NoOperandBundles()
+         result
+       , Call(
+           DefaultTail()
+         , DefaultCConv()
+         , Function(<get-type> t, [ParamUnnamed(Int64(), [])])
+         , ConstAtom(Constant("record_new"))
+         , [TypedAtom(Int64(), Literal(Int("0")))]
+         , []
+         , NoOperandBundles()
+         )
        )
-     )]
+     , markPointers
+     ]
+  with markPointers := <select-mark-pointer-call <+ ![]> (t, result)
 //  select-primop(|result) : ("record-new", t, args) ->
 //    [Assign(
 //       result
@@ -158,7 +163,7 @@ rules
   select-funcall-primop : ("record-read", t) -> ("record_read_ptr", <get-type> t)
   
   // Arrays
-  select-primop(|result) : ("array-new", t, args) ->
+  select-primop(|result) : ("array-new", ARRAY(t), args) ->
     <concat> [
       [ Assign(sizepvar, GetElementPtr(Int64(), [TypedAtom(Pointer(), Literal(Null())), allocLen]))
       , Assign(sizevar, PtrToInt(TypedAtom(Pointer(), VarAtom(sizepvar)), Int64()))
@@ -174,6 +179,7 @@ rules
       , Expression(Store(arrLen, TypedAtom(PointerAddrSpace("1"), VarAtom(result))))
       ]
     , stores
+    , markPointers
     ]
   with
     len := <length> args
@@ -185,6 +191,7 @@ rules
   ; let apply(|i) = array-new-store(|result, i) in
       stores := <nmap(apply|1) ; concat> args
     end
+  ; markPointers := <select-mark-pointer-call <+ ![]> (t, result)
 
   array-new-store(|arr, i) : v ->
     [ Assign(offset, GetElementPtr(Int64(), [arr', i']))
@@ -352,6 +359,18 @@ rules
     ( [Expression(Call(DefaultTail(), DefaultCConv(), Void(), ConstAtom(Constant("exit")), [TypedAtom(Int32(), Literal(Int("0")))], [NoReturn()], NoOperandBundles()))]
     , Unreachable()
     )
+  
+  select-mark-pointer-call : (type, var) -> [Expression(Call(
+          DefaultTail()
+        , DefaultCConv()
+        , Void()
+        , ConstAtom(Constant("gc_mark_has_pointers"))
+        , [TypedAtom(PointerAddrSpace("1"), VarAtom(var))]
+        , []
+        , NoOperandBundles()
+        ))
+        ]
+  where <type-is-gc-pointer> type
 
   select-typed-value : x -> TypedAtom(type, atom)
   with
@@ -371,3 +390,5 @@ rules
   get-type : INT() -> Int64()
   get-type : FUNCTION(_) -> Pointer()
   get-type : _ -> PointerAddrSpace("1")
+
+  type-is-gc-pointer = not(?INT()) ; not(?FUNCTION(_))

@@ -32,6 +32,23 @@ void *GarbageCollector::allocate_no_collect(size_t size, ObjectTag tag) {
     return user_space;
 }
 
+void *GarbageCollector::allocate_bitfield_no_collect(size_t size, uint64_t bitfield) {
+    assert(size <= 64 * sizeof(uint64_t));
+    size = (size + 7) & ~7;  // Ensure we are 8 byte aligned
+    size_t total_size = size + sizeof(ObjectMetadata);  // Type tag and size
+    if (active_space.free_ptr + total_size > active_space.end) {
+        std::cout << "Heap is full :'(" << std::endl;
+        exit(1);
+    }
+    auto *new_space = reinterpret_cast<ObjectMetadata *>(active_space.free_ptr);
+    size_t long_size = size / sizeof(uint64_t);
+    assert(long_size == (long_size & 0x3F));
+    new_space->bitfield = (bitfield << 8) | (long_size << 2) | STRUCT;
+    active_space.free_ptr += total_size;
+    void *user_space = new_space + 1;
+    return user_space;
+}
+
 void GarbageCollector::swap_spaces() {
     swap(old_space, active_space);
 }
@@ -142,29 +159,37 @@ void GarbageCollector::visit_heap(GcSpace &space) {
     uint8_t *scan_ptr = space.start;
     while (scan_ptr < space.free_ptr) {
         auto *metadata = reinterpret_cast<ObjectMetadata *>(scan_ptr);
-        scan_ptr += metadata->size;
-        switch (metadata->tag) {
-            case ARRAY:
-            case CLOSURE:
-            case REF: {
-                auto **pointers = reinterpret_cast<uint8_t **>(metadata + 1);
-                for (; reinterpret_cast<uint8_t *>(pointers) < scan_ptr; pointers++) {
+        if (~metadata->tag & NOT_FORWARDED_FLAG) {
+            assert(false);
+        }
+        if (metadata->tag & BITFIELD_FLAG) {
+            scan_ptr += metadata->get_bitfield_size();
+            uint64_t bitfield = metadata->get_ptr_bitfield();
+
+            auto **pointers = reinterpret_cast<uint8_t **>(metadata + 1);
+            for (; reinterpret_cast<uint8_t *>(pointers) < scan_ptr; pointers++) {
+                if (bitfield & 1) {
                     relocate(*pointers);
                 }
-                break;
+                bitfield >>= 1;
             }
-            case RECORD: {
+        } else {
+            scan_ptr += metadata->size;
+            if (metadata->tag & (RECORD_FLAG | POINTER_FLAG)) {
                 auto &map = **reinterpret_cast<std::map<std::string, int64_t> **>(metadata + 1);
                 for (auto &item: map) {
                     relocate(reinterpret_cast<uint8_t *&>(item.second));
                 }
+                std::cerr << "Pointerfull record" << std::endl;
+            } else if (metadata->tag & POINTER_FLAG) {
+                auto **pointers = reinterpret_cast<uint8_t **>(metadata + 1);
+                for (; reinterpret_cast<uint8_t *>(pointers) < scan_ptr; pointers++) {
+                    relocate(*pointers);
+                }
+                std::cerr << "Pointerfull object" << std::endl;
+            } else {
+                std::cerr << "Pointerless object" << std::endl;
             }
-                break;
-            case STRING:
-                break;
-            case FORWARDED_FLAG:
-            default:
-                assert(false);
         }
     }
 }

@@ -26,6 +26,8 @@ declare ptr addrspace(1) @int_to_string(i64) nounwind
 
 declare void @gc_init( ) nounwind
 declare ptr addrspace(1) @gc_alloc(i64) nounwind inaccessiblememonly allockind("alloc,uninitialized") allocsize(0) "alloc-family"="malloc"
+declare ptr addrspace(1) @gc_alloc_bitfield(i64, i64) nounwind inaccessiblememonly allockind("alloc,uninitialized") allocsize(0) "alloc-family"="malloc"
+declare void @gc_mark_has_pointers(ptr addrspace(1)) nounwind
 declare void @gc_collect( ) nounwind
 
 define i32 @main() {

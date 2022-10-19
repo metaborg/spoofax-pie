@@ -1,0 +1,75 @@
+module compile/box-values
+
+imports
+
+  signatures/tim-sig
+  signatures/tim/-
+  compile/ast
+
+rules
+
+  box-values = bottomup(try(unbox-output) ; try(box-inputs))
+  
+  unbox-output : TExpPrimOp(op, type, args, output, cont) -> TExpPrimOp(op, type', args, tmp, cont')
+  where <should-unbox> (op, args, type)
+  with
+    tmp := <newname> output
+  ; type' := REF(type)
+  ; cont' := TExpPrimOp("ref-fetch", type, [TValueVar(tmp, type')], output, cont)
+
+  box-inputs : TExpPrimOp(op, type, args, output, cont) -> exp'
+  where (type', args', ops) := <collect-boxed> (op, type, args)
+  with
+    exp := TExpPrimOp(op, type', args', output, cont)
+  ; exp' := <foldr(!exp, \((v, tmp, T), c) -> TExpPrimOp("ref-new", T, [v], tmp, c)\)> ops
+
+  should-unbox : ("array-read", [TValueVar(_, ARRAY(ANY()))|_], t) -> ()
+  where <boxed-type> t
+  should-unbox : ("record-read", [TValueVar(_, RECORD(ANY()))|_], t) -> ()
+  where <boxed-type> t
+  should-unbox : ("ref-fetch", [TValueVar(_, REF(ANY()))|_], t) -> ()
+  where <boxed-type> t
+  
+  collect-boxed : ("array-new", ARRAY(ANY()), args) -> (ARRAY(ANY()), args', ops)
+  where
+    (args', opmap) := <map(box-value <+ !(<id>, [])) ; unzip> args
+  with ops := <flatten-list> opmap
+  collect-boxed : ("array-write", type, [arr, idx, val]) -> (type', [arr, idx, val'], [op])
+  where
+    <boxed-type> type
+  ; <boxing-var> arr
+  with
+    tmp := <newname> "tmp"
+  ; type' := REF(type)
+  ; op := (val, tmp, type')
+  ; val' := TValueVar(tmp, type')
+  collect-boxed : ("record-write", type, [record, idx, val]) -> (type', [record, idx, val'], [op])
+  where
+    <boxed-type> type
+  ; <boxing-var> record
+  with
+    tmp := <newname> "tmp"
+  ; type' := REF(type)
+  ; op := (val, tmp, type')
+  ; val' := TValueVar(tmp, type')
+  collect-boxed : ("ref-store", type, [ref, val]) -> (type', [ref, val'], [op])
+  where
+    <boxed-type> type
+  ; <boxing-var> ref
+  with
+    tmp := <newname> "tmp"
+  ; type' := REF(type)
+  ; op := (val, tmp, type')
+  ; val' := TValueVar(tmp, type')
+  collect-boxed : ("ref-new", REF(ANY()), [val]) -> (REF(ANY()), [val'], [op])
+  where (val', [op]) := <box-value> val
+  
+  box-value : v -> (TValueVar(tmp, REF(INT())), [(v, tmp, REF(INT()))])
+  where <   ?TValueGlobal(_, <boxed-type>) 
+         <+ ?TValueVar(_, <boxed-type>)
+         <+ ?TValueInt(_)> v
+  with tmp := <newname> "tmp"
+
+  boxed-type = ?INT()
+  boxing-var = ?TValueVar(_, <boxing-type>) <+ ?TValueGlobal(_, <boxing-type>)
+  boxing-type = ?ARRAY(ANY()) <+ ?RECORD(ANY()) <+ ?REF(ANY())
