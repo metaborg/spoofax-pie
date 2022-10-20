@@ -18,6 +18,9 @@ context-free syntax
   TType.TAnyT = <any>
   TType.TBoxedT = [boxed<[TType]>]
   TType.TStructT = [{[{TStructMember ", "}*]}]
+  TType.TNamedT = <<TID>>
+  TType.TSymbolT = <symbol(<TID>)>
+  TType.TInferredT = <*>
   
   TStructMember.TStructMember = <<TID>: <TType>>
 

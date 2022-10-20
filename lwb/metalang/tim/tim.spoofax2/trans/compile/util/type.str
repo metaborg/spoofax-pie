@@ -23,5 +23,12 @@ rules
   
   get-target-elem-type : CLOSURE(types) -> Struct(<map(get-target-type)> types)
   get-target-elem-type : ANONCLOSURE() -> Array("1", Pointer())
+  get-target-elem-type : STRUCT(members) -> Struct(<map(?(_, <id>) ; get-target-type)> members)
   get-target-elem-type : v -> t
   where t := <get-source-type ; get-target-elem-type> v
+
+  get-member-type : (STRUCT(members), field) -> type
+  with type := <getfirst(?(field, <id>))> members
+  
+  get-member-index : (STRUCT(members), field) -> idx
+  with idx := <get-index0(?(field, _))> members

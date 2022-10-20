@@ -17,6 +17,7 @@ signature
     CLOSURE : list(TYPE) -> TYPE
     ANONCLOSURE : TYPE
     ANY : TYPE
+    STRUCT : list((TID, TYPE)) -> TYPE
 
 signature
 

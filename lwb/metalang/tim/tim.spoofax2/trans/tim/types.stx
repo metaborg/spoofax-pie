@@ -3,6 +3,7 @@ module tim/types
 imports
   signatures/tim/common-sig
   signatures/tim/type-sig
+  tim/names
   
 signature
   sorts TYPE
@@ -16,29 +17,48 @@ signature
     CLOSURE : list(TYPE) -> TYPE
     ANONCLOSURE : TYPE
     ANY : TYPE
+    STRUCT : list((TID * TYPE)) -> TYPE
+    SYMBOL : TID -> TYPE
     
 rules
-  typeOfType : TType -> TYPE
-  typesOfTypes maps typeOfType(list(*)) = list(*)
+  typeOfType : scope * TType -> TYPE
+  typesOfTypes maps typeOfType(*, list(*)) = list(*)
   
-  typeOfType(TIntT()) = INT().
-  typeOfType(TStringT()) = STRING().
-  typeOfType(TFunctionT(Ts)) = FUNCTION(Ts') :-
-    Ts' == typesOfTypes(Ts).
-  typeOfType(TRefT(T)) = REF(T') :-
-    T' == typeOfType(T).
-  typeOfType(TArrayT(T)) = ARRAY(T') :-
-    T' == typeOfType(T).
-  typeOfType(TRecordT(T)) = RECORD(T') :-
-    T' == typeOfType(T).
-  typeOfType(TAnonClosureT()) = ANONCLOSURE().
-  typeOfType(TClosureT(Ts)) = CLOSURE(Ts') :-
-    Ts' == typesOfTypes(Ts).
-  typeOfType(TAnyT()) = ANY().
+  typeOfType(s, TIntT()) = INT().
+  typeOfType(s, TStringT()) = STRING().
+  typeOfType(s, TFunctionT(Ts)) = FUNCTION(Ts') :-
+    Ts' == typesOfTypes(s, Ts).
+  typeOfType(s, TRefT(T)) = REF(T') :-
+    T' == typeOfType(s, T).
+  typeOfType(s, TArrayT(T)) = ARRAY(T') :-
+    T' == typeOfType(s, T).
+  typeOfType(s, TRecordT(T)) = RECORD(T') :-
+    T' == typeOfType(s, T).
+  typeOfType(s, TAnonClosureT()) = ANONCLOSURE().
+  typeOfType(s, TClosureT(Ts)) = CLOSURE(Ts') :-
+    Ts' == typesOfTypes(s, Ts).
+  typeOfType(s, TAnyT()) = ANY().
+  typeOfType(s, TStructT(members)) = STRUCT(members') :-
+    members' == membersOk(s, members).
+  typeOfType(s, TNamedT(x)) = resolveType(s, x).
+  typeOfType(s, TSymbolT(x)) = SYMBOL(x).
+  typeOfType(s, TInferredT()) = T :-
+    T != ANY().
   
   typeNotAny : TYPE
   typesNotAny maps typeNotAny(list(*))
   typeNotAny(T) :- T != ANY().
+  
+  memberOk : scope * TStructMember -> (TID * TYPE)
+  membersOk maps memberOk(*, list(*)) = list(*)
+  memberOk(s, TStructMember(x, T)) = (x, T') :-
+    T' == typeOfType(s, T).
+
+  typeOfMember : TYPE * TID -> TYPE
+  typeOfMember(STRUCT([(x, T)|_]), x) = T :-
+    @x.type := T.
+  typeOfMember(STRUCT([_|tail]), x) = T :-
+    T == typeOfMember(STRUCT(tail), x).
   
   printable : TYPE
   printable(INT()).

@@ -5,6 +5,7 @@ imports
   signatures/tim-sig
   signatures/tim/-
   compile/ast
+  compile/util/type
 
 rules
 
@@ -29,6 +30,10 @@ rules
   where <boxed-type> t
   should-unbox : ("ref-fetch", [TValueVar(_, REF(ANY()))|_], t) -> ()
   where <boxed-type> t
+  should-unbox : ("struct-read", [TValueVar(_, t1), TValueSymbol(name)|_], t2) -> ()
+  where
+    ANY() := <get-member-type> (t1, name)
+  ; <boxed-type> t2
   
   collect-boxed : ("array-new", ARRAY(ANY()), args) -> (ARRAY(ANY()), args', ops)
   where
@@ -63,6 +68,16 @@ rules
   ; val' := TValueVar(tmp, type')
   collect-boxed : ("ref-new", REF(ANY()), [val]) -> (REF(ANY()), [val'], [op])
   where (val', [op]) := <box-value> val
+  collect-boxed : ("struct-write", type, [struct@TValueVar(_, t1), TValueSymbol(name), val]) -> 
+    (type', [struct, TValueSymbol(name), val'], [op])
+  where
+    <boxed-type> type
+  ; ANY() := <get-member-type> (t1, name)
+  with
+    tmp := <newname> "tmp"
+  ; type' := REF(type)
+  ; op := (val, tmp, type')
+  ; val' := TValueVar(tmp, type')
   
   box-value : v -> (TValueVar(tmp, REF(INT())), [(v, tmp, REF(INT()))])
   where <   ?TValueGlobal(_, <boxed-type>) 

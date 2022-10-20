@@ -134,6 +134,7 @@ rules
   find-free-vars(|usedVars) : TValueVar(x, _) -> []
     where <elem> (x, usedVars)
   find-free-vars(|usedVars) : t@TValueVar(x, _) -> [t]
+  find-free-vars(|usedVars) : TValueSymbol(_) -> []
   find-free-vars(|usedVars) : THole() -> []
   find-free-vars(|usedVars) : TExpApp(v, vs) ->
     <foldr(![], union, find-free-vars(|usedVars))> [v|vs]
@@ -158,6 +159,7 @@ rules
     with
       extraVars := <map(\TBind(x, _) -> x\)> binds
     ; newVars := <conc> (usedVars, extraVars)
+  find-free-vars(|usedVars) : TExpTypes(_, exp) -> <find-free-vars(|usedVars)> exp
 
   extract-funs : TProgram(exp) -> TProgram(TExpFix(funs, exp'))
     with {| Functions

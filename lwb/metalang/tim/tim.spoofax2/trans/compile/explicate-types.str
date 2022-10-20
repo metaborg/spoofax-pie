@@ -39,5 +39,7 @@ rules
   with
     type := <stx-get-ast-type(|analysis)> result
 
+  explicate-type(|analysis) : TExpTypes(_, e) -> e  // All type definitions should already be resolved by statix
+
   print-for-type : INT() -> "print-int"
   print-for-type : STRING() -> "print-string"

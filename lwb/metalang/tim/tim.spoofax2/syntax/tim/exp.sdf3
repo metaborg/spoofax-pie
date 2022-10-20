@@ -9,6 +9,7 @@ context-free syntax
   TValue.TValueInt = <<TINT>>
   TValue.TValueString = <<TSTRING>>
   TValue.TValueVar = <<TID>>
+  TValue.TValueSymbol = <!<TID>>
 
 context-free sorts TExp TFun
 context-free syntax
@@ -66,6 +67,17 @@ context-free syntax // sugar
   ]
   
   TBind.TBind = [[TID] = [TValue]]
+
+context-free sorts TTypeDef
+context-free syntax
+  TExp.TExpTypes = [
+    typedef {
+      [{TTypeDef "\n"}*]
+    } in
+      [TExp]
+  ]
+  
+  TTypeDef.TTypeDef = [[TID] = [TType]]
   
 template options
   TID = keyword {reject} // ensure print and friends are parsed as primops and not calls

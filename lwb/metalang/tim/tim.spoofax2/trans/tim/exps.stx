@@ -15,6 +15,8 @@ rules
   typeOfTValue(_, t@TValueInt(_)) = INT() :- @t.type := INT().
   typeOfTValue(_, t@TValueString(_)) = STRING() :- @t.type := STRING().
   typeOfTValue(s, t@TValueVar(v)) = T :- resolveVar(s, v) == T, @t.type := T.
+  typeOfTValue(_, t@TValueSymbol(x)) = SYMBOL(x) :-
+    @t.type := SYMBOL(x).
 
 rules
   texpOk : scope * TExp
@@ -41,6 +43,13 @@ rules
     new bodyS, bodyS -P-> bindS,
     texpOk(bodyS, body).
 
+  texpOk(s, TExpTypes(typedefs, body)) :- {typeS}
+    new typeS, typeS -P-> s,
+    declareTypeDefs(typeS, typedefs),
+    texpOk(typeS, body). // TODO: Should another scope be made?
+
+  texpOk(s, TExpPrimOp(op@"struct-new", args, x, rest)) :-
+    false | error $[struct-new must be explicitly typed]@op.
   texpOk(s, TExpPrimOp(op@"array-new", args, x, rest)) :-
     texpOk(s, TExpTypedPrimOp(op, TArrayT(TAnyT()), args, x, rest)).
   texpOk(s, TExpPrimOp(op@"record-new", args, x, rest)) :-
@@ -63,7 +72,7 @@ rules
 
   texpOk(s, TExpTypedPrimOp(op, type, args, x, rest)) :- {T argTys s'}
     new s', s' -P-> s,
-    typeOfType(type) == T,
+    typeOfType(s, type) == T,
     typesOfTValues(s, args) == argTys,
     typeOfPrimOp(op, argTys) == T | error $[Illegal primitive operation.],
     declareVar(s', x, T),
@@ -94,7 +103,7 @@ rules
 
   declareFun(s, fn@TTypedFun(name, Ts, argNames, body)) :- {argS argTys fnTy}
     new argS, argS -P-> s,
-    typesOfTypes(Ts) == argTys,
+    typesOfTypes(s, Ts) == argTys,
     declareFunArgs(argS, argNames) == argTys,
     FUNCTION(argTys) == fnTy,
     @fn.type := fnTy,
@@ -180,6 +189,16 @@ rules
   typeOfPrimOp("closure-new", Ts) = CLOSURE(Ts).
   typeOfPrimOp("closure-offset", [CLOSURE(_), INT()]) = ANONCLOSURE().
   typeOfPrimOp("closure-offset", [ANONCLOSURE(), INT()]) = CLOSURE(_).
+  
+  typeOfPrimOp(op@"struct-new", []) = T :-
+    try { T == STRUCT(_) } | error $[struct-new must return a struct]@op.
+  typeOfPrimOp("struct-write", [struct@STRUCT(_), SYMBOL(x), T]) = T :- {T'}
+    typeOfMember(struct, x) == T',
+    typeCoercibleTo(T, T').
+  typeOfPrimOp("struct-read", [struct@STRUCT(_), SYMBOL(x)]) = T :- {T'}
+    typeOfMember(struct, x) == T',
+    typeCoercibleTo(T', T),
+    T != ANY().
 
 //  typeOfPrimOp("array-read", [ARRAY(ANY()), INT()]) = _. // intentionally unbound
   typeOfPrimOp("array-read", [ARRAY(T1), INT()]) = T2 :-
@@ -191,6 +210,7 @@ rules
     T2 != ANY().
   typeOfPrimOp("closure-read", [ANONCLOSURE(), INT()]) = _. // intentionally unbound
   typeOfPrimOp("closure-read", [CLOSURE(Ts), INT()]) = _. // intentionally unbound
+    
   
   isNotAny : TYPE
   areNotAny maps isNotAny(list(*))

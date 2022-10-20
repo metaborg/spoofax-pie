@@ -237,7 +237,7 @@ rules
   // Closures
   select-primop(|result) : ("closure-new", type, args) ->
     <concat> [
-      [ Assign(sizepvar, GetElementPtr(Int64(), [TypedAtom(Pointer(), Literal(Null())), n]))
+      [ Assign(sizepvar, GetElementPtr(structType, [TypedAtom(Pointer(), Literal(Null())), TypedAtom(Int64(), Literal(Int("1")))]))
       , Assign(sizevar, PtrToInt(TypedAtom(Pointer(), VarAtom(sizepvar)), Int64()))
       , Assign(result, Call(
           DefaultTail()
@@ -252,10 +252,10 @@ rules
     , stores
     ]
   with
-    n := TypedAtom(Int64(), Literal(Int(<length ; int-to-string> args)))
-  ; sizepvar := Variable(<newname> "sizep")
+    sizepvar := Variable(<newname> "sizep")
   ; sizevar := Variable(<newname> "size")
-  ; let apply(|i) = closure-new-store(|result, i, <get-target-elem-type> type) in
+  ; structType := <get-target-elem-type> type
+  ; let apply(|i) = closure-new-store(|result, i, structType) in
       stores := <nmap(apply|0) ; concat> args
     end
   ; bitfield := <gen-bitfield ; int-to-string> args
@@ -278,6 +278,50 @@ rules
   
   select-primop(|result) : ("closure-offset", _, [arr, TValueInt(index)]) ->
     [Assign(result, GetElementPtr(<get-target-elem-type> arr, [<select-typed-value> arr, TypedAtom(Int32(), Literal(Int("0"))), TypedAtom(Int32(), Literal(Int(index)))]))]
+
+  select-primop(|result) : ("struct-new", type@STRUCT(members), []) ->
+    [ Assign(sizepvar, GetElementPtr(structType, [TypedAtom(Pointer(), Literal(Null())), TypedAtom(Int64(), Literal(Int("1")))]))
+    , Assign(sizevar, PtrToInt(TypedAtom(Pointer(), VarAtom(sizepvar)), Int64()))
+    , Assign(result, Call(
+        DefaultTail()
+      , DefaultCConv()
+      , PointerAddrSpace("1")
+      , ConstAtom(Constant("gc_alloc_bitfield"))
+      , [TypedAtom(Int64(), VarAtom(sizevar)), TypedAtom(Int64(), Literal(Int(bitfield)))]
+      , []
+      , NoOperandBundles()
+      ))
+    ]
+  with
+    sizepvar := Variable(<newname> "sizeptr")
+  ; sizevar := Variable(<newname> "size")
+  ; structType := <get-target-elem-type> type
+  ; bitfield := <map(?(_, <id>)) ; gen-bitfield ; int-to-string> members
+  
+  select-primop(|result) : ("struct-read", t, [struct, TValueSymbol(field)]) ->
+    [ Assign(ptr, GetElementPtr(<get-target-elem-type> struct, [
+        <select-typed-value> struct
+      , TypedAtom(Int32(), Literal(Int("0")))
+      , offset
+      ]))
+    , Assign(result, Load(<get-target-type> t, TypedAtom(PointerAddrSpace("1"), VarAtom(ptr))))
+    ]
+  with
+    ptr := Variable(<newname> "ptr")
+  ; offset := TypedAtom(Int32(), Literal(Int(<get-member-index ; int-to-string> (<get-source-type> struct, field))))
+  
+  select-primop(|result) : ("struct-write", _, [struct, TValueSymbol(field), value]) ->
+    [ Assign(ptr, GetElementPtr(<get-target-elem-type> struct, [
+        <select-typed-value> struct
+      , TypedAtom(Int32(), Literal(Int("0")))
+      , offset
+      ]))
+    , Expression(Store(<select-typed-value> value, TypedAtom(PointerAddrSpace("1"), VarAtom(ptr))))
+    ]
+  with
+    ptr := Variable(<newname> "ptr")
+  ; offset := TypedAtom(Int32(), Literal(Int(<get-member-index ; int-to-string> (<get-source-type> struct, field))))
+  
 
   // Print
   select-primop(|result) : ("print", INT(), [a]) ->
