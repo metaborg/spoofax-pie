@@ -75,7 +75,6 @@ rules
  assertRuleImplNotEqual2 : astId * astId * MRuleDecl * MRuleDecl
  assertRuleImplNotEqual2(x, x, _, _).
  assertRuleImplNotEqual2(_, _, MRuleDecl(aname, apats, _), MRuleDecl(bname, bpats, _)) :-
-    try { false } | note $[Comparing [apats] and [bpats]],
     try { comparePatterns(apats, bpats) != MPatternEqual() } | error $[This implementation is equally specific to at least one other implementation. To prevent ambiguity in matching order, each rule implementation must have a distinct set of values it can match. [apats] and [bpats] overlap.]@aname,
     try { comparePatterns(apats, bpats) != MPatternEqual() } | error $[This implementation is equally specific to at least one other implementation. To prevent ambiguity in matching order, each rule implementation must have a distinct set of values it can match. [apats] and [bpats] overlap.]@bname.
 

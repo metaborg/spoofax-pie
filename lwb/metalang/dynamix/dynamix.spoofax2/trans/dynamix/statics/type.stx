@@ -30,6 +30,8 @@ signature
     TVALUE : TTYPE // value
     TSTATEMENT : TTYPE // statement
     TFUN : TTYPE // fun def (inside fix block)
+    TTYPE : TTYPE // type
+    TSTRUCTMEMBER : TTYPE // Member of a struct
 
 // constructor management
 signature
@@ -87,6 +89,7 @@ rules
   targetTypeToTTYPE(s, MTargetTypeValue()) = TVALUE().
   targetTypeToTTYPE(s, MTargetTypeCPSFinalized()) = TSTATEMENT().
   targetTypeToTTYPE(s, MTargetTypeFun()) = TFUN().
+  targetTypeToTTYPE(s, MTargetTypeType()) = TTYPE().
 
 rules
   composeTypes : MTYPE * MTYPE -> MTYPE

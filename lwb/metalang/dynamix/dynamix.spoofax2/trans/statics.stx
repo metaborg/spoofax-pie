@@ -223,6 +223,12 @@ rules
     resolvePrimitive(s, name) == P,
     primitiveArgumentsType(P) == EAT | error $[Primitive [name] is not defined or not an expression or statement primitive.],
     callTypesCompatible(AT, EAT).
+  typeOfExp_(s, MExprCallTypedPrimitive(name, type, args)) = primitiveReturnType(P) :- {AT EAT}
+    typeCoercibleTo(typeOfExp(s, type), MTTYPE(TTYPE())),
+    typesOfExps(s, args) == AT,
+    resolvePrimitive(s, name) == P,
+    primitiveArgumentsType(P) == EAT | error $[Primitive [name] is not defined or not an expression or statement primitive.],
+    callTypesCompatible(AT, EAT).
   typeOfExp_(s, MExprConditionalPrimitive(name, args, ift, ife)) = MTTYPE(TSTATEMENT()) :- {AT IT ET EAT}
     typesOfExps(s, args) == AT,
     resolvePrimitive(s, name) == MPRIMITIVECOND(EAT) | error $[Primitive [name] is not defined or is not a conditional primitive.],
@@ -254,6 +260,45 @@ rules
     new s', s' -P-> s,
     typeOfExp(s', body) == RT,
     try { RT == MTTYPE(TSTATEMENT()) } | error $[The body of a function definition must always result in a tail-call (value of type @statement).].
+  typeOfExp_(s, MExprTTypedFun(name, type, args, body)) = MTTYPE(TFUN()) :- {s' RT}
+    typeCoercibleTo(typeOfExp(s, type), MTTYPE(TTYPE())),
+    typeCoercibleTo(typeOfExp(s, name), MTTYPE(TVALUE())) | error $[The name of a function must be a value.],
+    typeCoercibleTo(typeOfExp(s, args), MLIST(MTTYPE(TVALUE()))) | error $[The arguments of a function must be a list of values.],
+    new s', s' -P-> s,
+    typeOfExp(s', body) == RT,
+    try { RT == MTTYPE(TSTATEMENT()) } | error $[The body of a function definition must always result in a tail-call (value of type @statement).].
+
+  // Target type usages
+  typeOfExp_(s, MExprTTypes(defs)) = MHOLY0() :-
+    typeDefsOk(s, defs).
+
+  typeDefOk : scope * MTypeDef
+  typeDefsOk maps typeDefOk(*, list(*))
+  typeDefOk(s, MTypeDef(target, value)) :-
+    typeOfExp(s, target) == MSTYPE(SSTRING()),
+    typeOfExp(s, value) == MTTYPE(TTYPE()).
+
+  typeOfExp_(s, MExprTTypeInt()) = MTTYPE(TTYPE()).
+  typeOfExp_(s, MExprTTypeString()) = MTTYPE(TTYPE()).
+  typeOfExp_(s, MExprTTypeFunction(argTypes)) = MTTYPE(TTYPE()) :-
+    typeCoercibleTo(typeOfExp(s, argTypes), MLIST(MTTYPE(TTYPE()))).
+  typeOfExp_(s, MExprTTypeRef(T)) = MTTYPE(TTYPE()) :-
+    typeCoercibleTo(typeOfExp(s, T), MTTYPE(TTYPE())).
+  typeOfExp_(s, MExprTTypeArray(T)) = MTTYPE(TTYPE()) :-
+    typeCoercibleTo(typeOfExp(s, T), MTTYPE(TTYPE())).
+  typeOfExp_(s, MExprTTypeRecord(T)) = MTTYPE(TTYPE()) :-
+    typeCoercibleTo(typeOfExp(s, T), MTTYPE(TTYPE())).
+  typeOfExp_(s, MExprTTypeAny()) = MTTYPE(TTYPE()).
+  typeOfExp_(s, MExprTTypeStruct(fields)) = MTTYPE(TTYPE()) :-
+    typeCoercibleTo(typeOfExp(s, fields), MLIST(MTTYPE(TSTRUCTMEMBER()))).
+  typeOfExp_(s, MExprTStructMember(name, type)) = MTTYPE(TSTRUCTMEMBER()) :-
+    typeCoercibleTo(typeOfExp(s, name), MSTYPE(SSTRING())),
+    typeCoercibleTo(typeOfExp(s, type), MTTYPE(TTYPE())).
+  typeOfExp_(s, MExprTTypeNamed(name)) = MTTYPE(TTYPE()) :-
+    typeCoercibleTo(typeOfExp(s, name), MSTYPE(SSTRING())).
+  typeOfExp_(s, MExprTTypeSymbol(name)) = MTTYPE(TTYPE()) :-
+    typeCoercibleTo(typeOfExp(s, name), MSTYPE(SSTRING())).
+  typeOfExp_(s, MExprTTypeWildcard()) = MTTYPE(TTYPE()).
 
   coercibleToInt : MTYPE
   coercibleToInt(MSTYPE(SSTRING())).

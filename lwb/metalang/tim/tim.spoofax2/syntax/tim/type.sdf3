@@ -16,7 +16,6 @@ context-free syntax
   TType.TAnonClosureT = [closure]
   TType.TClosureT = [closure<[{TType ", "}*]>]
   TType.TAnyT = <any>
-  TType.TBoxedT = [boxed<[TType]>]
   TType.TStructT = [{[{TStructMember ", "}*]}]
   TType.TNamedT = <<TID>>
   TType.TSymbolT = <symbol(<TID>)>

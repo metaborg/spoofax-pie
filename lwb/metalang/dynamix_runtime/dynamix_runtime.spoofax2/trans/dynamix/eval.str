@@ -11,6 +11,7 @@ imports
   signatures/dynamix/meta-sig
   signatures/tim/common-sig
   signatures/tim/exp-sig
+  signatures/tim/type-sig
 
   tim/pp
 
@@ -50,6 +51,12 @@ signature
 
     // A target-level TFun node, to be included in a TFix statement.
     MRuntimeTFun : TFun -> MRuntimeValue
+
+    // A target-level TType node, used in type annotations/definitions
+    MRuntimeTType : TType -> MRuntimeValue
+
+    // A target-level TStructMember node, representing one member of a structure
+    MRuntimeTStructMember : TStructMember -> MRuntimeValue
 
 // Program evaluation
 rules
@@ -237,6 +244,10 @@ rules
   dx--eval-expr(|scope): MExprCallPrimitive(op, args) -> MRuntimeHoly([MRuntimeValue(TValueVar(y))], TExpPrimOp(op, v, y, THole()))
     with v := <map(dx--eval-expr(|scope)); dx--assert-runtime-values-or-metalists> args
     with <newname> "y" => y
+  dx--eval-expr(|scope): MExprCallTypedPrimitive(op, type, args) -> MRuntimeHoly([MRuntimeValue(TValueVar(y))], TExpTypedPrimOp(op, type', v, y, THole()))
+    with v := <map(dx--eval-expr(|scope)); dx--assert-runtime-values-or-metalists> args
+    with type' := <dx--eval-expr(|scope); dx--assert-target-type(|"Type annotation must be a target type")> type
+    with <newname> "y" => y
   dx--eval-expr(|scope): MExprConditionalPrimitive(primop, args, then, else) -> MRuntimeCPSFinalized(
     TExpConditionalPrimOp(primop, args', then', else')
   )
@@ -273,6 +284,59 @@ rules
         map(dx--assert-tvar(|"Argument must be a var name: "))
       > args;
       body' := <dx--eval-expr(|scope); dx--assert-tail-call(|"Body of a function must end with a tail call: ")> body
+  dx--eval-expr(|scope): MExprTTypedFun(name, type, args, body) -> MRuntimeTFun(TTypedFun(name', type', args', body'))
+    with
+      name' := <dx--eval-expr(|scope); dx--assert-target-var(|"Function name must be a value: ")> name;
+      type' := <dx--eval-expr(|scope); dx--assert-target-type(|"Type annotation must be a target type") ; ?TFunctionT(<id>) <+ dx--fail-msg(|"Type must be a function")> type;
+      args' := <
+        dx--eval-expr(|scope);
+        dx--assert-target-value-metalist(|"Function args must be a meta-list: ");
+        map(dx--assert-tvar(|"Argument must be a var name: "))
+      > args;
+      body' := <dx--eval-expr(|scope); dx--assert-tail-call(|"Body of a function must end with a tail call: ")> body
+
+  dx--eval-expr(|scope): MExprTTypes(types) -> MRuntimeHoly([], TExpTypes(types', THole()))
+    with
+      types' := <map(dx--eval-typedef(|scope))> types
+  dx--eval-typedef(|scope): MTypeDef(name, type) -> TTypeDef(name', type')
+    with
+      name' := <dx--eval-expr(|scope) ; dx--assert-source-string(|"Type name must be a source string")> name;
+      type' := <dx--eval-expr(|scope) ; dx--assert-target-type(|"Type must be a target type")> type
+
+  dx--eval-expr(|scope): MExprSourceSymbolToTargetSymbol(name) -> MRuntimeValue(TValueSymbol(name'))
+    with
+      name' := <dx--eval-expr(|scope) ; dx--assert-source-string(|"Symbol name must be a source string")> name
+
+  dx--eval-expr(|scope): MExprTTypeInt() -> MRuntimeTType(TIntT())
+  dx--eval-expr(|scope): MExprTTypeString() -> MRuntimeTType(TStringT())
+  dx--eval-expr(|scope): MExprTTypeFunction(args) -> MRuntimeTType(TFunctionT(args'))
+    with
+      args' := <dx--eval-expr(|scope); dx--assert-metalist; map(dx--assert-target-type(|"Function-type args must be types"))> args
+  dx--eval-expr(|scope): MExprTTypeRef(type) -> MRuntimeTType(TRefT(type'))
+    with
+      type' := <dx--eval-expr(|scope); dx--assert-target-type(|"Reference type must be a type")> type
+  dx--eval-expr(|scope): MExprTTypeArray(type) -> MRuntimeTType(TArrayT(type'))
+    with
+      type' := <dx--eval-expr(|scope); dx--assert-target-type(|"Array type must be a type")> type
+  dx--eval-expr(|scope): MExprTTypeRecord(type) -> MRuntimeTType(TRecordT(type'))
+    with
+      type' := <dx--eval-expr(|scope); dx--assert-target-type(|"Record type must be a type")> type
+  dx--eval-expr(|scope): MExprTTypeAny() -> MRuntimeTType(TAnyT())
+  dx--eval-expr(|scope): MExprTTypeStruct(members) -> MRuntimeTType(TStructT(members'))
+    with
+      members' := <dx--eval-expr(|scope); dx--assert-metalist; map(dx--assert-target-struct-member(|"Expected struct members"))> members
+  dx--eval-expr(|scope): MExprTStructMember(name, type) -> MRuntimeTStructMember(TStructMember(name', type'))
+    with
+      name' := <dx--eval-expr(|scope) ; dx--assert-source-string(|"Struct member name must be a source string")> name;
+      type' := <dx--eval-expr(|scope) ; dx--assert-target-type(|"Expected type for struct member")> type
+  dx--eval-expr(|scope): MExprTTypeNamed(name) -> MRuntimeTType(TNamedT(name'))
+    with
+      name' := <dx--eval-expr(|scope) ; dx--assert-source-string(|"Type name must be a source string")> name
+  dx--eval-expr(|scope): MExprTTypeSymbol(name) -> MRuntimeTType(TSymbolT(name'))
+    with
+      name' := <dx--eval-expr(|scope) ; dx--assert-source-string(|"Symbol name must be a source string")> name
+  dx--eval-expr(|scope): MExprTTypeWildcard() -> MRuntimeTType(TInferredT())
+
 
   // dx--call-function :: (string, List(TRuntimeValue)) -> TRuntimeValue
   dx--call-function: (name, args) -> ret
@@ -352,6 +416,14 @@ rules
   dx--assert-target-value-metalist(|msg): MRuntimeMetaList(vs) -> <map(dx--assert-runtime-value(|msg))> vs
   dx--assert-target-value-metalist(|msg) = dx--fail-msg(|msg)
 
+  // dx--assert-target-type(|string) :: MRuntimeValue -> TType
+  dx--assert-target-type(|_): MRuntimeTType(t) -> t
+  dx--assert-target-type(|msg) = dx--fail-msg(|msg)
+
+  // dx--assert-target-struct-member(|string) :: MRuntimeValue -> TStructMember
+  dx--assert-target-struct-member(|_): MRuntimeTStructMember(t) -> t
+  dx--assert-target-struct-member(|msg) = dx--fail-msg(|msg)
+
   // dx--assert-tvar(|string) :: TValue -> TID
   dx--assert-tvar(|_): TValueVar(vs) -> vs
   dx--assert-tvar(|msg) = dx--fail-msg(|msg)
@@ -374,6 +446,8 @@ rules
   dx--compose-cps-values: (MRuntimeValue(_), b) -> b
   dx--compose-cps-values: (MRuntimeMetaList(_), b) -> b
   dx--compose-cps-values: (MRuntimeTFun(_), b) -> b
+  dx--compose-cps-values: (MRuntimeTType(_), b) -> b
+  dx--compose-cps-values: (MRuntimeTStructMember(_), b) -> b
 
   // prevent issues by disallowing finalized terms. Since we do
   // not allow binding finalized terms this would throw away the
@@ -415,6 +489,10 @@ rules
   dx--assign-bind(|name, scope): v@MRuntimeMetaList(_) -> ()
     with <dx--scope-set(|name, v)> scope
   dx--assign-bind(|name, scope): v@MRuntimeQuote(_) -> ()
+    with <dx--scope-set(|name, v)> scope
+  dx--assign-bind(|name, scope): v@MRuntimeTType(_) -> ()
+    with <dx--scope-set(|name, v)> scope
+  dx--assign-bind(|name, scope): v@MRuntimeTStructMember(_) -> ()
     with <dx--scope-set(|name, v)> scope
   dx--assign-bind(|name, scope): v@MRuntimeCPSFinalized(_) -> ()
     with <dx--fail-msg(|"Cannot bind term that has already been finalized: ")> v

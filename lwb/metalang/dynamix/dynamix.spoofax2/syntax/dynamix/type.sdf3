@@ -3,6 +3,7 @@ module dynamix/type
 imports
   dynamix/common
   dynamix/source
+  dynamix/meta
 
 context-free sorts MSourceType
 context-free syntax
@@ -46,8 +47,25 @@ context-free syntax
   // represents a finalized AST node (aka tail calling)
   MTargetType.MTargetTypeCPSFinalized = <statement>
   MTargetType.MTargetTypeFun = <fun>
+  MTargetType.MTargetTypeType = <type>
 
 context-free sorts MRuleSignature
 context-free syntax
   MRuleSignature.MRuleSignature = [[{MType " * "}+] -> [MType]]
   MRuleSignature.MRuleZeroSignature = [() -> [MType]] // function that takes no arguments
+
+context-free syntax
+  // Types - defined here to prevent keywords such as `ref` and `type` from being rejected due to template options
+  MExpr.MExprTTypeFunction = [function<[MExpr]>]
+  MExpr.MExprTTypeRef = [ref<[MExpr]>]
+  MExpr.MExprTTypeArray = [array<[MExpr]>]
+  MExpr.MExprTTypeRecord = [record<[MExpr]>]
+  MExpr.MExprTTypeStruct = [struct<[MExpr]>]
+  MExpr.MExprTStructMember = [[MExpr] : [MExpr]]
+  MExpr.MExprTTypeNamed = [typevar([MExpr])]  // Reuse var(_) for this instead?
+  MExpr.MExprTTypeSymbol = [symboltype([MExpr])]
+  MExpr.MExprTTypeWildcard = [*]
+
+template options
+
+  tokenize : "(:<"

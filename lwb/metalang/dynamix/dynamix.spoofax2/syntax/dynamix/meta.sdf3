@@ -91,7 +91,7 @@ context-free syntax
   MPattern.MPatternListCons = <[<{MPattern ", "}*>|<MPattern>]>
   MPattern.MPatternBound = <<LID>@<MPattern>>
 
-context-free sorts MExpr MStatement MScopedGlobalBinding
+context-free sorts MExpr MStatement MScopedGlobalBinding MTypeDef
 context-free syntax
   // source language operations
   MExpr.MExprQuote = <'<STerm>>
@@ -119,6 +119,7 @@ context-free syntax
   MExpr.MExprSourceIntToTargetInt = <int(<MExpr>)>
   MExpr.MExprSourceStrToTargetStr = <str(<MExpr>)>
   MExpr.MExprSourceVarToTargetVar = <var(<MExpr>)>
+  MExpr.MExprSourceSymbolToTargetSymbol = <symbol(<MExpr>)>
   MExpr.MExprConcatenateStr = <<MExpr> + <MExpr>>
   MExpr.MExprFreshNamedTargetVar = <fresh-var(<ID>)>
   MExpr.MExprNameOfFun = <nameof(<MExpr>)>
@@ -142,7 +143,16 @@ context-free syntax
 
   // target language operations
   MExpr.MExprCallPrimitive = <#<PID>(<{MExpr ", "}*>)>
+  MExpr.MExprCallTypedPrimitive = [#[PID]<[MExpr]>([{MExpr ", "}*])]
   MExpr.MExprQuoteTarget = <@<TExp>>
+
+  MExpr.MExprTTypes = [
+    typedef {
+      [{MTypeDef "\n"}*]
+    }
+  ]
+
+  MTypeDef.MTypeDef = [[MExpr] = [MExpr]]
 
   MExpr.MExprTLet = [
     let [MExpr] = [MExpr] in
@@ -155,6 +165,10 @@ context-free syntax
     fun <MExpr>(<MExpr>) =
       <MExpr>
   >
+  MExpr.MExprTTypedFun = [
+    fun [MExpr]<[MExpr]>([MExpr]) =
+      [MExpr]
+  ]
   MExpr.MExprTFix = [
     fix {
       [{MExpr "\n"}+]
@@ -166,6 +180,11 @@ context-free syntax
     else
       [MExpr]
   ]
+
+  // Types - see also type.sdf3, split up due to keyword conflicts
+  MExpr.MExprTTypeInt = <int>
+  MExpr.MExprTTypeString = <string>
+  MExpr.MExprTTypeAny = [any]
 
 template options
   LID = keyword {reject}
