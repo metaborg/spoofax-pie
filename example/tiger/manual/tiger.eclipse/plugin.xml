@@ -198,6 +198,7 @@
   <!-- Transform -->
   <extension point="org.eclipse.ui.commands">
     <command id="tiger.eclipse.command" name="Command">
+      <commandParameter id="languageCoordinate" name="Language coordinate" optional="false"/>
       <commandParameter id="data" name="Data" optional="false"/>
     </command>
   </extension>
