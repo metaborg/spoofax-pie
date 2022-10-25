@@ -105,12 +105,14 @@ rules
   constraintPropertyDeclOk(s, MConstraintPropertyDecl(name, ty)) :- {T}
     mTypeToMTYPE(s, ty) == T,
     @name.isConstraintProperty := "1", // for merging/desugaring
-    try { isListOrSourceType(T) } | error $[Constraint property types must be source types (starting with ') or lists of source types.],
+    try { isMetaOrSourceType(T) } | error $[Constraint property types must be source types (starting with ') or a list/tuple of source types.],
     declareRule(s, name, MRULE([MANYSOURCE()], MLIST(T))).
 
-  isListOrSourceType : MTYPE
-  isListOrSourceType(MSTYPE(_)).
-  isListOrSourceType(MLIST(T)) :- isListOrSourceType(T).
+  isMetaOrSourceType : MTYPE
+  areMetaOrSourceTypes maps isMetaOrSourceType(list(*))
+  isMetaOrSourceType(MSTYPE(_)).
+  isMetaOrSourceType(MLIST(T)) :- isMetaOrSourceType(T).
+  isMetaOrSourceType(MTUPLE(Ts)) :- areMetaOrSourceTypes(Ts).
 
 // rules section
 rules
@@ -164,6 +166,9 @@ rules
     resolveConstructor(s, name) == SCONS(AT, ST),
     declareZipPatterns(s, ds, argpats, AT) == _,
     typeCoercibleTo(MSTYPE(ST), ty) | error $[This pattern matches values of sort [ST], which is not compatible with the expected type of this pattern [ty].].
+  declarePattern(s, ds, MPatternTuple(pats), ty) = MTUPLE(ETs) :-
+    typeCoercibleTo(MTUPLE(ETs), ty) | error $[A tuple pattern cannot be used to match values of type [ty]],
+    declareZipPatterns(s, ds, pats, ETs) == ETs.
   declarePattern(s, ds, MPatternBound(name, pat), ty) = PT :-
     declarePattern(s, ds, pat, ty) == PT,
     declareVar(ds, name, PT),
@@ -204,6 +209,9 @@ rules
   typeOfExp_(s, MExprSourceStrToTargetStr(v)) = MTTYPE(TVALUE()) :- {T}
     typeOfExp(s, v) == T,
     try { typeCoercibleTo(MSTYPE(SSTRING()), T) } | error $[Can only coerce strings to target strings.].
+  typeOfExp_(s, MExprSourceSymbolToTargetSymbol(v)) = MTTYPE(TVALUE()) :- {T}
+    typeOfExp(s, v) == T,
+    try { typeCoercibleTo(MSTYPE(SSTRING()), T) } | error $[Can only coerce strings to target strings.].
   typeOfExp_(s, MExprFreshNamedTargetVar(_)) = MTTYPE(TVALUE()).
   typeOfExp_(s, MExprList([])) = MLIST(MAUTO(_)).
   typeOfExp_(s, MExprList(es)) = MLIST(ET) :-
@@ -215,6 +223,8 @@ rules
     typeOfExp(s, left) == MLIST(LET) | error $[List concatenation performed on non-list value.],
     typeOfExp(s, right) == MLIST(RET) | error $[List concatenation performed on non-list value.],
     try { LET == RET } | error $[List concatenation types are not compatible with each other.].
+  typeOfExp_(s, MExprTuple(es)) = MTUPLE(ETs) :-
+    typesOfExps(s, es) == ETs.
   typeOfExp_(s, MExprContinueAt(tgt, args)) = MTTYPE(TSTATEMENT()) :-
     typeCoercibleTo(typeOfExp(s, tgt), MTTYPE(TVALUE())) | error $[Can only continue on target values.],
     typeCoercibleTo(typeOfExp(s, args), MLIST(MTTYPE(TVALUE()))) | error $[Continuation arguments must be a list of target values.].
@@ -275,7 +285,7 @@ rules
   typeDefOk : scope * MTypeDef
   typeDefsOk maps typeDefOk(*, list(*))
   typeDefOk(s, MTypeDef(target, value)) :-
-    typeOfExp(s, target) == MSTYPE(SSTRING()),
+    typeOfExp(s, target) == MTTYPE(TTYPE()),
     typeOfExp(s, value) == MTTYPE(TTYPE()).
 
   typeOfExp_(s, MExprTTypeInt()) = MTTYPE(TTYPE()).
@@ -291,11 +301,13 @@ rules
   typeOfExp_(s, MExprTTypeAny()) = MTTYPE(TTYPE()).
   typeOfExp_(s, MExprTTypeStruct(fields)) = MTTYPE(TTYPE()) :-
     typeCoercibleTo(typeOfExp(s, fields), MLIST(MTTYPE(TSTRUCTMEMBER()))).
-  typeOfExp_(s, MExprTStructMember(name, type)) = MTTYPE(TSTRUCTMEMBER()) :-
-    typeCoercibleTo(typeOfExp(s, name), MSTYPE(SSTRING())),
+  typeOfExp_(s, MExprTStructMember(name, type)) = MTTYPE(TSTRUCTMEMBER()) :- {T}
+    typeOfExp(s, name) == T,
+    try { typeCoercibleTo(MSTYPE(SSTRING()), T) } | error $[Can only coerce strings to member names.],
     typeCoercibleTo(typeOfExp(s, type), MTTYPE(TTYPE())).
   typeOfExp_(s, MExprTTypeNamed(name)) = MTTYPE(TTYPE()) :-
     typeCoercibleTo(typeOfExp(s, name), MSTYPE(SSTRING())).
+  typeOfExp_(s, MExprTTypeFreshNamed(_)) = MTTYPE(TTYPE()).
   typeOfExp_(s, MExprTTypeSymbol(name)) = MTTYPE(TTYPE()) :-
     typeCoercibleTo(typeOfExp(s, name), MSTYPE(SSTRING())).
   typeOfExp_(s, MExprTTypeWildcard()) = MTTYPE(TTYPE()).
@@ -350,6 +362,7 @@ rules
   typeOfQuote_(s, STermApp(name, args)) = MSTYPE(ST) :- {AT}
     resolveConstructor(s, name) == SCONS(AT, ST),
     quoteTypesCompatible(s, args, AT) | error $[Mismatched number of arguments.].
+  typeOfQuote_(s, STermTuple(es)) = MTUPLE(typesOfQuotes(s, es)).
 
   quoteTypeCompatible : scope * STerm * MTYPE
   quoteTypesCompatible maps quoteTypeCompatible(*, list(*), list(*))
@@ -376,6 +389,8 @@ rules // statements and composition
   performAssignment(s, n, MHOLY1(x)) :- declareVar(s, n, x).
   performAssignment(s, n, x@MTTYPE(TVALUE())) :- declareVar(s, n, x).
   performAssignment(s, n, x@MTTYPE(TFUN())) :- declareVar(s, n, x).
+  performAssignment(s, n, x@MTTYPE(TTYPE())) :- declareVar(s, n, x).
+  performAssignment(s, n, x@MTTYPE(TSTRUCTMEMBER())) :- declareVar(s, n, x).
   performAssignment(s, n, x@MLIST(_)) :- declareVar(s, n, x).
   performAssignment(s, n, x@MSTYPE(_)) :- declareVar(s, n, x).
   performAssignment(s, n, x) :-

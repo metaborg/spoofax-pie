@@ -86,6 +86,7 @@ context-free syntax
   MPattern.MPatternVariable = <<LID>>
   MPattern.MPatternConstructor = <<UID>(<{MPattern ", "}*>)>
   MPattern.MPatternList = <[<{MPattern ", "}*>]>
+  MPattern.MPatternTuple = <(<{MPattern ", "}+>)>
   MPattern.MPatternString = <<STRING>>
   MPattern.MPatternInt = <<INT>>
   MPattern.MPatternListCons = <[<{MPattern ", "}*>|<MPattern>]>
@@ -132,6 +133,7 @@ context-free syntax
   MExpr.MExprList = <[<{MExpr ", "}*>]>
   MExpr.MExprListCons = <[<{MExpr ", "}*>|<MExpr>]>
   MExpr.MExprConcatList = <<MExpr> ++ <MExpr>> {left}
+  MExpr.MExprTuple = <tuple(<{MExpr ", "}+>)>
   // TODO:
   // MExpr.MExprWith = ...
   // MExpr.MExprSplice/Code?
@@ -185,6 +187,9 @@ context-free syntax
   MExpr.MExprTTypeInt = <int>
   MExpr.MExprTTypeString = <string>
   MExpr.MExprTTypeAny = [any]
+  MExpr.MExprTTypeNamed = [typevar([MExpr])]  // Reuse var(_) for this instead?
+  MExpr.MExprTTypeFreshNamed = [fresh-typevar([ID])]
+  MExpr.MExprTTypeSymbol = [symboltype([MExpr])]
 
 template options
   LID = keyword {reject}

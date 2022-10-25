@@ -17,6 +17,7 @@ context-free syntax
   STerm.STermString = <<STRING>>
   STerm.STermApp = <<SConstructorName>(<{STerm ", "}*>)>
   STerm.STermList = <[<{STerm ", "}*>]>
+  STerm.STermTuple = <(<{STerm ", "}+>)>
   
 // source language types (modeled after statix/stratego syntax)
 context-free sorts SType SConstructorType
@@ -25,6 +26,7 @@ context-free syntax
   SType.STypeInt = <int>
   SType.STypeString = <string>
   SType.STypeList = <list(<SType>)>
+  SType.STypeTuple = <(<{SType " * "}+>)>
   
   SConstructorType.SConstructorTypeSingleton = <<UID>>
   SConstructorType.SConstructorTypeParams = <<{SType " * "}+> -\> <UID>>

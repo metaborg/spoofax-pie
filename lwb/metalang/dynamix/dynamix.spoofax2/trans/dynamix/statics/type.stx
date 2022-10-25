@@ -21,6 +21,7 @@ signature
     MSTYPE : STYPE -> MTYPE // '<stype>
     MTTYPE : TTYPE -> MTYPE // @<ttype>
     MLIST : MTYPE -> MTYPE // List(...)
+    MTUPLE : list(MTYPE) -> MTYPE // (mtype * mtype * ...)
     MHOLY0 : MTYPE // Holy
     MHOLY1 : MTYPE -> MTYPE // Holy(T)
     MAUTO : MTYPE -> MTYPE // automatic derivation of type, used for empty list literal
@@ -79,6 +80,7 @@ rules
   mTypeToMTYPE(s, MTypeSourceType(st)) = MSTYPE(sourceTypeToSTYPE(s, st)).
   mTypeToMTYPE(s, MTypeTargetType(st)) = MTTYPE(targetTypeToTTYPE(s, st)).
   mTypeToMTYPE(s, MTypeList(el)) = MLIST(mTypeToMTYPE(s, el)).
+  mTypeToMTYPE(s, MTypeTuple(types)) = MTUPLE(mTypesToMTYPEs(s, types)).
   mTypeToMTYPE(s, MTypeHoly1(el)) = MHOLY1(mTypeToMTYPE(s, el)).
   mTypeToMTYPE(s, MTypeHoly0()) = MHOLY0().
 
@@ -90,6 +92,7 @@ rules
   targetTypeToTTYPE(s, MTargetTypeCPSFinalized()) = TSTATEMENT().
   targetTypeToTTYPE(s, MTargetTypeFun()) = TFUN().
   targetTypeToTTYPE(s, MTargetTypeType()) = TTYPE().
+  targetTypeToTTYPE(s, MTargetTypeStructMember()) = TSTRUCTMEMBER().
 
 rules
   composeTypes : MTYPE * MTYPE -> MTYPE

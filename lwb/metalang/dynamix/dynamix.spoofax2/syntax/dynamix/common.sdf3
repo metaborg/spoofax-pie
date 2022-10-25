@@ -1,5 +1,5 @@
 module dynamix/common
-  
+
 lexical sorts
   ID LID UID MID PID INT STRING
   STRING_CHAR BACKSLASH_CHAR
@@ -39,11 +39,11 @@ lexical restrictions
   UID             -/- [a-zA-Z0-9\_\-]
   MID             -/- [a-zA-Z0-9\_\-\/]
   GID             -/- [a-zA-Z0-9\_]
-  
+
   // EOF may not be followed by any char
   EOF             -/- ~[]
-  
-  // Backslash chars in strings may not be followed by " 
+
+  // Backslash chars in strings may not be followed by "
   BACKSLASH_CHAR  -/- [\"]
 
 context-free restrictions

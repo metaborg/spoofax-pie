@@ -33,6 +33,7 @@ context-free syntax
   // todo: this currently doesn't align with the interpreter
   // as the interpreter only supports lists of CPS values (#6)
   MType.MTypeList = <List(<MType>)>
+  MType.MTypeTuple = <(<{MType " * "}+>)>
 
   // the type argument represents the type of the variable used
   // when bound within a body using the <- operator, and does not
@@ -48,6 +49,7 @@ context-free syntax
   MTargetType.MTargetTypeCPSFinalized = <statement>
   MTargetType.MTargetTypeFun = <fun>
   MTargetType.MTargetTypeType = <type>
+  MTargetType.MTargetTypeStructMember = <structmember>
 
 context-free sorts MRuleSignature
 context-free syntax
@@ -62,8 +64,6 @@ context-free syntax
   MExpr.MExprTTypeRecord = [record<[MExpr]>]
   MExpr.MExprTTypeStruct = [struct<[MExpr]>]
   MExpr.MExprTStructMember = [[MExpr] : [MExpr]]
-  MExpr.MExprTTypeNamed = [typevar([MExpr])]  // Reuse var(_) for this instead?
-  MExpr.MExprTTypeSymbol = [symboltype([MExpr])]
   MExpr.MExprTTypeWildcard = [*]
 
 template options

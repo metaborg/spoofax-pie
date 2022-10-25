@@ -143,6 +143,11 @@ rules
   dx--compare-pattern: (MPatternList([]), MPatternVariable(_)) -> MPatternMoreSpecific()
   dx--compare-pattern: (MPatternList([]), _) -> MPatternUncomparable()
 
+  // tuple patterns compare between their elements from left to right, uncomparable to anything else other than variables
+  dx--compare-pattern: (MPatternTuple(_), MPatternWildcard()) -> MPatternMoreSpecific()
+  dx--compare-pattern: (MPatternTuple(_), MPatternVariable(_)) -> MPatternMoreSpecific()
+  dx--compare-pattern: (MPatternTuple(elems1), MPatternTuple(elems2)) -> <dx--compare-patterns> (elems1, elems2)
+
 rules
   // compare a list of patterns and return the first ordering
   // for which the two are not equal, or return equal if they

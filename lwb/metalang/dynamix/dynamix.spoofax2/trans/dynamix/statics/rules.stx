@@ -148,6 +148,12 @@ rules
   comparePattern(MPatternList([]), MPatternList([])) = MPatternEqual().
   comparePattern(MPatternList([]), _) = MPatternUncomparable().
 
+  // tuple patterns compare between their elements from left to right, uncomparable to anything else other than variables
+  comparePattern(MPatternTuple(_), MPatternWildcard()) = MPatternMoreSpecific().
+  comparePattern(MPatternTuple(_), MPatternVariable(_)) = MPatternMoreSpecific().
+  comparePattern(MPatternTuple(elems1), MPatternTuple(elems2)) = comparePatterns(elems1, elems2).
+  comparePattern(_, _) = MPatternUncomparable().
+
 rules
   // compare a list of patterns and return the first ordering
   // for which the two are not equal, or return equal if they
@@ -172,6 +178,7 @@ rules
   desugarPattern(a@MPatternInt(_)) = a.
   desugarPattern(MPatternBound(a, b)) = MPatternBound(a, desugarPattern(b)).
   desugarPattern(MPatternConstructor(a, b)) = MPatternConstructor(a, desugarPatterns(b)).
+  desugarPattern(MPatternTuple(pats)) = MPatternTuple(desugarPatterns(pats)).
 
   // [] -> [] (nil case)
   desugarPattern(a@MPatternList([])) = a.

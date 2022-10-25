@@ -9,6 +9,7 @@ imports
   signatures/dynamix/common-sig
   signatures/dynamix/source-sig
   signatures/dynamix/meta-sig
+  signatures/dynamix/type-sig
   signatures/tim/common-sig
   signatures/tim/exp-sig
   signatures/tim/type-sig
@@ -48,6 +49,9 @@ signature
 
     // A list at the meta level of the language.
     MRuntimeMetaList : List(MRuntimeValue) -> MRuntimeValue
+
+    // A tuple at the meta level of the language
+    MRuntimeMetaTuple : List(MRuntimeValue) -> MRuntimeValue
 
     // A target-level TFun node, to be included in a TFix statement.
     MRuntimeTFun : TFun -> MRuntimeValue
@@ -190,6 +194,8 @@ rules
   dx--eval-expr(|scope): MExprConcatList(l, r) -> MRuntimeMetaList(<conc> (left', right'))
     with left' := <dx--eval-expr(|scope); dx--assert-metalist> l
     with right' := <dx--eval-expr(|scope); dx--assert-metalist> r
+  dx--eval-expr(|scope): MExprTuple(args) -> MRuntimeMetaTuple(args')
+    with args' := <map(dx--eval-expr(|scope))> args
 
   // todo: continuation argument composition? currently force values (#7)
   dx--eval-expr(|scope): MExprContinueAt(tgt, args) -> MRuntimeCPSFinalized(TExpApp(tgtf, argvs))
@@ -300,12 +306,13 @@ rules
       types' := <map(dx--eval-typedef(|scope))> types
   dx--eval-typedef(|scope): MTypeDef(name, type) -> TTypeDef(name', type')
     with
-      name' := <dx--eval-expr(|scope) ; dx--assert-source-string(|"Type name must be a source string")> name;
+      typevar := <dx--eval-expr(|scope) ; dx--assert-target-type(|"Name must be a target type var")> name;
+      name' := <?TNamedT(<id>) <+ dx--fail-msg(|"Name must be a target type var")> typevar;
       type' := <dx--eval-expr(|scope) ; dx--assert-target-type(|"Type must be a target type")> type
 
   dx--eval-expr(|scope): MExprSourceSymbolToTargetSymbol(name) -> MRuntimeValue(TValueSymbol(name'))
     with
-      name' := <dx--eval-expr(|scope) ; dx--assert-source-string(|"Symbol name must be a source string")> name
+      name' := <dx--eval-expr(|scope) ; dx--assert-source-string(|"Symbol name must be a source string") ; un-double-quote> name
 
   dx--eval-expr(|scope): MExprTTypeInt() -> MRuntimeTType(TIntT())
   dx--eval-expr(|scope): MExprTTypeString() -> MRuntimeTType(TStringT())
@@ -327,14 +334,17 @@ rules
       members' := <dx--eval-expr(|scope); dx--assert-metalist; map(dx--assert-target-struct-member(|"Expected struct members"))> members
   dx--eval-expr(|scope): MExprTStructMember(name, type) -> MRuntimeTStructMember(TStructMember(name', type'))
     with
-      name' := <dx--eval-expr(|scope) ; dx--assert-source-string(|"Struct member name must be a source string")> name;
+      name' := <dx--eval-expr(|scope) ; dx--assert-source-string(|"Struct member name must be a source string") ; un-double-quote> name;
       type' := <dx--eval-expr(|scope) ; dx--assert-target-type(|"Expected type for struct member")> type
   dx--eval-expr(|scope): MExprTTypeNamed(name) -> MRuntimeTType(TNamedT(name'))
     with
-      name' := <dx--eval-expr(|scope) ; dx--assert-source-string(|"Type name must be a source string")> name
+      name' := <dx--eval-expr(|scope) ; dx--assert-source-string(|"Type name must be a source string") ; un-double-quote> name
+  dx--eval-expr(|scope): MExprTTypeFreshNamed(name) -> MRuntimeTType(TNamedT(name'))
+    with
+      name' := <newname> name
   dx--eval-expr(|scope): MExprTTypeSymbol(name) -> MRuntimeTType(TSymbolT(name'))
     with
-      name' := <dx--eval-expr(|scope) ; dx--assert-source-string(|"Symbol name must be a source string")> name
+      name' := <dx--eval-expr(|scope) ; dx--assert-source-string(|"Symbol name must be a source string") ; un-double-quote> name
   dx--eval-expr(|scope): MExprTTypeWildcard() -> MRuntimeTType(TInferredT())
 
 
@@ -356,6 +366,7 @@ rules
   dx--quoted-term-to-runtime: x{a*} -> STermInt(<int-to-string> x){a*} where <is-int> x
   dx--quoted-term-to-runtime: x{a*} -> STermString($["[x]"]){a*} where <is-string> x
   dx--quoted-term-to-runtime: x{a*} -> STermList(x){a*} where <is-list> x
+  dx--quoted-term-to-runtime: ""#(a){an*} -> STermTuple(a){an*}
   dx--quoted-term-to-runtime: c#(a){an*} -> STermApp(c, a){an*}
 
 // Evaluation helpers
@@ -471,7 +482,10 @@ rules
     MRuntimeHoly(vals, exp),
     v
   ) -> MRuntimeHoly([v], exp)
-    where <?MRuntimeQuote(_) <+ ?MRuntimeValue(_) <+ ?MRuntimeMetaList(_) <+ ?MRuntimeTFun(_)> v
+    where <?MRuntimeQuote(_) <+ ?MRuntimeValue(_)
+           <+ ?MRuntimeMetaList(_) <+ ?MRuntimeMetaTuple(_)
+           <+ ?MRuntimeTFun(_) <+ ?MRuntimeTType(_)
+           <+ ?MRuntimeTStructMember(_)> v
 
   // the rest of the combinations are illegal
   dx--compose-cps-values: (
@@ -487,6 +501,8 @@ rules
   dx--assign-bind(|name, scope): v@MRuntimeTFun(_) -> ()
     with <dx--scope-set(|name, v)> scope
   dx--assign-bind(|name, scope): v@MRuntimeMetaList(_) -> ()
+    with <dx--scope-set(|name, v)> scope
+  dx--assign-bind(|name, scope): v@MRuntimeMetaTuple(_) -> ()
     with <dx--scope-set(|name, v)> scope
   dx--assign-bind(|name, scope): v@MRuntimeQuote(_) -> ()
     with <dx--scope-set(|name, v)> scope
@@ -543,6 +559,10 @@ rules
     where (argvs, restv) := <split-at(|<length> argpats)> args
     where <zip(dx--match-pattern(|scope))> (argpats, argvs)
     where <dx--match-pattern(|scope)> (restpat, MRuntimeMetaList(restv))
+  dx--match-pattern(|scope): (MPatternTuple(l), MRuntimeMetaTuple(args)) -> ()
+    where <zip(dx--match-pattern(|scope))> (l, args)
+  dx--match-pattern(|scope): (MPatternTuple(l), MRuntimeQuote(STermTuple(args))) -> ()
+    where <zip(dx--match-pattern(|scope))> (l, <map(!MRuntimeQuote(<id>))> args)
   dx--match-pattern(|scope): (MPatternBound(x, p), v) -> ()
     where <dx--match-pattern(|scope)> (p, v)
     where <not(dx--scope-get(|x))> scope // ensure not already bound in sub-pattern or adjacent pattern
