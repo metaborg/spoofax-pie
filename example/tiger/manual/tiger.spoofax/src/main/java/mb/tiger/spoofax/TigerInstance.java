@@ -228,39 +228,14 @@ public class TigerInstance implements LanguageInstance, TestableParse {
     }
 
     @Override public ListView<MenuItem> getResourceContextMenuItems() {
-        return ListView.of(
-            MenuItem.menu("Compile",
-                CommandAction.builder().manualOnce(compileFileCommand).fileRequired().buildItem(),
-                CommandAction.builder().manualOnce(compileDirectoryCommand).directoryRequired().buildItem(),
-                CommandAction.builder().manualOnce(altCompileFileCommand, "- default").fileRequired().buildItem(),
-                CommandAction.builder().manualOnce(altCompileFileCommand, "- list literal values instead", new RawArgs(MapView.of("listDefNames", false, "compiledFileNameSuffix", "litvals.aterm"))).fileRequired().buildItem(),
-                CommandAction.builder().manualOnce(altCompileFileCommand, "- base64 encode", new RawArgs(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))).fileRequired().buildItem(),
-                CommandAction.builder().manualOnce(altCompileFileCommand, "- list literal values instead + base64 encode", new RawArgs(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt"))).fileRequired().buildItem(),
-                CommandAction.builder().manualContinuous(altCompileFileCommand, "- default").buildItem(),
-                CommandAction.builder().manualContinuous(altCompileFileCommand, "- list literal values instead", new RawArgs(MapView.of("listDefNames", false, "compiledFileNameSuffix", "litvals.aterm"))).fileRequired().buildItem(),
-                CommandAction.builder().manualContinuous(altCompileFileCommand, "- base64 encode", new RawArgs(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))).fileRequired().buildItem(),
-                CommandAction.builder().manualContinuous(altCompileFileCommand, "- list literal values instead + base64 encode", new RawArgs(MapView.of("listDefNames", false, "base64Encode", true, "compiledFileNameSuffix", "litvals_base64.txt"))).fileRequired().buildItem()
-            ),
-            MenuItem.menu("Debug",
-                MenuItem.menu("Syntax",
-                    CommandAction.builder().manualOnce(showParsedAstCommand).buildItem(),
-                    CommandAction.builder().manualOnce(showPrettyPrintedTextCommand).buildItem()
-                ),
-                MenuItem.menu("Static Semantics",
-                    CommandAction.builder().manualOnce(showAnalyzedAstCommand).buildItem()
-                ),
-                MenuItem.menu("Transformations",
-                    CommandAction.builder().manualOnce(showDesugaredAstCommand).buildItem(),
-                    CommandAction.builder().manualOnce(inlineMethodCallCommand).buildItem()
-                )
-            )
-        );
+        return getEditorContextMenuItems();
     }
 
     @Override public ListView<MenuItem> getEditorContextMenuItems() {
         return ListView.of(
             MenuItem.menu("Compile",
                 CommandAction.builder().manualOnce(compileFileCommand).fileRequired().buildItem(),
+                CommandAction.builder().manualOnce(compileDirectoryCommand).directoryRequired().buildItem(),
                 CommandAction.builder().manualOnce(altCompileFileCommand, "- default").fileRequired().buildItem(),
                 CommandAction.builder().manualOnce(altCompileFileCommand, "- list literal values instead", new RawArgs(MapView.of("listDefNames", false, "compiledFileNameSuffix", "litvals.aterm"))).fileRequired().buildItem(),
                 CommandAction.builder().manualOnce(altCompileFileCommand, "- base64 encode", new RawArgs(MapView.of("base64Encode", true, "compiledFileNameSuffix", "defnames_base64.txt"))).fileRequired().buildItem(),
@@ -283,7 +258,8 @@ public class TigerInstance implements LanguageInstance, TestableParse {
                 ),
                 MenuItem.menu("Transformations",
                     CommandAction.builder().manualOnce(showDesugaredAstCommand).buildItem(),
-                    CommandAction.builder().manualContinuous(showDesugaredAstCommand).buildItem()
+                    CommandAction.builder().manualContinuous(showDesugaredAstCommand).buildItem(),
+                    CommandAction.builder().manualOnce(inlineMethodCallCommand).buildItem()
                 )
             )
         );
