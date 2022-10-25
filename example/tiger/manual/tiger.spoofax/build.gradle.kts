@@ -18,6 +18,8 @@ dependencies {
   api(compositeBuild("jsglr.pie"))
   api(compositeBuild("constraint.pie"))
   api(compositeBuild("spt.api"))
+  api(compositeBuild("statix.referenceretention"))
+  api(compositeBuild("statix.referenceretention.pie"))
   api("org.metaborg:pie.api")
   api("org.metaborg:pie.dagger")
   api("com.google.dagger:dagger")

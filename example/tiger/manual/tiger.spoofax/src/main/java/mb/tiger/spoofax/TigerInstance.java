@@ -31,6 +31,8 @@ import mb.spoofax.core.language.cli.CliCommand;
 import mb.spoofax.core.language.cli.CliParam;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandDef;
+import mb.spoofax.core.language.command.CommandExecutionType;
+import mb.spoofax.core.language.command.EditorFileType;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.spoofax.core.language.menu.CommandAction;
 import mb.spoofax.core.language.menu.MenuItem;
@@ -41,6 +43,7 @@ import mb.spt.api.parse.TestableParse;
 import mb.tiger.spoofax.command.TigerCompileDirectoryCommand;
 import mb.tiger.spoofax.command.TigerCompileFileAltCommand;
 import mb.tiger.spoofax.command.TigerCompileFileCommand;
+import mb.tiger.spoofax.command.TigerInlineMethodCallCommand;
 import mb.tiger.spoofax.command.TigerShowAnalyzedAstCommand;
 import mb.tiger.spoofax.command.TigerShowDesugaredAstCommand;
 import mb.tiger.spoofax.command.TigerShowParsedAstCommand;
@@ -48,12 +51,14 @@ import mb.tiger.spoofax.command.TigerShowPrettyPrintedTextCommand;
 import mb.tiger.spoofax.task.TigerCheck;
 import mb.tiger.spoofax.task.TigerCheckAggregator;
 import mb.tiger.spoofax.task.TigerIdeTokenize;
+import mb.tiger.spoofax.task.TigerInlineMethodCall;
 import mb.tiger.spoofax.task.reusable.TigerParse;
 import mb.tiger.spoofax.task.reusable.TigerStyle;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
+import java.io.Serializable;
 import java.util.Optional;
 import java.util.Set;
 
@@ -75,6 +80,7 @@ public class TigerInstance implements LanguageInstance, TestableParse {
     private final TigerCompileFileCommand compileFileCommand;
     private final TigerCompileFileAltCommand altCompileFileCommand;
     private final TigerCompileDirectoryCommand compileDirectoryCommand;
+    private final TigerInlineMethodCallCommand inlineMethodCallCommand;
 
     private final CollectionView<CommandDef<?>> commandDefs;
     private final CollectionView<AutoCommandRequest<?>> autoCommandDefs;
@@ -96,6 +102,7 @@ public class TigerInstance implements LanguageInstance, TestableParse {
         TigerCompileFileCommand compileFileCommand,
         TigerCompileFileAltCommand altCompileFileCommand,
         TigerCompileDirectoryCommand compileDirectoryCommand,
+        TigerInlineMethodCallCommand inlineMethodCallCommand,
 
         Set<CommandDef<?>> commandDefs,
         Set<AutoCommandRequest<?>> autoCommandDefs
@@ -115,6 +122,7 @@ public class TigerInstance implements LanguageInstance, TestableParse {
         this.compileFileCommand = compileFileCommand;
         this.altCompileFileCommand = altCompileFileCommand;
         this.compileDirectoryCommand = compileDirectoryCommand;
+        this.inlineMethodCallCommand = inlineMethodCallCommand;
 
         this.commandDefs = CollectionView.copyOf(commandDefs);
         this.autoCommandDefs = CollectionView.copyOf(autoCommandDefs);
@@ -206,6 +214,10 @@ public class TigerInstance implements LanguageInstance, TestableParse {
             )),
             CliCommand.of("compile-dir", "Compiles Tiger sources in given directory and shows the compiled file", compileDirectoryCommand, ListView.of(
                 CliParam.positional("dir", 0, "DIR", "Directory to compile")
+            )),
+            CliCommand.of("inline-method-call", "Inlines a method call", inlineMethodCallCommand, ListView.of(
+                CliParam.positional("resource", 0, "FILE", "Source file to inline"),
+                CliParam.option("region", ListView.of("-r", "--region"), false, "REGION", "Region in source file to inline")
             )))
         );
     }
@@ -238,7 +250,8 @@ public class TigerInstance implements LanguageInstance, TestableParse {
                     CommandAction.builder().manualOnce(showAnalyzedAstCommand).buildItem()
                 ),
                 MenuItem.menu("Transformations",
-                    CommandAction.builder().manualOnce(showDesugaredAstCommand).buildItem()
+                    CommandAction.builder().manualOnce(showDesugaredAstCommand).buildItem(),
+                    CommandAction.builder().manualOnce(inlineMethodCallCommand).buildItem()
                 )
             )
         );
