@@ -1,23 +1,9 @@
-module compile/ast
+module compile/util/ast
 
 imports
 
   signatures/tim-sig
   signatures/tim/-
-
-signature
-  sorts TYPE
-  constructors
-    INT : TYPE
-    STRING : TYPE
-    FUNCTION : list(TYPE) -> TYPE
-    REF : TYPE -> TYPE
-    ARRAY : TYPE -> TYPE
-    RECORD : TYPE -> TYPE
-    CLOSURE : list(TYPE) -> TYPE
-    ANONCLOSURE : TYPE
-    ANY : TYPE
-    STRUCT : list((TID, TYPE)) -> TYPE
 
 signature
 

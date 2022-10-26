@@ -4,7 +4,7 @@ imports
 
   signatures/tim-sig
   signatures/tim/-
-  compile/ast
+  compile/util/ast
 
 rules
 

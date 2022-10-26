@@ -5,7 +5,7 @@ imports
   signatures/tim-sig
   signatures/tim/-
   compile/uniquify
-  compile/ast
+  compile/util/ast
   compile/debug
   compile/util/type
   pp

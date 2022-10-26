@@ -2,11 +2,25 @@ module compile/util/type
 
 imports
 
-  compile/ast
+  compile/util/ast
   signatures/tim-sig
   signatures/tim/-
   signatures/llvm-sig
   signatures/llvm/-
+
+signature
+  sorts TYPE
+  constructors
+    INT : TYPE
+    STRING : TYPE
+    FUNCTION : list(TYPE) -> TYPE
+    REF : TYPE -> TYPE
+    ARRAY : TYPE -> TYPE
+    RECORD : TYPE -> TYPE
+    CLOSURE : list(TYPE) -> TYPE
+    ANONCLOSURE : TYPE
+    ANY : TYPE
+    STRUCT : list((TID, TYPE)) -> TYPE
 
 rules
 

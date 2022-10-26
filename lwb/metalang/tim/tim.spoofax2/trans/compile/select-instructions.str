@@ -6,8 +6,8 @@ imports
   signatures/tim-sig
   signatures/llvm/-
   signatures/llvm-sig
-  compile/ast
-  compile/string
+  compile/util/ast
+  compile/util/string
   compile/util/bitfield
   compile/util/type
 

@@ -2,7 +2,6 @@ module compile/util/bitfield
 
 imports
 
-  compile/ast
   compile/util/type
   signatures/llvm/-
   signatures/llvm-sig

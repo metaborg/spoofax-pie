@@ -5,7 +5,8 @@ imports
   statix/api
   signatures/tim/-
   signatures/tim-sig
-  compile/ast
+  compile/util/ast
+  compile/util/type
 
 rules
 

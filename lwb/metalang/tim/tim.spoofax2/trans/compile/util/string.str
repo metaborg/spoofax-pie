@@ -1,4 +1,4 @@
-module compile/string
+module compile/util/string
 
 imports
 
