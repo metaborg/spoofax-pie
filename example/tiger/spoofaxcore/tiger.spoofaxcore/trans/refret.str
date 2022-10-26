@@ -1,0 +1,8 @@
+module refret
+
+imports
+  //signatures/Tiger-sig
+
+strategies
+
+  inline-method-call(|region) = debug(!"Inlining: ")
