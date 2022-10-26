@@ -24,3 +24,11 @@ rules
   
   merge-equal : t@TExpPrimOp("struct-write", _, [_, _, arg], result, next) -> t
   with rules(Mapping : TValueVar(result, _) -> arg)
+  
+  merge-equal : TExpPrimOp("as-supertype", type, [arg], result, next) -> <try(merge-equal)> next
+  with
+    rules(Mapping : TValueVar(result, _) -> TValueCast(arg, type))
+  
+  merge-equal : TExpPrimOp("as-subtype", type, [arg], result, next) -> <try(merge-equal)> next
+  with
+    rules(Mapping : TValueVar(result, _) -> TValueCast(arg, type))

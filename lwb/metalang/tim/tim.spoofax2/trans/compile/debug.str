@@ -14,6 +14,8 @@ rules
   fix-invalid-elem : TValueGlobal(x, t) -> TValueVar($[glb_[x]])
   
   fix-invalid-elem : TValueVar(x, t) -> TValueVar(x)
+  fix-invalid-elem : TValueCast(TValueVar(x), t) -> TValueVar($[cast_[x]])
+  fix-invalid-elem : TValueCast(x, t) -> x
   
   fix-invalid-elem : TExpLet([], b) -> b
   fix-invalid-elem : TExpFix([], b) -> b
@@ -27,7 +29,7 @@ rules
   with
     types' := <map(type-to-ast)> types
   
-  fix-invalid-elem : TExpPrimOp(op, type, args, result, next) -> TExpTypedPrimOp(op, type', args, $[[result]], next)
+  fix-invalid-elem : TExpPrimOp(op, type, args, result, next) -> TExpTypedPrimOp(op, type', args, result, next)
   with
     type' := <type-to-ast> type
   
@@ -39,5 +41,7 @@ rules
   type-to-ast : RECORD(t) -> TRecordT(<type-to-ast> t)
   type-to-ast : ANONCLOSURE() -> TAnonClosureT()
   type-to-ast : CLOSURE(ts) -> TClosureT(<map(type-to-ast)> ts)
-  type-to-ast : STRUCT(mems) -> TStructT(<map(\(name, t) -> TStructMember(name, <type-to-ast> t)\)> mems)
+  type-to-ast : STRUCT([], mems) -> TStructT(<map(\(name, t) -> TStructMember(name, <type-to-ast> t)\)> mems)
+  type-to-ast : STRUCT([super], mems) -> TStructSuperT(<type-to-ast> super, <map(\(name, t) -> TStructMember(name, <type-to-ast> t)\)> mems)
   type-to-ast : ANY() -> TAnyT()
+  type-to-ast = debug(!"No matching type for: ") ; fail

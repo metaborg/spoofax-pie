@@ -279,7 +279,7 @@ rules
   select-primop(|result) : ("closure-offset", _, [arr, TValueInt(index)]) ->
     [Assign(result, GetElementPtr(<get-target-elem-type> arr, [<select-typed-value> arr, TypedAtom(Int32(), Literal(Int("0"))), TypedAtom(Int32(), Literal(Int(index)))]))]
 
-  select-primop(|result) : ("struct-new", type@STRUCT(members), []) ->
+  select-primop(|result) : ("struct-new", type@STRUCT(super, members), []) ->
     [ Assign(sizepvar, GetElementPtr(structType, [TypedAtom(Pointer(), Literal(Null())), TypedAtom(Int64(), Literal(Int("1")))]))
     , Assign(sizevar, PtrToInt(TypedAtom(Pointer(), VarAtom(sizepvar)), Int64()))
     , Assign(result, Call(
@@ -296,31 +296,34 @@ rules
     sizepvar := Variable(<newname> "sizeptr")
   ; sizevar := Variable(<newname> "size")
   ; structType := <get-target-elem-type> type
-  ; bitfield := <map(?(_, <id>)) ; gen-bitfield ; int-to-string> members
+  ; memberTypes := <flatten-struct ; map(?(_, <id>))> type
+  ; bitfield := <gen-bitfield ; int-to-string> memberTypes
   
   select-primop(|result) : ("struct-read", t, [struct, TValueSymbol(field)]) ->
     [ Assign(ptr, GetElementPtr(<get-target-elem-type> struct, [
         <select-typed-value> struct
       , TypedAtom(Int32(), Literal(Int("0")))
-      , offset
+      , offsets*
       ]))
     , Assign(result, Load(<get-target-type> t, TypedAtom(PointerAddrSpace("1"), VarAtom(ptr))))
     ]
   with
     ptr := Variable(<newname> "ptr")
-  ; offset := TypedAtom(Int32(), Literal(Int(<get-member-index ; int-to-string> (<get-source-type> struct, field))))
+  ; indices := <get-member-indices> (<get-source-type> struct, field)
+  ; offsets* := <map(!TypedAtom(Int32(), Literal(Int(<int-to-string>))))> indices
   
   select-primop(|result) : ("struct-write", _, [struct, TValueSymbol(field), value]) ->
     [ Assign(ptr, GetElementPtr(<get-target-elem-type> struct, [
         <select-typed-value> struct
       , TypedAtom(Int32(), Literal(Int("0")))
-      , offset
+      , offsets*
       ]))
     , Expression(Store(<select-typed-value> value, TypedAtom(PointerAddrSpace("1"), VarAtom(ptr))))
     ]
   with
     ptr := Variable(<newname> "ptr")
-  ; offset := TypedAtom(Int32(), Literal(Int(<get-member-index ; int-to-string> (<get-source-type> struct, field))))
+  ; indices := <get-member-indices> (<get-source-type> struct, field)
+  ; offsets* := <map(!TypedAtom(Int32(), Literal(Int(<int-to-string>))))> indices
   
 
   // Print
@@ -434,5 +437,6 @@ rules
   select-value : TValueGlobal(x, _) -> ConstAtom(Constant(x))
   select-value : TValueInt(x) -> Literal(Int(x))
   select-value : TValueString(x) -> Literal(String(x))
+  select-value : TValueCast(x, _) -> <select-value> x
 
   type-is-gc-pointer = not(?INT()) ; not(?FUNCTION(_))

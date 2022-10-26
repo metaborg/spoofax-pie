@@ -17,6 +17,7 @@ context-free syntax
   TType.TClosureT = [closure<[{TType ", "}*]>]
   TType.TAnyT = <any>
   TType.TStructT = [{[{TStructMember ", "}*]}]
+  TType.TStructSuperT = [{extends [TType], [{TStructMember ", "}*]}]
   TType.TNamedT = <<TID>>
   TType.TSymbolT = <symbol(<TID>)>
   TType.TInferredT = <*>
@@ -26,4 +27,4 @@ context-free syntax
 template options
   TID = keyword {reject}
   TPRIM = keyword {reject}
-  tokenize : "<"
+  tokenize : "(:{<"

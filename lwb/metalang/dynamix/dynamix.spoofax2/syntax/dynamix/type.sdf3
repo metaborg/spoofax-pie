@@ -63,6 +63,7 @@ context-free syntax
   MExpr.MExprTTypeArray = [array<[MExpr]>]
   MExpr.MExprTTypeRecord = [record<[MExpr]>]
   MExpr.MExprTTypeStruct = [struct<[MExpr]>]
+  MExpr.MExprTTypeStructSuper = [struct<extends [MExpr], [MExpr]>]
   MExpr.MExprTStructMember = [[MExpr] : [MExpr]]
   MExpr.MExprTTypeWildcard = [*]
 

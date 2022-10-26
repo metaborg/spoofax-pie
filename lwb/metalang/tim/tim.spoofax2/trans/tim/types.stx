@@ -17,7 +17,7 @@ signature
     CLOSURE : list(TYPE) -> TYPE
     ANONCLOSURE : TYPE
     ANY : TYPE
-    STRUCT : list((TID * TYPE)) -> TYPE
+    STRUCT : list(TYPE) * list((TID * TYPE)) -> TYPE
     SYMBOL : TID -> TYPE
     
 rules
@@ -38,8 +38,11 @@ rules
   typeOfType(s, TClosureT(Ts)) = CLOSURE(Ts') :-
     Ts' == typesOfTypes(s, Ts).
   typeOfType(s, TAnyT()) = ANY().
-  typeOfType(s, TStructT(members)) = STRUCT(members') :-
+  typeOfType(s, TStructT(members)) = STRUCT([], members') :-
     members' == membersOk(s, members).
+  typeOfType(s, TStructSuperT(T, members)) = STRUCT([T'], members') :-
+    members' == membersOk(s, members),
+    T' == typeOfType(s, T).
   typeOfType(s, TNamedT(x)) = resolveType(s, x).
   typeOfType(s, TSymbolT(x)) = SYMBOL(x).
   typeOfType(s, TInferredT()) = T :-
@@ -55,10 +58,22 @@ rules
     T' == typeOfType(s, T).
 
   typeOfMember : TYPE * TID -> TYPE
-  typeOfMember(STRUCT([(x, T)|_]), x) = T :-
+  typeOfMember_ : list(TYPE) * TID -> TYPE
+  typeOfMember(T, x) = typeOfMember_([T], x).
+  typeOfMember_([STRUCT(supers, [(x, T)|_])|_], x) = T :-
     @x.type := T.
-  typeOfMember(STRUCT([_|tail]), x) = T :-
-    T == typeOfMember(STRUCT(tail), x).
+  typeOfMember_([STRUCT(supers, [_|tail1])|tail2], x) = T :-
+    T == typeOfMember_([STRUCT(supers, tail1)|tail2], x).
+  typeOfMember_([STRUCT([super|tail1], [])|tail2], x) = T :-
+    T == typeOfMember_([super, STRUCT(tail1, [])|tail2], x).
+  typeOfMember_([STRUCT([], [])|tail2], x) = T :-
+    T == typeOfMember_(tail2, x).
+    
+
+  isSubtypeOf : TYPE * TYPE
+  isSubtypeOf(STRUCT([Tsuper], _), Tsuper).
+  isSubtypeOf(STRUCT([Tsuper], _), T) :-
+    isSubtypeOf(Tsuper, T).
   
   printable : TYPE
   printable(INT()).

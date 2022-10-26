@@ -301,6 +301,9 @@ rules
   typeOfExp_(s, MExprTTypeAny()) = MTTYPE(TTYPE()).
   typeOfExp_(s, MExprTTypeStruct(fields)) = MTTYPE(TTYPE()) :-
     typeCoercibleTo(typeOfExp(s, fields), MLIST(MTTYPE(TSTRUCTMEMBER()))).
+  typeOfExp_(s, MExprTTypeStructSuper(super, fields)) = MTTYPE(TTYPE()) :-
+    typeCoercibleTo(typeOfExp(s, super), MTTYPE(TTYPE())),
+    typeCoercibleTo(typeOfExp(s, fields), MLIST(MTTYPE(TSTRUCTMEMBER()))).
   typeOfExp_(s, MExprTStructMember(name, type)) = MTTYPE(TSTRUCTMEMBER()) :- {T}
     typeOfExp(s, name) == T,
     try { typeCoercibleTo(MSTYPE(SSTRING()), T) } | error $[Can only coerce strings to member names.],

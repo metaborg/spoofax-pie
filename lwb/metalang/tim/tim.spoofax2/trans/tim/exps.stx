@@ -191,11 +191,11 @@ rules
   typeOfPrimOp("closure-offset", [ANONCLOSURE(), INT()]) = CLOSURE(_).
   
   typeOfPrimOp(op@"struct-new", []) = T :-
-    try { T == STRUCT(_) } | error $[struct-new must return a struct]@op.
-  typeOfPrimOp("struct-write", [struct@STRUCT(_), SYMBOL(x), T]) = T :- {T'}
+    try { T == STRUCT(_, _) } | error $[struct-new must return a struct]@op.
+  typeOfPrimOp("struct-write", [struct@STRUCT(_, _), SYMBOL(x), T]) = T :- {T'}
     typeOfMember(struct, x) == T',
     typeCoercibleTo(T, T').
-  typeOfPrimOp("struct-read", [struct@STRUCT(_), SYMBOL(x)]) = T :- {T'}
+  typeOfPrimOp("struct-read", [struct@STRUCT(_, _), SYMBOL(x)]) = T :- {T'}
     typeOfMember(struct, x) == T',
     typeCoercibleTo(T', T),
     T != ANY().
@@ -210,7 +210,11 @@ rules
     T2 != ANY().
   typeOfPrimOp("closure-read", [ANONCLOSURE(), INT()]) = _. // intentionally unbound
   typeOfPrimOp("closure-read", [CLOSURE(Ts), INT()]) = _. // intentionally unbound
-    
+  
+  typeOfPrimOp("as-supertype", [T1]) = T2 :-
+    try { isSubtypeOf(T1, T2) } | error $[[T2] is not a supertype of [T1]].
+  typeOfPrimOp("as-subtype", [T1]) = T2 :-
+    try { isSubtypeOf(T2, T1) } | error $[[T2] is not a subtype of [T1]].
   
   isNotAny : TYPE
   areNotAny maps isNotAny(list(*))

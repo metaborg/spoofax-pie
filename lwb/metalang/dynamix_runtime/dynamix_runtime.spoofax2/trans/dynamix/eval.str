@@ -332,6 +332,10 @@ rules
   dx--eval-expr(|scope): MExprTTypeStruct(members) -> MRuntimeTType(TStructT(members'))
     with
       members' := <dx--eval-expr(|scope); dx--assert-metalist; map(dx--assert-target-struct-member(|"Expected struct members"))> members
+  dx--eval-expr(|scope): MExprTTypeStructSuper(super, members) -> MRuntimeTType(TStructSuperT(super', members'))
+    with
+      super' := <dx--eval-expr(|scope); dx--assert-target-type(|"Super type must be a type")> super;
+      members' := <dx--eval-expr(|scope); dx--assert-metalist; map(dx--assert-target-struct-member(|"Expected struct members"))> members
   dx--eval-expr(|scope): MExprTStructMember(name, type) -> MRuntimeTStructMember(TStructMember(name', type'))
     with
       name' := <dx--eval-expr(|scope) ; dx--assert-source-string(|"Struct member name must be a source string") ; un-double-quote> name;
