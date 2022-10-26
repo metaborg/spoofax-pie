@@ -39,8 +39,8 @@ context-free syntax
   // when bound within a body using the <- operator, and does not
   // necessarily represent the "return value" of the AST node that
   // contains the hole
-  MType.MTypeHoly1 = <Holy(<MType>)>
-  MType.MTypeHoly0 = <Holy>
+  MType.MTypePluggable1 = <Pluggable(<MType>)>
+  MType.MTypePluggable0 = <Pluggable>
 
 context-free sorts MTargetType
 context-free syntax

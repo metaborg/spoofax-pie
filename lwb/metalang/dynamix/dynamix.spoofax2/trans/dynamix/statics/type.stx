@@ -22,8 +22,8 @@ signature
     MTTYPE : TTYPE -> MTYPE // @<ttype>
     MLIST : MTYPE -> MTYPE // List(...)
     MTUPLE : list(MTYPE) -> MTYPE // (mtype * mtype * ...)
-    MHOLY0 : MTYPE // Holy
-    MHOLY1 : MTYPE -> MTYPE // Holy(T)
+    MPLUGGABLE0 : MTYPE // Pluggable
+    MPLUGGABLE1 : MTYPE -> MTYPE // Pluggable(T)
     MAUTO : MTYPE -> MTYPE // automatic derivation of type, used for empty list literal
     MANYSOURCE : MTYPE // any source type, only used for properties
 
@@ -81,8 +81,8 @@ rules
   mTypeToMTYPE(s, MTypeTargetType(st)) = MTTYPE(targetTypeToTTYPE(s, st)).
   mTypeToMTYPE(s, MTypeList(el)) = MLIST(mTypeToMTYPE(s, el)).
   mTypeToMTYPE(s, MTypeTuple(types)) = MTUPLE(mTypesToMTYPEs(s, types)).
-  mTypeToMTYPE(s, MTypeHoly1(el)) = MHOLY1(mTypeToMTYPE(s, el)).
-  mTypeToMTYPE(s, MTypeHoly0()) = MHOLY0().
+  mTypeToMTYPE(s, MTypePluggable1(el)) = MPLUGGABLE1(mTypeToMTYPE(s, el)).
+  mTypeToMTYPE(s, MTypePluggable0()) = MPLUGGABLE0().
 
   sourceTypeToSTYPE(s, MSourceTypeSortID(x)) = resolveSort(s, x).
   sourceTypeToSTYPE(s, MSourceTypeString()) = SSTRING().
@@ -102,19 +102,19 @@ rules
   composeTypes(MTTYPE(_), a) = a. // any other target type (expr, tfun) is thrown away
   composeTypes(MLIST(_), a) = a. // any list is thrown away
 
-  // holy + fin
-  composeTypes(MHOLY1(_), MTTYPE(TSTATEMENT())) = MTTYPE(TSTATEMENT()).
-  composeTypes(MHOLY0(), MTTYPE(TSTATEMENT())) = MTTYPE(TSTATEMENT()).
+  // pluggable + fin
+  composeTypes(MPLUGGABLE1(_), MTTYPE(TSTATEMENT())) = MTTYPE(TSTATEMENT()).
+  composeTypes(MPLUGGABLE0(), MTTYPE(TSTATEMENT())) = MTTYPE(TSTATEMENT()).
 
-  // holy + holy
-  composeTypes(MHOLY1(_), MHOLY1(x)) = MHOLY1(x).
-  composeTypes(MHOLY1(_), MHOLY0()) = MHOLY0().
-  composeTypes(MHOLY0(), MHOLY1(x)) = MHOLY1(x).
-  composeTypes(MHOLY0(), MHOLY0()) = MHOLY0().
+  // pluggable + pluggable
+  composeTypes(MPLUGGABLE1(_), MPLUGGABLE1(x)) = MPLUGGABLE1(x).
+  composeTypes(MPLUGGABLE1(_), MPLUGGABLE0()) = MPLUGGABLE0().
+  composeTypes(MPLUGGABLE0(), MPLUGGABLE1(x)) = MPLUGGABLE1(x).
+  composeTypes(MPLUGGABLE0(), MPLUGGABLE0()) = MPLUGGABLE0().
 
-  // holy + value
-  composeTypes(MHOLY1(_), t) = MHOLY1(t).
-  composeTypes(MHOLY0(), t) = MHOLY1(t).
+  // pluggable + value
+  composeTypes(MPLUGGABLE1(_), t) = MPLUGGABLE1(t).
+  composeTypes(MPLUGGABLE0(), t) = MPLUGGABLE1(t).
 
   composeTypes(A, B) = _ :-
     try { false } | error $[Cannot compose [A] and [B].],
@@ -128,11 +128,11 @@ rules
   typeCoercibleTo(T, T).
   typeCoercibleTo(MSTYPE(_), MANYSOURCE()).
   typeCoercibleTo(MAUTO(A), B) :- A == B.
-  typeCoercibleTo(MHOLY1(_), MHOLY0()).
-  typeCoercibleTo(MTTYPE(TSTATEMENT()), MHOLY0()).
-  typeCoercibleTo(MTTYPE(TVALUE()), MHOLY1(MTTYPE(TVALUE()))).
-  typeCoercibleTo(MLIST(MTTYPE(TVALUE())), MHOLY1(MLIST(MTTYPE(TVALUE())))).
-  typeCoercibleTo(MLIST(MAUTO(_)), MHOLY1(MLIST(MTTYPE(TVALUE())))).
+  typeCoercibleTo(MPLUGGABLE1(_), MPLUGGABLE0()).
+  typeCoercibleTo(MTTYPE(TSTATEMENT()), MPLUGGABLE0()).
+  typeCoercibleTo(MTTYPE(TVALUE()), MPLUGGABLE1(MTTYPE(TVALUE()))).
+  typeCoercibleTo(MLIST(MTTYPE(TVALUE())), MPLUGGABLE1(MLIST(MTTYPE(TVALUE())))).
+  typeCoercibleTo(MLIST(MAUTO(_)), MPLUGGABLE1(MLIST(MTTYPE(TVALUE())))).
   typeCoercibleTo(MLIST(A), MLIST(B)) :-
     typeCoercibleTo(A, B).
   typeCoercibleTo(T, MSTYPE(TT@SSORT(_, s))) :-

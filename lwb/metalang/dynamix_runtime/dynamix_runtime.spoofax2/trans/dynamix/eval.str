@@ -36,7 +36,7 @@ signature
     // the first argument is a list of either a single argument
     // (in the cases that there exists some value), or an empty list
     // only valid runtime values here are MRuntimeValues and MRuntimeMetaLists
-    MRuntimeHoly : List(MRuntimeValue) * TExp -> MRuntimeValue
+    MRuntimePluggable : List(MRuntimeValue) * TExp -> MRuntimeValue
 
     // a directly accessible CPS value. the value may not be legal
     // in all contexts (such as when the value represents a variable)
@@ -112,7 +112,7 @@ rules
 // Finalizing example
 rules
   // dx--finalize :: MRuntimeValue -> TExp
-  dx--finalize: MRuntimeHoly(_, ctx) -> <dx--plug(|TExpTerminatingPrimOp("exit", []))> ctx
+  dx--finalize: MRuntimePluggable(_, ctx) -> <dx--plug(|TExpTerminatingPrimOp("exit", []))> ctx
   dx--finalize: MRuntimeCPSFinalized(ctx) -> ctx
   // dx--finalize: MRuntimeValue(v) -> TExpPrimOp0(TPrimOpPrint(), [v])
   dx--finalize = dx--fail-msg(|"Unable to represent this value as a CPS term: ")
@@ -147,7 +147,7 @@ rules
 
       // check if we received a tail-calling expression
       if <?MRuntimeCPSFinalized(fin)> bodye then
-        ret := MRuntimeHoly([MRuntimeValue(TValueVar(argumentName))], TExpFix([
+        ret := MRuntimePluggable([MRuntimeValue(TValueVar(argumentName))], TExpFix([
           TFun(continuationName, [argumentName], THole())
         ], fin))
       else
@@ -165,7 +165,7 @@ rules
 
       // check if we received a tail-calling expression
       if <?MRuntimeCPSFinalized(fin)> bodye then
-        ret := MRuntimeHoly([], TExpFix([
+        ret := MRuntimePluggable([], TExpFix([
           TFun(continuationName, [], THole())
         ], fin))
       else
@@ -247,10 +247,10 @@ rules
       ret := <dx--assert-runtime-value(|"Expected continuation argument to be a value: ")> v
 
   // target language ops
-  dx--eval-expr(|scope): MExprCallPrimitive(op, args) -> MRuntimeHoly([MRuntimeValue(TValueVar(y))], TExpPrimOp(op, v, y, THole()))
+  dx--eval-expr(|scope): MExprCallPrimitive(op, args) -> MRuntimePluggable([MRuntimeValue(TValueVar(y))], TExpPrimOp(op, v, y, THole()))
     with v := <map(dx--eval-expr(|scope)); dx--assert-runtime-values-or-metalists> args
     with <newname> "y" => y
-  dx--eval-expr(|scope): MExprCallTypedPrimitive(op, type, args) -> MRuntimeHoly([MRuntimeValue(TValueVar(y))], TExpTypedPrimOp(op, type', v, y, THole()))
+  dx--eval-expr(|scope): MExprCallTypedPrimitive(op, type, args) -> MRuntimePluggable([MRuntimeValue(TValueVar(y))], TExpTypedPrimOp(op, type', v, y, THole()))
     with v := <map(dx--eval-expr(|scope)); dx--assert-runtime-values-or-metalists> args
     with type' := <dx--eval-expr(|scope); dx--assert-target-type(|"Type annotation must be a target type")> type
     with <newname> "y" => y
@@ -262,14 +262,14 @@ rules
       then' := <dx--eval-expr(|scope); dx--assert-tail-call(|"If statement body must be a tail-call: ")> then;
       else' := <dx--eval-expr(|scope); dx--assert-tail-call(|"If statement body must be a tail-call: ")> else
   dx--eval-expr(|scope): MExprTLet(name, val, body) -> <dx--compose-cps-values> (
-    MRuntimeHoly([], TExpLet([TBind(x, val')], THole())),
+    MRuntimePluggable([], TExpLet([TBind(x, val')], THole())),
     res
   )
     with
       x := <dx--eval-expr(|scope); dx--assert-target-var(|"Name of a let binding must be a target var, not: ")> name;
       val' := <dx--eval-expr(|scope); dx--assert-runtime-value(|"Value of let-stmt must be a value: ")> val;
       res := <dx--eval-expr(|scope)> body
-  dx--eval-expr(|scope): MExprHole() -> MRuntimeHoly([], THole())
+  dx--eval-expr(|scope): MExprHole() -> MRuntimePluggable([], THole())
   dx--eval-expr(|scope): MExprNameOfFun(e) -> MRuntimeValue(TValueVar(vname))
     where
       v := <dx--eval-expr(|scope)> e;
@@ -278,8 +278,8 @@ rules
     with
       tfuns := <map(dx--eval-expr(|scope)); dx--assert-runtime-tfuns-or-metalists> funs;
       // do not insert a fix block if we have no stmts, just use a blank hole
-      out := <?[] < !MRuntimeHoly([], THole()) + !MRuntimeHoly([], TExpFix(tfuns, THole()))> tfuns
-  dx--eval-expr(|scope): MExprQuoteTarget(lit) -> MRuntimeHoly([], lit)
+      out := <?[] < !MRuntimePluggable([], THole()) + !MRuntimePluggable([], TExpFix(tfuns, THole()))> tfuns
+  dx--eval-expr(|scope): MExprQuoteTarget(lit) -> MRuntimePluggable([], lit)
     with <oncetd(?THole()) <+ dx--fail-msg(|"Must have a hole in a target language literal.")> lit
   dx--eval-expr(|scope): MExprTFun(name, args, body) -> MRuntimeTFun(TFun(name', args', body'))
     with
@@ -301,7 +301,7 @@ rules
       > args;
       body' := <dx--eval-expr(|scope); dx--assert-tail-call(|"Body of a function must end with a tail call: ")> body
 
-  dx--eval-expr(|scope): MExprTTypes(types) -> MRuntimeHoly([], TExpTypes(types', THole()))
+  dx--eval-expr(|scope): MExprTTypes(types) -> MRuntimePluggable([], TExpTypes(types', THole()))
     with
       types' := <map(dx--eval-typedef(|scope))> types
   dx--eval-typedef(|scope): MTypeDef(name, type) -> TTypeDef(name', type')
@@ -467,21 +467,21 @@ rules
   dx--compose-cps-values: (a@MRuntimeCPSFinalized(_), b) -> a
     with <dx--fail-msg(|"Finalized CPS terms (@statement terms) cannot be composed with anything. Tried to compose: ")> (a, b)
 
-  // holy + fin1 = fin2 with fin1 plugged into holy
+  // pluggable + fin1 = fin2 with fin1 plugged into pluggable
   dx--compose-cps-values: (
-    MRuntimeHoly(vals, exp),
+    MRuntimePluggable(vals, exp),
     MRuntimeCPSFinalized(rest)
   ) -> MRuntimeCPSFinalized(<dx--plug(|rest)> exp)
-  // holy1 + holy2 = holy3 with holy2 plugged into holy1
+  // pluggable1 + pluggable2 = pluggable3 with pluggable2 plugged into pluggable1
   dx--compose-cps-values: (
-    MRuntimeHoly(vals1, exp1),
-    MRuntimeHoly(vals2, exp2)
-  ) -> MRuntimeHoly(vals2, <dx--plug(|exp2)> exp1)
-  // holy + x = holy yielding x, for all other values
+    MRuntimePluggable(vals1, exp1),
+    MRuntimePluggable(vals2, exp2)
+  ) -> MRuntimePluggable(vals2, <dx--plug(|exp2)> exp1)
+  // pluggable + x = pluggable yielding x, for all other values
   dx--compose-cps-values: (
-    MRuntimeHoly(vals, exp),
+    MRuntimePluggable(vals, exp),
     v
-  ) -> MRuntimeHoly([v], exp)
+  ) -> MRuntimePluggable([v], exp)
     where <?MRuntimeQuote(_) <+ ?MRuntimeValue(_)
            <+ ?MRuntimeMetaList(_) <+ ?MRuntimeMetaTuple(_)
            <+ ?MRuntimeTFun(_) <+ ?MRuntimeTType(_)
@@ -494,7 +494,7 @@ rules
   ) -> <dx--fail-msg(|"Invalid composition of CPS values. This should have been rejected by Statix. Tried to compose: ")> (a, b)
 
   // dx--assign-bind(|string, MScope) :: MRuntimeValue -> ?
-  dx--assign-bind(|name, scope): MRuntimeHoly([x], _) -> ()
+  dx--assign-bind(|name, scope): MRuntimePluggable([x], _) -> ()
     with <dx--scope-set(|name, x)> scope
   dx--assign-bind(|name, scope): v@MRuntimeValue(_) -> ()
     with <dx--scope-set(|name, v)> scope

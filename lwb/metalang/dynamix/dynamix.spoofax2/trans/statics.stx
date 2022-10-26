@@ -190,12 +190,12 @@ rules
   typeOfExp_(s, MExprCall(ruleName, args)) = RT :- {AT}
     resolveRule(s, ruleName) == (_, MRULE(AT, RT)),
     callTypesCompatible(typesOfExps(s, args), AT).
-  typeOfExp_(s, MExprLabeled0(body, labelName)) = MHOLY0() :- {s' RT}
+  typeOfExp_(s, MExprLabeled0(body, labelName)) = MPLUGGABLE0() :- {s' RT}
     new s', s' -P-> s,
     declareVar(s', labelName, MTTYPE(TVALUE())),
     typeOfExp(s', body) == RT,
     try { RT == MTTYPE(TSTATEMENT()) } | error $[The body of a labeled expression must always result in a tail-call (value of type @statement).].
-  typeOfExp_(s, MExprLabeled1(body, labelName)) = MHOLY1(MTTYPE(TVALUE())) :- {s' RT}
+  typeOfExp_(s, MExprLabeled1(body, labelName)) = MPLUGGABLE1(MTTYPE(TVALUE())) :- {s' RT}
     new s', s' -P-> s,
     declareVar(s', labelName, MTTYPE(TVALUE())),
     typeOfExp(s', body) == RT,
@@ -250,11 +250,11 @@ rules
   typeOfExp_(s, MExprTLet(name, val, body)) = RT :-
     typeOfExp(s, name) == MTTYPE(TVALUE()) | error $[`let` name must be a @value.]@name,
     typeOfExp(s, val) == MTTYPE(TVALUE()) | error $[`let` value must be a @value.]@val,
-    RT == composeTypes(MHOLY0(), typeOfExp(s, body)).
-  typeOfExp_(s, MExprHole()) = MHOLY0().
+    RT == composeTypes(MPLUGGABLE0(), typeOfExp(s, body)).
+  typeOfExp_(s, MExprHole()) = MPLUGGABLE0().
   typeOfExp_(s, MExprNameOfFun(e)) = MTTYPE(TVALUE()) :-
     typeCoercibleTo(typeOfExp(s, e), MTTYPE(TFUN())) | error $[Expected @fun value as argument to nameof operator.].
-  typeOfExp_(s, MExprTFix(funs)) = MHOLY0() :- {Ts}
+  typeOfExp_(s, MExprTFix(funs)) = MPLUGGABLE0() :- {Ts}
     typesOfExps(s, funs) == Ts,
     try { validTFixMembers(Ts) } | error $[Expressions within a fix block must be of type @fun or List(@fun).].
   typeOfExp_(s, MExprConcatenateStr(left, right)) = MSTYPE(SSTRING()) :-
@@ -262,7 +262,7 @@ rules
     typeCoercibleTo(MSTYPE(SSTRING()), typeOfExp(s, right)) | error $[The right-hand side of the `+` operator must be a source string. Runtime addition is done through primitives, not the + operator.]@right.
   typeOfExp_(s, MExprScopedGlobals(bindings, exp)) = typeOfExp(s, exp) :-
     scopedGlobalBindingsOk(s, bindings).
-  typeOfExp_(s, MExprQuoteTarget(_)) = MHOLY0() :-
+  typeOfExp_(s, MExprQuoteTarget(_)) = MPLUGGABLE0() :-
     try { false } | warning $[Quoted target blocks are deprecated and will be removed.].
   typeOfExp_(s, MExprTFun(name, args, body)) = MTTYPE(TFUN()) :- {s' RT}
     typeCoercibleTo(typeOfExp(s, name), MTTYPE(TVALUE())) | error $[The name of a function must be a value.],
@@ -279,7 +279,7 @@ rules
     try { RT == MTTYPE(TSTATEMENT()) } | error $[The body of a function definition must always result in a tail-call (value of type @statement).].
 
   // Target type usages
-  typeOfExp_(s, MExprTTypes(defs)) = MHOLY0() :-
+  typeOfExp_(s, MExprTTypes(defs)) = MPLUGGABLE0() :-
     typeDefsOk(s, defs).
 
   typeDefOk : scope * MTypeDef
@@ -334,7 +334,7 @@ rules
   primitiveArgumentsType(MPRIMITIVESTMT(A)) = A.
 
   primitiveReturnType : MPRIMITIVE -> MTYPE
-  primitiveReturnType(MPRIMITIVEEXPR(_)) = MHOLY1(MTTYPE(TVALUE())).
+  primitiveReturnType(MPRIMITIVEEXPR(_)) = MPLUGGABLE1(MTTYPE(TVALUE())).
   primitiveReturnType(MPRIMITIVESTMT(_)) = MTTYPE(TSTATEMENT()).
 
   callTypesCompatible : list(MTYPE) * list(MTYPE)
@@ -386,7 +386,7 @@ rules // statements and composition
     performAssignment(s, name, T).
 
   performAssignment : scope * string * MTYPE
-  performAssignment(s, n, MHOLY1(x)) :- declareVar(s, n, x).
+  performAssignment(s, n, MPLUGGABLE1(x)) :- declareVar(s, n, x).
   performAssignment(s, n, x@MTTYPE(TVALUE())) :- declareVar(s, n, x).
   performAssignment(s, n, x@MTTYPE(TFUN())) :- declareVar(s, n, x).
   performAssignment(s, n, x@MTTYPE(TTYPE())) :- declareVar(s, n, x).
