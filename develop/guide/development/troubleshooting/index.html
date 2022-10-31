@@ -768,13 +768,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#could-not-generate-a-decorated-class-for-type-eclipsecompilerplugin" class="md-nav__link">
-    Could not generate a decorated class for type EclipseCompilerPlugin
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -1110,13 +1103,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#could-not-generate-a-decorated-class-for-type-eclipsecompilerplugin" class="md-nav__link">
-    Could not generate a decorated class for type EclipseCompilerPlugin
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -1221,20 +1207,6 @@ Caused by: java.lang.ArrayIndexOutOfBoundsException: 195
         ... 15 more
 </code></pre></div>
 <p>Determine the version of Java using <code>java -version</code>. Java 8 and 9 can exhibit this problem. The solution is to update your Java to version 11 or later. You can use a tool such as <a href="https://sdkman.io/">SDKMAN!</a> to easily manage the (default) versions of Java on your system.</p>
-<h3 id="could-not-generate-a-decorated-class-for-type-eclipsecompilerplugin">Could not generate a decorated class for type EclipseCompilerPlugin<a class="headerlink" href="#could-not-generate-a-decorated-class-for-type-eclipsecompilerplugin" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>FAILURE: Build failed with an exception.
-
-* Where:
-Build file &#39;esv/org.metaborg.meta.lang.esv/build.gradle.kts&#39; line: 1
-
-* What went wrong:
-An exception occurred applying plugin request [id: &#39;de.set.ecj&#39;]
-&gt; Failed to apply plugin &#39;de.set.ecj&#39;.
-   &gt; Could not create plugin of type &#39;EclipseCompilerPlugin&#39;.
-      &gt; Could not generate a decorated class for type EclipseCompilerPlugin.
-         &gt; org/gradle/jvm/toolchain/JavaToolChain
-</code></pre></div>
-<p>The above error is caused by using Gradle 7 or newer, for which the ECJ plugin is not yet compatible. See <a href="https://github.com/TwoStone/gradle-eclipse-compiler-plugin/issues/13">TwoStone/gradle-eclipse-compiler-plugin#13</a>. If this error occurs while importing the project into IntelliJ, then your version of Gradle is not set correctly. Select Gradle version 6.8.</p>
 
 
 
