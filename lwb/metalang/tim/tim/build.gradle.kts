@@ -102,7 +102,8 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
 
   val showEvaluated = TypeInfo.of(taskPackageId, "TimShowEvaluated")
   val compileToLLVM = TypeInfo.of(taskPackageId, "TimCompileToLLVM")
-  addTaskDefs(showEvaluated, compileToLLVM)
+  val showTyped = TypeInfo.of(taskPackageId, "TimShowTyped")
+  addTaskDefs(showEvaluated, compileToLLVM, showTyped)
 
   val showEvaluatedCommand = CommandDefRepr.builder()
     .type(commandPackageId, showEvaluated.id() + "Command")
@@ -140,14 +141,35 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
     .enclosingProjectRequired()
     .buildItem()
 
+
+  val showTypedCommand = CommandDefRepr.builder()
+    .type(commandPackageId, showTyped.id() + "Command")
+    .taskDefType(showTyped)
+    .argType(showTyped.appendToId(".Args"))
+    .displayName("Show processed representation")
+    .description("Compile the Tim to a limited version.")
+    .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous)
+    .addAllParams(listOf(
+      ParamRepr.of("rootDirectory", TypeInfo.of("mb.resource.hierarchical", "ResourcePath"), true, ArgProviderRepr.enclosingContext(EnclosingCommandContextType.Project)),
+      ParamRepr.of("file", TypeInfo.of("mb.resource.hierarchical", "ResourcePath"), true, ArgProviderRepr.context(CommandContextType.File))
+    ))
+    .build()
+  val showTypedCommandMenuItem = CommandActionRepr.builder()
+    .manualOnce(showTypedCommand)
+    .fileRequired()
+    .enclosingProjectRequired()
+    .buildItem()
+
   val commands = listOf(
     showEvaluatedCommand,
-    compileToLLVMCommand
+    compileToLLVMCommand,
+    showTypedCommand
   )
   addAllCommandDefs(commands)
 
   val menuItems = listOf(
-    MenuItemRepr.menu("Run", listOf(showEvaluatedCommandMenuItem, compileToLLVMCommandMenuItem))
+    MenuItemRepr.menu("Run", listOf(showEvaluatedCommandMenuItem, compileToLLVMCommandMenuItem)),
+    MenuItemRepr.menu("Debug", listOf(showTypedCommandMenuItem))
   )
   addAllMainMenuItems(menuItems)
   addAllEditorContextMenuItems(menuItems)

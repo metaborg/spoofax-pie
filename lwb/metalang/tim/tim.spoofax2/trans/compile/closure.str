@@ -139,9 +139,10 @@ rules
     with <map(\x -> x with rules(Functions :+ _ -> x)\)> funs
 
   replace-funtype-by-closure : FUNCTION(_) -> ANONCLOSURE()
-  replace-funtype-by-closure : ARRAY(t) -> ARRAY(<replace-funtype-by-closure> t)
-  replace-funtype-by-closure : REF(t) -> REF(<replace-funtype-by-closure> t)
-  replace-funtype-by-closure : RECORD(t) -> RECORD(<replace-funtype-by-closure> t)
+  replace-funtype-by-closure : ARRAY(t) -> ARRAY(<try(replace-funtype-by-closure)> t)
+  replace-funtype-by-closure : REF(t) -> REF(<try(replace-funtype-by-closure)> t)
+  replace-funtype-by-closure : RECORD(t) -> RECORD(<try(replace-funtype-by-closure)> t)
+  replace-funtype-by-closure : STRUCT(super, t) -> STRUCT(<map(try(replace-funtype-by-closure))> super, <map((id, try(replace-funtype-by-closure)))> t)
   replace-all-funtypes = rec x(try(sometd(
      \TExpApp(fun, args) -> TExpApp(fun, <x> args)\
   <+ \TValueVar(v, t) -> TValueVar(v, <replace-funtype-by-closure> t)\

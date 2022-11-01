@@ -7,7 +7,7 @@ lexical sorts
   TNEWLINE_EOF TEOF
 
 lexical syntax
-  TID               = [\$a-zA-Z\_] [a-zA-Z0-9\_\-]*
+  TID               = [\$a-zA-Z\_] [\$a-zA-Z0-9\_\-]*
   TPRIM             = [\+\-\*\/A-Za-z0-9\_]+ // primitive id
   TINT              = "-"? [0-9]+
   TSTRING           = "\"" TSTRING_CHAR* "\""

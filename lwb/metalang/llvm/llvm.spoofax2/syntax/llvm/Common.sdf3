@@ -7,7 +7,7 @@ lexical sorts
 
 lexical syntax
 
-  ID               = [a-zA-Z0-9\_\.]*
+  ID               = [\$a-zA-Z0-9\_\.]*
   INT              = "-"? [0-9]+
   POSINT           = [0-9]+
   STRING           = "\"" STRING_CHAR* "\""

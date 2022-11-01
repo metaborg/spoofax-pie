@@ -44,4 +44,4 @@ rules
   type-to-ast : STRUCT([], mems) -> TStructT(<map(\(name, t) -> TStructMember(name, <type-to-ast> t)\)> mems)
   type-to-ast : STRUCT([super], mems) -> TStructSuperT(<type-to-ast> super, <map(\(name, t) -> TStructMember(name, <type-to-ast> t)\)> mems)
   type-to-ast : ANY() -> TAnyT()
-  type-to-ast = debug(!"No matching type for: ") ; fail
+  type-to-ast = debug(!"No matching type for: ") ; !TInferredT()
