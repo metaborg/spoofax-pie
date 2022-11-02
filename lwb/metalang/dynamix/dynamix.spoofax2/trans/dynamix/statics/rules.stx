@@ -17,19 +17,19 @@ signature
 rules
   // Go through all defined rules, and check whether the implementations do
   // not have equal patterns.
-  assertNoEqualRuleImplementations : scope
-  assertNoEqualRuleImplementations(s) :- {ps}
+  assertNoEqualRuleImplementations : scope * scope
+  assertNoEqualRuleImplementations(gs, s) :- {ps}
     // step one, find all rule declarations
     query rule min and false in s |-> ps,
-    assertNoEqualRuleImplementationsForRules(s, ps).
+    assertNoEqualRuleImplementationsForRules(gs, s, ps).
 
   // step two: for each rule declaration ensure things are sane
-  assertNoEqualRuleImplementationsForRule : scope * (path * (string * scope))
-  assertNoEqualRuleImplementationsForRules maps assertNoEqualRuleImplementationsForRule(*, list(*))
+  assertNoEqualRuleImplementationsForRule : scope * scope * (path * (string * scope))
+  assertNoEqualRuleImplementationsForRules maps assertNoEqualRuleImplementationsForRule(*, *, list(*))
 
-  assertNoEqualRuleImplementationsForRule(s, (_, (name, _))) :- {ps pps}
+  assertNoEqualRuleImplementationsForRule(gs, s, (_, (name, _))) :- {ps pps}
     // find all implementations
-    query ruleImpl filter ~0 and { x' :- x' == astId(name) } min and false in s |-> ps,
+    query ruleImpl filter C* and { x' :- x' == astId(name) } min and false in gs |-> ps,
     ruleImplScopeToDecls(ps) == pps,
 
     // compare each implementation against each other implementation
@@ -63,18 +63,9 @@ rules
     assertRuleImplsNotEqual(els, cmptl). // recurse
 
   assertRuleImplNotEqual : (path * (astId * MRuleDecl)) * (path * (astId * MRuleDecl))
-  assertRuleImplNotEqual((_, (_, x@MRuleDecl(aname, _, _))), (_, (_, y@MRuleDecl(bname, _, _)))) :- {a b}
-    astId(aname) == a,
-    astId(bname) == b,
-    assertRuleImplNotEqual2(a, b, x, y).
-
- // TODO: despite the above unfolding technique which should prevent
- // a rule from ever being matched by itself, we're still running
- // into issues where this goes wrong for some reason. This is a stopgap
- // which asserts that we're not comparing with ourselves.
- assertRuleImplNotEqual2 : astId * astId * MRuleDecl * MRuleDecl
- assertRuleImplNotEqual2(x, x, _, _).
- assertRuleImplNotEqual2(_, _, MRuleDecl(aname, apats, _), MRuleDecl(bname, bpats, _)) :-
+  assertRuleImplNotEqual((_, (_, x@MRuleDecl(aname, apats, _))), (_, (_, y@MRuleDecl(bname, bpats, _)))) :- {a b}
+    // In an earlier implementation, a performance issue would occur due to ruleImpls being resolved multiple times, this check remains as a smoke test for a regression
+    try {astId(aname) != astId(bname)} | error $[This implementation is compared to itself, due to a bug in the Dynamix implementation, you should not see this error]@aname,
     try { comparePatterns(apats, bpats) != MPatternEqual() } | error $[This implementation is equally specific to at least one other implementation. To prevent ambiguity in matching order, each rule implementation must have a distinct set of values it can match. [apats] and [bpats] overlap.]@aname,
     try { comparePatterns(apats, bpats) != MPatternEqual() } | error $[This implementation is equally specific to at least one other implementation. To prevent ambiguity in matching order, each rule implementation must have a distinct set of values it can match. [apats] and [bpats] overlap.]@bname.
 

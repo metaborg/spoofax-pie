@@ -44,12 +44,12 @@ context-free syntax
 
 context-free sorts MTargetType
 context-free syntax
-  MTargetType.MTargetTypeValue = <value>
+  MTargetType.MTargetTypeValue = <cval>
   // represents a finalized AST node (aka tail calling)
-  MTargetType.MTargetTypeCPSFinalized = <statement>
-  MTargetType.MTargetTypeFun = <fun>
-  MTargetType.MTargetTypeType = <type>
-  MTargetType.MTargetTypeStructMember = <structmember>
+  MTargetType.MTargetTypeCPSFinalized = <cexp>
+  MTargetType.MTargetTypeFun = <cfun>
+  MTargetType.MTargetTypeType = <ctype>
+  MTargetType.MTargetTypeStructMember = <cstructmember>
 
 context-free sorts MRuleSignature
 context-free syntax

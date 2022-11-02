@@ -8,21 +8,22 @@ signature
   name-resolution labels
     P // parent-child, only used in rules
     I // import
+    C // child scope, used from the global scope to modules
 
   relations
     rule : string -> scope
     ruleOf : MRULE
-    
+
     primitive : string -> scope
     primitiveOf : MPRIMITIVE
-    
+
     var : string -> scope
     global : string -> scope
     typeOf : MTYPE
-    
+
     mod : string -> scope // module
     modOf : scope
-    
+
     curmod : string // name of current module
 
     ruleImpl : astId -> scope
@@ -40,25 +41,25 @@ signature
 rules
   withType : MTYPE -> scope
   typeOf   : scope -> MTYPE
-  
+
   withRule : MRULE -> scope
   ruleOf   : scope -> MRULE
-  
+
   withMod : scope -> scope
   modOf   : scope -> scope
-  
+
   withPrimitive : MPRIMITIVE -> scope
   primitiveOf   : scope -> MPRIMITIVE
-  
+
   withType(T) = s :- new s, !typeOf[T] in s.
   typeOf(s) = T :- query typeOf filter e in s |-> [(_, T)].
-  
+
   withRule(T) = s :- new s, !ruleOf[T] in s.
   ruleOf(s) = T :- query ruleOf filter e in s |-> [(_, T)].
-  
+
   withMod(T) = s :- new s, !modOf[T] in s.
   modOf(s) = T :- query modOf filter e in s |-> [(_, T)].
-  
+
   withPrimitive(T) = s :- new s, !primitiveOf[T] in s.
   primitiveOf(s) = T :- query primitiveOf filter e in s |-> [(_, T)].
 

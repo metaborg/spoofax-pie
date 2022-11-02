@@ -464,12 +464,8 @@ rules
   dx--compose-cps-values: (MRuntimeTType(_), b) -> b
   dx--compose-cps-values: (MRuntimeTStructMember(_), b) -> b
 
-  // prevent issues by disallowing finalized terms. Since we do
-  // not allow binding finalized terms this would throw away the
-  // entire finalized term, which is never what you would want
-  // to do in this situation
+  // a finalized value throws away anything in the second part (dead code)
   dx--compose-cps-values: (a@MRuntimeCPSFinalized(_), b) -> a
-    with <dx--fail-msg(|"Finalized CPS terms (@statement terms) cannot be composed with anything. Tried to compose: ")> (a, b)
 
   // pluggable + fin1 = fin2 with fin1 plugged into pluggable
   dx--compose-cps-values: (

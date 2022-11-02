@@ -14,13 +14,14 @@ rules
   fileOk : scope * DynamixProgram
   fileOk(globalS, DynamixProgram(modname, sections)) :- {modS}
     new modS,
+    globalS-C->modS,
     insertModuleName(modS, modname),
     declareModule(globalS, modname, modS),
     sectionsOk(globalS, modS, sections),
     // todo: this will assert only if the rules are imported, but compilation
     // right now unconditionally combines modules together (even if they are
     // not imported by any file) (#2)
-    assertNoEqualRuleImplementations(modS).
+    assertNoEqualRuleImplementations(globalS, modS).
     // true.
   fileOk(globalS, DynamixMultiProgram(programs)) :-
     filesOk(globalS, programs).

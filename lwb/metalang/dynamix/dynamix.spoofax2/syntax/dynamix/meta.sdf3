@@ -40,8 +40,8 @@ context-free syntax
 
 context-free sorts MPrimitiveDecl
 context-free syntax
-  MPrimitiveDecl.MPrimitiveDeclExpression = <expression #<PID>(<{MType ", "}*>)>
-  MPrimitiveDecl.MPrimitiveDeclStatement = <statement #<PID>(<{MType ", "}*>)>
+  MPrimitiveDecl.MPrimitiveDeclExpression = <value #<PID>(<{MType ", "}*>)>
+  MPrimitiveDecl.MPrimitiveDeclStatement = <expression #<PID>(<{MType ", "}*>)>
   MPrimitiveDecl.MPrimitiveDeclConditional = <conditional #<PID>(<{MType ", "}*>)>
 
 context-free sorts MConstraintPropertyDecl
