@@ -53,11 +53,15 @@ rules
 
   convert-non-escaping : t@TExpFix(funs, exp) -> t'
   where <fix-is-non-escaping> t
+  with t' := <repeat(convert-non-escaping-)> t
+
+  convert-non-escaping- : t@TExpFix(funs, exp) -> t'
   with
     {| ConvertCall
     : funs' := <map(convert-non-escaping-fun)> funs
     ; t' := <topdown(try(ConvertCall))> TExpFix(funs', exp)
     |}
+  where <not(equal)> (t, t')
 
   convert-non-escaping-fun : TFun(name, FUNCTION(types), args, body) -> TFun(name, FUNCTION(types'), args', body)
   with
