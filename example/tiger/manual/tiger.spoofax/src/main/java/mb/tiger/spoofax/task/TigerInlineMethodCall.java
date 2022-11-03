@@ -10,10 +10,12 @@ import mb.resource.ResourceKey;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
 import mb.stratego.common.StrategoRuntime;
+import mb.tego.tuples.Pair;
 import mb.tiger.spoofax.TigerScope;
 import mb.tiger.spoofax.task.reusable.TigerAnalyze;
 import mb.tiger.spoofax.task.reusable.TigerParse;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -45,13 +47,16 @@ public class TigerInlineMethodCall implements TaskDef<TigerShowArgs, CommandFeed
         return context
             .require(analyze, new TigerAnalyze.Input(key, parse.inputBuilder().withFile(key).buildAstSupplier()))
             .map(output -> {
+                IStrategoTerm regionAst;
                 if(region != null) {
-                    return TermTracer.getSmallestTermEncompassingRegion(output.result.analyzedAst, region);
+                    regionAst = TermTracer.getSmallestTermEncompassingRegion(output.result.analyzedAst, region);
                 } else {
-                    return output.result.analyzedAst;
+                    regionAst = output.result.analyzedAst;
                 }
+                // inline-method-call(|regionAst)
+                return Pair.of(output.result.analyzedAst, regionAst);
             })
-            .mapCatching(ast -> TermToString.toString(strategoRuntimeProvider.get().invoke("inline-method-call", ast)))
+            .mapCatching(ast -> TermToString.toString(strategoRuntimeProvider.get().invoke("inline-method-call", ast.component2(), ast.component1())))
             .mapOrElse(text -> CommandFeedback.of(ShowFeedback.showText(text, "Inlined method call in '" + key + "'")), e -> CommandFeedback.ofTryExtractMessagesFrom(e, key));
     }
 

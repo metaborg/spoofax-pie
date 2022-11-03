@@ -4,6 +4,7 @@ import mb.nabl2.terms.ITerm;
 import mb.statix.codecompletion.SolverContext;
 import mb.statix.constraints.messages.IMessage;
 import mb.statix.solver.IConstraint;
+import mb.tego.strategies.Strategy;
 import mb.tego.strategies.Strategy1;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
