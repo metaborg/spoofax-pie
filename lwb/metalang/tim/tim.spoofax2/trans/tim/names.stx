@@ -9,6 +9,7 @@ signature
   relations
     var : TID -> TYPE
     type : TID -> TYPE
+    withType : -> TYPE
     
   name-resolution labels
     P
@@ -46,7 +47,7 @@ rules
     
   // declare new type, assert it is not shadowed in the current scope
   declareType : scope * TID * TYPE
-  declareType(s, x, T) :- {ps psT}
+  declareType(s, x, T) :- {ps}
     !type[x, T] in s,
     query type filter e and { x' :- x' == x } min and false in s |-> ps,
     try { ps == [_] } | error $[Duplicate declaration of [x] in the same scope.]@x,
@@ -54,6 +55,7 @@ rules
 
   declareTypeDef : scope * TTypeDef
   declareTypeDefs maps declareTypeDef(*, list(*))
-  declareTypeDef(s, TTypeDef(x, T)) :- {T'}
+  declareTypeDef(s, TTypeDef(x, T)) :- {T' sT}
     T' == typeOfType(s, T),
-    declareType(s, x, T').
+    new sT, !withType[T'] in sT,
+    declareType(s, x, TYPEVAR(sT)).

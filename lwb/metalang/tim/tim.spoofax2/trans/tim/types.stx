@@ -18,6 +18,7 @@ signature
     ANONCLOSURE : TYPE
     ANY : TYPE
     STRUCT : list(TYPE) * list((TID * TYPE)) -> TYPE
+    TYPEVAR : scope -> TYPE
     SYMBOL : TID -> TYPE
     
 rules
@@ -59,7 +60,7 @@ rules
 
   typeOfMember : TYPE * TID -> TYPE
   typeOfMember_ : list(TYPE) * TID -> TYPE
-  typeOfMember(T, x) = typeOfMember_([T], x).
+  typeOfMember(T, x) = typeOfTypeVar(typeOfMember_([T], x)).
   typeOfMember_([STRUCT(supers, [(x, T)|_])|_], x) = T :-
     @x.type := T.
   typeOfMember_([STRUCT(supers, [_|tail1])|tail2], x) = T :-
@@ -68,6 +69,12 @@ rules
     T == typeOfMember_([super, STRUCT(tail1, [])|tail2], x).
   typeOfMember_([STRUCT([], [])|tail2], x) = T :-
     T == typeOfMember_(tail2, x).
+
+  typeOfTypeVar : TYPE -> TYPE
+  typeOfTypeVar(TYPEVAR(s)) = T :-
+    query withType
+      in s |-> [(_, T)].
+  typeOfTypeVar(T) = T.
     
 
   isSubtypeOf : TYPE * TYPE

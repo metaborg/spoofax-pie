@@ -29,13 +29,13 @@ void *GarbageCollector::allocate_no_collect(size_t size, ObjectTag tag) {
     new_space->size = total_size;
     active_space.free_ptr += total_size;
     void *user_space = new_space + 1;
-    return user_space;
+    return memset(user_space, 0, size);
 }
 
 void *GarbageCollector::allocate_bitfield_no_collect(size_t size, uint64_t bitfield) {
-    assert(size <= 64 * sizeof(uint64_t));
-    size = (size + 7) & ~7;  // Ensure we are 8 byte aligned
+    assert(size <= 56 * sizeof(uint64_t));
     size_t total_size = size + sizeof(ObjectMetadata);  // Type tag and size
+    total_size = (total_size + 7) & ~7;  // Ensure we are 8 byte aligned
     if (active_space.free_ptr + total_size > active_space.end) {
         std::cout << "Heap is full :'(" << std::endl;
         exit(1);
@@ -46,7 +46,7 @@ void *GarbageCollector::allocate_bitfield_no_collect(size_t size, uint64_t bitfi
     new_space->bitfield = (bitfield << 8) | (long_size << 2) | STRUCT;
     active_space.free_ptr += total_size;
     void *user_space = new_space + 1;
-    return user_space;
+    return memset(user_space, 0, size);
 }
 
 void GarbageCollector::swap_spaces() {

@@ -9,7 +9,7 @@ imports
   signatures/llvm/-
 
 signature
-  sorts TYPE
+  sorts TYPE SCOPE
   constructors
     INT : TYPE
     STRING : TYPE
@@ -21,6 +21,7 @@ signature
     ANONCLOSURE : TYPE
     ANY : TYPE
     STRUCT : list(TYPE) * list((TID, TYPE)) -> TYPE
+    TYPEVAR : SCOPE -> TYPE
 
 rules
 
