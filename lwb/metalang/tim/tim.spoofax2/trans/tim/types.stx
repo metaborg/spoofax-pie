@@ -20,33 +20,41 @@ signature
     STRUCT : list(TYPE) * list((TID * TYPE)) -> TYPE
     TYPEVAR : scope -> TYPE
     SYMBOL : TID -> TYPE
+    AUTO : TYPE -> TYPE
     
 rules
   typeOfType : scope * TType -> TYPE
   typesOfTypes maps typeOfType(*, list(*)) = list(*)
+  typeOfInnerType : scope * TType -> TYPE
+  typesOfInnerTypes maps typeOfInnerType(*, list(*)) = list(*)
   
-  typeOfType(s, TIntT()) = INT().
-  typeOfType(s, TStringT()) = STRING().
-  typeOfType(s, TFunctionT(Ts)) = FUNCTION(Ts') :-
-    Ts' == typesOfTypes(s, Ts).
-  typeOfType(s, TRefT(T)) = REF(T') :-
-    T' == typeOfType(s, T).
-  typeOfType(s, TArrayT(T)) = ARRAY(T') :-
-    T' == typeOfType(s, T).
-  typeOfType(s, TRecordT(T)) = RECORD(T') :-
-    T' == typeOfType(s, T).
-  typeOfType(s, TAnonClosureT()) = ANONCLOSURE().
-  typeOfType(s, TClosureT(Ts)) = CLOSURE(Ts') :-
-    Ts' == typesOfTypes(s, Ts).
-  typeOfType(s, TAnyT()) = ANY().
-  typeOfType(s, TStructT(members)) = STRUCT([], members') :-
-    members' == membersOk(s, members).
-  typeOfType(s, TStructSuperT(T, members)) = STRUCT([T'], members') :-
-    members' == membersOk(s, members),
-    T' == typeOfType(s, T).
-  typeOfType(s, TNamedT(x)) = resolveType(s, x).
-  typeOfType(s, TSymbolT(x)) = SYMBOL(x).
+  typeOfType(s, T) = typeOfInnerType(s, T).
+  typeOfType(s, TNamedT(x)) = typeOfTypeVar(resolveType(s, x)).
   typeOfType(s, TInferredT()) = T :-
+    T != ANY().
+  
+  typeOfInnerType(s, TIntT()) = INT().
+  typeOfInnerType(s, TStringT()) = STRING().
+  typeOfInnerType(s, TFunctionT(Ts)) = FUNCTION(Ts') :-
+    Ts' == typesOfInnerTypes(s, Ts).
+  typeOfInnerType(s, TRefT(T)) = REF(T') :-
+    T' == typeOfInnerType(s, T).
+  typeOfInnerType(s, TArrayT(T)) = ARRAY(T') :-
+    T' == typeOfInnerType(s, T).
+  typeOfInnerType(s, TRecordT(T)) = RECORD(T') :-
+    T' == typeOfInnerType(s, T).
+  typeOfInnerType(s, TAnonClosureT()) = ANONCLOSURE().
+  typeOfInnerType(s, TClosureT(Ts)) = CLOSURE(Ts') :-
+    Ts' == typesOfInnerTypes(s, Ts).
+  typeOfInnerType(s, TAnyT()) = ANY().
+  typeOfInnerType(s, TStructT(members)) = STRUCT([], members') :-
+    members' == membersOk(s, members).
+  typeOfInnerType(s, TStructSuperT(T, members)) = STRUCT([T'], members') :-
+    members' == membersOk(s, members),
+    T' == typeOfInnerType(s, T).
+  typeOfInnerType(s, TNamedT(x)) = resolveType(s, x).
+  typeOfInnerType(s, TSymbolT(x)) = SYMBOL(x).
+  typeOfInnerType(s, TInferredT()) = AUTO(T) :-
     T != ANY().
   
   typeNotAny : TYPE
@@ -56,7 +64,7 @@ rules
   memberOk : scope * TStructMember -> (TID * TYPE)
   membersOk maps memberOk(*, list(*)) = list(*)
   memberOk(s, TStructMember(x, T)) = (x, T') :-
-    T' == typeOfType(s, T).
+    T' == typeOfInnerType(s, T).
 
   typeOfMember : TYPE * TID -> TYPE
   typeOfMember_ : list(TYPE) * TID -> TYPE
@@ -71,10 +79,12 @@ rules
     T == typeOfMember_(tail2, x).
 
   typeOfTypeVar : TYPE -> TYPE
+  typesOfTypeVars maps typeOfTypeVar(list(*)) = list(*)
   typeOfTypeVar(TYPEVAR(s)) = T :-
     query withType
       in s |-> [(_, T)].
   typeOfTypeVar(T) = T.
+  typeOfTypeVar(AUTO(T)) = T.
     
 
   isSubtypeOf : TYPE * TYPE

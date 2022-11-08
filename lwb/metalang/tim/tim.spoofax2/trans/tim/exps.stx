@@ -72,7 +72,7 @@ rules
 
   texpOk(s, TExpTypedPrimOp(op, type, args, x, rest)) :- {T argTys s'}
     new s', s' -P-> s,
-    typeOfTypeVar(typeOfType(s, type)) == T,
+    typeOfType(s, type) == T,
     typesOfTValues(s, args) == argTys,
     typeOfPrimOp(op, argTys) == T | error $[Illegal primitive operation.],
     declareVar(s', x, T),
