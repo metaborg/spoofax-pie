@@ -29,7 +29,7 @@ rules
     T == FUNCTION(expectedArgTys) | error $[The target of a function application must be a function, [T] given.],
     typesOfTValues(s, args) == givenArgTys,
     typesCoercibleTo(givenArgTys, expectedArgTys) | error $[Incompatible arguments passed to function application.],
-    areNotAny(expectedArgTys). 
+    areNotAny(expectedArgTys).
 
   texpOk(s, TExpFix(funs, body)) :- {funS bodyS}
     new funS, funS -P-> s,
@@ -161,12 +161,10 @@ rules
   typeOfPrimOp("str-length", [STRING()]) = INT().
   typeOfPrimOp("str-index", [STRING(), INT()]) = STRING().
 
-  typeOfPrimOp("array-new", Ts) = ARRAY(T) :- {T'}
-    T' == typeOfTypeVar(T),
-    typesCoercibleToOne(Ts, T') | error $[Types [Ts] do not match with array type [T]].
-  typeOfPrimOp("array-write", [ARRAY(T1), INT(), T2]) = T2 :- {T1'}
-    T1' == typeOfTypeVar(T1),
-    typeCoercibleTo(T2, T1') | error $[The type [T2] is not assignable to an array of type [T1].].
+  typeOfPrimOp("array-new", Ts) = ARRAY(T) :-
+    typesCoercibleToOne(Ts, T) | error $[Types [Ts] do not match with array type [T]].
+  typeOfPrimOp("array-write", [ARRAY(T1), INT(), T2]) = T2 :-
+    typeCoercibleTo(T2, T1) | error $[The type [T2] is not assignable to an array of type [T1].].
   typeOfPrimOp("array-length", [ARRAY(_)]) = INT().
   typeOfPrimOp("array-concat", [ARRAY(T), ARRAY(T)]) = ARRAY(T).
   typeOfPrimOp("array-concat", [ARRAY(INT()), ARRAY(T)]) = ARRAY(INT()) :-
@@ -177,9 +175,8 @@ rules
   typeOfPrimOp("array-tail", [ARRAY(T)]) = ARRAY(T).
 
   typeOfPrimOp("record-new", _) = RECORD(_).
-  typeOfPrimOp("record-write", [RECORD(T1), STRING(), T2]) = T2 :- {T1'}
-    T1' == typeOfTypeVar(T1),
-    typeCoercibleTo(T2, T1') | error $[The type [T2] is not assignable to a record of type [T1].].
+  typeOfPrimOp("record-write", [RECORD(T1), STRING(), T2]) = T2 :-
+    typeCoercibleTo(T2, T1) | error $[The type [T2] is not assignable to a record of type [T1].].
 
   typeOfPrimOp("ref-new", [T1]) = REF(T2) :-
     typeCoercibleTo(T1, T2) | error $[The type [T1] is not assignable to a reference of type [T2]].
@@ -192,7 +189,7 @@ rules
   typeOfPrimOp("closure-new", Ts) = CLOSURE(Ts).
   typeOfPrimOp("closure-offset", [CLOSURE(_), INT()]) = ANONCLOSURE().
   typeOfPrimOp("closure-offset", [ANONCLOSURE(), INT()]) = CLOSURE(_).
-  
+
   typeOfPrimOp(op@"struct-new", []) = T :-
     try { T == STRUCT(_, _) } | error $[struct-new must return a struct]@op.
   typeOfPrimOp("struct-write", [struct@STRUCT(_, _), SYMBOL(x), T]) = T :- {T'}
@@ -204,23 +201,21 @@ rules
     T != ANY().
 
 //  typeOfPrimOp("array-read", [ARRAY(ANY()), INT()]) = _. // intentionally unbound
-  typeOfPrimOp("array-read", [ARRAY(T1), INT()]) = T2 :- {T1'}
-    T1' == typeOfTypeVar(T1),
-    typeCoercibleTo(T1', T2),
+  typeOfPrimOp("array-read", [ARRAY(T1), INT()]) = T2 :-
+    typeCoercibleTo(T1, T2),
     T2 != ANY().
 //  typeOfPrimOp("record-read", [RECORD(ANY()), STRING()]) = _. // intentionally unbound
-  typeOfPrimOp("record-read", [RECORD(T1), STRING()]) = T2 :- {T1'}
-    T1' == typeOfTypeVar(T1),
-    typeCoercibleTo(T1', T2),
+  typeOfPrimOp("record-read", [RECORD(T1), STRING()]) = T2 :-
+    typeCoercibleTo(T1, T2),
     T2 != ANY().
   typeOfPrimOp("closure-read", [ANONCLOSURE(), INT()]) = _. // intentionally unbound
   typeOfPrimOp("closure-read", [CLOSURE(Ts), INT()]) = _. // intentionally unbound
-  
+
   typeOfPrimOp("as-supertype", [T1]) = T2 :-
     try { isSubtypeOf(T1, T2) } | error $[[T2] is not a supertype of [T1]].
   typeOfPrimOp("as-subtype", [T1]) = T2 :-
     try { isSubtypeOf(T2, T1) } | error $[[T2] is not a subtype of [T1]].
-  
+
   isNotAny : TYPE
   areNotAny maps isNotAny(list(*))
   isNotAny(T) :-

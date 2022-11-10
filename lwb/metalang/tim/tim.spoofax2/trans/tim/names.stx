@@ -4,28 +4,27 @@ imports
   signatures/tim/common-sig
   signatures/tim/exp-sig
   tim/types
-  
+
 signature
   relations
     var : TID -> TYPE
     type : TID -> TYPE
-    withType : -> TYPE
-    
+
   name-resolution labels
     P
-    
+
 rules
   // lookup var in current scope or parent scopes
   lookupVar : scope * TID -> list((path * (TID * TYPE)))
   lookupVar(s, x) = ps :-
     query var filter P* and { x' :- x == x' } min $ < P and true in s |-> ps.
-    
+
   // resolve var to the given ID
   resolveVar : scope * TID -> TYPE
   resolveVar(s, x) = T :- {x'}
     lookupVar(s, x) == [(_, (x', T))|_] | error $[Undefined variable [x].]@x,
     @x.ref := x'.
-    
+
   // declare new var, assert it is not shadowed in the current scope
   declareVar : scope * TID * TYPE
   declareVar(s, x, T) :- {ps psT}
@@ -38,16 +37,16 @@ rules
   lookupType : scope * TID -> list((path * (TID * TYPE)))
   lookupType(s, x) = ps :-
     query type filter P* and { x' :- x == x' } min $ < P and true in s |-> ps.
-    
+
   // resolve type to the given ID
   resolveType : scope * TID -> TYPE
   resolveType(s, x) = T :- {x'}
     lookupType(s, x) == [(_, (x', T))|_] | error $[Undefined type [x].]@x,
     @x.ref := x'.
-    
+
   // declare new type, assert it is not shadowed in the current scope
   declareType : scope * TID * TYPE
-  declareType(s, x, T) :- {ps}
+  declareType(s, x, T) :- {ps psT}
     !type[x, T] in s,
     query type filter e and { x' :- x' == x } min and false in s |-> ps,
     try { ps == [_] } | error $[Duplicate declaration of [x] in the same scope.]@x,
@@ -55,7 +54,6 @@ rules
 
   declareTypeDef : scope * TTypeDef
   declareTypeDefs maps declareTypeDef(*, list(*))
-  declareTypeDef(s, TTypeDef(x, T)) :- {T' sT}
+  declareTypeDef(s, TTypeDef(x, T)) :- {T'}
     T' == typeOfType(s, T),
-    new sT, !withType[T'] in sT,
-    declareType(s, x, TYPEVAR(sT)).
+    declareType(s, x, T').

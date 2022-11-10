@@ -4,7 +4,7 @@ imports
   signatures/tim/common-sig
   signatures/tim/type-sig
   tim/names
-  
+
 signature
   sorts TYPE
   constructors
@@ -18,57 +18,48 @@ signature
     ANONCLOSURE : TYPE
     ANY : TYPE
     STRUCT : list(TYPE) * list((TID * TYPE)) -> TYPE
-    TYPEVAR : scope -> TYPE
     SYMBOL : TID -> TYPE
-    AUTO : TYPE -> TYPE
-    
+
 rules
   typeOfType : scope * TType -> TYPE
   typesOfTypes maps typeOfType(*, list(*)) = list(*)
-  typeOfInnerType : scope * TType -> TYPE
-  typesOfInnerTypes maps typeOfInnerType(*, list(*)) = list(*)
-  
-  typeOfType(s, T) = typeOfInnerType(s, T).
-  typeOfType(s, TNamedT(x)) = typeOfTypeVar(resolveType(s, x)).
+
+  typeOfType(s, TIntT()) = INT().
+  typeOfType(s, TStringT()) = STRING().
+  typeOfType(s, TFunctionT(Ts)) = FUNCTION(Ts') :-
+    Ts' == typesOfTypes(s, Ts).
+  typeOfType(s, TRefT(T)) = REF(T') :-
+    T' == typeOfType(s, T).
+  typeOfType(s, TArrayT(T)) = ARRAY(T') :-
+    T' == typeOfType(s, T).
+  typeOfType(s, TRecordT(T)) = RECORD(T') :-
+    T' == typeOfType(s, T).
+  typeOfType(s, TAnonClosureT()) = ANONCLOSURE().
+  typeOfType(s, TClosureT(Ts)) = CLOSURE(Ts') :-
+    Ts' == typesOfTypes(s, Ts).
+  typeOfType(s, TAnyT()) = ANY().
+  typeOfType(s, TStructT(members)) = STRUCT([], members') :-
+    members' == membersOk(s, members).
+  typeOfType(s, TStructSuperT(T, members)) = STRUCT([T'], members') :-
+    members' == membersOk(s, members),
+    T' == typeOfType(s, T).
+  typeOfType(s, TNamedT(x)) = resolveType(s, x).
+  typeOfType(s, TSymbolT(x)) = SYMBOL(x).
   typeOfType(s, TInferredT()) = T :-
     T != ANY().
-  
-  typeOfInnerType(s, TIntT()) = INT().
-  typeOfInnerType(s, TStringT()) = STRING().
-  typeOfInnerType(s, TFunctionT(Ts)) = FUNCTION(Ts') :-
-    Ts' == typesOfInnerTypes(s, Ts).
-  typeOfInnerType(s, TRefT(T)) = REF(T') :-
-    T' == typeOfInnerType(s, T).
-  typeOfInnerType(s, TArrayT(T)) = ARRAY(T') :-
-    T' == typeOfInnerType(s, T).
-  typeOfInnerType(s, TRecordT(T)) = RECORD(T') :-
-    T' == typeOfInnerType(s, T).
-  typeOfInnerType(s, TAnonClosureT()) = ANONCLOSURE().
-  typeOfInnerType(s, TClosureT(Ts)) = CLOSURE(Ts') :-
-    Ts' == typesOfInnerTypes(s, Ts).
-  typeOfInnerType(s, TAnyT()) = ANY().
-  typeOfInnerType(s, TStructT(members)) = STRUCT([], members') :-
-    members' == membersOk(s, members).
-  typeOfInnerType(s, TStructSuperT(T, members)) = STRUCT([T'], members') :-
-    members' == membersOk(s, members),
-    T' == typeOfInnerType(s, T).
-  typeOfInnerType(s, TNamedT(x)) = resolveType(s, x).
-  typeOfInnerType(s, TSymbolT(x)) = SYMBOL(x).
-  typeOfInnerType(s, TInferredT()) = AUTO(T) :-
-    T != ANY().
-  
+
   typeNotAny : TYPE
   typesNotAny maps typeNotAny(list(*))
   typeNotAny(T) :- T != ANY().
-  
+
   memberOk : scope * TStructMember -> (TID * TYPE)
   membersOk maps memberOk(*, list(*)) = list(*)
   memberOk(s, TStructMember(x, T)) = (x, T') :-
-    T' == typeOfInnerType(s, T).
+    T' == typeOfType(s, T).
 
   typeOfMember : TYPE * TID -> TYPE
   typeOfMember_ : list(TYPE) * TID -> TYPE
-  typeOfMember(T, x) = typeOfTypeVar(typeOfMember_([T], x)).
+  typeOfMember(T, x) = typeOfMember_([T], x).
   typeOfMember_([STRUCT(supers, [(x, T)|_])|_], x) = T :-
     @x.type := T.
   typeOfMember_([STRUCT(supers, [_|tail1])|tail2], x) = T :-
@@ -78,20 +69,12 @@ rules
   typeOfMember_([STRUCT([], [])|tail2], x) = T :-
     T == typeOfMember_(tail2, x).
 
-  typeOfTypeVar : TYPE -> TYPE
-  typesOfTypeVars maps typeOfTypeVar(list(*)) = list(*)
-  typeOfTypeVar(TYPEVAR(s)) = T :-
-    query withType
-      in s |-> [(_, T)].
-  typeOfTypeVar(T) = T.
-  typeOfTypeVar(AUTO(T)) = T.
-    
 
   isSubtypeOf : TYPE * TYPE
   isSubtypeOf(STRUCT([Tsuper], _), Tsuper).
   isSubtypeOf(STRUCT([Tsuper], _), T) :-
     isSubtypeOf(Tsuper, T).
-  
+
   printable : TYPE
   printable(INT()).
   printable(STRING()).
@@ -101,13 +84,13 @@ rules
   typeCoercibleTo : TYPE * TYPE
   typesCoercibleTo maps typeCoercibleTo(list(*), list(*))
   typesCoercibleToOne maps typeCoercibleTo(list(*), *)
-  
+
   typeCoercibleTo(T, T).
-//  typeCoercibleTo(REF(T1), REF(T2)) :- 
+//  typeCoercibleTo(REF(T1), REF(T2)) :-
 //    elementCoercibleTo(T1, T2).
-//  typeCoercibleTo(ARRAY(T1), ARRAY(T2)) :- 
+//  typeCoercibleTo(ARRAY(T1), ARRAY(T2)) :-
 //    elementCoercibleTo(T1, T2).
-//  typeCoercibleTo(RECORD(T1), RECORD(T2)) :- 
+//  typeCoercibleTo(RECORD(T1), RECORD(T2)) :-
 //    elementCoercibleTo(T1, T2).
   typeCoercibleTo(INT(), ANY()) :-
     try { false } | note $[Boxing an integer].
@@ -115,7 +98,7 @@ rules
     try { false } | note $[Unboxing an integer].
   typeCoercibleTo(T, ANY()).
   typeCoercibleTo(ANY(), T).
-  
+
   elementCoercibleTo : TYPE * TYPE
   elementCoercibleTo(T, T).
   elementCoercibleTo(T, ANY()) :-
