@@ -31,6 +31,7 @@ rules
   ; strip-annos
   ; uniquify
   ; merge-equals
+  ; desugar-record-news
   ; inline-lets
   ; box-values
   ; convert-closures
@@ -44,6 +45,7 @@ rules
   ; strip-annos
   ; uniquify
   ; merge-equals
+  ; desugar-record-news
   ; box-values
   ; convert-closures
   ; inline-lets

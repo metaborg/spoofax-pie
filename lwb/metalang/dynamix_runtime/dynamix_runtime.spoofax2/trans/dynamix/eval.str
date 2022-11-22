@@ -391,7 +391,7 @@ rules
     with <dx--assign-bind(|name, scope)> e
 
   // dx--assert-metalist :: MRuntimeValue -> List(MRuntimeValue)
-  dx--assert-metalist = (?MRuntimeMetaList(x); !x) <+ dx--fail-msg(|"Expected a meta-list, got ")
+  dx--assert-metalist = (?MRuntimeMetaList(x); !x) <+ (?MRuntimeQuote(STermList(<id>)); map(!MRuntimeQuote(<id>))) <+ dx--fail-msg(|"Expected a meta-list, got ")
 
   // dx--assert-runtime-values-or-metalists :: List(MRuntimeValue) -> List(TValue)
   dx--assert-runtime-values-or-metalists = map({ x, y:

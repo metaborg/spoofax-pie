@@ -10,6 +10,11 @@ imports
 
 rules
 
+  reveal-structs(|analysis) : STRUCT(supers, memberScope) -> STRUCT(<map(reveal-structs(|analysis))> supers, members)
+  with
+    [members] := <stx-get-scopegraph-data(|analysis, "tim/names!withMembers"); debug> memberScope
+  reveal-structs(|analysis) = id
+
   explicate-types : program -> program'
   with
     analysis := <stx-get-ast-analysis> program
@@ -18,11 +23,7 @@ rules
   
   explicate-type(|analysis) : t@TValueVar(x) -> TValueVar(x, type)
   with
-    type := <stx-get-ast-type(|analysis)> t
-
-  explicate-type(|analysis) : f@TFun(x, args, body) -> TFun(x, type, args, body)
-  with
-    type := <stx-get-ast-type(|analysis)> f
+    type := <stx-get-ast-type(|analysis) ; reveal-structs(|analysis)> t
 
   explicate-type(|analysis) : f@TFun(x, args, body) -> TFun(x, type, args, body)
   with
@@ -34,11 +35,11 @@ rules
 
   explicate-type(|analysis) : TExpPrimOp(name, args, result, body) -> TExpPrimOp(name, type, args, result, body)
   with
-    type := <stx-get-ast-type(|analysis)> result
+    type := <stx-get-ast-type(|analysis) ; reveal-structs(|analysis)> result
 
   explicate-type(|analysis) : TExpTypedPrimOp(name, _, args, result, body) -> TExpPrimOp(name, type, args, result, body)
   with
-    type := <stx-get-ast-type(|analysis)> result
+    type := <stx-get-ast-type(|analysis) ; reveal-structs(|analysis)> result
 
   explicate-type(|analysis) : TExpTypes(_, e) -> e  // All type definitions should already be resolved by statix
 

@@ -1,0 +1,20 @@
+module compile/desugar-record-new
+
+imports
+
+  compile/util/ast
+  compile/util/type
+
+rules
+
+  desugar-record-news = bottomup(try(desugar-record-new))
+  
+  desugar-record-new : TExpPrimOp("record-new", t, args, result, next) -> TExpPrimOp("record-new", t, [], result, next')
+  with
+    next' := <add-writes> (TValueVar(result, t), args, next)
+  
+  add-writes : (target, [key, value|rest], next) -> TExpPrimOp("record-write", <get-source-type> value, [target, key, value], <newname> "noop", next')
+  with
+    next' := <add-writes> (target, rest, next)
+  
+  add-writes : (_, [], next) -> next

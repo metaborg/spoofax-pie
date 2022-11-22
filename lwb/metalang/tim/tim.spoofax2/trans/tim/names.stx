@@ -9,6 +9,7 @@ signature
   relations
     var : TID -> TYPE
     type : TID -> TYPE
+    withMembers : list((TID * TYPE))
 
   name-resolution labels
     P
@@ -57,3 +58,8 @@ rules
   declareTypeDef(s, TTypeDef(x, T)) :- {T'}
     T' == typeOfType(s, T),
     declareType(s, x, T').
+
+  resolveMembers : scope -> list((TID * TYPE))
+  resolveMembers(s) = members :-
+    query withMembers
+      in s |-> [(_, members)].

@@ -212,7 +212,7 @@ rules
     try { typeCoercibleTo(MSTYPE(SSTRING()), T) } | error $[Can only coerce strings to target strings.].
   typeOfExp_(s, MExprSourceSymbolToTargetSymbol(v)) = MTTYPE(TVALUE()) :- {T}
     typeOfExp(s, v) == T,
-    try { typeCoercibleTo(MSTYPE(SSTRING()), T) } | error $[Can only coerce strings to target strings.].
+    try { typeCoercibleTo(MSTYPE(SSTRING()), T) } | error $[Can only coerce strings to target symbols.].
   typeOfExp_(s, MExprFreshNamedTargetVar(_)) = MTTYPE(TVALUE()).
   typeOfExp_(s, MExprList([])) = MLIST(MAUTO(_)).
   typeOfExp_(s, MExprList(es)) = MLIST(ET) :-
@@ -309,11 +309,13 @@ rules
     typeOfExp(s, name) == T,
     try { typeCoercibleTo(MSTYPE(SSTRING()), T) } | error $[Can only coerce strings to member names.],
     typeCoercibleTo(typeOfExp(s, type), MTTYPE(TTYPE())).
-  typeOfExp_(s, MExprTTypeNamed(name)) = MTTYPE(TTYPE()) :-
-    typeCoercibleTo(typeOfExp(s, name), MSTYPE(SSTRING())).
+  typeOfExp_(s, MExprTTypeNamed(name)) = MTTYPE(TTYPE()) :- {T}
+    typeOfExp(s, name) == T,
+    try { typeCoercibleTo(MSTYPE(SSTRING()), T) } | error $[Can only coerce strings to target type variables.].
   typeOfExp_(s, MExprTTypeFreshNamed(_)) = MTTYPE(TTYPE()).
-  typeOfExp_(s, MExprTTypeSymbol(name)) = MTTYPE(TTYPE()) :-
-    typeCoercibleTo(typeOfExp(s, name), MSTYPE(SSTRING())).
+  typeOfExp_(s, MExprTTypeSymbol(name)) = MTTYPE(TTYPE()) :- {T}
+    typeOfExp(s, name) == T,
+    try { typeCoercibleTo(MSTYPE(SSTRING()), T) } | error $[Can only coerce strings to target symbols.].
   typeOfExp_(s, MExprTTypeWildcard()) = MTTYPE(TTYPE()).
 
   coercibleToInt : MTYPE

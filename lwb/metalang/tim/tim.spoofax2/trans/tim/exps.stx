@@ -192,11 +192,11 @@ rules
 
   typeOfPrimOp(op@"struct-new", []) = T :-
     try { T == STRUCT(_, _) } | error $[struct-new must return a struct]@op.
-  typeOfPrimOp("struct-write", [struct@STRUCT(_, _), SYMBOL(x), T]) = T :- {T'}
-    typeOfMember(struct, x) == T',
+  typeOfPrimOp(op@"struct-write", [struct@STRUCT(_, _), SYMBOL(x), T]) = T :- {T'}
+    typeOfMember(struct, x) == T' | error $[No member named [x]],
     typeCoercibleTo(T, T').
-  typeOfPrimOp("struct-read", [struct@STRUCT(_, _), SYMBOL(x)]) = T :- {T'}
-    typeOfMember(struct, x) == T',
+  typeOfPrimOp(op@"struct-read", [struct@STRUCT(_, _), SYMBOL(x)]) = T :- {T'}
+    typeOfMember(struct, x) == T' | error $[No member named [x]],
     typeCoercibleTo(T', T),
     T != ANY().
 

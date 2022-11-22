@@ -43,6 +43,5 @@ rules
   type-to-ast : CLOSURE(ts) -> TClosureT(<map(type-to-ast)> ts)
   type-to-ast : STRUCT([], mems) -> TStructT(<map(\(name, t) -> TStructMember(name, <type-to-ast> t)\)> mems)
   type-to-ast : STRUCT([super], mems) -> TStructSuperT(<type-to-ast> super, <map(\(name, t) -> TStructMember(name, <type-to-ast> t)\)> mems)
-  type-to-ast : TYPEVAR(_) -> TNamedT(<newname> "typevar")
   type-to-ast : ANY() -> TAnyT()
   type-to-ast = debug(!"No matching type for: ") ; !TInferredT()

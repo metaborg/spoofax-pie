@@ -21,7 +21,6 @@ signature
     ANONCLOSURE : TYPE
     ANY : TYPE
     STRUCT : list(TYPE) * list((TID, TYPE)) -> TYPE
-    TYPEVAR : SCOPE -> TYPE
 
 rules
 
