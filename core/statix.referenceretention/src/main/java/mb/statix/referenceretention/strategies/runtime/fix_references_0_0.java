@@ -16,6 +16,7 @@ public final class fix_references_0_0 extends Strategy {
     public static final fix_references_0_0 instance = new fix_references_0_0();
 
     @Override public @Nullable IStrategoTerm invoke(Context context, IStrategoTerm current) {
+        // TODO: This should call the Tego engine and strategy.
         throw new IllegalStateException("Strategy fix_references_0_0 called!");
     }
 }

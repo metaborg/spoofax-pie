@@ -5,4 +5,4 @@ imports
 
 strategies
 
-  inline-method-call(|region) = debug(!"Inlining: ")
+  inline-method-call(|region) = debug(!"Inlining: "); prim("RR_fix_references"); debug(!"Inlined: ")

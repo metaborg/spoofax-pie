@@ -11,6 +11,7 @@ import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.HierarchicalResourceType;
+import mb.statix.referenceretention.pie.InlineMethodCallTaskDef;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
 import mb.tiger.TigerConstraintAnalyzer;
@@ -98,6 +99,10 @@ public class TigerModule {
         return builder.buildFromPrototype(prototype);
     }
 
+    @Provides @TigerScope
+    static mb.tego.strategies.runtime.TegoRuntime provideTegoRuntime(mb.tego.strategies.runtime.TegoRuntimeImpl tegoImplementation) {
+        return tegoImplementation;
+    }
 
     @Provides @TigerScope
     static TigerConstraintAnalyzerFactory provideConstraintAnalyzerFactory(ResourceService resourceService) {
@@ -131,6 +136,7 @@ public class TigerModule {
         TigerShowDesugaredAst showDesugaredAst,
 
         TigerInlineMethodCall inlineMethodCall,
+        InlineMethodCallTaskDef inlineMethodCallTaskDef,
 
         TigerCompileFile compileFile,
         TigerCompileFileAlt compileFileAlt,
@@ -157,6 +163,7 @@ public class TigerModule {
         taskDefs.add(showDesugaredAst);
 
         taskDefs.add(inlineMethodCall);
+        taskDefs.add(inlineMethodCallTaskDef);
 
         taskDefs.add(compileFile);
         taskDefs.add(compileFileAlt);
