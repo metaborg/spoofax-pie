@@ -1,6 +1,7 @@
-package mb.statix.referenceretention.strategies.runtime;
+package mb.statix.referenceretention.tego;
 
 import mb.nabl2.terms.ITerm;
+import mb.statix.referenceretention.statix.LockedReference;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Objects;

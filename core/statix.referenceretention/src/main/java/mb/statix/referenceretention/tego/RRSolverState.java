@@ -1,4 +1,4 @@
-package mb.statix.referenceretention.strategies.runtime;
+package mb.statix.referenceretention.tego;
 
 import com.google.common.collect.ImmutableMap;
 import io.usethesource.capsule.Map;

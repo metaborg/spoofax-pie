@@ -3,15 +3,14 @@ package mb.statix.referenceretention.pie;
 import mb.common.result.Result;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
+import mb.nabl2.terms.stratego.StrategoTerms;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Interactivity;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
-import mb.statix.referenceretention.pie.util.AnalyzedStrategoTransformTaskDef;
-import mb.statix.referenceretention.strategies.runtime.RRStrategoContext;
+import mb.statix.referenceretention.stratego.RRStrategoContext;
 import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
-import mb.stratego.pie.GetStrategoRuntimeProvider;
 import mb.tego.strategies.runtime.TegoRuntime;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -55,15 +54,18 @@ public class InlineMethodCallTaskDef implements TaskDef<InlineMethodCallTaskDef.
 
     private final Logger log;
     private final TegoRuntime tegoRuntime;
+    private final StrategoTerms strategoTerms;
     private final Provider<StrategoRuntime> strategoRuntimeProvider;
 
     @Inject public InlineMethodCallTaskDef(
         Provider<StrategoRuntime> strategoRuntimeProvider,
         TegoRuntime tegoRuntime,
+        StrategoTerms strategoTerms,
         LoggerFactory loggerFactory
     ) {
         this.strategoRuntimeProvider = strategoRuntimeProvider;
         this.tegoRuntime = tegoRuntime;
+        this.strategoTerms = strategoTerms;
         this.log = loggerFactory.create(getClass());
     }
 
@@ -72,7 +74,14 @@ public class InlineMethodCallTaskDef implements TaskDef<InlineMethodCallTaskDef.
     }
 
     @Override public Result<IStrategoTerm, ?> exec(ExecContext context, Input input) throws Exception {
-        final StrategoRuntime strategoRuntime = strategoRuntimeProvider.get().addContextObject(new RRStrategoContext(tegoRuntime));
+        final RRStrategoContext rrctx = new RRStrategoContext(
+            tegoRuntime,
+            strategoTerms,
+            "qualify-reference" // TODO: Make this configurable?
+        );
+        final StrategoRuntime strategoRuntime = strategoRuntimeProvider.get().addContextObject(rrctx);
+        rrctx.strategoRuntime = strategoRuntime;
+
         return context.require(input.astSupplier)
             .flatMapOrElse((ast) -> {
                 try {

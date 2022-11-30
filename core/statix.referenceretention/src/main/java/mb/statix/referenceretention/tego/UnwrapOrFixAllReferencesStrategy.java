@@ -1,19 +1,13 @@
-package mb.statix.referenceretention.strategies.runtime;
+package mb.statix.referenceretention.tego;
 
 import mb.nabl2.terms.ITermVar;
 import mb.tego.sequences.Seq;
-import mb.tego.strategies.LambdaStrategy1;
 import mb.tego.strategies.NamedStrategy1;
 import mb.tego.strategies.Strategy;
 import mb.tego.strategies.Strategy1;
-import mb.tego.strategies.runtime.FlatMapStrategy;
 import mb.tego.strategies.runtime.TegoEngine;
 import mb.tego.tuples.Pair;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Map;
-
-import static mb.statix.codecompletion.strategies.runtime.SearchStrategies.assertValid;
 import static mb.tego.strategies.StrategyExt.fun;
 import static mb.tego.strategies.StrategyExt.lam;
 import static mb.tego.strategies.StrategyExt.let;

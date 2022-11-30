@@ -48,6 +48,8 @@ import mb.tiger.spoofax.task.reusable.TigerListDefNames;
 import mb.tiger.spoofax.task.reusable.TigerListLiteralVals;
 import mb.tiger.spoofax.task.reusable.TigerParse;
 import mb.tiger.spoofax.task.reusable.TigerStyle;
+import org.spoofax.interpreter.terms.ITermFactory;
+import org.spoofax.terms.TermFactory;
 
 import javax.inject.Named;
 import java.util.HashSet;
@@ -112,6 +114,17 @@ public class TigerModule {
     @Provides @TigerScope
     static TigerConstraintAnalyzer provideConstraintAnalyzer(TigerConstraintAnalyzerFactory factory) {
         return factory.create();
+    }
+
+
+    @Provides @TigerScope
+    static ITermFactory provideTermFactory() {
+        return new org.spoofax.jsglr.client.imploder.ImploderOriginTermFactory(new TermFactory());
+    }
+
+    @Provides @TigerScope
+    static mb.nabl2.terms.stratego.StrategoTerms provideStrategoTerms(ITermFactory termFactory) {
+        return new mb.nabl2.terms.stratego.StrategoTerms(termFactory);
     }
 
 

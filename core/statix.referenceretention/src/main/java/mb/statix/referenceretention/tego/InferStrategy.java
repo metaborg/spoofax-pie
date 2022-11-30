@@ -1,6 +1,5 @@
-package mb.statix.referenceretention.strategies.runtime;
+package mb.statix.referenceretention.tego;
 
-import mb.statix.codecompletion.CCSolverState;
 import mb.statix.solver.completeness.IsComplete;
 import mb.statix.solver.log.NullDebugContext;
 import mb.statix.solver.persistent.Solver;

@@ -1,25 +1,16 @@
-package mb.statix.referenceretention.strategies.runtime;
-
+package mb.statix.referenceretention.statix;
 
 import com.google.common.collect.ImmutableList;
-import mb.nabl2.terms.IApplTerm;
-import mb.nabl2.terms.IAttachments;
-import mb.nabl2.terms.IStringTerm;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.build.AbstractApplTerm;
-import mb.nabl2.terms.build.AbstractTerm;
-import mb.nabl2.terms.matching.TermMatch;
 import mb.statix.scopegraph.Scope;
 import org.immutables.serial.Serial;
 import org.immutables.value.Value;
 
 import java.util.List;
-import java.util.Objects;
 
 import static mb.nabl2.terms.build.TermBuild.B;
 import static mb.nabl2.terms.matching.TermMatch.M;
-
-// FIXME: This won't work, the ITerm.Cases class doesn't support it? (I added otherwise())
 
 /**
  * A locked reference is a reference for which the declaration it refers to is known.

@@ -1,8 +1,6 @@
-package mb.statix.referenceretention.strategies.runtime;
+package mb.statix.referenceretention.tego;
 
-import mb.nabl2.terms.ITermVar;
 import mb.tego.strategies.NamedStrategy1;
-import mb.tego.strategies.NamedStrategy2;
 import mb.tego.strategies.Strategy;
 import mb.tego.strategies.StrategyExt;
 import mb.tego.strategies.runtime.NotStrategy;

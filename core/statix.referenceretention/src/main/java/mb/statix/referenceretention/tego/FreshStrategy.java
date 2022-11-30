@@ -1,4 +1,4 @@
-package mb.statix.referenceretention.strategies.runtime;
+package mb.statix.referenceretention.tego;
 
 import mb.nabl2.terms.ITermVar;
 import mb.nabl2.terms.build.TermVar;

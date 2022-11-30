@@ -1,10 +1,11 @@
-package mb.statix.referenceretention.strategies.runtime;
+package mb.statix.referenceretention.tego;
 
 import mb.nabl2.terms.IApplTerm;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
 import mb.nabl2.terms.build.TermBuild;
 import mb.statix.constraints.CEqual;
+import mb.statix.referenceretention.statix.LockedReference;
 import mb.tego.sequences.Seq;
 import mb.tego.strategies.NamedStrategy3;
 import mb.tego.strategies.Strategy1;
