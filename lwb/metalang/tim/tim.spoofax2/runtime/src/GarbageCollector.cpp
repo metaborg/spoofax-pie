@@ -263,4 +263,4 @@ void swap(GcSpace &one, GcSpace &other) {
     std::swap(one.free_ptr, other.free_ptr);
 }
 
-GarbageCollector garbageCollector = GarbageCollector(1024);
+GarbageCollector garbageCollector = GarbageCollector(65536);

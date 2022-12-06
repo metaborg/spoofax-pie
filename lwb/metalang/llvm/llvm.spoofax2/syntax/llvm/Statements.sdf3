@@ -33,7 +33,7 @@ context-free syntax
   Terminator.Br = <br label <Atom>>
   Terminator.Switch = <switch <TypedAtom>, <TypedAtom> [<{TypedAtom ", "}*>]>
   Terminator.Unreachable = <unreachable>
-  
+
   Statement.Assign = <<Variable> = <Expression>>
   Statement.Expression = <<Expression>>
 
@@ -51,9 +51,9 @@ context-free syntax
   Operation.Sub = <sub>
   Operation.Mul = <mul>
   Operation.SDiv = <sdiv>
-  
+
   Condition.Equal = <eq>
-  Condition.NotEqual = <neq>
+  Condition.NotEqual = <ne>
   Condition.SignedGreaterThan = <sgt>
   Condition.SignedGreaterEqual = <sge>
   Condition.SignedLessThan = <slt>

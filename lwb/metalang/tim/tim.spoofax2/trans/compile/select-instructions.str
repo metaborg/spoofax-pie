@@ -19,15 +19,15 @@ rules
     , <map(select-function)> funs
     , [<select-function> TFun("start", FUNCTION([]), [], body)]
     ])
-  select-instructions : TProgram(body) -> 
+  select-instructions : TProgram(body) ->
     <select-function> TFun("start", FUNCTION([]), [], body)
-  
+
   select-constant : TBind(var, TValueString(value)) ->
     GlobalDef(Constant(var), Private(), [UnnamedAddr(), AddrSpace("1"), Constant()], type, String(str))
   with
     (length, str) := <process-string> value
   ; type := Array(<int-to-string> length, Int8())
-  
+
   select-function : TFun(name, FUNCTION(argTypes), args, body) ->
     FunDef(Private(), TailCConv(), Void(), Constant(name), args', [NoUnwind(), GCLeafFunction(), GC("\"statepoint-example\"")], blocks)
   with {| Blocks
@@ -37,7 +37,7 @@ rules
   ; otherblocks := <bagof-Blocks> ()
   ; blocks := [mainblock|otherblocks]
   |}
-  
+
   select-function : TFunOffset(name, offset, FUNCTION(argTypes), args, body) ->
     FunDef(Private(), TailCConv(), Void(), Constant(name), args', [NoUnwind(), GCLeafFunction(), GC("\"statepoint-example\""), Prefix(TypedAtom(Int64(), Literal(Int(offset))))], blocks)
   with {| Blocks
@@ -62,10 +62,10 @@ rules
   with
     stmts1 := <select-primop(|Variable(result))> (op, type, args)
   ; (stmts2, term) := <select-exp> cont
-  
+
   select-exp : TExpTerminatingPrimOp(op, args) ->
     <select-terminating-primop> (op, args)
-  
+
   select-exp : TExpConditionalPrimOp(op, [a1, a2], b1, b2) ->
     ( [Assign(tmp, ICmp(cond, Int64(), <select-value> a1, <select-value> a2))]
     , BrCond(TypedAtom(Bool(), VarAtom(tmp)), VarAtom(Variable(l1)), VarAtom(Variable(l2)))
@@ -102,13 +102,38 @@ rules
   ; l2 := <newname> "Else"
   ; <create-block(|Label(l1))> b1
   ; <create-block(|Label(l2))> b2
-  
+
+  select-exp : TExpConditionalPrimOp("str-neq", [a1, a2], b1, b2) ->
+    ( [ Assign(
+          tmp1
+        , Call(
+            DefaultTail()
+          , DefaultCConv()
+          , Int64()
+          , ConstAtom(Constant("strcmp"))
+          , [<select-typed-value> a1, <select-typed-value> a2]
+          , []
+          , NoOperandBundles()
+          )
+        )
+      , Assign(tmp2, ICmp(NotEqual(), Int64(), VarAtom(tmp1), Literal(Int("0"))))
+      ]
+    , BrCond(TypedAtom(Bool(), VarAtom(tmp2)), VarAtom(Variable(l1)), VarAtom(Variable(l2)))
+    )
+  with
+    tmp1 := Variable(<newname> "result")
+  ; tmp2 := Variable(<newname> "result")
+  ; l1 := <newname> "If"
+  ; l2 := <newname> "Else"
+  ; <create-block(|Label(l1))> b1
+  ; <create-block(|Label(l2))> b2
+
   select-exp : TExpApp(x, args) ->
     ( [ Expression(Call(MustTail(), TailCConv(), Void(), <select-value> x, <select-call-args> args, [GCLeafFunction()], NoOperandBundles()))]
     , RetVoid()
     )
-  
-  select-exp = with(fail|$[unsupported exp])
+
+  select-exp = with(debug(!"Unsupported exp: ") ; fail|$[Unsupported exp])
 
   select-int-condition : "int-eq" -> Equal()
   select-int-condition : "int-neq" -> NotEqual()
@@ -132,7 +157,7 @@ rules
   // References
   select-primop(|result) : ("ref-new", REF(t), [v]) ->
     <concat>
-    [ 
+    [
       [ Assign(result, Call(
           DefaultTail()
         , DefaultCConv()
@@ -189,10 +214,10 @@ rules
 
   select-funcall-primop : ("record-write", INT()) -> ("record_write", Void())
   select-funcall-primop : ("record-read", t@INT()) -> ("record_read", <get-target-type> t)
-  
+
   select-funcall-primop : ("record-write", _) -> ("record_write_ptr", Void())
   select-funcall-primop : ("record-read", t) -> ("record_read_ptr", <get-target-type> t)
-  
+
   // Arrays
   select-primop(|result) : ("array-new", ARRAY(t), args) ->
     <concat> [
@@ -232,21 +257,21 @@ rules
     offset := Variable(<newname> "offset")
   ; arr' := TypedAtom(PointerAddrSpace("1"), VarAtom(arr))
   ; i' := TypedAtom(Int64(), Literal(Int(<int-to-string> i)))
-  
+
   select-primop(|result) : ("array-read", t, [arr, index]) ->
     [ Assign(offset, GetElementPtr(VarType(Variable(".array_type")), [<select-typed-value> arr, TypedAtom(Int32(), Literal(Int("0"))), TypedAtom(Int32(), Literal(Int("1"))), <select-typed-value> index]))
     , Assign(result, Load(<get-target-type> t, TypedAtom(PointerAddrSpace("1"), VarAtom(offset))))
     ]
   with
     offset := Variable(<newname> "offset")
-  
+
   select-primop(|result) : ("array-write", _, [arr, index, value]) ->
     [ Assign(offset, GetElementPtr(VarType(Variable(".array_type")), [<select-typed-value> arr, TypedAtom(Int32(), Literal(Int("0"))), TypedAtom(Int32(), Literal(Int("1"))), <select-typed-value> index]))
     , Expression(Store(<select-typed-value> value, TypedAtom(PointerAddrSpace("1"), VarAtom(offset))))
     ]
   with
     offset := Variable(<newname> "offset")
-  
+
   select-primop(|result) : ("array-length", _, [arr]) ->
     [ Assign(offset, GetElementPtr(VarType(Variable(".array_type")), [<select-typed-value> arr, TypedAtom(Int32(), Literal(Int("0"))), TypedAtom(Int32(), Literal(Int("0")))]))
     , Assign(result, Load(Int64(), TypedAtom(PointerAddrSpace("1"), VarAtom(offset))))
@@ -291,14 +316,14 @@ rules
     offset := Variable(<newname> "offset")
   ; arr' := TypedAtom(PointerAddrSpace("1"), VarAtom(arr))
   ; i' := TypedAtom(Int32(), Literal(Int(<int-to-string> i)))
-  
+
   select-primop(|result) : ("closure-read", t, [arr, TValueInt(index)]) ->
     [ Assign(offset, GetElementPtr(<get-target-elem-type> arr, [<select-typed-value> arr, TypedAtom(Int32(), Literal(Int("0"))), TypedAtom(Int32(), Literal(Int(index)))]))
     , Assign(result, Load(<get-target-type> t, TypedAtom(PointerAddrSpace("1"), VarAtom(offset))))
     ]
   with
     offset := Variable(<newname> "offset")
-  
+
   select-primop(|result) : ("closure-offset", _, [arr, TValueInt(index)]) ->
     [Assign(result, GetElementPtr(<get-target-elem-type> arr, [<select-typed-value> arr, TypedAtom(Int32(), Literal(Int("0"))), TypedAtom(Int32(), Literal(Int(index)))]))]
 
@@ -321,7 +346,7 @@ rules
   ; structType := <get-target-elem-type> type
   ; memberTypes := <flatten-struct ; map(?(_, <id>))> type
   ; bitfield := <gen-bitfield ; int-to-string> memberTypes
-  
+
   select-primop(|result) : ("struct-read", t, [struct, TValueSymbol(field)]) ->
     [ Assign(ptr, GetElementPtr(<get-target-elem-type> struct, [
         <select-typed-value> struct
@@ -334,7 +359,7 @@ rules
     ptr := Variable(<newname> "ptr")
   ; indices := <get-member-indices> (<get-source-type> struct, field)
   ; offsets* := <map(!TypedAtom(Int32(), Literal(Int(<int-to-string>))))> indices
-  
+
   select-primop(|result) : ("struct-write", _, [struct, TValueSymbol(field), value]) ->
     [ Assign(ptr, GetElementPtr(<get-target-elem-type> struct, [
         <select-typed-value> struct
@@ -347,7 +372,7 @@ rules
     ptr := Variable(<newname> "ptr")
   ; indices := <get-member-indices> (<get-source-type> struct, field)
   ; offsets* := <map(!TypedAtom(Int32(), Literal(Int(<int-to-string>))))> indices
-  
+
 
   // Print
   select-primop(|result) : ("print", INT(), [a]) ->
@@ -405,7 +430,7 @@ rules
   select-funcall-primop : ("int-to-string", t) -> ("int_to_string", <get-target-type> t)
 
   // Generic function call primops
-  select-primop(|result) : (func, t, args) -> 
+  select-primop(|result) : (func, t, args) ->
     [Expression(
        Call(
          DefaultTail()
@@ -418,7 +443,7 @@ rules
        )
      )]
   where (func', t'@Void()) := <select-funcall-primop> (func, t)
-  select-primop(|result) : (func, t, args) -> 
+  select-primop(|result) : (func, t, args) ->
     [Assign(
        result
      , Call(
@@ -434,11 +459,11 @@ rules
   where (func', t') := <select-funcall-primop> (func, t)
 
   // Exit
-  select-terminating-primop : ("exit", []) -> 
+  select-terminating-primop : ("exit", []) ->
     ( [Expression(Call(DefaultTail(), DefaultCConv(), Void(), ConstAtom(Constant("exit")), [TypedAtom(Int32(), Literal(Int("0")))], [NoReturn()], NoOperandBundles()))]
     , Unreachable()
     )
-  
+
   select-mark-pointer-call : (type, var) -> [Expression(Call(
           DefaultTail()
         , DefaultCConv()

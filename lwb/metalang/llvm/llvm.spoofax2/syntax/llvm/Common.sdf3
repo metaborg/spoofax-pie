@@ -7,7 +7,7 @@ lexical sorts
 
 lexical syntax
 
-  ID               = [\$a-zA-Z0-9\_\.]*
+  ID               = [\$a-zA-Z0-9\_\-\.]*
   INT              = "-"? [0-9]+
   POSINT           = [0-9]+
   STRING           = "\"" STRING_CHAR* "\""
@@ -23,18 +23,18 @@ lexical syntax
 lexical restrictions
 
   // Ensure greedy matching for lexicals
-  
+
   INT             -/- [0-9]
   ID              -/- [a-zA-Z0-9\_]
-  
+
   // EOF may not be followed by any char
-  
+
   EOF             -/- ~[]
 
 context-free restrictions
 
   // Ensure greedy matching for comments
-  
+
   LAYOUT? -/- [\ \t\n\r]
   LAYOUT? -/- [\/].[\/]
   LAYOUT? -/- [\/].[\*]

@@ -273,7 +273,7 @@ rules
   dx--eval-expr(|scope): MExprNameOfFun(e) -> MRuntimeValue(TValueVar(vname))
     where
       v := <dx--eval-expr(|scope)> e;
-      <?MRuntimeTFun(TFun(vname, _, _)) <+ dx--fail-msg(|"Argument passed to nameof operator is not a @fun")> v
+      vname := <?MRuntimeTFun(TFun(<id>, _, _)) <+ ?MRuntimeTFun(TTypedFun(<id>, _, _, _)) <+ dx--fail-msg(|"Argument passed to nameof operator is not a @fun")> v
   dx--eval-expr(|scope): MExprTFix(funs) -> out
     with
       tfuns := <map(dx--eval-expr(|scope)); dx--assert-runtime-tfuns-or-metalists> funs;
