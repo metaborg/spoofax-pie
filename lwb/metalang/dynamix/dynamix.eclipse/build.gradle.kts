@@ -16,3 +16,7 @@ dependencies {
 languageEclipseProject {
   adapterProject.set(project(":dynamix"))
 }
+
+mavenize {
+  majorVersion.set("2021-03")
+}

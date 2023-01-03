@@ -6,3 +6,7 @@ plugins {
 languageEclipseProject {
   adapterProject.set(project(":libspoofax2"))
 }
+
+mavenize {
+  majorVersion.set("2021-03")
+}

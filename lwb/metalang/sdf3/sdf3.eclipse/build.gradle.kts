@@ -28,3 +28,7 @@ tasks {
     }
   }
 }
+
+mavenize {
+  majorVersion.set("2021-03")
+}
