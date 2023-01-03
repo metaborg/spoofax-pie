@@ -1011,31 +1011,31 @@
 <ol>
 <li>
 <p>Add the following to your language's <code>spoofaxc.cfg</code> file:</p>
-<div class="highlight"><pre><span></span><code><span class="na">tego-runtime {}</span><span class="w"></span>
-<span class="na">code-completion {}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="na">tego-runtime {}</span>
+<span class="na">code-completion {}</span>
 </code></pre></div>
 </li>
 <li>
 <p>Declare the following strategies in your language's <code>main.str2</code> file, where <code>MyLang</code> is the name of your languages (as defined in <code>spoofaxc.cfg</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="k">rules</span><span class="w"> </span><span class="c c-Singleline">// Analysis</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="k">rules</span><span class="w"> </span><span class="c c-Singleline">// Analysis</span>
 
-<span class="w">  </span><span class="nv">downgrade-placeholders</span><span class="w"> </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">downgrade-placeholders-MyLang</span><span class="w"></span>
-<span class="w">  </span><span class="nv">upgrade-placeholders</span><span class="w">   </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">upgrade-placeholders-MyLang</span><span class="w"></span>
-<span class="w">  </span><span class="nv">is-inj</span><span class="w">                 </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">is-MyLang-inj-cons</span><span class="w"></span>
-<span class="w">  </span><span class="nv">pp-partial</span><span class="w">             </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">pp-partial-MyLang-string</span><span class="w"></span>
-<span class="w">  </span><span class="nv">pre-analyze</span><span class="w">            </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">explicate-injections-MyLang</span><span class="w"></span>
-<span class="w">  </span><span class="nv">post-analyze</span><span class="w">           </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">implicate-injections-MyLang</span><span class="w"></span>
+<span class="w">  </span><span class="nv">downgrade-placeholders</span><span class="w"> </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">downgrade-placeholders-MyLang</span>
+<span class="w">  </span><span class="nv">upgrade-placeholders</span><span class="w">   </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">upgrade-placeholders-MyLang</span>
+<span class="w">  </span><span class="nv">is-inj</span><span class="w">                 </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">is-MyLang-inj-cons</span>
+<span class="w">  </span><span class="nv">pp-partial</span><span class="w">             </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">pp-partial-MyLang-string</span>
+<span class="w">  </span><span class="nv">pre-analyze</span><span class="w">            </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">explicate-injections-MyLang</span>
+<span class="w">  </span><span class="nv">post-analyze</span><span class="w">           </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">implicate-injections-MyLang</span>
 </code></pre></div>
 </li>
 <li>
 <p>In your Statix files, for each rule define a predicate that accepts a placeholder where a syntactic sort is permitted. For example:</p>
-<div class="highlight"><pre><span></span><code><span class="k">rules</span><span class="w"> </span><span class="c c-Singleline">// placeholders</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="k">rules</span><span class="w"> </span><span class="c c-Singleline">// placeholders</span>
 
-<span class="w">  </span><span class="nv">programOk</span><span class="p">(</span><span class="nv">Module-Plhdr</span><span class="p">()).</span><span class="w"></span>
+<span class="w">  </span><span class="nv">programOk</span><span class="p">(</span><span class="nv">Module-Plhdr</span><span class="p">()).</span>
 
-<span class="w">  </span><span class="nv">declOk</span><span class="p">(</span><span class="nv">_</span><span class="p">,</span><span class="w"> </span><span class="nv">Decl-Plhdr</span><span class="p">()).</span><span class="w"></span>
+<span class="w">  </span><span class="nv">declOk</span><span class="p">(</span><span class="nv">_</span><span class="p">,</span><span class="w"> </span><span class="nv">Decl-Plhdr</span><span class="p">()).</span>
 
-<span class="w">  </span><span class="nv">typeOfExp</span><span class="p">(</span><span class="nv">_</span><span class="p">,</span><span class="w"> </span><span class="nv">Exp-Plhdr</span><span class="p">())</span><span class="w"> </span>=<span class="w"> </span><span class="nv">_</span><span class="p">.</span><span class="w"></span>
+<span class="w">  </span><span class="nv">typeOfExp</span><span class="p">(</span><span class="nv">_</span><span class="p">,</span><span class="w"> </span><span class="nv">Exp-Plhdr</span><span class="p">())</span><span class="w"> </span>=<span class="w"> </span><span class="nv">_</span><span class="p">.</span>
 </code></pre></div>
 </li>
 </ol>
@@ -1050,9 +1050,9 @@
 <li>You have to type the placeholder explicitly to invoke code completion.</li>
 <li>If the file contains errors, code completion might fail to return results.</li>
 <li>If you have <em>catch-all</em> predicates, code completion will not work. For example:
-  <div class="highlight"><pre><span></span><code><span class="c c-Singleline">// This prevents code completion from finding completions:</span><span class="w"></span>
-<span class="nv">typeOfExp</span><span class="p">(</span><span class="nv">_</span><span class="p">,</span><span class="w"> </span><span class="nv">_</span><span class="p">)</span><span class="w"> </span>=<span class="w"> </span><span class="nv">_</span><span class="w"> </span><span class="p">:</span><span class="nv">-</span><span class="w"></span>
-<span class="w">  </span><span class="nv">try</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">false</span><span class="w"> </span><span class="p">}</span><span class="w"> </span>|<span class="w"> </span><span class="nv">warning</span><span class="w"> </span>$[<span class="nv">This</span><span class="w"> </span><span class="nv">expression</span><span class="w"> </span><span class="nv">is</span><span class="w"> </span><span class="nv">not</span><span class="w"> </span><span class="nv">yet</span><span class="w"> </span><span class="nv">implemented</span>]<span class="p">.</span><span class="w"></span>
+  <div class="highlight"><pre><span></span><code><span class="c c-Singleline">// This prevents code completion from finding completions:</span>
+<span class="nv">typeOfExp</span><span class="p">(</span><span class="nv">_</span><span class="p">,</span><span class="w"> </span><span class="nv">_</span><span class="p">)</span><span class="w"> </span>=<span class="w"> </span><span class="nv">_</span><span class="w"> </span><span class="p">:</span><span class="nv">-</span>
+<span class="w">  </span><span class="nv">try</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">false</span><span class="w"> </span><span class="p">}</span><span class="w"> </span>|<span class="w"> </span><span class="nv">warning</span><span class="w"> </span>$[<span class="nv">This</span><span class="w"> </span><span class="nv">expression</span><span class="w"> </span><span class="nv">is</span><span class="w"> </span><span class="nv">not</span><span class="w"> </span><span class="nv">yet</span><span class="w"> </span><span class="nv">implemented</span>]<span class="p">.</span>
 </code></pre></div></li>
 </ul>
 <p>These limitations will be lifted in subsequent releases.</p>

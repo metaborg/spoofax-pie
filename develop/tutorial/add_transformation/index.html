@@ -918,92 +918,92 @@
 <p>Finally, we will define a transformation for our language and add a task, command-tasks, command, and menu item for it.
 Open the main Stratego file <code>helloworld/src/main.str</code>.
 <a href="https://www.spoofax.dev/references/stratego/">Stratego</a>. is a meta-language for defining term (AST) transformations through rewrite rules.
-We will add a silly transformation that replaces all instances of <code class="highlight"><span class="nv">World</span><span class=" -Punctuation">()</span><span class="w"></span></code> with <code class="highlight"><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"></span></code>.</p>
+We will add a silly transformation that replaces all instances of <code class="highlight"><span class="nv">World</span><span class=" -Punctuation">()</span></code> with <code class="highlight"><span class="nv">Hello</span><span class=" -Punctuation">()</span></code>.</p>
 <p>Add the following code to the end of the Stratego file:</p>
-<div class="highlight"><pre><span></span><code><span class="k">rules</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="k">rules</span>
 
-<span class="w">  </span><span class="nv">replace-world</span><span class=" -Punctuation">:</span><span class="w"> </span><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"> </span><span class="nv">-</span><span class=" -Punctuation">&gt;</span><span class="w"> </span><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"></span>
-<span class="w">  </span><span class="nv">replace-world</span><span class=" -Punctuation">:</span><span class="w"> </span><span class="nv">World</span><span class=" -Punctuation">()</span><span class="w"> </span><span class="nv">-</span><span class=" -Punctuation">&gt;</span><span class="w"> </span><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"></span>
-<span class="w">  </span><span class="nv">replace-worlds</span><span class="w"> </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">topdown</span><span class=" -Punctuation">(</span><span class="nv">try</span><span class=" -Punctuation">(</span><span class="nv">replace-world</span><span class=" -Punctuation">))</span><span class="w"></span>
+<span class="w">  </span><span class="nv">replace-world</span><span class=" -Punctuation">:</span><span class="w"> </span><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"> </span><span class="nv">-</span><span class=" -Punctuation">&gt;</span><span class="w"> </span><span class="nv">Hello</span><span class=" -Punctuation">()</span>
+<span class="w">  </span><span class="nv">replace-world</span><span class=" -Punctuation">:</span><span class="w"> </span><span class="nv">World</span><span class=" -Punctuation">()</span><span class="w"> </span><span class="nv">-</span><span class=" -Punctuation">&gt;</span><span class="w"> </span><span class="nv">Hello</span><span class=" -Punctuation">()</span>
+<span class="w">  </span><span class="nv">replace-worlds</span><span class="w"> </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">topdown</span><span class=" -Punctuation">(</span><span class="nv">try</span><span class=" -Punctuation">(</span><span class="nv">replace-world</span><span class=" -Punctuation">))</span>
 </code></pre></div>
-<p>The <code class="highlight"><span class="nv">replace-world</span><span class="w"></span></code> rule passes <code class="highlight"><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"></span></code> terms but rewrites <code class="highlight"><span class="nv">World</span><span class=" -Punctuation">()</span><span class="w"></span></code> terms to <code class="highlight"><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"></span></code>.
-The <code class="highlight"><span class="nv">replace-worlds</span><span class="w"></span></code> strategy tries to apply <code class="highlight"><span class="nv">replace-world</span><span class="w"></span></code> in a top-down manner over the entire AST.</p>
+<p>The <code class="highlight"><span class="nv">replace-world</span></code> rule passes <code class="highlight"><span class="nv">Hello</span><span class=" -Punctuation">()</span></code> terms but rewrites <code class="highlight"><span class="nv">World</span><span class=" -Punctuation">()</span></code> terms to <code class="highlight"><span class="nv">Hello</span><span class=" -Punctuation">()</span></code>.
+The <code class="highlight"><span class="nv">replace-worlds</span></code> strategy tries to apply <code class="highlight"><span class="nv">replace-world</span></code> in a top-down manner over the entire AST.</p>
 <details class="note">
 <summary><code>src/main.str</code> full contents</summary>
 </details>
-<div class="highlight"><pre><span></span><code><span class="k">module</span><span class="w"> </span><span class="nv">main</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="k">module</span><span class="w"> </span><span class="nv">main</span>
 
-<span class="w">    </span><span class="k">imports</span><span class="w"></span>
+<span class="w">    </span><span class="k">imports</span>
 
-<span class="w">      </span><span class="nv">statixruntime</span><span class="w"></span>
-<span class="w">      </span><span class="nv">statix</span>/<span class="nv">api</span><span class="w"></span>
-<span class="w">      </span><span class="nv">injections</span>/<span class="nv">-</span><span class="w"></span>
-<span class="w">      </span><span class="nv">signatures</span>/<span class="nv">-</span><span class="w"></span>
+<span class="w">      </span><span class="nv">statixruntime</span>
+<span class="w">      </span><span class="nv">statix</span>/<span class="nv">api</span>
+<span class="w">      </span><span class="nv">injections</span>/<span class="nv">-</span>
+<span class="w">      </span><span class="nv">signatures</span>/<span class="nv">-</span>
 
-<span class="w">    </span><span class="k">rules</span><span class="w"> </span><span class="c c-Singleline">// Analysis</span><span class="w"></span>
+<span class="w">    </span><span class="k">rules</span><span class="w"> </span><span class="c c-Singleline">// Analysis</span>
 
-<span class="w">      </span><span class="nv">pre-analyze</span><span class="w">  </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">explicate-injections-helloworld-Start</span><span class="w"></span>
-<span class="w">      </span><span class="nv">post-analyze</span><span class="w"> </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">implicate-injections-helloworld-Start</span><span class="w"></span>
+<span class="w">      </span><span class="nv">pre-analyze</span><span class="w">  </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">explicate-injections-helloworld-Start</span>
+<span class="w">      </span><span class="nv">post-analyze</span><span class="w"> </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">implicate-injections-helloworld-Start</span>
 
-<span class="w">      </span><span class="nv">editor-analyze</span><span class="w"> </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">stx-editor-analyze</span><span class=" -Punctuation">(</span><span class="nv">pre-analyze</span><span class=" -Punctuation">,</span><span class="w"> </span><span class="nv">post-analyze</span><span class=" -Punctuation">|</span><span class="s">&quot;main&quot;</span><span class=" -Punctuation">,</span><span class="w"> </span><span class="s">&quot;programOk&quot;</span><span class=" -Punctuation">)</span><span class="w"></span>
+<span class="w">      </span><span class="nv">editor-analyze</span><span class="w"> </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">stx-editor-analyze</span><span class=" -Punctuation">(</span><span class="nv">pre-analyze</span><span class=" -Punctuation">,</span><span class="w"> </span><span class="nv">post-analyze</span><span class=" -Punctuation">|</span><span class="s">&quot;main&quot;</span><span class=" -Punctuation">,</span><span class="w"> </span><span class="s">&quot;programOk&quot;</span><span class=" -Punctuation">)</span>
 
-<span class="w">    </span><span class="k">rules</span><span class="w"></span>
+<span class="w">    </span><span class="k">rules</span>
 
-<span class="w">      </span><span class="nv">replace-world</span><span class=" -Punctuation">:</span><span class="w"> </span><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"> </span><span class="nv">-</span><span class=" -Punctuation">&gt;</span><span class="w"> </span><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"></span>
-<span class="w">      </span><span class="nv">replace-world</span><span class=" -Punctuation">:</span><span class="w"> </span><span class="nv">World</span><span class=" -Punctuation">()</span><span class="w"> </span><span class="nv">-</span><span class=" -Punctuation">&gt;</span><span class="w"> </span><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"></span>
-<span class="w">      </span><span class="nv">replace-worlds</span><span class="w"> </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">topdown</span><span class=" -Punctuation">(</span><span class="nv">try</span><span class=" -Punctuation">(</span><span class="nv">replace-world</span><span class=" -Punctuation">))</span><span class="w"></span>
-<span class="w">    </span>```<span class="w"></span>
+<span class="w">      </span><span class="nv">replace-world</span><span class=" -Punctuation">:</span><span class="w"> </span><span class="nv">Hello</span><span class=" -Punctuation">()</span><span class="w"> </span><span class="nv">-</span><span class=" -Punctuation">&gt;</span><span class="w"> </span><span class="nv">Hello</span><span class=" -Punctuation">()</span>
+<span class="w">      </span><span class="nv">replace-world</span><span class=" -Punctuation">:</span><span class="w"> </span><span class="nv">World</span><span class=" -Punctuation">()</span><span class="w"> </span><span class="nv">-</span><span class=" -Punctuation">&gt;</span><span class="w"> </span><span class="nv">Hello</span><span class=" -Punctuation">()</span>
+<span class="w">      </span><span class="nv">replace-worlds</span><span class="w"> </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">topdown</span><span class=" -Punctuation">(</span><span class="nv">try</span><span class=" -Punctuation">(</span><span class="nv">replace-world</span><span class=" -Punctuation">))</span>
+<span class="w">    </span>```
 
 
-<span class="nv">Now</span><span class="w"> </span><span class="nv">we</span><span class="w"> </span><span class="nv">add</span><span class="w"> </span><span class="nv">a</span><span class="w"> </span><span class="nv">task</span><span class="w"> </span><span class="nv">and</span><span class="w"> </span><span class="nv">command-task</span><span class="w"> </span><span class="nv">for</span><span class="w"> </span><span class="nv">this</span><span class="w"> </span><span class="nv">transformation</span>.<span class="w"></span>
-<span class="nv">We</span><span class="w"> </span><span class="nv">define</span><span class="w"> </span><span class="nv">two</span><span class="w"> </span><span class="nv">separate</span><span class="w"> </span><span class="nv">tasks</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">keep</span><span class="w"> </span><span class="nv">separate</span><span class="w"></span>
+<span class="nv">Now</span><span class="w"> </span><span class="nv">we</span><span class="w"> </span><span class="nv">add</span><span class="w"> </span><span class="nv">a</span><span class="w"> </span><span class="nv">task</span><span class="w"> </span><span class="nv">and</span><span class="w"> </span><span class="nv">command-task</span><span class="w"> </span><span class="nv">for</span><span class="w"> </span><span class="nv">this</span><span class="w"> </span><span class="nv">transformation</span>.
+<span class="nv">We</span><span class="w"> </span><span class="nv">define</span><span class="w"> </span><span class="nv">two</span><span class="w"> </span><span class="nv">separate</span><span class="w"> </span><span class="nv">tasks</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">keep</span><span class="w"> </span><span class="nv">separate</span>
 
-<span class="m">1</span>.<span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">act</span><span class="w"> </span><span class="nv">of</span><span class="w"> </span><span class="nv">transforming</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">program</span><span class=" -Punctuation">,</span><span class="w"> </span><span class="nv">and</span><span class="w"></span>
-<span class="m">2</span>.<span class="w"> </span><span class="nv">feeding</span><span class="w"> </span><span class="nv">back</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">result</span><span class="w"> </span><span class="nv">of</span><span class="w"> </span><span class="nv">that</span><span class="w"> </span><span class="nv">transformation</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">user</span><span class="w"> </span><span class="nv">that</span><span class="w"> </span><span class="nv">executes</span><span class="w"> </span><span class="nv">a</span><span class="w"> </span><span class="nv">command</span>.<span class="w"></span>
+<span class="m">1</span>.<span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">act</span><span class="w"> </span><span class="nv">of</span><span class="w"> </span><span class="nv">transforming</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">program</span><span class=" -Punctuation">,</span><span class="w"> </span><span class="nv">and</span>
+<span class="m">2</span>.<span class="w"> </span><span class="nv">feeding</span><span class="w"> </span><span class="nv">back</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">result</span><span class="w"> </span><span class="nv">of</span><span class="w"> </span><span class="nv">that</span><span class="w"> </span><span class="nv">transformation</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">user</span><span class="w"> </span><span class="nv">that</span><span class="w"> </span><span class="nv">executes</span><span class="w"> </span><span class="nv">a</span><span class="w"> </span><span class="nv">command</span>.
 
-<span class="nv">This</span><span class="w"> </span><span class="nv">practice</span><span class="w"> </span><span class="nv">later</span><span class="w"> </span><span class="nv">allows</span><span class="w"> </span><span class="nv">us</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">reuse</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">first</span><span class="w"> </span><span class="nv">task</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nv">a</span><span class="w"> </span><span class="nv">different</span><span class="w"> </span><span class="nv">task</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nv">we</span><span class="w"> </span><span class="nv">need</span><span class="w"> </span><span class="nv">to</span>.<span class="w"></span>
-<span class="nv">Right-click</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span>`<span class="nv">mb</span>.<span class="nv">helloworld</span>.<span class="nv">task</span>`<span class="w"> </span><span class="nv">package</span><span class="w"> </span><span class="nv">and</span><span class="w"> </span><span class="nv">create</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span>`<span class="nv">HelloWorldReplaceWorlds</span>`<span class="w"> </span><span class="nv">class</span><span class="w"> </span><span class="nv">and</span><span class="w"> </span><span class="nv">replace</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">entire</span><span class="w"> </span><span class="nv">Java</span><span class="w"> </span><span class="nv">file</span><span class="w"> </span><span class="k">with</span><span class=" -Punctuation">:</span><span class="w"></span>
+<span class="nv">This</span><span class="w"> </span><span class="nv">practice</span><span class="w"> </span><span class="nv">later</span><span class="w"> </span><span class="nv">allows</span><span class="w"> </span><span class="nv">us</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">reuse</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">first</span><span class="w"> </span><span class="nv">task</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nv">a</span><span class="w"> </span><span class="nv">different</span><span class="w"> </span><span class="nv">task</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nv">we</span><span class="w"> </span><span class="nv">need</span><span class="w"> </span><span class="nv">to</span>.
+<span class="nv">Right-click</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span>`<span class="nv">mb</span>.<span class="nv">helloworld</span>.<span class="nv">task</span>`<span class="w"> </span><span class="nv">package</span><span class="w"> </span><span class="nv">and</span><span class="w"> </span><span class="nv">create</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span>`<span class="nv">HelloWorldReplaceWorlds</span>`<span class="w"> </span><span class="nv">class</span><span class="w"> </span><span class="nv">and</span><span class="w"> </span><span class="nv">replace</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">entire</span><span class="w"> </span><span class="nv">Java</span><span class="w"> </span><span class="nv">file</span><span class="w"> </span><span class="k">with</span><span class=" -Punctuation">:</span>
 
-```<span class=" -Punctuation">{</span><span class="w"> </span>.<span class="nv">java</span><span class="w"> </span>.<span class="nv">annotate</span><span class="w"> </span><span class="nv">linenums</span><span class=" -Punctuation">=</span><span class="s">&quot;1&quot;</span><span class="w"> </span><span class=" -Punctuation">}</span><span class="w"></span>
-<span class="nv">package</span><span class="w"> </span><span class="nv">mb</span>.<span class="nv">helloworld</span>.<span class="nv">task</span><span class=" -Punctuation">;</span><span class="w"></span>
+```<span class=" -Punctuation">{</span><span class="w"> </span>.<span class="nv">java</span><span class="w"> </span>.<span class="nv">annotate</span><span class="w"> </span><span class="nv">linenums</span><span class=" -Punctuation">=</span><span class="s">&quot;1&quot;</span><span class="w"> </span><span class=" -Punctuation">}</span>
+<span class="nv">package</span><span class="w"> </span><span class="nv">mb</span>.<span class="nv">helloworld</span>.<span class="nv">task</span><span class=" -Punctuation">;</span>
 
-<span class="nv">import</span><span class="w"> </span><span class="nv">mb</span>.<span class="nv">helloworld</span>.<span class="nv">HelloWorldClassLoaderResources</span><span class=" -Punctuation">;</span><span class="w"></span>
-<span class="nv">import</span><span class="w"> </span><span class="nv">mb</span>.<span class="nv">helloworld</span>.<span class="nv">HelloWorldScope</span><span class=" -Punctuation">;</span><span class="w"></span>
-<span class="nv">import</span><span class="w"> </span><span class="nv">mb</span>.<span class="nv">pie</span>.<span class="nv">api</span>.<span class="nv">ExecContext</span><span class=" -Punctuation">;</span><span class="w"></span>
-<span class="nv">import</span><span class="w"> </span><span class="nv">mb</span>.<span class="nv">pie</span>.<span class="nv">api</span>.<span class="nv">stamp</span>.<span class="nv">resource</span>.<span class="nv">ResourceStampers</span><span class=" -Punctuation">;</span><span class="w"></span>
-<span class="nv">import</span><span class="w"> </span><span class="nv">mb</span>.<span class="nv">stratego</span>.<span class="nv">pie</span>.<span class="nv">AstStrategoTransformTaskDef</span><span class=" -Punctuation">;</span><span class="w"></span>
+<span class="nv">import</span><span class="w"> </span><span class="nv">mb</span>.<span class="nv">helloworld</span>.<span class="nv">HelloWorldClassLoaderResources</span><span class=" -Punctuation">;</span>
+<span class="nv">import</span><span class="w"> </span><span class="nv">mb</span>.<span class="nv">helloworld</span>.<span class="nv">HelloWorldScope</span><span class=" -Punctuation">;</span>
+<span class="nv">import</span><span class="w"> </span><span class="nv">mb</span>.<span class="nv">pie</span>.<span class="nv">api</span>.<span class="nv">ExecContext</span><span class=" -Punctuation">;</span>
+<span class="nv">import</span><span class="w"> </span><span class="nv">mb</span>.<span class="nv">pie</span>.<span class="nv">api</span>.<span class="nv">stamp</span>.<span class="nv">resource</span>.<span class="nv">ResourceStampers</span><span class=" -Punctuation">;</span>
+<span class="nv">import</span><span class="w"> </span><span class="nv">mb</span>.<span class="nv">stratego</span>.<span class="nv">pie</span>.<span class="nv">AstStrategoTransformTaskDef</span><span class=" -Punctuation">;</span>
 
-<span class="nv">import</span><span class="w"> </span><span class="nv">javax</span>.<span class="nv">inject</span>.<span class="nv">Inject</span><span class=" -Punctuation">;</span><span class="w"></span>
-<span class="nv">import</span><span class="w"> </span><span class="nv">java</span>.<span class="nv">io</span>.<span class="nv">IOException</span><span class=" -Punctuation">;</span><span class="w"></span>
+<span class="nv">import</span><span class="w"> </span><span class="nv">javax</span>.<span class="nv">inject</span>.<span class="nv">Inject</span><span class=" -Punctuation">;</span>
+<span class="nv">import</span><span class="w"> </span><span class="nv">java</span>.<span class="nv">io</span>.<span class="nv">IOException</span><span class=" -Punctuation">;</span>
 
-@<span class="nv">HelloWorldScope</span><span class="w"></span>
-<span class="nv">public</span><span class="w"> </span><span class="nv">class</span><span class="w"> </span><span class="nv">HelloWorldReplaceWorlds</span><span class="w"> </span><span class="nv">extends</span><span class="w"> </span><span class="nv">AstStrategoTransformTaskDef</span><span class="w"> </span><span class=" -Punctuation">{</span><span class="w"></span>
-<span class="w">  </span><span class="nv">private</span><span class="w"> </span><span class="nv">final</span><span class="w"> </span><span class="nv">HelloWorldClassLoaderResources</span><span class="w"> </span><span class="nv">classloaderResources</span><span class=" -Punctuation">;</span><span class="w"></span>
+@<span class="nv">HelloWorldScope</span>
+<span class="nv">public</span><span class="w"> </span><span class="nv">class</span><span class="w"> </span><span class="nv">HelloWorldReplaceWorlds</span><span class="w"> </span><span class="nv">extends</span><span class="w"> </span><span class="nv">AstStrategoTransformTaskDef</span><span class="w"> </span><span class=" -Punctuation">{</span>
+<span class="w">  </span><span class="nv">private</span><span class="w"> </span><span class="nv">final</span><span class="w"> </span><span class="nv">HelloWorldClassLoaderResources</span><span class="w"> </span><span class="nv">classloaderResources</span><span class=" -Punctuation">;</span>
 
-<span class="w">  </span>@<span class="nv">Inject</span><span class="w"></span>
-<span class="w">  </span><span class="nv">public</span><span class="w"> </span><span class="nv">HelloWorldReplaceWorlds</span><span class=" -Punctuation">(</span><span class="w"> </span><span class="c c-Singleline">// 1</span><span class="w"></span>
-<span class="w">    </span><span class="nv">HelloWorldClassLoaderResources</span><span class="w"> </span><span class="nv">classloaderResources</span><span class=" -Punctuation">,</span><span class="w"></span>
-<span class="w">    </span><span class="nv">HelloWorldGetStrategoRuntimeProvider</span><span class="w"> </span><span class="nv">getStrategoRuntimeProvider</span><span class="w"></span>
-<span class="w">  </span><span class=" -Punctuation">)</span><span class="w"> </span><span class=" -Punctuation">{</span><span class="w"></span>
-<span class="w">    </span><span class="nv">super</span><span class=" -Punctuation">(</span><span class="nv">getStrategoRuntimeProvider</span><span class=" -Punctuation">,</span><span class="w"> </span><span class="s">&quot;replace-worlds&quot;</span><span class=" -Punctuation">);</span><span class="w"> </span><span class="c c-Singleline">// 2</span><span class="w"></span>
-<span class="w">    </span><span class="nv">this</span>.<span class="nv">classloaderResources</span><span class="w"> </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">classloaderResources</span><span class=" -Punctuation">;</span><span class="w"></span>
-<span class="w">  </span><span class=" -Punctuation">}</span><span class="w"></span>
+<span class="w">  </span>@<span class="nv">Inject</span>
+<span class="w">  </span><span class="nv">public</span><span class="w"> </span><span class="nv">HelloWorldReplaceWorlds</span><span class=" -Punctuation">(</span><span class="w"> </span><span class="c c-Singleline">// 1</span>
+<span class="w">    </span><span class="nv">HelloWorldClassLoaderResources</span><span class="w"> </span><span class="nv">classloaderResources</span><span class=" -Punctuation">,</span>
+<span class="w">    </span><span class="nv">HelloWorldGetStrategoRuntimeProvider</span><span class="w"> </span><span class="nv">getStrategoRuntimeProvider</span>
+<span class="w">  </span><span class=" -Punctuation">)</span><span class="w"> </span><span class=" -Punctuation">{</span>
+<span class="w">    </span><span class="nv">super</span><span class=" -Punctuation">(</span><span class="nv">getStrategoRuntimeProvider</span><span class=" -Punctuation">,</span><span class="w"> </span><span class="s">&quot;replace-worlds&quot;</span><span class=" -Punctuation">);</span><span class="w"> </span><span class="c c-Singleline">// 2</span>
+<span class="w">    </span><span class="nv">this</span>.<span class="nv">classloaderResources</span><span class="w"> </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">classloaderResources</span><span class=" -Punctuation">;</span>
+<span class="w">  </span><span class=" -Punctuation">}</span>
 
-<span class="w">  </span>@<span class="nv">Override</span><span class="w"> </span><span class="nv">public</span><span class="w"> </span><span class="nv">String</span><span class="w"> </span><span class="nv">getId</span><span class=" -Punctuation">()</span><span class="w"> </span><span class=" -Punctuation">{</span><span class="w"> </span><span class="c c-Singleline">// 3</span><span class="w"></span>
-<span class="w">    </span><span class="nv">return</span><span class="w"> </span><span class="nv">getClass</span><span class=" -Punctuation">()</span>.<span class="nv">getName</span><span class=" -Punctuation">();</span><span class="w"></span>
-<span class="w">  </span><span class=" -Punctuation">}</span><span class="w"></span>
+<span class="w">  </span>@<span class="nv">Override</span><span class="w"> </span><span class="nv">public</span><span class="w"> </span><span class="nv">String</span><span class="w"> </span><span class="nv">getId</span><span class=" -Punctuation">()</span><span class="w"> </span><span class=" -Punctuation">{</span><span class="w"> </span><span class="c c-Singleline">// 3</span>
+<span class="w">    </span><span class="nv">return</span><span class="w"> </span><span class="nv">getClass</span><span class=" -Punctuation">()</span>.<span class="nv">getName</span><span class=" -Punctuation">();</span>
+<span class="w">  </span><span class=" -Punctuation">}</span>
 
-<span class="w">  </span>@<span class="nv">Override</span><span class="w"> </span><span class="nv">protected</span><span class="w"> </span><span class="nv">void</span><span class="w"> </span><span class="nv">createDependencies</span><span class=" -Punctuation">(</span><span class="nv">ExecContext</span><span class="w"> </span><span class="nv">context</span><span class=" -Punctuation">)</span><span class="w"> </span><span class="nv">throws</span><span class="w"> </span><span class="nv">IOException</span><span class="w"> </span><span class=" -Punctuation">{</span><span class="w"> </span><span class="c c-Singleline">// 4</span><span class="w"></span>
-<span class="w">    </span><span class="nv">context</span>.<span class="nv">require</span><span class=" -Punctuation">(</span><span class="nv">classloaderResources</span>.<span class="nv">tryGetAsLocalResource</span><span class=" -Punctuation">(</span><span class="nv">getClass</span><span class=" -Punctuation">()),</span><span class="w"> </span><span class="nv">ResourceStampers</span>.<span class="nv">hashFile</span><span class=" -Punctuation">());</span><span class="w"></span>
-<span class="w">  </span><span class=" -Punctuation">}</span><span class="w"></span>
-<span class=" -Punctuation">}</span><span class="w"></span>
+<span class="w">  </span>@<span class="nv">Override</span><span class="w"> </span><span class="nv">protected</span><span class="w"> </span><span class="nv">void</span><span class="w"> </span><span class="nv">createDependencies</span><span class=" -Punctuation">(</span><span class="nv">ExecContext</span><span class="w"> </span><span class="nv">context</span><span class=" -Punctuation">)</span><span class="w"> </span><span class="nv">throws</span><span class="w"> </span><span class="nv">IOException</span><span class="w"> </span><span class=" -Punctuation">{</span><span class="w"> </span><span class="c c-Singleline">// 4</span>
+<span class="w">    </span><span class="nv">context</span>.<span class="nv">require</span><span class=" -Punctuation">(</span><span class="nv">classloaderResources</span>.<span class="nv">tryGetAsLocalResource</span><span class=" -Punctuation">(</span><span class="nv">getClass</span><span class=" -Punctuation">()),</span><span class="w"> </span><span class="nv">ResourceStampers</span>.<span class="nv">hashFile</span><span class=" -Punctuation">());</span>
+<span class="w">  </span><span class=" -Punctuation">}</span>
+<span class=" -Punctuation">}</span>
 </code></pre></div>
-<p>This task extends <code class="highlight"><span class="n">AstStrategoTransformTaskDef</span><span class="w"></span></code> which is a convenient abstract class for creating tasks that run Stratego transformations by implementing a constructor and a couple of methods:</p>
+<p>This task extends <code class="highlight"><span class="n">AstStrategoTransformTaskDef</span></code> which is a convenient abstract class for creating tasks that run Stratego transformations by implementing a constructor and a couple of methods:</p>
 <ol>
-<li>The constructor should inject <code class="highlight"><span class="n">HelloWorldClassLoaderResources</span><span class="w"></span></code> which we again will use to create a self-dependency, and <code class="highlight"><span class="n">HelloWorldGetStrategoRuntimeProvider</span><span class="w"></span></code> which is a task that Spoofax generates for your language, which provides a Stratego runtime to execute strategies with.</li>
-<li>The <code class="highlight"><span class="n">HelloWorldGetStrategoRuntimeProvider</span><span class="w"></span></code> instance is provided to the superclass constructor, along with the strategy that we want this task to execute, which is <code class="highlight"><span class="s">&quot;replace-worlds&quot;</span><span class="w"></span></code>.</li>
-<li>We override <code class="highlight"><span class="n">getId</span><span class="w"></span></code> of <code class="highlight"><span class="n">TaskDef</span><span class="w"></span></code> again to give this task a unique identifier.</li>
-<li>We override <code class="highlight"><span class="n">createDependencies</span><span class="w"></span></code> of <code class="highlight"><span class="n">AstStrategoTransformTaskDef</span><span class="w"></span></code> to create a self-dependency.</li>
+<li>The constructor should inject <code class="highlight"><span class="n">HelloWorldClassLoaderResources</span></code> which we again will use to create a self-dependency, and <code class="highlight"><span class="n">HelloWorldGetStrategoRuntimeProvider</span></code> which is a task that Spoofax generates for your language, which provides a Stratego runtime to execute strategies with.</li>
+<li>The <code class="highlight"><span class="n">HelloWorldGetStrategoRuntimeProvider</span></code> instance is provided to the superclass constructor, along with the strategy that we want this task to execute, which is <code class="highlight"><span class="s">&quot;replace-worlds&quot;</span></code>.</li>
+<li>We override <code class="highlight"><span class="n">getId</span></code> of <code class="highlight"><span class="n">TaskDef</span></code> again to give this task a unique identifier.</li>
+<li>We override <code class="highlight"><span class="n">createDependencies</span></code> of <code class="highlight"><span class="n">AstStrategoTransformTaskDef</span></code> to create a self-dependency.</li>
 </ol>
 <p>Then create the <code>HelloWorldShowReplaceWorlds</code> class and replace the entire Java file with:</p>
 <div class="annotate highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -1082,123 +1082,123 @@ The <code class="highlight"><span class="nv">replace-worlds</span><span class="w
 <span class="normal">74</span>
 <span class="normal">75</span>
 <span class="normal">76</span>
-<span class="normal">77</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">mb.helloworld.task</span><span class="p">;</span><span class="w"></span>
+<span class="normal">77</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">mb.helloworld.task</span><span class="p">;</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">java.io.Serializable</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Objects</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.io.Serializable</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Objects</span><span class="p">;</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">javax.inject.Inject</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">javax.inject.Inject</span><span class="p">;</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">org.checkerframework.checker.nullness.qual.Nullable</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.checkerframework.checker.nullness.qual.Nullable</span><span class="p">;</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">mb.helloworld.HelloWorldClassLoaderResources</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">mb.helloworld.HelloWorldScope</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">mb.pie.api.ExecContext</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">mb.pie.api.TaskDef</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">mb.pie.api.stamp.resource.ResourceStampers</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">mb.resource.ResourceKey</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">mb.spoofax.core.language.command.CommandFeedback</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">mb.spoofax.core.language.command.ShowFeedback</span><span class="p">;</span><span class="w"></span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">mb.aterm.common.TermToString</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">mb.helloworld.HelloWorldClassLoaderResources</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">mb.helloworld.HelloWorldScope</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">mb.pie.api.ExecContext</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">mb.pie.api.TaskDef</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">mb.pie.api.stamp.resource.ResourceStampers</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">mb.resource.ResourceKey</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">mb.spoofax.core.language.command.CommandFeedback</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">mb.spoofax.core.language.command.ShowFeedback</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">mb.aterm.common.TermToString</span><span class="p">;</span>
 
-<span class="nd">@HelloWorldScope</span><span class="w"></span>
-<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">HelloWorldShowReplaceWorlds</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">TaskDef</span><span class="o">&lt;</span><span class="n">HelloWorldShowReplaceWorlds</span><span class="p">.</span><span class="na">Args</span><span class="p">,</span><span class="w"> </span><span class="n">CommandFeedback</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Args</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">Serializable</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">serialVersionUID</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1L</span><span class="p">;</span><span class="w"></span>
+<span class="nd">@HelloWorldScope</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">HelloWorldShowReplaceWorlds</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">TaskDef</span><span class="o">&lt;</span><span class="n">HelloWorldShowReplaceWorlds</span><span class="p">.</span><span class="na">Args</span><span class="p">,</span><span class="w"> </span><span class="n">CommandFeedback</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Args</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">Serializable</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">serialVersionUID</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1L</span><span class="p">;</span>
 
-<span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">ResourceKey</span><span class="w"> </span><span class="n">file</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">ResourceKey</span><span class="w"> </span><span class="n">file</span><span class="p">;</span>
 
-<span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="nf">Args</span><span class="p">(</span><span class="n">ResourceKey</span><span class="w"> </span><span class="n">file</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="k">this</span><span class="p">.</span><span class="na">file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">file</span><span class="p">;</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="nf">Args</span><span class="p">(</span><span class="n">ResourceKey</span><span class="w"> </span><span class="n">file</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">this</span><span class="p">.</span><span class="na">file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">file</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
 
-<span class="w">        </span><span class="nd">@Override</span><span class="w"></span>
-<span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">equals</span><span class="p">(</span><span class="nd">@Nullable</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">o</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">this</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">o</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
-<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">o</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">getClass</span><span class="p">()</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="na">getClass</span><span class="p">())</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span><span class="w"></span>
-<span class="w">            </span><span class="kd">final</span><span class="w"> </span><span class="n">Args</span><span class="w"> </span><span class="n">args</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">Args</span><span class="p">)</span><span class="w"> </span><span class="n">o</span><span class="p">;</span><span class="w"></span>
-<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">file</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="na">file</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="nd">@Override</span>
+<span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">equals</span><span class="p">(</span><span class="nd">@Nullable</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">o</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">this</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">o</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">o</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">getClass</span><span class="p">()</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="na">getClass</span><span class="p">())</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span>
+<span class="w">            </span><span class="kd">final</span><span class="w"> </span><span class="n">Args</span><span class="w"> </span><span class="n">args</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">Args</span><span class="p">)</span><span class="w"> </span><span class="n">o</span><span class="p">;</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">file</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="na">file</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
 
-<span class="w">        </span><span class="nd">@Override</span><span class="w"></span>
-<span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">hashCode</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">Objects</span><span class="p">.</span><span class="na">hash</span><span class="p">(</span><span class="n">file</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="nd">@Override</span>
+<span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">hashCode</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">Objects</span><span class="p">.</span><span class="na">hash</span><span class="p">(</span><span class="n">file</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
 
-<span class="w">        </span><span class="nd">@Override</span><span class="w"></span>
-<span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">toString</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="s">&quot;Args{&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;file=&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="sc">&#39;}&#39;</span><span class="p">;</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
-
-
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">HelloWorldClassLoaderResources</span><span class="w"> </span><span class="n">classloaderResources</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">HelloWorldParse</span><span class="w"> </span><span class="n">parse</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">HelloWorldReplaceWorlds</span><span class="w"> </span><span class="n">replaceWorlds</span><span class="p">;</span><span class="w"></span>
-
-<span class="w">    </span><span class="nd">@Inject</span><span class="w"></span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">HelloWorldShowReplaceWorlds</span><span class="p">(</span><span class="n">HelloWorldClassLoaderResources</span><span class="w"> </span><span class="n">classloaderResources</span><span class="p">,</span><span class="w"> </span><span class="n">HelloWorldParse</span><span class="w"> </span><span class="n">parse</span><span class="p">,</span><span class="w"> </span><span class="n">HelloWorldReplaceWorlds</span><span class="w"> </span><span class="n">replaceWorlds</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">classloaderResources</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">classloaderResources</span><span class="p">;</span><span class="w"></span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">parse</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">parse</span><span class="p">;</span><span class="w"></span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">replaceWorlds</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">replaceWorlds</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="nd">@Override</span>
+<span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">toString</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="s">&quot;Args{&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;file=&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="sc">&#39;}&#39;</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
 
 
-<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">CommandFeedback</span><span class="w"> </span><span class="nf">exec</span><span class="p">(</span><span class="n">ExecContext</span><span class="w"> </span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">Args</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">Exception</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="n">context</span><span class="p">.</span><span class="na">require</span><span class="p">(</span><span class="n">classloaderResources</span><span class="p">.</span><span class="na">tryGetAsLocalResource</span><span class="p">(</span><span class="n">getClass</span><span class="p">()),</span><span class="w"> </span><span class="n">ResourceStampers</span><span class="p">.</span><span class="na">hashFile</span><span class="p">());</span><span class="w"></span>
-<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">ResourceKey</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">args</span><span class="p">.</span><span class="na">file</span><span class="p">;</span><span class="w"></span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">context</span><span class="p">.</span><span class="na">require</span><span class="p">(</span><span class="n">replaceWorlds</span><span class="p">,</span><span class="w"> </span><span class="n">parse</span><span class="p">.</span><span class="na">inputBuilder</span><span class="p">().</span><span class="na">withFile</span><span class="p">(</span><span class="n">file</span><span class="p">).</span><span class="na">buildAstSupplier</span><span class="p">()).</span><span class="na">mapOrElse</span><span class="p">(</span><span class="w"></span>
-<span class="w">            </span><span class="n">ast</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">CommandFeedback</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">ShowFeedback</span><span class="p">.</span><span class="na">showText</span><span class="p">(</span><span class="n">TermToString</span><span class="p">.</span><span class="na">toString</span><span class="p">(</span><span class="n">ast</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;Replaced World()s with Hello()s for &#39;&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;&#39;&quot;</span><span class="p">)),</span><span class="w"></span>
-<span class="w">            </span><span class="n">e</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">CommandFeedback</span><span class="p">.</span><span class="na">ofTryExtractMessagesFrom</span><span class="p">(</span><span class="n">e</span><span class="p">,</span><span class="w"> </span><span class="n">file</span><span class="p">)</span><span class="w"></span>
-<span class="w">        </span><span class="p">);</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">HelloWorldClassLoaderResources</span><span class="w"> </span><span class="n">classloaderResources</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">HelloWorldParse</span><span class="w"> </span><span class="n">parse</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">HelloWorldReplaceWorlds</span><span class="w"> </span><span class="n">replaceWorlds</span><span class="p">;</span>
 
-<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">getId</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">getClass</span><span class="p">().</span><span class="na">getName</span><span class="p">();</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="nd">@Inject</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">HelloWorldShowReplaceWorlds</span><span class="p">(</span><span class="n">HelloWorldClassLoaderResources</span><span class="w"> </span><span class="n">classloaderResources</span><span class="p">,</span><span class="w"> </span><span class="n">HelloWorldParse</span><span class="w"> </span><span class="n">parse</span><span class="p">,</span><span class="w"> </span><span class="n">HelloWorldReplaceWorlds</span><span class="w"> </span><span class="n">replaceWorlds</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">classloaderResources</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">classloaderResources</span><span class="p">;</span>
+<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">parse</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">parse</span><span class="p">;</span>
+<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">replaceWorlds</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">replaceWorlds</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">CommandFeedback</span><span class="w"> </span><span class="nf">exec</span><span class="p">(</span><span class="n">ExecContext</span><span class="w"> </span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">Args</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">Exception</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">context</span><span class="p">.</span><span class="na">require</span><span class="p">(</span><span class="n">classloaderResources</span><span class="p">.</span><span class="na">tryGetAsLocalResource</span><span class="p">(</span><span class="n">getClass</span><span class="p">()),</span><span class="w"> </span><span class="n">ResourceStampers</span><span class="p">.</span><span class="na">hashFile</span><span class="p">());</span>
+<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">ResourceKey</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">args</span><span class="p">.</span><span class="na">file</span><span class="p">;</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">context</span><span class="p">.</span><span class="na">require</span><span class="p">(</span><span class="n">replaceWorlds</span><span class="p">,</span><span class="w"> </span><span class="n">parse</span><span class="p">.</span><span class="na">inputBuilder</span><span class="p">().</span><span class="na">withFile</span><span class="p">(</span><span class="n">file</span><span class="p">).</span><span class="na">buildAstSupplier</span><span class="p">()).</span><span class="na">mapOrElse</span><span class="p">(</span>
+<span class="w">            </span><span class="n">ast</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">CommandFeedback</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">ShowFeedback</span><span class="p">.</span><span class="na">showText</span><span class="p">(</span><span class="n">TermToString</span><span class="p">.</span><span class="na">toString</span><span class="p">(</span><span class="n">ast</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;Replaced World()s with Hello()s for &#39;&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;&#39;&quot;</span><span class="p">)),</span>
+<span class="w">            </span><span class="n">e</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">CommandFeedback</span><span class="p">.</span><span class="na">ofTryExtractMessagesFrom</span><span class="p">(</span><span class="n">e</span><span class="p">,</span><span class="w"> </span><span class="n">file</span><span class="p">)</span>
+<span class="w">        </span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">getId</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">getClass</span><span class="p">().</span><span class="na">getName</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
 </code></pre></div></td></tr></table></div>
 <p>This class very similar to <code>HelloWorldShowParsedAst</code>, but runs the <code>HelloWorldReplaceWorlds</code> task on the parsed AST, transforming the AST.</p>
 <p>Now open <code>helloworld/spoofax.cfg</code> again and register the tasks by adding:</p>
-<div class="highlight"><pre><span></span><code><span class="na">task-def mb.helloworld.task.HelloWorldReplaceWorlds</span><span class="w"></span>
-<span class="na">let showReplaceWorlds</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">task-def mb.helloworld.task.HelloWorldShowReplaceWorlds</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="na">task-def mb.helloworld.task.HelloWorldReplaceWorlds</span>
+<span class="na">let showReplaceWorlds</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">task-def mb.helloworld.task.HelloWorldShowReplaceWorlds</span>
 </code></pre></div>
 <p>Then add a command for it by adding:</p>
-<div class="highlight"><pre><span></span><code><span class="na">let showReplaceWorldsCommand</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">command-def {</span><span class="w"></span>
-<span class="w">  </span><span class="na">task-def</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">showReplaceWorlds</span><span class="w"></span>
-<span class="w">  </span><span class="na">display-name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Replace world with hello&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="na">parameters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">[</span><span class="w"></span>
-<span class="w">    </span><span class="na">file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">parameter {</span><span class="w"></span>
-<span class="w">      </span><span class="na">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">java mb.resource.ResourceKey</span><span class="w"></span>
-<span class="w">      </span><span class="na">argument-providers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">[Context(ReadableResource)]</span><span class="w"></span>
-<span class="w">    </span><span class="na">}</span><span class="w"></span>
-<span class="w">  </span><span class="na">]</span><span class="w"></span>
-<span class="na">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="na">let showReplaceWorldsCommand</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">command-def {</span>
+<span class="w">  </span><span class="na">task-def</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">showReplaceWorlds</span>
+<span class="w">  </span><span class="na">display-name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Replace world with hello&quot;</span>
+<span class="w">  </span><span class="na">parameters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">[</span>
+<span class="w">    </span><span class="na">file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">parameter {</span>
+<span class="w">      </span><span class="na">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">java mb.resource.ResourceKey</span>
+<span class="w">      </span><span class="na">argument-providers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">[Context(ReadableResource)]</span>
+<span class="w">    </span><span class="na">}</span>
+<span class="w">  </span><span class="na">]</span>
+<span class="na">}</span>
 </code></pre></div>
 <p>Finally, add menu items for the command by adding:</p>
-<div class="highlight"><pre><span></span><code><span class="na">editor-context-menu [</span><span class="w"></span>
-<span class="w">  </span><span class="na">menu &quot;Transform&quot; [</span><span class="w"></span>
-<span class="w">    </span><span class="na">command-action {</span><span class="w"></span>
-<span class="w">      </span><span class="na">command-def</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">showReplaceWorldsCommand</span><span class="w"></span>
-<span class="w">      </span><span class="na">execution-type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">Once</span><span class="w"></span>
-<span class="w">    </span><span class="na">}</span><span class="w"></span>
-<span class="w">    </span><span class="na">command-action {</span><span class="w"></span>
-<span class="w">      </span><span class="na">command-def</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">showReplaceWorldsCommand</span><span class="w"></span>
-<span class="w">      </span><span class="na">execution-type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">Continuous</span><span class="w"></span>
-<span class="w">    </span><span class="na">}</span><span class="w"></span>
-<span class="w">  </span><span class="na">]</span><span class="w"></span>
-<span class="na">]</span><span class="w"></span>
-<span class="na">resource-context-menu [</span><span class="w"></span>
-<span class="w">  </span><span class="na">menu &quot;Transform&quot; [</span><span class="w"></span>
-<span class="w">    </span><span class="na">command-action {</span><span class="w"></span>
-<span class="w">      </span><span class="na">command-def</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">showReplaceWorldsCommand</span><span class="w"></span>
-<span class="w">      </span><span class="na">execution-type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">Once</span><span class="w"></span>
-<span class="w">      </span><span class="na">required-resource-types</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">[File]</span><span class="w"></span>
-<span class="w">    </span><span class="na">}</span><span class="w"></span>
-<span class="w">  </span><span class="na">]</span><span class="w"></span>
-<span class="na">]</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="na">editor-context-menu [</span>
+<span class="w">  </span><span class="na">menu &quot;Transform&quot; [</span>
+<span class="w">    </span><span class="na">command-action {</span>
+<span class="w">      </span><span class="na">command-def</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">showReplaceWorldsCommand</span>
+<span class="w">      </span><span class="na">execution-type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">Once</span>
+<span class="w">    </span><span class="na">}</span>
+<span class="w">    </span><span class="na">command-action {</span>
+<span class="w">      </span><span class="na">command-def</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">showReplaceWorldsCommand</span>
+<span class="w">      </span><span class="na">execution-type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">Continuous</span>
+<span class="w">    </span><span class="na">}</span>
+<span class="w">  </span><span class="na">]</span>
+<span class="na">]</span>
+<span class="na">resource-context-menu [</span>
+<span class="w">  </span><span class="na">menu &quot;Transform&quot; [</span>
+<span class="w">    </span><span class="na">command-action {</span>
+<span class="w">      </span><span class="na">command-def</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">showReplaceWorldsCommand</span>
+<span class="w">      </span><span class="na">execution-type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">Once</span>
+<span class="w">      </span><span class="na">required-resource-types</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">[File]</span>
+<span class="w">    </span><span class="na">}</span>
+<span class="w">  </span><span class="na">]</span>
+<span class="na">]</span>
 </code></pre></div>
 <p>Build the project so that we can test our changes.
 Test the command similarly to testing the "Show parsed AST" command.</p>

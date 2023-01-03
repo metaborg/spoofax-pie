@@ -1043,37 +1043,37 @@ There should now be a project named <code>helloworld</code> in the <span class="
 <p>First we will add some syntax to the language.
 Open the main SDF3 file <code>helloworld/src/start.sdf3</code> file by expanding the folders and double-clicking the file.
 <a href="https://www.spoofax.dev/references/syntax/">SDF3</a> is a meta-language (i.e., a language to describe languages) for describing the syntax of a language, from which Spoofax will derive the parser of your language.
-Under the <code class="highlight"><span class="k">context-free</span><span class="w"> </span><span class="k">syntax</span><span class="w"></span></code> section, replace the <code class="highlight"><span class="nv">Start</span><span class=" -Punctuation">.</span><span class="nv">Empty</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;&gt;</span><span class="w"></span></code> line with <code class="highlight"><span class="nv">Start</span><span class=" -Punctuation">.</span><span class="nv">Program</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;&lt;{</span><span class="nv">Part</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class=" -Punctuation">}</span><span class="o">*</span><span class=" -Punctuation">&gt;&gt;</span><span class="w"></span></code>, indicating that the language accepts programs which consists of zero or more parts.</p>
-<p><code class="highlight"><span class="nv">Part</span><span class="w"></span></code> is a <em>sort</em> and must be defined by adding its name to the <code class="highlight"><span class="k">context-free</span><span class="w"> </span><span class="k">sorts</span><span class="w"></span></code> section on a new line.</p>
-<p>Now we will add syntax productions to <code class="highlight"><span class="nv">Part</span><span class="w"></span></code> to the <code class="highlight"><span class="k">context-free</span><span class="w"> </span><span class="k">syntax</span><span class="w"></span></code> section.
-Add <code class="highlight"><span class="nv">Part</span><span class=" -Punctuation">.</span><span class="nv">Hello</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;</span><span class="nv">hello</span><span class=" -Punctuation">&gt;</span><span class="w"></span></code> on a new line, indicating that one sort of <code class="highlight"><span class="nv">Part</span><span class="w"></span></code> is the word <code>hello.</code>
-Then add <code class="highlight"><span class="nv">Part</span><span class=" -Punctuation">.</span><span class="nv">World</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;</span><span class="nv">world</span><span class=" -Punctuation">&gt;</span><span class="w"></span></code> on a new line, indicating that one sort of <code class="highlight"><span class="nv">Part</span><span class="w"></span></code> is the word <code>world</code>.</p>
+Under the <code class="highlight"><span class="k">context-free</span><span class="w"> </span><span class="k">syntax</span></code> section, replace the <code class="highlight"><span class="nv">Start</span><span class=" -Punctuation">.</span><span class="nv">Empty</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;&gt;</span></code> line with <code class="highlight"><span class="nv">Start</span><span class=" -Punctuation">.</span><span class="nv">Program</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;&lt;{</span><span class="nv">Part</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class=" -Punctuation">}</span><span class="o">*</span><span class=" -Punctuation">&gt;&gt;</span></code>, indicating that the language accepts programs which consists of zero or more parts.</p>
+<p><code class="highlight"><span class="nv">Part</span></code> is a <em>sort</em> and must be defined by adding its name to the <code class="highlight"><span class="k">context-free</span><span class="w"> </span><span class="k">sorts</span></code> section on a new line.</p>
+<p>Now we will add syntax productions to <code class="highlight"><span class="nv">Part</span></code> to the <code class="highlight"><span class="k">context-free</span><span class="w"> </span><span class="k">syntax</span></code> section.
+Add <code class="highlight"><span class="nv">Part</span><span class=" -Punctuation">.</span><span class="nv">Hello</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;</span><span class="nv">hello</span><span class=" -Punctuation">&gt;</span></code> on a new line, indicating that one sort of <code class="highlight"><span class="nv">Part</span></code> is the word <code>hello.</code>
+Then add <code class="highlight"><span class="nv">Part</span><span class=" -Punctuation">.</span><span class="nv">World</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;</span><span class="nv">world</span><span class=" -Punctuation">&gt;</span></code> on a new line, indicating that one sort of <code class="highlight"><span class="nv">Part</span></code> is the word <code>world</code>.</p>
 <details class="note">
 <summary><code>src/start.sdf3</code> full contents</summary>
-<div class="highlight"><pre><span></span><code><span class="k">module</span><span class="w"> </span><span class="nv">start</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="k">module</span><span class="w"> </span><span class="nv">start</span>
 
-<span class="k">context-free</span><span class="w"> </span><span class="k">start-symbols</span><span class="w"></span>
+<span class="k">context-free</span><span class="w"> </span><span class="k">start-symbols</span>
 
-<span class="w">  </span><span class="nv">Start</span><span class="w"></span>
+<span class="w">  </span><span class="nv">Start</span>
 
-<span class="k">context-free</span><span class="w"> </span><span class="k">sorts</span><span class="w"></span>
+<span class="k">context-free</span><span class="w"> </span><span class="k">sorts</span>
 
-<span class="w">  </span><span class="nv">Start</span><span class="w"></span>
-<span class="w">  </span><span class="nv">Part</span><span class="w"></span>
+<span class="w">  </span><span class="nv">Start</span>
+<span class="w">  </span><span class="nv">Part</span>
 
-<span class="k">context-free</span><span class="w"> </span><span class="k">syntax</span><span class="w"></span>
+<span class="k">context-free</span><span class="w"> </span><span class="k">syntax</span>
 
-<span class="w">  </span><span class="nv">Start</span><span class=" -Punctuation">.</span><span class="nv">Program</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;&lt;{</span><span class="nv">Part</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class=" -Punctuation">}</span><span class="o">*</span><span class=" -Punctuation">&gt;&gt;</span><span class="w"></span>
-<span class="w">  </span><span class="nv">Part</span><span class=" -Punctuation">.</span><span class="nv">Hello</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;</span><span class="nv">hello</span><span class=" -Punctuation">&gt;</span><span class="w"></span>
-<span class="w">  </span><span class="nv">Part</span><span class=" -Punctuation">.</span><span class="nv">World</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;</span><span class="nv">world</span><span class=" -Punctuation">&gt;</span><span class="w"></span>
+<span class="w">  </span><span class="nv">Start</span><span class=" -Punctuation">.</span><span class="nv">Program</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;&lt;{</span><span class="nv">Part</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class=" -Punctuation">}</span><span class="o">*</span><span class=" -Punctuation">&gt;&gt;</span>
+<span class="w">  </span><span class="nv">Part</span><span class=" -Punctuation">.</span><span class="nv">Hello</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;</span><span class="nv">hello</span><span class=" -Punctuation">&gt;</span>
+<span class="w">  </span><span class="nv">Part</span><span class=" -Punctuation">.</span><span class="nv">World</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">&lt;</span><span class="nv">world</span><span class=" -Punctuation">&gt;</span>
 
-<span class="k">lexical</span><span class="w"> </span><span class="k">syntax</span><span class="w"></span>
+<span class="k">lexical</span><span class="w"> </span><span class="k">syntax</span>
 
-<span class="w">  </span><span class="nv">LAYOUT</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">[</span>\<span class="w"> </span>\<span class="nv">n</span>\<span class="nv">v</span>\<span class="nv">f</span>\<span class="nv">r</span><span class=" -Punctuation">]</span><span class="w"></span>
+<span class="w">  </span><span class="nv">LAYOUT</span><span class="w"> </span>=<span class="w"> </span><span class=" -Punctuation">[</span>\<span class="w"> </span>\<span class="nv">n</span>\<span class="nv">v</span>\<span class="nv">f</span>\<span class="nv">r</span><span class=" -Punctuation">]</span>
 
-<span class="k">context-free</span><span class="w"> </span><span class="nv">restrictions</span><span class="w"></span>
+<span class="k">context-free</span><span class="w"> </span><span class="nv">restrictions</span>
 
-<span class="w">  </span><span class="nv">LAYOUT</span><span class="o">?</span><span class="w"> </span><span class="nv">-</span>/<span class="nv">-</span><span class="w"> </span><span class=" -Punctuation">[</span>\<span class="w"> </span>\<span class="nv">n</span>\<span class="nv">v</span>\<span class="nv">f</span>\<span class="nv">r</span><span class=" -Punctuation">]</span><span class="w"></span>
+<span class="w">  </span><span class="nv">LAYOUT</span><span class="o">?</span><span class="w"> </span><span class="nv">-</span>/<span class="nv">-</span><span class="w"> </span><span class=" -Punctuation">[</span>\<span class="w"> </span>\<span class="nv">n</span>\<span class="nv">v</span>\<span class="nv">f</span>\<span class="nv">r</span><span class=" -Punctuation">]</span>
 </code></pre></div>
 </details>
 <p>To observe our changes, build the project by clicking on the project in the <span class="guilabel">Package Explorer</span> and choosing <span class="guilabel">Project ‣ Build Project</span> from the main menu, or by pressing <span class="keys"><kbd class="key-command">Cmd</kbd><span>+</span><kbd class="key-b">B</kbd></span> on macOS or <span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-b">B</kbd></span> on others.
@@ -1091,7 +1091,7 @@ There are three ways to run this debugging command:</p>
 <li>Right-click the <code>example/example1.hel</code> file in the <span class="guilabel">Package Explorer</span> and choose: <span class="guilabel">HelloWorld ‣ Debug ‣ Show parsed <abbr title="Abstract Syntax Tree">AST</abbr></span></li>
 </ul>
 <p>Running this command will open a new editor with the <abbr title="Abstract Syntax Tree">AST</abbr> of the program, such as:</p>
-<div class="highlight"><pre><span></span><code>Program<span class=" -Punctuation">([</span>Hello<span class=" -Punctuation">(),</span><span class="w"> </span>World<span class=" -Punctuation">()])</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code>Program<span class=" -Punctuation">([</span>Hello<span class=" -Punctuation">(),</span><span class="w"> </span>World<span class=" -Punctuation">()])</span>
 </code></pre></div>
 <p>There are also <code>(continuous)</code> variants of these debugging commands which will keep updating the debugging view when the source program changes.
 You can drag tabs to the sides of the screen to keep multiple editors open simultaneously, for example to keep the continuous debugging view visible, and to keep the syntax definition files editable.</p>
@@ -1136,7 +1136,7 @@ This will (once the tests are done executing) pop up a <span class="guilabel">SP
 <p>Now we will change the syntax highlighter of the language.
 Open the main ESV file <code>helloworld/src/main.esv</code>.
 ESV is a meta-language for describing the syntax highlighter.
-Change the <code class="highlight">keyword<span class="w"> </span><span class=" -Punctuation">:</span><span class="w"> </span>127<span class="w"> </span>0<span class="w"> </span>85<span class="w"> </span>bold<span class="w"></span></code> line to <code class="highlight">keyword<span class=" -Punctuation">:</span><span class="w"> </span>0<span class="w"> </span>0<span class="w"> </span>150<span class="w"> </span>bold<span class="w"></span></code> and build the project.
+Change the <code class="highlight">keyword<span class="w"> </span><span class=" -Punctuation">:</span><span class="w"> </span>127<span class="w"> </span>0<span class="w"> </span>85<span class="w"> </span>bold</code> line to <code class="highlight">keyword<span class=" -Punctuation">:</span><span class="w"> </span>0<span class="w"> </span>0<span class="w"> </span>150<span class="w"> </span>bold</code> and build the project.
 Then check your <code>example1.hel</code> example file, it should now be highlighted blue.</p>
 <p>To make iteration easier, you can drag the <code>example1.hel</code> tab to the side of the screen to open the language definition and example file side-by-side.
 You can play around with the coloring a bit and choose a style to your liking.
