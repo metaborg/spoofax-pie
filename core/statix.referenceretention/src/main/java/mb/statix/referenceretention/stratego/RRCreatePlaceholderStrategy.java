@@ -1,12 +1,16 @@
 package mb.statix.referenceretention.stratego;
 
+import mb.statix.referenceretention.statix.RRPlaceholder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.core.InterpreterException;
 import org.spoofax.interpreter.library.AbstractPrimitive;
 import org.spoofax.interpreter.stratego.Strategy;
+import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
+
+import java.util.List;
 
 /**
  * Creates a reference retention placeholder, that is, a placeholder of the form {@code [[ <body> | <context> ]]}
@@ -28,16 +32,16 @@ public final class RRCreatePlaceholderStrategy extends AbstractPrimitive {
 
     @Override
     public boolean call(IContext env, Strategy[] svars, IStrategoTerm[] tvars) throws InterpreterException {
-        @Nullable final IStrategoTerm result = eval(env.getFactory(), env.current(), tvars[0]);
+        final IStrategoTerm body = env.current();
+        final List<IStrategoTerm> context = ((IStrategoList)tvars[0]).getSubterms();
+        @Nullable final IStrategoTerm result = eval(env.getFactory(), body, context);
         if (result == null) return false;
         env.setCurrent(result);
         return true;
     }
 
-    @Nullable private IStrategoTerm eval(ITermFactory termFactory, IStrategoTerm input, IStrategoTerm ctx) throws InterpreterException {
-        // TODO
-        return null;
-        //return new RRPlaceholder(input, ctx);
+    @Nullable private IStrategoTerm eval(ITermFactory termFactory, IStrategoTerm body, List<IStrategoTerm> context) {
+        return new RRPlaceholderApplTerm(body, context, termFactory);
     }
 }
 

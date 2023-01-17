@@ -5,4 +5,7 @@ imports
 
 strategies
 
-  inline-method-call(|region) = debug(!"Inlining: "); prim("RR_fix_references"); debug(!"Inlined: ")
+  inline-method-call(|region) = debug(!"Inlining: ");
+    prim("RR_create_placeholder", ["abc"]);
+    //prim("RR_fix_references");
+    debug(!"Inlined: ")
