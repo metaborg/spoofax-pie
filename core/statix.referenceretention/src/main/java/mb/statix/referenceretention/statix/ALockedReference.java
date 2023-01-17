@@ -17,6 +17,7 @@ import static mb.nabl2.terms.matching.TermMatch.M;
  */
 @Value.Immutable(lazyhash = false)
 @Serial.Version(value = 42L)
+@Deprecated // Not used, use Stratego version?
 public abstract class ALockedReference extends AbstractApplTerm {
 
 

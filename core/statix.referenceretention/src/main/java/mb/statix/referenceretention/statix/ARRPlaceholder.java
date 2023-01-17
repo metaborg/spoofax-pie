@@ -21,6 +21,7 @@ import java.util.List;
  */
 @Value.Immutable(lazyhash = false)
 @Serial.Version(value = 42L)
+@Deprecated // Not used, use Stratego version?
 public abstract class ARRPlaceholder extends AbstractApplTerm {
 
     /**

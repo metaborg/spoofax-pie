@@ -33,11 +33,9 @@ public final class RRLockReferenceStrategy extends AbstractPrimitive {
 
     // TODO: The scope should be an appropriate type, e.g., Scope or something.
     @Nullable private IStrategoTerm eval(ITermFactory termFactory, IStrategoTerm input, IStrategoTerm scope) throws InterpreterException {
-        final ITerm input2 = null; // TODO: Get this from the `input` term
-        final Scope scope2 = null; // TODO: Get this from the `scope` term
-        // TODO: Build RRLockedReference Stratego term
-        //RRLockedReference.builder().term(input2).declaration(scope2).build();
-        return null;
+        final Scope declaration = null; // TODO: Get this from the `scope` term
+
+        return new RRLockedReferenceApplTerm(input, declaration, termFactory);
     }
 }
 
