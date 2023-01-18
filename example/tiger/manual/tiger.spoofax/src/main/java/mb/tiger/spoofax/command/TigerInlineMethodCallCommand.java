@@ -14,7 +14,6 @@ import mb.spoofax.core.language.command.arg.Param;
 import mb.spoofax.core.language.command.arg.ParamDef;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.tiger.spoofax.TigerScope;
-import mb.tiger.spoofax.task.TigerInlineMethodCall;
 import mb.tiger.spoofax.task.TigerShowArgs;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -23,16 +22,16 @@ import javax.inject.Inject;
 @TigerScope
 public class TigerInlineMethodCallCommand implements CommandDef<TigerShowArgs> {
 
-    private final TigerInlineMethodCall tigerInlineMethodCall;
+    private final mb.tiger.spoofax.task.TigerInlineMethodCallCommand tigerInlineMethodCallCommand;
 
     @Inject public TigerInlineMethodCallCommand(
-        TigerInlineMethodCall tigerInlineMethodCall
+        mb.tiger.spoofax.task.TigerInlineMethodCallCommand tigerInlineMethodCallCommand
     ) {
-        this.tigerInlineMethodCall = tigerInlineMethodCall;
+        this.tigerInlineMethodCallCommand = tigerInlineMethodCallCommand;
     }
 
     @Override public String getId() {
-        return tigerInlineMethodCall.getId();
+        return tigerInlineMethodCallCommand.getId();
     }
 
     @Override public String getDisplayName() {
@@ -64,6 +63,6 @@ public class TigerInlineMethodCallCommand implements CommandDef<TigerShowArgs> {
     }
 
     @Override public Task<CommandFeedback> createTask(TigerShowArgs args) {
-        return tigerInlineMethodCall.createTask(args);
+        return tigerInlineMethodCallCommand.createTask(args);
     }
 }

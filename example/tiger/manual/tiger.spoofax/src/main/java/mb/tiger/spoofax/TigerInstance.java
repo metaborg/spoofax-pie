@@ -31,8 +31,6 @@ import mb.spoofax.core.language.cli.CliCommand;
 import mb.spoofax.core.language.cli.CliParam;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandDef;
-import mb.spoofax.core.language.command.CommandExecutionType;
-import mb.spoofax.core.language.command.EditorFileType;
 import mb.spoofax.core.language.command.arg.RawArgs;
 import mb.spoofax.core.language.menu.CommandAction;
 import mb.spoofax.core.language.menu.MenuItem;
@@ -51,14 +49,12 @@ import mb.tiger.spoofax.command.TigerShowPrettyPrintedTextCommand;
 import mb.tiger.spoofax.task.TigerCheck;
 import mb.tiger.spoofax.task.TigerCheckAggregator;
 import mb.tiger.spoofax.task.TigerIdeTokenize;
-import mb.tiger.spoofax.task.TigerInlineMethodCall;
 import mb.tiger.spoofax.task.reusable.TigerParse;
 import mb.tiger.spoofax.task.reusable.TigerStyle;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
-import java.io.Serializable;
 import java.util.Optional;
 import java.util.Set;
 

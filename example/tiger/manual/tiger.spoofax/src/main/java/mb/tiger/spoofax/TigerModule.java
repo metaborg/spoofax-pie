@@ -24,7 +24,6 @@ import mb.tiger.TigerStylerFactory;
 import mb.tiger.spoofax.command.TigerCompileDirectoryCommand;
 import mb.tiger.spoofax.command.TigerCompileFileAltCommand;
 import mb.tiger.spoofax.command.TigerCompileFileCommand;
-import mb.tiger.spoofax.command.TigerInlineMethodCallCommand;
 import mb.tiger.spoofax.command.TigerShowAnalyzedAstCommand;
 import mb.tiger.spoofax.command.TigerShowDesugaredAstCommand;
 import mb.tiger.spoofax.command.TigerShowParsedAstCommand;
@@ -37,7 +36,7 @@ import mb.tiger.spoofax.task.TigerCompileFile;
 import mb.tiger.spoofax.task.TigerCompileFileAlt;
 import mb.tiger.spoofax.task.TigerGetSourceFiles;
 import mb.tiger.spoofax.task.TigerIdeTokenize;
-import mb.tiger.spoofax.task.TigerInlineMethodCall;
+import mb.tiger.spoofax.task.TigerInlineMethodCallCommand;
 import mb.tiger.spoofax.task.TigerShowAnalyzedAst;
 import mb.tiger.spoofax.task.TigerShowDesugaredAst;
 import mb.tiger.spoofax.task.TigerShowParsedAst;
@@ -148,7 +147,7 @@ public class TigerModule {
         TigerShowScopeGraph showScopeGraph,
         TigerShowDesugaredAst showDesugaredAst,
 
-        TigerInlineMethodCall inlineMethodCall,
+        TigerInlineMethodCallCommand inlineMethodCall,
         InlineMethodCallTaskDef inlineMethodCallTaskDef,
 
         TigerCompileFile compileFile,
@@ -193,7 +192,7 @@ public class TigerModule {
         TigerShowScopeGraphCommand showScopeGraphCommand,
         TigerShowPrettyPrintedTextCommand showPrettyPrintedTextCommand,
 
-        TigerInlineMethodCallCommand inlineMethodCallCommand,
+        mb.tiger.spoofax.command.TigerInlineMethodCallCommand inlineMethodCallCommand,
 
         TigerCompileFileCommand compileFileCommand,
         TigerCompileDirectoryCommand compileDirectoryCommand,
