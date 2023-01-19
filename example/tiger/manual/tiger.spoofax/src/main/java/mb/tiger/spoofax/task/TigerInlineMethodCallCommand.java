@@ -32,18 +32,18 @@ public class TigerInlineMethodCallCommand implements TaskDef<TigerShowArgs, Comm
     private final TigerParse parse;
     private final TigerAnalyze analyze;
     private final Provider<StrategoRuntime> strategoRuntimeProvider;
-    private final InlineMethodCallTaskDef inlineMethodCallTaskDef;
+//    private final InlineMethodCallTaskDef inlineMethodCallTaskDef;
 
     @Inject public TigerInlineMethodCallCommand(
         TigerParse parse,
         TigerAnalyze analyze,
-        Provider<StrategoRuntime> strategoRuntimeProvider,
-        InlineMethodCallTaskDef inlineMethodCallTaskDef
+        Provider<StrategoRuntime> strategoRuntimeProvider
+//        InlineMethodCallTaskDef inlineMethodCallTaskDef
     ) {
         this.parse = parse;
         this.analyze = analyze;
         this.strategoRuntimeProvider = strategoRuntimeProvider;
-        this.inlineMethodCallTaskDef = inlineMethodCallTaskDef;
+//        this.inlineMethodCallTaskDef = inlineMethodCallTaskDef;
     }
 
     @Override public String getId() {
@@ -52,40 +52,11 @@ public class TigerInlineMethodCallCommand implements TaskDef<TigerShowArgs, Comm
 
     @Override public CommandFeedback exec(ExecContext context, TigerShowArgs input) throws Exception {
         final ResourceKey key = input.key;
-//        final @Nullable Region region = input.region;
-//        final Supplier<Result<ConstraintAnalyzeTaskDef.Output, ?>> analysisSupplier = analyze
-//            .createSupplier(new TigerAnalyze.Input(key, parse.inputBuilder().withFile(key).buildAstSupplier()));
-
-//            .map(new StatelessSerializableFunction<Result<ConstraintAnalyzeTaskDef.Output, ?>, Result<IStrategoTerm, ?>>() {
-//                @Override public Result<IStrategoTerm, ?> apply(Result<ConstraintAnalyzeTaskDef.Output, ?> output) {
-//                    return output.map(analyzed ->
-//                        analyzed
-//                    );
-//                }
-//            });
-
-//        final Supplier<Result<IStrategoTerm, ?>> astSupplier = analyze
-//            .createSupplier(new TigerAnalyze.Input(key, parse.inputBuilder().withFile(key).buildAstSupplier()))
-//            .map(new StatelessSerializableFunction<Result<ConstraintAnalyzeTaskDef.Output, ?>, Result<IStrategoTerm, ?>>() {
-//                @Override public Result<IStrategoTerm, ?> apply(Result<ConstraintAnalyzeTaskDef.Output, ?> output) {
-//                    return output.map(analyzed -> {
-//                        final IStrategoTerm ast = analyzed.result.analyzedAst;
-//                        if(region != null) {
-//                            return TermTracer.getSmallestTermEncompassingRegion(ast, region);
-//                        } else {
-//                            return ast;
-//                        }
-//                    });
-//                }
-//            });
-        return context.require(inlineMethodCallTaskDef, new InlineMethodCallTaskDef.Input(
-                key,
-                input.region
-            ));
-//            .map(TermToString::toString)
-//            .mapOrElse(
-//                text -> CommandFeedback.of(ShowFeedback.showText(text, "Inlined method call in '" + key + "'")),
-//                e -> CommandFeedback.ofTryExtractMessagesFrom(e, key));
+//        return context.require(inlineMethodCallTaskDef, new InlineMethodCallTaskDef.Input(
+//                key,
+//                input.region
+//            ));
+        return null;
     }
 
     @Override public Task<CommandFeedback> createTask(TigerShowArgs input) {

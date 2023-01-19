@@ -147,8 +147,8 @@ public class TigerModule {
         TigerShowScopeGraph showScopeGraph,
         TigerShowDesugaredAst showDesugaredAst,
 
-        TigerInlineMethodCallCommand inlineMethodCall,
-        InlineMethodCallTaskDef inlineMethodCallTaskDef,
+//        TigerInlineMethodCallCommand inlineMethodCall,
+//        InlineMethodCallTaskDef inlineMethodCallTaskDef,
 
         TigerCompileFile compileFile,
         TigerCompileFileAlt compileFileAlt,
@@ -174,8 +174,8 @@ public class TigerModule {
         taskDefs.add(showScopeGraph);
         taskDefs.add(showDesugaredAst);
 
-        taskDefs.add(inlineMethodCall);
-        taskDefs.add(inlineMethodCallTaskDef);
+//        taskDefs.add(inlineMethodCall);
+//        taskDefs.add(inlineMethodCallTaskDef);
 
         taskDefs.add(compileFile);
         taskDefs.add(compileFileAlt);
@@ -192,7 +192,7 @@ public class TigerModule {
         TigerShowScopeGraphCommand showScopeGraphCommand,
         TigerShowPrettyPrintedTextCommand showPrettyPrintedTextCommand,
 
-        mb.tiger.spoofax.command.TigerInlineMethodCallCommand inlineMethodCallCommand,
+//        mb.tiger.spoofax.command.TigerInlineMethodCallCommand inlineMethodCallCommand,
 
         TigerCompileFileCommand compileFileCommand,
         TigerCompileDirectoryCommand compileDirectoryCommand,
@@ -206,7 +206,7 @@ public class TigerModule {
         commandDefs.add(showScopeGraphCommand);
         commandDefs.add(showPrettyPrintedTextCommand);
 
-        commandDefs.add(inlineMethodCallCommand);
+//        commandDefs.add(inlineMethodCallCommand);
 
         commandDefs.add(compileFileCommand);
         commandDefs.add(compileDirectoryCommand);

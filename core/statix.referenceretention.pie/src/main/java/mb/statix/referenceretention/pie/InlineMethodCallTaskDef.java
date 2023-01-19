@@ -111,7 +111,7 @@ public class InlineMethodCallTaskDef implements TaskDef<InlineMethodCallTaskDef.
     private final StrategoTerms strategoTerms;
     private final Logger log;
 
-    @Inject public InlineMethodCallTaskDef(
+    public InlineMethodCallTaskDef(
 //        JsglrParseTaskDef parseTaskDef,
 //        ConstraintAnalyzeTaskDef analyzeTaskDef,
         JsglrParseTaskDef parseTaskDef,
