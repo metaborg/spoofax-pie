@@ -53,8 +53,8 @@ public class TigerInlineMethodCallCommand implements TaskDef<TigerShowArgs, Comm
     @Override public CommandFeedback exec(ExecContext context, TigerShowArgs input) throws Exception {
         final ResourceKey key = input.key;
 //        final @Nullable Region region = input.region;
-        final Supplier<Result<ConstraintAnalyzeTaskDef.Output, ?>> analysisSupplier = analyze
-            .createSupplier(new TigerAnalyze.Input(key, parse.inputBuilder().withFile(key).buildAstSupplier()));
+//        final Supplier<Result<ConstraintAnalyzeTaskDef.Output, ?>> analysisSupplier = analyze
+//            .createSupplier(new TigerAnalyze.Input(key, parse.inputBuilder().withFile(key).buildAstSupplier()));
 
 //            .map(new StatelessSerializableFunction<Result<ConstraintAnalyzeTaskDef.Output, ?>, Result<IStrategoTerm, ?>>() {
 //                @Override public Result<IStrategoTerm, ?> apply(Result<ConstraintAnalyzeTaskDef.Output, ?> output) {
@@ -79,13 +79,13 @@ public class TigerInlineMethodCallCommand implements TaskDef<TigerShowArgs, Comm
 //                }
 //            });
         return context.require(inlineMethodCallTaskDef, new InlineMethodCallTaskDef.Input(
-                analysisSupplier,
+                key,
                 input.region
-            ))
-            .map(TermToString::toString)
-            .mapOrElse(
-                text -> CommandFeedback.of(ShowFeedback.showText(text, "Inlined method call in '" + key + "'")),
-                e -> CommandFeedback.ofTryExtractMessagesFrom(e, key));
+            ));
+//            .map(TermToString::toString)
+//            .mapOrElse(
+//                text -> CommandFeedback.of(ShowFeedback.showText(text, "Inlined method call in '" + key + "'")),
+//                e -> CommandFeedback.ofTryExtractMessagesFrom(e, key));
     }
 
     @Override public Task<CommandFeedback> createTask(TigerShowArgs input) {

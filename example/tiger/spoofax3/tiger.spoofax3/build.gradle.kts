@@ -10,6 +10,11 @@ plugins {
 fun compositeBuild(name: String) = "$group:$name:$version"
 
 dependencies {
+  api(platform(compositeBuild("spoofax.depconstraints")))
+
+  api(compositeBuild("statix.referenceretention"))
+  api(compositeBuild("statix.referenceretention.pie"))
+
   testImplementation(compositeBuild("spoofax.test"))
   testCompileOnly("org.checkerframework:checker-qual-android")
 }

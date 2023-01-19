@@ -1,5 +1,6 @@
 package mb.statix.referenceretention.pie;
 
+import mb.aterm.common.TermToString;
 import mb.common.region.Region;
 import mb.common.result.Result;
 import mb.constraint.pie.ConstraintAnalyzeTaskDef;
@@ -12,9 +13,9 @@ import mb.pie.api.Interactivity;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
-import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.core.language.command.CommandFeedback;
+import mb.spoofax.core.language.command.ShowFeedback;
 import mb.statix.referenceretention.stratego.RRStrategoContext;
-import mb.statix.solver.persistent.SolverResult;
 import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
 import mb.tego.strategies.runtime.TegoRuntime;
@@ -32,12 +33,13 @@ import java.util.Set;
  * Task definition calling the Stratego transformation 'inline-method-call'
  * on an analyzed AST.
  */
-public class InlineMethodCallTaskDef implements TaskDef<InlineMethodCallTaskDef.Input, Result<IStrategoTerm, ?>> {
+public class InlineMethodCallTaskDef implements TaskDef<InlineMethodCallTaskDef.Input, CommandFeedback> {
 
     public static class Input implements Serializable {
 //        /** The analyzed AST. */
 //        public final Supplier<? extends Result<IStrategoTerm, ?>> astSupplier;
-        public final Supplier<? extends Result<ConstraintAnalyzeTaskDef.Output, ?>> analysisSupplier;
+//        public final Supplier<? extends Result<ConstraintAnalyzeTaskDef.Output, ?>> analysisSupplier;
+        public final ResourceKey resource;
         public final @Nullable Region region;
 //        /** The {@link SolverResult}, wrapped in a Stratego blob. */
 //        public final IStrategoTerm soálverResultTerm;
@@ -46,14 +48,16 @@ public class InlineMethodCallTaskDef implements TaskDef<InlineMethodCallTaskDef.
 
         public Input(
 //            Supplier<? extends Result<IStrategoTerm, ?>> astSupplier,
-            Supplier<? extends Result<ConstraintAnalyzeTaskDef.Output, ?>> analysisSupplier,
+            ResourceKey resource,
+//            Supplier<? extends Result<ConstraintAnalyzeTaskDef.Output, ?>> analysisSupplier,
             @Nullable Region region
 //            IStrategoTerm solverResultTerm
 //            ResourceKey resource,
 //            ResourcePath rootDirectory
         ) {
 //            this.astSupplier = astSupplier;
-            this.analysisSupplier = analysisSupplier;
+            this.resource = resource;
+//            this.analysisSupplier = analysisSupplier;
             this.region = region;
 //            this.solverResultTerm = solverResultTerm;
 //            this.resource = resource;
@@ -63,19 +67,21 @@ public class InlineMethodCallTaskDef implements TaskDef<InlineMethodCallTaskDef.
         @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
-            final Input input = (Input)o;
-            return // astSupplier.equals(input.astSupplier)
-                   analysisSupplier.equals(input.analysisSupplier)
-                && Objects.equals(region, input.region);
-//                && solverResultTerm.equals(input.solverResultTerm);
-//                && resource.equals(input.resource)
-//                && rootDirectory.equals(input.rootDirectory);
+            final Input that = (Input)o;
+            return // astSupplier.equals(that.astSupplier)
+                   this.resource.equals(that.resource)
+//                   analysisSupplier.equals(that.analysisSupplier)
+                && Objects.equals(this.region, that.region);
+//                && solverResultTerm.equals(that.solverResultTerm);
+//                && resource.equals(that.resource)
+//                && rootDirectory.equals(that.rootDirectory);
         }
 
         @Override public int hashCode() {
             return Objects.hash(
 //                astSupplier,
-                analysisSupplier,
+                resource,
+//                analysisSupplier,
                 region
 //                solverResultTerm
 //                resource,
@@ -86,7 +92,8 @@ public class InlineMethodCallTaskDef implements TaskDef<InlineMethodCallTaskDef.
         @Override public String toString() {
             return "InlineMethodCallTaskDef.Input{" +
 //                "astSupplier=" + astSupplier + "," +
-                "analysisSupplier=" + analysisSupplier + "," +
+                "file=" + resource + "," +
+//                "analysisSupplier=" + analysisSupplier + "," +
                 "region=" + region +
 //                "solverResultTerm=" + solverResultTerm +
 //                "file=" + resource + "," +
@@ -97,6 +104,8 @@ public class InlineMethodCallTaskDef implements TaskDef<InlineMethodCallTaskDef.
 
 //    private final JsglrParseTaskDef parseTaskDef;
 //    private final ConstraintAnalyzeTaskDef analyzeTaskDef;
+    private final JsglrParseTaskDef parseTaskDef;
+    private final ConstraintAnalyzeTaskDef analyzeTaskDef;
     private final Provider<StrategoRuntime> strategoRuntimeProvider;
     private final TegoRuntime tegoRuntime;
     private final StrategoTerms strategoTerms;
@@ -105,6 +114,8 @@ public class InlineMethodCallTaskDef implements TaskDef<InlineMethodCallTaskDef.
     @Inject public InlineMethodCallTaskDef(
 //        JsglrParseTaskDef parseTaskDef,
 //        ConstraintAnalyzeTaskDef analyzeTaskDef,
+        JsglrParseTaskDef parseTaskDef,
+        ConstraintAnalyzeTaskDef analyzeTaskDef,
         Provider<StrategoRuntime> strategoRuntimeProvider,
         TegoRuntime tegoRuntime,
         StrategoTerms strategoTerms,
@@ -112,6 +123,8 @@ public class InlineMethodCallTaskDef implements TaskDef<InlineMethodCallTaskDef.
     ) {
 //        this.parseTaskDef = parseTaskDef;
 //        this.analyzeTaskDef = analyzeTaskDef;
+        this.parseTaskDef = parseTaskDef;
+        this.analyzeTaskDef = analyzeTaskDef;
         this.strategoRuntimeProvider = strategoRuntimeProvider;
         this.tegoRuntime = tegoRuntime;
         this.strategoTerms = strategoTerms;
@@ -122,7 +135,12 @@ public class InlineMethodCallTaskDef implements TaskDef<InlineMethodCallTaskDef.
         return getClass().getName();
     }
 
-    @Override public Result<IStrategoTerm, ?> exec(ExecContext context, Input input) throws Exception {
+    @Override public CommandFeedback exec(ExecContext context, Input input) throws Exception {
+
+        final ResourceKey key = input.resource;
+        final Supplier<Result<ConstraintAnalyzeTaskDef.Output, ?>> analysisSupplier = analyzeTaskDef
+            .createSupplier(new ConstraintAnalyzeTaskDef.Input(key, parseTaskDef.inputBuilder().withFile(key).buildAstSupplier()));
+
         final RRStrategoContext rrctx = new RRStrategoContext(
             tegoRuntime,
             strategoTerms,
@@ -131,7 +149,7 @@ public class InlineMethodCallTaskDef implements TaskDef<InlineMethodCallTaskDef.
         final StrategoRuntime strategoRuntime = strategoRuntimeProvider.get().addContextObject(rrctx);
         rrctx.strategoRuntime = strategoRuntime;
 
-        return context.require(input.analysisSupplier)
+        return context.require(analysisSupplier)
             .flatMapOrElse((analysis) -> {
                 try {
                     log.info("Calling inline-method-call...");
@@ -155,7 +173,11 @@ public class InlineMethodCallTaskDef implements TaskDef<InlineMethodCallTaskDef.
                 } catch(StrategoException e) {
                     return Result.ofErr(e);
                 }
-            }, Result::ofErr);
+            }, Result::ofErr)
+            .map(TermToString::toString)
+            .mapOrElse(
+                text -> CommandFeedback.of(ShowFeedback.showText(text, "Inlined method call in '" + key + "'")),
+                e -> CommandFeedback.ofTryExtractMessagesFrom(e, key));
 
 //
 //        final Result<ConstraintAnalyzeTaskDef.Output, ?> analysisResult = context.require(
