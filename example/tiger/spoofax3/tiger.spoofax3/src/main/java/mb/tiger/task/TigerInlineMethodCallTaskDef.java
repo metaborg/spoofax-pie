@@ -1,6 +1,5 @@
 package mb.tiger.task;
 
-import mb.jsglr.pie.ShowParsedAstTaskDef;
 import mb.log.api.LoggerFactory;
 import mb.nabl2.terms.stratego.StrategoTerms;
 import mb.pie.api.ExecContext;
@@ -43,7 +42,7 @@ public class TigerInlineMethodCallTaskDef extends InlineMethodCallTaskDef {
         return getClass().getName();
     }
 
-    @Override public CommandFeedback exec(ExecContext context, InlineMethodCallTaskDef.Input args) throws Exception {
+    @Override public CommandFeedback exec(ExecContext context, Args args) throws Exception {
         context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
         return super.exec(context, args);
     }

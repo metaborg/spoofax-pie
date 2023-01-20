@@ -23,7 +23,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import mb.jsglr.common.TermTracer;
 
-import javax.inject.Inject;
 import javax.inject.Provider;
 import java.io.Serializable;
 import java.util.Objects;
@@ -33,9 +32,9 @@ import java.util.Set;
  * Task definition calling the Stratego transformation 'inline-method-call'
  * on an analyzed AST.
  */
-public class InlineMethodCallTaskDef implements TaskDef<InlineMethodCallTaskDef.Input, CommandFeedback> {
+public class InlineMethodCallTaskDef implements TaskDef<InlineMethodCallTaskDef.Args, CommandFeedback> {
 
-    public static class Input implements Serializable {
+    public static class Args implements Serializable {
 //        /** The analyzed AST. */
 //        public final Supplier<? extends Result<IStrategoTerm, ?>> astSupplier;
 //        public final Supplier<? extends Result<ConstraintAnalyzeTaskDef.Output, ?>> analysisSupplier;
@@ -46,7 +45,7 @@ public class InlineMethodCallTaskDef implements TaskDef<InlineMethodCallTaskDef.
 //        public final ResourceKey resource;
 //        public final ResourcePath rootDirectory;
 
-        public Input(
+        public Args(
 //            Supplier<? extends Result<IStrategoTerm, ?>> astSupplier,
             ResourceKey resource,
 //            Supplier<? extends Result<ConstraintAnalyzeTaskDef.Output, ?>> analysisSupplier,
@@ -67,7 +66,7 @@ public class InlineMethodCallTaskDef implements TaskDef<InlineMethodCallTaskDef.
         @Override public boolean equals(@Nullable Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
-            final Input that = (Input)o;
+            final Args that = (Args)o;
             return // astSupplier.equals(that.astSupplier)
                    this.resource.equals(that.resource)
 //                   analysisSupplier.equals(that.analysisSupplier)
@@ -135,7 +134,7 @@ public class InlineMethodCallTaskDef implements TaskDef<InlineMethodCallTaskDef.
         return getClass().getName();
     }
 
-    @Override public CommandFeedback exec(ExecContext context, Input input) throws Exception {
+    @Override public CommandFeedback exec(ExecContext context, Args input) throws Exception {
 
         final ResourceKey key = input.resource;
         final Supplier<Result<ConstraintAnalyzeTaskDef.Output, ?>> analysisSupplier = analyzeTaskDef
@@ -205,7 +204,7 @@ public class InlineMethodCallTaskDef implements TaskDef<InlineMethodCallTaskDef.
 //        }
     }
 
-    @Override public boolean shouldExecWhenAffected(Input input, Set<?> tags) {
+    @Override public boolean shouldExecWhenAffected(Args input, Set<?> tags) {
         return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 
