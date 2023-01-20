@@ -332,7 +332,19 @@ Currently, no `MultilangAnalyzerOption`s are supported.
 
 The `stratego-runtime { $StrategoRuntimeOption* }` section enables generation of a stratego runtime, and groups options.
 The `stratego` section must be enabled when the `stratego-runtime` section is enabled.
-Currently, no `StrategoRuntimeOption`s are supported.
+The following `StrategoRuntimeOption`s are supported:
+
+| Syntax | Required? | Description | Type |
+| - | - | - | - |
+| `strategy-package-id = $Expression` | no | Adds a package as a private Stratego package. Can be specified multiple times. | Java package identifier |
+| `interop-registerer-by-reflection = $Expression` | no | Adds an interop registerer to load by reflection. Can be specified multiple times. | Java type identifier |
+| `add-spoofax2-primitives = $Expression` | no | Whether to add the Spoofax 2 Stratego primitives. | Boolean |
+| `add-nabl2-primitives = $Expression` | no | Whether to add the NaBL2 Stratego primitives. | Boolean |
+| `add-statix-primitives = $Expression` | no | Whether to add the Statix Stratego primitives. | Boolean |
+| `with-library = $Expression` | no | Adds a library of Stratego strategies (implementing `IOperatorRegistry`) to the generated `StrategoRuntimeBuilderFactory`. The library must have an `@Inject` constructor. Can be specified multiple times. | Java type identifier |
+| `base-StrategoRuntimeBuilderFactory = $Expression` | no | Package and name of the generated `StrategoRuntimeBuilderFactory`. | Java type identifier |
+| `extend-StrategoRuntimeBuilderFactory = $Expression` | no | Package and name of the extending `StrategoRuntimeBuilderFactory`, if any. | Java type identifier |
+
 
 ### Completer
 

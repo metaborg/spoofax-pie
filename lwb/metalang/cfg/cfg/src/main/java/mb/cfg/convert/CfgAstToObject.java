@@ -444,6 +444,11 @@ public class CfgAstToObject {
             subParts.forOneSubtermAsBool("StrategoRuntimeAddSpoofax2Primitives", base::addSpoofax2Primitives);
             subParts.forOneSubtermAsBool("StrategoRuntimeAddNaBL2Primitives", base::addNaBL2Primitives);
             subParts.forOneSubtermAsBool("StrategoRuntimeAddStatixPrimitives", base::addStatixPrimitives);
+
+            subParts.forAllSubtermsAsStrings("StrategoRuntime_WithLibrary", base::addLibraries);
+            subParts.forOneSubtermAsTypeInfo("StrategoRuntime_BaseStrategoRuntimeBuilderFactory", base::baseStrategoRuntimeBuilderFactory);
+            subParts.forOneSubtermAsTypeInfo("StrategoRuntime_ExtendStrategoRuntimeBuilderFactory", base::extendStrategoRuntimeBuilderFactory);
+
             // TODO: more strategoRuntime language properties
             final StrategoRuntimeAdapterCompiler.Input.Builder adapter = adapterBuilder.withStrategoRuntime();
             // TODO: strategoRuntime adapter properties

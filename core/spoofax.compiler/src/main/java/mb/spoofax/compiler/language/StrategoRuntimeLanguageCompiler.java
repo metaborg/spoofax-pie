@@ -77,6 +77,16 @@ public class StrategoRuntimeLanguageCompiler {
 
         List<String> interopRegisterersByReflection();
 
+        /**
+         * A list of fully-qualified class names of Stratego libraries implementing the
+         * {@code org.spoofax.interpreter.library.IOperatorRegistry} interface.
+         * Each class should have one constructor with the {@link Inject} annotation,
+         * usually a parameterless constructor.
+         * <p>
+         * The libraries are registered in the generated {@code Sdf3StrategoRuntimeBuilderFactory} class.
+         */
+        List<String> libraries();
+
         List<String> ctreeRelativePaths();
 
         @Value.Default default boolean addSpoofax2Primitives() { return false; }

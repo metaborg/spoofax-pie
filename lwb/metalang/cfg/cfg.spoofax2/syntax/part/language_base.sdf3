@@ -104,6 +104,11 @@ context-free syntax
   StrategoRuntimeOption.StrategoRuntimeAddNaBL2Primitives            = <add-nabl2-primitives = <Expr>>
   StrategoRuntimeOption.StrategoRuntimeAddStatixPrimitives           = <add-statix-primitives = <Expr>>
 
+  StrategoRuntimeOption.StrategoRuntime_WithLibrary                  = <with-library = <Expr>> // IOperatorRegistry
+
+  StrategoRuntimeOption.StrategoRuntime_BaseStrategoRuntimeBuilderFactory    = <base-StrategoRuntimeBuilderFactory = <Expr>>
+  StrategoRuntimeOption.StrategoRuntime_ExtendStrategoRuntimeBuilderFactory  = <extend-StrategoRuntimeBuilderFactory = <Expr>>
+
 context-free syntax
 
   Part.TegoRuntimeSection = <tego-runtime {
