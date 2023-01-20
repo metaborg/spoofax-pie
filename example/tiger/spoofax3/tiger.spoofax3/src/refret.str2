@@ -1,0 +1,12 @@
+module refret
+
+imports
+  strategolib
+  //signatures/Tiger-sig
+
+strategies
+
+  inline-method-call(|name, analysis) = debug(!"Inlining: ");
+    //prim("RR_create_placeholder", ["abc"]);
+    prim("RR_fix_references", analysis);
+    debug(!"Inlined: ")
