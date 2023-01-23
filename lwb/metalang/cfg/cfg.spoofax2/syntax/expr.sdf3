@@ -3,3 +3,4 @@ module expr
 context-free sorts
 
   Expr
+  ClassKind

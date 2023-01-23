@@ -680,9 +680,9 @@ public class CfgAstToObject {
     private static ClassKind toClassKind(IStrategoTerm term) {
         final IStrategoAppl appl = TermUtils.asAppl(term).orElseThrow(() -> new InvalidAstShapeException("a term application", term));
         switch(appl.getConstructor().getName()) {
-            case "ClassKind_Generated":
+            case "Generated":
                 return ClassKind.Generated;
-            case "ClassKind_Manual":
+            case "Manual":
                 return ClassKind.Manual;
             default:
                 throw new InvalidAstShapeException("a term of sort ClassKind", appl);

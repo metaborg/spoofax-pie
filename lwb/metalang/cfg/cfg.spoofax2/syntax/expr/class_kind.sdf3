@@ -6,5 +6,5 @@ imports
 
 context-free syntax
 
-  Expr.ClassKind_Generated = <Generated>
-  Expr.ClassKind_Manual    = <Manual>
+  ClassKind.Generated = <Generated>
+  ClassKind.Manual    = <Manual>
