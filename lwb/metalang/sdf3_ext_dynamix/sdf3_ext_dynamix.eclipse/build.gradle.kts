@@ -6,3 +6,7 @@ plugins {
 languageEclipseProject {
   adapterProject.set(project(":sdf3_ext_dynamix"))
 }
+
+mavenize {
+  majorVersion.set("2021-03")
+}

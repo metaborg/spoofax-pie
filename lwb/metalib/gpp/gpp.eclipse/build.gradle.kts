@@ -12,6 +12,10 @@ languageEclipseProject {
   adapterProject.set(project(":gpp"))
 }
 
+mavenize {
+  majorVersion.set("2021-03")
+}
+
 tasks {
   "jar"(Jar::class) {
     val exportPackages = LinkedHashSet<String>()

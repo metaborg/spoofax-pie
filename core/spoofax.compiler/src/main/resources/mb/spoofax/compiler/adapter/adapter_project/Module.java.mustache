@@ -131,8 +131,19 @@ public class {{baseModule.id}} {
 
 
     @Provides @{{scope.id}}
-    static {{this.languageProjectInput.strategoRuntimeBuilderFactory.qualifiedId}} provideStrategoRuntimeBuilderFactory(LoggerFactory loggerFactory, ResourceService resourceService, @{{qualifier.id}}("definition-directory") HierarchicalResource definitionDir) {
-        return new {{this.languageProjectInput.strategoRuntimeBuilderFactory.qualifiedId}}(loggerFactory, resourceService, definitionDir);
+    static {{this.languageProjectInput.strategoRuntimeBuilderFactory.qualifiedId}} provideStrategoRuntimeBuilderFactory(
+        LoggerFactory loggerFactory,
+        ResourceService resourceService,
+        @{{qualifier.id}}("definition-directory") HierarchicalResource definitionDir{{#this.languageProjectInput.libraryVars}}{{#-first}},{{/-first}}
+        {{variable}}{{^-last}},{{/-last}}
+{{/this.languageProjectInput.libraryVars}}
+    ) {
+        return new {{this.languageProjectInput.strategoRuntimeBuilderFactory.qualifiedId}}(
+            loggerFactory,
+            resourceService,
+            definitionDir{{#this.languageProjectInput.libraryVars}}{{#-first}},{{/-first}}
+            {{name}}{{^-last}},{{/-last}}{{/this.languageProjectInput.libraryVars}}
+        );
     }
 
     @Provides @{{scope.id}} @{{qualifier.id}}

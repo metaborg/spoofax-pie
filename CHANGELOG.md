@@ -2,6 +2,17 @@
 All notable changes to this project are documented in this file, based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
+## [0.19.3] - 2022-11-25
+### Fixed
+- Missing class files in 0.19.2 release.
+
+### Changed
+- `releng` (devenv-release) requirement to `0.1.33`.
+
+### Added
+- Preliminary support for using existing Stratego concrete syntax extension parse tables.
+
+
 ## [0.19.2] - 2022-05-25
 ### Fixed
 - New SDF3 and Statix source files not being detected.
@@ -513,6 +524,7 @@ build-dependencies [
 
 
 [Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.2...HEAD
+[0.19.3]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.2...release-0.19.3
 [0.19.2]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.1...release-0.19.2
 [0.19.1]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.0...release-0.19.1
 [0.19.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.18.0...release-0.19.0

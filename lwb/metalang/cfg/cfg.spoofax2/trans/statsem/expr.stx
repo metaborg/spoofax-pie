@@ -23,6 +23,7 @@ signature
     MENU_ITEM              : TYPE
     COORDINATE             : TYPE
     COORDINATE_REQUIREMENT : TYPE
+    CLASS_KIND             : TYPE
 
 rules
 

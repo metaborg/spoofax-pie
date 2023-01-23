@@ -50,7 +50,7 @@ context-free syntax
 context-free syntax
 
   Part.CommentSymbolSection = <comment-symbols {
-    <{CommentSymbolOption "\n"}*> 
+    <{CommentSymbolOption "\n"}*>
 }>
 
   CommentSymbolOption.LineComment = <line = <Expr>>
@@ -59,7 +59,7 @@ context-free syntax
 context-free syntax
 
   Part.BracketSymbolSection = <bracket-symbols {
-    <{BracketSymbolOption "\n"}*> 
+    <{BracketSymbolOption "\n"}*>
 }>
 
   BracketSymbolOption.Bracket = <bracket = <Expr> * <Expr>>
@@ -80,7 +80,7 @@ context-free syntax
   ConstraintAnalyzerOption.ConstraintAnalyzerEnableStatix     = <enable-statix = <Expr>>
   ConstraintAnalyzerOption.ConstraintAnalyzerMultiFile        = <multi-file = <Expr>>
   ConstraintAnalyzerOption.ConstraintAnalyzerStrategoStrategy = <stratego-strategy = <Expr>>
-  
+
   ConstraintAnalyzerOption.ConstraintAnalyzerDefaultStatixMessageStacktraceLength = <default-statix-message-stacktrace-length = <Expr>>
   ConstraintAnalyzerOption.ConstraintAnalyzerDefaultStatixMessageTermDepth        = <default-statix-message-term-depth = <Expr>>
   ConstraintAnalyzerOption.ConstraintAnalyzerDefaultStatixTestLogLevel            = <default-statix-test-log-level = <Expr>>
@@ -103,6 +103,12 @@ context-free syntax
   StrategoRuntimeOption.StrategoRuntimeAddSpoofax2Primitives         = <add-spoofax2-primitives = <Expr>>
   StrategoRuntimeOption.StrategoRuntimeAddNaBL2Primitives            = <add-nabl2-primitives = <Expr>>
   StrategoRuntimeOption.StrategoRuntimeAddStatixPrimitives           = <add-statix-primitives = <Expr>>
+
+  StrategoRuntimeOption.StrategoRuntime_WithLibrary                  = <with-library = <Expr>> // IOperatorRegistry
+
+  StrategoRuntimeOption.StrategoRuntime_ClassKind                            = <class-kind = <ClassKind>>
+  StrategoRuntimeOption.StrategoRuntime_BaseStrategoRuntimeBuilderFactory    = <base-StrategoRuntimeBuilderFactory = <Expr>>
+  StrategoRuntimeOption.StrategoRuntime_ExtendStrategoRuntimeBuilderFactory  = <extend-StrategoRuntimeBuilderFactory = <Expr>>
 
 context-free syntax
 

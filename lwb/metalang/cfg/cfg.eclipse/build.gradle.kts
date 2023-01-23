@@ -16,3 +16,7 @@ dependencies {
 languageEclipseProject {
   adapterProject.set(project(":cfg"))
 }
+
+mavenize {
+  majorVersion.set("2021-03")
+}

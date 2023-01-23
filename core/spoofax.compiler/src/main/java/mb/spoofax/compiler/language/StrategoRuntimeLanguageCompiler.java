@@ -7,6 +7,7 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.Conversion;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
+import mb.spoofax.compiler.util.NamedTypeInfo;
 import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
@@ -76,6 +77,28 @@ public class StrategoRuntimeLanguageCompiler {
         }
 
         List<String> interopRegisterersByReflection();
+
+        /**
+         * A list of fully-qualified class names of Stratego libraries implementing the
+         * {@code org.spoofax.interpreter.library.IOperatorRegistry} interface.
+         * Each class should have one constructor with the {@link Inject} annotation,
+         * usually a parameterless constructor.
+         * <p>
+         * The libraries are registered in the generated {@code Sdf3StrategoRuntimeBuilderFactory} class.
+         */
+        List<TypeInfo> libraries();
+
+        /**
+         * Computes a list of named variables for the libraries.
+         * @return a list of named variables
+         */
+        @Value.Lazy default List<NamedTypeInfo> libraryVars() {
+            ArrayList<NamedTypeInfo> results = new ArrayList<>();
+            for (int i = 0; i < libraries().size(); i++) {
+                results.add(NamedTypeInfo.of("library" + i, libraries().get(i)));
+            }
+            return results;
+        }
 
         List<String> ctreeRelativePaths();
 
