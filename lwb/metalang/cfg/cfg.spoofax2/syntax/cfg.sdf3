@@ -12,7 +12,7 @@ imports
   part/language_adapter
   part/eclipse
   part/task_def
-  
+
   expr/literal
   expr/task_def
   expr/command
@@ -28,9 +28,9 @@ context-free sorts
   Start
 
 context-free start-symbols
-  
+
   Start
 
 context-free syntax
-  
+
   Start.Configuration = <<{Part "\n"}*>>

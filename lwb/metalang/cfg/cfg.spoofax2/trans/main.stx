@@ -17,11 +17,11 @@ imports
   statsem/part/language
   statsem/part/eclipse
   statsem/part/task_def
-  
+
   statsem/value
   statsem/task_def
   statsem/command
-  
+
   signatures/cfg-sig
   signatures/normalize-sig
 
