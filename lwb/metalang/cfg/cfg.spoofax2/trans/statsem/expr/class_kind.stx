@@ -5,7 +5,7 @@ imports
   statsem/expr
 
   signatures/expr-sig
-  signatures/expr/coordinate-sig
+  signatures/expr/class_kind-sig
 
 rules
 
