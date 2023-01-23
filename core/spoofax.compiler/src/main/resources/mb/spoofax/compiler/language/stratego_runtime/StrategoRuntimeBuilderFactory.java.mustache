@@ -18,8 +18,7 @@ public class {{baseStrategoRuntimeBuilderFactory.id}} implements StrategoRuntime
         LoggerFactory loggerFactory,
         ResourceService resourceService,
         HierarchicalResource definitionDir{{#libraryVars}}{{#-first}},{{/-first}}
-        {{variable}}{{^-last}},{{/-last}}
-{{/libraryVars}}
+        {{variable}}{{^-last}},{{/-last}}{{/libraryVars}}
     ) {
         this.loggerFactory = loggerFactory;
         this.resourceService = resourceService;

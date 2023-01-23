@@ -142,8 +142,7 @@ public class {{baseModule.id}} {
             loggerFactory,
             resourceService,
             definitionDir{{#this.languageProjectInput.libraryVars}}{{#-first}},{{/-first}}
-            {{name}}{{^-last}},{{/-last}}
-{{/this.languageProjectInput.libraryVars}}
+            {{name}}{{^-last}},{{/-last}}{{/this.languageProjectInput.libraryVars}}
         );
     }
 
