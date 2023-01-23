@@ -40,7 +40,7 @@ class StrategoRuntimeCompilerTest extends TestBase {
             .baseStrategoRuntimeBuilderFactory("my.lang", "MyStrategoRuntimeBuilderFactory");
         final StrategoRuntimeLanguageCompiler.Input input = inputs.strategoRuntimeLanguageCompilerInput();
         component.getStrategoRuntimeLanguageCompiler().compile(new MockExecContext(), input);
-        fileAssertions.scopedExists(input.generatedJavaSourcesDirectory(), (s) -> {
+        fileAssertions.scopedNotExists(input.generatedJavaSourcesDirectory(), (s) -> {
             s.assertNotExists(input.baseStrategoRuntimeBuilderFactory());
         });
     }
