@@ -106,6 +106,7 @@ context-free syntax
 
   StrategoRuntimeOption.StrategoRuntime_WithLibrary                  = <with-library = <Expr>> // IOperatorRegistry
 
+  StrategoRuntimeOption.StrategoRuntime_ClassKind                            = <class-kind = <Expr>>
   StrategoRuntimeOption.StrategoRuntime_BaseStrategoRuntimeBuilderFactory    = <base-StrategoRuntimeBuilderFactory = <Expr>>
   StrategoRuntimeOption.StrategoRuntime_ExtendStrategoRuntimeBuilderFactory  = <extend-StrategoRuntimeBuilderFactory = <Expr>>
 

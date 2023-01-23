@@ -18,7 +18,8 @@ imports
   expr/command
   expr/menu_item
   expr/coordinate
-  
+  expr/class_kind
+
   value
   normalize
 

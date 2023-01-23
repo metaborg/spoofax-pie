@@ -8,7 +8,8 @@ imports
   statsem/expr/command
   statsem/expr/menu_item
   statsem/expr/coordinate
-  
+  statsem/expr/class_kind
+
   statsem/part
   statsem/part/shared
   statsem/part/language_base
