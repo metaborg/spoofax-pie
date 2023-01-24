@@ -13,6 +13,7 @@ import mb.pie.api.Interactivity;
 import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
+import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
 import mb.statix.referenceretention.stratego.RRStrategoContext;
@@ -35,13 +36,16 @@ import java.util.Set;
 public class InlineMethodCallTaskDef implements TaskDef<InlineMethodCallTaskDef.Args, CommandFeedback> {
 
     public static class Args implements Serializable {
+        public final ResourcePath project;
         public final ResourceKey resource;
         public final @Nullable Region region;
 
         public Args(
+            ResourcePath project,
             ResourceKey resource,
             @Nullable Region region
         ) {
+            this.project = project;
             this.resource = resource;
             this.region = region;
         }
@@ -50,12 +54,14 @@ public class InlineMethodCallTaskDef implements TaskDef<InlineMethodCallTaskDef.
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
             final Args that = (Args)o;
-            return this.resource.equals(that.resource)
+            return Objects.equals(this.project, that.project)
+                && this.resource.equals(that.resource)
                 && Objects.equals(this.region, that.region);
         }
 
         @Override public int hashCode() {
             return Objects.hash(
+                project,
                 resource,
                 region
             );
@@ -63,7 +69,8 @@ public class InlineMethodCallTaskDef implements TaskDef<InlineMethodCallTaskDef.
 
         @Override public String toString() {
             return "InlineMethodCallTaskDef.Input{" +
-                "file=" + resource + "," +
+                "project=" + project + "," +
+                "resource=" + resource + "," +
                 "region=" + region +
             '}';
         }
