@@ -3,10 +3,19 @@ module refret
 imports
   strategolib
   //signatures/Tiger-sig
+imports
+  libspoofax/analysis/constraint
+  statix/runtime/analysis
+  statix/runtime/ast
 
 strategies
 
-  inline-method-call(|name, analysis) = debug(!"Inlining: ");
-    //prim("RR_create_placeholder", ["abc"]);
-    prim("RR_fix_references", analysis);
-    debug(!"Inlined: ")
+  inline-method-call(|call, solverResultTerm): ast -> newAst
+  where where(<debug(!"Inlining call: ")> call);
+        a := <stx--get-ast-analysis> ast;
+        r := <stx--get-ast-property(|a,Ref())>
+        where(<debug(!"Ref: ")> r);
+        //prim("RR_create_placeholder", ["abc"]);
+        //prim("RR_fix_references", analysis);
+        newAst := ast;	// TODO
+        debug(!"Inlined: ")
