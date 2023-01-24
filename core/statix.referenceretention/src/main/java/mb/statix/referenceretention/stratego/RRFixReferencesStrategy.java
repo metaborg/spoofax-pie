@@ -62,8 +62,24 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
             env.getFactory());
 
         // The solver result (analysis) should be the first term argument
-        final SolverResult analysis = M.blobValue(SolverResult.class).match(terms.get(0))
-            .orElseThrow(() -> new InterpreterException("Expected solver result."));
+        final SolverResult analysis = M.cases(
+            M.appl5("ProjectAnalysis",
+                M.term(),                           // globalScope: Scope
+                M.blobValue(SolverResult.class),    // globalAnalysis: SolverResult
+                M.blobValue(SolverResult.class),    // initialAnalysis: SolverResult
+                M.blobValue(SolverResult.class),    // finalAnalysis: SolverResult
+                M.term(),                           // customAnalysis: CustomAnalysis
+                (t, s, g, i, f, a) -> f             // = finalAnalysis: SolverResult
+            ),
+            M.appl3("FileAnalysis",
+                M.blobValue(SolverResult.class),    // initialAnalysis: SolverResult
+                M.blobValue(SolverResult.class),    // finalAnalysis: SolverResult
+                M.term(),                           // customAnalysis: CustomAnalysis
+                (t, i, f, a) -> f                   // = finalAnalysis: SolverResult
+            ),
+            M.blobValue(SolverResult.class)         // SolverResult
+        ).match(terms.get(0))
+        .orElseThrow(() -> new InterpreterException("Expected solver result."));
 
         final Map.Immutable<ITermVar, RRPlaceholderDescriptor> placeholderDescriptors = Map.Immutable.of(); // TODO: Get them from the AST
         final RRSolverState state = RRSolverState.fromSolverResult(analysis, null, placeholderDescriptors);  // TODO

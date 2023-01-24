@@ -25,6 +25,8 @@ dependencies {
   compileOnly("org.checkerframework:checker-qual-android")
 
   // Annotation processing
+  api("com.google.dagger:dagger")
+  annotationProcessor("com.google.dagger:dagger-compiler")
   annotationProcessor("org.immutables:value")
   annotationProcessor("org.immutables:serial")
   testAnnotationProcessor("org.immutables:value")
