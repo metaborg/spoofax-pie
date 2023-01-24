@@ -10,22 +10,22 @@ public class {{baseStrategoRuntimeBuilderFactory.id}} implements StrategoRuntime
     private final LoggerFactory loggerFactory;
     private final ResourceService resourceService;
     private final HierarchicalResource definitionDir;
-{{#libraryVars}}
+{{#primitiveLibraryVars}}
     private final {{variable}};
-{{/libraryVars}}
+{{/primitiveLibraryVars}}
 
     public {{baseStrategoRuntimeBuilderFactory.id}}(
         LoggerFactory loggerFactory,
         ResourceService resourceService,
-        HierarchicalResource definitionDir{{#libraryVars}}{{#-first}},{{/-first}}
-        {{variable}}{{^-last}},{{/-last}}{{/libraryVars}}
+        HierarchicalResource definitionDir{{#primitiveLibraryVars}}{{#-first}},{{/-first}}
+        {{variable}}{{^-last}},{{/-last}}{{/primitiveLibraryVars}}
     ) {
         this.loggerFactory = loggerFactory;
         this.resourceService = resourceService;
         this.definitionDir = definitionDir;
-{{#libraryVars}}
+{{#primitiveLibraryVars}}
         {{thisAssign}};
-{{/libraryVars}}
+{{/primitiveLibraryVars}}
     }
 
     @Override public StrategoRuntimeBuilder create() {
@@ -57,9 +57,9 @@ public class {{baseStrategoRuntimeBuilderFactory.id}} implements StrategoRuntime
 {{#requiresConstraintSolverPrimitives}}
         builder.addLibrary(new mb.constraint.common.stratego.ConstraintPrimitiveLibrary(resourceService));
 {{/requiresConstraintSolverPrimitives}}
-{{#libraryVars}}
+{{#primitiveLibraryVars}}
         builder.addLibrary({{name}});
-{{/libraryVars}}
+{{/primitiveLibraryVars}}
         return builder;
     }
 }

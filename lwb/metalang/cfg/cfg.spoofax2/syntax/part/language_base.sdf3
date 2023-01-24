@@ -104,7 +104,7 @@ context-free syntax
   StrategoRuntimeOption.StrategoRuntimeAddNaBL2Primitives            = <add-nabl2-primitives = <Expr>>
   StrategoRuntimeOption.StrategoRuntimeAddStatixPrimitives           = <add-statix-primitives = <Expr>>
 
-  StrategoRuntimeOption.StrategoRuntime_WithLibrary                  = <with-library = <Expr>> // IOperatorRegistry
+  StrategoRuntimeOption.StrategoRuntime_WithPrimitiveLibrary                 = <with-primitive-library = <Expr>> // IOperatorRegistry
 
   StrategoRuntimeOption.StrategoRuntime_ClassKind                            = <class-kind = <ClassKind>>
   StrategoRuntimeOption.StrategoRuntime_BaseStrategoRuntimeBuilderFactory    = <base-StrategoRuntimeBuilderFactory = <Expr>>

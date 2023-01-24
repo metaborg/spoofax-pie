@@ -86,16 +86,16 @@ public class StrategoRuntimeLanguageCompiler {
          * <p>
          * The libraries are registered in the generated {@code Sdf3StrategoRuntimeBuilderFactory} class.
          */
-        List<TypeInfo> libraries();
+        List<TypeInfo> primitiveLibraries();
 
         /**
-         * Computes a list of named variables for the libraries.
+         * Computes a list of named variables for the primitive libraries.
          * @return a list of named variables
          */
-        @Value.Lazy default List<NamedTypeInfo> libraryVars() {
+        @Value.Lazy default List<NamedTypeInfo> primitiveLibraryVars() {
             ArrayList<NamedTypeInfo> results = new ArrayList<>();
-            for (int i = 0; i < libraries().size(); i++) {
-                results.add(NamedTypeInfo.of("library" + i, libraries().get(i)));
+            for (int i = 0; i < primitiveLibraries().size(); i++) {
+                results.add(NamedTypeInfo.of("library" + i, primitiveLibraries().get(i)));
             }
             return results;
         }
