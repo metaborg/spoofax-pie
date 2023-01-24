@@ -13,7 +13,6 @@ import mb.tiger.TigerScope;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-// TODO: This task needs to be registered somewhere
 @TigerScope
 public class TigerInlineMethodCallTaskDef extends InlineMethodCallTaskDef {
     private final mb.tiger.TigerClassLoaderResources classLoaderResources;
