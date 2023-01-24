@@ -19,9 +19,7 @@ __pycache__/
 **/out
 
 # Eclipse
-**/.project
 **/.settings
-**/.classpath
 **/.factorypath
 **/bin
 
