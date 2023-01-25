@@ -1973,7 +1973,73 @@ Currently, no <code>MultilangAnalyzerOption</code>s are supported.</p>
 <h3 id="stratego-runtime">Stratego runtime<a class="headerlink" href="#stratego-runtime" title="Permanent link">&para;</a></h3>
 <p>The <code>stratego-runtime { $StrategoRuntimeOption* }</code> section enables generation of a stratego runtime, and groups options.
 The <code>stratego</code> section must be enabled when the <code>stratego-runtime</code> section is enabled.
-Currently, no <code>StrategoRuntimeOption</code>s are supported.</p>
+The following <code>StrategoRuntimeOption</code>s are supported:</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Required?</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>strategy-package-id = $Expression</code></td>
+<td>no</td>
+<td>Adds a package as a private Stratego package. Can be specified multiple times.</td>
+<td>Java package identifier</td>
+</tr>
+<tr>
+<td><code>interop-registerer-by-reflection = $Expression</code></td>
+<td>no</td>
+<td>Adds an interop registerer to load by reflection. Can be specified multiple times.</td>
+<td>Java type identifier</td>
+</tr>
+<tr>
+<td><code>add-spoofax2-primitives = $Expression</code></td>
+<td>no</td>
+<td>Whether to add the Spoofax 2 Stratego primitives.</td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td><code>add-nabl2-primitives = $Expression</code></td>
+<td>no</td>
+<td>Whether to add the NaBL2 Stratego primitives.</td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td><code>add-statix-primitives = $Expression</code></td>
+<td>no</td>
+<td>Whether to add the Statix Stratego primitives.</td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td><code>with-primitive-library = $Expression</code></td>
+<td>no</td>
+<td>Adds a Stratego primitive strategies library (implementing <code>IOperatorRegistry</code>) to the generated <code>StrategoRuntimeBuilderFactory</code>. The library must have an <code>@Inject</code> constructor. Can be specified multiple times.</td>
+<td>Java type identifier</td>
+</tr>
+<tr>
+<td><code>class-kind = $Expression</code></td>
+<td>no</td>
+<td>Specifies whether the classes are generated (<code>Generated</code>) or provided manually (<code>Manual</code>). Defaults to <code>Generated</code>.</td>
+<td><code>Generated</code> or <code>Manual</code></td>
+</tr>
+<tr>
+<td><code>base-StrategoRuntimeBuilderFactory = $Expression</code></td>
+<td>no</td>
+<td>Package and name of the generated <code>StrategoRuntimeBuilderFactory</code>.</td>
+<td>Java type identifier</td>
+</tr>
+<tr>
+<td><code>extend-StrategoRuntimeBuilderFactory = $Expression</code></td>
+<td>no</td>
+<td>Package and name of the extending <code>StrategoRuntimeBuilderFactory</code>, if any.</td>
+<td>Java type identifier</td>
+</tr>
+</tbody>
+</table>
 <h3 id="completer">Completer<a class="headerlink" href="#completer" title="Permanent link">&para;</a></h3>
 <p>The <code>completer { $CompleterOption* }</code> section enables generation of a code completer, and groups options.
 The <code>constraint-analyzer</code> and <code>statix</code> sections must be enabled when the <code>completer</code> section is enabled.
