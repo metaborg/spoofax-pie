@@ -49,7 +49,7 @@ rules // Comment symbols and options
 
   commentSymbolOptionOk : scope * CommentSymbolOption
   commentSymbolOptionsOk maps commentSymbolOptionOk(*, list(*))
-  
+
   commentSymbolOptionOk(s, LineComment(e)) :-
     typeOfExpr(s, e) == STRING() | error $[Expected string]@e.
   commentSymbolOptionOk(s, BlockComment(e1, e2)) :-
@@ -63,7 +63,7 @@ rules // Bracket symbols and options
 
   bracketSymbolOptionOk : scope * BracketSymbolOption
   bracketSymbolOptionsOk maps bracketSymbolOptionOk(*, list(*))
-  
+
   bracketSymbolOptionOk(s, Bracket(e1, e2)) :-
     typeOfExpr(s, e1) == CHAR() | error $[Expected symbol (e.g., '\[')]@e1,
     typeOfExpr(s, e2) == CHAR() | error $[Expected symbol (e.g., '\]')]@e2.
@@ -129,6 +129,16 @@ rules // Stratego runtime section and options
   strategoRuntimeOptionOk(s, StrategoRuntimeAddStatixPrimitives(e)) :-
     typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
 
+  strategoRuntimeOptionOk(s, StrategoRuntime_WithPrimitiveLibrary(e)) :-
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e.
+
+  strategoRuntimeOptionOk(s, StrategoRuntime_ClassKind(_)).
+  strategoRuntimeOptionOk(s, StrategoRuntime_BaseStrategoRuntimeBuilderFactory(e)) :-
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e.
+  strategoRuntimeOptionOk(s, StrategoRuntime_ExtendStrategoRuntimeBuilderFactory(e)) :-
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e.
+
+
 rules // Tego runtime section and options
 
   partOk(s, TegoRuntimeSection(options)) :-
@@ -141,6 +151,6 @@ rules // Code completion section and options
 
   partOk(s, CodeCompletionSection(options)) :-
     codeCompletionOptionsOk(s, options).
-    
+
   codeCompletionOptionOk : scope * CodeCompletionOption
   codeCompletionOptionsOk maps codeCompletionOptionOk(*, list(*))

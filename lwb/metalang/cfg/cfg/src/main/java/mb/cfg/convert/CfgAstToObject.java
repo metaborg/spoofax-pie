@@ -59,6 +59,7 @@ import mb.spoofax.compiler.language.ParserVariant;
 import mb.spoofax.compiler.language.StrategoRuntimeLanguageCompiler;
 import mb.spoofax.compiler.language.StylerLanguageCompiler;
 import mb.spoofax.compiler.platform.EclipseProjectCompiler;
+import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.TypeInfo;
 import mb.spoofax.core.Coordinate;
@@ -444,6 +445,13 @@ public class CfgAstToObject {
             subParts.forOneSubtermAsBool("StrategoRuntimeAddSpoofax2Primitives", base::addSpoofax2Primitives);
             subParts.forOneSubtermAsBool("StrategoRuntimeAddNaBL2Primitives", base::addNaBL2Primitives);
             subParts.forOneSubtermAsBool("StrategoRuntimeAddStatixPrimitives", base::addStatixPrimitives);
+
+            subParts.forAllSubtermsAsTypeInfo("StrategoRuntime_WithPrimitiveLibrary", base::addPrimitiveLibraries);
+
+            subParts.forOneSubterm("StrategoRuntime_ClassKind", term -> base.classKind(toClassKind(term)));
+            subParts.forOneSubtermAsTypeInfo("StrategoRuntime_BaseStrategoRuntimeBuilderFactory", base::baseStrategoRuntimeBuilderFactory);
+            subParts.forOneSubtermAsTypeInfo("StrategoRuntime_ExtendStrategoRuntimeBuilderFactory", base::extendStrategoRuntimeBuilderFactory);
+
             // TODO: more strategoRuntime language properties
             final StrategoRuntimeAdapterCompiler.Input.Builder adapter = adapterBuilder.withStrategoRuntime();
             // TODO: strategoRuntime adapter properties
@@ -669,8 +677,20 @@ public class CfgAstToObject {
         return kinds;
     }
 
+    private static ClassKind toClassKind(IStrategoTerm term) {
+        final IStrategoAppl appl = TermUtils.asAppl(term).orElseThrow(() -> new InvalidAstShapeException("a term application", term));
+        switch(appl.getConstructor().getName()) {
+            case "Generated":
+                return ClassKind.Generated;
+            case "Manual":
+                return ClassKind.Manual;
+            default:
+                throw new InvalidAstShapeException("a term of sort ClassKind", appl);
+        }
+    }
+
     private static CommandExecutionType toCommandExecutionType(IStrategoTerm term) {
-        final IStrategoAppl appl = TermUtils.asAppl(term).orElseThrow(() -> new InvalidAstShapeException("an ExecutionType term application", term));
+        final IStrategoAppl appl = TermUtils.asAppl(term).orElseThrow(() -> new InvalidAstShapeException("a term application", term));
         switch(appl.getConstructor().getName()) {
             case "Once":
                 return CommandExecutionType.ManualOnce;
@@ -679,7 +699,7 @@ public class CfgAstToObject {
             case "Automatic":
                 return CommandExecutionType.AutomaticContinuous;
             default:
-                throw new InvalidAstShapeException("a term of sort ExecutionType", appl);
+                throw new InvalidAstShapeException("a term of sort CommandExecutionType", appl);
         }
     }
 
