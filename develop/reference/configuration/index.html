@@ -2017,7 +2017,13 @@ The following <code>StrategoRuntimeOption</code>s are supported:</p>
 <tr>
 <td><code>with-primitive-library = $Expression</code></td>
 <td>no</td>
-<td>Adds a Stratego primitive strategies library (implementing <code>IOperatorRegistry</code>) to the generated <code>StrategoRuntimeBuilderFactory</code>. The library must have an <code>@Inject</code> constructor. Can be specified multiple times.</td>
+<td>Adds a Stratego primitive strategies library (implementing <code>org.spoofax.interpreter.library.IOperatorRegistry</code>) to the generated <code>StrategoRuntimeBuilderFactory</code>. The library must have an <code>@Inject</code> constructor. Can be specified multiple times.</td>
+<td>Java type identifier</td>
+</tr>
+<tr>
+<td><code>with-interop-registerer = $Expression</code></td>
+<td>no</td>
+<td>Adds a Stratego interop registerer (implementing <code>org.strategoxt.lang.InteropRegisterer</code>) to the generated <code>StrategoRuntimeBuilderFactory</code>. The registerer must have an <code>@Inject</code> constructor. Can be specified multiple times.</td>
 <td>Java type identifier</td>
 </tr>
 <tr>
