@@ -129,7 +129,7 @@ rules // Stratego runtime section and options
   strategoRuntimeOptionOk(s, StrategoRuntimeAddStatixPrimitives(e)) :-
     typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
 
-  strategoRuntimeOptionOk(s, StrategoRuntime_WithLibrary(e)) :-
+  strategoRuntimeOptionOk(s, StrategoRuntime_WithPrimitiveLibrary(e)) :-
     typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e.
 
   strategoRuntimeOptionOk(s, StrategoRuntime_ClassKind(_)).

@@ -12,3 +12,10 @@ Then, press <span class="guilabel">Finish</span> to import the project.
 The project should now be imported into your workspace.
 Finally, build the language project by selecting the project in the <span class="guilabel">Package Explorer</span> and choosing <span class="guilabel">Project ‣ Build Project</span>.
 Building the project at least once after importing is required to update the project.
+
+
+## Troubleshooting
+
+### The project does not appear in the Import window
+Ensure the project has associated `.project` and `.classpath` files, and that they are not ignored
+for version control. [Minimum file content](../../reference/eclipse-lwb/eclipse-project-files.md).
