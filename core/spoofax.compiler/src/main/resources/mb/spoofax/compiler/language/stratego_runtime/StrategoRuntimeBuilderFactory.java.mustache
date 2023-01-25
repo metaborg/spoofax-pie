@@ -13,12 +13,16 @@ public class {{baseStrategoRuntimeBuilderFactory.id}} implements StrategoRuntime
 {{#primitiveLibraryVars}}
     private final {{variable}};
 {{/primitiveLibraryVars}}
+{{#interopRegistererVars}}
+    private final {{variable}};
+{{/interopRegistererVars}}
 
     public {{baseStrategoRuntimeBuilderFactory.id}}(
         LoggerFactory loggerFactory,
         ResourceService resourceService,
         HierarchicalResource definitionDir{{#primitiveLibraryVars}}{{#-first}},{{/-first}}
-        {{variable}}{{^-last}},{{/-last}}{{/primitiveLibraryVars}}
+        {{variable}}{{^-last}},{{/-last}}{{/primitiveLibraryVars}}{{#interopRegistererVars}}{{#-first}},{{/-first}}
+{{variable}}{{^-last}},{{/-last}}{{/interopRegistererVars}}
     ) {
         this.loggerFactory = loggerFactory;
         this.resourceService = resourceService;
@@ -26,6 +30,9 @@ public class {{baseStrategoRuntimeBuilderFactory.id}} implements StrategoRuntime
 {{#primitiveLibraryVars}}
         {{thisAssign}};
 {{/primitiveLibraryVars}}
+{{#interopRegistererVars}}
+        {{thisAssign}};
+{{/interopRegistererVars}}
     }
 
     @Override public StrategoRuntimeBuilder create() {
@@ -60,6 +67,9 @@ public class {{baseStrategoRuntimeBuilderFactory.id}} implements StrategoRuntime
 {{#primitiveLibraryVars}}
         builder.addLibrary({{name}});
 {{/primitiveLibraryVars}}
+{{#interopRegistererVars}}
+        builder.addInteropRegisterer({{name}});
+{{/interopRegistererVars}}
         return builder;
     }
 }

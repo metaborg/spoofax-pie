@@ -136,13 +136,16 @@ public class {{baseModule.id}} {
         ResourceService resourceService,
         @{{qualifier.id}}("definition-directory") HierarchicalResource definitionDir{{#this.languageProjectInput.primitiveLibraryVars}}{{#-first}},{{/-first}}
         {{variable}}{{^-last}},{{/-last}}
-{{/this.languageProjectInput.primitiveLibraryVars}}
+{{/this.languageProjectInput.primitiveLibraryVars}}{{#this.languageProjectInput.interopRegistererVars}}{{#-first}},{{/-first}}
+    {{variable}}{{^-last}},{{/-last}}
+{{/this.languageProjectInput.interopRegistererVars}}
     ) {
         return new {{this.languageProjectInput.strategoRuntimeBuilderFactory.qualifiedId}}(
             loggerFactory,
             resourceService,
             definitionDir{{#this.languageProjectInput.primitiveLibraryVars}}{{#-first}},{{/-first}}
-            {{name}}{{^-last}},{{/-last}}{{/this.languageProjectInput.primitiveLibraryVars}}
+            {{name}}{{^-last}},{{/-last}}{{/this.languageProjectInput.primitiveLibraryVars}}{{#this.languageProjectInput.interopRegistererVars}}{{#-first}},{{/-first}}
+            {{name}}{{^-last}},{{/-last}}{{/this.languageProjectInput.interopRegistererVars}}
         );
     }
 

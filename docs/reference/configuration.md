@@ -341,7 +341,8 @@ The following `StrategoRuntimeOption`s are supported:
 | `add-spoofax2-primitives = $Expression` | no | Whether to add the Spoofax 2 Stratego primitives. | Boolean |
 | `add-nabl2-primitives = $Expression` | no | Whether to add the NaBL2 Stratego primitives. | Boolean |
 | `add-statix-primitives = $Expression` | no | Whether to add the Statix Stratego primitives. | Boolean |
-| `with-primitive-library = $Expression` | no | Adds a Stratego primitive strategies library (implementing `IOperatorRegistry`) to the generated `StrategoRuntimeBuilderFactory`. The library must have an `@Inject` constructor. Can be specified multiple times. | Java type identifier |
+| `with-primitive-library = $Expression` | no | Adds a Stratego primitive strategies library (implementing `org.spoofax.interpreter.library.IOperatorRegistry`) to the generated `StrategoRuntimeBuilderFactory`. The library must have an `@Inject` constructor. Can be specified multiple times. | Java type identifier |
+| `with-interop-registerer = $Expression` | no | Adds a Stratego interop registerer (implementing `org.strategoxt.lang.InteropRegisterer`) to the generated `StrategoRuntimeBuilderFactory`. The registerer must have an `@Inject` constructor. Can be specified multiple times. | Java type identifier |
 | `class-kind = $Expression` | no | Specifies whether the classes are generated (`Generated`) or provided manually (`Manual`). Defaults to `Generated`. | `Generated` or `Manual` |
 | `base-StrategoRuntimeBuilderFactory = $Expression` | no | Package and name of the generated `StrategoRuntimeBuilderFactory`. | Java type identifier |
 | `extend-StrategoRuntimeBuilderFactory = $Expression` | no | Package and name of the extending `StrategoRuntimeBuilderFactory`, if any. | Java type identifier |

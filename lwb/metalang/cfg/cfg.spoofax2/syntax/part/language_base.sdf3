@@ -104,7 +104,8 @@ context-free syntax
   StrategoRuntimeOption.StrategoRuntimeAddNaBL2Primitives            = <add-nabl2-primitives = <Expr>>
   StrategoRuntimeOption.StrategoRuntimeAddStatixPrimitives           = <add-statix-primitives = <Expr>>
 
-  StrategoRuntimeOption.StrategoRuntime_WithPrimitiveLibrary                 = <with-primitive-library = <Expr>> // IOperatorRegistry
+  StrategoRuntimeOption.StrategoRuntime_WithPrimitiveLibrary                 = <with-primitive-library = <Expr>>  // org.spoofax.interpreter.library.IOperatorRegistry
+  StrategoRuntimeOption.StrategoRuntime_WithInteropRegisterer                = <with-interop-registerer = <Expr>> // org.strategoxt.lang.InteropRegisterer
 
   StrategoRuntimeOption.StrategoRuntime_ClassKind                            = <class-kind = <ClassKind>>
   StrategoRuntimeOption.StrategoRuntime_BaseStrategoRuntimeBuilderFactory    = <base-StrategoRuntimeBuilderFactory = <Expr>>
