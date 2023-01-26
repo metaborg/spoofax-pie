@@ -7,15 +7,36 @@ imports
   libspoofax/analysis/constraint
   statix/runtime/analysis
   statix/runtime/ast
+  
+  signatures/syntax/Functions-sig
 
 strategies
 
-  inline-method-call(|call, solverResultTerm): ast -> newAst
-  where where(<debug(!"Inlining call: ")> call);
-        a := <stx--get-ast-analysis> ast;
-        r := <stx--get-ast-property(|a,Ref())>
-        where(<debug(!"Ref: ")> r);
-        //prim("RR_create_placeholder", ["abc"]);
-        //prim("RR_fix_references", analysis);
-        newAst := ast;	// TODO
-        debug(!"Inlined: ")
+  inline-method-call(|call@Call(name, args), solverResultTerm): ast -> newAst
+  where where(<debug(!"Call: ")> call);
+        analysis := <stx--get-ast-analysis> ast;
+        decl := <stx--get-ast-property(|analysis, Ref())> name;
+        where(<debug(!"Decl: ")> decl);
+        // TODO: Get from the `decl` to the body of the method
+        newAst := ast // TODO
+        
+  
+//  where where(<debug(!"Inlining call: ")> call);
+//        where(<debug(!"Call: ")> call);
+//        analysis := <stx--get-ast-analysis> ast;
+//        decl := <stx--get-ast-property(|analysis, Ref())> call;
+//        where(<debug(!"Decl: ")> decl);
+//        //prim("RR_create_placeholder", ["abc"]);
+//        //prim("RR_fix_references", analysis);
+//        lockedRef := <prim("RR_lock_reference", decl, solverResultTerm)> call;
+//        where(<debug(!"Locked Ref: ")> lockedRef);
+//        newAst := ast;	// TODO
+//        debug(!"Inlined: ")
+
+  rr-lock-all-references(|solverResultTerm) = bottomup(try(rr-lock-one-reference(|solverResultTerm)))
+
+  rr-lock-one-reference(|solverResultTerm): ref -> lockedRef
+  with  analysis := <stx--get-ast-analysis> ref
+  where decl := <stx--get-ast-property(|analysis, Ref())> ref;
+        lockedRef := <prim("RR_lock_reference", decl, solverResultTerm)> ref
+

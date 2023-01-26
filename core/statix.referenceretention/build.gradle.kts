@@ -20,6 +20,7 @@ dependencies {
   api("org.metaborg.devenv:statix.generator")
 
   implementation(project(":stratego.common"))
+  implementation(project(":constraint.common"))
   implementation(project(":jsglr.common"))
 
   compileOnly("org.checkerframework:checker-qual-android")

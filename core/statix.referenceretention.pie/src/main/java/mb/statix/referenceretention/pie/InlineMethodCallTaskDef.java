@@ -114,11 +114,13 @@ public class InlineMethodCallTaskDef implements TaskDef<InlineMethodCallTaskDef.
             strategoTerms,
             "qualify-reference" // TODO: Make this configurable?
         );
-        final StrategoRuntime strategoRuntime = strategoRuntimeProvider.get().addContextObject(rrctx);
-        rrctx.strategoRuntime = strategoRuntime;
 
         return context.require(analysisSupplier)
             .flatMapOrElse((analysis) -> {
+                final StrategoRuntime strategoRuntime = strategoRuntimeProvider.get()
+                    .addContextObject(rrctx)
+                    .addContextObject(analysis.context);
+                rrctx.strategoRuntime = strategoRuntime;
                 try {
                     log.info("Calling inline-method-call...");
                     final IStrategoTerm ast = analysis.result.analyzedAst;
