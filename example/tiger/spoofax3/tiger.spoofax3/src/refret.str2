@@ -42,7 +42,8 @@ strategies
         argvars := <zip(?(FArg(pn, pty), ae); !VarDec(pn, pty, ae))> (fparams, args);
         replacement := Let(argvars, [ fbody ]);
         newAst := <replace(!replacement|call)> ast
-//        (_, _, text) := <construct-textual-change> (ast, newAst) // Fails due to Stratego 2?
+        //text := <construct-textual-change> (ast, newAst);
+        //where(<debug(!"Text: ")> text)
         
    // Finds the method declaration corresponding to the specified declaration00000
    // (that was retrieved from the @ref attribute of a reference)
