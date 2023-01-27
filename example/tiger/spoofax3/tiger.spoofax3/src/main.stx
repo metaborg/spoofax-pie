@@ -35,45 +35,36 @@ signature // names
 signature
 
   sorts
-    VARS = list((path * (ID * TYPE)))
+    VARS  = list((path * (ID * TYPE)))
+    TYPES = list((path * (ID * TYPE)))
 
   relations
     typeOfDecl : occurrence -> TYPE
-    var  : ID -> TYPE
-  namespaces
-    Var  : string
-    Type : string
+    var   : ID -> TYPE
+    type  : ID -> TYPE
+
   name-resolution
     labels P
-    resolve Var  filter P* min $ < P
-    resolve Type filter P* min $ < P
 
 
 rules // type binding
 
-  declareType : scope * string * TYPE
+  declareType : scope * ID * TYPE
+  lookupType  : scope * ID -> TYPES
+  // no `typeOfType: scope * ID -> TYPE` due to name clash
 
   declareType(s, x, T) :-
-    s -> Type{x} with typeOfDecl T,
+  	!type[x, T] in s,
     // declaration is distinct
-    typeOfDecl of Type{x} in s |-> [(_, (_, T))],
+    lookupType(s, x) == [_],
     @x.decl := x.
 
-
-
-
-  declareTypeRaw : scope * string * TYPE
-  lookupType : scope * string -> TYPE
-
-  declareTypeRaw(s, x, T) :-
-    s -> Type{x} with typeOfDecl T,
-    typeOfDecl of Type{x} in s |-> [(_, (_, T))],
-    @x.decl := x.
-    // declaration is distinct
-
-  lookupType(s, x) = T :- {x'} @x.ref := x',
-    typeOfDecl of Type{x} in s |-> [(_, (Type{x'}, T))].
-    // permissive lookup to cope with double declaration
+  lookupType(s, x) = TYPES :-
+    query type
+      filter P* 
+        and { x' :- x' == x }
+      min $ < P
+       in s |-> TYPES.
 
 rules // variable binding
 
@@ -240,7 +231,10 @@ rules // types
 
   typeOfType : scope * Type -> TYPE
 
-  typeOfType(s, Tid(x)) = lookupType(s, x).
+  typeOfType(s, Tid(x)) = T :- {x'}  
+    // permissive lookup to cope with double declaration
+    lookupType(s, x) == [(_, (x', T)) | _],
+    @x.ref := x'.
 
     // typeOfDecl of Type{x} in s |-> [(_, (_, T))|_].
     // permissive query to allow non-distinct type declarations
@@ -507,8 +501,8 @@ rules
   init : scope
 
   init(s) :-
-    declareTypeRaw(s, "int",    INT()),
-    declareTypeRaw(s, "string", STRING()),
+    declareType(s, "int",    INT()),
+    declareType(s, "string", STRING()),
 
     declareVar(s,  "print",     FUN([STRING()], UNIT())),
     declareVar(s,  "chr",       FUN([INT()], STRING())),
