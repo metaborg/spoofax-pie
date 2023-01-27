@@ -33,8 +33,13 @@ signature // names
 
 
 signature
+
+  sorts
+    VARS = list((path * (ID * TYPE)))
+
   relations
     typeOfDecl : occurrence -> TYPE
+    var  : ID -> TYPE
   namespaces
     Var  : string
     Type : string
@@ -54,13 +59,6 @@ rules // type binding
     typeOfDecl of Type{x} in s |-> [(_, (_, T))],
     @x.decl := x.
 
-  declareVar : scope * string * TYPE
-
-  declareVar(s, x, T) :-
-    s -> Var{x} with typeOfDecl T,
-    // declaration is distinct
-    typeOfDecl of Var{x} in s |-> [(_, (_, T))],
-    @x.decl := x.
 
 
 
@@ -79,18 +77,28 @@ rules // type binding
 
 rules // variable binding
 
-  declareVarRaw : scope * string * TYPE
-  lookupVar : scope * string -> TYPE
+  declareVar : scope * string * TYPE
+  lookupVar : scope * ID -> VARS
+  typeOfVar : scope * ID -> TYPE
 
-  declareVarRaw(s, x, T) :-
-    s -> Var{x} with typeOfDecl T,
+  declareVar(s, x, T) :-
+    !var[x, T] in s,
     // declaration is distinct
-    typeOfDecl of Var{x} in s |-> [(_, (_, T))],
+    lookupVar(s, x) == [_],
     @x.decl := x.
 
-  lookupVar(s, x) = T :- {x'} @x.ref := x',
-    typeOfDecl of Var{x} in s |-> [(_, (Var{x'}, T))].
+  lookupVar(s, x) = VARs :-
+    query var
+      filter P*
+        and { x' :- x' == x }
+      min $ < P
+       in s |-> VARs.
+
+  typeOfVar(s, x) = T :- {x'}
     // permissive lookup to cope with double declaration
+    lookupVar(s, x) == [(_, (x', T)) |_],
+    @x.ref := x'.
+
 
 rules // field binding
 
@@ -268,7 +276,7 @@ rules
 rules // function calls
 
   typeOfExp(s, Call(f, es)) = T :- {Ts Ss}
-    lookupVar(s, f) == FUN(Ts, T),
+    typeOfVar(s, f) == FUN(Ts, T),
     typeOfExps(s, es) == Ss,
     subtypes(Ss, Ts).
 
@@ -319,11 +327,11 @@ rules // statements
 rules
 
   typeOfLVal(s, Var2LValue(Var(x))) = T :-
-    lookupVar(s, x) == T.
+    typeOfVar(s, x) == T.
 
   typeOfExp(s, LValue2Exp(lval)) = typeOfLVal(s, lval).
 
-  typeOfExp(s, LValue2Exp(Var2LValue(Var(x)))) = lookupVar(s, x).
+  typeOfExp(s, LValue2Exp(Var2LValue(Var(x)))) = typeOfVar(s, x).
 
 rules // sequence
 
@@ -502,21 +510,21 @@ rules
     declareTypeRaw(s, "int",    INT()),
     declareTypeRaw(s, "string", STRING()),
 
-    declareVarRaw(s,  "print",     FUN([STRING()], UNIT())),
-    declareVarRaw(s,  "chr",       FUN([INT()], STRING())),
-    declareVarRaw(s,  "ord",       FUN([STRING()], INT())),
-    declareVarRaw(s,  "size",      FUN([STRING()], INT())),
-    declareVarRaw(s,  "substring", FUN([STRING(), INT(), INT()], STRING())),
-    declareVarRaw(s,  "concat",    FUN([STRING(), STRING()], STRING())),
-    declareVarRaw(s,  "not",       FUN([INT()], INT())),
-    declareVarRaw(s,  "exit",      FUN([INT()], UNIT())),
-    declareVarRaw(s,  "getchar",   FUN([], STRING())),
-    declareVarRaw(s,  "flush",     FUN([], UNIT())),
-    declareVarRaw(s,  "printi",    FUN([INT()], UNIT())),
+    declareVar(s,  "print",     FUN([STRING()], UNIT())),
+    declareVar(s,  "chr",       FUN([INT()], STRING())),
+    declareVar(s,  "ord",       FUN([STRING()], INT())),
+    declareVar(s,  "size",      FUN([STRING()], INT())),
+    declareVar(s,  "substring", FUN([STRING(), INT(), INT()], STRING())),
+    declareVar(s,  "concat",    FUN([STRING(), STRING()], STRING())),
+    declareVar(s,  "not",       FUN([INT()], INT())),
+    declareVar(s,  "exit",      FUN([INT()], UNIT())),
+    declareVar(s,  "getchar",   FUN([], STRING())),
+    declareVar(s,  "flush",     FUN([], UNIT())),
+    declareVar(s,  "printi",    FUN([INT()], UNIT())),
 
     // For benchmarks
-    declareVarRaw(s,  "timeGo",    FUN([], UNIT())),
-    declareVarRaw(s,  "timeStop",  FUN([], UNIT())).
+    declareVar(s,  "timeGo",    FUN([], UNIT())),
+    declareVar(s,  "timeStop",  FUN([], UNIT())).
 
 
 
