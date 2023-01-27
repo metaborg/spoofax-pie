@@ -1,0 +1,153 @@
+module tiger-statics-functions
+
+language Tiger
+
+test define a recursive function [[
+  /* define a recursive function */
+  let
+
+    function printnl(x : string) =
+      (print(x); print("\n"))
+
+    function mod(i : int, j : int) : int =
+      i - ((i / j) * j)
+
+    function inttostring(n : int) : string =
+      if n < 10 
+      then chr(48 + n)
+      else concat(inttostring(n / 10), inttostring(mod(n, 10)))
+
+    /* calculate n! */
+    function nfactor(n: int): int =
+      if n = 0 then 1 else (n * nfactor(n-1))
+  in
+    printnl(inttostring(nfactor(10)))
+  end
+]] analysis succeeds
+
+//test define valid mutually recursive functions [[
+//  /* define valid mutually recursive functions */
+//  let
+//
+//  function do_nothing1(a: int, b: string):int=
+//		(if a < 25 then do_nothing2(a+1) else 1;0)
+//
+//  function do_nothing2(d: int):string =
+//		(do_nothing1(d, "str");" ")
+//  in
+//	do_nothing1(0, "str2")
+//  end
+//]] analysis succeeds
+
+test function definition and call [[
+  let
+    function inc(x : int) : int = x + 1
+  in
+    inc(1)
+  end 
+]] analysis succeeds
+
+test function definition and call [[
+  let
+    function inc(x : int) : int = x + 1
+  in
+    inc(1)
+  end 
+]] analysis succeeds
+
+
+test function with multiple arguments [[
+  let
+    function power(n : int, x : int) : int = 
+      if n = 0 then 1 else x * power(n - 1, x)
+  in
+    power(2, 3)
+  end 
+]] analysis succeeds
+
+test recursive function definition and call [[
+  let
+    function fac(x : int) : int = 
+      if x = 0 then 1 else x * fac(x - 1)
+  in
+    fac(1)
+  end 
+]] analysis succeeds
+
+test return type mismatch [[
+  let
+    function one(x : int) : string = 
+      1
+  in
+    print(one(1))
+  end 
+]] analysis fails
+
+test return type mismatch [[
+  let
+    function fac(x : int) : string = 
+      if x = 0 then 1 else x * fac(x - 1)
+  in
+    fac(1) 
+  end 
+]] analysis fails
+
+test shadowing of function definitions [[
+  let
+    function f() : string = "1"
+    var x := f()
+    function f(x : int) : int = 1
+  in
+    f(1)
+  end 
+]] analysis succeeds
+
+//test no duplicate function definitions in same block [[
+//  let
+//    function f() : int = 1 
+//    function f(x : int) : int = 1
+//  in
+//   1
+//  end 
+//]] analysis fails
+
+test mutually recursive function definitions [[
+  let
+    function f() : int = g(1)
+    function g(x : int) : int = f()
+  in
+   1
+  end 
+]] analysis succeeds
+
+test no mutually recursion across function declaration blocks [[
+  let
+    function f() : int = g(1)
+    var x := 1
+    function g(x : int) : int = f()
+  in
+   1
+  end 
+]] analysis fails
+
+//test no duplicate procedure definitions [[
+//  let 
+//    function g() = ()
+//    function g() = ()
+//  in
+//    1
+//  end 
+//]] analysis fails
+
+test shadowing of procedure definitions [[
+  let
+    function h() = ()
+    var x := 1  
+    function h() = ()
+  in
+    h() 
+  end 
+]] analysis succeeds 
+ 
+
+ 
