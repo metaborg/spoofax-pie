@@ -61,13 +61,12 @@ rules // variable binding
       filter P*
         and { x' :- x' == x }
       min $ < P
-       in s |-> VARs,
-    @x.ref := x'.
+       in s |-> VARs.
 
-  typeOfVar(s, x) = T :- {x'}
+  typeOfVar(s, x) = T :- {d}
     // permissive lookup to cope with double declaration
-    lookupVar(s, x) == [(_, (x', T)) |_],
-    @x.ref := x'.
+    lookupVar(s, x) == [(_, (d, T)) |_],
+    @x.ref := d.
 
 rules // type binding
 
@@ -86,8 +85,7 @@ rules // type binding
       filter P*
         and { x' :- x' == x }
       min $ < P
-       in s |-> TYPES,
-    @x.ref := x'.
+       in s |-> TYPES.
 
 rules // field binding
 
@@ -107,8 +105,7 @@ rules // field binding
       filter P* 
         and { x' :- x' == x }
       min $ < P
-      in s |-> FLDs,
-    @x.ref := x'.
+      in s |-> FLDs.
 
   lookupAllFields(s) = FLDs :-
     query field
