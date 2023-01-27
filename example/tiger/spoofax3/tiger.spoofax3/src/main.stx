@@ -20,13 +20,14 @@ rules // multi-file entry point
 
 signature // names
   namespaces
-    Loop  : string
     Field : string
+
+  relations
+    loop:
 
 signature // names
   name-resolution
     labels R
-    resolve Loop  filter P* min $ < P
     resolve Field filter P* min $ < P
 
 
@@ -332,7 +333,7 @@ rules // sequence
 
   typeOfExp(s, While(e1, e2)) = UNIT() :- {s_loop}
     new s_loop, s_loop -P-> s,
-    s_loop -> Loop{"break"} with typeOfDecl UNIT(),
+    !loop[] in s_loop,
     typeOfExp(s_loop, e1) == INT(),
     typeOfExp(s_loop, e2) == UNIT().
 
@@ -340,13 +341,16 @@ rules // sequence
     new s_for,
     s_for -P-> s,
     declareVar(s_for, x, INT()),
-    s_for -> Loop{"break"} with typeOfDecl UNIT(),
+    !loop[] in s_for,
     typeOfExp(s, e1) == INT(),
     typeOfExp(s, e2) == INT(),
     typeOfExp(s_for, e3) == UNIT().
 
   typeOfExp(s, Break()) = UNIT() :-
-    typeOfDecl of Loop{"break"} in s |-> [(_, (_, UNIT()))].
+    query loop 
+      filter P* 
+      min $ < P
+       in s |-> [_].
 
 rules // literals
 
