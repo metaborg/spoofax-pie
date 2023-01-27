@@ -18,59 +18,37 @@ rules // multi-file entry point
 //  fileOk : scope * Start
 //  fileOk(s, Empty()).
 
-signature // names
-
-  sorts
-    FIELDS = list((path * (ID * TYPE)))
-
-  relations
-    loop:
-    field: string -> TYPE
-
-signature // names
-  name-resolution
-    labels R
-
-
-signature
+signature // variables
 
   sorts
     VARS  = list((path * (ID * TYPE)))
     TYPES = list((path * (ID * TYPE)))
 
   relations
-    typeOfDecl : occurrence -> TYPE
     var   : ID -> TYPE
     type  : ID -> TYPE
 
   name-resolution
     labels P
 
+signature // records
 
-rules // type binding
+  sorts
+    FIELDS = list((path * (ID * TYPE)))
 
-  declareType : scope * ID * TYPE
-  lookupType  : scope * ID -> TYPES
-  // no `typeOfType: scope * ID -> TYPE` due to name clash
+  relations
+    field: ID -> TYPE
 
-  declareType(s, x, T) :-
-  	!type[x, T] in s,
-    // declaration is distinct
-    lookupType(s, x) == [_],
-    @x.decl := x.
+signature // control-flow
 
-  lookupType(s, x) = TYPES :-
-    query type
-      filter P* 
-        and { x' :- x' == x }
-      min $ < P
-       in s |-> TYPES.
+  relations
+    loop:
 
 rules // variable binding
 
-  declareVar : scope * string * TYPE
-  lookupVar : scope * ID -> VARS
-  typeOfVar : scope * ID -> TYPE
+  declareVar : scope * ID *  TYPE
+  lookupVar  : scope * ID -> VARS
+  typeOfVar  : scope * ID -> TYPE
 
   declareVar(s, x, T) :-
     !var[x, T] in s,
@@ -90,6 +68,24 @@ rules // variable binding
     lookupVar(s, x) == [(_, (x', T)) |_],
     @x.ref := x'.
 
+rules // type binding
+
+  declareType : scope * ID * TYPE
+  lookupType  : scope * ID -> TYPES
+  // no `typeOfType: scope * ID -> TYPE` due to name clash
+
+  declareType(s, x, T) :-
+    !type[x, T] in s,
+    // declaration is distinct
+    lookupType(s, x) == [_],
+    @x.decl := x.
+
+  lookupType(s, x) = TYPES :-
+    query type
+      filter P*
+        and { x' :- x' == x }
+      min $ < P
+       in s |-> TYPES.
 
 rules // field binding
 
