@@ -135,12 +135,6 @@ rules subtype : TYPE * TYPE
 
   subtype(NIL(), RECORD(s)).
 
-rules subtypeO : Type * TYPE * TYPE
-
-  subtypeO(t, T, T).
-
-  subtypeO(t, NIL(), RECORD(s)).
-
 rules subtypes : list(TYPE) * list(TYPE)
 
 //  subtypes maps subtype(list(*), list(*))
@@ -253,7 +247,7 @@ rules // function declarations
     typeOfType(s_outer, t) == T,
     declareVar(s, f, FUN(Ts, T)),
     typeOfExp(s_fun, e) == S,
-    subtypeO(t, S, T).
+    subtype(S, T) | error $[[S] is not a subtype of [T]] @t.
 
 rules
   typeOfArg  : scope * scope * FArg -> TYPE
