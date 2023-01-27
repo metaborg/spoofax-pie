@@ -8,18 +8,57 @@ imports
   statix/runtime/analysis
   statix/runtime/ast
   
+  signatures/syntax/Arrays-sig
+  signatures/syntax/Base-sig
+  signatures/syntax/Bindings-sig
+  signatures/syntax/Control-Flow-sig
   signatures/syntax/Functions-sig
+  signatures/syntax/Identifiers-sig
+  signatures/syntax/Numbers-sig
+  signatures/syntax/Records-sig
+  signatures/syntax/Strings-sig
+  signatures/syntax/Types-sig
+  signatures/syntax/Variables-sig
+  signatures/syntax/Whitespace-sig
+  
+imports //construct-textual-change
+  libstratego-gpp
+  libspoofax/sdf/pp
+  libspoofax/editor/refactoring/-
+  pp/tiger-parenthesize
+  pp
 
 strategies
+
+  construct-textual-change = construct-textual-change(pp-partial-tiger-string, parenthesize, override-reconstruction, resugar)
 
   inline-method-call(|call@Call(name, args), solverResultTerm): ast -> newAst
   where where(<debug(!"Call: ")> call);
         analysis := <stx--get-ast-analysis> ast;
         decl := <stx--get-ast-property(|analysis, Ref())> name;
         where(<debug(!"Decl: ")> decl);
-        // TODO: Get from the `decl` to the body of the method
-        newAst := ast // TODO
+        fun@FunDec(fname, fparams, fretType, fbody) := <collect(?FunDec(_,_,_,_)|decl)> ast;
+        where(<debug(!"Fun: ")> fun);
+        argvars := <zip(?(FArg(pn, pty), ae); !VarDec(pn, pty, ae))> (fparams, args);
+        replacement := Let(argvars, [ fbody ]);
+        newAst := <replace(!replacement|call)> ast
+//        (_, _, text) := <construct-textual-change> (ast, newAst) // Fails due to Stratego 2?
         
+   // Finds the method declaration corresponding to the specified declaration00000
+   // (that was retrieved from the @ref attribute of a reference)
+   collect(s|decl) =
+     where(idx := <stx--get-ast-index> decl);
+     collect-onebu(s; has-index(|idx))
+     
+   // Replaces a term in the ast that matches the given term and its index
+   // by applying strategy s to it
+   replace(s|term) =
+     where(idx := <stx--get-ast-index> term);
+     oncebu(?term; where(stx--get-ast-index; ?idx); s)
+   
+   // Succeeds if the term has a subterm with the specified index
+   has-index(|idx): term -> term
+   where oncetd(stx--get-ast-index; ?idx)
   
 //  where where(<debug(!"Inlining call: ")> call);
 //        where(<debug(!"Call: ")> call);
@@ -33,10 +72,13 @@ strategies
 //        newAst := ast;	// TODO
 //        debug(!"Inlined: ")
 
+  collect-onebu(s) = oncebu(where(s; ?t)); !t
+
   rr-lock-all-references(|solverResultTerm) = bottomup(try(rr-lock-one-reference(|solverResultTerm)))
 
   rr-lock-one-reference(|solverResultTerm): ref -> lockedRef
   with  analysis := <stx--get-ast-analysis> ref
   where decl := <stx--get-ast-property(|analysis, Ref())> ref;
         lockedRef := <prim("RR_lock_reference", decl, solverResultTerm)> ref
+
 
