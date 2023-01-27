@@ -447,6 +447,7 @@ public class CfgAstToObject {
             subParts.forOneSubtermAsBool("StrategoRuntimeAddStatixPrimitives", base::addStatixPrimitives);
 
             subParts.forAllSubtermsAsTypeInfo("StrategoRuntime_WithPrimitiveLibrary", base::addPrimitiveLibraries);
+            subParts.forAllSubtermsAsTypeInfo("StrategoRuntime_WithInteropRegisterer", base::addInteropRegisterers);
 
             subParts.forOneSubterm("StrategoRuntime_ClassKind", term -> base.classKind(toClassKind(term)));
             subParts.forOneSubtermAsTypeInfo("StrategoRuntime_BaseStrategoRuntimeBuilderFactory", base::baseStrategoRuntimeBuilderFactory);

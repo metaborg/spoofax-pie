@@ -1,0 +1,129 @@
+module tiger-bindings
+
+language Tiger
+
+test a record type and a record variable [[ 
+  /* a record type and a record variable */
+  let
+    type rectype = {
+       name : string, 
+       age : int
+    }
+    var rec1: rectype := rectype{ name = "Nobody", age = 1000 }
+  in
+    rec1.name := "Somebody";
+    rec1.age
+  end
+]] analysis succeeds
+
+test define valid recursive types [[ 
+  /* define valid recursive types */
+  let
+    /* define a list */
+    type intlist = {hd: int, tl: intlist} 
+
+    /* define a tree */
+    type tree ={key: int, children: treelist}
+    type treelist = {hd: tree, tl: treelist}
+
+    var lis:intlist := intlist { hd=0, tl= nil } 
+  in
+	lis
+  end
+]] analysis succeeds
+
+test record type and initialization [[ 
+  let
+    type point = {x : int, y: int}
+  in 
+    point{x = 1, y = 10}
+  end
+]] analysis succeeds
+
+test field access [[ 
+  let
+    type point = {x : int, y: int}
+    var p := point{x = 1, y = 10}
+  in 
+    p.y
+  end
+]] analysis succeeds
+
+test field access [[ 
+  let
+    type r = {x : int}
+    var x := r{x = 1} 
+  in 
+    x.x + 1
+  end
+]] analysis succeeds
+ 
+test field access to undeclared [[ 
+  let
+    type r = {x : int}
+    var x := r{x = 1} 
+  in 
+    x.y + 1
+  end
+]] analysis fails
+ 
+test name spaces [[ 
+  let
+    type x = {x : int}
+    var x : x := x{x = 1}
+  in 
+    x.x + 1
+  end
+]] analysis succeeds
+ 
+
+test recursive record types [[ 
+  let
+    type list = {hd : int, tl : list}
+    function size(xs : list) : int = 
+      if xs = nil then 0
+      else 1 + size(xs.tl)
+  in 
+    list{hd = 1, tl = list{hd = 0, tl = nil}}
+  end
+]] analysis succeeds
+
+test record field declaration and initialization [[ 
+  let
+    type r = {x : int, y : int, z : string}
+  in 
+    r{y = 3, z = "a", x = 1}
+  end
+]] analysis succeeds
+ 
+
+test duplicate field declaration [[ 
+  let
+    type r = {x : int, x : int, y : int, z : int}
+  in 
+    1
+  end
+]] analysis fails
+ 
+ 
+test duplicate field initialization [[ 
+  let
+    type r = {x : int}
+  in 
+    r{x = 1, x = 2} 
+  end
+]] analysis fails
+ 
+test missing field initialization [[ 
+  let
+    type r = {x : int}
+  in 
+    r{} 
+  end
+]] analysis fails
+ 
+
+
+
+
+

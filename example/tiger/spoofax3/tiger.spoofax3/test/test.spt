@@ -1,3 +1,7 @@
 module test
 
-test parse empty [[]] parse succeeds
+language Tiger
+
+test parse [[
+  1
+]] parse succeeds

@@ -131,6 +131,8 @@ rules // Stratego runtime section and options
 
   strategoRuntimeOptionOk(s, StrategoRuntime_WithPrimitiveLibrary(e)) :-
     typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e.
+  strategoRuntimeOptionOk(s, StrategoRuntime_WithInteropRegisterer(e)) :-
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e.
 
   strategoRuntimeOptionOk(s, StrategoRuntime_ClassKind(_)).
   strategoRuntimeOptionOk(s, StrategoRuntime_BaseStrategoRuntimeBuilderFactory(e)) :-

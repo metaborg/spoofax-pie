@@ -1,0 +1,38 @@
+module tiger-statics-arrays
+
+language Tiger
+
+test an array type and an array variable [[ 
+  /* an array type and an array variable */ 
+  let
+	type  arrtype = array of int
+	var arr1:arrtype := arrtype [10] of 0
+  in
+	arr1[2]
+  end
+]] analysis succeeds
+
+test arr1 is valid since expression 0 is int = myint [[ 
+  /* arr1 is valid since expression 0 is int = myint */
+  let
+	type myint = int
+	type  arrtype = array of myint
+
+	var arr1:arrtype := arrtype [10] of 0
+  in
+	arr1
+  end
+]] analysis succeeds
+
+test record type and initialization [[ 
+  /* arr1 is valid since expression 0 is int = myint */
+  let
+	type myint = int
+	type  arrtype = array of myint
+
+	var arr1:arrtype := arrtype [10] of 0
+  in
+	arr1
+  end
+]] analysis succeeds
+
