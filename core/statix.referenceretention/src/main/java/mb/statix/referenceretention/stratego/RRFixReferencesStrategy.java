@@ -44,6 +44,8 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
     public static final String NAME = "RR_fix_references";
     public RRFixReferencesStrategy()  { super(NAME, 1); }
 
+    // Usage:
+    // fixedAst := <prim("RR_fix_references", solverResultTerm)> ast
     @Override
     protected Optional<? extends ITerm> call(IContext env, ITerm term, List<ITerm> terms) throws InterpreterException {
         final RRStrategoContext context;
@@ -64,6 +66,8 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
         // The solver result (analysis) should be the first term argument
         final SolverResult analysis = RRTermUtils.extractFinalSolverResult(terms.get(0));
 
+        // TODO: Create an AST without the RRPlaceholder classes, but instead unbound term variables
+        //  and a list of placeholder descriptors.
         final Map.Immutable<ITermVar, RRPlaceholderDescriptor> placeholderDescriptors = Map.Immutable.of(); // TODO: Get them from the AST
         final RRSolverState state = RRSolverState.fromSolverResult(analysis, null, placeholderDescriptors);  // TODO
         final Collection<Map.Entry<IConstraint, IMessage>> allowedErrors = Collections.emptyList(); // TODO

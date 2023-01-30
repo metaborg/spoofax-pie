@@ -32,7 +32,7 @@ strategies
 
   construct-textual-change = construct-textual-change(pp-partial-tiger-string, parenthesize, override-reconstruction, resugar)
 
-  inline-method-call(|call@Call(name, args), solverResultTerm): ast -> newAst
+  inline-method-call(|call@Call(name, args), solverResultTerm): ast -> fixedAst
   where where(<debug(!"Call: ")> call);
         analysis := <stx--get-ast-analysis> ast;
         decl := <stx--get-ast-property(|analysis, Ref())> name;
@@ -45,9 +45,10 @@ strategies
         replacement := Let(argvars, [ plhdrbody ]);
         newAst := <replace(!replacement|call)> ast;
         where(<debug(!"Pre-RR: ")> newAst);
+        fixedAst := <prim("RR_fix_references", solverResultTerm)> newAst
         // TODO: RR
-        text := <construct-textual-change> (ast, <replace(!Let(argvars, [ fbody ])|call)> ast);
-        where(<debug(!"Text: ")> text)
+        //text := <construct-textual-change> (ast, <replace(!Let(argvars, [ fbody ])|call)> ast);
+        //where(<debug(!"Text: ")> text)
         
         
    build-contexts(|call@Call(_, _), solverResultTerm): ast -> [] // Not sure what contexts we could provide here
