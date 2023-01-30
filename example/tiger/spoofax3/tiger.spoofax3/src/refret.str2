@@ -40,7 +40,7 @@ strategies
         where(<debug(!"Inlining: ")> fun);
         argvars := <zip(?(FArg(pn, pty), ae); !VarDec(pn, pty, ae))> (fparams, args);
         newbody := <rr-lock-all-references(|solverResultTerm)> fbody;
-        ctxs := ["x"];// TODO: Determine contexts from call
+        ctxs := <build-contexts(|call, solverResultTerm)> ast;
         plhdrbody := <prim("RR_create_placeholder", ctxs)> newbody;
         replacement := Let(argvars, [ plhdrbody ]);
         newAst := <replace(!replacement|call)> ast;
@@ -50,8 +50,8 @@ strategies
         where(<debug(!"Text: ")> text)
         
         
-//   build-contexts(|call@Call(name, args), solverResultTerm): ast -> contexts
-//   where 
+   build-contexts(|call@Call(_, _), solverResultTerm): ast -> [] // Not sure what contexts we could provide here
+   
         
    // Finds the declaration term corresponding to the specified declaration
    // (that was retrieved from the @ref attribute of a reference)
