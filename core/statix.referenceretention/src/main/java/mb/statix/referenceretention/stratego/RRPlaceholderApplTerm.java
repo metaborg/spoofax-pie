@@ -12,6 +12,7 @@ import java.util.List;
 /**
  * A reference retention placeholder term, that is, a placeholder of the form {@code [[ &lt;body&gt; | &lt;context&gt; ]]}.
  */
+@Deprecated
 public final class RRPlaceholderApplTerm extends StrategoAppl {
 
     private final IStrategoTerm body;

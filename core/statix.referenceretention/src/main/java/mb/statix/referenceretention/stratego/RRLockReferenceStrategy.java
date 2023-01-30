@@ -60,7 +60,7 @@ public final class RRLockReferenceStrategy extends StatixPrimitive {
     // Usage:
     // a := <stx--get-ast-analysis> ast;
     // decl := <stx--get-ast-property(|a,Ref())> ref;
-    // <rr_lock_reference(|decl, solverResultTerm)> ref
+    // <prim("RR_lock_reference", decl, solverResultTerm)> ref
     // TODO: The scope should be an appropriate type, e.g., Scope or something.
     @Nullable private ITerm eval(
         RRStrategoContext rrctx,
@@ -79,10 +79,9 @@ public final class RRLockReferenceStrategy extends StatixPrimitive {
         final IScopeGraph<Scope, ITerm, ITerm> scopeGraph = result.state().scopeGraph();
         final Optional<Scope> declScope = scopeGraph.getData().entrySet().stream()
             .filter(e -> {
-//                Scope entryScope = e.getKey();
                 ITerm scopeData = e.getValue();
-//                T.collecttd(t -> t.getAttachments().get(TermIndex.class).equals(declIdx))
-                return T.collecttd(t -> Optional.ofNullable(declIdx.equals(t.getAttachments().get(TermIndex.class)) ? t : null)).apply(scopeData).isEmpty();
+                return T.collecttd(t -> Optional.ofNullable(declIdx.equals(t.getAttachments().get(TermIndex.class)) ? t : null))
+                    .apply(scopeData).isEmpty();
             })
             .map(e -> e.getKey())
             .findFirst();

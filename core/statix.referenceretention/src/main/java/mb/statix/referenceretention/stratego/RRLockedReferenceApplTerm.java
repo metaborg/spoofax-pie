@@ -18,6 +18,7 @@ import java.util.List;
  * (e.g., when inlining a method body), this could invalidate the reference. To prevent this, the reference syntax and
  * the declaration scope it resolved to are wrapped in this term.
  */
+@Deprecated
 public final class RRLockedReferenceApplTerm extends StrategoAppl {
 
     private final IStrategoTerm term;

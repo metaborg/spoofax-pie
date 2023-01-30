@@ -41,7 +41,9 @@ strategies
         where(<debug(!"Fun: ")> fun);
         argvars := <zip(?(FArg(pn, pty), ae); !VarDec(pn, pty, ae))> (fparams, args);
         newbody := <rr-lock-all-references(|solverResultTerm)> fbody;
-        replacement := Let(argvars, [ newbody ]);
+        ctxs := ["x"];// TODO: Determine contexts from call
+        plhdrbody := <prim("RR_create_placeholder", ctxs)> newbody;
+        replacement := Let(argvars, [ plhdrbody ]);
         newAst := <replace(!replacement|call)> ast
 //        text := <construct-textual-change> (ast, newAst);
 //        where(<debug(!"Text: ")> text)
