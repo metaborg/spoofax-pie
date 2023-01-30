@@ -36,19 +36,24 @@ strategies
   where where(<debug(!"Call: ")> call);
         analysis := <stx--get-ast-analysis> ast;
         decl := <stx--get-ast-property(|analysis, Ref())> name;
-        where(<debug(!"Decl: ")> decl);
         fun@FunDec(fname, fparams, fretType, fbody) := <collect(?FunDec(_,_,_,_)|decl)> ast;
-        where(<debug(!"Fun: ")> fun);
+        where(<debug(!"Inlining: ")> fun);
         argvars := <zip(?(FArg(pn, pty), ae); !VarDec(pn, pty, ae))> (fparams, args);
         newbody := <rr-lock-all-references(|solverResultTerm)> fbody;
         ctxs := ["x"];// TODO: Determine contexts from call
         plhdrbody := <prim("RR_create_placeholder", ctxs)> newbody;
         replacement := Let(argvars, [ plhdrbody ]);
-        newAst := <replace(!replacement|call)> ast
-//        text := <construct-textual-change> (ast, newAst);
-//        where(<debug(!"Text: ")> text)
+        newAst := <replace(!replacement|call)> ast;
+        where(<debug(!"Pre-RR: ")> newAst);
+        // TODO: RR
+        text := <construct-textual-change> (ast, <replace(!Let(argvars, [ fbody ])|call)> ast);
+        where(<debug(!"Text: ")> text)
         
-   // Finds the method declaration corresponding to the specified declaration00000
+        
+//   build-contexts(|call@Call(name, args), solverResultTerm): ast -> contexts
+//   where 
+        
+   // Finds the declaration term corresponding to the specified declaration
    // (that was retrieved from the @ref attribute of a reference)
    collect(s|decl) =
      where(idx := <stx--get-ast-index> decl);
@@ -76,10 +81,14 @@ strategies
 //        newAst := ast;	// TODO
 //        debug(!"Inlined: ")
 
+  // Collect bottomup the first term where strategy `s` succeeds; or fails if there is no such term
   collect-onebu(s) = oncebu(where(s; ?t)); !t
 
+  // Locks all references in the given term
   rr-lock-all-references(|solverResultTerm) = bottomup(try(rr-lock-one-reference(|solverResultTerm)))
 
+  // Locks the reference represented by the given term
+  // if the reference has a @ref property, or fails if it is not a reference.
   rr-lock-one-reference(|solverResultTerm): ref -> lockedRef
   with  analysis := <stx--get-ast-analysis> ref
   where //where(<debug(!"Try: ")> ref);
