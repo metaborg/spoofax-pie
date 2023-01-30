@@ -40,10 +40,11 @@ strategies
         fun@FunDec(fname, fparams, fretType, fbody) := <collect(?FunDec(_,_,_,_)|decl)> ast;
         where(<debug(!"Fun: ")> fun);
         argvars := <zip(?(FArg(pn, pty), ae); !VarDec(pn, pty, ae))> (fparams, args);
-        replacement := Let(argvars, [ fbody ]);
+        newbody := <rr-lock-all-references(|solverResultTerm)> fbody;
+        replacement := Let(argvars, [ newbody ]);
         newAst := <replace(!replacement|call)> ast
-        //text := <construct-textual-change> (ast, newAst);
-        //where(<debug(!"Text: ")> text)
+//        text := <construct-textual-change> (ast, newAst);
+//        where(<debug(!"Text: ")> text)
         
    // Finds the method declaration corresponding to the specified declaration00000
    // (that was retrieved from the @ref attribute of a reference)
@@ -79,7 +80,10 @@ strategies
 
   rr-lock-one-reference(|solverResultTerm): ref -> lockedRef
   with  analysis := <stx--get-ast-analysis> ref
-  where decl := <stx--get-ast-property(|analysis, Ref())> ref;
-        lockedRef := <prim("RR_lock_reference", decl, solverResultTerm)> ref
+  where //where(<debug(!"Try: ")> ref);
+        decl := <stx--get-ast-property(|analysis, Ref())> ref;
+        where(<debug(!"Accept Decl: ")> decl);
+        lockedRef := <prim("RR_lock_reference", decl, solverResultTerm)> ref;
+        where(<debug(!"Locked: ")> lockedRef)
 
 
