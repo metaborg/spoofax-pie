@@ -1,20 +1,25 @@
 package mb.statix.referenceretention.tego;
 
 import mb.nabl2.terms.IApplTerm;
+import mb.nabl2.terms.IListTerm;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
 import mb.nabl2.terms.build.TermBuild;
+import mb.nabl2.terms.matching.TermMatch;
 import mb.statix.constraints.CEqual;
 import mb.statix.referenceretention.statix.LockedReference;
+import mb.statix.referenceretention.statix.RRPlaceholder;
 import mb.tego.sequences.Seq;
 import mb.tego.strategies.NamedStrategy3;
 import mb.tego.strategies.Strategy1;
 import mb.tego.strategies.runtime.TegoEngine;
 import mb.tego.tuples.Pair;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import static mb.nabl2.terms.matching.TermMatch.M;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Optional;
 
 /**
  * If the placeholder is a locked reference and has no context, this verifies that the reference still resolves
@@ -22,7 +27,7 @@ import java.util.Collections;
  * this creates alternatives where the name is qualified and unqualified and the placeholder has no context.
  * Otherwise, if the placeholder is a term, this unwraps the term.
  */
-public final class UnwrapOrFixReferenceStrategy extends NamedStrategy3<RRContext, ITermVar, RRPlaceholderDescriptor, RRSolverState, Seq<RRSolverState>> {
+public final class UnwrapOrFixReferenceStrategy extends NamedStrategy3<RRContext, ITermVar, RRPlaceholder, RRSolverState, Seq<RRSolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final UnwrapOrFixReferenceStrategy instance = new UnwrapOrFixReferenceStrategy();
@@ -52,7 +57,7 @@ public final class UnwrapOrFixReferenceStrategy extends NamedStrategy3<RRContext
         TegoEngine engine,
         RRContext ctx,
         ITermVar v,
-        RRPlaceholderDescriptor descriptor,
+        RRPlaceholder descriptor,
         RRSolverState input
     ) {
         return eval(engine, ctx, v, descriptor, input);
@@ -72,26 +77,28 @@ public final class UnwrapOrFixReferenceStrategy extends NamedStrategy3<RRContext
         TegoEngine engine,
         RRContext ctx,
         ITermVar v,
-        RRPlaceholderDescriptor descriptor,
+        RRPlaceholder descriptor,
         RRSolverState input
     ) {
         // Get all the strategies at the start
         final NewPlaceholderStrategy newPlaceholder = NewPlaceholderStrategy.getInstance();
         final Strategy1<ITerm, LockedReference, @Nullable ITerm> qualifyReference = ctx.getQualifyReferenceStrategy();
 
-        // (term, context) <- descriptor,
-        final ITerm term = descriptor.getTerm();
-        final @Nullable ITerm context = descriptor.getContext();
+        // (body, contexts) <- descriptor,
+        final ITerm term = descriptor.getBody();
+        final IListTerm contexts = descriptor.getContexts();
+        // TODO: Use the other contexts as well, not just the first
+        final @Nullable ITerm firstContext = M.listElems().map(e -> !e.isEmpty() ? e.get(0) : null).match(contexts).orElse(null);
         if (term instanceof LockedReference) {
             final @Nullable LockedReference reference = (LockedReference)term;
-            if (context != null) {
+            if (firstContext != null) {
                 // The term is a locked reference with a context,
                 // so we try both the qualified and unqualified reference.
                 // "[[ r | c ]]" = { "x.[[ r |]]" , "[[ r |]]" }
-                final @Nullable ITerm qreference = engine.eval(qualifyReference, descriptor.getContext(), reference);
+                final @Nullable ITerm qreference = engine.eval(qualifyReference, descriptor.getContexts(), reference);
                 @Nullable RRSolverState newStateQ = null;    // The state for the qualified reference "x.[[r |]]"; or `null` when it could not be constructed
                 if (qreference != null) {
-                    final Pair<IApplTerm, RRSolverState> newApplTermAndState = unwrap(engine, (IApplTerm)term, context, input);
+                    final Pair<IApplTerm, RRSolverState> newApplTermAndState = unwrap(engine, (IApplTerm)term, firstContext, input);
                     final IApplTerm newApplTerm = newApplTermAndState.component1();
                     newStateQ = newApplTermAndState.component2();
                     newStateQ = newStateQ.withUpdatedConstraints(
@@ -125,7 +132,7 @@ public final class UnwrapOrFixReferenceStrategy extends NamedStrategy3<RRContext
         } else if (term instanceof IApplTerm) {
             // The term is a term application, so we unwrap it once
             // "[[ T(a0, a1, .., an) | c ]]" -> "T( [[ a0 | c ]], [[ a1 | c ]], .., [[ an | c ]] )"
-            final Pair<IApplTerm, RRSolverState> newApplTermAndState = unwrap(engine, (IApplTerm)term, context, input);
+            final Pair<IApplTerm, RRSolverState> newApplTermAndState = unwrap(engine, (IApplTerm)term, firstContext, input);
             final IApplTerm newApplTerm = newApplTermAndState.component1();
             final RRSolverState newState = newApplTermAndState.component2();
             final RRSolverState finalState = newState.withUpdatedConstraints(

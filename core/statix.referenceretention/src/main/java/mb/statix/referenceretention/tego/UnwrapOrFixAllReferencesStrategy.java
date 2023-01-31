@@ -1,6 +1,7 @@
 package mb.statix.referenceretention.tego;
 
 import mb.nabl2.terms.ITermVar;
+import mb.statix.referenceretention.statix.RRPlaceholder;
 import mb.tego.sequences.Seq;
 import mb.tego.strategies.NamedStrategy1;
 import mb.tego.strategies.Strategy;
@@ -78,14 +79,14 @@ public final class UnwrapOrFixAllReferencesStrategy extends NamedStrategy1<RRCon
 
         final AssertValidStrategy assertValid = AssertValidStrategy.getInstance();
         final UnwrapOrFixReferenceStrategy unwrapOrFixReference = UnwrapOrFixReferenceStrategy.getInstance();
-        final Strategy1<RRContext, RRSolverState, Seq<Pair<ITermVar, RRPlaceholderDescriptor>>> getAllPlaceholders =
+        final Strategy1<RRContext, RRSolverState, Seq<Pair<ITermVar, RRPlaceholder>>> getAllPlaceholders =
             fun((RRSolverState i, RRContext c) -> Seq.from(input.getPlaceholderDescriptors().entrySet()).map(Pair::from));
 
         final Strategy<RRSolverState, Seq<RRSolverState>> strategy = repeat(
-            let(getAllPlaceholders.apply(ctx), (Seq<Pair<ITermVar, RRPlaceholderDescriptor>> ps) ->
-                flatten(forEach(ps, lam((Pair<ITermVar, RRPlaceholderDescriptor> p) ->
+            let(getAllPlaceholders.apply(ctx), (Seq<Pair<ITermVar, RRPlaceholder>> ps) ->
+                flatten(forEach(ps, lam((Pair<ITermVar, RRPlaceholder> p) ->
                     let(fun(i -> p.component1()), (ITermVar v) ->
-                        let(fun(i -> p.component2()), (RRPlaceholderDescriptor d) ->
+                        let(fun(i -> p.component2()), (RRPlaceholder d) ->
                             seq(unwrapOrFixReference.apply(ctx, v, d))
                             .$(flatMap(ntl(assertValid.apply(ctx))))
                             .$()

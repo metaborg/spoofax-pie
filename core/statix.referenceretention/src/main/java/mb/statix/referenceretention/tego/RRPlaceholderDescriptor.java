@@ -9,6 +9,7 @@ import java.util.Objects;
 /**
  * A reference retention descriptor for a placeholder.
  */
+@Deprecated
 public final class RRPlaceholderDescriptor {
     private final ITerm term;
     private final @Nullable ITerm context;
@@ -26,7 +27,7 @@ public final class RRPlaceholderDescriptor {
      * @return the context, which is a term that describes the context reference,
      * such as {@code Var("x")} or {@code Member("x", Var("y"))}; or {@code null}
      */
-    public @Nullable ITerm getContext() {
+    public @Nullable ITerm getContexts() {
         return context;
     }
 
@@ -46,7 +47,7 @@ public final class RRPlaceholderDescriptor {
         RRPlaceholderDescriptor that = (RRPlaceholderDescriptor)other;
         // @formatter:off
         return Objects.equals(this.getTerm(), that.getTerm())
-            && Objects.equals(this.getContext(), that.getContext());
+            && Objects.equals(this.getContexts(), that.getContexts());
         // @formatter:on
     }
 
@@ -57,6 +58,6 @@ public final class RRPlaceholderDescriptor {
 
     @Override
     public String toString() {
-        return "[[" + getTerm() + "|" + (getContext() != null ? getContext() : "") + "]]";
+        return "[[" + getTerm() + "|" + (getContexts() != null ? getContexts() : "") + "]]";
     }
 }

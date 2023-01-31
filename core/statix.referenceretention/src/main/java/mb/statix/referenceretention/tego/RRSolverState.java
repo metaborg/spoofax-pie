@@ -9,6 +9,7 @@ import mb.nabl2.terms.unification.ud.IUniDisunifier;
 import mb.statix.codecompletion.ISolverState;
 import mb.statix.codecompletion.SolverState;
 import mb.statix.constraints.messages.IMessage;
+import mb.statix.referenceretention.statix.RRPlaceholder;
 import mb.statix.solver.Delay;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.IState;
@@ -46,7 +47,7 @@ public class RRSolverState extends SolverState {
         Spec spec,
         IState.Immutable state,
         Iterable<? extends IConstraint> constraints,
-        Map.Immutable<ITermVar, RRPlaceholderDescriptor> placeholderDescriptors
+        Map.Immutable<ITermVar, RRPlaceholder> placeholderDescriptors
     ) {
         final ICompleteness.Transient completeness = Completeness.Transient.of();
         completeness.addAll(constraints, spec, state.unifier());
@@ -67,7 +68,7 @@ public class RRSolverState extends SolverState {
     public static RRSolverState fromSolverResult(
         SolverResult result,
         @Nullable ImmutableMap<ITermVar, ITermVar> existentials,
-        Map.Immutable<ITermVar, RRPlaceholderDescriptor> placeholderDescriptors
+        Map.Immutable<ITermVar, RRPlaceholder> placeholderDescriptors
     ) {
         final Set.Transient<IConstraint> constraints = Set.Transient.of();
         final Map.Transient<IConstraint, Delay> delays = Map.Transient.of();
@@ -86,7 +87,7 @@ public class RRSolverState extends SolverState {
             result.completeness(), placeholderDescriptors);
     }
 
-    protected final Map.Immutable<ITermVar, RRPlaceholderDescriptor> placeholderDescriptors;
+    protected final Map.Immutable<ITermVar, RRPlaceholder> placeholderDescriptors;
 
     /**
      * Initializes a new instance of the {@link RRSolverState} class.
@@ -108,7 +109,7 @@ public class RRSolverState extends SolverState {
         Map.Immutable<IConstraint, Delay> delays,
         @Nullable ImmutableMap<ITermVar, ITermVar> existentials,
         ICompleteness.Immutable completeness,
-        Map.Immutable<ITermVar, RRPlaceholderDescriptor> placeholderDescriptors
+        Map.Immutable<ITermVar, RRPlaceholder> placeholderDescriptors
     ) {
         super(spec, state, messages, constraints, delays, existentials, completeness);
         this.placeholderDescriptors = placeholderDescriptors;
@@ -117,7 +118,7 @@ public class RRSolverState extends SolverState {
     /**
      * Gets the map from constraint variables to placeholder descriptors.
      */
-    public Map.Immutable<ITermVar, RRPlaceholderDescriptor> getPlaceholderDescriptors() {
+    public Map.Immutable<ITermVar, RRPlaceholder> getPlaceholderDescriptors() {
         return this.placeholderDescriptors;
     }
 
@@ -128,7 +129,7 @@ public class RRSolverState extends SolverState {
      * @param newPlaceholderDescriptors the new placeholder descriptors
      * @return the modified copy of the solver state
      */
-    public RRSolverState withPlaceholderDescriptors(Map.Immutable<ITermVar, RRPlaceholderDescriptor> newPlaceholderDescriptors) {
+    public RRSolverState withPlaceholderDescriptors(Map.Immutable<ITermVar, RRPlaceholder> newPlaceholderDescriptors) {
         return copy(this.spec, this.state, this.messages, this.constraints, this.delays,
             this.existentials, this.completeness, newPlaceholderDescriptors);
     }
@@ -141,7 +142,7 @@ public class RRSolverState extends SolverState {
      * @param placeholderDescriptor the descriptor
      * @return the modified copy of the solver state
      */
-    public RRSolverState addPlaceholder(ITermVar metaVar, RRPlaceholderDescriptor placeholderDescriptor) {
+    public RRSolverState addPlaceholder(ITermVar metaVar, RRPlaceholder placeholderDescriptor) {
         return withPlaceholderDescriptors(this.placeholderDescriptors.__put(metaVar, placeholderDescriptor));
     }
 
@@ -222,7 +223,7 @@ public class RRSolverState extends SolverState {
         Map.Immutable<IConstraint, Delay> newDelays,
         @Nullable ImmutableMap<ITermVar, ITermVar> newExistentials,
         ICompleteness.Immutable newCompleteness,
-        Map.Immutable<ITermVar, RRPlaceholderDescriptor>  newPlaceholderDescriptors
+        Map.Immutable<ITermVar, RRPlaceholder>  newPlaceholderDescriptors
     ) {
         return new RRSolverState(newSpec, newState, newMessages, newConstraints, newDelays,
             newExistentials, newCompleteness, newPlaceholderDescriptors);
