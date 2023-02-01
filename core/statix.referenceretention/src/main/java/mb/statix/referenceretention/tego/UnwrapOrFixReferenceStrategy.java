@@ -18,7 +18,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import static mb.nabl2.terms.matching.TermMatch.M;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -86,16 +88,16 @@ public final class UnwrapOrFixReferenceStrategy extends NamedStrategy3<RRContext
 
         // (body, contexts) <- descriptor,
         final ITerm term = descriptor.getBody();
-        final IListTerm contexts = descriptor.getContexts();
+        final List<ITerm> contexts = descriptor.getContexts();
         // TODO: Use the other contexts as well, not just the first
-        final @Nullable ITerm firstContext = M.listElems().map(e -> !e.isEmpty() ? e.get(0) : null).match(contexts).orElse(null);
+        final @Nullable ITerm firstContext = contexts.get(0);
         if (term instanceof LockedReference) {
             final @Nullable LockedReference reference = (LockedReference)term;
             if (firstContext != null) {
                 // The term is a locked reference with a context,
                 // so we try both the qualified and unqualified reference.
                 // "[[ r | c ]]" = { "x.[[ r |]]" , "[[ r |]]" }
-                final @Nullable ITerm qreference = engine.eval(qualifyReference, descriptor.getContexts(), reference);
+                final @Nullable ITerm qreference = engine.eval(qualifyReference, firstContext, reference);
                 @Nullable RRSolverState newStateQ = null;    // The state for the qualified reference "x.[[r |]]"; or `null` when it could not be constructed
                 if (qreference != null) {
                     final Pair<IApplTerm, RRSolverState> newApplTermAndState = unwrap(engine, (IApplTerm)term, firstContext, input);
@@ -108,7 +110,7 @@ public final class UnwrapOrFixReferenceStrategy extends NamedStrategy3<RRContext
                 }
                 RRSolverState newStateUQ;            // The state for the unqualified reference "[[ r |]]"
                 {
-                    @Nullable final Pair<ITermVar, RRSolverState> newVarAndState = engine.eval(newPlaceholder, new RRPlaceholderDescriptor(reference, null /* No context */), input);
+                    @Nullable final Pair<ITermVar, RRSolverState> newVarAndState = engine.eval(newPlaceholder, RRPlaceholder.of(reference, Collections.emptyList() /* No context */), input);
                     final ITermVar newVar = newVarAndState.component1();
                     final RRSolverState newState = newVarAndState.component2();
                     newStateUQ = newState.withUpdatedConstraints(
@@ -169,7 +171,7 @@ public final class UnwrapOrFixReferenceStrategy extends NamedStrategy3<RRContext
         final ArrayList<ITermVar> newSubterms = new ArrayList<>();
         for (ITerm a: term.getArgs()) {
             // fold(newPlaceholder) over the arguments
-            @Nullable final Pair<ITermVar, RRSolverState> newVarAndState = engine.eval(newPlaceholder, new RRPlaceholderDescriptor(a, context), newState);
+            @Nullable final Pair<ITermVar, RRSolverState> newVarAndState = engine.eval(newPlaceholder, RRPlaceholder.of(a, Arrays.asList(context)), newState);
             final ITermVar newVar = newVarAndState.component1();
             newState = newVarAndState.component2();
             newSubterms.add(newVar);

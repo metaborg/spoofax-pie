@@ -64,7 +64,7 @@ public final class RRCreatePlaceholderStrategy extends StatixPrimitive {
     // Usage:
     // <prim("RR_create_placeholder", ctxs)> body
     @Nullable private ITerm eval(ITerm body, IListTerm contexts) throws InterpreterException {
-        return RRPlaceholder.of(body, contexts);
+        return RRPlaceholder.of(body, M.listElems().match(contexts).get());
     }
 
 }

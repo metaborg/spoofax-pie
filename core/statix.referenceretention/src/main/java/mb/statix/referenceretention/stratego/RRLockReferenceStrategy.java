@@ -2,7 +2,7 @@ package mb.statix.referenceretention.stratego;
 
 import mb.constraint.common.ConstraintAnalyzerContext;
 import mb.nabl2.terms.ITerm;
-import mb.nabl2.terms.matching.Transform.T;
+import static mb.nabl2.terms.matching.Transform.T;
 import mb.nabl2.terms.stratego.StrategoTerms;
 import mb.nabl2.terms.stratego.TermIndex;
 import mb.scopegraph.oopsla20.IScopeGraph;

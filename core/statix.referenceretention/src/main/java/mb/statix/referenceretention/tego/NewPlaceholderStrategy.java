@@ -1,6 +1,7 @@
 package mb.statix.referenceretention.tego;
 
 import mb.nabl2.terms.ITermVar;
+import mb.statix.referenceretention.statix.RRPlaceholder;
 import mb.tego.strategies.NamedStrategy1;
 import mb.tego.strategies.runtime.TegoEngine;
 import mb.tego.tuples.Pair;
@@ -10,7 +11,7 @@ import mb.tego.tuples.Pair;
  * to the solver state under a fresh constraint variable, and returns both the
  * new solver state and the generated fresh constraint variable.
  */
-public final class NewPlaceholderStrategy extends NamedStrategy1<RRPlaceholderDescriptor, RRSolverState, Pair<ITermVar, RRSolverState>> {
+public final class NewPlaceholderStrategy extends NamedStrategy1<RRPlaceholder, RRSolverState, Pair<ITermVar, RRSolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final NewPlaceholderStrategy instance = new NewPlaceholderStrategy();
@@ -36,7 +37,7 @@ public final class NewPlaceholderStrategy extends NamedStrategy1<RRPlaceholderDe
     @Override
     public Pair<ITermVar, RRSolverState> evalInternal(
         TegoEngine engine,
-        RRPlaceholderDescriptor descriptor,
+        RRPlaceholder descriptor,
         RRSolverState input
     ) {
         return eval(engine, descriptor, input);
@@ -44,7 +45,7 @@ public final class NewPlaceholderStrategy extends NamedStrategy1<RRPlaceholderDe
 
     public static Pair<ITermVar, RRSolverState> eval(
         TegoEngine engine,
-        RRPlaceholderDescriptor descriptor,
+        RRPlaceholder descriptor,
         RRSolverState input
     ) {
         final FreshStrategy fresh = FreshStrategy.getInstance();

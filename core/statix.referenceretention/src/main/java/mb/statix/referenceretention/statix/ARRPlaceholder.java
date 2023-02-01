@@ -5,6 +5,7 @@ import mb.nabl2.terms.IListTerm;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ListTerms;
 import mb.nabl2.terms.build.AbstractApplTerm;
+import mb.nabl2.terms.build.TermBuild;
 import mb.nabl2.terms.matching.TermMatch;
 import mb.statix.referenceretention.statix.RRLockedReference;
 import mb.statix.referenceretention.statix.RRPlaceholder;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static mb.nabl2.terms.build.TermBuild.B;
 import static mb.nabl2.terms.matching.TermMatch.M;
 
 /**
@@ -45,18 +47,18 @@ public abstract class ARRPlaceholder extends AbstractApplTerm {
      * @return the contexts, which are terms that describe the context references,
      * such as {@code Var("x")} or {@code Member("x", Var("y"))}
      */
-    @Value.Parameter public abstract IListTerm getContexts();
+    @Value.Parameter public abstract List<ITerm> getContexts();
 
     @Override public String getOp() {
         return OP;
     }
 
     @Value.Lazy @Override public List<ITerm> getArgs() {
-        return ImmutableList.of(getBody(), getContexts());
+        return ImmutableList.of(getBody(), B.newList(getContexts()));
     }
 
     public static TermMatch.IMatcher<RRPlaceholder> matcher() {
-        return M.preserveAttachments(M.appl2(OP, M.term(), M.list(), (t, body, contexts) -> {
+        return M.preserveAttachments(M.appl2(OP, M.term(), M.listElems(), (t, body, contexts) -> {
             if(t instanceof RRPlaceholder) {
                 return (RRPlaceholder) t;
             } else {
@@ -92,25 +94,16 @@ public abstract class ARRPlaceholder extends AbstractApplTerm {
         sb.append("[[");
         sb.append(getBody());
         sb.append("|");
-        final AtomicBoolean first = new AtomicBoolean(true);
-        getContexts().match(ListTerms.cases(
-            (cons) -> {
-                if (!first.getAndSet(false)) sb.append(", ");
-                sb.append(cons);
-                return Unit.unit;
-            },
-            (nil) -> {
-                if (first.getAndSet(false)) sb.append("ε");
-                return Unit.unit;
-            },
-            (var) -> {
-                if (!first.getAndSet(false)) sb.append(", ");
-                sb.append("<");
-                sb.append(var);
-                sb.append(">");
-                return Unit.unit;
+        if (getContexts() != null && !getContexts().isEmpty()) {
+            final Iterator<ITerm> it = getContexts().iterator();
+            sb.append(it.next());
+            while(it.hasNext()) {
+                sb.append(", ");
+                sb.append(it.next());
             }
-        ));
+        } else {
+            sb.append("ε");
+        }
         sb.append("]]");
         return sb.toString();
     }
