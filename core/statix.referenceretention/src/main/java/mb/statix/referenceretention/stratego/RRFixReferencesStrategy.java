@@ -3,9 +3,15 @@ package mb.statix.referenceretention.stratego;
 import com.google.common.collect.ImmutableList;
 import io.usethesource.capsule.Map;
 import io.usethesource.capsule.Set;
+import mb.common.result.Result;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
+import mb.nabl2.terms.stratego.PlaceholderVarMap;
+import mb.nabl2.terms.stratego.StrategoTermIndices;
 import mb.nabl2.terms.stratego.StrategoTerms;
+import mb.resource.DefaultResourceKey;
+import mb.resource.ResourceKey;
+import mb.statix.codecompletion.CCSolverState;
 import mb.statix.constraints.CUser;
 import mb.statix.constraints.messages.IMessage;
 import mb.statix.referenceretention.statix.LockedReference;
@@ -66,31 +72,34 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
         // The solver result (analysis) should be the first term argument
         final SolverResult analysis = RRTermUtils.extractFinalSolverResult(terms.get(0));
 
-        // TODO: Make these parameters
-        final String statixSecName = "main";
-        final String statixRootPredicateName = "programOk";
-
         final Execution execution = new Execution(
             context.tegoRuntime,
             context.strategoRuntime,
             context.strategoTerms,
             context.qualifyReferenceStrategyName,
             env.getFactory(),
-            analysis.spec());
+            analysis.spec(),
+
+            new DefaultResourceKey("rr", "somefile.tig"),   // TODO: Not sure how to get the resource key here? Do we even need it?
+            "main",                 // TODO: Tiger specific. Make configurable.
+            "programOk",            // TODO: Tiger specific. Make configurable.
+            "pre-analyze",          // TODO: Tiger specific. Make configurable.
+            "post-analuze"          // TODO: Tiger specific. Make configurable.
+            );
 
         final IState.Transient state = analysis.state().melt();
         final Pair<ITerm, Map.Immutable<ITermVar, RRPlaceholder>> pair = extractPlaceholders(state, term);
         final ITerm newTerm = pair.component1();
         final Map.Immutable<ITermVar, RRPlaceholder> placeholderDescriptors = pair.component2();
-        final Set.Transient<ITermVar> vars = Set.Transient.of();
-        vars.__insertAll(placeholderDescriptors.keySet());
 
-        final RRSolverState startState = execution.createInitialSolverState(newTerm, statixSecName, statixRootPredicateName, vars, placeholderDescriptors);
-        final RRSolverState analyzedState = execution.analyze(startState);
+//        final RRSolverState startState = execution.createInitialSolverState(newTerm, statixSecName, statixRootPredicateName, vars, placeholderDescriptors);
+        final ITerm explicatedAst = execution.preprocess(newTerm);
+        final RRSolverState analyzedState = execution.analyze(explicatedAst, placeholderDescriptors.keySet(), placeholderDescriptors);
         final Collection<Map.Entry<IConstraint, IMessage>> allowedErrors = Collections.emptyList(); // TODO: Get from initial analysis?
         final @Nullable ITerm result = execution.fix(analyzedState, allowedErrors);
         if (result == null) return Optional.empty();
-        return Optional.of(result);
+        final ITerm implicatedAst = execution.postprocess(result);
+        return Optional.of(implicatedAst);
     }
 
     /**
@@ -157,13 +166,26 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
         /** The Statix specification. */
         private final Spec spec;
 
+        private final String statixSecName;
+        private final String statixRootPredicateName;
+        private final String preAnalyzeStrategyName;
+        private final String postAnalyzeStrategyName;
+
+        private final ResourceKey resource;
+
         private Execution(
             TegoRuntime tegoRuntime,
             StrategoRuntime strategoRuntime,
             StrategoTerms strategoTerms,
             String qualifyReferenceStrategyName,
             ITermFactory termFactory,
-            Spec spec
+            Spec spec,
+
+            ResourceKey resource,
+            String statixSecName,
+            String statixRootPredicateName,
+            String preAnalyzeStrategyName,
+            String postAnalyzeStrategyName
         ) {
             this.tegoRuntime = tegoRuntime;
             this.strategoRuntime = strategoRuntime;
@@ -171,6 +193,12 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
             this.qualifyReferenceStrategyName = qualifyReferenceStrategyName;
             this.termFactory = termFactory;
             this.spec = spec;
+
+            this.resource = resource;
+            this.statixSecName = statixSecName;
+            this.statixRootPredicateName = statixRootPredicateName;
+            this.preAnalyzeStrategyName = preAnalyzeStrategyName;
+            this.postAnalyzeStrategyName = postAnalyzeStrategyName;
         }
 
         /**
@@ -196,14 +224,67 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
                 .withPrecomputedCriticalEdges();
         }
 
+        private ITerm preprocess(ITerm ast) {
+            // Preprocess the AST (explicate, add term indices)
+            final IStrategoTerm strAst = strategoTerms.toStratego(ast);
+            final Result<IStrategoTerm, ?> explicatedAstResult = preAnalyze(strAst);
+            final IStrategoTerm explicatedAst = explicatedAstResult.unwrapUnchecked();
+            final IStrategoTerm indexedAst = StrategoTermIndices.index(explicatedAst, resource.toString(), termFactory);;
+            return strategoTerms.fromStratego(indexedAst);
+        }
+
+        private ITerm postprocess(ITerm ast) {
+            // Postprocess the AST (implicate)
+            final IStrategoTerm strAst = strategoTerms.toStratego(ast);
+            final Result<IStrategoTerm, ?> implicatedAstResult = postAnalyze(strAst);
+            final IStrategoTerm explicatedAst = implicatedAstResult.unwrapUnchecked();
+            return strategoTerms.fromStratego(explicatedAst);
+        }
+
+        /**
+         * Performs pre-analysis on the given AST.
+         *
+         * @param ast     the AST to explicate
+         * @return the explicated AST
+         */
+        private Result<IStrategoTerm, ?> preAnalyze(IStrategoTerm ast) {
+            try {
+                return Result.ofOk(strategoRuntime.invoke(preAnalyzeStrategyName, ast));
+            } catch (StrategoException ex) {
+                return Result.ofErr(ex);
+            }
+        }
+
+        /**
+         * Performs post-analysis on the given term.
+         *
+         * @param term     the term to implicate
+         * @return the implicated AST
+         */
+        private Result<IStrategoTerm, ?> postAnalyze(IStrategoTerm term) {
+            try {
+                return Result.ofOk(strategoRuntime.invoke(postAnalyzeStrategyName, term));
+            } catch (StrategoException ex) {
+                return Result.ofErr(ex);
+            }
+        }
+
         /**
          * Performs analysis on the given solver state.
          *
-         * @param initialState the solver state to analyze
          * @return the resulting analyzed solver state
          * @throws IllegalStateException if the analyzed solver state has errors or has no constraints
          */
-        private RRSolverState analyze(RRSolverState initialState) {
+        private RRSolverState analyze(
+            ITerm ast,
+            java.util.Set<ITermVar> existentials,
+            Map.Immutable<ITermVar, RRPlaceholder> placeholderDescriptors
+//            RRSolverState initialState
+        ) {
+            final Set.Transient<ITermVar> existentials2 = Set.Transient.of();
+            existentials2.__insertAll(existentials);
+            final RRSolverState initialState = createInitialSolverState(ast, statixSecName, statixRootPredicateName, existentials2, placeholderDescriptors);
+
             final @Nullable RRSolverState analyzedState = tegoRuntime.eval(InferStrategy.getInstance(), initialState);
             if (analyzedState == null) {
                 throw new IllegalStateException("Completion failed: got no result from Tego strategy.");
