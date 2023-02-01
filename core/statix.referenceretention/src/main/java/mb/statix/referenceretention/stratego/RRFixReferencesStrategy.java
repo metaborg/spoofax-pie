@@ -6,12 +6,10 @@ import io.usethesource.capsule.Set;
 import mb.common.result.Result;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
-import mb.nabl2.terms.stratego.PlaceholderVarMap;
 import mb.nabl2.terms.stratego.StrategoTermIndices;
 import mb.nabl2.terms.stratego.StrategoTerms;
 import mb.resource.DefaultResourceKey;
 import mb.resource.ResourceKey;
-import mb.statix.codecompletion.CCSolverState;
 import mb.statix.constraints.CUser;
 import mb.statix.constraints.messages.IMessage;
 import mb.statix.referenceretention.statix.LockedReference;
@@ -93,12 +91,12 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
         final Map.Immutable<ITermVar, RRPlaceholder> placeholderDescriptors = pair.component2();
 
 //        final RRSolverState startState = execution.createInitialSolverState(newTerm, statixSecName, statixRootPredicateName, vars, placeholderDescriptors);
-        final ITerm explicatedAst = execution.preprocess(newTerm);
+        final ITerm explicatedAst = execution.preProcess(newTerm);
         final RRSolverState analyzedState = execution.analyze(explicatedAst, placeholderDescriptors.keySet(), placeholderDescriptors);
         final Collection<Map.Entry<IConstraint, IMessage>> allowedErrors = Collections.emptyList(); // TODO: Get from initial analysis?
         final @Nullable ITerm result = execution.fix(analyzedState, allowedErrors);
         if (result == null) return Optional.empty();
-        final ITerm implicatedAst = execution.postprocess(result);
+        final ITerm implicatedAst = execution.postProcess(result);
         return Optional.of(implicatedAst);
     }
 
@@ -224,7 +222,27 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
                 .withPrecomputedCriticalEdges();
         }
 
-        private ITerm preprocess(ITerm ast) {
+        /**
+         * Converts the NaBL term to a Stratego term.
+         *
+         * @param term the NaBL term
+         * @return the Stratego term
+         */
+        private IStrategoTerm toStratego(ITerm term) {
+            return strategoTerms.toStratego(term);
+        }
+
+        /**
+         * Converts the Stratego term to a NaBL term.
+         *
+         * @param term the Stratego term
+         * @return the NaBL term
+         */
+        private ITerm fromStratego(IStrategoTerm term) {
+            return strategoTerms.fromStratego(term);
+        }
+
+        private ITerm preProcess(ITerm ast) {
             // Preprocess the AST (explicate, add term indices)
             final IStrategoTerm strAst = strategoTerms.toStratego(ast);
             final Result<IStrategoTerm, ?> explicatedAstResult = preAnalyze(strAst);
@@ -233,7 +251,7 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
             return strategoTerms.fromStratego(indexedAst);
         }
 
-        private ITerm postprocess(ITerm ast) {
+        private ITerm postProcess(ITerm ast) {
             // Postprocess the AST (implicate)
             final IStrategoTerm strAst = strategoTerms.toStratego(ast);
             final Result<IStrategoTerm, ?> implicatedAstResult = postAnalyze(strAst);
