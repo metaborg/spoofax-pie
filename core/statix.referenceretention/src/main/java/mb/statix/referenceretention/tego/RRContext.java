@@ -15,7 +15,7 @@ import java.util.Map;
  */
 public final class RRContext {
 
-    private final Strategy1<ITerm, LockedReference, @Nullable ITerm> qualifyReferenceStrategy;
+    private final Strategy1</* ctx */ ITerm, /* term */ ITerm, /* result */ @Nullable ITerm> qualifyReferenceStrategy;
     private final Collection<Map.Entry<IConstraint, IMessage>> allowedErrors;
 
     /**
@@ -25,7 +25,7 @@ public final class RRContext {
      * @param allowedErrors a collection of constraints/message pairs that are allowed
      */
     public RRContext(
-        Strategy1<ITerm, LockedReference, @Nullable ITerm> qualifyReferenceStrategy,
+        Strategy1</* ctx */ ITerm, /* term */ ITerm, /* result */ @Nullable ITerm> qualifyReferenceStrategy,
         Collection<Map.Entry<IConstraint, IMessage>> allowedErrors
     ) {
         this.qualifyReferenceStrategy = qualifyReferenceStrategy;
@@ -41,7 +41,7 @@ public final class RRContext {
      *
      * @return the strategy
      */
-    public Strategy1<ITerm, LockedReference, @Nullable ITerm> getQualifyReferenceStrategy() {
+    public Strategy1</* ctx */ ITerm, /* term */ ITerm, /* result */ @Nullable ITerm> getQualifyReferenceStrategy() {
         return qualifyReferenceStrategy;
     }
 

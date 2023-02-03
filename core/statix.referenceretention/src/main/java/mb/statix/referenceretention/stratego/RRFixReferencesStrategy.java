@@ -232,26 +232,6 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
         }
 
         /**
-         * Converts the NaBL term to a Stratego term.
-         *
-         * @param term the NaBL term
-         * @return the Stratego term
-         */
-        private IStrategoTerm toStratego(ITerm term) {
-            return strategoTerms.toStratego(term);
-        }
-
-        /**
-         * Converts the Stratego term to a NaBL term.
-         *
-         * @param term the Stratego term
-         * @return the NaBL term
-         */
-        private ITerm fromStratego(IStrategoTerm term) {
-            return strategoTerms.fromStratego(term);
-        }
-
-        /**
          * Explicates the given AST, that is, adds explicit injection constructors.
          * This also adds term indices on terms where they are not present.
          * <p>
@@ -294,51 +274,6 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
             return strategoTerms.fromStratego(implcatedStrAst);
         }
 
-//        private ITerm preProcess(ITerm ast) {
-//            // Preprocess the AST (explicate, add term indices)
-//            final IStrategoTerm strAst = strategoTerms.toStratego(ast);
-//            final Result<IStrategoTerm, ?> explicatedAstResult = preAnalyze(strAst);
-//            final IStrategoTerm explicatedAst = explicatedAstResult.unwrapUnchecked();
-//            final IStrategoTerm indexedAst = StrategoTermIndices.index(explicatedAst, resource.toString(), termFactory);
-//            return strategoTerms.fromStratego(indexedAst);
-//        }
-//
-//        private ITerm postProcess(ITerm ast) {
-//            // Postprocess the AST (implicate)
-//            final IStrategoTerm strAst = strategoTerms.toStratego(ast);
-//            final Result<IStrategoTerm, ?> implicatedAstResult = postAnalyze(strAst);
-//            final IStrategoTerm explicatedAst = implicatedAstResult.unwrapUnchecked();
-//            return strategoTerms.fromStratego(explicatedAst);
-//        }
-
-//        /**
-//         * Performs pre-analysis on the given AST.
-//         *
-//         * @param ast     the AST to explicate
-//         * @return the explicated AST
-//         */
-//        private Result<IStrategoTerm, ?> preAnalyze(IStrategoTerm ast) {
-//            try {
-//                return Result.ofOk(strategoRuntime.invoke(preAnalyzeStrategyName, ast));
-//            } catch (StrategoException ex) {
-//                return Result.ofErr(ex);
-//            }
-//        }
-//
-//        /**
-//         * Performs post-analysis on the given term.
-//         *
-//         * @param term     the term to implicate
-//         * @return the implicated AST
-//         */
-//        private Result<IStrategoTerm, ?> postAnalyze(IStrategoTerm term) {
-//            try {
-//                return Result.ofOk(strategoRuntime.invoke(postAnalyzeStrategyName, term));
-//            } catch (StrategoException ex) {
-//                return Result.ofErr(ex);
-//            }
-//        }
-
         /**
          * Performs analysis on the given solver state.
          *
@@ -349,7 +284,6 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
             ITerm ast,
             java.util.Set<ITermVar> existentials,
             Map.Immutable<ITermVar, RRPlaceholder> placeholderDescriptors
-//            RRSolverState initialState
         ) {
             final Set.Transient<ITermVar> existentials2 = Set.Transient.of();
             existentials2.__insertAll(existentials);
@@ -367,9 +301,16 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
             return analyzedState;
         }
 
+        /**
+         * Fixes the specified solver state (which includes placeholders).
+         *
+         * @param state the state to fix
+         * @param allowedErrors the errors that are allowed
+         * @return the fixed state; or {@code null} if the state could not be fixed
+         */
         private @Nullable ITerm fix(RRSolverState state, Collection<Map.Entry<IConstraint, IMessage>> allowedErrors) {
             // Create a strategy that fails if the term is not an injection
-            final Strategy1<ITerm, LockedReference, @Nullable ITerm> qualifyReferenceStrategy = fun(this::qualifyReference);
+            final Strategy1</* ctx */ ITerm, /* term */ ITerm, /* result */ @Nullable ITerm> qualifyReferenceStrategy = fun(this::qualifyReference);
 
             final RRContext ctx = new RRContext(qualifyReferenceStrategy, allowedErrors);
 
@@ -382,22 +323,23 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
                     state);
                 if (results == null) throw new IllegalStateException("This cannot be happening.");
                 // NOTE: This is the point at which the built sequence gets evaluated:
+                // TODO: Extract one of the solver states (use a heuristic) and then find the AST in there?
+                //  Probably similar to how I did it in code completion
                 resultsEvaluated = results.toList();
+                return null;    // TODO: Return AST
             } catch(InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            // TODO: Create an AST with the fixed reference
-            return null;
         }
 
         /**
          * Qualifies the given reference.
          *
-         * @param lockedReference the declaration the reference is locked to
+         * @param context the context
          * @param term the reference to qualify
          * @return the qualified reference term; otherwise, {@code null}
          */
-        private @Nullable ITerm qualifyReference(LockedReference lockedReference, ITerm term) {
+        private @Nullable ITerm qualifyReference(ITerm context, ITerm term) {
             try {
                 final IStrategoTerm strategoTerm = strategoTerms.toStratego(term, true);
                 @Nullable final IStrategoTerm output = strategoRuntime.invokeOrNull(qualifyReferenceStrategyName, strategoTerm);
