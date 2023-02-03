@@ -15,7 +15,7 @@
     
     
       
-        <title>Semantic Code Completion - Spoofax 3</title>
+        <title>Debugging in IntelliJ - Spoofax 3</title>
       
     
     
@@ -70,7 +70,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#how-to-enable-semantic-code-completion" class="md-skip">
+        <a href="#how-to-debug-spoofax-3-development-using-intellij" class="md-skip">
           Skip to content
         </a>
       
@@ -104,7 +104,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Semantic Code Completion
+              Debugging in IntelliJ
             
           </span>
         </div>
@@ -568,16 +568,14 @@
               
   
   
-    
-  
   
     
       
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_4" type="checkbox" id="__nav_3_4" checked>
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" data-md-toggle="__nav_3_4" type="checkbox" id="__nav_3_4" checked>
       
       
       
@@ -602,66 +600,11 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Semantic Code Completion
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../static-semantics/code-completion/" class="md-nav__link">
         Semantic Code Completion
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#enabling-semantic-code-completion" class="md-nav__link">
-    Enabling Semantic Code Completion
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#using-semantic-code-completion" class="md-nav__link">
-    Using Semantic Code Completion
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#limitations" class="md-nav__link">
-    Limitations
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -678,14 +621,16 @@
               
   
   
+    
+  
   
     
       
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" data-md-toggle="__nav_3_5" type="checkbox" id="__nav_3_5" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_5" type="checkbox" id="__nav_3_5" checked>
       
       
       
@@ -712,11 +657,59 @@
               
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../../development/debugging-in-intellij/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Debugging in IntelliJ
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         Debugging in IntelliJ
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#debugging-tests" class="md-nav__link">
+    Debugging tests
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-about-java_tool_options" class="md-nav__link">
+    What about JAVA_TOOL_OPTIONS?
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -728,7 +721,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/troubleshooting/" class="md-nav__link">
+      <a href="../troubleshooting/" class="md-nav__link">
         Troubleshooting
       </a>
     </li>
@@ -996,22 +989,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#enabling-semantic-code-completion" class="md-nav__link">
-    Enabling Semantic Code Completion
+  <a href="#debugging-tests" class="md-nav__link">
+    Debugging tests
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#using-semantic-code-completion" class="md-nav__link">
-    Using Semantic Code Completion
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#limitations" class="md-nav__link">
-    Limitations
+  <a href="#what-about-java_tool_options" class="md-nav__link">
+    What about JAVA_TOOL_OPTIONS?
   </a>
   
 </li>
@@ -1030,64 +1016,51 @@
                 
                   
 
-  <a href="https://github.com/metaborg/spoofax-pie/edit/master/docs/guide/static-semantics/code-completion.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/metaborg/spoofax-pie/edit/master/docs/guide/development/debugging-in-intellij.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="how-to-enable-semantic-code-completion">How to Enable Semantic Code Completion<a class="headerlink" href="#how-to-enable-semantic-code-completion" title="Permanent link">&para;</a></h1>
-<p>Semantic code completion is now part of Spoofax 3.</p>
-<h2 id="enabling-semantic-code-completion">Enabling Semantic Code Completion<a class="headerlink" href="#enabling-semantic-code-completion" title="Permanent link">&para;</a></h2>
-<p>To enable support for semantic code completion in your language:</p>
-<ol>
-<li>
-<p>Add the following to your language's <code>spoofaxc.cfg</code> file:</p>
-<div class="highlight"><pre><span></span><code><span class="na">tego-runtime {}</span>
-<span class="na">code-completion {}</span>
+<h1 id="how-to-debug-spoofax-3-development-using-intellij">How to debug Spoofax 3 development using IntelliJ<a class="headerlink" href="#how-to-debug-spoofax-3-development-using-intellij" title="Permanent link">&para;</a></h1>
+<p>To debug Spoofax 3 development using IntelliJ, create a new Run Configuration and pass the <code>--debug-jvm</code> option to the task. For example:</p>
+<div class="highlight"><pre><span></span><code>:spoofax3.example.root:tiger.eclipse:runEclipse --debug-jvm
 </code></pre></div>
-</li>
-<li>
-<p>Declare the following strategies in your language's <code>main.str2</code> file, where <code>MyLang</code> is the name of your languages (as defined in <code>spoofaxc.cfg</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="k">rules</span><span class="w"> </span><span class="c c-Singleline">// Analysis</span>
-
-<span class="w">  </span><span class="nv">downgrade-placeholders</span><span class="w"> </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">downgrade-placeholders-MyLang</span>
-<span class="w">  </span><span class="nv">upgrade-placeholders</span><span class="w">   </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">upgrade-placeholders-MyLang</span>
-<span class="w">  </span><span class="nv">is-inj</span><span class="w">                 </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">is-MyLang-inj-cons</span>
-<span class="w">  </span><span class="nv">pp-partial</span><span class="w">             </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">pp-partial-MyLang-string</span>
-<span class="w">  </span><span class="nv">pre-analyze</span><span class="w">            </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">explicate-injections-MyLang</span>
-<span class="w">  </span><span class="nv">post-analyze</span><span class="w">           </span><span class=" -Punctuation">=</span><span class="w"> </span><span class="nv">implicate-injections-MyLang</span>
+<p><img alt="Image showing the Run Configuration for debugging Spoofax 3" src="../debug-configuration.png" title="IntelliJ Run Configuration" /></p>
+<details class="tip">
+<summary>Error: <code>Unknown command-line option '--debug-jvm'</code></summary>
+<p>You specified the delegate task name (e.g., <code>runTigerEclipse</code>) instead of the full task name. Only the <code>JavaExec</code> type tasks support the <code>--debug-jvm</code> option, and the delegate tasks are of the wrong type. Specify the full task name instead. For example, if the delegate task <code>runTigerEclipse</code> is defined in the root <code>build.gradle.kts</code> like this:</p>
+<div class="highlight"><span class="filename">build.gradle.kts</span><pre><span></span><code><span class="n">tasksWithIncludedBuild</span><span class="p">(</span><span class="s">&quot;spoofax3.example.root&quot;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">registerDelegateTask</span><span class="p">(</span><span class="s">&quot;runTigerCli&quot;</span><span class="p">,</span><span class="w"> </span><span class="nb">it</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;:tiger.cli:run&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="n">registerDelegateTask</span><span class="p">(</span><span class="s">&quot;runTigerEclipse&quot;</span><span class="p">,</span><span class="w"> </span><span class="nb">it</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;:tiger.eclipse:runEclipse&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="n">registerDelegateTask</span><span class="p">(</span><span class="s">&quot;runTigerIntelliJ&quot;</span><span class="p">,</span><span class="w"> </span><span class="nb">it</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;:tiger.intellij:runIde&quot;</span><span class="p">)</span>
+<span class="p">}</span>
 </code></pre></div>
-</li>
-<li>
-<p>In your Statix files, for each rule define a predicate that accepts a placeholder where a syntactic sort is permitted. For example:</p>
-<div class="highlight"><pre><span></span><code><span class="k">rules</span><span class="w"> </span><span class="c c-Singleline">// placeholders</span>
-
-<span class="w">  </span><span class="nv">programOk</span><span class="p">(</span><span class="nv">Module-Plhdr</span><span class="p">()).</span>
-
-<span class="w">  </span><span class="nv">declOk</span><span class="p">(</span><span class="nv">_</span><span class="p">,</span><span class="w"> </span><span class="nv">Decl-Plhdr</span><span class="p">()).</span>
-
-<span class="w">  </span><span class="nv">typeOfExp</span><span class="p">(</span><span class="nv">_</span><span class="p">,</span><span class="w"> </span><span class="nv">Exp-Plhdr</span><span class="p">())</span><span class="w"> </span>=<span class="w"> </span><span class="nv">_</span><span class="p">.</span>
+<p>Then the full task name is the name of the included build combined with the name of the task, starting and separated with colons (<code>:</code>). Thus it would be:</p>
+<div class="highlight"><pre><span></span><code>:spoofax3.example.root:tiger.eclipse:runEclipse
 </code></pre></div>
-</li>
-</ol>
-<h2 id="using-semantic-code-completion">Using Semantic Code Completion<a class="headerlink" href="#using-semantic-code-completion" title="Permanent link">&para;</a></h2>
-<p>In Eclipse, in a file of your language, type the placeholder somewhere where it is permitted. Unless overridden, the placeholder is a sort name within double square brackets, such as <code>[[Exp]]</code>. Then put the caret on the placeholder and press <span class="keys"><kbd class="key-command">Cmd</kbd><span>+</span><kbd class="key-space">Space</kbd></span> on macOS (or <span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-space">Space</kbd></span> on Linux/Windows) to invoke code completion.</p>
-<div class="admonition tip">
-<p class="admonition-title">In a future release the placeholder will not need to be input explicitly.</p>
-</div>
-<h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
-<p>For this first release of semantic code completion, there are some limitations:</p>
-<ul>
-<li>You have to type the placeholder explicitly to invoke code completion.</li>
-<li>If the file contains errors, code completion might fail to return results.</li>
-<li>If you have <em>catch-all</em> predicates, code completion will not work. For example:
-  <div class="highlight"><pre><span></span><code><span class="c c-Singleline">// This prevents code completion from finding completions:</span>
-<span class="nv">typeOfExp</span><span class="p">(</span><span class="nv">_</span><span class="p">,</span><span class="w"> </span><span class="nv">_</span><span class="p">)</span><span class="w"> </span>=<span class="w"> </span><span class="nv">_</span><span class="w"> </span><span class="p">:</span><span class="nv">-</span>
-<span class="w">  </span><span class="nv">try</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">false</span><span class="w"> </span><span class="p">}</span><span class="w"> </span>|<span class="w"> </span><span class="nv">warning</span><span class="w"> </span>$[<span class="nv">This</span><span class="w"> </span><span class="nv">expression</span><span class="w"> </span><span class="nv">is</span><span class="w"> </span><span class="nv">not</span><span class="w"> </span><span class="nv">yet</span><span class="w"> </span><span class="nv">implemented</span>]<span class="p">.</span>
-</code></pre></div></li>
-</ul>
-<p>These limitations will be lifted in subsequent releases.</p>
+</details>
+<p>Then start the configuration in <em>Run</em> mode, and wait until the following shows up in the console:</p>
+<div class="highlight"><pre><span></span><code>Listening for transport dt_socket at address: 5005 [Attach debugger]
+</code></pre></div>
+<p>Then click the <span class="guilabel">Attach debugger</span> text in the console to start and attach an external debugger and start debugging.</p>
+<h2 id="debugging-tests">Debugging tests<a class="headerlink" href="#debugging-tests" title="Permanent link">&para;</a></h2>
+<p>If you are debugging tests, make sure that the test results are cleaned before by running <code>cleanTest</code>, otherwise Gradle may skip the test task. For example, run the following Gradle tasks as part of the Run configuration:</p>
+<div class="highlight"><pre><span></span><code>:spoofax3.lwb.root:spoofax.dynamicloading:cleanTest :spoofax3.lwb.root:spoofax.dynamicloading:test
+</code></pre></div>
+<h2 id="what-about-java_tool_options">What about <code>JAVA_TOOL_OPTIONS</code>?<a class="headerlink" href="#what-about-java_tool_options" title="Permanent link">&para;</a></h2>
+<p>Instead of specifying <code>--debug-jvm</code>, you can add the following configuration variable to your Run configuration:</p>
+<div class="highlight"><pre><span></span><code>JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005
+</code></pre></div>
+<p>This will work regardless of which task is specified, including specifying a delegate (non <code>JavaExec</code>) task.</p>
+<p>However, note an important downside with this approach: this enables debugging for any Gradle task that executes Java in an isolated way, including any (Java/Kotlin) compilation tasks that run in a separate process. You might see the following error:</p>
+<div class="highlight"><pre><span></span><code>Picked up JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005
+ERROR: transport error 202: bind failed: Address already in use
+FATAL ERROR in native method: JDWP No transports initialized, jvmtiError=AGENT_ERROR_TRANSPORT_INIT(197)
+ERROR: JDWP Transport dt_socket failed to initialize, TRANSPORT_INIT(510)
+JDWP exit error AGENT_ERROR_TRANSPORT_INIT(197): No transports initialized [debugInit.c:750]
+</code></pre></div>
+<p>To avoid this error, make sure to first build normally such that these tasks are no longer executed, then run your debugging configuration.</p>
 
 
 
@@ -1113,7 +1086,7 @@
     <nav class="md-footer__inner md-grid" aria-label="Footer" >
       
         
-        <a href="../../eclipse_lwb/troubleshooting/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Troubleshooting" rel="prev">
+        <a href="../../static-semantics/code-completion/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Semantic Code Completion" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -1122,20 +1095,20 @@
               <span class="md-footer__direction">
                 Previous
               </span>
-              Troubleshooting
+              Semantic Code Completion
             </div>
           </div>
         </a>
       
       
         
-        <a href="../../development/debugging-in-intellij/" class="md-footer__link md-footer__link--next" aria-label="Next: Debugging in IntelliJ" rel="next">
+        <a href="../troubleshooting/" class="md-footer__link md-footer__link--next" aria-label="Next: Troubleshooting" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Debugging in IntelliJ
+              Troubleshooting
             </div>
           </div>
           <div class="md-footer__button md-icon">

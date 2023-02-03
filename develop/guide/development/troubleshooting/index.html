@@ -637,6 +637,8 @@
         
           
         
+          
+        
       
       
         <label class="md-nav__link" for="__nav_3_5">
@@ -650,6 +652,20 @@
           Development
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../debugging-in-intellij/" class="md-nav__link">
+        Debugging in IntelliJ
+      </a>
+    </li>
+  
+
+            
           
             
               
@@ -1152,18 +1168,7 @@
 <h3 id="many-errors-about-unresolved-classes-in-intellij">Many errors about unresolved classes in IntelliJ<a class="headerlink" href="#many-errors-about-unresolved-classes-in-intellij" title="Permanent link">&para;</a></h3>
 <p>If after importing there are many errors in files about classes not existing, re-import all the projects by pressing the <code>Reload All Gradle Projects</code> button in the Gradle tool window.</p>
 <h3 id="cannot-debug-in-intellij">Cannot debug in IntelliJ<a class="headerlink" href="#cannot-debug-in-intellij" title="Permanent link">&para;</a></h3>
-<p>Debugging in IntelliJ is a bit buggy at the moment. To force debugging, add the following environment variable to your run configuration:</p>
-<div class="highlight"><pre><span></span><code>JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005
-</code></pre></div>
-<p>Then start the run configuration in debug mode, and wait until the following shows up in the console:</p>
-<div class="highlight"><pre><span></span><code>Listening for transport dt_socket at address: 5005 Attach debugger
-</code></pre></div>
-<p>Then click the <span class="guilabel">Attach debugger</span> text in the console to attach the debugger and start debugging.</p>
-<p>Note that this enables debugging for any Gradle task that executes Java in an isolated way, including any (Java/Kotlin) compilation tasks that run in a separate process.
-Make sure to first build normally such that these tasks are no longer executed, then run your debugging configuration.</p>
-<p>If you are debugging tests, make sure that the test results are cleaned before by running <code>cleanTest</code>, otherwise Gradle may skip the test task. For example, run the following Gradle tasks as part of the run configuration:</p>
-<div class="highlight"><pre><span></span><code>:spoofax3.lwb.root:spoofax.dynamicloading:cleanTest :spoofax3.lwb.root:spoofax.dynamicloading:test
-</code></pre></div>
+<p>See <a href="../debugging-in-intellij/">how to debug in IntelliJ</a> for more information and tips.</p>
 <h3 id="profiling-in-intellij">Profiling in IntelliJ<a class="headerlink" href="#profiling-in-intellij" title="Permanent link">&para;</a></h3>
 <p>Profiling in IntelliJ can be done similarly to debugging. For example, to profile with YourKit, add the following environment variable to your run configuration:</p>
 <div class="highlight"><pre><span></span><code>JAVA_TOOL_OPTIONS=-agentpath:/Applications/YourKit-Java-Profiler-2020.9.app/Contents/Resources/bin/mac/libyjpagent.dylib=listen=all,sampling,onexit=snapshot
@@ -1248,7 +1253,7 @@ Caused by: java.lang.ArrayIndexOutOfBoundsException: 195
     <nav class="md-footer__inner md-grid" aria-label="Footer" >
       
         
-        <a href="../../static-semantics/code-completion/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Semantic Code Completion" rel="prev">
+        <a href="../debugging-in-intellij/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Debugging in IntelliJ" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -1257,7 +1262,7 @@ Caused by: java.lang.ArrayIndexOutOfBoundsException: 195
               <span class="md-footer__direction">
                 Previous
               </span>
-              Semantic Code Completion
+              Debugging in IntelliJ
             </div>
           </div>
         </a>
