@@ -90,7 +90,7 @@ public final class UnwrapOrFixReferenceStrategy extends NamedStrategy3<RRContext
         final ITerm term = descriptor.getBody();
         final List<ITerm> contexts = descriptor.getContexts();
         // TODO: Use the other contexts as well, not just the first
-        final @Nullable ITerm firstContext = contexts.get(0);
+        final @Nullable ITerm firstContext = contexts.isEmpty() ? null : contexts.get(0);
         if (term instanceof LockedReference) {
             final @Nullable LockedReference reference = (LockedReference)term;
             if (firstContext != null) {
