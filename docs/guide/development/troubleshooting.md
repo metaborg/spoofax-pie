@@ -11,28 +11,7 @@ The following are known problems that can occur, and their solutions or workarou
 If after importing there are many errors in files about classes not existing, re-import all the projects by pressing the `Reload All Gradle Projects` button in the Gradle tool window.
 
 ### Cannot debug in IntelliJ
-Debugging in IntelliJ is a bit buggy at the moment. To force debugging, add the following environment variable to your run configuration:
-
-```
-JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005
-```
-
-Then start the run configuration in debug mode, and wait until the following shows up in the console:
-
-```
-Listening for transport dt_socket at address: 5005 Attach debugger
-```
-
-Then click the <span class="guilabel">Attach debugger</span> text in the console to attach the debugger and start debugging.
-
-Note that this enables debugging for any Gradle task that executes Java in an isolated way, including any (Java/Kotlin) compilation tasks that run in a separate process.
-Make sure to first build normally such that these tasks are no longer executed, then run your debugging configuration.
-
-If you are debugging tests, make sure that the test results are cleaned before by running `cleanTest`, otherwise Gradle may skip the test task. For example, run the following Gradle tasks as part of the run configuration:
-
-```
-:spoofax3.lwb.root:spoofax.dynamicloading:cleanTest :spoofax3.lwb.root:spoofax.dynamicloading:test
-```
+See [how to debug in IntelliJ](debugging-in-intellij.md) for more information and tips.
 
 ### Profiling in IntelliJ
 Profiling in IntelliJ can be done similarly to debugging. For example, to profile with YourKit, add the following environment variable to your run configuration:

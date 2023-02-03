@@ -18,6 +18,7 @@ nav:
       - Static Semantics:
           - guide/static-semantics/code-completion.md
       - Development:
+          - guide/development/debugging-in-intellij.md
           - guide/development/troubleshooting.md
   - Reference:
       - reference/configuration.md
