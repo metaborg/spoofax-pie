@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import io.usethesource.capsule.Map;
 import io.usethesource.capsule.Set;
 import mb.common.result.Result;
+import mb.common.util.UncheckedException;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
 import mb.nabl2.terms.stratego.StrategoTermIndices;
@@ -79,10 +80,12 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
             analysis.spec(),
 
             new DefaultResourceKey("rr", "somefile.tig"),   // TODO: Not sure how to get the resource key here? Do we even need it?
-            "main",                 // TODO: Tiger specific. Make configurable.
-            "programOk",            // TODO: Tiger specific. Make configurable.
-            "pre-analyze",          // TODO: Tiger specific. Make configurable.
-            "post-analuze"          // TODO: Tiger specific. Make configurable.
+            "main",                         // TODO: Tiger specific. Make configurable.
+            "programOk",                    // TODO: Tiger specific. Make configurable.
+            "pre-analyze",                  // TODO: Tiger specific. Make configurable.
+            "post-analuze",                 // TODO: Tiger specific. Make configurable.
+            "explicate-injections-tiger",   // TODO: Tiger specific. Make configurable.
+            "implicate-injections-tiger"    // TODO: Tiger specific. Make configurable.
             );
 
         final IState.Transient state = analysis.state().melt();
@@ -91,12 +94,12 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
         final Map.Immutable<ITermVar, RRPlaceholder> placeholderDescriptors = pair.component2();
 
 //        final RRSolverState startState = execution.createInitialSolverState(newTerm, statixSecName, statixRootPredicateName, vars, placeholderDescriptors);
-        final ITerm explicatedAst = execution.preProcess(newTerm);
+        final ITerm explicatedAst = execution.explicate(newTerm);
         final RRSolverState analyzedState = execution.analyze(explicatedAst, placeholderDescriptors.keySet(), placeholderDescriptors);
         final Collection<Map.Entry<IConstraint, IMessage>> allowedErrors = Collections.emptyList(); // TODO: Get from initial analysis?
         final @Nullable ITerm result = execution.fix(analyzedState, allowedErrors);
         if (result == null) return Optional.empty();
-        final ITerm implicatedAst = execution.postProcess(result);
+        final ITerm implicatedAst = execution.implicate(result);
         return Optional.of(implicatedAst);
     }
 
@@ -168,6 +171,8 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
         private final String statixRootPredicateName;
         private final String preAnalyzeStrategyName;
         private final String postAnalyzeStrategyName;
+        private final String explicateStrategyName;
+        private final String implicateStrategyName;
 
         private final ResourceKey resource;
 
@@ -183,7 +188,9 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
             String statixSecName,
             String statixRootPredicateName,
             String preAnalyzeStrategyName,
-            String postAnalyzeStrategyName
+            String postAnalyzeStrategyName,
+            String explicateStrategyName,
+            String implicateStrategyName
         ) {
             this.tegoRuntime = tegoRuntime;
             this.strategoRuntime = strategoRuntime;
@@ -197,6 +204,8 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
             this.statixRootPredicateName = statixRootPredicateName;
             this.preAnalyzeStrategyName = preAnalyzeStrategyName;
             this.postAnalyzeStrategyName = postAnalyzeStrategyName;
+            this.explicateStrategyName = explicateStrategyName;
+            this.implicateStrategyName = implicateStrategyName;
         }
 
         /**
@@ -242,50 +251,93 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
             return strategoTerms.fromStratego(term);
         }
 
-        private ITerm preProcess(ITerm ast) {
-            // Preprocess the AST (explicate, add term indices)
-            final IStrategoTerm strAst = strategoTerms.toStratego(ast);
-            final Result<IStrategoTerm, ?> explicatedAstResult = preAnalyze(strAst);
-            final IStrategoTerm explicatedAst = explicatedAstResult.unwrapUnchecked();
-            final IStrategoTerm indexedAst = StrategoTermIndices.index(explicatedAst, resource.toString(), termFactory);;
-            return strategoTerms.fromStratego(indexedAst);
-        }
-
-        private ITerm postProcess(ITerm ast) {
-            // Postprocess the AST (implicate)
-            final IStrategoTerm strAst = strategoTerms.toStratego(ast);
-            final Result<IStrategoTerm, ?> implicatedAstResult = postAnalyze(strAst);
-            final IStrategoTerm explicatedAst = implicatedAstResult.unwrapUnchecked();
-            return strategoTerms.fromStratego(explicatedAst);
-        }
-
         /**
-         * Performs pre-analysis on the given AST.
+         * Explicates the given AST, that is, adds explicit injection constructors.
+         * This also adds term indices on terms where they are not present.
+         * <p>
+         * The AST may contain term variables.
          *
-         * @param ast     the AST to explicate
+         * @param ast the AST to explicate
          * @return the explicated AST
          */
-        private Result<IStrategoTerm, ?> preAnalyze(IStrategoTerm ast) {
+        private ITerm explicate(ITerm ast) {
+            final IStrategoTerm strAst = strategoTerms.toStratego(ast);
+            // Explicate
+            final IStrategoTerm explicatedStrAst;
             try {
-                return Result.ofOk(strategoRuntime.invoke(preAnalyzeStrategyName, ast));
+                explicatedStrAst = strategoRuntime.invoke(explicateStrategyName, strAst);
             } catch (StrategoException ex) {
-                return Result.ofErr(ex);
+                throw new UncheckedException(ex);
             }
+            // Add missing term indices
+            final IStrategoTerm indexedStrAst = StrategoTermIndices.indexMore(explicatedStrAst, resource.toString(), termFactory);
+            return strategoTerms.fromStratego(indexedStrAst);
         }
 
         /**
-         * Performs post-analysis on the given term.
+         * Implicates the given AST, that is, removes explicit injection constructors.
+         * <p>
+         * The AST may contain term variables.
          *
-         * @param term     the term to implicate
+         * @param ast the AST to implicate
          * @return the implicated AST
          */
-        private Result<IStrategoTerm, ?> postAnalyze(IStrategoTerm term) {
+        private ITerm implicate(ITerm ast) {
+            final IStrategoTerm strAst = strategoTerms.toStratego(ast);
+            // Implicate
+            final IStrategoTerm implcatedStrAst;
             try {
-                return Result.ofOk(strategoRuntime.invoke(postAnalyzeStrategyName, term));
+                implcatedStrAst = strategoRuntime.invoke(implicateStrategyName, strAst);
             } catch (StrategoException ex) {
-                return Result.ofErr(ex);
+                throw new UncheckedException(ex);
             }
+            return strategoTerms.fromStratego(implcatedStrAst);
         }
+
+//        private ITerm preProcess(ITerm ast) {
+//            // Preprocess the AST (explicate, add term indices)
+//            final IStrategoTerm strAst = strategoTerms.toStratego(ast);
+//            final Result<IStrategoTerm, ?> explicatedAstResult = preAnalyze(strAst);
+//            final IStrategoTerm explicatedAst = explicatedAstResult.unwrapUnchecked();
+//            final IStrategoTerm indexedAst = StrategoTermIndices.index(explicatedAst, resource.toString(), termFactory);
+//            return strategoTerms.fromStratego(indexedAst);
+//        }
+//
+//        private ITerm postProcess(ITerm ast) {
+//            // Postprocess the AST (implicate)
+//            final IStrategoTerm strAst = strategoTerms.toStratego(ast);
+//            final Result<IStrategoTerm, ?> implicatedAstResult = postAnalyze(strAst);
+//            final IStrategoTerm explicatedAst = implicatedAstResult.unwrapUnchecked();
+//            return strategoTerms.fromStratego(explicatedAst);
+//        }
+
+//        /**
+//         * Performs pre-analysis on the given AST.
+//         *
+//         * @param ast     the AST to explicate
+//         * @return the explicated AST
+//         */
+//        private Result<IStrategoTerm, ?> preAnalyze(IStrategoTerm ast) {
+//            try {
+//                return Result.ofOk(strategoRuntime.invoke(preAnalyzeStrategyName, ast));
+//            } catch (StrategoException ex) {
+//                return Result.ofErr(ex);
+//            }
+//        }
+//
+//        /**
+//         * Performs post-analysis on the given term.
+//         *
+//         * @param term     the term to implicate
+//         * @return the implicated AST
+//         */
+//        private Result<IStrategoTerm, ?> postAnalyze(IStrategoTerm term) {
+//            try {
+//                return Result.ofOk(strategoRuntime.invoke(postAnalyzeStrategyName, term));
+//            } catch (StrategoException ex) {
+//                return Result.ofErr(ex);
+//            }
+//        }
 
         /**
          * Performs analysis on the given solver state.
@@ -305,12 +357,12 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
 
             final @Nullable RRSolverState analyzedState = tegoRuntime.eval(InferStrategy.getInstance(), initialState);
             if (analyzedState == null) {
-                throw new IllegalStateException("Completion failed: got no result from Tego strategy.");
+                throw new IllegalStateException("Reference retention failed: got no result from Tego strategy.");
             } else if(analyzedState.hasErrors()) {
                 // TODO: We can add these errors to the set of allowed errors
-                throw new IllegalStateException("Completion failed: input program validation failed:\n" + analyzedState.messagesToString());
+                throw new IllegalStateException("Reference retention failed: input program validation failed:\n" + analyzedState.messagesToString());
             } else if(analyzedState.getConstraints().isEmpty()) {
-                throw new IllegalStateException("Completion failed: no constraints left, nothing to complete.\n" + analyzedState);
+                throw new IllegalStateException("Reference retention failed: no constraints left, nothing to complete.\n" + analyzedState);
             }
             return analyzedState;
         }
