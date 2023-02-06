@@ -71,10 +71,21 @@ public class {{baseAnalyzeMultiTaskDef.id}} extends ConstraintAnalyzeMultiTaskDe
         context.require(classLoaderResources.tryGetAsNativeResource({{languageProjectInput.constraintAnalyzer.qualifiedId}}.class), ResourceStampers.hashFile());
         context.require(classLoaderResources.tryGetAsNativeResource({{languageProjectInput.constraintAnalyzerFactory.qualifiedId}}.class), ResourceStampers.hashFile());
         final StrategoRuntime strategoRuntime = context.require(getStrategoRuntimeProvider, None.instance).getValue().get();
-        return constraintAnalyzer.analyze(root, asts, constraintAnalyzerContext, strategoRuntime{{#languageProjectInput.enableStatix}}.addContextObject(mb.statix.spoofax.IStatixProjectConfig.class, createStatixProjectConfig()){{/languageProjectInput.enableStatix}}, resourceService);
+        return constraintAnalyzer.analyze(root, asts, constraintAnalyzerContext, decorateStrategoRuntime(strategoRuntime, root), resourceService);
     }
 
+    {{^languageProjectInput.enableStatix}}
+    protected StrategoRuntime decorateStrategoRuntime(StrategoRuntime strategoRuntime, ResourcePath root) {
+        return strategoRuntime;
+    }
+    {{/languageProjectInput.enableStatix}}
     {{#languageProjectInput.enableStatix}}
+    protected StrategoRuntime decorateStrategoRuntime(StrategoRuntime strategoRuntime, ResourcePath root) {
+        return strategoRuntime.addContextObject(mb.statix.spoofax.IStatixProjectConfig. class, createStatixProjectConfig())
+                    .addContextObject(mb.spoofax2.common.primitive.generic.Spoofax2ProjectContext.class, createSpoofax2ProjectContext(root))
+                    .addContextObject(mb.statix.common.Spoofax3StatixProjectConfig.class, createSpoofax3ProjectConfig());
+    }
+
     protected mb.statix.spoofax.IStatixProjectConfig createStatixProjectConfig() {
         return new mb.statix.spoofax.StatixProjectConfig(
             null,
@@ -84,5 +95,18 @@ public class {{baseAnalyzeMultiTaskDef.id}} extends ConstraintAnalyzeMultiTaskDe
             {{#defaultStatixSuppressCascadingErrors}}{{this}}{{/defaultStatixSuppressCascadingErrors}}{{^defaultStatixSuppressCascadingErrors}}true{{/defaultStatixSuppressCascadingErrors}}
         );
     }
+
+    protected mb.spoofax2.common.primitive.generic.Spoofax2ProjectContext createSpoofax2ProjectContext(ResourcePath root) {
+        return new mb.spoofax2.common.primitive.generic.Spoofax2ProjectContext(
+            root,
+            mb.common.util.MultiMapView.of(),
+            mb.common.util.MultiMapView.of()
+        );
+    }
+
+    protected mb.statix.common.Spoofax3StatixProjectConfig createSpoofax3ProjectConfig() {
+        return mb.statix.common.Spoofax3StatixProjectConfig.of(mb.statix.spoofax.SolverMode.{{statixSolverMode}});
+    }
+
     {{/languageProjectInput.enableStatix}}
 }

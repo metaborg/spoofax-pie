@@ -1,6 +1,6 @@
 module Syntax
 
-imports 
+imports
 
   completion/colorer/cfg-cc-esv
 
@@ -14,9 +14,9 @@ language
   fences        : [ ] ( ) { }
 
 menus
-  
+
   menu: "Syntax" (openeditor)
-    
+
     action: "Format"          = editor-format (source)
     action: "Show parsed AST" = debug-show-aterm (source)
 
@@ -34,6 +34,7 @@ colorer
   funcid   = 153 51 0
   operator = 0 0 0
   comment  = 63 127 95 italic
+  option   = 0 0 128
 
 colorer
 
@@ -49,3 +50,5 @@ colorer
   PathLit    : string
   JavaIdLit  : varid
   JavaQIdLit : varid
+
+  StatixSolverMode : option

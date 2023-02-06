@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
   api(platform(project(":spoofax.depconstraints")))
+  annotationProcessor(platform(project(":spoofax.depconstraints")))
 
   api("org.metaborg:common")
 
@@ -13,4 +14,7 @@ dependencies {
   implementation(project(":jsglr.common"))
 
   compileOnly("org.checkerframework:checker-qual-android")
+  compileOnly("org.immutables:value-annotations")
+
+  annotationProcessor("org.immutables:value")
 }
