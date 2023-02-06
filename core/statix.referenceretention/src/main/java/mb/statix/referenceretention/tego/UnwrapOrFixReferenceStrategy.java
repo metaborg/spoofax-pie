@@ -243,9 +243,10 @@ public final class UnwrapOrFixReferenceStrategy extends NamedStrategy3<RRContext
      * @return the new state with the bound variable
      */
     private static RRSolverState bindToVar(RRSolverState state, ITermVar v, ITerm term) {
-        // TODO: Remove the variable from the existentials?
+        // FIXME: Depends on existentials being passed down when replacing placeholders
+        final ITermVar v2 = state.getExistentials().get(v);
         return state.withUpdatedConstraints(
-            Collections.singleton(new CEqual(v, term)),
+            Collections.singleton(new CEqual((v2 != null ? v2 : v), term)),
             Collections.emptySet()
         );
     }

@@ -17,26 +17,26 @@ import java.util.Collections;
 import static mb.tego.strategies.StrategyExt.fun;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class UnwrapOrFixAllReferencesStrategyTests {
-
-    @SuppressWarnings("resource") @Test
-    void test() throws InterruptedException {
-        // Arrange
-        final UnwrapOrFixAllReferencesStrategy strategy = UnwrapOrFixAllReferencesStrategy.getInstance();
-        final SLF4JLoggerFactory loggerFactory = new SLF4JLoggerFactory();
-        final TegoRuntime runtime = new TegoRuntimeImpl(loggerFactory);
-        final Strategy1<ITerm, LockedReference, @Nullable ITerm> qualifyReferenceStrategy = fun((input, arg1) -> {
-            // TODO: Implement!
-            return input;
-        });
-        final RRContext ctx = new RRContext(qualifyReferenceStrategy, Collections.emptyList());
-        final RRSolverState input = null; // TODO: RRSolverState.fromSolverResult();
-
-        // Act
-//        @Nullable final Seq<RRSolverState> resultSeq = runtime.eval(strategy, ctx, input);
-//        @Nullable final List<RRSolverState> result = (resultSeq != null ? resultSeq.toList() : null);
-
-        // Assert
-        assertTrue(true);
-    }
-}
+//public class UnwrapOrFixAllReferencesStrategyTests {
+//
+//    @SuppressWarnings("resource") @Test
+//    void test() throws InterruptedException {
+//        // Arrange
+//        final UnwrapOrFixAllReferencesStrategy strategy = UnwrapOrFixAllReferencesStrategy.getInstance();
+//        final SLF4JLoggerFactory loggerFactory = new SLF4JLoggerFactory();
+//        final TegoRuntime runtime = new TegoRuntimeImpl(loggerFactory);
+//        final Strategy1<ITerm, LockedReference, @Nullable ITerm> qualifyReferenceStrategy = fun((input, arg1) -> {
+//            // TODO: Implement!
+//            return input;
+//        });
+//        final RRContext ctx = new RRContext(qualifyReferenceStrategy, Collections.emptyList());
+//        final RRSolverState input = null; // TODO: RRSolverState.fromSolverResult();
+//
+//        // Act
+////        @Nullable final Seq<RRSolverState> resultSeq = runtime.eval(strategy, ctx, input);
+////        @Nullable final List<RRSolverState> result = (resultSeq != null ? resultSeq.toList() : null);
+//
+//        // Assert
+//        assertTrue(true);
+//    }
+//}
