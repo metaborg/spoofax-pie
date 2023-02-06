@@ -3,7 +3,6 @@ package mb.statix.referenceretention.stratego;
 import com.google.common.collect.ImmutableList;
 import io.usethesource.capsule.Map;
 import io.usethesource.capsule.Set;
-import mb.common.result.Result;
 import mb.common.util.UncheckedException;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
@@ -11,9 +10,10 @@ import mb.nabl2.terms.stratego.StrategoTermIndices;
 import mb.nabl2.terms.stratego.StrategoTerms;
 import mb.resource.DefaultResourceKey;
 import mb.resource.ResourceKey;
+import mb.statix.constraints.CConj;
+import mb.statix.constraints.CEqual;
 import mb.statix.constraints.CUser;
 import mb.statix.constraints.messages.IMessage;
-import mb.statix.referenceretention.statix.LockedReference;
 import mb.statix.referenceretention.statix.RRPlaceholder;
 import mb.statix.referenceretention.tego.InferStrategy;
 import mb.statix.referenceretention.tego.RRContext;
@@ -41,6 +41,7 @@ import org.spoofax.interpreter.terms.ITermFactory;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -88,18 +89,29 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
             "implicate-injections-tiger"    // TODO: Tiger specific. Make configurable.
             );
 
+        // Build a new analysis
+        final SolverResult solverResult = SolverResult.of(analysis.spec());
+
         final IState.Transient state = analysis.state().melt();
         final Pair<ITerm, Map.Immutable<ITermVar, RRPlaceholder>> pair = extractPlaceholders(state, term);
         final ITerm newTerm = pair.component1();
         final Map.Immutable<ITermVar, RRPlaceholder> placeholderDescriptors = pair.component2();
-
-//        final RRSolverState startState = execution.createInitialSolverState(newTerm, statixSecName, statixRootPredicateName, vars, placeholderDescriptors);
         final ITerm explicatedAst = execution.explicate(newTerm);
-        final RRSolverState analyzedState = execution.analyze(explicatedAst, placeholderDescriptors.keySet(), placeholderDescriptors);
+
+        final Pair<ITermVar, RRSolverState> initialRootVarAndSolverState = execution.createInitialSolverState(
+            explicatedAst,
+            placeholderDescriptors.keySet(),
+            placeholderDescriptors
+        );
+        final ITermVar rootVar = initialRootVarAndSolverState.component1();
+        final RRSolverState initialSolverState = initialRootVarAndSolverState.component2();
+        final RRSolverState analyzedState = execution.analyze(initialSolverState);
         final Collection<Map.Entry<IConstraint, IMessage>> allowedErrors = Collections.emptyList(); // TODO: Get from initial analysis?
-        final @Nullable ITerm result = execution.fix(analyzedState, allowedErrors);
-        if (result == null) return Optional.empty();
-        final ITerm implicatedAst = execution.implicate(result);
+        final @Nullable RRSolverState fixedState = execution.fix(analyzedState, allowedErrors);
+//        final @Nullable ITerm result = execution.fix(analyzedState, allowedErrors);
+        if (fixedState == null) return Optional.empty();
+        final ITerm fixedAst = fixedState.project(rootVar);
+        final ITerm implicatedAst = execution.implicate(fixedAst);
         return Optional.of(implicatedAst);
     }
 
@@ -167,7 +179,7 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
         /** The Statix specification. */
         private final Spec spec;
 
-        private final String statixSecName;
+        private final String statixSpecName;
         private final String statixRootPredicateName;
         private final String preAnalyzeStrategyName;
         private final String postAnalyzeStrategyName;
@@ -185,7 +197,7 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
             Spec spec,
 
             ResourceKey resource,
-            String statixSecName,
+            String statixSpecName,
             String statixRootPredicateName,
             String preAnalyzeStrategyName,
             String postAnalyzeStrategyName,
@@ -200,7 +212,7 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
             this.spec = spec;
 
             this.resource = resource;
-            this.statixSecName = statixSecName;
+            this.statixSpecName = statixSpecName;
             this.statixRootPredicateName = statixRootPredicateName;
             this.preAnalyzeStrategyName = preAnalyzeStrategyName;
             this.postAnalyzeStrategyName = postAnalyzeStrategyName;
@@ -212,23 +224,35 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
          * Creates the initial solver state for the code completion algorithm.
          *
          * @param ast the AST
-         * @param specName the name of the Statix spec
-         * @param rootPredicateName the name of the root predicate
          * @param existentials the existentials
          * @param placeholderDescriptors the placeholder descriptors
-         * @return the initial solver state
+         * @return a term variable for the AST, and the initial solver state
          */
-        private RRSolverState createInitialSolverState(ITerm ast, String specName, String rootPredicateName, Set<ITermVar> existentials, Map.Immutable<ITermVar, RRPlaceholder> placeholderDescriptors) {
-            String qualifiedName = RRUtils.makeQualifiedName(specName, rootPredicateName);
-            IConstraint rootConstraint = new CUser(qualifiedName, Collections.singletonList(ast), null);
-            return RRSolverState.of(
-                    spec,                               // the specification
-                    State.of(),                         // the new empty Statix state
-                    ImmutableList.of(rootConstraint),   // list of constraints
-                    placeholderDescriptors              // list of placeholder descriptors
+        private Pair<ITermVar, RRSolverState> createInitialSolverState(
+            ITerm ast,
+            java.util.Set<ITermVar> existentials,
+            Map.Immutable<ITermVar, RRPlaceholder> placeholderDescriptors
+        ) {
+//            final Set.Transient<ITermVar> existentials2 = Set.Transient.of();
+//            existentials2.__insertAll(existentials);
+            final IState.Transient state = State.of().melt();
+            String qualifiedName = RRUtils.makeQualifiedName(statixSpecName, statixRootPredicateName);
+            final ITermVar rootVar = state.freshWld();
+            final IConstraint initialConstraint = new CConj(
+                new CUser(qualifiedName, Collections.singletonList(rootVar), null),
+                new CEqual(rootVar, ast)
+            );
+            final HashSet<ITermVar> newExistentials = new HashSet<>(existentials);
+            newExistentials.add(rootVar);
+            final RRSolverState solverState = RRSolverState.of(
+                    spec,                                   // the specification
+                    state.freeze(),                         // the new empty Statix state
+                    ImmutableList.of(initialConstraint),    // list of constraints
+                    placeholderDescriptors                  // list of placeholder descriptors
                 )
-                .withExistentials(existentials)
+                .withExistentials(newExistentials)
                 .withPrecomputedCriticalEdges();
+            return Pair.of(rootVar, solverState);
         }
 
         /**
@@ -281,15 +305,16 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
          * @throws IllegalStateException if the analyzed solver state has errors or has no constraints
          */
         private RRSolverState analyze(
-            ITerm ast,
-            java.util.Set<ITermVar> existentials,
-            Map.Immutable<ITermVar, RRPlaceholder> placeholderDescriptors
+            RRSolverState state
+//            ITerm ast,
+//            java.util.Set<ITermVar> existentials,
+//            Map.Immutable<ITermVar, RRPlaceholder> placeholderDescriptors
         ) {
-            final Set.Transient<ITermVar> existentials2 = Set.Transient.of();
-            existentials2.__insertAll(existentials);
-            final RRSolverState initialState = createInitialSolverState(ast, statixSecName, statixRootPredicateName, existentials2, placeholderDescriptors);
+//            final Set.Transient<ITermVar> existentials2 = Set.Transient.of();
+//            existentials2.__insertAll(existentials);
+//            final RRSolverState initialState = createInitialSolverState(ast, statixSpecName, statixRootPredicateName, existentials2, placeholderDescriptors);
 
-            final @Nullable RRSolverState analyzedState = tegoRuntime.eval(InferStrategy.getInstance(), initialState);
+            final @Nullable RRSolverState analyzedState = tegoRuntime.eval(InferStrategy.getInstance(), state);
             if (analyzedState == null) {
                 throw new IllegalStateException("Reference retention failed: got no result from Tego strategy.");
             } else if(analyzedState.hasErrors()) {
@@ -308,7 +333,8 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
          * @param allowedErrors the errors that are allowed
          * @return the fixed state; or {@code null} if the state could not be fixed
          */
-        private @Nullable ITerm fix(RRSolverState state, Collection<Map.Entry<IConstraint, IMessage>> allowedErrors) {
+        private @Nullable RRSolverState fix(RRSolverState state, Collection<Map.Entry<IConstraint, IMessage>> allowedErrors) {
+//        private @Nullable ITerm fix(RRSolverState state, Collection<Map.Entry<IConstraint, IMessage>> allowedErrors) {
             // Create a strategy that fails if the term is not an injection
             final Strategy1</* ctx */ ITerm, /* term */ ITerm, /* result */ @Nullable ITerm> qualifyReferenceStrategy = fun(this::qualifyReference);
 
@@ -326,7 +352,8 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
                 // TODO: Extract one of the solver states (use a heuristic) and then find the AST in there?
                 //  Probably similar to how I did it in code completion
                 resultsEvaluated = results.toList();
-                return null;    // TODO: Return AST
+                // Return the first one. TODO: Better heuristic to pick one if there are multiple options.
+                return resultsEvaluated.stream().findFirst().orElse(null);
             } catch(InterruptedException e) {
                 throw new RuntimeException(e);
             }
