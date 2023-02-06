@@ -5,6 +5,12 @@ plugins {
   id("org.metaborg.spoofax.compiler.gradle.adapter")
 }
 
+fun compositeBuild(name: String) = "$group:$name:$version"
+
+dependencies {
+  api(compositeBuild("spoofax2.common"))
+}
+
 languageAdapterProject {
   languageProject.set(project(":mod"))
   compilerInput {
