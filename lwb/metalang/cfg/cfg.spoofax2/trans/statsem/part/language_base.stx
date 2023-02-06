@@ -92,6 +92,7 @@ rules // Constraint analyzer section and options
     typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
   constraintAnalyzerOptionOk(s, ConstraintAnalyzerStrategoStrategy(e)) :-
     typeOfExpr(s, e) == STRATEGY() | error $[Expected Stratego strategy identifier]@e.
+  constraintAnalyzerOptionOk(s, ConstraintAnalyzerStatixSolverMode(_)).
 
   constraintAnalyzerOptionOk(s, ConstraintAnalyzerDefaultStatixMessageStacktraceLength(e)) :-
     typeOfExpr(s, e) == UINT() | error $[Expected unsigned integer]@e.
