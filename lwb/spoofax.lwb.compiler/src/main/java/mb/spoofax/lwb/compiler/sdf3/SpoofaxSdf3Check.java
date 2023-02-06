@@ -43,7 +43,7 @@ public class SpoofaxSdf3Check implements TaskDef<ResourcePath, KeyedMessages> {
 
     public KeyedMessages check(ExecContext context, SpoofaxSdf3Config config) {
         return config.caseOf()
-            .files((sdf3SpecConfig, outputParseTableAtermFile, outputParseTablePersistedFile) -> context.require(check, sdf3SpecConfig))
+            .files((mainBuildParseTable, otherBuildParseTables) -> context.require(check, mainBuildParseTable.sdf3SpecConfig))
             .prebuilt((inputParseTableAtermFile, inputParseTablePersistedFile, outputParseTableAtermFile, outputParseTablePersistedFile) -> KeyedMessages.of())
             ;
     }

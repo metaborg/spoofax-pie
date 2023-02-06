@@ -15,7 +15,8 @@ dependencies {
 
 languageEclipseProject {
   adapterProject.set(project(":cfg"))
-  compilerInput {
-    languageGroup("mb.spoofax.lwb")
-  }
+}
+
+mavenize {
+  majorVersion.set("2021-03")
 }

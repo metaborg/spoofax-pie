@@ -10,6 +10,7 @@ imports
   lex/java_id
   lex/sdf3_id
   lex/stratego_id
+  lex/coordinate
 
 context-free sorts
 
@@ -41,5 +42,5 @@ lexical syntax // Keywords
   Keyword = "true"
   Keyword = "false"
   Keyword = "java"
-  Keyword = "sdf3"
-  Keyword = "stratego"
+  Keyword = "sort"
+  Keyword = "strategy"

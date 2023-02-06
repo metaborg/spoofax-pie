@@ -11,6 +11,7 @@ import mb.jsglr.common.TermTracer;
 import mb.pie.api.ExecContext;
 import mb.pie.api.stamp.resource.ResourceStampers;
 import mb.resource.ResourceKey;
+import mb.resource.ResourceRuntimeException;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.TypeInfo;
@@ -230,6 +231,14 @@ class Parts {
         getAllSubTermsAsExistingFiles(name, base, errorSuffix).forEach(consumer);
     }
 
+    Stream<String> getAllSubTermsAsRelativePathOfExistingFiles(String name, ResourcePath base, String errorSuffix) {
+        return getAllSubTerms(name).map(t -> relativePathStringOfExistingFile(t, base, errorSuffix));
+    }
+
+    void forAllSubTermsAsRelativePathOfExistingFiles(String name, ResourcePath base, String errorSuffix, Consumer<String> consumer) {
+        getAllSubTermsAsRelativePathOfExistingFiles(name, base, errorSuffix).forEach(consumer);
+    }
+
     Stream<ResourcePath> getAllSubTermsAsExistingDirectories(String name, ResourcePath base, String errorSuffix) {
         return getAllSubTerms(name).map(t -> pathAsExistingDirectory(t, base, errorSuffix));
     }
@@ -237,6 +246,15 @@ class Parts {
     void forAllSubtermsAsExistingDirectories(String name, ResourcePath base, String errorSuffix, Consumer<ResourcePath> consumer) {
         getAllSubTermsAsExistingDirectories(name, base, errorSuffix).forEach(consumer);
     }
+
+    Stream<String> getAllSubTermsAsRelativePathOfExistingDirectories(String name, ResourcePath base, String errorSuffix) {
+        return getAllSubTerms(name).map(t -> relativePathStringOfExistingDirectory(t, base, errorSuffix));
+    }
+
+    void forAllSubtermsAsRelativePathOfExistingDirectories(String name, ResourcePath base, String errorSuffix, Consumer<String> consumer) {
+        getAllSubTermsAsRelativePathOfExistingDirectories(name, base, errorSuffix).forEach(consumer);
+    }
+
 
     Stream<TypeInfo> getAllSubtermsAsTypeInfo(String name) {
         return getAllSubTermsAsStrings(name).map(TypeInfo::of);
@@ -280,31 +298,37 @@ class Parts {
         return TermTracer.getResourceKey(term);
     }
 
-    private void createCfgMessage(String text, Severity severity, IStrategoTerm term) {
+    void createCfgMessage(String text, Severity severity, IStrategoTerm term) {
         messagesBuilder.addMessage(text, severity, getCfgFile(term), getRegion(term));
     }
 
-    private void createCfgMessage(String text, Throwable e, IStrategoTerm term) {
+    void createCfgMessage(String text, Throwable e, IStrategoTerm term) {
         messagesBuilder.addMessage(text, e, Severity.Error, getCfgFile(term), getRegion(term));
     }
 
 
-    private void createCfgError(String text, IStrategoTerm term) {
+    void createCfgError(String text, IStrategoTerm term) {
         createCfgMessage(text, Severity.Error, term);
     }
 
-    private void createCfgError(String text, Throwable e, IStrategoTerm term) {
+    void createCfgError(String text, Throwable e, IStrategoTerm term) {
         createCfgMessage(text, e, term);
     }
 
-    private void createCfgWarning(String text, IStrategoTerm term) {
+    void createCfgWarning(String text, IStrategoTerm term) {
         createCfgMessage(text, Severity.Warning, term);
     }
 
 
-    private ResourcePath pathAsExistingFile(IStrategoTerm pathTerm, ResourcePath base, String errorSuffix) {
+    String relativePathStringOfExistingFile(IStrategoTerm pathTerm, ResourcePath base, String errorSuffix) {
         final String relativePath = Parts.toJavaString(pathTerm);
-        final ResourcePath path = base.appendRelativePath(relativePath).getNormalized();
+        final ResourcePath path;
+        try {
+            path = base.appendRelativePath(relativePath).getNormalized();
+        } catch(ResourceRuntimeException e) {
+            createCfgError("Path " + relativePath + " is not a relative path", pathTerm);
+            return "." + relativePath; // HACK: make relative.
+        }
         try {
             final HierarchicalResource file = context.require(path, ResourceStampers.<HierarchicalResource>exists());
             if(!file.exists()) {
@@ -315,12 +339,23 @@ class Parts {
         } catch(IOException e) {
             createCfgError("Failed to check if " + errorSuffix + " '" + path + "' exists", e, pathTerm);
         }
-        return path;
+        return relativePath;
     }
 
-    private ResourcePath pathAsExistingDirectory(IStrategoTerm pathTerm, ResourcePath base, String errorSuffix) {
+    ResourcePath pathAsExistingFile(IStrategoTerm pathTerm, ResourcePath base, String errorSuffix) {
+        final String relativePath = relativePathStringOfExistingFile(pathTerm, base, errorSuffix);
+        return base.appendRelativePath(relativePath).getNormalized();
+    }
+
+    String relativePathStringOfExistingDirectory(IStrategoTerm pathTerm, ResourcePath base, String errorSuffix) {
         final String relativePath = Parts.toJavaString(pathTerm);
-        final ResourcePath path = base.appendRelativePath(relativePath).getNormalized();
+        final ResourcePath path;
+        try {
+            path = base.appendRelativePath(relativePath).getNormalized();
+        } catch(ResourceRuntimeException e) {
+            createCfgError("Path " + relativePath + " is not a relative path", pathTerm);
+            return "." + relativePath; // HACK: make relative.
+        }
         try {
             final HierarchicalResource directory = context.require(path, ResourceStampers.<HierarchicalResource>exists());
             if(!directory.exists()) {
@@ -331,7 +366,12 @@ class Parts {
         } catch(IOException e) {
             createCfgError("Failed to check if " + errorSuffix + " '" + path + "' exists", e, pathTerm);
         }
-        return path;
+        return relativePath;
+    }
+
+    ResourcePath pathAsExistingDirectory(IStrategoTerm pathTerm, ResourcePath base, String errorSuffix) {
+        final String relativePath = relativePathStringOfExistingDirectory(pathTerm, base, errorSuffix);
+        return base.appendRelativePath(relativePath).getNormalized();
     }
 
 

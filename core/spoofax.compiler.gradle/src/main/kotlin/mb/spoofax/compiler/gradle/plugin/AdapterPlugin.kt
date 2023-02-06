@@ -7,8 +7,8 @@ import mb.common.result.Result
 import mb.pie.api.ValueSupplier
 import mb.pie.dagger.PieComponent
 import mb.resource.dagger.ResourceServiceComponent
+import mb.spoofax.compiler.*
 import mb.spoofax.compiler.adapter.*
-import mb.spoofax.compiler.dagger.*
 import mb.spoofax.compiler.gradle.*
 import org.gradle.api.Plugin
 import org.gradle.api.Project

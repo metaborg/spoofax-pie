@@ -4,6 +4,7 @@ import mb.common.message.KeyedMessages;
 import mb.common.message.Message;
 import mb.common.message.Severity;
 import mb.common.util.ListView;
+import mb.common.util.MapView;
 import mb.pie.api.MixedSession;
 import mb.resource.fs.FSResource;
 import mb.str.config.StrategoAnalyzeConfig;
@@ -27,6 +28,8 @@ class AnalyzeTest extends TestBase {
                 ListView.of(projectDir.getPath()),
                 ListView.of(BuiltinLibraryIdentifier.StrategoLib),
                 ListView.of(),
+                MapView.of(),
+                MapView.of(),
                 ListView.of()
             );
             final KeyedMessages messages = session.require(check.createTask(config));

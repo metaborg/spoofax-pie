@@ -2,7 +2,103 @@
 All notable changes to this project are documented in this file, based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
-## [Unreleased]
+## [0.19.3] - 2022-11-25
+### Fixed
+- Missing class files in 0.19.2 release.
+
+### Changed
+- `releng` (devenv-release) requirement to `0.1.33`.
+
+### Added
+- Preliminary support for using existing Stratego concrete syntax extension parse tables.
+
+
+## [0.19.2] - 2022-05-25
+### Fixed
+- New SDF3 and Statix source files not being detected.
+- Default SDF3 layout definition not including horizontal tabs.
+
+### Changed
+- `releng` (devenv-release) requirement to `0.1.32`.
+
+
+## [0.19.1] - 2022-05-24
+### Fixed
+- CFG conversion being executed even if static analysis returned errors, resulting in runtime exceptions. Fixes [#109](https://github.com/metaborg/spoofax-pie/issues/109), [#94](https://github.com/metaborg/spoofax-pie/issues/94).
+- Value argument provider always causing runtime exceptions. Fixes [#102](https://github.com/metaborg/spoofax-pie/issues/102).
+- Absolute file paths in places where relative ones were expected always causing runtime exceptions. Fixes [#96](https://github.com/metaborg/spoofax-pie/issues/96).
+- Eclipse LWB plugin still generating the old `build/generated/sources/languageSpecification/java` directory.
+
+
+## [0.19.0] - 2022-05-13
+### Fixed
+- ESV imports not resolving to modules in the main source directory.
+- Updating the Eclipse LWB plugin causing failures when no clean is performed. The PIE store is now automatically cleaned when the version changes. Fixes [#39](https://github.com/metaborg/spoofax-pie/issues/39).
+- UNIX JVMs embedded into Eclipse installations not working due to JVM not having the executable mode set. Fixes [#37](https://github.com/metaborg/spoofax-pie/issues/37).
+
+### Removed
+- `include-libspoofax2-exports` option in `esv` section of `spoofaxc.cfg`, this can now simply be replaced with a dependency to `org.metaborg:libspoofax2:*`.
+
+### Changed
+- `resource` requirement to `0.14.1`.
+- `common` requirement to `0.11.0`.
+- `pie` requirement to `0.21.0`.
+- `releng` (devenv-release) requirement to `0.1.31`.
+- `coronium` plugin requirement to `0.3.16`.
+- Dependency syntax to be less verbose and more configurable.
+- Dependency kinds into `Build` for dependencies that are needed when building the language, and `Run` for dependencies that are needed when running the language.
+- Generated meta-language files are now generated in `./build/generated/sources/metalang/<metalang>` instead of `./build/generated/sources/languageSpecification/<metalang>`.
+- Unarchived meta-language files are now unarchived into `./build/unarchive/<metalang>` instead of `./build/unarchive`.
+- `<Name> = parameter { <Options> }` into `<Name> = { <Options> }`. The old syntax is still supported but deprecated, and will be removed in the future.
+- `parse-table-generator` section in `sdf3` section is now part of `source = files { ... }` section.
+- `sdf3-statix-signature-generation` section in `statix` section is now part of `source = files { ... }` section.
+- `sdf3-statix-explication-generation` section in `stratego` section is now part of `source = files { ... }` section.
+- `language-strategy-affix` option in `stratego` section is now part `source = files { ... }` section. Also, the property in the lockfile corresponding to this option has been changed from `stratego.languageStrategyAffix` to `stratego.source.files.languageStrategyAffix`.
+- Default dependencies are now only added if no dependencies are specified in `spoofaxc.cfg`. When generating a new Spoofax 3 project, these default dependencies are added explicitly to the `spoofaxc.cfg` file. In the future, these default dependencies will be removed. It is recommended to add these dependencies to your `spoofax.cfg`:
+```
+build-dependencies [
+  org.metaborg:strategolib:*
+  org.metaborg:gpp:*
+  org.metaborg:libspoofax2:*
+  org.metaborg:libstatix:*
+]
+```
+
+### Added
+- Preliminary support for SDF3, ESV, and Statix compile-time dependencies. That is, exports of source directories of those meta-languages and imports through dependencies.
+- Support for include directories for SDF3.
+- `build-dependencies [ ... ]` section for quickly specifying build dependencies without having to specify the kind for every dependency.
+
+
+## [0.18.0] - 2022-04-04
+### Fixed
+- Ensure that `strategolib.eclipse` and `gpp.eclipse` are published, as they are required by Eclipse plugins of languages.
+- Exception in `DynamicLoad` when a classpath directory did not exist.
+
+### Changed
+- Update `org.jetbrains.intellij` Gradle plugin to `1.4.0`.
+- `common` requirement to `0.10.3`.
+- `resource` requirement to `0.14.0`.
+- `pie` requirement to `0.20.0`.
+- `releng` (devenv-release) requirement to `0.1.30`.
+
+### Added
+- Preliminary support for Stratego compile-time dependencies.
+
+
+## [0.17.0] - 2022-03-09
+### Fixed
+- Literals on the left-hand side in SDF3 kernel syntax productions causing errors even though they are valid.
+
+### Changed
+- Improve "language/component management" and make it cross-platform.
+- Merge `spoofax.compiler.dagger` into `spoofax.compiler`.
+- Merge `spoofax.lwb.compiler.dagger` into `spoofax.lwb.compiler`.
+- Rename `Spoofax3` -> `SpoofaxLwb` in `spoofax.lwb.compiler`.
+- Update `org.jetbrains.intellij` Gradle plugin to `1.0`.
+- `releng` (devenv-release) requirement to `0.1.29`.
+- `common` requirement to `0.10.2`.
+- `pie` requirement to `0.19.8`.
 
 
 ## [0.16.17] - 2021-12-13
@@ -427,7 +523,13 @@ All notable changes to this project are documented in this file, based on [Keep 
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.17...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.2...HEAD
+[0.19.3]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.2...release-0.19.3
+[0.19.2]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.1...release-0.19.2
+[0.19.1]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.0...release-0.19.1
+[0.19.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.18.0...release-0.19.0
+[0.18.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.17.0...release-0.18.0
+[0.17.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.17...release-0.17.0
 [0.16.17]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.16...release-0.16.17
 [0.16.16]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.15...release-0.16.16
 [0.16.15]: https://github.com/metaborg/spoofax-pie/compare/release-0.16.14...release-0.16.15

@@ -1,6 +1,7 @@
 package mb.statix.codecompletion.strategies.runtime;
 
 import mb.nabl2.terms.ITermVar;
+import mb.statix.codecompletion.CCSolverState;
 import mb.statix.codecompletion.SolverContext;
 import mb.statix.codecompletion.SolverState;
 import mb.tego.sequences.Seq;
@@ -16,7 +17,7 @@ import java.util.Set;
 
 import static mb.tego.strategies.runtime.Strategies.ntl;
 
-public final class ExpandAllInjectionsStrategy extends NamedStrategy3<SolverContext, ITermVar, Set<String>, SolverState, Seq<SolverState>> {
+public final class ExpandAllInjectionsStrategy extends NamedStrategy3<SolverContext, ITermVar, Set<String>, CCSolverState, Seq<CCSolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final ExpandAllInjectionsStrategy instance = new ExpandAllInjectionsStrategy();
@@ -27,23 +28,23 @@ public final class ExpandAllInjectionsStrategy extends NamedStrategy3<SolverCont
 
     @SuppressWarnings("UnnecessaryLocalVariable")
     @Override
-    public Seq<SolverState> evalInternal(
+    public Seq<CCSolverState> evalInternal(
         TegoEngine engine,
         SolverContext ctx,
         ITermVar v,
         Set<String> visitedInjections,
-        SolverState input
+        CCSolverState input
     ) {
         return eval(engine, ctx, v, visitedInjections, input);
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
-    public static Seq<SolverState> eval(
+    public static Seq<CCSolverState> eval(
         TegoEngine engine,
         SolverContext ctx,
         ITermVar v,
         Set<String> visitedInjections,
-        SolverState input
+        CCSolverState input
     ) {
         // Tego:
         // def expandAllInjections(v: ITermVar, visitedInjections: Set<String>): SolverState -> SolverState =
@@ -83,18 +84,18 @@ public final class ExpandAllInjectionsStrategy extends NamedStrategy3<SolverCont
 
         // NOTE: Here we optimize getting the strategies to the start of the method.
         final ExpandInjectionStrategy expandInjection = ExpandInjectionStrategy.getInstance();
-        final TryStrategy<SolverState> try_ = TryStrategy.getInstance();
-        final FixSetStrategy<SolverState> fixSet = FixSetStrategy.getInstance();
+        final TryStrategy<CCSolverState> try_ = TryStrategy.getInstance();
+        final FixSetStrategy<CCSolverState> fixSet = FixSetStrategy.getInstance();
         final AssertValidStrategy assertValid = AssertValidStrategy.getInstance();
-        final FlatMapStrategy<SolverState, SolverState> flatMap = FlatMapStrategy.getInstance();
+        final FlatMapStrategy<CCSolverState, CCSolverState> flatMap = FlatMapStrategy.getInstance();
 
-        final Strategy<SolverState, Seq<SolverState>> s1 = expandInjection.apply(ctx, v, visitedInjections);
-        final Strategy<SolverState, Seq<SolverState>> s2 = try_.apply(s1);
-        final @Nullable Seq<SolverState> r3 = engine.eval(fixSet, s2, input);
+        final Strategy<CCSolverState, Seq<CCSolverState>> s1 = expandInjection.apply(ctx, v, visitedInjections);
+        final Strategy<CCSolverState, Seq<CCSolverState>> s2 = try_.apply(s1);
+        final @Nullable Seq<CCSolverState> r3 = engine.eval(fixSet, s2, input);
         if (r3 == null) return Seq.of();
 
-        final Strategy<SolverState, Seq<SolverState>> s4 = ntl(assertValid.apply(ctx, v));
-        final @Nullable Seq<SolverState> r4 = engine.eval(flatMap, s4, r3);
+        final Strategy<CCSolverState, Seq<CCSolverState>> s4 = ntl(assertValid.apply(ctx, v));
+        final @Nullable Seq<CCSolverState> r4 = engine.eval(flatMap, s4, r3);
         if (r4 == null) return Seq.of();
 
         return r4;

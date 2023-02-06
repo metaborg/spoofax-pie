@@ -48,11 +48,11 @@ Furthermore, we now discuss the status of features that were not new key ideas.
             * [x] Statix signature generation based on SDF3 specification
         * [ ] FlowSpec
         * [x] Stratego 2
-  * Transformation (compilation)
-      * [x] Stratego 2
-  * Testing
-      * [x] SPT
-          * Not all expectations have been ported over yet
+    * Transformation (compilation)
+        * [x] Stratego 2
+    * Testing
+        * [x] SPT
+            * Not all expectations have been ported over yet
 * Editor services
     * [x] Syntax-based styling
     * [x] Inline error/warning/note messages

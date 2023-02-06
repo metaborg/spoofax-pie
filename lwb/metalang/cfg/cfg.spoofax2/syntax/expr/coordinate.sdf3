@@ -1,0 +1,15 @@
+module expr/coordinate
+
+imports
+
+  expr
+  lex/coordinate
+
+context-free sorts
+
+  CoordinateRequirementPart
+
+context-free syntax
+
+  Expr.Coordinate            = <<CoordinateChars>:<CoordinateChars>:<CoordinateChars>> {prefer}
+  Expr.CoordinateRequirement = <<CoordinateChars>:<CoordinateChars>:<CoordinateRequirementChars>>

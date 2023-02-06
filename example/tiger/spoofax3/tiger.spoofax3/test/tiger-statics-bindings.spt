@@ -1,0 +1,102 @@
+module tiger-bindings
+
+language Tiger
+
+test number [[
+42 
+]] analysis succeeds 
+ 
+test variable declaration [[
+  let 
+    var x := 1
+  in 
+    x + 4 
+  end
+]] analysis succeeds
+ 
+test shadowing of variable declarations [[ 
+  let 
+    var x := "1"
+    var x := 2 // shadows previous x
+  in  
+    x + x
+  end
+]] analysis succeeds
+ 
+test shadowing of variable declarations [[ 
+  let 
+    var x := 1
+    var x := "2" // shadows previous x
+  in  
+    x + x
+  end
+]] analysis fails
+
+test duplicate type declarations [[ 
+  let 
+    type t = int
+    var a := 1
+    type t = int
+    type t = string
+    type r = {x : t}
+  in
+    2
+  end
+]] analysis fails
+
+test for index variable not in scope outside loop [[ 
+  (for x := 1 to 10 do
+    print(chr(x)); 
+  x) // not in scope
+]] analysis fails
+ 
+test recursive record types [[ 
+  let
+    type list = {hd : int, tl : list}
+    function size(xs : list) : int = 
+      if xs = nil then 0
+      else 1 + size(xs.tl)
+  in 
+    list{hd = 1, tl = list{hd = 0, tl = nil}}
+  end
+]] analysis succeeds
+
+test record field declaration and initialization [[ 
+  let
+    type r = {x : int, y : int, z : string}
+  in 
+    r{y = 3, z = "a", x = 1}
+  end
+]] analysis succeeds
+ 
+
+test duplicate field declaration [[ 
+  let
+    type r = {x : int, x : int, y : int, z : int}
+  in 
+    1
+  end
+]] analysis fails
+ 
+ 
+test duplicate field initialization [[ 
+  let
+    type r = {x : int}
+  in 
+    r{x = 1, x = 2} 
+  end
+]] analysis fails
+ 
+ 
+test missing field initialization [[ 
+  let
+    type r = {x : int}
+  in 
+    r{} 
+  end
+]] analysis fails
+ 
+ 
+ 
+
+

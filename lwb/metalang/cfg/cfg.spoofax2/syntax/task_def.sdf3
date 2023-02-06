@@ -3,6 +3,7 @@ module task_def
 imports
 
   lex/java_id
+  lex/keyword
 
 context-free sorts
 
@@ -11,3 +12,7 @@ context-free sorts
 context-free syntax
 
   TaskDef.TaskDef = <task-def <JavaQIdLit>>
+
+lexical syntax
+
+  Keyword = "task-def"

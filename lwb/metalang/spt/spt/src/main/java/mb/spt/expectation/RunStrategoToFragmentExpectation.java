@@ -11,6 +11,7 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.MixedSession;
 import mb.pie.api.Session;
 import mb.resource.ResourceKey;
+import mb.spoofax.core.CoordinateRequirement;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spt.api.analyze.TestableAnalysis;
 import mb.spt.api.parse.TestableParse;
@@ -26,19 +27,19 @@ import org.strategoxt.lang.TermEqualityUtil;
 
 public class RunStrategoToFragmentExpectation extends RunStrategoExpectation {
     private final ResourceKey fragmentResource;
-    private final Option<String> languageIdHint;
+    private final @Nullable CoordinateRequirement languageCoordinateRequirementHint;
 
     public RunStrategoToFragmentExpectation(
         String strategyName,
         ListView<IStrategoAppl> arguments,
         Option<SelectionReference> selection,
         ResourceKey fragmentResource,
-        Option<String> languageIdHint,
+        @Nullable CoordinateRequirement languageCoordinateRequirementHint,
         Region sourceRegion
     ) {
         super(strategyName, arguments, selection, sourceRegion, false);
         this.fragmentResource = fragmentResource;
-        this.languageIdHint = languageIdHint;
+        this.languageCoordinateRequirementHint = languageCoordinateRequirementHint;
     }
 
     @Override
@@ -47,15 +48,16 @@ public class RunStrategoToFragmentExpectation extends RunStrategoExpectation {
         KeyedMessagesBuilder messagesBuilder,
         TestCase testCase,
         LanguageUnderTest languageUnderTest,
-        Session languageUnderTestSession, LanguageUnderTestProvider languageUnderTestProvider,
+        Session languageUnderTestSession,
+        LanguageUnderTestProvider languageUnderTestProvider,
         ExecContext context,
         Region sourceRegion
     ) throws InterruptedException {
         ResourceKey file = testCase.testSuiteFile;
-        final @Nullable LanguageUnderTest fragmentLanguageUnderTest = ExpectationFragmentUtil.getLanguageUnderTest(testCase, languageUnderTest, languageUnderTestProvider, context, languageIdHint.get());
+        final @Nullable LanguageUnderTest fragmentLanguageUnderTest = ExpectationFragmentUtil.getLanguageUnderTest(testCase, languageUnderTest, languageUnderTestProvider, context, languageCoordinateRequirementHint);
         if (fragmentLanguageUnderTest == null) {
             messagesBuilder.addMessage(
-                "Cannot evaluate run to fragment expectation because providing language under test for language id '" + languageIdHint + "' failed unexpectedly",
+                "Cannot evaluate run to fragment expectation because providing language under test for language '" + languageCoordinateRequirementHint + "' failed unexpectedly",
                 Severity.Error,
                 file,
                 sourceRegion

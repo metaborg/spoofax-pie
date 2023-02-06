@@ -3,9 +3,9 @@
 <plugin>
   <!-- Extension point for participating in the lifecycle of resource service and PIE components -->
   <extension-point
-    id="spoofax.eclipse.lifecycle"
-    name="Spoofax Eclipse lifecycle participant"
-    schema="schema/spoofax.eclipse.lifecycle.exsd"
+    id="spoofax.eclipse.participant"
+    name="Spoofax Eclipse participant"
+    schema="schema/spoofax.eclipse.participant.exsd"
   />
 
   <!-- Early startup -->

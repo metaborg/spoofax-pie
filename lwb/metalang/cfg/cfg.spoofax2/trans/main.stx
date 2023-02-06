@@ -7,7 +7,8 @@ imports
   statsem/expr/task_def
   statsem/expr/command
   statsem/expr/menu_item
-  
+  statsem/expr/coordinate
+
   statsem/part
   statsem/part/shared
   statsem/part/language_base
@@ -15,11 +16,11 @@ imports
   statsem/part/language
   statsem/part/eclipse
   statsem/part/task_def
-  
+
   statsem/value
   statsem/task_def
   statsem/command
-  
+
   signatures/cfg-sig
   signatures/normalize-sig
 

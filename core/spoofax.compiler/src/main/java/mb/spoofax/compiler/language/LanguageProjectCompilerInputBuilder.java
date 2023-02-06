@@ -24,9 +24,6 @@ public class LanguageProjectCompilerInputBuilder {
     private boolean strategoRuntimeEnabled = false;
     public final StrategoRuntimeLanguageCompiler.Input.Builder strategoRuntime = StrategoRuntimeLanguageCompiler.Input.builder();
 
-    private boolean exportsEnabled = false;
-    public final ExportsLanguageCompiler.Input.Builder exports = ExportsLanguageCompiler.Input.builder();
-
     public final LanguageProjectCompiler.Input.Builder project = LanguageProjectCompiler.Input.builder();
 
     public ClassLoaderResourcesCompiler.Input.Builder withClassloaderResources() {
@@ -58,11 +55,6 @@ public class LanguageProjectCompilerInputBuilder {
         return strategoRuntime;
     }
 
-    public ExportsLanguageCompiler.Input.Builder withExports() {
-        exportsEnabled = true;
-        return exports;
-    }
-
 
     public LanguageProjectCompiler.Input build(Shared shared, LanguageProject languageProject) {
         final ClassLoaderResourcesCompiler.Input classLoaderResources = buildClassLoaderResources(shared, languageProject);
@@ -82,9 +74,6 @@ public class LanguageProjectCompilerInputBuilder {
 
         final StrategoRuntimeLanguageCompiler.@Nullable Input strategoRuntime = buildStrategoRuntime(shared, languageProject, constraintAnalyzer);
         if(strategoRuntime != null) project.strategoRuntime(strategoRuntime);
-
-        final ExportsLanguageCompiler.@Nullable Input exports = buildExports(shared, languageProject);
-        if(exports != null) project.exports(exports);
 
         return project
             .languageProject(languageProject)
@@ -155,13 +144,5 @@ public class LanguageProjectCompilerInputBuilder {
         }
 
         return builder.build();
-    }
-
-    private ExportsLanguageCompiler.@Nullable Input buildExports(Shared shared, LanguageProject languageProject) {
-        if(!exportsEnabled) return null;
-        return exports
-            .shared(shared)
-            .languageProject(languageProject)
-            .build();
     }
 }

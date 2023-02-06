@@ -2,6 +2,7 @@ package mb.spoofax.lwb.compiler.sdf3;
 
 import mb.common.option.Option;
 import mb.common.util.ADT;
+import mb.common.util.ListView;
 import mb.resource.hierarchical.ResourcePath;
 import mb.sdf3.task.spec.Sdf3SpecConfig;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -13,14 +14,50 @@ import java.io.Serializable;
  */
 @ADT
 public abstract class SpoofaxSdf3Config implements Serializable {
+    public static class BuildParseTable implements Serializable {
+        public final Sdf3SpecConfig sdf3SpecConfig;
+        public final ResourcePath outputParseTableAtermFile;
+        public final ResourcePath outputParseTablePersistedFile;
+
+        public BuildParseTable(Sdf3SpecConfig sdf3SpecConfig, ResourcePath outputParseTableAtermFile, ResourcePath outputParseTablePersistedFile) {
+            this.sdf3SpecConfig = sdf3SpecConfig;
+            this.outputParseTableAtermFile = outputParseTableAtermFile;
+            this.outputParseTablePersistedFile = outputParseTablePersistedFile;
+        }
+
+        @Override public boolean equals(@Nullable Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            final BuildParseTable that = (BuildParseTable)o;
+            if(!sdf3SpecConfig.equals(that.sdf3SpecConfig)) return false;
+            if(!outputParseTableAtermFile.equals(that.outputParseTableAtermFile)) return false;
+            return outputParseTablePersistedFile.equals(that.outputParseTablePersistedFile);
+        }
+
+        @Override public int hashCode() {
+            int result = sdf3SpecConfig.hashCode();
+            result = 31 * result + outputParseTableAtermFile.hashCode();
+            result = 31 * result + outputParseTablePersistedFile.hashCode();
+            return result;
+        }
+
+        @Override public String toString() {
+            return "BuildParseTable{" +
+                "sdf3SpecConfig=" + sdf3SpecConfig +
+                ", outputParseTableAtermFile=" + outputParseTableAtermFile +
+                ", outputParseTablePersistedFile=" + outputParseTablePersistedFile +
+                '}';
+        }
+    }
+
     public interface Cases<R> {
-        R files(Sdf3SpecConfig sdf3SpecConfig, ResourcePath outputParseTableAtermFile, ResourcePath outputParseTablePersistedFile);
+        R files(BuildParseTable mainBuildParseTable, ListView<Sdf3SpecConfig> strategoConcreteSyntaxExtensions);
 
         R prebuilt(ResourcePath inputParseTableAtermFile, ResourcePath inputParseTablePersistedFile, ResourcePath outputParseTableAtermFile, ResourcePath outputParseTablePersistedFile);
     }
 
-    public static SpoofaxSdf3Config files(Sdf3SpecConfig sdf3SpecConfig, ResourcePath outputParseTableAtermFile, ResourcePath outputParseTablePersistedFile) {
-        return SpoofaxSdf3Configs.files(sdf3SpecConfig, outputParseTableAtermFile, outputParseTablePersistedFile);
+    public static SpoofaxSdf3Config files(BuildParseTable mainBuildParseTable, ListView<Sdf3SpecConfig> strategoConcreteSyntaxExtensions) {
+        return SpoofaxSdf3Configs.files(mainBuildParseTable, strategoConcreteSyntaxExtensions);
     }
 
     public static SpoofaxSdf3Config prebuilt(ResourcePath inputParseTableAtermFile, ResourcePath inputParseTablePersistedFile, ResourcePath outputParseTableAtermFile, ResourcePath outputParseTablePersistedFile) {
@@ -39,8 +76,16 @@ public abstract class SpoofaxSdf3Config implements Serializable {
     }
 
 
-    public Option<Sdf3SpecConfig> getSdf3SpecConfig() {
-        return Option.ofOptional(SpoofaxSdf3Configs.getSdf3SpecConfig(this));
+    public Option<BuildParseTable> getMainBuildParseTable() {
+        return Option.ofOptional(SpoofaxSdf3Configs.getMainBuildParseTable(this));
+    }
+
+    public Option<Sdf3SpecConfig> getMainSdf3SpecConfig() {
+        return getMainBuildParseTable().map(b -> b.sdf3SpecConfig);
+    }
+
+    public Option<ListView<Sdf3SpecConfig>> getStrategoConcreteSyntaxExtensions() {
+        return Option.ofOptional(SpoofaxSdf3Configs.getStrategoConcreteSyntaxExtensions(this));
     }
 
 

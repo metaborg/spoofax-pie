@@ -1,6 +1,7 @@
 package mb.sdf3.adapter;
 
 import mb.common.result.Result;
+import mb.common.util.ListView;
 import mb.log.dagger.DaggerLoggerComponent;
 import mb.log.dagger.LoggerModule;
 import mb.pie.api.Supplier;
@@ -13,10 +14,10 @@ import mb.sdf3.Sdf3Component;
 import mb.sdf3.Sdf3ResourcesComponent;
 import mb.sdf3.task.Sdf3AnalyzeMulti;
 import mb.sdf3.task.Sdf3Desugar;
-import mb.sdf3.task.Sdf3GetSourceFiles;
 import mb.sdf3.task.Sdf3Parse;
 import mb.sdf3.task.debug.MultiAstDesugarFunction;
 import mb.sdf3.task.spec.Sdf3SpecConfig;
+import mb.sdf3.task.spoofax.Sdf3GetSourceFilesWrapper;
 import mb.spoofax.test.SingleLanguageTestBase;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -35,7 +36,7 @@ class TestBase extends SingleLanguageTestBase<Sdf3ResourcesComponent, Sdf3Compon
     }
 
     final Sdf3Parse parse = component.getSdf3Parse();
-    final Sdf3GetSourceFiles getSourceFiles = component.getSdf3GetSourceFiles();
+    final Sdf3GetSourceFilesWrapper getSourceFiles = component.getSdf3GetSourceFilesWrapper();
     final Sdf3Desugar desugar = component.getSdf3Desugar();
     final Sdf3AnalyzeMulti analyze = component.getSdf3AnalyzeMulti();
 
@@ -68,7 +69,7 @@ class TestBase extends SingleLanguageTestBase<Sdf3ResourcesComponent, Sdf3Compon
 
 
     Sdf3SpecConfig specConfig(ResourcePath rootDirectory, ResourcePath mainSourceDirectory, ResourcePath mainFile) {
-        return new Sdf3SpecConfig(rootDirectory, mainSourceDirectory, mainFile, Sdf3SpecConfig.createDefaultParseTableConfiguration());
+        return new Sdf3SpecConfig(rootDirectory, mainSourceDirectory, mainFile, ListView.of(), ListView.of(), Sdf3SpecConfig.createDefaultParseTableConfiguration());
     }
 
     Sdf3SpecConfig specConfig(ResourcePath rootDirectory) {

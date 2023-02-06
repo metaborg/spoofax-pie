@@ -1,0 +1,7 @@
+module main
+
+imports lib/test
+
+colorer
+
+  unknown : black

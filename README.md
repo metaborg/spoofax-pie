@@ -1,5 +1,5 @@
 [![GitHub license](https://img.shields.io/github/license/metaborg/spoofax-pie)](https://github.com/metaborg/spoofax-pie/blob/master/LICENSE)
-[![GitHub actions](https://img.shields.io/github/workflow/status/metaborg/spoofax-pie/Build?label=GitHub%20actions)](https://github.com/metaborg/spoofax-pie/actions/workflows/build.yml)
+[![GitHub actions](https://img.shields.io/github/actions/workflow/status/metaborg/spoofax-pie/build.yml?branch=master)](https://github.com/metaborg/spoofax-pie/actions/workflows/build.yml)
 [![Jenkins](https://img.shields.io/jenkins/build/https/buildfarm.metaborg.org/job/metaborg/job/spoofax-pie/job/master?label=Jenkins)](https://buildfarm.metaborg.org/job/metaborg/job/spoofax-pie/job/master/lastBuild)
 [![Jenkins Tests](https://img.shields.io/jenkins/tests/https/buildfarm.metaborg.org/job/metaborg/job/spoofax-pie/job/master?label=Jenkins%20tests)](https://buildfarm.metaborg.org/job/metaborg/job/spoofax-pie/job/master/lastBuild/testReport/)
 [![Spoofax 3 core](https://img.shields.io/maven-metadata/v?label=spoofax.core&metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fspoofax.core%2Fmaven-metadata.xml)](https://mvnrepository.com/artifact/org.metaborg/spoofax.core?repo=metaborg-releases)
@@ -57,6 +57,8 @@ This repository is built with Gradle, which requires a JDK of at least version 8
 
 To build this repository, run `./gradlew buildAll` on Linux and macOS, or `gradlew.bat buildAll` on Windows.
 
+To build the documentation, see [docs/README.md](docs/README.md).
+
 ### Automated Builds
 
 This repository is built on:
@@ -97,7 +99,7 @@ Push this change to the `develop` branch and a GitHub actions build will automat
 
 ## Copyright and License
 
-Copyright © 2018-2021 Delft University of Technology
+Copyright © 2018-2022 Delft University of Technology
 
 The files in this repository are licensed under the [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
 You may use the files in this repository in compliance with the license.

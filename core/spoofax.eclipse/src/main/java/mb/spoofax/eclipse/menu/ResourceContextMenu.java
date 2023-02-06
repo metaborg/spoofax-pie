@@ -126,7 +126,7 @@ public abstract class ResourceContextMenu extends CommandMenuShared {
                 final ArrayList<CommandContext> finalContexts =
                     enclosingCommandContextProvider.filterRequired(contexts.stream(), commandAction.requiredEnclosingResourceTypes())
                         .collect(Collectors.toCollection(ArrayList::new));
-                menu.add(createCommand(runCommandCommandId, languageComponent.getLanguageInstance().getId(), commandRequest, ListView.of(finalContexts), commandAction.displayName(), commandAction.description()));
+                menu.add(createCommand(runCommandCommandId, languageComponent.getLanguageInstance().getCoordinate(), commandRequest, ListView.of(finalContexts), commandAction.displayName(), commandAction.description()));
             });
         }
 

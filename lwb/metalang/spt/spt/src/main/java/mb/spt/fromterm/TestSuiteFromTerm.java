@@ -8,6 +8,7 @@ import mb.common.util.MapView;
 import mb.jsglr.common.TermTracer;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.core.CoordinateRequirement;
 import mb.spt.model.TestCase;
 import mb.spt.model.TestExpectation;
 import mb.spt.model.TestFragment;
@@ -44,13 +45,14 @@ public class TestSuiteFromTerm {
         }
 
         String name = "";
-        @Nullable String languageIdHint = null;
+        @Nullable CoordinateRequirement languageCoordinateRequirementHint = null;
         final IStrategoList headers = TermUtils.asListAt(appl, 0).orElseThrow(() -> new InvalidAstShapeException("a term list as first subterm", appl));
         for(IStrategoTerm header : headers) {
             if(TermUtils.isAppl(header, "Name", 1)) {
                 name = TermUtils.asJavaStringAt(header, 0).orElseThrow(() -> new InvalidAstShapeException("a string as first subterm", header));
             } else if(TermUtils.isAppl(header, "Language", 1)) {
-                languageIdHint = TermUtils.asJavaStringAt(header, 0).orElseThrow(() -> new InvalidAstShapeException("a string as first subterm", header));
+                final String requirement = TermUtils.asJavaStringAt(header, 0).orElseThrow(() -> new InvalidAstShapeException("a string as first subterm", header));
+                languageCoordinateRequirementHint = CoordinateRequirement.parse(requirement).get();
             }
         }
         if(name.isEmpty()) {
@@ -73,7 +75,7 @@ public class TestSuiteFromTerm {
                     .orElseThrow(() -> new InvalidAstShapeException("test fixture start text as fifth subterm", testFixtureTerm));
                 return new TestFixture(beforeText, beforeRegion.getStartOffset(), afterText, afterRegion.getStartOffset());
             })
-            .orElse(null);
+            .get();
 
         final IStrategoList testCaseTerms = TermUtils.asListAt(appl, 2).orElseThrow(() -> new InvalidAstShapeException("a term list as third subterm", appl));
         final ArrayList<TestCase> testCases = new ArrayList<>(testCaseTerms.size());
@@ -83,7 +85,7 @@ public class TestSuiteFromTerm {
             testCases.add(testCase);
         }
 
-        return new TestSuite(name, file, ListView.of(testCases), languageIdHint, rootDirectoryHint);
+        return new TestSuite(name, file, ListView.of(testCases), rootDirectoryHint, languageCoordinateRequirementHint);
     }
 
     private static TestCase testCaseFromTerm(

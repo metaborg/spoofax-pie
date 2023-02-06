@@ -9,7 +9,6 @@ import mb.log.dagger.LoggerModule;
 import mb.pie.api.ExecException;
 import mb.pie.api.MixedSession;
 import mb.pie.dagger.PieComponent;
-import mb.pie.dagger.PieModule;
 import mb.pie.runtime.PieBuilderImpl;
 import mb.pie.runtime.store.SerializingStoreBuilder;
 import mb.pie.serde.fst.FstSerde;
@@ -21,11 +20,17 @@ import mb.resource.classloader.ClassLoaderResourceLocations;
 import mb.resource.classloader.ClassLoaderResourceRegistry;
 import mb.resource.classloader.JarFileWithPath;
 import mb.resource.dagger.DaggerRootResourceServiceComponent;
+import mb.resource.dagger.ResourceServiceComponent;
 import mb.resource.dagger.RootResourceServiceComponent;
 import mb.resource.dagger.RootResourceServiceModule;
 import mb.resource.fs.FSResource;
 import mb.resource.hierarchical.HierarchicalResource;
-import mb.spoofax.lwb.compiler.dagger.StandaloneSpoofax3Compiler;
+import mb.spoofax.core.component.StaticComponentManagerBuilder;
+import mb.spoofax.core.platform.DaggerPlatformComponent;
+import mb.spoofax.core.platform.PlatformComponent;
+import mb.spoofax.lwb.compiler.definition.CheckLanguageDefinition;
+import mb.spoofax.lwb.compiler.definition.CompileLanguageDefinition;
+import mb.spoofax.lwb.compiler.definition.CompileLanguageDefinitionException;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -34,18 +39,19 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class TestBase {
     final ClassLoaderResourceRegistry classLoaderResourceRegistry =
-        new ClassLoaderResourceRegistry("language-compiler", CompileLanguageTest.class.getClassLoader());
+        new ClassLoaderResourceRegistry("language-compiler", CompileLanguageDefinitionTest.class.getClassLoader());
 
     HierarchicalResource tempDirectory;
     HierarchicalResource rootDirectory;
     ExceptionPrinter exceptionPrinter;
     LoggerComponent loggerComponent;
-    RootResourceServiceComponent rootResourceServiceComponent;
-    StandaloneSpoofax3Compiler compiler;
+    RootResourceServiceComponent baseResourceServiceComponent;
+    PlatformComponent platformComponent;
+    SpoofaxLwbCompiler compiler;
     ResourceService resourceService;
     PieComponent pieComponent;
-    CheckLanguageSpecification checkLanguageSpecification;
-    CompileLanguage compileLanguage;
+    CheckLanguageDefinition checkLanguageDefinition;
+    CompileLanguageDefinition compileLanguageDefinition;
 
     void setup(Path temporaryDirectoryPath) throws IOException {
         tempDirectory = new FSResource(temporaryDirectoryPath);
@@ -54,22 +60,28 @@ class TestBase {
         loggerComponent = DaggerLoggerComponent.builder()
             .loggerModule(LoggerModule.stdOutVeryVerbose())
             .build();
-        rootResourceServiceComponent = DaggerRootResourceServiceComponent.builder()
+        baseResourceServiceComponent = DaggerRootResourceServiceComponent.builder()
             .rootResourceServiceModule(new RootResourceServiceModule(classLoaderResourceRegistry))
             .loggerComponent(loggerComponent)
+            .build();
+        platformComponent = DaggerPlatformComponent.builder()
+            .loggerComponent(loggerComponent)
+            .resourceServiceComponent(baseResourceServiceComponent)
             .build();
         recreateCompiler();
     }
 
     void teardown() throws Exception {
-        compileLanguage = null;
+        compileLanguageDefinition = null;
         pieComponent.close();
         pieComponent = null;
         resourceService = null;
         compiler.close();
         compiler = null;
-        rootResourceServiceComponent.close();
-        rootResourceServiceComponent = null;
+        platformComponent.close();
+        platformComponent = null;
+        baseResourceServiceComponent.close();
+        baseResourceServiceComponent = null;
         loggerComponent = null;
         exceptionPrinter = null;
         rootDirectory.close();
@@ -87,23 +99,23 @@ class TestBase {
         }
     }
 
-    void checkAndCompileLanguage() throws CompileLanguageException, ExecException, InterruptedException {
-        final CompileLanguage.Args args = CompileLanguage.Args.builder()
+    void checkAndCompileLanguage() throws CompileLanguageDefinitionException, ExecException, InterruptedException {
+        final CompileLanguageDefinition.Args args = CompileLanguageDefinition.Args.builder()
             .rootDirectory(rootDirectory.getPath())
             .build();
         try(final MixedSession session = pieComponent.getPie().newSession()) {
-            final KeyedMessages messages = session.require(checkLanguageSpecification.createTask(rootDirectory.getPath()));
+            final KeyedMessages messages = session.require(checkLanguageDefinition.createTask(rootDirectory.getPath()));
             assertNoErrors(messages);
-            session.require(compileLanguage.createTask(args)).unwrap();
-        } catch(CompileLanguageException e) {
+            session.require(compileLanguageDefinition.createTask(args)).unwrap();
+        } catch(CompileLanguageDefinitionException e) {
             System.err.println(exceptionPrinter.printExceptionToString(e));
             throw e;
         }
     }
 
     void recreateCompiler() throws IOException {
-        compileLanguage = null;
-        checkLanguageSpecification = null;
+        compileLanguageDefinition = null;
+        checkLanguageDefinition = null;
         pieComponent = null;
         resourceService = null;
         if(compiler != null) {
@@ -112,20 +124,25 @@ class TestBase {
         }
 
         final WritableResource pieStoreFile = tempDirectory.appendRelativePath(".build/compiler.piestore").createParents();
-        compiler = new StandaloneSpoofax3Compiler(
+        final StaticComponentManagerBuilder<LoggerComponent, ResourceServiceComponent, PlatformComponent> builder = new StaticComponentManagerBuilder<>(
             loggerComponent,
-            rootResourceServiceComponent.createChildModule(classLoaderResourceRegistry),
-            new PieModule(PieBuilderImpl::new)
-                .withSerdeFactory((loggerFactory -> new FstSerde()))
-                .withStoreFactory(((serde, resourceService, loggerFactory) -> SerializingStoreBuilder.ofInMemoryStore(serde)
-                    .withResourceStorage(pieStoreFile)
-                    .build()
-                ))
+            baseResourceServiceComponent,
+            platformComponent,
+            PieBuilderImpl::new
         );
-        resourceService = compiler.compiler.resourceServiceComponent.getResourceService();
+        builder.registerPieModuleCustomizer(pieModule -> {
+            pieModule.withSerdeFactory((loggerFactory -> new FstSerde()));
+            pieModule.withStoreFactory((serde, resourceService, loggerFactory) -> SerializingStoreBuilder.ofInMemoryStore(serde)
+                .withResourceStorage(pieStoreFile)
+                .build()
+            );
+        });
+        compiler = SpoofaxLwbCompiler.fromComponentBuilder(builder);
+        final SpoofaxLwbCompilerComponent spoofaxLwbCompilerComponent = compiler.spoofaxLwbCompilerComponent;
+        resourceService = spoofaxLwbCompilerComponent.getResourceServiceComponent().getResourceService();
         pieComponent = compiler.pieComponent;
-        compileLanguage = compiler.compiler.component.getCompileLanguage();
-        checkLanguageSpecification = compiler.compiler.component.getCheckLanguageSpecification();
+        compileLanguageDefinition = spoofaxLwbCompilerComponent.getCompileLanguageDefinition();
+        checkLanguageDefinition = spoofaxLwbCompilerComponent.getCheckLanguageDefinition();
     }
 
     void assertNoErrors(KeyedMessages messages) {

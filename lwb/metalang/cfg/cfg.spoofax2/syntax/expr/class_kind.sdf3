@@ -1,0 +1,10 @@
+module expr/class_kind
+
+imports
+
+  expr
+
+context-free syntax
+
+  ClassKind.Generated = <Generated>
+  ClassKind.Manual    = <Manual>

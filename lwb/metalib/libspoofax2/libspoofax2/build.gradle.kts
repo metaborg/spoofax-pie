@@ -14,10 +14,6 @@ languageProject {
     defaultPackageId("mb.libspoofax2")
   }
   compilerInput {
-    withExports().run {
-      addExports("Stratego", "trans")
-      addExports("Esv", "editor")
-    }
   }
 }
 spoofax2BasedLanguageProject {
@@ -36,8 +32,12 @@ spoofax2BasedLanguageProject {
 languageAdapterProject {
   compilerInput {
     project.configureCompilerInput()
+    withExports().run {
+      addDirectoryExport("Stratego", "trans")
+      addDirectoryExport("ESV", "editor")
+    }
   }
 }
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
-
+  compositionGroup("mb.spoofax.lwb")
 }

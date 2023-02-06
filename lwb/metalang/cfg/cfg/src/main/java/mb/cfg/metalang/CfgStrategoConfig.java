@@ -1,9 +1,9 @@
 package mb.cfg.metalang;
 
-import mb.cfg.CompileLanguageSpecificationShared;
+import mb.cfg.CompileMetaLanguageSourcesShared;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.compiler.adapter.ExportsCompiler;
 import mb.spoofax.compiler.language.StrategoRuntimeLanguageCompiler;
-import mb.spoofax.compiler.util.BuilderBase;
 import mb.spoofax.compiler.util.Conversion;
 import mb.spoofax.compiler.util.Shared;
 import org.immutables.value.Value;
@@ -16,50 +16,34 @@ import java.util.Properties;
  */
 @Value.Immutable
 public interface CfgStrategoConfig extends Serializable {
-    class Builder extends ImmutableCfgStrategoConfig.Builder implements BuilderBase {
-        static final String propertiesPrefix = "stratego.";
-        static final String languageStrategyAffix = propertiesPrefix + "languageStrategyAffix";
+    String exportsId = "Stratego";
 
-        public Builder withPersistentProperties(Properties properties) {
-            with(properties, languageStrategyAffix, this::languageStrategyAffix);
-            return this;
-        }
-    }
+
+    class Builder extends ImmutableCfgStrategoConfig.Builder {}
 
     static Builder builder() {return new Builder();}
 
 
     @Value.Default default CfgStrategoSource source() {
         return CfgStrategoSource.files(CfgStrategoSource.Files.builder()
-            .compileLanguageShared(compileLanguageShared())
+            .compileMetaLanguageSourcesShared(compileMetaLanguageSourcesShared())
+            .shared(shared())
             .build()
         );
     }
 
 
-    @Value.Default default boolean enableSdf3StatixExplicationGen() {
-        // TODO: move into source after CC lab.
-        return false;
-    }
-
-    @Value.Default default String languageStrategyAffix() {
-        // TODO: should go into CfgStrategoSource.Files? complicated due to persistent properties though...
-        // TODO: convert to Stratego ID instead of Java ID.
-        return Conversion.nameToJavaId(shared().name().toLowerCase());
-    }
-
-
     @Value.Default default ResourcePath javaSourceFileOutputDirectory() {
         // Generated Java sources directory, so that Gradle compiles the Java sources into classes.
-        return compileLanguageShared().generatedJavaSourcesDirectory();
+        return compileMetaLanguageSourcesShared().generatedJavaSourcesDirectory();
     }
 
     @Value.Default default ResourcePath javaClassFileOutputDirectory() {
-        return compileLanguageShared().languageProject().project().buildClassesDirectory();
+        return compileMetaLanguageSourcesShared().languageProject().project().buildClassesDirectory();
     }
 
     @Value.Default default String outputJavaPackageId() {
-        return compileLanguageShared().languageProject().packageId() + ".strategies";
+        return compileMetaLanguageSourcesShared().languageProject().packageId() + ".strategies";
     }
 
     default String outputJavaPackagePath() {
@@ -67,7 +51,7 @@ public interface CfgStrategoConfig extends Serializable {
     }
 
     default String outputLibraryName() {
-        return compileLanguageShared().languageProject().project().coordinate().artifactId();
+        return compileMetaLanguageSourcesShared().languageProject().project().coordinate().artifactId;
     }
 
     default ResourcePath outputJavaInteropRegistererFile() {
@@ -81,18 +65,22 @@ public interface CfgStrategoConfig extends Serializable {
 
     /// Automatically provided sub-inputs
 
-    CompileLanguageSpecificationShared compileLanguageShared();
+    CompileMetaLanguageSourcesShared compileMetaLanguageSourcesShared();
 
     Shared shared();
 
 
     default void savePersistentProperties(Properties properties) {
-        properties.setProperty(Builder.languageStrategyAffix, languageStrategyAffix());
+        source().getFiles().savePersistentProperties(properties);
     }
 
 
     default void syncTo(StrategoRuntimeLanguageCompiler.Input.Builder builder) {
         builder.addStrategyPackageIds(outputJavaPackageId());
         builder.addInteropRegisterersByReflection(outputJavaPackageId() + ".InteropRegisterer");
+    }
+
+    default void syncTo(ExportsCompiler.Input.Builder builder) {
+        source().getFiles().syncTo(builder);
     }
 }

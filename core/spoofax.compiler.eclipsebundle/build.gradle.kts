@@ -17,7 +17,6 @@ dependencies {
   bundleApi(project(":tooling.eclipsebundle"))
 
   bundleEmbedApi(project(":spoofax.compiler"))
-  bundleEmbedApi(project(":spoofax.compiler.dagger"))
 }
 
 // Use bnd to create a single OSGi bundle JAR that includes all dependencies.

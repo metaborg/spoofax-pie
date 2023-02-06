@@ -5,7 +5,8 @@ plugins {
 
 languageEclipseProject {
   adapterProject.set(project(":libstatix"))
-  compilerInput {
-    languageGroup("mb.spoofax.lwb")
-  }
+}
+
+mavenize {
+  majorVersion.set("2021-03")
 }

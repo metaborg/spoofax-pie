@@ -1,12 +1,13 @@
 package mb.cfg.metalang;
 
-import mb.cfg.CompileLanguageSpecificationShared;
+import mb.cfg.CompileMetaLanguageSourcesShared;
 import mb.common.util.ADT;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -17,7 +18,7 @@ public abstract class CfgSdf3Source implements Serializable {
     @Value.Immutable
     public interface Files extends Serializable {
         class Builder extends ImmutableCfgSdf3Source.Files.Builder {
-            public static ResourcePath getDefaultMainSourceDirectory(CompileLanguageSpecificationShared shared) {
+            public static ResourcePath getDefaultMainSourceDirectory(CompileMetaLanguageSourcesShared shared) {
                 return shared.languageProject().project().srcDirectory();
             }
         }
@@ -26,16 +27,52 @@ public abstract class CfgSdf3Source implements Serializable {
 
 
         @Value.Default default ResourcePath mainSourceDirectory() {
-            return Builder.getDefaultMainSourceDirectory(compileLanguageShared());
+            return Builder.getDefaultMainSourceDirectory(compileMetaLanguageSourcesShared());
         }
 
         @Value.Default default ResourcePath mainFile() {
             return mainSourceDirectory().appendRelativePath("start.sdf3");
         }
 
+        List<ResourcePath> includeDirectories();
+
+        List<String> exportDirectories();
+
+        default ResourcePath unarchiveDirectory() {
+            return compileMetaLanguageSourcesShared().unarchiveDirectory().appendAsRelativePath("sdf3");
+        }
+
+        List<ResourcePath> strategoConcreteSyntaxExtensionMainFiles();
+
+
+        @Value.Default default boolean createDynamicParseTable() {
+            return false;
+        }
+
+        @Value.Default default boolean createDataDependentParseTable() {
+            return false;
+        }
+
+        @Value.Default default boolean createLayoutSensitiveParseTable() {
+            return false;
+        }
+
+        @Value.Default default boolean solveDeepConflictsInParseTable() {
+            return true;
+        }
+
+        @Value.Default default boolean checkOverlapInParseTable() {
+            return false;
+        }
+
+        @Value.Default default boolean checkPrioritiesInParseTable() {
+            return false;
+        }
+
+
         /// Automatically provided sub-inputs
 
-        CompileLanguageSpecificationShared compileLanguageShared();
+        CompileMetaLanguageSourcesShared compileMetaLanguageSourcesShared();
     }
 
     interface Cases<R> {

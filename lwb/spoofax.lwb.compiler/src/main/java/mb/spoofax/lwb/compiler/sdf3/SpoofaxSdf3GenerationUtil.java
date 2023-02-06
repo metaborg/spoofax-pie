@@ -10,9 +10,9 @@ import mb.pie.api.Supplier;
 import mb.resource.hierarchical.ResourcePath;
 import mb.sdf3.task.Sdf3AnalyzeMulti;
 import mb.sdf3.task.Sdf3Desugar;
-import mb.sdf3.task.Sdf3GetSourceFiles;
-import mb.sdf3.task.Sdf3Parse;
 import mb.sdf3.task.spec.Sdf3SpecConfig;
+import mb.sdf3.task.spoofax.Sdf3GetSourceFilesWrapper;
+import mb.sdf3.task.spoofax.Sdf3ParseWrapper;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
@@ -23,15 +23,15 @@ import java.io.IOException;
  */
 public class SpoofaxSdf3GenerationUtil {
     private final SpoofaxSdf3Configure configure;
-    private final Sdf3Parse parse;
-    private final Sdf3GetSourceFiles getSourceFiles;
+    private final Sdf3ParseWrapper parse;
+    private final Sdf3GetSourceFilesWrapper getSourceFiles;
     private final Sdf3Desugar desugar;
     private final Sdf3AnalyzeMulti analyze;
 
     @Inject public SpoofaxSdf3GenerationUtil(
         SpoofaxSdf3Configure configure,
-        Sdf3Parse parse,
-        Sdf3GetSourceFiles getSourceFiles,
+        Sdf3ParseWrapper parse,
+        Sdf3GetSourceFilesWrapper getSourceFiles,
         Sdf3Desugar desugar,
         Sdf3AnalyzeMulti analyze
     ) {
@@ -48,7 +48,9 @@ public class SpoofaxSdf3GenerationUtil {
 
         default void generateFromAnalyzed(ExecContext context, Supplier<Result<ConstraintAnalyzeMultiTaskDef.SingleFileOutput, ?>> singleFileAnalysisOutputSupplier) throws E, IOException, InterruptedException {}
 
-        default void generateFromConfig(ExecContext context, Sdf3SpecConfig sdf3Config) throws E, IOException, InterruptedException {}
+        default void generateFromMainBuildParseTable(ExecContext context, SpoofaxSdf3Config.BuildParseTable buildParseTable) throws E, IOException, InterruptedException {}
+
+        default void generateFromStrategoConcreteSyntaxExtension(ExecContext context, Sdf3SpecConfig strategoConcreteSyntaxExtension) throws E, IOException, InterruptedException {}
     }
 
     public <E extends Exception> void performSdf3GenerationIfEnabled(
@@ -60,19 +62,22 @@ public class SpoofaxSdf3GenerationUtil {
         final Option<SpoofaxSdf3Config> configureOption = configureResult.unwrap();
         if(configureOption.isSome()) {
             final SpoofaxSdf3Config spoofaxSdf3Config = configureOption.unwrap();
-            if(!spoofaxSdf3Config.getSdf3SpecConfig().isSome()) {
+            if(!spoofaxSdf3Config.getMainSdf3SpecConfig().isSome()) {
                 return; // Only generate when there are SDF3 source files (not prebuilt).
             }
-            final Sdf3SpecConfig config = spoofaxSdf3Config.getSdf3SpecConfig().unwrap();
+            final SpoofaxSdf3Config.BuildParseTable buildParseTable = spoofaxSdf3Config.getMainBuildParseTable().unwrap();
             final JsglrParseTaskInput.Builder parseInputBuilder = parse.inputBuilder().rootDirectoryHint(rootDirectory);
-            final Sdf3AnalyzeMulti.Input analyzeInput = new Sdf3AnalyzeMulti.Input(config.rootDirectory, parse.createRecoverableMultiAstSupplierFunction(getSourceFiles.createFunction()));
+            final Sdf3AnalyzeMulti.Input analyzeInput = new Sdf3AnalyzeMulti.Input(buildParseTable.sdf3SpecConfig.rootDirectory, parse.createRecoverableMultiAstSupplierFunction(getSourceFiles.createFunction()));
             for(ResourcePath file : context.require(getSourceFiles, rootDirectory)) {
                 final Supplier<Result<ConstraintAnalyzeMultiTaskDef.SingleFileOutput, ?>> singleFileAnalysisOutputSupplier = analyze.createSingleFileOutputSupplier(analyzeInput, file);
                 callbacks.generateFromAnalyzed(context, singleFileAnalysisOutputSupplier);
                 final STask<Result<IStrategoTerm, ?>> astSupplier = desugar.createSupplier(parseInputBuilder.withFile(file).buildAstSupplier());
                 callbacks.generateFromAst(context, astSupplier);
             }
-            callbacks.generateFromConfig(context, config);
+            callbacks.generateFromMainBuildParseTable(context, buildParseTable);
+            for(Sdf3SpecConfig strategoConcreteSyntaxExtension : spoofaxSdf3Config.getStrategoConcreteSyntaxExtensions().unwrap()) {
+                callbacks.generateFromStrategoConcreteSyntaxExtension(context, strategoConcreteSyntaxExtension);
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 package mb.statix.codecompletion.strategies.runtime;
 
-import mb.statix.codecompletion.SelectedConstraintSolverState;
+import mb.statix.codecompletion.CCSolverState;
+import mb.statix.codecompletion.SelectedConstraintCCSolverState;
 import mb.statix.codecompletion.SolverState;
 import mb.tego.sequences.Seq;
 import mb.statix.solver.IConstraint;
@@ -12,7 +13,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 /**
  * Selects constraints for which the given predicate does not fail.
  */
-public final class SelectStrategy<C extends IConstraint> extends NamedStrategy2<Class<C>, Strategy1<C, SolverState, @Nullable SolverState>, SolverState, Seq<SelectedConstraintSolverState<C>>> {
+public final class SelectStrategy<C extends IConstraint> extends NamedStrategy2<Class<C>, Strategy1<C, CCSolverState, @Nullable CCSolverState>, CCSolverState, Seq<SelectedConstraintCCSolverState<C>>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final SelectStrategy instance = new SelectStrategy();
@@ -36,25 +37,25 @@ public final class SelectStrategy<C extends IConstraint> extends NamedStrategy2<
     }
 
     @Override
-    public Seq<SelectedConstraintSolverState<C>> evalInternal(
+    public Seq<SelectedConstraintCCSolverState<C>> evalInternal(
         TegoEngine engine,
         Class<C> constraintClass,
-        Strategy1<C, SolverState, @Nullable SolverState> predicate,
-        SolverState input
+        Strategy1<C, CCSolverState, @Nullable CCSolverState> predicate,
+        CCSolverState input
     ) {
         return eval(engine, constraintClass, predicate, input);
     }
 
-    public static <C extends IConstraint> Seq<SelectedConstraintSolverState<C>> eval(
+    public static <C extends IConstraint> Seq<SelectedConstraintCCSolverState<C>> eval(
         TegoEngine engine,
         Class<C> constraintClass,
-        Strategy1<C, SolverState, @Nullable SolverState> predicate,
-        SolverState input
+        Strategy1<C, CCSolverState, @Nullable CCSolverState> predicate,
+        CCSolverState input
     ) {
         return Seq.from(input.getConstraints())
             .filterIsInstance(constraintClass)
             .filter(c -> engine.eval(predicate, c, input) != null)
-            .map(c -> SelectedConstraintSolverState.of(c, input));
+            .map(c -> SelectedConstraintCCSolverState.of(c, input));
     }
 
 }

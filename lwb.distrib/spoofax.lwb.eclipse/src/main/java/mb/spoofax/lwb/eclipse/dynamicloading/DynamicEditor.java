@@ -1,13 +1,15 @@
 package mb.spoofax.lwb.eclipse.dynamicloading;
 
+import mb.spoofax.core.Coordinate;
+import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.eclipse.EclipseLanguageComponent;
 import mb.spoofax.eclipse.SpoofaxPlugin;
 import mb.spoofax.eclipse.editor.SpoofaxEditorBase;
 import mb.spoofax.eclipse.editor.SpoofaxSourceViewerConfiguration;
 import mb.spoofax.eclipse.util.StyleUtil;
-import mb.spoofax.lwb.dynamicloading.DynamicLanguage;
-import mb.spoofax.lwb.dynamicloading.DynamicLanguageRegistry;
-import mb.spoofax.lwb.eclipse.SpoofaxLwbLifecycleParticipant;
+import mb.spoofax.lwb.dynamicloading.component.DynamicComponent;
+import mb.spoofax.lwb.dynamicloading.component.DynamicComponentManager;
+import mb.spoofax.lwb.eclipse.SpoofaxLwbPlugin;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -33,14 +35,14 @@ public class DynamicEditor extends SpoofaxEditorBase {
 
     // Set in initializeEditor, never null after that.
     protected @MonotonicNonNull StyleUtil styleUtil;
-    protected @MonotonicNonNull DynamicLanguageRegistry languageRegistry;
+    protected @MonotonicNonNull DynamicComponentManager dynamicComponentManager;
 
     // Set in createSourceViewer/setInput, unset in dispose, may be null when no file is set.
-    protected @Nullable String languageId;
+    protected @Nullable Coordinate componentCoordinate;
 
 
-    public @Nullable String getLanguageId() {
-        return languageId;
+    public @Nullable Coordinate getComponentCoordinate() {
+        return componentCoordinate;
     }
 
 
@@ -82,7 +84,7 @@ public class DynamicEditor extends SpoofaxEditorBase {
         super.initializeEditor();
 
         this.styleUtil = SpoofaxPlugin.getPlatformComponent().getStyleUtil();
-        this.languageRegistry = SpoofaxLwbLifecycleParticipant.getInstance().getDynamicLoadingComponent().getDynamicLanguageRegistry();
+        this.dynamicComponentManager = SpoofaxLwbPlugin.getDynamicLoadingComponent().getDynamicComponentManager();
     }
 
     @Override protected void setInput() {
@@ -91,10 +93,10 @@ public class DynamicEditor extends SpoofaxEditorBase {
     }
 
     @Override protected SourceViewerConfiguration createSourceViewerConfiguration() {
-        if(languageId != null) {
-            final @Nullable DynamicLanguage language = languageRegistry.getLanguageForId(languageId);
-            if(language != null) {
-                return new SpoofaxSourceViewerConfiguration(this, language.getLanguageComponent(), language.getPieComponent());
+        if(componentCoordinate != null) {
+            final @Nullable DynamicComponent component = dynamicComponentManager.getDynamicComponent(componentCoordinate).get();
+            if(component != null) {
+                return new SpoofaxSourceViewerConfiguration(this, component.getLanguageComponent().get(), component.getPieComponent());
             }
         }
         return new SpoofaxSourceViewerConfiguration(this);
@@ -102,10 +104,13 @@ public class DynamicEditor extends SpoofaxEditorBase {
 
     @Override protected void configureSourceViewerDecorationSupport(SourceViewerDecorationSupport support) {
         super.configureSourceViewerDecorationSupport(support);
-        if(languageId != null) {
-            final @Nullable DynamicLanguage language = languageRegistry.getLanguageForId(languageId);
+        if(componentCoordinate != null) {
+            final @Nullable DynamicComponent language = dynamicComponentManager.getDynamicComponent(componentCoordinate).get();
             if(language != null) {
-                setBracketSymbols(language.getLanguageComponent().getLanguageInstance(), support);
+                final @Nullable LanguageComponent languageComponent = language.getLanguageComponent().get();
+                if(languageComponent != null) {
+                    setBracketSymbols(languageComponent.getLanguageInstance(), support);
+                }
             }
         }
     }
@@ -123,43 +128,42 @@ public class DynamicEditor extends SpoofaxEditorBase {
             logger.error("Cannot set dynamically loaded language for editor '{}' because its input does not have have a file extension", inputName);
             return;
         }
-        final @Nullable DynamicLanguage language = languageRegistry.getLanguageForFileExtension(fileExtension);
+        final @Nullable DynamicComponent language = dynamicComponentManager.getDynamicComponent(fileExtension).get();
         if(language == null) {
             logger.error("Cannot set dynamically loaded language for editor '{}' because no language was found for file extension '{}'", inputName, fileExtension);
             return;
         }
-        languageId = language.getId();
-        logger.debug("Set dynamically loaded language for editor '{}' to '{}'", inputName, languageId);
+        componentCoordinate = language.getCoordinate();
+        logger.debug("Set dynamically loaded language for editor '{}' to '{}'", inputName, componentCoordinate);
     }
 
     @Override protected void scheduleJob(boolean initialUpdate) {
         // TODO: support case where file is null but document is not.
-        if(input == null || document == null || file == null || languageId == null) return;
-        final @Nullable EclipseDynamicLanguage language = (EclipseDynamicLanguage)languageRegistry.getLanguageForId(languageId);
-        if(language == null) {
-            logger.error("Cannot schedule editor update job for editor '{}' because no language for id '{}' was found", inputName, languageId);
+        if(input == null || document == null || file == null || componentCoordinate == null) return;
+        final @Nullable DynamicComponent component = dynamicComponentManager.getDynamicComponent(componentCoordinate).get();
+        if(component == null) {
+            logger.error("Cannot schedule editor update job for editor '{}' because no component for coordinate '{}' was found", inputName, componentCoordinate);
             return;
         }
-        final EclipseLanguageComponent languageComponent = language.getLanguageComponent();
-        logger.debug("Scheduling update job for editor '{}' of dynamically loaded language '{}'", inputName, language);
+        final @Nullable LanguageComponent languageComponent = component.getLanguageComponent().get();
+        if(languageComponent == null) {
+            return; // Component has no language component.
+        }
+        if(!(languageComponent instanceof EclipseLanguageComponent)) {
+            logger.error("Cannot schedule editor update job for editor '{}' because component for coordinate '{}' does not have a language component that implements EclipseLanguageComponent", inputName, componentCoordinate);
+            return;
+        }
+        final EclipseLanguageComponent eclipseLanguageComponent = (EclipseLanguageComponent)languageComponent;
+        logger.debug("Scheduling update job for editor '{}' of dynamically loaded language '{}'", inputName, component);
 
         cancelJobs();
-        final Job job = languageComponent.editorUpdateJobFactory().create(languageComponent, language.getPieComponent(), project, file, document, input, this);
-
-        //A dd refresh scheduling rule because listing/walking a resource may require refreshes.
-        final @Nullable ISchedulingRule refreshSchedulingRule;
-        if(project != null) {
-            refreshSchedulingRule = ResourcesPlugin.getWorkspace().getRuleFactory().refreshRule(project);
-        } else {
-            refreshSchedulingRule = null;
-        }
-
-        // noinspection ConstantConditions (scheduling rules may be null)
-        job.setRule(MultiRule.combine(new ISchedulingRule[]{
-            refreshSchedulingRule,
-            file,
-            languageComponent.startupReadLockRule()
-        }));
+        final Job job = eclipseLanguageComponent.editorUpdateJobFactory().create(eclipseLanguageComponent, component.getPieComponent(), project, file, document, input, this);
+        final ISchedulingRule rule = getJobSchedulingRule(eclipseLanguageComponent);
+        job.setRule(rule);
         job.schedule(initialUpdate ? 0 : 300);
+    }
+
+    private ISchedulingRule getJobSchedulingRule(EclipseLanguageComponent languageComponent) {
+        return getJobSchedulingRule(languageComponent, false);
     }
 }

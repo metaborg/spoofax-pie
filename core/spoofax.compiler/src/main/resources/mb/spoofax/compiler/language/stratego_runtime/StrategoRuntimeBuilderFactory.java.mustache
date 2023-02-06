@@ -10,11 +10,29 @@ public class {{baseStrategoRuntimeBuilderFactory.id}} implements StrategoRuntime
     private final LoggerFactory loggerFactory;
     private final ResourceService resourceService;
     private final HierarchicalResource definitionDir;
+{{#primitiveLibraryVars}}
+    private final {{variable}};
+{{/primitiveLibraryVars}}
+{{#interopRegistererVars}}
+    private final {{variable}};
+{{/interopRegistererVars}}
 
-    public {{baseStrategoRuntimeBuilderFactory.id}}(LoggerFactory loggerFactory, ResourceService resourceService, HierarchicalResource definitionDir) {
+    public {{baseStrategoRuntimeBuilderFactory.id}}(
+        LoggerFactory loggerFactory,
+        ResourceService resourceService,
+        HierarchicalResource definitionDir{{#primitiveLibraryVars}}{{#-first}},{{/-first}}
+        {{variable}}{{^-last}},{{/-last}}{{/primitiveLibraryVars}}{{#interopRegistererVars}}{{#-first}},{{/-first}}
+{{variable}}{{^-last}},{{/-last}}{{/interopRegistererVars}}
+    ) {
         this.loggerFactory = loggerFactory;
         this.resourceService = resourceService;
         this.definitionDir = definitionDir;
+{{#primitiveLibraryVars}}
+        {{thisAssign}};
+{{/primitiveLibraryVars}}
+{{#interopRegistererVars}}
+        {{thisAssign}};
+{{/interopRegistererVars}}
     }
 
     @Override public StrategoRuntimeBuilder create() {
@@ -39,13 +57,19 @@ public class {{baseStrategoRuntimeBuilderFactory.id}} implements StrategoRuntime
         builder.addContextObject(new mb.spoofax2.common.primitive.generic.Spoofax2LanguageContext(
             "{{languageProject.project.coordinate.groupId}}",
             "{{languageProject.project.coordinate.artifactId}}",
-            "{{languageProject.project.coordinate.versionOrUnspecified}}",
+            "{{languageProject.project.coordinate.version}}",
             definitionDir.getPath()
         ));
 {{/requiresSpoofax2Primitives}}
 {{#requiresConstraintSolverPrimitives}}
         builder.addLibrary(new mb.constraint.common.stratego.ConstraintPrimitiveLibrary(resourceService));
 {{/requiresConstraintSolverPrimitives}}
+{{#primitiveLibraryVars}}
+        builder.addLibrary({{name}});
+{{/primitiveLibraryVars}}
+{{#interopRegistererVars}}
+        builder.addInteropRegisterer({{name}});
+{{/interopRegistererVars}}
         return builder;
     }
 }

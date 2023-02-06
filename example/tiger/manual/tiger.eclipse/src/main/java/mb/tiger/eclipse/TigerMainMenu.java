@@ -1,9 +1,10 @@
 package mb.tiger.eclipse;
 
 import mb.spoofax.eclipse.menu.MainMenu;
+import mb.tiger.spoofax.TigerParticipant;
 
 public class TigerMainMenu extends MainMenu {
     public TigerMainMenu() {
-        super(TigerLanguage.getInstance().getComponent());
+        super(TigerEclipseParticipantFactory.getParticipant().getComponent());
     }
 }

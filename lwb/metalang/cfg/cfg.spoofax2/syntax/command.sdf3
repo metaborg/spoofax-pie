@@ -38,9 +38,12 @@ context-free sorts // Parameter
 
 context-free syntax
 
-  Parameter.Parameter = <<JavaIdLit> = parameter {
+  Parameter.Parameter = <<JavaIdLit> {
   <{ParameterProperty "\n"}*>
 }>
+  Parameter.ParameterDeprecated = <<JavaIdLit> = parameter {
+  <{ParameterProperty "\n"}*>
+}> {deprecated("Use <ParameterName> { ... } syntax instead (remove the '= parameter' part)")}
 
   ParameterProperty.ParameterType      = <type = <Expr>>
   ParameterProperty.ParameterRequired  = <required = <Expr>>

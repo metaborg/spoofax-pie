@@ -19,8 +19,8 @@ dependencies {
 }
 
 intellij {
-  version = "2019.3.2"
-  instrumentCode = false
+  version.set("2019.3.2")
+  instrumentCode.set(false)
 }
 
 // Skip non-incremental, slow, and unnecessary buildSearchableOptions task from IntelliJ.

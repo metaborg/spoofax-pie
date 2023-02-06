@@ -46,8 +46,8 @@ public class StrategoCheck implements TaskDef<StrategoAnalyzeConfig, KeyedMessag
     @Override public KeyedMessages exec(ExecContext context, StrategoAnalyzeConfig config) throws IOException {
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
 
-        final ResourceWalker walker = StrategoUtil.createResourceWalker();
-        final ResourceMatcher matcher = StrategoUtil.createResourceMatcher();
+        final ResourceWalker walker = StrategoUtil.resourceWalker;
+        final ResourceMatcher matcher = StrategoUtil.resourceMatcher;
         final HierarchicalResource rootDirectory = context.require(config.rootDirectory, ResourceStampers.modifiedDirRec(walker, matcher));
         try {
             final JsglrParseTaskInput.Builder parseInputBuilder = strategoParse.inputBuilder().rootDirectoryHint(config.rootDirectory);

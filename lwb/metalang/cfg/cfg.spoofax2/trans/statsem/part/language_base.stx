@@ -130,6 +130,18 @@ rules // Stratego runtime section and options
   strategoRuntimeOptionOk(s, StrategoRuntimeAddStatixPrimitives(e)) :-
     typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
 
+  strategoRuntimeOptionOk(s, StrategoRuntime_WithPrimitiveLibrary(e)) :-
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e.
+  strategoRuntimeOptionOk(s, StrategoRuntime_WithInteropRegisterer(e)) :-
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e.
+
+  strategoRuntimeOptionOk(s, StrategoRuntime_ClassKind(_)).
+  strategoRuntimeOptionOk(s, StrategoRuntime_BaseStrategoRuntimeBuilderFactory(e)) :-
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e.
+  strategoRuntimeOptionOk(s, StrategoRuntime_ExtendStrategoRuntimeBuilderFactory(e)) :-
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e.
+
+
 rules // Tego runtime section and options
 
   partOk(s, TegoRuntimeSection(options)) :-
@@ -145,11 +157,3 @@ rules // Code completion section and options
 
   codeCompletionOptionOk : scope * CodeCompletionOption
   codeCompletionOptionsOk maps codeCompletionOptionOk(*, list(*))
-
-rules // Exports section and options
-
-  partOk(s, ExportsSection(options)) :-
-    exportsOptionsOk(s, options).
-
-  exportsOptionOk : scope * ExportsOption
-  exportsOptionsOk maps exportsOptionOk(*, list(*))

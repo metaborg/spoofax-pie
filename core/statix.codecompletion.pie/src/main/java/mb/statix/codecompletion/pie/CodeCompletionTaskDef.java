@@ -27,6 +27,7 @@ import mb.pie.api.None;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
+import mb.statix.codecompletion.CCSolverState;
 import mb.statix.codecompletion.CodeCompletionProposal;
 import mb.statix.codecompletion.SolutionMeta;
 import mb.statix.codecompletion.SolverContext;
@@ -336,12 +337,12 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
             if (upgradedAstResult.isErr()) return upgradedAstResult.ignoreValueIfErr();
             final ITerm upgradedAst = upgradedAstResult.unwrapUnchecked();
             final ITermVar placeholder = getCompletionPlaceholder(upgradedAst);
-            final SolverState initialState = createInitialSolverState(upgradedAst, statixSecName, statixRootPredicateName, placeholderVarMap);
+            final CCSolverState initialState = createInitialSolverState(upgradedAst, statixSecName, statixRootPredicateName, placeholderVarMap);
             if (eventHandler != null) eventHandler.endPreparation();
 
             // Analyze the AST
             if (eventHandler != null) eventHandler.beginAnalysis();
-            final SolverState analyzedState = analyze(initialState);
+            final CCSolverState analyzedState = analyze(initialState);
             if (eventHandler != null) eventHandler.endAnalysis();
 
             // Execute the code completion Tego strategy
@@ -519,10 +520,10 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * @param placeholderVarMap the map of placeholders to variables
          * @return the initial solver state
          */
-        private SolverState createInitialSolverState(ITerm ast, String specName, String rootPredicateName, PlaceholderVarMap placeholderVarMap) {
+        private CCSolverState createInitialSolverState(ITerm ast, String specName, String rootPredicateName, PlaceholderVarMap placeholderVarMap) {
             String qualifiedName = makeQualifiedName(specName, rootPredicateName);
             IConstraint rootConstraint = new CUser(qualifiedName, Collections.singletonList(ast), null);
-            return SolverState.of(
+            return CCSolverState.of(
                     spec,                               // the specification
                     State.of(),                         // the new empty Statix state
                     ImmutableList.of(rootConstraint),   // list of constraints
@@ -540,8 +541,8 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * @return the resulting analyzed solver state
          * @throws IllegalStateException if the analyzed solver state has errors or has no constraints
          */
-        private SolverState analyze(SolverState initialState) {
-            final @Nullable SolverState analyzedState = tegoRuntime.eval(InferStrategy.getInstance(), initialState);
+        private CCSolverState analyze(CCSolverState initialState) {
+            final @Nullable CCSolverState analyzedState = tegoRuntime.eval(InferStrategy.getInstance(), initialState);
             if (analyzedState == null) {
                 throw new IllegalStateException("Completion failed: got no result from Tego strategy.");
             } else if(analyzedState.hasErrors()) {
@@ -561,7 +562,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * @param allowedErrors the collection of allowed errors
          * @return a lazy sequence of code completion proposals
          */
-        private Seq<CodeCompletionProposal> complete(SolverState state, ITermVar placeholder, Collection<Map.Entry<IConstraint, IMessage>> allowedErrors) {
+        private Seq<CodeCompletionProposal> complete(CCSolverState state, ITermVar placeholder, Collection<Map.Entry<IConstraint, IMessage>> allowedErrors) {
             // Create a strategy that fails if the term is not an injection
             final Strategy<ITerm, @Nullable ITerm> isInjPredicate = pred(this::isInjection);
 
@@ -574,7 +575,7 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
             }
 
             // The variable we're looking for is not in the unifier
-            final @Nullable Seq<SolverState> results = tegoRuntime.eval(CompleteStrategy.getInstance(), ctx, placeholder, Collections.emptySet(), state);
+            final @Nullable Seq<CCSolverState> results = tegoRuntime.eval(CompleteStrategy.getInstance(), ctx, placeholder, Collections.emptySet(), state);
             if (results == null) throw new IllegalStateException("This cannot be happening.");
             // NOTE: This is the point at which the built sequence gets evaluated.
             return results.map(s -> new CodeCompletionProposal(s, s.project(placeholder)));
@@ -706,9 +707,10 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          * @return the proposal term
          */
         private Result<IStrategoTerm, ?> proposalToStrategoTerm(CodeCompletionProposal proposal) {
-                final IStrategoTerm proposalTerm = strategoTerms.toStratego(proposal.getTerm(), true);
-                return downgradePlaceholders(proposalTerm)
-                    .flatMap((IStrategoTerm term) -> postAnalyze(term).ignoreErrIfOk());
+            final ITerm proposalTerm = removeListVariables(proposal.getTerm());
+            final IStrategoTerm proposalStrategoTerm = strategoTerms.toStratego(proposalTerm, true);
+            return downgradePlaceholders(proposalStrategoTerm)
+                .flatMap((IStrategoTerm term) -> postAnalyze(term).ignoreErrIfOk());
         }
 
         /**
@@ -719,6 +721,19 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
          */
         private Result<String, ?> strategoTermToString(IStrategoTerm implicatedTerm) {
             return prettyPrint(implicatedTerm);
+        }
+
+        /**
+         * Removes term variables in list positions.
+         *
+         * This is because they are not supported in Stratego, and no conversion is possible.
+         * We'll replace them with empty lists.
+         *
+         * @param term the term to transform
+         * @return the new term
+         */
+        private ITerm removeListVariables(ITerm term) {
+            return StrategoPlaceholders.replaceListVariablesByEmptyList(term);
         }
     }
 

@@ -4,29 +4,54 @@ imports
 
   statsem/part
   statsem/expr
-  
+  statsem/util
+
   signatures/part/language-sig
 
 rules // Sdf3 section and options
 
   partOk(s, Sdf3Section(options)) :- sdf3OptionsOk(s, options).
-  
+
   sdf3OptionOk : scope * Sdf3Option
   sdf3OptionsOk maps sdf3OptionOk(*, list(*))
-  
+
   sdf3OptionOk(s, Sdf3Source(source)) :-
     sdf3SourceOk(s, source).
-    
+
   sdf3SourceOk : scope * Sdf3Source
   sdf3SourceOk(s, Sdf3Files(options)) :- sdf3FilesOptionsOk(s, options).
   sdf3SourceOk(s, Sdf3Prebuilt(options)) :- sdf3PrebuiltOptionsOk(s, options).
-  
+
   sdf3FilesOptionOk : scope * Sdf3FilesOption
   sdf3FilesOptionsOk maps sdf3FilesOptionOk(*, list(*))
   sdf3FilesOptionOk(s, Sdf3FilesMainSourceDirectory(e)) :-
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
   sdf3FilesOptionOk(s, Sdf3FilesMainFile(e)) :-
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
+  sdf3FilesOptionOk(s, Sdf3FilesIncludeDirectory(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
+  sdf3FilesOptionOk(s, Sdf3FilesExportDirectory(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
+  sdf3FilesOptionOk(s, Sdf3ParseTableGeneratorSection(options)) :-
+    sdf3ParseTableGeneratorOptionsOk(s, options).
+  sdf3FilesOptionOk(s, Sdf3StrategoConcreteSyntaxExtensionMainFile(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
+
+  sdf3ParseTableGeneratorOptionOk : scope * Sdf3ParseTableGeneratorOption
+  sdf3ParseTableGeneratorOptionsOk maps sdf3ParseTableGeneratorOptionOk(*, list(*))
+
+  sdf3ParseTableGeneratorOptionOk(s, Sdf3ParseTableGeneratorDynamic(e)) :-
+    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
+  sdf3ParseTableGeneratorOptionOk(s, Sdf3ParseTableGeneratorDataDependent(e)) :-
+    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
+  sdf3ParseTableGeneratorOptionOk(s, Sdf3ParseTableGeneratorLayoutSensitive(e)) :-
+    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
+  sdf3ParseTableGeneratorOptionOk(s, Sdf3ParseTableGeneratorSolveDeepConflicts(e)) :-
+    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
+  sdf3ParseTableGeneratorOptionOk(s, Sdf3ParseTableGeneratorCheckOverlap(e)) :-
+    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
+  sdf3ParseTableGeneratorOptionOk(s, Sdf3ParseTableGeneratorCheckPriorities(e)) :-
+    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
 
   sdf3PrebuiltOptionOk : scope * Sdf3PrebuiltOption
   sdf3PrebuiltOptionsOk maps sdf3PrebuiltOptionOk(*, list(*))
@@ -35,39 +60,20 @@ rules // Sdf3 section and options
   sdf3PrebuiltOptionOk(s, Sdf3PrebuiltParseTablePersistedFile(e)) :-
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
 
-  sdf3OptionOk(s, Sdf3ParseTableGeneratorSection(options)) :-
-    sdf3ParseTableGeneratorOptionsOk(s, options).
-  
-  sdf3ParseTableGeneratorOptionOk : scope * Sdf3ParseTableGeneratorOption
-  sdf3ParseTableGeneratorOptionsOk maps sdf3ParseTableGeneratorOptionOk(*, list(*))
-  
-  sdf3ParseTableGeneratorOptionOk(s, Sdf3ParseTableGeneratorDynamic(e)) :- 
-    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
-  sdf3ParseTableGeneratorOptionOk(s, Sdf3ParseTableGeneratorDataDependent(e)) :- 
-    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
-  sdf3ParseTableGeneratorOptionOk(s, Sdf3ParseTableGeneratorLayoutSensitive(e)) :- 
-    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
-  sdf3ParseTableGeneratorOptionOk(s, Sdf3ParseTableGeneratorSolveDeepConflicts(e)) :- 
-    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
-  sdf3ParseTableGeneratorOptionOk(s, Sdf3ParseTableGeneratorCheckOverlap(e)) :- 
-    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
-  sdf3ParseTableGeneratorOptionOk(s, Sdf3ParseTableGeneratorCheckPriorities(e)) :- 
-    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
-
 rules // Esv section and options
 
   partOk(s, EsvSection(options)) :- esvOptionsOk(s, options).
-  
+
   esvOptionOk : scope * EsvOption
   esvOptionsOk maps esvOptionOk(*, list(*))
 
   esvOptionOk(s, EsvSource(source)) :-
     esvSourceOk(s, source).
-    
+
   esvSourceOk : scope * EsvSource
   esvSourceOk(s, EsvFiles(options)) :- esvFilesOptionsOk(s, options).
   esvSourceOk(s, EsvPrebuilt(options)) :- esvPrebuiltOptionsOk(s, options).
-  
+
   esvFilesOptionOk : scope * EsvFilesOption
   esvFilesOptionsOk maps esvFilesOptionOk(*, list(*))
   esvFilesOptionOk(s, EsvFilesMainSourceDirectory(e)) :-
@@ -76,8 +82,8 @@ rules // Esv section and options
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
   esvFilesOptionOk(s, EsvFilesIncludeDirectory(e)) :-
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
-  esvFilesOptionOk(s, EsvFilesIncludeLibspoofax2Exports(e)) :-
-    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
+  esvFilesOptionOk(s, EsvFilesExportDirectory(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
 
   esvPrebuiltOptionOk : scope * EsvPrebuiltOption
   esvPrebuiltOptionsOk maps esvPrebuiltOptionOk(*, list(*))
@@ -87,17 +93,17 @@ rules // Esv section and options
 rules // Statix section and options
 
   partOk(s, StatixSection(options)) :- statixOptionsOk(s, options).
-  
+
   statixOptionOk : scope * StatixOption
   statixOptionsOk maps statixOptionOk(*, list(*))
-  
+
   statixOptionOk(s, StatixSource(source)) :-
     statixSourceOk(s, source).
-    
+
   statixSourceOk : scope * StatixSource
   statixSourceOk(s, StatixFiles(options)) :- statixFilesOptionsOk(s, options).
   statixSourceOk(s, StatixPrebuilt(options)) :- statixPrebuiltOptionsOk(s, options).
-  
+
   statixFilesOptionOk : scope * StatixFilesOption
   statixFilesOptionsOk maps statixFilesOptionOk(*, list(*))
   statixFilesOptionOk(s, StatixFilesMainSourceDirectory(e)) :-
@@ -106,28 +112,29 @@ rules // Statix section and options
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
   statixFilesOptionOk(s, StatixFilesIncludeDirectory(e)) :-
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
+  statixFilesOptionOk(s, StatixFilesExportDirectory(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
+  statixFilesOptionOk(s, StatixSdf3SignatureGen(e)) :-
+    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
 
   statixPrebuiltOptionOk : scope * StatixPrebuiltOption
   statixPrebuiltOptionsOk maps statixPrebuiltOptionOk(*, list(*))
   statixPrebuiltOptionOk(s, StatixPrebuiltSpecAtermDirectory(e)) :-
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
 
-  statixOptionOk(s, StatixSdf3SignatureGen(e)) :-
-    typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e. 
-      
 rules // Stratego section and options
 
   partOk(s, StrategoSection(options)) :- strategoOptionsOk(s, options).
-  
+
   strategoOptionOk : scope * StrategoOption
   strategoOptionsOk maps strategoOptionOk(*, list(*))
 
   strategoOptionOk(s, StrategoSource(source)) :-
     strategoSourceOk(s, source).
-    
+
   strategoSourceOk : scope * StrategoSource
   strategoSourceOk(s, StrategoFiles(options)) :- strategoFilesOptionsOk(s, options).
-  
+
   strategoFilesOptionOk : scope * StrategoFilesOption
   strategoFilesOptionsOk maps strategoFilesOptionOk(*, list(*))
   strategoFilesOptionOk(s, StrategoFilesMainSourceDirectory(e)) :-
@@ -136,10 +143,86 @@ rules // Stratego section and options
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
   strategoFilesOptionOk(s, StrategoFilesIncludeDirectory(e)) :-
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
-
-  strategoOptionOk(s, StrategoSdf3StatixExplicationGen(e)) :-
+  strategoFilesOptionOk(s, StrategoFilesExportDirectory(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
+  strategoFilesOptionOk(s, StrategoSdf3StatixExplicationGen(e)) :-
     typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
-  strategoOptionOk(s, StrategoLanguageStrategyAffix(e)) :-
+  strategoFilesOptionOk(s, StrategoLanguageStrategyAffix(e)) :-
     typeOfExpr(s, e) == STRATEGY() | error $[Expected Stratego strategy identifier]@e.
+  strategoFilesOptionOk(s, StrategoConcreteSyntaxExtensionParseTable(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
+
   strategoOptionOk(s, StrategoOutputJavaPackageId(e)) :-
     typeOfExpr(s, e) == STRING() | error $[Expected string]@e.
+
+rules // Dynamix section and options
+
+  partOk(s, DynamixSection(options)) :- dynamixOptionsOk(s, options).
+
+  dynamixOptionOk : scope * DynamixOption
+  dynamixOptionsOk maps dynamixOptionOk(*, list(*))
+
+  dynamixOptionOk(s, DynamixSource(source)) :-
+    dynamixSourceOk(s, source).
+
+  dynamixSourceOk : scope * DynamixSource
+  dynamixSourceOk(s, DynamixFiles(options)) :- dynamixFilesOptionsOk(s, options).
+  dynamixSourceOk(s, DynamixPrebuilt(options)) :- dynamixPrebuiltOptionsOk(s, options).
+
+  dynamixFilesOptionOk : scope * DynamixFilesOption
+  dynamixFilesOptionsOk maps dynamixFilesOptionOk(*, list(*))
+  dynamixFilesOptionOk(s, DynamixFilesMainSourceDirectory(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
+  dynamixFilesOptionOk(s, DynamixFilesMainFile(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
+
+  dynamixPrebuiltOptionOk : scope * DynamixPrebuiltOption
+  dynamixPrebuiltOptionsOk maps dynamixPrebuiltOptionOk(*, list(*))
+  dynamixPrebuiltOptionOk(s, DynamixPrebuiltSpecAtermDirectory(e)) :-
+    typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
+
+rules
+
+  partOk(s, Dependencies(dependencies)) :-
+    dependenciesOk(s, dependencies).
+
+  dependencyOk : scope * Dependency
+  dependenciesOk maps dependencyOk(*, list(*))
+
+  dependencyOk(s, DefaultDependency(e)) :-
+    dependencyExprOk(s, e).
+
+  dependencyOk(s, ConfiguredDependency(e, options)) :-
+    dependencyExprOk(s, e),
+    dependencyOptionsOk(s, options).
+
+
+  dependencyExprOk : scope * Expr
+  dependencyExprsOk maps dependencyExprOk(*, list(*))
+
+  dependencyExprOk(s, e) :- {T}
+    typeOfExpr(s, e) == T,
+    bOr(bOr(bOr(typeEq(T, STRING()), typeEq(T, COORDINATE())), typeEq(T, COORDINATE_REQUIREMENT())), typeEq(T, PATH())) == TRUE() | error $[Expected string, coordinate, coordinate requirement, or path]@e.
+
+
+  dependencyOptionOk : scope * DependencyOption
+  dependencyOptionsOk maps dependencyOptionOk(*, list(*))
+  dependencyOptionOk(s, DependencyKinds(kinds)) :-
+    dependencyKindsOk(s, kinds).
+
+
+  dependencyKindOk : scope * DependencyKind
+  dependencyKindsOk maps dependencyKindOk(*, list(*))
+
+  dependencyKindOk(s, BuildDependencyKind()).
+  dependencyKindOk(s, RunDependencyKind()).
+
+
+  partOk(s, BuildDependencies(dependencies)) :-
+    buildDependenciesOk(s, dependencies).
+
+  buildDependencyOk : scope * BuildDependency
+  buildDependenciesOk maps buildDependencyOk(*, list(*))
+  
+  buildDependencyOk(s, DefaultBuildDependency(e)) :-
+    dependencyExprOk(s, e).

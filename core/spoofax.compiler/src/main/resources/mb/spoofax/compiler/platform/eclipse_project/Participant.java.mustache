@@ -1,0 +1,193 @@
+package {{baseParticipant.packageId}};
+
+import mb.log.api.Logger;
+import mb.pie.api.ExecException;
+import mb.pie.dagger.PieComponent;
+import mb.resource.dagger.ResourceServiceComponent;
+import mb.spoofax.core.component.ComponentDependencyResolver;
+import mb.spoofax.core.component.SubcomponentRegistry;
+import mb.spoofax.eclipse.EclipseParticipant;
+import mb.spoofax.eclipse.EclipsePlatformComponent;
+import mb.spoofax.eclipse.EclipseResourceServiceComponent;
+import mb.spoofax.eclipse.log.EclipseLoggerComponent;
+import mb.spoofax.eclipse.resource.EclipseClassLoaderToNativeResolver;
+import mb.spoofax.eclipse.resource.EclipseClassLoaderUrlResolver;
+import mb.spoofax.eclipse.util.StatusUtil;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.WorkspaceJob;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IContributor;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.InvalidRegistryObjectException;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.MultiRule;
+
+import java.io.IOException;
+import java.util.ArrayList;
+
+public class {{baseParticipant.id}} extends {{adapterProjectCompilerInput.participant.qualifiedId}}<EclipseLoggerComponent, EclipseResourceServiceComponent, EclipsePlatformComponent> implements EclipseParticipant {
+    protected {{eclipseComponent.nullableQualifiedId}} eclipseComponent;
+    protected @Nullable PieComponent pieComponent;
+
+
+    public {{eclipseComponent.qualifiedId}} getComponent() {
+        if(eclipseComponent == null) {
+            throw new RuntimeException("{{eclipseComponent.id}} has not been initialized yet or has been deinitialized");
+        }
+        return eclipseComponent;
+    }
+
+    public PieComponent getPieComponent() {
+        if(pieComponent == null) {
+            throw new RuntimeException("PieComponent has not been initialized yet or has been deinitialized");
+        }
+        return pieComponent;
+    }
+
+
+    @Override
+    protected {{adapterProjectCompilerInput.resourcesModule.qualifiedId}} createResourcesModule(
+        EclipseLoggerComponent loggerComponent,
+        EclipseResourceServiceComponent baseResourceServiceComponent,
+        EclipsePlatformComponent platformComponent
+    ) {
+        return new {{adapterProjectCompilerInput.resourcesModule.qualifiedId}}(
+            new EclipseClassLoaderUrlResolver(),
+            new EclipseClassLoaderToNativeResolver(baseResourceServiceComponent.getEclipseResourceRegistry())
+        );
+    }
+
+    @Override
+    protected void customizeResourcesComponentBuilder(
+        EclipseLoggerComponent loggerComponent,
+        EclipseResourceServiceComponent baseResourceServiceComponent,
+        EclipsePlatformComponent platformComponent,
+        {{adapterProjectCompilerInput.daggerResourcesComponent.qualifiedId}}.Builder builder
+    ) {
+        getCustomizers(loggerComponent).forEach(c -> c.customize(builder));
+    }
+
+
+    @Override
+    public {{eclipseComponent.qualifiedId}} getTaskDefsProvider(
+        EclipseLoggerComponent loggerComponent,
+        EclipseResourceServiceComponent baseResourceServiceComponent,
+        ResourceServiceComponent resourceServiceComponent,
+        EclipsePlatformComponent platformComponent,
+        SubcomponentRegistry subcomponentRegistry,
+        ComponentDependencyResolver dependencyResolver
+    ) {
+        final {{eclipseComponent.qualifiedId}} languageComponent = getLanguageComponent(
+            loggerComponent,
+            baseResourceServiceComponent,
+            resourceServiceComponent,
+            platformComponent,
+            subcomponentRegistry,
+            dependencyResolver
+        );
+        subcomponentRegistry.register({{adapterProjectCompilerInput.component.qualifiedId}}.class, languageComponent);
+        subcomponentRegistry.register({{eclipseComponent.qualifiedId}}.class, languageComponent);
+        return languageComponent;
+    }
+
+    @Override
+    public {{eclipseComponent.qualifiedId}} getLanguageComponent(
+        EclipseLoggerComponent loggerComponent,
+        EclipseResourceServiceComponent baseResourceServiceComponent,
+        ResourceServiceComponent resourceServiceComponent,
+        EclipsePlatformComponent platformComponent,
+        SubcomponentRegistry subcomponentRegistry,
+        ComponentDependencyResolver dependencyResolver
+    ) {
+        if(eclipseComponent == null) {
+            final {{adapterProjectCompilerInput.module.qualifiedId}} module = createModule(loggerComponent, baseResourceServiceComponent, resourceServiceComponent, platformComponent);
+            customizeModule(loggerComponent, baseResourceServiceComponent, resourceServiceComponent, platformComponent, module);
+            final {{daggerEclipseComponent.qualifiedId}}.Builder builder = {{daggerEclipseComponent.qualifiedId}}.builder()
+                .{{adapterProjectCompilerInput.module.idAsCamelCase}}(module)
+                .eclipseLoggerComponent(loggerComponent)
+                .{{adapterProjectCompilerInput.resourcesComponent.idAsCamelCase}}(getResourceRegistriesProvider(loggerComponent, baseResourceServiceComponent, platformComponent, subcomponentRegistry, dependencyResolver))
+                .resourceServiceComponent(resourceServiceComponent)
+                .eclipsePlatformComponent(platformComponent)
+                {{#adapterProjectCompilerInput.dependOnRv32Im}}.rv32ImEclipseComponent(dependencyResolver.getOneSubcomponent(mb.rv32im.eclipse.Rv32ImEclipseComponent.class).unwrap()){{/adapterProjectCompilerInput.dependOnRv32Im}}
+                ;
+            getCustomizers(loggerComponent).forEach(c -> c.customize(builder));
+            eclipseComponent = builder.build();
+            component = builder.build();
+        }
+        return eclipseComponent;
+    }
+
+
+    @Override public void start(
+        EclipseLoggerComponent loggerComponent,
+        EclipseResourceServiceComponent baseResourceServiceComponent,
+        ResourceServiceComponent resourceServiceComponent,
+        EclipsePlatformComponent platformComponent,
+        PieComponent pieComponent,
+        ComponentDependencyResolver dependencyResolver
+    ) {
+        this.pieComponent = pieComponent;
+        final {{eclipseComponent.qualifiedId}} component = getComponent();
+        component.getEditorTracker().register();
+        final WorkspaceJob job = new WorkspaceJob("{{shared.name}} startup") {
+            @Override public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
+                try {
+                    platformComponent.getPieRunner().startup(component, pieComponent, monitor);
+                } catch(IOException | ExecException | InterruptedException e) {
+                    throw new CoreException(StatusUtil.error("SDF3 startup job failed unexpectedly", e));
+                }
+                return StatusUtil.success();
+            }
+        };
+        job.setRule(MultiRule.combine(new ISchedulingRule[]{
+            component.startupWriteLockRule(),
+            // Require refresh rule for the workspace, as the startup job walks over all projects, which refreshes them.
+            ResourcesPlugin.getWorkspace().getRuleFactory().refreshRule(ResourcesPlugin.getWorkspace().getRoot()),
+        }));
+        job.schedule();
+    }
+
+    @Override public void close() {
+        pieComponent = null;
+        if(eclipseComponent != null) {
+            eclipseComponent.getEditorTracker().unregister();
+            eclipseComponent.close();
+            eclipseComponent = null;
+        }
+        super.close();
+    }
+
+
+    private static ArrayList<{{componentCustomizer.qualifiedId}}> getCustomizers(EclipseLoggerComponent loggerComponent) {
+        final Logger logger = loggerComponent.getLoggerFactory().create({{baseParticipant.id}}.class);
+        final ArrayList<{{componentCustomizer.qualifiedId}}> customizers = new ArrayList<>();
+        final IExtensionRegistry registry = Platform.getExtensionRegistry();
+        final @Nullable IExtensionPoint point = registry.getExtensionPoint("{{componentExtensionPointId}}");
+        if(point == null) return customizers; // Dynamically loaded languages do not have this extension point.
+        final IContributor contributor = point.getContributor();
+        for(IConfigurationElement config : point.getConfigurationElements()) {
+            if(config.getName().equals("customizer")) {
+                try {
+                    final Object object = config.createExecutableExtension("class");
+                    if(object == null) {
+                        logger.error("Found customizer in '{}', but it does not have a 'class' property; skipping...", contributor);
+                    }
+                    if(object instanceof {{componentCustomizer.qualifiedId}}) {
+                        customizers.add(({{componentCustomizer.qualifiedId}})object);
+                    } else {
+                        logger.error("Found customizer in '{}', but the object '{}' instantiated from its 'class' property does not implement '{{componentCustomizer.qualifiedId}}'; skipping...", contributor, object);
+                    }
+                } catch(CoreException | InvalidRegistryObjectException e) {
+                    logger.error("Found participant in '{}', but instantiating an object of its 'class' property failed unexpectedly; skipping...", e, contributor);
+                }
+            }
+        }
+        return customizers;
+    }
+}

@@ -1,5 +1,9 @@
 module lex/java_id
 
+imports
+
+  lex/keyword
+
 lexical sorts
 
   JavaIdLit JavaQIdLit JavaQIdPart JavaIdChars JavaKeyword
@@ -12,8 +16,8 @@ lexical syntax
   JavaQIdPart = "." JavaIdChars
   
   JavaIdChars = [a-zA-Z\_\$] [a-zA-Z0-9\_\$]*
-
-  JavaIdChars = JavaKeyword {reject}
+  JavaIdChars = Keyword     {reject}
+  JavaIdChars = JavaKeyword {reject} 
   JavaIdChars = "true"      {reject}
   JavaIdChars = "false"     {reject}
   JavaIdChars = "null"      {reject}

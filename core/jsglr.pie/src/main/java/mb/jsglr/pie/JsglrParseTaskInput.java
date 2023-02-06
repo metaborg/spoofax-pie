@@ -41,6 +41,15 @@ public interface JsglrParseTaskInput extends Serializable {
             return fileHint(Option.ofSome(file));
         }
 
+        public Builder fileHintNullable(@Nullable ResourceKey fileHint) {
+            return fileHint(Option.ofNullable(fileHint));
+        }
+
+
+        public Builder rootDirectoryHintNullable(@Nullable ResourcePath rootDirectoryHint) {
+            return rootDirectoryHint(Optional.ofNullable(rootDirectoryHint));
+        }
+
 
         public Builder withFile(ResourceKey file, @Nullable ResourceStamper<ReadableResource> stamper, Charset charset) {
             textSupplier(new ResourceTextSupplier(file, stamper, charset));

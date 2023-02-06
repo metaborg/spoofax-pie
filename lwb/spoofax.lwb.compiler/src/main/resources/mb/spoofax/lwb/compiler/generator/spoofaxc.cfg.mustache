@@ -7,10 +7,14 @@ file-extension = "{{this}}"
 sdf3 {}
 esv {}
 statix {
-  sdf3-statix-signature-generation = true
+  source = files {
+    sdf3-statix-signature-generation = true
+  }
 }
 stratego {
-  sdf3-statix-explication-generation = true
+  source = files {
+    sdf3-statix-explication-generation = true
+  }
 }
 
 parser {
@@ -36,3 +40,10 @@ hover {
     strategy = strategy editor-hover
   }
 }
+
+build-dependencies [
+  org.metaborg:strategolib:*
+  org.metaborg:gpp:*
+  org.metaborg:libspoofax2:*
+  org.metaborg:libstatix:*
+]

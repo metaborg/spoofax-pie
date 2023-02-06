@@ -141,7 +141,7 @@ public class SptCheck implements TaskDef<SptCheck.Input, KeyedMessages> {
         }
 
         final LanguageUnderTestProvider languageUnderTestProvider = wrapper.get();
-        final Result<LanguageUnderTest, ?> languageUnderTestResult = languageUnderTestProvider.provide(context, file, rootDirectoryHint, testSuite.languageIdHint);
+        final Result<LanguageUnderTest, ?> languageUnderTestResult = languageUnderTestProvider.provide(context, file, rootDirectoryHint, testSuite.languageCoordinateRequirementHint);
         final CancelToken cancelToken = context.cancelToken();
         languageUnderTestResult.ifThrowingElse(
             languageUnderTest -> runTests(languageUnderTestProvider, context, languageUnderTest, cancelToken, messagesBuilder, testSuite),

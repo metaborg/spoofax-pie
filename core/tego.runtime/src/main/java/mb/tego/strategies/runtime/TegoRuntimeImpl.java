@@ -91,7 +91,7 @@ public /* open */ class TegoRuntimeImpl implements TegoRuntime, TegoEngine {
      * @return the (possibly modified) result of evaluating the strategy
      */
     protected <R> @Nullable R exitStrategy(StrategyDecl strategy, @Nullable R result) {
-        log.trace(prefixString(" ", level - 1, " " + strategy));
+        log.trace(prefixString(" ", level - 1, "- " + strategy));
         if (result != null) {
             log.trace(prefixString(" ", level - 1, "← " + strategy.toString()));
         } else {

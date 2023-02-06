@@ -11,6 +11,7 @@ import mb.pie.api.MixedSession;
 import mb.pie.api.Session;
 import mb.pie.api.exec.CancelToken;
 import mb.resource.ResourceKey;
+import mb.spoofax.core.CoordinateRequirement;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spt.api.parse.TestableParse;
 import mb.spt.lut.LanguageUnderTestProvider;
@@ -22,12 +23,12 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 
 public class ParseToFragmentExpectation implements TestExpectation {
     private final ResourceKey fragmentResource;
-    private final @Nullable String languageIdHint;
+    private final @Nullable CoordinateRequirement languageCoordinateRequirementHint;
     private final Region sourceRegion;
 
-    public ParseToFragmentExpectation(ResourceKey fragmentResource, @Nullable String languageIdHint, Region sourceRegion) {
+    public ParseToFragmentExpectation(ResourceKey fragmentResource, @Nullable CoordinateRequirement languageCoordinateRequirementHint, Region sourceRegion) {
         this.fragmentResource = fragmentResource;
-        this.languageIdHint = languageIdHint;
+        this.languageCoordinateRequirementHint = languageCoordinateRequirementHint;
         this.sourceRegion = sourceRegion;
     }
 
@@ -50,9 +51,9 @@ public class ParseToFragmentExpectation implements TestExpectation {
         }
         final TestableParse testableParse = (TestableParse)languageInstance;
 
-        final @Nullable LanguageUnderTest fragmentLanguageUnderTest = ExpectationFragmentUtil.getLanguageUnderTest(testCase, languageUnderTest, languageUnderTestProvider, context, languageIdHint);
+        final @Nullable LanguageUnderTest fragmentLanguageUnderTest = ExpectationFragmentUtil.getLanguageUnderTest(testCase, languageUnderTest, languageUnderTestProvider, context, languageCoordinateRequirementHint);
         if(fragmentLanguageUnderTest == null) {
-            messagesBuilder.addMessage("Cannot evaluate parse to fragment expectation because providing language under test for language id '" + languageIdHint + "' failed unexpectedly", Severity.Error, file, sourceRegion);
+            messagesBuilder.addMessage("Cannot evaluate parse to fragment expectation because providing language under test for language '" + languageCoordinateRequirementHint + "' failed unexpectedly", Severity.Error, file, sourceRegion);
             return messagesBuilder.build(file);
         }
 

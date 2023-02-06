@@ -16,7 +16,6 @@ dependencies {
   kapt(platform(project(":spoofax.depconstraints")))
 
   api(project(":spoofax.compiler"))
-  api(project(":spoofax.compiler.dagger"))
   api(project(":spoofax.compiler.spoofax2"))
   api(project(":spoofax.compiler.spoofax2.dagger"))
   api("com.google.dagger:dagger")

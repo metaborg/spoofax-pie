@@ -3,10 +3,10 @@
 package mb.spoofax.compiler.gradle.plugin
 
 import mb.pie.dagger.PieComponent
-import mb.spoofax.compiler.dagger.*
+import mb.resource.dagger.ResourceServiceComponent
+import mb.spoofax.compiler.*
 import mb.spoofax.compiler.gradle.*
 import mb.spoofax.compiler.platform.*
-import mb.resource.dagger.ResourceServiceComponent
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project

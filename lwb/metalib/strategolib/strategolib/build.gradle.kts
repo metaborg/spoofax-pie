@@ -24,10 +24,6 @@ languageProject {
       addStrategyPackageIds("strategolib.trans")
       addInteropRegisterersByReflection("strategolib.trans.InteropRegisterer")
     }
-    withExports().run {
-      addExports("Stratego", "trans")
-      addExports("Str2Lib", "src-gen/java/strategolib/trans/strategolib.str2lib")
-    }
   }
 }
 spoofax2BasedLanguageProject {
@@ -38,8 +34,6 @@ spoofax2BasedLanguageProject {
     }
     project.run {
       addAdditionalCopyResources(
-        "trans/**/*.str",
-        "trans/**/*.str2",
         "src-gen/java/strategolib/trans/strategolib.str2lib"
       )
       languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:strategolib:${ext["spoofax2DevenvVersion"]}"))
@@ -50,9 +44,14 @@ spoofax2BasedLanguageProject {
 languageAdapterProject {
   compilerInput {
     project.configureCompilerInput()
+      withExports().run {
+        addFileExport("Stratego", "src-gen/java/strategolib/trans/strategolib.str2lib")
+      }
   }
 }
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
+  compositionGroup("mb.spoofax.lwb")
+
   val packageId = "mb.strategolib"
 
   // Extend component

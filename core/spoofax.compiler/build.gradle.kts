@@ -21,6 +21,7 @@ dependencies {
   api("org.metaborg:resource")
   api("org.metaborg:pie.api")
   api("com.samskivert:jmustache:1.15")
+  api("com.google.dagger:dagger")
 
   compileOnly("org.checkerframework:checker-qual-android")
   compileOnly("org.immutables:value-annotations")
@@ -28,8 +29,9 @@ dependencies {
 
   annotationProcessor("org.immutables:value")
   annotationProcessor("org.derive4j:derive4j")
+  annotationProcessor("com.google.dagger:dagger-compiler")
 
-  testImplementation(project(":spoofax.compiler.dagger"))
+  testImplementation(project(":spoofax.compiler"))
   testImplementation("com.google.dagger:dagger")
   testImplementation("org.metaborg:pie.runtime")
   testImplementation("org.junit.jupiter:junit-jupiter-params:${metaborg.junitVersion}")

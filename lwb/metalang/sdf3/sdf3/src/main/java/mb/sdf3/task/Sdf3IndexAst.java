@@ -7,6 +7,7 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.TaskDef;
 import mb.resource.ResourceKey;
 import mb.sdf3.Sdf3Scope;
+import mb.sdf3.task.spoofax.Sdf3ParseWrapper;
 import mb.stratego.common.StrategoRuntime;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
@@ -16,10 +17,10 @@ import javax.inject.Named;
 
 @Sdf3Scope
 public class Sdf3IndexAst implements TaskDef<ResourceKey, Result<IStrategoTerm, ?>> {
-    private final Sdf3Parse parse;
+    private final Sdf3ParseWrapper parse;
     private final ITermFactory termFactory;
 
-    @Inject public Sdf3IndexAst(Sdf3Parse parse, @Named("prototype") StrategoRuntime prototype) {
+    @Inject public Sdf3IndexAst(Sdf3ParseWrapper parse, @Named("prototype") StrategoRuntime prototype) {
         this.parse = parse;
         this.termFactory = prototype.getTermFactory();
     }

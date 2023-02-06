@@ -1,8 +1,12 @@
 module lex/path
 
+imports
+
+  lex/keyword
+
 lexical sorts
 
-  PathLit PathSegmentLit PathStart PathChar
+  PathLit PathStart PathChars
 
 lexical syntax
 
@@ -10,10 +14,11 @@ lexical syntax
   
   PathStart = "/"
   PathStart = "./"
+  PathStart = "../"
 
-  PathChars = PathChar*
-  PathChar  = ~[\n\r\,\;\]\)\}\ ]
+  PathChars = ~[\n\r\,\;\[\]\)\{\}\ ]*
+  PathChars = Keyword {reject}
 
 lexical restrictions
 
-  PathChars -/- ~[\n\r\,\;\]\)\}\ ]
+  PathChars -/- ~[\n\r\,\;\[\]\)\{\}\ ]

@@ -21,6 +21,8 @@ public abstract class SpoofaxSdf3CompileException extends Exception implements H
         R checkFail(KeyedMessages messages);
 
         R parseTableCompileFail(Exception cause);
+
+        R strategoConcreteSyntaxExtensionCompileFail(Exception cause);
     }
 
     public static SpoofaxSdf3CompileException getLanguageCompilerConfigurationFail(CfgRootDirectoryToObjectException cfgRootDirectoryToObjectException) {
@@ -38,6 +40,11 @@ public abstract class SpoofaxSdf3CompileException extends Exception implements H
     public static SpoofaxSdf3CompileException parseTableCompileFail(Exception cause) {
         return withCause(SpoofaxSdf3CompileExceptions.parseTableCompileFail(cause), cause);
     }
+
+    public static SpoofaxSdf3CompileException strategoConcreteSyntaxExtensionCompileFail(Exception cause) {
+        return withCause(SpoofaxSdf3CompileExceptions.strategoConcreteSyntaxExtensionCompileFail(cause), cause);
+    }
+
 
     private static SpoofaxSdf3CompileException withCause(SpoofaxSdf3CompileException e, Exception cause) {
         e.initCause(cause);
@@ -62,6 +69,7 @@ public abstract class SpoofaxSdf3CompileException extends Exception implements H
             .configureFail((cause) -> "Configuring SDF3 failed")
             .checkFail((messages) -> "Parsing or checking SDF3 source files failed; see error messages")
             .parseTableCompileFail((cause) -> "Compile parse table from SDF3 failed unexpectedly")
+            .strategoConcreteSyntaxExtensionCompileFail((cause) -> "Compile Stratego concrete syntax extension from SDF3 failed unexpectedly")
             ;
     }
 

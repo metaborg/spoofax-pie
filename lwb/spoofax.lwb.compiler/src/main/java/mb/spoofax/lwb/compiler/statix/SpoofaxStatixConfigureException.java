@@ -4,6 +4,7 @@ import mb.cfg.task.CfgRootDirectoryToObjectException;
 import mb.common.util.ADT;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.lwb.compiler.definition.ResolveDependenciesException;
 import mb.spoofax.lwb.compiler.sdf3.SpoofaxSdf3ConfigureException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -18,6 +19,10 @@ public abstract class SpoofaxStatixConfigureException extends Exception {
         R mainSourceDirectoryFail(ResourcePath mainSourceDirectory);
 
         R mainFileFail(ResourceKey mainFile);
+
+        R includeDirectoryFail(ResourcePath includeDirectory);
+
+        R resolveIncludeFail(ResolveDependenciesException resolveDependenciesException);
 
         R sdf3ConfigureFail(SpoofaxSdf3ConfigureException spoofaxSdf3ConfigureException);
 
@@ -34,6 +39,14 @@ public abstract class SpoofaxStatixConfigureException extends Exception {
 
     public static SpoofaxStatixConfigureException mainFileFail(ResourceKey mainFile) {
         return SpoofaxStatixConfigureExceptions.mainFileFail(mainFile);
+    }
+
+    public static SpoofaxStatixConfigureException includeDirectoryFail(ResourcePath includeDirectory) {
+        return SpoofaxStatixConfigureExceptions.includeDirectoryFail(includeDirectory);
+    }
+
+    public static SpoofaxStatixConfigureException resolveIncludeFail(ResolveDependenciesException cause) {
+        return withCause(SpoofaxStatixConfigureExceptions.resolveIncludeFail(cause), cause);
     }
 
     public static SpoofaxStatixConfigureException sdf3ConfigureFail(SpoofaxSdf3ConfigureException spoofaxSdf3ConfigureException) {
@@ -66,6 +79,8 @@ public abstract class SpoofaxStatixConfigureException extends Exception {
             .getLanguageCompilerConfigurationFail((cause) -> "Getting language compiler configuration failed")
             .mainSourceDirectoryFail((mainSourceDirectory) -> "Statix main source directory '" + mainSourceDirectory + "' does not exist or is not a directory")
             .mainFileFail((mainFile) -> "Statix main file '" + mainFile + "' does not exist or is not a file")
+            .includeDirectoryFail(includeDirectory -> "Statix include directory '" + includeDirectory + "' does not exist or is not a directory")
+            .resolveIncludeFail(cause -> "Resolving compile-time dependency to Statix imports failed")
             .sdf3ConfigureFail(cause -> "Configuring SDF3 failed")
             .sdf3ExtStatixGenInjFail(cause -> "SDF3 to Statix signature generator failed")
             ;

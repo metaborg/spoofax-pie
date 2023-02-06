@@ -64,7 +64,13 @@ spoofax2BasedLanguageProject {
       copyCtree(false)
       copyClasses(true)
     }
-    project.languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:stratego.lang:${ext["spoofax2DevenvVersion"]}"))
+    project.run {
+      addAdditionalCopyResources(
+        "syntax/**/*.sdf3",
+        "src-gen/syntax/**/*.sdf3"
+      )
+      languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:stratego.lang:${ext["spoofax2DevenvVersion"]}"))
+    }
   }
 }
 
@@ -80,10 +86,16 @@ languageAdapterProject {
     }
     withStyler()
     withStrategoRuntime()
+    withExports().run {
+      addDirectoryExport("SDF3", "syntax")
+      addDirectoryExport("SDF3", "src-gen/syntax")
+    }
     project.configureCompilerInput()
   }
 }
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
+  compositionGroup("mb.spoofax.lwb")
+
   val incrPackageId = "$packageId.incr"
   val commandPackageId = "$packageId.command"
 
@@ -141,6 +153,8 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
       ParamRepr.of("builtinLibs", TypeInfo.of("mb.common.util", "ListView"), false, ArgProviderRepr.value("mb.common.util.ListView.of()")),
       ParamRepr.of("str2libraries", TypeInfo.of("mb.common.util", "ListView"), false, ArgProviderRepr.value("mb.common.util.ListView.of()")),
       ParamRepr.of("extraCompilerArguments", TypeInfo.of("org.metaborg.util.cmd", "Arguments"), false, ArgProviderRepr.value("new org.metaborg.util.cmd.Arguments()")),
+      ParamRepr.of("concreteSyntaxExtensionParseTables", TypeInfo.of("mb.common.util", "MapView"), false, ArgProviderRepr.value("mb.common.util.MapView.of()")),
+      ParamRepr.of("concreteSyntaxExtensionTransientParseTables", TypeInfo.of("mb.common.util", "MapView"), false, ArgProviderRepr.value("mb.common.util.MapView.of()")),
       ParamRepr.of("sourceFileOrigins", TypeInfo.of("mb.common.util", "ListView"), false, ArgProviderRepr.value("mb.common.util.ListView.of()")),
       ParamRepr.of("cacheDir", resourcePathType, false),
       ParamRepr.of("javaSourceFileOutputDir", resourcePathType, true),

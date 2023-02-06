@@ -3,7 +3,8 @@ package mb.statix.codecompletion.strategies.runtime;
 import com.google.common.collect.ImmutableList;
 import io.usethesource.capsule.Set;
 import mb.nabl2.terms.ITermVar;
-import mb.statix.codecompletion.SelectedConstraintSolverState;
+import mb.statix.codecompletion.CCSolverState;
+import mb.statix.codecompletion.SelectedConstraintCCSolverState;
 import mb.statix.codecompletion.SolverContext;
 import mb.statix.codecompletion.SolverState;
 import mb.statix.constraints.CUser;
@@ -24,7 +25,7 @@ import java.util.stream.Collectors;
  * Given a state with a selected predicate constraint {@link CUser},
  * this strategy expands the initial state into as many states as there are rules defined for the predicate.
  */
-public final class ExpandPredicateStrategy extends NamedStrategy2<SolverContext, ITermVar, SelectedConstraintSolverState<CUser>, Seq<SolverState>> {
+public final class ExpandPredicateStrategy extends NamedStrategy2<SolverContext, ITermVar, SelectedConstraintCCSolverState<CUser>, Seq<CCSolverState>> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final ExpandPredicateStrategy instance = new ExpandPredicateStrategy();
@@ -48,11 +49,11 @@ public final class ExpandPredicateStrategy extends NamedStrategy2<SolverContext,
     }
 
     @Override
-    public Seq<SolverState> evalInternal(TegoEngine engine, SolverContext ctx, @Nullable ITermVar focus, SelectedConstraintSolverState<CUser> input) {
+    public Seq<CCSolverState> evalInternal(TegoEngine engine, SolverContext ctx, @Nullable ITermVar focus, SelectedConstraintCCSolverState<CUser> input) {
         return eval(engine, ctx, focus, input);
     }
 
-    public static Seq<SolverState> eval(TegoEngine engine, SolverContext ctx, @Nullable ITermVar focus, SelectedConstraintSolverState<CUser> input) {
+    public static Seq<CCSolverState> eval(TegoEngine engine, SolverContext ctx, @Nullable ITermVar focus, SelectedConstraintCCSolverState<CUser> input) {
         final CUser selected = input.getSelected();
         // Get the rules for the given predicate constraint
         final ImmutableList<Rule> rules = input.getSpec().rules().getOrderIndependentRules(selected.name()).asList();
@@ -60,7 +61,7 @@ public final class ExpandPredicateStrategy extends NamedStrategy2<SolverContext,
         // - Remove the selected constraint
         // - Add the constraint's name to the set of expanded constraints
         // - Increment the number of expanded rules
-        final SolverState newState = input
+        final CCSolverState newState = input
             .withoutSelected()
             .withExpanded(addToSet(input.getExpanded(), selected.name()))
             .withMeta(input.getMeta().withExpandedRulesIncremented());
@@ -90,12 +91,12 @@ public final class ExpandPredicateStrategy extends NamedStrategy2<SolverContext,
      * @return a sequence of new states
      */
     @SuppressWarnings("unused")
-    private static Seq<SolverState> applyAllEager(
+    private static Seq<CCSolverState> applyAllEager(
         List<Rule> rules,
         CUser selected,
-        SolverState state
+        CCSolverState state
     ) {
-        final List<SolverState> output = RuleUtil.applyAll(state.getState().unifier(), rules, selected.args(), selected,
+        final List<CCSolverState> output = RuleUtil.applyAll(state.getState().unifier(), rules, selected.args(), selected,
                 ApplyMode.RELAXED, ApplyMode.Safety.UNSAFE).stream()
             .map(t -> state.withApplyResult(t._2(), selected))
             .collect(Collectors.toList());
@@ -111,12 +112,12 @@ public final class ExpandPredicateStrategy extends NamedStrategy2<SolverContext,
      * @return a sequence of new states
      */
     @SuppressWarnings("unused")
-    private static Seq<SolverState> applyAllLazy(
+    private static Seq<CCSolverState> applyAllLazy(
         List<Rule> rules,
         CUser selected,
-        SolverState state
+        CCSolverState state
     ) {
-        return new SeqBase<SolverState>() {
+        return new SeqBase<CCSolverState>() {
             private int index = 0;
             @Override
             protected void computeNext() {
@@ -131,7 +132,7 @@ public final class ExpandPredicateStrategy extends NamedStrategy2<SolverContext,
                         ApplyMode.RELAXED, ApplyMode.Safety.UNSAFE).orElse(null);
                     index += 1;
                 } while (result == null);
-                final SolverState resultState = state.withApplyResult(result, selected);
+                final CCSolverState resultState = state.withApplyResult(result, selected);
                 this.yield(resultState);
             }
         };

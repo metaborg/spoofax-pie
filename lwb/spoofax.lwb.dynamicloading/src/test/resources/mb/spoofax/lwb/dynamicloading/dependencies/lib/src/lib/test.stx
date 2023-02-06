@@ -1,0 +1,9 @@
+module lib/test
+
+imports
+
+  signatures/lib/start-sig
+
+rules
+
+  test : Start

@@ -1,0 +1,249 @@
+package {{baseParticipant.packageId}};
+
+import mb.common.util.ListView;
+import mb.log.dagger.LoggerComponent;
+import mb.pie.dagger.PieComponent;
+import mb.pie.dagger.RootPieModule;
+import mb.pie.dagger.TaskDefsProvider;
+import mb.resource.dagger.ResourceRegistriesProvider;
+import mb.resource.dagger.ResourceServiceComponent;
+import mb.resource.dagger.ResourceServiceModule;
+import mb.spoofax.core.Coordinate;
+import mb.spoofax.core.CoordinateRequirement;
+import mb.spoofax.core.Version;
+import mb.spoofax.core.component.ComponentDependencyResolver;
+import mb.spoofax.core.component.ComponentManager;
+import mb.spoofax.core.component.Participant;
+import mb.spoofax.core.component.StaticComponentManager;
+import mb.spoofax.core.component.SubcomponentRegistry;
+import mb.spoofax.core.platform.PlatformComponent;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.function.Consumer;
+
+public class {{baseParticipant.id}}<L extends LoggerComponent, R extends ResourceServiceComponent, P extends PlatformComponent> implements Participant<L, R, P> {
+    protected {{resourcesComponent.nullableQualifiedId}} resourcesComponent;
+    protected {{component.nullableQualifiedId}} component;
+
+
+    @Override
+    public Coordinate getCoordinate() {
+        return new Coordinate(
+            "{{adapterProject.project.coordinate.groupId}}",
+            "{{adapterProject.project.coordinate.artifactId}}",
+{{#adapterProject.project.coordinate.version}}
+            Version.parse("{{this}}")
+{{/adapterProject.project.coordinate.version}}
+{{^adapterProject.project.coordinate.version}}
+            new Version(0, 1, 0)
+{{/adapterProject.project.coordinate.version}}
+        );
+    }
+
+    @Override
+    public ListView<CoordinateRequirement> getDependencies() {
+        return ListView.of({{#dependOnRv32Im}}new CoordinateRequirement("org.metaborg", "rv32im"){{/dependOnRv32Im}});
+    }
+
+    @Override
+    public @Nullable String getCompositionGroup() {
+{{#compositionGroup}}
+        return "{{this}}";
+{{/compositionGroup}}
+{{^compositionGroup}}
+        return null;
+{{/compositionGroup}}
+    }
+
+    @Override
+    public ListView<String> getLanguageFileExtensions() {
+        return ListView.of({{#shared.fileExtensions}}"{{this}}"{{^-last}}, {{/-last}}{{/shared.fileExtensions}});
+    }
+
+
+    @Override
+    public @Nullable ResourceRegistriesProvider getGlobalResourceRegistriesProvider(
+        L loggerComponent,
+        R baseResourceServiceComponent,
+        P platformComponent,
+        SubcomponentRegistry subcomponentRegistry,
+        ComponentDependencyResolver dependencyResolver
+    ) {
+        return null;
+    }
+
+    @Override
+    public @Nullable TaskDefsProvider getGlobalTaskDefsProvider(
+        L loggerComponent,
+        R baseResourceServiceComponent,
+        ResourceServiceComponent resourceServiceComponent,
+        P platformComponent,
+        SubcomponentRegistry subcomponentRegistry,
+        ComponentDependencyResolver dependencyResolver
+    ) {
+        return null;
+    }
+
+
+    protected {{resourcesModule.qualifiedId}} createResourcesModule(
+        L loggerComponent,
+        R baseResourceServiceComponent,
+        P platformComponent
+    ) {
+        return new {{resourcesModule.qualifiedId}}();
+    }
+
+    protected void customizeResourcesModule(
+        L loggerComponent,
+        R baseResourceServiceComponent,
+        P platformComponent,
+        {{resourcesModule.qualifiedId}} module
+    ) {}
+
+    protected void customizeResourcesComponentBuilder(
+        L loggerComponent,
+        R baseResourceServiceComponent,
+        P platformComponent,
+        {{daggerResourcesComponent.qualifiedId}}.Builder builder
+    ) {}
+
+    @Override
+    public {{resourcesComponent.qualifiedId}} getResourceRegistriesProvider(
+        L loggerComponent,
+        R baseResourceServiceComponent,
+        P platformComponent,
+        SubcomponentRegistry subcomponentRegistry,
+        ComponentDependencyResolver dependencyResolver
+    ) {
+        final {{resourcesComponent.qualifiedId}} resourcesComponent = getResourcesComponent(
+            loggerComponent,
+            baseResourceServiceComponent,
+            platformComponent,
+            subcomponentRegistry,
+            dependencyResolver
+        );
+        subcomponentRegistry.register({{resourcesComponent.qualifiedId}}.class, resourcesComponent);
+        return resourcesComponent;
+    }
+
+    @Override
+    public {{resourcesComponent.qualifiedId}} getResourcesComponent(
+        L loggerComponent,
+        R baseResourceServiceComponent,
+        P platformComponent,
+        SubcomponentRegistry subcomponentRegistry,
+        ComponentDependencyResolver dependencyResolver
+    ) {
+        if(resourcesComponent == null) {
+            final {{resourcesModule.qualifiedId}} module = createResourcesModule(loggerComponent, baseResourceServiceComponent, platformComponent);
+            customizeResourcesModule(loggerComponent, baseResourceServiceComponent, platformComponent, module);
+            final {{daggerResourcesComponent.qualifiedId}}.Builder builder = {{daggerResourcesComponent.qualifiedId}}.builder()
+                .{{resourcesModule.idAsCamelCase}}(module);
+            customizeResourcesComponentBuilder(loggerComponent, baseResourceServiceComponent, platformComponent, builder);
+            resourcesComponent = builder.build();
+            subcomponentRegistry.register({{resourcesComponent.qualifiedId}}.class, resourcesComponent);
+        }
+        return resourcesComponent;
+    }
+
+    @Override
+    public @Nullable Consumer<ResourceServiceModule> getResourceServiceModuleCustomizer() {
+        return null;
+    }
+
+
+    @Override
+    public {{component.qualifiedId}} getTaskDefsProvider(
+        L loggerComponent,
+        R baseResourceServiceComponent,
+        ResourceServiceComponent resourceServiceComponent,
+        P platformComponent,
+        SubcomponentRegistry subcomponentRegistry,
+        ComponentDependencyResolver dependencyResolver
+    ) {
+        final {{component.qualifiedId}} languageComponent = getLanguageComponent(
+            loggerComponent,
+            baseResourceServiceComponent,
+            resourceServiceComponent,
+            platformComponent,
+            subcomponentRegistry,
+            dependencyResolver
+        );
+        subcomponentRegistry.register({{component.qualifiedId}}.class, languageComponent);
+        return languageComponent;
+    }
+
+    protected {{module.qualifiedId}} createModule(
+        L loggerComponent,
+        R baseResourceServiceComponent,
+        ResourceServiceComponent resourceServiceComponent,
+        P platformComponent
+    ) {
+        return new {{module.qualifiedId}}();
+    }
+
+    protected void customizeModule(
+        L loggerComponent,
+        R baseResourceServiceComponent,
+        ResourceServiceComponent resourceServiceComponent,
+        P platformComponent,
+        {{module.qualifiedId}} module
+    ) {}
+
+    @Override
+    public {{component.qualifiedId}} getLanguageComponent(
+        L loggerComponent,
+        R baseResourceServiceComponent,
+        ResourceServiceComponent resourceServiceComponent,
+        P platformComponent,
+        SubcomponentRegistry subcomponentRegistry,
+        ComponentDependencyResolver dependencyResolver
+    ) {
+        if(component == null) {
+            final {{module.qualifiedId}} module = createModule(loggerComponent, baseResourceServiceComponent, resourceServiceComponent, platformComponent);
+            customizeModule(loggerComponent, baseResourceServiceComponent, resourceServiceComponent, platformComponent, module);
+            final {{daggerComponent.qualifiedId}}.Builder builder = {{daggerComponent.qualifiedId}}.builder()
+                .{{module.idAsCamelCase}}(module)
+                .loggerComponent(loggerComponent)
+                .{{resourcesComponent.idAsCamelCase}}(getResourceRegistriesProvider(loggerComponent, baseResourceServiceComponent, platformComponent, subcomponentRegistry, dependencyResolver))
+                .resourceServiceComponent(resourceServiceComponent)
+                .platformComponent(platformComponent)
+                {{#dependOnRv32Im}}.rv32ImComponent(dependencyResolver.getOneSubcomponent(mb.rv32im.Rv32ImComponent.class).unwrap()){{/dependOnRv32Im}}
+                ;
+            component = builder.build();
+        }
+        return component;
+    }
+
+    @Override
+    public @Nullable Consumer<RootPieModule> getPieModuleCustomizer() {
+        return null;
+    }
+
+
+    @Override
+    public void start(
+        L loggerComponent,
+        R baseResourceServiceComponent,
+        ResourceServiceComponent resourceServiceComponent,
+        P platformComponent,
+        PieComponent pieComponent,
+        ComponentDependencyResolver dependencyResolver
+    ) {}
+
+    @Override
+    public void started(
+        ResourceServiceComponent resourceServiceComponent,
+        PieComponent pieComponent,
+        StaticComponentManager staticComponentManager,
+        ComponentManager componentManager
+    ) {}
+
+    @Override public void close() {
+        if(component != null) {
+            component.close();
+            component = null;
+        }
+        resourcesComponent = null;
+    }
+}

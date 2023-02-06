@@ -5,9 +5,6 @@ plugins {
 
 languageEclipseProject {
   adapterProject.set(project(":sdf3"))
-  compilerInput {
-    languageGroup("mb.spoofax.lwb")
-  }
 }
 
 tasks {
@@ -30,4 +27,8 @@ tasks {
       )
     }
   }
+}
+
+mavenize {
+  majorVersion.set("2021-03")
 }

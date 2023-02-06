@@ -1,0 +1,10 @@
+module main
+
+imports
+
+  lib/test
+  pp/lib/start-pp
+
+strategies
+
+  bla = exported-test-strategy; prettyprint-lib-Start

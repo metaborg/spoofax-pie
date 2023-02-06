@@ -1,0 +1,18 @@
+module dynamix
+
+imports
+  common
+  meta
+
+context-free start-symbols Start
+context-free sorts Start
+context-free syntax
+  Start.Program = <
+    module <MID>
+    
+    <{MSection "\n\n"}*>
+  >
+  
+  Start.MultiProgram = <
+    multiple-files-syntax-for-testing-only <{Start "\n"}+>
+  >

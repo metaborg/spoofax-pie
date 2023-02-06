@@ -18,92 +18,105 @@ rules // multi-file entry point
 //  fileOk : scope * Start
 //  fileOk(s, Empty()).
 
-signature // names
-  namespaces
-    Loop  : string
-    Field : string
+signature // variables
 
-signature // names
-  name-resolution
-    labels R
-    resolve Loop  filter P* min $ < P
-    resolve Field filter P* min $ < P
+  sorts
+    VARS  = list((path * (ID * TYPE)))
+    TYPES = list((path * (ID * TYPE)))
 
-
-signature
   relations
-    typeOfDecl : occurrence -> TYPE
-  namespaces
-    Var  : string
-    Type : string
+    var   : ID -> TYPE
+    type  : ID -> TYPE
+
   name-resolution
     labels P
-    resolve Var  filter P* min $ < P
-    resolve Type filter P* min $ < P
 
+signature // records
 
-rules // type binding
+  sorts
+    FIELDS = list((path * (ID * TYPE)))
 
-  declareType : scope * string * TYPE
+  relations
+    field: ID -> TYPE
 
-  declareType(s, x, T) :-
-    s -> Type{x} with typeOfDecl T,
-    // declaration is distinct
-    typeOfDecl of Type{x} in s |-> [(_, (_, T))],
-    @x.decl := x.
+signature // control-flow
 
-  declareVar : scope * string * TYPE
-
-  declareVar(s, x, T) :-
-    s -> Var{x} with typeOfDecl T,
-    // declaration is distinct
-    typeOfDecl of Var{x} in s |-> [(_, (_, T))],
-    @x.decl := x.
-
-
-
-  declareTypeRaw : scope * string * TYPE
-  lookupType : scope * string -> TYPE
-
-  declareTypeRaw(s, x, T) :-
-    s -> Type{x} with typeOfDecl T,
-    typeOfDecl of Type{x} in s |-> [(_, (_, T))],
-    @x.decl := x.
-    // declaration is distinct
-
-  lookupType(s, x) = T :- {x'} @x.ref := x',
-    typeOfDecl of Type{x} in s |-> [(_, (Type{x'}, T))].
-    // permissive lookup to cope with double declaration
+  relations
+    loop:
 
 rules // variable binding
 
-  declareVarRaw : scope * string * TYPE
-  lookupVar : scope * string -> TYPE
+  declareVar : scope * ID *  TYPE
+  lookupVar  : scope * ID -> VARS
+  typeOfVar  : scope * ID -> TYPE
 
-  declareVarRaw(s, x, T) :-
-    s -> Var{x} with typeOfDecl T,
+  declareVar(s, x, T) :-
+    !var[x, T] in s,
     // declaration is distinct
-    typeOfDecl of Var{x} in s |-> [(_, (_, T))],
+    lookupVar(s, x) == [_],
     @x.decl := x.
 
-  lookupVar(s, x) = T :- {x'} @x.ref := x',
-    typeOfDecl of Var{x} in s |-> [(_, (Var{x'}, T))].
+  lookupVar(s, x) = VARs :-
+    query var
+      filter P*
+        and { x' :- x' == x }
+      min $ < P
+       in s |-> VARs.
+
+  typeOfVar(s, x) = T :- {x'}
     // permissive lookup to cope with double declaration
+    lookupVar(s, x) == [(_, (x', T)) |_],
+    @x.ref := x'.
+
+rules // type binding
+
+  declareType : scope * ID * TYPE
+  lookupType  : scope * ID -> TYPES
+  // no `typeOfType: scope * ID -> TYPE` due to name clash
+
+  declareType(s, x, T) :-
+    !type[x, T] in s,
+    // declaration is distinct
+    lookupType(s, x) == [_],
+    @x.decl := x.
+
+  lookupType(s, x) = TYPES :-
+    query type
+      filter P*
+        and { x' :- x' == x }
+      min $ < P
+       in s |-> TYPES.
 
 rules // field binding
 
-  declareField : scope * ID * TYPE
-  lookupField  : scope * string -> TYPE
+  declareField      : scope * ID * TYPE
+  lookupField       : scope * ID        -> FIELDS
+  lookupAllFields   : scope             -> FIELDS
+  typeOfField       : scope * ID        -> TYPE
 
   declareField(s, x, T) :-
-    s -> Field{x} with typeOfDecl T,
+    !field[x, T] in s,
     // declaration is distinct
-    typeOfDecl of Field{x} in s |-> [(_, (_, T))],
+    lookupField(s, x) == [_],
     @x.decl := x.
 
-  lookupField(s, x) = T :- {x'} @x.ref := x',
-    typeOfDecl of Field{x} in s |-> [(_, (Field{x'}, T))].
+  lookupField(s, x) = FLDs :-
+    query field
+      filter P* 
+        and { x' :- x' == x }
+      min $ < P
+      in s |-> FLDs.
+
+  lookupAllFields(s) = FLDs :-
+    query field
+      filter P* 
+      min $ < P
+      in s |-> FLDs.
+
+  typeOfField(s, x) = T :- {d}
     // permissive lookup to cope with double declaration
+    lookupField(s, x) == [(_, (d, T)) | _],
+    @x.ref := d.
 
 signature
   sorts TYPE
@@ -121,12 +134,6 @@ rules subtype : TYPE * TYPE
   subtype(T, T).
 
   subtype(NIL(), RECORD(s)).
-
-rules subtypeO : Type * TYPE * TYPE
-
-  subtypeO(t, T, T).
-
-  subtypeO(t, NIL(), RECORD(s)).
 
 rules subtypes : list(TYPE) * list(TYPE)
 
@@ -214,7 +221,10 @@ rules // types
 
   typeOfType : scope * Type -> TYPE
 
-  typeOfType(s, Tid(x)) = lookupType(s, x).
+  typeOfType(s, Tid(x)) = T :- {x'}  
+    // permissive lookup to cope with double declaration
+    lookupType(s, x) == [(_, (x', T)) | _],
+    @x.ref := x'.
 
     // typeOfDecl of Type{x} in s |-> [(_, (_, T))|_].
     // permissive query to allow non-distinct type declarations
@@ -237,7 +247,7 @@ rules // function declarations
     typeOfType(s_outer, t) == T,
     declareVar(s, f, FUN(Ts, T)),
     typeOfExp(s_fun, e) == S,
-    subtypeO(t, S, T).
+    subtype(S, T) | error $[[S] is not a subtype of [T]] @t.
 
 rules
   typeOfArg  : scope * scope * FArg -> TYPE
@@ -250,7 +260,7 @@ rules
 rules // function calls
 
   typeOfExp(s, Call(f, es)) = T :- {Ts Ss}
-    lookupVar(s, f) == FUN(Ts, T),
+    typeOfVar(s, f) == FUN(Ts, T),
     typeOfExps(s, es) == Ss,
     subtypes(Ss, Ts).
 
@@ -301,11 +311,11 @@ rules // statements
 rules
 
   typeOfLVal(s, Var2LValue(Var(x))) = T :-
-    lookupVar(s, x) == T.
+    typeOfVar(s, x) == T.
 
   typeOfExp(s, LValue2Exp(lval)) = typeOfLVal(s, lval).
 
-  typeOfExp(s, LValue2Exp(Var2LValue(Var(x)))) = lookupVar(s, x).
+  typeOfExp(s, LValue2Exp(Var2LValue(Var(x)))) = typeOfVar(s, x).
 
 rules // sequence
 
@@ -332,7 +342,7 @@ rules // sequence
 
   typeOfExp(s, While(e1, e2)) = UNIT() :- {s_loop}
     new s_loop, s_loop -P-> s,
-    s_loop -> Loop{"break"} with typeOfDecl UNIT(),
+    !loop[] in s_loop,
     typeOfExp(s_loop, e1) == INT(),
     typeOfExp(s_loop, e2) == UNIT().
 
@@ -340,13 +350,16 @@ rules // sequence
     new s_for,
     s_for -P-> s,
     declareVar(s_for, x, INT()),
-    s_for -> Loop{"break"} with typeOfDecl UNIT(),
+    !loop[] in s_for,
     typeOfExp(s, e1) == INT(),
     typeOfExp(s, e2) == INT(),
     typeOfExp(s_for, e3) == UNIT().
 
   typeOfExp(s, Break()) = UNIT() :-
-    typeOfDecl of Loop{"break"} in s |-> [(_, (_, UNIT()))].
+    query loop 
+      filter P* 
+      min $ < P
+       in s |-> [_].
 
 rules // literals
 
@@ -434,12 +447,12 @@ rules // record creation
     typeOfType(s, Tid(t)) == RECORD(s_rec),
     new s_init,
     initsOk(s, s_rec, s_init, inits),
-    typeOfDecl of Field{_} in s_rec |-> ds,
+    lookupAllFields(s_rec) == ds,
     fieldsSameLength(ds, inits),
     allFieldsInitialized(t, ds, s_init).
 
 
-  fieldsSameLength : list((path * (occurrence * TYPE))) * list(InitField)
+  fieldsSameLength : list((path * (ID * TYPE))) * list(InitField)
   fieldsSameLength([],[]).
   fieldsSameLength([_|xs], [_|ys]) :- fieldsSameLength(xs, ys).
 
@@ -449,16 +462,16 @@ rules // record creation
   initsOk maps initOk(*, *, *, list(*))
 
   initOk(s, s_rec, s_init, InitField(x, e)) :- {S T}
-    lookupField(s_rec, x) == T,
+    typeOfField(s_rec, x) == T,
     typeOfExp(s, e) == S,
     declareField(s_init, x, S),
     subtype(S, T).
 
-  fieldInitialized : ID * (path * (occurrence * TYPE)) * scope
+  fieldInitialized : ID * (path * (ID * TYPE)) * scope
   allFieldsInitialized maps fieldInitialized(*, list(*), *)
 
-  fieldInitialized(t, (_, (Field{x}, _)), s) :-
-    typeOfDecl of Field{x} in s |-> [_].
+  fieldInitialized(t, (_, (x, _)), s) :-
+    lookupField(s, x) == [_].
     // t is passed such that error is displayed be on t;
     // noting that init of x is missing
 
@@ -466,7 +479,7 @@ rules // record field access
 
   typeOfLVal(s, FieldVar(lval, x)) = T :- {s_rec}
     typeOfLVal(s, lval) == RECORD(s_rec),
-    lookupField(s_rec, x) == T.
+    typeOfField(s_rec, x) == T.
 
 rules // literals
 
@@ -478,24 +491,24 @@ rules
   init : scope
 
   init(s) :-
-    declareTypeRaw(s, "int",    INT()),
-    declareTypeRaw(s, "string", STRING()),
+    declareType(s, "int",    INT()),
+    declareType(s, "string", STRING()),
 
-    declareVarRaw(s,  "print",     FUN([STRING()], UNIT())),
-    declareVarRaw(s,  "chr",       FUN([INT()], STRING())),
-    declareVarRaw(s,  "ord",       FUN([STRING()], INT())),
-    declareVarRaw(s,  "size",      FUN([STRING()], INT())),
-    declareVarRaw(s,  "substring", FUN([STRING(), INT(), INT()], STRING())),
-    declareVarRaw(s,  "concat",    FUN([STRING(), STRING()], STRING())),
-    declareVarRaw(s,  "not",       FUN([INT()], INT())),
-    declareVarRaw(s,  "exit",      FUN([INT()], UNIT())),
-    declareVarRaw(s,  "getchar",   FUN([], STRING())),
-    declareVarRaw(s,  "flush",     FUN([], UNIT())),
-    declareVarRaw(s,  "printi",    FUN([INT()], UNIT())),
+    declareVar(s,  "print",     FUN([STRING()], UNIT())),
+    declareVar(s,  "chr",       FUN([INT()], STRING())),
+    declareVar(s,  "ord",       FUN([STRING()], INT())),
+    declareVar(s,  "size",      FUN([STRING()], INT())),
+    declareVar(s,  "substring", FUN([STRING(), INT(), INT()], STRING())),
+    declareVar(s,  "concat",    FUN([STRING(), STRING()], STRING())),
+    declareVar(s,  "not",       FUN([INT()], INT())),
+    declareVar(s,  "exit",      FUN([INT()], UNIT())),
+    declareVar(s,  "getchar",   FUN([], STRING())),
+    declareVar(s,  "flush",     FUN([], UNIT())),
+    declareVar(s,  "printi",    FUN([INT()], UNIT())),
 
     // For benchmarks
-    declareVarRaw(s,  "timeGo",    FUN([], UNIT())),
-    declareVarRaw(s,  "timeStop",  FUN([], UNIT())).
+    declareVar(s,  "timeGo",    FUN([], UNIT())),
+    declareVar(s,  "timeStop",  FUN([], UNIT())).
 
 
 

@@ -20,7 +20,6 @@ dependencies {
   kapt(platform(project(":spoofax.depconstraints")))
 
   api(project(":spoofax.compiler"))
-  api(project(":spoofax.compiler.dagger"))
   api("com.google.dagger:dagger")
 
   implementation("org.metaborg:pie.runtime")
@@ -30,9 +29,9 @@ dependencies {
   compileOnly("org.immutables:value-annotations") // Dagger accesses these annotations, which have class retention.
 
   // Dependencies to be able to configure the extensions provided by these Gradle plugins.
-  compileOnly("org.metaborg:coronium:0.3.6")
-  compileOnly("biz.aQute.bnd:biz.aQute.bnd.gradle:5.2.0")
-  compileOnly("org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.6.5")
+  compileOnly("org.metaborg:coronium:0.3.16")
+  compileOnly("biz.aQute.bnd:biz.aQute.bnd.gradle:5.3.0")
+  compileOnly("org.jetbrains.intellij:org.jetbrains.intellij.gradle.plugin:1.0") // Keep at 1.0 for JVM 8 compatibility.
 }
 
 gradlePlugin {

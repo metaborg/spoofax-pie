@@ -19,6 +19,7 @@ import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
+import mb.spoofax.core.Coordinate;
 import org.immutables.value.Value;
 
 import javax.inject.Inject;
@@ -37,8 +38,8 @@ public class EclipseProjectCompiler implements TaskDef<Supplier<Result<Option<Ec
     private final TemplateWriter packageInfoTemplate;
     private final TemplateWriter componentExtensionSchemaTemplate;
     private final TemplateWriter componentCustomizerTemplate;
-    private final TemplateWriter languageTemplate;
-    private final TemplateWriter languageFactoryTemplate;
+    private final TemplateWriter participantTemplate;
+    private final TemplateWriter participantFactoryTemplate;
     private final TemplateWriter pluginTemplate;
     private final TemplateWriter moduleTemplate;
     private final TemplateWriter componentTemplate;
@@ -66,8 +67,8 @@ public class EclipseProjectCompiler implements TaskDef<Supplier<Result<Option<Ec
         this.packageInfoTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/package-info.java.mustache");
         this.componentExtensionSchemaTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/component.exsd.mustache");
         this.componentCustomizerTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/ComponentCustomizer.java.mustache");
-        this.languageTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/Language.java.mustache");
-        this.languageFactoryTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/LanguageFactory.java.mustache");
+        this.participantTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/Participant.java.mustache");
+        this.participantFactoryTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/ParticipantFactory.java.mustache");
         this.pluginTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/Plugin.java.mustache");
         this.moduleTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/Module.java.mustache");
         this.componentTemplate = templateCompiler.getOrCompileToWriter("eclipse_project/Component.java.mustache");
@@ -117,8 +118,8 @@ public class EclipseProjectCompiler implements TaskDef<Supplier<Result<Option<Ec
             packageInfoTemplate.write(context, input.packageInfo().file(generatedJavaSourcesDirectory), input);
         }
         componentCustomizerTemplate.write(context, input.baseComponentCustomizer().file(generatedJavaSourcesDirectory), input);
-        languageTemplate.write(context, input.baseLanguage().file(generatedJavaSourcesDirectory), input);
-        languageFactoryTemplate.write(context, input.baseLanguageFactory().file(generatedJavaSourcesDirectory), input);
+        participantTemplate.write(context, input.baseParticipant().file(generatedJavaSourcesDirectory), input);
+        participantFactoryTemplate.write(context, input.baseParticipantFactory().file(generatedJavaSourcesDirectory), input);
         pluginTemplate.write(context, input.basePlugin().file(generatedJavaSourcesDirectory), input);
         moduleTemplate.write(context, input.baseEclipseModule().file(generatedJavaSourcesDirectory), input);
         componentTemplate.write(context, input.baseEclipseComponent().file(generatedJavaSourcesDirectory), input);
@@ -199,7 +200,7 @@ public class EclipseProjectCompiler implements TaskDef<Supplier<Result<Option<Ec
 
             public Builder withDefaultProject(ResourcePath baseDirectory, Shared shared) {
                 final GradleProject gradleProject = GradleProject.builder()
-                    .coordinate(shared.defaultGroupId(), defaultArtifactId(shared), Optional.of(shared.defaultVersion()))
+                    .coordinate(new Coordinate(shared.defaultGroupId(), defaultArtifactId(shared), shared.defaultVersion()))
                     .baseDirectory(baseDirectory)
                     .build();
                 return this
@@ -228,7 +229,7 @@ public class EclipseProjectCompiler implements TaskDef<Supplier<Result<Option<Ec
 
             public Builder withDefaultsSameProject(ResourcePath baseDirectory, Shared shared) {
                 final GradleProject gradleProject = GradleProject.builder()
-                    .coordinate(shared.defaultGroupId(), defaultSameArtifactId(shared), Optional.of(shared.defaultVersion()))
+                    .coordinate(new Coordinate(shared.defaultGroupId(), defaultSameArtifactId(shared), shared.defaultVersion()))
                     .baseDirectory(baseDirectory)
                     .build();
                 return this
@@ -262,10 +263,6 @@ public class EclipseProjectCompiler implements TaskDef<Supplier<Result<Option<Ec
 
         String packageId();
 
-        @Value.Default default String languageGroup() {
-            return packageId();
-        }
-
 
         /// Gradle configuration
 
@@ -286,7 +283,7 @@ public class EclipseProjectCompiler implements TaskDef<Supplier<Result<Option<Ec
 
         /// Eclipse configuration
 
-        @Value.Default default String pluginId() {return project().coordinate().artifactId();}
+        @Value.Default default String pluginId() {return project().coordinate().artifactId;}
 
         @Value.Default default String componentExtensionPointId() {return pluginId() + ".component";}
 
@@ -391,28 +388,28 @@ public class EclipseProjectCompiler implements TaskDef<Supplier<Result<Option<Ec
             return extendComponentCustomizer().orElseGet(this::baseComponentCustomizer);
         }
 
-        // Language
+        // Participant
 
-        @Value.Default default TypeInfo baseLanguage() {
-            return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "Language");
+        @Value.Default default TypeInfo baseParticipant() {
+            return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "EclipseParticipant");
         }
 
-        Optional<TypeInfo> extendLanguage();
+        Optional<TypeInfo> extendParticipant();
 
-        default TypeInfo language() {
-            return extendLanguage().orElseGet(this::baseLanguage);
+        default TypeInfo participant() {
+            return extendParticipant().orElseGet(this::baseParticipant);
         }
 
         // LanguageFactory
 
-        @Value.Default default TypeInfo baseLanguageFactory() {
-            return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "LanguageFactory");
+        @Value.Default default TypeInfo baseParticipantFactory() {
+            return TypeInfo.of(packageId(), shared().defaultClassPrefix() + "EclipseParticipantFactory");
         }
 
-        Optional<TypeInfo> extendLanguageFactory();
+        Optional<TypeInfo> extendParticipantFactory();
 
-        default TypeInfo languageFactory() {
-            return extendLanguageFactory().orElseGet(this::baseLanguageFactory);
+        default TypeInfo participantFactory() {
+            return extendParticipantFactory().orElseGet(this::baseParticipantFactory);
         }
 
         // Plugin
@@ -678,8 +675,8 @@ public class EclipseProjectCompiler implements TaskDef<Supplier<Result<Option<Ec
                     // have two package-info.java files in the same package, which is an error.
                     generatedFiles.add(basePackageInfo().file(this.generatedJavaSourcesDirectory()));
                 }
-                generatedFiles.add(baseLanguage().file(this.generatedJavaSourcesDirectory()));
-                generatedFiles.add(baseLanguageFactory().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(baseParticipant().file(this.generatedJavaSourcesDirectory()));
+                generatedFiles.add(baseParticipantFactory().file(this.generatedJavaSourcesDirectory()));
                 generatedFiles.add(basePlugin().file(this.generatedJavaSourcesDirectory()));
                 generatedFiles.add(baseEclipseComponent().file(this.generatedJavaSourcesDirectory()));
                 generatedFiles.add(baseEclipseModule().file(this.generatedJavaSourcesDirectory()));

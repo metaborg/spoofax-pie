@@ -2,8 +2,8 @@
 
 package mb.spoofax.lwb.compiler.gradle
 
-import mb.cfg.CompileLanguageInput
-import mb.cfg.CompileLanguageSpecificationInput
+import mb.cfg.CompileLanguageDefinitionInput
+import mb.cfg.CompileMetaLanguageSourcesInput
 import mb.cfg.task.CfgRootDirectoryToObjectException
 import mb.common.message.KeyedMessages
 import mb.common.message.Message
@@ -16,7 +16,6 @@ import mb.log.dagger.DaggerLoggerComponent
 import mb.log.dagger.LoggerModule
 import mb.pie.api.Pie
 import mb.pie.api.ValueSupplier
-import mb.pie.dagger.PieModule
 import mb.pie.runtime.PieBuilderImpl
 import mb.resource.ResourceKey
 import mb.resource.ResourceService
@@ -29,9 +28,10 @@ import mb.spoofax.compiler.gradle.*
 import mb.spoofax.compiler.gradle.plugin.*
 import mb.spoofax.compiler.language.*
 import mb.spoofax.compiler.util.*
-import mb.spoofax.lwb.compiler.CheckLanguageSpecification
-import mb.spoofax.lwb.compiler.CompileLanguageSpecification
-import mb.spoofax.lwb.compiler.dagger.StandaloneSpoofax3Compiler
+import mb.spoofax.core.platform.DaggerPlatformComponent
+import mb.spoofax.lwb.compiler.definition.CheckLanguageDefinition
+import mb.spoofax.lwb.compiler.SpoofaxLwbCompiler
+import mb.spoofax.lwb.compiler.definition.CompileMetaLanguageSources
 import mb.strategolib.StrategoLibUtil
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -39,6 +39,7 @@ import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPlugin
 import java.io.File
 import java.util.*
+import java.util.function.Supplier
 
 open class LanguageExtension() {
   companion object {
@@ -46,7 +47,7 @@ open class LanguageExtension() {
   }
 }
 
-open class Spoofax3AdapterExtension(project: Project, input: CompileLanguageInput) : AdapterProjectExtension(project) {
+open class Spoofax3AdapterExtension(project: Project, input: CompileLanguageDefinitionInput) : AdapterProjectExtension(project) {
   companion object {
     internal const val id = "spoofax3LanguageAdapterProject"
   }
@@ -55,7 +56,7 @@ open class Spoofax3AdapterExtension(project: Project, input: CompileLanguageInpu
   override val compilerInputFinalized: AdapterProjectCompiler.Input = input.adapterProjectInput()
 }
 
-open class Spoofax3LanguageExtension(project: Project, input: CompileLanguageInput) : LanguageProjectExtension(project) {
+open class Spoofax3LanguageExtension(project: Project, input: CompileLanguageDefinitionInput) : LanguageProjectExtension(project) {
   companion object {
     internal const val id = "spoofax3LanguageProject"
   }
@@ -72,21 +73,27 @@ open class LanguagePlugin : Plugin<Project> {
     val loggerComponent = DaggerLoggerComponent.builder()
       .loggerModule(LoggerModule.stdErrErrorsAndWarnings())
       .build()
-    val resourceServiceComponent = DaggerRootResourceServiceComponent.builder()
+    val baseResourceServiceComponent = DaggerRootResourceServiceComponent.builder()
       .loggerComponent(loggerComponent)
       .build()
-    val spoofax3Compiler = StandaloneSpoofax3Compiler(
+    val platformComponent = DaggerPlatformComponent.builder()
+      .loggerComponent(loggerComponent)
+      .resourceServiceComponent(baseResourceServiceComponent)
+      .build();
+
+    val spoofaxLwbCompiler = SpoofaxLwbCompiler.fromComponents(
       loggerComponent,
-      resourceServiceComponent.createChildModule(),
-      PieModule { PieBuilderImpl() }
+      baseResourceServiceComponent,
+      platformComponent,
+      Supplier { PieBuilderImpl() }
     )
 
     val extension = LanguageExtension()
     project.extensions.add(LanguageExtension.id, extension)
 
     try {
-      val input = getInput(project, spoofax3Compiler)
-      LanguagePluginInstance(project, resourceServiceComponent, spoofax3Compiler, input)
+      val input = getInput(project, spoofaxLwbCompiler)
+      LanguagePluginInstance(project, baseResourceServiceComponent, spoofaxLwbCompiler, input)
     } catch(e: CfgRootDirectoryToObjectException) {
       val exceptionPrinter = ExceptionPrinter()
       exceptionPrinter.addCurrentDirectoryContext(project.path)
@@ -96,26 +103,26 @@ open class LanguagePlugin : Plugin<Project> {
     }
   }
 
-  private fun getInput(project: Project, spoofax3Compiler: StandaloneSpoofax3Compiler): CompileLanguageInput {
-    spoofax3Compiler.pieComponent.pie.newSession().use {
-      return it.require(spoofax3Compiler.compiler.cfgComponent.cfgRootDirectoryToObject.createTask(FSPath(project.projectDir)))
-        .unwrap().compileLanguageInput // Note: exception is caught in apply.
+  private fun getInput(project: Project, spoofaxLwbCompiler: SpoofaxLwbCompiler): CompileLanguageDefinitionInput {
+    spoofaxLwbCompiler.pieComponent.pie.newSession().use {
+      return it.require(spoofaxLwbCompiler.spoofaxLwbCompilerComponent.cfgComponent.cfgRootDirectoryToObject.createTask(FSPath(project.projectDir)))
+        .unwrap().compileLanguageDefinitionInput // Note: exception is caught in apply.
     }
   }
 }
 
 class LanguagePluginInstance(
-  val project: Project,
-  resourceServiceComponent: ResourceServiceComponent,
-  val spoofax3Compiler: StandaloneSpoofax3Compiler,
-  val compileLanguageInput: CompileLanguageInput
+    val project: Project,
+    resourceServiceComponent: ResourceServiceComponent,
+    val spoofaxLwbCompiler: SpoofaxLwbCompiler,
+    val compileLanguageDefinitionInput: CompileLanguageDefinitionInput
 ) {
   val resourceService: ResourceService = resourceServiceComponent.resourceService
-  val pie: Pie = spoofax3Compiler.pieComponent.pie
+  val pie: Pie = spoofaxLwbCompiler.pieComponent.pie
 
   init {
-    project.extensions.add(Spoofax3AdapterExtension.id, Spoofax3AdapterExtension(project, compileLanguageInput))
-    project.extensions.add(Spoofax3LanguageExtension.id, Spoofax3LanguageExtension(project, compileLanguageInput))
+    project.extensions.add(Spoofax3AdapterExtension.id, Spoofax3AdapterExtension(project, compileLanguageDefinitionInput))
+    project.extensions.add(Spoofax3LanguageExtension.id, Spoofax3LanguageExtension(project, compileLanguageDefinitionInput))
 
     project.afterEvaluate {
       configure()
@@ -124,14 +131,14 @@ class LanguagePluginInstance(
 
 
   private fun configure() {
-    val languageProjectCompiler = spoofax3Compiler.compiler.spoofaxCompilerComponent.languageProjectCompiler
-    val adapterProjectCompiler = spoofax3Compiler.compiler.spoofaxCompilerComponent.adapterProjectCompiler
-    configureProject(languageProjectCompiler, spoofax3Compiler.compiler.strategolibComponent.strategoLibUtil, spoofax3Compiler.compiler.gppComponent.gppUtil, adapterProjectCompiler)
-    configureCompileLanguageProjectTask(languageProjectCompiler, compileLanguageInput.languageProjectInput())
-    val check = spoofax3Compiler.compiler.component.checkLanguageSpecification
-    val compile = spoofax3Compiler.compiler.component.compileLanguageSpecification
-    configureCompileLanguageTask(check, compile, compileLanguageInput.compileLanguageSpecificationInput())
-    configureCompileAdapterProjectTask(adapterProjectCompiler, compileLanguageInput.adapterProjectInput())
+    val languageProjectCompiler = spoofaxLwbCompiler.spoofaxCompilerComponent.languageProjectCompiler
+    val adapterProjectCompiler = spoofaxLwbCompiler.spoofaxCompilerComponent.adapterProjectCompiler
+    configureProject(languageProjectCompiler, spoofaxLwbCompiler.spoofaxLwbCompilerComponent.strategoLibComponent.strategoLibUtil, spoofaxLwbCompiler.spoofaxLwbCompilerComponent.gppComponent.gppUtil, adapterProjectCompiler)
+    configureCompileLanguageProjectTask(languageProjectCompiler, compileLanguageDefinitionInput.languageProjectInput())
+    val check = spoofaxLwbCompiler.spoofaxLwbCompilerComponent.checkLanguageDefinition
+    val compile = spoofaxLwbCompiler.spoofaxLwbCompilerComponent.compileMetaLanguageSources
+    configureCompileLanguageTask(check, compile, compileLanguageDefinitionInput.compileMetaLanguageSourcesInput())
+    configureCompileAdapterProjectTask(adapterProjectCompiler, compileLanguageDefinitionInput.adapterProjectInput())
   }
 
   private fun configureProject(
@@ -141,19 +148,21 @@ class LanguagePluginInstance(
     adapterProjectCompiler: AdapterProjectCompiler
   ) {
     // Language project compiler
-    val languageProjectInput = compileLanguageInput.languageProjectInput()
+    val languageProjectInput = compileLanguageDefinitionInput.languageProjectInput()
     project.addMainJavaSourceDirectory(languageProjectInput.generatedJavaSourcesDirectory(), resourceService)
     languageProjectCompiler.getDependencies(languageProjectInput).forEach {
       it.addToDependencies(project)
     }
     // Language compiler
-    val languageSpecificationInput = compileLanguageInput.compileLanguageSpecificationInput()
-    project.addMainResourceDirectory(languageSpecificationInput.compileLanguageShared().generatedResourcesDirectory(), resourceService)
-    project.addMainJavaSourceDirectory(languageSpecificationInput.compileLanguageShared().generatedJavaSourcesDirectory(), resourceService)
+    val languageSpecificationInput = compileLanguageDefinitionInput.compileMetaLanguageSourcesInput()
+    project.addMainResourceDirectory(languageSpecificationInput.compileMetaLanguageSourcesShared().generatedResourcesDirectory(), resourceService)
+    project.addMainJavaSourceDirectory(languageSpecificationInput.compileMetaLanguageSourcesShared().generatedJavaSourcesDirectory(), resourceService)
+    // TODO: move this classpath functionality into the resources components of those libraries
+    // HACK: add strategolib and gpp classpaths as dependencies, so that the Gradle Java compilation task does not fail.
     project.dependencies.add("implementation", project.files(strategoLibUtil.strategoLibJavaClassPaths))
     project.dependencies.add("implementation", project.files(gppUtil.gppJavaClassPaths))
     // Adapter project compiler
-    val adapterProjectInput = compileLanguageInput.adapterProjectInput()
+    val adapterProjectInput = compileLanguageDefinitionInput.adapterProjectInput()
     project.addMainJavaSourceDirectory(adapterProjectInput.adapterProject().generatedJavaSourcesDirectory(), resourceService)
     adapterProjectCompiler.getDependencies(adapterProjectInput).forEach {
       it.addToDependencies(project)
@@ -181,9 +190,9 @@ class LanguagePluginInstance(
   }
 
   private fun configureCompileLanguageTask(
-    check: CheckLanguageSpecification,
-    compile: CompileLanguageSpecification,
-    input: CompileLanguageSpecificationInput
+    check: CheckLanguageDefinition,
+    compile: CompileMetaLanguageSources,
+    input: CompileMetaLanguageSourcesInput
   ) {
     val compileTask = project.tasks.register("compileLanguage") {
       group = "spoofax compiler"
@@ -225,12 +234,6 @@ class LanguagePluginInstance(
             files.includeDirectories().forEach { includeDirectory ->
               includeDirectory.tryAsLocal("ESV files in include directory") { dir ->
                 inputs.files(project.fileTree(dir) { include("**/*.esv") })
-              }
-            }
-            if(files.includeLibSpoofax2Exports()) {
-              // Output: libspoofax2 unarchive directory
-              files.libSpoofax2UnarchiveDirectory().tryAsLocal("libspoofax2 unarchive directory") { dir ->
-                outputs.dir(dir)
               }
             }
           }
@@ -276,6 +279,39 @@ class LanguagePluginInstance(
 
         // Output: output spec ATerm directory
         statixConfig.outputSpecAtermDirectory().tryAsLocal("Statix output spec ATerms directory") { dir ->
+          outputs.files(project.fileTree(dir) {
+            include("**/*.aterm")
+          })
+        }
+      }
+      input.dynamix().ifPresent { dynamixConfig ->
+        dynamixConfig.source().caseOf()
+          .files { files ->
+            // Input: all Dynamix files in the main source directory and include directories
+            files.mainSourceDirectory().tryAsLocal("Dynamix files in main source directory") { dir ->
+              inputs.files(project.fileTree(dir) {
+                include("**/*.dx")
+              })
+            }
+            files.includeDirectories().forEach { includeDirectory ->
+              includeDirectory.tryAsLocal("Dynamix files in include directory") { dir ->
+                inputs.files(project.fileTree(dir) {
+                  include("**/*.dx")
+                })
+              }
+            }
+          }
+          .prebuilt { specAtermDirectory ->
+            // Input: prebuilt spec ATerm directory
+            specAtermDirectory.tryAsLocal("Dynamix prebuilt spec ATerm directory") { dir ->
+              inputs.files(project.fileTree(dir) {
+                include("**/*.aterm")
+              })
+            }
+          }
+
+        // Output: output spec ATerm directory
+        dynamixConfig.outputSpecAtermDirectory().tryAsLocal("Dynamix output spec ATerms directory") { dir ->
           outputs.files(project.fileTree(dir) {
             include("**/*.aterm")
           })

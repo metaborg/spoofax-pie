@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 
 public class RunCommandHandler extends AbstractHandler {
-    public final static String languageIdParameterId = "languageId"; // Used for dynamic loading.
+    public final static String languageCoordinateParameterId = "languageCoordinate"; // Used for dynamic loading.
     public final static String dataParameterId = "data";
 
     private final LoggerFactory loggerFactory;

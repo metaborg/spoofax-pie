@@ -16,6 +16,7 @@ import mb.pie.api.TaskDef;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.spoofax.core.language.LanguageInstance;
+import mb.spoofax.core.language.ResourceExports;
 import mb.spoofax.core.language.command.AutoCommandRequest;
 import mb.spoofax.core.language.command.CommandDef;
 {{#isMultiLang}}
@@ -64,6 +65,10 @@ public class {{baseModule.id}} {
 
     @Provides @Named("packageId") String providePackageId() {
         return "{{adapterProject.packageId}}";
+    }
+
+    @Provides ResourceExports provideResourceExports({{exports.resourceExportsClass.qualifiedId}} resourceExports) {
+        return resourceExports;
     }
 {{#parser}}
 
@@ -126,8 +131,22 @@ public class {{baseModule.id}} {
 
 
     @Provides @{{scope.id}}
-    static {{this.languageProjectInput.strategoRuntimeBuilderFactory.qualifiedId}} provideStrategoRuntimeBuilderFactory(LoggerFactory loggerFactory, ResourceService resourceService, @{{qualifier.id}}("definition-directory") HierarchicalResource definitionDir) {
-        return new {{this.languageProjectInput.strategoRuntimeBuilderFactory.qualifiedId}}(loggerFactory, resourceService, definitionDir);
+    static {{this.languageProjectInput.strategoRuntimeBuilderFactory.qualifiedId}} provideStrategoRuntimeBuilderFactory(
+        LoggerFactory loggerFactory,
+        ResourceService resourceService,
+        @{{qualifier.id}}("definition-directory") HierarchicalResource definitionDir{{#this.languageProjectInput.primitiveLibraryVars}}{{#-first}},{{/-first}}
+        {{variable}}{{^-last}},{{/-last}}
+{{/this.languageProjectInput.primitiveLibraryVars}}{{#this.languageProjectInput.interopRegistererVars}}{{#-first}},{{/-first}}
+    {{variable}}{{^-last}},{{/-last}}
+{{/this.languageProjectInput.interopRegistererVars}}
+    ) {
+        return new {{this.languageProjectInput.strategoRuntimeBuilderFactory.qualifiedId}}(
+            loggerFactory,
+            resourceService,
+            definitionDir{{#this.languageProjectInput.primitiveLibraryVars}}{{#-first}},{{/-first}}
+            {{name}}{{^-last}},{{/-last}}{{/this.languageProjectInput.primitiveLibraryVars}}{{#this.languageProjectInput.interopRegistererVars}}{{#-first}},{{/-first}}
+            {{name}}{{^-last}},{{/-last}}{{/this.languageProjectInput.interopRegistererVars}}
+        );
     }
 
     @Provides @{{scope.id}} @{{qualifier.id}}

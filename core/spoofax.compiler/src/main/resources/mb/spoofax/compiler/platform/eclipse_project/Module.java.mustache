@@ -22,6 +22,7 @@ public class {{baseEclipseModule.id}} {
         return new {{eclipseIdentifiers.qualifiedId}}();
     }
 
+
 {{#adapterProjectCompilerInput.multilangAnalyzer}}
     @Provides @{{adapterProjectCompilerInput.qualifier.qualifiedId}}("StartupWriteLock") @{{adapterProjectCompilerInput.scope.qualifiedId}}
     static LockRule provideStartupWriteLockRule(@MultiLang LockRule startUpWriteLockRule) {
@@ -39,6 +40,7 @@ public class {{baseEclipseModule.id}} {
     static ReadLockRule provideStartupReadLockRule(@{{adapterProjectCompilerInput.qualifier.qualifiedId}}("StartupWriteLock") LockRule writeLock) {
         return writeLock.createReadLock();
     }
+
 
     @Provides @{{adapterProjectCompilerInput.qualifier.qualifiedId}} @{{adapterProjectCompilerInput.scope.qualifiedId}}
     static EditorUpdateJob.Factory provideEditorUpdateJobFactory(LoggerFactory loggerFactory, PieRunner pieRunner) {
@@ -65,5 +67,27 @@ public class {{baseEclipseModule.id}} {
             project,
             file
         );
+    }
+
+
+    @Provides @{{adapterProjectCompilerInput.qualifier.qualifiedId}} @{{adapterProjectCompilerInput.scope.qualifiedId}}
+    static {{mainMenu.qualifiedId}} provideMainMenu() {
+        return new {{mainMenu.qualifiedId}}();
+    }
+
+    @Provides @{{adapterProjectCompilerInput.qualifier.qualifiedId}} @{{adapterProjectCompilerInput.scope.qualifiedId}}
+    static {{resourceContextMenu.qualifiedId}} provideResourceContextMenu() {
+        return new {{resourceContextMenu.qualifiedId}}();
+    }
+
+    @Provides @{{adapterProjectCompilerInput.qualifier.qualifiedId}} @{{adapterProjectCompilerInput.scope.qualifiedId}}
+    static {{editorContextMenu.qualifiedId}} provideEditorContextMenu() {
+        return new {{editorContextMenu.qualifiedId}}();
+    }
+
+
+    @Provides @{{adapterProjectCompilerInput.qualifier.qualifiedId}} @{{adapterProjectCompilerInput.scope.qualifiedId}}
+    static {{runCommandHandler.qualifiedId}} provideRunCommandHandler() {
+        return new {{runCommandHandler.qualifiedId}}();
     }
 }

@@ -11,28 +11,7 @@ The following are known problems that can occur, and their solutions or workarou
 If after importing there are many errors in files about classes not existing, re-import all the projects by pressing the `Reload All Gradle Projects` button in the Gradle tool window.
 
 ### Cannot debug in IntelliJ
-Debugging in IntelliJ is a bit buggy at the moment. To force debugging, add the following environment variable to your run configuration:
-
-```
-JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005
-```
-
-Then start the run configuration in debug mode, and wait until the following shows up in the console:
-
-```
-Listening for transport dt_socket at address: 5005 Attach debugger
-```
-
-Then click the <span class="guilabel">Attach debugger</span> text in the console to attach the debugger and start debugging.
-
-Note that this enables debugging for any Gradle task that executes Java in an isolated way, including any (Java/Kotlin) compilation tasks that run in a separate process.
-Make sure to first build normally such that these tasks are no longer executed, then run your debugging configuration.
-
-If you are debugging tests, make sure that the test results are cleaned before by running `cleanTest`, otherwise Gradle may skip the test task. For example, run the following Gradle tasks as part of the run configuration:
-
-```
-:spoofax3.lwb.root:spoofax.dynamicloading:cleanTest :spoofax3.lwb.root:spoofax.dynamicloading:test
-```
+See [how to debug in IntelliJ](debugging-in-intellij.md) for more information and tips.
 
 ### Profiling in IntelliJ
 Profiling in IntelliJ can be done similarly to debugging. For example, to profile with YourKit, add the following environment variable to your run configuration:
@@ -119,21 +98,3 @@ Caused by: java.lang.ArrayIndexOutOfBoundsException: 195
 ```
 
 Determine the version of Java using `java -version`. Java 8 and 9 can exhibit this problem. The solution is to update your Java to version 11 or later. You can use a tool such as [SDKMAN!](https://sdkman.io/) to easily manage the (default) versions of Java on your system.
-
-
-### Could not generate a decorated class for type EclipseCompilerPlugin
-```
-FAILURE: Build failed with an exception.
-
-* Where:
-Build file 'esv/org.metaborg.meta.lang.esv/build.gradle.kts' line: 1
-
-* What went wrong:
-An exception occurred applying plugin request [id: 'de.set.ecj']
-> Failed to apply plugin 'de.set.ecj'.
-   > Could not create plugin of type 'EclipseCompilerPlugin'.
-      > Could not generate a decorated class for type EclipseCompilerPlugin.
-         > org/gradle/jvm/toolchain/JavaToolChain
-```
-
-The above error is caused by using Gradle 7 or newer, for which the ECJ plugin is not yet compatible. See [TwoStone/gradle-eclipse-compiler-plugin#13](https://github.com/TwoStone/gradle-eclipse-compiler-plugin/issues/13). If this error occurs while importing the project into IntelliJ, then your version of Gradle is not set correctly. Select Gradle version 6.8.

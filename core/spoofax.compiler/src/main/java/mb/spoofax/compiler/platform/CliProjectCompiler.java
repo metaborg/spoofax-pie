@@ -13,6 +13,7 @@ import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
+import mb.spoofax.core.Coordinate;
 import org.immutables.value.Value;
 
 import javax.inject.Inject;
@@ -87,7 +88,7 @@ public class CliProjectCompiler implements TaskDef<CliProjectCompiler.Input, Cli
 
             public Builder withDefaultProject(ResourcePath baseDirectory, Shared shared) {
                 final GradleProject gradleProject = GradleProject.builder()
-                    .coordinate(shared.defaultGroupId(), defaultArtifactId(shared), Optional.of(shared.defaultVersion()))
+                    .coordinate(new Coordinate(shared.defaultGroupId(), defaultArtifactId(shared), shared.defaultVersion()))
                     .baseDirectory(baseDirectory)
                     .build();
                 return this

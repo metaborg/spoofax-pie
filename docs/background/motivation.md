@@ -64,11 +64,11 @@ Configuration conventions should be changeable, and defaults should be persisted
 To summarize, Spoofax 2 suffers from the following problems that form the motivation for Spoofax 3:
 
 * Monolithic, inflexible, and non-incremental architecture causing:
-  * Inflexible and slow language processing due to non-incremental fixed-function pipeline
-  * Coupling in Spoofax Core: every language depends on Spoofax Core, and Spoofax Core depends on all meta-components
-  * Slow iteration times when developing Spoofax 2 due to its monolithic and non-incremental build
-  * Tedious to use languages due to dynamic language loading
+    * Inflexible and slow language processing due to non-incremental fixed-function pipeline
+    * Coupling in Spoofax Core: every language depends on Spoofax Core, and Spoofax Core depends on all meta-components
+    * Slow iteration times when developing Spoofax 2 due to its monolithic and non-incremental build
+    * Tedious to use languages due to dynamic language loading
 * Confusing (end-)user experience due to:
-  * Bad error traceability
-  * Scattered configuration
-  * Non-incremental configuration (restarts required to update configuration)
+    * Bad error traceability
+    * Scattered configuration
+    * Non-incremental configuration (restarts required to update configuration)

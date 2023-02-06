@@ -3,11 +3,11 @@ plugins {
   `maven-publish`
 }
 
-val commonVersion = "0.10.1"
+val commonVersion = "0.11.0"
 val logVersion = "0.5.5"
 val slf4jVersion = "1.7.30"
-val resourceVersion = "0.13.2"
-val pieVersion = "0.19.7"
+val resourceVersion = "0.14.1"
+val pieVersion = "0.21.0"
 
 val spoofax2Version: String by ext
 val spoofax2DevenvVersion: String by ext
@@ -71,6 +71,7 @@ dependencies {
     api("org.metaborg:resource.dagger:$resourceVersion")
     /// PIE
     api("org.metaborg:pie.api:$pieVersion")
+    api("org.metaborg:pie.graph:$pieVersion")
     api("org.metaborg:pie.runtime:$pieVersion")
     api("org.metaborg:pie.dagger:$pieVersion")
     api("org.metaborg:pie.task.java:$pieVersion")
@@ -114,6 +115,7 @@ dependencies {
     api("org.derive4j:derive4j:$derive4jVersion")
     api("org.derive4j:derive4j-annotation:$derive4jVersion")
     /// org.immutables
+    api("org.immutables:serial:$immutablesVersion")
     api("org.immutables:value:$immutablesVersion")
     api("org.immutables:value-annotations:$immutablesVersion")
     // Yaml

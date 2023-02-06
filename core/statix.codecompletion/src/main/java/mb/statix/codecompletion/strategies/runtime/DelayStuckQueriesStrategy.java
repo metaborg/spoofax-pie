@@ -9,6 +9,7 @@ import mb.scopegraph.oopsla20.reference.LabelWF;
 import mb.scopegraph.oopsla20.reference.RegExpLabelWF;
 import mb.scopegraph.oopsla20.reference.RelationLabelOrder;
 import mb.scopegraph.oopsla20.reference.ResolutionException;
+import mb.statix.codecompletion.CCSolverState;
 import mb.statix.codecompletion.SolverContext;
 import mb.statix.codecompletion.SolverState;
 import mb.statix.constraints.CEqual;
@@ -37,7 +38,7 @@ import java.util.stream.Collectors;
 /**
  * Delays stuck queries.
  */
-public final class DelayStuckQueriesStrategy extends NamedStrategy1<SolverContext, SolverState, SolverState> {
+public final class DelayStuckQueriesStrategy extends NamedStrategy1<SolverContext, CCSolverState, CCSolverState> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final DelayStuckQueriesStrategy instance = new DelayStuckQueriesStrategy();
@@ -61,11 +62,11 @@ public final class DelayStuckQueriesStrategy extends NamedStrategy1<SolverContex
     }
 
     @Override
-    public SolverState evalInternal(TegoEngine engine, SolverContext ctx, SolverState input) {
+    public CCSolverState evalInternal(TegoEngine engine, SolverContext ctx, CCSolverState input) {
         return eval(engine, ctx, input);
     }
 
-    public static SolverState eval(TegoEngine engine, SolverContext ctx, SolverState input) {
+    public static CCSolverState eval(TegoEngine engine, SolverContext ctx, CCSolverState input) {
         final IState.Immutable state = input.getState();
         final ICompleteness.Immutable completeness = input.getCompleteness();
 

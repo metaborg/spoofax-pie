@@ -21,14 +21,10 @@ included build, as Gradle plugins are only available through included builds.
 │   ├── libspoofax2                  # Wrapper around Spoofax 2's meta.lib.spoofax
 │   ├── libstatix                    # Wrapper around Spoofax 2's statix.runtime
 │   ├── strategolib                  # Wrapper around Spoofax 2's strategolib (Stratego 2 standard library)
-├── spoofax.lwb.compiler           # Incremental compilation from language specification to Java library
-├── spoofax.lwb.compiler.dagger    # Compiler Dagger integration. Separate project to resolve ordering
-│                                    problems between annotation processors.
-├── spoofax.lwb.compiler.gradle    # Compiler Gradle plugin
+│   ├── strategolib                  # Wrapper around Spoofax 2's gpp (Stratego 2 pretty-printing library)
+├── spoofax.lwb.compiler           # Incremental compilation from language definition to Java library
+├── spoofax.lwb.compiler.gradle    # Language definition compiler Gradle plugin
 ├── spoofax.lwb.dynamicloading     # Dynamic loading for interactive language development
-├── spoofax.lwb.eclipse            # Eclipse language workbench plugin
-├── spoofax.lwb.eclipse.feature    # Eclipse language workbench feature
-├── spoofax.lwb.eclipse.repository # Eclipse language workbench repository
 ├── build.gradle.kts               # Gradle build configuration
 ├── settings.gradle.kts            # Gradle build settings (multi-project)
 └── README.md

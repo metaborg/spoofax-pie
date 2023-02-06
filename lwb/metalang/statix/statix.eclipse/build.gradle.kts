@@ -10,9 +10,10 @@ dependencies {
 
 languageEclipseProject {
   adapterProject.set(project(":statix"))
-  compilerInput {
-    languageGroup("mb.spoofax.lwb")
-  }
+}
+
+mavenize {
+  majorVersion.set("2021-03")
 }
 
 tasks {

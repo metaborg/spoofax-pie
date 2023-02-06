@@ -1,0 +1,17 @@
+module start
+
+imports
+
+  lib/test
+
+context-free sorts
+
+  Start
+
+context-free start-symbols
+
+  Start
+
+context-free syntax
+
+  Start.Program = Test

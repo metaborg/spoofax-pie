@@ -17,6 +17,12 @@ context-free syntax
   <{Expr "\n"}*>
 ]>
 
+lexical syntax
+
+  Keyword = "main-menu"
+  Keyword = "resource-context-menu"
+  Keyword = "editor-context-menu"
+
 context-free sorts
 
   ReferenceResolutionOption

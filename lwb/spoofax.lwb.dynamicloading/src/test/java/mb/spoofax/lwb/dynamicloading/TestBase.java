@@ -1,21 +1,26 @@
 package mb.spoofax.lwb.dynamicloading;
 
+import mb.cfg.CompileLanguageDefinitionInput;
+import mb.cfg.task.CfgRootDirectoryToObject;
+import mb.cfg.task.CfgRootDirectoryToObjectException;
+import mb.cfg.task.CfgToObject;
 import mb.common.message.KeyedMessages;
 import mb.common.message.Message;
 import mb.common.result.Result;
 import mb.common.util.ExceptionPrinter;
+import mb.common.util.SetView;
 import mb.log.dagger.DaggerLoggerComponent;
 import mb.log.dagger.LoggerComponent;
 import mb.log.dagger.LoggerModule;
 import mb.pie.api.MixedSession;
 import mb.pie.api.OutTransient;
 import mb.pie.api.Session;
+import mb.pie.api.StatelessSerializableFunction;
+import mb.pie.api.Supplier;
 import mb.pie.api.Task;
 import mb.pie.api.TopDownSession;
 import mb.pie.dagger.DaggerPieComponent;
 import mb.pie.dagger.PieComponent;
-import mb.pie.dagger.PieModule;
-import mb.pie.dagger.RootPieModule;
 import mb.pie.runtime.PieBuilderImpl;
 import mb.pie.runtime.store.SerializingStoreBuilder;
 import mb.pie.runtime.store.SerializingStoreInMemoryBuffer;
@@ -30,17 +35,23 @@ import mb.resource.classloader.ClassLoaderResourceLocations;
 import mb.resource.classloader.ClassLoaderResourceRegistry;
 import mb.resource.classloader.JarFileWithPath;
 import mb.resource.dagger.DaggerRootResourceServiceComponent;
+import mb.resource.dagger.ResourceServiceComponent;
 import mb.resource.dagger.RootResourceServiceComponent;
-import mb.resource.dagger.RootResourceServiceModule;
 import mb.resource.fs.FSResource;
 import mb.resource.hierarchical.HierarchicalResource;
 import mb.resource.hierarchical.ResourcePath;
-import mb.spoofax.lwb.compiler.CompileLanguage;
-import mb.spoofax.lwb.compiler.dagger.StandaloneSpoofax3Compiler;
-import mb.spt.DaggerSptComponent;
-import mb.spt.DaggerSptResourcesComponent;
+import mb.spoofax.core.component.CompositeComponentManager;
+import mb.spoofax.core.component.StaticComponentManager;
+import mb.spoofax.core.component.StaticComponentManagerBuilder;
+import mb.spoofax.core.platform.DaggerPlatformComponent;
+import mb.spoofax.core.platform.PlatformComponent;
+import mb.spoofax.lwb.compiler.SpoofaxLwbCompiler;
+import mb.spoofax.lwb.compiler.definition.CompileLanguageDefinition;
+import mb.spoofax.lwb.compiler.definition.CompileLanguageDefinitionException;
+import mb.spoofax.lwb.dynamicloading.component.DynamicComponent;
+import mb.spoofax.lwb.dynamicloading.component.DynamicComponentManager;
 import mb.spt.SptComponent;
-import mb.spt.SptResourcesComponent;
+import mb.spt.SptParticipant;
 import mb.spt.dynamicloading.DynamicLanguageUnderTestProvider;
 
 import java.io.IOException;
@@ -53,20 +64,23 @@ class TestBase {
 
     HierarchicalResource temporaryDirectory;
     HierarchicalResource rootDirectory;
+    ExceptionPrinter exceptionPrinter;
+
     LoggerComponent loggerComponent;
-    SptResourcesComponent sptResourcesComponent;
-    RootResourceServiceComponent rootResourceServiceComponent;
+    RootResourceServiceComponent baseResourceServiceComponent;
+    PlatformComponent platformComponent;
+
     SerializingStoreInMemoryBuffer spoofax3CompilerStoreBuffer;
-    StandaloneSpoofax3Compiler standaloneSpoofax3Compiler;
+    SpoofaxLwbCompiler spoofaxLwbCompiler;
+    CfgRootDirectoryToObject cfgRootDirectoryToObject;
+    CompileLanguageDefinition compileLanguageDefinition;
     SptComponent sptComponent;
     ResourceService resourceService;
     MetricsTracer languageMetricsTracer;
-    SerializingStoreInMemoryBuffer dynamicLoadingStoreBuffer;
     DynamicLoadingComponent dynamicLoadingComponent;
+    DynamicComponentManager dynamicComponentManager;
     DynamicLoad dynamicLoad;
-    DynamicLanguageRegistry dynamicLanguageRegistry;
     PieComponent pieComponent;
-    ExceptionPrinter exceptionPrinter;
 
     void setup(Path temporaryDirectoryPath) throws IOException {
         temporaryDirectory = new FSResource(temporaryDirectoryPath);
@@ -76,62 +90,69 @@ class TestBase {
         loggerComponent = DaggerLoggerComponent.builder()
             .loggerModule(LoggerModule.stdOutVeryVerbose())
             .build();
-        sptResourcesComponent = DaggerSptResourcesComponent.create();
-        rootResourceServiceComponent = DaggerRootResourceServiceComponent.builder()
-            .rootResourceServiceModule(new RootResourceServiceModule(classLoaderResourceRegistry).addRegistriesFrom(sptResourcesComponent))
+        baseResourceServiceComponent = DaggerRootResourceServiceComponent.builder()
             .loggerComponent(loggerComponent)
             .build();
-        spoofax3CompilerStoreBuffer = new SerializingStoreInMemoryBuffer();
-        standaloneSpoofax3Compiler = new StandaloneSpoofax3Compiler(
-            loggerComponent,
-            rootResourceServiceComponent.createChildModule(classLoaderResourceRegistry),
-            new PieModule(PieBuilderImpl::new)
-                .withSerdeFactory(loggerFactory -> new FstSerde())
-                .withStoreFactory((serde, resourceService, loggerFactory) -> SerializingStoreBuilder.ofInMemoryStore(serde)
-                    .withInMemoryBuffer(spoofax3CompilerStoreBuffer)
-                    .withLoggingDeserializeFailHandler(loggerFactory)
-                    .build()
-                )
-        );
-        sptComponent = DaggerSptComponent.builder()
+        platformComponent = DaggerPlatformComponent.builder()
             .loggerComponent(loggerComponent)
-            .sptResourcesComponent(sptResourcesComponent)
-            .resourceServiceComponent(standaloneSpoofax3Compiler.compiler.resourceServiceComponent)
-            .platformComponent(standaloneSpoofax3Compiler.compiler.platformComponent)
+            .resourceServiceComponent(baseResourceServiceComponent)
             .build();
-        resourceService = standaloneSpoofax3Compiler.compiler.resourceServiceComponent.getResourceService();
 
+        final StaticComponentManagerBuilder<LoggerComponent, ResourceServiceComponent, PlatformComponent> builder =
+            new StaticComponentManagerBuilder<>(loggerComponent, baseResourceServiceComponent, platformComponent, PieBuilderImpl::new);
+        SpoofaxLwbCompiler.registerParticipants(builder);
+        builder.registerParticipant(new SptParticipant<>()); // Also register SPT. TODO: should the LWB compiler do this?
+        spoofax3CompilerStoreBuffer = new SerializingStoreInMemoryBuffer();
+        builder.registerPieModuleCustomizer(pieModule -> {
+            pieModule.withSerdeFactory(loggerFactory -> new FstSerde()); // Use FstSerde for faster serialization
+        });
+        builder.registerPieModuleCustomizer(pieModule -> {
+            pieModule.withStoreFactory((serde, resourceService, loggerFactory) -> SerializingStoreBuilder.ofInMemoryStore(serde)
+                .withInMemoryBuffer(spoofax3CompilerStoreBuffer) // Serialize/deserialize compiler tasks with memory buffer.
+                .withLoggingDeserializeFailHandler(loggerFactory)
+                .build()
+            );
+        }, "mb.spoofax.lwb");
+        final StaticComponentManager staticComponentManager = builder.build();
+        spoofaxLwbCompiler = SpoofaxLwbCompiler.fromComponentManager(staticComponentManager);
+
+        cfgRootDirectoryToObject = spoofaxLwbCompiler.spoofaxLwbCompilerComponent.getCfgComponent().getCfgRootDirectoryToObject();
+        compileLanguageDefinition = spoofaxLwbCompiler.spoofaxLwbCompilerComponent.getCompileLanguageDefinition();
+        sptComponent = spoofaxLwbCompiler.componentManager.getOneSubcomponent(SptComponent.class).unwrap();
+        resourceService = spoofaxLwbCompiler.resourceServiceComponent.getResourceService();
         languageMetricsTracer = new MetricsTracer();
-        dynamicLoadingStoreBuffer = new SerializingStoreInMemoryBuffer();
         dynamicLoadingComponent = DaggerDynamicLoadingComponent.builder()
-            .dynamicLoadingPieModule(new DynamicLoadingPieModule(() -> new RootPieModule(PieBuilderImpl::new)
-                .withSerdeFactory(loggerFactory -> new FstSerde())
-                .withStoreFactory((serde, resourceService, loggerFactory) -> SerializingStoreBuilder.ofInMemoryStore(serde)
-                    .withInMemoryBuffer(dynamicLoadingStoreBuffer)
-                    .withLoggingDeserializeFailHandler(loggerFactory)
-                    .build()
-                )
-                .withTracerFactory(loggerFactory -> new CompositeTracer(new LoggingTracer(loggerFactory), languageMetricsTracer)))
+            .dynamicLoadingModule(new DynamicLoadingModule(
+                PieBuilderImpl::new,
+                (loggerFactory, classLoader) -> new FstSerde(classLoader)) // Use FstSerde for faster serialization
+                .addPieModuleCustomizers(pieModule -> {
+                    // Use languageMetricsTracer to support checking which tasks have been executed.
+                    pieModule.withTracerFactory(loggerFactory -> new CompositeTracer(languageMetricsTracer, new LoggingTracer(loggerFactory)));
+                })
+                .withBaseComponentManager(staticComponentManager)
             )
             .loggerComponent(loggerComponent)
-            .resourceServiceComponent(standaloneSpoofax3Compiler.compiler.resourceServiceComponent)
-            .platformComponent(standaloneSpoofax3Compiler.compiler.platformComponent)
-            .cfgComponent(standaloneSpoofax3Compiler.compiler.cfgComponent)
-            .spoofax3CompilerComponent(standaloneSpoofax3Compiler.compiler.component)
+            .resourceServiceComponent(baseResourceServiceComponent)
+            .platformComponent(platformComponent)
             .build();
+        dynamicComponentManager = dynamicLoadingComponent.getDynamicComponentManager();
         dynamicLoad = dynamicLoadingComponent.getDynamicLoad();
-        dynamicLanguageRegistry = dynamicLoadingComponent.getDynamicLanguageRegistry();
 
+        // Set dynamic component manager in several places.
         sptComponent.getLanguageUnderTestProviderWrapper().set(new DynamicLanguageUnderTestProvider(
-            dynamicLanguageRegistry,
+            dynamicComponentManager,
             dynamicLoad,
-            TestBase::compileLanguageArgs
+            // NOTE: this has to be the same supplier as being used by the rest of the tests, otherwise the dynamic
+            //       components will be reloaded by SPT, which closes and thus invalidates previous dynamic components.
+            this::dynamicLoadSupplierOutputSupplier
         ));
+        spoofaxLwbCompiler.spoofaxLwbCompilerComponent.getSpoofaxLwbCompilerComponentManagerWrapper().set(new CompositeComponentManager(staticComponentManager, dynamicComponentManager));
 
+        // TODO: this won't work properly with bottom-up building when builds are executed from `standaloneSpoofax3Compiler.pieComponent`.
         pieComponent = DaggerPieComponent.builder()
-            .pieModule(standaloneSpoofax3Compiler.pieComponent.createChildModule(dynamicLoadingComponent, sptComponent))
+            .pieModule(spoofaxLwbCompiler.pieComponent.createChildModule(dynamicLoadingComponent))
             .loggerComponent(loggerComponent)
-            .resourceServiceComponent(standaloneSpoofax3Compiler.compiler.resourceServiceComponent)
+            .resourceServiceComponent(spoofaxLwbCompiler.resourceServiceComponent)
             .build();
     }
 
@@ -139,10 +160,8 @@ class TestBase {
         exceptionPrinter = null;
         pieComponent.close();
         pieComponent = null;
-        dynamicLanguageRegistry = null;
         dynamicLoad = null;
-        dynamicLoadingStoreBuffer.close();
-        dynamicLoadingStoreBuffer = null;
+        dynamicComponentManager = null;
         dynamicLoadingComponent.close();
         dynamicLoadingComponent = null;
         languageMetricsTracer = null;
@@ -151,12 +170,12 @@ class TestBase {
         sptComponent = null;
         spoofax3CompilerStoreBuffer.close();
         spoofax3CompilerStoreBuffer = null;
-        standaloneSpoofax3Compiler.close();
-        standaloneSpoofax3Compiler = null;
-        rootResourceServiceComponent.close();
-        rootResourceServiceComponent = null;
-        sptResourcesComponent.close();
-        sptResourcesComponent = null;
+        compileLanguageDefinition = null;
+        cfgRootDirectoryToObject = null;
+        spoofaxLwbCompiler.close();
+        spoofaxLwbCompiler = null;
+        baseResourceServiceComponent.close();
+        baseResourceServiceComponent = null;
         loggerComponent = null;
         rootDirectory.close();
         rootDirectory = null;
@@ -165,8 +184,8 @@ class TestBase {
     }
 
 
-    static CompileLanguage.Args compileLanguageArgs(ResourcePath rootDirectory) {
-        return CompileLanguage.Args.builder().rootDirectory(rootDirectory).build();
+    static CompileLanguageDefinition.Args compileLanguageArgs(ResourcePath rootDirectory) {
+        return CompileLanguageDefinition.Args.builder().rootDirectory(rootDirectory).build();
     }
 
 
@@ -174,15 +193,28 @@ class TestBase {
         return pieComponent.newSession();
     }
 
-    Task<OutTransient<Result<DynamicLanguage, ?>>> dynamicLoadTask(ResourcePath rootDirectory) {
-        return dynamicLoad.createTask(compileLanguageArgs(rootDirectory));
+    Task<Result<CompileLanguageDefinition.Output, CompileLanguageDefinitionException>> compileLanguageTask(ResourcePath rootDirectory) {
+        return compileLanguageDefinition.createTask(compileLanguageArgs(rootDirectory));
     }
 
-    DynamicLanguage requireDynamicLoad(Session session, ResourcePath rootDirectory) throws Exception {
+    Supplier<Result<DynamicLoad.SupplierOutput, ?>> dynamicLoadSupplierOutputSupplier(ResourcePath rootDirectory) {
+        return compileLanguageTask(rootDirectory).toSupplier().map(new ToDynamicLoadSupplierOutput());
+    }
+
+    Task<OutTransient<Result<DynamicComponent, DynamicLoadException>>> dynamicLoadTask(ResourcePath rootDirectory) {
+        return dynamicLoad.createTask(dynamicLoadSupplierOutputSupplier(rootDirectory));
+    }
+
+    DynamicComponent requireDynamicLoad(Session session, ResourcePath rootDirectory) throws Exception {
         return session.require(dynamicLoadTask(rootDirectory)).getValue().unwrap();
     }
 
-    DynamicLanguage getDynamicLoadOutput(TopDownSession session, ResourcePath rootDirectory) throws Exception {
+    CompileLanguageDefinitionInput requireCompileLanguageInput(Session session, ResourcePath rootDirectory) throws Exception {
+        final Result<CfgToObject.Output, CfgRootDirectoryToObjectException> result = session.require(cfgRootDirectoryToObject.createTask(rootDirectory));
+        return result.expect("Getting configuration for '" + rootDirectory + "' to succeed, but it failed").compileLanguageDefinitionInput;
+    }
+
+    DynamicComponent getDynamicLoadOutput(TopDownSession session, ResourcePath rootDirectory) throws Exception {
         return session.getOutputOrRequireAndEnsureExplicitlyObserved(dynamicLoadTask(rootDirectory)).getValue().unwrap();
     }
 
@@ -221,5 +253,13 @@ class TestBase {
 
     protected void assertNoErrors(KeyedMessages messages, String failure) {
         assertFalse(messages.containsError(), () -> "Expected " + failure + ".\n" + exceptionPrinter.printMessagesToString(messages.filter(Message::isErrorOrHigher)));
+    }
+
+
+    private static class ToDynamicLoadSupplierOutput extends StatelessSerializableFunction<Result<CompileLanguageDefinition.Output, CompileLanguageDefinitionException>, Result<DynamicLoad.SupplierOutput, ?>> {
+        @Override
+        public Result<DynamicLoad.SupplierOutput, ?> apply(Result<CompileLanguageDefinition.Output, CompileLanguageDefinitionException> r) {
+            return r.map(o -> new DynamicLoad.SupplierOutput(o.rootDirectory(), SetView.of(o.javaClassPaths()), o.participantClassQualifiedId()));
+        }
     }
 }

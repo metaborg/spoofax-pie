@@ -1,11 +1,16 @@
 package mb.cfg.convert;
 
 import mb.aterm.common.InvalidAstShapeException;
-import mb.cfg.CompileLanguageInput;
-import mb.cfg.CompileLanguageInputCustomizer;
-import mb.cfg.CompileLanguageSpecificationInput;
-import mb.cfg.CompileLanguageSpecificationInputBuilder;
-import mb.cfg.CompileLanguageSpecificationShared;
+import mb.cfg.CompileLanguageDefinitionInput;
+import mb.cfg.CompileLanguageDefinitionInputCustomizer;
+import mb.cfg.CompileMetaLanguageSourcesInput;
+import mb.cfg.CompileMetaLanguageSourcesInputBuilder;
+import mb.cfg.CompileMetaLanguageSourcesShared;
+import mb.cfg.Dependency;
+import mb.cfg.DependencyKind;
+import mb.cfg.DependencySource;
+import mb.cfg.metalang.CfgDynamixConfig;
+import mb.cfg.metalang.CfgDynamixSource;
 import mb.cfg.metalang.CfgEsvConfig;
 import mb.cfg.metalang.CfgEsvSource;
 import mb.cfg.metalang.CfgSdf3Config;
@@ -19,6 +24,7 @@ import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Severity;
 import mb.common.option.Option;
 import mb.common.util.Properties;
+import mb.common.util.SetView;
 import mb.jsglr.common.TermTracer;
 import mb.pie.api.ExecContext;
 import mb.resource.ResourceKey;
@@ -44,7 +50,6 @@ import mb.spoofax.compiler.adapter.data.CommandRequestRepr;
 import mb.spoofax.compiler.adapter.data.MenuItemRepr;
 import mb.spoofax.compiler.adapter.data.ParamRepr;
 import mb.spoofax.compiler.language.ConstraintAnalyzerLanguageCompiler;
-import mb.spoofax.compiler.language.ExportsLanguageCompiler;
 import mb.spoofax.compiler.language.LanguageProject;
 import mb.spoofax.compiler.language.LanguageProjectCompiler;
 import mb.spoofax.compiler.language.LanguageProjectCompilerInputBuilder;
@@ -54,8 +59,12 @@ import mb.spoofax.compiler.language.ParserVariant;
 import mb.spoofax.compiler.language.StrategoRuntimeLanguageCompiler;
 import mb.spoofax.compiler.language.StylerLanguageCompiler;
 import mb.spoofax.compiler.platform.EclipseProjectCompiler;
+import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.TypeInfo;
+import mb.spoofax.core.Coordinate;
+import mb.spoofax.core.CoordinateRequirement;
+import mb.spoofax.core.Version;
 import mb.spoofax.core.language.command.CommandContextType;
 import mb.spoofax.core.language.command.CommandExecutionType;
 import mb.spoofax.core.language.command.EditorFileType;
@@ -68,21 +77,22 @@ import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.util.TermUtils;
 
+import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
 /**
- * Converts a CFG AST into an {@link Output} containing messages, a {@link CompileLanguageInput} output object, and
- * properties that need to be written to a lockfile.
+ * Converts a CFG AST into an {@link Output} containing messages, a {@link CompileLanguageDefinitionInput} output
+ * object, and properties that need to be written to a lockfile.
  */
 public class CfgAstToObject {
     public static class Output {
         public final KeyedMessages messages;
-        public final CompileLanguageInput compileLanguageInput;
+        public final CompileLanguageDefinitionInput compileLanguageDefinitionInput;
         public final Properties properties;
 
-        public Output(KeyedMessages messages, CompileLanguageInput compileLanguageInput, Properties properties) {
+        public Output(KeyedMessages messages, CompileLanguageDefinitionInput compileLanguageDefinitionInput, Properties properties) {
             this.messages = messages;
-            this.compileLanguageInput = compileLanguageInput;
+            this.compileLanguageDefinitionInput = compileLanguageDefinitionInput;
             this.properties = properties;
         }
     }
@@ -93,7 +103,7 @@ public class CfgAstToObject {
         @Nullable ResourceKey cfgFile,
         IStrategoTerm normalizedAst,
         Properties properties,
-        CompileLanguageInputCustomizer customizer
+        CompileLanguageDefinitionInputCustomizer customizer
     ) throws InvalidAstShapeException, IllegalStateException {
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
         final IStrategoList taskDefList = TermUtils.asListAt(normalizedAst, 0).orElseThrow(() -> new InvalidAstShapeException("task definition list as first subterm", normalizedAst));
@@ -106,7 +116,7 @@ public class CfgAstToObject {
         parts.forOneSubtermAsString("Group", sharedBuilder::defaultGroupId);
         parts.forOneSubtermAsString("Id", sharedBuilder::defaultArtifactId);
         parts.forOneSubtermAsString("Name", sharedBuilder::name);
-        parts.forOneSubtermAsString("Version", sharedBuilder::defaultVersion);
+        parts.forOneSubtermAsString("Version", versionString -> sharedBuilder.defaultVersion(Version.parse(versionString)));
         parts.forAllSubtermsAsStrings("FileExtension", sharedBuilder::addFileExtensions);
         parts.forOneSubtermAsString("JavaPackageIdPrefix", prefix -> {
             if(prefix.endsWith(".")) {
@@ -122,7 +132,7 @@ public class CfgAstToObject {
         final Shared shared = sharedBuilder.build();
 
         // CompileLanguageInput builder
-        final CompileLanguageInput.Builder compileLanguageInputBuilder = CompileLanguageInput.builder()
+        final CompileLanguageDefinitionInput.Builder compileLanguageInputBuilder = CompileLanguageDefinitionInput.builder()
             .shared(shared);
 
         // LanguageBaseShared & LanguageAdapterShared
@@ -137,29 +147,40 @@ public class CfgAstToObject {
         final AdapterProject languageAdapterShared = languageAdapterSharedBuilder.build();
 
         // LanguageShared
-        final CompileLanguageSpecificationShared.Builder languageSharedBuilder = CompileLanguageSpecificationShared.builder()
+        final CompileMetaLanguageSourcesShared.Builder languageSharedBuilder = CompileMetaLanguageSourcesShared.builder()
             .languageProject(languageBaseShared);
         // TODO: includeLibSpoofax2Exports
         // TODO: includeLibStatixExports
         customizer.customize(languageSharedBuilder);
-        final CompileLanguageSpecificationShared languageShared = languageSharedBuilder.build();
+        final CompileMetaLanguageSourcesShared languageShared = languageSharedBuilder.build();
 
         // Builders for LanguageBaseCompilerInput & LanguageCompilerInput
         final LanguageProjectCompilerInputBuilder baseBuilder = new LanguageProjectCompilerInputBuilder();
         final AdapterProjectCompilerInputBuilder adapterBuilder = new AdapterProjectCompilerInputBuilder();
 
-        // LanguageCompilerInput
-        final CompileLanguageSpecificationInputBuilder languageCompilerInputBuilder = new CompileLanguageSpecificationInputBuilder();
+        // CompileMetaLanguageSourcesInput
+        final CompileMetaLanguageSourcesInputBuilder compileMetaLanguageSourcesInputBuilder = new CompileMetaLanguageSourcesInputBuilder();
         parts.getAllSubTermsInListAsParts("Sdf3Section").ifSome(subParts -> {
-            final CfgSdf3Config.Builder builder = languageCompilerInputBuilder.withSdf3();
+            final CfgSdf3Config.Builder builder = compileMetaLanguageSourcesInputBuilder.withSdf3();
             subParts.getOneSubterm("Sdf3Source").ifSome(source -> {
                 if(TermUtils.isAppl(source, "Sdf3Files", 1)) {
                     final Parts filesParts = subParts.subParts(source.getSubterm(0));
-                    final CfgSdf3Source.Files.Builder filesSourceBuilder = CfgSdf3Source.Files.builder().compileLanguageShared(languageShared);
+                    final CfgSdf3Source.Files.Builder filesSourceBuilder = CfgSdf3Source.Files.builder().compileMetaLanguageSourcesShared(languageShared);
                     final ResourcePath mainSourceDirectory = filesParts.getOneSubtermAsExistingDirectory("Sdf3FilesMainSourceDirectory", rootDirectory, "SDF3 main source directory")
                         .unwrapOrElse(() -> CfgSdf3Source.Files.Builder.getDefaultMainSourceDirectory(languageShared));
                     filesSourceBuilder.mainSourceDirectory(mainSourceDirectory);
                     filesParts.forOneSubtermAsExistingFile("Sdf3FilesMainFile", mainSourceDirectory, "SDF3 main file", filesSourceBuilder::mainFile);
+                    filesParts.forAllSubtermsAsExistingDirectories("Sdf3FilesIncludeDirectory", rootDirectory, "SDF3 include directory", filesSourceBuilder::addIncludeDirectories);
+                    filesParts.forAllSubtermsAsStrings("Sdf3FilesExportDirectory", filesSourceBuilder::addExportDirectories);
+                    filesParts.getAllSubTermsInListAsParts("Sdf3ParseTableGeneratorSection").ifSome(ptgParts -> {
+                        ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorDynamic", filesSourceBuilder::createDynamicParseTable);
+                        ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorDataDependent", filesSourceBuilder::createDataDependentParseTable);
+                        ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorLayoutSensitive", filesSourceBuilder::createLayoutSensitiveParseTable);
+                        ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorSolveDeepConflicts", filesSourceBuilder::solveDeepConflictsInParseTable);
+                        ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorCheckOverlap", filesSourceBuilder::checkOverlapInParseTable);
+                        ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorCheckPriorities", filesSourceBuilder::checkPrioritiesInParseTable);
+                    });
+                    filesParts.forAllSubtermsAsExistingFiles("Sdf3StrategoConcreteSyntaxExtensionMainFile", mainSourceDirectory, "SDF3 Stratego concrete syntax extension main file", filesSourceBuilder::addStrategoConcreteSyntaxExtensionMainFiles);
                     builder.source(CfgSdf3Source.files(filesSourceBuilder.build()));
                 } else if(TermUtils.isAppl(source, "Sdf3Prebuilt", 1)) {
                     final Parts prebuiltParts = subParts.subParts(source.getSubterm(0));
@@ -178,28 +199,19 @@ public class CfgAstToObject {
                     throw new InvalidAstShapeException("SDF3 source", source);
                 }
             });
-
-            subParts.getAllSubTermsInListAsParts("Sdf3ParseTableGeneratorSection").ifSome(ptgParts -> {
-                ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorDynamic", builder::createDynamicParseTable);
-                ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorDataDependent", builder::createDataDependentParseTable);
-                ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorLayoutSensitive", builder::createLayoutSensitiveParseTable);
-                ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorSolveDeepConflicts", builder::solveDeepConflictsInParseTable);
-                ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorCheckOverlap", builder::checkOverlapInParseTable);
-                ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorCheckPriorities", builder::checkPrioritiesInParseTable);
-            });
         });
         parts.getAllSubTermsInListAsParts("EsvSection").ifSome(subParts -> {
-            final CfgEsvConfig.Builder builder = languageCompilerInputBuilder.withEsv();
+            final CfgEsvConfig.Builder builder = compileMetaLanguageSourcesInputBuilder.withEsv();
             subParts.getOneSubterm("EsvSource").ifSome(source -> {
                 if(TermUtils.isAppl(source, "EsvFiles", 1)) {
                     final Parts filesParts = subParts.subParts(source.getSubterm(0));
-                    final CfgEsvSource.Files.Builder filesSourceBuilder = CfgEsvSource.Files.builder().compileLanguageShared(languageShared);
+                    final CfgEsvSource.Files.Builder filesSourceBuilder = CfgEsvSource.Files.builder().compileMetaLanguageSourcesShared(languageShared);
                     final ResourcePath mainSourceDirectory = filesParts.getOneSubtermAsExistingDirectory("EsvFilesMainSourceDirectory", rootDirectory, "ESV main source directory")
                         .unwrapOrElse(() -> CfgEsvSource.Files.Builder.getDefaultMainSourceDirectory(languageShared));
                     filesSourceBuilder.mainSourceDirectory(mainSourceDirectory);
                     filesParts.forOneSubtermAsExistingFile("EsvFilesMainFile", mainSourceDirectory, "ESV main file", filesSourceBuilder::mainFile);
                     filesParts.forAllSubtermsAsExistingDirectories("EsvFilesIncludeDirectory", rootDirectory, "ESV include directory", filesSourceBuilder::addIncludeDirectories);
-                    filesParts.forOneSubtermAsBool("EsvFilesIncludeLibspoofax2Exports", filesSourceBuilder::includeLibSpoofax2Exports);
+                    filesParts.forAllSubtermsAsStrings("EsvFilesExportDirectory", filesSourceBuilder::addExportDirectories);
                     builder.source(CfgEsvSource.files(filesSourceBuilder.build()));
                 } else if(TermUtils.isAppl(source, "EsvPrebuilt", 1)) {
                     final Parts prebuiltParts = subParts.subParts(source.getSubterm(0));
@@ -213,16 +225,18 @@ public class CfgAstToObject {
             });
         });
         parts.getAllSubTermsInListAsParts("StatixSection").ifSome(subParts -> {
-            final CfgStatixConfig.Builder builder = languageCompilerInputBuilder.withStatix();
+            final CfgStatixConfig.Builder builder = compileMetaLanguageSourcesInputBuilder.withStatix();
             subParts.getOneSubterm("StatixSource").ifSome(source -> {
                 if(TermUtils.isAppl(source, "StatixFiles", 1)) {
                     final Parts filesParts = subParts.subParts(source.getSubterm(0));
-                    final CfgStatixSource.Files.Builder filesSourceBuilder = CfgStatixSource.Files.builder().compileLanguageShared(languageShared);
+                    final CfgStatixSource.Files.Builder filesSourceBuilder = CfgStatixSource.Files.builder().compileMetaLanguageSourcesShared(languageShared);
                     final ResourcePath mainSourceDirectory = filesParts.getOneSubtermAsExistingDirectory("StatixFilesMainSourceDirectory", rootDirectory, "Statix main source directory")
                         .unwrapOrElse(() -> CfgStatixSource.Files.Builder.getDefaultMainSourceDirectory(languageShared));
                     filesSourceBuilder.mainSourceDirectory(mainSourceDirectory);
                     filesParts.forOneSubtermAsExistingFile("StatixFilesMainFile", mainSourceDirectory, "Statix main file", filesSourceBuilder::mainFile);
                     filesParts.forAllSubtermsAsExistingDirectories("StatixFilesIncludeDirectory", rootDirectory, "Statix include directory", filesSourceBuilder::addIncludeDirectories);
+                    filesParts.forAllSubtermsAsStrings("StatixFilesExportDirectory", filesSourceBuilder::addExportDirectories);
+                    filesParts.forOneSubtermAsBool("StatixSdf3SignatureGen", filesSourceBuilder::enableSdf3SignatureGen);
                     builder.source(CfgStatixSource.files(filesSourceBuilder.build()));
                 } else if(TermUtils.isAppl(source, "StatixPrebuilt", 1)) {
                     final Parts prebuiltParts = subParts.subParts(source.getSubterm(0));
@@ -234,32 +248,100 @@ public class CfgAstToObject {
                     throw new InvalidAstShapeException("Statix source", source);
                 }
             });
-            subParts.forOneSubtermAsBool("StatixSdf3SignatureGen", builder::enableSdf3SignatureGen);
+        });
+        parts.getAllSubTermsInListAsParts("DynamixSection").ifSome(subParts -> {
+            final CfgDynamixConfig.Builder builder = compileMetaLanguageSourcesInputBuilder.withDynamix();
+            subParts.getOneSubterm("DynamixSource").ifSome(source -> {
+                if(TermUtils.isAppl(source, "DynamixFiles", 1)) {
+                    final Parts filesParts = subParts.subParts(source.getSubterm(0));
+                    final CfgDynamixSource.Files.Builder filesSourceBuilder = CfgDynamixSource.Files.builder().compileMetaLanguageSourcesShared(languageShared);
+                    final ResourcePath mainSourceDirectory = filesParts.getOneSubtermAsExistingDirectory("DynamixFilesMainSourceDirectory", rootDirectory, "Dynamix main source directory")
+                        .unwrapOrElse(() -> CfgDynamixSource.Files.Builder.getDefaultMainSourceDirectory(languageShared));
+                    filesSourceBuilder.mainSourceDirectory(mainSourceDirectory);
+                    filesParts.forOneSubtermAsExistingFile("DynamixFilesMainFile", mainSourceDirectory, "Dynamix main file", filesSourceBuilder::mainFile);
+                    builder.source(CfgDynamixSource.files(filesSourceBuilder.build()));
+                } else if(TermUtils.isAppl(source, "DynamixPrebuilt", 1)) {
+                    final Parts prebuiltParts = subParts.subParts(source.getSubterm(0));
+                    prebuiltParts.getOneSubtermAsExistingDirectory("DynamixPrebuiltSpecAtermDirectory", rootDirectory, "Dynamix prebuilt spec ATerm directory").ifElse(
+                        dir -> builder.source(CfgDynamixSource.prebuilt(dir)),
+                        () -> messagesBuilder.addMessage("spec-aterm-directory = $Path option is missing", Severity.Error, cfgFile, TermTracer.getRegion(source))
+                    );
+                } else {
+                    throw new InvalidAstShapeException("Dynamix source", source);
+                }
+            });
         });
         parts.getAllSubTermsInListAsParts("StrategoSection").ifSome(subParts -> {
-            final CfgStrategoConfig.Builder builder = languageCompilerInputBuilder.withStratego();
+            final CfgStrategoConfig.Builder builder = compileMetaLanguageSourcesInputBuilder.withStratego();
             subParts.getOneSubterm("StrategoSource").ifSome(source -> {
                 if(TermUtils.isAppl(source, "StrategoFiles", 1)) {
                     final Parts filesParts = subParts.subParts(source.getSubterm(0));
-                    final CfgStrategoSource.Files.Builder filesSourceBuilder = CfgStrategoSource.Files.builder().compileLanguageShared(languageShared);
+                    final CfgStrategoSource.Files.Builder filesSourceBuilder = compileMetaLanguageSourcesInputBuilder.withStrategoFilesSource();
                     final ResourcePath mainSourceDirectory = filesParts.getOneSubtermAsExistingDirectory("StrategoFilesMainSourceDirectory", rootDirectory, "Stratego main source directory")
                         .unwrapOrElse(() -> CfgStrategoSource.Files.Builder.getDefaultMainSourceDirectory(languageShared));
                     filesSourceBuilder.mainSourceDirectory(mainSourceDirectory);
                     filesParts.forOneSubtermAsExistingFile("StrategoFilesMainFile", mainSourceDirectory, "Stratego main file", filesSourceBuilder::mainFile);
                     filesParts.forAllSubtermsAsExistingDirectories("StrategoFilesIncludeDirectory", rootDirectory, "Stratego include directory", filesSourceBuilder::addIncludeDirectories);
-                    builder.source(CfgStrategoSource.files(filesSourceBuilder.build()));
+                    filesParts.forAllSubtermsAsStrings("StrategoFilesExportDirectory", filesSourceBuilder::addExportDirectories);
+                    filesParts.forOneSubtermAsBool("StrategoSdf3StatixExplicationGen", filesSourceBuilder::enableSdf3StatixExplicationGen);
+                    filesParts.forOneSubtermAsString("StrategoLanguageStrategyAffix", filesSourceBuilder::languageStrategyAffix);
+                    filesParts.forOneSubterm("StrategoConcreteSyntaxExtensionParseTable", t -> {
+                        final ResourcePath path = filesParts.pathAsExistingFile(t, mainSourceDirectory, "Stratego concrete syntax extension parse table");
+                        final @Nullable String id = path.getLeafWithoutFileExtension();
+                        if(id != null) {
+                            filesSourceBuilder.putConcreteSyntaxExtensionParseTables(id, path);
+                        } else {
+                            filesParts.createCfgError("Cannot use concrete syntax extension parse table; path does not point to a file", t);
+                        }
+                    });
                 } else {
                     throw new InvalidAstShapeException("Stratego source", source);
                 }
             });
-            subParts.forOneSubtermAsBool("StrategoSdf3StatixExplicationGen", builder::enableSdf3StatixExplicationGen);
-            subParts.forOneSubtermAsString("StrategoLanguageStrategyAffix", builder::languageStrategyAffix);
             subParts.forOneSubtermAsString("StrategoOutputJavaPackageId", builder::outputJavaPackageId);
         });
-        customizer.customize(languageCompilerInputBuilder);
-        final CompileLanguageSpecificationInput languageCompilerInput = languageCompilerInputBuilder.build(properties, shared, languageShared);
-        languageCompilerInput.syncTo(baseBuilder);
-        compileLanguageInputBuilder.compileLanguageSpecificationInput(languageCompilerInput);
+        parts.forAllSubTermsInList("Dependencies", dependencyTerm -> {
+            final Dependency dependency;
+            if(TermUtils.isAppl(dependencyTerm, "DefaultDependency", 1)) {
+                final IStrategoAppl sourceTermAppl = TermUtils.asApplAt(dependencyTerm, 0)
+                    .orElseThrow(() -> new InvalidAstShapeException("term application as first subterm", dependencyTerm));
+                final DependencySource source = toDependencySource(sourceTermAppl);
+                dependency = new Dependency(source, DependencyKind.all);
+            } else if(TermUtils.isAppl(dependencyTerm, "ConfiguredDependency", 2)) {
+                final IStrategoAppl sourceTermAppl = TermUtils.asApplAt(dependencyTerm, 0)
+                    .orElseThrow(() -> new InvalidAstShapeException("term application as first subterm", dependencyTerm));
+                final DependencySource source = toDependencySource(sourceTermAppl);
+                final LinkedHashSet<DependencyKind> kinds = new LinkedHashSet<>();
+                final Parts options = parts.subParts(dependencyTerm.getSubterm(1));
+                options.forAllSubTermsInList("DependencyKinds", kindTerm -> {
+                    final IStrategoAppl kindTermAppl = TermUtils.asAppl(kindTerm)
+                        .orElseThrow(() -> new InvalidAstShapeException("term application", kindTerm));
+                    kinds.add(toDependencyKind(kindTermAppl));
+                });
+                dependency = new Dependency(source, SetView.of(kinds));
+            } else {
+                throw new InvalidAstShapeException("Dependency", dependencyTerm);
+            }
+            compileMetaLanguageSourcesInputBuilder.compileMetaLanguageSources.addDependencies(dependency);
+        });
+        parts.forAllSubTermsInList("BuildDependencies", dependencyTerm -> {
+            final Dependency dependency;
+            if(TermUtils.isAppl(dependencyTerm, "DefaultBuildDependency", 1)) {
+                final IStrategoAppl sourceTermAppl = TermUtils.asApplAt(dependencyTerm, 0)
+                    .orElseThrow(() -> new InvalidAstShapeException("term application as first subterm", dependencyTerm));
+                final DependencySource source = toDependencySource(sourceTermAppl);
+                dependency = new Dependency(source, SetView.of(DependencyKind.Build));
+            } else {
+                throw new InvalidAstShapeException("Dependency", dependencyTerm);
+            }
+            compileMetaLanguageSourcesInputBuilder.compileMetaLanguageSources.addDependencies(dependency);
+        });
+
+        customizer.customize(compileMetaLanguageSourcesInputBuilder);
+        final CompileMetaLanguageSourcesInput compileMetaLanguageSourcesInput = compileMetaLanguageSourcesInputBuilder.build(properties, shared, languageShared);
+        compileMetaLanguageSourcesInput.syncTo(baseBuilder);
+        compileMetaLanguageSourcesInput.syncTo(adapterBuilder);
+        compileLanguageInputBuilder.compileMetaLanguageSourcesInput(compileMetaLanguageSourcesInput);
 
         // LanguageBaseCompilerInput & LanguageAdapterCompilerInput
         parts.getAllSubTermsInListAsParts("ParserSection").ifSome(subParts -> {
@@ -365,6 +447,14 @@ public class CfgAstToObject {
             subParts.forOneSubtermAsBool("StrategoRuntimeAddSpoofax2Primitives", base::addSpoofax2Primitives);
             subParts.forOneSubtermAsBool("StrategoRuntimeAddNaBL2Primitives", base::addNaBL2Primitives);
             subParts.forOneSubtermAsBool("StrategoRuntimeAddStatixPrimitives", base::addStatixPrimitives);
+
+            subParts.forAllSubtermsAsTypeInfo("StrategoRuntime_WithPrimitiveLibrary", base::addPrimitiveLibraries);
+            subParts.forAllSubtermsAsTypeInfo("StrategoRuntime_WithInteropRegisterer", base::addInteropRegisterers);
+
+            subParts.forOneSubterm("StrategoRuntime_ClassKind", term -> base.classKind(toClassKind(term)));
+            subParts.forOneSubtermAsTypeInfo("StrategoRuntime_BaseStrategoRuntimeBuilderFactory", base::baseStrategoRuntimeBuilderFactory);
+            subParts.forOneSubtermAsTypeInfo("StrategoRuntime_ExtendStrategoRuntimeBuilderFactory", base::extendStrategoRuntimeBuilderFactory);
+
             // TODO: more strategoRuntime language properties
             final StrategoRuntimeAdapterCompiler.Input.Builder adapter = adapterBuilder.withStrategoRuntime();
             // TODO: strategoRuntime adapter properties
@@ -374,10 +464,6 @@ public class CfgAstToObject {
         });
         parts.getAllSubTermsInListAsParts("CodeCompletionSection").ifSome(subParts -> {
             final CodeCompletionAdapterCompiler.Input.Builder adapter = adapterBuilder.withCodeCompletion();
-        });
-        parts.getAllSubTermsInListAsParts("ExportsSection").ifSome(subParts -> {
-            final ExportsLanguageCompiler.Input.Builder builder = baseBuilder.withExports();
-            // TODO: exports language properties
         });
         parts.getAllSubTermsInListAsParts("ReferenceResolutionSection").ifSome(subParts -> {
             final ReferenceResolutionAdapterCompiler.Input.Builder builder = adapterBuilder.withReferenceResolution();
@@ -469,8 +555,8 @@ public class CfgAstToObject {
                 .withDefaultsSameProject(rootDirectory, shared)
                 .languageProjectCompilerInput(languageBaseCompilerInput)
                 .adapterProjectCompilerInput(languageAdapterCompilerInput);
-            subParts.forOneSubtermAsTypeInfo("EclipseBaseLanguage", builder::baseLanguage);
-            subParts.forOneSubtermAsTypeInfo("EclipseExtendLanguage", builder::extendLanguage);
+            subParts.forOneSubtermAsTypeInfo("EclipseBaseParticipant", builder::baseParticipant);
+            subParts.forOneSubtermAsTypeInfo("EclipseExtendParticipant", builder::extendParticipant);
             if(customizer.customize(builder)) {
                 final EclipseProjectCompiler.Input input = builder.build();
                 compileLanguageInputBuilder.eclipseProjectInput(input);
@@ -489,12 +575,12 @@ public class CfgAstToObject {
 
         // Build compile language input object
         customizer.customize(compileLanguageInputBuilder);
-        final CompileLanguageInput compileLanguageInput = compileLanguageInputBuilder.build();
-        compileLanguageInput.savePersistentProperties(properties);
+        final CompileLanguageDefinitionInput compileLanguageDefinitionInput = compileLanguageInputBuilder.build();
+        compileLanguageDefinitionInput.savePersistentProperties(properties);
 
         // TODO: remove used parts and check to see that there are no leftover parts in the end? Or at least put warnings/errors on those?
 
-        final Output output = new Output(messagesBuilder.build(), compileLanguageInput, properties);
+        final Output output = new Output(messagesBuilder.build(), compileLanguageDefinitionInput, properties);
         return output;
     }
 
@@ -535,8 +621,79 @@ public class CfgAstToObject {
         return commandDefParts.getOneSubtermAsString("CommandDefDescription");
     }
 
+    private static DependencySource toDependencySource(IStrategoAppl sourceTerm) {
+        switch(sourceTerm.getConstructor().getName()) {
+            case "CoordinateRequirement": {
+                final String groupIdString = TermUtils.asJavaStringAt(sourceTerm, 0)
+                    .orElseThrow(() -> new InvalidAstShapeException("string as first subterm", sourceTerm));
+                final String artifactId = TermUtils.asJavaStringAt(sourceTerm, 1)
+                    .orElseThrow(() -> new InvalidAstShapeException("string as second subterm", sourceTerm));
+                final String versionString = TermUtils.asJavaStringAt(sourceTerm, 2)
+                    .orElseThrow(() -> new InvalidAstShapeException("string as third subterm", sourceTerm));
+                return DependencySource.coordinateRequirement(new CoordinateRequirement(
+                    groupIdString,
+                    artifactId,
+                    versionString.equals("*") ? null : Version.parse(versionString)
+                ));
+            }
+            case "Coordinate": {
+                final String groupId = TermUtils.asJavaStringAt(sourceTerm, 0)
+                    .orElseThrow(() -> new InvalidAstShapeException("string as first subterm", sourceTerm));
+                final String artifactId = TermUtils.asJavaStringAt(sourceTerm, 1)
+                    .orElseThrow(() -> new InvalidAstShapeException("string as second subterm", sourceTerm));
+                final String version = TermUtils.asJavaStringAt(sourceTerm, 2)
+                    .orElseThrow(() -> new InvalidAstShapeException("string as third subterm", sourceTerm));
+                return DependencySource.coordinate(new Coordinate(
+                    groupId,
+                    artifactId,
+                    Version.parse(version)
+                ));
+            }
+            case "Path": {
+                final String path = TermUtils.asJavaStringAt(sourceTerm, 0)
+                    .orElseThrow(() -> new InvalidAstShapeException("string as first subterm", sourceTerm));
+                return DependencySource.path(path);
+            }
+            default:
+                throw new InvalidAstShapeException("Dependency source expression", sourceTerm);
+        }
+    }
+
+    private static DependencyKind toDependencyKind(IStrategoAppl kindTerm) {
+        switch(kindTerm.getConstructor().getName()) {
+            case "BuildDependencyKind":
+                return DependencyKind.Build;
+            case "RunDependencyKind":
+                return DependencyKind.Run;
+            default:
+                throw new InvalidAstShapeException("Dependency kind", kindTerm);
+        }
+    }
+
+    private static LinkedHashSet<DependencyKind> toDependencyKinds(IStrategoTerm kindsTerm) {
+        final LinkedHashSet<DependencyKind> kinds = new LinkedHashSet<>();
+        for(IStrategoTerm kindTerm : kindsTerm) {
+            final IStrategoAppl kindTermAppl = TermUtils.asAppl(kindTerm)
+                .orElseThrow(() -> new InvalidAstShapeException("constructor application", kindTerm));
+            kinds.add(toDependencyKind(kindTermAppl));
+        }
+        return kinds;
+    }
+
+    private static ClassKind toClassKind(IStrategoTerm term) {
+        final IStrategoAppl appl = TermUtils.asAppl(term).orElseThrow(() -> new InvalidAstShapeException("a term application", term));
+        switch(appl.getConstructor().getName()) {
+            case "Generated":
+                return ClassKind.Generated;
+            case "Manual":
+                return ClassKind.Manual;
+            default:
+                throw new InvalidAstShapeException("a term of sort ClassKind", appl);
+        }
+    }
+
     private static CommandExecutionType toCommandExecutionType(IStrategoTerm term) {
-        final IStrategoAppl appl = TermUtils.asAppl(term).orElseThrow(() -> new InvalidAstShapeException("an ExecutionType term application", term));
+        final IStrategoAppl appl = TermUtils.asAppl(term).orElseThrow(() -> new InvalidAstShapeException("a term application", term));
         switch(appl.getConstructor().getName()) {
             case "Once":
                 return CommandExecutionType.ManualOnce;
@@ -545,7 +702,7 @@ public class CfgAstToObject {
             case "Automatic":
                 return CommandExecutionType.AutomaticContinuous;
             default:
-                throw new InvalidAstShapeException("a term of sort ExecutionType", appl);
+                throw new InvalidAstShapeException("a term of sort CommandExecutionType", appl);
         }
     }
 
@@ -587,7 +744,7 @@ public class CfgAstToObject {
         final IStrategoAppl appl = TermUtils.asAppl(term).orElseThrow(() -> new InvalidAstShapeException("a term application", term));
         switch(appl.getConstructor().getName()) {
             case "ValueArgumentProvider":
-                return ArgProviderRepr.value(TermUtils.asJavaStringAt(appl, 0).orElseThrow(() -> new InvalidAstShapeException("a string as first subterm", appl)));
+                return ArgProviderRepr.value(Parts.toJavaString(appl.getSubterm(0)));
             case "ContextArgumentProvider":
                 return ArgProviderRepr.context(toCommandContextType(appl.getSubterm(0)));
             case "EnclosingContextArgumentProvider":

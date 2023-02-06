@@ -14,10 +14,6 @@ languageProject {
     defaultPackageId("mb.libstatix")
   }
   compilerInput {
-    withExports().run {
-      addExports("Stratego", "trans")
-      addExports("Stratego", "src-gen")
-    }
   }
 }
 spoofax2BasedLanguageProject {
@@ -32,8 +28,12 @@ spoofax2BasedLanguageProject {
 languageAdapterProject {
   compilerInput {
     project.configureCompilerInput()
+    withExports().run {
+      addDirectoryExport("Stratego", "trans")
+      addDirectoryExport("Stratego", "src-gen")
+    }
   }
 }
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
-
+  compositionGroup("mb.spoofax.lwb")
 }

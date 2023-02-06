@@ -12,12 +12,14 @@ imports
   part/language_adapter
   part/eclipse
   part/task_def
-  
+
   expr/literal
   expr/task_def
   expr/command
   expr/menu_item
-  
+  expr/coordinate
+  expr/class_kind
+
   value
   normalize
 
@@ -26,9 +28,9 @@ context-free sorts
   Start
 
 context-free start-symbols
-  
+
   Start
 
 context-free syntax
-  
+
   Start.Configuration = <<{Part "\n"}*>>

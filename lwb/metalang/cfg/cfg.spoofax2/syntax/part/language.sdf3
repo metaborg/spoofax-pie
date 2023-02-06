@@ -16,29 +16,31 @@ context-free syntax
   <{Sdf3Option "\n"}*>
 }>
   Sdf3Option.Sdf3Source = <source = <Sdf3Source>>
-  
+
   Sdf3Source.Sdf3Files  = <files {
   <{Sdf3FilesOption "\n"}*>
 }>
-  Sdf3FilesOption.Sdf3FilesMainSourceDirectory       = <main-source-directory = <Expr>>
-  Sdf3FilesOption.Sdf3FilesMainFile                  = <main-file = <Expr>>
-  
-  Sdf3Source.Sdf3Prebuilt = <prebuilt {
-  <{Sdf3PrebuiltOption "\n"}*>
-}>
-  Sdf3PrebuiltOption.Sdf3PrebuiltParseTableAtermFile     = <parse-table-aterm-file = <Expr>>
-  Sdf3PrebuiltOption.Sdf3PrebuiltParseTablePersistedFile = <parse-table-persisted-file = <Expr>>
-  
-  // TODO: move into source after CC lab.
-  Sdf3Option.Sdf3ParseTableGeneratorSection = <parse-table-generator {
+  Sdf3FilesOption.Sdf3FilesMainSourceDirectory = <main-source-directory = <Expr>>
+  Sdf3FilesOption.Sdf3FilesMainFile            = <main-file = <Expr>>
+  Sdf3FilesOption.Sdf3FilesIncludeDirectory    = <include-directory = <Expr>>
+  Sdf3FilesOption.Sdf3FilesExportDirectory     = <export-directory = <Expr>>
+  Sdf3FilesOption.Sdf3ParseTableGeneratorSection = <parse-table-generator {
   <{Sdf3ParseTableGeneratorOption "\n"}*>
 }>
+  Sdf3FilesOption.Sdf3StrategoConcreteSyntaxExtensionMainFile = <stratego-concrete-syntax-extension-main-file = <Expr>>
+  
   Sdf3ParseTableGeneratorOption.Sdf3ParseTableGeneratorDynamic = <dynamic = <Expr>>
   Sdf3ParseTableGeneratorOption.Sdf3ParseTableGeneratorDataDependent = <data-dependent = <Expr>>
   Sdf3ParseTableGeneratorOption.Sdf3ParseTableGeneratorLayoutSensitive = <layout-sensitive = <Expr>>
   Sdf3ParseTableGeneratorOption.Sdf3ParseTableGeneratorSolveDeepConflicts = <solve-deep-conflicts = <Expr>>
   Sdf3ParseTableGeneratorOption.Sdf3ParseTableGeneratorCheckOverlap = <check-overlap = <Expr>>
   Sdf3ParseTableGeneratorOption.Sdf3ParseTableGeneratorCheckPriorities = <check-priorities = <Expr>>
+
+  Sdf3Source.Sdf3Prebuilt = <prebuilt {
+  <{Sdf3PrebuiltOption "\n"}*>
+}>
+  Sdf3PrebuiltOption.Sdf3PrebuiltParseTableAtermFile     = <parse-table-aterm-file = <Expr>>
+  Sdf3PrebuiltOption.Sdf3PrebuiltParseTablePersistedFile = <parse-table-persisted-file = <Expr>>
 
 context-free sorts
 
@@ -50,15 +52,15 @@ context-free syntax
   <{EsvOption "\n"}*>
 }>
   EsvOption.EsvSource = <source = <EsvSource>>
-  
+
   EsvSource.EsvFiles  = <files {
   <{EsvFilesOption "\n"}*>
 }>
   EsvFilesOption.EsvFilesMainSourceDirectory       = <main-source-directory = <Expr>>
   EsvFilesOption.EsvFilesMainFile                  = <main-file = <Expr>>
   EsvFilesOption.EsvFilesIncludeDirectory          = <include-directory = <Expr>>
-  EsvFilesOption.EsvFilesIncludeLibspoofax2Exports = <include-libspoofax2-exports = <Expr>>
-  
+  EsvFilesOption.EsvFilesExportDirectory           = <export-directory = <Expr>>
+
   EsvSource.EsvPrebuilt = <prebuilt {
   <{EsvPrebuiltOption "\n"}*>
 }>
@@ -74,21 +76,20 @@ context-free syntax
   <{StatixOption "\n"}*>
 }>
   StatixOption.StatixSource = <source = <StatixSource>>
-  
+
   StatixSource.StatixFiles  = <files {
   <{StatixFilesOption "\n"}*>
 }>
   StatixFilesOption.StatixFilesMainSourceDirectory = <main-source-directory = <Expr>>
   StatixFilesOption.StatixFilesMainFile            = <main-file = <Expr>>
   StatixFilesOption.StatixFilesIncludeDirectory    = <include-directory = <Expr>>
-  
+  StatixFilesOption.StatixFilesExportDirectory     = <export-directory = <Expr>>
+  StatixFilesOption.StatixSdf3SignatureGen         = <sdf3-statix-signature-generation = <Expr>>
+
   StatixSource.StatixPrebuilt = <prebuilt {
   <{StatixPrebuiltOption "\n"}*>
 }>
   StatixPrebuiltOption.StatixPrebuiltSpecAtermDirectory = <spec-aterm-directory = <Expr>>
-
-  // TODO: move into source after CC lab.
-  StatixOption.StatixSdf3SignatureGen = <sdf3-statix-signature-generation = <Expr>>
 
 context-free sorts
 
@@ -100,16 +101,71 @@ context-free syntax
   <{StrategoOption "\n"}*>
 }>
   StrategoOption.StrategoSource = <source = <StrategoSource>>
-  
+
   StrategoSource.StrategoFiles  = <files {
   <{StrategoFilesOption "\n"}*>
 }>
-  StrategoFilesOption.StrategoFilesMainSourceDirectory      = <main-source-directory = <Expr>>
-  StrategoFilesOption.StrategoFilesMainFile                 = <main-file = <Expr>>
-  StrategoFilesOption.StrategoFilesIncludeDirectory         = <include-directory = <Expr>>
-  
-  // TODO: move into source after CC lab.
-  StrategoOption.StrategoSdf3StatixExplicationGen = <sdf3-statix-explication-generation = <Expr>>
-  
-  StrategoOption.StrategoLanguageStrategyAffix = <language-strategy-affix = <Expr>>
+  StrategoFilesOption.StrategoFilesMainSourceDirectory          = <main-source-directory = <Expr>>
+  StrategoFilesOption.StrategoFilesMainFile                     = <main-file = <Expr>>
+  StrategoFilesOption.StrategoFilesIncludeDirectory             = <include-directory = <Expr>>
+  StrategoFilesOption.StrategoFilesExportDirectory              = <export-directory = <Expr>>
+  StrategoFilesOption.StrategoSdf3StatixExplicationGen          = <sdf3-statix-explication-generation = <Expr>>
+  StrategoFilesOption.StrategoLanguageStrategyAffix             = <language-strategy-affix = <Expr>>
+  StrategoFilesOption.StrategoConcreteSyntaxExtensionParseTable = <concrete-syntax-extension-parse-table = <Expr>>
+
   StrategoOption.StrategoOutputJavaPackageId = <output-java-package = <Expr>>
+
+context-free sorts
+
+  DynamixOption DynamixSource DynamixFilesOption DynamixPrebuiltOption
+
+context-free syntax
+
+  Part.DynamixSection = <dynamix {
+  <{DynamixOption "\n"}*>
+}>
+  DynamixOption.DynamixSource = <source = <DynamixSource>>
+
+  DynamixSource.DynamixFiles  = <files {
+  <{DynamixFilesOption "\n"}*>
+}>
+  DynamixFilesOption.DynamixFilesMainSourceDirectory = <main-source-directory = <Expr>>
+  DynamixFilesOption.DynamixFilesMainFile            = <main-file = <Expr>>
+
+  DynamixSource.DynamixPrebuilt = <prebuilt {
+  <{DynamixPrebuiltOption "\n"}*>
+}>
+  DynamixPrebuiltOption.DynamixPrebuiltSpecAtermDirectory = <spec-aterm-directory = <Expr>>
+
+context-free sorts
+
+  Dependency BuildDependency DependencyOption DependencyKind
+
+context-free syntax
+
+  Part.Dependencies = <dependencies [
+  <{Dependency "\n"}*>
+]>
+
+  Dependency.DefaultDependency = <<Expr>>
+  Dependency.ConfiguredDependency = <<Expr> {
+    <{DependencyOption "\n"}*>
+  }>
+  DependencyOption.DependencyKinds = <kinds = [
+    <{DependencyKind "\n"}*>
+  ]>
+  DependencyKind.BuildDependencyKind = <Build>
+  DependencyKind.RunDependencyKind = <Run>
+
+  Part.BuildDependencies = <build-dependencies [
+  <{BuildDependency "\n"}*>
+]>
+  BuildDependency.DefaultBuildDependency = <<Expr>>
+
+lexical syntax
+
+  Keyword = "dependencies"
+  Keyword = "build-dependencies"
+  Keyword = "build"
+  Keyword = "Build"
+  Keyword = "Run"

@@ -2,10 +2,11 @@ package mb.spoofax.compiler.adapter;
 
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.util.ClassKind;
-import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.Conversion;
 import mb.spoofax.compiler.util.GradleProject;
+import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.TypeInfo;
+import mb.spoofax.core.Coordinate;
 import org.immutables.value.Value;
 
 import java.io.Serializable;
@@ -20,7 +21,7 @@ public interface AdapterProject extends Serializable {
 
         public Builder withDefaults(ResourcePath baseDirectory, Shared shared) {
             final GradleProject gradleProject = GradleProject.builder()
-                .coordinate(shared.defaultGroupId(), defaultArtifactId(shared), Optional.of(shared.defaultVersion()))
+                .coordinate(new Coordinate(shared.defaultGroupId(), defaultArtifactId(shared), shared.defaultVersion()))
                 .baseDirectory(baseDirectory)
                 .build();
             return this
@@ -49,7 +50,7 @@ public interface AdapterProject extends Serializable {
 
         public Builder withDefaultsSeparateProject(ResourcePath baseDirectory, Shared shared) {
             final GradleProject gradleProject = GradleProject.builder()
-                .coordinate(shared.defaultGroupId(), defaultSeparateArtifactId(shared), Optional.of(shared.defaultVersion()))
+                .coordinate(new Coordinate(shared.defaultGroupId(), defaultSeparateArtifactId(shared), shared.defaultVersion()))
                 .baseDirectory(baseDirectory)
                 .build();
             return this

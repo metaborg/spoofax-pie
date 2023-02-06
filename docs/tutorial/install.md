@@ -44,13 +44,6 @@ On {{ os.macos }} Sierra (10.12) and above, after unpacking, open the Terminal a
 xattr -rc Spoofax3.app
 ```
 
-On {{ os.linux }}, there is currently a bug where the embedded `java` executable does not have executable permission, leading to a long error when starting Eclipse.
-To solve this, run in the eclipse directory:
-
-```shell
-chmod +x jvm/bin/java
-```
-
 ## Running Eclipse
 
 Start up Eclipse, depending on your operating system:

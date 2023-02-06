@@ -92,4 +92,7 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
   includeProject("multilang.test")
 }
 
-
+"deps".run {
+  includeProject("lib")
+  includeProject("lang")
+}

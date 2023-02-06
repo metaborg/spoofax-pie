@@ -55,6 +55,8 @@ CFG has the following literals:
 | `task-def $JavaQIdLit` | `task-def foo.bar.Baz` | Qualified Java identifier that represents a task definition |
 | `sort [a-zA-Z0-9\-\_\$]+` | `sort Start` | SDF3 sort identifier |
 | `strategy [a-zA-Z0-9\-\_\$]+` | `strategy Start` | Stratego strategy identifier |
+| `$CoordinateChars:$CoordinateChars:$CoordinateChars` | `org.metaborg:strategolib:1.0.0` | Coordinate |
+| `$CoordinateChars:$CoordinateChars:$CoordinateRequirementChars` | `org.metaborg:strategolib:*` | Coordinate requirement |
 
 With the following syntax non-terminals:
 
@@ -62,6 +64,8 @@ With the following syntax non-terminals:
 | - | - |
 | `JavaIdChars` | `[a-zA-Z\_\$][a-zA-Z0-9\_\$]*` |
 | `JavaQIdLit` | `$JavaIdChars(\.$JavaIdChars)*` |
+| `CoordinateChars` | `(~[\"\:\;\,\*\$\{\}\[\]\n\r\\\ ]|\\~[\n\r])` |
+| `CoordinateRequirementChars` | `($CoordinateChars|\*)` |
 
 For Java, SDF3 sort, and Stratego strategy identifiers, the corresponding keywords of those languages are rejected as identifiers.
 
@@ -132,7 +136,7 @@ The following `ExecutionType`s are supported:
 * `Once` indicates a that this command supports being executed as a one-shot command.
 * `Continuous` indicates that this command supports being executed every time the source file changes.
 
-A `$Parameter` has the form `$Identifier = parameter { $ParameterOptions }` with the following options:
+A `$Parameter` has the form `$Identifier { $ParameterOptions }` with the following options:
 
 | Syntax | Required? | Description | Type |
 | - | - | - | - |
@@ -145,15 +149,15 @@ The following `ArgumentProvider`s are supported:
 
 * `Value($Expression)` provides a default value given by the expression. The expression must match the type of the parameter, even though this is not currently checked.
 * `Context($CommandContext)` attempts to infer the argument by context. The following `CommandContext`s are supported:
-  * `Directory`: attempt to infer a `ResourcePath` to an existing directory. For example, when right-clicking a directory in an IDE to execute a command on that directory.
-  * `File`: attempt to infer a `ResourcePath` to an existing file. For example, when right-clicking a file in an IDE to execute a command on that directory, or when executing a command in an editor for a file.
-  * `HierarchicalResource`: attempt to infer a `ResourcePath` to a hierarchical resource. A hierarchical resource is a resource that belongs to a (tree) hierarchy, such as a file or directory on the local filesystem. Use this when the command relies on the resource being in a filesystem, but does not care whether it is a directory or a file.
-  * `ReadableResource`: attempt to infer a `ResourceKey` to a readable resource. This is more general than `File`, as we only ask for a resource that can be read, not one that belongs to a (local) filesystem. Use this when the command does not rely on the resource being in a filesystem.
-  * `Region`: attempt to infer a `Region` in a source file. Inference succeeds when the context has a selection of size 1 or larger. For example, when executing a command in an editor that has a selection, the region will be that selection.
-  * `Offset`: attempt to infer an `int` representing an offset in a source file. Inference succeeds when the context has a cursor offset (i.e., a selection of size 0 or larger). For example, when executing a command in an editor, the offset will be the offset to the cursor in the editor.
+    * `Directory`: attempt to infer a `ResourcePath` to an existing directory. For example, when right-clicking a directory in an IDE to execute a command on that directory.
+    * `File`: attempt to infer a `ResourcePath` to an existing file. For example, when right-clicking a file in an IDE to execute a command on that directory, or when executing a command in an editor for a file.
+    * `HierarchicalResource`: attempt to infer a `ResourcePath` to a hierarchical resource. A hierarchical resource is a resource that belongs to a (tree) hierarchy, such as a file or directory on the local filesystem. Use this when the command relies on the resource being in a filesystem, but does not care whether it is a directory or a file.
+    * `ReadableResource`: attempt to infer a `ResourceKey` to a readable resource. This is more general than `File`, as we only ask for a resource that can be read, not one that belongs to a (local) filesystem. Use this when the command does not rely on the resource being in a filesystem.
+    * `Region`: attempt to infer a `Region` in a source file. Inference succeeds when the context has a selection of size 1 or larger. For example, when executing a command in an editor that has a selection, the region will be that selection.
+    * `Offset`: attempt to infer an `int` representing an offset in a source file. Inference succeeds when the context has a cursor offset (i.e., a selection of size 0 or larger). For example, when executing a command in an editor, the offset will be the offset to the cursor in the editor.
 * `EnclosingContext($EnclosingCommandContext)` attempts to infer the argument by the enclosing context. The following `EnclosingCommandContext`s are supported:
-  * `Project`: attempt to infer a `ResourcePath` to the enclosing project. For example, when executing a command in an IDE on a file, directory, or editor for a file, that belongs to a project. Or when executing a command in a CLI, the directory will be the current working directory.
-  * `Directory`: attempt to infer a `ResourcePath` to the enclosing directory. For example, when executing a command in the context of a file, directory, or editor for a file, the directory will be the parent of that file/directory.
+    * `Project`: attempt to infer a `ResourcePath` to the enclosing project. For example, when executing a command in an IDE on a file, directory, or editor for a file, that belongs to a project. Or when executing a command in a CLI, the directory will be the current working directory.
+    * `Directory`: attempt to infer a `ResourcePath` to the enclosing directory. For example, when executing a command in the context of a file, directory, or editor for a file, the directory will be the parent of that file/directory.
 
 Here is an example of a command that shows the parsed AST by taking one file argument that is inferred from context:
 
@@ -267,16 +271,16 @@ The following `ParserVariant`s are supported:
 
 * `jsglr1`: uses the [JSGLR1](https://github.com/metaborg/jsglr/tree/master/org.spoofax.jsglr) parser.
 * `jsglr2 { $Jsglr2Option* }`: uses the [JSGLR2](https://github.com/metaborg/jsglr/tree/master/org.spoofax.jsglr2) parser. The following `Jsglr2Option`s are supported:
-  * `preset = $Jsglr2Preset`: sets the [JSGLR2 preset](https://github.com/metaborg/jsglr/blob/master/org.spoofax.jsglr2/src/main/java/org/spoofax/jsglr2/JSGLR2Variant.java#L120) to use. The following `Jsglr2Preset`s are supported:
-    * `Standard`
-    * `Elkhound`
-    * `Recovery`
-    * `RecoveryElkhound`
-    * `DataDependent`
-    * `LayoutSensitive`
-    * `Composite`
-    * `Incremental`
-    * `IncrementalRecovery`
+    * `preset = $Jsglr2Preset`: sets the [JSGLR2 preset](https://github.com/metaborg/jsglr/blob/master/org.spoofax.jsglr2/src/main/java/org/spoofax/jsglr2/JSGLR2Variant.java#L120) to use. The following `Jsglr2Preset`s are supported:
+        * `Standard`
+        * `Elkhound`
+        * `Recovery`
+        * `RecoveryElkhound`
+        * `DataDependent`
+        * `LayoutSensitive`
+        * `Composite`
+        * `Incremental`
+        * `IncrementalRecovery`
 
 ### Comment symbols
 
@@ -328,7 +332,21 @@ Currently, no `MultilangAnalyzerOption`s are supported.
 
 The `stratego-runtime { $StrategoRuntimeOption* }` section enables generation of a stratego runtime, and groups options.
 The `stratego` section must be enabled when the `stratego-runtime` section is enabled.
-Currently, no `StrategoRuntimeOption`s are supported.
+The following `StrategoRuntimeOption`s are supported:
+
+| Syntax | Required? | Description | Type |
+| - | - | - | - |
+| `strategy-package-id = $Expression` | no | Adds a package as a private Stratego package. Can be specified multiple times. | Java package identifier |
+| `interop-registerer-by-reflection = $Expression` | no | Adds an interop registerer to load by reflection. Can be specified multiple times. | Java type identifier |
+| `add-spoofax2-primitives = $Expression` | no | Whether to add the Spoofax 2 Stratego primitives. | Boolean |
+| `add-nabl2-primitives = $Expression` | no | Whether to add the NaBL2 Stratego primitives. | Boolean |
+| `add-statix-primitives = $Expression` | no | Whether to add the Statix Stratego primitives. | Boolean |
+| `with-primitive-library = $Expression` | no | Adds a Stratego primitive strategies library (implementing `org.spoofax.interpreter.library.IOperatorRegistry`) to the generated `StrategoRuntimeBuilderFactory`. The library must have an `@Inject` constructor. Can be specified multiple times. | Java type identifier |
+| `with-interop-registerer = $Expression` | no | Adds a Stratego interop registerer (implementing `org.strategoxt.lang.InteropRegisterer`) to the generated `StrategoRuntimeBuilderFactory`. The registerer must have an `@Inject` constructor. Can be specified multiple times. | Java type identifier |
+| `class-kind = $Expression` | no | Specifies whether the classes are generated (`Generated`) or provided manually (`Manual`). Defaults to `Generated`. | `Generated` or `Manual` |
+| `base-StrategoRuntimeBuilderFactory = $Expression` | no | Package and name of the generated `StrategoRuntimeBuilderFactory`. | Java type identifier |
+| `extend-StrategoRuntimeBuilderFactory = $Expression` | no | Package and name of the extending `StrategoRuntimeBuilderFactory`, if any. | Java type identifier |
+
 
 ### Completer
 
@@ -373,7 +391,6 @@ The following `Sdf3Option`s are supported:
 | Syntax | Required? | Description | Type |
 | - | - | - | - |
 | `source = $Sdf3Source` | no | The source of the SDF3 definition. Defaults to a `files` source with the top-level `source-directory` option as its main source directory, and `./start.sdf3` as its main file relative to the main source directory. | n/a |
-| `parse-table-generator { $ParseTableGeneratorOption* }` | no | Parse table generator options. | n/a |
 
 The following `$Sdf3Source`s are supported:
 
@@ -386,6 +403,7 @@ The following `Sdf3FilesOption`s are supported:
 | - | - | - | - |
 | `main-source-directory = $Expression` | no | The directory relative to the root directory that contains the main SDF3 file. Defaults to the value of the top-level `source-directory` option. | Path |
 | `main-file = $Expression` | no | The main SDF3 file relative to the `main-source-directory`. Defaults to `./start.sdf3`. | Path |
+| `parse-table-generator { $ParseTableGeneratorOption* }` | no | Parse table generator options. | n/a |
 
 The following `$Sdf3PrebuiltOption`s are supported:
 
@@ -473,8 +491,6 @@ The following `StrategoOption`s are supported:
 | Syntax | Required? | Description | Type |
 | - | - | - | - |
 | `source = $StrategoSource` | no | The source of the Statix definition. Defaults to a `files` source with the top-level `source-directory` option as its main source directory, and `./main.str2` as its main file relative to the main source directory. | n/a |
-| `sdf3-statix-explication-generation = $Expression` | no | Whether SDF3 to Statix injection explication/implication generation is enabled. When enabled, `statix { sdf3-statix-signature-generation = true }` must also be enabled. Defaults to `false`. | Boolean |
-| `language-strategy-affix = $Expression` | no | The affix that is used to make certain generated strategies unique to the language. This is used both as a prefix and suffix. Defaults to name of the language transformed to a Stratego strategy identifier. | Stratego strategy identifier |
 | `output-java-package = $Expression` | no | The Java package into which compiled Stratego Java files are generated. Defaults to the language's package, followed by `.strategies`. | String |
 
 The following `$StrategoSource`s are supported:
@@ -488,7 +504,50 @@ The following `$StrategoFilesOption`s are supported:
 | `main-source-directory = $Expression` | no | The directory relative to the root directory that contains the main Stratego file. Defaults to the value of the top-level `source-directory` option. | Path |
 | `main-file = $Expression` | no | The main Stratego file relative to the `main-source-directory`. Defaults to `./main.str2`. | Path |
 | `include-directory = $Expression` | no | Adds an include directory from which to resolve Stratego imports. May be given multiple times. | Path |
+| `sdf3-statix-explication-generation = $Expression` | no | Whether SDF3 to Statix injection explication/implication generation is enabled. When enabled, `statix { sdf3-statix-signature-generation = true }` must also be enabled. Defaults to `false`. | Boolean |
+| `language-strategy-affix = $Expression` | no | The affix that is used to make certain generated strategies unique to the language. This is used both as a prefix and suffix. Defaults to name of the language transformed to a Stratego strategy identifier. | Stratego strategy identifier |
 
+### Dependencies
+
+The `dependencies [ $Dependency* ]` section allows specifying dependencies to other language (library) projects.
+A dependency consists of a *dependency expression* (`$Exp`) that specifies the source of the dependency. The following expressions are supported:
+
+* `$Coordinate`: an exact coordinate to a project, such as `org.metaborg:strategolib:1.0.0`. Coordinates are resolved to a statically loaded language, or a dynamically loaded language definition.
+* `$CoordinateRequirement`: a coordinate to a project with an open version, such as `org.metaborg:strategolib:*`, resolved identically to  `$Coordinate` except that the latest available version will be chosen.
+* `$Path`: a relative path (relative to the directory `spoofaxc.cfg` is in) to a language definition.
+
+Dependencies can be of a certain kind (`$DependencyKind`):
+
+* `Build`: a dependency that is resolved at *build time*, meaning when the language definition is built, allowing the use of sources and binaries of the project the dependency points to.
+* `Run`: a dependency that is resolved at *run time*, meaning when the language is executed, allowing use of the classes and tasks of the project the dependency points to. Note: this kind of dependency has not yet been implemented.
+
+The following `Dependency`s are supported:
+
+| Syntax | Description |
+| - | - |
+| `$Exp` | A dependency to project defined by the expression, available at `Build` and `Run` time. |
+| `$Exp { $DependencyOption* }` | A dependency to project defined by the expression, with configuration options. |
+
+The following `DependencyOption`s are supported:
+
+* `kinds = [ $DependencyKind* ]`: set the kinds at which this dependency is resolved.
+
+Additionally, build time dependencies can be quickly defined with the `build-dependencies [ $BuildDependency* ]` section. The following `BuildDependency`s are supported:
+
+| Syntax | Description |
+| - | - |
+| `$Exp` | A dependency to project defined by the expression, available only at `Build` time. |
+
+For example, the following configuration adds build dependencies to common libraries shipped with Spoofax 3:
+
+```cfg
+build-dependencies [
+  org.metaborg:strategolib:*
+  org.metaborg:gpp:*
+  org.metaborg:libspoofax2:*
+  org.metaborg:libstatix:*
+]
+```
 
 ## spoofaxc.lock
 

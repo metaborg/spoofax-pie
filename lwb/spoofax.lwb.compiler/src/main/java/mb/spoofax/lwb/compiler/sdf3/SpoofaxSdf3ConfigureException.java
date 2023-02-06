@@ -4,6 +4,7 @@ import mb.cfg.task.CfgRootDirectoryToObjectException;
 import mb.common.util.ADT;
 import mb.resource.ResourceKey;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.lwb.compiler.definition.ResolveDependenciesException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -17,6 +18,10 @@ public abstract class SpoofaxSdf3ConfigureException extends Exception {
         R mainSourceDirectoryFail(ResourcePath mainSourceDirectory);
 
         R mainFileFail(ResourceKey mainFile);
+
+        R includeDirectoryFail(ResourcePath includeDirectory);
+
+        R resolveIncludeFail(ResolveDependenciesException resolveDependenciesException);
     }
 
     public static SpoofaxSdf3ConfigureException getLanguageCompilerConfigurationFail(CfgRootDirectoryToObjectException cfgRootDirectoryToObjectException) {
@@ -29,6 +34,14 @@ public abstract class SpoofaxSdf3ConfigureException extends Exception {
 
     public static SpoofaxSdf3ConfigureException mainFileFail(ResourceKey mainFile) {
         return SpoofaxSdf3ConfigureExceptions.mainFileFail(mainFile);
+    }
+
+    public static SpoofaxSdf3ConfigureException includeDirectoryFail(ResourcePath includeDirectory) {
+        return SpoofaxSdf3ConfigureExceptions.includeDirectoryFail(includeDirectory);
+    }
+
+    public static SpoofaxSdf3ConfigureException resolveIncludeFail(ResolveDependenciesException cause) {
+        return withCause(SpoofaxSdf3ConfigureExceptions.resolveIncludeFail(cause), cause);
     }
 
     private static SpoofaxSdf3ConfigureException withCause(SpoofaxSdf3ConfigureException e, Exception cause) {
@@ -53,6 +66,8 @@ public abstract class SpoofaxSdf3ConfigureException extends Exception {
             .getLanguageCompilerConfigurationFail((cause) -> "Getting language compiler configuration failed")
             .mainSourceDirectoryFail((mainSourceDirectory) -> "SDF3 main source directory '" + mainSourceDirectory + "' does not exist or is not a directory")
             .mainFileFail((mainFile) -> "SDF3 main file '" + mainFile + "' does not exist or is not a file")
+            .includeDirectoryFail(includeDirectory -> "SDF3 include directory '" + includeDirectory + "' does not exist or is not a directory")
+            .resolveIncludeFail(cause -> "Resolving compile-time dependency to SDF3 imports failed")
             ;
     }
 

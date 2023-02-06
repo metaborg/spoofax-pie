@@ -53,6 +53,10 @@ rules // Parameter and properties
     parameterPropertiesOk(s, properties),
     hasParameterType(properties) == TRUE() | error $['type' property has not been set]@t. 
     // TODO: check for duplicate parameter names
+  parameterOk(s, t@ParameterDeprecated(id, properties)) :-
+    parameterPropertiesOk(s, properties),
+    hasParameterType(properties) == TRUE() | error $['type' property has not been set]@t. 
+    // TODO: check for duplicate parameter names
 
   parameterPropertyOk : scope * ParameterProperty
   parameterPropertiesOk maps parameterPropertyOk(*, list(*))
@@ -63,8 +67,15 @@ rules // Parameter and properties
     typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
   parameterPropertyOk(s, ParameterConverter(e)) :- 
     typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e.
-  parameterPropertyOk(_, ParameterArgumentProviders(_)).
-  
+  parameterPropertyOk(s, ParameterArgumentProviders(ps)) :-
+    argumentProvidersOk(s, ps).
+
+  argumentProviderOk : scope * ArgumentProvider
+  argumentProvidersOk maps argumentProviderOk(*, list(*))
+  argumentProviderOk(s, ValueArgumentProvider(e)) :-
+    typeOfExpr(s, e) == STRING() | error $[Expected string]@e.
+  argumentProviderOk(_, _).
+
   hasParameterType: list(ParameterProperty) -> BOOL
   hasParameterType([ParameterType(_)|_]) = TRUE().
   hasParameterType([_|s]) = hasParameterType(s).

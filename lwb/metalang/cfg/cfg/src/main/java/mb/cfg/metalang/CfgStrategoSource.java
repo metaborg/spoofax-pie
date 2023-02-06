@@ -1,14 +1,21 @@
 package mb.cfg.metalang;
 
-import mb.cfg.CompileLanguageSpecificationShared;
+import mb.cfg.CompileMetaLanguageSourcesShared;
 import mb.common.util.ADT;
 import mb.resource.hierarchical.ResourcePath;
+import mb.spoofax.compiler.adapter.ExportsCompiler;
+import mb.spoofax.compiler.language.StrategoRuntimeLanguageCompiler;
+import mb.spoofax.compiler.util.BuilderBase;
+import mb.spoofax.compiler.util.Conversion;
+import mb.spoofax.compiler.util.Shared;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * Configuration for Stratego sources in the context of CFG.
@@ -17,8 +24,16 @@ import java.util.List;
 public abstract class CfgStrategoSource implements Serializable {
     @Value.Immutable
     public interface Files extends Serializable {
-        class Builder extends ImmutableCfgStrategoSource.Files.Builder {
-            public static ResourcePath getDefaultMainSourceDirectory(CompileLanguageSpecificationShared shared) {
+        class Builder extends ImmutableCfgStrategoSource.Files.Builder implements BuilderBase {
+            static final String propertiesPrefix = "stratego.source.files.";
+            static final String languageStrategyAffix = propertiesPrefix + "languageStrategyAffix";
+
+            public Builder withPersistentProperties(Properties properties) {
+                with(properties, languageStrategyAffix, this::languageStrategyAffix);
+                return this;
+            }
+
+            public static ResourcePath getDefaultMainSourceDirectory(CompileMetaLanguageSourcesShared shared) {
                 return shared.languageProject().project().srcDirectory();
             }
         }
@@ -27,7 +42,7 @@ public abstract class CfgStrategoSource implements Serializable {
 
 
         @Value.Default default ResourcePath mainSourceDirectory() {
-            return Builder.getDefaultMainSourceDirectory(compileLanguageShared());
+            return Builder.getDefaultMainSourceDirectory(compileMetaLanguageSourcesShared());
         }
 
         @Value.Default default ResourcePath mainFile() {
@@ -40,6 +55,8 @@ public abstract class CfgStrategoSource implements Serializable {
 
         List<ResourcePath> includeDirectories();
 
+        List<String> exportDirectories();
+
         @Value.Default default List<String> includeBuiltinLibraries() {
             final ArrayList<String> strategoBuiltinLibs = new ArrayList<>();
             strategoBuiltinLibs.add("libstratego-sglr");
@@ -47,41 +64,46 @@ public abstract class CfgStrategoSource implements Serializable {
             return strategoBuiltinLibs;
         }
 
-        default ResourcePath strategoLibUnarchiveDirectory() {
-            return compileLanguageShared().unarchiveDirectory().appendRelativePath("strategoLib");
+        @Value.Default default boolean enableSdf3StatixExplicationGen() {
+            return false;
         }
 
-        default ResourcePath gppUnarchiveDirectory() {
-            return compileLanguageShared().unarchiveDirectory().appendRelativePath("gpp");
+        @Value.Default default String languageStrategyAffix() {
+            // TODO: convert to Stratego ID instead of Java ID.
+            return Conversion.nameToJavaId(shared().name().toLowerCase());
         }
 
-        @Value.Default default boolean includeLibSpoofax2Exports() {
-            return compileLanguageShared().includeLibSpoofax2Exports();
-        }
+        Map<String, ResourcePath> concreteSyntaxExtensionParseTables();
 
-        default ResourcePath libSpoofax2UnarchiveDirectory() {
-            return compileLanguageShared().libSpoofax2UnarchiveDirectory();
-        }
 
-        @Value.Default default boolean includeLibStatixExports() {
-            return compileLanguageShared().includeLibStatixExports();
-        }
-
-        default ResourcePath libStatixUnarchiveDirectory() {
-            return compileLanguageShared().libStatixUnarchiveDirectory();
+        default ResourcePath unarchiveDirectory() {
+            return compileMetaLanguageSourcesShared().unarchiveDirectory().appendAsRelativePath("stratego");
         }
 
         @Value.Default default ResourcePath generatedSourcesDirectory() {
-            return compileLanguageShared().generatedSourcesDirectory().appendRelativePath("stratego");
+            return compileMetaLanguageSourcesShared().generatedSourcesDirectory().appendRelativePath("stratego");
         }
 
         @Value.Default default ResourcePath cacheDirectory() {
-            return compileLanguageShared().languageProject().project().buildDirectory().appendRelativePath("stratego-cache");
+            return compileMetaLanguageSourcesShared().cacheDirectory().appendAsRelativePath("stratego");
         }
+
 
         /// Automatically provided sub-inputs
 
-        CompileLanguageSpecificationShared compileLanguageShared();
+        CompileMetaLanguageSourcesShared compileMetaLanguageSourcesShared();
+
+        Shared shared();
+
+
+        default void savePersistentProperties(Properties properties) {
+            properties.setProperty(Builder.languageStrategyAffix, languageStrategyAffix());
+        }
+
+
+        default void syncTo(ExportsCompiler.Input.Builder builder) {
+            exportDirectories().forEach(exportDirectory -> builder.addDirectoryExport(CfgStrategoConfig.exportsId, exportDirectory));
+        }
     }
 
     interface Cases<R> {
@@ -98,10 +120,6 @@ public abstract class CfgStrategoSource implements Serializable {
     public static CfgStrategoSources.CasesMatchers.TotalMatcher_Files cases() {
         return CfgStrategoSources.cases();
     }
-
-//    public CfgStrategoSources.CaseOfMatchers.TotalMatcher_Files caseOf() {
-//        return CfgStrategoSources.caseOf(this);
-//    }
 
     public Files getFiles() {
         return CfgStrategoSources.getFiles(this);

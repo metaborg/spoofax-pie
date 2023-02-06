@@ -1,12 +1,13 @@
 package mb.statix.codecompletion.strategies.runtime;
 
+import mb.statix.codecompletion.CCSolverState;
 import mb.statix.codecompletion.SolverState;
 import mb.statix.constraints.CUser;
 import mb.tego.strategies.NamedStrategy1;
 import mb.tego.strategies.runtime.TegoEngine;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public final class NotYetExpandedStrategy extends NamedStrategy1<CUser, SolverState, @Nullable SolverState> {
+public final class NotYetExpandedStrategy extends NamedStrategy1<CUser, CCSolverState, @Nullable CCSolverState> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final NotYetExpandedStrategy instance = new NotYetExpandedStrategy();
@@ -17,24 +18,24 @@ public final class NotYetExpandedStrategy extends NamedStrategy1<CUser, SolverSt
 
     @SuppressWarnings("UnnecessaryLocalVariable")
     @Override
-    public @Nullable SolverState evalInternal(
+    public @Nullable CCSolverState evalInternal(
         TegoEngine engine,
         CUser constraint,
-        SolverState input
+        CCSolverState input
     ) {
         return eval(engine, constraint, input);
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
-    public static @Nullable SolverState eval(
+    public static @Nullable CCSolverState eval(
         TegoEngine engine,
         CUser constraint,
-        SolverState input
+        CCSolverState input
     ) {
         return checkNotYetExpanded(input, constraint) ? input : null;
     }
 
-    private static boolean checkNotYetExpanded(SolverState state, CUser constraint) {
+    private static boolean checkNotYetExpanded(CCSolverState state, CUser constraint) {
         boolean alreadyExpanded = state.getExpanded().contains(constraint.name());
         if (alreadyExpanded) {
             System.out.println("Constraint was expanded before: " + constraint);
