@@ -56,6 +56,7 @@ import mb.spoofax.compiler.language.LanguageProjectCompilerInputBuilder;
 import mb.spoofax.compiler.language.MultilangAnalyzerLanguageCompiler;
 import mb.spoofax.compiler.language.ParserLanguageCompiler;
 import mb.spoofax.compiler.language.ParserVariant;
+import mb.spoofax.compiler.language.StatixSolverMode;
 import mb.spoofax.compiler.language.StrategoRuntimeLanguageCompiler;
 import mb.spoofax.compiler.language.StylerLanguageCompiler;
 import mb.spoofax.compiler.platform.EclipseProjectCompiler;
@@ -424,7 +425,17 @@ public class CfgAstToObject {
             subParts.forOneSubtermAsBool("ConstraintAnalyzerEnableStatix", base::enableStatix);
             subParts.forOneSubtermAsBool("ConstraintAnalyzerMultiFile", base::multiFile);
             subParts.forOneSubtermAsString("ConstraintAnalyzerStrategoStrategy", base::strategoStrategy);
-            subParts.forOneSubtermAsConstructorName("StatixSolverMode", base::statixSolverMode);
+            subParts.forOneSubterm("StatixSolverMode", mode -> {
+                if(TermUtils.isAppl(mode, "Traditional", 0)) {
+                    base.statixSolverMode(StatixSolverMode.TRADITIONAL);
+                } else if(TermUtils.isAppl(mode, "Concurrent", 0)) {
+                    base.statixSolverMode(StatixSolverMode.CONCURRENT);
+                } else if(TermUtils.isAppl(mode, "Incremental", 0)) {
+                    base.statixSolverMode(StatixSolverMode.INCREMENTAL);
+                } else {
+                    throw new InvalidAstShapeException("Statix solver mode", mode);
+                }
+            });
 
             // TODO: more constraintAnalyzer language properties
             final ConstraintAnalyzerAdapterCompiler.Input.Builder adapter = adapterBuilder.withConstraintAnalyzer();
