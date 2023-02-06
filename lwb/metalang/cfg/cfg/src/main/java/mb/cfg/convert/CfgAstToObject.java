@@ -425,7 +425,7 @@ public class CfgAstToObject {
             subParts.forOneSubtermAsBool("ConstraintAnalyzerEnableStatix", base::enableStatix);
             subParts.forOneSubtermAsBool("ConstraintAnalyzerMultiFile", base::multiFile);
             subParts.forOneSubtermAsString("ConstraintAnalyzerStrategoStrategy", base::strategoStrategy);
-            subParts.forOneSubterm("StatixSolverMode", mode -> {
+            subParts.forOneSubterm("ConstraintAnalyzerStatixSolverMode", mode -> {
                 if(TermUtils.isAppl(mode, "Traditional", 0)) {
                     base.statixSolverMode(StatixSolverMode.TRADITIONAL);
                 } else if(TermUtils.isAppl(mode, "Concurrent", 0)) {
