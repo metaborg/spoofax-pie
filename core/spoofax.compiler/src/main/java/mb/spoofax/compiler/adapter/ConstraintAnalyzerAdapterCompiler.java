@@ -12,7 +12,6 @@ import mb.spoofax.compiler.adapter.data.MenuItemRepr;
 import mb.spoofax.compiler.language.ClassLoaderResourcesCompiler;
 import mb.spoofax.compiler.language.ConstraintAnalyzerLanguageCompiler;
 import mb.spoofax.compiler.util.ClassKind;
-import mb.spoofax.compiler.util.Coordinate;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
 import mb.spoofax.compiler.util.MenuItemCollection;
 import mb.spoofax.compiler.util.Shared;
@@ -20,6 +19,7 @@ import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
 import mb.spoofax.compiler.util.TypeInfo;
 import mb.spoofax.compiler.util.TypeInfoCollection;
+import mb.spoofax.core.Coordinate;
 import mb.spoofax.core.language.command.CommandContextType;
 import mb.spoofax.core.language.command.EditorFileType;
 import mb.spoofax.core.language.command.EnclosingCommandContextType;
@@ -98,7 +98,7 @@ public class ConstraintAnalyzerAdapterCompiler {
 
         default String qualifiedLanguageId() {
             Coordinate coord = languageProjectInput().languageProject().project().coordinate();
-            return coord.groupId() + ":" + coord.artifactId();
+            return coord.groupId + ":" + coord.artifactId;
         }
 
         Optional<Integer> defaultStatixMessageStacktraceLength();
