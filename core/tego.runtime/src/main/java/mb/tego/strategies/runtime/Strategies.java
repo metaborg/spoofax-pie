@@ -54,6 +54,12 @@ public final class Strategies {
         return SingleStrategy.<I, O>getInstance().apply(s);
     }
 
+    public static <I, O> Strategy<I, O> first(
+        Strategy<I, Seq<O>> s
+    ) {
+        return FirstStrategy.<I, O>getInstance().apply(s);
+    }
+
     public static <T> Strategy<T, Seq<T>> try_(
         Strategy<T, Seq<T>> s
     ) {

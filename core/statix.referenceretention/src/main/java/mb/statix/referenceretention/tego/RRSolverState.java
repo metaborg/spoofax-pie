@@ -118,7 +118,7 @@ public class RRSolverState extends SolverState {
     /**
      * Gets the map from constraint variables to placeholder descriptors.
      */
-    public Map.Immutable<ITermVar, RRPlaceholder> getPlaceholderDescriptors() {
+    public Map.Immutable<ITermVar, RRPlaceholder> getPlaceholders() {
         return this.placeholderDescriptors;
     }
 
@@ -129,7 +129,7 @@ public class RRSolverState extends SolverState {
      * @param newPlaceholderDescriptors the new placeholder descriptors
      * @return the modified copy of the solver state
      */
-    public RRSolverState withPlaceholderDescriptors(Map.Immutable<ITermVar, RRPlaceholder> newPlaceholderDescriptors) {
+    public RRSolverState withPlaceholders(Map.Immutable<ITermVar, RRPlaceholder> newPlaceholderDescriptors) {
         return copy(this.spec, this.state, this.messages, this.constraints, this.delays,
             this.existentials, this.completeness, newPlaceholderDescriptors);
     }
@@ -143,7 +143,18 @@ public class RRSolverState extends SolverState {
      * @return the modified copy of the solver state
      */
     public RRSolverState addPlaceholder(ITermVar metaVar, RRPlaceholder placeholderDescriptor) {
-        return withPlaceholderDescriptors(this.placeholderDescriptors.__put(metaVar, placeholderDescriptor));
+        return withPlaceholders(this.placeholderDescriptors.__put(metaVar, placeholderDescriptor));
+    }
+
+    /**
+     * Creates a copy of this {@link ISolverState} without the specified
+     * placeholder descriptor and variable mapping.
+     *
+     * @param metaVar the variable
+     * @return the modified copy of the solver state
+     */
+    public RRSolverState removePlaceholder(ITermVar metaVar) {
+        return withPlaceholders(this.placeholderDescriptors.__remove(metaVar));
     }
 
     @Override public RRSolverState withExistentials(Iterable<ITermVar> existentials) {

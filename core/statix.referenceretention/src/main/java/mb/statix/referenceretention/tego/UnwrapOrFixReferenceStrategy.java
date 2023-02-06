@@ -83,12 +83,16 @@ public final class UnwrapOrFixReferenceStrategy extends NamedStrategy3<RRContext
 //        final NewPlaceholderStrategy newPlaceholderStrategy = NewPlaceholderStrategy.getInstance();
         final Strategy1</* ctx */ ITerm, /* term */ ITerm, /* result */ @Nullable ITerm> qualifyReference = ctx.getQualifyReferenceStrategy();
 
+        // Construct the state without the placeholder being unwrapped/fixed
+        final RRSolverState inputWithoutPlaceholder = input.removePlaceholder(v);
+
         // (body, contexts) <- descriptor,
         final ITerm term = descriptor.getBody();
         final List<ITerm> contexts = descriptor.getContexts();
-        if (term instanceof RRLockedReference) {
+
+        final @Nullable RRLockedReference lockedRef = RRLockedReference.matcher().match(term).orElse(null);
+        if (lockedRef != null) {
             // The term is a locked reference
-            final @Nullable RRLockedReference reference = (RRLockedReference)term;
             if (contexts.size() == 0) {
                 // A locked reference to declaration d with no context.
                 // Check whether the resulting reference resolves to declaration d
@@ -98,7 +102,7 @@ public final class UnwrapOrFixReferenceStrategy extends NamedStrategy3<RRContext
                 // TODO: Do the check whether the reference still points to the given declaration
                 if (true /* TODO: if check succeeds */) {
                     // Check succeeded, reference is valid.
-                    final RRSolverState newState = bindToVar(input, v, reference.getTerm());
+                    final RRSolverState newState = bindToVar(inputWithoutPlaceholder, v, lockedRef.getTerm());
                     return Seq.of(newState);
                 } else {
                     // Check failed, reference is invalid.
@@ -110,9 +114,9 @@ public final class UnwrapOrFixReferenceStrategy extends NamedStrategy3<RRContext
                 // ⟦ r | c0 ⟧ = { ⟦ r' | ε ⟧ } where c0(r) == r' else {}
                 final ITerm context = contexts.get(0);
                 // This executes the context on the reference
-                final @Nullable ITerm qreference = engine.eval(qualifyReference, context, reference.getTerm());
+                final @Nullable ITerm qreference = engine.eval(qualifyReference, context, lockedRef.getTerm());
                 if(qreference != null) {
-                    final RRSolverState newState = unwrap(engine, v, (IApplTerm)term, contexts, input);
+                    final RRSolverState newState = unwrap(engine, v, (IApplTerm)term, contexts, inputWithoutPlaceholder);
                     return Seq.of(newState);
                 } else {
                     // No results.
@@ -123,7 +127,7 @@ public final class UnwrapOrFixReferenceStrategy extends NamedStrategy3<RRContext
                 // ⟦ r | c0, c1, .. ⟧ = { ⟦ r | c0 ⟧, ⟦ r | c1 ⟧, .. }
                 List<RRSolverState> newStates = new ArrayList<>(contexts.size() + 1);
                 for(ITerm context : contexts) {
-                    final Pair<ITermVar, RRSolverState> varAndstate = newPlaceholder(engine, input, reference, Collections.singletonList(context));
+                    final Pair<ITermVar, RRSolverState> varAndstate = newPlaceholder(engine, inputWithoutPlaceholder, lockedRef, Collections.singletonList(context));
                     final ITermVar newVar = varAndstate.component1();
                     final RRSolverState newState = varAndstate.component2();    // TODO: Do we need to apply `bindToVar`?
                     newStates.add(newState);
@@ -175,12 +179,12 @@ public final class UnwrapOrFixReferenceStrategy extends NamedStrategy3<RRContext
         } else if (term instanceof IApplTerm) {
             // The term is a term application, so we unwrap it once
             //   ⟦ T(a0, a1, ..) | C ⟧  ->  { T( ⟦ a0 | C ⟧, ⟦ a1 | C ⟧, .. ) }
-            final RRSolverState finalState = unwrap(engine, v, (IApplTerm)term, contexts, input);
+            final RRSolverState finalState = unwrap(engine, v, (IApplTerm)term, contexts, inputWithoutPlaceholder);
             return Seq.of(finalState);
         } else {
             // The term is not a term application and not a locked reference
             //   ⟦ t | _ ⟧  ->  { t }
-            final RRSolverState newState = bindToVar(input, v, term);
+            final RRSolverState newState = bindToVar(inputWithoutPlaceholder, v, term);
             return Seq.of(newState);
         }
 

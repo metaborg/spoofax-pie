@@ -1,5 +1,6 @@
 package mb.statix.referenceretention.tego;
 
+import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
 import mb.statix.referenceretention.statix.RRPlaceholder;
 import mb.tego.sequences.Seq;
@@ -12,6 +13,7 @@ import mb.tego.tuples.Pair;
 import static mb.tego.strategies.StrategyExt.fun;
 import static mb.tego.strategies.StrategyExt.lam;
 import static mb.tego.strategies.StrategyExt.let;
+import static mb.tego.strategies.runtime.Strategies.first;
 import static mb.tego.strategies.runtime.Strategies.flatMap;
 import static mb.tego.strategies.runtime.Strategies.flatten;
 import static mb.tego.strategies.runtime.Strategies.forEach;
@@ -51,7 +53,6 @@ public final class UnwrapOrFixAllReferencesStrategy extends NamedStrategy1<RRCon
         return eval(engine, ctx, input);
     }
 
-
     /**
      * Fixes all placeholder references.
      *
@@ -69,33 +70,74 @@ public final class UnwrapOrFixAllReferencesStrategy extends NamedStrategy1<RRCon
         // def unwrapOrFixAllReferences(RRContext): RRSolverState -> [RRSolverState]
         // unwrapOrFixAllReferences(ctx) =
         //     repeat(
-        //         ps <- getAllPlaceholders;
-        //         flatten(forEach(ps, /(p) i ->
-        //              (v, d) <- p;
-        //              unwrapOrFixReference(ctx, v, d);
-        //              flatMap(ntl(assertValid))
-        //          /)
+        //         (v, d) <- first(getAllPlaceholders());
+        //         unwrapOrFixReference(ctx, v, d);
+        //         flatMap(ntl(assertValid))
         //     )
 
         final AssertValidStrategy assertValid = AssertValidStrategy.getInstance();
         final UnwrapOrFixReferenceStrategy unwrapOrFixReference = UnwrapOrFixReferenceStrategy.getInstance();
         final Strategy1<RRContext, RRSolverState, Seq<Pair<ITermVar, RRPlaceholder>>> getAllPlaceholders =
-            fun((RRSolverState i, RRContext c) -> Seq.from(input.getPlaceholderDescriptors().entrySet()).map(Pair::from));
+            fun((RRSolverState i, RRContext c) -> Seq.from(i.getPlaceholders().entrySet()).map(Pair::from));
 
         final Strategy<RRSolverState, Seq<RRSolverState>> strategy = repeat(
-            let(getAllPlaceholders.apply(ctx), (Seq<Pair<ITermVar, RRPlaceholder>> ps) ->
-                flatten(forEach(ps, lam((Pair<ITermVar, RRPlaceholder> p) ->
-                    let(fun(i -> p.component1()), (ITermVar v) ->
-                        let(fun(i -> p.component2()), (RRPlaceholder d) ->
-                            seq(unwrapOrFixReference.apply(ctx, v, d))
-                            .$(flatMap(ntl(assertValid.apply(ctx))))
-                            .$()
-                        )
+            let(first(getAllPlaceholders.apply(ctx)), (Pair<ITermVar, RRPlaceholder> p) ->
+                let(fun(i -> p.component1()), (ITermVar v) ->
+                    let(fun(i -> p.component2()), (RRPlaceholder d) ->
+                        seq(unwrapOrFixReference.apply(ctx, v, d))
+                        .$(flatMap(ntl(assertValid.apply(ctx))))
+                        .$()
                     )
-                )))
+                )
             )
         );
 
         return engine.eval(strategy, input);
     }
+//    /**
+//     * Fixes all placeholder references.
+//     *
+//     * @param engine the Tego engine
+//     * @param ctx the solver context
+//     * @param input the input solver state
+//     * @return a lazy sequence of solver states
+//     */
+//    public static Seq<RRSolverState> eval(
+//        TegoEngine engine,
+//        RRContext ctx,
+//        RRSolverState input
+//    ) {
+//
+//        // def unwrapOrFixAllReferences(RRContext): RRSolverState -> [RRSolverState]
+//        // unwrapOrFixAllReferences(ctx) =
+//        //     repeat(
+//        //         ps <- getAllPlaceholders;
+//        //         flatten(forEach(ps, /(p) i ->
+//        //              (v, d) <- p;
+//        //              unwrapOrFixReference(ctx, v, d);
+//        //              flatMap(ntl(assertValid))
+//        //          /)
+//        //     )
+//
+//        final AssertValidStrategy assertValid = AssertValidStrategy.getInstance();
+//        final UnwrapOrFixReferenceStrategy unwrapOrFixReference = UnwrapOrFixReferenceStrategy.getInstance();
+//        final Strategy1<RRContext, RRSolverState, Seq<Pair<ITermVar, RRPlaceholder>>> getAllPlaceholders =
+//            fun((RRSolverState i, RRContext c) -> Seq.from(input.getPlaceholders().entrySet()).map(Pair::from));
+//
+//        final Strategy<RRSolverState, Seq<RRSolverState>> strategy = repeat(
+//            let(getAllPlaceholders.apply(ctx), (Seq<Pair<ITermVar, RRPlaceholder>> ps) ->
+//                flatten(forEach(ps, lam((Pair<ITermVar, RRPlaceholder> p) ->
+//                    let(fun(i -> p.component1()), (ITermVar v) ->
+//                        let(fun(i -> p.component2()), (RRPlaceholder d) ->
+//                            seq(unwrapOrFixReference.apply(ctx, v, d))
+//                            .$(flatMap(ntl(assertValid.apply(ctx))))
+//                            .$()
+//                        )
+//                    )
+//                )))
+//            )
+//        );
+//
+//        return engine.eval(strategy, input);
+//    }
 }

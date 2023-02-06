@@ -58,7 +58,7 @@ public final class InferStrategy extends NamedStrategy<RRSolverState, RRSolverSt
 
             // NOTE: Call the isSuccessful() strategy on this result to ensure it has no errors.
 
-            return RRSolverState.fromSolverResult(result, input.getExistentials(), input.getPlaceholderDescriptors());
+            return RRSolverState.fromSolverResult(result, input.getExistentials(), input.getPlaceholders());
         } catch(InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
