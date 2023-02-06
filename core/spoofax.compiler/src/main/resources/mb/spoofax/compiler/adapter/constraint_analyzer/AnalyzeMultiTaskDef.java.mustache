@@ -82,15 +82,13 @@ public class {{baseAnalyzeMultiTaskDef.id}} extends ConstraintAnalyzeMultiTaskDe
     {{#languageProjectInput.enableStatix}}
     protected StrategoRuntime decorateStrategoRuntime(StrategoRuntime strategoRuntime, ResourcePath root) {
         return strategoRuntime.addContextObject(mb.statix.spoofax.IStatixProjectConfig. class, createStatixProjectConfig())
-                    .addContextObject(mb.spoofax2.common.primitive.generic.Spoofax2ProjectContext.class, createProjectContext(root));
+                    .addContextObject(mb.spoofax2.common.primitive.generic.Spoofax2ProjectContext.class, createSpoofax2ProjectContext(root))
+                    .addContextObject(mb.statix.common.Spoofax3StatixProjectConfig.class, createSpoofax3ProjectConfig());
     }
 
     protected mb.statix.spoofax.IStatixProjectConfig createStatixProjectConfig() {
         return new mb.statix.spoofax.StatixProjectConfig(
-            // Spoofax 2 uses language name here. In Spoofax 3, we use the FQ artifact id, because that can be retrieved from the context object.
-            // Currently, we do not differentiate by version, because that is optional (which slightly complicates creating identical strings.
-            // This place should be kept in sync with `StatixCommonPrimitive`.
-            java.util.Collections.singletonMap("{{qualifiedLanguageId}}", mb.statix.spoofax.SolverMode.{{statixSolverMode}}),
+            null,
             {{#defaultStatixMessageStacktraceLength}}{{this}}{{/defaultStatixMessageStacktraceLength}}{{^defaultStatixMessageStacktraceLength}}null{{/defaultStatixMessageStacktraceLength}},
             {{#defaultStatixMessageTermDepth}}{{this}}{{/defaultStatixMessageTermDepth}}{{^defaultStatixMessageTermDepth}}null{{/defaultStatixMessageTermDepth}},
             {{#defaultStatixTestLogLevel}}"{{this}}"{{/defaultStatixTestLogLevel}}{{^defaultStatixTestLogLevel}}null{{/defaultStatixTestLogLevel}},
@@ -98,12 +96,16 @@ public class {{baseAnalyzeMultiTaskDef.id}} extends ConstraintAnalyzeMultiTaskDe
         );
     }
 
-    protected mb.spoofax2.common.primitive.generic.Spoofax2ProjectContext createProjectContext(ResourcePath root) {
+    protected mb.spoofax2.common.primitive.generic.Spoofax2ProjectContext createSpoofax2ProjectContext(ResourcePath root) {
         return new mb.spoofax2.common.primitive.generic.Spoofax2ProjectContext(
             root,
             mb.common.util.MultiMapView.of(),
             mb.common.util.MultiMapView.of()
         );
+    }
+
+    protected mb.statix.common.Spoofax3StatixProjectConfig createSpoofax3ProjectConfig() {
+        return mb.statix.common.Spoofax3StatixProjectConfig.of(mb.statix.spoofax.SolverMode.{{statixSolverMode}});
     }
 
     {{/languageProjectInput.enableStatix}}

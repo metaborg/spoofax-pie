@@ -97,11 +97,6 @@ public class ConstraintAnalyzerAdapterCompiler {
             return languageProjectInput().statixSolverMode();
         }
 
-        default String qualifiedLanguageId() {
-            Coordinate coord = languageProjectInput().languageProject().project().coordinate();
-            return coord.groupId + ":" + coord.artifactId;
-        }
-
         Optional<Integer> defaultStatixMessageStacktraceLength();
 
         Optional<Integer> defaultStatixMessageTermDepth();
