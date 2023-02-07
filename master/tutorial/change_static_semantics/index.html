@@ -975,33 +975,33 @@
 Open the main Statix file <code>helloworld/src/main.stx</code>
 <a href="https://www.spoofax.dev/references/statix/">Statix</a> is a meta-language for defining the static semantics of your language, which includes type checking.</p>
 <p>First we will update the Statix specification to handle the new language constructs.
-Replace the <code class="highlight"><span class="nv">programOk</span><span class="p">(</span><span class="nv">_</span><span class="p">).</span><span class="w"></span></code> line with <code>programOk(Program(parts)) :- partsOk(parts).</code>, meaning that we accept programs consisting of parts, as long as their parts are ok.
+Replace the <code class="highlight"><span class="nv">programOk</span><span class="p">(</span><span class="nv">_</span><span class="p">).</span></code> line with <code>programOk(Program(parts)) :- partsOk(parts).</code>, meaning that we accept programs consisting of parts, as long as their parts are ok.
 As a silly rule, we will add a warning to all instances of <code>world</code> in the program.
 Add the following code to the end of the Statix definition:</p>
-<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nv">partOk</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="nv">Part</span><span class="w"></span>
-<span class="w">  </span><span class="nv">partOk</span><span class="p">(</span><span class="nv">Hello</span><span class="p">()).</span><span class="w"></span>
-<span class="w">  </span><span class="nv">partOk</span><span class="p">(</span><span class="nv">World</span><span class="p">())</span><span class="w"> </span><span class="p">:</span><span class="nv">-</span><span class="w"> </span><span class="nv">try</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">false</span><span class="w"> </span><span class="p">}</span><span class="w"> </span>|<span class="w"> </span><span class="nv">warning</span><span class="w"> </span>$[<span class="nv">World</span>!]<span class="p">.</span><span class="w"></span>
-<span class="w">  </span><span class="nv">partsOk</span><span class="w"> </span><span class="k">maps</span><span class="w"> </span><span class="nv">partOk</span><span class="p">(</span><span class="k">list</span><span class="p">(</span>*<span class="p">))</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nv">partOk</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="nv">Part</span>
+<span class="w">  </span><span class="nv">partOk</span><span class="p">(</span><span class="nv">Hello</span><span class="p">()).</span>
+<span class="w">  </span><span class="nv">partOk</span><span class="p">(</span><span class="nv">World</span><span class="p">())</span><span class="w"> </span><span class="p">:</span><span class="nv">-</span><span class="w"> </span><span class="nv">try</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">false</span><span class="w"> </span><span class="p">}</span><span class="w"> </span>|<span class="w"> </span><span class="nv">warning</span><span class="w"> </span>$[<span class="nv">World</span>!]<span class="p">.</span>
+<span class="w">  </span><span class="nv">partsOk</span><span class="w"> </span><span class="k">maps</span><span class="w"> </span><span class="nv">partOk</span><span class="p">(</span><span class="k">list</span><span class="p">(</span>*<span class="p">))</span>
 </code></pre></div>
-<p>This adds a <code class="highlight"><span class="nv">partOk</span><span class="w"></span></code> rule that lets all <code class="highlight"><span class="nv">Hello</span><span class="p">()</span><span class="w"></span></code> parts pass, but will add a warning to all <code class="highlight"><span class="nv">World</span><span class="p">()</span><span class="w"></span></code> parts.
-<code class="highlight"><span class="nv">partsOk</span><span class="w"></span></code> goes over a list of parts and applies <code class="highlight"><span class="nv">partOk</span><span class="w"></span></code>.</p>
+<p>This adds a <code class="highlight"><span class="nv">partOk</span></code> rule that lets all <code class="highlight"><span class="nv">Hello</span><span class="p">()</span></code> parts pass, but will add a warning to all <code class="highlight"><span class="nv">World</span><span class="p">()</span></code> parts.
+<code class="highlight"><span class="nv">partsOk</span></code> goes over a list of parts and applies <code class="highlight"><span class="nv">partOk</span></code>.</p>
 <details class="note">
 <summary><code>src/main.stx</code> full contents</summary>
-<div class="highlight"><pre><span></span><code><span class="k">module</span><span class="w"> </span><span class="nv">main</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="k">module</span><span class="w"> </span><span class="nv">main</span>
 
-<span class="k">imports</span><span class="w"></span>
+<span class="k">imports</span>
 
-<span class="w">  </span><span class="nv">signatures</span>/<span class="nv">start-sig</span><span class="w"></span>
+<span class="w">  </span><span class="nv">signatures</span>/<span class="nv">start-sig</span>
 
-<span class="k">rules</span><span class="w"></span>
+<span class="k">rules</span>
 
-<span class="w">  </span><span class="nv">programOk</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="nv">Start</span><span class="w"></span>
-<span class="w">  </span><span class="nv">programOk</span><span class="p">(</span><span class="nv">Program</span><span class="p">(</span><span class="nv">parts</span><span class="p">))</span><span class="w"> </span><span class="p">:</span><span class="nv">-</span><span class="w"> </span><span class="nv">partsOk</span><span class="p">(</span><span class="nv">parts</span><span class="p">).</span><span class="w"></span>
+<span class="w">  </span><span class="nv">programOk</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="nv">Start</span>
+<span class="w">  </span><span class="nv">programOk</span><span class="p">(</span><span class="nv">Program</span><span class="p">(</span><span class="nv">parts</span><span class="p">))</span><span class="w"> </span><span class="p">:</span><span class="nv">-</span><span class="w"> </span><span class="nv">partsOk</span><span class="p">(</span><span class="nv">parts</span><span class="p">).</span>
 
-<span class="w">  </span><span class="nv">partOk</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="nv">Part</span><span class="w"></span>
-<span class="w">  </span><span class="nv">partOk</span><span class="p">(</span><span class="nv">Hello</span><span class="p">()).</span><span class="w"></span>
-<span class="w">  </span><span class="nv">partOk</span><span class="p">(</span><span class="nv">World</span><span class="p">())</span><span class="w"> </span><span class="p">:</span><span class="nv">-</span><span class="w"> </span><span class="nv">try</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">false</span><span class="w"> </span><span class="p">}</span><span class="w"> </span>|<span class="w"> </span><span class="nv">warning</span><span class="w"> </span>$[<span class="nv">World</span>!]<span class="p">.</span><span class="w"></span>
-<span class="w">  </span><span class="nv">partsOk</span><span class="w"> </span><span class="k">maps</span><span class="w"> </span><span class="nv">partOk</span><span class="p">(</span><span class="k">list</span><span class="p">(</span>*<span class="p">))</span><span class="w"></span>
+<span class="w">  </span><span class="nv">partOk</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="nv">Part</span>
+<span class="w">  </span><span class="nv">partOk</span><span class="p">(</span><span class="nv">Hello</span><span class="p">()).</span>
+<span class="w">  </span><span class="nv">partOk</span><span class="p">(</span><span class="nv">World</span><span class="p">())</span><span class="w"> </span><span class="p">:</span><span class="nv">-</span><span class="w"> </span><span class="nv">try</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">false</span><span class="w"> </span><span class="p">}</span><span class="w"> </span>|<span class="w"> </span><span class="nv">warning</span><span class="w"> </span>$[<span class="nv">World</span>!]<span class="p">.</span>
+<span class="w">  </span><span class="nv">partsOk</span><span class="w"> </span><span class="k">maps</span><span class="w"> </span><span class="nv">partOk</span><span class="p">(</span><span class="k">list</span><span class="p">(</span>*<span class="p">))</span>
 </code></pre></div>
 </details>
 <p>Build the project, and a warning marker should appear under all instances of <code>world</code> in the example program.</p>

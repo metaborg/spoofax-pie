@@ -1333,18 +1333,18 @@ The directory that the <code>spoofaxc.cfg</code> file is in is called the "root 
 </ul>
 <p>If something in the documentation is unclear, the <a href="https://github.com/metaborg/spoofax-pie/tree/develop/lwb/metalang/cfg/cfg.spoofax2">CFG language definition can be found here</a>.</p>
 <p>In its most basic form, the <code>spoofaxc.cfg</code> file for a language named <code>Calc</code> looks as follows:</p>
-<div class="highlight"><pre><span></span><code><span class="na">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Calc&quot;</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="na">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Calc&quot;</span>
 </code></pre></div>
 <p>which assigns the string <code>"Calc"</code> to the <code>name</code> option.
 A more interesting example configures more options and enables syntax definition:</p>
-<div class="highlight"><pre><span></span><code><span class="na">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Calc&quot;</span><span class="w"></span>
-<span class="na">java-class-id-prefix</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">java Calc</span><span class="w"></span>
-<span class="na">file-extension</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;calc&quot;</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="na">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Calc&quot;</span>
+<span class="na">java-class-id-prefix</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">java Calc</span>
+<span class="na">file-extension</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;calc&quot;</span>
 
-<span class="na">sdf3 {}</span><span class="w"></span>
-<span class="na">parser {</span><span class="w"></span>
-<span class="w">  </span><span class="na">default-start-symbol</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">sort Program</span><span class="w"></span>
-<span class="na">}</span><span class="w"></span>
+<span class="na">sdf3 {}</span>
+<span class="na">parser {</span>
+<span class="w">  </span><span class="na">default-start-symbol</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">sort Program</span>
+<span class="na">}</span>
 </code></pre></div>
 <p>Here, <code>java Calc</code> is assigned to the <code>java-class-id-prefix</code> option.
 The <code>sdf3 {}</code> section from the example is empty, but is used to <em>enable</em> the SDF3 meta-language.
@@ -1458,19 +1458,19 @@ CFG has the following literals:</p>
 <p>For Java, SDF3 sort, and Stratego strategy identifiers, the corresponding keywords of those languages are rejected as identifiers.</p>
 <h2 id="let-bindings">Let bindings<a class="headerlink" href="#let-bindings" title="Permanent link">&para;</a></h2>
 <p>Let bindings of the form <code>let $Name = $Expression</code> bind a name to an expression, for example:</p>
-<div class="highlight"><pre><span></span><code><span class="na">let showParsedAst</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">task-def mb.helloworld.task.HelloWorldShowParsedAst</span><span class="w"></span>
-<span class="na">let showParsedAstCommand</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">command-def {</span><span class="w"></span>
-<span class="w">  </span><span class="na">task-def</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">showParsedAst</span><span class="w"></span>
-<span class="w">  </span><span class="na">...</span><span class="w"></span>
-<span class="na">}</span><span class="w"></span>
-<span class="na">editor-context-menu [</span><span class="w"></span>
-<span class="w">  </span><span class="na">menu &quot;Debug&quot; [</span><span class="w"></span>
-<span class="w">    </span><span class="na">command-action {</span><span class="w"></span>
-<span class="w">      </span><span class="na">command-def</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">showParsedAstCommand</span><span class="w"></span>
-<span class="w">      </span><span class="na">...</span><span class="w"></span>
-<span class="w">    </span><span class="na">}</span><span class="w"></span>
-<span class="w">  </span><span class="na">]</span><span class="w"></span>
-<span class="na">]</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="na">let showParsedAst</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">task-def mb.helloworld.task.HelloWorldShowParsedAst</span>
+<span class="na">let showParsedAstCommand</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">command-def {</span>
+<span class="w">  </span><span class="na">task-def</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">showParsedAst</span>
+<span class="w">  </span><span class="na">...</span>
+<span class="na">}</span>
+<span class="na">editor-context-menu [</span>
+<span class="w">  </span><span class="na">menu &quot;Debug&quot; [</span>
+<span class="w">    </span><span class="na">command-action {</span>
+<span class="w">      </span><span class="na">command-def</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">showParsedAstCommand</span>
+<span class="w">      </span><span class="na">...</span>
+<span class="w">    </span><span class="na">}</span>
+<span class="w">  </span><span class="na">]</span>
+<span class="na">]</span>
 </code></pre></div>
 <p>creates a binding from name <code>showParsedAst</code> to <code>task-def mb.helloworld.task.HelloWorldShowParsedAst</code>, which we then pass to the <code>task-def</code> option in <code>command-def</code>.
 The command in turn is bound to <code>showParsedAstCommand</code>, assigned to the <code>command-def</code> option in a <code>command-action</code> section.</p>
@@ -1544,9 +1544,9 @@ The command in turn is bound to <code>showParsedAstCommand</code>, assigned to t
 </table>
 <h2 id="commands">Commands<a class="headerlink" href="#commands" title="Permanent link">&para;</a></h2>
 <p>Commands are sections that are also expressions, typically assigned to a name with a let binding, with the following form:</p>
-<div class="highlight"><pre><span></span><code><span class="na">let $Name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">command-def {</span><span class="w"></span>
-<span class="w">  </span><span class="na">$CommandOption*</span><span class="w"></span>
-<span class="na">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="na">let $Name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">command-def {</span>
+<span class="w">  </span><span class="na">$CommandOption*</span>
+<span class="na">}</span>
 </code></pre></div>
 <p>The following options are available in a command:</p>
 <table>
@@ -1660,21 +1660,21 @@ The command in turn is bound to <code>showParsedAstCommand</code>, assigned to t
 <li><code>Directory</code>: attempt to infer a <code>ResourcePath</code> to the enclosing directory. For example, when executing a command in the context of a file, directory, or editor for a file, the directory will be the parent of that file/directory.</li>
 </ul>
 <p>Here is an example of a command that shows the parsed AST by taking one file argument that is inferred from context:</p>
-<div class="highlight"><pre><span></span><code><span class="na">let showParsedAstCommand</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">command-def {</span><span class="w"></span>
-<span class="w">  </span><span class="na">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">java mb.helloworld.command.HelloWorldShowParsedAstCommand</span><span class="w"></span>
-<span class="w">  </span><span class="na">task-def</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">showParsedAst</span><span class="w"></span>
-<span class="w">  </span><span class="na">args-type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">java mb.helloworld.task.HelloWorldShowParsedAst.Args</span><span class="w"></span>
-<span class="w">  </span><span class="na">display-name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Show parsed AST&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="na">description</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Shows the parsed AST&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="na">supported-execution-types</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">[Once, Continuous]</span><span class="w"></span>
-<span class="w">  </span><span class="na">parameters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">[</span><span class="w"></span>
-<span class="w">    </span><span class="na">file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">parameter {</span><span class="w"></span>
-<span class="w">      </span><span class="na">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">java mb.resource.ResourceKey</span><span class="w"></span>
-<span class="w">      </span><span class="na">required</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">true</span><span class="w"></span>
-<span class="w">      </span><span class="na">argument-providers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">[Context(ResourceKey)]</span><span class="w"></span>
-<span class="w">    </span><span class="na">}</span><span class="w"></span>
-<span class="w">  </span><span class="na">]</span><span class="w"></span>
-<span class="na">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="na">let showParsedAstCommand</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">command-def {</span>
+<span class="w">  </span><span class="na">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">java mb.helloworld.command.HelloWorldShowParsedAstCommand</span>
+<span class="w">  </span><span class="na">task-def</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">showParsedAst</span>
+<span class="w">  </span><span class="na">args-type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">java mb.helloworld.task.HelloWorldShowParsedAst.Args</span>
+<span class="w">  </span><span class="na">display-name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Show parsed AST&quot;</span>
+<span class="w">  </span><span class="na">description</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Shows the parsed AST&quot;</span>
+<span class="w">  </span><span class="na">supported-execution-types</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">[Once, Continuous]</span>
+<span class="w">  </span><span class="na">parameters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">[</span>
+<span class="w">    </span><span class="na">file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">parameter {</span>
+<span class="w">      </span><span class="na">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">java mb.resource.ResourceKey</span>
+<span class="w">      </span><span class="na">required</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">true</span>
+<span class="w">      </span><span class="na">argument-providers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">[Context(ResourceKey)]</span>
+<span class="w">    </span><span class="na">}</span>
+<span class="w">  </span><span class="na">]</span>
+<span class="na">}</span>
 </code></pre></div>
 <h2 id="menu-items">Menu items<a class="headerlink" href="#menu-items" title="Permanent link">&para;</a></h2>
 <p>Menu items take the form of:</p>
@@ -1772,27 +1772,27 @@ The command in turn is bound to <code>showParsedAstCommand</code>, assigned to t
 <li><code>main-menu [ $MenuIitem* ]</code>: the main menu of the language, which is shown on the menu bar in IDEs. When no <code>main-menu</code> section is given, it defaults to the same menu as <code>editor-context-menu</code>.</li>
 </ul>
 <p>For example, we can assign the command defined earlier to several menus:</p>
-<div class="highlight"><pre><span></span><code><span class="na">editor-context-menu [</span><span class="w"></span>
-<span class="w">  </span><span class="na">menu &quot;Debug&quot; [</span><span class="w"></span>
-<span class="w">    </span><span class="na">command-action {</span><span class="w"></span>
-<span class="w">      </span><span class="na">command-def</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">showParsedAstCommand</span><span class="w"></span>
-<span class="w">      </span><span class="na">execution-type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">Once</span><span class="w"></span>
-<span class="w">    </span><span class="na">}</span><span class="w"></span>
-<span class="w">    </span><span class="na">command-action {</span><span class="w"></span>
-<span class="w">      </span><span class="na">command-def</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">showParsedAstCommand</span><span class="w"></span>
-<span class="w">      </span><span class="na">execution-type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">Continuous</span><span class="w"></span>
-<span class="w">    </span><span class="na">}</span><span class="w"></span>
-<span class="w">  </span><span class="na">]</span><span class="w"></span>
-<span class="na">]</span><span class="w"></span>
-<span class="na">resource-context-menu [</span><span class="w"></span>
-<span class="w">  </span><span class="na">menu &quot;Debug&quot; [</span><span class="w"></span>
-<span class="w">    </span><span class="na">command-action {</span><span class="w"></span>
-<span class="w">      </span><span class="na">command-def</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">showParsedAstCommand</span><span class="w"></span>
-<span class="w">      </span><span class="na">execution-type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">Once</span><span class="w"></span>
-<span class="w">      </span><span class="na">required-resource-types</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">[File]</span><span class="w"></span>
-<span class="w">    </span><span class="na">}</span><span class="w"></span>
-<span class="w">  </span><span class="na">]</span><span class="w"></span>
-<span class="na">]</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="na">editor-context-menu [</span>
+<span class="w">  </span><span class="na">menu &quot;Debug&quot; [</span>
+<span class="w">    </span><span class="na">command-action {</span>
+<span class="w">      </span><span class="na">command-def</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">showParsedAstCommand</span>
+<span class="w">      </span><span class="na">execution-type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">Once</span>
+<span class="w">    </span><span class="na">}</span>
+<span class="w">    </span><span class="na">command-action {</span>
+<span class="w">      </span><span class="na">command-def</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">showParsedAstCommand</span>
+<span class="w">      </span><span class="na">execution-type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">Continuous</span>
+<span class="w">    </span><span class="na">}</span>
+<span class="w">  </span><span class="na">]</span>
+<span class="na">]</span>
+<span class="na">resource-context-menu [</span>
+<span class="w">  </span><span class="na">menu &quot;Debug&quot; [</span>
+<span class="w">    </span><span class="na">command-action {</span>
+<span class="w">      </span><span class="na">command-def</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">showParsedAstCommand</span>
+<span class="w">      </span><span class="na">execution-type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">Once</span>
+<span class="w">      </span><span class="na">required-resource-types</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">[File]</span>
+<span class="w">    </span><span class="na">}</span>
+<span class="w">  </span><span class="na">]</span>
+<span class="na">]</span>
 </code></pre></div>
 <h2 id="language-feature-sections">Language feature sections<a class="headerlink" href="#language-feature-sections" title="Permanent link">&para;</a></h2>
 <h3 id="parser">Parser<a class="headerlink" href="#parser" title="Permanent link">&para;</a></h3>
@@ -1941,6 +1941,12 @@ The following <code>ConstraintAnalyzerOption</code>s are supported:</p>
 <td>no</td>
 <td>Whether to suppress cascading errors by default. Default is implementation-defined. Does nothing if Statix is not enabled.</td>
 <td>Boolean</td>
+</tr>
+<tr>
+<td><code>statix-solver-mode = $Expression</code></td>
+<td>no</td>
+<td>Statix Solver Mode. Default is <code>traditional</code>. Does nothing if Statix is not enabled.</td>
+<td>Enum ({<code>traditional</code>, <code>concurrent</code>, <code>incremental</code>}) `</td>
 </tr>
 </tbody>
 </table>
@@ -2426,12 +2432,12 @@ A dependency consists of a <em>dependency expression</em> (<code>$Exp</code>) th
 </tbody>
 </table>
 <p>For example, the following configuration adds build dependencies to common libraries shipped with Spoofax 3:</p>
-<div class="highlight"><pre><span></span><code><span class="na">build-dependencies [</span><span class="w"></span>
-<span class="w">  </span><span class="na">org.metaborg:strategolib:*</span><span class="w"></span>
-<span class="w">  </span><span class="na">org.metaborg:gpp:*</span><span class="w"></span>
-<span class="w">  </span><span class="na">org.metaborg:libspoofax2:*</span><span class="w"></span>
-<span class="w">  </span><span class="na">org.metaborg:libstatix:*</span><span class="w"></span>
-<span class="na">]</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="na">build-dependencies [</span>
+<span class="w">  </span><span class="na">org.metaborg</span><span class="o">:</span><span class="s">strategolib:*</span>
+<span class="w">  </span><span class="na">org.metaborg</span><span class="o">:</span><span class="s">gpp:*</span>
+<span class="w">  </span><span class="na">org.metaborg</span><span class="o">:</span><span class="s">libspoofax2:*</span>
+<span class="w">  </span><span class="na">org.metaborg</span><span class="o">:</span><span class="s">libstatix:*</span>
+<span class="na">]</span>
 </code></pre></div>
 <h2 id="spoofaxclock">spoofaxc.lock<a class="headerlink" href="#spoofaxclock" title="Permanent link">&para;</a></h2>
 <p>The <code>spoofaxc.lock</code> file, which resides next to the <code>spoofaxc.cfg</code> file, contains values for several options that have defaults derived from other options, in order to keep these derived values stable even when the options they are derived from are changed.
