@@ -36,8 +36,7 @@ public final class AssertValidStrategy extends NamedStrategy1<RRContext, RRSolve
         // Tego:
         // def assertValid(allowedErrors: Collection<Map.Entry<IConstraint, IMessage>>, v: ITermVar): SolverState -> SolverState =
         //    infer ;
-        //    not(SolverState#hasSeriousErrors(allowedErrors)) ;
-        //    delayStuckQueries
+        //    not(SolverState#hasSeriousErrors(allowedErrors))
 
         final InferStrategy infer = InferStrategy.getInstance();
         final NotStrategy<RRSolverState, RRSolverState> not = NotStrategy.getInstance();
@@ -50,11 +49,6 @@ public final class AssertValidStrategy extends NamedStrategy1<RRContext, RRSolve
         final @Nullable RRSolverState r3 = engine.eval(s3, r1);
         if (r3 == null) return null;
         return r3;
-
-//        final @Nullable SolverState r4 = engine.eval(delayStuckQueries, ctx, r3);
-//        if (r4 == null) return null;
-
-//        return r4;
     }
 
     @Override

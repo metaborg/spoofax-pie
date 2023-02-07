@@ -63,6 +63,8 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
     // fixedAst := <prim("RR_fix_references", solverResultTerm)> ast
     @Override
     protected Optional<? extends ITerm> call(IContext env, ITerm term, List<ITerm> terms) throws InterpreterException {
+        // The `term` must be explicated, as well as the terms in the placeholders.
+
         final RRStrategoContext context;
         try {
             context = AdaptableContext.adaptContextObject(env.contextObject(), RRStrategoContext.class);
@@ -84,22 +86,22 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
             "main",                         // TODO: Tiger specific. Make configurable.
             "programOk",                    // TODO: Tiger specific. Make configurable.
             "pre-analyze",                  // TODO: Tiger specific. Make configurable.
-            "post-analuze",                 // TODO: Tiger specific. Make configurable.
+            "post-analyze",                 // TODO: Tiger specific. Make configurable.
             "explicate-injections-tiger",   // TODO: Tiger specific. Make configurable.
             "implicate-injections-tiger"    // TODO: Tiger specific. Make configurable.
             );
 
         // Build a new analysis
-        final SolverResult solverResult = SolverResult.of(analysis.spec());
+//        final SolverResult solverResult = SolverResult.of(analysis.spec());
 
         final IState.Transient state = analysis.state().melt();
         final Pair<ITerm, Map.Immutable<ITermVar, RRPlaceholder>> pair = extractPlaceholders(state, term);
         final ITerm newTerm = pair.component1();
         final Map.Immutable<ITermVar, RRPlaceholder> placeholderDescriptors = pair.component2();
-        final ITerm explicatedAst = execution.explicate(newTerm);
+//        final ITerm explicatedAst = execution.explicate(newTerm);
 
         final Pair<ITermVar, RRSolverState> initialRootVarAndSolverState = execution.createInitialSolverState(
-            explicatedAst,
+            newTerm, // explicated
             placeholderDescriptors.keySet(),
             placeholderDescriptors
         );
@@ -111,8 +113,9 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
 //        final @Nullable ITerm result = execution.fix(analyzedState, allowedErrors);
         if (fixedState == null) return Optional.empty();
         final ITerm fixedAst = fixedState.project(rootVar);
-        final ITerm implicatedAst = execution.implicate(fixedAst);
-        return Optional.of(implicatedAst);
+//        final ITerm implicatedAst = execution.implicate(fixedAst);
+//        return Optional.of(implicatedAst);
+        return Optional.of(fixedAst);
     }
 
     /**

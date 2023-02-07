@@ -72,8 +72,10 @@ public final class UnwrapOrFixAllReferencesStrategy extends NamedStrategy1<RRCon
         //     repeat(
         //         (v, d) <- first(getAllPlaceholders());
         //         unwrapOrFixReference(ctx, v, d);
-        //         flatMap(ntl(assertValid))
+        //         //flatMap(ntl(assertValid))
         //     )
+
+        // TODO: Do a try(assertValid) or something, and report if it failed
 
         final AssertValidStrategy assertValid = AssertValidStrategy.getInstance();
         final UnwrapOrFixReferenceStrategy unwrapOrFixReference = UnwrapOrFixReferenceStrategy.getInstance();
@@ -85,7 +87,7 @@ public final class UnwrapOrFixAllReferencesStrategy extends NamedStrategy1<RRCon
                 let(fun(i -> p.component1()), (ITermVar v) ->
                     let(fun(i -> p.component2()), (RRPlaceholder d) ->
                         seq(unwrapOrFixReference.apply(ctx, v, d))
-                        .$(flatMap(ntl(assertValid.apply(ctx))))
+                        //.$(flatMap(ntl(assertValid.apply(ctx))))
                         .$()
                     )
                 )

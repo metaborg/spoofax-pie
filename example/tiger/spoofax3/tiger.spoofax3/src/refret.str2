@@ -20,6 +20,8 @@ imports
   signatures/syntax/Types-sig
   signatures/syntax/Variables-sig
   signatures/syntax/Whitespace-sig
+  injections/-
+  injections/syntax/-
   
 imports //construct-textual-change
   libstratego-gpp
@@ -34,18 +36,24 @@ strategies
 
   inline-method-call(|call@Call(name, args), solverResultTerm): ast -> fixedAst
   where where(<debug(!"Call: ")> call);
-        analysis := <stx--get-ast-analysis> ast;
-        decl := <stx--get-ast-property(|analysis, Ref())> name;
-        fun@FunDec(fname, fparams, fretType, fbody) := <collect(?FunDec(_,_,_,_)|decl)> ast;
+  		explicatedCall := <explicate-injections-tiger-Exp> call;										// Explicate call, because we only work with explicated ASTs
+  		where(<debug(!"Explicated Call: ")> explicatedCall);
+  		analysis := <stx--get-ast-analysis> ast;														// Get the original analysis
+  		explicatedAst := <explicate-injections-tiger> ast;												// Explicate the full AST, because we only work with explicated ASTs
+        decl := <stx--get-ast-property(|analysis, Ref())> name;											// Get the declaration term the reference is pointing to (@ref attribute)
+        fun@FunDec(fname, fparams, fretType, fbody) := <collect(?FunDec(_,_,_,_)|decl)> explicatedAst;	// Get the function definition corresponding to the declaration term
         where(<debug(!"Inlining: ")> fun);
-        argvars := <zip(?(FArg(pn, pty), ae); !VarDec(pn, pty, ae))> (fparams, args);
-        newbody := <rr-lock-all-references(|solverResultTerm)> fbody;
-        ctxs := <build-contexts(|call, solverResultTerm)> ast;
-        plhdrbody := <prim("RR_create_placeholder", ctxs)> newbody;
-        replacement := Let(argvars, [ plhdrbody ]);
-        newAst := <replace(!replacement|call)> ast;
+        
+        newbody := <rr-lock-all-references(|analysis, solverResultTerm)> fbody;							// Lock all references in the function body
+        ctxs := <build-contexts(|explicatedCall, solverResultTerm)> explicatedAst;						// Build the contexts
+        plhdrbody := <prim("RR_create_placeholder", ctxs)> newbody;										// Build the placeholder for the inlined function body
+        argvars := <zip(?(FArg(pn, pty), ae); !VarDec(pn, pty, <explicate-injections-tiger-Exp> ae))> (fparams, args);					// Construct variable definitions from the parameters and call arguments
+        replacement := Let(argvars, [ plhdrbody ]);														// Build the AST surrounding the inlined function body
+        newAst := <replace(!replacement|explicatedCall)> explicatedAst;									// Replace the old call with the new AST
         where(<debug(!"Pre-RR: ")> newAst);
-        fixedAst := <prim("RR_fix_references", solverResultTerm)> newAst
+        fixedAst := <prim("RR_fix_references", solverResultTerm)> newAst;								// Fix references inside the placeholders
+        where(<debug(!"Post-RR: ")> fixedAst);
+        implcatedAst := <implicate-injections-tiger> fixedAst											// Implicate the final (fixed) AST
         // TODO: RR
         //text := <construct-textual-change> (ast, <replace(!Let(argvars, [ fbody ])|call)> ast);
         //where(<debug(!"Text: ")> text)
@@ -63,8 +71,12 @@ strategies
    // Replaces a term in the ast that matches the given term and its index
    // by applying strategy s to it
    replace(s|term) =
+     where(<debug(!"Replace: ")> term);
      where(idx := <stx--get-ast-index> term);
-     oncebu(?term; where(stx--get-ast-index; ?idx); s)
+     where(<debug(!"Replace idx: ")> idx);
+     where(debug(!"Replace in: "));
+     where(s; debug(!"Replace with: "));
+     oncebu(debug(!"A: "); ?term; debug(!"B: "); where(stx--get-ast-index; ?idx); debug(!"C: "); s; debug(!"D: "))
    
    // Succeeds if the term has a subterm with the specified index
    has-index(|idx): term -> term
@@ -86,14 +98,13 @@ strategies
   collect-onebu(s) = oncebu(where(s; ?t)); !t
 
   // Locks all references in the given term
-  rr-lock-all-references(|solverResultTerm) = bottomup(try(rr-lock-one-reference(|solverResultTerm)))
+  rr-lock-all-references(|analysis, solverResultTerm) = bottomup(try(rr-lock-one-reference(|analysis, solverResultTerm)))
 
   // Locks the reference represented by the given term
   // if the reference has a @ref property, or fails if it is not a reference.
-  rr-lock-one-reference(|solverResultTerm): ref -> lockedRef
-  with  analysis := <stx--get-ast-analysis> ref
-  where //where(<debug(!"Try: ")> ref);
-        decl := <stx--get-ast-property(|analysis, Ref())> ref;
+  rr-lock-one-reference(|analysis, solverResultTerm): ref -> lockedRef
+  //with  analysis := <debug(!"Pre ref analysis: "); stx--get-ast-analysis; debug(!"Post ref analysis: ")> ref
+  where decl := <stx--get-ast-property(|analysis, Ref())> ref;
         where(<debug(!"Accept Decl: ")> decl);
         lockedRef := <prim("RR_lock_reference", decl, solverResultTerm)> ref;
         where(<debug(!"Locked: ")> lockedRef)

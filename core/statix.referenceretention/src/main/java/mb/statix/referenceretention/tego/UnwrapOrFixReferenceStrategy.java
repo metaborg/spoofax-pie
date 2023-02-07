@@ -134,48 +134,6 @@ public final class UnwrapOrFixReferenceStrategy extends NamedStrategy3<RRContext
                 }
                 return Seq.from(newStates);
             }
-
-            // We make the unqualified reference part of the contexts?
-//            {
-//                @Nullable final Pair<ITermVar, RRSolverState> newVarAndState = engine.eval(newPlaceholderStrategy, RRPlaceholder.of(reference, Collections.emptyList() /* No context */), input);
-//                final ITermVar newVar = newVarAndState.component1();
-//                // The state for the unqualified reference "[[ r |]]"
-//                final RRSolverState newState = newVarAndState.component2().withUpdatedConstraints(
-//                    Collections.singleton(new CEqual(v, newVar)),
-//                    Collections.emptySet()
-//                );
-//                newStates.add(newState);
-//            }
-
-//            if (!contexts.isEmpty()) {
-//                // The term is a locked reference with one or more contexts,
-//                // so we each qualified reference and also the unqualified reference.
-//                // "[[ r | c ]]" = { "x.[[ r |]]" , "[[ r |]]" }
-//                final @Nullable ITerm qreference = engine.eval(qualifyReference, firstContext, reference);
-//                @Nullable RRSolverState newStateQ = null;    // The state for the qualified reference "x.[[r |]]"; or `null` when it could not be constructed
-//                if (qreference != null) {
-//                    final Pair<IApplTerm, RRSolverState> newApplTermAndState = unwrap(engine, (IApplTerm)term, contexts, input);
-//                    final IApplTerm newApplTerm = newApplTermAndState.component1();
-//                    newStateQ = newApplTermAndState.component2();
-//                    newStateQ = newStateQ.withUpdatedConstraints(
-//                        Collections.singleton(new CEqual(v, newApplTerm)),
-//                        Collections.emptySet()
-//                    );
-//                }
-//                return Seq.ofNotNull(newStateQ, newStateUQ);
-//            } else {
-//                // The term is a locked reference without any context.
-//                // TODO: check whether it resolves correctly.
-//                //  "[[ r |]]" = "r" if r still resolves to the same declaration
-//                // FIXME: For now we just construct the reference and check if it resolves at all (resolves anywhere)
-//                final RRSolverState finalState = input.withUpdatedConstraints(
-//                    Collections.singleton(new CEqual(v, reference.getTerm())),
-//                    Collections.emptySet()
-//                );
-//                // TODO: Can I add a constraint that says where the query should resolve to?
-//                return Seq.of(finalState);
-//            }
-//            return Seq.from(newStates);
         } else if (term instanceof IApplTerm) {
             // The term is a term application, so we unwrap it once
             //   ⟦ T(a0, a1, ..) | C ⟧  ->  { T( ⟦ a0 | C ⟧, ⟦ a1 | C ⟧, .. ) }
