@@ -1,11 +1,11 @@
 package mb.statix.referenceretention.tego;
 
 import mb.nabl2.terms.IApplTerm;
+import mb.nabl2.terms.IListTerm;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
 import mb.nabl2.terms.build.TermBuild;
 import mb.statix.constraints.CEqual;
-import mb.statix.referenceretention.statix.LockedReference;
 import mb.statix.referenceretention.statix.RRLockedReference;
 import mb.statix.referenceretention.statix.RRPlaceholder;
 import mb.tego.sequences.Seq;
@@ -116,7 +116,7 @@ public final class UnwrapOrFixReferenceStrategy extends NamedStrategy3<RRContext
                 // This executes the context on the reference
                 final @Nullable ITerm qreference = engine.eval(qualifyReference, context, lockedRef.getTerm());
                 if(qreference != null) {
-                    final RRSolverState newState = unwrap(engine, v, (IApplTerm)term, contexts, inputWithoutPlaceholder);
+                    final RRSolverState newState = unwrapAppl(engine, v, (IApplTerm)term, contexts, inputWithoutPlaceholder);
                     return Seq.of(newState);
                 } else {
                     // No results.
@@ -137,7 +137,12 @@ public final class UnwrapOrFixReferenceStrategy extends NamedStrategy3<RRContext
         } else if (term instanceof IApplTerm) {
             // The term is a term application, so we unwrap it once
             //   ⟦ T(a0, a1, ..) | C ⟧  ->  { T( ⟦ a0 | C ⟧, ⟦ a1 | C ⟧, .. ) }
-            final RRSolverState finalState = unwrap(engine, v, (IApplTerm)term, contexts, inputWithoutPlaceholder);
+            final RRSolverState finalState = unwrapAppl(engine, v, (IApplTerm)term, contexts, inputWithoutPlaceholder);
+            return Seq.of(finalState);
+        } else if (term instanceof IListTerm) {
+            // The term is a list term, so we unwrap it into its elements
+            //   ⟦ [e0, e1, ..] | C ⟧  ->  { [ ⟦ e0 | C ⟧, ⟦ e1 | C ⟧, .. ] }
+            final RRSolverState finalState = unwrapList(engine, v, (IListTerm)term, contexts, inputWithoutPlaceholder);
             return Seq.of(finalState);
         } else {
             // The term is not a term application and not a locked reference
@@ -161,7 +166,7 @@ public final class UnwrapOrFixReferenceStrategy extends NamedStrategy3<RRContext
      * @param contexts the contexts
      * @return the new state
      */
-    private static RRSolverState unwrap(TegoEngine engine, ITermVar v, IApplTerm term, List<ITerm> contexts, RRSolverState state) {
+    private static RRSolverState unwrapAppl(TegoEngine engine, ITermVar v, IApplTerm term, List<ITerm> contexts, RRSolverState state) {
         RRSolverState newState = state;
         final ArrayList<ITermVar> newSubterms = new ArrayList<>();
         for (ITerm a: term.getArgs()) {
@@ -173,6 +178,32 @@ public final class UnwrapOrFixReferenceStrategy extends NamedStrategy3<RRContext
         }
         final IApplTerm newApplTerm = TermBuild.B.newAppl(term.getOp(), newSubterms);
         return bindToVar(newState, v, newApplTerm);
+    }
+
+    /**
+     * Takes a list term and unwraps it by recreating the list term
+     * but with placeholders for the elements, and adds placeholder descriptors to
+     * the state for each element placeholder.
+     *
+     * @param engine the Tego engine
+     * @param v the placeholder variable to which the unwrapped term should be bound
+     * @param term the term application to unwrap
+     * @param state the starting state
+     * @param contexts the contexts
+     * @return the new state
+     */
+    private static RRSolverState unwrapList(TegoEngine engine, ITermVar v, IListTerm term, List<ITerm> contexts, RRSolverState state) {
+        RRSolverState newState = state;
+        final ArrayList<ITermVar> newElements = new ArrayList<>();
+        for (ITerm e: M.listElems().match(term).get()) {
+            // fold(newPlaceholder) over the elements
+            final Pair<ITermVar, RRSolverState> newVarAndState = newPlaceholder(engine, newState, e, contexts);
+            final ITermVar newVar = newVarAndState.component1();
+            newState = newVarAndState.component2();
+            newElements.add(newVar);
+        }
+        final IListTerm newListTerm = TermBuild.B.newList(newElements);
+        return bindToVar(newState, v, newListTerm);
     }
 
     /**
