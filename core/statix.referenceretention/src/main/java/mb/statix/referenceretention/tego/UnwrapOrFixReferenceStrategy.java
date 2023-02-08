@@ -80,7 +80,6 @@ public final class UnwrapOrFixReferenceStrategy extends NamedStrategy3<RRContext
         RRSolverState input
     ) {
         // Get all the strategies at the start
-//        final NewPlaceholderStrategy newPlaceholderStrategy = NewPlaceholderStrategy.getInstance();
         final Strategy1</* ctx */ ITerm, /* term */ ITerm, /* result */ @Nullable ITerm> qualifyReference = ctx.getQualifyReferenceStrategy();
 
         // Construct the state without the placeholder being unwrapped/fixed

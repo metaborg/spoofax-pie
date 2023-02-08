@@ -92,13 +92,10 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
             );
 
         // Build a new analysis
-//        final SolverResult solverResult = SolverResult.of(analysis.spec());
-
         final IState.Transient state = analysis.state().melt();
         final Pair<ITerm, Map.Immutable<ITermVar, RRPlaceholder>> pair = extractPlaceholders(state, term);
         final ITerm newTerm = pair.component1();
         final Map.Immutable<ITermVar, RRPlaceholder> placeholderDescriptors = pair.component2();
-//        final ITerm explicatedAst = execution.explicate(newTerm);
 
         final Pair<ITermVar, RRSolverState> initialRootVarAndSolverState = execution.createInitialSolverState(
             newTerm, // explicated
@@ -110,11 +107,8 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
         final RRSolverState analyzedState = execution.analyze(initialSolverState);
         final Collection<Map.Entry<IConstraint, IMessage>> allowedErrors = Collections.emptyList(); // TODO: Get from initial analysis?
         final @Nullable RRSolverState fixedState = execution.fix(analyzedState, allowedErrors);
-//        final @Nullable ITerm result = execution.fix(analyzedState, allowedErrors);
         if (fixedState == null) return Optional.empty();
         final ITerm fixedAst = fixedState.project(rootVar);
-//        final ITerm implicatedAst = execution.implicate(fixedAst);
-//        return Optional.of(implicatedAst);
         return Optional.of(fixedAst);
     }
 
@@ -146,32 +140,6 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
         map.put(newVar, placeholder);
         return newVar;
     }
-
-
-//    /**
-//     * Performs analysis on the given state, and returns the result.
-//     *
-//     * @param input the input state
-//     * @return the resulting state
-//     * @throws InterruptedException
-//     */
-//    private RRSolverState analyze(RRSolverState input) throws InterruptedException {
-//        final SolverResult result = Solver.solve(
-//            input.getSpec(),
-//            input.getState(),
-//            input.getConstraints(),
-//            input.getDelays(),
-//            input.getCompleteness(),
-//            IsComplete.ALWAYS,
-//            new NullDebugContext(),
-//            new NullProgress(),
-//            new NullCancel(),
-//            RETURN_ON_FIRST_ERROR
-//        );
-//        // NOTE: This does not ensure there are no errors.
-//
-//        return RRSolverState.fromSolverResult(result, input.getExistentials(), input.getPlaceholderDescriptors());
-//    }
 
     private final class Execution {
         private final TegoRuntime tegoRuntime;
@@ -236,8 +204,6 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
             java.util.Set<ITermVar> existentials,
             Map.Immutable<ITermVar, RRPlaceholder> placeholderDescriptors
         ) {
-//            final Set.Transient<ITermVar> existentials2 = Set.Transient.of();
-//            existentials2.__insertAll(existentials);
             final IState.Transient state = State.of().melt();
             String qualifiedName = RRUtils.makeQualifiedName(statixSpecName, statixRootPredicateName);
             final ITermVar rootVar = state.freshWld();
@@ -307,16 +273,7 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
          * @return the resulting analyzed solver state
          * @throws IllegalStateException if the analyzed solver state has errors or has no constraints
          */
-        private RRSolverState analyze(
-            RRSolverState state
-//            ITerm ast,
-//            java.util.Set<ITermVar> existentials,
-//            Map.Immutable<ITermVar, RRPlaceholder> placeholderDescriptors
-        ) {
-//            final Set.Transient<ITermVar> existentials2 = Set.Transient.of();
-//            existentials2.__insertAll(existentials);
-//            final RRSolverState initialState = createInitialSolverState(ast, statixSpecName, statixRootPredicateName, existentials2, placeholderDescriptors);
-
+        private RRSolverState analyze(RRSolverState state) {
             final @Nullable RRSolverState analyzedState = tegoRuntime.eval(InferStrategy.getInstance(), state);
             if (analyzedState == null) {
                 throw new IllegalStateException("Reference retention failed: got no result from Tego strategy.");
@@ -337,7 +294,6 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
          * @return the fixed state; or {@code null} if the state could not be fixed
          */
         private @Nullable RRSolverState fix(RRSolverState state, Collection<Map.Entry<IConstraint, IMessage>> allowedErrors) {
-//        private @Nullable ITerm fix(RRSolverState state, Collection<Map.Entry<IConstraint, IMessage>> allowedErrors) {
             // Create a strategy that fails if the term is not an injection
             final Strategy1</* ctx */ ITerm, /* term */ ITerm, /* result */ @Nullable ITerm> qualifyReferenceStrategy = fun(this::qualifyReference);
 
