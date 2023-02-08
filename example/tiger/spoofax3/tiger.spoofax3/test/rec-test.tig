@@ -1,0 +1,13 @@
+let
+	type R = { s : S }
+	type S = { i : int }
+	var s2: S := S { i = 10 }
+	var r2: R := R { s = s2 }
+	function f(r: R): int = r.s.i
+in
+	let var s := S { i = 20 } in
+	//let var n := 10 in
+	//let var n := n - 1 in 1 end end;
+	f(r2)
+	end
+end

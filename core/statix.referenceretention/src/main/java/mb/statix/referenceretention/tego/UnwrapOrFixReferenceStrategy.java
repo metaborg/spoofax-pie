@@ -1,20 +1,33 @@
 package mb.statix.referenceretention.tego;
 
+import mb.common.util.Preconditions;
 import mb.nabl2.terms.IApplTerm;
 import mb.nabl2.terms.IListTerm;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
 import mb.nabl2.terms.build.TermBuild;
+import mb.nabl2.terms.stratego.TermIndex;
 import mb.statix.constraints.CEqual;
 import mb.statix.referenceretention.statix.RRLockedReference;
 import mb.statix.referenceretention.statix.RRPlaceholder;
+import mb.statix.scopegraph.Scope;
+import mb.statix.solver.ITermProperty;
+import mb.statix.solver.completeness.IsComplete;
+import mb.statix.solver.log.NullDebugContext;
+import mb.statix.solver.persistent.Solver;
+import mb.statix.solver.persistent.SolverResult;
 import mb.tego.sequences.Seq;
 import mb.tego.strategies.NamedStrategy3;
 import mb.tego.strategies.Strategy1;
 import mb.tego.strategies.runtime.TegoEngine;
 import mb.tego.tuples.Pair;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.metaborg.util.task.NullCancel;
+import org.metaborg.util.task.NullProgress;
+import org.metaborg.util.tuple.Tuple2;
+
 import static mb.nabl2.terms.matching.TermMatch.M;
+import static mb.statix.solver.persistent.Solver.RETURN_ON_FIRST_ERROR;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -99,7 +112,18 @@ public final class UnwrapOrFixReferenceStrategy extends NamedStrategy3<RRContext
                 // Apply the context to the reference r^d and check whether the result is a valid locked reference to declaration d
                 // Or should we do the check somewhere else?
                 // TODO: Do the check whether the reference still points to the given declaration
-                if (true /* TODO: if check succeeds */) {
+
+                final ITerm referenceTerm = lockedRef.getTerm();
+                final TermIndex referenceIndex = checkNotNull(tryGetTermIndex(input, referenceTerm), "Reference term has no index: " + referenceTerm);
+
+                final RRSolverState testState = bindToVar(inputWithoutPlaceholder, v, lockedRef.getTerm());
+                @Nullable final RRSolverState testResultState = engine.eval(InferStrategy.getInstance(), testState);
+
+                if (testResultState == null || testResultState.hasErrors()) return Seq.of();   // TODO: Report that it has errors and was therefore excluded
+                final ITerm refTargetTerm = checkNotNull(tryGetRefProperty(testResultState, referenceIndex), "Reference has no @ref target: " + referenceTerm);
+                final TermIndex refTargetIndex = checkNotNull(tryGetTermIndex(testResultState, refTargetTerm), "Reference target has no index: " + refTargetTerm);
+
+                if (refTargetIndex.equals(lockedRef.getDeclaration())) {
                     // Check succeeded, reference is valid.
                     final RRSolverState newState = bindToVar(inputWithoutPlaceholder, v, lockedRef.getTerm());
                     return Seq.of(newState);
@@ -151,6 +175,35 @@ public final class UnwrapOrFixReferenceStrategy extends NamedStrategy3<RRContext
         }
 
         // Done!
+    }
+
+    /**
+     * Attempts to get the term index of the specified term or term variable.
+     *
+     * @param state the solver state
+     * @param term the term or term variable
+     * @return the term index; or {@code null} if not found
+     */
+    private static @Nullable TermIndex tryGetTermIndex(RRSolverState state, ITerm term) {
+        final ITerm projectedTerm = term instanceof ITermVar ? state.project((ITermVar)term) : term;
+        return TermIndex.get(projectedTerm).orElse(null);
+    }
+
+    /**
+     * Attempts to get the @ref property of the term with the specified term index.
+     *
+     * @param state the solver state
+     * @param refTermIndex the term index
+     * @return the term of the @ref property; or {@code null} if not found
+     */
+    private static @Nullable ITerm tryGetRefProperty(RRSolverState state, TermIndex refTermIndex) {
+        final ITermProperty property = state.getState().termProperties().get(Tuple2.of(refTermIndex, TermBuild.B.newAppl("Ref")));
+        return (property != null ? property.value() : null);
+    }
+
+    private static <T> T checkNotNull(@Nullable T value, String message) {
+        if (value == null) throw new NullPointerException(message);
+        return value;
     }
 
     /**

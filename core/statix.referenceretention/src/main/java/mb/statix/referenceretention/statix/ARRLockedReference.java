@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.build.AbstractApplTerm;
 import mb.nabl2.terms.matching.TermMatch;
+import mb.nabl2.terms.stratego.TermIndex;
 import mb.statix.referenceretention.statix.RRLockedReference;
 import mb.statix.scopegraph.Scope;
 import org.immutables.serial.Serial;
@@ -41,7 +42,7 @@ public abstract class ARRLockedReference extends AbstractApplTerm {
      * Gets the declaration to which this locked reference resolved.
      * @return a declaration, represented by the declaration's unique scope
      */
-    @Value.Parameter public abstract Scope getDeclaration();
+    @Value.Parameter public abstract TermIndex getDeclaration();
 
     @Override public String getOp() {
         return OP;
@@ -52,7 +53,7 @@ public abstract class ARRLockedReference extends AbstractApplTerm {
     }
 
     public static TermMatch.IMatcher<RRLockedReference> matcher() {
-        return M.preserveAttachments(M.appl2(OP, M.term(), Scope.matcher(), (t, term, decl) -> {
+        return M.preserveAttachments(M.appl2(OP, M.term(), TermIndex.matcher(), (t, term, decl) -> {
             if(t instanceof RRLockedReference) {
                 return (RRLockedReference) t;
             } else {

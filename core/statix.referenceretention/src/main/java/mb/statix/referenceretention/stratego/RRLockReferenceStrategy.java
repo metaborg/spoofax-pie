@@ -73,24 +73,7 @@ public final class RRLockReferenceStrategy extends StatixPrimitive {
         final @Nullable TermIndex declIdx = decl.getAttachments().get(TermIndex.class);
         if (declIdx == null) throw new RuntimeException("Could not get TermIndex from declaration: " + decl);
 
-
-        // The solver result (analysis) should be the first term argument
-        final SolverResult result = RRTermUtils.extractFinalSolverResult(solverResultTerm);
-        final IScopeGraph<Scope, ITerm, ITerm> scopeGraph = result.state().scopeGraph();
-        final Optional<Scope> declScope = scopeGraph.getData().entrySet().stream()
-            .filter(e -> {
-                ITerm scopeData = e.getValue();
-                return T.collecttd(t -> Optional.ofNullable(declIdx.equals(t.getAttachments().get(TermIndex.class)) ? t : null))
-                    .apply(scopeData).isEmpty();
-            })
-            .map(e -> e.getKey())
-            .findFirst();
-        if (!declScope.isPresent()) {
-            // throw new RuntimeException("Could not find scope for declaration: " + decl);
-            return null;
-        }
-
-        return RRLockedReference.of(ref, declScope.get());
+        return RRLockedReference.of(ref, declIdx);
     }
 }
 
