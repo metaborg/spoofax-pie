@@ -34,7 +34,7 @@ strategies
 
   construct-textual-change = construct-textual-change(pp-partial-tiger-string, parenthesize, override-reconstruction, resugar)
 
-  inline-method-call(|call@Call(name, args), solverResultTerm): ast -> fixedAst
+  inline-method-call(|call@Call(name, args), solverResultTerm): ast -> text
   where where(<debug(!"Call: ")> call);
   		explicatedCall := <explicate-injections-tiger-Exp> call;										// Explicate call, because we only work with explicated ASTs
   		where(<debug(!"Explicated Call: ")> explicatedCall);
@@ -53,10 +53,9 @@ strategies
         where(<debug(!"Pre-RR: ")> newAst);
         fixedAst := <prim("RR_fix_references", solverResultTerm)> newAst;								// Fix references inside the placeholders
         where(<debug(!"Post-RR: ")> fixedAst);
-        implcatedAst := <implicate-injections-tiger> fixedAst											// Implicate the final (fixed) AST
-        // TODO: RR
-        //text := <construct-textual-change> (ast, <replace(!Let(argvars, [ fbody ])|call)> ast);
-        //where(<debug(!"Text: ")> text)
+        implcatedAst := <implicate-injections-tiger> fixedAst;  										// Implicate the final (fixed) AST
+        (_, _, text) := <construct-textual-change> (ast, implcatedAst);			// FIXME: Sometimes fails with NullPointerException because a Token doesn't have a Tokenizer, after building the language but before the file with the inlining source is (re-)saved
+        where(<debug(!"Text: ")> text)
         
         
    build-contexts(|call@Call(_, _), solverResultTerm): ast -> [] // Not sure what contexts we could provide here
@@ -82,18 +81,6 @@ strategies
    has-index(|idx): term -> term
    where oncetd(stx--get-ast-index; ?idx)
   
-//  where where(<debug(!"Inlining call: ")> call);
-//        where(<debug(!"Call: ")> call);
-//        analysis := <stx--get-ast-analysis> ast;
-//        decl := <stx--get-ast-property(|analysis, Ref())> call;
-//        where(<debug(!"Decl: ")> decl);
-//        //prim("RR_create_placeholder", ["abc"]);
-//        //prim("RR_fix_references", analysis);
-//        lockedRef := <prim("RR_lock_reference", decl, solverResultTerm)> call;
-//        where(<debug(!"Locked Ref: ")> lockedRef);
-//        newAst := ast;	// TODO
-//        debug(!"Inlined: ")
-
   // Collect bottomup the first term where strategy `s` succeeds; or fails if there is no such term
   collect-onebu(s) = oncebu(where(s; ?t)); !t
 

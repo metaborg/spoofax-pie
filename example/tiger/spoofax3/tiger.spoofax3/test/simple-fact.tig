@@ -6,7 +6,6 @@ let function fact(n : int) : int =
     fact(x)
 //    let
 //      var n : int := x
-//      var t : int := 3
 //    in
 //      if n < 1 then 1 else (n * fact(n - 1))
 //    end
