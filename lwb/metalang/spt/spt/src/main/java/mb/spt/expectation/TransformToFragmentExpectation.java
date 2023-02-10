@@ -3,7 +3,9 @@ package mb.spt.expectation;
 import mb.common.message.KeyedMessages;
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Severity;
+import mb.common.option.Option;
 import mb.common.region.Region;
+import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.MixedSession;
 import mb.pie.api.Session;
@@ -15,6 +17,7 @@ import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spt.lut.LanguageUnderTestProvider;
 import mb.spt.model.LanguageUnderTest;
+import mb.spt.model.SelectionReference;
 import mb.spt.model.TestCase;
 import mb.spt.model.TestExpectation;
 import mb.spt.util.SptMessageRemap;
@@ -25,17 +28,20 @@ public class TransformToFragmentExpectation implements TestExpectation {
     private final @Nullable CoordinateRequirement languageCoordinateRequirementHint;
     private final String commandDisplayName;
     private final Region sourceRegion;
+    private final Option<SelectionReference> selectionReference;
 
     public TransformToFragmentExpectation(
         ResourcePath fragmentResource,
         @Nullable CoordinateRequirement languageCoordinateRequirementHint,
         String commandDisplayName,
-        Region sourceRegion
+        Region sourceRegion,
+        Option<SelectionReference> selectionReference
     ) {
         this.fragmentResource = fragmentResource;
         this.languageCoordinateRequirementHint = languageCoordinateRequirementHint;
         this.commandDisplayName = commandDisplayName;
         this.sourceRegion = sourceRegion;
+        this.selectionReference = selectionReference;
     }
 
     @Override
@@ -50,11 +56,28 @@ public class TransformToFragmentExpectation implements TestExpectation {
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
         final ResourceKey file = testCase.testSuiteFile;
 
-        final @Nullable CommandDef<?> commandDef = TransformExpectationUtil.getCommandDef(languageUnderTest, commandDisplayName, messagesBuilder, file, sourceRegion);
+        final @Nullable Region selection;
+        if(selectionReference.isNone()) {
+            selection = null;
+        } else {
+            final SelectionReference selectionReference = this.selectionReference.get();
+            final Integer selectionIndex = selectionReference.selection;
+            final ListView<Region> availableSelections = testCase.testFragment.getInFragmentSelections();
+            if(selectionIndex > availableSelections.size()) {
+                messagesBuilder.addMessage("Cannot resolve #" + selectionIndex + ". Only " + availableSelections.size() + " available.",
+                    Severity.Error, file, selectionReference.region);
+                return messagesBuilder.build(file);
+            }
+            selection = availableSelections.get(selectionIndex - 1);
+        }
+
+        final @Nullable CommandDef<?> commandDef = TransformExpectationUtil.getCommandDef(languageUnderTest,
+            commandDisplayName, messagesBuilder, file, sourceRegion);
         if(commandDef == null) {
             return messagesBuilder.build(file);
         }
-        final @Nullable CommandFeedback feedback = TransformExpectationUtil.runCommand(testCase.resource, commandDef, languageUnderTest, languageUnderTestSession, messagesBuilder, file, sourceRegion);
+        final @Nullable CommandFeedback feedback = TransformExpectationUtil.runCommand(testCase.resource, commandDef,
+            languageUnderTest, languageUnderTestSession, messagesBuilder, file, sourceRegion, selection);
         if(feedback == null) {
             return messagesBuilder.build(file);
         }
@@ -70,7 +93,7 @@ public class TransformToFragmentExpectation implements TestExpectation {
         }
         final @Nullable CommandFeedback fragmentFeedback;
         try(final MixedSession session = fragmentLanguageUnderTest.getPieComponent().newSession() /* OPTO: share a single session for one test suite run. */) {
-            fragmentFeedback = TransformExpectationUtil.runCommand(fragmentResource, commandDef, fragmentLanguageUnderTest, session, messagesBuilder, file, sourceRegion);
+            fragmentFeedback = TransformExpectationUtil.runCommand(fragmentResource, commandDef, fragmentLanguageUnderTest, session, messagesBuilder, file, sourceRegion, selection);
         }
         if(fragmentFeedback == null) {
             return messagesBuilder.build(file);
