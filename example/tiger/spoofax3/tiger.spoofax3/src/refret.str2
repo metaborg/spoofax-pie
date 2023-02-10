@@ -55,18 +55,20 @@ strategies
         where(<debug(!"Pre-RR: ")> newAst);
         fixedAst := <prim("RR_fix_references", solverResultTerm)> newAst;								// Fix references inside the placeholders
         where(<debug(!"Post-RR: ")> fixedAst);
-        implcatedAst := <implicate-injections-tiger> fixedAst;  										// Implicate the final (fixed) AST
-        text := <pp-into-existing> (ast, implcatedAst);
+        implicatedAst := <implicate-injections-tiger> fixedAst;  										// Implicate the final (fixed) AST
+        where(<debug(!"Implicated: ")> implicatedAst);
+        text := <pp-into-existing> (ast, implicatedAst);
         where(<debug(!"Text: ")> text)
         
         
    // Pretty-prints the changed AST into the existing code,
    // or as a fallback performs pretty-printing on the whole AST.
-   pp-into-existing: (oldAst, newAst) -> newText
-   where newText := <catch-with(
-   		 	construct-textual-change; ?(_, _, <id>),		// FIXME: Sometimes fails with NullPointerException because a Token doesn't have a Tokenizer, after building the language but before the file with the inlining source is (re-)saved
-   		 	?(_, (_, <id>), _); pp-tiger-string
-	 	 )> (oldAst, newAst)
+   pp-into-existing = ?(_, <id>); pp-tiger-string
+   // pp-into-existing: (oldAst, newAst) -> newText
+   //where newText := <catch-with(
+   //		 	construct-textual-change; ?(_, _, <id>),		// FIXME: Sometimes fails with NullPointerException because a Token doesn't have a Tokenizer, after building the language but before the file with the inlining source is (re-)saved
+   //		 	?(_, (_, <id>), _); pp-tiger-string
+	// 	 )> (oldAst, newAst)
         
         
    build-contexts(|call@Call(_, _), solverResultTerm): ast -> [] // Not sure what contexts we could provide here
