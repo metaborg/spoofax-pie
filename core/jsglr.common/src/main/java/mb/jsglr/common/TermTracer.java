@@ -103,7 +103,7 @@ public class TermTracer {
             final @Nullable Region termRegion = getInFragmentRegion(term);
             if(termRegion != null) {
                 final int length = termRegion.getLength();
-                if(termRegion.contains(region) && length < minimalLength) {
+                if(termRegion.contains(region) && length <= minimalLength) {
                     minimalTerm = term;
                     minimalLength = length;
                 }
