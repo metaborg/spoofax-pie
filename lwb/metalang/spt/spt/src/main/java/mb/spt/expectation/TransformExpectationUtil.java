@@ -2,6 +2,7 @@ package mb.spt.expectation;
 
 import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Severity;
+import mb.common.option.Option;
 import mb.common.region.Region;
 import mb.pie.api.ExecException;
 import mb.pie.api.Session;
@@ -17,6 +18,7 @@ import mb.spoofax.core.language.command.EnclosingCommandContextType;
 import mb.spoofax.core.language.command.arg.ArgConverters;
 import mb.spoofax.core.language.command.arg.ArgumentBuilderException;
 import mb.spt.model.LanguageUnderTest;
+import mb.spt.model.SelectionReference;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class TransformExpectationUtil {
@@ -45,10 +47,11 @@ public class TransformExpectationUtil {
         Session languageUnderTestSession,
         KeyedMessagesBuilder messagesBuilder,
         ResourceKey failMessageFile,
-        Region fileMessageRegion
+        Region fileMessageRegion,
+        @Nullable Region selection
     ) throws InterruptedException {
         try {
-            final CommandContext commandContext = CommandContext.ofReadableResource(resource);
+            final CommandContext commandContext = CommandContext.ofReadableResource(resource, selection);
             commandContext.setEnclosing(EnclosingCommandContextType.Directory, CommandContext.ofDirectory(resource));
             commandContext.setEnclosing(EnclosingCommandContextType.Project, CommandContext.ofProject(resource));
             final Task<CommandFeedback> task = commandDef.createTask(CommandExecutionType.ManualOnce, commandContext, new ArgConverters(languageUnderTest.getResourceServiceComponent().getResourceService()));
