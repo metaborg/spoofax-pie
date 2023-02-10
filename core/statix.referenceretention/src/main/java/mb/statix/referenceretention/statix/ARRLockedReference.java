@@ -1,6 +1,7 @@
 package mb.statix.referenceretention.statix;
 
 import com.google.common.collect.ImmutableList;
+import mb.nabl2.terms.IStringTerm;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.build.AbstractApplTerm;
 import mb.nabl2.terms.matching.TermMatch;
@@ -44,20 +45,26 @@ public abstract class ARRLockedReference extends AbstractApplTerm {
      */
     @Value.Parameter public abstract TermIndex getDeclaration();
 
+    /**
+     * Gets the name of the sort of the reference that was locked.
+     * @return the name of the sort, such as {@code "Expr"}
+     */
+    @Value.Parameter public abstract IStringTerm getSortName();
+
     @Override public String getOp() {
         return OP;
     }
 
     @Value.Lazy @Override public List<ITerm> getArgs() {
-        return ImmutableList.of(getTerm(), getDeclaration());
+        return ImmutableList.of(getTerm(), getDeclaration(), getSortName());
     }
 
     public static TermMatch.IMatcher<RRLockedReference> matcher() {
-        return M.preserveAttachments(M.appl2(OP, M.term(), TermIndex.matcher(), (t, term, decl) -> {
+        return M.preserveAttachments(M.appl3(OP, M.term(), TermIndex.matcher(), M.string(), (t, term, decl, sortName) -> {
             if(t instanceof RRLockedReference) {
                 return (RRLockedReference) t;
             } else {
-                return RRLockedReference.of(term, decl);
+                return RRLockedReference.of(term, decl, sortName);
             }
         }));
     }
@@ -80,7 +87,8 @@ public abstract class ARRLockedReference extends AbstractApplTerm {
         if(this.hashCode() != that.hashCode()) return false;
         // @formatter:off
         return Objects.equals(this.getTerm(), that.getTerm())
-            && Objects.equals(this.getDeclaration(), that.getDeclaration());
+            && Objects.equals(this.getDeclaration(), that.getDeclaration())
+            && Objects.equals(this.getSortName(), that.getSortName());
         // @formatter:on
     }
 

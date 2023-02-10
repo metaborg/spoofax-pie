@@ -1,10 +1,13 @@
 package mb.statix.referenceretention.tego;
 
+import mb.nabl2.terms.IListTerm;
+import mb.nabl2.terms.IStringTerm;
 import mb.nabl2.terms.ITerm;
 import mb.statix.constraints.messages.IMessage;
 import mb.statix.referenceretention.statix.LockedReference;
 import mb.statix.solver.IConstraint;
 import mb.tego.strategies.Strategy1;
+import mb.tego.strategies.Strategy2;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
@@ -15,7 +18,7 @@ import java.util.Map;
  */
 public final class RRContext {
 
-    private final Strategy1</* ctx */ ITerm, /* term */ ITerm, /* result */ @Nullable ITerm> qualifyReferenceStrategy;
+    private final Strategy2</* ctx */ IListTerm, /* sortName */ IStringTerm, /* term */ ITerm, /* result */ @Nullable ITerm> qualifyReferenceStrategy;
     private final Collection<Map.Entry<IConstraint, IMessage>> allowedErrors;
 
     /**
@@ -25,7 +28,7 @@ public final class RRContext {
      * @param allowedErrors a collection of constraints/message pairs that are allowed
      */
     public RRContext(
-        Strategy1</* ctx */ ITerm, /* term */ ITerm, /* result */ @Nullable ITerm> qualifyReferenceStrategy,
+        Strategy2</* ctx */ IListTerm, /* sortName */ IStringTerm, /* term */ ITerm, /* result */ @Nullable ITerm> qualifyReferenceStrategy,
         Collection<Map.Entry<IConstraint, IMessage>> allowedErrors
     ) {
         this.qualifyReferenceStrategy = qualifyReferenceStrategy;
@@ -41,7 +44,7 @@ public final class RRContext {
      *
      * @return the strategy
      */
-    public Strategy1</* ctx */ ITerm, /* term */ ITerm, /* result */ @Nullable ITerm> getQualifyReferenceStrategy() {
+    public Strategy2</* ctx */ IListTerm, /* sortName */ IStringTerm, /* term */ ITerm, /* result */ @Nullable ITerm> getQualifyReferenceStrategy() {
         return qualifyReferenceStrategy;
     }
 

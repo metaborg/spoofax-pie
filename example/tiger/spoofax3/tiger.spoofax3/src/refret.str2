@@ -32,6 +32,8 @@ imports //construct-textual-change
 
 strategies
 
+  qualify-reference(|ctxs, sortName) = debug(!"Qualifying: "); ![(<id>, <rr-get-ref-index>)]; debug(!"Qualified as: ") //, (LValue2Exp(FieldVar(Var("r"), <id>)), <stx--get-ast-index>)]
+
   construct-textual-change = construct-textual-change(pp-partial-tiger-string, parenthesize, override-reconstruction, resugar)
 
   inline-method-call(|call@Call(name, args), solverResultTerm): ast -> text
@@ -54,8 +56,17 @@ strategies
         fixedAst := <prim("RR_fix_references", solverResultTerm)> newAst;								// Fix references inside the placeholders
         where(<debug(!"Post-RR: ")> fixedAst);
         implcatedAst := <implicate-injections-tiger> fixedAst;  										// Implicate the final (fixed) AST
-        (_, _, text) := <construct-textual-change> (ast, implcatedAst);			// FIXME: Sometimes fails with NullPointerException because a Token doesn't have a Tokenizer, after building the language but before the file with the inlining source is (re-)saved
+        text := <pp-into-existing> (ast, implcatedAst);
         where(<debug(!"Text: ")> text)
+        
+        
+   // Pretty-prints the changed AST into the existing code,
+   // or as a fallback performs pretty-printing on the whole AST.
+   pp-into-existing: (oldAst, newAst) -> newText
+   where newText := <catch-with(
+   		 	construct-textual-change; ?(_, _, <id>),		// FIXME: Sometimes fails with NullPointerException because a Token doesn't have a Tokenizer, after building the language but before the file with the inlining source is (re-)saved
+   		 	?(_, (_, <id>), _); pp-tiger-string
+	 	 )> (oldAst, newAst)
         
         
    build-contexts(|call@Call(_, _), solverResultTerm): ast -> [] // Not sure what contexts we could provide here
@@ -89,11 +100,23 @@ strategies
 
   // Locks the reference represented by the given term
   // if the reference has a @ref property, or fails if it is not a reference.
+  //rr-lock-one-reference(|analysis, solverResultTerm): ref -> lockedRef
+  //where decl := <stx--get-ast-property(|analysis, Ref())> ref;
+  //      where(<debug(!"Accept Decl: ")> decl);
+  //      lockedRef := <prim("RR_lock_reference", decl, solverResultTerm)> ref;
+  //      where(<debug(!"Locked: ")> lockedRef)
+        
   rr-lock-one-reference(|analysis, solverResultTerm): ref -> lockedRef
-  //with  analysis := <debug(!"Pre ref analysis: "); stx--get-ast-analysis; debug(!"Post ref analysis: ")> ref
-  where decl := <stx--get-ast-property(|analysis, Ref())> ref;
+  where (name, sortName) := <rr-get-ref-name> ref;	// Fails if the term is not a valid reference
+        decl := <stx--get-ast-property(|analysis, Ref())> name;
         where(<debug(!"Accept Decl: ")> decl);
-        lockedRef := <prim("RR_lock_reference", decl, solverResultTerm)> ref;
+        lockedRef := <prim("RR_lock_reference", decl, solverResultTerm, sortName)> ref;
         where(<debug(!"Locked: ")> lockedRef)
+        
+  // If the term is a valid reference, returns the name and the sort name
+  // Otherwise, fails
+  rr-get-ref-name: LValue2Exp(Var2LValue(Var(name))) -> (name, "Exp")
+  // If the term is a valid reference, returns the term index.
+  rr-get-ref-index: LValue2Exp(Var2LValue(Var(name))) -> <stx--get-ast-index> name
 
 

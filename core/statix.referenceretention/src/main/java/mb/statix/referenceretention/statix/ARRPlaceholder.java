@@ -1,23 +1,15 @@
 package mb.statix.referenceretention.statix;
 
 import com.google.common.collect.ImmutableList;
-import mb.nabl2.terms.IListTerm;
 import mb.nabl2.terms.ITerm;
-import mb.nabl2.terms.ListTerms;
 import mb.nabl2.terms.build.AbstractApplTerm;
-import mb.nabl2.terms.build.TermBuild;
 import mb.nabl2.terms.matching.TermMatch;
-import mb.statix.referenceretention.statix.RRLockedReference;
-import mb.statix.referenceretention.statix.RRPlaceholder;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.serial.Serial;
 import org.immutables.value.Value;
-import org.metaborg.util.unit.Unit;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static mb.nabl2.terms.build.TermBuild.B;
 import static mb.nabl2.terms.matching.TermMatch.M;
@@ -43,18 +35,18 @@ public abstract class ARRPlaceholder extends AbstractApplTerm {
     @Value.Parameter public abstract ITerm getBody();
 
     /**
-     * Gets the contexts for the references inside the placeholder's AST.
+     * Gets the context terms for the references inside the placeholder's AST.
      * @return the contexts, which are terms that describe the context references,
      * such as {@code Var("x")} or {@code Member("x", Var("y"))}
      */
-    @Value.Parameter public abstract List<ITerm> getContexts();
+    @Value.Parameter public abstract List<ITerm> getContextTerms();
 
     @Override public String getOp() {
         return OP;
     }
 
     @Value.Lazy @Override public List<ITerm> getArgs() {
-        return ImmutableList.of(getBody(), B.newList(getContexts()));
+        return ImmutableList.of(getBody(), B.newList(getContextTerms()));
     }
 
     public static TermMatch.IMatcher<RRPlaceholder> matcher() {
@@ -85,7 +77,7 @@ public abstract class ARRPlaceholder extends AbstractApplTerm {
         if(this.hashCode() != that.hashCode()) return false;
         // @formatter:off
         return Objects.equals(this.getBody(), that.getBody())
-            && Objects.equals(this.getContexts(), that.getContexts());
+            && Objects.equals(this.getContextTerms(), that.getContextTerms());
         // @formatter:on
     }
 
@@ -94,8 +86,8 @@ public abstract class ARRPlaceholder extends AbstractApplTerm {
         sb.append("[[");
         sb.append(getBody());
         sb.append("|");
-        if (getContexts() != null && !getContexts().isEmpty()) {
-            final Iterator<ITerm> it = getContexts().iterator();
+        if (getContextTerms() != null && !getContextTerms().isEmpty()) {
+            final Iterator<ITerm> it = getContextTerms().iterator();
             sb.append(it.next());
             while(it.hasNext()) {
                 sb.append(", ");

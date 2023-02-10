@@ -42,12 +42,18 @@ public final class AssertValidStrategy extends NamedStrategy1<RRContext, RRSolve
         final NotStrategy<RRSolverState, RRSolverState> not = NotStrategy.getInstance();
 
         final @Nullable RRSolverState r1 = engine.eval(infer, input);
-        if (r1 == null) return null;
+        if (r1 == null) {
+            engine.log(instance, "Infer strategy failed on: {}", input);
+            return null;
+        }
 
         final Strategy<RRSolverState, @Nullable RRSolverState> s2 = StrategyExt.pred(RRSolverState::hasSeriousErrors).apply(ctx.getAllowedErrors());
         final Strategy<RRSolverState, @Nullable RRSolverState> s3 = not.apply(s2);
         final @Nullable RRSolverState r3 = engine.eval(s3, r1);
-        if (r3 == null) return null;
+        if (r3 == null) {
+            engine.log(instance, "Errors occurred, rejecting input: {}", input);
+            return null;
+        }
         return r3;
     }
 

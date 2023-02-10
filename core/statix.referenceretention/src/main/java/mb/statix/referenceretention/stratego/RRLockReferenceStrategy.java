@@ -3,6 +3,8 @@ package mb.statix.referenceretention.stratego;
 import mb.constraint.common.ConstraintAnalyzerContext;
 import mb.nabl2.terms.ITerm;
 import static mb.nabl2.terms.matching.Transform.T;
+
+import mb.nabl2.terms.matching.TermMatch;
 import mb.nabl2.terms.stratego.StrategoTerms;
 import mb.nabl2.terms.stratego.TermIndex;
 import mb.scopegraph.oopsla20.IScopeGraph;
@@ -18,6 +20,7 @@ import org.spoofax.interpreter.library.AbstractPrimitive;
 import org.spoofax.interpreter.stratego.Strategy;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
+import org.spoofax.terms.util.M;
 
 import java.util.List;
 import java.util.Map;
@@ -32,7 +35,7 @@ import static mb.statix.referenceretention.stratego.RRTermUtils.unwrapStrategoCo
 public final class RRLockReferenceStrategy extends StatixPrimitive {
     public static final String NAME = "RR_lock_reference";
     public RRLockReferenceStrategy() {
-        super(NAME, 2);
+        super(NAME, 3);
     }
 
 
@@ -52,7 +55,8 @@ public final class RRLockReferenceStrategy extends StatixPrimitive {
             env.getFactory(),
             term,
             terms.get(0),
-            terms.get(1)
+            terms.get(1),
+            terms.get(2)
         );
         return Optional.ofNullable(result);
     }
@@ -60,7 +64,7 @@ public final class RRLockReferenceStrategy extends StatixPrimitive {
     // Usage:
     // a := <stx--get-ast-analysis> ast;
     // decl := <stx--get-ast-property(|a,Ref())> ref;
-    // <prim("RR_lock_reference", decl, solverResultTerm)> ref
+    // <prim("RR_lock_reference", decl, solverResultTerm, "Exp")> ref
     // TODO: The scope should be an appropriate type, e.g., Scope or something.
     @Nullable private ITerm eval(
         RRStrategoContext rrctx,
@@ -68,12 +72,13 @@ public final class RRLockReferenceStrategy extends StatixPrimitive {
         ITermFactory termFactory,
         ITerm ref,
         ITerm decl,
-        ITerm solverResultTerm
+        ITerm solverResultTerm,
+        ITerm sortName
     ) throws InterpreterException {
         final @Nullable TermIndex declIdx = decl.getAttachments().get(TermIndex.class);
         if (declIdx == null) throw new RuntimeException("Could not get TermIndex from declaration: " + decl);
 
-        return RRLockedReference.of(ref, declIdx);
+        return RRLockedReference.of(ref, declIdx, TermMatch.M.string().match(sortName).get());
     }
 }
 
