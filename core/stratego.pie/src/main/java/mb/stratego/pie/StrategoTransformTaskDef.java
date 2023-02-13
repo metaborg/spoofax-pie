@@ -7,6 +7,7 @@ import mb.pie.api.None;
 import mb.pie.api.OutTransient;
 import mb.pie.api.Supplier;
 import mb.stratego.common.StrategoRuntime;
+import mb.stratego.common.Strategy;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Provider;

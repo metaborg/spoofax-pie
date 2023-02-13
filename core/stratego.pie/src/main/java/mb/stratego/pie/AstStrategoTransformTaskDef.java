@@ -4,6 +4,7 @@ import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
+import mb.stratego.common.Strategy;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 /**

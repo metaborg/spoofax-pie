@@ -7,6 +7,7 @@ import mb.pie.api.Supplier;
 import mb.pie.api.TaskDef;
 import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
+import mb.stratego.common.Strategy;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import java.util.Arrays;
@@ -23,32 +24,13 @@ import java.util.stream.Collectors;
  * @param <T> Type of wrapped inputs to this task definition, from which an {@link IStrategoTerm AST} can be extracted.
  */
 public abstract class BaseStrategoTransformTaskDef<T> implements TaskDef<Supplier<? extends Result<T, ?>>, Result<IStrategoTerm, ?>> {
-    public static class Strategy {
-        public final String name;
-        public final ListView<IStrategoTerm> termArguments;
-
-        public Strategy(String name, ListView<IStrategoTerm> termArguments) {
-            this.name = name;
-            this.termArguments = termArguments;
-        }
-
-        public Strategy(String name, IStrategoTerm... termArguments) {
-            this.name = name;
-            this.termArguments = ListView.of(termArguments);
-        }
-
-        public Strategy(String name) {
-            this.name = name;
-            this.termArguments = ListView.of();
-        }
-    }
 
     private final ListView<Strategy> strategies;
 
     public BaseStrategoTransformTaskDef(ListView<String> strategyNames) {
         this.strategies = ListView.of(
             strategyNames.stream()
-            .map(Strategy::new)
+            .map(Strategy::strategy)
             .collect(Collectors.toList())
         );
     }
@@ -56,7 +38,7 @@ public abstract class BaseStrategoTransformTaskDef<T> implements TaskDef<Supplie
     public BaseStrategoTransformTaskDef(String... strategyNames) {
         this.strategies = ListView.of(
             Arrays.stream(strategyNames)
-                .map(Strategy::new)
+                .map(Strategy::strategy)
                 .collect(Collectors.toList())
         );
     }
@@ -81,7 +63,7 @@ public abstract class BaseStrategoTransformTaskDef<T> implements TaskDef<Supplie
             IStrategoTerm ast = getAst(context, t);
             for(Strategy strategy : getStrategies(context, t)) {
                 try {
-                    ast = strategoRuntime.invoke(strategy.name, ast, strategy.termArguments);
+                    ast = strategoRuntime.invoke(strategy, ast);
                 } catch(StrategoException e) {
                     return Result.ofErr(e);
                 }

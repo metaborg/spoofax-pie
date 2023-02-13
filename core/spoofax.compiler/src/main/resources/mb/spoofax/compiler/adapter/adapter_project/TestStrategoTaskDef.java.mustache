@@ -7,6 +7,7 @@ import mb.spt.api.analyze.StrategoRunArgument;
 import mb.jsglr.common.TermTracer;
 import mb.pie.api.ExecContext;
 import mb.stratego.common.StrategoRuntime;
+import mb.stratego.common.Strategy;
 import mb.stratego.pie.StrategoTransformTaskDef;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -80,7 +81,7 @@ public class {{baseTestStrategoTaskDef.id}} extends StrategoTransformTaskDef<{{b
 
     @Override
     protected ListView<Strategy> getStrategies(ExecContext context, Input input) {
-        return ListView.of(new Strategy(input.strategy, processArguments(input.termArguments, context, input)));
+        return ListView.of(Strategy.strategy(input.strategy, ListView.of(), processArguments(input.termArguments, context, input)));
     }
 
     {{#constraintAnalyzer}}

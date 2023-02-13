@@ -1,6 +1,7 @@
 package mb.stratego.common;
 
 import mb.common.util.ListView;
+import mb.common.util.MapView;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.core.Interpreter;
 import org.spoofax.interpreter.core.InterpreterException;
@@ -94,6 +95,22 @@ public class StrategoRuntime {
     }
 
     /**
+     * Invokes a Stratego strategy with the specified term arguments,
+     * throwing {@link StrategoException} if the strategy fails.
+     *
+     * @param strategy        the definition of the strategy to invoke
+     * @param input           the input term
+     * @return the resulting term
+     * @throws StrategoException if the strategy or its invocation failed
+     */
+    public IStrategoTerm invoke(Strategy strategy, IStrategoTerm input) throws StrategoException {
+        @Nullable final IStrategoTerm result = invokeOrNull(strategy, input);
+        if (result == null)
+            throw StrategoException.strategyFail(StrategoUtil.name(strategy), input, hybridInterpreter.getCompiledContext().getTrace());
+        return result;
+    }
+
+    /**
      * Invokes a Stratego strategy with no term arguments,
      * returning {@link Optional#empty()} if the strategy fails.
      *
@@ -158,31 +175,41 @@ public class StrategoRuntime {
      * @throws StrategoException if the strategy invocation failed
      */
     public @Nullable IStrategoTerm invokeOrNull(String strategy, IStrategoTerm input, ListView<IStrategoTerm> arguments) throws StrategoException {
+        return invokeOrNull(Strategy.strategy(strategy, ListView.of(), arguments), input);
+    }
+
+    /**
+     * Invokes a Stratego strategy,
+     * returning {@code null} if the strategy fails.
+     *
+     * @param strategy        the definition of the strategy to invoke
+     * @param input           the input term
+     * @return the resulting term; or {@code null} if the strategy failed
+     * @throws StrategoException if the strategy invocation failed
+     */
+    public @Nullable IStrategoTerm invokeOrNull(Strategy strategy, IStrategoTerm input) throws StrategoException {
         hybridInterpreter.setCurrent(input);
         hybridInterpreter.setIOAgent(ioAgent);
         hybridInterpreter.getContext().setContextObject(contextObject);
         hybridInterpreter.getCompiledContext().setContextObject(contextObject);
 
         try {
-            final boolean success;
-            if (arguments.isEmpty()) {
-                success = hybridInterpreter.invoke(strategy);
-            } else {
-                ITermFactory termFactory = getTermFactory();
-                IStrategoTerm strategyName = termFactory.makeString(Interpreter.cify(strategy) + "_0_" + arguments.size());
-                IStrategoTerm strategyNameTerm = termFactory.makeAppl("SVar", strategyName);
-                IStrategoAppl strategyCallTerm = termFactory.makeAppl(
-                    "CallT",
-                    strategyNameTerm,
-                    termFactory.makeList(),
-                    termFactory.makeList(arguments.asUnmodifiable())
-                );
-                success = hybridInterpreter.evaluate(strategyCallTerm);
-            }
+            final StrategyInvocation call = Strategies.cases()
+                .<StrategyInvocation>invoke(NamedStrategyInvocation::new)
+                .otherwise(() -> {
+                    final IStrategoAppl expr = StrategoUtil.toStrategyExpressionTerm(strategy, hybridInterpreter.getFactory());
+                    return new StrategyExpressionInvocation(expr);
+                })
+                .apply(strategy);
+            final boolean success = call.call(hybridInterpreter);
+
+            // Strategies
+
             if(!success) return null;
             return hybridInterpreter.current();
         } catch(InterpreterException e) {
-            throw StrategoException.fromInterpreterException(strategy, input, hybridInterpreter.getCompiledContext().getTrace(), e);
+            throw StrategoException.fromInterpreterException(StrategoUtil.name(strategy), input,
+                hybridInterpreter.getCompiledContext().getTrace(), e);
         }
     }
 
@@ -243,5 +270,37 @@ public class StrategoRuntime {
 
     public AdaptableContext getContextObject() {
         return contextObject;
+    }
+
+    // Utility interface & classes for handling exceptions from interpreter
+
+    private interface StrategyInvocation {
+        boolean call(HybridInterpreter interpreter) throws InterpreterException;
+    }
+
+    private static class NamedStrategyInvocation implements StrategyInvocation {
+        private final String name;
+
+        private NamedStrategyInvocation(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public boolean call(HybridInterpreter interpreter) throws InterpreterException {
+            return interpreter.invoke(name);
+        }
+    }
+
+    private static class StrategyExpressionInvocation implements StrategyInvocation {
+        private final IStrategoAppl expr;
+
+        private StrategyExpressionInvocation(IStrategoAppl expr) {
+            this.expr = expr;
+        }
+
+        @Override
+        public boolean call(HybridInterpreter interpreter) throws InterpreterException {
+            return interpreter.evaluate(expr);
+        }
     }
 }

@@ -6,6 +6,7 @@ import mb.pie.api.ExecContext;
 import mb.sdf3.task.Sdf3GetStrategoRuntimeProvider;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.pie.StrategoTransformTaskDef;
+import mb.stratego.common.Strategy;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 public abstract class AnalyzedStrategoTransformTaskDef extends StrategoTransformTaskDef<ConstraintAnalyzeMultiTaskDef.SingleFileOutput> {
