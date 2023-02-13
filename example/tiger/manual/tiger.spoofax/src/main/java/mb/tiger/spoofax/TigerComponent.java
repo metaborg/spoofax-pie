@@ -6,6 +6,7 @@ import mb.pie.api.TaskDef;
 import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.platform.PlatformComponent;
+import mb.tiger.spoofax.command.TigerConstructTextualChangeCommand;
 import mb.tiger.spoofax.command.TigerShowScopeGraphCommand;
 import mb.tiger.spoofax.task.TigerShowScopeGraph;
 
@@ -35,4 +36,6 @@ public interface TigerComponent extends LanguageComponent {
     TigerShowScopeGraph getShowScopeGraph();
 
     TigerShowScopeGraphCommand getShowScopeGraphCommand();
+
+    TigerConstructTextualChangeCommand getConstructTextualChangeCommand();
 }
