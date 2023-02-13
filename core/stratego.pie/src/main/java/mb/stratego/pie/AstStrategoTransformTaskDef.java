@@ -40,7 +40,7 @@ public abstract class AstStrategoTransformTaskDef extends StrategoTransformTaskD
         super(getStrategoRuntimeProvider, strategies);
     }
 
-    @Override protected IStrategoTerm getAst(ExecContext context, IStrategoTerm input) {
-        return input;
+    @Override protected Result<IStrategoTerm, ?> getAst(ExecContext context, IStrategoTerm input) {
+        return Result.ofOk(input);
     }
 }

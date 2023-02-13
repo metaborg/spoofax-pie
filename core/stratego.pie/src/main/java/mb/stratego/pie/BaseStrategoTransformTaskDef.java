@@ -51,7 +51,7 @@ public abstract class BaseStrategoTransformTaskDef<T> implements TaskDef<Supplie
 
     protected abstract StrategoRuntime getStrategoRuntime(ExecContext context, T input);
 
-    protected abstract IStrategoTerm getAst(ExecContext context, T input);
+    protected abstract Result<IStrategoTerm, ?> getAst(ExecContext context, T input);
 
     protected ListView<Strategy> getStrategies(ExecContext context, T input) { return strategies; }
 
@@ -60,15 +60,19 @@ public abstract class BaseStrategoTransformTaskDef<T> implements TaskDef<Supplie
         createDependencies(context);
         return context.require(supplier).flatMapOrElse((t) -> {
             final StrategoRuntime strategoRuntime = getStrategoRuntime(context, t);
-            IStrategoTerm ast = getAst(context, t);
-            for(Strategy strategy : getStrategies(context, t)) {
-                try {
-                    ast = strategoRuntime.invoke(strategy, ast);
-                } catch(StrategoException e) {
-                    return Result.ofErr(e);
-                }
-            }
-            return Result.ofOk(ast);
+            return getAst(context, t).flatMapOrElse(
+                ast -> {
+                    for(Strategy strategy : getStrategies(context, t)) {
+                        try {
+                            ast = strategoRuntime.invoke(strategy, ast);
+                        } catch(StrategoException e) {
+                            return Result.ofErr(e);
+                        }
+                    }
+                    return Result.ofOk(ast);
+                },
+                Result::ofErr
+            );
         }, Result::ofErr);
     }
 }
