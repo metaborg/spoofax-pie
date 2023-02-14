@@ -17,6 +17,7 @@ dependencies {
   api(compositeBuild("aterm.common"))
   api(compositeBuild("jsglr.pie"))
   api(compositeBuild("constraint.pie"))
+  api(compositeBuild("transform.pie"))
   api(compositeBuild("spt.api"))
   api(compositeBuild("statix.referenceretention"))
   api(compositeBuild("statix.referenceretention.pie"))

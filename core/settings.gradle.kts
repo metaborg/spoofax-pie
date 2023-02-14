@@ -36,6 +36,7 @@ include("spt.api")
 include("tego.runtime")
 include("spoofax2.common")
 include("tooling.eclipsebundle")
+include("transform.pie")
 
 include("spoofax.core")
 include("spoofax.resource")

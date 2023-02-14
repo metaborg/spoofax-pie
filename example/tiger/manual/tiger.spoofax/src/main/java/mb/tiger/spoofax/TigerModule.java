@@ -14,6 +14,8 @@ import mb.spoofax.core.language.command.HierarchicalResourceType;
 import mb.statix.referenceretention.pie.InlineMethodCallTaskDef;
 import mb.stratego.common.StrategoRuntime;
 import mb.stratego.common.StrategoRuntimeBuilder;
+import mb.stratego.pie.GetStrategoRuntimeProvider;
+import mb.tiger.TigerClassloaderResources;
 import mb.tiger.TigerConstraintAnalyzer;
 import mb.tiger.TigerConstraintAnalyzerFactory;
 import mb.tiger.TigerParser;
@@ -34,7 +36,10 @@ import mb.tiger.spoofax.task.TigerCheckAggregator;
 import mb.tiger.spoofax.task.TigerCompileDirectory;
 import mb.tiger.spoofax.task.TigerCompileFile;
 import mb.tiger.spoofax.task.TigerCompileFileAlt;
+import mb.tiger.spoofax.task.TigerShowReconstructedAst;
+import mb.tiger.spoofax.task.reusable.TigerConstructTextualChange;
 import mb.tiger.spoofax.task.TigerGetSourceFiles;
+import mb.tiger.spoofax.task.TigerGetStrategoRuntimeProvider;
 import mb.tiger.spoofax.task.TigerIdeTokenize;
 import mb.tiger.spoofax.task.TigerInlineMethodCallCommand;
 import mb.tiger.spoofax.task.TigerShowAnalyzedAst;
@@ -51,6 +56,7 @@ import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.terms.TermFactory;
 
 import javax.inject.Named;
+import javax.inject.Provider;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -88,6 +94,11 @@ public class TigerModule {
     @Provides @TigerScope
     static StrategoRuntimeBuilder provideStrategoRuntimeBuilder(TigerStrategoRuntimeBuilderFactory factory) {
         return factory.create();
+    }
+
+    @Provides @TigerScope
+    static GetStrategoRuntimeProvider provideGetStrategoRuntimeProvider(TigerClassloaderResources classloaderResources, Provider<StrategoRuntime> strategoRuntimeProvider) {
+        return new TigerGetStrategoRuntimeProvider(classloaderResources, strategoRuntimeProvider);
     }
 
     @Provides @TigerScope @Named("prototype")
@@ -152,7 +163,11 @@ public class TigerModule {
 
         TigerCompileFile compileFile,
         TigerCompileFileAlt compileFileAlt,
-        TigerCompileDirectory compileDirectory
+        TigerCompileDirectory compileDirectory,
+
+        TigerGetStrategoRuntimeProvider getStrategoRuntimeProvider,
+        TigerConstructTextualChange constructTextualChange,
+        TigerShowReconstructedAst showReconstructedAst
     ) {
         final HashSet<TaskDef<?, ?>> taskDefs = new HashSet<>();
 
@@ -180,6 +195,10 @@ public class TigerModule {
         taskDefs.add(compileFile);
         taskDefs.add(compileFileAlt);
         taskDefs.add(compileDirectory);
+
+        taskDefs.add(getStrategoRuntimeProvider);
+        taskDefs.add(constructTextualChange);
+        taskDefs.add(showReconstructedAst);
 
         return taskDefs;
     }

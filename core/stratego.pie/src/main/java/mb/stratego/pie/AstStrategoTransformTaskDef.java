@@ -4,6 +4,7 @@ import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Supplier;
+import mb.stratego.common.Strategy;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 /**
@@ -39,7 +40,7 @@ public abstract class AstStrategoTransformTaskDef extends StrategoTransformTaskD
         super(getStrategoRuntimeProvider, strategies);
     }
 
-    @Override protected IStrategoTerm getAst(ExecContext context, IStrategoTerm input) {
-        return input;
+    @Override protected Result<IStrategoTerm, ?> getAst(ExecContext context, IStrategoTerm input) {
+        return Result.ofOk(input);
     }
 }

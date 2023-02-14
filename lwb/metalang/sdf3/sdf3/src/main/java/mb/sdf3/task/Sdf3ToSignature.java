@@ -1,6 +1,7 @@
 package mb.sdf3.task;
 
 import mb.common.result.Result;
+import mb.common.util.ListView;
 import mb.constraint.pie.ConstraintAnalyzeMultiTaskDef;
 import mb.pie.api.ExecContext;
 import mb.pie.api.Interactivity;
@@ -8,6 +9,7 @@ import mb.pie.api.Supplier;
 import mb.sdf3.Sdf3Scope;
 import mb.sdf3.task.util.AnalyzedStrategoTransformTaskDef;
 import mb.stratego.common.StrategoRuntime;
+import mb.stratego.common.Strategy;
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.core.InterpreterException;
 import org.spoofax.interpreter.terms.ITermFactory;
@@ -19,7 +21,7 @@ import java.util.Set;
 public class Sdf3ToSignature extends AnalyzedStrategoTransformTaskDef {
     @Inject
     public Sdf3ToSignature(Sdf3GetStrategoRuntimeProvider getStrategoRuntimeProvider, ITermFactory termFactory) {
-        super(getStrategoRuntimeProvider, new Strategy("desugar-templates"), new Strategy("module-to-sig", termFactory.makeString("2")));
+        super(getStrategoRuntimeProvider, Strategy.strategy("desugar-templates"), Strategy.strategy("module-to-sig", ListView.of(), ListView.of(termFactory.makeString("2"))));
     }
 
     @Override public String getId() {
