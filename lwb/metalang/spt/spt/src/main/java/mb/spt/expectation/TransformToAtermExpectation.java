@@ -5,7 +5,6 @@ import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Severity;
 import mb.common.option.Option;
 import mb.common.region.Region;
-import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.None;
 import mb.pie.api.Session;
@@ -58,23 +57,13 @@ public class TransformToAtermExpectation implements TestExpectation {
             return messagesBuilder.build(file);
         }
 
-        final @Nullable Region selection;
-        if(selectionReference.isNone()) {
-            selection = null;
-        } else {
-            final SelectionReference selectionReference = this.selectionReference.get();
-            final Integer selectionIndex = selectionReference.selection;
-            final ListView<Region> availableSelections = testCase.testFragment.getInFragmentSelections();
-            if(selectionIndex > availableSelections.size()) {
-                messagesBuilder.addMessage("Cannot resolve #" + selectionIndex + ". Only " + availableSelections.size() + " available.",
-                    Severity.Error, file, selectionReference.region);
-                return messagesBuilder.build(file);
-            }
-            selection = availableSelections.get(selectionIndex - 1);
+        if(!TransformExpectationUtil.isSelectionValid(testCase, selectionReference, messagesBuilder, file)) {
+            return messagesBuilder.build(file);
         }
+        final @Nullable Region selectionRegion = TransformExpectationUtil.getSelection(testCase, selectionReference);
 
         final @Nullable CommandFeedback feedback = TransformExpectationUtil.runCommand(testCase.resource, commandDef,
-            languageUnderTest, languageUnderTestSession, messagesBuilder, file, sourceRegion, selection);
+            languageUnderTest, languageUnderTestSession, messagesBuilder, file, sourceRegion, selectionRegion);
         if(feedback == null) {
             return messagesBuilder.build(file);
         }

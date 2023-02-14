@@ -4,6 +4,7 @@ import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Severity;
 import mb.common.option.Option;
 import mb.common.region.Region;
+import mb.common.util.ListView;
 import mb.pie.api.ExecException;
 import mb.pie.api.Session;
 import mb.pie.api.Task;
@@ -19,6 +20,7 @@ import mb.spoofax.core.language.command.arg.ArgConverters;
 import mb.spoofax.core.language.command.arg.ArgumentBuilderException;
 import mb.spt.model.LanguageUnderTest;
 import mb.spt.model.SelectionReference;
+import mb.spt.model.TestCase;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class TransformExpectationUtil {
@@ -59,6 +61,29 @@ public class TransformExpectationUtil {
         } catch(ExecException | ArgumentBuilderException e) {
             messagesBuilder.addMessage("Failed to execute command '" + commandDef + "'; see exception", e, Severity.Error, failMessageFile, fileMessageRegion);
             return null;
+        }
+    }
+
+    public static boolean isSelectionValid(TestCase testCase, Option<SelectionReference> selectionReference,
+        KeyedMessagesBuilder messagesBuilder, ResourceKey file) {
+        if(selectionReference.isSome()) {
+            final SelectionReference ref = selectionReference.get();
+            final int count = testCase.testFragment.getInFragmentSelections().size();
+            if(ref.selection > count) {
+                messagesBuilder.addMessage("Cannot resolve #" + ref.selection + ". Only " + count + " available.",
+                    Severity.Error, file, ref.region);
+                return false;
+            }
+        }
+         return true;
+    }
+
+    public static @Nullable Region getSelection(TestCase testCase, Option<SelectionReference> selectionReference) {
+        if(selectionReference.isNone()) {
+            return null;
+        } else {
+            final ListView<Region> availableSelections = testCase.testFragment.getInFragmentSelections();
+            return availableSelections.get(selectionReference.get().selection - 1);
         }
     }
 }
