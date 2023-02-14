@@ -5,7 +5,6 @@ import mb.common.message.KeyedMessagesBuilder;
 import mb.common.message.Severity;
 import mb.common.option.Option;
 import mb.common.region.Region;
-import mb.common.util.ListView;
 import mb.pie.api.ExecContext;
 import mb.pie.api.MixedSession;
 import mb.pie.api.Session;
@@ -56,28 +55,19 @@ public class TransformToFragmentExpectation implements TestExpectation {
         final KeyedMessagesBuilder messagesBuilder = new KeyedMessagesBuilder();
         final ResourceKey file = testCase.testSuiteFile;
 
-        final @Nullable Region selection;
-        if(selectionReference.isNone()) {
-            selection = null;
-        } else {
-            final SelectionReference selectionReference = this.selectionReference.get();
-            final Integer selectionIndex = selectionReference.selection;
-            final ListView<Region> availableSelections = testCase.testFragment.getInFragmentSelections();
-            if(selectionIndex > availableSelections.size()) {
-                messagesBuilder.addMessage("Cannot resolve #" + selectionIndex + ". Only " + availableSelections.size() + " available.",
-                    Severity.Error, file, selectionReference.region);
-                return messagesBuilder.build(file);
-            }
-            selection = availableSelections.get(selectionIndex - 1);
-        }
-
         final @Nullable CommandDef<?> commandDef = TransformExpectationUtil.getCommandDef(languageUnderTest,
             commandDisplayName, messagesBuilder, file, sourceRegion);
         if(commandDef == null) {
             return messagesBuilder.build(file);
         }
+
+        if(!TransformExpectationUtil.isSelectionValid(testCase, selectionReference, messagesBuilder, file)) {
+            return messagesBuilder.build(file);
+        }
+        final @Nullable Region selectionRegion = TransformExpectationUtil.getSelection(testCase, selectionReference);
+
         final @Nullable CommandFeedback feedback = TransformExpectationUtil.runCommand(testCase.resource, commandDef,
-            languageUnderTest, languageUnderTestSession, messagesBuilder, file, sourceRegion, selection);
+            languageUnderTest, languageUnderTestSession, messagesBuilder, file, sourceRegion, selectionRegion);
         if(feedback == null) {
             return messagesBuilder.build(file);
         }
@@ -93,7 +83,7 @@ public class TransformToFragmentExpectation implements TestExpectation {
         }
         final @Nullable CommandFeedback fragmentFeedback;
         try(final MixedSession session = fragmentLanguageUnderTest.getPieComponent().newSession() /* OPTO: share a single session for one test suite run. */) {
-            fragmentFeedback = TransformExpectationUtil.runCommand(fragmentResource, commandDef, fragmentLanguageUnderTest, session, messagesBuilder, file, sourceRegion, selection);
+            fragmentFeedback = TransformExpectationUtil.runCommand(fragmentResource, commandDef, fragmentLanguageUnderTest, session, messagesBuilder, file, sourceRegion, selectionRegion);
         }
         if(fragmentFeedback == null) {
             return messagesBuilder.build(file);
