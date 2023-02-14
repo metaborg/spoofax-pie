@@ -64,7 +64,7 @@ public class TransformToAtermExpectation implements TestExpectation {
         } else {
             final SelectionReference selectionReference = this.selectionReference.get();
             final Integer selectionIndex = selectionReference.selection;
-            final ListView<Region> availableSelections = testCase.testFragment.getSelections();
+            final ListView<Region> availableSelections = testCase.testFragment.getInFragmentSelections();
             if(selectionIndex > availableSelections.size()) {
                 messagesBuilder.addMessage("Cannot resolve #" + selectionIndex + ". Only " + availableSelections.size() + " available.",
                     Severity.Error, file, selectionReference.region);
