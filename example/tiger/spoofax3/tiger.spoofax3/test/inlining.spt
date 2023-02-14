@@ -1,0 +1,16 @@
+module inlining
+
+test simple inline [[
+let
+  function const() : int = 42
+in [[const()]] end
+]]
+transform "Inline method call" on #1 to "let
+  function const( ) : int =
+    42
+ in
+  let
+   in
+    42
+  end
+end"
