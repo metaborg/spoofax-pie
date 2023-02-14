@@ -1,9 +1,11 @@
 package mb.statix.referenceretention.pie.util;
 
+import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.constraint.pie.ConstraintAnalyzeMultiTaskDef;
 import mb.pie.api.ExecContext;
 import mb.stratego.common.StrategoRuntime;
+import mb.stratego.common.Strategy;
 import mb.stratego.pie.GetStrategoRuntimeProvider;
 import mb.stratego.pie.StrategoTransformTaskDef;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -27,7 +29,7 @@ public abstract class AnalyzedStrategoTransformTaskDef extends StrategoTransform
     }
 
     @Override
-    protected IStrategoTerm getAst(ExecContext context, ConstraintAnalyzeMultiTaskDef.SingleFileOutput input) {
-        return input.result.analyzedAst;
+    protected Result<IStrategoTerm, ?> getAst(ExecContext context, ConstraintAnalyzeMultiTaskDef.SingleFileOutput input) {
+        return Result.ofOk(input.result.analyzedAst);
     }
 }
