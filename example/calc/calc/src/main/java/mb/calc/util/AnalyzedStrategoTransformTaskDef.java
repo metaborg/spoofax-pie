@@ -1,6 +1,7 @@
 package mb.calc.util;
 
 import mb.calc.task.CalcGetStrategoRuntimeProvider;
+import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.constraint.pie.ConstraintAnalyzeTaskDef;
 import mb.pie.api.ExecContext;
@@ -21,7 +22,7 @@ public abstract class AnalyzedStrategoTransformTaskDef extends StrategoTransform
         return super.getStrategoRuntime(context, input).addContextObject(input.context);
     }
 
-    @Override protected IStrategoTerm getAst(ExecContext context, ConstraintAnalyzeTaskDef.Output input) {
-        return input.result.analyzedAst;
+    @Override protected Result<IStrategoTerm, ?> getAst(ExecContext context, ConstraintAnalyzeTaskDef.Output input) {
+        return Result.ofOk(input.result.analyzedAst);
     }
 }

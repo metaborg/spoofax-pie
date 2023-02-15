@@ -23,8 +23,8 @@ public class {{basePostStatixTaskDef.id}} extends StrategoTransformTaskDef<FileR
         return "{{basePostStatixTaskDef.qualifiedId}}";
     }
 
-    @Override protected IStrategoTerm getAst(ExecContext context, FileResult input) {
-        return input.ast();
+    @Override protected Result<IStrategoTerm, ?> getAst(ExecContext context, FileResult input) {
+        return Result.ofOk(input.ast());
     }
 
     @Override
