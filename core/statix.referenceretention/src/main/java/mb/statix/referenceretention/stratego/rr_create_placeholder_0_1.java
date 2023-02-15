@@ -16,7 +16,16 @@ public final class rr_create_placeholder_0_1 extends Strategy {
     /** The Strategy instance. */
     public static rr_create_placeholder_0_1 instance = new rr_create_placeholder_0_1();
 
-    @Override public @Nullable IStrategoTerm invoke(Context context, IStrategoTerm current, IStrategoTerm ctx) {
-        return context.invokePrimitive(RRCreatePlaceholderStrategy.NAME, current, NO_STRATEGIES, new IStrategoTerm[] { ctx });
+    @Override public @Nullable IStrategoTerm invoke(
+        Context context,
+        IStrategoTerm current,
+        IStrategoTerm contexts
+    ) {
+        // NOTE: Ensure the strategy has the same number of tvars as the primitive it's wrapping.
+        assert(RRCreatePlaceholderStrategy.SVARS == 0);
+        assert(RRCreatePlaceholderStrategy.TVARS == 1);
+        return context.invokePrimitive(RRCreatePlaceholderStrategy.NAME, current, NO_STRATEGIES, new IStrategoTerm[] {
+            contexts
+        });
     }
 }

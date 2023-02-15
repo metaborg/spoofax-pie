@@ -38,21 +38,14 @@ import java.util.Optional;
  */
 public final class RRCreatePlaceholderStrategy extends StatixPrimitive {
     public static final String NAME = "RR_create_placeholder";
+    public static final int SVARS = 0;
+    public static final int TVARS = 1;
     public RRCreatePlaceholderStrategy() {
-        super(NAME, 1);
+        super(NAME, TVARS);
     }
 
     @Override
     protected Optional<? extends ITerm> call(IContext env, ITerm body, List<ITerm> terms) throws InterpreterException {
-//        final ArrayList<ITerm> contexts = new ArrayList<>();
-//        TermMatch.M.list().match(terms.get(0)).map(l -> l.match(ListTerms.cases(
-//            (cons) -> {
-//                contexts.add(cons);
-//                return Unit.unit;
-//            },
-//            (nil) -> Unit.unit,
-//            (var) -> Unit.unit
-//        )));
         @Nullable final ITerm result = eval(
             body,
             // Either get a list of context terms, or a single context term in a singleton list

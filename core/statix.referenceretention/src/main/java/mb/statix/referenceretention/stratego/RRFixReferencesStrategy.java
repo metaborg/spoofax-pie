@@ -60,7 +60,9 @@ import static mb.tego.strategies.StrategyExt.fun;
  */
 public final class RRFixReferencesStrategy extends StatixPrimitive {
     public static final String NAME = "RR_fix_references";
-    public RRFixReferencesStrategy()  { super(NAME, 1); }
+    public static final int SVARS = 0;
+    public static final int TVARS = 1;
+    public RRFixReferencesStrategy()  { super(NAME, TVARS); }
 
     // Usage:
     // fixedAst := <prim("RR_fix_references", solverResultTerm)> ast

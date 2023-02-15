@@ -34,8 +34,10 @@ import static mb.statix.referenceretention.stratego.RRTermUtils.unwrapStrategoCo
  */
 public final class RRLockReferenceStrategy extends StatixPrimitive {
     public static final String NAME = "RR_lock_reference";
+    public static final int SVARS = 0;
+    public static final int TVARS = 3;
     public RRLockReferenceStrategy() {
-        super(NAME, 3);
+        super(NAME, TVARS);
     }
 
 
