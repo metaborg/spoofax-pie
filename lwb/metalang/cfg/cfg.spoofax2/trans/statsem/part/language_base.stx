@@ -140,6 +140,26 @@ rules // Stratego runtime section and options
     typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e.
   strategoRuntimeOptionOk(s, StrategoRuntime_ExtendStrategoRuntimeBuilderFactory(e)) :-
     typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e.
+  strategoRuntimeOptionOk(s, StrategoRuntime_ExtendStrategoRuntimeBuilderFactoryWithArgs(opts)) :-
+    strategoRuntimeBuilderFactoryOptionsOk(s, opts) == TRUE() | error $[Options must contain a name.]@opts.
+
+  strategoRuntimeBuilderFactoryOptionsOk: scope * list(StrategoRuntimeBuilderFactoryOption) -> BOOL
+
+  strategoRuntimeBuilderFactoryOptionsOk(s, []) = FALSE.
+
+  strategoRuntimeBuilderFactoryOptionsOk(s, [StrategoRuntimeBuilderFactoryName(e) | opts]) = TRUE() :-
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e,
+    strategoRuntimeBuilderFactoryOptionsOk(s, opts) == _.
+
+  strategoRuntimeBuilderFactoryOptionsOk(s, [StrategoRuntimeBuilderFactoryArguments(args) | opts]) = hasName :-
+    strategoRuntimeBuilderFactoryArgumentsOk(s, args),
+    strategoRuntimeBuilderFactoryOptionsOk(s, opts) == hasName.
+
+  strategoRuntimeBuilderFactoryArgumentOk : scope * Expr
+  strategoRuntimeBuilderFactoryArgumentsOk maps strategoRuntimeBuilderFactoryArgumentOk(*, list(*))
+
+  strategoRuntimeBuilderFactoryArgumentOk(s, e) :-
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e.
 
 
 rules // Tego runtime section and options

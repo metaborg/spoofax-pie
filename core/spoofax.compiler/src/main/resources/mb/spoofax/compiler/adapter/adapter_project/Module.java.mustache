@@ -137,15 +137,18 @@ public class {{baseModule.id}} {
         @{{qualifier.id}}("definition-directory") HierarchicalResource definitionDir{{#this.languageProjectInput.primitiveLibraryVars}}{{#-first}},{{/-first}}
         {{variable}}{{^-last}},{{/-last}}
 {{/this.languageProjectInput.primitiveLibraryVars}}{{#this.languageProjectInput.interopRegistererVars}}{{#-first}},{{/-first}}
-    {{variable}}{{^-last}},{{/-last}}
-{{/this.languageProjectInput.interopRegistererVars}}
+        {{variable}}{{^-last}},{{/-last}}
+{{/this.languageProjectInput.interopRegistererVars}}{{#this.extendStrategoRuntimeBuilderFactoryCustomVars}}{{#-first}},{{/-first}}
+        {{variable}}{{^-last}},{{/-last}}
+{{/this.extendStrategoRuntimeBuilderFactoryCustomVars}}
     ) {
         return new {{this.languageProjectInput.strategoRuntimeBuilderFactory.qualifiedId}}(
             loggerFactory,
             resourceService,
             definitionDir{{#this.languageProjectInput.primitiveLibraryVars}}{{#-first}},{{/-first}}
             {{name}}{{^-last}},{{/-last}}{{/this.languageProjectInput.primitiveLibraryVars}}{{#this.languageProjectInput.interopRegistererVars}}{{#-first}},{{/-first}}
-            {{name}}{{^-last}},{{/-last}}{{/this.languageProjectInput.interopRegistererVars}}
+            {{name}}{{^-last}},{{/-last}}{{/this.languageProjectInput.interopRegistererVars}}{{#this.extendStrategoRuntimeBuilderFactoryCustomVars}}{{#-first}},{{/-first}}
+            {{name}}{{^-last}},{{/-last}}{{/this.extendStrategoRuntimeBuilderFactoryCustomVars}}
         );
     }
 

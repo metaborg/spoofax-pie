@@ -164,7 +164,6 @@ public class StrategoRuntimeLanguageCompiler {
             return extendStrategoRuntimeBuilderFactory().orElseGet(this::baseStrategoRuntimeBuilderFactory);
         }
 
-
         /// Files information, known up-front for build systems with static dependencies such as Gradle.
 
         default ListView<ResourcePath> javaSourceFiles() {
