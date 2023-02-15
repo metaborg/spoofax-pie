@@ -39,7 +39,7 @@ public class ReferenceRetentionAdapterCompiler {
         if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
         final ResourcePath generatedJavaSourcesDirectory = input.generatedJavaSourcesDirectory();
         // TODO: Enable
-        referenceRetentionTaskDefTemplate.write(context, input.baseReferenceRetentionTaskDef().file(generatedJavaSourcesDirectory), input);
+        // referenceRetentionTaskDefTemplate.write(context, input.baseReferenceRetentionTaskDef().file(generatedJavaSourcesDirectory), input);
         return None.instance;
     }
 

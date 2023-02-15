@@ -43,6 +43,8 @@ public class AdapterProjectCompilerInputBuilder {
     private boolean hoverEnabled = false;
     public final HoverAdapterCompiler.Input.Builder hover = HoverAdapterCompiler.Input.builder();
 
+    private boolean referenceRetentionEnabled = false;
+    public final ReferenceRetentionAdapterCompiler.Input.Builder referenceRetention = ReferenceRetentionAdapterCompiler.Input.builder();
 
     public AdapterProjectCompiler.Input.Builder project = AdapterProjectCompiler.Input.builder();
 
@@ -104,6 +106,11 @@ public class AdapterProjectCompilerInputBuilder {
         return hover;
     }
 
+    public ReferenceRetentionAdapterCompiler.Input.Builder withReferenceRetention() {
+        referenceRetentionEnabled = true;
+        return referenceRetention;
+    }
+
 
     public AdapterProjectCompiler.Input build(LanguageProjectCompiler.Input languageProjectInput, Option<GradleDependency> languageProjectDependency, AdapterProject adapterProject) {
         final Shared shared = languageProjectInput.shared();
@@ -143,6 +150,9 @@ public class AdapterProjectCompilerInputBuilder {
 
         final HoverAdapterCompiler.@Nullable Input hover = buildHover(shared, adapterProject, strategoRuntime, constraintAnalyzer, classLoaderResources);
         if(hover != null) project.hover(hover);
+
+        final ReferenceRetentionAdapterCompiler.@Nullable Input referenceRetention = buildReferenceRetention(shared, adapterProject, parser, constraintAnalyzer, strategoRuntime, tegoRuntime, classLoaderResources);
+        if(referenceRetention != null) project.referenceRetention(referenceRetention);
 
         project.languageProjectDependency(languageProjectDependency);
 
@@ -359,6 +369,39 @@ public class AdapterProjectCompilerInputBuilder {
             .adapterProject(adapterProject)
             .strategoRuntimeInput(strategoRuntimeInput)
             .constraintAnalyzerInput(constraintAnalyzerInput)
+            .classLoaderResourcesInput(classloaderResources)
+            .build();
+    }
+
+    private ReferenceRetentionAdapterCompiler.@Nullable Input buildReferenceRetention(
+        Shared shared,
+        AdapterProject adapterProject,
+        ParserAdapterCompiler.@Nullable Input parserInput,
+        ConstraintAnalyzerAdapterCompiler.@Nullable Input constraintAnalyzerInput,
+        StrategoRuntimeAdapterCompiler.@Nullable Input strategoRuntimeInput,
+        TegoRuntimeAdapterCompiler.@Nullable Input tegoRuntimeInput,
+        ClassLoaderResourcesCompiler.Input classloaderResources
+    ) {
+        if(!referenceRetentionEnabled) return null;
+        if(parserInput == null) {
+            throw new RuntimeException("Reference retention input requires a parser, but the parse has not been set");
+        }
+        if(constraintAnalyzerInput == null) {
+            throw new RuntimeException("Reference retention input requires a constraint analyzer, but the constraint analyzer has not been set");
+        }
+        if(strategoRuntimeInput == null) {
+            throw new RuntimeException("Reference retention input requires a Stratego runtime, but the Stratego runtime has not been set");
+        }
+        if(tegoRuntimeInput == null) {
+            throw new RuntimeException("Reference retention input requires a Tego runtime, but the Tego runtime has not been set");
+        }
+        return referenceRetention
+            .shared(shared)
+            .adapterProject(adapterProject)
+            .parserInput(parserInput)
+            .constraintAnalyzerInput(constraintAnalyzerInput)
+            .strategoRuntimeInput(strategoRuntimeInput)
+            .tegoRuntimeInput(tegoRuntimeInput)
             .classLoaderResourcesInput(classloaderResources)
             .build();
     }

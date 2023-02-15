@@ -40,6 +40,8 @@ import mb.spoofax.compiler.adapter.HoverAdapterCompiler;
 import mb.spoofax.compiler.adapter.MultilangAnalyzerAdapterCompiler;
 import mb.spoofax.compiler.adapter.ParserAdapterCompiler;
 import mb.spoofax.compiler.adapter.ReferenceResolutionAdapterCompiler;
+import mb.spoofax.compiler.adapter.ReferenceResolutionAdapterCompilerData;
+import mb.spoofax.compiler.adapter.ReferenceRetentionAdapterCompiler;
 import mb.spoofax.compiler.adapter.StrategoRuntimeAdapterCompiler;
 import mb.spoofax.compiler.adapter.StylerAdapterCompiler;
 import mb.spoofax.compiler.adapter.TegoRuntimeAdapterCompiler;
@@ -469,6 +471,9 @@ public class CfgAstToObject {
             // TODO: more strategoRuntime language properties
             final StrategoRuntimeAdapterCompiler.Input.Builder adapter = adapterBuilder.withStrategoRuntime();
             // TODO: strategoRuntime adapter properties
+        });
+        parts.getAllSubTermsInListAsParts("ReferenceRetentionSection").ifSome(subParts -> {
+            final ReferenceRetentionAdapterCompiler.Input.Builder adapter = adapterBuilder.withReferenceRetention();
         });
         parts.getAllSubTermsInListAsParts("TegoRuntimeSection").ifSome(subParts -> {
             final TegoRuntimeAdapterCompiler.Input.Builder adapter = adapterBuilder.withTegoRuntime();

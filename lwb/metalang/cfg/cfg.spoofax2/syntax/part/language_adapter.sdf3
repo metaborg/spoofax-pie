@@ -30,7 +30,7 @@ context-free sorts
 
 context-free syntax
 
-  Part.ReferenceResolutionSection = <reference-resolution { 
+  Part.ReferenceResolutionSection = <reference-resolution {
   <{ReferenceResolutionOption "\n"}*>
 }>
 
@@ -46,13 +46,23 @@ context-free sorts
 
 context-free syntax
 
-  Part.HoverSection = <hover { 
+  Part.HoverSection = <hover {
   <{HoverOption "\n"}*>
 }>
 
   HoverOption.HoverVariant = <variant = <HoverVariant>>
   HoverVariant.HoverStrategoVariant = <stratego {
     strategy = <Expr>
+  }>
+
+context-free sorts
+
+  ReferenceRetentionOption
+
+context-free syntax
+
+  Part.ReferenceRetentionSection = <reference-retention {
+    <{ReferenceRetentionOption "\n"}*>
   }>
 
 context-free syntax

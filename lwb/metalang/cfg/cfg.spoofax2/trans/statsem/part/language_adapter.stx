@@ -50,5 +50,9 @@ rules
 
 rules
 
+  partOk(s, ReferenceRetentionSection(_)).
+
+rules
+
   partOk(s, DependOnRv32Im(e)) :-
     typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.

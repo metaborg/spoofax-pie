@@ -74,6 +74,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
     private final TegoRuntimeAdapterCompiler tegoRuntimeCompiler;
     private final ReferenceResolutionAdapterCompiler referenceResolutionAdapterCompiler;
     private final HoverAdapterCompiler hoverAdapterCompiler;
+    private final ReferenceRetentionAdapterCompiler referenceRetentionAdapterCompiler;
     private final GetSourceFilesAdapterCompiler getSourceFilesAdapterCompiler;
 
     @Inject public AdapterProjectCompiler(
@@ -88,6 +89,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         TegoRuntimeAdapterCompiler tegoRuntimeCompiler,
         ReferenceResolutionAdapterCompiler referenceResolutionAdapterCompiler,
         HoverAdapterCompiler hoverAdapterCompiler,
+        ReferenceRetentionAdapterCompiler referenceRetentionAdapterCompiler,
         GetSourceFilesAdapterCompiler getSourceFilesAdapterCompiler
     ) {
         templateCompiler = templateCompiler.loadingFromClass(getClass());
@@ -118,6 +120,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         this.tegoRuntimeCompiler = tegoRuntimeCompiler;
         this.referenceResolutionAdapterCompiler = referenceResolutionAdapterCompiler;
         this.hoverAdapterCompiler = hoverAdapterCompiler;
+        this.referenceRetentionAdapterCompiler = referenceRetentionAdapterCompiler;
         this.getSourceFilesAdapterCompiler = getSourceFilesAdapterCompiler;
     }
 
@@ -147,6 +150,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         Option.ofOptional(input.tegoRuntime()).ifSomeThrowing((i) -> tegoRuntimeCompiler.compile(context, i));
         Option.ofOptional(input.referenceResolution()).ifSomeThrowing((i) -> referenceResolutionAdapterCompiler.compile(context, i));
         Option.ofOptional(input.hover()).ifSomeThrowing((i) -> hoverAdapterCompiler.compile(context, i));
+        Option.ofOptional(input.referenceRetention()).ifSomeThrowing((i) -> referenceRetentionAdapterCompiler.compile(context, i));
         getSourceFilesAdapterCompiler.compile(context, input.getSourceFiles());
 
         if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
@@ -373,6 +377,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         input.strategoRuntime().ifPresent((i) -> strategoRuntimeCompiler.getDependencies(i).addAllTo(dependencies));
         input.tegoRuntime().ifPresent((i) -> tegoRuntimeCompiler.getDependencies(i).addAllTo(dependencies));
         input.codeCompletion().ifPresent((i) -> codeCompletionCompiler.getDependencies(i).addAllTo(dependencies));
+        input.referenceRetention().ifPresent((i) -> referenceRetentionAdapterCompiler.getDependencies(i).addAllTo(dependencies));
         dependencies.add(GradleConfiguredDependency.api(shared.sptApiDep()));
         if(input.dependOnRv32Im()) {
             dependencies.add(GradleConfiguredDependency.api(shared.rv32ImDep()));
@@ -415,6 +420,8 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         Optional<TegoRuntimeAdapterCompiler.Input> tegoRuntime();
 
         Optional<HoverAdapterCompiler.Input> hover();
+
+        Optional<ReferenceRetentionAdapterCompiler.Input> referenceRetention();
 
         GetSourceFilesAdapterCompiler.Input getSourceFiles();
 
