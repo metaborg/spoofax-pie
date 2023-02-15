@@ -468,8 +468,17 @@ public class CfgAstToObject {
             subParts.forOneSubtermAsTypeInfo("StrategoRuntime_BaseStrategoRuntimeBuilderFactory", base::baseStrategoRuntimeBuilderFactory);
             subParts.forOneSubtermAsTypeInfo("StrategoRuntime_ExtendStrategoRuntimeBuilderFactory", base::extendStrategoRuntimeBuilderFactory);
 
+            subParts.getAllSubTermsInListAsParts("StrategoRuntime_ExtendStrategoRuntimeBuilderFactoryWithArgs").ifSome(extendParts -> {
+                extendParts.forOneSubtermAsTypeInfo("StrategoRuntimeBuilderFactoryName", base::extendStrategoRuntimeBuilderFactory);
+            });
+
             // TODO: more strategoRuntime language properties
             final StrategoRuntimeAdapterCompiler.Input.Builder adapter = adapterBuilder.withStrategoRuntime();
+            subParts.getAllSubTermsInListAsParts("StrategoRuntime_ExtendStrategoRuntimeBuilderFactoryWithArgs").ifSome(extendParts -> {
+                extendParts.forAllSubTermsInList("StrategoRuntimeBuilderFactoryArguments", argument -> {
+                    adapter.addExtendStrategoRuntimeBuilderFactoryCustomArgs(TypeInfo.of(Parts.toJavaString(argument)));
+                });
+            });
             // TODO: strategoRuntime adapter properties
         });
         parts.getAllSubTermsInListAsParts("ReferenceRetentionSection").ifSome(subParts -> {

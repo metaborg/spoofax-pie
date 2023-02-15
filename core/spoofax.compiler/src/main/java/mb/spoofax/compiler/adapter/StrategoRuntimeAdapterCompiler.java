@@ -8,6 +8,7 @@ import mb.spoofax.compiler.language.ClassLoaderResourcesCompiler;
 import mb.spoofax.compiler.language.StrategoRuntimeLanguageCompiler;
 import mb.spoofax.compiler.util.ClassKind;
 import mb.spoofax.compiler.util.GradleConfiguredDependency;
+import mb.spoofax.compiler.util.NamedTypeInfo;
 import mb.spoofax.compiler.util.Shared;
 import mb.spoofax.compiler.util.TemplateCompiler;
 import mb.spoofax.compiler.util.TemplateWriter;
@@ -17,6 +18,9 @@ import org.immutables.value.Value;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 @Value.Enclosing
@@ -59,6 +63,20 @@ public class StrategoRuntimeAdapterCompiler {
 
         default ResourcePath generatedJavaSourcesDirectory() {
             return adapterProject().generatedJavaSourcesDirectory();
+        }
+
+        // Additional arguments to be injected in extended Stratego Runtime Builder Factory
+
+        @Value.Default default List<TypeInfo> extendStrategoRuntimeBuilderFactoryCustomArgs() {
+            return Collections.emptyList();
+        }
+
+        @Value.Lazy default List<NamedTypeInfo> extendStrategoRuntimeBuilderFactoryCustomVars() {
+            ArrayList<NamedTypeInfo> results = new ArrayList<>();
+            for (int i = 0; i < extendStrategoRuntimeBuilderFactoryCustomArgs().size(); i++) {
+                results.add(NamedTypeInfo.of("custom" + i, extendStrategoRuntimeBuilderFactoryCustomArgs().get(i)));
+            }
+            return results;
         }
 
         // Style task definition
