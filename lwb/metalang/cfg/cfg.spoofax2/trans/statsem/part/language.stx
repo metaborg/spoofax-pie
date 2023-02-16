@@ -145,6 +145,8 @@ rules // Stratego section and options
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
   strategoFilesOptionOk(s, StrategoFilesExportDirectory(e)) :-
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
+  strategoFilesOptionOk(s, StrategoWithImportStrategyPackageId(e)) :-
+    typeOfExpr(s, e) == STRING() | error $[Expected package name]@e.
   strategoFilesOptionOk(s, StrategoSdf3StatixExplicationGen(e)) :-
     typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
   strategoFilesOptionOk(s, StrategoLanguageStrategyAffix(e)) :-
@@ -223,6 +225,6 @@ rules
 
   buildDependencyOk : scope * BuildDependency
   buildDependenciesOk maps buildDependencyOk(*, list(*))
-  
+
   buildDependencyOk(s, DefaultBuildDependency(e)) :-
     dependencyExprOk(s, e).

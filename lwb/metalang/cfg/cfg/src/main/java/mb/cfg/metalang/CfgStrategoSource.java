@@ -13,6 +13,7 @@ import org.immutables.value.Value;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -62,6 +63,16 @@ public abstract class CfgStrategoSource implements Serializable {
             strategoBuiltinLibs.add("libstratego-sglr");
             strategoBuiltinLibs.add("libstratego-aterm");
             return strategoBuiltinLibs;
+        }
+
+        /**
+         * A list of Java package names to import.
+         *
+         * For example: `["mb.mylang.strategies"]`. The package will be imported as `import mb.mylang.strategies.*`
+         * using the `-la` flag of the Stratego compiler.
+         */
+        @Value.Default default List<String> importedStrategyPackages() {
+            return Collections.emptyList();
         }
 
         @Value.Default default boolean enableSdf3StatixExplicationGen() {

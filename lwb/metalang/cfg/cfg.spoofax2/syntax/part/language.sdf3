@@ -28,7 +28,7 @@ context-free syntax
   <{Sdf3ParseTableGeneratorOption "\n"}*>
 }>
   Sdf3FilesOption.Sdf3StrategoConcreteSyntaxExtensionMainFile = <stratego-concrete-syntax-extension-main-file = <Expr>>
-  
+
   Sdf3ParseTableGeneratorOption.Sdf3ParseTableGeneratorDynamic = <dynamic = <Expr>>
   Sdf3ParseTableGeneratorOption.Sdf3ParseTableGeneratorDataDependent = <data-dependent = <Expr>>
   Sdf3ParseTableGeneratorOption.Sdf3ParseTableGeneratorLayoutSensitive = <layout-sensitive = <Expr>>
@@ -109,6 +109,7 @@ context-free syntax
   StrategoFilesOption.StrategoFilesMainFile                     = <main-file = <Expr>>
   StrategoFilesOption.StrategoFilesIncludeDirectory             = <include-directory = <Expr>>
   StrategoFilesOption.StrategoFilesExportDirectory              = <export-directory = <Expr>>
+  StrategoFilesOption.StrategoWithImportStrategyPackageId       = <with-import-strategy-package-id = <Expr>>
   StrategoFilesOption.StrategoSdf3StatixExplicationGen          = <sdf3-statix-explication-generation = <Expr>>
   StrategoFilesOption.StrategoLanguageStrategyAffix             = <language-strategy-affix = <Expr>>
   StrategoFilesOption.StrategoConcreteSyntaxExtensionParseTable = <concrete-syntax-extension-parse-table = <Expr>>
