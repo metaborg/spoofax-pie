@@ -286,6 +286,7 @@ public class CfgAstToObject {
                     filesParts.forOneSubtermAsExistingFile("StrategoFilesMainFile", mainSourceDirectory, "Stratego main file", filesSourceBuilder::mainFile);
                     filesParts.forAllSubtermsAsExistingDirectories("StrategoFilesIncludeDirectory", rootDirectory, "Stratego include directory", filesSourceBuilder::addIncludeDirectories);
                     filesParts.forAllSubtermsAsStrings("StrategoFilesExportDirectory", filesSourceBuilder::addExportDirectories);
+                    filesParts.forAllSubtermsAsStrings("StrategoWithImportStrategyPackageId", filesSourceBuilder::addImportedStrategyPackages);
                     filesParts.forOneSubtermAsBool("StrategoSdf3StatixExplicationGen", filesSourceBuilder::enableSdf3StatixExplicationGen);
                     filesParts.forOneSubtermAsString("StrategoLanguageStrategyAffix", filesSourceBuilder::languageStrategyAffix);
                     filesParts.forOneSubterm("StrategoConcreteSyntaxExtensionParseTable", t -> {

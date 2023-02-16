@@ -305,13 +305,19 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
             builtinLibraryIdentifiers.add(identifier);
         }
 
+        // Add extra compiler arguments
+        final Arguments extraCompilerArguments = new Arguments();
+        for(String importedStrategyPackage : sourceFiles.importedStrategyPackages()) {
+            extraCompilerArguments.add("-la", importedStrategyPackage);
+        }
+
         return Result.ofOk(new StrategoCompileConfig(
             rootDirectory,
             new ModuleIdentifier(true, false, sourceFiles.mainModule(), mainFile.getPath()),
             ListView.copyOf(allIncludeDirectories),
             ListView.of(builtinLibraryIdentifiers),
             ListView.copyOf(allStratego2LibInfos),
-            new Arguments(), // TODO: add to input and configure
+            extraCompilerArguments,
             MapView.of(concreteSyntaxExtensionParseTables),
             MapView.of(concreteSyntaxExtensionTransientParseTables),
             ListView.of(sourceFileOrigins),
