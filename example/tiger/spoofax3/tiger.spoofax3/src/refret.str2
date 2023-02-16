@@ -37,24 +37,40 @@ strategies
   construct-textual-change = construct-textual-change(pp-partial-tiger-string, parenthesize, override-reconstruction, resugar)
 
   inline-method-call(|call@Call(name, args), solverResultTerm): ast -> text
-  where where(<debug(!"Call: ")> call);
+  where // Boilerplate preprocessing
+        where(<debug(!"Call: ")> call);
   		explicatedCall := <explicate-injections-tiger-Exp> call;										// Explicate call, because we only work with explicated ASTs
   		where(<debug(!"Explicated Call: ")> explicatedCall);
   		analysis := <stx--get-ast-analysis> ast;														// Get the original analysis
   		explicatedAst := <explicate-injections-tiger> ast;												// Explicate the full AST, because we only work with explicated ASTs
+  		
+  		///////////////////////
+  		// Refactoring Start //
+  		///////////////////////
+  		
+  		// Find method definition
         decl := <stx--get-ast-property(|analysis, Ref())> name;											// Get the declaration term the reference is pointing to (@ref attribute)
         fun@FunDec(fname, fparams, fretType, fbody) := <collect(?FunDec(_,_,_,_)|decl)> explicatedAst;	// Get the function definition corresponding to the declaration term
         where(<debug(!"Inlining: ")> fun);
         
+        // Replace method call with built inlined code, with fix references wrapped in a RR placeholder
         newbody := <rr-lock-all-references(|analysis, solverResultTerm)> fbody;							// Lock all references in the function body
-        ctxs := <build-contexts(|explicatedCall, solverResultTerm)> explicatedAst;						// Build the contexts
-        plhdrbody := <prim("RR_create_placeholder", ctxs)> newbody;										// Build the placeholder for the inlined function body
+        ctxs := <build-contexts(|explicatedCall, solverResultTerm)> explicatedAst;						// Build the contexts (e.g. receiver)
+        plhdrbody := <stx--erase-ast-indices; rr--create-placeholder(|ctxs)> newbody;		      		// Build the placeholder for the inlined function body
         argvars := <zip(?(FArg(pn, pty), ae); !VarDec(pn, pty, <explicate-injections-tiger-Exp> ae))> (fparams, args);					// Construct variable definitions from the parameters and call arguments
         replacement := Let(argvars, [ plhdrbody ]);														// Build the AST surrounding the inlined function body
         newAst := <replace(!replacement|explicatedCall)> explicatedAst;									// Replace the old call with the new AST
+        
+        // Unwrap placeholder and fix references
         where(<debug(!"Pre-RR: ")> newAst);
-        fixedAst := <prim("RR_fix_references", solverResultTerm)> newAst;								// Fix references inside the placeholders
+        fixedAst := <rr--fix-references(|solverResultTerm)> newAst;								        // Fix references inside the placeholders
         where(<debug(!"Post-RR: ")> fixedAst);
+        
+        ///////////////////////
+        //  Refactoring End  //
+        ///////////////////////
+        
+        // Boilerplate postprocessing
         implicatedAst := <implicate-injections-tiger> fixedAst;  										// Implicate the final (fixed) AST
         where(<debug(!"Implicated: ")> implicatedAst);
         text := <pp-into-existing> (ast, implicatedAst);
@@ -97,28 +113,40 @@ strategies
   // Collect bottomup the first term where strategy `s` succeeds; or fails if there is no such term
   collect-onebu(s) = oncebu(where(s; ?t)); !t
 
-  // Locks all references in the given term
+  // Locks all references in the given subtree, by traversing the subtree and finding all terms
+  // with a @ref property. The locked reference wraped the term and stores the declaration the
+  // reference resolves to (as a term index).
   rr-lock-all-references(|analysis, solverResultTerm) = bottomup(try(rr-lock-one-reference(|analysis, solverResultTerm)))
 
   // Locks the reference represented by the given term
   // if the reference has a @ref property, or fails if it is not a reference.
-  //rr-lock-one-reference(|analysis, solverResultTerm): ref -> lockedRef
-  //where decl := <stx--get-ast-property(|analysis, Ref())> ref;
-  //      where(<debug(!"Accept Decl: ")> decl);
-  //      lockedRef := <prim("RR_lock_reference", decl, solverResultTerm)> ref;
-  //      where(<debug(!"Locked: ")> lockedRef)
-        
   rr-lock-one-reference(|analysis, solverResultTerm): ref -> lockedRef
-  where (name, sortName) := <rr-get-ref-name> ref;	// Fails if the term is not a valid reference
-        decl := <stx--get-ast-property(|analysis, Ref())> name;
+  where (_, sortName) := <rr-get-ref-name> ref;			// Fails if the term is not a valid reference
+  		decl := <rr-get-ref-decl(|analysis)> ref;		// Fails if the term does not have an @ref property
         where(<debug(!"Accept Decl: ")> decl);
-        lockedRef := <prim("RR_lock_reference", decl, solverResultTerm, sortName)> ref;
+        lockedRef := <rr--lock-reference(|decl, solverResultTerm, sortName)> ref;
         where(<debug(!"Locked: ")> lockedRef)
         
-  // If the term is a valid reference, returns the name and the sort name
-  // Otherwise, fails
+  // If the term is a valid reference, returns the name and the sort name; otherwise, fails.
   rr-get-ref-name: LValue2Exp(Var2LValue(Var(name))) -> (name, "Exp")
-  // If the term is a valid reference, returns the term index.
+  // If the term is a valid reference, returns the term index; otherwise, fails.
   rr-get-ref-index: LValue2Exp(Var2LValue(Var(name))) -> <stx--get-ast-index> name
+  // If the term is a valid reference, returns the value of the @ref property, if any; otherwise, fails.
+  rr-get-ref-decl(|analysis): LValue2Exp(Var2LValue(Var(name))) -> <stx--get-ast-property(|analysis, Ref())> name
 
+  // For each term in the subtree, replace the existing term index with a new term index (starting at `startIndex`).
+  // For each @ref property on a term in the subtree, if it refers to a replaced index,
+  //  update the @ref property to reference the new index.
+  // For each locked reference, if its declaration is a replaced index,
+  //  update the locked reference to have the new index as its declaration.
+  rr-reindex(|startIndex): a -> a
+  
+  
+  rules
+    //external rr-lock-reference(|decl, solverResultTerm, sortName)
+    rr--lock-reference(|decl, solverResultTerm, sortName) = prim("RR_lock_reference", decl, solverResultTerm, sortName)
+    //external rr-create-placeholder(|contexts)
+    rr--create-placeholder(|contexts) = prim("RR_create_placeholder", contexts)
+    //external rr-fix-references(|analysis)
+    rr--fix-references(|solverResultTerm) = prim("RR_fix_references", solverResultTerm)
 
