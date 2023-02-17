@@ -248,7 +248,7 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
                 throw new UncheckedException(ex);
             }
             // Add missing term indices
-            final IStrategoTerm indexedStrAst = StrategoTermIndices.indexMore(explicatedStrAst, resource.toString(), termFactory);
+            final IStrategoTerm indexedStrAst = StrategoTermIndices.indexMore(explicatedStrAst, resource.toString(), StrategoTermIndices.findMaxIndex(strAst) + 1, termFactory);
             return strategoTerms.fromStratego(indexedStrAst);
         }
 

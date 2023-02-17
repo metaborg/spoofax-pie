@@ -54,9 +54,11 @@ strategies
         where(<debug(!"Inlining: ")> fun);
         
         // Replace method call with built inlined code, with fix references wrapped in a RR placeholder
-        newbody := <rr-lock-all-references(|analysis, solverResultTerm)> fbody;							// Lock all references in the function body
+        newBody := <rr-lock-all-references(|analysis, solverResultTerm)> fbody;							// Lock all references in the function body
         ctxs := <build-contexts(|explicatedCall, solverResultTerm)> explicatedAst;						// Build the contexts (e.g. receiver)
-        plhdrbody := <stx--erase-ast-indices; rr--create-placeholder(|ctxs)> newbody;		      		// Build the placeholder for the inlined function body
+        max-index := </*stx--get-max-ast-index*/ !255> ast;														// Get the maximum AST index
+        reindexedNewBody := <rr-reindex(|max-index)> newBody;											// Reindex the new function body
+        plhdrbody := <rr--create-placeholder(|ctxs)> reindexedNewBody;		      	                 	// Build the placeholder for the inlined function body
         argvars := <zip(?(FArg(pn, pty), ae); !VarDec(pn, pty, <explicate-injections-tiger-Exp> ae))> (fparams, args);					// Construct variable definitions from the parameters and call arguments
         replacement := Let(argvars, [ plhdrbody ]);														// Build the AST surrounding the inlined function body
         newAst := <replace(!replacement|explicatedCall)> explicatedAst;									// Replace the old call with the new AST
@@ -139,7 +141,12 @@ strategies
   //  update the @ref property to reference the new index.
   // For each locked reference, if its declaration is a replaced index,
   //  update the locked reference to have the new index as its declaration.
-  rr-reindex(|startIndex): a -> a
+  rr-reindex(|startIndex): t -> t'
+  where t' := t;
+        where(<stx--reindex(|"", startIndex); debug(!"Reindexed: ")> t)
+  
+  rr-reindex-with-map(|startIndex): a -> b
+    where b := <stx--set-ast-index(|"TermIndex"("a", "b"))> a
   
   
   rules
