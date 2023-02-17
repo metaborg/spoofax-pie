@@ -142,11 +142,11 @@ strategies
   // For each locked reference, if its declaration is a replaced index,
   //  update the locked reference to have the new index as its declaration.
   rr-reindex(|startIndex): t -> t'
-  where t' := t;
-        where(<stx--reindex(|"", startIndex); debug(!"Reindexed: ")> t)
+  where t' := t//;
+        //where(<stx--reindex(|"", startIndex); debug(!"Reindexed: ")> t)
   
-  rr-reindex-with-map(|startIndex): a -> b
-    where b := <stx--set-ast-index(|"TermIndex"("a", "b"))> a
+  //rr-reindex-with-map(|startIndex): a -> b
+    //where b := <stx--set-ast-index(|"TermIndex"("a", "b"))> a
   
   
   rules
