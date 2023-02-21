@@ -278,4 +278,15 @@ public class RRSolverState extends SolverState {
 
         sb.append(linePrefix).append("placeholderDescriptors: ").appendln(placeholderDescriptors);
     }
+
+    public SolverResult toSolverResult() {
+        return SolverResult.builder()
+            .spec(spec)
+            .state(state)
+            .delays(delays)
+            .completeness(completeness)
+            .existentials(existentials)
+            .messages(messages)
+            .build();
+    }
 }

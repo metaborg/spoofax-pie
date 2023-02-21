@@ -5,16 +5,15 @@ import mb.nabl2.terms.IListTerm;
 import mb.nabl2.terms.IStringTerm;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
-import mb.nabl2.terms.build.TermBuild;
 import mb.nabl2.terms.stratego.TermIndex;
 import mb.statix.constraints.CEqual;
 import mb.statix.referenceretention.statix.RRLockedReference;
 import mb.statix.referenceretention.statix.RRPlaceholder;
 import mb.statix.solver.ITermProperty;
+import mb.statix.solver.persistent.SolverResult;
 import mb.tego.sequences.Seq;
 import mb.tego.strategies.NamedStrategy3;
-import mb.tego.strategies.Strategy1;
-import mb.tego.strategies.Strategy2;
+import mb.tego.strategies.Strategy3;
 import mb.tego.strategies.runtime.TegoEngine;
 import mb.tego.tuples.Pair;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -26,7 +25,6 @@ import static mb.nabl2.terms.matching.TermMatch.M;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * If the placeholder is a locked reference and has no context, this verifies that the reference still resolves
@@ -206,9 +204,9 @@ public final class UnwrapOrFixReferenceStrategy extends NamedStrategy3<RRContext
         // For example, while inlining a call `c.f()`, the context is the term `c`
         // and the term is a reference to be fixed `x`. The result can be a term `c.x`,
         // a qualified reference, and the term index of `x`.
-        final Strategy2</* ctx */ IListTerm, /* sortName */ IStringTerm, /* term */ ITerm, /* result */ @Nullable ITerm> qualifyReference = ctx.getQualifyReferenceStrategy();
+        final Strategy3</* ctx */ IListTerm, /* sortName */ IStringTerm, /* solverResult */SolverResult, /* term */ ITerm, /* result */ @Nullable ITerm> qualifyReference = ctx.getQualifyReferenceStrategy();
 
-        final @Nullable ITerm qreferences = engine.eval(qualifyReference, B.newList(contextTerms), lockedRef.getSortName(), lockedRef.getTerm());
+        final @Nullable ITerm qreferences = engine.eval(qualifyReference, B.newList(contextTerms), lockedRef.getSortName(), state.toSolverResult(), lockedRef.getTerm());
         if (qreferences == null) {
             return Seq.of(); // No qualified reference
         }

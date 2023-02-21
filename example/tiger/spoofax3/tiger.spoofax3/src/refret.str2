@@ -7,7 +7,7 @@ imports
   libspoofax/analysis/constraint
   statix/runtime/analysis
   statix/runtime/ast
-  
+
   signatures/syntax/Arrays-sig
   signatures/syntax/Base-sig
   signatures/syntax/Bindings-sig
@@ -22,7 +22,7 @@ imports
   signatures/syntax/Whitespace-sig
   injections/-
   injections/syntax/-
-  
+
 imports //construct-textual-change
   libstratego-gpp
   libspoofax/sdf/pp
@@ -32,7 +32,7 @@ imports //construct-textual-change
 
 strategies
 
-  qualify-reference(|ctxs, sortName) = debug(!"Qualifying: "); ![(<id>, <rr-get-ref-index>)]; debug(!"Qualified as: ") //, (LValue2Exp(FieldVar(Var("r"), <id>)), <stx--get-ast-index>)]
+  qualify-reference(|ctxs, sortName, a) = debug(!"Qualifying: "); ![(<id>, <rr-get-ref-index>)]; debug(!"Qualified as: ") //, (LValue2Exp(FieldVar(Var("r"), <id>)), <stx--get-ast-index>)]
 
   construct-textual-change = construct-textual-change(pp-partial-tiger-string, parenthesize, override-reconstruction, resugar)
 
@@ -43,16 +43,16 @@ strategies
   		where(<debug(!"Explicated Call: ")> explicatedCall);
   		analysis := <stx--get-ast-analysis> ast;														// Get the original analysis
   		explicatedAst := <explicate-injections-tiger> ast;												// Explicate the full AST, because we only work with explicated ASTs
-  		
+
   		///////////////////////
   		// Refactoring Start //
   		///////////////////////
-  		
+
   		// Find method definition
         decl := <stx--get-ast-property(|analysis, Ref())> name;											// Get the declaration term the reference is pointing to (@ref attribute)
         fun@FunDec(fname, fparams, fretType, fbody) := <collect(?FunDec(_,_,_,_)|decl)> explicatedAst;	// Get the function definition corresponding to the declaration term
         where(<debug(!"Inlining: ")> fun);
-        
+
         // Replace method call with built inlined code, with fix references wrapped in a RR placeholder
         max-index := </*stx--get-max-ast-index*/ !255> ast;														// Get the maximum AST index
         (reindexedBody, map) := <rr-reindex(|max-index)> fbody;						    				// Reindexes the body that is being moved (this must happen before locking references)
@@ -64,23 +64,23 @@ strategies
         argvars := <zip(?(FArg(pn, pty), ae); !VarDec(pn, pty, <explicate-injections-tiger-Exp> ae))> (fparams, args);					// Construct variable definitions from the parameters and call arguments
         replacement := Let(argvars, [ plhdrbody ]);														// Build the AST surrounding the inlined function body
         newAst := <replace(!replacement|explicatedCall)> explicatedAst;									// Replace the old call with the new AST
-        
+
         // Unwrap placeholder and fix references
         where(<debug(!"Pre-RR: ")> newAst);
         fixedAst := <rr--fix-references(|solverResultTerm)> newAst;								        // Fix references inside the placeholders
         where(<debug(!"Post-RR: ")> fixedAst);
-        
+
         ///////////////////////
         //  Refactoring End  //
         ///////////////////////
-        
+
         // Boilerplate postprocessing
         implicatedAst := <implicate-injections-tiger> fixedAst;  										// Implicate the final (fixed) AST
         where(<debug(!"Implicated: ")> implicatedAst);
         text := <pp-into-existing> (ast, implicatedAst);
         where(<debug(!"Text: ")> text)
-        
-        
+
+
    // Pretty-prints the changed AST into the existing code,
    // or as a fallback performs pretty-printing on the whole AST.
    pp-into-existing = ?(_, <id>); pp-tiger-string
@@ -89,17 +89,17 @@ strategies
    //		 	construct-textual-change; ?(_, _, <id>),		// FIXME: Sometimes fails with NullPointerException because a Token doesn't have a Tokenizer, after building the language but before the file with the inlining source is (re-)saved
    //		 	?(_, (_, <id>), _); pp-tiger-string
 	// 	 )> (oldAst, newAst)
-        
-        
+
+
    build-contexts(|call@Call(_, _), solverResultTerm): ast -> [] // Not sure what contexts we could provide here
-   
-        
+
+
    // Finds the declaration term corresponding to the specified declaration
    // (that was retrieved from the @ref attribute of a reference)
    collect(s|decl) =
      where(idx := <stx--get-ast-index> decl);
      collect-onebu(s; has-index(|idx))
-     
+
    // Replaces a term in the ast that matches the given term and its index
    // by applying strategy s to it
    replace(s|term) =
@@ -109,11 +109,11 @@ strategies
      where(debug(!"Replace in: "));
      where(s; debug(!"Replace with: "));
      oncebu(debug(!"A: "); ?term; debug(!"B: "); where(stx--get-ast-index; ?idx); debug(!"C: "); s; debug(!"D: "))
-   
+
    // Succeeds if the term has a subterm with the specified index
    has-index(|idx): term -> term
    where oncetd(stx--get-ast-index; ?idx)
-  
+
   // Collect bottomup the first term where strategy `s` succeeds; or fails if there is no such term
   collect-onebu(s) = oncebu(where(s; ?t)); !t
 
@@ -134,7 +134,7 @@ strategies
         where(<debug(!"Accept Decl: ")> decl);
         lockedRef := <rr--lock-reference(|decl, solverResultTerm, sortName)> ref;
         where(<debug(!"Locked: ")> lockedRef)
-        
+
   // If the term is a valid reference, returns the name and the sort name; otherwise, fails.
   rr-get-ref-name: LValue2Exp(Var2LValue(Var(name))) -> (name, "Exp")
   // If the term is a valid reference, returns the term index; otherwise, fails.
