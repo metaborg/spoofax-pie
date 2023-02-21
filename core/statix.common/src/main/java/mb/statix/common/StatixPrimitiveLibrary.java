@@ -7,6 +7,7 @@ import mb.statix.spoofax.STX_delays_as_errors;
 import mb.statix.spoofax.STX_diff_scopegraphs;
 import mb.statix.spoofax.STX_extract_messages;
 import mb.statix.spoofax.STX_get_ast_property;
+import mb.statix.spoofax.STX_get_ast_property_from_index;
 import mb.statix.spoofax.STX_get_scopegraph;
 import mb.statix.spoofax.STX_get_scopegraph_data;
 import mb.statix.spoofax.STX_get_scopegraph_edges;
@@ -33,6 +34,7 @@ public class StatixPrimitiveLibrary extends AbstractStrategoOperatorRegistry {
         add(new STX_diff_scopegraphs());
         add(new STX_extract_messages());
         add(new STX_get_ast_property());
+        add(new STX_get_ast_property_from_index());
         add(new STX_get_scopegraph());
         add(new STX_get_scopegraph_data());
         add(new STX_get_scopegraph_edges());
