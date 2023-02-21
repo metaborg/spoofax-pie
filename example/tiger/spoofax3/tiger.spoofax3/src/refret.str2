@@ -54,9 +54,11 @@ strategies
         where(<debug(!"Inlining: ")> fun);
         
         // Replace method call with built inlined code, with fix references wrapped in a RR placeholder
-        newBody := <rr-lock-all-references(|analysis, solverResultTerm)> fbody;							// Lock all references in the function body
-        ctxs := <build-contexts(|explicatedCall, solverResultTerm)> explicatedAst;						// Build the contexts (e.g. receiver)
         max-index := </*stx--get-max-ast-index*/ !255> ast;														// Get the maximum AST index
+        (reindexedBody, map) := <rr-reindex(|max-index)> fbody;						    				// Reindexes the body that is being moved (this must happen before locking references)
+        newBody := <rr-lock-all-references(|analysis, solverResultTerm, map)> fbody;					// Lock all references in the function body
+        ctxs := <build-contexts(|explicatedCall, solverResultTerm)> explicatedAst;						// Build the contexts (e.g. receiver)
+        
         reindexedNewBody := <rr-reindex(|max-index)> newBody;											// Reindex the new function body
         plhdrbody := <rr--create-placeholder(|ctxs)> reindexedNewBody;		      	                 	// Build the placeholder for the inlined function body
         argvars := <zip(?(FArg(pn, pty), ae); !VarDec(pn, pty, <explicate-injections-tiger-Exp> ae))> (fparams, args);					// Construct variable definitions from the parameters and call arguments
@@ -116,15 +118,19 @@ strategies
   collect-onebu(s) = oncebu(where(s; ?t)); !t
 
   // Locks all references in the given subtree, by traversing the subtree and finding all terms
-  // with a @ref property. The locked reference wraped the term and stores the declaration the
+  // with a @ref property. The locked reference wraps the term and stores the declaration the
   // reference resolves to (as a term index).
-  rr-lock-all-references(|analysis, solverResultTerm) = bottomup(try(rr-lock-one-reference(|analysis, solverResultTerm)))
+  // The map may contain a mapping from the original term index to the new term index;
+  // or alternatively, provide an empty map if this is not necessary/computed: <immap-new>
+  rr-lock-all-references(|analysis, solverResultTerm, map) = bottomup(try(rr-lock-one-reference(|analysis, solverResultTerm, map)))
+//  rr-lock-all-references(|analysis, solverResultTerm) = rr-lock-all-references(|analysis, solverResultTerm, <immap-new>)
 
   // Locks the reference represented by the given term
   // if the reference has a @ref property, or fails if it is not a reference.
-  rr-lock-one-reference(|analysis, solverResultTerm): ref -> lockedRef
+  // The map contains a mapping from the original term index to the new term index, if applicable.
+  rr-lock-one-reference(|analysis, solverResultTerm, map): ref -> lockedRef
   where (_, sortName) := <rr-get-ref-name> ref;			// Fails if the term is not a valid reference
-  		decl := <rr-get-ref-decl(|analysis)> ref;		// Fails if the term does not have an @ref property
+  		decl := <rr-get-ref-decl(|analysis, map)> ref;	// Fails if the term does not have an @ref property
         where(<debug(!"Accept Decl: ")> decl);
         lockedRef := <rr--lock-reference(|decl, solverResultTerm, sortName)> ref;
         where(<debug(!"Locked: ")> lockedRef)
@@ -134,26 +140,23 @@ strategies
   // If the term is a valid reference, returns the term index; otherwise, fails.
   rr-get-ref-index: LValue2Exp(Var2LValue(Var(name))) -> <stx--get-ast-index> name
   // If the term is a valid reference, returns the value of the @ref property, if any; otherwise, fails.
-  rr-get-ref-decl(|analysis): LValue2Exp(Var2LValue(Var(name))) -> <stx--get-ast-property(|analysis, Ref())> name
-
-  // For each term in the subtree, replace the existing term index with a new term index (starting at `startIndex`).
-  // For each @ref property on a term in the subtree, if it refers to a replaced index,
-  //  update the @ref property to reference the new index.
-  // For each locked reference, if its declaration is a replaced index,
-  //  update the locked reference to have the new index as its declaration.
-  rr-reindex(|startIndex): t -> t'
-  where t' := t//;
-        //where(<stx--reindex(|"", startIndex); debug(!"Reindexed: ")> t)
+  rr-get-ref-decl(|analysis, map) = rr-get-ref-index; try(<immap-get(|<id>)> map); stx--get-ast-property-from-index(|analysis, Ref())
   
-  //rr-reindex-with-map(|startIndex): a -> b
-    //where b := <stx--set-ast-index(|"TermIndex"("a", "b"))> a
+  
+  // For each term in the subtree, replace the existing term index with a new term index (starting at `startIndex`).
+  // Returns a tuple of the new term and a map mapping the original indices to the new indices.
+  // Terms that did not have an original index are not in the resulting map.
+  rr-reindex(|startIndex): t -> (t', map)
+  where (t', map) := <stx--reindex-ast(|"", startIndex); debug(!"Reindexed: ")> t
+        //t'' := <rr-adjust-locked-references(|map); debug(!"Refs adjusted: ")> t'
+  
+  // Attempts to fix each locked refence according to the given map
+  //rr-adjust-locked-references(|map) = bottomup(try(rr--adjust-locked-reference(|map)))
   
   
   rules
-    //external rr-lock-reference(|decl, solverResultTerm, sortName)
     rr--lock-reference(|decl, solverResultTerm, sortName) = prim("RR_lock_reference", decl, solverResultTerm, sortName)
-    //external rr-create-placeholder(|contexts)
     rr--create-placeholder(|contexts) = prim("RR_create_placeholder", contexts)
-    //external rr-fix-references(|analysis)
-    rr--fix-references(|solverResultTerm) = prim("RR_fix_references", solverResultTerm)
+    rr--fix-references(|solverResultTerm) = prim("RR_fix_references", solverResultTerm) 
+    rr--adjust-locked-reference(|map) = prim("RR_adjust_locked_reference", map) 
 
