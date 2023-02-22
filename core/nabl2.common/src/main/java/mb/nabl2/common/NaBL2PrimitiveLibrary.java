@@ -58,7 +58,6 @@ public class NaBL2PrimitiveLibrary extends AbstractStrategoOperatorRegistry {
         add(new SG_reindex_ast());
         add(new SG_get_max_ast_index());
         add(new SG_set_ast_index());
-        add(new SG_reindex_ast());
         // nabl2.solver
         add(new SG_analysis_has_errors());
         add(new SG_debug_constraints());
