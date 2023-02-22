@@ -67,7 +67,6 @@ public final class AssertValidStrategy extends NamedStrategy1<RRContext, RRSolve
     public String getParamName(int index) {
         switch (index) {
             case 0: return "ctx";
-            case 1: return "v";
             default: return super.getParamName(index);
         }
     }
