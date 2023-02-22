@@ -17,11 +17,11 @@ import mb.statix.spoofax.STX_labelre_to_states;
 import mb.statix.spoofax.STX_ords_to_relation;
 import mb.statix.spoofax.STX_solve_constraint;
 import mb.statix.spoofax.STX_solve_constraint_concurrent;
+import mb.statix.spoofax.STX_solve_constraint_with_initial_state;
 import mb.statix.spoofax.STX_solve_multi;
 import mb.statix.spoofax.STX_solve_multi_file;
 import mb.statix.spoofax.STX_solve_multi_project;
 import mb.statix.spoofax.STX_test_log_level;
-import mb.stratego.common.primitive.FailingPrimitive;
 import org.spoofax.interpreter.library.AbstractStrategoOperatorRegistry;
 
 public class StatixPrimitiveLibrary extends AbstractStrategoOperatorRegistry {
@@ -39,6 +39,7 @@ public class StatixPrimitiveLibrary extends AbstractStrategoOperatorRegistry {
         add(new STX_is_analysis());
         add(new STX_solve_constraint());
         add(new STX_solve_constraint_concurrent());
+        add(new STX_solve_constraint_with_initial_state());
         add(new STX_solve_multi());
         add(new STX_solve_multi_file());
         add(new STX_solve_multi_project());
