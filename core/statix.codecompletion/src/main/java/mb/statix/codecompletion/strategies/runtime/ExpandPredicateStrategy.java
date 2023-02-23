@@ -6,7 +6,6 @@ import mb.nabl2.terms.ITermVar;
 import mb.statix.codecompletion.CCSolverState;
 import mb.statix.codecompletion.SelectedConstraintCCSolverState;
 import mb.statix.codecompletion.SolverContext;
-import mb.statix.codecompletion.SolverState;
 import mb.statix.constraints.CUser;
 import mb.tego.sequences.Seq;
 import mb.tego.sequences.SeqBase;
@@ -100,7 +99,7 @@ public final class ExpandPredicateStrategy extends NamedStrategy2<SolverContext,
                 ApplyMode.RELAXED, ApplyMode.Safety.UNSAFE).stream()
             .map(t -> state.withApplyResult(t._2(), selected))
             .collect(Collectors.toList());
-        return Seq.from(output);
+        return Seq.fromIterable(output);
     }
 
     /**

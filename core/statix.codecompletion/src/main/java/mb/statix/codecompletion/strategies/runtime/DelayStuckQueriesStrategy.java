@@ -11,7 +11,6 @@ import mb.scopegraph.oopsla20.reference.RelationLabelOrder;
 import mb.scopegraph.oopsla20.reference.ResolutionException;
 import mb.statix.codecompletion.CCSolverState;
 import mb.statix.codecompletion.SolverContext;
-import mb.statix.codecompletion.SolverState;
 import mb.statix.constraints.CEqual;
 import mb.statix.constraints.CResolveQuery;
 import mb.statix.generator.scopegraph.DataWF;
@@ -78,7 +77,7 @@ public final class DelayStuckQueriesStrategy extends NamedStrategy1<SolverContex
 
         final Map<IConstraint, Delay> delays;
         try {
-            delays = Seq.from(input.getConstraints())
+            delays = Seq.fromIterable(input.getConstraints())
                 .filterIsInstance(CResolveQuery.class)
                 .mapPresent(q -> checkDelay(input.getSpec(), q, state, completeness).map(d -> Pair.of(q, d)))
                 .collect(Collectors.toMap(Pair::component1, Pair::component2));

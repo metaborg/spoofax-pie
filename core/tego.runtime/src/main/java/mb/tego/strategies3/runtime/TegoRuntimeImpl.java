@@ -1,4 +1,4 @@
-package mb.tego.strategies.runtime;
+package mb.tego.strategies3.runtime;
 
 import mb.log.api.Level;
 import mb.log.api.Logger;
@@ -6,21 +6,19 @@ import mb.log.api.LoggerFactory;
 import mb.log.noop.NoopLogger;
 import mb.tego.sequences.DebugSeq;
 import mb.tego.sequences.Seq;
-import mb.tego.strategies.Strategy;
-import mb.tego.strategies.Strategy1;
-import mb.tego.strategies.Strategy2;
-import mb.tego.strategies.Strategy3;
-import mb.tego.strategies.StrategyDecl;
+import mb.tego.strategies3.Strategy;
+import mb.tego.strategies3.Strategy1;
+import mb.tego.strategies3.Strategy2;
+import mb.tego.strategies3.Strategy3;
+import mb.tego.strategies3.StrategyDecl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 
 /**
  * Implements the {@link TegoRuntime}.
- *
- * This is used for debugging.
  */
-public final class EagerDebugTegoRuntimeImpl implements TegoRuntime, TegoEngine {
+public /* open */ class TegoRuntimeImpl implements TegoRuntime, TegoEngine {
 
     @Nullable private final LoggerFactory loggerFactory;
     private final Logger log;
@@ -28,50 +26,50 @@ public final class EagerDebugTegoRuntimeImpl implements TegoRuntime, TegoEngine 
     private int level = 0;
 
     /**
-     * Initializes a new instance of the {@link EagerDebugTegoRuntimeImpl} class.
+     * Initializes a new instance of the {@link TegoRuntimeImpl} class.
      *
      * @param loggerFactory the logger factory
      */
     @Inject
-    public EagerDebugTegoRuntimeImpl(
+    public TegoRuntimeImpl(
         @Nullable LoggerFactory loggerFactory
     ) {
         this.loggerFactory = loggerFactory;
-        this.log = loggerFactory != null ? loggerFactory.create(EagerDebugTegoRuntimeImpl.class) : NoopLogger.instance;
+        this.log = loggerFactory != null ? loggerFactory.create(TegoRuntimeImpl.class) : NoopLogger.instance;
     }
 
-    @Override
-    public @Nullable Object eval(StrategyDecl strategy, Object[] args, Object input) {
+    @SuppressWarnings("rawtypes") @Override
+    public Seq eval(StrategyDecl strategy, Object[] args, Object input) {
         enterStrategy(strategy);
-        final @Nullable Object result = strategy.evalInternal(this, args, input);
+        final Seq result = strategy.evalInternal(this, args, input);
         return exitStrategy(strategy, result);
     }
 
     @Override
-    public <T, R> @Nullable R eval(Strategy<T, R> strategy, T input) {
+    public <T, R> Seq<R> eval(Strategy<T, R> strategy, T input) {
         enterStrategy(strategy);
-        final @Nullable R result = strategy.evalInternal(this, input);
+        final Seq<R> result = strategy.evalInternal(this, input);
         return exitStrategy(strategy, result);
     }
 
     @Override
-    public <A1, T, R> @Nullable R eval(Strategy1<A1, T, R> strategy, A1 arg1, T input) {
+    public <A1, T, R> Seq<R> eval(Strategy1<A1, T, R> strategy, A1 arg1, T input) {
         enterStrategy(strategy);
-        final @Nullable R result = strategy.evalInternal(this, arg1, input);
+        final Seq<R> result = strategy.evalInternal(this, arg1, input);
         return exitStrategy(strategy, result);
     }
 
     @Override
-    public <A1, A2, T, R> @Nullable R eval(Strategy2<A1, A2, T, R> strategy, A1 arg1, A2 arg2, T input) {
+    public <A1, A2, T, R> Seq<R> eval(Strategy2<A1, A2, T, R> strategy, A1 arg1, A2 arg2, T input) {
         enterStrategy(strategy);
-        final @Nullable R result = strategy.evalInternal(this, arg1, arg2, input);
+        final Seq<R> result = strategy.evalInternal(this, arg1, arg2, input);
         return exitStrategy(strategy, result);
     }
 
     @Override
-    public <A1, A2, A3, T, R> @Nullable R eval(Strategy3<A1, A2, A3, T, R> strategy, A1 arg1, A2 arg2, A3 arg3, T input) {
+    public <A1, A2, A3, T, R> Seq<R> eval(Strategy3<A1, A2, A3, T, R> strategy, A1 arg1, A2 arg2, A3 arg3, T input) {
         enterStrategy(strategy);
-        final @Nullable R result = strategy.evalInternal(this, arg1, arg2, arg3, input);
+        final Seq<R> result = strategy.evalInternal(this, arg1, arg2, arg3, input);
         return exitStrategy(strategy, result);
     }
 
@@ -80,9 +78,9 @@ public final class EagerDebugTegoRuntimeImpl implements TegoRuntime, TegoEngine 
      *
      * @param strategy the strategy that will be evaluated
      */
-    private void enterStrategy(StrategyDecl strategy) {
+    protected void enterStrategy(StrategyDecl strategy) {
+        log.trace(prefixString(" ", level, "→ " + strategy.toString()));
         level += 1;
-        log.trace(prefixString("→", level, " " + strategy.toString()));
     }
 
     /**
@@ -92,46 +90,10 @@ public final class EagerDebugTegoRuntimeImpl implements TegoRuntime, TegoEngine 
      * @param result the result of evaluating the strategy
      * @return the (possibly modified) result of evaluating the strategy
      */
-    private <R> @Nullable R exitStrategy(StrategyDecl strategy, @Nullable R result) {
-        R finalResult = result;
-        log.trace(prefixString("-", level, " " + strategy.toString()));
-        if (finalResult instanceof Seq) {
-            // Print when a sequence is evaluated, and its results
-            Seq<?> newResult = (Seq<?>)finalResult;
-            if(!(newResult instanceof DebugSeq)) {
-                //noinspection unchecked
-                newResult = new DebugSeq(newResult) {
-                    @Override
-                    protected void onBeforeNext(int index) {
-                    }
-
-                    @Override
-                    protected Object onAfterNext(int index, Object result) {
-                        log.trace(prefixString(" ", level, "◀[" + index + "] " + result.toString()));
-                        return result;
-                    }
-
-                    @Override
-                    protected void onEnd(int index) {
-                        log.trace(prefixString(" ", level, "⨯[" + index + "]"));
-                    }
-                };
-                // Force evaluation of the sequence
-                try {
-                    //noinspection unchecked
-                    finalResult = (R)Seq.fromIterable(newResult.toList());
-                } catch(InterruptedException ex) {
-                    throw new RuntimeException(ex);
-                }
-            }
-        } else if (result != null) {
-            log.trace(prefixString(" ", level, "◀" + result.toString()));
-        } else {
-            log.trace(prefixString(" ", level, "⨯ FAIL"));
-        }
-        log.trace(prefixString("←", level, " " + strategy.toString()));
+    protected <R> Seq<R> exitStrategy(StrategyDecl strategy, Seq<R> result) {
         level -= 1;
-        return finalResult;
+        log.trace(prefixString(" ", level, "← " + strategy.toString()));
+        return result;
     }
 
     /**
@@ -197,6 +159,8 @@ public final class EagerDebugTegoRuntimeImpl implements TegoRuntime, TegoEngine 
         // Most logger implementations (e.g., Log4J) perform some logger caching
         // using a hashtable lookup on the name. Therefore, we are not going to
         // do any effort here to reuse loggers on every log call.
-        return loggerFactory.create(strategy.toString());
+        // We separate the strategy name from the prefix with "::.", such that you
+        // can filter logs on a dot-prefix or colon-colon-prefix.
+        return loggerFactory.create("tego::." + strategy.getName());
     }
 }

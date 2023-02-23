@@ -1,9 +1,9 @@
-package mb.tego.strategies.runtime;
+package mb.tego.strategies3.runtime;
 
 import mb.tego.sequences.Seq;
 import mb.tego.sequences.SeqBase;
-import mb.tego.strategies.NamedStrategy1;
-import mb.tego.strategies.Strategy;
+import mb.tego.strategies3.NamedStrategy1;
+import mb.tego.strategies3.Strategy;
 import mb.tego.utils.ExcludeFromJacocoGeneratedReport;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -11,13 +11,13 @@ import java.util.HashSet;
 
 /**
  * Distinct strategy.
- *
+ * <p>
  * This strategy returns a lazy sequence that skips any elements it returned previously.
  *
  * @param <T> the type of input (contravariant)
  * @param <R> the type of output (covariant)
  */
-public final class DistinctStrategy<T, R> extends NamedStrategy1<Strategy<T, Seq<R>>, T, @Nullable Seq<R>> {
+public final class DistinctStrategy<T, R> extends NamedStrategy1<Strategy<T, R>, T, R> {
 
     @SuppressWarnings({"rawtypes", "RedundantSuppression"})
     private static final DistinctStrategy instance = new DistinctStrategy();
@@ -26,9 +26,8 @@ public final class DistinctStrategy<T, R> extends NamedStrategy1<Strategy<T, Seq
 
     private DistinctStrategy() { /* Prevent instantiation. Use getInstance(). */ }
 
-    public static <T, R> @Nullable Seq<R> eval(TegoEngine engine, Strategy<T, Seq<R>> s, T input) {
-        @Nullable final Seq<R> rs = engine.eval(s, input);
-        if (rs == null) return null;
+    public static <T, R> Seq<R> eval(TegoEngine engine, Strategy<T, R> s, T input) {
+        final Seq<R> rs = engine.eval(s, input);
         return new SeqBase<R>() {
             // Implementation if `yield` and `yieldBreak` could actually suspend computation
             @SuppressWarnings("unused")
@@ -99,7 +98,7 @@ public final class DistinctStrategy<T, R> extends NamedStrategy1<Strategy<T, Seq
     }
 
     @Override
-    public @Nullable Seq<R> evalInternal(TegoEngine engine, Strategy<T, Seq<R>> s, T input) {
+    public Seq<R> evalInternal(TegoEngine engine, Strategy<T, R> s, T input) {
         return eval(engine, s, input);
     }
 

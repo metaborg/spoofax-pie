@@ -2,7 +2,6 @@ package mb.statix.codecompletion.strategies.runtime;
 
 import mb.statix.codecompletion.CCSolverState;
 import mb.statix.codecompletion.SelectedConstraintCCSolverState;
-import mb.statix.codecompletion.SolverState;
 import mb.tego.sequences.Seq;
 import mb.statix.solver.IConstraint;
 import mb.tego.strategies.NamedStrategy2;
@@ -52,7 +51,7 @@ public final class SelectStrategy<C extends IConstraint> extends NamedStrategy2<
         Strategy1<C, CCSolverState, @Nullable CCSolverState> predicate,
         CCSolverState input
     ) {
-        return Seq.from(input.getConstraints())
+        return Seq.fromIterable(input.getConstraints())
             .filterIsInstance(constraintClass)
             .filter(c -> engine.eval(predicate, c, input) != null)
             .map(c -> SelectedConstraintCCSolverState.of(c, input));

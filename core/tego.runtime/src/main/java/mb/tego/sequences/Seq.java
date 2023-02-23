@@ -26,15 +26,15 @@ import java.util.stream.Collectors;
  *
  * @param <T> the type of values in the sequence (covariant)
  */
-public interface Seq<T> extends AutoCloseable {
+public interface Seq<T> {
 
     /**
      * Gets the current element in the iterator.
      *
      * Note that the behavior is undefined when the iterator is not positioned
      * on a valid element. In this case, this method may return {@code null},
-     * may return another value, may return an old value, or throw an exception.
-     *
+     * may return another value, may return an old value, or may throw an exception.
+     * <p>
      * Initially the iterator is positioned <i>before</i> the first element.
      *
      * @return the current element
@@ -61,8 +61,34 @@ public interface Seq<T> extends AutoCloseable {
      * @return the empty sequence
      */
     @SuppressWarnings("unchecked")
+    static <T> Seq<T> empty() {
+        return EmptySeq.instance;
+    }
+
+    /**
+     * Returns an empty lazy sequence.
+     * <p>
+     * This is an initial operation.
+     *
+     * @param <T> the type of values in the sequence (covariant)
+     * @return the empty sequence
+     */
+    @SuppressWarnings("unchecked")
     static <T> Seq<T> of() {
         return EmptySeq.instance;
+    }
+
+    /**
+     * Returns a lazy sequence with one element.
+     * <p>
+     * This is an initial operation.
+     *
+     * @param element the element in the sequence
+     * @param <T> the type of values in the sequence (covariant)
+     * @return the sequence
+     */
+    static <T> Seq<T> of(T element) {
+        return Computation.of(element);
     }
 
     /**
@@ -98,7 +124,7 @@ public interface Seq<T> extends AutoCloseable {
      * @param <T> the type of values being supplied (covariant)
      * @return the sequence
      */
-    static <T> Seq<T> from(Iterable<T> iterable) {
+    static <T> Seq<T> fromIterable(Iterable<T> iterable) {
         Objects.requireNonNull(iterable, "'iterable' must not be null.");
 
         return new IterableSeq<>(iterable);
@@ -118,7 +144,7 @@ public interface Seq<T> extends AutoCloseable {
      * @param <T> the type of values being supplied (covariant)
      * @return the sequence
      */
-    static <T> Seq<T> from(InterruptibleSupplier<T> supplier) {
+    static <T> Seq<T> fromRepeat(InterruptibleSupplier<T> supplier) {
         Objects.requireNonNull(supplier, "'supplier' must not be null.");
 
         return new SuppliedSeq<>(supplier);
@@ -185,7 +211,7 @@ public interface Seq<T> extends AutoCloseable {
             // Return originally wrapped iterator
             return ((IteratorSeq<T>)seq).iterator;
         } else {
-            // Unwrap interruptible iterator
+            // Wrap lazy sequence
             return new SeqIterator<>(seq);
         }
     }
@@ -401,15 +427,25 @@ public interface Seq<T> extends AutoCloseable {
      * @return the peekable sequence
      */
     default PeekableSeq<T> peekable() {
-        return new BufferSeq<>(this, 1);
+        return new BufferedSeq<>(this, 1);
+    }
+
+    /**
+     * Creates a copyable version of this sequence from its current position.
+     *
+     * @return the copyable sequence
+     */
+    default CopyableSeq<T> copyable() {
+        return new CopyableSeq<>(this);
     }
 
 }
 
+
 /**
- * An empty sequence.
+ * An empty sequence
  *
- * @param <T> the type of values in the sequence (covariant)
+ * @param <T> the type of value in the computation (covariant)
  */
 final class EmptySeq<T> implements Seq<T> {
     @SuppressWarnings("rawtypes")
@@ -419,19 +455,15 @@ final class EmptySeq<T> implements Seq<T> {
 
     @Override
     public T getCurrent() {
-        throw new NoSuchElementException("Positioned before or after the sequence.");
+        throw new NoSuchElementException("Empty sequence.");
     }
 
     @Override
     public boolean next() throws InterruptedException {
         return false;
     }
-
-    @Override
-    public void close() {
-        // Nothing to do.
-    }
 }
+
 
 /**
  * Wraps an array.
@@ -457,11 +489,6 @@ final class ArraySeq<T> implements Seq<T> {
     public boolean next() throws InterruptedException {
         index += 1;
         return index >= 0 && index < elements.length;
-    }
-
-    @Override
-    public void close() {
-        // Nothing to do.
     }
 }
 
@@ -492,11 +519,6 @@ final class FilterSeq<T> extends SeqBase<T> {
 
         // We're done
         yieldBreak();
-    }
-
-    @Override
-    public void close() throws Exception {
-        seq.close();
     }
 }
 
@@ -530,11 +552,6 @@ final class FilterIsInstanceSeq<T, R> extends SeqBase<R> {
         // We're done
         yieldBreak();
     }
-
-    @Override
-    public void close() throws Exception {
-        seq.close();
-    }
 }
 
 /**
@@ -565,11 +582,6 @@ final class MapSeq<T, R> extends SeqBase<R> {
         }
 
         yieldBreak();
-    }
-
-    @Override
-    public void close() throws Exception {
-        seq.close();
     }
 }
 
@@ -604,11 +616,6 @@ final class MapNotNullSeq<T, R> extends SeqBase<R> {
 
         yieldBreak();
     }
-
-    @Override
-    public void close() throws Exception {
-        seq.close();
-    }
 }
 
 /**
@@ -633,13 +640,6 @@ final class SuppliedSeq<T> extends SeqBase<T> {
         } catch (Throwable ex) {
             yieldBreak();
             throw ex;
-        }
-    }
-
-    @Override
-    public void close() throws Exception {
-        if (this.supplier instanceof AutoCloseable) {
-            ((AutoCloseable)this.supplier).close();
         }
     }
 }
@@ -676,11 +676,6 @@ final class LimitSeq<T> extends SeqBase<T> {
         } else {
             yieldBreak();
         }
-    }
-
-    @Override
-    public void close() throws Exception {
-        seq.close();
     }
 }
 
@@ -743,7 +738,7 @@ final class IterableSeq<T> extends SeqBase<T> {
  *
  * @param <T> the type of values in the sequence (covariant)
  */
-class SeqIterator<T> implements Iterator<T>, AutoCloseable {
+class SeqIterator<T> implements Iterator<T> {
     final Seq<T> seq;
     private boolean consumed = false;
 
@@ -772,11 +767,6 @@ class SeqIterator<T> implements Iterator<T>, AutoCloseable {
         this.consumed = true;
         return seq.getCurrent();
     }
-
-    @Override
-    public void close() throws Exception {
-        this.seq.close();
-    }
 }
 
 
@@ -785,7 +775,7 @@ class SeqIterator<T> implements Iterator<T>, AutoCloseable {
  *
  * @param <T> the type of values in the sequence (covariant)
  */
-final class BufferSeq<T> implements Seq<T>, PeekableSeq<T> {
+final class BufferedSeq<T> implements Seq<T>, PeekableSeq<T> {
 
     /** The sequence whose elements are buffered. */
     private final Seq<T> seq;
@@ -799,15 +789,15 @@ final class BufferSeq<T> implements Seq<T>, PeekableSeq<T> {
     private boolean finished = false;
 
     /**
-     * Initializes a new instance of the {@link BufferSeq} class.
-     *
+     * Initializes a new instance of the {@link BufferedSeq} class.
+     * <p>
      * Note that a maximum buffer size of 0
      * will cause only the current element to be buffered.
      *
      * @param seq the sequence being buffered
      * @param maxBufferSize the maximum buffer size; or -1 to impose no limit
      */
-    public BufferSeq(Seq<T> seq, int maxBufferSize) {
+    public BufferedSeq(Seq<T> seq, int maxBufferSize) {
         this.seq = seq;
         this.maxBufferSize = maxBufferSize;
         this.buffer = new ArrayList<>(maxBufferSize >= 0 ? maxBufferSize : 10);
@@ -861,14 +851,5 @@ final class BufferSeq<T> implements Seq<T>, PeekableSeq<T> {
             this.buffer.add(seq.getCurrent());
         }
         return this.buffer.size();
-    }
-
-    /**
-     * Override this method to perform any closing operations.
-     * @throws Exception if an exception occurs
-     */
-    @Override
-    public void close() throws Exception {
-        this.seq.close();
     }
 }

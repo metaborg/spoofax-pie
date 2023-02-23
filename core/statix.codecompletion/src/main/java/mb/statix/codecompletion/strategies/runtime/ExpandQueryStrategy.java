@@ -40,7 +40,6 @@ import mb.statix.constraints.CResolveQuery;
 import mb.statix.constraints.IResolveQuery;
 import mb.statix.generator.scopegraph.Match;
 import mb.statix.generator.scopegraph.NameResolution;
-import mb.statix.generator.strategy.ResolveDataWF;
 import mb.statix.scopegraph.Scope;
 import mb.statix.solver.Delay;
 import mb.statix.solver.IConstraint;
@@ -177,7 +176,7 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
             }
         }
 
-        return Seq.from(output);
+        return Seq.fromIterable(output);
     }
 
     private static int cached = 0;

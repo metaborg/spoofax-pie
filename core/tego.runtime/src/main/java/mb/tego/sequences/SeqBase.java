@@ -2,7 +2,11 @@ package mb.tego.sequences;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Base class for lazy sequences.
@@ -27,7 +31,7 @@ public abstract class SeqBase<T> implements Seq<T> {
 
     @Nullable private T current = null;
 
-    @SuppressWarnings({"ConstantConditions", "NullableProblems"})
+    @SuppressWarnings("ConstantConditions")
     @Override
     public final T getCurrent() {
         return this.current;
@@ -44,7 +48,6 @@ public abstract class SeqBase<T> implements Seq<T> {
         } catch (Throwable ex) {
             // NOTE: This may be an InterruptedException
             onError();
-            // TODO: Should we close() here too?
             throw ex;
         }
         assert this.state != State.Preparing : "No call to either yield() or yieldBreak() was performed this iteration.";
@@ -76,6 +79,9 @@ public abstract class SeqBase<T> implements Seq<T> {
         this.state = State.Ready;
     }
 
+    // NOTE: A yieldAll(Seq) or yieldAll(Iterable) cannot be added here,
+    // because an implementation of computeNext() can only return a single element.
+
     /**
      * Indicates that the iterator is done.
      *
@@ -98,14 +104,5 @@ public abstract class SeqBase<T> implements Seq<T> {
         // or after a call to `yield()` or `yieldBreak()`.
         this.current = null;
         this.state = State.Finished;
-    }
-
-    /**
-     * Override this method to perform any closing operations.
-     * @throws Exception if an exception occurs
-     */
-    @Override
-    public void close() throws Exception {
-        // Nothing to do.
     }
 }

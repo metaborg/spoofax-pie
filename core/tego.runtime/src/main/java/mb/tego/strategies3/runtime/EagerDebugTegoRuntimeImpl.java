@@ -1,4 +1,4 @@
-package mb.tego.strategies.runtime;
+package mb.tego.strategies3.runtime;
 
 import mb.log.api.Level;
 import mb.log.api.Logger;
@@ -6,18 +6,18 @@ import mb.log.api.LoggerFactory;
 import mb.log.noop.NoopLogger;
 import mb.tego.sequences.DebugSeq;
 import mb.tego.sequences.Seq;
-import mb.tego.strategies.Strategy;
-import mb.tego.strategies.Strategy1;
-import mb.tego.strategies.Strategy2;
-import mb.tego.strategies.Strategy3;
-import mb.tego.strategies.StrategyDecl;
+import mb.tego.strategies3.Strategy;
+import mb.tego.strategies3.Strategy1;
+import mb.tego.strategies3.Strategy2;
+import mb.tego.strategies3.Strategy3;
+import mb.tego.strategies3.StrategyDecl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import javax.inject.Inject;
 
 /**
  * Implements the {@link TegoRuntime}.
- *
+ * <p>
  * This is used for debugging.
  */
 public final class EagerDebugTegoRuntimeImpl implements TegoRuntime, TegoEngine {
@@ -41,37 +41,37 @@ public final class EagerDebugTegoRuntimeImpl implements TegoRuntime, TegoEngine 
     }
 
     @Override
-    public @Nullable Object eval(StrategyDecl strategy, Object[] args, Object input) {
+    public Seq eval(StrategyDecl strategy, Object[] args, Object input) {
         enterStrategy(strategy);
-        final @Nullable Object result = strategy.evalInternal(this, args, input);
+        final Seq result = strategy.evalInternal(this, args, input);
         return exitStrategy(strategy, result);
     }
 
     @Override
-    public <T, R> @Nullable R eval(Strategy<T, R> strategy, T input) {
+    public <T, R> Seq<R> eval(Strategy<T, R> strategy, T input) {
         enterStrategy(strategy);
-        final @Nullable R result = strategy.evalInternal(this, input);
+        final Seq<R> result = strategy.evalInternal(this, input);
         return exitStrategy(strategy, result);
     }
 
     @Override
-    public <A1, T, R> @Nullable R eval(Strategy1<A1, T, R> strategy, A1 arg1, T input) {
+    public <A1, T, R> Seq<R> eval(Strategy1<A1, T, R> strategy, A1 arg1, T input) {
         enterStrategy(strategy);
-        final @Nullable R result = strategy.evalInternal(this, arg1, input);
+        final Seq<R> result = strategy.evalInternal(this, arg1, input);
         return exitStrategy(strategy, result);
     }
 
     @Override
-    public <A1, A2, T, R> @Nullable R eval(Strategy2<A1, A2, T, R> strategy, A1 arg1, A2 arg2, T input) {
+    public <A1, A2, T, R> Seq<R> eval(Strategy2<A1, A2, T, R> strategy, A1 arg1, A2 arg2, T input) {
         enterStrategy(strategy);
-        final @Nullable R result = strategy.evalInternal(this, arg1, arg2, input);
+        final Seq<R> result = strategy.evalInternal(this, arg1, arg2, input);
         return exitStrategy(strategy, result);
     }
 
     @Override
-    public <A1, A2, A3, T, R> @Nullable R eval(Strategy3<A1, A2, A3, T, R> strategy, A1 arg1, A2 arg2, A3 arg3, T input) {
+    public <A1, A2, A3, T, R> Seq<R> eval(Strategy3<A1, A2, A3, T, R> strategy, A1 arg1, A2 arg2, A3 arg3, T input) {
         enterStrategy(strategy);
-        final @Nullable R result = strategy.evalInternal(this, arg1, arg2, arg3, input);
+        final Seq<R> result = strategy.evalInternal(this, arg1, arg2, arg3, input);
         return exitStrategy(strategy, result);
     }
 
@@ -92,11 +92,13 @@ public final class EagerDebugTegoRuntimeImpl implements TegoRuntime, TegoEngine 
      * @param result the result of evaluating the strategy
      * @return the (possibly modified) result of evaluating the strategy
      */
-    private <R> @Nullable R exitStrategy(StrategyDecl strategy, @Nullable R result) {
-        R finalResult = result;
+    private <R> Seq<R> exitStrategy(StrategyDecl strategy, Seq<R> result) {
+        Seq<R> finalResult = result;
         log.trace(prefixString("-", level, " " + strategy.toString()));
         if (finalResult instanceof Seq) {
             // Print when a sequence is evaluated, and its results
+            // FIXME: We should not be iterating the sequence here.
+            //  Instead, we can print the strategy whose computation is being iterated/evaluated.
             Seq<?> newResult = (Seq<?>)finalResult;
             if(!(newResult instanceof DebugSeq)) {
                 //noinspection unchecked
@@ -119,7 +121,7 @@ public final class EagerDebugTegoRuntimeImpl implements TegoRuntime, TegoEngine 
                 // Force evaluation of the sequence
                 try {
                     //noinspection unchecked
-                    finalResult = (R)Seq.fromIterable(newResult.toList());
+                    finalResult = (Seq<R>)Seq.fromIterable(newResult.toList());
                 } catch(InterruptedException ex) {
                     throw new RuntimeException(ex);
                 }

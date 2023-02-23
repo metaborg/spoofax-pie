@@ -19,7 +19,6 @@ public abstract class DebugSeq<T> extends SeqBase<T> {
         this.innerSeq = innerSeq;
     }
 
-
     @Override
     protected void computeNext() throws InterruptedException {
         index += 1;
@@ -32,11 +31,6 @@ public abstract class DebugSeq<T> extends SeqBase<T> {
             final T result = innerSeq.getCurrent();
             this.yield(onAfterNext(index, result));
         }
-    }
-
-    @Override
-    public void close() throws Exception {
-        innerSeq.close();
     }
 
     /**

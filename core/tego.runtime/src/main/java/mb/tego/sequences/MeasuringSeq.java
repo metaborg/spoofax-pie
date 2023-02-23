@@ -44,9 +44,4 @@ public final class MeasuringSeq<T> extends SeqBase<T> {
             timeReporter.accept(endTime - startTime, finished);
         }
     }
-
-    @Override
-    public void close() throws Exception {
-        wrappedSeq.close();
-    }
 }

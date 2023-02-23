@@ -11,7 +11,7 @@ public class MyTestStrategy2 extends NamedStrategy2<String, String, String, Seq<
     @Override
     public Seq<String> evalInternal(TegoEngine engine, String part1, String part2, String input) {
         doEvalCalls.incrementAndGet();
-        return Seq.fromOnce(() -> part1 + part2 + input);
+        return Seq.from(() -> part1 + part2 + input);
     }
 
     @Override
