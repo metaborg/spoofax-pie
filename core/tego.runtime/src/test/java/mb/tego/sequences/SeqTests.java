@@ -1,8 +1,5 @@
 package mb.tego.sequences;
 
-import mb.tego.sequences.InterruptibleSupplier;
-import mb.tego.sequences.Seq;
-import mb.tego.sequences.SeqBase;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -72,7 +69,7 @@ public final class SeqTests {
         final InterruptibleSupplier<Integer> supplier = counter::getAndIncrement;
 
         // Act
-        final Seq<Integer> seq = Seq.from(supplier);
+        final Seq<Integer> seq = Seq.fromRepeat(supplier);
 
         // Assert
         assertTrue(seq.next());
@@ -94,7 +91,7 @@ public final class SeqTests {
         };
 
         // Act
-        final Seq<Integer> seq = Seq.from(supplier);
+        final Seq<Integer> seq = Seq.fromRepeat(supplier);
 
         // Assert
         assertTrue(seq.next());
@@ -116,7 +113,7 @@ public final class SeqTests {
         };
 
         // Act
-        final Seq<Integer> seq = Seq.from(supplier);
+        final Seq<Integer> seq = Seq.fromRepeat(supplier);
 
         // Assert
         assertTrue(seq.next());
@@ -147,7 +144,7 @@ public final class SeqTests {
         };
 
         // Act
-        final Seq<Integer> seq = Seq.from(supplier);
+        final Seq<Integer> seq = Seq.fromRepeat(supplier);
 
         // Assert
         assertFalse(closed.get());
@@ -231,7 +228,7 @@ public final class SeqTests {
         final Iterable<Integer> iterable = Arrays.asList(0, 1, 2);
 
         // Act
-        final Seq<Integer> seq = Seq.from(iterable);
+        final Seq<Integer> seq = Seq.fromIterable(iterable);
 
         // Assert
         assertTrue(seq.next());
@@ -254,7 +251,7 @@ public final class SeqTests {
         };
 
         // Act
-        final Seq<Integer> seq = Seq.from(iterable);
+        final Seq<Integer> seq = Seq.fromIterable(iterable);
 
         // Assert
         assertFalse(iteratorCalled.get());
@@ -370,7 +367,7 @@ public final class SeqTests {
         // Arrange
         final AtomicInteger counter = new AtomicInteger();
         final InterruptibleSupplier<Integer> supplier = counter::getAndIncrement;
-        final Seq<Integer> seq = Seq.from(supplier);
+        final Seq<Integer> seq = Seq.fromRepeat(supplier);
 
         // Act
         final Seq<Integer> filteredSeq = seq.filter(i -> i % 2 == 0);
@@ -392,7 +389,7 @@ public final class SeqTests {
         // Arrange
         final AtomicInteger counter = new AtomicInteger();
         final InterruptibleSupplier<Integer> supplier = counter::getAndIncrement;
-        final Seq<Object> seq = Seq.from(() -> {
+        final Seq<Object> seq = Seq.fromRepeat(() -> {
             final int value = counter.getAndIncrement();
             if (value % 2 == 0) {
                 // Even values are returned as Integer
@@ -436,7 +433,7 @@ public final class SeqTests {
         // Arrange
         final AtomicInteger counter = new AtomicInteger();
         final InterruptibleSupplier<Integer> supplier = counter::getAndIncrement;
-        final Seq<Integer> seq = Seq.from(supplier);
+        final Seq<Integer> seq = Seq.fromRepeat(supplier);
 
         // Act
         final Seq<String> mappedSeq = seq.map(i -> Integer.toString(i));
@@ -458,7 +455,7 @@ public final class SeqTests {
         // Arrange
         final AtomicInteger counter = new AtomicInteger();
         final InterruptibleSupplier<Integer> supplier = counter::getAndIncrement;
-        final Seq<Integer> seq = Seq.from(supplier);
+        final Seq<Integer> seq = Seq.fromRepeat(supplier);
 
         // Act
         final Seq<Integer> limitedSeq = seq.limit(3);
@@ -506,7 +503,7 @@ public final class SeqTests {
         // Arrange
         final AtomicInteger counter = new AtomicInteger();
         final InterruptibleSupplier<Integer> supplier = counter::getAndIncrement;
-        final Seq<Integer> seq = Seq.from(supplier);
+        final Seq<Integer> seq = Seq.fromRepeat(supplier);
 
         // Act
         final Seq<Integer> limitedSeq = seq.limit(0);
@@ -557,7 +554,7 @@ public final class SeqTests {
         // Arrange
         final AtomicInteger counter = new AtomicInteger();
         final InterruptibleSupplier<Integer> supplier = counter::getAndIncrement;
-        final Seq<Integer> seq = Seq.from(supplier);
+        final Seq<Integer> seq = Seq.fromRepeat(supplier);
 
         // Act
         final PeekableSeq<Integer> peekableSeq = seq.peekable();

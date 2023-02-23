@@ -119,7 +119,7 @@ public final class EagerDebugTegoRuntimeImpl implements TegoRuntime, TegoEngine 
                 // Force evaluation of the sequence
                 try {
                     //noinspection unchecked
-                    finalResult = (R)Seq.from(newResult.toList());
+                    finalResult = (R)Seq.fromIterable(newResult.toList());
                 } catch(InterruptedException ex) {
                     throw new RuntimeException(ex);
                 }
