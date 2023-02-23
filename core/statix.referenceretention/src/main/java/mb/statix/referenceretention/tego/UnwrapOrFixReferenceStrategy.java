@@ -240,7 +240,7 @@ public final class UnwrapOrFixReferenceStrategy extends NamedStrategy3<RRContext
 //            final TermIndex refTargetIndex = pair.component2();
 //            return unwrapAppl(engine, v, qreference, contextTerms, state);
 //        }).collect(Collectors.toList());
-        return Seq.from(newStates);
+        return Seq.fromIterable(newStates);
     }
 
     /**

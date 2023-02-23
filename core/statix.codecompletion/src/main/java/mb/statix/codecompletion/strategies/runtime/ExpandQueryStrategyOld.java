@@ -13,7 +13,6 @@ import mb.statix.codecompletion.CCSolverState;
 import mb.tego.sequences.Seq;
 import mb.statix.codecompletion.SelectedConstraintCCSolverState;
 import mb.statix.codecompletion.SolverContext;
-import mb.statix.codecompletion.SolverState;
 import mb.statix.constraints.CAstId;
 import mb.statix.constraints.CEqual;
 import mb.statix.constraints.CInequal;
@@ -163,7 +162,7 @@ public final class ExpandQueryStrategyOld extends NamedStrategy2<SolverContext, 
             }
         }
 
-        return Seq.from(output);
+        return Seq.fromIterable(output);
     }
 
     /**

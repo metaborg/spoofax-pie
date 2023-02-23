@@ -76,7 +76,7 @@ public final class UnwrapOrFixAllReferencesStrategy extends NamedStrategy1<RRCon
         final AssertValidStrategy assertValid = AssertValidStrategy.getInstance();
         final UnwrapOrFixReferenceStrategy unwrapOrFixReference = UnwrapOrFixReferenceStrategy.getInstance();
         final Strategy1<RRContext, RRSolverState, Seq<Pair<ITermVar, RRPlaceholder>>> getAllPlaceholders =
-            fun((RRSolverState i, RRContext c) -> Seq.from(i.getPlaceholders().entrySet()).map(Pair::from));
+            fun((RRSolverState i, RRContext c) -> Seq.fromIterable(i.getPlaceholders().entrySet()).map(Pair::from));
 
         final Strategy<RRSolverState, Seq<RRSolverState>> strategy = repeat(
             let(first(getAllPlaceholders.apply(ctx)), (Pair<ITermVar, RRPlaceholder> p) ->

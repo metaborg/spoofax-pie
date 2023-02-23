@@ -33,7 +33,7 @@ public interface Seq<T> extends AutoCloseable {
      * <p>
      * Note that the behavior is undefined when the iterator is not positioned
      * on a valid element. In this case, this method may return {@code null},
-     * may return another value, may return an old value, or throw an exception.
+     * may return another value, may return an old value, or may throw an exception.
      * <p>
      * Initially the iterator is positioned <i>before</i> the first element.
      *
@@ -51,6 +51,19 @@ public interface Seq<T> extends AutoCloseable {
      * @throws InterruptedException if the operation was interrupted
      */
     boolean next() throws InterruptedException;
+
+    /**
+     * Returns an empty lazy sequence.
+     * <p>
+     * This is an initial operation.
+     *
+     * @param <T> the type of values in the sequence (covariant)
+     * @return the empty sequence
+     */
+    @SuppressWarnings("unchecked")
+    static <T> Seq<T> empty() {
+        return EmptySeq.instance;
+    }
 
     /**
      * Returns an empty lazy sequence.
@@ -117,7 +130,7 @@ public interface Seq<T> extends AutoCloseable {
      * @param <T> the type of values being supplied (covariant)
      * @return the sequence
      */
-    static <T> Seq<T> from(Iterable<T> iterable) {
+    static <T> Seq<T> fromIterable(Iterable<T> iterable) {
         Objects.requireNonNull(iterable, "'iterable' must not be null.");
 
         return new IterableSeq<>(iterable);
@@ -137,7 +150,7 @@ public interface Seq<T> extends AutoCloseable {
      * @param <T> the type of values being supplied (covariant)
      * @return the sequence
      */
-    static <T> Seq<T> from(InterruptibleSupplier<T> supplier) {
+    static <T> Seq<T> fromRepeat(InterruptibleSupplier<T> supplier) {
         Objects.requireNonNull(supplier, "'supplier' must not be null.");
 
         return new SuppliedSeq<>(supplier);
@@ -204,7 +217,7 @@ public interface Seq<T> extends AutoCloseable {
             // Return originally wrapped iterator
             return ((IteratorSeq<T>)seq).iterator;
         } else {
-            // Unwrap interruptible iterator
+            // Wrap lazy sequence
             return new SeqIterator<>(seq);
         }
     }
@@ -438,7 +451,7 @@ final class EmptySeq<T> implements Seq<T> {
 
     @Override
     public T getCurrent() {
-        throw new NoSuchElementException("Positioned before or after the sequence.");
+        throw new NoSuchElementException("Empty sequence.");
     }
 
     @Override
