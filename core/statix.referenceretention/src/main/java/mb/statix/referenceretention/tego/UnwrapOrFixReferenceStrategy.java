@@ -13,6 +13,7 @@ import mb.statix.solver.ITermProperty;
 import mb.statix.solver.persistent.SolverResult;
 import mb.tego.sequences.Seq;
 import mb.tego.strategies.NamedStrategy3;
+import mb.tego.strategies.Strategy2;
 import mb.tego.strategies.Strategy3;
 import mb.tego.strategies.runtime.TegoEngine;
 import mb.tego.tuples.Pair;
@@ -204,9 +205,9 @@ public final class UnwrapOrFixReferenceStrategy extends NamedStrategy3<RRContext
         // For example, while inlining a call `c.f()`, the context is the term `c`
         // and the term is a reference to be fixed `x`. The result can be a term `c.x`,
         // a qualified reference, and the term index of `x`.
-        final Strategy3</* ctx */ IListTerm, /* sortName */ IStringTerm, /* solverResult */SolverResult, /* term */ ITerm, /* result */ @Nullable ITerm> qualifyReference = ctx.getQualifyReferenceStrategy();
+        final Strategy2</* ctx */ IListTerm, /* sortName */ IStringTerm, /* term */ ITerm, /* result */ @Nullable ITerm> qualifyReference = ctx.getQualifyReferenceStrategy();
 
-        final @Nullable ITerm qreferences = engine.eval(qualifyReference, B.newList(contextTerms), lockedRef.getSortName(), state.toSolverResult(), lockedRef.getTerm());
+        final @Nullable ITerm qreferences = engine.eval(qualifyReference, B.newList(contextTerms), lockedRef.getSortName(), lockedRef.getTerm());
         if (qreferences == null) {
             return Seq.of(); // No qualified reference
         }

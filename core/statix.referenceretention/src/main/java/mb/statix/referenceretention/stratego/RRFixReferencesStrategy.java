@@ -2,13 +2,11 @@ package mb.statix.referenceretention.stratego;
 
 import com.google.common.collect.ImmutableList;
 import io.usethesource.capsule.Map;
-import io.usethesource.capsule.Set;
 import mb.common.util.UncheckedException;
 import mb.nabl2.terms.IListTerm;
 import mb.nabl2.terms.IStringTerm;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
-import mb.nabl2.terms.build.TermBuild;
 import mb.nabl2.terms.stratego.StrategoTermIndices;
 import mb.nabl2.terms.stratego.StrategoTerms;
 import mb.resource.DefaultResourceKey;
@@ -27,13 +25,11 @@ import mb.statix.solver.IConstraint;
 import mb.statix.solver.IState;
 import mb.statix.solver.persistent.SolverResult;
 import mb.statix.solver.persistent.State;
-import mb.statix.spec.Spec;
 import mb.statix.spoofax.StatixPrimitive;
 import mb.stratego.common.AdaptableContext;
 import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
 import mb.tego.sequences.Seq;
-import mb.tego.strategies.Strategy1;
 import mb.tego.strategies.Strategy2;
 import mb.tego.strategies.Strategy3;
 import mb.tego.strategies.runtime.TegoRuntime;
@@ -79,7 +75,7 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
             return Optional.empty(); // Context not available; fail
         }
         // The solver result (analysis) should be the first term argument
-        final SolverResult analysis = RRTermUtils.extractFinalSolverResult(terms.get(0));
+        final SolverResult originalAnalysis = RRTermUtils.extractFinalSolverResult(terms.get(0));
 
         final Execution execution = new Execution(
             context.tegoRuntime,
@@ -87,7 +83,7 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
             context.strategoTerms,
             context.qualifyReferenceStrategyName,
             env.getFactory(),
-            analysis.spec(),
+            originalAnalysis,
 
             new DefaultResourceKey("rr", "somefile.tig"),   // TODO: Not sure how to get the resource key here? Do we even need it?
             "main",                         // TODO: Tiger specific. Make configurable.
@@ -99,7 +95,7 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
             );
 
         // Build a new analysis
-        final IState.Transient state = analysis.state().melt();
+        final IState.Transient state = originalAnalysis.state().melt();
         final Pair<ITerm, Map.Immutable<ITermVar, RRPlaceholder>> pair = extractPlaceholders(state, term);
         final ITerm newTerm = pair.component1();
         final Map.Immutable<ITermVar, RRPlaceholder> placeholderDescriptors = pair.component2();
@@ -154,8 +150,11 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
         private final StrategoTerms strategoTerms;
         private final String qualifyReferenceStrategyName;
         private final ITermFactory termFactory;
-        /** The Statix specification. */
-        private final Spec spec;
+        /**
+         * The analysis of the program before we started messing with the AST to replace qualified holes (placeholders) with term variables.
+         * This is passed to the qualifyReference() strategy.
+         */
+        private final SolverResult originalAnalysis;
 
         private final String statixSpecName;
         private final String statixRootPredicateName;
@@ -172,7 +171,7 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
             StrategoTerms strategoTerms,
             String qualifyReferenceStrategyName,
             ITermFactory termFactory,
-            Spec spec,
+            SolverResult originalAnalysis,
 
             ResourceKey resource,
             String statixSpecName,
@@ -187,7 +186,7 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
             this.strategoTerms = strategoTerms;
             this.qualifyReferenceStrategyName = qualifyReferenceStrategyName;
             this.termFactory = termFactory;
-            this.spec = spec;
+            this.originalAnalysis = originalAnalysis;
 
             this.resource = resource;
             this.statixSpecName = statixSpecName;
@@ -221,7 +220,7 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
             final HashSet<ITermVar> newExistentials = new HashSet<>(existentials);
             newExistentials.add(rootVar);
             final RRSolverState solverState = RRSolverState.of(
-                    spec,                                   // the specification
+                    originalAnalysis.spec(),                // the specification
                     state.freeze(),                         // the new empty Statix state
                     ImmutableList.of(initialConstraint),    // list of constraints
                     placeholderDescriptors                  // list of placeholder descriptors
@@ -302,7 +301,7 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
          */
         private @Nullable RRSolverState fix(RRSolverState state, Collection<Map.Entry<IConstraint, IMessage>> allowedErrors) {
             // Create a strategy that fails if the term is not an injection
-            final Strategy3</* ctx */ IListTerm, /* sortName */ IStringTerm, /* solverResult */SolverResult, /* term */ ITerm, /* result */ @Nullable ITerm> qualifyReferenceStrategy = fun(this::qualifyReference);
+            final Strategy2</* ctx */ IListTerm, /* sortName */ IStringTerm, /* term */ ITerm, /* result */ @Nullable ITerm> qualifyReferenceStrategy = fun(this::qualifyReference);
 
             final RRContext ctx = new RRContext(qualifyReferenceStrategy, allowedErrors);
 
@@ -333,12 +332,12 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
          * @param sortName the sort name of the incoming and resulting reference
          * @return a list of pairs of a qualified reference term and a term index; otherwise, {@code null}
          */
-        private @Nullable ITerm qualifyReference(ITerm term, IListTerm contextTerms, IStringTerm sortName, SolverResult solverResult) {
+        private @Nullable ITerm qualifyReference(ITerm term, IListTerm contextTerms, IStringTerm sortName) {
             try {
                 final IStrategoTerm sTerm = strategoTerms.toStratego(term, true);
                 final IStrategoTerm sContextTerms = strategoTerms.toStratego(contextTerms, true);
                 final IStrategoTerm sSortName = strategoTerms.toStratego(sortName, true);
-                final IStrategoTerm sSolverResult = strategoTerms.toStratego(mb.nabl2.terms.build.TermBuild.B.newBlob(solverResult));
+                final IStrategoTerm sSolverResult = strategoTerms.toStratego(mb.nabl2.terms.build.TermBuild.B.newBlob(originalAnalysis));
 //                @Nullable final IStrategoTerm output = strategoRuntime.invokeOrNull(qualifyReferenceStrategyName, sTerm, sContextTerms, sSortName);
                 @Nullable final IStrategoTerm output = strategoRuntime.invoke(qualifyReferenceStrategyName, sTerm, sContextTerms, sSortName, sSolverResult);
 //                if (output == null) {
