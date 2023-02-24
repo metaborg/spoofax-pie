@@ -275,8 +275,17 @@ public final class UnwrapOrFixReferenceStrategy extends NamedStrategy3<RRContext
             engine.log(instance, "Locked reference test has errors: {} => {}", referenceTerm, testResultState);
             return null;   // TODO: Report that it has errors and was therefore excluded
         }
-        final ITerm refTargetTerm = checkNotNull(tryGetRefProperty(testResultState, referenceIndex), "Reference has no @ref target: " + referenceTerm);
-        final TermIndex refTargetIndex = checkNotNull(tryGetTermIndex(testResultState, refTargetTerm), "Reference target has no index: " + refTargetTerm);
+        final @Nullable ITerm refTargetTerm = tryGetRefProperty(testResultState, referenceIndex); //, "Reference has no @ref target: " + referenceTerm);
+        if(refTargetTerm == null) {
+            engine.log(instance, "Reference has no @ref target: {} in {}", referenceIndex, testResultState);
+            return null;   // TODO: Report that reference had no @ref target and was therefore excluded
+        }
+
+        final @Nullable TermIndex refTargetIndex = tryGetTermIndex(testResultState, refTargetTerm); //, "Reference target has no index: " + refTargetTerm);
+        if(refTargetIndex == null) {
+            engine.log(instance, "Reference target has no index: {} in {}", refTargetTerm, testResultState);
+            return null;   // TODO: Report that reference had no index and was therefore excluded
+        }
 
         if (refTargetIndex.equals(declarationIndex)) {
             // Check succeeded, reference is valid.
