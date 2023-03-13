@@ -11,6 +11,45 @@ imports
 
 rules
 
+  partOk(s, AdapterSection(options)) :-
+    adapterOptionsOk(s, options).
+
+  adapterOptionOk : scope * AdapterOption
+  adapterOptionsOk maps adapterOptionOk(*, list(*))
+
+  adapterOptionOk(s, BaseResourcesComponent(e)) :-
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e.
+  adapterOptionOk(s, ExtendResourcesComponent(e)) :-
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e.
+  adapterOptionOk(s, BaseResourcesModule(e)) :-
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e.
+  adapterOptionOk(s, ExtendResourcesModule(e)) :-
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e.
+  adapterOptionOk(s, AdditionalResourcesModule(e)) :-
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e.
+
+  adapterOptionOk(s, BaseComponent(e)) :-
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e.
+  adapterOptionOk(s, ExtendComponent(e)) :-
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e.
+  adapterOptionOk(s, BaseModule(e)) :-
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e.
+  adapterOptionOk(s, ExtendModule(e)) :-
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e.
+  adapterOptionOk(s, AdditionalModule(e)) :-
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e.
+
+  adapterOptionOk(s, BaseInstance(e)) :-
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e.
+  adapterOptionOk(s, ExtendInstance(e)) :-
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e.
+  adapterOptionOk(s, BaseParticipant(e)) :-
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e.
+  adapterOptionOk(s, ExtendParticipant(e)) :-
+    typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java type identifier]@e.
+
+rules
+
   partOk(s, MainMenu(e_menu_items)) :-
     exprsAreMenuItems(s, e_menu_items).
   partOk(s, ResourceContextMenu(e_menu_items)) :-

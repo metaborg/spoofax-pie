@@ -4,20 +4,20 @@ imports
 
   statsem/part
   statsem/expr
-  
+
   signatures/part/shared-sig
-  
+
 rules
 
   partOk(s, Group(e))   :- typeOfExpr(s, e) == STRING() | error $[Expected string]@e.
   partOk(s, Id(e))      :- typeOfExpr(s, e) == STRING() | error $[Expected string]@e.
   partOk(s, Name(e))    :- typeOfExpr(s, e) == STRING() | error $[Expected string]@e.
   partOk(s, Version(e)) :- typeOfExpr(s, e) == STRING() | error $[Expected string]@e.
-  
+
   partOk(s, FileExtension(e)) :- typeOfExpr(s, e) == STRING() | error $[Expected string]@e.
-  
+
   partOk(s, JavaPackageIdPrefix(e)) :- typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java identifier]@e.
   partOk(s, JavaClassIdPrefix(e))   :- typeOfExpr(s, e) == JAVA_ID() | error $[Expected Java identifier]@e.
-  
+
   partOk(s, SourceDirectory(e)) :- typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
   partOk(s, BuildDirectory(e))  :- typeOfExpr(s, e) == PATH() | error $[Expected path]@e.

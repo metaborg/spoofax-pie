@@ -11,9 +11,9 @@ context-free syntax
   Part.Id      = <id = <Expr>>
   Part.Name    = <name = <Expr>>
   Part.Version = <version = <Expr>>
-  
+
   Part.FileExtension = <file-extension = <Expr>>
-  
+
   Part.JavaPackageIdPrefix = <java-package-id-prefix = <Expr>>
   Part.JavaClassIdPrefix   = <java-class-id-prefix = <Expr>>
 

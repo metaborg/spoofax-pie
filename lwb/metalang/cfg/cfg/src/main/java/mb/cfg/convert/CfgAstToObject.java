@@ -499,6 +499,27 @@ public class CfgAstToObject {
             });
         });
 
+        // LanguageAdapterCompilerInput > Adapter section
+        parts.getAllSubTermsInListAsParts("AdapterSection").ifSome(subParts -> {
+            final AdapterProjectCompiler.Input.Builder builder = adapterBuilder.project;
+            subParts.forOneSubtermAsTypeInfo("BaseResourcesComponent", builder::baseResourcesComponent);
+            subParts.forOneSubtermAsTypeInfo("ExtendResourcesComponent", builder::extendResourcesComponent);
+            subParts.forOneSubtermAsTypeInfo("BaseResourcesModule", builder::baseResourcesModule);
+            subParts.forOneSubtermAsTypeInfo("ExtendResourcesModule", builder::extendResourcesModule);
+            subParts.forAllSubtermsAsTypeInfo("AdditionalResourcesModule", builder::addAdditionalResourcesModules);
+
+            subParts.forOneSubtermAsTypeInfo("BaseComponent", builder::baseComponent);
+            subParts.forOneSubtermAsTypeInfo("ExtendComponent", builder::extendComponent);
+            subParts.forOneSubtermAsTypeInfo("BaseModule", builder::baseModule);
+            subParts.forOneSubtermAsTypeInfo("ExtendModule", builder::extendModule);
+            subParts.forAllSubtermsAsTypeInfo("AdditionalModule", builder::addAdditionalModules);
+
+            subParts.forOneSubtermAsTypeInfo("BaseInstance", builder::baseInstance);
+            subParts.forOneSubtermAsTypeInfo("ExtendInstance", builder::extendInstance);
+            subParts.forOneSubtermAsTypeInfo("BaseParticipant", builder::baseParticipant);
+            subParts.forOneSubtermAsTypeInfo("ExtendParticipant", builder::extendParticipant);
+        });
+
         // LanguageAdapterCompilerInput > Task definitions
         for(IStrategoTerm taskDefTerm : taskDefList) {
             final String type = TermUtils.asJavaStringAt(taskDefTerm, 0).orElseThrow(() -> new InvalidAstShapeException("Java type id as first subterm", taskDefTerm));

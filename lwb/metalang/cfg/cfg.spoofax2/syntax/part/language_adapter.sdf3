@@ -5,6 +5,32 @@ imports
   part
   expr
 
+context-free sorts
+
+  AdapterOption
+
+context-free syntax
+
+  Part.AdapterSection = <adapter {
+  <{AdapterOption "\n"}*>
+}>
+  AdapterOption.BaseResourcesComponent = <base-resources-component = <Expr>>
+  AdapterOption.ExtendResourcesComponent = <extend-resources-component = <Expr>>
+  AdapterOption.BaseResourcesModule = <base-resources-module = <Expr>>
+  AdapterOption.ExtendResourcesModule = <extend-resources-module = <Expr>>
+  AdapterOption.AdditionalResourcesModule = <additional-resources-module = <Expr>>
+
+  AdapterOption.BaseComponent = <base-component = <Expr>>
+  AdapterOption.ExtendComponent = <extend-component = <Expr>>
+  AdapterOption.BaseModule = <base-module = <Expr>>
+  AdapterOption.ExtendModule = <extend-module = <Expr>>
+  AdapterOption.AdditionalModule = <additional-module = <Expr>>
+
+  AdapterOption.BaseInstance = <base-instance = <Expr>>
+  AdapterOption.ExtendInstance = <extend-instance = <Expr>>
+  AdapterOption.BaseParticipant = <base-participant = <Expr>>
+  AdapterOption.ExtendParticipant = <extend-participant = <Expr>>
+
 context-free syntax
 
   Part.MainMenu = <main-menu [
@@ -30,7 +56,7 @@ context-free sorts
 
 context-free syntax
 
-  Part.ReferenceResolutionSection = <reference-resolution { 
+  Part.ReferenceResolutionSection = <reference-resolution {
   <{ReferenceResolutionOption "\n"}*>
 }>
 
@@ -46,7 +72,7 @@ context-free sorts
 
 context-free syntax
 
-  Part.HoverSection = <hover { 
+  Part.HoverSection = <hover {
   <{HoverOption "\n"}*>
 }>
 
