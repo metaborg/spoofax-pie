@@ -76,7 +76,7 @@ public class CalcExtendInstance extends CalcInstance {
     @Override public CliCommand getCliCommand() {
         return CliCommand.of(
             "Calc",
-            CliCommand.of("to-java", calcShowToJavaCommand, CliParam.positional("file", 0, "file", "Calc source file to convert to a Java source file"))
+            CliCommand.of("to-java", "Convert Calc source files into Java source files", calcShowToJavaCommand, CliParam.positional("file", 0, "file", "Calc source file to convert to a Java source file"))
         );
     }
 }
