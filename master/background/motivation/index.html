@@ -633,6 +633,8 @@
         
           
         
+          
+        
       
       
         <label class="md-nav__link" for="__nav_3_5">
@@ -646,6 +648,20 @@
           Development
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/development/debugging-in-intellij/" class="md-nav__link">
+        Debugging in IntelliJ
+      </a>
+    </li>
+  
+
+            
           
             
               
@@ -692,6 +708,8 @@
         
           
         
+          
+        
       
       
         <label class="md-nav__link" for="__nav_4">
@@ -714,6 +732,20 @@
     <li class="md-nav__item">
       <a href="../../reference/configuration/" class="md-nav__link">
         Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/eclipse-lwb/eclipse-project-files/" class="md-nav__link">
+        Eclipse Project Files
       </a>
     </li>
   
@@ -1089,15 +1121,19 @@ Configuration conventions should be changeable, and defaults should be persisted
 <h2 id="summary-of-problems">Summary of Problems<a class="headerlink" href="#summary-of-problems" title="Permanent link">&para;</a></h2>
 <p>To summarize, Spoofax 2 suffers from the following problems that form the motivation for Spoofax 3:</p>
 <ul>
-<li>Monolithic, inflexible, and non-incremental architecture causing:</li>
+<li>Monolithic, inflexible, and non-incremental architecture causing:<ul>
 <li>Inflexible and slow language processing due to non-incremental fixed-function pipeline</li>
 <li>Coupling in Spoofax Core: every language depends on Spoofax Core, and Spoofax Core depends on all meta-components</li>
 <li>Slow iteration times when developing Spoofax 2 due to its monolithic and non-incremental build</li>
 <li>Tedious to use languages due to dynamic language loading</li>
-<li>Confusing (end-)user experience due to:</li>
+</ul>
+</li>
+<li>Confusing (end-)user experience due to:<ul>
 <li>Bad error traceability</li>
 <li>Scattered configuration</li>
 <li>Non-incremental configuration (restarts required to update configuration)</li>
+</ul>
+</li>
 </ul>
 
 

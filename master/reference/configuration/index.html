@@ -633,6 +633,8 @@
         
           
         
+          
+        
       
       
         <label class="md-nav__link" for="__nav_3_5">
@@ -646,6 +648,20 @@
           Development
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/development/debugging-in-intellij/" class="md-nav__link">
+        Debugging in IntelliJ
+      </a>
+    </li>
+  
+
+            
           
             
               
@@ -691,6 +707,8 @@
       
       
       
+        
+          
         
           
         
@@ -931,6 +949,20 @@
   
 </nav>
       
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../eclipse-lwb/eclipse-project-files/" class="md-nav__link">
+        Eclipse Project Files
+      </a>
     </li>
   
 
@@ -1648,16 +1680,20 @@ The command in turn is bound to <code>showParsedAstCommand</code>, assigned to t
 <p>The following <code>ArgumentProvider</code>s are supported:</p>
 <ul>
 <li><code>Value($Expression)</code> provides a default value given by the expression. The expression must match the type of the parameter, even though this is not currently checked.</li>
-<li><code>Context($CommandContext)</code> attempts to infer the argument by context. The following <code>CommandContext</code>s are supported:</li>
+<li><code>Context($CommandContext)</code> attempts to infer the argument by context. The following <code>CommandContext</code>s are supported:<ul>
 <li><code>Directory</code>: attempt to infer a <code>ResourcePath</code> to an existing directory. For example, when right-clicking a directory in an IDE to execute a command on that directory.</li>
 <li><code>File</code>: attempt to infer a <code>ResourcePath</code> to an existing file. For example, when right-clicking a file in an IDE to execute a command on that directory, or when executing a command in an editor for a file.</li>
 <li><code>HierarchicalResource</code>: attempt to infer a <code>ResourcePath</code> to a hierarchical resource. A hierarchical resource is a resource that belongs to a (tree) hierarchy, such as a file or directory on the local filesystem. Use this when the command relies on the resource being in a filesystem, but does not care whether it is a directory or a file.</li>
 <li><code>ReadableResource</code>: attempt to infer a <code>ResourceKey</code> to a readable resource. This is more general than <code>File</code>, as we only ask for a resource that can be read, not one that belongs to a (local) filesystem. Use this when the command does not rely on the resource being in a filesystem.</li>
 <li><code>Region</code>: attempt to infer a <code>Region</code> in a source file. Inference succeeds when the context has a selection of size 1 or larger. For example, when executing a command in an editor that has a selection, the region will be that selection.</li>
 <li><code>Offset</code>: attempt to infer an <code>int</code> representing an offset in a source file. Inference succeeds when the context has a cursor offset (i.e., a selection of size 0 or larger). For example, when executing a command in an editor, the offset will be the offset to the cursor in the editor.</li>
-<li><code>EnclosingContext($EnclosingCommandContext)</code> attempts to infer the argument by the enclosing context. The following <code>EnclosingCommandContext</code>s are supported:</li>
+</ul>
+</li>
+<li><code>EnclosingContext($EnclosingCommandContext)</code> attempts to infer the argument by the enclosing context. The following <code>EnclosingCommandContext</code>s are supported:<ul>
 <li><code>Project</code>: attempt to infer a <code>ResourcePath</code> to the enclosing project. For example, when executing a command in an IDE on a file, directory, or editor for a file, that belongs to a project. Or when executing a command in a CLI, the directory will be the current working directory.</li>
 <li><code>Directory</code>: attempt to infer a <code>ResourcePath</code> to the enclosing directory. For example, when executing a command in the context of a file, directory, or editor for a file, the directory will be the parent of that file/directory.</li>
+</ul>
+</li>
 </ul>
 <p>Here is an example of a command that shows the parsed AST by taking one file argument that is inferred from context:</p>
 <div class="highlight"><pre><span></span><code><span class="na">let showParsedAstCommand</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">command-def {</span>
@@ -1826,7 +1862,7 @@ The following <code>ParserOption</code>s are supported:</p>
 <p>The following <code>ParserVariant</code>s are supported:</p>
 <ul>
 <li><code>jsglr1</code>: uses the <a href="https://github.com/metaborg/jsglr/tree/master/org.spoofax.jsglr">JSGLR1</a> parser.</li>
-<li><code>jsglr2 { $Jsglr2Option* }</code>: uses the <a href="https://github.com/metaborg/jsglr/tree/master/org.spoofax.jsglr2">JSGLR2</a> parser. The following <code>Jsglr2Option</code>s are supported:</li>
+<li><code>jsglr2 { $Jsglr2Option* }</code>: uses the <a href="https://github.com/metaborg/jsglr/tree/master/org.spoofax.jsglr2">JSGLR2</a> parser. The following <code>Jsglr2Option</code>s are supported:<ul>
 <li><code>preset = $Jsglr2Preset</code>: sets the <a href="https://github.com/metaborg/jsglr/blob/master/org.spoofax.jsglr2/src/main/java/org/spoofax/jsglr2/JSGLR2Variant.java#L120">JSGLR2 preset</a> to use. The following <code>Jsglr2Preset</code>s are supported:<ul>
 <li><code>Standard</code></li>
 <li><code>Elkhound</code></li>
@@ -1837,6 +1873,8 @@ The following <code>ParserOption</code>s are supported:</p>
 <li><code>Composite</code></li>
 <li><code>Incremental</code></li>
 <li><code>IncrementalRecovery</code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -1957,7 +1995,79 @@ Currently, no <code>MultilangAnalyzerOption</code>s are supported.</p>
 <h3 id="stratego-runtime">Stratego runtime<a class="headerlink" href="#stratego-runtime" title="Permanent link">&para;</a></h3>
 <p>The <code>stratego-runtime { $StrategoRuntimeOption* }</code> section enables generation of a stratego runtime, and groups options.
 The <code>stratego</code> section must be enabled when the <code>stratego-runtime</code> section is enabled.
-Currently, no <code>StrategoRuntimeOption</code>s are supported.</p>
+The following <code>StrategoRuntimeOption</code>s are supported:</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Required?</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>strategy-package-id = $Expression</code></td>
+<td>no</td>
+<td>Adds a package as a private Stratego package. Can be specified multiple times.</td>
+<td>Java package identifier</td>
+</tr>
+<tr>
+<td><code>interop-registerer-by-reflection = $Expression</code></td>
+<td>no</td>
+<td>Adds an interop registerer to load by reflection. Can be specified multiple times.</td>
+<td>Java type identifier</td>
+</tr>
+<tr>
+<td><code>add-spoofax2-primitives = $Expression</code></td>
+<td>no</td>
+<td>Whether to add the Spoofax 2 Stratego primitives.</td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td><code>add-nabl2-primitives = $Expression</code></td>
+<td>no</td>
+<td>Whether to add the NaBL2 Stratego primitives.</td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td><code>add-statix-primitives = $Expression</code></td>
+<td>no</td>
+<td>Whether to add the Statix Stratego primitives.</td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td><code>with-primitive-library = $Expression</code></td>
+<td>no</td>
+<td>Adds a Stratego primitive strategies library (implementing <code>org.spoofax.interpreter.library.IOperatorRegistry</code>) to the generated <code>StrategoRuntimeBuilderFactory</code>. The library must have an <code>@Inject</code> constructor. Can be specified multiple times.</td>
+<td>Java type identifier</td>
+</tr>
+<tr>
+<td><code>with-interop-registerer = $Expression</code></td>
+<td>no</td>
+<td>Adds a Stratego interop registerer (implementing <code>org.strategoxt.lang.InteropRegisterer</code>) to the generated <code>StrategoRuntimeBuilderFactory</code>. The registerer must have an <code>@Inject</code> constructor. Can be specified multiple times.</td>
+<td>Java type identifier</td>
+</tr>
+<tr>
+<td><code>class-kind = $Expression</code></td>
+<td>no</td>
+<td>Specifies whether the classes are generated (<code>Generated</code>) or provided manually (<code>Manual</code>). Defaults to <code>Generated</code>.</td>
+<td><code>Generated</code> or <code>Manual</code></td>
+</tr>
+<tr>
+<td><code>base-StrategoRuntimeBuilderFactory = $Expression</code></td>
+<td>no</td>
+<td>Package and name of the generated <code>StrategoRuntimeBuilderFactory</code>.</td>
+<td>Java type identifier</td>
+</tr>
+<tr>
+<td><code>extend-StrategoRuntimeBuilderFactory = $Expression</code></td>
+<td>no</td>
+<td>Package and name of the extending <code>StrategoRuntimeBuilderFactory</code>, if any.</td>
+<td>Java type identifier</td>
+</tr>
+</tbody>
+</table>
 <h3 id="completer">Completer<a class="headerlink" href="#completer" title="Permanent link">&para;</a></h3>
 <p>The <code>completer { $CompleterOption* }</code> section enables generation of a code completer, and groups options.
 The <code>constraint-analyzer</code> and <code>statix</code> sections must be enabled when the <code>completer</code> section is enabled.
@@ -2487,13 +2597,13 @@ The value will be re-derived and stored in <code>spoofaxc.lock</code>, after whi
       
       
         
-        <a href="../../background/documentation/" class="md-footer__link md-footer__link--next" aria-label="Next: Documentation" rel="next">
+        <a href="../eclipse-lwb/eclipse-project-files/" class="md-footer__link md-footer__link--next" aria-label="Next: Eclipse Project Files" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Documentation
+              Eclipse Project Files
             </div>
           </div>
           <div class="md-footer__button md-icon">

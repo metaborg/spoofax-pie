@@ -532,9 +532,53 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Importing a Project
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         Importing a Project
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    Troubleshooting
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-project-does-not-appear-in-the-import-window" class="md-nav__link">
+    The project does not appear in the Import window
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -647,6 +691,8 @@
         
           
         
+          
+        
       
       
         <label class="md-nav__link" for="__nav_3_5">
@@ -660,6 +706,20 @@
           Development
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/debugging-in-intellij/" class="md-nav__link">
+        Debugging in IntelliJ
+      </a>
+    </li>
+  
+
+            
           
             
               
@@ -706,6 +766,8 @@
         
           
         
+          
+        
       
       
         <label class="md-nav__link" for="__nav_4">
@@ -728,6 +790,20 @@
     <li class="md-nav__item">
       <a href="../../../reference/configuration/" class="md-nav__link">
         Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/eclipse-lwb/eclipse-project-files/" class="md-nav__link">
+        Eclipse Project Files
       </a>
     </li>
   
@@ -912,6 +988,34 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    Troubleshooting
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-project-does-not-appear-in-the-import-window" class="md-nav__link">
+    The project does not appear in the Import window
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -940,6 +1044,10 @@ Then, press <span class="guilabel">Finish</span> to import the project.</p>
 <p>The project should now be imported into your workspace.
 Finally, build the language project by selecting the project in the <span class="guilabel">Package Explorer</span> and choosing <span class="guilabel">Project ‣ Build Project</span>.
 Building the project at least once after importing is required to update the project.</p>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="the-project-does-not-appear-in-the-import-window">The project does not appear in the Import window<a class="headerlink" href="#the-project-does-not-appear-in-the-import-window" title="Permanent link">&para;</a></h3>
+<p>Ensure the project has associated <code>.project</code> and <code>.classpath</code> files, and that they are not ignored
+for version control. <a href="../../../reference/eclipse-lwb/eclipse-project-files/">Minimum file content</a>.</p>
 
 
 
