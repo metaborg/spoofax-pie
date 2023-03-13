@@ -2,6 +2,18 @@
 All notable changes to this project are documented in this file, based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
+## [Unreleased]
+
+
+## [0.19.4] - 2023-03-13
+### Changed
+- `releng` (devenv-release) requirement to `0.1.34`.
+- Eclipse versions to `2021-03`.
+
+### Added
+- Adapter section to `spoofaxc.cfg` to extend several adapter classes of languages.
+
+
 ## [0.19.3] - 2022-11-25
 ### Fixed
 - Missing class files in 0.19.2 release.
@@ -523,7 +535,8 @@ build-dependencies [
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.2...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.4...HEAD
+[0.19.4]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.3...release-0.19.4
 [0.19.3]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.2...release-0.19.3
 [0.19.2]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.1...release-0.19.2
 [0.19.1]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.0...release-0.19.1
