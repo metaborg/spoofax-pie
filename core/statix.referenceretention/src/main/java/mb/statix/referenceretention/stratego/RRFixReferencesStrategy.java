@@ -301,7 +301,7 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
          */
         private @Nullable RRSolverState fix(RRSolverState state, Collection<Map.Entry<IConstraint, IMessage>> allowedErrors) {
             // Create a strategy that fails if the term is not an injection
-            final Strategy2</* ctx */ IListTerm, /* sortName */ IStringTerm, /* term */ ITerm, /* result */ @Nullable ITerm> qualifyReferenceStrategy = fun(this::qualifyReference);
+            final Strategy3</* ctx */ IListTerm, /* sortName */ IStringTerm, /* SolverResult */ SolverResult, /* term */ ITerm, /* result */ @Nullable ITerm> qualifyReferenceStrategy = fun(this::qualifyReference);
 
             final RRContext ctx = new RRContext(qualifyReferenceStrategy, allowedErrors);
 
@@ -332,12 +332,13 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
          * @param sortName the sort name of the incoming and resulting reference
          * @return a list of pairs of a qualified reference term and a term index; otherwise, {@code null}
          */
-        private @Nullable ITerm qualifyReference(ITerm term, IListTerm contextTerms, IStringTerm sortName) {
+        private @Nullable ITerm qualifyReference(ITerm term, IListTerm contextTerms, IStringTerm sortName, SolverResult solverResult) {
             try {
                 final IStrategoTerm sTerm = strategoTerms.toStratego(term, true);
                 final IStrategoTerm sContextTerms = strategoTerms.toStratego(contextTerms, true);
                 final IStrategoTerm sSortName = strategoTerms.toStratego(sortName, true);
-                final IStrategoTerm sSolverResult = strategoTerms.toStratego(mb.nabl2.terms.build.TermBuild.B.newBlob(originalAnalysis));
+                final IStrategoTerm sSolverResult = strategoTerms.toStratego(mb.nabl2.terms.build.TermBuild.B.newBlob(solverResult));
+                // final IStrategoTerm sSolverResult = strategoTerms.toStratego(mb.nabl2.terms.build.TermBuild.B.newBlob(originalAnalysis));
 //                @Nullable final IStrategoTerm output = strategoRuntime.invokeOrNull(qualifyReferenceStrategyName, sTerm, sContextTerms, sSortName);
                 @Nullable final IStrategoTerm output = strategoRuntime.invoke(qualifyReferenceStrategyName, sTerm, sContextTerms, sSortName, sSolverResult);
 //                if (output == null) {

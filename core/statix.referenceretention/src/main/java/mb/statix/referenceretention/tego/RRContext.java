@@ -18,7 +18,7 @@ import java.util.Map;
  */
 public final class RRContext {
 
-    private final Strategy2</* ctx */ IListTerm, /* sortName */ IStringTerm, /* term */ ITerm, /* result */ @Nullable ITerm> qualifyReferenceStrategy;
+    private final Strategy3</* ctx */ IListTerm, /* sortName */ IStringTerm, /* SolverResult */ SolverResult, /* term */ ITerm, /* result */ @Nullable ITerm> qualifyReferenceStrategy;
     private final Collection<Map.Entry<IConstraint, IMessage>> allowedErrors;
 
     /**
@@ -28,7 +28,7 @@ public final class RRContext {
      * @param allowedErrors a collection of constraints/message pairs that are allowed
      */
     public RRContext(
-        Strategy2</* ctx */ IListTerm, /* sortName */ IStringTerm, /* term */ ITerm, /* result */ @Nullable ITerm> qualifyReferenceStrategy,
+        Strategy3</* ctx */ IListTerm, /* sortName */ IStringTerm, /* SolverResult */ SolverResult, /* term */ ITerm, /* result */ @Nullable ITerm> qualifyReferenceStrategy,
         Collection<Map.Entry<IConstraint, IMessage>> allowedErrors
     ) {
         this.qualifyReferenceStrategy = qualifyReferenceStrategy;
@@ -44,7 +44,7 @@ public final class RRContext {
      *
      * @return the strategy
      */
-    public Strategy2</* ctx */ IListTerm, /* sortName */ IStringTerm, /* term */ ITerm, /* result */ @Nullable ITerm> getQualifyReferenceStrategy() {
+    public Strategy3</* ctx */ IListTerm, /* sortName */ IStringTerm, /* SolverResult */ SolverResult, /* term */ ITerm, /* result */ @Nullable ITerm> getQualifyReferenceStrategy() {
         return qualifyReferenceStrategy;
     }
 
