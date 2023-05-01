@@ -47,10 +47,9 @@ class CommandRunner<A extends Serializable> implements Callable {
 
     @Override public @Nullable Object call() throws Exception {
         final FSPath workingDirectory = FSPath.workingDirectory();
-        final CommandContext enclosingContext = CommandContext.ofProject(workingDirectory);
         final CommandContext context = new CommandContext();
-        context.setEnclosing(EnclosingCommandContextType.Project, enclosingContext);
-        context.setEnclosing(EnclosingCommandContextType.Directory, enclosingContext);
+        context.setEnclosing(EnclosingCommandContextType.Project, CommandContext.ofProject(workingDirectory));
+        context.setEnclosing(EnclosingCommandContextType.Directory, CommandContext.ofDirectory(workingDirectory));
 
         final RawArgs rawArgs = rawArgsBuilder.build(context);
         final A args = commandDef.fromRawArgs(rawArgs);
