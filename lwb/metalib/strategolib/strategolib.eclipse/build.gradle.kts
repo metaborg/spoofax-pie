@@ -7,6 +7,10 @@ languageEclipseProject {
   adapterProject.set(project(":strategolib"))
 }
 
+mavenize {
+  majorVersion.set("2021-03")
+}
+
 tasks {
   "jar"(Jar::class) {
     val exportPackages = LinkedHashSet<String>()

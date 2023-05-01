@@ -3,6 +3,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+### Fixed
+- `strategolib.eclipse` not using Eclipse version `2021-03`.
 
 
 ## [0.19.4] - 2023-03-13
