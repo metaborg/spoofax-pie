@@ -6,9 +6,11 @@ import mb.pie.api.Task;
 import mb.resource.ReadableResource;
 import mb.resource.ResourceRuntimeException;
 import mb.resource.ResourceService;
+import mb.resource.fs.FSPath;
 import mb.spoofax.core.language.command.CommandContext;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.CommandFeedback;
+import mb.spoofax.core.language.command.EnclosingCommandContextType;
 import mb.spoofax.core.language.command.ShowFeedback;
 import mb.spoofax.core.language.command.arg.ArgConverters;
 import mb.spoofax.core.language.command.arg.RawArgs;
@@ -44,7 +46,13 @@ class CommandRunner<A extends Serializable> implements Callable {
     }
 
     @Override public @Nullable Object call() throws Exception {
-        final RawArgs rawArgs = rawArgsBuilder.build(new CommandContext());
+        final FSPath workingDirectory = FSPath.workingDirectory();
+        final CommandContext enclosingContext = CommandContext.ofProject(workingDirectory);
+        final CommandContext context = new CommandContext();
+        context.setEnclosing(EnclosingCommandContextType.Project, enclosingContext);
+        context.setEnclosing(EnclosingCommandContextType.Directory, enclosingContext);
+
+        final RawArgs rawArgs = rawArgsBuilder.build(context);
         final A args = commandDef.fromRawArgs(rawArgs);
         final Task<CommandFeedback> task = commandDef.createTask(args);
         final CommandFeedback feedback = session.requireWithoutObserving(task);

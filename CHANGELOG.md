@@ -3,8 +3,14 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+
+
+## [0.19.5] - 2023-05-01
 ### Fixed
 - `strategolib.eclipse` not using Eclipse version `2021-03`.
+
+### Changed
+- Command-line runs use the current working directory as enclosing project/directory context.
 
 
 ## [0.19.4] - 2023-03-13
@@ -537,7 +543,8 @@ build-dependencies [
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.4...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.5...HEAD
+[0.19.5]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.4...release-0.19.5
 [0.19.4]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.3...release-0.19.4
 [0.19.3]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.2...release-0.19.3
 [0.19.2]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.1...release-0.19.2
