@@ -6,11 +6,9 @@ import mb.pie.api.Task;
 import mb.resource.ReadableResource;
 import mb.resource.ResourceRuntimeException;
 import mb.resource.ResourceService;
-import mb.resource.fs.FSPath;
 import mb.spoofax.core.language.command.CommandContext;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.CommandFeedback;
-import mb.spoofax.core.language.command.EnclosingCommandContextType;
 import mb.spoofax.core.language.command.ShowFeedback;
 import mb.spoofax.core.language.command.arg.ArgConverters;
 import mb.spoofax.core.language.command.arg.RawArgs;
@@ -24,12 +22,22 @@ import java.util.concurrent.Callable;
 
 class CommandRunner<A extends Serializable> implements Callable {
     private final ResourceService resourceService;
+    private final CommandContext context;
     private final MixedSession session;
     private final CommandDef<A> commandDef;
     private final RawArgsBuilder rawArgsBuilder;
 
-    CommandRunner(ResourceService resourceService, MixedSession session, CommandDef<A> commandDef, ArgConverters argConverters) {
+    public boolean printFeedbackNames = false;
+
+    CommandRunner(
+        ResourceService resourceService,
+        CommandContext context,
+        MixedSession session,
+        CommandDef<A> commandDef,
+        ArgConverters argConverters
+    ) {
         this.resourceService = resourceService;
+        this.context = context;
         this.session = session;
         this.commandDef = commandDef;
         this.rawArgsBuilder = new RawArgsBuilder(commandDef.getParamDef(), argConverters);
@@ -46,11 +54,6 @@ class CommandRunner<A extends Serializable> implements Callable {
     }
 
     @Override public @Nullable Object call() throws Exception {
-        final FSPath workingDirectory = FSPath.workingDirectory();
-        final CommandContext context = new CommandContext();
-        context.setEnclosing(EnclosingCommandContextType.Project, CommandContext.ofProject(workingDirectory));
-        context.setEnclosing(EnclosingCommandContextType.Directory, CommandContext.ofDirectory(workingDirectory));
-
         final RawArgs rawArgs = rawArgsBuilder.build(context);
         final A args = commandDef.fromRawArgs(rawArgs);
         final Task<CommandFeedback> task = commandDef.createTask(args);
@@ -73,8 +76,10 @@ class CommandRunner<A extends Serializable> implements Callable {
                     try {
                         final ReadableResource resource = resourceService.getReadableResource(file);
                         final String text = resource.readString();
-                        System.out.println(file + ":");
-                        System.out.println();
+                        if(printFeedbackNames) {
+                            System.out.println(file + ":");
+                            System.out.println();
+                        }
                         System.out.println(text);
                     } catch(IOException | ResourceRuntimeException e) {
                         System.err.println("An exception occurred while showing file '" + file + "':");
@@ -83,8 +88,10 @@ class CommandRunner<A extends Serializable> implements Callable {
                     return Optional.empty();
                 })
                 .showText((text, name, region) -> {
-                    System.out.println(name + ":");
-                    System.out.println();
+                    if(printFeedbackNames && !name.isEmpty()) {
+                        System.out.println(name + ":");
+                        System.out.println();
+                    }
                     System.out.println(text);
                     return Optional.empty();
                 })

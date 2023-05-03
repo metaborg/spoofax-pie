@@ -5,12 +5,14 @@ import mb.pie.api.MixedSession;
 import mb.pie.api.Pie;
 import mb.pie.dagger.PieComponent;
 import mb.resource.ResourceService;
+import mb.resource.fs.FSPath;
 import mb.spoofax.core.language.LanguageComponent;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spoofax.core.language.cli.CliCommand;
 import mb.spoofax.core.language.cli.CliParam;
 import mb.spoofax.core.language.command.CommandContext;
 import mb.spoofax.core.language.command.CommandDef;
+import mb.spoofax.core.language.command.EnclosingCommandContextType;
 import mb.spoofax.core.language.command.arg.ArgConverter;
 import mb.spoofax.core.language.command.arg.ArgConverters;
 import mb.spoofax.core.language.command.arg.Param;
@@ -67,7 +69,12 @@ public class SpoofaxCli {
         final String name = cliCommand.getName();
         final @Nullable CommandDef<?> commandDef = cliCommand.getCommandDef();
         if(commandDef != null) { // CLI command with actual command definition that can be executed.
-            final CommandRunner<?> commandRunner = new CommandRunner<>(resourceService, session, commandDef, argConverters);
+            final FSPath workingDirectory = FSPath.workingDirectory();
+            final CommandContext context = new CommandContext();
+            context.setEnclosing(EnclosingCommandContextType.Project, CommandContext.ofProject(workingDirectory));
+            context.setEnclosing(EnclosingCommandContextType.Directory, CommandContext.ofDirectory(workingDirectory));
+
+            final CommandRunner<?> commandRunner = new CommandRunner<>(resourceService, context, session, commandDef, argConverters);
             commandSpec = CommandSpec.wrapWithoutInspection(commandRunner);
             final ParamDef commandParams = commandDef.getParamDef();
             for(CliParam cliParam : cliCommand.getParams()) {
@@ -81,7 +88,7 @@ public class SpoofaxCli {
                         builder.type(param.getType());
                         builder.required(param.isRequired());
                         builder.negatable(negatable);
-                        final @Nullable Serializable provided = RawArgFromProviders.get(param, new CommandContext());
+                        final @Nullable Serializable provided = RawArgFromProviders.get(param, context);
                         if(provided != null) {
                             builder.defaultValue(provided.toString());
                             builder.showDefaultValue(CommandLine.Help.Visibility.ALWAYS);
@@ -90,7 +97,7 @@ public class SpoofaxCli {
                         if(label != null) {
                             builder.paramLabel(label);
                         }
-                        // noinspection ConstantConditions (label can really be null)
+                        // noinspection ConstantConditions (description can really be null)
                         if(description != null) {
                             builder.description(description);
                         }
@@ -115,7 +122,7 @@ public class SpoofaxCli {
                         builder.index(Integer.toString(index));
                         builder.type(param.getType());
                         builder.required(param.isRequired());
-                        final @Nullable Serializable provided = RawArgFromProviders.get(param, new CommandContext());
+                        final @Nullable Serializable provided = RawArgFromProviders.get(param, context);
                         if(provided != null) {
                             builder.defaultValue(provided.toString());
                             builder.showDefaultValue(CommandLine.Help.Visibility.ALWAYS);
@@ -124,7 +131,7 @@ public class SpoofaxCli {
                         if(label != null) {
                             builder.paramLabel(label);
                         }
-                        // noinspection ConstantConditions (label can really be null)
+                        // noinspection ConstantConditions (description can really be null)
                         if(description != null) {
                             builder.description(description);
                         }
@@ -141,6 +148,7 @@ public class SpoofaxCli {
                         return (ArgSpec)builder.build();
                     }));
             }
+            commandSpec.add(printFeedbackNamesOption(commandRunner));
         } else {
             // CLI command without actual command to run: just a container for sub-commands.
             final DelegateRunnable delegateRunnable = new DelegateRunnable();
@@ -165,6 +173,22 @@ public class SpoofaxCli {
         }
 
         return commandSpec;
+    }
+
+    private static ArgSpec printFeedbackNamesOption(CommandRunner<?> commandRunner) {
+        return OptionSpec
+            .builder("--print-feedback-names")
+            .hidden(true)
+            .description("Print names from feedback for this command")
+            .setter(new ISetter() {
+                @Override public <T> T set(T value) {
+                    if(value instanceof Boolean) {
+                        commandRunner.printFeedbackNames = (Boolean)value;
+                    }
+                    return value;
+                }
+            })
+            .build();
     }
 
     private static <T extends Serializable> void registerConverter(CommandLine commandLine, TypeConverter<T> converter) {
