@@ -147,7 +147,8 @@ open class IntellijPlugin : Plugin<Project> {
       }
     }
 
-    // Make compileJava depend on our task, because we generate Java code.
+    // Make processResources and compileJava depend on our task, because we generate Java code.
+    project.tasks.getByName(JavaPlugin.PROCESS_RESOURCES_TASK_NAME).dependsOn(compileTask)
     project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(compileTask)
 
     // Make all of IntelliJ's tasks depend on our task, because we generate Java code and a plugin.xml file.

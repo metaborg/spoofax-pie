@@ -128,8 +128,9 @@ open class EclipsePlugin : Plugin<Project> {
       }
     }
 
-    // Make compileJava depend on our task, because we configure source sets and dependencies.
+    // Make processResources and compileJava depend on our task, because we configure source sets and dependencies.
     project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(compileTask)
+    project.tasks.getByName(JavaPlugin.PROCESS_RESOURCES_TASK_NAME).dependsOn(compileTask)
   }
 
   private fun configureBundle(
