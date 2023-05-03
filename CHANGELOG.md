@@ -5,6 +5,15 @@ All notable changes to this project are documented in this file, based on [Keep 
 ## [Unreleased]
 
 
+## [0.19.6] - 2023-05-03
+### Fixed
+- Command-line options not getting default values due to wrong command context.
+- Missing dependencies from Gradle `processResources` tasks to our tasks that provide resources.
+
+### Changed
+- Feedback names to not be printed by default in command-line runs. Can be printed with `--print-feedback-names`.
+
+
 ## [0.19.5] - 2023-05-01
 ### Fixed
 - `strategolib.eclipse` not using Eclipse version `2021-03`.
@@ -543,7 +552,8 @@ build-dependencies [
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.5...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.6...HEAD
+[0.19.6]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.5...release-0.19.6
 [0.19.5]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.4...release-0.19.5
 [0.19.4]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.3...release-0.19.4
 [0.19.3]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.2...release-0.19.3
