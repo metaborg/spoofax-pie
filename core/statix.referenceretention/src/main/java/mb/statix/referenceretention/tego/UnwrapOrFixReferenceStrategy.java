@@ -272,18 +272,18 @@ public final class UnwrapOrFixReferenceStrategy extends NamedStrategy3<RRContext
         @Nullable final RRSolverState testResultState = engine.eval(InferStrategy.getInstance(), testState);
 
         if (testResultState == null || testResultState.hasErrors()) {
-            engine.log(instance, "Locked reference test has errors: {} => {}", referenceTerm, testResultState);
+            engine.log(instance, "Locked reference test has errors, excluded: {} => {}", referenceTerm, testResultState);
             return null;   // TODO: Report that it has errors and was therefore excluded
         }
         final @Nullable ITerm refTargetTerm = tryGetRefProperty(testResultState, referenceIndex); //, "Reference has no @ref target: " + referenceTerm);
         if(refTargetTerm == null) {
-            engine.log(instance, "Reference has no @ref target: {} in {}", referenceIndex, testResultState);
+            engine.log(instance, "Reference has no @ref target, excluded: {} in {}", referenceIndex, testResultState);
             return null;   // TODO: Report that reference had no @ref target and was therefore excluded
         }
 
         final @Nullable TermIndex refTargetIndex = tryGetTermIndex(testResultState, refTargetTerm); //, "Reference target has no index: " + refTargetTerm);
         if(refTargetIndex == null) {
-            engine.log(instance, "Reference target has no index: {} in {}", refTargetTerm, testResultState);
+            engine.log(instance, "Reference target has no index, excluded: {} in {}", refTargetTerm, testResultState);
             return null;   // TODO: Report that reference had no index and was therefore excluded
         }
 
@@ -293,7 +293,7 @@ public final class UnwrapOrFixReferenceStrategy extends NamedStrategy3<RRContext
             return testResultState;
         } else {
             // Check failed, reference is invalid.
-            engine.log(instance, "Locked reference test failed (points to different declaration): {} => {}", referenceTerm, testResultState);
+            engine.log(instance, "Locked reference test failed (points to different declaration), excluded: {} => {}", referenceTerm, testResultState);
             return null;
         }
     }

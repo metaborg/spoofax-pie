@@ -92,7 +92,7 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
             "post-analyze",                 // TODO: Tiger specific. Make configurable.
             "explicate-injections-tiger",   // TODO: Tiger specific. Make configurable.
             "implicate-injections-tiger"    // TODO: Tiger specific. Make configurable.
-            );
+        );
 
         // Build a new analysis
         final IState.Transient state = originalAnalysis.state().melt();
@@ -100,18 +100,24 @@ public final class RRFixReferencesStrategy extends StatixPrimitive {
         final ITerm newTerm = pair.component1();
         final Map.Immutable<ITermVar, RRPlaceholder> placeholderDescriptors = pair.component2();
 
-        final Pair<ITermVar, RRSolverState> initialRootVarAndSolverState = execution.createInitialSolverState(
-            newTerm, // explicated
-            placeholderDescriptors.keySet(),
-            placeholderDescriptors
-        );
-        final ITermVar rootVar = initialRootVarAndSolverState.component1();
-        final RRSolverState initialSolverState = initialRootVarAndSolverState.component2();
-        final RRSolverState analyzedState = execution.analyze(initialSolverState);
-        final Collection<Map.Entry<IConstraint, IMessage>> allowedErrors = initialSolverState.getMessages().entrySet();
-        final @Nullable RRSolverState fixedState = execution.fix(analyzedState, allowedErrors);
-        if (fixedState == null) return Optional.empty();
-        final ITerm fixedAst = fixedState.project(rootVar);
+        final ITerm fixedAst;
+        try {
+            final Pair<ITermVar, RRSolverState> initialRootVarAndSolverState = execution.createInitialSolverState(
+                newTerm, // explicated
+                placeholderDescriptors.keySet(),
+                placeholderDescriptors
+            );
+            final ITermVar rootVar = initialRootVarAndSolverState.component1();
+            final RRSolverState initialSolverState = initialRootVarAndSolverState.component2();
+            final RRSolverState analyzedState = execution.analyze(initialSolverState);
+            final Collection<Map.Entry<IConstraint, IMessage>> allowedErrors = initialSolverState.getMessages().entrySet();
+            final @Nullable RRSolverState fixedState = execution.fix(analyzedState, allowedErrors);
+            if(fixedState == null) return Optional.empty();
+            fixedAst = fixedState.project(rootVar);
+        } catch (Throwable ex) {
+            logger.error("Unhandled error during RR_fix_references!", ex);
+            throw ex;
+        }
         return Optional.of(fixedAst);
     }
 
