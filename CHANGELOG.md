@@ -3,6 +3,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+### Changed
+- Removed SnakeYAML dependency of Tego.
 
 
 ## [0.19.6] - 2023-05-03
