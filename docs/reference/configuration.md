@@ -321,7 +321,13 @@ The following `ConstraintAnalyzerOption`s are supported:
 | `default-statix-message-term-depth = $Expression` | no | The default Statix message term depth to use. Default is implementation-defined. Does nothing if Statix is not enabled. | Unsigned integer |
 | `default-statix-test-log-level = $Expression` | no | The default Statix test log level to use. Default is implementation-defined. Does nothing if Statix is not enabled. | String |
 | `default-statix-supress-cascading-errors = $Expression` | no | Whether to suppress cascading errors by default. Default is implementation-defined. Does nothing if Statix is not enabled. | Boolean |
-| `statix-solver-mode = $Expression` | no | Statix Solver Mode. Default is `traditional`. Does nothing if Statix is not enabled. | Enum ({`traditional`, `concurrent`, `incremental`}) ` |
+| `statix-solver-mode = $StatixSolverMode` | no | Statix solver mode. Defaults to `traditional`. Does nothing if Statix is not enabled. | n/a |
+
+The following `StatixSolverMode`s are supported:
+
+* `traditional`
+* `concurrent`
+* `incremental`
 
 ### Multi-language analyzer
 
