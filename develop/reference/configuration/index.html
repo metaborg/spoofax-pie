@@ -2182,7 +2182,7 @@ The following <code>Sdf3Option</code>s are supported:</p>
 <tr>
 <td><code>export-directory = $Expression</code></td>
 <td>no</td>
-<td>Exports a directory, making the SDF3 files in that directory accessable to dependencies. May be given multiple times.</td>
+<td>Exports a directory, making the SDF3 files in it accessable to dependencies. May be given multiple times.</td>
 <td>Path</td>
 </tr>
 <tr>
@@ -2195,7 +2195,7 @@ The following <code>Sdf3Option</code>s are supported:</p>
 <td><code>stratego-concrete-syntax-extension-main-file = $Expression</code></td>
 <td>no</td>
 <td>Sets the main SDF3 file used to create a concrete syntax extension parse table.</td>
-<td>n/a</td>
+<td>Path</td>
 </tr>
 </tbody>
 </table>
@@ -2329,6 +2329,12 @@ The following <code>EsvOption</code>s are supported:</p>
 <td>Adds an include directory from which to resolve ESV imports. May be given multiple times.</td>
 <td>Path</td>
 </tr>
+<tr>
+<td><code>export-directory = $Expression</code></td>
+<td>no</td>
+<td>Exports a directory, making the ESV files in it accessable to dependencies. May be given multiple times.</td>
+<td>Path</td>
+</tr>
 </tbody>
 </table>
 <p>The following <code>$EsvPrebuiltOption</code>s are supported:</p>
@@ -2404,6 +2410,12 @@ The following <code>StatixOption</code>s are supported:</p>
 <td><code>include-directory = $Expression</code></td>
 <td>no</td>
 <td>Adds an include directory from which to resolve Statix imports. May be given multiple times.</td>
+<td>Path</td>
+</tr>
+<tr>
+<td><code>export-directory = $Expression</code></td>
+<td>no</td>
+<td>Exports a directory, making the Statix files in it accessable to dependencies. May be given multiple times.</td>
 <td>Path</td>
 </tr>
 <tr>
@@ -2495,6 +2507,12 @@ The following <code>StrategoOption</code>s are supported:</p>
 <td>Path</td>
 </tr>
 <tr>
+<td><code>export-directory = $Expression</code></td>
+<td>no</td>
+<td>Exports a directory, making the Stratego files in it accessable to dependencies. May be given multiple times.</td>
+<td>Path</td>
+</tr>
+<tr>
 <td><code>sdf3-statix-explication-generation = $Expression</code></td>
 <td>no</td>
 <td>Whether SDF3 to Statix injection explication/implication generation is enabled. When enabled, <code>statix { sdf3-statix-signature-generation = true }</code> must also be enabled. Defaults to <code>false</code>.</td>
@@ -2505,6 +2523,12 @@ The following <code>StrategoOption</code>s are supported:</p>
 <td>no</td>
 <td>The affix that is used to make certain generated strategies unique to the language. This is used both as a prefix and suffix. Defaults to name of the language transformed to a Stratego strategy identifier.</td>
 <td>Stratego strategy identifier</td>
+</tr>
+<tr>
+<td><code>concrete-syntax-extension-parse-table = $Expression</code></td>
+<td>no</td>
+<td>Adds a Stratego concrete syntax extension parse table that can be used to parse Stratego files with. May be given multiple times.</td>
+<td>Path</td>
 </tr>
 </tbody>
 </table>
