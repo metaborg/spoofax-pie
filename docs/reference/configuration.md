@@ -404,7 +404,10 @@ The following `Sdf3FilesOption`s are supported:
 | - | - | - | - |
 | `main-source-directory = $Expression` | no | The directory relative to the root directory that contains the main SDF3 file. Defaults to the value of the top-level `source-directory` option. | Path |
 | `main-file = $Expression` | no | The main SDF3 file relative to the `main-source-directory`. Defaults to `./start.sdf3`. | Path |
+| `include-directory = $Expression` | no | Adds an include directory from which to resolve SDF3 imports. May be given multiple times. | Path |
+| `export-directory = $Expression` | no | Exports a directory, making the SDF3 files in that directory accessable to dependencies. May be given multiple times. | Path |
 | `parse-table-generator { $ParseTableGeneratorOption* }` | no | Parse table generator options. | n/a |
+| `stratego-concrete-syntax-extension-main-file = $Expression` | no | Sets the main SDF3 file used to create a concrete syntax extension parse table. | n/a |
 
 The following `$Sdf3PrebuiltOption`s are supported:
 
