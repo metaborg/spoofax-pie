@@ -2513,6 +2513,12 @@ The following <code>StrategoOption</code>s are supported:</p>
 <td>Path</td>
 </tr>
 <tr>
+<td><code>with-import-strategy-package-id = $Expression</code></td>
+<td>no</td>
+<td>Adds a Java package to import in the Java files that have been compiled from Stratego files. For example, <code>"mb.mylang.strategies"</code> adds import <code>import mb.mylang.strategies.*</code>. May be given multiple times.</td>
+<td>String</td>
+</tr>
+<tr>
 <td><code>sdf3-statix-explication-generation = $Expression</code></td>
 <td>no</td>
 <td>Whether SDF3 to Statix injection explication/implication generation is enabled. When enabled, <code>statix { sdf3-statix-signature-generation = true }</code> must also be enabled. Defaults to <code>false</code>.</td>
@@ -2556,7 +2562,7 @@ A dependency consists of a <em>dependency expression</em> (<code>$Exp</code>) th
 <tbody>
 <tr>
 <td><code>$Exp</code></td>
-<td>A dependency to project defined by the expression, available at <code>Build</code> and <code>Run</code> time.</td>
+<td>A dependency to a project defined by the expression, available at <code>Build</code> and <code>Run</code> time.</td>
 </tr>
 <tr>
 <td><code>$Exp { $DependencyOption* }</code></td>
