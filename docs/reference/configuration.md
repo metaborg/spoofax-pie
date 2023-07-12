@@ -405,9 +405,9 @@ The following `Sdf3FilesOption`s are supported:
 | `main-source-directory = $Expression` | no | The directory relative to the root directory that contains the main SDF3 file. Defaults to the value of the top-level `source-directory` option. | Path |
 | `main-file = $Expression` | no | The main SDF3 file relative to the `main-source-directory`. Defaults to `./start.sdf3`. | Path |
 | `include-directory = $Expression` | no | Adds an include directory from which to resolve SDF3 imports. May be given multiple times. | Path |
-| `export-directory = $Expression` | no | Exports a directory, making the SDF3 files in that directory accessable to dependencies. May be given multiple times. | Path |
+| `export-directory = $Expression` | no | Exports a directory, making the SDF3 files in it accessable to dependencies. May be given multiple times. | Path |
 | `parse-table-generator { $ParseTableGeneratorOption* }` | no | Parse table generator options. | n/a |
-| `stratego-concrete-syntax-extension-main-file = $Expression` | no | Sets the main SDF3 file used to create a concrete syntax extension parse table. | n/a |
+| `stratego-concrete-syntax-extension-main-file = $Expression` | no | Sets the main SDF3 file used to create a concrete syntax extension parse table. | Path |
 
 The following `$Sdf3PrebuiltOption`s are supported:
 
@@ -449,6 +449,7 @@ The following `EsvFilesOption`s are supported:
 | `main-source-directory = $Expression` | no | The directory relative to the root directory that contains the main ESV file. Defaults to the value of the top-level `source-directory` option. | Path |
 | `main-file = $Expression` | no | The main ESV file relative to the `main-source-directory`. Defaults to `./main.esv`. | Path |
 | `include-directory = $Expression` | no | Adds an include directory from which to resolve ESV imports. May be given multiple times. | Path |
+| `export-directory = $Expression` | no | Exports a directory, making the ESV files in it accessable to dependencies. May be given multiple times. | Path |
 
 The following `$EsvPrebuiltOption`s are supported:
 
@@ -478,6 +479,7 @@ The following `StatixFilesOption`s are supported:
 | `main-source-directory = $Expression` | no | The directory relative to the root directory that contains the main Statix file. Defaults to the value of the top-level `source-directory` option. | Path |
 | `main-file = $Expression` | no | The main Statix file relative to the `main-source-directory`. Defaults to `./main.stx`. | Path |
 | `include-directory = $Expression` | no | Adds an include directory from which to resolve Statix imports. May be given multiple times. | Path |
+| `export-directory = $Expression` | no | Exports a directory, making the Statix files in it accessable to dependencies. May be given multiple times. | Path |
 | `sdf3-statix-signature-generation = $Expression` | no | Whether SDF3 to Statix signature generation is enabled. When enabled, `stratego { sdf3-statix-explication-generation = true }` must also be enabled. Defaults to `false`. | Boolean |
 
 The following `$StatixPrebuiltOption`s are supported:
@@ -508,8 +510,10 @@ The following `$StrategoFilesOption`s are supported:
 | `main-source-directory = $Expression` | no | The directory relative to the root directory that contains the main Stratego file. Defaults to the value of the top-level `source-directory` option. | Path |
 | `main-file = $Expression` | no | The main Stratego file relative to the `main-source-directory`. Defaults to `./main.str2`. | Path |
 | `include-directory = $Expression` | no | Adds an include directory from which to resolve Stratego imports. May be given multiple times. | Path |
+| `export-directory = $Expression` | no | Exports a directory, making the Stratego files in it accessable to dependencies. May be given multiple times. | Path |
 | `sdf3-statix-explication-generation = $Expression` | no | Whether SDF3 to Statix injection explication/implication generation is enabled. When enabled, `statix { sdf3-statix-signature-generation = true }` must also be enabled. Defaults to `false`. | Boolean |
 | `language-strategy-affix = $Expression` | no | The affix that is used to make certain generated strategies unique to the language. This is used both as a prefix and suffix. Defaults to name of the language transformed to a Stratego strategy identifier. | Stratego strategy identifier |
+| `concrete-syntax-extension-parse-table = $Expression` | no | Adds a Stratego concrete syntax extension parse table that can be used to parse Stratego files with. May be given multiple times. | Path |
 
 ### Dependencies
 
