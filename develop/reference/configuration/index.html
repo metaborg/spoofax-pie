@@ -2174,9 +2174,27 @@ The following <code>Sdf3Option</code>s are supported:</p>
 <td>Path</td>
 </tr>
 <tr>
+<td><code>include-directory = $Expression</code></td>
+<td>no</td>
+<td>Adds an include directory from which to resolve SDF3 imports. May be given multiple times.</td>
+<td>Path</td>
+</tr>
+<tr>
+<td><code>export-directory = $Expression</code></td>
+<td>no</td>
+<td>Exports a directory, making the SDF3 files in that directory accessable to dependencies. May be given multiple times.</td>
+<td>Path</td>
+</tr>
+<tr>
 <td><code>parse-table-generator { $ParseTableGeneratorOption* }</code></td>
 <td>no</td>
 <td>Parse table generator options.</td>
+<td>n/a</td>
+</tr>
+<tr>
+<td><code>stratego-concrete-syntax-extension-main-file = $Expression</code></td>
+<td>no</td>
+<td>Sets the main SDF3 file used to create a concrete syntax extension parse table.</td>
 <td>n/a</td>
 </tr>
 </tbody>
