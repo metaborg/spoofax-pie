@@ -1,6 +1,5 @@
 package mb.statix.codecompletion;
 
-import com.google.common.collect.ImmutableMap;
 import io.usethesource.capsule.Map;
 import io.usethesource.capsule.Set;
 import mb.nabl2.terms.ITerm;
@@ -69,7 +68,7 @@ public final class SelectedConstraintCCSolverState<C extends IConstraint> extend
         Map.Immutable<IConstraint, IMessage> messages,
         Set.Immutable<IConstraint> constraints,
         Map.Immutable<IConstraint, Delay> delays,
-        @Nullable ImmutableMap<ITermVar, ITermVar> existentials,
+        Map.@Nullable Immutable<ITermVar, ITermVar> existentials,
         ICompleteness.Immutable completeness,
         Set.Immutable<String> expanded,
         SolutionMeta meta
@@ -181,7 +180,7 @@ public final class SelectedConstraintCCSolverState<C extends IConstraint> extend
         Map.Immutable<IConstraint, IMessage> newMessages,
         Set.Immutable<IConstraint> newConstraints,
         Map.Immutable<IConstraint, Delay> newDelays,
-        @Nullable ImmutableMap<ITermVar, ITermVar> newExistentials,
+        Map.@Nullable Immutable<ITermVar, ITermVar> newExistentials,
         ICompleteness.Immutable newCompleteness,
         Set.Immutable<String> newExpanded,
         SolutionMeta newMeta
@@ -196,7 +195,7 @@ public final class SelectedConstraintCCSolverState<C extends IConstraint> extend
         Map.Immutable<IConstraint, IMessage> newMessages,
         Set.Immutable<IConstraint> newConstraints,
         Map.Immutable<IConstraint, Delay> newDelays,
-        @Nullable ImmutableMap<ITermVar, ITermVar> newExistentials,
+        Map.@Nullable Immutable<ITermVar, ITermVar> newExistentials,
         ICompleteness.Immutable newCompleteness,
         Set.Immutable<String> newExpanded,
         SolutionMeta newMeta

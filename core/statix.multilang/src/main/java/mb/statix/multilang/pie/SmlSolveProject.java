@@ -1,6 +1,5 @@
 package mb.statix.multilang.pie;
 
-import com.google.common.collect.ImmutableMap;
 import dagger.Lazy;
 import mb.common.result.Result;
 import mb.common.result.ResultCollector;
@@ -30,6 +29,7 @@ import mb.statix.solver.persistent.Solver;
 import mb.statix.solver.persistent.SolverResult;
 import mb.statix.solver.persistent.State;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.metaborg.util.collection.CapsuleUtil;
 import org.metaborg.util.log.Level;
 import org.metaborg.util.task.NullCancel;
 import org.metaborg.util.task.NullProgress;
@@ -171,10 +171,10 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
                     logger.info("Project analyzed in {} ms", dt);
 
                     // Mark Delays as Errors
-                    final ImmutableMap.Builder<IConstraint, IMessage> messages = ImmutableMap.builder();
-                    messages.putAll(result.messages());
-                    result.delays().keySet().forEach(c -> messages.put(c, MessageUtil.findClosestMessage(c)));
-                    final SolverResult newResult = result.withMessages(messages.build()).withDelays(ImmutableMap.of());
+                    final io.usethesource.capsule.Map.Transient<IConstraint, IMessage> messages = CapsuleUtil.transientMap();
+                    messages.__putAll(result.messages());
+                    result.delays().keySet().forEach(c -> messages.__put(c, MessageUtil.findClosestMessage(c)));
+                    final SolverResult newResult = result.withMessages(messages.freeze()).withDelays(CapsuleUtil.immutableMap());
 
                     return Result.ofOk(newResult);
                 } catch(InterruptedException e) {

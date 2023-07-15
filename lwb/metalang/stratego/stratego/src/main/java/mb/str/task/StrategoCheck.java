@@ -25,6 +25,7 @@ import mb.stratego.build.strincr.task.output.CheckOutput;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.LinkedHashSet;
 
 @StrategoScope
 public class StrategoCheck implements TaskDef<StrategoAnalyzeConfig, KeyedMessages> {
@@ -65,9 +66,12 @@ public class StrategoCheck implements TaskDef<StrategoAnalyzeConfig, KeyedMessag
             config.rootDirectory,
             new IModuleImportService.ImportResolutionInfo(
                 config.sourceFileOrigins.asCopy(),
-                config.includeDirs.asCopy(),
+                new LinkedHashSet<>(config.includeDirs.asUnmodifiable()),
                 config.builtinLibs.asCopy(),
-                config.str2libraries.asCopy()
+                new LinkedHashSet<>(config.str2libraries.asUnmodifiable()),
+                false,
+                false,
+                null
             ),
             true
         ));

@@ -19,7 +19,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -78,10 +78,10 @@ public class StrategoCompileToJava implements TaskDef<StrategoCompileConfig, Res
             config.rootDirectory,
             config.javaSourceFileOutputDir,
             config.javaClassFileOutputDir,
-            new ArrayList<>(Arrays.asList(config.outputJavaPackageId)),
+            new ArrayList<>(Collections.singletonList(config.outputJavaPackageId)),
             config.cacheDir,
             new ArrayList<>(),
-            config.includeDirs.asCopy(),
+            new LinkedHashSet<>(config.includeDirs.asUnmodifiable()),
             config.builtinLibs.asCopy(),
             config.extraCompilerArguments,
             config.sourceFileOrigins.asCopy(),
@@ -89,7 +89,10 @@ public class StrategoCompileToJava implements TaskDef<StrategoCompileConfig, Res
             true,
             false,
             config.outputLibraryName,
-            config.str2libraries.asCopy()
+            new LinkedHashSet<>(config.str2libraries.asUnmodifiable()),
+            config.supportRTree,
+            config.supportStr1,
+            null
         ));
         if(output instanceof CompileOutput.Failure) {
             final CompileOutput.Failure failure = (CompileOutput.Failure)output;

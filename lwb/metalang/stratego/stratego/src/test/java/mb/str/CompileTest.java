@@ -15,6 +15,7 @@ import mb.pie.task.archive.ArchiveToJar;
 import mb.pie.task.java.CompileJava;
 import mb.resource.fs.FSResource;
 import mb.str.config.StrategoCompileConfig;
+import mb.str.config.StrategoConfig;
 import mb.str.task.StrategoCompileToJava;
 import mb.str.util.TestBase;
 import mb.stratego.build.strincr.Stratego2LibInfo;
@@ -70,7 +71,7 @@ class CompileTest extends TestBase {
             // Compile Stratego source files to Java source files.
             final StrategoCompileConfig config = new StrategoCompileConfig(
                 strategoSourceDir.getPath(),
-                strategoMainFile.getPath(),
+                StrategoConfig.fromRootDirectoryAndMainFile(strategoSourceDir.getPath(), strategoMainFile.getPath()),
                 ListView.of(strategoSourceDir.getPath()),
                 ListView.of(),
                 ListView.copyOf(str2Libs),
@@ -83,7 +84,9 @@ class CompileTest extends TestBase {
                 strategoJavaClassFileOutputDir.getPath(),
                 "mb.test",
                 "test",
-                ListView.copyOf(javaClassPaths)
+                ListView.copyOf(javaClassPaths),
+                true,
+                true
             );
             final Task<Result<StrategoCompileToJava.Output, MessagesException>> strategoCompileTask = compile.createTask(config);
             final Result<StrategoCompileToJava.Output, ?> result = session.require(strategoCompileTask);

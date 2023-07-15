@@ -1,9 +1,7 @@
 package mb.spoofax.intellij.editor;
 
-import com.google.common.collect.Lists;
 import com.intellij.lexer.LexerBase;
 import com.intellij.psi.tree.IElementType;
-import dagger.Lazy;
 import mb.common.option.Option;
 import mb.common.region.Region;
 import mb.common.token.TokenImpl;
@@ -25,7 +23,6 @@ import mb.spoofax.intellij.ScopeNames;
 import mb.spoofax.intellij.psi.SpoofaxTokenTypeManager;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.inject.Inject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -130,9 +127,9 @@ public final class SpoofaxLexer extends LexerBase {
         final ReadableResource resource = this.resourceService.getReadableResource(resourceKey);
         try {
             int length = (int)resource.getSize() / 2; // Divide by two because we want the number of UTF-16 chars, not the number of bytes.
-            return Lists.newArrayList(
+            return new ArrayList<>(Collections.singletonList(
                     new TokenImpl<>(TokenTypes.unknown(), Region.fromOffsetLength(0, length), null)
-            );
+            ));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

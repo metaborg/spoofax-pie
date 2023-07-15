@@ -33,6 +33,8 @@ public class StrategoCompileConfig implements Serializable {
     public final String outputJavaPackageId;
     public final String outputLibraryName;
     public final ListView<File> javaClassPaths;
+    public final boolean supportRTree;
+    public final boolean supportStr1;
 
     public StrategoCompileConfig(
         ResourcePath rootDirectory,
@@ -49,7 +51,9 @@ public class StrategoCompileConfig implements Serializable {
         ResourcePath javaClassFileOutputDir,
         String outputJavaPackageId,
         String outputLibraryName,
-        ListView<File> javaClassPaths
+        ListView<File> javaClassPaths,
+        boolean supportRTree,
+        boolean supportStr1
     ) {
         this.rootDirectory = rootDirectory;
         this.mainModule = mainModule;
@@ -66,6 +70,8 @@ public class StrategoCompileConfig implements Serializable {
         this.outputJavaPackageId = outputJavaPackageId;
         this.outputLibraryName = outputLibraryName;
         this.javaClassPaths = javaClassPaths;
+        this.supportRTree = supportRTree;
+        this.supportStr1 = supportStr1;
     }
 
     public StrategoCompileConfig(
@@ -100,7 +106,9 @@ public class StrategoCompileConfig implements Serializable {
             javaClassFileOutputDir,
             outputJavaPackageId,
             outputLibraryName,
-            javaClassPaths
+            javaClassPaths,
+            false,
+            false
         );
     }
 
@@ -126,7 +134,9 @@ public class StrategoCompileConfig implements Serializable {
             javaClassFileOutputDir,
             outputJavaPackageId,
             outputLibraryName,
-            ListView.of()
+            ListView.of(),
+            false,
+            false
         );
     }
 
@@ -162,7 +172,9 @@ public class StrategoCompileConfig implements Serializable {
         if(!javaClassFileOutputDir.equals(that.javaClassFileOutputDir)) return false;
         if(!outputJavaPackageId.equals(that.outputJavaPackageId)) return false;
         if(!outputLibraryName.equals(that.outputLibraryName)) return false;
-        return javaClassPaths.equals(that.javaClassPaths);
+        if(!javaClassPaths.equals(that.javaClassPaths)) return false;
+        if(supportRTree != that.supportRTree) return false;
+        return supportStr1 != that.supportStr1;
     }
 
     @Override public int hashCode() {
@@ -181,6 +193,8 @@ public class StrategoCompileConfig implements Serializable {
         result = 31 * result + outputJavaPackageId.hashCode();
         result = 31 * result + outputLibraryName.hashCode();
         result = 31 * result + javaClassPaths.hashCode();
+        result = 31 * result + Boolean.hashCode(supportRTree);
+        result = 31 * result + Boolean.hashCode(supportStr1);
         return result;
     }
 
@@ -201,6 +215,8 @@ public class StrategoCompileConfig implements Serializable {
             ", outputJavaPackageId='" + outputJavaPackageId + '\'' +
             ", outputLibraryName='" + outputLibraryName + '\'' +
             ", javaClassPaths=" + javaClassPaths +
+            ", supportRTree'" + supportRTree +
+            ", supportStr1=" + supportStr1 +
             '}';
     }
 }

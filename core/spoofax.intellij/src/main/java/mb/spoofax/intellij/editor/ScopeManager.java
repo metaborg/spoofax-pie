@@ -1,12 +1,13 @@
 package mb.spoofax.intellij.editor;
 
-import com.google.common.collect.Lists;
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors;
 import com.intellij.openapi.editor.HighlighterColors;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 import mb.spoofax.intellij.ScopeNames;
 
 import javax.inject.Inject;
+
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -34,7 +35,7 @@ public final class ScopeManager {
     /**
      * Map from scope prefixes to their styles.
      */
-    private final List<StyleScope> styleScopes = Lists.newArrayList(
+    private final List<StyleScope> styleScopes = Arrays.asList(
         // Put more specific scopes (longer prefixes) before more general scopes (shorter prefixes).
         // See https://manual.macromates.com/en/language_grammars for details about these scopes.
         // @formatter:off
