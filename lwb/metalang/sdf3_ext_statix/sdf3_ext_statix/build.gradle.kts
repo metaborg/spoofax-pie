@@ -22,6 +22,8 @@ languageProject {
   }
   compilerInput {
     withStrategoRuntime().run {
+      addStrategyPackageIds("sdf3.ext.statix.trans")
+      addInteropRegisterersByReflection("sdf3.ext.statix.trans.InteropRegisterer")
       baseStrategoRuntimeBuilderFactory("mb.sdf3_ext_statix.stratego", "BaseSdf3ExtStatixStrategoRuntimeBuilderFactory")
       extendStrategoRuntimeBuilderFactory("mb.sdf3_ext_statix.stratego", "Sdf3ExtStatixStrategoRuntimeBuilderFactory")
     }
@@ -30,8 +32,7 @@ languageProject {
 spoofax2BasedLanguageProject {
   compilerInput {
     withStrategoRuntime().run {
-      copyCtree(true)
-      copyClasses(false)
+      copyClasses(true)
     }
     project.languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:sdf3.ext.statix:${ext["spoofax2DevenvVersion"]}"))
   }
