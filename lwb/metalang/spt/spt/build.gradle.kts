@@ -31,7 +31,10 @@ languageProject {
       startSymbol("TestSuite")
     }
     withStyler()
-    withStrategoRuntime()
+    withStrategoRuntime().run {
+      addStrategyPackageIds("org.metaborg.meta.lang.spt.trans")
+      addInteropRegisterersByReflection("org.metaborg.meta.lang.spt.trans.InteropRegisterer")
+    }
   }
 }
 spoofax2BasedLanguageProject {
@@ -39,8 +42,7 @@ spoofax2BasedLanguageProject {
     withParser()
     withStyler()
     withStrategoRuntime().run {
-      copyCtree(true)
-      copyClasses(false)
+      copyClasses(true)
     }
     project.languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:org.metaborg.meta.lang.spt:${ext["spoofax2DevenvVersion"]}"))
   }
