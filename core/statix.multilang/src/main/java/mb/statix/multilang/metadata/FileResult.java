@@ -11,5 +11,5 @@ public interface FileResult extends Serializable {
 
     IStrategoTerm ast();
 
-    SolverResult result();
+    SolverResult<?> result();
 }

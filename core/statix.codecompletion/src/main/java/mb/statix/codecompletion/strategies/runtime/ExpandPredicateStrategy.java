@@ -56,7 +56,7 @@ public final class ExpandPredicateStrategy extends NamedStrategy2<SolverContext,
     public static Seq<CCSolverState> eval(TegoEngine engine, SolverContext ctx, @Nullable ITermVar focus, SelectedConstraintCCSolverState<CUser> input) {
         final CUser selected = input.getSelected();
         // Get the rules for the given predicate constraint
-        final ImmutableList<Rule> rules = input.getSpec().rules().getOrderIndependentRules(selected.name()).asList();
+        final ImmutableList<Rule> rules = ImmutableList.copyOf(input.getSpec().rules().getOrderIndependentRules(selected.name()));
         // Prepare the new state for each of the expansions:
         // - Remove the selected constraint
         // - Add the constraint's name to the set of expanded constraints

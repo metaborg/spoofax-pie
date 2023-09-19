@@ -14,6 +14,9 @@ dependencies {
   api("org.metaborg:tego.runtime")
   api("org.metaborg:log.api")
 
+  // api("com.google.guava:guava:27.0")
+  // api("com.google.guava:failureaccess:1.0.1")
+
   api("org.metaborg.devenv:statix.solver")
   api("org.metaborg.devenv:statix.generator")
 

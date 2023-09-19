@@ -334,7 +334,7 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, Sp
      * @return {@code combinedSpec} when there are no overlapping rules, error otherwise.
      */
     private Result<Spec, SpecLoadException> validateNoOverlappingRules(Spec combinedSpec) {
-        final ListMultimap<String, Rule> rulesWithEquivalentPatterns = combinedSpec.rules().getAllEquivalentRules();
+        final Map<String, Set<Rule>> rulesWithEquivalentPatterns = combinedSpec.rules().getAllEquivalentRules();
         if(!rulesWithEquivalentPatterns.isEmpty()) {
             return Result.ofErr(new OverlappingRulesException(rulesWithEquivalentPatterns));
         }

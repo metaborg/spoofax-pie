@@ -37,6 +37,7 @@ import org.metaborg.util.tuple.Tuple2;
 
 import java.util.AbstractMap;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -65,7 +66,7 @@ public class SolverState implements ISolverState {
     public static SolverState of(
         Spec spec,
         IState.Immutable state,
-        Iterable<? extends IConstraint> constraints
+        Collection<? extends IConstraint> constraints
     ) {
         final ICompleteness.Transient completeness = Completeness.Transient.of();
         completeness.addAll(constraints, spec, state.unifier());
@@ -83,7 +84,7 @@ public class SolverState implements ISolverState {
      * @return the resulting search state
      */
     public static SolverState fromSolverResult(
-        SolverResult result,
+        SolverResult<?> result,
         @Nullable ImmutableMap<ITermVar, ITermVar> existentials
     ) {
         final Set.Transient<IConstraint> constraints = Set.Transient.of();
@@ -97,7 +98,7 @@ public class SolverState implements ISolverState {
         });
 
         final ImmutableMap<ITermVar, ITermVar> newExistentials =
-            existentials == null ? result.existentials() : existentials;
+            existentials == null ? ImmutableMap.copyOf(result.existentials()) : existentials;
         return new SolverState(result.spec(), result.state(), CapsuleUtil.toMap(result.messages()),
             constraints.freeze(), delays.freeze(), newExistentials,
             result.completeness());

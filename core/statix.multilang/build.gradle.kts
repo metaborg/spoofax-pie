@@ -11,6 +11,9 @@ dependencies {
   api(project(":stratego.common"))
   api(project(":spoofax.core"))
 
+  api("com.google.guava:guava:27.0-jre")
+  api("com.google.guava:failureaccess:1.0.1")
+
   api("org.metaborg.devenv:statix.solver")
   api("org.metaborg:pie.api")
   api("org.yaml:snakeyaml")

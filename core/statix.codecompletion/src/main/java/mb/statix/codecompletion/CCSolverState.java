@@ -29,6 +29,7 @@ import org.metaborg.util.log.LoggerUtils;
 import org.metaborg.util.tuple.Tuple2;
 
 import java.util.AbstractMap;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Objects;
@@ -54,7 +55,7 @@ public class CCSolverState extends SolverState {
     public static CCSolverState of(
         Spec spec,
         IState.Immutable state,
-        Iterable<? extends IConstraint> constraints,
+        Collection<? extends IConstraint> constraints,
         Set.Immutable<String> expanded,
         SolutionMeta meta
     ) {
@@ -76,7 +77,7 @@ public class CCSolverState extends SolverState {
      * @return the resulting search state
      */
     public static CCSolverState fromSolverResult(
-        SolverResult result,
+        SolverResult<?> result,
         @Nullable ImmutableMap<ITermVar, ITermVar> existentials,
         Set.Immutable<String> expanded,
         SolutionMeta meta
@@ -92,7 +93,7 @@ public class CCSolverState extends SolverState {
         });
 
         final ImmutableMap<ITermVar, ITermVar> newExistentials =
-            existentials == null ? result.existentials() : existentials;
+            existentials == null ? ImmutableMap.copyOf(result.existentials()) : existentials;
         return new CCSolverState(result.spec(), result.state(), CapsuleUtil.toMap(result.messages()),
             constraints.freeze(), delays.freeze(), newExistentials,
             result.completeness(), expanded, meta);
