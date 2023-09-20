@@ -12,6 +12,8 @@ val pieVersion = "0.21.0"
 val spoofax2Version: String by ext
 val spoofax2DevenvVersion: String by ext
 
+val spoofax2RefretVersion = "999.9.9-refret-SNAPSHOT"
+
 val picocliVersion = "4.5.0"
 
 val javaxInjectVersion = "1"
@@ -82,7 +84,6 @@ dependencies {
     /// Spoofax 2.x with devenv override
     api("org.metaborg.devenv:org.strategoxt.strj:$spoofax2DevenvVersion")
     api("org.metaborg.devenv:org.spoofax.terms:$spoofax2DevenvVersion")
-    api("org.metaborg.devenv:org.metaborg.util:$spoofax2DevenvVersion")
     api("org.metaborg.devenv:org.spoofax.interpreter.core:$spoofax2DevenvVersion")
     api("org.metaborg.devenv:org.spoofax.jsglr:$spoofax2DevenvVersion")
     api("org.metaborg.devenv:org.spoofax.jsglr2:$spoofax2DevenvVersion")
@@ -90,10 +91,12 @@ dependencies {
     api("org.metaborg.devenv:sdf2parenthesize:$spoofax2DevenvVersion")
     api("org.metaborg.devenv:org.metaborg.parsetable:$spoofax2DevenvVersion")
     api("org.metaborg.devenv:stratego.build:$spoofax2DevenvVersion")
-    api("org.metaborg.devenv:nabl2.terms:$spoofax2DevenvVersion")
-    api("org.metaborg.devenv:nabl2.solver:$spoofax2DevenvVersion")
-    api("org.metaborg.devenv:statix.solver:$spoofax2DevenvVersion")
-    api("org.metaborg.devenv:statix.generator:$spoofax2DevenvVersion")
+
+    api("org.metaborg.devenv:org.metaborg.util:$spoofax2RefretVersion")
+    api("org.metaborg.devenv:nabl2.terms:$spoofax2RefretVersion")
+    api("org.metaborg.devenv:nabl2.solver:$spoofax2RefretVersion")
+    api("org.metaborg.devenv:statix.solver:$spoofax2RefretVersion")
+    api("org.metaborg.devenv:statix.generator:$spoofax2RefretVersion")
 
     /// Picocli
     api("info.picocli:picocli:$picocliVersion")
