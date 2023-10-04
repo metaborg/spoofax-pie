@@ -10,7 +10,7 @@ fun compositeBuild(name: String) = "$group:$name:$version"
 
 dependencies {
   bundle(project(":spoofax.lwb.eclipse"))
-//  bundle(project(":rv32im.eclipse"))
+  bundle(project(":rv32im.eclipse"))
 }
 
 tasks {

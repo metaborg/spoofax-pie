@@ -38,7 +38,7 @@ dependencies {
   bundleImplementation(compositeBuild("libspoofax2.eclipse"))
   bundleImplementation(compositeBuild("libstatix.eclipse"))
 
-//  bundleImplementation(project(":rv32im.eclipse"))
+  bundleImplementation(project(":rv32im.eclipse"))
 
 
   // Convenient library to get the current classpath, which works under OSGi (Eclipse) as well. Used to pass the current
