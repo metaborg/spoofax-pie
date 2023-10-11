@@ -7,6 +7,7 @@ dependencies {
 
   implementation("org.metaborg:common")
   implementation(project(":stratego.common"))
+  implementation("org.metaborg.devenv:org.metaborg.util")
 
   api("org.metaborg:resource")
   api("org.metaborg:log.api")
