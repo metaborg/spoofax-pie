@@ -53,7 +53,7 @@ public class TransformExpectationUtil {
         @Nullable Region selection
     ) throws InterruptedException {
         try {
-            final CommandContext commandContext = CommandContext.ofReadableResource(resource, selection);
+            final CommandContext commandContext = CommandContext.ofFile(resource, selection);
             commandContext.setEnclosing(EnclosingCommandContextType.Directory, CommandContext.ofDirectory(resource));
             commandContext.setEnclosing(EnclosingCommandContextType.Project, CommandContext.ofProject(resource));
             final Task<CommandFeedback> task = commandDef.createTask(CommandExecutionType.ManualOnce, commandContext, new ArgConverters(languageUnderTest.getResourceServiceComponent().getResourceService()));
