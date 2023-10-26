@@ -1,0 +1,30 @@
+module tim/type
+
+imports
+
+  tim/common
+
+context-free sorts TType TStructMember
+context-free syntax
+
+  TType.TIntT = <int>
+  TType.TStringT = <string>
+  TType.TFunctionT = [function<[{TType ", "}*]>]
+  TType.TRefT = [ref<[TType]>]
+  TType.TArrayT = [array<[TType]>]
+  TType.TRecordT = [record<[TType]>]
+  TType.TAnonClosureT = [closure]
+  TType.TClosureT = [closure<[{TType ", "}*]>]
+  TType.TAnyT = <any>
+  TType.TStructT = [{[{TStructMember ", "}*]}]
+  TType.TStructSuperT = [{extends [TType], [{TStructMember ", "}*]}]
+  TType.TNamedT = <<TID>>
+  TType.TSymbolT = <symbol(<TID>)>
+  TType.TInferredT = <*>
+  
+  TStructMember.TStructMember = <<TID>: <TType>>
+
+template options
+  TID = keyword {reject}
+  TPRIM = keyword {reject}
+  tokenize : "(:{<"

@@ -1,0 +1,10 @@
+module dynamixruntime
+
+imports
+  libstratego-lib
+
+imports
+  dynamix/api
+  dynamix/eval
+  dynamix/scope
+

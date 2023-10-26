@@ -14,6 +14,7 @@ import mb.libspoofax2.LibSpoofax2Component;
 import mb.libspoofax2.LibSpoofax2ResourcesComponent;
 import mb.libstatix.LibStatixComponent;
 import mb.libstatix.LibStatixResourcesComponent;
+import mb.llvm.LLVMComponent;
 import mb.log.dagger.LoggerComponent;
 import mb.pie.api.StatelessSerializableFunction;
 import mb.pie.dagger.TaskDefsProvider;
@@ -45,6 +46,7 @@ import mb.str.config.StrategoAnalyzeConfig;
 import mb.str.config.StrategoCompileConfig;
 import mb.strategolib.StrategoLibComponent;
 import mb.strategolib.StrategoLibResourcesComponent;
+import mb.tim.TimComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class SpoofaxLwbCompilerParticipant<L extends LoggerComponent, R extends ResourceServiceComponent, P extends PlatformComponent> extends EmptyParticipant<L, R, P> {
@@ -75,6 +77,8 @@ public class SpoofaxLwbCompilerParticipant<L extends LoggerComponent, R extends 
             new CoordinateRequirement(groupId, "stratego"),
             new CoordinateRequirement(groupId, "statix"),
             new CoordinateRequirement(groupId, "dynamix"),
+            new CoordinateRequirement(groupId, "tim"),
+            new CoordinateRequirement(groupId, "llvm"),
 
             new CoordinateRequirement(groupId, "sdf3_ext_statix"),
             new CoordinateRequirement(groupId, "sdf3_ext_dynamix"),
@@ -111,6 +115,8 @@ public class SpoofaxLwbCompilerParticipant<L extends LoggerComponent, R extends 
         final EsvComponent esvComponent = dependencyResolver.getOneSubcomponent(EsvComponent.class).unwrap();
         final StatixComponent statixComponent = dependencyResolver.getOneSubcomponent(StatixComponent.class).unwrap();
         final DynamixComponent dynamixComponent = dependencyResolver.getOneSubcomponent(DynamixComponent.class).unwrap();
+        final TimComponent timComponent = dependencyResolver.getOneSubcomponent(TimComponent.class).unwrap();
+        final LLVMComponent llvmComponent = dependencyResolver.getOneSubcomponent(LLVMComponent.class).unwrap();
 
         final Sdf3ExtStatixComponent sdf3ExtStatixComponent = dependencyResolver.getOneSubcomponent(Sdf3ExtStatixComponent.class).unwrap();
         final Sdf3ExtDynamixComponent sdf3ExtDynamixComponent = dependencyResolver.getOneSubcomponent(Sdf3ExtDynamixComponent.class).unwrap();
@@ -138,7 +144,9 @@ public class SpoofaxLwbCompilerParticipant<L extends LoggerComponent, R extends 
             .strategoComponent(strategoComponent)
             .esvComponent(esvComponent)
             .statixComponent(statixComponent)
+            .timComponent(timComponent)
             .dynamixComponent(dynamixComponent)
+            .lLVMComponent(llvmComponent)
 
             .sdf3ExtStatixComponent(sdf3ExtStatixComponent)
             .sdf3ExtDynamixComponent(sdf3ExtDynamixComponent)

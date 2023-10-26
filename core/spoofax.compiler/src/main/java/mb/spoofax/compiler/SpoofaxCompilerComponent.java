@@ -8,6 +8,7 @@ import mb.resource.dagger.ResourceServiceComponent;
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler;
 import mb.spoofax.compiler.adapter.CodeCompletionAdapterCompiler;
 import mb.spoofax.compiler.adapter.ConstraintAnalyzerAdapterCompiler;
+import mb.spoofax.compiler.adapter.DynamixAdapterCompiler;
 import mb.spoofax.compiler.adapter.GetSourceFilesAdapterCompiler;
 import mb.spoofax.compiler.adapter.HoverAdapterCompiler;
 import mb.spoofax.compiler.adapter.MultilangAnalyzerAdapterCompiler;
@@ -77,6 +78,8 @@ public interface SpoofaxCompilerComponent extends TaskDefsProvider, AutoCloseabl
     GetSourceFilesAdapterCompiler getGetSourceFilesAdapterCompiler();
 
     TegoRuntimeAdapterCompiler getTegoRuntimeAdapterCompiler();
+
+    DynamixAdapterCompiler getDynamixAdapterCompiler();
 
 
     CliProjectCompiler getCliProjectCompiler();

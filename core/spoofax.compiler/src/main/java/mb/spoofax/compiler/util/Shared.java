@@ -351,6 +351,22 @@ public interface Shared extends Serializable {
 
     /// Spoofax 3 lang
 
+    @Value.Default default GradleDependency dynamixRuntimeDep() {
+        return GradleDependency.module(new CoordinateRequirement("org.metaborg", "dynamix_runtime", spoofax3Version()));
+    }
+
+    @Value.Default default GradleDependency dynamixRuntimeEclipseDep() {
+        return GradleDependency.module(new CoordinateRequirement("org.metaborg", "dynamix_runtime.eclipse", spoofax3Version()));
+    }
+
+    @Value.Default default GradleDependency timRuntimeDep() {
+        return GradleDependency.module(new CoordinateRequirement("org.metaborg", "tim_runtime", spoofax3Version()));
+    }
+
+    @Value.Default default GradleDependency timRuntimeEclipseDep() {
+        return GradleDependency.module(new CoordinateRequirement("org.metaborg", "tim_runtime.eclipse", spoofax3Version()));
+    }
+
     @Value.Default default GradleDependency rv32ImDep() {
         return GradleDependency.module(new CoordinateRequirement("org.metaborg", "rv32im", spoofax3Version()));
     }

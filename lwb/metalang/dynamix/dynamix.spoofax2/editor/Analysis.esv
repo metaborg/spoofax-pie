@@ -1,28 +1,16 @@
 module Analysis
 
 imports
-
   statix/Menus
 
 language
-
-  // see README.md for details on how to switch to multi-file analysis
-
   observer : editor-analyze (constraint) (multifile)
 
 references
-
   reference _ : editor-resolve
-
   hover _ : editor-hover
 
 menus
-
   menu: "Analysis" (openeditor)
     action: "Show pre-analyzed AST" = debug-show-pre-analyzed (source)
     action: "Show analyzed AST"     = debug-show-analyzed
-
-  menu: "Debug" (openeditor)
-    action: "Qualify module"        = debug-qualify-usages
-    action: "Merge module"          = debug-merge-specs
-    action: "Evaluate examples"     = debug-evaluate-specs

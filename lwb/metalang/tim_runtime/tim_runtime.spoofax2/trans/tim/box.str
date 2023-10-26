@@ -1,0 +1,21 @@
+module tim/box
+
+imports
+  libstratego-lib
+
+  tim/eval
+  
+signature
+  sorts TBox
+  constructors TBox : IndexedSet -> TBox
+  
+rules
+  // tim-box-new(|?) :: ? -> TBox
+  tim-box-new(|v) = !TBox(<new-iset; iset-add(|v)>)
+  
+  // tim-box-set(|?) :: TBox -> TBox
+  tim-box-set(|v): b@TBox(set) -> b
+    with <iset-clear; iset-add(|v)> set
+    
+  // tim-box-get :: TBox -> ?
+  tim-box-get: TBox(set) -> <iset-elements; ?[v]; !v> set

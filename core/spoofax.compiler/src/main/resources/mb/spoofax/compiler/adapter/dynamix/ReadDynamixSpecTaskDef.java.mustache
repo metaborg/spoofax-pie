@@ -1,0 +1,40 @@
+package {{baseReadDynamixSpecTaskDef.packageId}};
+
+import mb.common.result.Result;
+import mb.dynamix_runtime.ReadDynamixSpecTaskDef;
+import mb.pie.api.ExecContext;
+import mb.pie.api.None;
+import mb.pie.api.stamp.resource.ResourceStampers;
+import mb.resource.ReadableResource;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.interpreter.terms.ITermFactory;
+
+import javax.inject.Inject;
+
+@{{adapterProject.scope.qualifiedId}}
+public class {{baseReadDynamixSpecTaskDef.id}} extends ReadDynamixSpecTaskDef {
+    private final {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources;
+
+    @Inject public {{baseReadDynamixSpecTaskDef.id}}(
+        {{classLoaderResourcesInput.classLoaderResources.qualifiedId}} classLoaderResources,
+        ITermFactory termFactory
+    ) {
+        super(termFactory);
+
+        this.classLoaderResources = classLoaderResources;
+    }
+
+    @Override
+    public String getId() {
+        return "{{baseReadDynamixSpecTaskDef.qualifiedId}}";
+    }
+
+    @Override
+    public Result<IStrategoTerm, ?> exec(ExecContext context, None input) throws Exception {
+        context.require(classLoaderResources.tryGetAsNativeResource(getClass()), ResourceStampers.hashFile());
+
+        final ReadableResource resource = classLoaderResources.tryGetAsNativeDefinitionResource("src-gen/dynamix/dynamix.merged.aterm");
+        context.require(resource);
+        return readToTerm(resource);
+    }
+}

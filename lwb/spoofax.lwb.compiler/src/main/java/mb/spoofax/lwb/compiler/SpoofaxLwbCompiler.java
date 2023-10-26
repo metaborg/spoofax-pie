@@ -6,6 +6,7 @@ import mb.esv.EsvParticipant;
 import mb.gpp.GppParticipant;
 import mb.libspoofax2.LibSpoofax2Participant;
 import mb.libstatix.LibStatixParticipant;
+import mb.llvm.LLVMParticipant;
 import mb.log.dagger.LoggerComponent;
 import mb.pie.api.PieBuilder;
 import mb.pie.dagger.PieComponent;
@@ -25,6 +26,7 @@ import mb.spoofax.core.platform.PlatformComponent;
 import mb.statix.StatixParticipant;
 import mb.str.StrategoParticipant;
 import mb.strategolib.StrategoLibParticipant;
+import mb.tim.TimParticipant;
 
 import java.nio.charset.StandardCharsets;
 import java.util.NoSuchElementException;
@@ -135,7 +137,9 @@ public class SpoofaxLwbCompiler implements AutoCloseable {
         builder.registerParticipant(new StrategoParticipant<>());
         builder.registerParticipant(new EsvParticipant<>());
         builder.registerParticipant(new StatixParticipant<>());
+        builder.registerParticipant(new TimParticipant<>());
         builder.registerParticipant(new DynamixParticipant<>());
+        builder.registerParticipant(new LLVMParticipant<>());
 
         builder.registerParticipant(new Sdf3ExtStatixParticipant<>());
         builder.registerParticipant(new Sdf3ExtDynamixParticipant<>());

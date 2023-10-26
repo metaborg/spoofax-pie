@@ -10,6 +10,7 @@ import mb.libspoofax2.LibSpoofax2Component;
 import mb.libspoofax2.LibSpoofax2ResourcesComponent;
 import mb.libstatix.LibStatixComponent;
 import mb.libstatix.LibStatixResourcesComponent;
+import mb.llvm.LLVMComponent;
 import mb.log.dagger.LoggerComponent;
 import mb.pie.api.TaskDef;
 import mb.pie.dagger.TaskDefsProvider;
@@ -36,6 +37,7 @@ import mb.statix.StatixComponent;
 import mb.str.StrategoComponent;
 import mb.strategolib.StrategoLibComponent;
 import mb.strategolib.StrategoLibResourcesComponent;
+import mb.tim.TimComponent;
 
 import java.util.Set;
 
@@ -54,7 +56,9 @@ import java.util.Set;
         StrategoComponent.class,
         EsvComponent.class,
         StatixComponent.class,
+        TimComponent.class,
         DynamixComponent.class,
+        LLVMComponent.class,
 
         Sdf3ExtStatixComponent.class,
         Sdf3ExtDynamixComponent.class,
@@ -88,8 +92,11 @@ public interface SpoofaxLwbCompilerComponent extends TaskDefsProvider, AutoClose
 
     StatixComponent getStatixComponent();
 
+    TimComponent getTimComponent();
+
     DynamixComponent getDynamixComponent();
 
+    LLVMComponent getLLVMComponent();
 
     Sdf3ExtStatixComponent getSdf3ExtStatixComponent();
 

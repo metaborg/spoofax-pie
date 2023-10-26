@@ -1,0 +1,8 @@
+module Compile
+
+menus
+
+  menu: "Compilation"
+
+  action: "Compile" = debug-compile-tim (openeditor)
+  action: "Debug types" = debug-typed-tim (openeditor)

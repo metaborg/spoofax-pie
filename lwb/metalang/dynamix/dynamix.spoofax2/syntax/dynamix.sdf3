@@ -1,18 +1,19 @@
 module dynamix
 
 imports
-  common
-  meta
+  dynamix/common
+  dynamix/meta
 
-context-free start-symbols Start
-context-free sorts Start
+context-free start-symbols DynamixProgram
+context-free sorts DynamixProgram
+
 context-free syntax
-  Start.Program = <
+  DynamixProgram.DynamixProgram = <
     module <MID>
     
     <{MSection "\n\n"}*>
   >
   
-  Start.MultiProgram = <
-    multiple-files-syntax-for-testing-only <{Start "\n"}+>
+  DynamixProgram.DynamixMultiProgram = <
+    multiple-files-syntax-for-testing-only <{DynamixProgram "\n"}+>
   >

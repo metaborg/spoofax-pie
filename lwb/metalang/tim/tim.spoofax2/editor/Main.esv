@@ -1,0 +1,15 @@
+module Main
+
+imports
+
+  Syntax
+  Analysis
+  Refactoring
+  Compile
+  
+  tim/colors
+
+language
+
+  extensions : tim
+  provider : target/metaborg/stratego.ctree

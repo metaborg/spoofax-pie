@@ -10,10 +10,14 @@ dependencies:
   source:
   - org.metaborg:meta.lib.spoofax:${metaborgVersion}
   - org.metaborg:statix.runtime:${metaborgVersion}
+  - org.metaborg:tim:0.1.0-SNAPSHOT # TODO: versioning
 pardonedLanguages:
 - EditorService
 - Stratego-Sugar
 - SDF
+runtime:
+  statix:
+    message-term-depth: 10
 language:
   sdf:
     pretty-print: dynamix
@@ -21,6 +25,7 @@ language:
     placeholder:
       prefix: "$"
   stratego:
+    enabled: true
     args:
     - -la
     - stratego-lib
@@ -39,11 +44,13 @@ language:
 exports:
 - language: ATerm
   directory: src-gen/statix
-- language: Stratego-Sugar
-  directory: trans
+# stratego signatures
 - language: Stratego-Sugar
   directory: src-gen
-  includes:
-  - "completion/dynamix/**/*.str"
-  - "pp/dynamix/**/*.str"
-  - "signatures/**/*.str"
+  includes: "signatures/dynamix/**/*.str"
+- language: Stratego-Sugar
+  directory: src-gen
+  includes: "signatures/dynamix-sig.str"
+- language: Stratego-Sugar
+  directory: trans
+  includes: "signatures/dynamix-ext-sig.str"

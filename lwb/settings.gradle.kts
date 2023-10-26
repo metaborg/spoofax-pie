@@ -47,6 +47,11 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
   includeProject("dynamix.intellij")
   includeProject("dynamix.spoofax2")
 }
+"metalang/dynamix_runtime".run {
+  includeProject("dynamix_runtime")
+  includeProject("dynamix_runtime.eclipse")
+  includeProject("dynamix_runtime.spoofax2")
+}
 "metalang/sdf3_ext_dynamix".run {
   includeProject("sdf3_ext_dynamix")
   includeProject("sdf3_ext_dynamix.eclipse")
@@ -86,6 +91,23 @@ fun String.includeProject(id: String, path: String = "$this/$id") {
   includeProject("spt.cli")
   includeProject("spt.eclipse")
   includeProject("spt.intellij")
+}
+"metalang/tim".run {
+  includeProject("tim")
+  includeProject("tim.cli")
+  includeProject("tim.eclipse")
+  includeProject("tim.intellij")
+  includeProject("tim.spoofax2")
+}
+"metalang/tim_runtime".run {
+  includeProject("tim_runtime")
+  includeProject("tim_runtime.eclipse")
+  includeProject("tim_runtime.spoofax2")
+}
+"metalang/llvm".run {
+  includeProject("llvm")
+  includeProject("llvm.eclipse")
+  includeProject("llvm.spoofax2")
 }
 "metalib/libspoofax2".run {
   includeProject("libspoofax2")

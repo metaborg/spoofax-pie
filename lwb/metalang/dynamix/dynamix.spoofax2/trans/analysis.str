@@ -1,35 +1,29 @@
 module analysis
 
 imports
+  libstratego-lib
 
+imports
   statixruntime
   statix/api
   statix/runtime/renaming
 
   pp
   injections/-
-  
-  compilation/compile
-  
-  evaluation/eval
 
   libspoofax/term/origin
 
 rules // Analysis
-  // multi-file analysis
   editor-analyze = stx-editor-analyze(pre-analyze, post-analyze|"statics", "projectOk", "fileOk")
 
-  pre-analyze  = origin-track-forced(explicate-injections-dynamix-Start)
-  post-analyze = origin-track-forced(implicate-injections-dynamix-Start)
+  pre-analyze  = origin-track-forced(explicate-injections-dynamix-DynamixProgram)
+  post-analyze = origin-track-forced(implicate-injections-dynamix-DynamixProgram)
 
 rules // Editor Services
-
   editor-resolve = stx-editor-resolve
-
   editor-hover = stx-editor-hover
 
 rules // Debugging
-
   // Prints the abstract syntax ATerm of a selection.
   debug-show-aterm: (selected, _, _, path, project-path) -> (filename, result)
     with filename := <guarantee-extension(|"aterm")> path
@@ -44,20 +38,7 @@ rules // Debugging
   debug-show-analyzed: (selected, _, _, path, project-path) -> (filename, result)
     with filename := <guarantee-extension(|"analyzed.aterm")> path
        ; result   := selected
-       
-  debug-qualify-usages: (_, _, p@Program(mid, _), path, project-path) -> (filename, result)
-    with filename := <guarantee-extension(|"qualified.dx")> path
-       ; result   := <dx--qualify-module(|mid); pp-dynamix-string> p
-       
-  debug-merge-specs: (_, _, p, path, project-path) -> (filename, result)
-    with filename := <guarantee-extension(|"merged.dx")> path
-       ; result := <dx--to-merged; pp-dynamix-string> p
-       
-  debug-evaluate-specs: (_, _, p, path, project-path) -> (filename, result)
-    with filename := <guarantee-extension(|"out")> path
-       ; result := <dx--to-merged; dx--eval-program> p
 
 rules // Rename refactoring
-
   // change last strategy argument to id if multi-file analysis is enabled
-  rename-menu-action = rename-action(construct-textual-change, editor-analyze, fail)
+  rename-menu-action = rename-action(construct-textual-change, editor-analyze, id)

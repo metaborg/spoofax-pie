@@ -1,5 +1,6 @@
 package mb.dynamix.task.debug;
 
+import mb.aterm.common.TermToString;
 import mb.dynamix.DynamixScope;
 import mb.dynamix.task.DynamixAnalyzeFile;
 import mb.dynamix.task.DynamixGetStrategoRuntimeProvider;
@@ -72,9 +73,10 @@ public class DynamixShowMerged implements TaskDef<DynamixShowMerged.Args, Comman
                     final StrategoRuntime strategoRuntime = context.require(getStrategoRuntimeProvider, None.instance).getValue().get().addContextObject(output.context);
 
                     final IStrategoTerm compiled = strategoRuntime.invoke("dx--to-merged", output.ast);
-                    final IStrategoTerm formatted = strategoRuntime.invoke("pp-dynamix-string", compiled);
-
-                    return CommandFeedback.of(ShowFeedback.showText(((IStrategoString)formatted).stringValue(), "Merged representation for '" + file + "'"));
+                    // TODO: compilation result cannot be pp'd because it contains constructors not in the SDF spec
+                    // final IStrategoTerm formatted = strategoRuntime.invoke("pp-dynamix-string", compiled);
+                    // return CommandFeedback.of(ShowFeedback.showText(((IStrategoString)formatted).stringValue(), "Merged representation for '" + file + "'"));
+                    return CommandFeedback.of(ShowFeedback.showText(TermToString.toString(compiled), "Merged representation for '" + file + "'"));
                 } catch(StrategoException e) {
                     final StringBuilder errorSB = new StringBuilder();
 

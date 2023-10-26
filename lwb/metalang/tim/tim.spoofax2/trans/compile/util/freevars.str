@@ -1,0 +1,43 @@
+module compile/util/freevars
+
+imports
+
+  signatures/tim-sig
+  signatures/tim/-
+  compile/util/ast
+
+rules
+
+  find-free-vars(|usedVars) : TValueInt(_) -> []
+  find-free-vars(|usedVars) : TValueString(_) -> []
+  find-free-vars(|usedVars) : TValueGlobal(_, _) -> []
+  find-free-vars(|usedVars) : TValueVar(x, _) -> []
+    where <elem> (x, usedVars)
+  find-free-vars(|usedVars) : t@TValueVar(x, _) -> [t]
+  find-free-vars(|usedVars) : TValueCast(x, _) -> <find-free-vars(|usedVars)> x
+  find-free-vars(|usedVars) : TValueSymbol(_) -> []
+  find-free-vars(|usedVars) : THole() -> []
+  find-free-vars(|usedVars) : TExpApp(v, vs) ->
+    <foldr(![], union, find-free-vars(|usedVars))> [v|vs]
+  find-free-vars(|usedVars) : TExpFix(funs, exp) -> freeVars
+    with
+      newVars := <map(\TFun(x, _, _, _) -> x\)> funs
+    ; usedVars' := <conc> (usedVars, newVars)
+    ; freeVars := <foldr(![], union, find-free-vars(|usedVars'))> [exp|funs]
+  find-free-vars(|usedVars) : TFun(name, _, args, body) -> freeVars
+    with
+      usedVars' := <conc> ([name|args], usedVars)
+    ; freeVars := <find-free-vars(|usedVars')> body
+  find-free-vars(|usedVars) : TExpPrimOp(_, _, vals, newVar, exp) -> <union> (a, b)
+    with
+      a := <foldr(![], union, find-free-vars(|usedVars))> vals
+    ; b := <find-free-vars(|[newVar|usedVars])> exp
+  find-free-vars(|usedVars) : TExpTerminatingPrimOp(_, vals) ->
+    <foldr(![], union, find-free-vars(|usedVars))> vals
+  find-free-vars(|usedVars) : TExpConditionalPrimOp(_, vals, exp1, exp2) ->
+    <foldr(![], union, find-free-vars(|usedVars))> [exp1, exp2|vals]
+  find-free-vars(|usedVars) : TExpLet(binds, exp) -> <find-free-vars(|newVars)> exp
+    with
+      extraVars := <map(\TBind(x, _) -> x\)> binds
+    ; newVars := <conc> (usedVars, extraVars)
+  find-free-vars(|usedVars) : TExpTypes(_, exp) -> <find-free-vars(|usedVars)> exp

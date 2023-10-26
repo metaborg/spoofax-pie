@@ -73,6 +73,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
     private final CodeCompletionAdapterCompiler codeCompletionCompiler;
     private final TegoRuntimeAdapterCompiler tegoRuntimeCompiler;
     private final ReferenceResolutionAdapterCompiler referenceResolutionAdapterCompiler;
+    private final DynamixAdapterCompiler dynamixAdapterCompiler;
     private final HoverAdapterCompiler hoverAdapterCompiler;
     private final GetSourceFilesAdapterCompiler getSourceFilesAdapterCompiler;
 
@@ -87,6 +88,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         CodeCompletionAdapterCompiler codeCompletionCompiler,
         TegoRuntimeAdapterCompiler tegoRuntimeCompiler,
         ReferenceResolutionAdapterCompiler referenceResolutionAdapterCompiler,
+        DynamixAdapterCompiler dynamixAdapterCompiler,
         HoverAdapterCompiler hoverAdapterCompiler,
         GetSourceFilesAdapterCompiler getSourceFilesAdapterCompiler
     ) {
@@ -117,6 +119,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         this.codeCompletionCompiler = codeCompletionCompiler;
         this.tegoRuntimeCompiler = tegoRuntimeCompiler;
         this.referenceResolutionAdapterCompiler = referenceResolutionAdapterCompiler;
+        this.dynamixAdapterCompiler = dynamixAdapterCompiler;
         this.hoverAdapterCompiler = hoverAdapterCompiler;
         this.getSourceFilesAdapterCompiler = getSourceFilesAdapterCompiler;
     }
@@ -147,6 +150,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         Option.ofOptional(input.tegoRuntime()).ifSomeThrowing((i) -> tegoRuntimeCompiler.compile(context, i));
         Option.ofOptional(input.referenceResolution()).ifSomeThrowing((i) -> referenceResolutionAdapterCompiler.compile(context, i));
         Option.ofOptional(input.hover()).ifSomeThrowing((i) -> hoverAdapterCompiler.compile(context, i));
+        Option.ofOptional(input.dynamix()).ifSomeThrowing((i) -> dynamixAdapterCompiler.compile(context, i));
         getSourceFilesAdapterCompiler.compile(context, input.getSourceFiles());
 
         if(input.classKind().isManual()) return None.instance; // Nothing to generate: return.
@@ -335,6 +339,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             final MenuItemCollection allMenuItems = new MenuItemCollection(input.mainMenuItems(), input.resourceContextMenuItems(), input.editorContextMenuItems());
             input.parser().ifPresent(i -> i.collectMenus(allMenuItems));
             input.constraintAnalyzer().ifPresent(i -> i.collectMenus(allMenuItems));
+            input.dynamix().ifPresent(i -> i.collectMenus(allMenuItems));
             // Deduplicate menu items.
             allMenuItems.deduplicateMenus();
             // Then add to map.
@@ -373,6 +378,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         input.strategoRuntime().ifPresent((i) -> strategoRuntimeCompiler.getDependencies(i).addAllTo(dependencies));
         input.tegoRuntime().ifPresent((i) -> tegoRuntimeCompiler.getDependencies(i).addAllTo(dependencies));
         input.codeCompletion().ifPresent((i) -> codeCompletionCompiler.getDependencies(i).addAllTo(dependencies));
+        input.dynamix().ifPresent((i) -> dynamixAdapterCompiler.getDependencies(i).addAllTo(dependencies));
         dependencies.add(GradleConfiguredDependency.api(shared.sptApiDep()));
         if(input.dependOnRv32Im()) {
             dependencies.add(GradleConfiguredDependency.api(shared.rv32ImDep()));
@@ -382,9 +388,12 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
 
 
     @Value.Immutable public interface Input extends Serializable {
-        class Builder extends AdapterProjectCompilerData.Input.Builder {}
+        class Builder extends AdapterProjectCompilerData.Input.Builder {
+        }
 
-        static Builder builder() {return new Builder();}
+        static Builder builder() {
+            return new Builder();
+        }
 
 
         /// Project
@@ -413,6 +422,8 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
         Optional<ReferenceResolutionAdapterCompiler.Input> referenceResolution();
 
         Optional<TegoRuntimeAdapterCompiler.Input> tegoRuntime();
+
+        Optional<DynamixAdapterCompiler.Input> dynamix();
 
         Optional<HoverAdapterCompiler.Input> hover();
 
@@ -475,6 +486,9 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             hover().ifPresent((i) -> {
                 taskDefs.add(i.hoverTaskDef(), i.baseHoverTaskDef());
             });
+            dynamix().ifPresent((i) -> {
+                i.collectTaskDefs(taskDefs);
+            });
             if(!hover().isPresent()) {
                 taskDefs.add(TypeInfo.of(NoneHoverTaskDef.class));
             }
@@ -498,6 +512,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             final ArrayList<CommandDefRepr> commandDefs = new ArrayList<>(commandDefs());
             parser().ifPresent(i -> i.collectCommands(commandDefs));
             constraintAnalyzer().ifPresent((i) -> i.collectCommands(commandDefs));
+            dynamix().ifPresent((i) -> i.collectCommands(commandDefs));
             return commandDefs;
         }
 
@@ -597,9 +612,13 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
 
         // Dagger resources scope (passthrough from AdapterProject)
 
-        default TypeInfo baseResourcesScope() {return adapterProject().baseResourcesScope();}
+        default TypeInfo baseResourcesScope() {
+            return adapterProject().baseResourcesScope();
+        }
 
-        default TypeInfo resourcesScope() {return adapterProject().resourcesScope();}
+        default TypeInfo resourcesScope() {
+            return adapterProject().resourcesScope();
+        }
 
         // Dagger resources component
 
@@ -631,15 +650,23 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
 
         // Dagger Scope (passthrough from AdapterProject)
 
-        default TypeInfo baseScope() {return adapterProject().baseScope();}
+        default TypeInfo baseScope() {
+            return adapterProject().baseScope();
+        }
 
-        default TypeInfo scope() {return adapterProject().scope();}
+        default TypeInfo scope() {
+            return adapterProject().scope();
+        }
 
         // Dagger Qualifier (passthrough from AdapterProject)
 
-        default TypeInfo baseQualifier() {return adapterProject().baseQualifier();}
+        default TypeInfo baseQualifier() {
+            return adapterProject().baseQualifier();
+        }
 
-        default TypeInfo qualifier() {return adapterProject().qualifier();}
+        default TypeInfo qualifier() {
+            return adapterProject().qualifier();
+        }
 
         // Dagger component
 
@@ -808,6 +835,7 @@ public class AdapterProjectCompiler implements TaskDef<Supplier<Result<AdapterPr
             multilangAnalyzer().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             codeCompletion().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             tegoRuntime().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
+            dynamix().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             hover().ifPresent((i) -> i.javaSourceFiles().addAllTo(javaSourceFiles));
             getSourceFiles().javaSourceFiles().addAllTo(javaSourceFiles);
             return javaSourceFiles;

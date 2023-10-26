@@ -16,4 +16,6 @@ dependencies {
 
   sourceLanguage("org.metaborg.devenv:meta.lib.spoofax:$spoofax2DevenvVersion")
   sourceLanguage("org.metaborg.devenv:statix.runtime:$spoofax2DevenvVersion")
+
+  sourceLanguage(project(":tim.spoofax2"))
 }

@@ -1,16 +1,25 @@
 module dynamix
 
 imports
+  libstratego-lib
+
+imports
 
   completion/completion
-
-  compilation/-
-  evaluation/-
-  dynamix/-
-
   pp
   outline
   analysis
+  injections/tim/-
+
+  dynamix/compilation/compile
+
+rules
+  // Remap certain implicate/explicates/pps since we use a different language.
+  explicate-injections-dynamix-TExp = explicate-injections-tim-TExp
+  implicate-injections-dynamix-TExp = implicate-injections-tim-TExp
+  upgrade-placeholders-dynamix-TExp = upgrade-placeholders-tim-TExp
+  downgrade-placeholders-dynamix-TExp = downgrade-placeholders-tim-TExp
+  prettyprint-dynamix-TExp = prettyprint-tim-TExp
 
 rules // Debugging
 
@@ -19,3 +28,9 @@ rules // Debugging
     with
       filename := <guarantee-extension(|"aterm")> path
     ; result   := node
+
+  debug-compile-spec:
+    (node, _, _, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"compiled.dx")> path
+    ; result   := <dx--to-merged> node

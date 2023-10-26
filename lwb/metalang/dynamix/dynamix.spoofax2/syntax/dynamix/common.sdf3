@@ -1,0 +1,53 @@
+module dynamix/common
+
+lexical sorts
+  ID LID UID MID PID INT STRING
+  STRING_CHAR BACKSLASH_CHAR
+  COMMENT_CHAR INSIDE_COMMENT
+  NEWLINE_EOF EOF RID GID
+
+lexical syntax
+  MID              = [a-zA-Z] [a-zA-Z0-9\_\-\/]* // module id
+  RID              = LID // rule id
+  ID               = [a-zA-Z] [a-zA-Z0-9\_]*
+  LID              = [a-z] [a-zA-Z0-9\_]*
+  UID              = [A-Z] [a-zA-Z0-9\_\-]*
+  GID              = [\$] ID // global ID
+  PID              = [\+\-\*\/A-Za-z0-9\_]+ // primitive id
+  INT              = "-"? [0-9]+
+  STRING           = "\"" STRING_CHAR* "\""
+  STRING_CHAR      = ~[\"\n]
+  STRING_CHAR      = "\\\""
+  STRING_CHAR      = BACKSLASH_CHAR
+  BACKSLASH_CHAR   = "\\"
+  LAYOUT           = [\ \t\n\r]
+  COMMENT_CHAR     = [\*]
+  LAYOUT           = "/*" INSIDE_COMMENT* "*/"
+  INSIDE_COMMENT   = ~[\*]
+  INSIDE_COMMENT   = COMMENT_CHAR
+  LAYOUT           = "//" ~[\n\r]* NEWLINE_EOF
+  NEWLINE_EOF      = [\n\r]
+  NEWLINE_EOF      = EOF
+  EOF              =
+
+lexical restrictions
+  // Ensure greedy matching for lexicals
+  COMMENT_CHAR    -/- [\/]
+  INT             -/- [0-9]
+  ID              -/- [a-zA-Z0-9\_]
+  LID             -/- [a-zA-Z0-9\_]
+  UID             -/- [a-zA-Z0-9\_\-]
+  MID             -/- [a-zA-Z0-9\_\-\/]
+  GID             -/- [a-zA-Z0-9\_]
+
+  // EOF may not be followed by any char
+  EOF             -/- ~[]
+
+  // Backslash chars in strings may not be followed by "
+  BACKSLASH_CHAR  -/- [\"]
+
+context-free restrictions
+  // Ensure greedy matching for comments
+  LAYOUT? -/- [\ \t\n\r]
+  LAYOUT? -/- [\/].[\/]
+  LAYOUT? -/- [\/].[\*]

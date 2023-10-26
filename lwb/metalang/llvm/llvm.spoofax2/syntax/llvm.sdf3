@@ -1,0 +1,38 @@
+module llvm
+
+imports
+  
+  llvm/Atoms
+  llvm/Attributes
+  llvm/Statements
+  llvm/Common
+
+context-free start-symbols
+  
+  Start
+
+context-free sorts
+
+  Start
+  Definition
+
+context-free syntax
+  
+  Start.LLVMProgram = <<defs:Definition*>> {layout(pp-align-list defs)}
+  
+  Definition.TargetTriple = <target triple = <STRING>>
+  Definition.ModuleAsm = <module asm <STRING>>
+  Definition.GlobalDef = <<Constant> = <Linkage> <GlobalAttribute*> <Type> <Literal>>
+  Definition.TypeDef = <<Variable> = type <Type>>
+  Definition.FunDecl = <declare <Linkage> <CallConv> <Type> <Constant>(<{Parameter ", "}*>) <FunctionAttribute*>>
+  Definition.FunDef = <
+define <Linkage> <CallConv> <Type> <Constant>(<{Parameter ", "}*>) <FunctionAttribute*> {
+  <blks:Block*>
+}> {layout(pp-align-list blks)}
+
+template options
+
+  keyword -/- [a-zA-Z0-9\_]
+  ID = keyword {reject}
+  tokenize : "("
+

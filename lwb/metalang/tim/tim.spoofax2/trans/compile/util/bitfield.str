@@ -1,0 +1,18 @@
+module compile/util/bitfield
+
+imports
+
+  compile/util/type
+  signatures/llvm/-
+  signatures/llvm-sig
+
+rules
+
+  gen-bitfield : args -> value
+  with
+    let cond = get-target-type ; ?PointerAddrSpace("1") in
+      bitarray := <map(cond < !1 + !0)> args
+    end
+  ; value := <bitarray-to-bitfield> bitarray
+  
+  bitarray-to-bitfield = foldr(!0, \(bit, value) -> <iori> (bit, <shli> (value, 1))\)

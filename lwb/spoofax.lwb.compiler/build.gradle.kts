@@ -25,6 +25,8 @@ dependencies {
   api(project(":esv"))
   api(project(":statix"))
   api(project(":dynamix"))
+  api(project(":tim"))
+  api(project(":llvm"))
   api(project(":sdf3_ext_statix"))
   api(project(":sdf3_ext_dynamix"))
 

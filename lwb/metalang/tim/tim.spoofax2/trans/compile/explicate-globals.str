@@ -1,0 +1,35 @@
+module compile/explicate-globals
+
+imports
+
+  signatures/tim/-
+  signatures/tim-sig
+  compile/util/ast
+  compile/util/type
+
+rules
+
+  explicate-globals = {|
+    GlobalNames, Strings
+  : topdown(try(collect-global))
+  ; topdown(try(GlobalNames))
+  ; store-strings
+  |}
+
+  collect-global : t@TFun(name, _, _, _) -> t
+  with rules(GlobalNames : TValueVar(name, t) -> TValueGlobal(name, t))
+  
+  collect-global : t@TFunOffset(name, _, _, _, _) -> t
+  with rules(GlobalNames : TValueVar(name, t) -> TValueGlobal(name, t))
+
+  collect-global : t@TValueString(v) -> t
+  where not(<GlobalNames> t)
+  with
+    varName := <newname> "str"
+  ; rules(GlobalNames : t -> TValueGlobal(varName, STRING()))
+  ; rules(Strings :+ _ -> TBind(varName, t))
+  
+  store-strings : TProgram(e) -> TProgram(TExpLet(globals, e))
+  with
+    globals := <bagof-Strings <+ ![]> ()
+  

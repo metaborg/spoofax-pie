@@ -17,6 +17,7 @@ dependencies:
   - org.metaborg:stratego.lang:${metaborgVersion}
   # TODO: not hardcoded version?
   - org.metaborg:dynamix:0.1.0-SNAPSHOT
+  - org.metaborg:tim:0.1.0-SNAPSHOT
 pardonedLanguages:
 - EditorService
 - Stratego-Sugar

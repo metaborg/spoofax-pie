@@ -1,0 +1,72 @@
+module dynamix/type
+
+imports
+  dynamix/common
+  dynamix/source
+  dynamix/meta
+
+context-free sorts MSourceType
+context-free syntax
+  MSourceType.MSourceTypeSortID = [[UID]]
+  MSourceType.MSourceTypeString = [string]
+  MSourceType.MSourceTypeInt = [int]
+
+// these differ from MSourceType in that they mirror
+// the exact syntax of the stratego generated signatures
+//
+// we do not use the same syntax since it would mean having
+// both source lists and meta lists, which is too confusing
+// for no good reason. instead, we transparently convert
+// any lists in a quoted expression into meta lists containing
+// the quoted source types
+context-free sorts MConstructorArgument
+context-free syntax
+  MConstructorArgument.MConstructorArgumentSortID = [[UID]]
+  MConstructorArgument.MConstructorArgumentString = [string]
+  MConstructorArgument.MConstructorArgumentInt = [int]
+  MConstructorArgument.MConstructorArgumentList = [List([MConstructorArgument])]
+
+context-free sorts MType
+context-free syntax
+  MType.MTypeSourceType = <'<MSourceType>>
+  MType.MTypeTargetType = <@<MTargetType>>
+  // todo: this currently doesn't align with the interpreter
+  // as the interpreter only supports lists of CPS values (#6)
+  MType.MTypeList = <List(<MType>)>
+  MType.MTypeTuple = <(<{MType " * "}+>)>
+
+  // the type argument represents the type of the variable used
+  // when bound within a body using the <- operator, and does not
+  // necessarily represent the "return value" of the AST node that
+  // contains the hole
+  MType.MTypePluggable1 = <Pluggable(<MType>)>
+  MType.MTypePluggable0 = <Pluggable>
+
+context-free sorts MTargetType
+context-free syntax
+  MTargetType.MTargetTypeValue = <cval>
+  // represents a finalized AST node (aka tail calling)
+  MTargetType.MTargetTypeCPSFinalized = <cexp>
+  MTargetType.MTargetTypeFun = <cfun>
+  MTargetType.MTargetTypeType = <ctype>
+  MTargetType.MTargetTypeStructMember = <cstructmember>
+
+context-free sorts MRuleSignature
+context-free syntax
+  MRuleSignature.MRuleSignature = [[{MType " * "}+] -> [MType]]
+  MRuleSignature.MRuleZeroSignature = [() -> [MType]] // function that takes no arguments
+
+context-free syntax
+  // Types - defined here to prevent keywords such as `ref` and `type` from being rejected due to template options
+  MExpr.MExprTTypeFunction = [function<[MExpr]>]
+  MExpr.MExprTTypeRef = [ref<[MExpr]>]
+  MExpr.MExprTTypeArray = [array<[MExpr]>]
+  MExpr.MExprTTypeRecord = [record<[MExpr]>]
+  MExpr.MExprTTypeStruct = [struct<[MExpr]>]
+  MExpr.MExprTTypeStructSuper = [struct<extends [MExpr], [MExpr]>]
+  MExpr.MExprTStructMember = [[MExpr] : [MExpr]]
+  MExpr.MExprTTypeWildcard = [*]
+
+template options
+
+  tokenize : "(:<"

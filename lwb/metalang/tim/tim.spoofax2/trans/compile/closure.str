@@ -1,0 +1,161 @@
+module compile/closure
+
+imports
+
+  signatures/tim-sig
+  signatures/tim/-
+  compile/uniquify
+  compile/util/ast
+  compile/debug
+  compile/util/type
+  compile/util/freevars
+  pp
+
+rules
+
+  debug-convert-closures :
+    (node, _, ast, path, project-path) -> (filename, result)
+    with
+      ext      := <get-extension> path
+    ; filename := <guarantee-extension(|$[cc.[ext]])> path
+    ; result   := <strip-annos; uniquify; convert-closures; fix-invalid-ast; pp-debug> ast
+
+  convert-closures =
+    topdown(try(mark-non-escaping))
+  ; topdown(try(convert-non-escaping))
+  ; bottomup(try(convert-closure))
+  ; replace-all-funtypes
+  ; bottomup(try(convert-closure-call))
+  ; bottomup(try(annotate-offsets))
+  ; extract-funs
+
+  mark-non-escaping : t@TExpFix(funs, body) -> t'
+  where <fix-is-non-escaping> t
+  with
+    {| Remap
+    : <map({name : ?TFun(name, _, _, _) ; rules(Remap : TValueVar(name, type) -> TValueGlobal(name, type))})> funs
+    ; t' := <topdown(try(Remap))> t
+    |}
+
+//  convert-fix : t@TExpFix(_, _) -> t'
+//  with
+//    if <fix-is-non-escaping> t then
+//      t' := <convert-non-escaping> t
+//    else
+//      t' := <convert-closure> t
+//    end
+
+  fix-is-non-escaping : t@TExpFix(funs, e) -> ()
+  where <map(\TFun(name, _, _, _) -> (name, t)\ ; fun-is-non-escaping)> funs
+
+  fun-is-non-escaping : (name, body) -> ()
+  where not(oncetd(not(?TExpApp(TValueVar(name, type), _)) ; one(?TValueVar(name, type))))
+
+  convert-non-escaping : t@TExpFix(funs, exp) -> t'
+  where <fix-is-non-escaping> t
+  with t' := <repeat(convert-non-escaping-)> t
+
+  convert-non-escaping- : t@TExpFix(funs, exp) -> t'
+  with
+    {| ConvertCall
+    : funs' := <map(convert-non-escaping-fun)> funs
+    ; t' := <topdown(try(ConvertCall))> TExpFix(funs', exp)
+    |}
+  where <not(equal)> (t, t')
+
+  convert-non-escaping-fun : TFun(name, FUNCTION(types), args, body) -> TFun(name, FUNCTION(types'), args', body)
+  with
+    freevars := <find-free-vars(|[name|args])> body
+  ; (freenames, freetypes) := <map(\TValueVar(n, t) -> (n, t)\); unzip> freevars
+  ; args' := <conc> (args, freenames)
+  ; types' := <conc; map(try(replace-funtype-by-closure))> (types, freetypes)
+  ; nonescaping-call(|name, FUNCTION(types'), freevars)
+
+  convert-closure : t@TExpFix(funs, exp) -> t'
+    where <not(fix-is-non-escaping)> t
+    with
+      {| ConvertCall
+      : funnames@[firstname|restnames] := <map(\TFun(name, _, _, _) -> name\)> funs
+      ; freevars := <foldr(![], union, \TFun(name, _, args, body) -> <find-free-vars(|<conc> (funnames, args))> body\)> funs
+      ; (freenames, freetypes) := <map(\TValueVar(n, t) -> (n, t)\); unzip> freevars
+      ; funtypes := <map(\TFun(_, FUNCTION(fargs), _, _) -> FUNCTION(<map(try(replace-funtype-by-closure))> [ANONCLOSURE()|fargs])\)> funs
+      ; closureType := CLOSURE(<conc> (funtypes, <map(try(replace-funtype-by-closure))> freetypes))
+      ; closure := <newname> "closure"
+      ; base := <newname> "base"
+      ; let var-to-read-exp = var-to-read-op(|funnames, freevars, closureType) in
+        let get-closure-base-exp = get-closure-base(|funnames, closureType) in
+          (funvars, funs') := <map(convert-fun(var-to-read-exp, get-closure-base-exp)) ; unzip> funs
+        ; exp' := <foldr(!exp, \(name, c)-> <var-to-read-exp> (base, name, c)\)> funnames
+        end
+        end
+      ; exp'' := TExpPrimOp("closure-new", closureType, <conc> (funvars, freevars), base, exp')
+      ; t' := <topdown(try(ConvertCall))> TExpFix(funs', exp'')
+      |}
+
+  nonescaping-call(|x, t', freevars) = rules(
+    ConvertCall : TExpApp(TValueGlobal(x, t), vals) -> TExpApp(TValueGlobal(x, t'), <conc> (vals, freevars))
+  )
+
+  convert-closure-call : TExpApp(TValueVar(x, FUNCTION(t)), vals) ->
+    TExpPrimOp("closure-read", funtype, [TValueVar(x, ANONCLOSURE()), TValueInt("0")], x', TExpApp(TValueVar(x', funtype), vals'))
+  with
+    x' := <newname> x
+  ; funtype := FUNCTION(<map(try(replace-funtype-by-closure))> [ANONCLOSURE()|t])
+  ; vals' := [TValueVar(x, ANONCLOSURE())|vals]
+
+  convert-fun(var-to-read-exp, get-closure-base-exp) : TFun(name, t, args, body) -> (TValueGlobal(name', t'), TFun(name', t', args', body''))
+  with
+    name' := <newname> name
+  ; args' := [name|args]
+  ; freevars := <find-free-vars(|args')> body
+  ; (freenames, freetypes) := <map(\TValueVar(n, t) -> (n, t)\); unzip> freevars
+  ; base := <newname> "base"
+  ; body' := <foldr(!body, \(v, c) -> <var-to-read-exp> (base, v, c)\)> freenames
+  ; body'' := <get-closure-base-exp> (name, base, body')
+  ; t' := <\FUNCTION(x) -> FUNCTION(<map(try(replace-funtype-by-closure))> [ANONCLOSURE()|x])\> t
+  ; rules(
+      ConvertCall : TExpApp(v@TValueVar(name, type), vals) -> TExpApp(TValueGlobal(name', t'), [v|vals])
+    )
+
+  var-to-read-op(|funs, vars, closureType) : (name, v, c) -> TExpPrimOp("closure-offset", ANONCLOSURE(), [TValueVar(name, closureType), n], v, c)
+  where idx := <fun-get-index(|funs)> v
+  with n := TValueInt(<int-to-string> idx)
+  var-to-read-op(|funs, vars, closureType) : (name, v, c) -> TExpPrimOp("closure-read", type, [TValueVar(name, closureType), n], v, c)
+  where (idx, type) := <var-get-index-type(|funs, vars)> v
+  with n := TValueInt(<int-to-string> idx)
+  get-closure-base(|funs, closureType) : (name, base, c) -> TExpPrimOp("closure-offset", closureType, [TValueVar(name, ANONCLOSURE()), offset'], base, c)
+  with
+    offset := <subti> (0, <fun-get-index(|funs)> name)
+  ; offset' := TValueInt(<int-to-string> offset)
+
+  fun-get-index(|funs) : v -> n
+  where n := <get-index0(?v)> funs
+  var-get-index-type(|funs, vars) : v -> (n, <try(replace-funtype-by-closure)> type)
+  where n := <addi> (<length> funs, <get-index0(?TValueVar(v, type))> vars)
+
+  extract-funs : TProgram(exp) -> TProgram(TExpFix(funs, exp'))
+    with {| Functions
+    : exp' := <bottomup(try(collect-funs))> exp
+    ; funs := <(bagof-Functions <+ ![])> ()
+    |}
+
+  collect-funs : fix@TExpFix(funs, exp) -> exp
+    with <map(\x -> x with rules(Functions :+ _ -> x)\)> funs
+
+  replace-funtype-by-closure : FUNCTION(_) -> ANONCLOSURE()
+  replace-funtype-by-closure : ARRAY(t) -> ARRAY(<try(replace-funtype-by-closure)> t)
+  replace-funtype-by-closure : REF(t) -> REF(<try(replace-funtype-by-closure)> t)
+  replace-funtype-by-closure : RECORD(t) -> RECORD(<try(replace-funtype-by-closure)> t)
+  replace-funtype-by-closure : STRUCT(super, t) -> STRUCT(<map(try(replace-funtype-by-closure))> super, <map((id, try(replace-funtype-by-closure)))> t)
+  replace-all-funtypes = rec x(try(sometd(
+     \TExpApp(fun, args) -> TExpApp(fun, <x> args)\
+  <+ \TValueVar(v, t) -> TValueVar(v, <replace-funtype-by-closure> t)\
+  <+ \TExpPrimOp(name, t, args, result, body) -> TExpPrimOp(name, <replace-funtype-by-closure> t, <x> args, result, <x> body)\
+  )))
+
+  annotate-offsets : TExpFix(funs, body) -> TExpFix(funs', body)
+  with
+    let annotate-offset(|i) = \TFun(x, type, args, body) -> TFunOffset(x, <int-to-string> i, type, args, body)\ in
+      funs' := <nmap(annotate-offset|0)> funs
+    end
+

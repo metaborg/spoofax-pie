@@ -1,0 +1,58 @@
+module llvm/Atoms
+
+imports
+
+  llvm/Common
+  llvm/Attributes
+
+context-free sorts
+
+  Parameter
+  Type
+  Atom
+  Literal
+  Constant
+  Variable
+  TypedAtom
+
+context-free syntax
+
+  Parameter.ParamUnnamed = <<Type> <ParameterAttribute*>>
+  Parameter.ParamNamed = <<Type> <Variable> <ParameterAttribute*>>
+  Parameter.Vararg = <...>
+
+  Type.Int64 = <i64>
+  Type.Int32 = <i32>
+  Type.Int8 = <i8>
+  Type.Bool = <i1>
+  Type.Pointer = <ptr>
+  Type.PointerAddrSpace = <ptr addrspace(<INT>)>
+  Type.Array = <[<POSINT> x <Type>]>
+  Type.Struct = <{<{Type ", "}*>}>
+  Type.PackedStruct = [<{[{Type ", "}*]}>]
+  Type.Label = <label>
+  Type.Void = <void>
+  Type.Function = <<Type> (<{Parameter ", "}*>)>
+  Type.VarType = <<Variable>>
+  
+  Atom.Literal = <<Literal>>
+  Atom.ConstAtom = <<Constant>>
+  Atom.VarAtom = <<Variable>>
+  Atom.PtrToIntAtom = <ptrtoint (ptr <Constant> to <Type>)>
+  
+  Literal.Int = <<INT>>
+  Literal.String = <c<STRING>>
+  Literal.Null = <null>
+  
+  TypedAtom.TypedAtom = <<Type> <Atom>>
+
+syntax
+
+  Variable-CF.Variable = "%" ID-CF
+  Constant-CF.Constant = "@" ID-CF
+
+template options
+
+  keyword -/- [a-zA-Z0-9\_]
+  ID = keyword {reject}
+  tokenize : "("

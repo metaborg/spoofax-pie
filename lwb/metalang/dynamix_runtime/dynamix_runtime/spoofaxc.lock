@@ -1,0 +1,5 @@
+shared.defaultArtifactId=dynamixruntime
+shared.defaultClassPrefix=DynamixRuntime
+shared.defaultGroupId=org.metaborg
+shared.defaultPackageId=mb.dynamix_runtime
+shared.defaultVersion=0.1.0

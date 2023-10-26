@@ -1,12 +1,17 @@
 module pp
 
 imports
+  libstratego-lib
+
+imports
 
   libstratego-gpp
   libspoofax/sdf/pp
   libspoofax/editor/refactoring/-
+  
   pp/dynamix-parenthesize
   pp/dynamix-pp
+  pp/tim-pp
 
 rules
 

@@ -34,6 +34,9 @@ public class AdapterProjectCompilerInputBuilder {
     private boolean tegoRuntimeEnabled = false;
     public final TegoRuntimeAdapterCompiler.Input.Builder tegoRuntime = TegoRuntimeAdapterCompiler.Input.builder();
 
+    private boolean dynamixEnabled = false;
+    public final DynamixAdapterCompiler.Input.Builder dynamix = DynamixAdapterCompiler.Input.builder();
+
     private boolean referenceResolutionEnabled = false;
     public final ReferenceResolutionAdapterCompiler.Input.Builder referenceResolution = ReferenceResolutionAdapterCompiler.Input.builder();
 
@@ -89,6 +92,11 @@ public class AdapterProjectCompilerInputBuilder {
         return tegoRuntime;
     }
 
+    public DynamixAdapterCompiler.Input.Builder withDynamix() {
+        dynamixEnabled = true;
+        return dynamix;
+    }
+
     public CodeCompletionAdapterCompiler.Input.Builder withCodeCompletion() {
         codeCompletionEnabled = true;
         return codeCompletion;
@@ -134,6 +142,9 @@ public class AdapterProjectCompilerInputBuilder {
 
         final TegoRuntimeAdapterCompiler.@Nullable Input tegoRuntime = buildTegoRuntime(shared, adapterProject, languageProjectInput, classLoaderResources);
         if(tegoRuntime != null) project.tegoRuntime(tegoRuntime);
+
+        final DynamixAdapterCompiler.@Nullable Input dynamix = buildDynamix(shared, adapterProject, classLoaderResources, constraintAnalyzer);
+        if(dynamix != null) project.dynamix(dynamix);
 
         final CodeCompletionAdapterCompiler.@Nullable Input codeCompletion = buildCodeCompletion(shared, adapterProject, languageProjectInput, parser, constraintAnalyzer, strategoRuntime, tegoRuntime, classLoaderResources);
         if(codeCompletion != null) project.codeCompletion(codeCompletion);
@@ -280,6 +291,21 @@ public class AdapterProjectCompilerInputBuilder {
             .shared(shared)
             .adapterProject(adapterProject)
             .classLoaderResourcesInput(classloaderResources)
+            .build();
+    }
+
+    private DynamixAdapterCompiler.@Nullable Input buildDynamix(
+        Shared shared,
+        AdapterProject adapterProject,
+        ClassLoaderResourcesCompiler.Input classloaderResources,
+        ConstraintAnalyzerAdapterCompiler.@Nullable Input constraintAnalyzerInput
+    ) {
+        if(!dynamixEnabled) return null;
+        return dynamix
+            .shared(shared)
+            .adapterProject(adapterProject)
+            .classLoaderResourcesInput(classloaderResources)
+            .constraintAnalyzerInput(constraintAnalyzerInput)
             .build();
     }
 

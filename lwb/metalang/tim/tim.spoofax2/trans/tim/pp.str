@@ -1,0 +1,32 @@
+module tim/pp
+
+imports
+  libstratego-lib
+
+imports
+
+  libstratego-gpp
+  libspoofax/sdf/pp
+  libspoofax/editor/refactoring/-
+  pp/tim-parenthesize
+  pp/tim-pp
+
+rules
+
+  pp-tim-string =
+    parenthesize-tim
+    ; prettyprint-tim-start-symbols
+    ; !V([], <id>)
+    ; box2text-string(|120)
+      
+  pp-partial-tim-string =
+    parenthesize-tim
+    ; prettyprint-tim
+    ; !V([], <id>)
+    ; box2text-string(|120)
+    
+  pp-partial-tim-string(|sort) =
+    parenthesize-tim
+    ; prettyprint-tim(|sort)
+    ; !V([], <id>)
+    ; box2text-string(|120)  

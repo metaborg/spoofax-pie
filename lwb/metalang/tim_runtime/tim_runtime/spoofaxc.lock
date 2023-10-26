@@ -1,0 +1,5 @@
+shared.defaultArtifactId=timruntime
+shared.defaultClassPrefix=TimRuntime
+shared.defaultGroupId=org.metaborg
+shared.defaultPackageId=mb.tim_runtime
+shared.defaultVersion=0.1.0

@@ -1,0 +1,222 @@
+module compile/conclude
+
+imports
+
+  signatures/llvm/-
+  signatures/llvm-sig
+
+rules
+  // TODO: make target triple depend on host
+  conclude : LLVMProgram(input) -> LLVMProgram(<conc> (prelude, input))
+  with prelude :=
+  [ TargetTriple("\"x86_64-unknown-linux-gnu\"")
+  , GlobalDef(
+      Constant(".int_fmt")
+    , Private()
+    , [UnnamedAddr(), Constant()]
+    , Array("5", Int8())
+    , String("\"%ld\\0A\\00\"")
+    )
+  , GlobalDef(
+      Constant(".str_fmt")
+    , Private()
+    , [UnnamedAddr(), Constant()]
+    , Array("4", Int8())
+    , String("\"%s\\0A\\00\"")
+    )
+  , TypeDef(
+      Variable(".array_type")
+    , Struct([Int64(), Array("0", Int64())])
+    )
+// Garbage collection stack map
+  , ModuleAsm("\".globl __LLVM_StackMaps\"")
+// Built in functions
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , Void()
+    , Constant("exit")
+    , [ParamUnnamed(Int32(), [])]
+    , [NoReturn(), NoUnwind()]
+    )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , Int32()
+    , Constant("printf")
+    , [ParamUnnamed(Pointer(), [NoCapture()]), Vararg()]
+    , [NoUnwind()]
+    )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , Int64()
+    , Constant("strlen")
+    , [ParamUnnamed(Pointer(), [])]
+    , [NoUnwind()]
+    )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , Int64()
+    , Constant("strcmp")
+    , [ParamUnnamed(Pointer(), []), ParamUnnamed(Pointer(), [])]
+    , [NoUnwind()]
+    )
+// TIM runtime library
+// Records
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , PointerAddrSpace("1")
+    , Constant("record_new")
+    , [ParamUnnamed(Int64(), []), Vararg()]
+    , [NoUnwind()]
+    )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , Void()
+    , Constant("record_write")
+    , [ ParamUnnamed(PointerAddrSpace("1"), [])
+      , ParamUnnamed(PointerAddrSpace("1"), [])
+      , ParamUnnamed(Int64(), [])
+      ]
+    , [NoUnwind(), GCLeafFunction()]
+    )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , Int64()
+    , Constant("record_read")
+    , [ParamUnnamed(PointerAddrSpace("1"), []), ParamUnnamed(PointerAddrSpace("1"), [])]
+    , [NoUnwind(), GCLeafFunction()]
+    )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , Void()
+    , Constant("record_write_ptr")
+    , [ ParamUnnamed(PointerAddrSpace("1"), [])
+      , ParamUnnamed(PointerAddrSpace("1"), [])
+      , ParamUnnamed(PointerAddrSpace("1"), [])
+      ]
+    , [NoUnwind(), GCLeafFunction()]
+    )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , PointerAddrSpace("1")
+    , Constant("record_read_ptr")
+    , [ParamUnnamed(PointerAddrSpace("1"), []), ParamUnnamed(PointerAddrSpace("1"), [])]
+    , [NoUnwind(), GCLeafFunction()]
+    )
+// Arrays
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , PointerAddrSpace("1")
+    , Constant("array_concat")
+    , [ParamUnnamed(PointerAddrSpace("1"), []), ParamUnnamed(PointerAddrSpace("1"), [])]
+    , [NoUnwind()]
+    )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , PointerAddrSpace("1")
+    , Constant("array_tail")
+    , [ParamUnnamed(PointerAddrSpace("1"), [])]
+    , [NoUnwind()]
+    )
+// Strings
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , PointerAddrSpace("1")
+    , Constant("string_concat")
+    , [ParamUnnamed(PointerAddrSpace("1"), []), ParamUnnamed(PointerAddrSpace("1"), [])]
+    , [NoUnwind()]
+    )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , PointerAddrSpace("1")
+    , Constant("string_index")
+    , [ParamUnnamed(PointerAddrSpace("1"), []), ParamUnnamed(Int64(), [])]
+    , [NoUnwind()]
+    )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , PointerAddrSpace("1")
+    , Constant("int_to_string")
+    , [ParamUnnamed(Int64(), [])]
+    , [NoUnwind()]
+    )
+// Garbage collection
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , Void()
+    , Constant("gc_init")
+    , []
+    , [NoUnwind()]
+    )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , PointerAddrSpace("1")
+    , Constant("gc_alloc")
+    , [ParamUnnamed(Int64(), [])]
+    , [NoUnwind(), InaccessibleMemOnly(), AllocKind("\"alloc,uninitialized\""), AllocSize("0"), AllocFamily("\"malloc\"")]
+    )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , PointerAddrSpace("1")
+    , Constant("gc_alloc_bitfield")
+    , [ParamUnnamed(Int64(), []), ParamUnnamed(Int64(), [])]
+    , [NoUnwind(), InaccessibleMemOnly(), AllocKind("\"alloc,uninitialized\""), AllocSize("0"), AllocFamily("\"malloc\"")]
+    )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , Void()
+    , Constant("gc_mark_has_pointers")
+    , [ParamUnnamed(PointerAddrSpace("1"), [])]
+    , [NoUnwind()]
+    )
+  , FunDecl(
+      DefaultLinkage()
+    , DefaultCConv()
+    , Void()
+    , Constant("gc_collect")
+    , []
+    , [NoUnwind()]
+    )
+  , FunDef(
+      DefaultLinkage()
+    , DefaultCConv()
+    , Int32()
+    , Constant("main")
+    , []
+    , []
+    , [ Block(
+          NoLabel()
+        , [ Expression(
+              Call(
+                DefaultTail()
+              , TailCConv()
+              , Void()
+              , ConstAtom(Constant("start"))
+              , []
+              , []
+              , NoOperandBundles()
+              )
+            )
+          ]
+        , Ret(TypedAtom(Int32(), Literal(Int("0"))))
+        )
+      ]
+    )
+  ]

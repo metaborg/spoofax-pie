@@ -1,0 +1,54 @@
+module compile
+
+imports
+
+  compile/-
+  pp
+  llvm/pp
+
+rules
+
+  debug-compile-tim :
+    (node, _, ast, path, project-path) -> (path', result)
+    with
+      ext      := <get-extension> path
+    ; folder   := <dirname> path
+    ; filename := <base-filename ; guarantee-extension(|$[ll])> path
+    ; path'    := $[[folder]/output/[filename]]
+    ; result   := <compile-tim> ast
+
+  debug-typed-tim :
+    (node, _, ast, path, project-path) -> (path', result)
+    with
+      ext      := <get-extension> path
+    ; folder   := <dirname> path
+    ; filename := <base-filename ; guarantee-extension(|$[typed.tim])> path
+    ; path'    := $[[folder]/output/[filename]]
+    ; result   := <typed-tim> ast
+
+  compile-tim =
+    explicate-types
+  ; strip-annos
+  ; uniquify
+  ; merge-equals
+  ; desugar-record-news
+  ; inline-lets
+  ; box-values
+  ; convert-closures
+  ; explicate-globals
+  ; select-instructions
+  ; conclude
+  ; pp-llvm-string
+
+  typed-tim =
+    explicate-types
+  ; strip-annos
+  ; uniquify
+  ; merge-equals
+  ; desugar-record-news
+  ; box-values
+  ; convert-closures
+  ; inline-lets
+  ; explicate-globals
+  ; fix-invalid-ast
+  ; pp-debug
