@@ -1,9 +1,9 @@
 package mb.statix.codecompletion.strategies.runtime;
 
-import com.google.common.collect.ImmutableMap;
+
+import io.usethesource.capsule.Map;
 import mb.nabl2.terms.ITermVar;
 import mb.statix.codecompletion.CCSolverState;
-import mb.statix.codecompletion.SolverState;
 import mb.statix.solver.IConstraint;
 import mb.tego.strategies.NamedStrategy2;
 import mb.tego.strategies.runtime.TegoEngine;
@@ -45,7 +45,7 @@ public final class ContainsAnyVarStrategy extends NamedStrategy2<Collection<ITer
     }
 
     private static boolean containsAnyVar(Collection<ITermVar> vars, IConstraint constraint, CCSolverState state) {
-        @Nullable final ImmutableMap<ITermVar, ITermVar> existentials = state.getExistentials();
+        final Map.@Nullable Immutable<ITermVar, ITermVar> existentials = state.getExistentials();
         final ArrayList<ITermVar> projectedVars = new ArrayList<>(vars.size());
         if(existentials != null) {
             for(ITermVar var : vars) {

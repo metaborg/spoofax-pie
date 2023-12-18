@@ -326,7 +326,9 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
             cfgStrategoConfig.javaClassFileOutputDirectory(),
             cfgStrategoConfig.outputJavaPackageId(),
             cfgStrategoConfig.outputLibraryName(),
-            ListView.copyOf(allJavaClassPaths)
+            ListView.copyOf(allJavaClassPaths),
+            false,
+            false
         ));
     }
 

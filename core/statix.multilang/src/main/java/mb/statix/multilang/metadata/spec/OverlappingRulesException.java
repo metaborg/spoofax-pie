@@ -1,9 +1,7 @@
 package mb.statix.multilang.metadata.spec;
 
-import com.google.common.collect.Multimap;
 import mb.statix.spec.Rule;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 

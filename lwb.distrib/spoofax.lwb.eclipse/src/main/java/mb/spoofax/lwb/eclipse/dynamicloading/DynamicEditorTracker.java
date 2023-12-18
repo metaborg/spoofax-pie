@@ -1,6 +1,5 @@
 package mb.spoofax.lwb.eclipse.dynamicloading;
 
-import com.google.common.collect.Sets;
 import mb.spoofax.eclipse.editor.WindowAndPartListener;
 import mb.spoofax.lwb.eclipse.SpoofaxLwbScope;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -18,7 +17,10 @@ import org.eclipse.ui.contexts.IContextActivation;
 import org.eclipse.ui.contexts.IContextService;
 
 import javax.inject.Inject;
+
+import java.util.Collections;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 @SpoofaxLwbScope
 public class DynamicEditorTracker extends WindowAndPartListener {
@@ -26,7 +28,7 @@ public class DynamicEditorTracker extends WindowAndPartListener {
 
     private @MonotonicNonNull IContextService contextService;
     private @Nullable IContextActivation contextActivation = null;
-    private Set<DynamicEditor> editors = Sets.newConcurrentHashSet();
+    private Set<DynamicEditor> editors = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
 
     @Inject public DynamicEditorTracker() {}

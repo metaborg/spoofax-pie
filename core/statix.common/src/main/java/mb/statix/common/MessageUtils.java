@@ -1,7 +1,5 @@
 package mb.statix.common;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Streams;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.stratego.TermIndex;
 import mb.nabl2.terms.stratego.TermOrigin;
@@ -14,7 +12,10 @@ import mb.statix.constraints.messages.IMessage;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.persistent.Solver;
 import mb.statix.spoofax.IStatixProjectConfig;
+
+import org.metaborg.util.collection.ImList;
 import org.metaborg.util.functions.Function1;
+import org.metaborg.util.stream.StreamUtil;
 import org.metaborg.util.tuple.Tuple2;
 
 import java.util.Collection;
@@ -34,9 +35,9 @@ public class MessageUtils {
     public static void addMessage(final IMessage message, final IConstraint constraint, final IUniDisunifier unifier,
                               IStatixProjectConfig config, final Collection<ITerm> errors, final Collection<ITerm> warnings,
                               final Collection<ITerm> notes) {
-        Tuple2<Iterable<String>, ITerm> message_origin = formatMessage(message, constraint, unifier, config);
+        Tuple2<Collection<String>, ITerm> message_origin = formatMessage(message, constraint, unifier, config);
 
-        final String messageText = Streams.stream(message_origin._1()).filter(s -> !s.isEmpty())
+        final String messageText = message_origin._1().stream().filter(s -> !s.isEmpty())
             .map(s -> cleanupString(s)).collect(Collectors.joining("<br>\n&gt;&nbsp;", "", "<br>\n"));
 
         final ITerm messageTerm = B.newTuple(message_origin._2(), B.newString(messageText));
@@ -56,7 +57,7 @@ public class MessageUtils {
 
     }
 
-    public static Tuple2<Iterable<String>, ITerm> formatMessage(final IMessage message, final IConstraint constraint,
+    public static Tuple2<Collection<String>, ITerm> formatMessage(final IMessage message, final IConstraint constraint,
                                                                 final IUniDisunifier unifier, IStatixProjectConfig config) {
         final TermFormatter formatter = Solver.shallowTermFormatter(unifier,
             config.messageTermDepth(config.messageTermDepth(IStatixProjectConfig.DEFAULT_MESSAGE_TERM_DEPTH)));
@@ -121,10 +122,8 @@ public class MessageUtils {
             onTry -> Stream.empty(),
             onUser -> onUser.args().stream()
         );
-        return terms.apply(constraint)
-            .flatMap(t -> Streams.stream(getOriginTerm(t, unifier)))
-            .findFirst();
         // @formatter:on
+        return StreamUtil.filterMap(terms.apply(constraint), t -> getOriginTerm(t, unifier)).findFirst();
     }
 
     private static Optional<ITerm> getOriginTerm(ITerm term, IUniDisunifier unifier) {
@@ -132,7 +131,7 @@ public class MessageUtils {
         return Optional.of(unifier.findTerm(term))
             .filter(t -> TermIndex.get(t).isPresent())
             .filter(t -> TermOrigin.get(t).isPresent()) // HACK Ignore terms without origin, such as empty lists
-            .map(t -> B.newTuple(ImmutableList.of(), t.getAttachments()));
+            .map(t -> B.newTuple(ImList.Immutable.of(), t.getAttachments()));
         // @formatter:on
     }
 

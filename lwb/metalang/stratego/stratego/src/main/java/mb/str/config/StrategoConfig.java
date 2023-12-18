@@ -5,7 +5,7 @@ import mb.resource.hierarchical.ResourcePath;
 import mb.stratego.build.strincr.BuiltinLibraryIdentifier;
 import mb.stratego.build.strincr.ModuleIdentifier;
 
-interface StrategoConfig {
+public interface StrategoConfig {
     static ResourcePath defaultMainFile(ResourcePath rootDirectory) {
         return rootDirectory.appendRelativePath("src/main.str");
     }

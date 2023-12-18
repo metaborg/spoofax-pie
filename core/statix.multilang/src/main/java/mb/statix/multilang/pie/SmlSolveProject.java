@@ -1,6 +1,5 @@
 package mb.statix.multilang.pie;
 
-import com.google.common.collect.ImmutableMap;
 import dagger.Lazy;
 import mb.common.result.Result;
 import mb.common.result.ResultCollector;
@@ -176,6 +175,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
                     messages.__putAll(result.messages());
                     result.delays().keySet().forEach(c -> messages.__put(c, MessageUtil.findClosestMessage(c)));
                     final SolverResult<?> newResult = result.withMessages(messages.freeze()).withDelays(CapsuleUtil.immutableMap());
+
 
                     return Result.ofOk(newResult);
                 } catch(InterruptedException e) {

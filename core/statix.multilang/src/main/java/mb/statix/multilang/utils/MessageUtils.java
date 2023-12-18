@@ -1,6 +1,5 @@
 package mb.statix.multilang.utils;
 
-import com.google.common.collect.Streams;
 import mb.common.message.Message;
 import mb.common.message.Severity;
 import mb.common.region.Region;
@@ -21,6 +20,7 @@ import mb.statix.solver.IConstraint;
 import mb.statix.solver.persistent.Solver;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.functions.Function1;
+import org.metaborg.util.stream.StreamUtil;
 import org.spoofax.interpreter.terms.ISimpleTerm;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -120,10 +120,8 @@ public class MessageUtils {
             onTry -> Stream.empty(),
             onUser -> onUser.args().stream()
         );
-        return terms.apply(constraint)
-            .flatMap(t -> Streams.stream(getOriginTerm(t, unifier)))
-            .findFirst();
         // @formatter:on
+        return StreamUtil.filterMap(terms.apply(constraint), t -> getOriginTerm(t, unifier)).findFirst();
     }
 
     private static Optional<ITerm> getOriginTerm(ITerm term, IUniDisunifier unifier) {

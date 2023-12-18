@@ -1,12 +1,10 @@
 package mb.statix.codecompletion.strategies.runtime;
 
-import com.google.common.collect.ImmutableList;
 import io.usethesource.capsule.Set;
 import mb.nabl2.terms.ITermVar;
 import mb.statix.codecompletion.CCSolverState;
 import mb.statix.codecompletion.SelectedConstraintCCSolverState;
 import mb.statix.codecompletion.SolverContext;
-import mb.statix.codecompletion.SolverState;
 import mb.statix.constraints.CUser;
 import mb.tego.sequences.Seq;
 import mb.tego.sequences.SeqBase;
@@ -17,6 +15,7 @@ import mb.statix.spec.RuleUtil;
 import mb.tego.strategies.NamedStrategy2;
 import mb.tego.strategies.runtime.TegoEngine;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.metaborg.util.collection.ImList;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -56,7 +55,7 @@ public final class ExpandPredicateStrategy extends NamedStrategy2<SolverContext,
     public static Seq<CCSolverState> eval(TegoEngine engine, SolverContext ctx, @Nullable ITermVar focus, SelectedConstraintCCSolverState<CUser> input) {
         final CUser selected = input.getSelected();
         // Get the rules for the given predicate constraint
-        final ImmutableList<Rule> rules = ImmutableList.copyOf(input.getSpec().rules().getOrderIndependentRules(selected.name()));
+        final ImList.Immutable<Rule> rules = ImList.Immutable.copyOf(input.getSpec().rules().getOrderIndependentRules(selected.name()));
         // Prepare the new state for each of the expansions:
         // - Remove the selected constraint
         // - Add the constraint's name to the set of expanded constraints

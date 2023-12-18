@@ -1,9 +1,5 @@
 package mb.spoofax2.common.primitive;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
 import mb.resource.ResourceRuntimeException;
@@ -22,12 +18,16 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.terms.io.binary.TermReader;
 import org.spoofax.terms.util.TermUtils;
+import org.metaborg.util.collection.Cache;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
+import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -72,12 +72,11 @@ public abstract class AResourcesPrimitive extends ASpoofaxPrimitive implements A
         super(name, 2, 0);
         this.log = loggerFactory.create(AResourcesPrimitive.class);
         this.resourceService = resourceService;
-        this.fileCache = CacheBuilder.newBuilder().maximumSize(32).build();
+        this.fileCache = new Cache<>(32);
     }
 
     @Override public void close() {
-        fileCache.invalidateAll();
-        fileCache.cleanUp();
+        fileCache.clear();
     }
 
     @Override protected @Nullable IStrategoTerm call(
@@ -99,8 +98,8 @@ public abstract class AResourcesPrimitive extends ASpoofaxPrimitive implements A
             projectContext = null;
         }
 
-        final Deque<IStrategoTerm> names = Lists.newLinkedList(parseNames(current));
-        final Map<IStrategoTerm, IStrategoTerm> resources = Maps.newHashMap();
+        final Deque<IStrategoTerm> names = new ArrayDeque<>(parseNames(current));
+        final Map<IStrategoTerm, IStrategoTerm> resources = new HashMap<>();
         while(!names.isEmpty()) {
             final IStrategoTerm name = names.pop();
             if(!resources.containsKey(name)) {
@@ -131,7 +130,7 @@ public abstract class AResourcesPrimitive extends ASpoofaxPrimitive implements A
                 continue;
             }
             final IStrategoTerm term;
-            final @Nullable CacheEntry cacheEntry = fileCache.getIfPresent(file.getPath());
+            final @Nullable CacheEntry cacheEntry = fileCache.get(file.getPath());
             try {
                 if(cacheEntry != null && !(cacheEntry.timestamp.isBefore(file.getLastModifiedTime()))) {
                     term = cacheEntry.term;
@@ -143,7 +142,7 @@ public abstract class AResourcesPrimitive extends ASpoofaxPrimitive implements A
                 }
             } catch(IOException e) {
                 log.error("Reading file '{}' failed unexpectedly; skipping file", e, path);
-                fileCache.invalidate(file.getPath());
+                fileCache.remove(file.getPath());
                 continue;
             }
             return Optional.of(term);
@@ -181,6 +180,6 @@ public abstract class AResourcesPrimitive extends ASpoofaxPrimitive implements A
         if(!TermUtils.isList(current)) {
             throw new InterpreterException("Expected list of names, got " + current);
         }
-        return Lists.newArrayList(current.getAllSubterms());
+        return Arrays.asList(current.getAllSubterms());
     }
 }

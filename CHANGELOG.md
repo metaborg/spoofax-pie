@@ -5,6 +5,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 ## [Unreleased]
 ### Changed
 - Removed SnakeYAML dependency of Tego.
+- Removed direct use of guava dependency.
+- Explicitly bundling guava dependency in Eclipse plugin due to 3rd party dependency via dagger-compiler.
 
 
 ## [0.19.6] - 2023-05-03

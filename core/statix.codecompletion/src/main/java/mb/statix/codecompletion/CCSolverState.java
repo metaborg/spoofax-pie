@@ -1,21 +1,16 @@
 package mb.statix.codecompletion;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
 import io.usethesource.capsule.Map;
+import io.usethesource.capsule.Map.Immutable;
 import io.usethesource.capsule.Set;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
 import mb.nabl2.terms.unification.ud.IUniDisunifier;
-import mb.statix.constraints.CConj;
-import mb.statix.constraints.CExists;
 import mb.statix.constraints.messages.IMessage;
-import mb.statix.solver.CriticalEdge;
 import mb.statix.solver.Delay;
 import mb.statix.solver.IConstraint;
 import mb.statix.solver.IState;
 import mb.statix.solver.completeness.Completeness;
-import mb.statix.solver.completeness.CompletenessUtil;
 import mb.statix.solver.completeness.ICompleteness;
 import mb.statix.solver.persistent.SolverResult;
 import mb.statix.spec.ApplyResult;
@@ -26,7 +21,6 @@ import org.metaborg.util.collection.CapsuleUtil;
 import org.metaborg.util.functions.Function2;
 import org.metaborg.util.log.ILogger;
 import org.metaborg.util.log.LoggerUtils;
-import org.metaborg.util.tuple.Tuple2;
 
 import java.util.AbstractMap;
 import java.util.Collection;
@@ -62,7 +56,7 @@ public class CCSolverState extends SolverState {
         final ICompleteness.Transient completeness = Completeness.Transient.of();
         completeness.addAll(constraints, spec, state.unifier());
 
-        return new CCSolverState(spec, state, Map.Immutable.of(), CapsuleUtil.toSet(constraints), Map.Immutable.of(),
+        return new CCSolverState(spec, state, Immutable.of(), CapsuleUtil.toSet(constraints), Immutable.of(),
             null, completeness.freeze(), expanded, meta);
     }
 
@@ -78,7 +72,7 @@ public class CCSolverState extends SolverState {
      */
     public static CCSolverState fromSolverResult(
         SolverResult<?> result,
-        @Nullable ImmutableMap<ITermVar, ITermVar> existentials,
+        @Nullable Immutable<ITermVar, ITermVar> existentials,
         Set.Immutable<String> expanded,
         SolutionMeta meta
     ) {
@@ -91,9 +85,8 @@ public class CCSolverState extends SolverState {
                 delays.__put(c, d);
             }
         });
-
-        final ImmutableMap<ITermVar, ITermVar> newExistentials =
-            existentials == null ? ImmutableMap.copyOf(result.existentials()) : existentials;
+        final Immutable<ITermVar, ITermVar> newExistentials =
+            existentials == null ? result.existentials() : existentials;
         return new CCSolverState(result.spec(), result.state(), CapsuleUtil.toMap(result.messages()),
             constraints.freeze(), delays.freeze(), newExistentials,
             result.completeness(), expanded, meta);
@@ -118,10 +111,10 @@ public class CCSolverState extends SolverState {
     protected CCSolverState(
         Spec spec,
         IState.Immutable state,
-        Map.Immutable<IConstraint, IMessage> messages,
+        Immutable<IConstraint, IMessage> messages,
         Set.Immutable<IConstraint> constraints,
-        Map.Immutable<IConstraint, Delay> delays,
-        @Nullable ImmutableMap<ITermVar, ITermVar> existentials,
+        Immutable<IConstraint, Delay> delays,
+        @Nullable Immutable<ITermVar, ITermVar> existentials,
         ICompleteness.Immutable completeness,
         Set.Immutable<String> expanded,
         SolutionMeta meta
@@ -234,10 +227,10 @@ public class CCSolverState extends SolverState {
     @Override protected CCSolverState copy(
         Spec newSpec,
         IState.Immutable newState,
-        Map.Immutable<IConstraint, IMessage> newMessages,
+        Immutable<IConstraint, IMessage> newMessages,
         Set.Immutable<IConstraint> newConstraints,
-        Map.Immutable<IConstraint, Delay> newDelays,
-        @Nullable ImmutableMap<ITermVar, ITermVar> newExistentials,
+        Immutable<IConstraint, Delay> newDelays,
+        @Nullable Immutable<ITermVar, ITermVar> newExistentials,
         ICompleteness.Immutable newCompleteness
     ) {
         return copy(newSpec, newState, newMessages, newConstraints, newDelays,
@@ -265,10 +258,10 @@ public class CCSolverState extends SolverState {
     protected CCSolverState copy(
         Spec newSpec,
         IState.Immutable newState,
-        Map.Immutable<IConstraint, IMessage> newMessages,
+        Immutable<IConstraint, IMessage> newMessages,
         Set.Immutable<IConstraint> newConstraints,
-        Map.Immutable<IConstraint, Delay> newDelays,
-        @Nullable ImmutableMap<ITermVar, ITermVar> newExistentials,
+        Immutable<IConstraint, Delay> newDelays,
+        @Nullable Immutable<ITermVar, ITermVar> newExistentials,
         ICompleteness.Immutable newCompleteness,
         Set.Immutable<String> newExpanded,
         SolutionMeta newMeta
