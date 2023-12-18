@@ -96,7 +96,7 @@ public final class ExpandPredicateStrategy extends NamedStrategy2<SolverContext,
         CCSolverState state
     ) {
         final List<CCSolverState> output = RuleUtil.applyAll(state.getState().unifier(), rules, selected.args(), selected,
-                ApplyMode.RELAXED, ApplyMode.Safety.UNSAFE).stream()
+                ApplyMode.RELAXED, ApplyMode.Safety.UNSAFE, true).stream()
             .map(t -> state.withApplyResult(t._2(), selected))
             .collect(Collectors.toList());
         return Seq.from(output);
