@@ -832,8 +832,9 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
         addConstraints.add(new CEqual(B.newList(pathTerms), query.resultTerm(), query));
         subEnv.matches.stream().flatMap(m -> Optionals.stream(m.condition)).forEach(addConstraints::add);
         subEnv.rejects.stream().flatMap(m -> Optionals.stream(m.condition)).forEach(condition -> addConstraints.add(
-                new CInequal(CapsuleUtil.immutableSet(), condition.term1(), condition.term2(),
-                    condition.cause().orElse(null), condition.message().orElse(null))
+                new CInequal(CapsuleUtil.immutableSet(), condition.term1(), condition.term2())
+                    .withCause(condition.cause().orElse(null))
+                    .withMessage(condition.message().orElse(null))
             )
         );
 
