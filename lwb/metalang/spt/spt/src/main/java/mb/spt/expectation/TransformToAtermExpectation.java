@@ -10,6 +10,7 @@ import mb.pie.api.None;
 import mb.pie.api.Session;
 import mb.pie.api.exec.CancelToken;
 import mb.resource.ResourceKey;
+import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.command.CommandDef;
 import mb.spoofax.core.language.command.CommandFeedback;
 import mb.spoofax.core.language.command.ShowFeedback;
@@ -45,6 +46,7 @@ public class TransformToAtermExpectation implements TestExpectation {
         LanguageUnderTest languageUnderTest,
         Session languageUnderTestSession,
         LanguageUnderTestProvider languageUnderTestProvider,
+        @Nullable ResourcePath rootDirectoryHint,
         ExecContext context,
         CancelToken cancel
     ) throws InterruptedException {
@@ -63,7 +65,7 @@ public class TransformToAtermExpectation implements TestExpectation {
         final @Nullable Region selectionRegion = TransformExpectationUtil.getSelection(testCase, selectionReference);
 
         final @Nullable CommandFeedback feedback = TransformExpectationUtil.runCommand(testCase.resource, commandDef,
-            languageUnderTest, languageUnderTestSession, messagesBuilder, file, sourceRegion, selectionRegion);
+            languageUnderTest, languageUnderTestSession, messagesBuilder, file, rootDirectoryHint, sourceRegion, selectionRegion);
         if(feedback == null) {
             return messagesBuilder.build(file);
         }

@@ -11,6 +11,7 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.Session;
 import mb.pie.api.exec.CancelToken;
 import mb.resource.ResourceKey;
+import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spt.api.analyze.StrategoRunArgument;
 import mb.spt.api.stratego.TestableStratego;
@@ -21,6 +22,7 @@ import mb.spt.model.SelectionReference;
 import mb.spt.model.TestCase;
 import mb.spt.model.TestExpectation;
 import mb.stratego.common.StrategoException;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoInt;
 import org.spoofax.interpreter.terms.IStrategoString;
@@ -62,6 +64,7 @@ public class RunStrategoExpectation implements TestExpectation {
         LanguageUnderTest languageUnderTest,
         Session languageUnderTestSession,
         LanguageUnderTestProvider languageUnderTestProvider,
+        @Nullable ResourcePath rootDirectoryHint,
         ExecContext context,
         CancelToken cancel
     ) throws InterruptedException {

@@ -10,6 +10,7 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.Session;
 import mb.pie.api.exec.CancelToken;
 import mb.resource.ResourceKey;
+import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spt.api.resolve.TestableResolve;
 import mb.spt.lut.LanguageUnderTestProvider;
@@ -18,6 +19,7 @@ import mb.spt.model.SelectionReference;
 import mb.spt.model.TestCase;
 import mb.spt.model.TestExpectation;
 import mb.spt.util.SptSelectionUtil;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class ResolveExpectation implements TestExpectation {
     public final SelectionReference fromTerm;
@@ -44,6 +46,7 @@ public class ResolveExpectation implements TestExpectation {
         LanguageUnderTest languageUnderTest,
         Session languageUnderTestSession,
         LanguageUnderTestProvider languageUnderTestProvider,
+        @Nullable ResourcePath rootDirectoryHint,
         ExecContext context,
         CancelToken cancel
     ) throws InterruptedException {

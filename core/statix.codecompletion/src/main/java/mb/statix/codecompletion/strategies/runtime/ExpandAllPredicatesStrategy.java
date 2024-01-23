@@ -62,6 +62,7 @@ public final class ExpandAllPredicatesStrategy extends NamedStrategy2<SolverCont
         // An example where this happens is in this program, on the $Type placeholder:
         //   let function $ID(): $Type = $Exp in 3 end
         //   debugState(v,
+
         final Strategy1<Set.Immutable<String>, CCSolverState, CCSolverState> CCSolverState$withExpanded
             = StrategyExt.def("CCSolverState#withExpanded", "x", fun(CCSolverState::withExpanded));
 

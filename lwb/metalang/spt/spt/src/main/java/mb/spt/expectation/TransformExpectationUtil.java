@@ -49,13 +49,14 @@ public class TransformExpectationUtil {
         Session languageUnderTestSession,
         KeyedMessagesBuilder messagesBuilder,
         ResourceKey failMessageFile,
+        @Nullable ResourcePath rootDirectoryHint,
         Region fileMessageRegion,
         @Nullable Region selection
     ) throws InterruptedException {
         try {
             final CommandContext commandContext = CommandContext.ofFile(resource, selection);
             commandContext.setEnclosing(EnclosingCommandContextType.Directory, CommandContext.ofDirectory(resource));
-            commandContext.setEnclosing(EnclosingCommandContextType.Project, CommandContext.ofProject(resource));
+            commandContext.setEnclosing(EnclosingCommandContextType.Project, CommandContext.ofProject(rootDirectoryHint != null ? rootDirectoryHint : resource));
             final Task<CommandFeedback> task = commandDef.createTask(CommandExecutionType.ManualOnce, commandContext, new ArgConverters(languageUnderTest.getResourceServiceComponent().getResourceService()));
             return languageUnderTestSession.require(task);
         } catch(ExecException | ArgumentBuilderException e) {
@@ -82,7 +83,7 @@ public class TransformExpectationUtil {
         if(selectionReference.isNone()) {
             return null;
         } else {
-            final ListView<Region> availableSelections = testCase.testFragment.getInFragmentSelections();
+            final ListView<Region> availableSelections = testCase.testFragment.getSelections();
             return availableSelections.get(selectionReference.get().selection - 1);
         }
     }

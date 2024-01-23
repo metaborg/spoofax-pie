@@ -144,7 +144,7 @@ public class SptCheck implements TaskDef<SptCheck.Input, KeyedMessages> {
         final Result<LanguageUnderTest, ?> languageUnderTestResult = languageUnderTestProvider.provide(context, file, rootDirectoryHint, testSuite.languageCoordinateRequirementHint);
         final CancelToken cancelToken = context.cancelToken();
         languageUnderTestResult.ifThrowingElse(
-            languageUnderTest -> runTests(languageUnderTestProvider, context, languageUnderTest, cancelToken, messagesBuilder, testSuite),
+            languageUnderTest -> runTests(languageUnderTestProvider, context, languageUnderTest, cancelToken, messagesBuilder, testSuite, rootDirectoryHint),
             e -> messagesBuilder.addMessage("Cannot run tests, failed to get language under test", e, Severity.Error, file)
         );
     }
@@ -155,12 +155,13 @@ public class SptCheck implements TaskDef<SptCheck.Input, KeyedMessages> {
         LanguageUnderTest languageUnderTest,
         CancelToken cancelToken,
         KeyedMessagesBuilder messagesBuilder,
-        TestSuite testSuite
+        TestSuite testSuite,
+        @Nullable ResourcePath rootDirectoryHint
     ) throws InterruptedException {
         try(final MixedSession languageUnderTestSession = languageUnderTest.getPieComponent().newSession()) {
             for(TestCase testCase : testSuite.testCases) {
                 for(TestExpectation expectation : testCase.expectations) {
-                    messagesBuilder.addMessages(expectation.evaluate(testCase, languageUnderTest, languageUnderTestSession, languageUnderTestProvider, context, cancelToken));
+                    messagesBuilder.addMessages(expectation.evaluate(testCase, languageUnderTest, languageUnderTestSession, languageUnderTestProvider, rootDirectoryHint, context, cancelToken));
                 }
             }
         }

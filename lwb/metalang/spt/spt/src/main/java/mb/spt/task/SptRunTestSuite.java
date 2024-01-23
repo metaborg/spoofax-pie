@@ -155,7 +155,7 @@ public class SptRunTestSuite implements TaskDef<SptRunTestSuite.Input, TestSuite
         final CancelToken cancelToken = context.cancelToken();
         return languageUnderTestResult.mapThrowingOrElse(
             languageUnderTest -> {
-                ListView<TestCaseResult> results = runTests(languageUnderTestProvider, context, languageUnderTest, cancelToken, testSuite);
+                ListView<TestCaseResult> results = runTests(languageUnderTestProvider, context, languageUnderTest, cancelToken, testSuite, rootDirectoryHint);
                 return new TestSuiteResult(messagesBuilder.build(), file, testSuite.name, results);
             },
             (e) -> {
@@ -170,7 +170,8 @@ public class SptRunTestSuite implements TaskDef<SptRunTestSuite.Input, TestSuite
         ExecContext context,
         LanguageUnderTest languageUnderTest,
         CancelToken cancelToken,
-        TestSuite testSuite
+        TestSuite testSuite,
+        @Nullable ResourcePath rootDirectoryHint
     ) throws InterruptedException {
         List<TestCaseResult> results = new ArrayList<>();
         try(final MixedSession languageUnderTestSession = languageUnderTest.getPieComponent().newSession()) {
@@ -180,7 +181,7 @@ public class SptRunTestSuite implements TaskDef<SptRunTestSuite.Input, TestSuite
                 final long startTime = System.currentTimeMillis();
                 for(TestExpectation expectation : testCase.expectations) {
                     testMessageBuilder.addMessages(
-                        expectation.evaluate(testCase, languageUnderTest, languageUnderTestSession, languageUnderTestProvider, context, cancelToken)
+                        expectation.evaluate(testCase, languageUnderTest, languageUnderTestSession, languageUnderTestProvider, rootDirectoryHint, context, cancelToken)
                     );
                 }
                 final long duration = System.currentTimeMillis() - startTime;

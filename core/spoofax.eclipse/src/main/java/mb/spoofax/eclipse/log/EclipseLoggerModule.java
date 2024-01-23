@@ -8,7 +8,7 @@ import mb.log.dagger.LoggerScope;
 @Module
 public class EclipseLoggerModule {
     @Provides @LoggerScope LoggerFactory provideLoggerFactory() {
-        return new EclipseLoggerFactory();
+        return new EclipseLoggerFactory(mb.log.api.Level.Warn, mb.log.api.Level.Trace, "Spoofax");
     }
 }
 

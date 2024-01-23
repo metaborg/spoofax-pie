@@ -150,7 +150,11 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
         if(!unifier.isGround(query.scopeTerm())) {
             // Delay
             final Delay delay = Delay.ofVars(unifier.getVars(query.scopeTerm()));
-            return Seq.of(input.withoutSelected().withDelay(query, delay));
+            return Seq.of(input
+                .withoutSelected()
+                .withUpdatedConstraints(Collections.emptySet(), Collections.singleton(query))
+                .withDelay(query, delay)
+            );
         }
         @Nullable final Scope scope = Scope.matcher().match(query.scopeTerm(), unifier).orElse(null);
         assert scope != null;

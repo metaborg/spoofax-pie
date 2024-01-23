@@ -11,6 +11,7 @@ import mb.pie.api.MixedSession;
 import mb.pie.api.Session;
 import mb.pie.api.exec.CancelToken;
 import mb.resource.ResourceKey;
+import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.CoordinateRequirement;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spt.api.parse.TestableParse;
@@ -38,6 +39,7 @@ public class ParseToFragmentExpectation implements TestExpectation {
         LanguageUnderTest languageUnderTest,
         Session languageUnderTestSession,
         LanguageUnderTestProvider languageUnderTestProvider,
+        @Nullable ResourcePath rootDirectoryHint,
         ExecContext context,
         CancelToken cancel
     ) throws InterruptedException {
