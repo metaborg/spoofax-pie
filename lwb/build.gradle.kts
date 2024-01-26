@@ -24,7 +24,7 @@ plugins {
 subprojects {
   metaborg {
     configureSubProject()
-    if(name.contains(".cli") || (name.contains(".eclipse") && !isMetaLibThatShouldBePublished(name)) || name.contains(".intellij")) {
+    if((name.contains(".eclipse") && !isMetaLibThatShouldBePublished(name)) || name.contains(".intellij")) {
       // Do not publish CLI, Eclipse plugin, and IntelliJ plugin for now.
       javaCreatePublication = false
       javaCreateSourcesJar = false

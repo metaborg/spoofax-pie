@@ -2,10 +2,11 @@ package mb.spoofax.compiler.adapter.data;
 
 import org.immutables.value.Value;
 
+import java.io.Serializable;
 import java.util.Optional;
 
 @Value.Immutable
-public interface SeparatorRepr {
+public interface SeparatorRepr extends Serializable  {
     class Builder extends ImmutableSeparatorRepr.Builder {}
 
     static Builder builder() {

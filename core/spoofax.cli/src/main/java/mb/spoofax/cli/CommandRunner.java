@@ -70,8 +70,9 @@ class CommandRunner<A extends Serializable> implements Callable {
             System.out.println("The following messages were produced by command '" + commandDef.getDisplayName() + "':\n" + keyedMessages.toString());
         }
 
+        boolean commandFailed = exception != null || keyedMessages.containsErrorOrHigher();
         for(ShowFeedback showFeedback : feedback.getShowFeedbacks()) {
-            showFeedback.caseOf()
+            commandFailed |= showFeedback.caseOf()
                 .showFile((file, region) -> {
                     try {
                         final ReadableResource resource = resourceService.getReadableResource(file);
@@ -85,7 +86,7 @@ class CommandRunner<A extends Serializable> implements Callable {
                         System.err.println("An exception occurred while showing file '" + file + "':");
                         e.printStackTrace(System.err);
                     }
-                    return Optional.empty();
+                    return false;
                 })
                 .showText((text, name, region) -> {
                     if(printFeedbackNames && !name.isEmpty()) {
@@ -93,14 +94,18 @@ class CommandRunner<A extends Serializable> implements Callable {
                         System.out.println();
                     }
                     System.out.println(text);
-                    return Optional.empty();
+                    return false;
                 })
                 .showTestResults(((testResults, region) -> {
                     StringBuilder builder = new StringBuilder();
                     testResults.addToStringBuilder(builder);
                     System.out.print(builder);
-                    return Optional.empty();
+                    return testResults.numFailed > 0;
                 }));
+        }
+
+        if(commandFailed) {
+            throw new SpoofaxCliException("Command '" + commandDef.getDisplayName() + "' failed (see messages above).", exception);
         }
         return null;
     }
