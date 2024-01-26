@@ -166,7 +166,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
                 try {
                     long t0 = System.currentTimeMillis();
                     IDebugContext debug = SolverUtils.createDebugContext(input.logLevel);
-                    SolverResult result = Solver.solve(combinedSpec, combinedState, combinedConstraint, (s, l, st) -> true, debug, new NullCancel(), new NullProgress(), 0);
+                    SolverResult<?> result = Solver.solve(combinedSpec, combinedState, combinedConstraint, (s, l, st) -> true, debug, new NullCancel(), new NullProgress(), 0);
                     long dt = System.currentTimeMillis() - t0;
                     logger.info("Project analyzed in {} ms", dt);
 
@@ -174,7 +174,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
                     final io.usethesource.capsule.Map.Transient<IConstraint, IMessage> messages = CapsuleUtil.transientMap();
                     messages.__putAll(result.messages());
                     result.delays().keySet().forEach(c -> messages.__put(c, MessageUtil.findClosestMessage(c)));
-                    final SolverResult newResult = result.withMessages(messages.freeze()).withDelays(CapsuleUtil.immutableMap());
+                    final SolverResult<?> newResult = result.withMessages(messages.freeze()).withDelays(CapsuleUtil.immutableMap());
 
                     return Result.ofOk(newResult);
                 } catch(InterruptedException e) {
@@ -186,7 +186,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
     private Result<HashMap<FileKey, Result<FileResult, MultiLangAnalysisException>>, MultiLangAnalysisException> postTransform(
         ExecContext context,
         Input input, Map<FileKey, Result<FileResult, MultiLangAnalysisException>> fileResults,
-        SolverResult finalResult
+        SolverResult<?> finalResult
     ) {
         return fileResults.entrySet().stream()
             .map(entry -> {

@@ -264,8 +264,8 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
             @Override public boolean leq(ITerm d1, ITerm d2)throws ResolutionException, InterruptedException {
                 // Apply the dataWF to each of the inputs. This should result in two solver results
                 // If this is not the case, this would already have failed the lambda in withDataWF().
-                final SolverResult result1 = applyDataWFCached(cache, query.filter().getDataWF(), d1, state, unifier,  completeness, input.getSpec() ).get();
-                final SolverResult result2 = applyDataWFCached(cache, query.filter().getDataWF(), d2, state, unifier,  completeness, input.getSpec() ).get();
+                final SolverResult<?> result1 = applyDataWFCached(cache, query.filter().getDataWF(), d1, state, unifier,  completeness, input.getSpec() ).get();
+                final SolverResult<?> result2 = applyDataWFCached(cache, query.filter().getDataWF(), d2, state, unifier,  completeness, input.getSpec() ).get();
 
                 // For each free variable in the query body...
                 final Set.Immutable<ITermVar> varsToCompare = query.filter().getDataWF().body().freeVars();
@@ -447,14 +447,14 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
         final IConstraint constraint = applyResult.body();
 
         // TODO: Reutrn a PreSolveResult or find another way to merge the SolverResult and PreSolveResult
-//        final Optional<Solver.PreSolveResult> solverResult = trySolveFast(constraint, state, _completeness, spec);
+//        final Optional<Solver.PreSolveResult> SolverResult<?> = trySolveFast(constraint, state, _completeness, spec);
 //        if (!solverResult.isPresent()) return Optional.empty();
 //        final Solver.PreSolveResult result = solverResult.get();
 //        final IState.Immutable newState = result.state;
 
-        final Optional<SolverResult> solverResult = trySolveSlow(constraint, state, _completeness, spec);
+        final Optional<SolverResult> SolverResult<?> = trySolveSlow(constraint, state, _completeness, spec);
         if (!solverResult.isPresent()) return Optional.empty();
-        final SolverResult result = solverResult.get();
+        final SolverResult<?> result = solverResult.get();
         final IState.Immutable newState = result.state();
 
         // NOTE: This part is almost a duplicate of ResolveDataWF::wf and should be kept in sync
@@ -526,7 +526,7 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
         Spec spec
     ) {
         // NOTE: This part is almost a duplicate of Solver::entails and should be kept in sync
-        final SolverResult result;
+        final SolverResult<?> result;
         try {
             result = Solver.solve(
                 spec,
@@ -777,7 +777,7 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
         final ArrayList<CEqual> eqs = new ArrayList<>();
         for (ResolutionPath<Scope, ITerm, ITerm> path : paths) {
             pathTerms.add(StatixTerms.pathToTerm(path, spec.dataLabels()));
-            final SolverResult solverResult = applyDataWFCached(cache, query.filter().getDataWF(), path.getDatum(), state.getState(), unifier, completeness, spec).get();
+            final SolverResult<?> solverResult = applyDataWFCached(cache, query.filter().getDataWF(), path.getDatum(), state.getState(), unifier, completeness, spec).get();
             for (ITermVar v : solverResult.updatedVars()) {
                 eqs.add(new CEqual(v, solverResult.state().unifier().findRecursive(v)));
             }

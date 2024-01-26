@@ -68,7 +68,7 @@ public class CCSolverState extends SolverState {
      * @return the resulting search state
      */
     public static CCSolverState fromSolverResult(
-        SolverResult result,
+        SolverResult<?> result,
         @Nullable Immutable<ITermVar, ITermVar> existentials,
         Set.Immutable<String> expanded,
         SolutionMeta meta

@@ -71,7 +71,7 @@ public class SmlInstantiateGlobalScope implements TaskDef<SmlInstantiateGlobalSc
             IDebugContext debug = SolverUtils.createDebugContext(input.logLevel);
 
             try {
-                SolverResult result = SolverUtils.partialSolve(Spec.of(), state, globalConstraint, debug, new NullCancel(), new NullProgress());
+                SolverResult<?> result = SolverUtils.partialSolve(Spec.of(), state, globalConstraint, debug, new NullCancel(), new NullProgress());
                 ITerm globalScope = result.state().unifier().findRecursive(result.existentials().get(globalScopeVar));
                 return Result.ofOk(ImmutableGlobalResult.builder()
                     .globalScope(globalScope)

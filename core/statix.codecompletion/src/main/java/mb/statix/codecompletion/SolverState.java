@@ -83,7 +83,7 @@ public class SolverState implements ISolverState {
      * @return the resulting search state
      */
     public static SolverState fromSolverResult(
-        SolverResult result,
+        SolverResult<?> result,
         @Nullable Immutable<ITermVar, ITermVar> existentials
     ) {
         final Set.Transient<IConstraint> constraints = Set.Transient.of();

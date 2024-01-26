@@ -45,7 +45,7 @@ public final class InferStrategy extends NamedStrategy<CCSolverState, CCSolverSt
 
     public static CCSolverState eval(TegoEngine engine, CCSolverState input) {
         try {
-            final SolverResult result = Solver.solve(
+            final SolverResult<?> result = Solver.solve(
                 input.getSpec(),
                 input.getState(),
                 input.getConstraints(),

@@ -99,7 +99,7 @@ public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.In
                                 IState.Immutable initialState = State.of()
                                     .add(globalResult.result().state())
                                     .withResource(input.languageId.getId());
-                                SolverResult res = SolverUtils.partialSolve(spec, initialState, projectConstraint, debug, new NullCancel(), new NullProgress());
+                                SolverResult<?> res = SolverUtils.partialSolve(spec, initialState, projectConstraint, debug, new NullCancel(), new NullProgress());
                                 return Result.ofOk(res);
                             } catch(InterruptedException e) {
                                 return Result.ofErr(new MultiLangAnalysisException(e));
