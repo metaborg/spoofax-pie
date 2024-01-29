@@ -1,6 +1,7 @@
 package mb.spoofax.cli;
 
 import mb.common.message.KeyedMessages;
+import mb.pie.api.ExecException;
 import mb.pie.api.MixedSession;
 import mb.pie.api.Task;
 import mb.resource.ReadableResource;
@@ -53,7 +54,7 @@ class CommandRunner<A extends Serializable> implements Callable {
         rawArgsBuilder.setArg(paramId, (Serializable)value);
     }
 
-    @Override public @Nullable Object call() throws Exception {
+    @Override public @Nullable Object call() throws SpoofaxCliException, InterruptedException, ExecException {
         final RawArgs rawArgs = rawArgsBuilder.build(context);
         final A args = commandDef.fromRawArgs(rawArgs);
         final Task<CommandFeedback> task = commandDef.createTask(args);
@@ -67,7 +68,7 @@ class CommandRunner<A extends Serializable> implements Callable {
 
         final KeyedMessages keyedMessages = feedback.getMessages();
         if(!keyedMessages.isEmpty()) {
-            System.out.println("The following messages were produced by command '" + commandDef.getDisplayName() + "':\n" + keyedMessages.toString());
+            System.out.println("The following messages were produced by command '" + commandDef.getDisplayName() + "':\n" + keyedMessages);
         }
 
         boolean commandFailed = exception != null || keyedMessages.containsErrorOrHigher();
@@ -105,6 +106,7 @@ class CommandRunner<A extends Serializable> implements Callable {
         }
 
         if(commandFailed) {
+            // Exception is processed and turned into an exit code by picocli.
             throw new SpoofaxCliException("Command '" + commandDef.getDisplayName() + "' failed (see messages above).", exception);
         }
         return null;
