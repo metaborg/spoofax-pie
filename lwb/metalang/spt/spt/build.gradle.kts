@@ -5,7 +5,6 @@ import mb.spoofax.core.language.command.CommandContextType
 import mb.spoofax.core.language.command.EnclosingCommandContextType
 import mb.spoofax.core.language.command.CommandExecutionType
 import mb.spoofax.common.*
-import java.util.Optional
 
 plugins {
   id("org.metaborg.gradle.config.java-library")
@@ -148,25 +147,5 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
   addResourceContextMenuItems(
     CommandActionRepr.builder().manualOnce(showTestSuiteCommand).fileRequired().enclosingProjectRequired().buildItem(),
     CommandActionRepr.builder().manualOnce(showTestSuitesCommand).directoryRequired().enclosingProjectRequired().buildItem()
-  )
-
-  cliCommand(
-    CliCommandRepr.of(
-      "spt",
-      CliCommandRepr.of(
-        "runTestSuite",
-        showTestSuiteCommand.description(),
-        showTestSuiteCommand.type(),
-        CliParamRepr.positional("file", 0, "FILE", "SPT test suite file to run")
-        // Enclosing project argument should be retrieved from context
-      ),
-      CliCommandRepr.of(
-          "runTestSuites",
-        showTestSuitesCommand.description(),
-        showTestSuitesCommand.type(),
-        CliParamRepr.positional("directory", 0, "DIRECTORY", "Directory with SPT test suites to run")
-        // Enclosing project argument should be retrieved from context
-      )
-    )
   )
 }

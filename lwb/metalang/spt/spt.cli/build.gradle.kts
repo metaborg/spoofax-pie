@@ -7,11 +7,9 @@ languageCliProject {
   adapterProject.set(project(":spt"))
 }
 
-/*
 tasks {
   // Disable currently unused distribution tasks.
   distZip.configure { enabled = false }
   distTar.configure { enabled = false }
   startScripts.configure { enabled = false }
 }
-*/
