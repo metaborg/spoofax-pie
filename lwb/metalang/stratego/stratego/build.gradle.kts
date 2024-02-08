@@ -20,11 +20,14 @@ dependencies {
   api(platform(compositeBuild("spoofax.depconstraints")))
   testAnnotationProcessor(platform(compositeBuild("spoofax.depconstraints")))
 
+  api("org.metaborg.devenv:org.metaborg.util")
   api("org.metaborg.devenv:stratego.build")
   api("org.metaborg:pie.task.archive")
 
   // Required because @Nullable has runtime retention (which includes classfile retention), and the Java compiler requires access to it.
   compileOnly("com.google.code.findbugs:jsr305")
+
+  implementation("commons-io:commons-io")
 
   testImplementation(compositeBuild("spoofax.test"))
   testImplementation("org.metaborg:pie.task.java")
