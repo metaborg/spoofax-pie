@@ -7,7 +7,10 @@ All notable changes to this project are documented in this file, based on [Keep 
 - Removed SnakeYAML dependency of Tego.
 - Removed direct use of guava dependency.
 - Explicitly bundling guava dependency in Eclipse plugin due to 3rd party dependency via dagger-compiler.
+- Eclipse versions to `2022-06`.
 
+### Fixed
+- Missing Java code bundling in sdf3.ext.statix
 
 ## [0.19.6] - 2023-05-03
 ### Fixed
