@@ -22,6 +22,7 @@ languageProject {
   }
   compilerInput {
     withStrategoRuntime().run {
+      addStrategyPackageIds("sdf3.ext.statix.strategies")
       addStrategyPackageIds("sdf3.ext.statix.trans")
       addInteropRegisterersByReflection("sdf3.ext.statix.trans.InteropRegisterer")
       baseStrategoRuntimeBuilderFactory("mb.sdf3_ext_statix.stratego", "BaseSdf3ExtStatixStrategoRuntimeBuilderFactory")
