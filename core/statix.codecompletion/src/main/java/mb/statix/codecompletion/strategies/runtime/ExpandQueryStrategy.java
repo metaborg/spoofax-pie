@@ -255,7 +255,7 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
             (s, l, st) -> isComplete2.test(s, l);
         final ConstraintQueries constraintQueries = new ConstraintQueries(input.getSpec(), state, isComplete3);
 
-        final HashMap<ITerm, Optional<SolverResult>> cache = new HashMap<>();
+        final HashMap<ITerm, Optional<SolverResult<?>>> cache = new HashMap<>();
 
         final DataWF<ITerm> dataWF = t ->
             // Assert that we can apply the dataWF to the input
@@ -396,7 +396,7 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
         return output;
     }
 
-    private static Optional<SolverResult> applyDataWFCached(HashMap<ITerm, Optional<SolverResult>> cache, Rule dataWF, ITerm d, IState.Immutable state, IUniDisunifier.Immutable unifier, ICompleteness.Immutable completeness, Spec spec) {
+    private static Optional<SolverResult<?>> applyDataWFCached(HashMap<ITerm, Optional<SolverResult<?>>> cache, Rule dataWF, ITerm d, IState.Immutable state, IUniDisunifier.Immutable unifier, ICompleteness.Immutable completeness, Spec spec) {
         return cache.compute(d, (k, term) -> {
             if (term == null) {
                 // Assert that we can apply the dataWF to the input
@@ -424,7 +424,7 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
      * @return either a {@link SolverResult} with the result of applying the {@code dataWF} to the given datum;
      * otherwise, nothing if the {@code dataWF} could not be applied
      */
-    private static Optional<SolverResult> applyDataWF(Rule dataWF, ITerm d, IState.Immutable state, IUniDisunifier.Immutable unifier, ICompleteness.Immutable completeness, Spec spec) {
+    private static Optional<SolverResult<?>> applyDataWF(Rule dataWF, ITerm d, IState.Immutable state, IUniDisunifier.Immutable unifier, ICompleteness.Immutable completeness, Spec spec) {
         // Apply the 'dataWF' to the specified 'd'
         final ApplyResult applyResult;
         if ((applyResult = RuleUtil.apply(
@@ -452,7 +452,7 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
 //        final Solver.PreSolveResult result = solverResult.get();
 //        final IState.Immutable newState = result.state;
 
-        final Optional<SolverResult> SolverResult<?> = trySolveSlow(constraint, state, _completeness, spec);
+        final Optional<SolverResult<?>> solverResult = trySolveSlow(constraint, state, _completeness, spec);
         if (!solverResult.isPresent()) return Optional.empty();
         final SolverResult<?> result = solverResult.get();
         final IState.Immutable newState = result.state();
@@ -519,7 +519,7 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
         return Optional.of(preSolveResult);
     }
 
-    private static Optional<SolverResult> trySolveSlow(
+    private static Optional<SolverResult<?>> trySolveSlow(
         IConstraint constraint,
         IState.Immutable state,
         ICompleteness.Transient completeness,
@@ -771,7 +771,7 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
         IResolveQuery query,
         CCSolverState state,
         IUniDisunifier.Immutable unifier, ICompleteness.Immutable completeness,
-        HashMap<ITerm, Optional<SolverResult>> cache
+        HashMap<ITerm, Optional<SolverResult<?>>> cache
     ) {
         final ArrayList<ITerm> pathTerms = new ArrayList<>();
         final ArrayList<CEqual> eqs = new ArrayList<>();

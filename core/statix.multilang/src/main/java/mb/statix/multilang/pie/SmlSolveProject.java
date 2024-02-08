@@ -107,18 +107,18 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
 
     @Override public Result<AnalysisResults, MultiLangAnalysisException> exec(ExecContext context, Input input) {
         // Solve project constraints
-        HashMap<LanguageId, Result<SolverResult, MultiLangAnalysisException>> projectResults = input.languages.stream()
+        HashMap<LanguageId, Result<SolverResult<?>, MultiLangAnalysisException>> projectResults = input.languages.stream()
             .map(languageId -> pair(languageId, context.require(partialSolveProject.createTask(new SmlPartialSolveProject.Input(languageId, input.logLevel)))))
             .collect(toMap(HashMap::new));
 
         // Solve file constraints
         return analyzeFiles(context, input).map(fileResults -> {
             // Collect results of all successful runs
-            HashSet<SolverResult> initialResults = new HashSet<>();
+            HashSet<SolverResult<?>> initialResults = new HashSet<>();
             projectResults.values().forEach(r -> r.ifOk(initialResults::add));
             fileResults.values().forEach(r -> r.map(FileResult::result).ifOk(initialResults::add));
 
-            Result<SolverResult, MultiLangAnalysisException> finalResult = solveCombined(context, input, initialResults);
+            Result<SolverResult<?>, MultiLangAnalysisException> finalResult = solveCombined(context, input, initialResults);
 
             HashMap<FileKey, Result<FileResult, MultiLangAnalysisException>> transFormedFileResults = finalResult
                 .flatMap(result -> postTransform(context, input, fileResults, result))
@@ -148,7 +148,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
                 .collect(toMap(HashMap::new)));
     }
 
-    private Result<SolverResult, MultiLangAnalysisException> solveCombined(ExecContext context, Input input, HashSet<SolverResult> initialResults) {
+    private Result<SolverResult<?>, MultiLangAnalysisException> solveCombined(ExecContext context, Input input, HashSet<SolverResult<?>> initialResults) {
         return context.require(buildSpec.createTask(new SmlBuildSpec.Input(input.languages)))
             // Upcast to make typing work
             .mapErr(MultiLangAnalysisException.class::cast)

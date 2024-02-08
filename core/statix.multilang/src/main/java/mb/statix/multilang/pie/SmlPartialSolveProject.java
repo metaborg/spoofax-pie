@@ -30,7 +30,7 @@ import java.util.Objects;
 import java.util.Set;
 
 @MultiLangScope
-public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.Input, Result<SolverResult, MultiLangAnalysisException>> {
+public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.Input, Result<SolverResult<?>, MultiLangAnalysisException>> {
     public static class Input implements Serializable {
         private final LanguageId languageId;
 
@@ -82,7 +82,7 @@ public class SmlPartialSolveProject implements TaskDef<SmlPartialSolveProject.In
     }
 
     @Override
-    public Result<SolverResult, MultiLangAnalysisException> exec(ExecContext context, Input input) {
+    public Result<SolverResult<?>, MultiLangAnalysisException> exec(ExecContext context, Input input) {
         return context.require(instantiateGlobalScope.createTask(input.logLevel))
             .mapErr(MultiLangAnalysisException::wrapIfNeeded)
             .flatMap(globalResult -> {

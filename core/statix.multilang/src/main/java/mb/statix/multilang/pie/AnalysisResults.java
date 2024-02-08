@@ -13,11 +13,11 @@ import java.util.HashMap;
 
 @Value.Immutable
 public abstract class AnalysisResults implements Serializable {
-    @Value.Parameter public abstract HashMap<LanguageId, Result<SolverResult, MultiLangAnalysisException>> projectResults();
+    @Value.Parameter public abstract HashMap<LanguageId, Result<SolverResult<?>, MultiLangAnalysisException>> projectResults();
 
     @Value.Parameter public abstract HashMap<FileKey, Result<FileResult, MultiLangAnalysisException>> fileResults();
 
-    @Value.Parameter public abstract Result<SolverResult, MultiLangAnalysisException> finalResult();
+    @Value.Parameter public abstract Result<SolverResult<?>, MultiLangAnalysisException> finalResult();
 
     // Custom toString to prevent memory leaks when logging
     @Override public String toString() {

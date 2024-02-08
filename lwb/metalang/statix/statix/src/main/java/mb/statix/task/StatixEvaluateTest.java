@@ -159,7 +159,7 @@ public class StatixEvaluateTest implements TaskDef<StatixEvaluateTest.Args, Comm
             .orElseThrow(() -> new InvalidAstShapeException("valid spec term", specTerm));
         final IDebugContext debug = new NullDebugContext();
 
-        final SolverResult resultConfig = Solver.solve(spec, State.of(), constraint, debug, new NullCancel(), new NullProgress(), 0);
+        final SolverResult<?> resultConfig = Solver.solve(spec, State.of(), constraint, debug, new NullCancel(), new NullProgress(), 0);
         // TODO: implement cancel
 
         final IUniDisunifier.Immutable unifier = resultConfig.state().unifier();
