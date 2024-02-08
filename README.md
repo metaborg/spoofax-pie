@@ -69,7 +69,7 @@ To build this repository, run:
 > gradlew.bat buildAll
 > ```
 
-> [!WARNING]
+> [!IMPORTANT]
 > When using MacOS, ensure you have Docker installed and running.
 
 To run a local Eclipse instance using the Spoofax version in this repository, run:
