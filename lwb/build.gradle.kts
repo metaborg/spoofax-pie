@@ -7,9 +7,9 @@ plugins {
   `kotlin-dsl` apply false
 
   id("org.metaborg.devenv.spoofax.gradle.langspec") version "0.1.32" apply false
-  id("org.metaborg.coronium.bundle") version "0.3.16" apply false
-  id("org.metaborg.coronium.feature") version "0.3.16" apply false
-  id("org.metaborg.coronium.repository") version "0.3.16" apply false
+  id("org.metaborg.coronium.bundle") version "0.3.17" apply false
+  id("org.metaborg.coronium.feature") version "0.3.17" apply false
+  id("org.metaborg.coronium.repository") version "0.3.17" apply false
   id("biz.aQute.bnd.builder") version "5.3.0" apply false
   id("org.jetbrains.intellij") version "1.4.0" apply false
 

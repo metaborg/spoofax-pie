@@ -4,6 +4,8 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 ## [Unreleased]
 ### Changed
+- `releng` (devenv-release) requirement to `0.1.32`.
+- `coronium` plugin requirement to `0.3.17`.
 - Removed SnakeYAML dependency of Tego.
 - Removed direct use of guava dependency.
 - Explicitly bundling guava dependency in Eclipse plugin due to 3rd party dependency via dagger-compiler.
