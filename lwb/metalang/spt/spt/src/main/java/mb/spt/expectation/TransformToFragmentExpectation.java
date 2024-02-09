@@ -49,6 +49,7 @@ public class TransformToFragmentExpectation implements TestExpectation {
         LanguageUnderTest languageUnderTest,
         Session languageUnderTestSession,
         LanguageUnderTestProvider languageUnderTestProvider,
+        @Nullable ResourcePath rootDirectoryHint,
         ExecContext context,
         CancelToken cancel
     ) throws InterruptedException {
@@ -67,7 +68,7 @@ public class TransformToFragmentExpectation implements TestExpectation {
         final @Nullable Region selectionRegion = TransformExpectationUtil.getSelection(testCase, selectionReference);
 
         final @Nullable CommandFeedback feedback = TransformExpectationUtil.runCommand(testCase.resource, commandDef,
-            languageUnderTest, languageUnderTestSession, messagesBuilder, file, sourceRegion, selectionRegion);
+            languageUnderTest, languageUnderTestSession, messagesBuilder, file, rootDirectoryHint, sourceRegion, selectionRegion);
         if(feedback == null) {
             return messagesBuilder.build(file);
         }
@@ -83,7 +84,7 @@ public class TransformToFragmentExpectation implements TestExpectation {
         }
         final @Nullable CommandFeedback fragmentFeedback;
         try(final MixedSession session = fragmentLanguageUnderTest.getPieComponent().newSession() /* OPTO: share a single session for one test suite run. */) {
-            fragmentFeedback = TransformExpectationUtil.runCommand(fragmentResource, commandDef, fragmentLanguageUnderTest, session, messagesBuilder, file, sourceRegion, selectionRegion);
+            fragmentFeedback = TransformExpectationUtil.runCommand(fragmentResource, commandDef, fragmentLanguageUnderTest, session, messagesBuilder, file, rootDirectoryHint, sourceRegion, selectionRegion);
         }
         if(fragmentFeedback == null) {
             return messagesBuilder.build(file);

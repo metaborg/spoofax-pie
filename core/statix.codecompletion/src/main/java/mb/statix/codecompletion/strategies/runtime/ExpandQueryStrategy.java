@@ -148,7 +148,12 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
         if(!unifier.isGround(query.scopeTerm())) {
             // Delay
             final Delay delay = Delay.ofVars(unifier.getVars(query.scopeTerm()));
-            return Seq.of(input.withoutSelected().withDelay(query, delay));
+            return Seq.of(input
+                .withoutSelected()
+                // remove query from active constraint set, as it is delayed now
+                .withUpdatedConstraints(Collections.emptySet(), Collections.singleton(query))
+                .withDelay(query, delay)
+            );
         }
         @Nullable final Scope scope = Scope.matcher().match(query.scopeTerm(), unifier).orElse(null);
         assert scope != null;
@@ -353,7 +358,12 @@ public final class ExpandQueryStrategy extends NamedStrategy2<SolverContext, ITe
         } catch(IncompleteException e) {
             // Delay
             final Delay delay = Delay.ofVars(unifier.getVars(query.scopeTerm()));
-            return Collections.singletonList(input.withoutSelected().withDelay(query, delay));
+            return Collections.singletonList(input
+                .withoutSelected()
+                // remove query from active constraint set, as it is delayed now
+                .withUpdatedConstraints(Collections.emptySet(), Collections.singleton(query))
+                .withDelay(query, delay)
+            );
         } catch(ResolutionException e) {
             throw new RuntimeException("Unexpected ResolutionException: " + e.getMessage(), e);
         } catch(InterruptedException e) {

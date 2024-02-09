@@ -10,12 +10,14 @@ import mb.pie.api.ExecException;
 import mb.pie.api.Session;
 import mb.pie.api.exec.CancelToken;
 import mb.resource.ResourceKey;
+import mb.resource.hierarchical.ResourcePath;
 import mb.spt.lut.LanguageUnderTestProvider;
 import mb.spt.model.LanguageUnderTest;
 import mb.spt.model.SelectionReference;
 import mb.spt.model.TestCase;
 import mb.spt.model.TestExpectation;
 import mb.spt.util.SptMessageRemap;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
@@ -77,6 +79,7 @@ public class CheckCountExpectation implements TestExpectation {
         LanguageUnderTest languageUnderTest,
         Session languageUnderTestSession,
         LanguageUnderTestProvider languageUnderTestProvider,
+        @Nullable ResourcePath rootDirectoryHint,
         ExecContext context,
         CancelToken cancel
     ) throws InterruptedException {

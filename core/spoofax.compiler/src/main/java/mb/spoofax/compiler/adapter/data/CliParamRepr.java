@@ -146,7 +146,7 @@ public abstract class CliParamRepr implements Serializable {
     }
 
 
-    public static class Option {
+    public static class Option implements Serializable {
         public final ListView<String> names;
         public final boolean negatable;
         public final @Nullable String label;
@@ -187,7 +187,7 @@ public abstract class CliParamRepr implements Serializable {
         }
     }
 
-    public static class Positional {
+    public static class Positional implements Serializable {
         public final int index;
         public final @Nullable String label;
         public final @Nullable String description;

@@ -10,6 +10,7 @@ import mb.pie.api.ExecContext;
 import mb.pie.api.Session;
 import mb.pie.api.exec.CancelToken;
 import mb.resource.ResourceKey;
+import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.core.language.LanguageInstance;
 import mb.spt.lut.LanguageUnderTestProvider;
 import mb.spt.model.LanguageUnderTest;
@@ -17,8 +18,10 @@ import mb.spt.model.TestCase;
 import mb.spt.api.parse.TestableParse;
 import mb.spt.model.TestExpectation;
 import mb.spt.util.SptAtermMatcher;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.terms.TermFactory;
+
 
 public class ParseToAtermExpectation implements TestExpectation {
     private final IStrategoTerm expectedMatch;
@@ -35,6 +38,7 @@ public class ParseToAtermExpectation implements TestExpectation {
         LanguageUnderTest languageUnderTest,
         Session languageUnderTestSession,
         LanguageUnderTestProvider languageUnderTestProvider,
+        @Nullable ResourcePath rootDirectoryHint,
         ExecContext context,
         CancelToken cancel
     ) throws InterruptedException {

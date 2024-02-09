@@ -1,6 +1,7 @@
 package mb.spoofax.cli;
 
 import mb.common.message.KeyedMessages;
+import mb.pie.api.ExecException;
 import mb.pie.api.MixedSession;
 import mb.pie.api.Task;
 import mb.resource.ReadableResource;
@@ -53,7 +54,7 @@ class CommandRunner<A extends Serializable> implements Callable {
         rawArgsBuilder.setArg(paramId, (Serializable)value);
     }
 
-    @Override public @Nullable Object call() throws Exception {
+    @Override public @Nullable Object call() throws SpoofaxCliException, InterruptedException, ExecException {
         final RawArgs rawArgs = rawArgsBuilder.build(context);
         final A args = commandDef.fromRawArgs(rawArgs);
         final Task<CommandFeedback> task = commandDef.createTask(args);
@@ -67,11 +68,12 @@ class CommandRunner<A extends Serializable> implements Callable {
 
         final KeyedMessages keyedMessages = feedback.getMessages();
         if(!keyedMessages.isEmpty()) {
-            System.out.println("The following messages were produced by command '" + commandDef.getDisplayName() + "':\n" + keyedMessages.toString());
+            System.out.println("The following messages were produced by command '" + commandDef.getDisplayName() + "':\n" + keyedMessages);
         }
 
+        boolean commandFailed = exception != null || keyedMessages.containsErrorOrHigher();
         for(ShowFeedback showFeedback : feedback.getShowFeedbacks()) {
-            showFeedback.caseOf()
+            commandFailed |= showFeedback.caseOf()
                 .showFile((file, region) -> {
                     try {
                         final ReadableResource resource = resourceService.getReadableResource(file);
@@ -85,7 +87,7 @@ class CommandRunner<A extends Serializable> implements Callable {
                         System.err.println("An exception occurred while showing file '" + file + "':");
                         e.printStackTrace(System.err);
                     }
-                    return Optional.empty();
+                    return false;
                 })
                 .showText((text, name, region) -> {
                     if(printFeedbackNames && !name.isEmpty()) {
@@ -93,14 +95,19 @@ class CommandRunner<A extends Serializable> implements Callable {
                         System.out.println();
                     }
                     System.out.println(text);
-                    return Optional.empty();
+                    return false;
                 })
                 .showTestResults(((testResults, region) -> {
                     StringBuilder builder = new StringBuilder();
                     testResults.addToStringBuilder(builder);
                     System.out.print(builder);
-                    return Optional.empty();
+                    return testResults.numFailed > 0;
                 }));
+        }
+
+        if(commandFailed) {
+            // Exception is processed and turned into an exit code by picocli.
+            throw new SpoofaxCliException("Command '" + commandDef.getDisplayName() + "' failed (see messages above).", exception);
         }
         return null;
     }

@@ -39,6 +39,11 @@ public class TestResults implements Serializable {
         for (TestSuiteResult suite : suites) {
             suite.addToStringBuilder(builder);
         }
+        builder
+            .append(numPassed)
+            .append(" test cases passed, ")
+            .append(numFailed)
+            .append(" test cases failed.");
     }
 
     @Override
