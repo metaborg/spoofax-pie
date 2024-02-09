@@ -56,7 +56,8 @@ public class SingleBaseLanguageTestBase extends TestBase {
         StrategoRuntimeBuilder create(
             LoggerFactory loggerFactory,
             ResourceService resourceService,
-            HierarchicalResource definitionDirectory
+            HierarchicalResource definitionDirectory,
+            ResourcePath rootPath
         );
     }
 
@@ -77,7 +78,7 @@ public class SingleBaseLanguageTestBase extends TestBase {
         this.parser = parserFunction.apply(loggerFactory, definitionDirectory);
         this.startSymbol = startSymbol;
         this.styler = stylerFunction.apply(loggerFactory, definitionDirectory);
-        this.strategoRuntimeBuilder = strategoRuntimeBuilderFactory.create(loggerFactory, resourceService, definitionDirectory);
+        this.strategoRuntimeBuilder = strategoRuntimeBuilderFactory.create(loggerFactory, resourceService, definitionDirectory, rootPath);
         this.strategoRuntime = strategoRuntimeBuilder.build();
         this.analyzer = analyzerFunction.apply(resourceService);
         this.multiFileAnalysis = multiFileAnalysis;

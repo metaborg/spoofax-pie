@@ -1,6 +1,5 @@
 package mb.statix.task;
 
-import com.google.common.collect.Lists;
 import mb.aterm.common.InvalidAstShapeException;
 import mb.aterm.common.TermToString;
 import mb.common.result.Result;
@@ -160,12 +159,12 @@ public class StatixEvaluateTest implements TaskDef<StatixEvaluateTest.Args, Comm
             .orElseThrow(() -> new InvalidAstShapeException("valid spec term", specTerm));
         final IDebugContext debug = new NullDebugContext();
 
-        final SolverResult resultConfig = Solver.solve(spec, State.of(), constraint, debug, new NullCancel(), new NullProgress(), 0);
+        final SolverResult<?> resultConfig = Solver.solve(spec, State.of(), constraint, debug, new NullCancel(), new NullProgress(), 0);
         // TODO: implement cancel
 
         final IUniDisunifier.Immutable unifier = resultConfig.state().unifier();
 
-        final List<ITerm> substEntries = Lists.newArrayList();
+        final List<ITerm> substEntries = new ArrayList<>();
         for(Map.Entry<ITermVar, ITermVar> e : resultConfig.existentials().entrySet()) {
             final ITerm v = StatixTerms.explode(e.getKey());
             final ITerm t = StatixTerms.explicateVars(unifier.findRecursive(e.getValue()));
@@ -179,9 +178,9 @@ public class StatixEvaluateTest implements TaskDef<StatixEvaluateTest.Args, Comm
         // TODO: At this point, It would be nice to call the stx--extract-messages strategy, to have the cascading error
         //       suppression. For now, I'll show a simple way to create messages
 
-        final List<ITerm> errorList = Lists.newArrayList();
-        final List<ITerm> warningList = Lists.newArrayList();
-        final List<ITerm> noteList = Lists.newArrayList();
+        final List<ITerm> errorList = new ArrayList<>();
+        final List<ITerm> warningList = new ArrayList<>();
+        final List<ITerm> noteList = new ArrayList<>();
 
         // TODO: pass statix project config
         resultConfig.messages().forEach((c, m) -> MessageUtils.addMessage(m, c, unifier, IStatixProjectConfig.NULL, errorList, warningList, noteList));

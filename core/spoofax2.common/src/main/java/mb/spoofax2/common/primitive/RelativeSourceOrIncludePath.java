@@ -1,6 +1,7 @@
 package mb.spoofax2.common.primitive;
 
 import mb.resource.ResourceKeyString;
+import mb.resource.ResourceRuntimeException;
 import mb.resource.ResourceService;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.util.SeparatorUtil;
@@ -44,7 +45,12 @@ public class RelativeSourceOrIncludePath extends ASpoofaxPrimitive {
                 break;
             }
         }
-        final String relativePath = base.relativize(path);
+        final String relativePath;
+        try {
+            relativePath = base.relativize(path);
+        } catch(ResourceRuntimeException e) {
+            return null;
+        }
         // Convert to UNIX separators (/) as meta-languages use / in module names and expect paths to also use this.
         return termFactory.makeString(SeparatorUtil.convertCurrentToUnixSeparator(relativePath));
     }

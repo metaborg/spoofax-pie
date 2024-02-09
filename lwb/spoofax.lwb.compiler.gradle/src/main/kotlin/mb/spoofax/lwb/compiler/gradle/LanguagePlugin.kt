@@ -370,8 +370,10 @@ class LanguagePluginInstance(
       }
     }
 
-    // Make compileJava depend on our task, because we generate Java code.
+    // Make `compileJava` depend on our task, because we generate Java code.
     project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(compileTask)
+    // Also make `processResources` depend on our task, because we generate resource files.
+    project.tasks.getByName(JavaPlugin.PROCESS_RESOURCES_TASK_NAME).dependsOn(compileTask)
   }
 
   private fun ResourcePath.tryAsLocal(name: String, func: (file: File) -> Unit) {

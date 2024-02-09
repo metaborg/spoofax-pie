@@ -3,9 +3,18 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
-### Changed
-- Removed SnakeYAML dependency of Tego.
 
+## [0.19.7] - 2024-02-09
+### Changed
+- `releng` (devenv-release) requirement to `0.1.35`.
+- `coronium` plugin requirement to `0.3.17`.
+- Removed SnakeYAML dependency of Tego.
+- Removed direct use of guava dependency.
+- Explicitly bundling guava dependency in Eclipse plugin due to 3rd party dependency via dagger-compiler.
+- Eclipse versions to `2022-06`.
+
+### Fixed
+- Missing Java code bundling in sdf3.ext.statix
 
 ## [0.19.6] - 2023-05-03
 ### Fixed
@@ -554,7 +563,8 @@ build-dependencies [
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.6...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.7...HEAD
+[0.19.7]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.6...release-0.19.7
 [0.19.6]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.5...release-0.19.6
 [0.19.5]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.4...release-0.19.5
 [0.19.4]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.3...release-0.19.4

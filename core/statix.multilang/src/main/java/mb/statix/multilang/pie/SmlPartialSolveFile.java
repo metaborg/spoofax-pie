@@ -119,7 +119,7 @@ public class SmlPartialSolveFile implements TaskDef<SmlPartialSolveFile.Input, R
 
                 long t0 = System.currentTimeMillis();
                 try {
-                    SolverResult result = SolverUtils.partialSolve(spec,
+                    SolverResult<?> result = SolverUtils.partialSolve(spec,
                         State.of()
                             .add(globalResult.result().state())
                             .withResource(input.resourceKey.getIdAsString()),

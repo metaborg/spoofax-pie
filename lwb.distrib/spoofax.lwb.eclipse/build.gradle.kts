@@ -6,7 +6,7 @@ plugins {
 fun compositeBuild(name: String) = "$group:$name:$version"
 
 mavenize {
-  majorVersion.set("2021-03")
+  majorVersion.set("2022-06")
 }
 
 dependencies {
@@ -139,6 +139,8 @@ val privatePackage = listOf(
   "dagger.model.*;-split-package:=merge-first",
   "dagger.*",
   "dagger.internal.*",
+  "com.google.common.*",
+  "com.google.common.util.concurrent.internal.*",
   "com.squareup.javapoet.*",
   "kotlin.*;-split-package:=merge-first",
   "javax.annotation.*;-split-package:=merge-first",

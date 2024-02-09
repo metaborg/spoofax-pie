@@ -1,6 +1,5 @@
 package mb.statix.multilang.pie;
 
-import com.google.common.collect.ImmutableMap;
 import dagger.Lazy;
 import mb.common.result.Result;
 import mb.common.result.ResultCollector;
@@ -30,6 +29,7 @@ import mb.statix.solver.persistent.Solver;
 import mb.statix.solver.persistent.SolverResult;
 import mb.statix.solver.persistent.State;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.metaborg.util.collection.CapsuleUtil;
 import org.metaborg.util.log.Level;
 import org.metaborg.util.task.NullCancel;
 import org.metaborg.util.task.NullProgress;
@@ -107,18 +107,18 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
 
     @Override public Result<AnalysisResults, MultiLangAnalysisException> exec(ExecContext context, Input input) {
         // Solve project constraints
-        HashMap<LanguageId, Result<SolverResult, MultiLangAnalysisException>> projectResults = input.languages.stream()
+        HashMap<LanguageId, Result<SolverResult<?>, MultiLangAnalysisException>> projectResults = input.languages.stream()
             .map(languageId -> pair(languageId, context.require(partialSolveProject.createTask(new SmlPartialSolveProject.Input(languageId, input.logLevel)))))
             .collect(toMap(HashMap::new));
 
         // Solve file constraints
         return analyzeFiles(context, input).map(fileResults -> {
             // Collect results of all successful runs
-            HashSet<SolverResult> initialResults = new HashSet<>();
+            HashSet<SolverResult<?>> initialResults = new HashSet<>();
             projectResults.values().forEach(r -> r.ifOk(initialResults::add));
             fileResults.values().forEach(r -> r.map(FileResult::result).ifOk(initialResults::add));
 
-            Result<SolverResult, MultiLangAnalysisException> finalResult = solveCombined(context, input, initialResults);
+            Result<SolverResult<?>, MultiLangAnalysisException> finalResult = solveCombined(context, input, initialResults);
 
             HashMap<FileKey, Result<FileResult, MultiLangAnalysisException>> transFormedFileResults = finalResult
                 .flatMap(result -> postTransform(context, input, fileResults, result))
@@ -148,7 +148,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
                 .collect(toMap(HashMap::new)));
     }
 
-    private Result<SolverResult, MultiLangAnalysisException> solveCombined(ExecContext context, Input input, HashSet<SolverResult> initialResults) {
+    private Result<SolverResult<?>, MultiLangAnalysisException> solveCombined(ExecContext context, Input input, HashSet<SolverResult<?>> initialResults) {
         return context.require(buildSpec.createTask(new SmlBuildSpec.Input(input.languages)))
             // Upcast to make typing work
             .mapErr(MultiLangAnalysisException.class::cast)
@@ -166,15 +166,15 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
                 try {
                     long t0 = System.currentTimeMillis();
                     IDebugContext debug = SolverUtils.createDebugContext(input.logLevel);
-                    SolverResult result = Solver.solve(combinedSpec, combinedState, combinedConstraint, (s, l, st) -> true, debug, new NullCancel(), new NullProgress(), 0);
+                    SolverResult<?> result = Solver.solve(combinedSpec, combinedState, combinedConstraint, (s, l, st) -> true, debug, new NullCancel(), new NullProgress(), 0);
                     long dt = System.currentTimeMillis() - t0;
                     logger.info("Project analyzed in {} ms", dt);
 
                     // Mark Delays as Errors
-                    final ImmutableMap.Builder<IConstraint, IMessage> messages = ImmutableMap.builder();
-                    messages.putAll(result.messages());
-                    result.delays().keySet().forEach(c -> messages.put(c, MessageUtil.findClosestMessage(c)));
-                    final SolverResult newResult = result.withMessages(messages.build()).withDelays(ImmutableMap.of());
+                    final io.usethesource.capsule.Map.Transient<IConstraint, IMessage> messages = CapsuleUtil.transientMap();
+                    messages.__putAll(result.messages());
+                    result.delays().keySet().forEach(c -> messages.__put(c, MessageUtil.findClosestMessage(c)));
+                    final SolverResult<?> newResult = result.withMessages(messages.freeze()).withDelays(CapsuleUtil.immutableMap());
 
                     return Result.ofOk(newResult);
                 } catch(InterruptedException e) {
@@ -186,7 +186,7 @@ public class SmlSolveProject implements TaskDef<SmlSolveProject.Input, Result<An
     private Result<HashMap<FileKey, Result<FileResult, MultiLangAnalysisException>>, MultiLangAnalysisException> postTransform(
         ExecContext context,
         Input input, Map<FileKey, Result<FileResult, MultiLangAnalysisException>> fileResults,
-        SolverResult finalResult
+        SolverResult<?> finalResult
     ) {
         return fileResults.entrySet().stream()
             .map(entry -> {

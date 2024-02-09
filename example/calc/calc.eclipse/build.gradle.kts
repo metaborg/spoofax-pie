@@ -4,7 +4,7 @@ plugins {
 }
 
 mavenize {
-  majorVersion.set("2021-03")
+  majorVersion.set("2022-06")
 }
 
 languageEclipseProject {

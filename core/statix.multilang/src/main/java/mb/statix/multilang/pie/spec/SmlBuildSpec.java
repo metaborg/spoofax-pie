@@ -1,7 +1,5 @@
 package mb.statix.multilang.pie.spec;
 
-import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Sets;
 import dagger.Lazy;
 import mb.common.result.Result;
 import mb.common.result.ResultCollector;
@@ -22,6 +20,7 @@ import mb.statix.spec.Rule;
 import mb.statix.spec.RuleSet;
 import mb.statix.spec.Spec;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.metaborg.util.collection.Sets;
 
 import javax.inject.Inject;
 import java.io.Serializable;
@@ -334,7 +333,7 @@ public class SmlBuildSpec implements TaskDef<SmlBuildSpec.Input, Result<Spec, Sp
      * @return {@code combinedSpec} when there are no overlapping rules, error otherwise.
      */
     private Result<Spec, SpecLoadException> validateNoOverlappingRules(Spec combinedSpec) {
-        final ListMultimap<String, Rule> rulesWithEquivalentPatterns = combinedSpec.rules().getAllEquivalentRules();
+        final Map<String, Set<Rule>> rulesWithEquivalentPatterns = combinedSpec.rules().getAllEquivalentRules();
         if(!rulesWithEquivalentPatterns.isEmpty()) {
             return Result.ofErr(new OverlappingRulesException(rulesWithEquivalentPatterns));
         }

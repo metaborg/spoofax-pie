@@ -100,9 +100,9 @@ public class SpecUtils {
         return Spec.builder()
             .from(acc)
             .rules(RuleSet.of(rules))
-            .addAllEdgeLabels(newSpec.edgeLabels())
-            .addAllDataLabels(newSpec.dataLabels())
-            .putAllScopeExtensions(newSpec.scopeExtensions())
+            .edgeLabels(newSpec.edgeLabels())
+            .dataLabels(newSpec.dataLabels())
+            .scopeExtensions(newSpec.scopeExtensions())
             .build();
     }
 

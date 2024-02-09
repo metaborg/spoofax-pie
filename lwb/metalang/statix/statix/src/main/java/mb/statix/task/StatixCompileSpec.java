@@ -1,6 +1,5 @@
 package mb.statix.task;
 
-import com.google.common.collect.ListMultimap;
 import mb.common.result.Result;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.stratego.StrategoTerms;

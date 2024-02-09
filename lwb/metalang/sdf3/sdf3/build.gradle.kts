@@ -45,7 +45,9 @@ languageProject {
     }
     withStrategoRuntime().run {
       addStrategyPackageIds("org.metaborg.meta.lang.template.strategies")
+      addStrategyPackageIds("org.metaborg.meta.lang.template.trans")
       addInteropRegisterersByReflection("org.metaborg.meta.lang.template.strategies.InteropRegisterer")
+      addInteropRegisterersByReflection("org.metaborg.meta.lang.template.trans.InteropRegisterer")
       baseStrategoRuntimeBuilderFactory("mb.sdf3.stratego", "BaseSdf3StrategoRuntimeBuilderFactory")
       extendStrategoRuntimeBuilderFactory("mb.sdf3.stratego", "Sdf3StrategoRuntimeBuilderFactory")
     }
@@ -59,7 +61,6 @@ spoofax2BasedLanguageProject {
       copyStatix(true)
     }
     withStrategoRuntime().run {
-      copyCtree(true)
       copyClasses(true)
     }
     project.run {

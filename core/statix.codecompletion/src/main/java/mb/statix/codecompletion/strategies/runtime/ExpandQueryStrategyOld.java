@@ -1,9 +1,5 @@
 package mb.statix.codecompletion.strategies.runtime;
 
-import com.google.common.collect.Collections2;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Range;
 import mb.nabl2.terms.IListTerm;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
@@ -13,7 +9,6 @@ import mb.statix.codecompletion.CCSolverState;
 import mb.tego.sequences.Seq;
 import mb.statix.codecompletion.SelectedConstraintCCSolverState;
 import mb.statix.codecompletion.SolverContext;
-import mb.statix.codecompletion.SolverState;
 import mb.statix.constraints.CAstId;
 import mb.statix.constraints.CEqual;
 import mb.statix.constraints.CInequal;
@@ -39,9 +34,12 @@ import mb.tego.strategies.NamedStrategy2;
 import mb.tego.strategies.runtime.TegoEngine;
 import mb.tego.utils.StreamUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.metaborg.util.collection.CapsuleUtil;
+import org.metaborg.util.collection.ImList;
 import org.metaborg.util.functions.Predicate2;
 import org.metaborg.util.iterators.Iterables2;
 import org.metaborg.util.optionals.Optionals;
+import org.metaborg.util.tuple.Tuple2;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -194,7 +192,7 @@ public final class ExpandQueryStrategyOld extends NamedStrategy2<SolverContext, 
 
         // No matches, so no results
         if(env.matches.isEmpty()) {
-            return ImmutableList.of();
+            return ImList.Immutable.of();
         }
 
         // Conditional matches
@@ -217,7 +215,7 @@ public final class ExpandQueryStrategyOld extends NamedStrategy2<SolverContext, 
         for (List<Match<Scope, ITerm, ITerm, CEqual>> optMatchGroup : optMatchGroups) {
             engine.log(instance, "  ▶ ▶ ▶ match group {}", optMatchGroup);
             // Determine the range of sizes the query result set can be
-            final Range<Integer> sizes = resultSize(query.resultTerm(), unifier, optMatchGroup.size());
+            final Tuple2<Integer, Integer> sizes = resultSize(query.resultTerm(), unifier, optMatchGroup.size());
 
             engine.log(instance, "  ▶ ▶ ▶ sizes {}", sizes);
 
@@ -332,14 +330,14 @@ public final class ExpandQueryStrategyOld extends NamedStrategy2<SolverContext, 
         Spec spec,
         CResolveQuery query,
         CCSolverState state,
-        Range<Integer> sizes,
+        Tuple2<Integer, Integer> sizes,
         Collection<Match<Scope, ITerm, ITerm, CEqual>> optMatches,
         Collection<Match<Scope, ITerm, ITerm, CEqual>> reqMatches,
         Collection<Match<Scope, ITerm, ITerm, CEqual>> reqRejects
     ) {
         // FIXME: Query should not return shadowed declarations, such as those that are further away
         // FIXME: Support queries that return multiple results
-        return IntStream.rangeClosed(sizes.lowerEndpoint(), sizes.upperEndpoint()).mapToObj(size ->
+        return IntStream.rangeClosed(sizes._1(), sizes._2()).mapToObj(size ->
         {
             final Stream<Collection<Match<Scope, ITerm, ITerm, CEqual>>> subsets = StreamUtils.subsetsOfSize(optMatches.stream(), size);
             final List<Collection<Match<Scope, ITerm, ITerm, CEqual>>> subsetsList = subsets.collect(Collectors.toList());
@@ -390,16 +388,17 @@ public final class ExpandQueryStrategyOld extends NamedStrategy2<SolverContext, 
         final Env<Scope, ITerm, ITerm, CEqual> subEnv = subEnvBuilder.build();
 
         // Build the list of constraints to add
-        final ImmutableList.Builder<IConstraint> addConstraints = ImmutableList.builder();
+        final ImList.Mutable<IConstraint> addConstraints = ImList.Mutable.of();
 
         // The explicated match path must match the query result term
         final List<ITerm> pathTerms = subEnv.matches.stream().map(m -> StatixTerms.pathToTerm(m.path, spec.dataLabels()))
-            .collect(ImmutableList.toImmutableList());
+            .collect(ImList.toImmutableList());
         addConstraints.add(new CEqual(B.newList(pathTerms), query.resultTerm(), query));
         subEnv.matches.stream().flatMap(m -> Optionals.stream(m.condition)).forEach(addConstraints::add);
         subEnv.rejects.stream().flatMap(m -> Optionals.stream(m.condition)).forEach(condition -> addConstraints.add(
-            new CInequal(ImmutableSet.of(), condition.term1(), condition.term2(),
-                condition.cause().orElse(null), condition.message().orElse(null))
+                new CInequal(CapsuleUtil.immutableSet(), condition.term1(), condition.term2())
+                    .withCause(condition.cause().orElse(null))
+                    .withMessage(condition.message().orElse(null))
             )
         );
 
@@ -407,7 +406,7 @@ public final class ExpandQueryStrategyOld extends NamedStrategy2<SolverContext, 
         final Iterable<IConstraint> remConstraints = Iterables2.singleton(query);
 
         // Update the given state with the added and removed constraints
-        return state.withUpdatedConstraints(addConstraints.build(), remConstraints)
+        return state.withUpdatedConstraints(addConstraints.freeze(), remConstraints)
             .withMeta(state.getMeta().withExpandedQueriesIncremented());
     }
 
@@ -426,8 +425,8 @@ public final class ExpandQueryStrategyOld extends NamedStrategy2<SolverContext, 
      *
      * @param constraints the builder for the list of constraints
      */
-    private static ImmutableList<IConstraint> removeTermIdConstraints(ImmutableList<IConstraint> constraints) {
-        return ImmutableList.copyOf(Collections2.filter(constraints, c -> !(c instanceof CAstId)));
+    private static ImList.Immutable<IConstraint> removeTermIdConstraints(ImList.Immutable<IConstraint> constraints) {
+        return constraints.stream().filter(c -> !(c instanceof CAstId)).collect(ImList.toImmutableList());
     }
 
     /**
@@ -453,18 +452,18 @@ public final class ExpandQueryStrategyOld extends NamedStrategy2<SolverContext, 
      * @param declarationCount the number of declarations found
      * @return the range of possible query result set sizes
      */
-    private static Range<Integer> resultSize(ITerm result, IUniDisunifier unifier, int declarationCount) {
+    private static Tuple2<Integer, Integer> resultSize(ITerm result, IUniDisunifier unifier, int declarationCount) {
         // @formatter:off
         final AtomicInteger min = new AtomicInteger(0);
-        return M.<Range<Integer>>list(ListTerms.casesFix(
+        return M.<Tuple2<Integer, Integer>>list(ListTerms.casesFix(
             (m, cons) -> {
                 // Increment the minimum
                 min.incrementAndGet();
                 return m.apply((IListTerm) unifier.findTerm(cons.getTail()));
             },
-            (m, nil) -> Range.singleton(min.get()),
-            (m, var) -> Range.closed(min.get(), declarationCount)
-        )).match(result, unifier).orElse(Range.closed(0, declarationCount));
+            (m, nil) -> Tuple2.of(min.get(), min.get()),
+            (m, var) -> Tuple2.of(min.get(), declarationCount)
+        )).match(result, unifier).orElse(Tuple2.of(0, declarationCount));
         // @formatter:on
     }
 

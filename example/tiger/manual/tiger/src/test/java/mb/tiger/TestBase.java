@@ -16,7 +16,7 @@ class TestBase extends SingleBaseLanguageTestBase {
             (loggerFactory, definitionDirectory) -> new TigerParserFactory(definitionDirectory).create(),
             "Module",
             (loggerFactory, definitionDirectory) -> new TigerStylerFactory(loggerFactory, definitionDirectory).create(),
-            (loggerFactory, resourceService, definitionDirectory) -> new TigerStrategoRuntimeBuilderFactory(loggerFactory, resourceService, definitionDirectory).create(),
+            (loggerFactory, resourceService, definitionDirectory, rootPath) -> new TigerStrategoRuntimeBuilderFactory(loggerFactory, resourceService, definitionDirectory).create(),
             resourceService -> new TigerConstraintAnalyzerFactory(resourceService).create(),
             false
         );

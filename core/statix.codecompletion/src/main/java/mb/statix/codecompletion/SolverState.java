@@ -1,8 +1,7 @@
 package mb.statix.codecompletion;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
 import io.usethesource.capsule.Map;
+import io.usethesource.capsule.Map.Immutable;
 import io.usethesource.capsule.Set;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.ITermVar;
@@ -28,6 +27,7 @@ import mb.statix.spec.Spec;
 import mb.tego.utils.TextStringBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.collection.CapsuleUtil;
+import org.metaborg.util.collection.Sets;
 import org.metaborg.util.functions.Function0;
 import org.metaborg.util.functions.Function1;
 import org.metaborg.util.functions.Function2;
@@ -36,7 +36,7 @@ import org.metaborg.util.log.LoggerUtils;
 import org.metaborg.util.tuple.Tuple2;
 
 import java.util.AbstractMap;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -65,12 +65,12 @@ public class SolverState implements ISolverState {
     public static SolverState of(
         Spec spec,
         IState.Immutable state,
-        Iterable<? extends IConstraint> constraints
+        Collection<? extends IConstraint> constraints
     ) {
         final ICompleteness.Transient completeness = Completeness.Transient.of();
         completeness.addAll(constraints, spec, state.unifier());
 
-        return new SolverState(spec, state, Map.Immutable.of(), CapsuleUtil.toSet(constraints), Map.Immutable.of(),
+        return new SolverState(spec, state, Immutable.of(), CapsuleUtil.toSet(constraints), Immutable.of(),
             null, completeness.freeze());
     }
 
@@ -83,8 +83,8 @@ public class SolverState implements ISolverState {
      * @return the resulting search state
      */
     public static SolverState fromSolverResult(
-        SolverResult result,
-        @Nullable ImmutableMap<ITermVar, ITermVar> existentials
+        SolverResult<?> result,
+        @Nullable Immutable<ITermVar, ITermVar> existentials
     ) {
         final Set.Transient<IConstraint> constraints = Set.Transient.of();
         final Map.Transient<IConstraint, Delay> delays = Map.Transient.of();
@@ -96,7 +96,7 @@ public class SolverState implements ISolverState {
             }
         });
 
-        final ImmutableMap<ITermVar, ITermVar> newExistentials =
+        final Immutable<ITermVar, ITermVar> newExistentials =
             existentials == null ? result.existentials() : existentials;
         return new SolverState(result.spec(), result.state(), CapsuleUtil.toMap(result.messages()),
             constraints.freeze(), delays.freeze(), newExistentials,
@@ -106,10 +106,10 @@ public class SolverState implements ISolverState {
     protected final Spec spec;
     protected final IState.Immutable state;
     protected final Set.Immutable<IConstraint> constraints;
-    protected final Map.Immutable<IConstraint, Delay> delays;
-    @Nullable protected final ImmutableMap<ITermVar, ITermVar> existentials;
+    protected final Immutable<IConstraint, Delay> delays;
+    @Nullable protected final Immutable<ITermVar, ITermVar> existentials;
     protected final ICompleteness.Immutable completeness;
-    protected final Map.Immutable<IConstraint, IMessage> messages;
+    protected final Immutable<IConstraint, IMessage> messages;
 
     /**
      * Initializes a new instance of the {@link SolverState} class.
@@ -125,10 +125,10 @@ public class SolverState implements ISolverState {
     protected SolverState(
         Spec spec,
         IState.Immutable state,
-        Map.Immutable<IConstraint, IMessage> messages,
+        Immutable<IConstraint, IMessage> messages,
         Set.Immutable<IConstraint> constraints,
-        Map.Immutable<IConstraint, Delay> delays,
-        @Nullable ImmutableMap<ITermVar, ITermVar> existentials,
+        Immutable<IConstraint, Delay> delays,
+        @Nullable Immutable<ITermVar, ITermVar> existentials,
         ICompleteness.Immutable completeness
     ) {
         this.spec = spec;
@@ -148,7 +148,7 @@ public class SolverState implements ISolverState {
         return this.state;
     }
 
-    @Override public Map.Immutable<IConstraint, IMessage> getMessages() {
+    @Override public Immutable<IConstraint, IMessage> getMessages() {
         return this.messages;
     }
 
@@ -156,11 +156,11 @@ public class SolverState implements ISolverState {
         return this.constraints;
     }
 
-    @Override public Map.Immutable<IConstraint, Delay> getDelays() {
+    @Override public Immutable<IConstraint, Delay> getDelays() {
         return this.delays;
     }
 
-    @Override @Nullable public ImmutableMap<ITermVar, ITermVar> getExistentials() {
+    @Override public @Nullable Immutable<ITermVar, ITermVar> getExistentials() {
         return this.existentials;
     }
 
@@ -279,7 +279,7 @@ public class SolverState implements ISolverState {
     @Override public SolverState withUpdatedConstraints(Iterable<IConstraint> add, Iterable<IConstraint> remove) {
         final ICompleteness.Transient completeness = this.completeness.melt();
         final Set.Transient<IConstraint> constraints = this.constraints.asTransient();
-        final java.util.Set<CriticalEdge> removedEdges = Sets.newHashSet();
+        final java.util.Set<CriticalEdge> removedEdges = new HashSet<>();
         add.forEach(c -> {
             if(constraints.__insert(c)) {
                 completeness.add(c, spec, state.unifier());
@@ -332,10 +332,10 @@ public class SolverState implements ISolverState {
     protected SolverState copy(
         Spec newSpec,
         IState.Immutable newState,
-        Map.Immutable<IConstraint, IMessage> newMessages,
+        Immutable<IConstraint, IMessage> newMessages,
         Set.Immutable<IConstraint> newConstraints,
-        Map.Immutable<IConstraint, Delay> newDelays,
-        @Nullable ImmutableMap<ITermVar, ITermVar> newExistentials,
+        Immutable<IConstraint, Delay> newDelays,
+        @Nullable Immutable<ITermVar, ITermVar> newExistentials,
         ICompleteness.Immutable newCompleteness
     ) {
         return new SolverState(newSpec, newState, newMessages, newConstraints, newDelays,

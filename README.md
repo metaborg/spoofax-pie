@@ -43,26 +43,52 @@ If you are looking for a more mature alternative, see [Spoofax 2](http://spoofax
 ## Development
 
 ### Git conventions
-
 The `master` branch of this repository is buildable in isolation, and is used to publish new releases.
 The `develop` branch of this repository is built via the [devenv repository](https://github.com/metaborg/devenv), against the `develop` branch of other repositories that are part of devenv, and is used for development.
 Other branches are feature branches and should be merged into `develop` at some point.
 
-### Building
 
+### Building
 The `master` branch of this repository can be built in isolation.
 However, the `develop` branch must be built via the [devenv repository](https://github.com/metaborg/devenv), due to it depending on development versions of other projects.
 
 This repository is built with Gradle, which requires a JDK of at least version 8 to be installed. Higher versions may work depending on [which version of Gradle is used](https://docs.gradle.org/current/userguide/compatibility.html).
 
-To build this repository, run `./gradlew buildAll` on Linux and macOS, or `gradlew.bat buildAll` on Windows.
+To build this repository, run:
 
-To run a local Eclipse instance using the Spoofax version in this repository, run `./gradlew :spoofax3.lwb.distrib.root:spoofax.lwb.eclipse:runEclipse` on Linux and macOS, or `gradlew.bat :spoofax3.lwb.distrib.root:spoofax.lwb.eclipse:runEclipse` on Windows.
+```shell
+./repo checkout
+./gradlew buildAll
+```
+
+> [!NOTE]
+> On Windows, instead run:
+>
+> ```shell
+> repo.bat checkout
+> gradlew.bat buildAll
+> ```
+
+> [!IMPORTANT]
+> When using MacOS, ensure you have Docker installed and running.
+
+To run a local Eclipse instance using the Spoofax version in this repository, run:
+
+```shell
+./gradlew :spoofax3.lwb.distrib.root:spoofax.lwb.eclipse:runEclipse
+```
+
+> [!NOTE]
+> On Windows, instead run:
+>
+> ```shell
+> gradlew.bat :spoofax3.lwb.distrib.root:spoofax.lwb.eclipse:runEclipse
+> ```
 
 To build the documentation, see [docs/README.md](docs/README.md).
 
-### Automated Builds
 
+### Automated Builds
 This repository is built on:
 - [GitHub actions](https://github.com/metaborg/spoofax-pie/actions/workflows/build.yml) via `.github/workflows/build.yml`. Only the `master` branch is built here.
 - Our [Jenkins buildfarm](https://buildfarm.metaborg.org/view/Devenv/job/metaborg/job/spoofax-pie/) via `Jenkinsfile` which uses our [Jenkins pipeline library](https://github.com/metaborg/jenkins.pipeline/).

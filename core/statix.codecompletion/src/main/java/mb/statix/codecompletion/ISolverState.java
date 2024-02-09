@@ -1,6 +1,5 @@
 package mb.statix.codecompletion;
 
-import com.google.common.collect.ImmutableMap;
 import io.usethesource.capsule.Map;
 import io.usethesource.capsule.Set;
 import mb.nabl2.terms.ITerm;
@@ -20,10 +19,7 @@ import mb.tego.utils.TextStringBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.util.functions.Function2;
 
-import java.util.AbstractMap;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 
 /**
  * The state of the solver.
@@ -74,7 +70,7 @@ public interface ISolverState {
      * @return a map relating an existentially quantified term variable and its fresh term variable;
      * or {@code null} when there are no existentially quantified variables (yet)
      */
-    @Nullable ImmutableMap<ITermVar, ITermVar> getExistentials();
+    Map.@Nullable Immutable<ITermVar, ITermVar> getExistentials();
 
     /**
      * The completeness of the solver state.
@@ -190,7 +186,7 @@ public interface ISolverState {
      * or the variable itself when not found
      */
     default ITerm project(ITermVar var) {
-        @Nullable final ImmutableMap<ITermVar, ITermVar> existentials = getExistentials();
+        final Map.@Nullable Immutable<ITermVar, ITermVar> existentials = getExistentials();
         @Nullable final ITermVar var2 = (existentials != null ? existentials.get(var) : null);
         final ITermVar var3 = (var2 != null ? var2 : var);
 

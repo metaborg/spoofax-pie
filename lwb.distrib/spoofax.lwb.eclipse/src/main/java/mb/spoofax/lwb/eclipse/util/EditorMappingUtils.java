@@ -1,6 +1,5 @@
 package mb.spoofax.lwb.eclipse.util;
 
-import com.google.common.collect.Iterables;
 import mb.common.util.ArrayUtil;
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorRegistry;
@@ -8,6 +7,7 @@ import org.eclipse.ui.IFileEditorMapping;
 import org.eclipse.ui.internal.registry.EditorDescriptor;
 import org.eclipse.ui.internal.registry.EditorRegistry;
 import org.eclipse.ui.internal.registry.FileEditorMapping;
+import org.metaborg.util.iterators.Iterables2;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -24,7 +24,7 @@ public class EditorMappingUtils {
     public static void set(IEditorRegistry iEditorRegistry, String editorId, Iterable<String> iterExtensions) {
         final EditorRegistry editorRegistry = (EditorRegistry)iEditorRegistry;
         final EditorDescriptor editorDescription = (EditorDescriptor)editorRegistry.findEditor(editorId);
-        final String[] extensions = Iterables.toArray(iterExtensions, String.class);
+        final String[] extensions = Iterables2.toArray(iterExtensions, String.class);
         if(extensions.length == 0) {
             return;
         }
@@ -41,7 +41,7 @@ public class EditorMappingUtils {
     public static void remove(IEditorRegistry iEditorRegistry, String editorId, Iterable<String> iterExtensions) {
         final EditorRegistry editorRegistry = (EditorRegistry)iEditorRegistry;
         final EditorDescriptor editorDescription = (EditorDescriptor)editorRegistry.findEditor(editorId);
-        final String[] extensions = Iterables.toArray(iterExtensions, String.class);
+        final String[] extensions = Iterables2.toArray(iterExtensions, String.class);
         if(extensions.length == 0) {
             return;
         }

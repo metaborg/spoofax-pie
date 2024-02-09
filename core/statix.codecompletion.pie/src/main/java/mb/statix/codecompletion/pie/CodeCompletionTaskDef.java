@@ -1,17 +1,14 @@
 package mb.statix.codecompletion.pie;
 
-import com.google.common.collect.ImmutableList;
 import io.usethesource.capsule.Set;
 import mb.common.codecompletion.CodeCompletionItem;
 import mb.common.codecompletion.CodeCompletionResult;
 import mb.common.editing.TextEdit;
-import mb.common.option.Option;
 import mb.common.region.Region;
 import mb.common.result.Result;
 import mb.common.style.StyleName;
 import mb.common.util.ListView;
 import mb.constraint.pie.ConstraintAnalyzeFile;
-import mb.jsglr.common.JsglrParseException;
 import mb.jsglr.pie.JsglrParseTaskDef;
 import mb.log.api.Logger;
 import mb.log.api.LoggerFactory;
@@ -31,7 +28,6 @@ import mb.statix.codecompletion.CCSolverState;
 import mb.statix.codecompletion.CodeCompletionProposal;
 import mb.statix.codecompletion.SolutionMeta;
 import mb.statix.codecompletion.SolverContext;
-import mb.statix.codecompletion.SolverState;
 import mb.statix.codecompletion.TermCodeCompletionItem;
 import mb.statix.codecompletion.TermCodeCompletionResult;
 import mb.statix.codecompletion.strategies.runtime.CompleteStrategy;
@@ -43,12 +39,12 @@ import mb.statix.solver.persistent.State;
 import mb.statix.spec.Spec;
 import mb.stratego.common.StrategoException;
 import mb.stratego.common.StrategoRuntime;
-import mb.stratego.common.StrategoUtil;
 import mb.stratego.pie.GetStrategoRuntimeProvider;
 import mb.tego.sequences.Seq;
 import mb.tego.strategies.Strategy;
 import mb.tego.strategies.runtime.TegoRuntime;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.metaborg.util.collection.ImList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.terms.util.TermUtils;
@@ -69,7 +65,6 @@ import java.util.stream.Collectors;
 
 import static mb.statix.codecompletion.pie.CodeCompletionUtils.findPlaceholderAt;
 import static mb.statix.codecompletion.pie.CodeCompletionUtils.getRegion;
-import static mb.statix.codecompletion.pie.CodeCompletionUtils.iterableToListView;
 import static mb.statix.codecompletion.pie.CodeCompletionUtils.makeQualifiedName;
 import static mb.statix.codecompletion.pie.CodeCompletionUtils.normalizeText;
 import static mb.statix.codecompletion.pie.CodeCompletionUtils.tryGetRegion;
@@ -524,11 +519,11 @@ public class CodeCompletionTaskDef implements TaskDef<CodeCompletionTaskDef.Inpu
             String qualifiedName = makeQualifiedName(specName, rootPredicateName);
             IConstraint rootConstraint = new CUser(qualifiedName, Collections.singletonList(ast), null);
             return CCSolverState.of(
-                    spec,                               // the specification
-                    State.of(),                         // the new empty Statix state
-                    ImmutableList.of(rootConstraint),   // list of constraints
-                    Set.Immutable.of(),                 // empty set of expanded rules
-                    new SolutionMeta()                  // empty solution Meta
+                    spec,                                // the specification
+                    State.of(),                          // the new empty Statix state
+                    ImList.Immutable.of(rootConstraint), // list of constraints
+                    Set.Immutable.of(),                  // empty set of expanded rules
+                    new SolutionMeta()                   // empty solution Meta
                 )
                 .withExistentials(placeholderVarMap.getVars())
                 .withPrecomputedCriticalEdges();
