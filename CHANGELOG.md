@@ -3,6 +3,15 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 
 ## [Unreleased]
+### Changed
+- Command Line Interface now returns a non-zero error code when the underlying command fails.
+- Command Line Interface executing tests now prints the number of passed and failed test cases.
+- SPT `transform` expectations support commands using the enclosing file and/or enclosing project.
+
+### Fixed
+- Termination issues in Code Completion
+- Serialization issues of meta-language configuration objects
+- Region arguments to SPT `transform` expectations now correspond to the imploder attachments.
 
 ## [0.19.7] - 2024-02-09
 ### Changed
