@@ -1,8 +1,9 @@
 # Changelog
 All notable changes to this project are documented in this file, based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-
 ## [Unreleased]
+
+## [0.19.8] - 2024-03-06
 ### Changed
 - Command Line Interface now returns a non-zero error code when the underlying command fails.
 - Command Line Interface executing tests now prints the number of passed and failed test cases.
@@ -12,6 +13,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 - Termination issues in Code Completion
 - Serialization issues of meta-language configuration objects
 - Region arguments to SPT `transform` expectations now correspond to the imploder attachments.
+- Missing Java code bundling in SPT
 
 ## [0.19.7] - 2024-02-09
 ### Changed
@@ -572,7 +574,8 @@ build-dependencies [
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.7...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.8...HEAD
+[0.19.8]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.7...release-0.19.8
 [0.19.7]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.6...release-0.19.7
 [0.19.6]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.5...release-0.19.6
 [0.19.5]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.4...release-0.19.5
