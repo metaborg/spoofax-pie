@@ -11,6 +11,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
+import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.plugins.ApplicationPlugin
 import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.plugins.JavaApplication
@@ -155,6 +156,9 @@ open class CliPlugin : Plugin<Project> {
           attributes["Main-Class"] = project.the<JavaApplication>().mainClassName
         }
       }
+
+      // Allow duplicates, as Spoofax has several duplicate things on the classpath.
+      duplicatesStrategy = DuplicatesStrategy.INCLUDE
     }
     project.tasks.named(BasePlugin.ASSEMBLE_TASK_NAME).configure { dependsOn(executableJarTask) }
 
