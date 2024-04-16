@@ -78,6 +78,7 @@ val generateVersionPropertiesTask = tasks.register("generateVersionProperties") 
 }
 tasks.compileJava.configure { dependsOn(generateVersionPropertiesTask) }
 tasks.compileTestJava.configure { dependsOn(generateVersionPropertiesTask) }
+tasks.processResources.configure { dependsOn(generateVersionPropertiesTask) }
 
 // Custom properties class that does not write the current date, fixing incrementality.
 class NonShittyProperties : Properties() {
