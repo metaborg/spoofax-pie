@@ -1,9 +1,9 @@
 plugins {
-  id("org.metaborg.gradle.config.root-project") version "0.4.7"
+  id("org.metaborg.gradle.config.root-project") version "0.5.6"
   id("org.metaborg.gitonium") version "0.1.5"
 
   // Set versions for plugins to use, only applying them in subprojects (apply false here).
-  id("org.metaborg.gradle.config.kotlin-gradle-plugin") version "0.4.7" apply false
+  id("org.metaborg.gradle.config.kotlin-gradle-plugin") version "0.5.6" apply false
   id("org.metaborg.coronium.bundle") version "0.3.17" apply false
   id("biz.aQute.bnd.builder") version "5.3.0" apply false
   id("org.jetbrains.intellij") version "1.4.0" apply false
