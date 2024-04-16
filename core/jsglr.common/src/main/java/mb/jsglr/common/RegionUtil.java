@@ -1,7 +1,7 @@
 package mb.jsglr.common;
 
 import mb.common.region.Region;
-import org.spoofax.jsglr.client.imploder.IToken;
+import mb.jsglr.shared.IToken;
 
 public class RegionUtil {
     public static Region fromToken(IToken token) {

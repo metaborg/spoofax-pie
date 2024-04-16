@@ -9,7 +9,7 @@ import mb.nabl2.terms.Terms;
 import mb.nabl2.terms.stratego.TermOrigin;
 import mb.nabl2.terms.stratego.TermPlaceholder;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spoofax.jsglr.client.imploder.ImploderAttachment;
+import mb.jsglr.shared.ImploderAttachment;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -6,8 +6,8 @@ import mb.common.token.TokenImpl;
 import mb.common.token.TokenType;
 import mb.common.token.TokenTypes;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.jsglr.client.imploder.IToken;
-import org.spoofax.jsglr.client.imploder.ITokens;
+import mb.jsglr.shared.IToken;
+import mb.jsglr.shared.ITokens;
 
 import java.util.ArrayList;
 

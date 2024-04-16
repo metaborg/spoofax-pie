@@ -8,7 +8,7 @@ import mb.log.api.LoggerFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.jsglr.client.imploder.ImploderAttachment;
+import mb.jsglr.shared.ImploderAttachment;
 import org.spoofax.terms.attachments.ParentAttachment;
 
 import java.util.ArrayList;

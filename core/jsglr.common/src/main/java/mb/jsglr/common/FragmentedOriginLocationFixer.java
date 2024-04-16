@@ -8,11 +8,12 @@ import mb.common.text.Text;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.jsglr.client.imploder.IToken;
-import org.spoofax.jsglr.client.imploder.ITokens;
-import org.spoofax.jsglr.client.imploder.ImploderAttachment;
-import org.spoofax.jsglr.client.imploder.ListImploderAttachment;
-import org.spoofax.jsglr.client.imploder.Token;
+import mb.jsglr.shared.IToken;
+import mb.jsglr.shared.ITokens;
+import mb.jsglr.shared.ImploderAttachment;
+import mb.jsglr.shared.ListImploderAttachment;
+import mb.jsglr.shared.Token;
+import mb.jsglr.shared.FilteredTokenIterator;
 import org.spoofax.jsglr.client.imploder.Tokenizer;
 import org.spoofax.terms.util.TermUtils;
 import org.spoofax.terms.visitor.AStrategoTermVisitor;
@@ -211,7 +212,7 @@ public class FragmentedOriginLocationFixer {
         }
 
         @Override public Iterator<IToken> iterator() {
-            return new Tokenizer.FilteredTokenIterator(allTokens());
+            return new FilteredTokenIterator(allTokens());
         }
 
         @Override public Iterable<IToken> allTokens() {

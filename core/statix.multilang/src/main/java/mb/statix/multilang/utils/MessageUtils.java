@@ -24,7 +24,7 @@ import org.metaborg.util.stream.StreamUtil;
 import org.spoofax.interpreter.terms.ISimpleTerm;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-import org.spoofax.jsglr.client.imploder.ImploderAttachment;
+import mb.jsglr.shared.ImploderAttachment;
 import org.spoofax.terms.attachments.ITermAttachment;
 import org.spoofax.terms.attachments.ParentAttachment;
 

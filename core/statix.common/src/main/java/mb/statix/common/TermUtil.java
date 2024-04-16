@@ -4,8 +4,8 @@ import mb.common.region.Region;
 import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.stratego.TermOrigin;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spoofax.jsglr.client.imploder.IToken;
-import org.spoofax.jsglr.client.imploder.ImploderAttachment;
+import mb.jsglr.shared.IToken;
+import mb.jsglr.shared.ImploderAttachment;
 
 public final class TermUtil {
     private TermUtil() { /* Prevent instantiation. */ }

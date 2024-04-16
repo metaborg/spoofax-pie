@@ -9,6 +9,7 @@ dependencies {
   api("org.metaborg:common")
 
   api("org.metaborg:resource")
+  api("org.metaborg.devenv:jsglr.shared")
   api("org.metaborg.devenv:org.spoofax.jsglr")
   api("org.metaborg.devenv:org.spoofax.terms")
 
