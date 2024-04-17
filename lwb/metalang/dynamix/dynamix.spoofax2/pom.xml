@@ -12,9 +12,9 @@
   <parent>
     <groupId>org.metaborg</groupId>
     <artifactId>parent.language</artifactId>
-    <version>2.5.16</version>
+    <version>2.5.20</version>
   </parent>
-  
+
   <repositories>
     <repository>
       <id>metaborg-release-repo</id>
@@ -37,7 +37,7 @@
       </snapshots>
     </repository>
   </repositories>
-  
+
   <pluginRepositories>
     <pluginRepository>
       <id>metaborg-release-repo</id>
