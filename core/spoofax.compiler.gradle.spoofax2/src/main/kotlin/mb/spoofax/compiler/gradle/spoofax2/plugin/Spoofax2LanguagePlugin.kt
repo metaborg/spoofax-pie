@@ -151,7 +151,6 @@ open class Spoofax2LanguagePlugin : Plugin<Project> {
       from(project.zipTree("$unpackSpoofaxLanguageDir/target/metaborg/stratego.jar"))
       exclude("META-INF")
     }
-
     val copyMainTask = project.tasks.register<Copy>("copyMainResources") {
       dependsOn(unpackSpoofaxLanguageTask)
       into(project.the<SourceSetContainer>()["main"].java.outputDir)
@@ -160,16 +159,9 @@ open class Spoofax2LanguagePlugin : Plugin<Project> {
         into(".") { with(strategoCopySpec) }
       }
     }
-    project.pluginManager.withPlugin("java") {
-      project.tasks.named(JavaPlugin.COMPILE_JAVA_TASK_NAME) { dependsOn(copyMainTask) }
-      project.tasks.named(JavaPlugin.COMPILE_TEST_JAVA_TASK_NAME) { dependsOn(copyMainTask) }
-      project.tasks.named(JavaPlugin.COMPILE_TEST_JAVA_TASK_NAME) { dependsOn(copyMainTask) }
-    }
-    project.pluginManager.withPlugin("kotlin-kapt") {
-      project.tasks.named("kaptGenerateStubsTestKotlin") { dependsOn(copyMainTask) }
-      project.tasks.named("kaptTestKotlin") { dependsOn(copyMainTask) }
-    }
-
+    project.tasks.getByName(JavaPlugin.CLASSES_TASK_NAME).dependsOn(copyMainTask)
+    project.tasks.getByName(JavaPlugin.JAR_TASK_NAME).dependsOn(copyMainTask)
+    project.tasks.getByName(LifecycleBasePlugin.ASSEMBLE_TASK_NAME).dependsOn(copyMainTask)
     val copyTestTask = project.tasks.register<Copy>("copyTestResources") {
       dependsOn(unpackSpoofaxLanguageTask)
       into(project.the<SourceSetContainer>()["test"].java.outputDir)
@@ -178,9 +170,6 @@ open class Spoofax2LanguagePlugin : Plugin<Project> {
         into(".") { with(strategoCopySpec) }
       }
     }
-
-    project.pluginManager.withPlugin("java") {
-      project.tasks.named(JavaPlugin.COMPILE_TEST_JAVA_TASK_NAME) { dependsOn(copyTestTask) }
-    }
+    project.tasks.getByName(JavaPlugin.TEST_CLASSES_TASK_NAME).dependsOn(copyTestTask)
   }
 }
