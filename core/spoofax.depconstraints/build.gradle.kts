@@ -86,6 +86,7 @@ dependencies {
     api("org.metaborg.devenv:org.spoofax.interpreter.core:$spoofax2DevenvVersion")
     api("org.metaborg.devenv:org.spoofax.jsglr:$spoofax2DevenvVersion")
     api("org.metaborg.devenv:org.spoofax.jsglr2:$spoofax2DevenvVersion")
+    api("org.metaborg.devenv:jsglr.shared:$spoofax2DevenvVersion")
     api("org.metaborg.devenv:sdf2table:$spoofax2DevenvVersion")
     api("org.metaborg.devenv:sdf2parenthesize:$spoofax2DevenvVersion")
     api("org.metaborg.devenv:org.metaborg.parsetable:$spoofax2DevenvVersion")
