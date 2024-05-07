@@ -1,7 +1,17 @@
 # Changelog
-All notable changes to this project are documented in this file, based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+All notable changes to this project are documented in this file, based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
+
+
+## [0.20.0] - 2024-05-07
+### Breaking Changes
+- Gradle 6 is no longer supported. The minimum supported Gradle version is 7.6.4.
+
+### Changes
+- Extract common classes from JSGLR and JSGLR2 into `jsglr.shared`.
+- Update the baseline.
+
 
 ## [0.19.8] - 2024-03-06
 ### Changed
@@ -15,6 +25,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 - Region arguments to SPT `transform` expectations now correspond to the imploder attachments.
 - Missing Java code bundling in SPT
 
+
 ## [0.19.7] - 2024-02-09
 ### Changed
 - `releng` (devenv-release) requirement to `0.1.35`.
@@ -26,6 +37,7 @@ All notable changes to this project are documented in this file, based on [Keep 
 
 ### Fixed
 - Missing Java code bundling in sdf3.ext.statix
+
 
 ## [0.19.6] - 2023-05-03
 ### Fixed
@@ -574,7 +586,9 @@ build-dependencies [
 - `editor-services` section from language CFG file. `reference-resolution` and `hover` subsections are promoted to sections.
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.8...HEAD
+
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.20.0...HEAD
+[0.20.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.8...release-0.20.0
 [0.19.8]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.7...release-0.19.8
 [0.19.7]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.6...release-0.19.7
 [0.19.6]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.5...release-0.19.6
