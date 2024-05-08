@@ -5,6 +5,13 @@ plugins {
 
 // Auto-accept build scan TOS
 extensions.findByName("buildScan")?.withGroovyBuilder {
-  setProperty("termsOfServiceUrl", "https://gradle.com/terms-of-service")
-  setProperty("termsOfServiceAgree", "yes")
+  try {
+    // New Developcity plugin
+    setProperty("termsOfUseUrl", "https://gradle.com/help/legal-terms-of-use")
+    setProperty("termsOfUseAgree", "yes")
+  } catch (ex: groovy.lang.MissingPropertyException) {
+    // Deprecated Gradle Enterprise plugin
+    setProperty("termsOfServiceUrl", "https://gradle.com/terms-of-service")
+    setProperty("termsOfServiceAgree", "yes")
+  }
 }
