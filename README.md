@@ -102,7 +102,9 @@ First, ensure that you depend on only released versions of other projects. That 
 Most dependencies are managed in the `core/spoofax.depconstraints/build.gradle.kts` file.
 Spoofax 2 versions are managed in `gradle.properties`:
 - `systemProp.spoofax2Version` sets the version of Spoofax 2 that Spoofax 3 uses, for Spoofax 2 artifacts. At the moment of writing, this is only the `org.metaborg:strategoxt-min-jar` artifact.
-- `systemProp.spoofax2DevenvVersion` sets the version of Spoofax 2 that Spoofax 3 uses, which is built as part of the `master` branch of [spoofax-deploy](https://github.com/metaborg/spoofax-deploy/tree/spoofax3/gradle).
+- `systemProp.spoofax2DevenvVersion` sets the version of Spoofax 2 that Spoofax 3 uses, which is built as part of the `master` branch of [spoofax-deploy](https://github.com/metaborg/spoofax-deploy/).
+
+**N.B.** If you're updating the `spoofax2Version` because you want to use some changes in a new Spoofax 2 release, you most likely will need to update to `spoofax2DevenvVersion` too, and in order to do so need to follow the above like and follow the instructions for releasing a new devenv version for the Spoofax 2 artifacts.
 
 Then, update `CHANGELOG.md` with your changes, create a new release entry, and update the release links at the bottom of the file.
 Commit your changes and merge them from the `develop` branch into the `master` branch.
