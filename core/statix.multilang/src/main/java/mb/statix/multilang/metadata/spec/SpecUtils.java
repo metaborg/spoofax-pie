@@ -8,6 +8,7 @@ import mb.nabl2.terms.ITerm;
 import mb.nabl2.terms.matching.TermMatch.IMatcher;
 import mb.statix.multilang.metadata.SpecFragmentId;
 import mb.statix.multilang.metadata.SpecManager;
+import mb.statix.spec.BaseRuleSet;
 import mb.statix.spec.Rule;
 import mb.statix.spec.RuleSet;
 import mb.statix.spec.Spec;
@@ -99,7 +100,7 @@ public class SpecUtils {
 
         return Spec.builder()
             .from(acc)
-            .rules(RuleSet.of(rules))
+            .rules(BaseRuleSet.of(rules))
             .edgeLabels(newSpec.edgeLabels())
             .dataLabels(newSpec.dataLabels())
             .scopeExtensions(newSpec.scopeExtensions())
