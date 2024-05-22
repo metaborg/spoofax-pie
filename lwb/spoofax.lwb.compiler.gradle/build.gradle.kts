@@ -1,6 +1,5 @@
 plugins {
   id("org.metaborg.gradle.config.kotlin-gradle-plugin")
-  id("org.metaborg.gitonium")
   kotlin("jvm")
   kotlin("kapt")
   id("org.gradle.kotlin.kotlin-dsl") // Same as `kotlin-dsl`, but without version, which is already set in root project.
