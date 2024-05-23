@@ -18,6 +18,7 @@ import mb.statix.spoofax.STX_is_analysis;
 import mb.statix.spoofax.STX_labelord_lt;
 import mb.statix.spoofax.STX_labelre_to_states;
 import mb.statix.spoofax.STX_ords_to_relation;
+import mb.statix.spoofax.STX_register_library;
 import mb.statix.spoofax.STX_solve_constraint;
 import mb.statix.spoofax.STX_solve_constraint_concurrent;
 import mb.statix.spoofax.STX_solve_multi;
@@ -50,6 +51,7 @@ public class StatixPrimitiveLibrary extends AbstractStrategoOperatorRegistry {
         add(new STX_solve_multi_project());
         add(new STX_test_log_level());
         add(new STX_incremental_diagnostics());
+        add(new STX_register_library());
 
         add(new STX_labelre_to_states(""));
         add(new STX_ords_to_relation());
