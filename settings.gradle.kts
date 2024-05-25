@@ -6,24 +6,19 @@ pluginManagement {
   }
 }
 
-
-// Only include composite builds when this is the root project (it has no parent). Otherwise, the parent project
-// (devenv) will include these composite builds, as IntelliJ does not support nested composite builds.
-if(gradle.parent == null) {
-  // We split the build up into one main composite build in the 'core' directory, because it builds Gradle plugins,
-  // which we want to test. Gradle plugins are not directly available in a multi-project build, therefore a separate
-  // composite build is required. Included builds listed below can use the Gradle plugins built in 'core'.
-  includeBuildWithName("core", "spoofax3.core.root")
-  // The 'lwb' (language workbench) composite build includes the meta-languages which depend on Gradle plugins from the
-  // 'core' composite build. Additionally, 'lwb' also contains Gradle plugins for building languages.
-  includeBuildWithName("lwb", "spoofax3.lwb.root")
-  // The 'lwb.distrib' (language workbench distribution) composite build distributes the language workbench, which
-  // depends on Gradle plugins from the 'core' and 'lwb' composite builds.
-  includeBuildWithName("lwb.distrib", "spoofax3.lwb.distrib.root")
-  // The 'example' composite build has example languages, some based on Gradle plugins from 'core', and some based on
-  // Gradle plugins from 'lwb'. It also uses 'metalib'.
-  includeBuildWithName("example", "spoofax3.example.root")
-}
+// We split the build up into one main composite build in the 'core' directory, because it builds Gradle plugins,
+// which we want to test. Gradle plugins are not directly available in a multi-project build, therefore a separate
+// composite build is required. Included builds listed below can use the Gradle plugins built in 'core'.
+includeBuildWithName("core", "spoofax3.core.root")
+// The 'lwb' (language workbench) composite build includes the meta-languages which depend on Gradle plugins from the
+// 'core' composite build. Additionally, 'lwb' also contains Gradle plugins for building languages.
+includeBuildWithName("lwb", "spoofax3.lwb.root")
+// The 'lwb.distrib' (language workbench distribution) composite build distributes the language workbench, which
+// depends on Gradle plugins from the 'core' and 'lwb' composite builds.
+includeBuildWithName("lwb.distrib", "spoofax3.lwb.distrib.root")
+// The 'example' composite build has example languages, some based on Gradle plugins from 'core', and some based on
+// Gradle plugins from 'lwb'. It also uses 'metalib'.
+includeBuildWithName("example", "spoofax3.example.root")
 
 fun includeBuildWithName(dir: String, name: String) {
   includeBuild(dir) {
