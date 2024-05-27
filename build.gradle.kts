@@ -6,7 +6,7 @@ plugins {
 // Auto-accept build scan TOS
 extensions.findByName("buildScan")?.withGroovyBuilder {
   try {
-    // New Developcity plugin
+    // New Develocity plugin
     setProperty("termsOfUseUrl", "https://gradle.com/help/legal-terms-of-use")
     setProperty("termsOfUseAgree", "yes")
   } catch (ex: groovy.lang.MissingPropertyException) {
