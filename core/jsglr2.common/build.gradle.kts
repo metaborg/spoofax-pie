@@ -1,17 +1,17 @@
 plugins {
-  id("org.metaborg.gradle.config.java-library")
+    id("org.metaborg.gradle.config.java-library")
 }
 
 dependencies {
-  api(platform(project(":spoofax.depconstraints")))
-  annotationProcessor(platform(project(":spoofax.depconstraints")))
+    api(platform(project(":spoofax.depconstraints")))
+    annotationProcessor(platform(project(":spoofax.depconstraints")))
 
-  api("org.metaborg:common")
-  api(project(":jsglr.common"))
-  api("org.metaborg.devenv:org.spoofax.jsglr2")
+    api("org.metaborg:common")
+    api(project(":jsglr.common"))
+    api("org.metaborg.devenv:org.spoofax.jsglr2")
 
-  compileOnly("org.checkerframework:checker-qual-android")
-  compileOnly("org.derive4j:derive4j-annotation")
+    compileOnly("org.checkerframework:checker-qual-android")
+    compileOnly("org.derive4j:derive4j-annotation")
 
-  annotationProcessor("org.derive4j:derive4j")
+    annotationProcessor("org.derive4j:derive4j")
 }

@@ -7,47 +7,47 @@ import mb.spoofax.core.language.command.CommandExecutionType
 import mb.spoofax.common.*
 
 plugins {
-  id("org.metaborg.gradle.config.java-library")
-  id("org.metaborg.spoofax.compiler.gradle.spoofax2.language")
-  id("org.metaborg.spoofax.compiler.gradle.adapter")
+    id("org.metaborg.gradle.config.java-library")
+    id("org.metaborg.spoofax.compiler.gradle.spoofax2.language")
+    id("org.metaborg.spoofax.compiler.gradle.adapter")
 }
 
 fun compositeBuild(name: String) = "$group:$name:$version"
 dependencies {
-  api(compositeBuild("spt.api"))
+    api(compositeBuild("spt.api"))
 
-  // Required because @Nullable has runtime retention (which includes classfile retention), and the Java compiler requires access to it.
-  compileOnly("com.google.code.findbugs:jsr305")
+    // Required because @Nullable has runtime retention (which includes classfile retention), and the Java compiler requires access to it.
+    compileOnly("com.google.code.findbugs:jsr305")
 }
 
 languageProject {
-  shared {
-    name("SPT")
-    defaultClassPrefix("Spt")
-    defaultPackageId("mb.spt")
-  }
-  compilerInput {
-    withParser().run {
-      startSymbol("TestSuite")
+    shared {
+        name("SPT")
+        defaultClassPrefix("Spt")
+        defaultPackageId("mb.spt")
     }
-    withStyler()
-    withStrategoRuntime().run {
-      addStrategyPackageIds("org.metaborg.meta.lang.spt.trans")
-      addStrategyPackageIds("org.metaborg.meta.lang.spt.strategies")
-      addInteropRegisterersByReflection("org.metaborg.meta.lang.spt.trans.InteropRegisterer")
-      addInteropRegisterersByReflection("org.metaborg.meta.lang.spt.strategies.InteropRegisterer")
+    compilerInput {
+        withParser().run {
+            startSymbol("TestSuite")
+        }
+        withStyler()
+        withStrategoRuntime().run {
+            addStrategyPackageIds("org.metaborg.meta.lang.spt.trans")
+            addStrategyPackageIds("org.metaborg.meta.lang.spt.strategies")
+            addInteropRegisterersByReflection("org.metaborg.meta.lang.spt.trans.InteropRegisterer")
+            addInteropRegisterersByReflection("org.metaborg.meta.lang.spt.strategies.InteropRegisterer")
+        }
     }
-  }
 }
 spoofax2BasedLanguageProject {
-  compilerInput {
-    withParser()
-    withStyler()
-    withStrategoRuntime().run {
-      copyClasses(true)
+    compilerInput {
+        withParser()
+        withStyler()
+        withStrategoRuntime().run {
+            copyClasses(true)
+        }
+        project.languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:org.metaborg.meta.lang.spt:${ext["spoofax2DevenvVersion"]}"))
     }
-    project.languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:org.metaborg.meta.lang.spt:${ext["spoofax2DevenvVersion"]}"))
-  }
 }
 
 val packageId = "mb.spt"
@@ -55,101 +55,114 @@ val taskPackageId = "$packageId.task"
 val commandPackageId = "$packageId.command"
 
 languageAdapterProject {
-  compilerInput {
-    withParser()
-    withStyler()
-    withStrategoRuntime()
-    project.configureCompilerInput()
-  }
+    compilerInput {
+        withParser()
+        withStyler()
+        withStrategoRuntime()
+        project.configureCompilerInput()
+    }
 }
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
-  compositionGroup("mb.spoofax.lwb")
+    compositionGroup("mb.spoofax.lwb")
 
-  // Symbols
-  addLineCommentSymbols("//")
-  addBlockCommentSymbols(BlockCommentSymbols("/*", "*/"))
-  addBracketSymbols(BracketSymbols('[', ']'))
-  addBracketSymbols(BracketSymbols('{', '}'))
-  addBracketSymbols(BracketSymbols('(', ')'))
+    // Symbols
+    addLineCommentSymbols("//")
+    addBlockCommentSymbols(BlockCommentSymbols("/*", "*/"))
+    addBracketSymbols(BracketSymbols('[', ']'))
+    addBracketSymbols(BracketSymbols('{', '}'))
+    addBracketSymbols(BracketSymbols('(', ')'))
 
-  // Extend resources component and add modules
-  baseResourcesComponent(packageId, "BaseSptResourcesComponent")
-  extendResourcesComponent(packageId, "SptResourcesComponent")
-  addAdditionalResourcesModules("$packageId.resource", "SptTestCaseResourceModule")
+    // Extend resources component and add modules
+    baseResourcesComponent(packageId, "BaseSptResourcesComponent")
+    extendResourcesComponent(packageId, "SptResourcesComponent")
+    addAdditionalResourcesModules("$packageId.resource", "SptTestCaseResourceModule")
 
-  // Extend component and add modules
-  baseComponent(packageId, "BaseSptComponent")
-  extendComponent(packageId, "SptComponent")
-  addAdditionalModules("$packageId.fromterm", "ExpectationFromTermsModule")
+    // Extend component and add modules
+    baseComponent(packageId, "BaseSptComponent")
+    extendComponent(packageId, "SptComponent")
+    addAdditionalModules("$packageId.fromterm", "ExpectationFromTermsModule")
 
-  // Extend participant
-  baseParticipant(packageId, "BaseSptParticipant")
-  extendParticipant(packageId, "SptParticipant")
+    // Extend participant
+    baseParticipant(packageId, "BaseSptParticipant")
+    extendParticipant(packageId, "SptParticipant")
 
-  // Wrap Check and rename base tasks
-  isMultiFile(false)
-  baseCheckTaskDef(taskPackageId, "BaseSptCheck")
-  baseCheckMultiTaskDef(taskPackageId, "BaseSptCheckMulti")
-  extendCheckTaskDef(taskPackageId, "SptCheck")
+    // Wrap Check and rename base tasks
+    isMultiFile(false)
+    baseCheckTaskDef(taskPackageId, "BaseSptCheck")
+    baseCheckMultiTaskDef(taskPackageId, "BaseSptCheckMulti")
+    extendCheckTaskDef(taskPackageId, "SptCheck")
 
-  // Internal task definitions
-  val check = TypeInfo.of(taskPackageId, "SptCheck")
-  addTaskDefs(check)
-  val runTestSuite = TypeInfo.of(taskPackageId, "SptRunTestSuite")
-  val runTestSuites = TypeInfo.of(taskPackageId, "SptRunTestSuites")
-  addTaskDefs(runTestSuite, runTestSuites)
+    // Internal task definitions
+    val check = TypeInfo.of(taskPackageId, "SptCheck")
+    addTaskDefs(check)
+    val runTestSuite = TypeInfo.of(taskPackageId, "SptRunTestSuite")
+    val runTestSuites = TypeInfo.of(taskPackageId, "SptRunTestSuites")
+    addTaskDefs(runTestSuite, runTestSuites)
 
-  // Add test running tasks
-  val showTestSuiteResults = TypeInfo.of(taskPackageId, "SptShowTestSuiteResults")
-  val showTestResults = TypeInfo.of(taskPackageId, "SptShowTestSuitesResults")
-  addTaskDefs(showTestSuiteResults, showTestResults)
+    // Add test running tasks
+    val showTestSuiteResults = TypeInfo.of(taskPackageId, "SptShowTestSuiteResults")
+    val showTestResults = TypeInfo.of(taskPackageId, "SptShowTestSuitesResults")
+    addTaskDefs(showTestSuiteResults, showTestResults)
 
-  // Add test running commands
-  val showTestSuiteCommand = CommandDefRepr.builder()
-    .type(commandPackageId, showTestSuiteResults.id() + "Command")
-    .taskDefType(showTestSuiteResults)
-    .argType(TypeInfo.of(taskPackageId, "SptShowTestSuiteResults.Args"))
-    .displayName("Run SPT tests")
-    .description("Run the SPT tests in this file")
-    .addSupportedExecutionTypes(CommandExecutionType.ManualOnce)
-    .addAllParams(listOf(
-      ParamRepr.of(
-        "rootDir", TypeInfo.of("mb.resource.hierarchical", "ResourcePath"),
-        true, ArgProviderRepr.enclosingContext(EnclosingCommandContextType.Project)
-      ),
-      ParamRepr.of("file", TypeInfo.of("mb.resource", "ResourceKey"), true, ArgProviderRepr.context(CommandContextType.File))
-    ))
-    .build()
-  val showTestSuitesCommand = CommandDefRepr.builder()
-    .type(commandPackageId, showTestResults.id() + "Command")
-    .taskDefType(showTestResults)
-    .argType(TypeInfo.of(taskPackageId, "SptShowTestSuitesResults.Args"))
-    .displayName("Run SPT tests")
-    .description("Run the SPT tests in this directory")
-    .addSupportedExecutionTypes(CommandExecutionType.ManualOnce)
-    .addAllParams(listOf(
-      ParamRepr.of(
-        "rootDir",
-        TypeInfo.of("mb.resource.hierarchical", "ResourcePath"),
-        true,
-        ArgProviderRepr.enclosingContext(EnclosingCommandContextType.Project)
-      ),
-      ParamRepr.of("directory",
-        TypeInfo.of("mb.resource.hierarchical", "ResourcePath"),
-        true,
-        ArgProviderRepr.context(CommandContextType.Directory))
-    ))
-    .build()
-  addCommandDefs(showTestSuiteCommand, showTestSuitesCommand)
+    // Add test running commands
+    val showTestSuiteCommand = CommandDefRepr.builder()
+        .type(commandPackageId, showTestSuiteResults.id() + "Command")
+        .taskDefType(showTestSuiteResults)
+        .argType(TypeInfo.of(taskPackageId, "SptShowTestSuiteResults.Args"))
+        .displayName("Run SPT tests")
+        .description("Run the SPT tests in this file")
+        .addSupportedExecutionTypes(CommandExecutionType.ManualOnce)
+        .addAllParams(
+            listOf(
+                ParamRepr.of(
+                    "rootDir",
+                    TypeInfo.of("mb.resource.hierarchical", "ResourcePath"),
+                    true,
+                    ArgProviderRepr.enclosingContext(EnclosingCommandContextType.Project)
+                ),
+                ParamRepr.of(
+                    "file",
+                    TypeInfo.of("mb.resource", "ResourceKey"),
+                    true,
+                    ArgProviderRepr.context(CommandContextType.File)
+                )
+            )
+        )
+        .build()
+    val showTestSuitesCommand = CommandDefRepr.builder()
+        .type(commandPackageId, showTestResults.id() + "Command")
+        .taskDefType(showTestResults)
+        .argType(TypeInfo.of(taskPackageId, "SptShowTestSuitesResults.Args"))
+        .displayName("Run SPT tests")
+        .description("Run the SPT tests in this directory")
+        .addSupportedExecutionTypes(CommandExecutionType.ManualOnce)
+        .addAllParams(
+            listOf(
+                ParamRepr.of(
+                    "rootDir",
+                    TypeInfo.of("mb.resource.hierarchical", "ResourcePath"),
+                    true,
+                    ArgProviderRepr.enclosingContext(EnclosingCommandContextType.Project)
+                ),
+                ParamRepr.of(
+                    "directory",
+                    TypeInfo.of("mb.resource.hierarchical", "ResourcePath"),
+                    true,
+                    ArgProviderRepr.context(CommandContextType.Directory)
+                )
+            )
+        )
+        .build()
+    addCommandDefs(showTestSuiteCommand, showTestSuitesCommand)
 
-  // Menu bindings
-  val mainAndEditorMenu = listOf(
-    CommandActionRepr.builder().manualOnce(showTestSuiteCommand).fileRequired().enclosingProjectRequired().buildItem()
-  )
-  addAllMainMenuItems(mainAndEditorMenu)
-  addAllEditorContextMenuItems(mainAndEditorMenu)
-  addResourceContextMenuItems(
-    CommandActionRepr.builder().manualOnce(showTestSuiteCommand).fileRequired().enclosingProjectRequired().buildItem(),
-    CommandActionRepr.builder().manualOnce(showTestSuitesCommand).directoryRequired().enclosingProjectRequired().buildItem()
-  )
+    // Menu bindings
+    val mainAndEditorMenu = listOf(
+        CommandActionRepr.builder().manualOnce(showTestSuiteCommand).fileRequired().enclosingProjectRequired().buildItem()
+    )
+    addAllMainMenuItems(mainAndEditorMenu)
+    addAllEditorContextMenuItems(mainAndEditorMenu)
+    addResourceContextMenuItems(
+        CommandActionRepr.builder().manualOnce(showTestSuiteCommand).fileRequired().enclosingProjectRequired().buildItem(),
+        CommandActionRepr.builder().manualOnce(showTestSuitesCommand).directoryRequired().enclosingProjectRequired().buildItem()
+    )
 }

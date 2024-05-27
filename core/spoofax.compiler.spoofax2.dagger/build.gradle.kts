@@ -2,17 +2,17 @@
 // main project, as there are staging conflicts with the other (org.immutables/derive4j) annotation processors.
 
 plugins {
-  id("org.metaborg.gradle.config.java-library")
+    id("org.metaborg.gradle.config.java-library")
 }
 
 dependencies {
-  api(platform(project(":spoofax.depconstraints")))
-  annotationProcessor(platform(project(":spoofax.depconstraints")))
+    api(platform(project(":spoofax.depconstraints")))
+    annotationProcessor(platform(project(":spoofax.depconstraints")))
 
-  api(project(":spoofax.compiler.spoofax2"))
-  api("com.google.dagger:dagger")
+    api(project(":spoofax.compiler.spoofax2"))
+    api("com.google.dagger:dagger")
 
-  compileOnly("org.immutables:value-annotations") // Dagger accesses these annotations, which have class retention.
+    compileOnly("org.immutables:value-annotations") // Dagger accesses these annotations, which have class retention.
 
-  annotationProcessor("com.google.dagger:dagger-compiler")
+    annotationProcessor("com.google.dagger:dagger-compiler")
 }

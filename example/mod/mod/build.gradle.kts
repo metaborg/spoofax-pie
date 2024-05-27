@@ -1,53 +1,49 @@
-import mb.spoofax.compiler.gradle.plugin.*
-import mb.spoofax.compiler.gradle.spoofax2.plugin.*
-import mb.spoofax.compiler.language.*
-import mb.spoofax.compiler.spoofax2.language.*
-import mb.spoofax.compiler.util.*
+import mb.spoofax.compiler.util.GradleDependency
 
 plugins {
-  id("org.metaborg.gradle.config.java-library")
-  id("org.metaborg.gradle.config.junit-testing")
-  id("org.metaborg.spoofax.compiler.gradle.spoofax2.language")
+    id("org.metaborg.gradle.config.java-library")
+    id("org.metaborg.gradle.config.junit-testing")
+    id("org.metaborg.spoofax.compiler.gradle.spoofax2.language")
 }
 
 fun compositeBuild(name: String) = "$group:$name:$version"
 
 dependencies {
-  testImplementation(compositeBuild("spoofax.test"))
-  testCompileOnly("org.checkerframework:checker-qual-android")
+    testImplementation(compositeBuild("spoofax.test"))
+    testCompileOnly("org.checkerframework:checker-qual-android")
 }
 
 languageProject {
-  shared {
-    name("Mod")
-    defaultPackageId("mb.mod")
-  }
-  compilerInput {
-    withParser().run {
-      startSymbol("Start")
+    shared {
+        name("Mod")
+        defaultPackageId("mb.mod")
     }
-    withStyler()
-    withConstraintAnalyzer().run {
-      enableNaBL2(false)
-      enableStatix(true)
-      multiFile(true)
+    compilerInput {
+        withParser().run {
+            startSymbol("Start")
+        }
+        withStyler()
+        withConstraintAnalyzer().run {
+            enableNaBL2(false)
+            enableStatix(true)
+            multiFile(true)
+        }
+        withStrategoRuntime()
     }
-    withStrategoRuntime()
-  }
 }
 
 spoofax2BasedLanguageProject {
-  compilerInput {
-    withParser()
-    withStyler()
-    withConstraintAnalyzer().run {
-      copyStatix(true)
+    compilerInput {
+        withParser()
+        withStyler()
+        withConstraintAnalyzer().run {
+            copyStatix(true)
+        }
+        withStrategoRuntime().run {
+            copyCtree(true)
+            copyClasses(false)
+        }
+        project
+            .languageSpecificationDependency(GradleDependency.project(":mod.spoofaxcore"))
     }
-    withStrategoRuntime().run {
-      copyCtree(true)
-      copyClasses(false)
-    }
-    project
-      .languageSpecificationDependency(GradleDependency.project(":mod.spoofaxcore"))
-  }
 }

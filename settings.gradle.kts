@@ -1,9 +1,9 @@
 rootProject.name = "spoofax3.root"
 
 pluginManagement {
-  repositories {
-    maven("https://artifacts.metaborg.org/content/groups/public/")
-  }
+    repositories {
+        maven("https://artifacts.metaborg.org/content/groups/public/")
+    }
 }
 
 // We split the build up into one main composite build in the 'core' directory, because it builds Gradle plugins,
@@ -21,13 +21,13 @@ includeBuildWithName("lwb.distrib", "spoofax3.lwb.distrib.root")
 includeBuildWithName("example", "spoofax3.example.root")
 
 fun includeBuildWithName(dir: String, name: String) {
-  includeBuild(dir) {
-    try {
-      ConfigurableIncludedBuild::class.java
-        .getDeclaredMethod("setName", String::class.java)
-        .invoke(this, name)
-    } catch(e: NoSuchMethodException) {
-      // Running Gradle < 6, no need to set the name, ignore.
+    includeBuild(dir) {
+        try {
+            ConfigurableIncludedBuild::class.java
+                .getDeclaredMethod("setName", String::class.java)
+                .invoke(this, name)
+        } catch (e: NoSuchMethodException) {
+            // Running Gradle < 6, no need to set the name, ignore.
+        }
     }
-  }
 }

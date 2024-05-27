@@ -1,12 +1,12 @@
 plugins {
-  id("org.metaborg.gradle.config.java-library")
-  id("org.metaborg.spoofax.compiler.gradle.eclipse")
+    id("org.metaborg.gradle.config.java-library")
+    id("org.metaborg.spoofax.compiler.gradle.eclipse")
 }
 
 languageEclipseProject {
-  adapterProject.set(project(":sdf3_ext_dynamix"))
+    adapterProject.set(project(":sdf3_ext_dynamix"))
 }
 
 mavenize {
-  majorVersion.set("2022-06")
+    majorVersion.set("2022-06")
 }

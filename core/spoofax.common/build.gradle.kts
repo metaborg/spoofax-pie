@@ -1,9 +1,9 @@
 plugins {
-  id("org.metaborg.gradle.config.java-library")
+    id("org.metaborg.gradle.config.java-library")
 }
 
 dependencies {
-  api(platform(project(":spoofax.depconstraints")))
+    api(platform(project(":spoofax.depconstraints")))
 
-  compileOnly("org.checkerframework:checker-qual-android")
+    compileOnly("org.checkerframework:checker-qual-android")
 }

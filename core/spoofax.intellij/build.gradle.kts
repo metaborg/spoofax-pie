@@ -1,26 +1,26 @@
 plugins {
-  id("org.metaborg.gradle.config.java-library")
-  id("org.jetbrains.intellij")
+    id("org.metaborg.gradle.config.java-library")
+    id("org.jetbrains.intellij")
 }
 
 dependencies {
-  implementation(platform(project(":spoofax.depconstraints")))
-  annotationProcessor(platform(project(":spoofax.depconstraints")))
+    implementation(platform(project(":spoofax.depconstraints")))
+    annotationProcessor(platform(project(":spoofax.depconstraints")))
 
-  api(project(":spoofax.core"))
+    api(project(":spoofax.core"))
 
-  api("org.metaborg:log.api")
-  implementation("org.metaborg:pie.runtime")
-  implementation("com.google.dagger:dagger")
+    api("org.metaborg:log.api")
+    implementation("org.metaborg:pie.runtime")
+    implementation("com.google.dagger:dagger")
 
-  compileOnly("org.checkerframework:checker-qual-android")
+    compileOnly("org.checkerframework:checker-qual-android")
 
-  annotationProcessor("com.google.dagger:dagger-compiler")
+    annotationProcessor("com.google.dagger:dagger-compiler")
 }
 
 intellij {
-  version.set("2019.3.2")
-  instrumentCode.set(false)
+    version.set("2019.3.2")
+    instrumentCode.set(false)
 }
 
 // Skip non-incremental, slow, and unnecessary buildSearchableOptions task from IntelliJ.

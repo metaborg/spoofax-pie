@@ -1,21 +1,21 @@
 plugins {
-  id("org.metaborg.gradle.config.java-library")
+    id("org.metaborg.gradle.config.java-library")
 }
 
 dependencies {
-  api(platform(project(":spoofax.depconstraints")))
-  annotationProcessor(platform(project(":spoofax.depconstraints")))
+    api(platform(project(":spoofax.depconstraints")))
+    annotationProcessor(platform(project(":spoofax.depconstraints")))
 
-  api("com.google.dagger:dagger")
-  implementation(project(":spoofax.core"))
-  api("info.picocli:picocli")
+    api("com.google.dagger:dagger")
+    implementation(project(":spoofax.core"))
+    api("info.picocli:picocli")
 
-  compileOnly("org.checkerframework:checker-qual-android")
+    compileOnly("org.checkerframework:checker-qual-android")
 
-  annotationProcessor("com.google.dagger:dagger-compiler")
-  annotationProcessor("info.picocli:picocli-codegen")
+    annotationProcessor("com.google.dagger:dagger-compiler")
+    annotationProcessor("info.picocli:picocli-codegen")
 }
 
 tasks.compileJava {
-  options.compilerArgs.add("-Aproject=${project.group}/${project.name}")
+    options.compilerArgs.add("-Aproject=${project.group}/${project.name}")
 }
