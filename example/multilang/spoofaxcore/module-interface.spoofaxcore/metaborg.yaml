@@ -1,6 +1,7 @@
 ---
 id: org.metaborg:module-interface:0.1.0-SNAPSHOT
 name: module-interface
+metaborgVersion: 2.6.0-SNAPSHOT
 language:
   sdf:
     enabled: false

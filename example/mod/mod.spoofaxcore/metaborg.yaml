@@ -1,6 +1,7 @@
 ---
 id: org.metaborg:mod.spoofaxcore:0.1.0-SNAPSHOT
 name: mod
+metaborgVersion: 2.6.0-SNAPSHOT
 dependencies: # Dependencies specified in build.gradle.kts.
 pardonedLanguages:
 - EditorService

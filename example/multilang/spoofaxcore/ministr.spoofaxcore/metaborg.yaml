@@ -1,6 +1,7 @@
 ---
 id: org.metaborg:lang-ministr:0.1.0-SNAPSHOT
 name: ministr
+metaborgVersion: 2.6.0-SNAPSHOT
 dependencies: # Dependencies overridden in build.gradle.kts.
   compile:
     - org.metaborg:org.metaborg.meta.lang.esv:${metaborgVersion}
