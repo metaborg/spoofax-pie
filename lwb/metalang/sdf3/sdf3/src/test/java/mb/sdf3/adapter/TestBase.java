@@ -1,5 +1,6 @@
 package mb.sdf3.adapter;
 
+import mb.common.option.Option;
 import mb.common.result.Result;
 import mb.common.util.ListView;
 import mb.log.dagger.DaggerLoggerComponent;
@@ -69,7 +70,8 @@ class TestBase extends SingleLanguageTestBase<Sdf3ResourcesComponent, Sdf3Compon
 
 
     Sdf3SpecConfig specConfig(ResourcePath rootDirectory, ResourcePath mainSourceDirectory, ResourcePath mainFile) {
-        return new Sdf3SpecConfig(rootDirectory, mainSourceDirectory, mainFile, ListView.of(), ListView.of(), Sdf3SpecConfig.createDefaultParseTableConfiguration());
+        return new Sdf3SpecConfig(rootDirectory, mainSourceDirectory, mainFile, ListView.of(), ListView.of(), Sdf3SpecConfig.createDefaultParseTableConfiguration(),
+            Option.ofNone());
     }
 
     Sdf3SpecConfig specConfig(ResourcePath rootDirectory) {

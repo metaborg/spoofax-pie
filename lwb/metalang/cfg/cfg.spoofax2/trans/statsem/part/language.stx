@@ -34,6 +34,8 @@ rules // Sdf3 section and options
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
   sdf3FilesOptionOk(s, Sdf3ParseTableGeneratorSection(options)) :-
     sdf3ParseTableGeneratorOptionsOk(s, options).
+  sdf3FilesOptionOk(s, Sdf3PlaceholderSection(e)) :-
+    sdf3PlaceholderOptionsOk(s, e).
   sdf3FilesOptionOk(s, Sdf3StrategoConcreteSyntaxExtensionMainFile(e)) :-
     typeOfExpr(s, e) == PATH() | error $[Expected path]@e.
 
@@ -52,6 +54,14 @@ rules // Sdf3 section and options
     typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
   sdf3ParseTableGeneratorOptionOk(s, Sdf3ParseTableGeneratorCheckPriorities(e)) :-
     typeOfExpr(s, e) == BOOL() | error $[Expected boolean]@e.
+
+  sdf3PlaceholderOptionOk : scope * Sdf3PlaceholderOption
+  sdf3PlaceholderOptionsOk maps sdf3PlaceholderOptionOk(*, list(*))
+
+  sdf3PlaceholderOptionOk(s, Sdf3PlaceholderPrefix(e)) :-
+    typeOfExpr(s, e) == STRING() | error $[Expected string]@e.
+  sdf3PlaceholderOptionOk(s, Sdf3PlaceholderPostfix(e)) :-
+    typeOfExpr(s, e) == STRING() | error $[Expected string]@e.
 
   sdf3PrebuiltOptionOk : scope * Sdf3PrebuiltOption
   sdf3PrebuiltOptionsOk maps sdf3PrebuiltOptionOk(*, list(*))

@@ -153,7 +153,8 @@ public class SpoofaxSdf3Configure implements TaskDef<ResourcePath, Result<Option
             mainFile.getPath(),
             ListView.copyOf(allIncludeDirectories),
             ListView.of(sourceFileOrigins),
-            parseTableConfiguration
+            parseTableConfiguration,
+            files.sdf3Placeholders()
         );
         final SpoofaxSdf3Config.BuildParseTable mainBuildParseTable = new SpoofaxSdf3Config.BuildParseTable(
             mainSdf3SpecConfig,
@@ -170,7 +171,8 @@ public class SpoofaxSdf3Configure implements TaskDef<ResourcePath, Result<Option
                 extensionMainFile, // Replace main file
                 mainSdf3SpecConfig.includeDirectories,
                 mainSdf3SpecConfig.sourceFileOrigins,
-                mainSdf3SpecConfig.parseTableConfig
+                mainSdf3SpecConfig.parseTableConfig,
+                files.sdf3Placeholders()
             );
             strategoConcreteSyntaxExtensions.add(sdf3SpecConfig);
         }

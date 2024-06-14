@@ -1,11 +1,13 @@
 package mb.sdf3.task.spec;
 
+import mb.common.option.Option;
 import mb.common.util.ListView;
 import mb.pie.api.STask;
 import mb.resource.hierarchical.ResourcePath;
 import mb.resource.util.SeparatorUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.sdf2table.parsetable.ParseTableConfiguration;
+import org.metaborg.util.tuple.Tuple2;
 
 import java.io.Serializable;
 
@@ -16,6 +18,7 @@ public class Sdf3SpecConfig implements Serializable {
     public final ListView<ResourcePath> includeDirectories;
     public final ListView<STask<?>> sourceFileOrigins;
     public final ParseTableConfiguration parseTableConfig;
+    public final Option<Tuple2<String, String>> placeholders;
 
     public Sdf3SpecConfig(
         ResourcePath rootDirectory,
@@ -23,14 +26,15 @@ public class Sdf3SpecConfig implements Serializable {
         ResourcePath mainFile,
         ListView<ResourcePath> includeDirectories,
         ListView<STask<?>> sourceFileOrigins,
-        ParseTableConfiguration parseTableConfig
-    ) {
+        ParseTableConfiguration parseTableConfig,
+        Option<Tuple2<String, String>> placeholders) {
         this.rootDirectory = rootDirectory;
         this.mainSourceDirectory = mainSourceDirectory;
         this.mainFile = mainFile;
         this.includeDirectories = includeDirectories;
         this.sourceFileOrigins = sourceFileOrigins;
         this.parseTableConfig = parseTableConfig;
+        this.placeholders = placeholders;
     }
 
     public String getMainModuleName() {
@@ -41,7 +45,8 @@ public class Sdf3SpecConfig implements Serializable {
         final ResourcePath mainSourceDirectory = rootDirectory.appendRelativePath("src");
         final ResourcePath mainFile = mainSourceDirectory.appendRelativePath("start.sdf3");
         final ParseTableConfiguration parseTableConfig = createDefaultParseTableConfiguration();
-        return new Sdf3SpecConfig(rootDirectory, mainSourceDirectory, mainFile, includeDirectories, sourceFileOrigins, parseTableConfig);
+        return new Sdf3SpecConfig(rootDirectory, mainSourceDirectory, mainFile, includeDirectories, sourceFileOrigins, parseTableConfig,
+            Option.ofNone());
     }
 
     public static Sdf3SpecConfig createDefault(ResourcePath rootDirectory, ListView<ResourcePath> includeDirectories) {
@@ -65,7 +70,8 @@ public class Sdf3SpecConfig implements Serializable {
         if(!mainFile.equals(that.mainFile)) return false;
         if(!includeDirectories.equals(that.includeDirectories)) return false;
         if(!sourceFileOrigins.equals(that.sourceFileOrigins)) return false;
-        return parseTableConfig.equals(that.parseTableConfig);
+        if(!parseTableConfig.equals(that.parseTableConfig)) return false;
+        return placeholders.equals(that.placeholders);
     }
 
     @Override public int hashCode() {
@@ -75,6 +81,7 @@ public class Sdf3SpecConfig implements Serializable {
         result = 31 * result + includeDirectories.hashCode();
         result = 31 * result + sourceFileOrigins.hashCode();
         result = 31 * result + parseTableConfig.hashCode();
+        result = 31 * result + placeholders.hashCode();
         return result;
     }
 
@@ -86,6 +93,7 @@ public class Sdf3SpecConfig implements Serializable {
             ", includeDirectories=" + includeDirectories +
             ", sourceFileOrigins=" + sourceFileOrigins +
             ", parseTableConfig=" + parseTableConfig +
+            ", placeholders=" + placeholders +
             '}';
     }
 }

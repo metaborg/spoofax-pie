@@ -44,6 +44,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.parsetable.IParseTable;
 import org.metaborg.sdf2table.parsetable.ParseTable;
 import org.metaborg.util.cmd.Arguments;
+import org.metaborg.util.tuple.Tuple2;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
@@ -214,12 +215,13 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
         // runtime, and injection explication (if enabled) module.
         final ResourcePath generatedSourcesDirectory = sourceFiles.generatedSourcesDirectory();
         final String strategyAffix = sourceFiles.languageStrategyAffix();
+        final Option<Tuple2<String, String>> placeholders = sourceFiles.sdf3Placeholders();
         try {
             spoofaxSdf3GenerationUtil.performSdf3GenerationIfEnabled(context, rootDirectory, new SpoofaxSdf3GenerationUtil.Callbacks<SpoofaxStrategoConfigureException>() {
                 @Override
                 public void generateFromAst(ExecContext context, STask<Result<IStrategoTerm, ?>> astSupplier) throws SpoofaxStrategoConfigureException, InterruptedException {
                     try {
-                        sdf3ToPrettyPrinter(context, strategyAffix, generatedSourcesDirectory, astSupplier);
+                        sdf3ToPrettyPrinter(context, strategyAffix, placeholders, generatedSourcesDirectory, astSupplier);
                     } catch(RuntimeException | InterruptedException e) {
                         throw e; // Do not wrap runtime and interrupted exceptions, rethrow them.
                     } catch(Exception e) {
@@ -227,7 +229,7 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
                     }
                     // HACK: for now disabled completion runtime generation, as it is not used in Spoofax 3 (yet?)
 //                    try {
-//                        sdf3ToCompletionRuntime(context, generatedSourcesDirectory, astSupplier);
+//                        sdf3ToCompletionRuntime(context, placeholders, generatedSourcesDirectory, astSupplier);
 //                    } catch(RuntimeException | InterruptedException e) {
 //                        throw e; // Do not wrap runtime and interrupted exceptions, rethrow them.
 //                    } catch(Exception e) {
@@ -344,10 +346,11 @@ public class SpoofaxStrategoConfigure implements TaskDef<ResourcePath, Result<Op
     private void sdf3ToPrettyPrinter(
         ExecContext context,
         String strategyAffix,
+        Option<Tuple2<String, String>> placeholders,
         ResourcePath generatesSourcesDirectory,
         STask<Result<IStrategoTerm, ?>> astSupplier
     ) throws Exception {
-        final STask<Result<IStrategoTerm, ?>> supplier = sdf3ToPrettyPrinter.createSupplier(new Sdf3ToPrettyPrinter.Input(astSupplier, strategyAffix));
+        final STask<Result<IStrategoTerm, ?>> supplier = sdf3ToPrettyPrinter.createSupplier(new Sdf3ToPrettyPrinter.Input(astSupplier, strategyAffix, placeholders));
         spoofaxStrategoGenerationUtil.writePrettyPrintedFile(context, generatesSourcesDirectory, supplier);
     }
 

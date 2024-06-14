@@ -234,7 +234,31 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
 
     val showDesugarCommand = showCommand(showDesugar, "desugared")
     val showPermissiveCommand = showCommand(showPermissive, "permissive grammar")
-    val showNormalFormCommand = showCommand(showNormalForm, "normal-form")
+    val showNormalFormCommand = CommandDefRepr.builder()
+        .type(commandPackageId, showNormalForm.id() + "Command")
+        .taskDefType(showNormalForm)
+        .argType(showNormalForm.appendToId(".Args"))
+        .displayName("Show normal-form")
+        .description("Shows the normal-form of the file")
+        .addSupportedExecutionTypes(CommandExecutionType.ManualOnce, CommandExecutionType.ManualContinuous)
+        .addAllParams(
+            listOf(
+                ParamRepr.of(
+                    "root",
+                    TypeInfo.of("mb.resource.hierarchical", "ResourcePath"),
+                    true,
+                    ArgProviderRepr.enclosingContext(EnclosingCommandContextType.Project)
+                ),
+                ParamRepr.of(
+                    "file",
+                    TypeInfo.of("mb.resource", "ResourceKey"),
+                    true,
+                    ArgProviderRepr.context(CommandContextType.File)
+                ),
+                ParamRepr.of("concrete", TypeInfo.ofBoolean(), true)
+            )
+        )
+        .build()
     val showSignatureCommand = showAnalyzedCommand(showSignature, "Stratego signatures")
     val showDynsemSignatureCommand = showAnalyzedCommand(showDynsemSignature, "DynSem signatures")
 

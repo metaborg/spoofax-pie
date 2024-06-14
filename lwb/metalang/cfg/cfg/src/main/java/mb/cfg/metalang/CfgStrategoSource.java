@@ -1,15 +1,16 @@
 package mb.cfg.metalang;
 
 import mb.cfg.CompileMetaLanguageSourcesShared;
+import mb.common.option.Option;
 import mb.common.util.ADT;
 import mb.resource.hierarchical.ResourcePath;
 import mb.spoofax.compiler.adapter.ExportsCompiler;
-import mb.spoofax.compiler.language.StrategoRuntimeLanguageCompiler;
 import mb.spoofax.compiler.util.BuilderBase;
 import mb.spoofax.compiler.util.Conversion;
 import mb.spoofax.compiler.util.Shared;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
+import org.metaborg.util.tuple.Tuple2;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -77,6 +78,20 @@ public abstract class CfgStrategoSource implements Serializable {
 
         @Value.Default default boolean enableSdf3StatixExplicationGen() {
             return false;
+        }
+
+        @Value.Default default @Nullable String sdf3PlaceholderPrefix() { return null; }
+
+        @Value.Default default @Nullable String sdf3PlaceholderPostfix() { return null; }
+
+        @Value.Derived default Option<Tuple2<String, String>> sdf3Placeholders() {
+            final @Nullable String prefix = sdf3PlaceholderPrefix();
+            final @Nullable String suffix = sdf3PlaceholderPostfix();
+            if(prefix != null || suffix != null) {
+                return Option.ofSome(Tuple2.of(prefix != null ? prefix : "", suffix != null ? suffix : ""));
+            } else {
+                return Option.ofNone();
+            }
         }
 
         @Value.Default default String languageStrategyAffix() {

@@ -181,6 +181,10 @@ public class CfgAstToObject {
                         ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorCheckOverlap", filesSourceBuilder::checkOverlapInParseTable);
                         ptgParts.forOneSubtermAsBool("Sdf3ParseTableGeneratorCheckPriorities", filesSourceBuilder::checkPrioritiesInParseTable);
                     });
+                    filesParts.getAllSubTermsInListAsParts("Sdf3PlaceholderSection").ifSome(ptgParts -> {
+                        ptgParts.forOneSubtermAsString("Sdf3PlaceholderPrefix", filesSourceBuilder::sdf3PlaceholderPrefix);
+                        ptgParts.forOneSubtermAsString("Sdf3PlaceholderPostfix", filesSourceBuilder::sdf3PlaceholderPostfix);
+                    });
                     filesParts.forAllSubtermsAsExistingFiles("Sdf3StrategoConcreteSyntaxExtensionMainFile", mainSourceDirectory, "SDF3 Stratego concrete syntax extension main file", filesSourceBuilder::addStrategoConcreteSyntaxExtensionMainFiles);
                     builder.source(CfgSdf3Source.files(filesSourceBuilder.build()));
                 } else if(TermUtils.isAppl(source, "Sdf3Prebuilt", 1)) {
@@ -280,6 +284,10 @@ public class CfgAstToObject {
                     final CfgStrategoSource.Files.Builder filesSourceBuilder = compileMetaLanguageSourcesInputBuilder.withStrategoFilesSource();
                     final ResourcePath mainSourceDirectory = filesParts.getOneSubtermAsExistingDirectory("StrategoFilesMainSourceDirectory", rootDirectory, "Stratego main source directory")
                         .unwrapOrElse(() -> CfgStrategoSource.Files.Builder.getDefaultMainSourceDirectory(languageShared));
+                    compileMetaLanguageSourcesInputBuilder.sdf3.compileMetaLanguageSourcesShared(languageShared).build().source().getFiles().ifPresent(f -> {
+                        filesSourceBuilder.sdf3PlaceholderPrefix(f.sdf3PlaceholderPrefix());
+                        filesSourceBuilder.sdf3PlaceholderPostfix(f.sdf3PlaceholderPostfix());
+                    });
                     filesSourceBuilder.mainSourceDirectory(mainSourceDirectory);
                     filesParts.forOneSubtermAsExistingFile("StrategoFilesMainFile", mainSourceDirectory, "Stratego main file", filesSourceBuilder::mainFile);
                     filesParts.forAllSubtermsAsExistingDirectories("StrategoFilesIncludeDirectory", rootDirectory, "Stratego include directory", filesSourceBuilder::addIncludeDirectories);

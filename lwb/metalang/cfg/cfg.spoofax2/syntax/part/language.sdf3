@@ -8,7 +8,7 @@ imports
 context-free sorts
 
   Sdf3Option Sdf3Source Sdf3FilesOption Sdf3PrebuiltOption
-  Sdf3ParseTableGeneratorOption
+  Sdf3ParseTableGeneratorOption Sdf3PlaceholderOption
 
 context-free syntax
 
@@ -27,6 +27,9 @@ context-free syntax
   Sdf3FilesOption.Sdf3ParseTableGeneratorSection = <parse-table-generator {
   <{Sdf3ParseTableGeneratorOption "\n"}*>
 }>
+  Sdf3FilesOption.Sdf3PlaceholderSection = <placeholders {
+  <{Sdf3PlaceholderOption "\n"}*>
+}>
   Sdf3FilesOption.Sdf3StrategoConcreteSyntaxExtensionMainFile = <stratego-concrete-syntax-extension-main-file = <Expr>>
 
   Sdf3ParseTableGeneratorOption.Sdf3ParseTableGeneratorDynamic = <dynamic = <Expr>>
@@ -35,6 +38,9 @@ context-free syntax
   Sdf3ParseTableGeneratorOption.Sdf3ParseTableGeneratorSolveDeepConflicts = <solve-deep-conflicts = <Expr>>
   Sdf3ParseTableGeneratorOption.Sdf3ParseTableGeneratorCheckOverlap = <check-overlap = <Expr>>
   Sdf3ParseTableGeneratorOption.Sdf3ParseTableGeneratorCheckPriorities = <check-priorities = <Expr>>
+
+  Sdf3PlaceholderOption.Sdf3PlaceholderPrefix = <prefix = <Expr>>
+  Sdf3PlaceholderOption.Sdf3PlaceholderPostfix = <postfix = <Expr>>
 
   Sdf3Source.Sdf3Prebuilt = <prebuilt {
   <{Sdf3PrebuiltOption "\n"}*>

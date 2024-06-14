@@ -4,6 +4,7 @@ import mb.common.result.Result;
 import mb.pie.api.Interactivity;
 import mb.pie.api.Supplier;
 import mb.sdf3.Sdf3Scope;
+import mb.sdf3.task.util.Sdf3StrategoTransformTaskDef;
 import mb.stratego.pie.AstStrategoTransformTaskDef;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -11,7 +12,7 @@ import javax.inject.Inject;
 import java.util.Set;
 
 @Sdf3Scope
-public class Sdf3ToNormalForm extends AstStrategoTransformTaskDef {
+public class Sdf3ToNormalForm extends Sdf3StrategoTransformTaskDef {
     @Inject public Sdf3ToNormalForm(Sdf3GetStrategoRuntimeProvider getStrategoRuntimeProvider) {
         super(getStrategoRuntimeProvider, "module-to-normal-form");
     }
@@ -20,7 +21,7 @@ public class Sdf3ToNormalForm extends AstStrategoTransformTaskDef {
         return getClass().getName();
     }
 
-    @Override public boolean shouldExecWhenAffected(Supplier<? extends Result<IStrategoTerm, ?>> input, Set<?> tags) {
+    @Override public boolean shouldExecWhenAffected(Set<?> tags) {
         return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 }

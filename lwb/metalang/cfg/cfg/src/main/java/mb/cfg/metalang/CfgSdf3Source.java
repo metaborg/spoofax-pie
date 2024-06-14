@@ -1,10 +1,12 @@
 package mb.cfg.metalang;
 
 import mb.cfg.CompileMetaLanguageSourcesShared;
+import mb.common.option.Option;
 import mb.common.util.ADT;
 import mb.resource.hierarchical.ResourcePath;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
+import org.metaborg.util.tuple.Tuple2;
 
 import java.io.Serializable;
 import java.util.List;
@@ -67,6 +69,20 @@ public abstract class CfgSdf3Source implements Serializable {
 
         @Value.Default default boolean checkPrioritiesInParseTable() {
             return false;
+        }
+
+        @Value.Default default @Nullable String sdf3PlaceholderPrefix() { return null; }
+
+        @Value.Default default @Nullable String sdf3PlaceholderPostfix() { return null; }
+
+        @Value.Derived default Option<Tuple2<String, String>> sdf3Placeholders() {
+            final @Nullable String prefix = sdf3PlaceholderPrefix();
+            final @Nullable String suffix = sdf3PlaceholderPostfix();
+            if(prefix != null || suffix != null) {
+                return Option.ofSome(Tuple2.of(prefix != null ? prefix : "", suffix != null ? suffix : ""));
+            } else {
+                return Option.ofNone();
+            }
         }
 
 

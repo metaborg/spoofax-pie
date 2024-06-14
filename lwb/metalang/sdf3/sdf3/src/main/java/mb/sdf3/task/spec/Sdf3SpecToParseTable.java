@@ -1,5 +1,6 @@
 package mb.sdf3.task.spec;
 
+import mb.common.option.Option;
 import mb.common.result.ExpectException;
 import mb.common.result.Result;
 import mb.common.util.ListView;
@@ -19,10 +20,13 @@ import mb.sdf3.task.Sdf3ToNormalForm;
 import mb.sdf3.task.Sdf3ToPermissive;
 import mb.sdf3.task.spoofax.Sdf3GetSourceFilesWrapper;
 import mb.sdf3.task.spoofax.Sdf3ParseWrapper;
+import mb.sdf3.task.util.Sdf3StrategoTransformTaskDef;
+
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.metaborg.sdf2table.grammar.NormGrammar;
 import org.metaborg.sdf2table.io.NormGrammarReader;
 import org.metaborg.sdf2table.parsetable.ParseTable;
+import org.metaborg.util.tuple.Tuple2;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import javax.inject.Inject;
@@ -30,6 +34,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Set;
+
+import static mb.sdf3.task.util.Sdf3StrategoTransformTaskDef.inputSupplier;
 
 @Sdf3Scope
 public class Sdf3SpecToParseTable implements TaskDef<Sdf3SpecToParseTable.Input, Result<ParseTable, ?>> {
@@ -109,12 +115,12 @@ public class Sdf3SpecToParseTable implements TaskDef<Sdf3SpecToParseTable.Input,
         modulesAstSuppliers.add(parseInputBuilder.withFile(classLoaderResources.getDefinitionResource("permissive-water.sdf3").getPath()).buildAstSupplier());
 
         try {
-            final IStrategoTerm mainNormalizedGrammar = context.require(toNormalized(mainModuleAstSupplier))
+            final IStrategoTerm mainNormalizedGrammar = context.require(toNormalized(mainModuleAstSupplier, input.config.placeholders))
                 .expect(e -> new ExpectException("Transforming SDF3 grammar of main module " + mainModuleAstSupplier + " to normal form failed", e));
 
             final NormGrammarReader normGrammarReader = new NormGrammarReader();
             for(Supplier<? extends Result<IStrategoTerm, ?>> astSupplier : modulesAstSuppliers) {
-                final IStrategoTerm normalizedGrammarTerm = context.require(toNormalized(astSupplier))
+                final IStrategoTerm normalizedGrammarTerm = context.require(toNormalized(astSupplier, input.config.placeholders))
                     .expect(e -> new ExpectException("Transforming SDF3 grammar of " + astSupplier + " to normal form failed", e));
                 normGrammarReader.addModuleAst(normalizedGrammarTerm);
             }
@@ -133,11 +139,11 @@ public class Sdf3SpecToParseTable implements TaskDef<Sdf3SpecToParseTable.Input,
                 // main module is the actual main module in case of creating a completion parse table.
                 normGrammarReader.addModuleAst(mainNormalizedGrammar);
 
-                final IStrategoTerm mainCompletionNormalizedGrammar = context.require(toCompletionNormalized(mainModuleAstSupplier))
+                final IStrategoTerm mainCompletionNormalizedGrammar = context.require(toCompletionNormalized(mainModuleAstSupplier, input.config.placeholders))
                     .expect(e -> new ExpectException("Transforming SDF3 grammar of main module " + mainModuleAstSupplier + " to completion normal form failed", e));
 
                 for(Supplier<? extends Result<IStrategoTerm, ?>> astSupplier : modulesAstSuppliers) {
-                    final IStrategoTerm normalizedGrammarTerm = context.require(toCompletionNormalized(astSupplier))
+                    final IStrategoTerm normalizedGrammarTerm = context.require(toCompletionNormalized(astSupplier, input.config.placeholders))
                         .expect(e -> new ExpectException("Transforming SDF3 grammar of " + astSupplier + " to completion normal form failed", e));
                     normGrammarReader.addModuleAst(normalizedGrammarTerm);
                 }
@@ -166,11 +172,14 @@ public class Sdf3SpecToParseTable implements TaskDef<Sdf3SpecToParseTable.Input,
         return tags.isEmpty() || tags.contains(Interactivity.NonInteractive);
     }
 
-    private Task<Result<IStrategoTerm, ?>> toNormalized(Supplier<? extends Result<IStrategoTerm, ?>> astSupplier) {
-        return toNormalForm.createTask(toPermissive.createSupplier(astSupplier));
+    private Task<Result<IStrategoTerm, ?>> toNormalized(Supplier<? extends Result<IStrategoTerm, ?>> astSupplier,
+        Option<Tuple2<String, String>> placeholders) {
+        return toNormalForm.createTask(
+            inputSupplier(toPermissive.createSupplier(astSupplier), placeholders));
     }
 
-    private Task<Result<IStrategoTerm, ?>> toCompletionNormalized(Supplier<? extends Result<IStrategoTerm, ?>> astSupplier) {
-        return toNormalForm.createTask(toCompletion.createSupplier(astSupplier));
+    private Task<Result<IStrategoTerm, ?>> toCompletionNormalized(Supplier<? extends Result<IStrategoTerm, ?>> astSupplier,
+        Option<Tuple2<String, String>> placeholders) {
+        return toNormalForm.createTask(inputSupplier(toCompletion.createSupplier(astSupplier), placeholders));
     }
 }

@@ -15,7 +15,10 @@ public class Sdf3PpLanguageSpecNamePrimitive extends AbstractPrimitive {
     @Override public boolean call(IContext env, Strategy[] svars, IStrategoTerm[] tvars) throws InterpreterException {
         try {
             final Sdf3Context context = AdaptableContext.adaptContextObject(env.contextObject(), Sdf3Context.class);
-            env.setCurrent(env.getFactory().makeString(context.strategoQualifier));
+            if(context.strategoQualifier.isNone()) {
+                return false;
+            }
+            env.setCurrent(env.getFactory().makeString(context.strategoQualifier.get()));
             return true;
         } catch(RuntimeException e) {
             return false; // Context not available; fail
