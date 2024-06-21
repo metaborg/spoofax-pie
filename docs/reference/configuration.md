@@ -413,6 +413,7 @@ The following `Sdf3FilesOption`s are supported:
 | `include-directory = $Expression` | no | Adds an include directory from which to resolve SDF3 imports. May be given multiple times. | Path |
 | `export-directory = $Expression` | no | Exports a directory, making the SDF3 files in it accessable to dependencies. May be given multiple times. | Path |
 | `parse-table-generator { $ParseTableGeneratorOption* }` | no | Parse table generator options. | n/a |
+| `placeholders { $PlaceholderOption* }` | no | Placeholder syntax used in code completion. | n/a |
 | `stratego-concrete-syntax-extension-main-file = $Expression` | no | Sets the main SDF3 file used to create a concrete syntax extension parse table. | Path |
 
 The following `$Sdf3PrebuiltOption`s are supported:
@@ -432,6 +433,13 @@ The following `ParseTableGeneratorOption`s are supported:
 | `solve-deep-conflicts = $Expression` | no | Whether the parse table generator solves deep priority conflicts. Defaults to `true`. | Boolean |
 | `check-overlap = $Expression` | no | Whether the parse table generator checks for overlap. Defaults to `false`. | Boolean |
 | `check-priorities = $Expression` | no | Whether the parse table generator checks priorities. Defaults to `false`. | Boolean |
+
+The following `PlaceholderOption`s are supported:
+
+| Syntax | Required? | Description | Type |
+| - | - | - | - |
+| `prefix = $Expression` | no | The prefix to a placholder. Defaults to `[[`, or empty if the other is defined. | String |
+| `postfix = $Expression` | no | The postfix to a placeholder. Defaults to `]]`, or empty if the other is defined. | String |
 
 ### ESV
 
