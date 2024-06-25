@@ -4,6 +4,22 @@ All notable changes to this project are documented in this file, based on [Keep 
 ## [Unreleased]
 
 
+## [0.21.0] - 2024-06-25
+### New
+- Configure placeholder syntax for SDF3:
+
+  ```
+  sdf3 {
+    source = files {
+      placeholders {
+        prefix = "$"
+        postfix = ""
+      }
+    }
+  }
+  ```
+
+
 ## [0.20.0] - 2024-05-07
 ### Breaking Changes
 - Gradle 6 is no longer supported. The minimum supported Gradle version is 7.6.4.
@@ -587,7 +603,8 @@ build-dependencies [
 
 
 
-[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.20.0...HEAD
+[Unreleased]: https://github.com/metaborg/spoofax-pie/compare/release-0.21.0...HEAD
+[0.21.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.20.0...release-0.21.0
 [0.20.0]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.8...release-0.20.0
 [0.19.8]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.7...release-0.19.8
 [0.19.7]: https://github.com/metaborg/spoofax-pie/compare/release-0.19.6...release-0.19.7
