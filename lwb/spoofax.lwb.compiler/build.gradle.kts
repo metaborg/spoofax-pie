@@ -59,5 +59,16 @@ tasks.test {
     testLogging {
         events(org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR)
     }
-    jvmArgs("-Xss16M") // Set required stack size, mainly for serialization.
+    jvmArgs(listOf(
+        "-Xss16M",      // Set required stack size, mainly for serialization.
+        // Needed for Java 17
+        "--add-opens", "java.base/java.io=ALL-UNNAMED",
+        "--add-opens", "java.base/java.lang=ALL-UNNAMED",
+        "--add-opens", "java.base/java.lang.invoke=ALL-UNNAMED",
+        "--add-opens", "java.base/java.math=ALL-UNNAMED",
+        "--add-opens", "java.base/java.net=ALL-UNNAMED",
+        "--add-opens", "java.base/java.text=ALL-UNNAMED",
+        "--add-opens", "java.base/java.util=ALL-UNNAMED",
+        "--add-opens", "java.base/java.util.concurrent=ALL-UNNAMED",
+    ))
 }
