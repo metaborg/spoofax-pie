@@ -130,7 +130,7 @@ dependencies {
         api("org.junit.jupiter:junit-jupiter-api:${metaborg.junitVersion}")
         api("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
         api("com.google.jimfs:jimfs:1.1")
-        api("nl.jqno.equalsverifier:equalsverifier:3.1.12")
+        api("nl.jqno.equalsverifier:equalsverifier:3.16.1")
     }
 }
 
