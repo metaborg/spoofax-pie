@@ -28,7 +28,7 @@ dependencies {
     compileOnly("org.immutables:value-annotations") // Dagger accesses these annotations, which have class retention.
 
     // Dependencies to be able to configure the extensions provided by these Gradle plugins.
-    compileOnly("org.metaborg:coronium:0.3.18")
+    compileOnly("org.metaborg:coronium:0.4.0")
     compileOnly("biz.aQute.bnd:biz.aQute.bnd.gradle:5.3.0")
     compileOnly("org.jetbrains.intellij:org.jetbrains.intellij.gradle.plugin:1.0") // Keep at 1.0 for JVM 8 compatibility.
 }
