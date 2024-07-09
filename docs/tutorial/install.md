@@ -22,7 +22,7 @@ To get started, we will download a premade Eclipse installation that comes bundl
 * {{release.rel.eclipse_lwb.install.jvm.link.macos}}
 * {{release.rel.eclipse_lwb.install.jvm.link.linux}}
 
-These are bundled with an embedded JVM so that you do not need to have a JVM installed. If your system has a JVM of version 11 (exactly, higher versions are not supported), and would rather use that, use the following download links instead:
+These are bundled with an embedded JVM so that you do not need to have a JVM installed. If your system has a JVM of version 17 (exactly, higher versions are not supported), and would rather use that, use the following download links instead:
 
 * {{release.rel.eclipse_lwb.install.link.windows}}
 * {{release.rel.eclipse_lwb.install.link.macos}}
