@@ -5,11 +5,6 @@ plugins {
     id("org.gradle.kotlin.kotlin-dsl") // Same as `kotlin-dsl`, but without version, which is already set in root project.
 }
 
-metaborg {
-    kotlinApiVersion = "1.3"
-    kotlinLanguageVersion = "1.3"
-}
-
 dependencies {
     api(platform(project(":spoofax.depconstraints")))
     kapt(platform(project(":spoofax.depconstraints")))
