@@ -6,6 +6,12 @@ pluginManagement {
     }
 }
 
+
+// This downloads an appropriate JVM if not already available
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
+}
+
 // We split the build up into one main composite build in the 'core' directory, because it builds Gradle plugins,
 // which we want to test. Gradle plugins are not directly available in a multi-project build, therefore a separate
 // composite build is required. Included builds listed below can use the Gradle plugins built in 'core'.
