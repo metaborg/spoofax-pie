@@ -17,8 +17,8 @@ dependencies {
 
     bundleEmbedApi(project(":statix.multilang"))
 
-    annotationProcessor("com.google.dagger:dagger-compiler")
-    compileOnly("org.checkerframework:checker-qual-android")
+    annotationProcessor(libs.dagger.compiler)
+    compileOnly(libs.checkerframework.android)
 }
 
 // Use bnd to create a single OSGi bundle JAR that includes all dependencies.

@@ -12,7 +12,7 @@ plugins {
 
 dependencies {
     // Required because @Nullable has runtime retention (which includes classfile retention), and the Java compiler requires access to it.
-    compileOnly("com.google.code.findbugs:jsr305")
+    compileOnly(libs.jsr305)
 }
 
 languageProject {

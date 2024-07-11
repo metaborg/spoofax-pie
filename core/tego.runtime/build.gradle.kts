@@ -9,18 +9,18 @@ dependencies {
     annotationProcessor(platform(project(":spoofax.depconstraints")))
     testAnnotationProcessor(platform(project(":spoofax.depconstraints")))
 
-    api("org.metaborg:common")
-    api("org.metaborg:log.api")
+    api(libs.metaborg.common)
+    api(libs.metaborg.log.api)
 
-    api("org.metaborg:log.dagger")
-    api("com.google.dagger:dagger")
-    annotationProcessor("com.google.dagger:dagger-compiler")
+    api(libs.metaborg.log.dagger)
+    api(libs.dagger)
+    annotationProcessor(libs.dagger.compiler)
 
-    compileOnly("org.checkerframework:checker-qual-android")
+    compileOnly(libs.checkerframework.android)
 
-    testCompileOnly("org.checkerframework:checker-qual-android")
-    testImplementation("org.metaborg:log.backend.slf4j")
-    testImplementation("org.slf4j:slf4j-simple:1.7.10")
+    testCompileOnly(libs.checkerframework.android)
+    testImplementation(libs.metaborg.log.backend.slf4j)
+    testImplementation(libs.slf4j.simple)
 }
 
 tasks.test {

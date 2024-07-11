@@ -21,18 +21,18 @@ plugins {
 fun compositeBuild(name: String) = "$group:$name:$version"
 
 dependencies {
-    api(compositeBuild("spoofax.common"))
-    api(compositeBuild("spoofax.compiler"))
+    api(libs.spoofax3.spoofax.common)
+    api(libs.spoofax3.compiler)
 
-    compileOnly("org.derive4j:derive4j-annotation")
+    compileOnly(libs.derive4j.annotation)
 
     // Required because @Nullable has runtime retention (which includes classfile retention), and the Java compiler requires access to it.
-    compileOnly("com.google.code.findbugs:jsr305")
+    compileOnly(libs.jsr305)
 
-    compileOnly("org.checkerframework:checker-qual-android")
-    compileOnly("org.immutables:value-annotations")
-    annotationProcessor("org.immutables:value")
-    annotationProcessor("org.derive4j:derive4j")
+    compileOnly(libs.checkerframework.android)
+    compileOnly(libs.immutables.value.annotations)
+    annotationProcessor(libs.immutables.value)
+    annotationProcessor(libs.derive4j)
 }
 
 val packageId = "mb.dynamix"

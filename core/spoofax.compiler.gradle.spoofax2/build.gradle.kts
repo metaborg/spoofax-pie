@@ -12,15 +12,15 @@ dependencies {
     api(project(":spoofax.compiler"))
     api(project(":spoofax.compiler.spoofax2"))
     api(project(":spoofax.compiler.spoofax2.dagger"))
-    api("com.google.dagger:dagger")
-    implementation("org.metaborg:pie.runtime")
+    api(libs.dagger)
+    implementation(libs.metaborg.pie.runtime)
 
-    kapt("com.google.dagger:dagger-compiler")
-    compileOnly("org.immutables:value-annotations") // Dagger accesses these annotations, which have class retention.
+    kapt(libs.dagger.compiler)
+    compileOnly(libs.immutables.value.annotations) // Dagger accesses these annotations, which have class retention.
 
     // Dependencies to be able to use/configure the extensions provided by these Gradle plugins.
     compileOnly(project(":spoofax.compiler.gradle"))
-    compileOnly("org.metaborg.devenv:spoofax.gradle")
+    compileOnly(libs.spoofax3.gradle)
 }
 
 gradlePlugin {

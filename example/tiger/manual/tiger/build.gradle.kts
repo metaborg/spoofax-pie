@@ -17,21 +17,21 @@ fun compositeBuild(name: String) = "$group:$name:$version"
 dependencies {
     api(platform(compositeBuild("spoofax.depconstraints")))
 
-    api("org.metaborg:common")
-    api(compositeBuild("spoofax.compiler.interfaces"))
-    api(compositeBuild("spoofax.resource"))
-    api(compositeBuild("jsglr1.common"))
-    api(compositeBuild("esv.common"))
-    api(compositeBuild("stratego.common"))
-    api(compositeBuild("constraint.common"))
+    api(libs.metaborg.common)
+    api(libs.spoofax3.compiler.interfaces)
+    api(libs.spoofax3.resource)
+    api(libs.spoofax3.jsglr1.common)
+    api(libs.spoofax3.esv.common)
+    api(libs.spoofax3.stratego.common)
+    api(libs.spoofax3.constraint.common)
 
-    implementation(compositeBuild("nabl2.common"))
-    implementation("org.metaborg:strategoxt-min-jar")
+    implementation(libs.spoofax3.nabl2.common)
+    implementation(libs.strategoxt.minjar)
 
-    compileOnly("org.checkerframework:checker-qual-android")
+    compileOnly(libs.checkerframework.android)
 
-    testImplementation(compositeBuild("spoofax.test"))
-    testCompileOnly("org.checkerframework:checker-qual-android")
+    testImplementation(libs.spoofax3.test)
+    testCompileOnly(libs.checkerframework.android)
 }
 
 fun copySpoofaxLanguageResources(

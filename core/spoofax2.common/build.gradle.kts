@@ -5,14 +5,14 @@ plugins {
 dependencies {
     api(platform(project(":spoofax.depconstraints")))
 
-    implementation("org.metaborg:common")
+    implementation(libs.metaborg.common)
     implementation(project(":stratego.common"))
-    implementation("org.metaborg.devenv:org.metaborg.util")
+    implementation(libs.metaborg.util)
 
-    api("org.metaborg:resource")
-    api("org.metaborg:log.api")
+    api(libs.metaborg.resource.api)
+    api(libs.metaborg.log.api)
 
-    implementation("org.metaborg.devenv:org.spoofax.interpreter.core")
+    implementation(libs.interpreter.core)
 
-    compileOnly("org.checkerframework:checker-qual-android")
+    compileOnly(libs.checkerframework.android)
 }

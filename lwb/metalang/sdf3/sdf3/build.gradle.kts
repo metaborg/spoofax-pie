@@ -22,11 +22,11 @@ plugins {
 fun compositeBuild(name: String) = "$group:$name:$version"
 
 dependencies {
-    api("org.metaborg.devenv:sdf2table")
-    api("org.metaborg.devenv:sdf2parenthesize")
+    api(libs.sdf2table)
+    api(libs.sdf2parenthesize)
 
-    testImplementation(compositeBuild("spoofax.test"))
-    testCompileOnly("org.checkerframework:checker-qual-android")
+    testImplementation(libs.spoofax3.test)
+    testCompileOnly(libs.checkerframework.android)
 }
 
 languageProject {

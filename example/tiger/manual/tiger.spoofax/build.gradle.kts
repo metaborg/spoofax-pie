@@ -13,21 +13,21 @@ dependencies {
 
     // Main
     api(project(":tiger"))
-    api(compositeBuild("spoofax.core"))
-    api(compositeBuild("aterm.common"))
-    api(compositeBuild("jsglr.pie"))
-    api(compositeBuild("constraint.pie"))
-    api(compositeBuild("transform.pie"))
-    api(compositeBuild("spt.api"))
-    api("org.metaborg:pie.api")
-    api("org.metaborg:pie.dagger")
-    api("com.google.dagger:dagger")
+    api(libs.spoofax3.core)
+    api(libs.spoofax3.aterm.common)
+    api(libs.spoofax3.jsglr.pie)
+    api(libs.spoofax3.constraint.pie)
+    api(libs.spoofax3.transform.pie)
+    api(libs.spoofax3.spt.api)
+    api(libs.metaborg.pie.api)
+    api(libs.metaborg.pie.dagger)
+    api(libs.dagger)
 
-    compileOnly("org.checkerframework:checker-qual-android")
+    compileOnly(libs.checkerframework.android)
 
-    annotationProcessor("com.google.dagger:dagger-compiler")
+    annotationProcessor(libs.dagger.compiler)
 
     // Test
-    testImplementation(compositeBuild("spoofax.test"))
-    testCompileOnly("org.checkerframework:checker-qual-android")
+    testImplementation(libs.spoofax3.test)
+    testCompileOnly(libs.checkerframework.android)
 }

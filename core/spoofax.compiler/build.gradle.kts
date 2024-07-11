@@ -15,33 +15,33 @@ dependencies {
     annotationProcessor(platform(project(":spoofax.depconstraints")))
     testAnnotationProcessor(platform(project(":spoofax.depconstraints")))
 
-    api("org.metaborg:common")
+    api(libs.metaborg.common)
     api(project(":spoofax.common"))
     api(project(":spoofax.core"))
-    api("org.metaborg:resource")
-    api("org.metaborg:pie.api")
-    api("com.samskivert:jmustache:1.15")
-    api("com.google.dagger:dagger")
+    api(libs.metaborg.resource.api)
+    api(libs.metaborg.pie.api)
+    api(libs.jmustache)
+    api(libs.dagger)
 
-    compileOnly("org.checkerframework:checker-qual-android")
-    compileOnly("org.immutables:value-annotations")
-    compileOnly("org.derive4j:derive4j-annotation")
+    compileOnly(libs.checkerframework.android)
+    compileOnly(libs.immutables.value.annotations)
+    compileOnly(libs.derive4j.annotation)
 
-    annotationProcessor("org.immutables:value")
-    annotationProcessor("org.derive4j:derive4j")
-    annotationProcessor("com.google.dagger:dagger-compiler")
+    annotationProcessor(libs.immutables.value)
+    annotationProcessor(libs.derive4j)
+    annotationProcessor(libs.dagger.compiler)
 
     testImplementation(project(":spoofax.compiler"))
-    testImplementation("com.google.dagger:dagger")
-    testImplementation("org.metaborg:pie.runtime")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:${metaborg.junitVersion}")
-    testImplementation("com.google.jimfs:jimfs:1.1")
-    testImplementation("org.eclipse.jdt:org.eclipse.jdt.core:3.33.0")
-    testImplementation("org.gradle:gradle-tooling-api:5.6.4")
-    testRuntimeOnly("org.slf4j:slf4j-simple:1.7.10") // SLF4J implementation required for Gradle tooling API.
-    testCompileOnly("org.checkerframework:checker-qual-android")
-    testCompileOnly("org.immutables:value-annotations") // Dagger accesses these annotations, which have class retention.
-    testAnnotationProcessor("com.google.dagger:dagger-compiler")
+    testImplementation(libs.dagger)
+    testImplementation(libs.metaborg.pie.runtime)
+    testImplementation(libs.junit.params)
+    testImplementation(libs.jimfs)
+    testImplementation(libs.eclipse.jdt.core)
+    testImplementation(libs.gradle.tooling.api)
+    testRuntimeOnly(libs.slf4j.simple) // SLF4J implementation required for Gradle tooling API.
+    testCompileOnly(libs.checkerframework.android)
+    testCompileOnly(libs.immutables.value.annotations) // Dagger accesses these annotations, which have class retention.
+    testAnnotationProcessor(libs.dagger.compiler)
 }
 
 tasks.test {

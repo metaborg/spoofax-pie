@@ -13,13 +13,13 @@ dependencies {
     api(platform(compositeBuild("spoofax.depconstraints")))
     annotationProcessor(platform(compositeBuild("spoofax.depconstraints")))
 
-    bundleApi(compositeBuild("spoofax.eclipse"))
+    bundleApi(libs.spoofax3.eclipse)
 
     bundleEmbedApi(project(":tiger"))
     bundleEmbedApi(project(":tiger.spoofax"))
 
-    compileOnly("org.checkerframework:checker-qual-android")
-    annotationProcessor("com.google.dagger:dagger-compiler")
+    compileOnly(libs.checkerframework.android)
+    annotationProcessor(libs.dagger.compiler)
 }
 
 // Use bnd to create a single OSGi bundle JAR that includes all dependencies.

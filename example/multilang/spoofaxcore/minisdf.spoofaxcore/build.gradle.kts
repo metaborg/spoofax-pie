@@ -9,13 +9,13 @@ spoofaxLanguageSpecification {
     addCompileDependenciesFromMetaborgYaml.set(false)
 }
 dependencies {
-    compileLanguage("org.metaborg.devenv:org.metaborg.meta.lang.template:$spoofax2DevenvVersion")
-    compileLanguage("org.metaborg.devenv:org.metaborg.meta.lang.esv:$spoofax2DevenvVersion")
-    compileLanguage("org.metaborg.devenv:statix.lang:$spoofax2DevenvVersion")
-    compileLanguage("org.metaborg.devenv:sdf3.ext.statix:$spoofax2DevenvVersion")
+    compileLanguage(libs.sdf3.lang)
+    compileLanguage(libs.esv.lang)
+    compileLanguage(libs.statix.lang)
+    compileLanguage(libs.sdf3.extstatix)
 
-    sourceLanguage("org.metaborg.devenv:meta.lib.spoofax:$spoofax2DevenvVersion")
-    sourceLanguage("org.metaborg.devenv:statix.runtime:$spoofax2DevenvVersion")
+    sourceLanguage(libs.spoofax2.meta.lib.spoofax)
+    sourceLanguage(libs.statix.runtime)
     sourceLanguage(project(":signature-interface.spoofaxcore"))
     sourceLanguage(project(":module-interface.spoofaxcore"))
 }

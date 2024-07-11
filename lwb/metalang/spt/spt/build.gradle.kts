@@ -14,10 +14,10 @@ plugins {
 
 fun compositeBuild(name: String) = "$group:$name:$version"
 dependencies {
-    api(compositeBuild("spt.api"))
+    api(libs.spoofax3.spt.api)
 
     // Required because @Nullable has runtime retention (which includes classfile retention), and the Java compiler requires access to it.
-    compileOnly("com.google.code.findbugs:jsr305")
+    compileOnly(libs.jsr305)
 }
 
 languageProject {

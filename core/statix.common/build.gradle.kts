@@ -6,15 +6,15 @@ dependencies {
     api(platform(project(":spoofax.depconstraints")))
     annotationProcessor(platform(project(":spoofax.depconstraints")))
 
-    api("org.metaborg:common")
+    api(libs.metaborg.common)
 
-    api("org.metaborg.devenv:statix.solver")
+    api(libs.statix.solver)
 
     implementation(project(":stratego.common"))
     implementation(project(":jsglr.common"))
 
-    compileOnly("org.checkerframework:checker-qual-android")
-    compileOnly("org.immutables:value-annotations")
+    compileOnly(libs.checkerframework.android)
+    compileOnly(libs.immutables.value.annotations)
 
-    annotationProcessor("org.immutables:value")
+    annotationProcessor(libs.immutables.value)
 }

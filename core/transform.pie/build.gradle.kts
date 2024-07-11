@@ -6,11 +6,11 @@ dependencies {
     api(platform(project(":spoofax.depconstraints")))
     annotationProcessor(platform(project(":spoofax.depconstraints")))
 
-    api("org.metaborg:common")
+    api(libs.metaborg.common)
     api(project(":stratego.pie"))
     implementation(project(":aterm.common"))
     api(project(":spoofax.core"))
-    api("org.metaborg:pie.api")
+    api(libs.metaborg.pie.api)
 
-    compileOnly("org.checkerframework:checker-qual-android")
+    compileOnly(libs.checkerframework.android)
 }

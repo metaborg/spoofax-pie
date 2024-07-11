@@ -9,13 +9,13 @@ dependencies {
 
     api(project(":spoofax.core"))
 
-    api("org.metaborg:log.api")
-    implementation("org.metaborg:pie.runtime")
-    implementation("com.google.dagger:dagger")
+    api(libs.metaborg.log.api)
+    implementation(libs.metaborg.pie.runtime)
+    implementation(libs.dagger)
 
-    compileOnly("org.checkerframework:checker-qual-android")
+    compileOnly(libs.checkerframework.android)
 
-    annotationProcessor("com.google.dagger:dagger-compiler")
+    annotationProcessor(libs.dagger.compiler)
 }
 
 intellij {

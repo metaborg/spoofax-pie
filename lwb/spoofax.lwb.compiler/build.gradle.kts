@@ -10,13 +10,13 @@ dependencies {
     annotationProcessor(platform(compositeBuild("spoofax.depconstraints")))
 
 
-    api(compositeBuild("spoofax.core"))
-    api(compositeBuild("spoofax.compiler"))
-    api("org.metaborg:common")
-    api("org.metaborg:resource")
-    api("org.metaborg:pie.api")
-    api("org.metaborg:pie.task.archive")
-    api("org.metaborg:pie.task.java")
+    api(libs.spoofax3.core)
+    api(libs.spoofax3.compiler)
+    api(libs.metaborg.common)
+    api(libs.metaborg.resource.api)
+    api(libs.metaborg.pie.api)
+    api(libs.metaborg.pie.task.archive)
+    api(libs.metaborg.pie.task.java)
 
     // TODO: should the meta-languages use implementation configuration? We don't expose their API AFAICS.
     api(project(":cfg"))
@@ -35,22 +35,22 @@ dependencies {
 
     // Using api configuration to make these annotations and processors available to javac that we call during
     // compilation, and to users of this library as well.
-    api("org.checkerframework:checker-qual-android")
-    api("com.google.dagger:dagger-compiler")
+    api(libs.checkerframework.android)
+    api(libs.dagger.compiler)
 
 
-    compileOnly("org.immutables:value-annotations")
-    compileOnly("org.derive4j:derive4j-annotation")
+    compileOnly(libs.immutables.value.annotations)
+    compileOnly(libs.derive4j.annotation)
 
-    annotationProcessor("org.immutables:value")
-    annotationProcessor("org.derive4j:derive4j")
-    annotationProcessor("com.google.dagger:dagger-compiler")
+    annotationProcessor(libs.immutables.value)
+    annotationProcessor(libs.derive4j)
+    annotationProcessor(libs.dagger.compiler)
 
 
-    testImplementation("org.junit.jupiter:junit-jupiter-params:${metaborg.junitVersion}")
-    testImplementation("org.metaborg:pie.runtime")
-    testImplementation("org.metaborg:pie.serde.fst")
-    testCompileOnly("org.checkerframework:checker-qual-android")
+    testImplementation(libs.junit.params)
+    testImplementation(libs.metaborg.pie.runtime)
+    testImplementation(libs.metaborg.pie.serde.fst)
+    testCompileOnly(libs.checkerframework.android)
 }
 
 tasks.test {

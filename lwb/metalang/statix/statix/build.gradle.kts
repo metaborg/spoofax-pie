@@ -17,12 +17,12 @@ fun compositeBuild(name: String) = "$group:$name:$version"
 
 dependencies {
     // Required because @Nullable has runtime retention (which includes classfile retention), and the Java compiler requires access to it.
-    compileOnly("com.google.code.findbugs:jsr305")
+    compileOnly(libs.jsr305)
 
-    implementation("$group:spoofax2.common:$version")
+    implementation(libs.spoofax3.spoofax2.common)
 
-    testImplementation(compositeBuild("spoofax.test"))
-    testCompileOnly("org.checkerframework:checker-qual-android")
+    testImplementation(libs.spoofax3.test)
+    testCompileOnly(libs.checkerframework.android)
 }
 
 languageProject {

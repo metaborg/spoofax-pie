@@ -8,6 +8,6 @@ plugins {
 fun compositeBuild(name: String) = "$group:$name:$version"
 
 dependencies {
-    testImplementation(compositeBuild("spoofax.test"))
-    testCompileOnly("org.checkerframework:checker-qual-android")
+    testImplementation(libs.spoofax3.test)
+    testCompileOnly(libs.checkerframework.android)
 }

@@ -7,10 +7,10 @@ fun compositeBuild(name: String) = "$group:$name:$version"
 
 dependencies {
     // Required because @Nullable has runtime retention (which includes classfile retention), and the Java compiler requires access to it.
-    compileOnly("com.google.code.findbugs:jsr305")
+    compileOnly(libs.jsr305)
 
     // Depend on `spoofax.compiler.eclipsebundle` because `cfg` uses `spoofax.compiler` and `spoofax.compiler.dagger`.
-    bundleApi(compositeBuild("spoofax.compiler.eclipsebundle"))
+    bundleApi(libs.spoofax3.compiler.eclipsebundle)
 }
 
 languageEclipseProject {

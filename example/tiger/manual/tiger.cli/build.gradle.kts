@@ -28,15 +28,15 @@ dependencies {
     annotationProcessor(platform(compositeBuild("spoofax.depconstraints")))
 
     implementation(project(":tiger.spoofax"))
-    implementation(compositeBuild("spoofax.cli"))
-    implementation("org.metaborg:log.backend.slf4j")
-    implementation("org.metaborg:pie.runtime")
-    implementation("org.metaborg:pie.dagger")
+    implementation(libs.spoofax3.cli)
+    implementation(libs.metaborg.log.backend.slf4j)
+    implementation(libs.metaborg.pie.runtime)
+    implementation(libs.metaborg.pie.dagger)
 
-    implementation("org.slf4j:slf4j-simple:1.7.26")
+    implementation(libs.slf4j.simple)
 
-    compileOnly("org.checkerframework:checker-qual-android")
+    compileOnly(libs.checkerframework.android)
 
-    annotationProcessor("com.google.dagger:dagger-compiler")
-    annotationProcessor("info.picocli:picocli-codegen")
+    annotationProcessor(libs.dagger.compiler)
+    annotationProcessor(libs.picocli.codegen)
 }

@@ -9,18 +9,18 @@ dependencies {
     implementation(platform(compositeBuild("spoofax.depconstraints")))
     annotationProcessor(platform(compositeBuild("spoofax.depconstraints")))
 
-    implementation("org.metaborg:pie.runtime")
-    implementation(compositeBuild("spoofax.core"))
-    implementation(compositeBuild("spoofax.intellij"))
+    implementation(libs.metaborg.pie.runtime)
+    implementation(libs.spoofax3.core)
+    implementation(libs.spoofax3.intellij)
     implementation(project(":tiger.spoofax")) {
         exclude(group = "org.slf4j")
     }
 
-    implementation("com.google.dagger:dagger")
+    implementation(libs.dagger)
 
-    compileOnly("org.checkerframework:checker-qual-android")
+    compileOnly(libs.checkerframework.android)
 
-    annotationProcessor("com.google.dagger:dagger-compiler")
+    annotationProcessor(libs.dagger.compiler)
 }
 
 intellij {

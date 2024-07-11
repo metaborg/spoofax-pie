@@ -29,17 +29,17 @@ dependencies {
     bundleTargetPlatformApi(eclipse("com.ibm.icu"))
     bundleTargetPlatformImplementation(eclipse("org.eclipse.ui.views.log"))
 
-    bundleEmbedApi("org.metaborg:common")
+    bundleEmbedApi(libs.metaborg.common)
     bundleEmbedApi(project(":spoofax.core"))
     bundleEmbedApi(project(":spoofax.resource"))
-    bundleEmbedApi("org.metaborg:log.api")
-    bundleEmbedApi("org.metaborg:resource")
-    bundleEmbedApi("org.metaborg:pie.api")
-    bundleEmbedApi("org.metaborg:pie.runtime")
-    bundleEmbedApi("com.google.dagger:dagger")
+    bundleEmbedApi(libs.metaborg.log.api)
+    bundleEmbedApi(libs.metaborg.resource.api)
+    bundleEmbedApi(libs.metaborg.pie.api)
+    bundleEmbedApi(libs.metaborg.pie.runtime)
+    bundleEmbedApi(libs.dagger)
 
-    compileOnly("org.checkerframework:checker-qual-android")
-    annotationProcessor("com.google.dagger:dagger-compiler")
+    compileOnly(libs.checkerframework.android)
+    annotationProcessor(libs.dagger.compiler)
 }
 
 // Use bnd to create a single OSGi bundle JAR that includes all dependencies.

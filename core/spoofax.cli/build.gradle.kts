@@ -6,14 +6,14 @@ dependencies {
     api(platform(project(":spoofax.depconstraints")))
     annotationProcessor(platform(project(":spoofax.depconstraints")))
 
-    api("com.google.dagger:dagger")
+    api(libs.dagger)
     implementation(project(":spoofax.core"))
-    api("info.picocli:picocli")
+    api(libs.picocli)
 
-    compileOnly("org.checkerframework:checker-qual-android")
+    compileOnly(libs.checkerframework.android)
 
-    annotationProcessor("com.google.dagger:dagger-compiler")
-    annotationProcessor("info.picocli:picocli-codegen")
+    annotationProcessor(libs.dagger.compiler)
+    annotationProcessor(libs.picocli.codegen)
 }
 
 tasks.compileJava {

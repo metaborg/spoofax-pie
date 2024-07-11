@@ -9,33 +9,33 @@ dependencies {
     annotationProcessor(platform(project(":spoofax.depconstraints")))
     testAnnotationProcessor(platform(project(":spoofax.depconstraints")))
 
-    api("org.metaborg:common")
-    api("org.metaborg:statix.common")
-    api("org.metaborg:tego.runtime")
-    api("org.metaborg:log.api")
+    api(libs.metaborg.common)
+    api(libs.spoofax3.statix.common)
+    api(libs.spoofax3.tego.runtime)
+    api(libs.metaborg.log.api)
 
-    api("org.metaborg.devenv:statix.solver")
-    api("org.metaborg.devenv:statix.generator")
+    api(libs.statix.solver)
+    api(libs.statix.generator)
 
     implementation(project(":stratego.common"))
     implementation(project(":jsglr.common"))
 
-    compileOnly("org.checkerframework:checker-qual-android")
+    compileOnly(libs.checkerframework.android)
 
-    annotationProcessor("org.immutables:value")
-    testAnnotationProcessor("org.immutables:value")
+    annotationProcessor(libs.immutables.value)
+    testAnnotationProcessor(libs.immutables.value)
 
-    testCompileOnly("org.checkerframework:checker-qual-android")
-    testImplementation("nl.jqno.equalsverifier:equalsverifier")
-    testImplementation("org.metaborg:log.backend.slf4j")
-    testImplementation("org.slf4j:slf4j-simple:1.7.10")
-    testCompileOnly("org.immutables:value")
+    testCompileOnly(libs.checkerframework.android)
+    testImplementation(libs.equalsverifier)
+    testImplementation(libs.metaborg.log.backend.slf4j)
+    testImplementation(libs.slf4j.simple)
+    testCompileOnly(libs.immutables.value)
 
-    testImplementation("com.opencsv:opencsv:4.1")
+    testImplementation(libs.opencsv)
 
     // Immutables
-    testCompileOnly("org.immutables:value")
-    testAnnotationProcessor("org.immutables:value")
+    testCompileOnly(libs.immutables.value)
+    testAnnotationProcessor(libs.immutables.value)
 }
 
 tasks.test {

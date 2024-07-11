@@ -6,18 +6,18 @@ dependencies {
     api(platform(project(":spoofax.depconstraints")))
     annotationProcessor(platform(project(":spoofax.depconstraints")))
 
-    api("org.metaborg:common")
+    api(libs.metaborg.common)
     api(project(":jsglr.common"))
     api(project(":stratego.common"))
     api(project(":spoofax.core"))
 
-    api("org.metaborg.devenv:statix.solver")
-    api("org.metaborg:pie.api")
-    api("org.yaml:snakeyaml")
+    api(libs.statix.solver)
+    api(libs.metaborg.pie.api)
+    api(libs.snakeyaml)
 
-    compileOnly("org.checkerframework:checker-qual-android")
-    compileOnly("org.immutables:value-annotations")
+    compileOnly(libs.checkerframework.android)
+    compileOnly(libs.immutables.value.annotations)
 
-    annotationProcessor("com.google.dagger:dagger-compiler")
-    annotationProcessor("org.immutables:value")
+    annotationProcessor(libs.dagger.compiler)
+    annotationProcessor(libs.immutables.value)
 }

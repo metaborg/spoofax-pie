@@ -16,14 +16,14 @@ dependencies {
     api(platform(compositeBuild("spoofax.depconstraints")))
     kapt(platform(compositeBuild("spoofax.depconstraints")))
 
-    compileOnly("org.metaborg:spoofax.compiler.gradle")
+    compileOnly(libs.spoofax3.compiler.gradle)
     api(project(":spoofax.lwb.compiler"))
-    api("com.google.dagger:dagger")
-    implementation("org.metaborg:pie.runtime")
-    implementation("org.metaborg:log.backend.slf4j")
+    api(libs.dagger)
+    implementation(libs.metaborg.pie.runtime)
+    implementation(libs.metaborg.log.backend.slf4j)
 
-    kapt("com.google.dagger:dagger-compiler")
-    compileOnly("org.immutables:value-annotations") // Dagger accesses these annotations, which have class retention.
+    kapt(libs.dagger.compiler)
+    compileOnly(libs.immutables.value.annotations) // Dagger accesses these annotations, which have class retention.
 }
 
 gradlePlugin {

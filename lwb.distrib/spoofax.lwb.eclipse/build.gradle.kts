@@ -18,25 +18,25 @@ dependencies {
     bundleTargetPlatformApi(eclipse("org.eclipse.jdt.core"))
 
 
-    bundleApi(compositeBuild("spoofax.eclipse"))
-    bundleApi(compositeBuild("tooling.eclipsebundle"))
-    bundleApi(compositeBuild("spoofax.compiler.eclipsebundle"))
+    bundleApi(libs.spoofax3.eclipse)
+    bundleApi(libs.spoofax3.tooling.eclipsebundle)
+    bundleApi(libs.spoofax3.compiler.eclipsebundle)
 
 
-    bundleImplementation(compositeBuild("cfg.eclipse"))
-    bundleImplementation(compositeBuild("sdf3.eclipse"))
-    bundleImplementation(compositeBuild("esv.eclipse"))
-    bundleImplementation(compositeBuild("stratego.eclipse"))
-    bundleImplementation(compositeBuild("statix.eclipse"))
-    bundleImplementation(compositeBuild("dynamix.eclipse"))
-    bundleImplementation(compositeBuild("sdf3_ext_statix.eclipse"))
-    bundleImplementation(compositeBuild("sdf3_ext_dynamix.eclipse"))
-    bundleImplementation(compositeBuild("spt.eclipse"))
+    bundleImplementation(libs.spoofax3.cfg.eclipse)
+    bundleImplementation(libs.spoofax3.sdf3.eclipse)
+    bundleImplementation(libs.spoofax3.esv.eclipse)
+    bundleImplementation(libs.spoofax3.stratego.eclipse)
+    bundleImplementation(libs.spoofax3.statix.eclipse)
+    bundleImplementation(libs.spoofax3.dynamix.eclipse)
+    bundleImplementation(libs.spoofax3.sdf3.extstatix.eclipse)
+    bundleImplementation(libs.spoofax3.sdf3.extdynamix.eclipse)
+    bundleImplementation(libs.spoofax3.spt.eclipse)
 
-    bundleImplementation(compositeBuild("strategolib.eclipse"))
-    bundleImplementation(compositeBuild("gpp.eclipse"))
-    bundleImplementation(compositeBuild("libspoofax2.eclipse"))
-    bundleImplementation(compositeBuild("libstatix.eclipse"))
+    bundleImplementation(libs.spoofax3.strategolib.eclipse)
+    bundleImplementation(libs.spoofax3.gpp.eclipse)
+    bundleImplementation(libs.spoofax3.libspoofax2.eclipse)
+    bundleImplementation(libs.spoofax3.libstatix.eclipse)
 
     bundleImplementation(project(":rv32im.eclipse"))
 
@@ -44,18 +44,18 @@ dependencies {
     // Convenient library to get the current classpath, which works under OSGi (Eclipse) as well. Used to pass the current
     // classpath to the Java compiler.
     // TODO: only using this to extract a classpath, can we just copy that functionality without a dependency?
-    bundleEmbedImplementation("io.github.classgraph:classgraph:4.8.102")
+    bundleEmbedImplementation(libs.classgraph)
 
-    bundleEmbedImplementation("com.google.dagger:dagger-compiler") {
+    bundleEmbedImplementation(libs.dagger.compiler) {
         // Exclude `checker-qual` in favor of `checker-qual-android` which has classfile retention instead of runtime.
         exclude("org.checkerframework", "checker-qual")
     }
 
     // HACK: embed javax.inject as classgraph does not seem to pick up the above javax.inject dependency?
-    bundleEmbedImplementation("javax.inject:javax.inject:1")
+    bundleEmbedImplementation(libs.javax.inject)
 
     // Embed `:spoofax.lwb.dynamicloading`.
-    bundleEmbedImplementation(compositeBuild("spoofax.lwb.dynamicloading")) {
+    bundleEmbedImplementation(libs.spoofax3.lwb.dynamicloading) {
         // Exclude modules already exported by `spoofax.eclipse`
         exclude("org.metaborg", "common")
         exclude("org.metaborg", "spoofax.core")
@@ -70,7 +70,7 @@ dependencies {
     }
 
     // Embed `:spoofax.lwb.compiler`.
-    bundleEmbedImplementation(compositeBuild("spoofax.lwb.compiler")) {
+    bundleEmbedImplementation(libs.spoofax3.lwb.compiler) {
         // Exclude meta-languages and libraries, as they have their own Eclipse plugins
         exclude("org.metaborg", "cfg")
         exclude("org.metaborg", "sdf3")
@@ -105,18 +105,18 @@ dependencies {
     }
 
     // Embed `:spt.dynamicloading`.
-    bundleEmbedImplementation(compositeBuild("spt.dynamicloading"))
+    bundleEmbedImplementation(libs.spoofax3.spt.dynamicloading)
 
     // Embed `org.metaborg:pie.task.archive` and `org.metaborg:pie.task.java`
-    bundleEmbedImplementation("org.metaborg:pie.task.archive")
-    bundleEmbedImplementation("org.metaborg:pie.task.java")
+    bundleEmbedImplementation(libs.metaborg.pie.task.archive)
+    bundleEmbedImplementation(libs.metaborg.pie.task.java)
 
     // Embed FST serialize/deserialize implementation.
-    bundleEmbedImplementation("org.metaborg:pie.serde.fst")
+    bundleEmbedImplementation(libs.metaborg.pie.serde.fst)
 
-    compileOnly("org.checkerframework:checker-qual-android")
+    compileOnly(libs.checkerframework.android)
 
-    annotationProcessor("com.google.dagger:dagger-compiler")
+    annotationProcessor(libs.dagger.compiler)
 }
 
 val privatePackage = listOf(

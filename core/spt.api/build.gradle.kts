@@ -5,11 +5,11 @@ plugins {
 dependencies {
     api(platform(project(":spoofax.depconstraints")))
     annotationProcessor(platform(project(":spoofax.depconstraints")))
-    api("org.metaborg:common")
+    api(libs.metaborg.common)
     api(project(":spoofax.core"))
-    api("org.metaborg:pie.api")
-    api("org.metaborg.devenv:org.spoofax.terms")
-    compileOnly("org.derive4j:derive4j-annotation")
-    compileOnly("org.checkerframework:checker-qual-android")
-    annotationProcessor("org.derive4j:derive4j")
+    api(libs.metaborg.pie.api)
+    api(libs.spoofax.terms)
+    compileOnly(libs.derive4j.annotation)
+    compileOnly(libs.checkerframework.android)
+    annotationProcessor(libs.derive4j)
 }

@@ -7,12 +7,12 @@ dependencies {
 
     api(project(":spoofax.core"))
     api(project(":spoofax.compiler.interfaces"))
-    api("org.metaborg:log.backend.slf4j")
-    api("org.slf4j:slf4j-simple:1.7.30")
-    api("com.google.jimfs:jimfs:1.1")
-    api("org.metaborg:pie.runtime")
+    api(libs.metaborg.log.backend.slf4j)
+    api(libs.slf4j.simple)
+    api(libs.jimfs)
+    api(libs.metaborg.pie.runtime)
 
-    api("org.junit.jupiter:junit-jupiter-api")
+    api(libs.junit.api)
 
-    compileOnly("org.checkerframework:checker-qual-android")
+    compileOnly(libs.checkerframework.android)
 }

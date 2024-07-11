@@ -5,9 +5,9 @@ plugins {
 dependencies {
     api(platform(project(":spoofax.depconstraints")))
 
-    api("org.metaborg:common")
+    api(libs.metaborg.common)
 
-    api("org.metaborg.devenv:nabl2.solver")
+    api(libs.nabl2.solver)
 
-    compileOnly("org.checkerframework:checker-qual-android")
+    compileOnly(libs.checkerframework.android)
 }

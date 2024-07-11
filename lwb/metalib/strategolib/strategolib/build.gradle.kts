@@ -1,6 +1,9 @@
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler
 import mb.spoofax.compiler.util.GradleDependency
 
+// FIXME: org.metaborg:strategolib in Spoofax 3 conflicts with a same named package in Spoofax 2 (from Stratego)
+//  Use a devenv prefix?
+
 plugins {
     id("org.metaborg.gradle.config.java-library")
     id("org.metaborg.spoofax.compiler.gradle.spoofax2.language")
@@ -10,7 +13,7 @@ plugins {
 fun compositeBuild(name: String) = "$group:$name:$version"
 
 dependencies {
-    api("org.metaborg:pie.task.archive")
+    api(libs.metaborg.pie.task.archive)
 }
 
 languageProject {

@@ -6,19 +6,19 @@ dependencies {
     api(platform(project(":spoofax.depconstraints")))
     annotationProcessor(platform(project(":spoofax.depconstraints")))
 
-    api("org.metaborg:common")
-    api("org.metaborg:log.api")
-    api("org.metaborg:resource")
+    api(libs.metaborg.common)
+    api(libs.metaborg.log.api)
+    api(libs.metaborg.resource.api)
 
     implementation(project(":aterm.common"))
     implementation(project(":jsglr.common"))
 
-    api("org.metaborg.devenv:org.spoofax.terms")
-    api("org.metaborg.devenv:org.spoofax.interpreter.core")
-    api("org.metaborg.devenv:org.strategoxt.strj")
+    api(libs.spoofax.terms)
+    api(libs.interpreter.core)
+    api(libs.strategoxt.strj)
 
-    compileOnly("org.checkerframework:checker-qual-android")
-    compileOnly("org.derive4j:derive4j-annotation")
+    compileOnly(libs.checkerframework.android)
+    compileOnly(libs.derive4j.annotation)
 
-    annotationProcessor("org.derive4j:derive4j")
+    annotationProcessor(libs.derive4j)
 }

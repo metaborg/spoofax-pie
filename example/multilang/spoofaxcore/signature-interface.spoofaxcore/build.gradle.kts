@@ -5,5 +5,5 @@ plugins {
 
 val spoofax2DevenvVersion: String by ext
 dependencies {
-    compileLanguage("org.metaborg.devenv:statix.lang:$spoofax2DevenvVersion")
+    compileLanguage(libs.statix.lang)
 }

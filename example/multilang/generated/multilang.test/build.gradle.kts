@@ -6,12 +6,12 @@ plugins {
 fun compositeBuild(name: String) = "$group:$name:$version"
 
 dependencies {
-    testImplementation("org.metaborg:spoofax.core")
+    testImplementation(libs.spoofax3.core)
     testImplementation(project(":minisdf"))
     testImplementation(project(":ministr"))
 
-    testImplementation(compositeBuild("spoofax.test"))
-    testCompileOnly("org.checkerframework:checker-qual-android")
+    testImplementation(libs.spoofax3.test)
+    testCompileOnly(libs.checkerframework.android)
 }
 
 tasks.test {

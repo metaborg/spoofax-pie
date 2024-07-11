@@ -13,12 +13,12 @@ spoofaxLanguageSpecification {
     languageContributions.add(LanguageContributionIdentifier(LanguageIdentifier("$group", "org.metaborg.meta.lang.template", LanguageVersion.parse("$version")), "TemplateLang"))
 }
 dependencies {
-    compileLanguage("org.metaborg.devenv:org.metaborg.meta.lang.esv:$spoofax2DevenvVersion")
-    sourceLanguage("org.metaborg.devenv:org.metaborg.meta.lang.template:$spoofax2DevenvVersion")
-    sourceLanguage("org.metaborg.devenv:statix.lang:$spoofax2DevenvVersion")
+    compileLanguage(libs.esv.lang)
+    sourceLanguage(libs.sdf3.lang)
+    sourceLanguage(libs.statix.lang)
 
-    sourceLanguage("org.metaborg.devenv:meta.lib.spoofax:$spoofax2DevenvVersion")
-    sourceLanguage("org.metaborg.devenv:statix.runtime:$spoofax2DevenvVersion")
+    sourceLanguage(libs.spoofax2.meta.lib.spoofax)
+    sourceLanguage(libs.statix.runtime)
 
     sourceLanguage(project(":dynamix.spoofax2"))
 }

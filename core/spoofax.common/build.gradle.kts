@@ -5,5 +5,5 @@ plugins {
 dependencies {
     api(platform(project(":spoofax.depconstraints")))
 
-    compileOnly("org.checkerframework:checker-qual-android")
+    compileOnly(libs.checkerframework.android)
 }

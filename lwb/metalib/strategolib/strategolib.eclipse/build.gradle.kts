@@ -1,3 +1,7 @@
+
+// FIXME: org.metaborg:strategolib.eclipse in Spoofax 3 conflicts with a same named package in Spoofax 2 (from Stratego)
+//  Use a devenv prefix?
+
 plugins {
     id("org.metaborg.gradle.config.java-library")
     id("org.metaborg.spoofax.compiler.gradle.eclipse")

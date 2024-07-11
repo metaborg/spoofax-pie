@@ -26,22 +26,22 @@ dependencies {
     api(platform(compositeBuild("spoofax.depconstraints")))
     testAnnotationProcessor(platform(compositeBuild("spoofax.depconstraints")))
 
-    api("org.metaborg.devenv:org.metaborg.util")
-    api("org.metaborg.devenv:stratego.build")
-    api("org.metaborg:pie.task.archive")
+    api(libs.metaborg.util)
+    api(libs.stratego.build)
+    api(libs.metaborg.pie.task.archive)
 
     // Required because @Nullable has runtime retention (which includes classfile retention), and the Java compiler requires access to it.
-    compileOnly("com.google.code.findbugs:jsr305")
+    compileOnly(libs.jsr305)
 
-    implementation("commons-io:commons-io")
+    implementation(libs.commons.io)
 
-    testImplementation(compositeBuild("spoofax.test"))
-    testImplementation("org.metaborg:pie.task.java")
-    testImplementation("org.metaborg:pie.task.archive")
-    testImplementation(compositeBuild("spoofax.test"))
+    testImplementation(libs.spoofax3.test)
+    testImplementation(libs.metaborg.pie.task.java)
+    testImplementation(libs.metaborg.pie.task.archive)
+    testImplementation(libs.spoofax3.test)
     testImplementation(project(":strategolib"))
-    testAnnotationProcessor("com.google.dagger:dagger-compiler")
-    testCompileOnly("org.checkerframework:checker-qual-android")
+    testAnnotationProcessor(libs.dagger.compiler)
+    testCompileOnly(libs.checkerframework.android)
 }
 
 languageProject {
@@ -299,7 +299,7 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
 val classPathInjection = configurations.create("classPathInjection")
 dependencies {
     classPathInjection(platform("$group:spoofax.depconstraints:$version"))
-    classPathInjection("org.metaborg.devenv:org.strategoxt.strj")
+    classPathInjection(libs.strategoxt.strj)
 }
 
 tasks.test {

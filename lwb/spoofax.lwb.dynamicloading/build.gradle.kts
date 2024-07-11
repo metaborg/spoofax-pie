@@ -9,22 +9,22 @@ dependencies {
     api(platform(compositeBuild("spoofax.depconstraints")))
     annotationProcessor(platform(compositeBuild("spoofax.depconstraints")))
 
-    api(compositeBuild("spoofax.core"))
-    api("com.google.dagger:dagger")
-    implementation("org.metaborg:pie.runtime")
+    api(libs.spoofax3.core)
+    api(libs.dagger)
+    implementation(libs.metaborg.pie.runtime)
 
-    compileOnly("org.checkerframework:checker-qual-android")
-    compileOnly("org.derive4j:derive4j-annotation")
+    compileOnly(libs.checkerframework.android)
+    compileOnly(libs.derive4j.annotation)
 
-    annotationProcessor("com.google.dagger:dagger-compiler")
-    annotationProcessor("org.derive4j:derive4j")
+    annotationProcessor(libs.dagger.compiler)
+    annotationProcessor(libs.derive4j)
 
-    testImplementation("org.slf4j:slf4j-nop:1.7.30")
+    testImplementation(libs.slf4j.nop)
     testImplementation(project(":spoofax.lwb.compiler"))
     testImplementation(project(":spt"))
     testImplementation(project(":spt.dynamicloading"))
-    testImplementation("org.metaborg:pie.runtime")
-    testImplementation("org.metaborg:pie.serde.fst")
+    testImplementation(libs.metaborg.pie.runtime)
+    testImplementation(libs.metaborg.pie.serde.fst)
 }
 
 tasks.test {
