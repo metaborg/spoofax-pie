@@ -14,8 +14,10 @@ import mb.spoofax.core.language.command.CommandExecutionType
 import mb.spoofax.core.language.command.EnclosingCommandContextType
 
 plugins {
-    id("org.metaborg.gradle.config.java-library")
-    id("org.metaborg.gradle.config.junit-testing")
+    `java-library`
+    `maven-publish`
+    id("org.metaborg.convention.java")
+    id("org.metaborg.convention.maven-publish")
     id("org.metaborg.spoofax.compiler.gradle.spoofax2.language")
     id("org.metaborg.spoofax.compiler.gradle.adapter")
 }
@@ -35,6 +37,7 @@ dependencies {
 
     implementation(libs.commons.io)
 
+    testImplementation(libs.junit)
     testImplementation(libs.spoofax3.test)
     testImplementation(libs.metaborg.pie.task.java)
     testImplementation(libs.metaborg.pie.task.archive)
@@ -298,8 +301,8 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
 // Additional dependencies which are injected into tests.
 val classPathInjection = configurations.create("classPathInjection")
 dependencies {
-    classPathInjection(platform("$group:spoofax.depconstraints:$version"))
-//    classPathInjection(platform(libs.metaborg.platform))
+//    classPathInjection(platform("$group:spoofax.depconstraints:$version"))      // I couldn't replace this by 'org.metaborg:platform' yet, it caused DynamicLoadingTest. testDynamicLanguage() to fail
+    classPathInjection(platform(libs.metaborg.platform))
     classPathInjection(libs.strategoxt.strj)
 }
 
@@ -312,5 +315,13 @@ tasks.test {
             "classPath",
             classPathInjection.resolvedConfiguration.resolvedArtifacts.map { it.file }.joinToString(File.pathSeparator)
         )
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
     }
 }

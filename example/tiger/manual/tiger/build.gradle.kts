@@ -1,6 +1,8 @@
 plugins {
-    id("org.metaborg.gradle.config.java-library")
-    id("org.metaborg.gradle.config.junit-testing")
+    `java-library`
+    `maven-publish`
+    id("org.metaborg.convention.java")
+    id("org.metaborg.convention.maven-publish")
     id("org.metaborg.devenv.spoofax.gradle.base")
 }
 
@@ -33,6 +35,7 @@ dependencies {
     compileOnly(libs.checkerframework.android)
 
     testImplementation(libs.spoofax3.test)
+    testImplementation(libs.junit)
     testCompileOnly(libs.checkerframework.android)
 }
 
@@ -93,3 +96,11 @@ copySpoofaxLanguageResources(
     true,
     "target/metaborg/editor.esv.af", "target/metaborg/sdf.tbl"
 )
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
+    }
+}

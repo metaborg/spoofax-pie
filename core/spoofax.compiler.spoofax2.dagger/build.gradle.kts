@@ -2,7 +2,10 @@
 // main project, as there are staging conflicts with the other (org.immutables/derive4j) annotation processors.
 
 plugins {
-    id("org.metaborg.gradle.config.java-library")
+    `java-library`
+    `maven-publish`
+    id("org.metaborg.convention.java")
+    id("org.metaborg.convention.maven-publish")
 }
 
 dependencies {
@@ -14,4 +17,12 @@ dependencies {
     compileOnly(libs.immutables.value.annotations) // Dagger accesses these annotations, which have class retention.
 
     annotationProcessor(libs.dagger.compiler)
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
+    }
 }

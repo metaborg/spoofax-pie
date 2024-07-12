@@ -1,5 +1,8 @@
 plugins {
-    id("org.metaborg.gradle.config.java-library")
+    `java-library`
+    `maven-publish`
+    id("org.metaborg.convention.java")
+    id("org.metaborg.convention.maven-publish")
     id("org.jetbrains.intellij")
 }
 
@@ -38,5 +41,13 @@ tasks {
         //       `org.jetbrains.intellij` plugin seems to ignore. This is probably because `spoofax.intellij` is a plugin
         //       but is not listed as a plugin dependency. This hack may not work when publishing this plugin.
         dependsOn(configurations.runtimeClasspath)
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
     }
 }

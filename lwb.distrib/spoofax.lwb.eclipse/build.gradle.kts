@@ -1,5 +1,8 @@
 plugins {
-    id("org.metaborg.gradle.config.java-library")
+    `java-library`
+    `maven-publish`
+    id("org.metaborg.convention.java")
+    id("org.metaborg.convention.maven-publish")
     id("org.metaborg.coronium.bundle")
 }
 
@@ -164,5 +167,13 @@ tasks {
     }
     withType<mb.coronium.task.EclipseRun> {
         jvmArgs("-Xss16M") // Set required stack size, mainly for serialization.
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
     }
 }

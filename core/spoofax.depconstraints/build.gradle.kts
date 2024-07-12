@@ -22,6 +22,7 @@ val derive4jVersion = "1.1.1"
 val immutablesVersion = "2.10.1"
 
 val yamlVersion = "1.26"
+val junitVersion = "5.10.1"
 
 dependencies {
     constraints {
@@ -127,7 +128,7 @@ dependencies {
 
 
         // Test dependencies // TODO: should be in a separate platform?
-        api("org.junit.jupiter:junit-jupiter-api:${metaborg.junitVersion}")
+        api("org.junit.jupiter:junit-jupiter-api:$junitVersion")
         api("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
         api(libs.jimfs)
         api("nl.jqno.equalsverifier:equalsverifier:3.16.1")

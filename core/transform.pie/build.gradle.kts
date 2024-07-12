@@ -1,5 +1,8 @@
 plugins {
-    id("org.metaborg.gradle.config.java-library")
+    `java-library`
+    `maven-publish`
+    id("org.metaborg.convention.java")
+    id("org.metaborg.convention.maven-publish")
 }
 
 dependencies {
@@ -13,4 +16,12 @@ dependencies {
     api(libs.metaborg.pie.api)
 
     compileOnly(libs.checkerframework.android)
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
+    }
 }

@@ -2,8 +2,10 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 import java.util.*
 
 plugins {
-    id("org.metaborg.gradle.config.java-library")
-    id("org.metaborg.gradle.config.junit-testing")
+    `java-library`
+    `maven-publish`
+    id("org.metaborg.convention.java")
+    id("org.metaborg.convention.maven-publish")
 }
 
 repositories {
@@ -29,6 +31,7 @@ dependencies {
     annotationProcessor(libs.derive4j)
     annotationProcessor(libs.dagger.compiler)
 
+    testImplementation(libs.junit)
     testImplementation(project(":spoofax.compiler"))
     testImplementation(libs.dagger)
     testImplementation(libs.metaborg.pie.runtime)
@@ -89,5 +92,13 @@ class NonShittyProperties : Properties() {
             writer.newLine()
         }
         writer.flush()
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
     }
 }

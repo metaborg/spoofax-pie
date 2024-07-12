@@ -1,5 +1,9 @@
 plugins {
-    id("org.metaborg.gradle.config.java-application")
+    java
+    application
+    `maven-publish`
+    id("org.metaborg.convention.java")
+    id("org.metaborg.convention.maven-publish")
     id("com.palantir.graal")
 }
 
@@ -38,4 +42,12 @@ dependencies {
 
     annotationProcessor(libs.dagger.compiler)
     annotationProcessor(libs.picocli.codegen)
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
+    }
 }

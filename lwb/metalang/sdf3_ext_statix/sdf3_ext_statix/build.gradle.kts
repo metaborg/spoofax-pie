@@ -2,7 +2,10 @@ import mb.spoofax.compiler.adapter.*
 import mb.spoofax.compiler.util.*
 
 plugins {
-    id("org.metaborg.gradle.config.java-library")
+    `java-library`
+    `maven-publish`
+    id("org.metaborg.convention.java")
+    id("org.metaborg.convention.maven-publish")
     id("org.metaborg.spoofax.compiler.gradle.spoofax2.language")
     id("org.metaborg.spoofax.compiler.gradle.adapter")
 }
@@ -56,4 +59,12 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
         TypeInfo.of(taskPackageId, "Sdf3ExtStatixGenerateStatix"),
         TypeInfo.of(taskPackageId, "Sdf3ExtStatixGenerateStratego")
     )
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
+    }
 }

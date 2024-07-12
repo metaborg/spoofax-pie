@@ -1,8 +1,10 @@
 import mb.spoofax.compiler.util.GradleDependency
 
 plugins {
-    id("org.metaborg.gradle.config.java-library")
-    id("org.metaborg.gradle.config.junit-testing")
+    `java-library`
+    `maven-publish`
+    id("org.metaborg.convention.java")
+    id("org.metaborg.convention.maven-publish")
     id("org.metaborg.spoofax.compiler.gradle.spoofax2.language")
 }
 
@@ -11,6 +13,7 @@ fun compositeBuild(name: String) = "$group:$name:$version"
 dependencies {
     testImplementation(platform(libs.metaborg.platform))
     testImplementation(libs.spoofax3.test)
+    testImplementation(libs.junit)
     testCompileOnly(libs.checkerframework.android)
 }
 
@@ -46,5 +49,13 @@ spoofax2BasedLanguageProject {
         }
         project
             .languageSpecificationDependency(GradleDependency.project(":mod.spoofaxcore"))
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
     }
 }

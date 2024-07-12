@@ -1,5 +1,8 @@
 plugins {
-    id("org.metaborg.gradle.config.java-library")
+    `java-library`
+    `maven-publish`
+    id("org.metaborg.convention.java")
+    id("org.metaborg.convention.maven-publish")
     id("org.metaborg.coronium.bundle")
 }
 
@@ -49,6 +52,14 @@ tasks {
             attributes(
                 Pair("Export-Package", exports.joinToString(", "))
             )
+        }
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
         }
     }
 }

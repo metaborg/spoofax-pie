@@ -2,7 +2,10 @@ import mb.spoofax.compiler.adapter.AdapterProjectCompiler
 import mb.spoofax.compiler.util.GradleDependency
 
 plugins {
-    id("org.metaborg.gradle.config.java-library")
+    `java-library`
+    `maven-publish`
+    id("org.metaborg.convention.java")
+    id("org.metaborg.convention.maven-publish")
     id("org.metaborg.spoofax.compiler.gradle.spoofax2.language")
     id("org.metaborg.spoofax.compiler.gradle.adapter")
 }
@@ -40,4 +43,12 @@ languageAdapterProject {
 }
 fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
     compositionGroup("mb.spoofax.lwb")
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
+    }
 }

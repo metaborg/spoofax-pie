@@ -1,7 +1,8 @@
 plugins {
-    id("org.metaborg.gradle.config.java-library")
-    id("org.metaborg.gradle.config.junit-testing")
-    jacoco
+    `java-library`
+    `maven-publish`
+    id("org.metaborg.convention.java")
+    id("org.metaborg.convention.maven-publish")
 }
 
 dependencies {
@@ -30,7 +31,7 @@ dependencies {
     testImplementation(libs.metaborg.log.backend.slf4j)
     testImplementation(libs.slf4j.simple)
     testCompileOnly(libs.immutables.value)
-
+    testImplementation(libs.junit)
     testImplementation(libs.opencsv)
 
     // Immutables
@@ -38,14 +39,10 @@ dependencies {
     testAnnotationProcessor(libs.immutables.value)
 }
 
-tasks.test {
-    finalizedBy(tasks.jacocoTestReport)
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
+    }
 }
-tasks.jacocoTestReport {
-    dependsOn(tasks.test)
-}
-
-//tasks { withType<Test> {
-//  debug = true
-//  maxHeapSize = "3g"
-//} }

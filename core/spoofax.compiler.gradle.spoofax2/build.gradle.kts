@@ -1,8 +1,11 @@
 plugins {
-    id("org.metaborg.gradle.config.kotlin-gradle-plugin")
-    kotlin("jvm")
+    `java-library`
+    `maven-publish`
+    id("org.metaborg.convention.java")
+    id("org.metaborg.convention.maven-publish")
+    `kotlin-dsl`
+    `java-gradle-plugin`
     kotlin("kapt")
-    id("org.gradle.kotlin.kotlin-dsl") // Same as `kotlin-dsl`, but without version, which is already set in root project.
 }
 
 dependencies {

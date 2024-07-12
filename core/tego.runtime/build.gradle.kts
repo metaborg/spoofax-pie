@@ -1,7 +1,8 @@
 plugins {
-    id("org.metaborg.gradle.config.java-library")
-    id("org.metaborg.gradle.config.junit-testing")
-    jacoco
+    `java-library`
+    `maven-publish`
+    id("org.metaborg.convention.java")
+    id("org.metaborg.convention.maven-publish")
 }
 
 dependencies {
@@ -17,15 +18,16 @@ dependencies {
 
     compileOnly(libs.checkerframework.android)
 
+    testImplementation(libs.junit)
     testCompileOnly(libs.checkerframework.android)
     testImplementation(libs.metaborg.log.backend.slf4j)
     testImplementation(libs.slf4j.simple)
 }
 
-tasks.test {
-    finalizedBy(tasks.jacocoTestReport)
-}
-
-tasks.jacocoTestReport {
-    dependsOn(tasks.test)
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
+    }
 }

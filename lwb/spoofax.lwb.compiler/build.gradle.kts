@@ -1,6 +1,8 @@
 plugins {
-    id("org.metaborg.gradle.config.java-library")
-    id("org.metaborg.gradle.config.junit-testing")
+    `java-library`
+    `maven-publish`
+    id("org.metaborg.convention.java")
+    id("org.metaborg.convention.maven-publish")
 }
 
 fun compositeBuild(name: String) = "$group:$name:$version"
@@ -45,7 +47,7 @@ dependencies {
     annotationProcessor(libs.derive4j)
     annotationProcessor(libs.dagger.compiler)
 
-
+    testImplementation(libs.junit)
     testImplementation(libs.junit.params)
     testImplementation(libs.metaborg.pie.runtime)
     testImplementation(libs.metaborg.pie.serde.fst)
@@ -70,4 +72,12 @@ tasks.test {
         "--add-opens", "java.base/java.util=ALL-UNNAMED",
         "--add-opens", "java.base/java.util.concurrent=ALL-UNNAMED",
     ))
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
+    }
 }

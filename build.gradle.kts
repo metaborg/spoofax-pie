@@ -1,6 +1,10 @@
+import org.metaborg.convention.MavenPublishConventionExtension
+
+// Workaround for issue: https://youtrack.jetbrains.com/issue/KTIJ-19369
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    id("org.metaborg.gradle.config.root-project") version "0.5.6"
-    id("org.metaborg.gitonium") version "1.2.0"
+    id("org.metaborg.convention.root-project")
+    alias(libs.plugins.gitonium)
 }
 
 // Auto-accept build scan TOS
@@ -35,5 +39,16 @@ gradle.includedBuild("spoofax3.lwb.distrib.root").let { lwbDistrib ->
     tasks.register("archiveSpoofax3LwbEclipseInstallations") {
         dependsOn(lwbDistrib.task(":spoofax.lwb.eclipse.repository:archiveEclipseInstallations"))
         dependsOn(lwbDistrib.task(":spoofax.lwb.eclipse.repository:archiveEclipseInstallationsWithJvm"))
+    }
+}
+
+allprojects {
+    group = "org.metaborg"
+
+    pluginManager.withPlugin("org.metaborg.convention.maven-publish") {
+        extensions.configure(MavenPublishConventionExtension::class.java) {
+            repoOwner.set("metaborg")
+            repoName.set("spoofax-pie")
+        }
     }
 }

@@ -1,14 +1,17 @@
 import mb.spoofax.compiler.util.GradleDependency
 
 plugins {
-    id("org.metaborg.gradle.config.java-library")
-    id("org.metaborg.gradle.config.junit-testing")
+    `java-library`
+    `maven-publish`
+    id("org.metaborg.convention.java")
+    id("org.metaborg.convention.maven-publish")
     id("org.metaborg.spoofax.compiler.gradle.spoofax2.language")
     id("org.metaborg.spoofax.compiler.gradle.adapter")
 }
 
 dependencies {
     api(project(":module"))
+    testImplementation(libs.junit)
 }
 
 languageProject {
@@ -57,5 +60,13 @@ languageAdapterProject {
             projectConstraint("mini-str!projectOk")
         }
         project.compositionGroup("minimeta")
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
     }
 }

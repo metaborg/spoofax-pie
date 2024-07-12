@@ -13,7 +13,10 @@ import mb.spoofax.core.language.command.CommandExecutionType
 import mb.spoofax.core.language.command.EnclosingCommandContextType
 
 plugins {
-    id("org.metaborg.gradle.config.java-library")
+    `java-library`
+    `maven-publish`
+    id("org.metaborg.convention.java")
+    id("org.metaborg.convention.maven-publish")
     id("org.metaborg.spoofax.compiler.gradle.spoofax2.language")
     id("org.metaborg.spoofax.compiler.gradle.adapter")
 }
@@ -173,4 +176,12 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
     )
     addAllMainMenuItems(menuItems)
     addAllEditorContextMenuItems(menuItems)
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
+    }
 }

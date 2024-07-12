@@ -3,7 +3,10 @@ import mb.spoofax.compiler.util.GradleDependency
 import mb.spoofax.compiler.util.TypeInfo
 
 plugins {
-    id("org.metaborg.gradle.config.java-library")
+    `java-library`
+    `maven-publish`
+    id("org.metaborg.convention.java")
+    id("org.metaborg.convention.maven-publish")
     id("org.metaborg.spoofax.compiler.gradle.spoofax2.language")
     id("org.metaborg.spoofax.compiler.gradle.adapter")
 }
@@ -50,4 +53,12 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
     addTaskDefs(
         TypeInfo.of(taskPackageId, "Sdf3ExtDynamixGenerateDynamix")
     )
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
+    }
 }

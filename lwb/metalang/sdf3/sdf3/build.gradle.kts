@@ -13,8 +13,10 @@ import mb.spoofax.core.language.command.CommandExecutionType
 import mb.spoofax.core.language.command.EnclosingCommandContextType
 
 plugins {
-    id("org.metaborg.gradle.config.java-library")
-    id("org.metaborg.gradle.config.junit-testing")
+    `java-library`
+    `maven-publish`
+    id("org.metaborg.convention.java")
+    id("org.metaborg.convention.maven-publish")
     id("org.metaborg.spoofax.compiler.gradle.spoofax2.language")
     id("org.metaborg.spoofax.compiler.gradle.adapter")
 }
@@ -28,6 +30,7 @@ dependencies {
     api(libs.sdf2table)
     api(libs.sdf2parenthesize)
 
+    testImplementation(libs.junit)
     testImplementation(libs.spoofax3.test)
     testCompileOnly(libs.checkerframework.android)
 }
@@ -391,4 +394,12 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
             )
         )
     )
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
+    }
 }

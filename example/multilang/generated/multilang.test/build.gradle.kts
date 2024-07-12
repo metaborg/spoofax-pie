@@ -1,6 +1,8 @@
 plugins {
-    id("org.metaborg.gradle.config.java-library")
-    id("org.metaborg.gradle.config.junit-testing")
+    `java-library`
+    `maven-publish`
+    id("org.metaborg.convention.java")
+    id("org.metaborg.convention.maven-publish")
 }
 
 fun compositeBuild(name: String) = "$group:$name:$version"
@@ -13,6 +15,7 @@ dependencies {
     testImplementation(project(":ministr"))
 
     testImplementation(libs.spoofax3.test)
+    testImplementation(libs.junit)
     testCompileOnly(libs.checkerframework.android)
 }
 
@@ -24,5 +27,13 @@ tasks.test {
             org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR
         )
         showStandardStreams = true
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
     }
 }

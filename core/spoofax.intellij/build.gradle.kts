@@ -1,5 +1,8 @@
 plugins {
-    id("org.metaborg.gradle.config.java-library")
+    `java-library`
+    `maven-publish`
+    id("org.metaborg.convention.java")
+    id("org.metaborg.convention.maven-publish")
     id("org.jetbrains.intellij")
 }
 
@@ -25,3 +28,11 @@ intellij {
 
 // Skip non-incremental, slow, and unnecessary buildSearchableOptions task from IntelliJ.
 tasks.getByName("buildSearchableOptions").enabled = false
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
+    }
+}
