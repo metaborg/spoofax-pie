@@ -6,8 +6,7 @@ plugins {
 }
 
 dependencies {
-    api(platform(project(":spoofax.depconstraints")))
-    annotationProcessor(platform(project(":spoofax.depconstraints")))
+    api(platform(libs.metaborg.platform))
 
     api(project(":spoofax.compiler.spoofax2"))
     api(libs.dagger)

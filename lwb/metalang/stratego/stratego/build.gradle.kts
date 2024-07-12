@@ -23,8 +23,8 @@ plugins {
 fun compositeBuild(name: String) = "$group:$name:$version"
 
 dependencies {
-    api(platform(compositeBuild("spoofax.depconstraints")))
-    testAnnotationProcessor(platform(compositeBuild("spoofax.depconstraints")))
+    api(platform(libs.metaborg.platform))
+    testImplementation(platform(libs.metaborg.platform))
 
     api(libs.metaborg.util)
     api(libs.stratego.build)
@@ -299,6 +299,7 @@ fun AdapterProjectCompiler.Input.Builder.configureCompilerInput() {
 val classPathInjection = configurations.create("classPathInjection")
 dependencies {
     classPathInjection(platform("$group:spoofax.depconstraints:$version"))
+//    classPathInjection(platform(libs.metaborg.platform))
     classPathInjection(libs.strategoxt.strj)
 }
 

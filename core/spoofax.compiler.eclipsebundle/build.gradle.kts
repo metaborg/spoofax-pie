@@ -8,9 +8,6 @@ mavenize {
 }
 
 dependencies {
-    api(platform(project(":spoofax.depconstraints")))
-    annotationProcessor(platform(project(":spoofax.depconstraints")))
-
     bundleTargetPlatformApi(eclipse("javax.inject"))
 
     bundleApi(project(":spoofax.eclipse"))

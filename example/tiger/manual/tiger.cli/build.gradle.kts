@@ -24,8 +24,7 @@ graal {
 fun compositeBuild(name: String) = "$group:$name:$version"
 
 dependencies {
-    implementation(platform(compositeBuild("spoofax.depconstraints")))
-    annotationProcessor(platform(compositeBuild("spoofax.depconstraints")))
+    implementation(platform(libs.metaborg.platform))
 
     implementation(project(":tiger.spoofax"))
     implementation(libs.spoofax3.cli)

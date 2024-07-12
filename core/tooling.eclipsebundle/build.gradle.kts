@@ -8,8 +8,7 @@ mavenize {
 }
 
 dependencies {
-    api(platform(project(":spoofax.depconstraints")))
-    annotationProcessor(platform(project(":spoofax.depconstraints")))
+    bundleEmbedApi(platform(libs.metaborg.platform))
 
     bundleTargetPlatformApi(eclipse("javax.inject"))
 

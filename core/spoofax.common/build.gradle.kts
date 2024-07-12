@@ -3,7 +3,5 @@ plugins {
 }
 
 dependencies {
-    api(platform(project(":spoofax.depconstraints")))
-
     compileOnly(libs.checkerframework.android)
 }

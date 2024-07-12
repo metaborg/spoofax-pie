@@ -13,6 +13,8 @@ plugins {
 fun compositeBuild(name: String) = "$group:$name:$version"
 
 dependencies {
+    api(platform(libs.metaborg.platform))
+
     api(project(":strategolib"))
     api(libs.metaborg.pie.task.archive)
 }

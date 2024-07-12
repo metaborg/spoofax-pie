@@ -4,9 +4,6 @@ plugins {
 }
 
 dependencies {
-    api(platform(project(":spoofax.depconstraints")))
-    annotationProcessor(platform(project(":spoofax.depconstraints")))
-
     bundleTargetPlatformApi(eclipse("javax.inject"))
     bundleTargetPlatformApi(eclipse("org.eclipse.core.runtime"))
     bundleTargetPlatformApi(eclipse("org.eclipse.core.expressions"))

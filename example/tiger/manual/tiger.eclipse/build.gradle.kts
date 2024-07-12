@@ -10,9 +10,6 @@ mavenize {
 fun compositeBuild(name: String) = "$group:$name:$version"
 
 dependencies {
-    api(platform(compositeBuild("spoofax.depconstraints")))
-    annotationProcessor(platform(compositeBuild("spoofax.depconstraints")))
-
     bundleApi(libs.spoofax3.eclipse)
 
     bundleEmbedApi(project(":tiger"))

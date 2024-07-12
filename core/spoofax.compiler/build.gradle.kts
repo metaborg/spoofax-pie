@@ -11,9 +11,7 @@ repositories {
 }
 
 dependencies {
-    api(platform(project(":spoofax.depconstraints")))
-    annotationProcessor(platform(project(":spoofax.depconstraints")))
-    testAnnotationProcessor(platform(project(":spoofax.depconstraints")))
+    api(platform(libs.metaborg.platform))
 
     api(libs.metaborg.common)
     api(project(":spoofax.common"))

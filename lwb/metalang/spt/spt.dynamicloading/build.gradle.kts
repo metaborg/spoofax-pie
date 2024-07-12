@@ -3,6 +3,8 @@ plugins {
 }
 
 dependencies {
+    api(platform(libs.metaborg.platform))
+
     api(project(":spt"))
     api(project(":spoofax.lwb.dynamicloading"))
 

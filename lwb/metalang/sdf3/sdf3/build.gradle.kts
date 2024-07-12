@@ -22,6 +22,9 @@ plugins {
 fun compositeBuild(name: String) = "$group:$name:$version"
 
 dependencies {
+    api(platform(libs.metaborg.platform))
+    testImplementation(platform(libs.metaborg.platform))
+
     api(libs.sdf2table)
     api(libs.sdf2parenthesize)
 

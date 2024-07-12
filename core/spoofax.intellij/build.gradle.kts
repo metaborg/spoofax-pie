@@ -4,8 +4,8 @@ plugins {
 }
 
 dependencies {
-    implementation(platform(project(":spoofax.depconstraints")))
-    annotationProcessor(platform(project(":spoofax.depconstraints")))
+    api(platform(libs.metaborg.platform))
+    implementation(platform(libs.metaborg.platform))
 
     api(project(":spoofax.core"))
 

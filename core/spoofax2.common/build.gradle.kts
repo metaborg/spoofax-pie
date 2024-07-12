@@ -3,7 +3,8 @@ plugins {
 }
 
 dependencies {
-    api(platform(project(":spoofax.depconstraints")))
+    api(platform(libs.metaborg.platform))
+    implementation(platform(libs.metaborg.platform))
 
     implementation(libs.metaborg.common)
     implementation(project(":stratego.common"))

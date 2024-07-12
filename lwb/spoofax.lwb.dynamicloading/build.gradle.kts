@@ -6,8 +6,9 @@ plugins {
 fun compositeBuild(name: String) = "$group:$name:$version"
 
 dependencies {
-    api(platform(compositeBuild("spoofax.depconstraints")))
-    annotationProcessor(platform(compositeBuild("spoofax.depconstraints")))
+    api(platform(libs.metaborg.platform))
+    implementation(platform(libs.metaborg.platform))
+    testImplementation(platform(libs.metaborg.platform))
 
     api(libs.spoofax3.core)
     api(libs.dagger)

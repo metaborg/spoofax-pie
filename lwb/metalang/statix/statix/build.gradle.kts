@@ -16,6 +16,9 @@ plugins {
 fun compositeBuild(name: String) = "$group:$name:$version"
 
 dependencies {
+    implementation(platform(libs.metaborg.platform))
+    testImplementation(platform(libs.metaborg.platform))
+
     // Required because @Nullable has runtime retention (which includes classfile retention), and the Java compiler requires access to it.
     compileOnly(libs.jsr305)
 

@@ -3,10 +3,10 @@ plugins {
 }
 
 dependencies {
-    api(platform(project(":spoofax.depconstraints")))
+    api(platform(libs.metaborg.platform))
+    implementation(platform(libs.metaborg.platform))
 
     api(libs.metaborg.common)
-
     api(libs.spoofax.terms)
 
     // Depend on Stratego projects for access to standard library strategies which do aterm pretty printing.

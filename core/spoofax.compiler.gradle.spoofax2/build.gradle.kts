@@ -6,8 +6,8 @@ plugins {
 }
 
 dependencies {
-    api(platform(project(":spoofax.depconstraints")))
-    kapt(platform(project(":spoofax.depconstraints")))
+    api(platform(libs.metaborg.platform))
+    implementation(platform(libs.metaborg.platform))
 
     api(project(":spoofax.compiler"))
     api(project(":spoofax.compiler.spoofax2"))
