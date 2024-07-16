@@ -45,4 +45,9 @@ allprojects {
             repoName.set("spoofax-pie")
         }
     }
+
+    repositories {
+        maven("https://artifacts.metaborg.org/content/groups/public/")
+        mavenCentral()
+    }
 }

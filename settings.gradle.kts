@@ -3,6 +3,7 @@ rootProject.name = "spoofax3.root"
 pluginManagement {
     repositories {
         maven("https://artifacts.metaborg.org/content/groups/public/")
+        mavenCentral()
     }
 }
 

@@ -23,18 +23,6 @@ plugins {
     id("org.metaborg.spoofax.lwb.compiler.gradle.language") apply false
 }
 
-subprojects {
-    metaborg {
-        configureSubProject()
-        // Do not publish examples, except for `tiger.spoofax3`
-        if (this@subprojects.name != "tiger.spoofax3") {
-            javaCreatePublication = false
-            javaCreateSourcesJar = false
-            javaCreateJavadocJar = false
-        }
-    }
-}
-
 val spoofax2Version: String = System.getProperty("spoofax2Version")
 val spoofax2DevenvVersion: String = System.getProperty("spoofax2DevenvVersion")
 allprojects {
@@ -52,5 +40,10 @@ allprojects {
             repoOwner.set("metaborg")
             repoName.set("spoofax-pie")
         }
+    }
+
+    repositories {
+        maven("https://artifacts.metaborg.org/content/groups/public/")
+        mavenCentral()
     }
 }

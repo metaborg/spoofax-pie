@@ -24,18 +24,6 @@ plugins {
     id("org.metaborg.spoofax.lwb.compiler.gradle.language") apply false
 }
 
-subprojects {
-    metaborg {
-        configureSubProject()
-        if (name.contains(".cli") || name.contains(".eclipse") || name.contains(".intellij")) {
-            // TODO: Publish CLI, Eclipse plugin, and IntelliJ plugin.
-            // Do not publish CLI, Eclipse plugin, and IntelliJ plugin for now.
-            javaCreatePublication = false
-            javaCreateSourcesJar = false
-            javaCreateJavadocJar = false
-        }
-    }
-}
 
 val spoofax2Version: String = System.getProperty("spoofax2Version")
 val spoofax2DevenvVersion: String = System.getProperty("spoofax2DevenvVersion")
@@ -48,6 +36,11 @@ allprojects {
     apply(plugin = "org.metaborg.gitonium")
     version = gitonium.version
     group = "org.metaborg"
+
+    repositories {
+        maven("https://artifacts.metaborg.org/content/groups/public/")
+        mavenCentral()
+    }
 
     pluginManager.withPlugin("org.metaborg.convention.maven-publish") {
         extensions.configure(MavenPublishConventionExtension::class.java) {
