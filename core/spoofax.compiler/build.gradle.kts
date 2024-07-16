@@ -37,7 +37,18 @@ dependencies {
     testImplementation(libs.metaborg.pie.runtime)
     testImplementation(libs.junit.params)
     testImplementation(libs.jimfs)
-    testImplementation(libs.eclipse.jdt.core)
+//    testImplementation(libs.eclipse.jdt.core)
+    testImplementation("org.eclipse.jdt:org.eclipse.jdt.core:3.33.0")
+//    testImplementation("org.eclipse.jdt:org.eclipse.jdt.core") {
+//        version {
+//            strictly("3.25.0")
+//        }
+//    }
+//    testImplementation("org.eclipse.platform:org.eclipse.core.runtime") {
+//        version {
+//            strictly("3.25.0")
+//        }
+//    }
     testImplementation(libs.gradle.tooling.api)
     testRuntimeOnly(libs.slf4j.simple) // SLF4J implementation required for Gradle tooling API.
     testCompileOnly(libs.checkerframework.android)

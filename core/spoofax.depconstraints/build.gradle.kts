@@ -3,26 +3,6 @@ plugins {
     `maven-publish`
 }
 
-val commonVersion = "0.11.0"
-val logVersion = "0.5.5"
-val slf4jVersion = "1.7.30"
-val resourceVersion = "0.14.1"
-val pieVersion = "0.21.0"
-
-val spoofax2Version: String by ext
-val spoofax2DevenvVersion: String by ext
-
-val picocliVersion = "4.5.0"
-
-val javaxInjectVersion = "1"
-val checkerframeworkVersion = "3.16.0"
-
-val daggerVersion = "2.36" // Do not upgrade, causes Gradle/Kotlin compatibility issues due to upgrade to Kotlin 1.5.
-val derive4jVersion = "1.1.1"
-val immutablesVersion = "2.10.1"
-
-val yamlVersion = "1.26"
-val junitVersion = "5.10.1"
 
 dependencies {
     constraints {
@@ -59,79 +39,79 @@ dependencies {
 
         // Main dependencies
         /// Common
-        api("org.metaborg:common:$commonVersion")
+        api(libs.metaborg.common)
         /// Log
-        api("org.metaborg:log.api:$logVersion")
-        api("org.metaborg:log.backend.logback:$logVersion")
-        api("org.metaborg:log.backend.slf4j:$logVersion")
-        api("org.metaborg:log.dagger:$logVersion")
+        api(libs.metaborg.log.api)
+        api(libs.metaborg.log.backend.logback)
+        api(libs.metaborg.log.backend.slf4j)
+        api(libs.metaborg.log.dagger)
         /// SLF4j
-        api("org.slf4j:slf4j-simple:$slf4jVersion")
+        api(libs.slf4j.simple)
         /// Resource
-        api("org.metaborg:resource:$resourceVersion")
-        api("org.metaborg:resource.dagger:$resourceVersion")
+        api(libs.metaborg.resource.api)
+        api(libs.metaborg.resource.dagger)
         /// PIE
-        api("org.metaborg:pie.api:$pieVersion")
-        api("org.metaborg:pie.graph:$pieVersion")
-        api("org.metaborg:pie.runtime:$pieVersion")
-        api("org.metaborg:pie.dagger:$pieVersion")
-        api("org.metaborg:pie.task.java:$pieVersion")
-        api("org.metaborg:pie.task.archive:$pieVersion")
-        api("org.metaborg:pie.serde.fst:$pieVersion")
+        api(libs.metaborg.pie.api)
+        api(libs.metaborg.pie.graph)
+        api(libs.metaborg.pie.runtime)
+        api(libs.metaborg.pie.dagger)
+        api(libs.metaborg.pie.task.java)
+        api(libs.metaborg.pie.task.archive)
+        api(libs.metaborg.pie.serde.fst)
         /// Spoofax 2.x
-        runtime("org.metaborg:strategoxt-min-jar:$spoofax2Version")
+        runtime(libs.strategoxt.minjar)
         /// Spoofax 2.x with devenv override
-        api("org.metaborg.devenv:org.strategoxt.strj:$spoofax2DevenvVersion")
-        api("org.metaborg.devenv:org.spoofax.terms:$spoofax2DevenvVersion")
-        api("org.metaborg.devenv:org.metaborg.util:$spoofax2DevenvVersion")
-        api("org.metaborg.devenv:org.spoofax.interpreter.core:$spoofax2DevenvVersion")
-        api("org.metaborg.devenv:org.spoofax.jsglr:$spoofax2DevenvVersion")
-        api("org.metaborg.devenv:org.spoofax.jsglr2:$spoofax2DevenvVersion")
-        api("org.metaborg.devenv:jsglr.shared:$spoofax2DevenvVersion")
-        api("org.metaborg.devenv:sdf2table:$spoofax2DevenvVersion")
-        api("org.metaborg.devenv:sdf2parenthesize:$spoofax2DevenvVersion")
-        api("org.metaborg.devenv:org.metaborg.parsetable:$spoofax2DevenvVersion")
-        api("org.metaborg.devenv:stratego.build:$spoofax2DevenvVersion")
-        api("org.metaborg.devenv:nabl2.terms:$spoofax2DevenvVersion")
-        api("org.metaborg.devenv:nabl2.solver:$spoofax2DevenvVersion")
-        api("org.metaborg.devenv:statix.solver:$spoofax2DevenvVersion")
-        api("org.metaborg.devenv:statix.generator:$spoofax2DevenvVersion")
+        api(libs.strategoxt.strj)
+        api(libs.spoofax.terms)
+        api(libs.metaborg.util)
+        api(libs.interpreter.core)
+        api(libs.jsglr)
+        api(libs.jsglr2)
+        api(libs.jsglr.shared)
+        api(libs.sdf2table)
+        api(libs.sdf2parenthesize)
+        api(libs.parsetable)
+        api(libs.stratego.build)
+        api(libs.nabl2.terms)
+        api(libs.nabl2.solver)
+        api(libs.statix.solver)
+        api(libs.statix.generator)
 
         /// Picocli
-        api("info.picocli:picocli:$picocliVersion")
-        api("info.picocli:picocli-codegen:$picocliVersion")
+        api(libs.picocli)
+        api(libs.picocli.codegen)
 
         // Annotation-only dependencies
         /// javax.inject
-        api("javax.inject:javax.inject:$javaxInjectVersion")
+        api(libs.javax.inject)
         /// Checkerframework
-        api("org.checkerframework:checker-qual-android:$checkerframeworkVersion") // Use android version: annotation retention policy is class instead of runtime.
+        api(libs.checkerframework.android) // Use android version: annotation retention policy is class instead of runtime.
         /// FindBugs JSR305
-        api("com.google.code.findbugs:jsr305:3.0.2")
+        api(libs.jsr305)
 
         // Annotation processor dependencies
         /// Dagger
-        api("com.google.dagger:dagger:$daggerVersion")
-        api("com.google.dagger:dagger-compiler:$daggerVersion")
+        api(libs.dagger)
+        api(libs.dagger.compiler)
         /// Derive4j
-        api("org.derive4j:derive4j:$derive4jVersion")
-        api("org.derive4j:derive4j-annotation:$derive4jVersion")
+        api(libs.derive4j)
+        api(libs.derive4j.annotation)
         /// org.immutables
-        api("org.immutables:serial:$immutablesVersion")
-        api("org.immutables:value:$immutablesVersion")
-        api("org.immutables:value-annotations:$immutablesVersion")
+        api(libs.immutables.serial)
+        api(libs.immutables.value)
+        api(libs.immutables.value.annotations)
         // Yaml
-        api("org.yaml:snakeyaml:$yamlVersion")
+        api(libs.snakeyaml)
 
         // Gradle plugins
-        api("org.metaborg.devenv:spoofax.gradle:$spoofax2DevenvVersion")
+        api(libs.spoofax3.gradle)
 
 
         // Test dependencies // TODO: should be in a separate platform?
-        api("org.junit.jupiter:junit-jupiter-api:$junitVersion")
-        api("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
+        api(libs.junit.api)
+        api(libs.mockito.kotlin)
         api(libs.jimfs)
-        api("nl.jqno.equalsverifier:equalsverifier:3.16.1")
+        api(libs.equalsverifier)
     }
 }
 
