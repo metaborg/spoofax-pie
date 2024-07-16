@@ -7,7 +7,7 @@ pluginManagement {
 }
 
 plugins {
-    id("org.metaborg.convention.settings") version "0.0.16"
+    id("org.metaborg.convention.settings") version "0.6.12"
 }
 
 
