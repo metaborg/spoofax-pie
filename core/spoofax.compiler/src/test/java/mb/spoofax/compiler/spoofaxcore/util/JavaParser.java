@@ -21,7 +21,7 @@ public class JavaParser {
     public void assertParses(String code) {
         parser.setSource(code.toCharArray());
         final HashMap<String, String> options = new HashMap<>();
-        JavaCore.setComplianceOptions(JavaCore.VERSION_1_8, options);
+        JavaCore.setComplianceOptions(JavaCore.VERSION_11, options);
         parser.setCompilerOptions(options);
         final CompilationUnit result = (CompilationUnit)parser.createAST(null);
         for(IProblem problem : result.getProblems()) {
