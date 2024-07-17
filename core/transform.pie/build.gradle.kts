@@ -7,7 +7,6 @@ plugins {
 
 dependencies {
     api(platform(libs.metaborg.platform))
-    implementation(platform(libs.metaborg.platform))
 
     api(libs.metaborg.common)
     api(project(":stratego.pie"))

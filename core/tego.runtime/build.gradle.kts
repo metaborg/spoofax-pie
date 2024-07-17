@@ -7,7 +7,6 @@ plugins {
 
 dependencies {
     api(platform(libs.metaborg.platform))
-    testImplementation(platform(libs.metaborg.platform))
 
     api(libs.metaborg.common)
     api(libs.metaborg.log.api)

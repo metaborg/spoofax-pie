@@ -14,8 +14,6 @@ repositories {
 
 dependencies {
     api(platform(libs.metaborg.platform))
-    implementation(platform(libs.metaborg.platform))
-    compileOnly(platform(libs.metaborg.platform))
 
     api(project(":spoofax.compiler"))
     api(libs.dagger)

@@ -8,7 +8,7 @@ plugins {
 fun compositeBuild(name: String) = "$group:$name:$version"
 
 dependencies {
-    testImplementation(platform(libs.metaborg.platform))
+    api(platform(libs.metaborg.platform))
 
     testImplementation(libs.spoofax3.core)
     testImplementation(project(":minisdf"))

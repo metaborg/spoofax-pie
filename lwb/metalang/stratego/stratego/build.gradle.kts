@@ -26,7 +26,6 @@ fun compositeBuild(name: String) = "$group:$name:$version"
 
 dependencies {
     api(platform(libs.metaborg.platform))
-    testImplementation(platform(libs.metaborg.platform))
 
     api(libs.metaborg.util)
     api(libs.stratego.build)

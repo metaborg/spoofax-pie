@@ -9,7 +9,6 @@ fun compositeBuild(name: String) = "$group:$name:$version"
 
 dependencies {
     api(platform(libs.metaborg.platform))
-    testImplementation(platform(libs.metaborg.platform))
 
     api(libs.spoofax3.core)
     api(libs.spoofax3.compiler)

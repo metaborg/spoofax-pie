@@ -7,7 +7,6 @@ plugins {
 
 dependencies {
     api(platform(libs.metaborg.platform))
-    implementation(platform(libs.metaborg.platform))
 
     api(project(":spoofax.common"))
     api(libs.metaborg.common)

@@ -12,8 +12,6 @@ fun compositeBuild(name: String) = "$group:$name:$version"
 
 dependencies {
     api(platform(libs.metaborg.platform))
-    implementation(platform(libs.metaborg.platform))
-    compileOnly(platform(libs.metaborg.platform))
 
     compileOnly(libs.spoofax3.compiler.gradle)
     api(project(":spoofax.lwb.compiler"))
