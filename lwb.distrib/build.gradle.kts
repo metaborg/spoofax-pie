@@ -37,11 +37,6 @@ allprojects {
     version = gitonium.version
     group = "org.metaborg"
 
-    repositories {
-        maven("https://artifacts.metaborg.org/content/groups/public/")
-        mavenCentral()
-    }
-
     pluginManager.withPlugin("org.metaborg.convention.maven-publish") {
         extensions.configure(MavenPublishConventionExtension::class.java) {
             repoOwner.set("metaborg")

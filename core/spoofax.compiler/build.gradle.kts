@@ -9,7 +9,7 @@ plugins {
 }
 
 repositories {
-    maven { url = uri("https://repo.gradle.org/gradle/libs-releases") } // Required for Gradle tooling API.
+    maven("https://repo.gradle.org/gradle/libs-releases") // Required for Gradle tooling API.
 }
 
 dependencies {

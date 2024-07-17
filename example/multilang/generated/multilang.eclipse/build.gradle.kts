@@ -2,11 +2,6 @@ plugins {
     id("org.metaborg.coronium.bundle")
 }
 
-repositories {
-    maven("https://artifacts.metaborg.org/content/groups/public/")
-    mavenCentral()
-}
-
 mavenize {
     majorVersion.set("2022-06")
 }
