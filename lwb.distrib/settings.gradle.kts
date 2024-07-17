@@ -1,14 +1,20 @@
 rootProject.name = "spoofax3.lwb.distrib.root"
 
+dependencyResolutionManagement {
+    repositories {
+        mavenLocal()
+    }
+}
+
 pluginManagement {
     repositories {
         maven("https://artifacts.metaborg.org/content/groups/public/")
-        mavenCentral()
+        gradlePluginPortal()
     }
 }
 
 plugins {
-    id("org.metaborg.convention.settings") version "0.6.12"
+    id("org.metaborg.convention.settings") version "0.8.1"
 }
 
 
