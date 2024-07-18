@@ -9,7 +9,7 @@ fun compositeBuild(name: String) = "$group:$name:$version"
 
 dependencies {
     // Platforms
-    api(platform(libs.metaborg.platform))
+    api(platform(libs.metaborg.platform)) { version { require("latest.integration") } }
 
     // Main
     api(project(":tiger"))

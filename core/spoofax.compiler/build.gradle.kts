@@ -13,7 +13,7 @@ repositories {
 }
 
 dependencies {
-    api(platform(libs.metaborg.platform))
+    api(platform(libs.metaborg.platform)) { version { require("latest.integration") } }
 
     api(libs.metaborg.common)
     api(project(":spoofax.common"))

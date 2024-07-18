@@ -24,7 +24,7 @@ plugins {
 fun compositeBuild(name: String) = "$group:$name:$version"
 
 dependencies {
-    api(platform(libs.metaborg.platform))
+    api(platform(libs.metaborg.platform)) { version { require("latest.integration") } }
 
     api(libs.spoofax3.spoofax.common)
     api(libs.spoofax3.compiler)
