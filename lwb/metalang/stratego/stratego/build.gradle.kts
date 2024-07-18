@@ -67,6 +67,7 @@ languageProject {
         }
     }
 }
+val spoofax2DevenvVersion = "2.6.0-SNAPSHOT"  // TODO
 spoofax2BasedLanguageProject {
     compilerInput {
         withParser()
@@ -80,7 +81,7 @@ spoofax2BasedLanguageProject {
                 "syntax/**/*.sdf3",
                 "src-gen/syntax/**/*.sdf3"
             )
-            languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:stratego.lang:${ext["spoofax2DevenvVersion"]}"))
+            languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:stratego.lang:$spoofax2DevenvVersion"))
         }
     }
 }

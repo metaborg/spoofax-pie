@@ -13,13 +13,6 @@ plugins {
     `kotlin-dsl` apply false        // This puts the correct version of Kotlin on the classpath
 }
 
-val spoofax2Version: String = System.getProperty("spoofax2Version")
-val spoofax2DevenvVersion: String = System.getProperty("spoofax2DevenvVersion")
-allprojects {
-    ext["spoofax2Version"] = spoofax2Version
-    ext["spoofax2DevenvVersion"] = spoofax2DevenvVersion
-}
-
 allprojects {
     apply(plugin = "org.metaborg.gitonium")
     version = gitonium.version

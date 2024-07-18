@@ -19,11 +19,12 @@ languageProject {
     compilerInput {
     }
 }
+val spoofax2DevenvVersion = "2.6.0-SNAPSHOT"  // TODO
 spoofax2BasedLanguageProject {
     compilerInput {
         project.run {
             addAdditionalCopyResources("trans/**/*.str", "trans/**/*.str2", "src-gen/**/*.str", "src-gen/**/*.str2")
-            languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:statix.runtime:${ext["spoofax2DevenvVersion"]}"))
+            languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:statix.runtime:$spoofax2DevenvVersion"))
         }
     }
 }

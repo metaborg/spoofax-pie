@@ -19,6 +19,7 @@ languageProject {
     compilerInput {
     }
 }
+val spoofax2DevenvVersion = "2.6.0-SNAPSHOT"  // TODO
 spoofax2BasedLanguageProject {
     compilerInput {
         project.run {
@@ -27,7 +28,7 @@ spoofax2BasedLanguageProject {
                 "trans/**/*.str2",
                 "editor/**/*.esv"
             )
-            languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:meta.lib.spoofax:${ext["spoofax2DevenvVersion"]}"))
+            languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:meta.lib.spoofax:$spoofax2DevenvVersion"))
         }
     }
 }

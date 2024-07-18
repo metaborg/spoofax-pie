@@ -9,6 +9,8 @@ plugins {
 }
 
 repositories {
+    maven("https://artifacts.metaborg.org/content/groups/public/")
+    mavenCentral()
     gradlePluginPortal() // Gradle plugin portal as repository for regular dependencies, as we depend on Gradle plugins.
 }
 

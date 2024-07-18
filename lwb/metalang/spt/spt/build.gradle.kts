@@ -44,6 +44,7 @@ languageProject {
         }
     }
 }
+val spoofax2DevenvVersion = "2.6.0-SNAPSHOT"  // TODO
 spoofax2BasedLanguageProject {
     compilerInput {
         withParser()
@@ -51,7 +52,7 @@ spoofax2BasedLanguageProject {
         withStrategoRuntime().run {
             copyClasses(true)
         }
-        project.languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:org.metaborg.meta.lang.spt:${ext["spoofax2DevenvVersion"]}"))
+        project.languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:org.metaborg.meta.lang.spt:$spoofax2DevenvVersion"))
     }
 }
 

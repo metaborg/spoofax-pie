@@ -9,6 +9,8 @@ plugins {
 }
 
 repositories {
+    maven("https://artifacts.metaborg.org/content/groups/public/")
+    mavenCentral()
     maven("https://repo.gradle.org/gradle/libs-releases") // Required for Gradle tooling API.
 }
 

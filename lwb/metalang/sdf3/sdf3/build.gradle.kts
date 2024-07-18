@@ -62,6 +62,7 @@ languageProject {
         }
     }
 }
+val spoofax2DevenvVersion = "2.6.0-SNAPSHOT"  // TODO
 spoofax2BasedLanguageProject {
     compilerInput {
         withParser()
@@ -74,7 +75,7 @@ spoofax2BasedLanguageProject {
         }
         project.run {
             addAdditionalCopyResources("target/metaborg/EditorService-pretty.pp.af")
-            languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:org.metaborg.meta.lang.template:${ext["spoofax2DevenvVersion"]}"))
+            languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:org.metaborg.meta.lang.template:$spoofax2DevenvVersion"))
         }
     }
 }
