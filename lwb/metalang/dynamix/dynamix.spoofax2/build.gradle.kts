@@ -3,10 +3,14 @@ plugins {
     `maven-publish`
 }
 
-val spoofax2DevenvVersion: String by ext
 spoofaxLanguageSpecification {
     addSourceDependenciesFromMetaborgYaml.set(false)
     addCompileDependenciesFromMetaborgYaml.set(false)
+
+    // We add the dependency manually and don't change the repositories
+    // Eventually, this functionality should be removed from spoofax.gradle
+    addSpoofaxCoreDependency.set(false)
+    addSpoofaxRepository.set(false)
 }
 dependencies {
     compileLanguage(libs.esv.lang)
@@ -16,4 +20,6 @@ dependencies {
 
     sourceLanguage(libs.spoofax2.meta.lib.spoofax)
     sourceLanguage(libs.statix.runtime)
+
+    compileOnly(libs.spoofax2.core)
 }
