@@ -209,7 +209,7 @@ public class StrategoRuntimeBuilder {
                 final Class<?> interopRegistererClass = Class.forName(interopRegistererClassName, true, interopRegistererByReflectionClassLoader);
                 final InteropRegisterer interopRegisterer = (InteropRegisterer)interopRegistererClass.newInstance();
                 hybridInterpreter.registerClass(interopRegisterer, jarParentClassLoader);
-            } catch(IllegalAccessException | InstantiationException | ClassNotFoundException e) {
+            } catch(IllegalAccessException | InstantiationException | ClassNotFoundException | LinkageError e) {
                 throw new RuntimeException("Loading InteropRegisterer '" + interopRegistererClassName + "' by reflection failed unexpectedly", e);
             }
         }
