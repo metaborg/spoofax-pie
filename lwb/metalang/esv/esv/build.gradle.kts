@@ -16,10 +16,6 @@ plugins {
 dependencies {
     // Required because @Nullable has runtime retention (which includes classfile retention), and the Java compiler requires access to it.
     compileOnly(libs.jsr305)
-
-    // Required to fix error: Cannot create Launcher without at least one TestEngine
-    //  even though there are no tests in this project
-    testImplementation(libs.junit)
 }
 
 languageProject {
