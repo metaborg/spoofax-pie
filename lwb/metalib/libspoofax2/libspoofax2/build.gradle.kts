@@ -10,6 +10,12 @@ plugins {
     id("org.metaborg.spoofax.compiler.gradle.adapter")
 }
 
+dependencies {
+    // Required to fix error: Cannot create Launcher without at least one TestEngine
+    //  even though there are no tests in this project
+    testImplementation(libs.junit)
+}
+
 languageProject {
     shared {
         name("LibSpoofax2")

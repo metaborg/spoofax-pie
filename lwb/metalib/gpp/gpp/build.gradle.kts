@@ -18,6 +18,10 @@ dependencies {
 
     api(project(":strategolib"))
     api(libs.metaborg.pie.task.archive)
+
+    // Required to fix error: Cannot create Launcher without at least one TestEngine
+    //  even though there are no tests in this project
+    testImplementation(libs.junit)
 }
 
 languageProject {

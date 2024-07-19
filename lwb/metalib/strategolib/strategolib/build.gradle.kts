@@ -17,6 +17,10 @@ dependencies {
     api(platform(libs.metaborg.platform)) { version { require("latest.integration") } }
 
     api(libs.metaborg.pie.task.archive)
+
+    // Required to fix error: Cannot create Launcher without at least one TestEngine
+    //  even though there are no tests in this project
+    testImplementation(libs.junit)
 }
 
 languageProject {
