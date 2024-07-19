@@ -6,6 +6,14 @@ plugins {
     id("org.metaborg.coronium.bundle")
 }
 
+// This is a copy of dependencyManagement in the root project's settings.gradle.kts,
+//  which is needed because the Mavenize plugin defined its own repository,
+//  overriding those defined in the root dependencyManagement.
+repositories {
+    maven("https://artifacts.metaborg.org/content/groups/public/")
+    mavenCentral()
+}
+
 dependencies {
     bundleTargetPlatformApi(eclipse("javax.inject"))
     bundleTargetPlatformApi(eclipse("org.eclipse.core.runtime"))
