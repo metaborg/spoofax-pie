@@ -3,6 +3,7 @@ plugins {
     `maven-publish`
     id("org.metaborg.convention.java")
     id("org.metaborg.convention.maven-publish")
+    id("org.metaborg.convention.junit")
 }
 
 dependencies {
@@ -17,7 +18,6 @@ dependencies {
 
     compileOnly(libs.checkerframework.android)
 
-    testImplementation(libs.junit)
     testCompileOnly(libs.checkerframework.android)
     testImplementation(libs.metaborg.log.backend.slf4j)
     testImplementation(libs.slf4j.simple)

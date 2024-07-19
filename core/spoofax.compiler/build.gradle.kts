@@ -6,6 +6,7 @@ plugins {
     `maven-publish`
     id("org.metaborg.convention.java")
     id("org.metaborg.convention.maven-publish")
+    id("org.metaborg.convention.junit")
 }
 
 repositories {
@@ -33,11 +34,9 @@ dependencies {
     annotationProcessor(libs.derive4j)
     annotationProcessor(libs.dagger.compiler)
 
-    testImplementation(libs.junit)
     testImplementation(project(":spoofax.compiler"))
     testImplementation(libs.dagger)
     testImplementation(libs.metaborg.pie.runtime)
-    testImplementation(libs.junit.params)
     testImplementation(libs.jimfs)
 //    testImplementation(libs.eclipse.jdt.core)
     testImplementation("org.eclipse.jdt:org.eclipse.jdt.core:3.33.0")

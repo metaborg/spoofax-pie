@@ -3,6 +3,7 @@ plugins {
     `maven-publish`
     id("org.metaborg.convention.java")
     id("org.metaborg.convention.maven-publish")
+    id("org.metaborg.convention.junit")
 }
 
 dependencies {
@@ -26,7 +27,6 @@ dependencies {
     annotationProcessor(libs.dagger.compiler)
 
     // Test
-    testImplementation(libs.junit)
     testImplementation(libs.spoofax3.test)
     testCompileOnly(libs.checkerframework.android)
 }

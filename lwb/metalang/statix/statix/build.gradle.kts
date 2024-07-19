@@ -11,6 +11,7 @@ plugins {
     `maven-publish`
     id("org.metaborg.convention.java")
     id("org.metaborg.convention.maven-publish")
+    id("org.metaborg.convention.junit")
     id("org.metaborg.spoofax.compiler.gradle.spoofax2.language")
     id("org.metaborg.spoofax.compiler.gradle.adapter")
 }
@@ -23,7 +24,6 @@ dependencies {
 
     implementation(libs.spoofax3.spoofax2.common)
 
-    testImplementation(libs.junit)
     testImplementation(libs.spoofax3.test)
     testCompileOnly(libs.checkerframework.android)
 }

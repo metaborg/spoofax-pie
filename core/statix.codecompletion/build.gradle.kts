@@ -3,6 +3,7 @@ plugins {
     `maven-publish`
     id("org.metaborg.convention.java")
     id("org.metaborg.convention.maven-publish")
+    id("org.metaborg.convention.junit")
 }
 
 dependencies {
@@ -29,7 +30,6 @@ dependencies {
     testImplementation(libs.metaborg.log.backend.slf4j)
     testImplementation(libs.slf4j.simple)
     testCompileOnly(libs.immutables.value)
-    testImplementation(libs.junit)
     testImplementation(libs.opencsv)
 
     // Immutables

@@ -3,6 +3,7 @@ plugins {
     `maven-publish`
     id("org.metaborg.convention.java")
     id("org.metaborg.convention.maven-publish")
+    id("org.metaborg.convention.junit")
 }
 
 dependencies {
@@ -18,7 +19,6 @@ dependencies {
     annotationProcessor(libs.dagger.compiler)
     annotationProcessor(libs.derive4j)
 
-    testImplementation(libs.junit)
     testImplementation(libs.slf4j.nop)
     testImplementation(project(":spoofax.lwb.compiler"))
     testImplementation(project(":spt"))
