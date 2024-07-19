@@ -19,12 +19,14 @@ dependencies {
     compileLanguage(libs.esv.lang)
     compileLanguage(libs.sdf3.lang)
     compileLanguage(libs.nabl2.lang)
+    compileLanguage(libs.statix.lang)
     compileLanguage(libs.spoofax2.nabl2.extdynsem)
     compileLanguage(libs.spoofax2.dynsem.lang)
 
     sourceLanguage(libs.meta.lib.spoofax)
     sourceLanguage(libs.nabl2.shared)
     sourceLanguage(libs.nabl2.runtime)
+    sourceLanguage(libs.statix.runtime)
 
     compileOnly(libs.spoofax.core)
 }
