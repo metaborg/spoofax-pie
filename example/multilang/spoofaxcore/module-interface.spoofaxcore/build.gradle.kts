@@ -4,6 +4,9 @@ plugins {
 }
 
 spoofaxLanguageSpecification {
+    addCompileDependenciesFromMetaborgYaml.set(false)
+    addSourceDependenciesFromMetaborgYaml.set(false)
+
     // We add the dependency manually and don't change the repositories
     // Eventually, this functionality should be removed from spoofax.gradle
     addSpoofaxCoreDependency.set(false)
@@ -14,7 +17,7 @@ dependencies {
     compileLanguage(libs.statix.lang)
     sourceLanguage(project(":signature-interface.spoofaxcore"))
 
-    compileOnly(libs.spoofax2.core)
+    compileOnly(libs.spoofax.core)
 }
 
 afterEvaluate {

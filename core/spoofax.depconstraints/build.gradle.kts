@@ -59,7 +59,7 @@ dependencies {
         api(libs.metaborg.pie.task.archive)
         api(libs.metaborg.pie.serde.fst)
         /// Spoofax 2.x
-        runtime(libs.strategoxt.minjar)
+        runtime(libs.spoofax2.strategoxt.minjar)
         /// Spoofax 2.x with devenv override
         api(libs.strategoxt.strj)
         api(libs.spoofax.terms)

@@ -28,7 +28,7 @@ dependencies {
     api(libs.spoofax3.constraint.common)
 
     implementation(libs.spoofax3.nabl2.common)
-    implementation(libs.strategoxt.minjar)
+    implementation(libs.spoofax2.strategoxt.minjar)
 
     compileOnly(libs.checkerframework.android)
 

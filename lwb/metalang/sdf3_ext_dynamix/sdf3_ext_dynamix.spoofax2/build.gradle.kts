@@ -19,11 +19,14 @@ spoofaxLanguageSpecification {
 dependencies {
     compileLanguage(libs.esv.lang)
 
+    sourceLanguage(libs.meta.lib.spoofax)
     sourceLanguage(libs.sdf3.lang)
+    sourceLanguage(libs.spoofax2.meta.lib.analysis)
+    sourceLanguage(libs.nabl2.lang)
+    sourceLanguage(libs.nabl2.runtime)
     sourceLanguage(libs.statix.lang)
-    sourceLanguage(libs.spoofax2.meta.lib.spoofax)
     sourceLanguage(libs.statix.runtime)
     sourceLanguage(project(":dynamix.spoofax2"))
 
-    compileOnly(libs.spoofax2.core)
+    compileOnly(libs.spoofax.core)
 }

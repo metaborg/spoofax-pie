@@ -18,12 +18,12 @@ dependencies {
     compileLanguage(libs.statix.lang)
     compileLanguage(libs.sdf3.extstatix)
 
-    sourceLanguage(libs.spoofax2.meta.lib.spoofax)
+    sourceLanguage(libs.meta.lib.spoofax)
     sourceLanguage(libs.statix.runtime)
     sourceLanguage(project(":signature-interface.spoofaxcore"))
     sourceLanguage(project(":module-interface.spoofaxcore"))
 
-    compileOnly(libs.spoofax2.core)
+    compileOnly(libs.spoofax.core)
 }
 
 afterEvaluate {
