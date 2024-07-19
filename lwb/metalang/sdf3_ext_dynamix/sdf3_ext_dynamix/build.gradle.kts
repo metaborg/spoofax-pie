@@ -4,7 +4,6 @@ import mb.spoofax.compiler.util.TypeInfo
 
 plugins {
     `java-library`
-    `maven-publish`
     id("org.metaborg.convention.java")
     id("org.metaborg.convention.maven-publish")
     id("org.metaborg.spoofax.compiler.gradle.spoofax2.language")

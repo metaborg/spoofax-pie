@@ -2,7 +2,6 @@ import org.metaborg.core.language.*
 
 plugins {
     `java-library`
-    `maven-publish`
     id("org.metaborg.convention.java")
     id("org.metaborg.convention.maven-publish")
     id("org.metaborg.devenv.spoofax.gradle.langspec")

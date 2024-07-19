@@ -13,7 +13,7 @@ plugins {
     id("org.metaborg.coronium.repository") version "0.4.0" apply false
     id("biz.aQute.bnd.builder") version "5.3.0" apply false         // libs.plugins.bnd.builder
     id("org.jetbrains.intellij") version "1.4.0" apply false        // libs.plugins.intellij
-    alias(libs.plugins.kotlin.jvm) apply false
+    `kotlin-dsl` apply false        // This puts the correct version of Kotlin on the classpath
 
     id("org.metaborg.spoofax.compiler.gradle.language") apply false
     id("org.metaborg.spoofax.compiler.gradle.adapter") apply false
