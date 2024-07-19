@@ -7,7 +7,7 @@ plugins {
 }
 
 // This is a copy of dependencyManagement in the root project's settings.gradle.kts,
-//  which is needed because the Mavenize plugin defined its own repository,
+//  which is needed because the Mavenize plugin (via Coronium) defines its own repository,
 //  overriding those defined in the root dependencyManagement.
 repositories {
     maven("https://artifacts.metaborg.org/content/groups/public/")

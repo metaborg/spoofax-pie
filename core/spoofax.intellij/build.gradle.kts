@@ -6,6 +6,14 @@ plugins {
     id("org.jetbrains.intellij")
 }
 
+// This is a copy of dependencyManagement in the root project's settings.gradle.kts,
+//  which is needed because the IntelliJ plugin defines its own repository,
+//  overriding those defined in the root dependencyManagement.
+repositories {
+    maven("https://artifacts.metaborg.org/content/groups/public/")
+    mavenCentral()
+}
+
 dependencies {
     api(platform(libs.metaborg.platform)) { version { require("latest.integration") } }
 
