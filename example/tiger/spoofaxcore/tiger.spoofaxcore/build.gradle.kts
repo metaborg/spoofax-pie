@@ -18,7 +18,7 @@ dependencies {
     compileLanguage(libs.sdf3.lang)
     compileLanguage(libs.nabl2.lang)
     compileLanguage(libs.spoofax2.nabl2.extdynsem)
-    compileLanguage(libs.dynsem)
+    compileLanguage(libs.spoofax2.dynsem.lang)
 
     sourceLanguage(libs.meta.lib.spoofax)
     sourceLanguage(libs.nabl2.shared)
