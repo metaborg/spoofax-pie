@@ -8,8 +8,6 @@ plugins {
     id("org.metaborg.spoofax.compiler.gradle.spoofax2.language")
 }
 
-fun compositeBuild(name: String) = "$group:$name:$version"
-
 dependencies {
     api(platform(libs.metaborg.platform)) { version { require("latest.integration") } }
     testImplementation(libs.spoofax3.test)

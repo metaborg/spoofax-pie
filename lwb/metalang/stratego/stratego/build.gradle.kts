@@ -22,8 +22,6 @@ plugins {
     id("org.metaborg.spoofax.compiler.gradle.adapter")
 }
 
-fun compositeBuild(name: String) = "$group:$name:$version"
-
 dependencies {
     api(platform(libs.metaborg.platform)) { version { require("latest.integration") } }
 

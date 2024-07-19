@@ -11,8 +11,6 @@ plugins {
     id("org.metaborg.spoofax.compiler.gradle.adapter")
 }
 
-fun compositeBuild(name: String) = "$group:$name:$version"
-
 dependencies {
 
 }

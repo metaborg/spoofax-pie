@@ -14,8 +14,6 @@ sourceSets {
     }
 }
 
-fun compositeBuild(name: String) = "$group:$name:$version"
-
 dependencies {
     api(platform(libs.metaborg.platform)) { version { require("latest.integration") } }
 
@@ -89,7 +87,7 @@ fun copySpoofaxLanguageResources(
     tasks.getByName(JavaPlugin.TEST_CLASSES_TASK_NAME).dependsOn(copyTestTask)
 }
 copySpoofaxLanguageResources(
-    dependencies.create(compositeBuild("tiger.spoofaxcore")),
+    dependencies.create("org.metaborg.devenv:tiger.spoofaxcore:$version"),
     "mb/tiger",
     true,
     "target/metaborg/editor.esv.af", "target/metaborg/sdf.tbl"

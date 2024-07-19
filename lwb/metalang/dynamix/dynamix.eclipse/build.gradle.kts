@@ -6,8 +6,6 @@ plugins {
     id("org.metaborg.spoofax.compiler.gradle.eclipse")
 }
 
-fun compositeBuild(name: String) = "$group:$name:$version"
-
 dependencies {
     // Required because @Nullable has runtime retention (which includes classfile retention), and the Java compiler requires access to it.
     compileOnly(libs.jsr305)
