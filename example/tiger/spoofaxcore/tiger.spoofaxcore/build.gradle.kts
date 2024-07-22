@@ -18,16 +18,19 @@ spoofaxLanguageSpecification {
 dependencies {
     api(platform(libs.metaborg.platform)) { version { require("latest.integration") } }
 
-    compileLanguage(libs.esv.lang)
-    compileLanguage(libs.sdf3.lang)
-    compileLanguage(libs.nabl2.lang)
-    compileLanguage(libs.statix.lang)
+    compileLanguage(libs.spoofax2.esv.lang)
+    compileLanguage(libs.spoofax2.sdf3.lang)
+    compileLanguage(libs.spoofax2.nabl2.lang)
     compileLanguage(libs.spoofax2.nabl2.extdynsem)
     compileLanguage(libs.spoofax2.dynsem.lang)
+    compileLanguage(libs.esv.lang)
+    compileLanguage(libs.sdf3.lang)
+    compileLanguage(libs.statix.lang)
 
+    sourceLanguage(libs.spoofax2.meta.lib.spoofax)
+    sourceLanguage(libs.spoofax2.nabl2.shared)
+    sourceLanguage(libs.spoofax2.nabl2.runtime)
     sourceLanguage(libs.meta.lib.spoofax)
-    sourceLanguage(libs.nabl2.shared)
-    sourceLanguage(libs.nabl2.runtime)
     sourceLanguage(libs.statix.runtime)
 
     compileOnly(libs.spoofax.core)
