@@ -347,6 +347,10 @@
         
           
         
+          
+        
+          
+        
       
       
         <label class="md-nav__link" for="__nav_2">
@@ -397,6 +401,34 @@
     <li class="md-nav__item">
       <a href="../../tutorial/change_static_semantics/" class="md-nav__link">
         Change static semantics
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/add_transformation/" class="md-nav__link">
+        Adding a transformation
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/pcf_tutorial/" class="md-nav__link">
+        A Spoofax tutorial implementing Programming Computable Functions (PCF)
       </a>
     </li>
   
@@ -2198,6 +2230,12 @@ The following <code>Sdf3Option</code>s are supported:</p>
 <td>n/a</td>
 </tr>
 <tr>
+<td><code>placeholders { $PlaceholderOption* }</code></td>
+<td>no</td>
+<td>Placeholder syntax used in code completion.</td>
+<td>n/a</td>
+</tr>
+<tr>
 <td><code>stratego-concrete-syntax-extension-main-file = $Expression</code></td>
 <td>no</td>
 <td>Sets the main SDF3 file used to create a concrete syntax extension parse table.</td>
@@ -2276,6 +2314,31 @@ The following <code>Sdf3Option</code>s are supported:</p>
 <td>no</td>
 <td>Whether the parse table generator checks priorities. Defaults to <code>false</code>.</td>
 <td>Boolean</td>
+</tr>
+</tbody>
+</table>
+<p>The following <code>PlaceholderOption</code>s are supported:</p>
+<table>
+<thead>
+<tr>
+<th>Syntax</th>
+<th>Required?</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>prefix = $Expression</code></td>
+<td>no</td>
+<td>The prefix to a placholder. Defaults to <code>[[</code>, or empty if the other is defined.</td>
+<td>String</td>
+</tr>
+<tr>
+<td><code>postfix = $Expression</code></td>
+<td>no</td>
+<td>The postfix to a placeholder. Defaults to <code>]]</code>, or empty if the other is defined.</td>
+<td>String</td>
 </tr>
 </tbody>
 </table>
