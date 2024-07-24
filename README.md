@@ -189,11 +189,13 @@ Push this change to the `develop` branch and a GitHub actions build will automat
 
 
 ## License
-Copyright 2018-2024 Delft University of Technology
+Copyright 2018-2024 [Programming Languages Group](https://pl.ewi.tudelft.nl/), [Delft University of Technology](https://www.tudelft.nl/)
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at <https://www.apache.org/licenses/LICENSE-2.0>
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an **"as is" basis, without warranties or conditions of any kind**, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+
+This product includes software developed at The Apache Software Foundation (http://www.apache.org/), copyright (C) 2001-2019 The Apache Software Foundation.
 
 [github-badge:build]: https://img.shields.io/github/actions/workflow/status/metaborg/spoofax-pie/build.yaml
 [github:build]: https://github.com/metaborg/spoofax-pie/actions
