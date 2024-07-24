@@ -11,7 +11,7 @@ dependencies {
     api(platform(project(":spoofax.depconstraints")))
     annotationProcessor(platform(project(":spoofax.depconstraints")))
 
-    bundleTargetPlatformApi(eclipse("javax.inject"))
+    bundleTargetPlatformApi(eclipse("jakarta.inject-api"))
 
     bundleApi(project(":spoofax.eclipse"))
 
@@ -40,8 +40,8 @@ dependencies {
 
 // Use bnd to create a single OSGi bundle JAR that includes all dependencies.
 val exportPackage = listOf(
-    // Provided by `javax.inject`
-    "!javax.inject.*",
+    // Provided by `jakarta.inject`
+    "!jakarta.inject.*",
     // Provided by `:spoofax.eclipse`
     "!mb.log.*",
     "!mb.resource.*",

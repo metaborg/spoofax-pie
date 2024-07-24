@@ -11,7 +11,7 @@ dependencies {
     api(platform(project(":spoofax.depconstraints")))
     annotationProcessor(platform(project(":spoofax.depconstraints")))
 
-    bundleTargetPlatformApi(eclipse("javax.inject"))
+    bundleTargetPlatformApi(eclipse("jakarta.inject-api"))
 
     bundleApi(project(":spoofax.eclipse"))
     bundleApi(project(":tooling.eclipsebundle"))
