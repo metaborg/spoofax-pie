@@ -35,3 +35,4 @@ dependencies {
 
     compileOnly(libs.spoofax.core)
 }
+

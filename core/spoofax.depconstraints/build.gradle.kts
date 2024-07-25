@@ -83,7 +83,7 @@ dependencies {
 
         // Annotation-only dependencies
         /// javax.inject
-        api(libs.javax.inject)
+        api(libs.jakarta.inject)
         /// Checkerframework
         api(libs.checkerframework.android) // Use android version: annotation retention policy is class instead of runtime.
         /// FindBugs JSR305

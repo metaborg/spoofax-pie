@@ -11,7 +11,7 @@ dependencies {
     api(project(":stratego.common"))
     api(libs.metaborg.pie.api)
 
-    compileOnly(libs.javax.inject)
+    compileOnly(libs.jakarta.inject)
     compileOnly(libs.checkerframework.android)
     compileOnly(libs.derive4j.annotation)
 

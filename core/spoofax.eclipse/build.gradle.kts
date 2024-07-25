@@ -18,7 +18,7 @@ repositories {
 }
 
 dependencies {
-    bundleTargetPlatformApi(eclipse("javax.inject"))
+    bundleTargetPlatformApi(eclipse("jakarta.inject-api"))
     bundleTargetPlatformApi(eclipse("org.eclipse.core.runtime"))
     bundleTargetPlatformApi(eclipse("org.eclipse.core.expressions"))
     bundleTargetPlatformApi(eclipse("org.eclipse.core.resources"))
