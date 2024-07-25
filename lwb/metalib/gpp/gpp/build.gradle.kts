@@ -1,5 +1,8 @@
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler
+import mb.spoofax.compiler.util.GradleDependencies
 import mb.spoofax.compiler.util.GradleDependency
+import mb.spoofax.core.CoordinateRequirement
+import mb.spoofax.core.Version
 
 // FIXME: org.metaborg:gpp in Spoofax 3 conflicts with a same named package in Spoofax 2 (from Stratego)
 //  Use a devenv prefix?
@@ -32,7 +35,17 @@ languageProject {
         }
     }
 }
-val spoofax2DevenvVersion = "2.6.0-SNAPSHOT"  // TODO
+
+fun ModuleDependency.toGradleDependency(): GradleDependency {
+    return GradleDependencies.module(
+        CoordinateRequirement(
+            this@toGradleDependency.group,
+            this@toGradleDependency.name,
+            Version.parse(this@toGradleDependency.version),
+        )
+    )
+}
+
 spoofax2BasedLanguageProject {
     compilerInput {
         withStrategoRuntime().run {
@@ -43,7 +56,7 @@ spoofax2BasedLanguageProject {
             addAdditionalCopyResources(
                 "src-gen/java/gpp/trans/gpp.str2lib"
             )
-            languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:gpp:$spoofax2DevenvVersion"))
+            languageSpecificationDependency(libs.gpp.lang.get().toGradleDependency())
         }
     }
 }

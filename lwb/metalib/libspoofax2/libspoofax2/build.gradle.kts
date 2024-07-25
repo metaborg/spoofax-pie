@@ -1,5 +1,8 @@
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler
+import mb.spoofax.compiler.util.GradleDependencies
 import mb.spoofax.compiler.util.GradleDependency
+import mb.spoofax.core.CoordinateRequirement
+import mb.spoofax.core.Version
 
 plugins {
     `java-library`
@@ -18,7 +21,17 @@ languageProject {
     compilerInput {
     }
 }
-val spoofax2DevenvVersion = "2.6.0-SNAPSHOT"  // TODO
+
+fun ModuleDependency.toGradleDependency(): GradleDependency {
+    return GradleDependencies.module(
+        CoordinateRequirement(
+            this@toGradleDependency.group,
+            this@toGradleDependency.name,
+            Version.parse(this@toGradleDependency.version),
+        )
+    )
+}
+
 spoofax2BasedLanguageProject {
     compilerInput {
         project.run {
@@ -27,7 +40,7 @@ spoofax2BasedLanguageProject {
                 "trans/**/*.str2",
                 "editor/**/*.esv"
             )
-            languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:meta.lib.spoofax:$spoofax2DevenvVersion"))
+            languageSpecificationDependency(libs.meta.lib.spoofax.get().toGradleDependency())
         }
     }
 }

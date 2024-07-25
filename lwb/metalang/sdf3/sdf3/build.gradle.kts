@@ -6,8 +6,11 @@ import mb.spoofax.compiler.adapter.data.CommandActionRepr
 import mb.spoofax.compiler.adapter.data.CommandDefRepr
 import mb.spoofax.compiler.adapter.data.MenuItemRepr
 import mb.spoofax.compiler.adapter.data.ParamRepr
+import mb.spoofax.compiler.util.GradleDependencies
 import mb.spoofax.compiler.util.GradleDependency
 import mb.spoofax.compiler.util.TypeInfo
+import mb.spoofax.core.CoordinateRequirement
+import mb.spoofax.core.Version
 import mb.spoofax.core.language.command.CommandContextType
 import mb.spoofax.core.language.command.CommandExecutionType
 import mb.spoofax.core.language.command.EnclosingCommandContextType
@@ -59,7 +62,17 @@ languageProject {
         }
     }
 }
-val spoofax2DevenvVersion = "2.6.0-SNAPSHOT"  // TODO
+
+fun ModuleDependency.toGradleDependency(): GradleDependency {
+    return GradleDependencies.module(
+        CoordinateRequirement(
+            this@toGradleDependency.group,
+            this@toGradleDependency.name,
+            Version.parse(this@toGradleDependency.version),
+        )
+    )
+}
+
 spoofax2BasedLanguageProject {
     compilerInput {
         withParser()
@@ -72,10 +85,12 @@ spoofax2BasedLanguageProject {
         }
         project.run {
             addAdditionalCopyResources("target/metaborg/EditorService-pretty.pp.af")
-            languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:org.metaborg.meta.lang.template:$spoofax2DevenvVersion"))
+            languageSpecificationDependency(libs.sdf3.lang.get().toGradleDependency())
         }
     }
 }
+
+
 
 val packageId = "mb.sdf3"
 val taskPackageId = "$packageId.task"

@@ -1,8 +1,11 @@
 import mb.spoofax.common.BlockCommentSymbols
 import mb.spoofax.common.BracketSymbols
 import mb.spoofax.compiler.adapter.AdapterProjectCompiler
+import mb.spoofax.compiler.util.GradleDependencies
 import mb.spoofax.compiler.util.GradleDependency
 import mb.spoofax.compiler.util.TypeInfo
+import mb.spoofax.core.CoordinateRequirement
+import mb.spoofax.core.Version
 
 plugins {
     `java-library`
@@ -34,7 +37,17 @@ languageProject {
         }
     }
 }
-val spoofax2DevenvVersion = "2.6.0-SNAPSHOT"  // TODO
+
+fun ModuleDependency.toGradleDependency(): GradleDependency {
+    return GradleDependencies.module(
+        CoordinateRequirement(
+            this@toGradleDependency.group,
+            this@toGradleDependency.name,
+            Version.parse(this@toGradleDependency.version),
+        )
+    )
+}
+
 spoofax2BasedLanguageProject {
     compilerInput {
         withParser()
@@ -44,7 +57,7 @@ spoofax2BasedLanguageProject {
             copyClasses(true)
         }
         project.run {
-            languageSpecificationDependency(GradleDependency.module("org.metaborg.devenv:org.metaborg.meta.lang.esv:$spoofax2DevenvVersion"))
+            languageSpecificationDependency(libs.esv.lang.get().toGradleDependency())
         }
     }
 }
