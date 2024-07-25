@@ -12,6 +12,7 @@ dependencies {
     api(libs.metaborg.pie.api)
 
     compileOnly(libs.jakarta.inject)
+    compileOnly(libs.javax.inject)
     compileOnly(libs.checkerframework.android)
     compileOnly(libs.derive4j.annotation)
 
