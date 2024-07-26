@@ -91,7 +91,7 @@ spoofax2BasedLanguageProject {
                 "syntax/**/*.sdf3",
                 "src-gen/syntax/**/*.sdf3"
             )
-            languageSpecificationDependency(libs.stratego.lang.get().toGradleDependency())
+            languageSpecificationDependency(libs.stratego2.lang.get().toGradleDependency())
         }
     }
 }
