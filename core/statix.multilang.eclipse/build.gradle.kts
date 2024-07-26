@@ -14,7 +14,7 @@ repositories {
 }
 
 dependencies {
-    bundleTargetPlatformApi(eclipse("jakarta.inject-api"))
+    bundleTargetPlatformApi(eclipse("javax.inject"))
     bundleTargetPlatformApi(eclipse("org.eclipse.core.runtime"))
     bundleTargetPlatformApi(eclipse("org.eclipse.core.expressions"))
     bundleTargetPlatformApi(eclipse("org.eclipse.core.resources"))
@@ -30,8 +30,8 @@ dependencies {
 
 // Use bnd to create a single OSGi bundle JAR that includes all dependencies.
 val exports = listOf(
-    // Provided by 'jakarta.inject' bundle.
-    "!jakarta.inject.*",
+    // Provided by 'javax.inject' bundle.
+    "!javax.inject.*",
     // Provided by 'spoofax.eclipse' bundle.
     "!mb.log.*",
     "!mb.resource.*",

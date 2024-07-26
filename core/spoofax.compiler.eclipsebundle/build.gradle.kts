@@ -18,7 +18,7 @@ repositories {
 }
 
 dependencies {
-    bundleTargetPlatformApi(eclipse("jakarta.inject-api"))
+    bundleTargetPlatformApi(eclipse("javax.inject"))
 
     bundleApi(project(":spoofax.eclipse"))
     bundleApi(project(":tooling.eclipsebundle"))

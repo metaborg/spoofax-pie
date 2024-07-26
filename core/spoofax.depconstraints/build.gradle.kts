@@ -3,7 +3,6 @@ plugins {
     `maven-publish`
 }
 
-
 dependencies {
     constraints {
         // Own projects
@@ -83,7 +82,7 @@ dependencies {
 
         // Annotation-only dependencies
         /// javax.inject
-        api(libs.jakarta.inject)
+        api(libs.javax.inject)
         /// Checkerframework
         api(libs.checkerframework.android) // Use android version: annotation retention policy is class instead of runtime.
         /// FindBugs JSR305
