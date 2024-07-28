@@ -120,6 +120,7 @@ fun GradleConfiguredDependency.addToDependencies(project: Project): Dependency {
     dependency = project.dependencies.platform(dependency)
   }
   project.dependencies.add(configurationName, dependency)
+  project.logger.info("$project: Added dependency to $configurationName: ${this.dependency.toKotlinCode()}")
   return dependency
 }
 
