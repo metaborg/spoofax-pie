@@ -14,7 +14,7 @@ val spoofax2DevenvVersion: String by ext
 
 val picocliVersion = "4.5.0"
 
-val jakartaInjectVersion = "2.0.1"
+val javaxInjectVersion = "1"
 val checkerframeworkVersion = "3.16.0"
 
 val daggerVersion = "2.36" // Do not upgrade, causes Gradle/Kotlin compatibility issues due to upgrade to Kotlin 1.5.
@@ -101,8 +101,8 @@ dependencies {
         api("info.picocli:picocli-codegen:$picocliVersion")
 
         // Annotation-only dependencies
-        /// jakarta.inject
-        api("jakarta.inject:jakarta.inject-api:$jakartaInjectVersion")
+        /// javax.inject
+        api("javax.inject:javax.inject:$javaxInjectVersion")
         /// Checkerframework
         api("org.checkerframework:checker-qual-android:$checkerframeworkVersion") // Use android version: annotation retention policy is class instead of runtime.
         /// FindBugs JSR305

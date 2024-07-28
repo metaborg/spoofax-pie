@@ -14,7 +14,7 @@ dependencies {
     annotationProcessor(platform(compositeBuild("spoofax.depconstraints")))
 
 
-    bundleTargetPlatformApi(eclipse("jakarta.inject-api"))
+    bundleTargetPlatformApi(eclipse("javax.inject"))
     bundleTargetPlatformApi(eclipse("org.eclipse.jdt.core"))
 
 
@@ -51,8 +51,8 @@ dependencies {
         exclude("org.checkerframework", "checker-qual")
     }
 
-    // HACK: embed jakarta.inject as classgraph does not seem to pick up the above jakarta.inject dependency?
-    bundleEmbedImplementation("jakarta.inject:jakarta.inject-api:2.0.1")
+    // HACK: embed javax.inject as classgraph does not seem to pick up the above javax.inject dependency?
+    bundleEmbedImplementation("javax.inject:javax.inject:1")
 
     // Embed `:spoofax.lwb.dynamicloading`.
     bundleEmbedImplementation(compositeBuild("spoofax.lwb.dynamicloading")) {
@@ -130,8 +130,8 @@ val privatePackage = listOf(
     "mb.spoofax.lwb.*",
     // Embed `mb.spt.dynamicloading`
     "mb.spt.dynamicloading.*",
-    // Embed `jakarta.inject`
-    "jakarta.inject.*",
+    // Embed `javax.inject`
+    "javax.inject.*",
     // Embed `org.checkerframework:checker-qual-android`
     "org.checkerframework.*",
     // Embed `com.google.dagger:dagger-compiler` and dependencies. Allow split packages for `dagger.model`, as

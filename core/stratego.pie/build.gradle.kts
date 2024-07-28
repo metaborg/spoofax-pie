@@ -10,7 +10,7 @@ dependencies {
     api(project(":stratego.common"))
     api("org.metaborg:pie.api")
 
-    compileOnly("jakarta.inject:jakarta.inject-api")
+    compileOnly("javax.inject:javax.inject")
     compileOnly("org.checkerframework:checker-qual-android")
     compileOnly("org.derive4j:derive4j-annotation")
 
