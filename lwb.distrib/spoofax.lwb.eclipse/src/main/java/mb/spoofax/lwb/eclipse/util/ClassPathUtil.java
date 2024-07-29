@@ -27,7 +27,7 @@ import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.osgi.framework.BundleActivator;
 
-import javax.annotation.Generated;
+import jakarta.annotation.Generated;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.util.Comparator;
@@ -49,7 +49,7 @@ public class ClassPathUtil {
             .addClassLoader(GppEclipseParticipant.class.getClassLoader())
             .addClassLoader(Rv32ImEclipseComponent.class.getClassLoader())
 
-            .addClassLoader(Generated.class.getClassLoader()) // Artifact: javax.annotation:jsr250-api:1.0
+            .addClassLoader(Generated.class.getClassLoader()) // Artifact: jakarta.annotation:annotation-api:2.1.0
 
             .addClassLoader(BundleActivator.class.getClassLoader()) // Bundle: org.eclipse.osgi
             .addClassLoader(IConfigurationElement.class.getClassLoader()) // Bundle: org.eclipse.equinox.registry
