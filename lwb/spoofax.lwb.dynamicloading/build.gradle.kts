@@ -45,6 +45,6 @@ tasks.test {
         "--add-opens", "java.base/java.net=ALL-UNNAMED",
         "--add-opens", "java.base/java.text=ALL-UNNAMED",
         "--add-opens", "java.base/java.util=ALL-UNNAMED",
-        "--add-opens", "java.base/java.util.concurrent=ALL-UNNAMED",
+        "--add-opens", "java.base/java.util.concurrent=ALL-UNNAMED"
     ))
 }
