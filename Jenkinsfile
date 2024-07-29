@@ -2,7 +2,6 @@
 @Library('metaborg.jenkins.pipeline') _
 
 gradlePipeline(
-  buildDevelopBranch: false,
   buildOtherBranch: false,
   buildTag: false,
   gradleParallel: false,
