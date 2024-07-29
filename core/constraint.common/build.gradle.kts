@@ -14,8 +14,8 @@ dependencies {
 
     api(libs.metaborg.log.api)
 
-    implementation(libs.nabl2.terms)
-    implementation(libs.metaborg.util)
+    api(libs.nabl2.terms)
+    api(libs.metaborg.util)
 
     compileOnly(libs.checkerframework.android)
     compileOnly(libs.derive4j.annotation)
