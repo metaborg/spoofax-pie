@@ -34,6 +34,7 @@ dependencies {
 
     // Required because @Nullable has runtime retention (which includes classfile retention), and the Java compiler requires access to it.
     compileOnly(libs.jsr305)
+    compileOnly(libs.jakarta.inject)
 
     implementation(libs.commons.io)
 
