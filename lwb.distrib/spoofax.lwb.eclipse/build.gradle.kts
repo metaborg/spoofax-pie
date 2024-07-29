@@ -147,7 +147,7 @@ val privatePackage = listOf(
     "com.google.common.util.concurrent.internal.*",
     "com.squareup.javapoet.*",
     "kotlin.*;-split-package:=merge-first",
-    "javax.annotation.*;-split-package:=merge-first",
+    "jakarta.annotation.*",
     // Embed `io.github.classgraph:classgraph`.
     "io.github.classgraph.*",
     "nonapi.io.github.classgraph.*",

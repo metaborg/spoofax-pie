@@ -27,8 +27,8 @@ import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.osgi.framework.BundleActivator;
 
-import javax.annotation.Generated;
-import javax.annotation.Nullable;
+import jakarta.annotation.Generated;
+import jakarta.annotation.Nullable;
 import java.io.File;
 import java.util.Comparator;
 import java.util.List;
