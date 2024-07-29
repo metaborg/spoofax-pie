@@ -32,6 +32,7 @@ dependencies {
 
     // Required because @Nullable has runtime retention (which includes classfile retention), and the Java compiler requires access to it.
     compileOnly("com.google.code.findbugs:jsr305")
+    compileOnly("jakarta.inject:jakarta.inject-api")
 
     implementation("commons-io:commons-io")
 
