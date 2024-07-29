@@ -8,7 +8,7 @@ plugins {
     alias(libs.plugins.gitonium)
 
     // Set versions for plugins to use, only applying them in subprojects (apply false here).
-    id("org.metaborg.devenv.spoofax.gradle.langspec") version "0.1.37" apply false
+    id("org.metaborg.devenv.spoofax.gradle.langspec") version "0.1.41" apply false
     id("org.metaborg.coronium.bundle") version "0.4.0" apply false  // libs.plugins.coronium.bundle
     id("biz.aQute.bnd.builder") version "5.3.0" apply false         // libs.plugins.bnd.builder
     id("org.jetbrains.intellij") version "1.4.0" apply false        // libs.plugins.intellij
