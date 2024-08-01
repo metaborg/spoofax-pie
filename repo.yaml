@@ -10,7 +10,7 @@ description: |
 documentationLink: "https://metaborg.github.io/spoofax-pie/develop/"
 inceptionYear: "2018"
 
-libraries:
+spoofax3Libraries:
   - group: "org.metaborg"
     name: "spoofax.common"
   - group: "org.metaborg"
@@ -191,14 +191,11 @@ developers:
     name: "Jeff Smits"
 
 files:
-  changelog:
-    generate: false
   githubWorkflows:
     publishRelease: true
     publishSnapshot: true
   gradleRootProject:
-    update: true
-    createPublishTasks: true
+    generate: true
     rootProjectName: "spoofax3.root"
     includedBuilds:
       - name: "spoofax3.core.root"

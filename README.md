@@ -1,3 +1,9 @@
+<!--
+!! THIS FILE WAS GENERATED USING repoman !!
+Modify `repo.yaml` instead and use `repoman` to update this file
+See: https://github.com/metaborg/metaborg-gradle/
+-->
+
 # Spoofax 3
 [![Build][github-badge:build]][github:build]
 [![License][license-badge]][license]
@@ -6,99 +12,76 @@
 
 Spoofax 3, a _modular_ and _incremental_ textual language workbench running on the JVM.
 
-This is a collection of tools and Java libraries that enable the development of textual languages, embeddable into batch compilers, code editors and IDEs, or custom applications. It is a reimplementation of [Spoofax 2](https://spoofax.dev/), with the goal of being more modular, flexible, and correctly incremental.
-
-Currently, Spoofax 3 is experimental and still a work-in-progress. Therefore, it does not have a stable API, lacks documentation and test coverage, and has not yet been applied to real-world use cases. If you are looking for a more mature alternative, see [Spoofax 2](http://spoofax.org), which Spoofax 3 is based on.
 
 [![Documentation][documentation-button]][documentation]
 
-| Artifact                                        | Latest Release                                                                                                                           |
-|-------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------|
-| `org.metaborg:spoofax.common`                   | [![org.metaborg:spoofax.common][maven-badge:spoofax.common]][maven:spoofax.common]                                                       |
-| `org.metaborg:aterm.common`                     | [![org.metaborg:aterm.common][maven-badge:aterm.common]][maven:aterm.common]                                                             |
-| `org.metaborg:jsglr.common`                     | [![org.metaborg:jsglr.common][maven-badge:jsglr.common]][maven:jsglr.common]                                                             |
-| `org.metaborg:jsglr.pie`                        | [![org.metaborg:jsglr.pie][maven-badge:jsglr.pie]][maven:jsglr.pie]                                                                      |
-| `org.metaborg:jsglr1.common`                    | [![org.metaborg:jsglr1.common][maven-badge:jsglr1.common]][maven:jsglr1.common]                                                          |
-| `org.metaborg:jsglr2.common`                    | [![org.metaborg:jsglr2.common][maven-badge:jsglr2.common]][maven:jsglr2.common]                                                          |
-| `org.metaborg:esv.common`                       | [![org.metaborg:esv.common][maven-badge:esv.common]][maven:esv.common]                                                                   |
-| `org.metaborg:stratego.common`                  | [![org.metaborg:stratego.common][maven-badge:stratego.common]][maven:stratego.common]                                                    |
-| `org.metaborg:stratego.pie`                     | [![org.metaborg:stratego.pie][maven-badge:stratego.pie]][maven:stratego.pie]                                                             |
-| `org.metaborg:constraint.common`                | [![org.metaborg:constraint.common][maven-badge:constraint.common]][maven:constraint.common]                                              |
-| `org.metaborg:constraint.pie`                   | [![org.metaborg:constraint.pie][maven-badge:constraint.pie]][maven:constraint.pie]                                                       |
-| `org.metaborg:nabl2.common`                     | [![org.metaborg:nabl2.common][maven-badge:nabl2.common]][maven:nabl2.common]                                                             |
-| `org.metaborg:statix.codecompletion`            | [![org.metaborg:statix.codecompletion][maven-badge:statix.codecompletion]][maven:statix.codecompletion]                                  |
-| `org.metaborg:statix.codecompletion.pie`        | [![org.metaborg:statix.codecompletion.pie][maven-badge:statix.codecompletion.pie]][maven:statix.codecompletion.pie]                      |
-| `org.metaborg:statix.common`                    | [![org.metaborg:statix.common][maven-badge:statix.common]][maven:statix.common]                                                          |
-| `org.metaborg:statix.pie`                       | [![org.metaborg:statix.pie][maven-badge:statix.pie]][maven:statix.pie]                                                                   |
-| `org.metaborg:statix.multilang`                 | [![org.metaborg:statix.multilang][maven-badge:statix.multilang]][maven:statix.multilang]                                                 |
-| `org.metaborg:statix.multilang.eclipse`         | [![org.metaborg:statix.multilang.eclipse][maven-badge:statix.multilang.eclipse]][maven:statix.multilang.eclipse]                         |
-| `org.metaborg:spt.api`                          | [![org.metaborg:spt.api][maven-badge:spt.api]][maven:spt.api]                                                                            |
-| `org.metaborg:tego.runtime`                     | [![org.metaborg:tego.runtime][maven-badge:tego.runtime]][maven:tego.runtime]                                                             |
-| `org.metaborg:spoofax2.common`                  | [![org.metaborg:spoofax2.common][maven-badge:spoofax2.common]][maven:spoofax2.common]                                                    |
-| `org.metaborg:tooling.eclipsebundle`            | [![org.metaborg:tooling.eclipsebundle][maven-badge:tooling.eclipsebundle]][maven:tooling.eclipsebundle]                                  |
-| `org.metaborg:transform.pie`                    | [![org.metaborg:transform.pie][maven-badge:transform.pie]][maven:transform.pie]                                                          |
-| `org.metaborg:spoofax.core`                     | [![org.metaborg:spoofax.core][maven-badge:spoofax.core]][maven:spoofax.core]                                                             |
-| `org.metaborg:spoofax.resource`                 | [![org.metaborg:spoofax.resource][maven-badge:spoofax.resource]][maven:spoofax.resource]                                                 |
-| `org.metaborg:spoofax.test`                     | [![org.metaborg:spoofax.test][maven-badge:spoofax.test]][maven:spoofax.test]                                                             |
-| `org.metaborg:spoofax.cli`                      | [![org.metaborg:spoofax.cli][maven-badge:spoofax.cli]][maven:spoofax.cli]                                                                |
-| `org.metaborg:spoofax.intellij`                 | [![org.metaborg:spoofax.intellij][maven-badge:spoofax.intellij]][maven:spoofax.intellij]                                                 |
-| `org.metaborg:spoofax.eclipse`                  | [![org.metaborg:spoofax.eclipse][maven-badge:spoofax.eclipse]][maven:spoofax.eclipse]                                                    |
-| `org.metaborg:spoofax.compiler`                 | [![org.metaborg:spoofax.compiler][maven-badge:spoofax.compiler]][maven:spoofax.compiler]                                                 |
-| `org.metaborg:spoofax.compiler.spoofax2`        | [![org.metaborg:spoofax.compiler.spoofax2][maven-badge:spoofax.compiler.spoofax2]][maven:spoofax.compiler.spoofax2]                      |
-| `org.metaborg:spoofax.compiler.spoofax2.dagger` | [![org.metaborg:spoofax.compiler.spoofax2.dagger][maven-badge:spoofax.compiler.spoofax2.dagger]][maven:spoofax.compiler.spoofax2.dagger] |
-| `org.metaborg:spoofax.compiler.interfaces`      | [![org.metaborg:spoofax.compiler.interfaces][maven-badge:spoofax.compiler.interfaces]][maven:spoofax.compiler.interfaces]                |
-| `org.metaborg:spoofax.compiler.gradle`          | [![org.metaborg:spoofax.compiler.gradle][maven-badge:spoofax.compiler.gradle]][maven:spoofax.compiler.gradle]                            |
-| `org.metaborg:spoofax.compiler.gradle.spoofax2` | [![org.metaborg:spoofax.compiler.gradle.spoofax2][maven-badge:spoofax.compiler.gradle.spoofax2]][maven:spoofax.compiler.gradle.spoofax2] |
-| `org.metaborg:spoofax.compiler.eclipsebundle`   | [![org.metaborg:spoofax.compiler.eclipsebundle][maven-badge:spoofax.compiler.eclipsebundle]][maven:spoofax.compiler.eclipsebundle]       |
-| `org.metaborg:spoofax.lwb.compiler`             | [![org.metaborg:spoofax.lwb.compiler][maven-badge:spoofax.lwb.compiler]][maven:spoofax.lwb.compiler]                                     |
-| `org.metaborg:spoofax.lwb.compiler.gradle`      | [![org.metaborg:spoofax.lwb.compiler.gradle][maven-badge:spoofax.lwb.compiler.gradle]][maven:spoofax.lwb.compiler.gradle]                |
-| `org.metaborg:spoofax.lwb.dynamicloading`       | [![org.metaborg:spoofax.lwb.dynamicloading][maven-badge:spoofax.lwb.dynamicloading]][maven:spoofax.lwb.dynamicloading]                   |
-| `org.metaborg:cfg`                              | [![org.metaborg:cfg][maven-badge:cfg]][maven:cfg]                                                                                        |
-| `org.metaborg:cfg.cli`                          | [![org.metaborg:cfg.cli][maven-badge:cfg.cli]][maven:cfg.cli]                                                                            |
-| `org.metaborg:cfg.eclipse`                      | [![org.metaborg:cfg.eclipse][maven-badge:cfg.eclipse]][maven:cfg.eclipse]                                                                |
-| `org.metaborg:cfg.intellij`                     | [![org.metaborg:cfg.intellij][maven-badge:cfg.intellij]][maven:cfg.intellij]                                                             |
-| `org.metaborg:cfg.spoofax2`                     | [![org.metaborg:cfg.spoofax2][maven-badge:cfg.spoofax2]][maven:cfg.spoofax2]                                                             |
-| `org.metaborg:dynamix`                          | [![org.metaborg:dynamix][maven-badge:dynamix]][maven:dynamix]                                                                            |
-| `org.metaborg:dynamix.cli`                      | [![org.metaborg:dynamix.cli][maven-badge:dynamix.cli]][maven:dynamix.cli]                                                                |
-| `org.metaborg:dynamix.eclipse`                  | [![org.metaborg:dynamix.eclipse][maven-badge:dynamix.eclipse]][maven:dynamix.eclipse]                                                    |
-| `org.metaborg:dynamix.intellij`                 | [![org.metaborg:dynamix.intellij][maven-badge:dynamix.intellij]][maven:dynamix.intellij]                                                 |
-| `org.metaborg:dynamix.spoofax2`                 | [![org.metaborg:dynamix.spoofax2][maven-badge:dynamix.spoofax2]][maven:dynamix.spoofax2]                                                 |
-| `org.metaborg:sdf3_ext_dynamix`                 | [![org.metaborg:sdf3_ext_dynamix][maven-badge:sdf3_ext_dynamix]][maven:sdf3_ext_dynamix]                                                 |
-| `org.metaborg:sdf3_ext_dynamix.eclipse`         | [![org.metaborg:sdf3_ext_dynamix.eclipse][maven-badge:sdf3_ext_dynamix.eclipse]][maven:sdf3_ext_dynamix.eclipse]                         |
-| `org.metaborg:sdf3_ext_dynamix.spoofax2`        | [![org.metaborg:sdf3_ext_dynamix.spoofax2][maven-badge:sdf3_ext_dynamix.spoofax2]][maven:sdf3_ext_dynamix.spoofax2]                      |
-| `org.metaborg:sdf3`                             | [![org.metaborg:sdf3][maven-badge:sdf3]][maven:sdf3]                                                                                     |
-| `org.metaborg:sdf3.cli`                         | [![org.metaborg:sdf3.cli][maven-badge:sdf3.cli]][maven:sdf3.cli]                                                                         |
-| `org.metaborg:sdf3.eclipse`                     | [![org.metaborg:sdf3.eclipse][maven-badge:sdf3.eclipse]][maven:sdf3.eclipse]                                                             |
-| `org.metaborg:sdf3.intellij`                    | [![org.metaborg:sdf3.intellij][maven-badge:sdf3.intellij]][maven:sdf3.intellij]                                                          |
-| `org.metaborg:stratego`                         | [![org.metaborg:stratego][maven-badge:stratego]][maven:stratego]                                                                         |
-| `org.metaborg:stratego.cli`                     | [![org.metaborg:stratego.cli][maven-badge:stratego.cli]][maven:stratego.cli]                                                             |
-| `org.metaborg:stratego.eclipse`                 | [![org.metaborg:stratego.eclipse][maven-badge:stratego.eclipse]][maven:stratego.eclipse]                                                 |
-| `org.metaborg:stratego.intellij`                | [![org.metaborg:stratego.intellij][maven-badge:stratego.intellij]][maven:stratego.intellij]                                              |
-| `org.metaborg:esv`                              | [![org.metaborg:esv][maven-badge:esv]][maven:esv]                                                                                        |
-| `org.metaborg:esv.cli`                          | [![org.metaborg:esv.cli][maven-badge:esv.cli]][maven:esv.cli]                                                                            |
-| `org.metaborg:esv.eclipse`                      | [![org.metaborg:esv.eclipse][maven-badge:esv.eclipse]][maven:esv.eclipse]                                                                |
-| `org.metaborg:esv.intellij`                     | [![org.metaborg:esv.intellij][maven-badge:esv.intellij]][maven:esv.intellij]                                                             |
-| `org.metaborg:statix`                           | [![org.metaborg:statix][maven-badge:statix]][maven:statix]                                                                               |
-| `org.metaborg:statix.cli`                       | [![org.metaborg:statix.cli][maven-badge:statix.cli]][maven:statix.cli]                                                                   |
-| `org.metaborg:statix.eclipse`                   | [![org.metaborg:statix.eclipse][maven-badge:statix.eclipse]][maven:statix.eclipse]                                                       |
-| `org.metaborg:statix.intellij`                  | [![org.metaborg:statix.intellij][maven-badge:statix.intellij]][maven:statix.intellij]                                                    |
-| `org.metaborg:sdf3_ext_statix`                  | [![org.metaborg:sdf3_ext_statix][maven-badge:sdf3_ext_statix]][maven:sdf3_ext_statix]                                                    |
-| `org.metaborg:sdf3_ext_statix.eclipse`          | [![org.metaborg:sdf3_ext_statix.eclipse][maven-badge:sdf3_ext_statix.eclipse]][maven:sdf3_ext_statix.eclipse]                            |
-| `org.metaborg:spt`                              | [![org.metaborg:spt][maven-badge:spt]][maven:spt]                                                                                        |
-| `org.metaborg:spt.dynamicloading`               | [![org.metaborg:spt.dynamicloading][maven-badge:spt.dynamicloading]][maven:spt.dynamicloading]                                           |
-| `org.metaborg:spt.cli`                          | [![org.metaborg:spt.cli][maven-badge:spt.cli]][maven:spt.cli]                                                                            |
-| `org.metaborg:spt.eclipse`                      | [![org.metaborg:spt.eclipse][maven-badge:spt.eclipse]][maven:spt.eclipse]                                                                |
-| `org.metaborg:spt.intellij`                     | [![org.metaborg:spt.intellij][maven-badge:spt.intellij]][maven:spt.intellij]                                                             |
-| `org.metaborg:libspoofax2`                      | [![org.metaborg:libspoofax2][maven-badge:libspoofax2]][maven:libspoofax2]                                                                |
-| `org.metaborg:libspoofax2.eclipse`              | [![org.metaborg:libspoofax2.eclipse][maven-badge:libspoofax2.eclipse]][maven:libspoofax2.eclipse]                                        |
-| `org.metaborg:libstatix`                        | [![org.metaborg:libstatix][maven-badge:libstatix]][maven:libstatix]                                                                      |
-| `org.metaborg:libstatix.eclipse`                | [![org.metaborg:libstatix.eclipse][maven-badge:libstatix.eclipse]][maven:libstatix.eclipse]                                              |
-| `org.metaborg:strategolib`                      | [![org.metaborg:strategolib][maven-badge:strategolib]][maven:strategolib]                                                                |
-| `org.metaborg:strategolib.eclipse`              | [![org.metaborg:strategolib.eclipse][maven-badge:strategolib.eclipse]][maven:strategolib.eclipse]                                        |
-| `org.metaborg:gpp`                              | [![org.metaborg:gpp][maven-badge:gpp]][maven:gpp]                                                                                        |
-| `org.metaborg:gpp.eclipse`                      | [![org.metaborg:gpp.eclipse][maven-badge:gpp.eclipse]][maven:gpp.eclipse]                                                                |
+## Spoofax 3 Artifacts
 
 
+| Maven Artifact | Latest Release | Latest Snapshot |
+|----------|----------------|-----------------|
+| `org.metaborg:spoofax.common` | [![Release][mvn-rel-badge:org.metaborg:spoofax.common]][mvn:org.metaborg:spoofax.common] | [![Snapshot][mvn-snap-badge:org.metaborg:spoofax.common]][mvn:org.metaborg:spoofax.common] |
+| `org.metaborg:aterm.common` | [![Release][mvn-rel-badge:org.metaborg:aterm.common]][mvn:org.metaborg:aterm.common] | [![Snapshot][mvn-snap-badge:org.metaborg:aterm.common]][mvn:org.metaborg:aterm.common] |
+| `org.metaborg:jsglr.common` | [![Release][mvn-rel-badge:org.metaborg:jsglr.common]][mvn:org.metaborg:jsglr.common] | [![Snapshot][mvn-snap-badge:org.metaborg:jsglr.common]][mvn:org.metaborg:jsglr.common] |
+| `org.metaborg:jsglr.pie` | [![Release][mvn-rel-badge:org.metaborg:jsglr.pie]][mvn:org.metaborg:jsglr.pie] | [![Snapshot][mvn-snap-badge:org.metaborg:jsglr.pie]][mvn:org.metaborg:jsglr.pie] |
+| `org.metaborg:jsglr1.common` | [![Release][mvn-rel-badge:org.metaborg:jsglr1.common]][mvn:org.metaborg:jsglr1.common] | [![Snapshot][mvn-snap-badge:org.metaborg:jsglr1.common]][mvn:org.metaborg:jsglr1.common] |
+| `org.metaborg:jsglr2.common` | [![Release][mvn-rel-badge:org.metaborg:jsglr2.common]][mvn:org.metaborg:jsglr2.common] | [![Snapshot][mvn-snap-badge:org.metaborg:jsglr2.common]][mvn:org.metaborg:jsglr2.common] |
+| `org.metaborg:esv.common` | [![Release][mvn-rel-badge:org.metaborg:esv.common]][mvn:org.metaborg:esv.common] | [![Snapshot][mvn-snap-badge:org.metaborg:esv.common]][mvn:org.metaborg:esv.common] |
+| `org.metaborg:stratego.common` | [![Release][mvn-rel-badge:org.metaborg:stratego.common]][mvn:org.metaborg:stratego.common] | [![Snapshot][mvn-snap-badge:org.metaborg:stratego.common]][mvn:org.metaborg:stratego.common] |
+| `org.metaborg:stratego.pie` | [![Release][mvn-rel-badge:org.metaborg:stratego.pie]][mvn:org.metaborg:stratego.pie] | [![Snapshot][mvn-snap-badge:org.metaborg:stratego.pie]][mvn:org.metaborg:stratego.pie] |
+| `org.metaborg:constraint.common` | [![Release][mvn-rel-badge:org.metaborg:constraint.common]][mvn:org.metaborg:constraint.common] | [![Snapshot][mvn-snap-badge:org.metaborg:constraint.common]][mvn:org.metaborg:constraint.common] |
+| `org.metaborg:constraint.pie` | [![Release][mvn-rel-badge:org.metaborg:constraint.pie]][mvn:org.metaborg:constraint.pie] | [![Snapshot][mvn-snap-badge:org.metaborg:constraint.pie]][mvn:org.metaborg:constraint.pie] |
+| `org.metaborg:nabl2.common` | [![Release][mvn-rel-badge:org.metaborg:nabl2.common]][mvn:org.metaborg:nabl2.common] | [![Snapshot][mvn-snap-badge:org.metaborg:nabl2.common]][mvn:org.metaborg:nabl2.common] |
+| `org.metaborg:statix.codecompletion` | [![Release][mvn-rel-badge:org.metaborg:statix.codecompletion]][mvn:org.metaborg:statix.codecompletion] | [![Snapshot][mvn-snap-badge:org.metaborg:statix.codecompletion]][mvn:org.metaborg:statix.codecompletion] |
+| `org.metaborg:statix.codecompletion.pie` | [![Release][mvn-rel-badge:org.metaborg:statix.codecompletion.pie]][mvn:org.metaborg:statix.codecompletion.pie] | [![Snapshot][mvn-snap-badge:org.metaborg:statix.codecompletion.pie]][mvn:org.metaborg:statix.codecompletion.pie] |
+| `org.metaborg:statix.common` | [![Release][mvn-rel-badge:org.metaborg:statix.common]][mvn:org.metaborg:statix.common] | [![Snapshot][mvn-snap-badge:org.metaborg:statix.common]][mvn:org.metaborg:statix.common] |
+| `org.metaborg:statix.pie` | [![Release][mvn-rel-badge:org.metaborg:statix.pie]][mvn:org.metaborg:statix.pie] | [![Snapshot][mvn-snap-badge:org.metaborg:statix.pie]][mvn:org.metaborg:statix.pie] |
+| `org.metaborg:statix.multilang` | [![Release][mvn-rel-badge:org.metaborg:statix.multilang]][mvn:org.metaborg:statix.multilang] | [![Snapshot][mvn-snap-badge:org.metaborg:statix.multilang]][mvn:org.metaborg:statix.multilang] |
+| `org.metaborg:statix.multilang.eclipse` | [![Release][mvn-rel-badge:org.metaborg:statix.multilang.eclipse]][mvn:org.metaborg:statix.multilang.eclipse] | [![Snapshot][mvn-snap-badge:org.metaborg:statix.multilang.eclipse]][mvn:org.metaborg:statix.multilang.eclipse] |
+| `org.metaborg:spt.api` | [![Release][mvn-rel-badge:org.metaborg:spt.api]][mvn:org.metaborg:spt.api] | [![Snapshot][mvn-snap-badge:org.metaborg:spt.api]][mvn:org.metaborg:spt.api] |
+| `org.metaborg:tego.runtime` | [![Release][mvn-rel-badge:org.metaborg:tego.runtime]][mvn:org.metaborg:tego.runtime] | [![Snapshot][mvn-snap-badge:org.metaborg:tego.runtime]][mvn:org.metaborg:tego.runtime] |
+| `org.metaborg:spoofax2.common` | [![Release][mvn-rel-badge:org.metaborg:spoofax2.common]][mvn:org.metaborg:spoofax2.common] | [![Snapshot][mvn-snap-badge:org.metaborg:spoofax2.common]][mvn:org.metaborg:spoofax2.common] |
+| `org.metaborg:tooling.eclipsebundle` | [![Release][mvn-rel-badge:org.metaborg:tooling.eclipsebundle]][mvn:org.metaborg:tooling.eclipsebundle] | [![Snapshot][mvn-snap-badge:org.metaborg:tooling.eclipsebundle]][mvn:org.metaborg:tooling.eclipsebundle] |
+| `org.metaborg:transform.pie` | [![Release][mvn-rel-badge:org.metaborg:transform.pie]][mvn:org.metaborg:transform.pie] | [![Snapshot][mvn-snap-badge:org.metaborg:transform.pie]][mvn:org.metaborg:transform.pie] |
+| `org.metaborg:spoofax.core` | [![Release][mvn-rel-badge:org.metaborg:spoofax.core]][mvn:org.metaborg:spoofax.core] | [![Snapshot][mvn-snap-badge:org.metaborg:spoofax.core]][mvn:org.metaborg:spoofax.core] |
+| `org.metaborg:spoofax.resource` | [![Release][mvn-rel-badge:org.metaborg:spoofax.resource]][mvn:org.metaborg:spoofax.resource] | [![Snapshot][mvn-snap-badge:org.metaborg:spoofax.resource]][mvn:org.metaborg:spoofax.resource] |
+| `org.metaborg:spoofax.test` | [![Release][mvn-rel-badge:org.metaborg:spoofax.test]][mvn:org.metaborg:spoofax.test] | [![Snapshot][mvn-snap-badge:org.metaborg:spoofax.test]][mvn:org.metaborg:spoofax.test] |
+| `org.metaborg:spoofax.cli` | [![Release][mvn-rel-badge:org.metaborg:spoofax.cli]][mvn:org.metaborg:spoofax.cli] | [![Snapshot][mvn-snap-badge:org.metaborg:spoofax.cli]][mvn:org.metaborg:spoofax.cli] |
+| `org.metaborg:spoofax.intellij` | [![Release][mvn-rel-badge:org.metaborg:spoofax.intellij]][mvn:org.metaborg:spoofax.intellij] | [![Snapshot][mvn-snap-badge:org.metaborg:spoofax.intellij]][mvn:org.metaborg:spoofax.intellij] |
+| `org.metaborg:spoofax.eclipse` | [![Release][mvn-rel-badge:org.metaborg:spoofax.eclipse]][mvn:org.metaborg:spoofax.eclipse] | [![Snapshot][mvn-snap-badge:org.metaborg:spoofax.eclipse]][mvn:org.metaborg:spoofax.eclipse] |
+| `org.metaborg:spoofax.compiler` | [![Release][mvn-rel-badge:org.metaborg:spoofax.compiler]][mvn:org.metaborg:spoofax.compiler] | [![Snapshot][mvn-snap-badge:org.metaborg:spoofax.compiler]][mvn:org.metaborg:spoofax.compiler] |
+| `org.metaborg:spoofax.compiler.spoofax2` | [![Release][mvn-rel-badge:org.metaborg:spoofax.compiler.spoofax2]][mvn:org.metaborg:spoofax.compiler.spoofax2] | [![Snapshot][mvn-snap-badge:org.metaborg:spoofax.compiler.spoofax2]][mvn:org.metaborg:spoofax.compiler.spoofax2] |
+| `org.metaborg:spoofax.compiler.spoofax2.dagger` | [![Release][mvn-rel-badge:org.metaborg:spoofax.compiler.spoofax2.dagger]][mvn:org.metaborg:spoofax.compiler.spoofax2.dagger] | [![Snapshot][mvn-snap-badge:org.metaborg:spoofax.compiler.spoofax2.dagger]][mvn:org.metaborg:spoofax.compiler.spoofax2.dagger] |
+| `org.metaborg:spoofax.compiler.interfaces` | [![Release][mvn-rel-badge:org.metaborg:spoofax.compiler.interfaces]][mvn:org.metaborg:spoofax.compiler.interfaces] | [![Snapshot][mvn-snap-badge:org.metaborg:spoofax.compiler.interfaces]][mvn:org.metaborg:spoofax.compiler.interfaces] |
+| `org.metaborg:spoofax.compiler.gradle` | [![Release][mvn-rel-badge:org.metaborg:spoofax.compiler.gradle]][mvn:org.metaborg:spoofax.compiler.gradle] | [![Snapshot][mvn-snap-badge:org.metaborg:spoofax.compiler.gradle]][mvn:org.metaborg:spoofax.compiler.gradle] |
+| `org.metaborg:spoofax.compiler.gradle.spoofax2` | [![Release][mvn-rel-badge:org.metaborg:spoofax.compiler.gradle.spoofax2]][mvn:org.metaborg:spoofax.compiler.gradle.spoofax2] | [![Snapshot][mvn-snap-badge:org.metaborg:spoofax.compiler.gradle.spoofax2]][mvn:org.metaborg:spoofax.compiler.gradle.spoofax2] |
+| `org.metaborg:spoofax.compiler.eclipsebundle` | [![Release][mvn-rel-badge:org.metaborg:spoofax.compiler.eclipsebundle]][mvn:org.metaborg:spoofax.compiler.eclipsebundle] | [![Snapshot][mvn-snap-badge:org.metaborg:spoofax.compiler.eclipsebundle]][mvn:org.metaborg:spoofax.compiler.eclipsebundle] |
+| `org.metaborg:spoofax.lwb.compiler` | [![Release][mvn-rel-badge:org.metaborg:spoofax.lwb.compiler]][mvn:org.metaborg:spoofax.lwb.compiler] | [![Snapshot][mvn-snap-badge:org.metaborg:spoofax.lwb.compiler]][mvn:org.metaborg:spoofax.lwb.compiler] |
+| `org.metaborg:spoofax.lwb.compiler.gradle` | [![Release][mvn-rel-badge:org.metaborg:spoofax.lwb.compiler.gradle]][mvn:org.metaborg:spoofax.lwb.compiler.gradle] | [![Snapshot][mvn-snap-badge:org.metaborg:spoofax.lwb.compiler.gradle]][mvn:org.metaborg:spoofax.lwb.compiler.gradle] |
+| `org.metaborg:spoofax.lwb.dynamicloading` | [![Release][mvn-rel-badge:org.metaborg:spoofax.lwb.dynamicloading]][mvn:org.metaborg:spoofax.lwb.dynamicloading] | [![Snapshot][mvn-snap-badge:org.metaborg:spoofax.lwb.dynamicloading]][mvn:org.metaborg:spoofax.lwb.dynamicloading] |
+| `org.metaborg:cfg` | [![Release][mvn-rel-badge:org.metaborg:cfg]][mvn:org.metaborg:cfg] | [![Snapshot][mvn-snap-badge:org.metaborg:cfg]][mvn:org.metaborg:cfg] |
+| `org.metaborg:cfg.spoofax2` | [![Release][mvn-rel-badge:org.metaborg:cfg.spoofax2]][mvn:org.metaborg:cfg.spoofax2] | [![Snapshot][mvn-snap-badge:org.metaborg:cfg.spoofax2]][mvn:org.metaborg:cfg.spoofax2] |
+| `org.metaborg:dynamix` | [![Release][mvn-rel-badge:org.metaborg:dynamix]][mvn:org.metaborg:dynamix] | [![Snapshot][mvn-snap-badge:org.metaborg:dynamix]][mvn:org.metaborg:dynamix] |
+| `org.metaborg:dynamix.spoofax2` | [![Release][mvn-rel-badge:org.metaborg:dynamix.spoofax2]][mvn:org.metaborg:dynamix.spoofax2] | [![Snapshot][mvn-snap-badge:org.metaborg:dynamix.spoofax2]][mvn:org.metaborg:dynamix.spoofax2] |
+| `org.metaborg:sdf3_ext_dynamix` | [![Release][mvn-rel-badge:org.metaborg:sdf3_ext_dynamix]][mvn:org.metaborg:sdf3_ext_dynamix] | [![Snapshot][mvn-snap-badge:org.metaborg:sdf3_ext_dynamix]][mvn:org.metaborg:sdf3_ext_dynamix] |
+| `org.metaborg:sdf3_ext_dynamix.spoofax2` | [![Release][mvn-rel-badge:org.metaborg:sdf3_ext_dynamix.spoofax2]][mvn:org.metaborg:sdf3_ext_dynamix.spoofax2] | [![Snapshot][mvn-snap-badge:org.metaborg:sdf3_ext_dynamix.spoofax2]][mvn:org.metaborg:sdf3_ext_dynamix.spoofax2] |
+| `org.metaborg:sdf3` | [![Release][mvn-rel-badge:org.metaborg:sdf3]][mvn:org.metaborg:sdf3] | [![Snapshot][mvn-snap-badge:org.metaborg:sdf3]][mvn:org.metaborg:sdf3] |
+| `org.metaborg:stratego` | [![Release][mvn-rel-badge:org.metaborg:stratego]][mvn:org.metaborg:stratego] | [![Snapshot][mvn-snap-badge:org.metaborg:stratego]][mvn:org.metaborg:stratego] |
+| `org.metaborg:esv` | [![Release][mvn-rel-badge:org.metaborg:esv]][mvn:org.metaborg:esv] | [![Snapshot][mvn-snap-badge:org.metaborg:esv]][mvn:org.metaborg:esv] |
+| `org.metaborg:statix` | [![Release][mvn-rel-badge:org.metaborg:statix]][mvn:org.metaborg:statix] | [![Snapshot][mvn-snap-badge:org.metaborg:statix]][mvn:org.metaborg:statix] |
+| `org.metaborg:sdf3_ext_statix` | [![Release][mvn-rel-badge:org.metaborg:sdf3_ext_statix]][mvn:org.metaborg:sdf3_ext_statix] | [![Snapshot][mvn-snap-badge:org.metaborg:sdf3_ext_statix]][mvn:org.metaborg:sdf3_ext_statix] |
+| `org.metaborg:spt` | [![Release][mvn-rel-badge:org.metaborg:spt]][mvn:org.metaborg:spt] | [![Snapshot][mvn-snap-badge:org.metaborg:spt]][mvn:org.metaborg:spt] |
+| `org.metaborg:libspoofax2` | [![Release][mvn-rel-badge:org.metaborg:libspoofax2]][mvn:org.metaborg:libspoofax2] | [![Snapshot][mvn-snap-badge:org.metaborg:libspoofax2]][mvn:org.metaborg:libspoofax2] |
+| `org.metaborg:libstatix` | [![Release][mvn-rel-badge:org.metaborg:libstatix]][mvn:org.metaborg:libstatix] | [![Snapshot][mvn-snap-badge:org.metaborg:libstatix]][mvn:org.metaborg:libstatix] |
+| `org.metaborg.devenv:strategolib` | [![Release][mvn-rel-badge:org.metaborg.devenv:strategolib]][mvn:org.metaborg.devenv:strategolib] | [![Snapshot][mvn-snap-badge:org.metaborg.devenv:strategolib]][mvn:org.metaborg.devenv:strategolib] |
+| `org.metaborg.devenv:gpp` | [![Release][mvn-rel-badge:org.metaborg.devenv:gpp]][mvn:org.metaborg.devenv:gpp] | [![Snapshot][mvn-snap-badge:org.metaborg.devenv:gpp]][mvn:org.metaborg.devenv:gpp] |
+
+
+
+
+This is a collection of tools and Java libraries that enable the development of textual languages, embeddable into batch compilers, code editors and IDEs, or custom applications. It is a reimplementation of [Spoofax 2](https://spoofax.dev/), with the goal of being more modular, flexible, and correctly incremental.
+
+Currently, Spoofax 3 is experimental and still a work-in-progress. Therefore, it does not have a stable API, lacks documentation and test coverage, and has not yet been applied to real-world use cases. If you are looking for a more mature alternative, see [Spoofax 2](http://spoofax.org), which Spoofax 3 is based on.
 
 ## Development
 
@@ -195,186 +178,177 @@ Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an **"as is" basis, without warranties or conditions of any kind**, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
-This product includes software developed at The Apache Software Foundation (http://www.apache.org/), copyright (C) 2001-2019 The Apache Software Foundation.
-
 [github-badge:build]: https://img.shields.io/github/actions/workflow/status/metaborg/spoofax-pie/build.yaml
 [github:build]: https://github.com/metaborg/spoofax-pie/actions
 [license-badge]: https://img.shields.io/github/license/metaborg/spoofax-pie
-[license]: https://github.com/metaborg/spoofax-pie/blob/master/LICENSE
-[github-badge:release]: https://img.shields.io/github/v/release/metaborg/spoofax-pie
+[license]: https://github.com/metaborg/spoofax-pie/blob/master/LICENSE.md
+[github-badge:release]: https://img.shields.io/github/v/release/metaborg/spoofax-pie?display_name=release
 [github:release]: https://github.com/metaborg/spoofax-pie/releases
 [documentation-badge]: https://img.shields.io/badge/docs-latest-brightgreen
 [documentation]: https://metaborg.github.io/spoofax-pie/develop/
 [documentation-button]: https://img.shields.io/badge/Documentation-blue?style=for-the-badge&logo=googledocs&logoColor=white
-
-
-
-[maven:spoofax.common]:                   https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.common~~~
-[maven:aterm.common]:                     https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~aterm.common~~~
-[maven:jsglr.common]:                     https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~jsglr.common~~~
-[maven:jsglr.pie]:                        https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~jsglr.pie~~~
-[maven:jsglr1.common]:                    https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~jsglr1.common~~~
-[maven:jsglr2.common]:                    https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~jsglr2.common~~~
-[maven:esv.common]:                       https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~esv.common~~~
-[maven:stratego.common]:                  https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~stratego.common~~~
-[maven:stratego.pie]:                     https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~stratego.pie~~~
-[maven:constraint.common]:                https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~constraint.common~~~
-[maven:constraint.pie]:                   https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~constraint.pie~~~
-[maven:nabl2.common]:                     https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~nabl2.common~~~
-[maven:statix.codecompletion]:            https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~statix.codecompletion~~~
-[maven:statix.codecompletion.pie]:        https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~statix.codecompletion.pie~~~
-[maven:statix.common]:                    https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~statix.common~~~
-[maven:statix.pie]:                       https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~statix.pie~~~
-[maven:statix.multilang]:                 https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~statix.multilang~~~
-[maven:statix.multilang.eclipse]:         https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~statix.multilang.eclipse~~~
-[maven:spt.api]:                          https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spt.api~~~
-[maven:tego.runtime]:                     https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~tego.runtime~~~
-[maven:spoofax2.common]:                  https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax2.common~~~
-[maven:tooling.eclipsebundle]:            https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~tooling.eclipsebundle~~~
-[maven:transform.pie]:                    https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~transform.pie~~~
-[maven:spoofax.core]:                     https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.core~~~
-[maven:spoofax.resource]:                 https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.resource~~~
-[maven:spoofax.test]:                     https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.test~~~
-[maven:spoofax.cli]:                      https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.cli~~~
-[maven:spoofax.intellij]:                 https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.intellij~~~
-[maven:spoofax.eclipse]:                  https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.eclipse~~~
-[maven:spoofax.compiler]:                 https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.compiler~~~
-[maven:spoofax.compiler.spoofax2]:        https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.compiler.spoofax2~~~
-[maven:spoofax.compiler.spoofax2.dagger]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.compiler.spoofax2.dagger~~~
-[maven:spoofax.compiler.interfaces]:      https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.compiler.interfaces~~~
-[maven:spoofax.compiler.gradle]:          https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.compiler.gradle~~~
-[maven:spoofax.compiler.gradle.spoofax2]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.compiler.gradle.spoofax2~~~
-[maven:spoofax.compiler.eclipsebundle]:   https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.compiler.eclipsebundle~~~
-[maven:spoofax.lwb.compiler]:             https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.lwb.compiler~~~
-[maven:spoofax.lwb.compiler.gradle]:      https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.lwb.compiler.gradle~~~
-[maven:spoofax.lwb.dynamicloading]:       https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.lwb.dynamicloading~~~
-[maven:cfg]:                              https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~cfg~~~
-[maven:cfg.cli]:                          https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~cfg.cli~~~
-[maven:cfg.eclipse]:                      https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~cfg.eclipse~~~
-[maven:cfg.intellij]:                     https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~cfg.intellij~~~
-[maven:cfg.spoofax2]:                     https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~cfg.spoofax2~~~
-[maven:dynamix]:                          https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~dynamix~~~
-[maven:dynamix.cli]:                      https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~dynamix.cli~~~
-[maven:dynamix.eclipse]:                  https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~dynamix.eclipse~~~
-[maven:dynamix.intellij]:                 https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~dynamix.intellij~~~
-[maven:dynamix.spoofax2]:                 https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~dynamix.spoofax2~~~
-[maven:sdf3_ext_dynamix]:                 https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~sdf3_ext_dynamix~~~
-[maven:sdf3_ext_dynamix.eclipse]:         https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~sdf3_ext_dynamix.eclipse~~~
-[maven:sdf3_ext_dynamix.spoofax2]:        https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~sdf3_ext_dynamix.spoofax2~~~
-[maven:sdf3]:                             https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~sdf3~~~
-[maven:sdf3.cli]:                         https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~sdf3.cli~~~
-[maven:sdf3.eclipse]:                     https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~sdf3.eclipse~~~
-[maven:sdf3.intellij]:                    https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~sdf3.intellij~~~
-[maven:stratego]:                         https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~stratego~~~
-[maven:stratego.cli]:                     https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~stratego.cli~~~
-[maven:stratego.eclipse]:                 https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~stratego.eclipse~~~
-[maven:stratego.intellij]:                https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~stratego.intellij~~~
-[maven:esv]:                              https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~esv~~~
-[maven:esv.cli]:                          https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~esv.cli~~~
-[maven:esv.eclipse]:                      https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~esv.eclipse~~~
-[maven:esv.intellij]:                     https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~esv.intellij~~~
-[maven:statix]:                           https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~statix~~~
-[maven:statix.cli]:                       https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~statix.cli~~~
-[maven:statix.eclipse]:                   https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~statix.eclipse~~~
-[maven:statix.intellij]:                  https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~statix.intellij~~~
-[maven:sdf3_ext_statix]:                  https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~sdf3_ext_statix~~~
-[maven:sdf3_ext_statix.eclipse]:          https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~sdf3_ext_statix.eclipse~~~
-[maven:spt]:                              https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spt~~~
-[maven:spt.dynamicloading]:               https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spt.dynamicloading~~~
-[maven:spt.cli]:                          https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spt.cli~~~
-[maven:spt.eclipse]:                      https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spt.eclipse~~~
-[maven:spt.intellij]:                     https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spt.intellij~~~
-[maven:libspoofax2]:                      https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~libspoofax2~~~
-[maven:libspoofax2.eclipse]:              https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~libspoofax2.eclipse~~~
-[maven:libstatix]:                        https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~libstatix~~~
-[maven:libstatix.eclipse]:                https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~libstatix.eclipse~~~
-[maven:strategolib]:                      https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~strategolib~~~
-[maven:strategolib.eclipse]:              https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~strategolib.eclipse~~~
-[maven:gpp]:                              https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~gpp~~~
-[maven:gpp.eclipse]:                      https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~gpp.eclipse~~~
-
-
-[maven-badge:spoofax.common]:                   https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fspoofax.common%2Fmaven-metadata.xml
-[maven-badge:aterm.common]:                     https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Faterm.common%2Fmaven-metadata.xml
-[maven-badge:jsglr.common]:                     https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fjsglr.common%2Fmaven-metadata.xml
-[maven-badge:jsglr.pie]:                        https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fjsglr.pie%2Fmaven-metadata.xml
-[maven-badge:jsglr1.common]:                    https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fjsglr1.common%2Fmaven-metadata.xml
-[maven-badge:jsglr2.common]:                    https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fjsglr2.common%2Fmaven-metadata.xml
-[maven-badge:esv.common]:                       https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fesv.common%2Fmaven-metadata.xml
-[maven-badge:stratego.common]:                  https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fstratego.common%2Fmaven-metadata.xml
-[maven-badge:stratego.pie]:                     https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fstratego.pie%2Fmaven-metadata.xml
-[maven-badge:constraint.common]:                https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fconstraint.common%2Fmaven-metadata.xml
-[maven-badge:constraint.pie]:                   https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fconstraint.pie%2Fmaven-metadata.xml
-[maven-badge:nabl2.common]:                     https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fnabl2.common%2Fmaven-metadata.xml
-[maven-badge:statix.codecompletion]:            https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fstatix.codecompletion%2Fmaven-metadata.xml
-[maven-badge:statix.codecompletion.pie]:        https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fstatix.codecompletion.pie%2Fmaven-metadata.xml
-[maven-badge:statix.common]:                    https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fstatix.common%2Fmaven-metadata.xml
-[maven-badge:statix.pie]:                       https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fstatix.pie%2Fmaven-metadata.xml
-[maven-badge:statix.multilang]:                 https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fstatix.multilang%2Fmaven-metadata.xml
-[maven-badge:statix.multilang.eclipse]:         https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fstatix.multilang.eclipse%2Fmaven-metadata.xml
-[maven-badge:spt.api]:                          https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fspt.api%2Fmaven-metadata.xml
-[maven-badge:tego.runtime]:                     https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Ftego.runtime%2Fmaven-metadata.xml
-[maven-badge:spoofax2.common]:                  https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fspoofax2.common%2Fmaven-metadata.xml
-[maven-badge:tooling.eclipsebundle]:            https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Ftooling.eclipsebundle%2Fmaven-metadata.xml
-[maven-badge:transform.pie]:                    https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Ftransform.pie%2Fmaven-metadata.xml
-[maven-badge:spoofax.core]:                     https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fspoofax.core%2Fmaven-metadata.xml
-[maven-badge:spoofax.resource]:                 https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fspoofax.resource%2Fmaven-metadata.xml
-[maven-badge:spoofax.test]:                     https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fspoofax.test%2Fmaven-metadata.xml
-[maven-badge:spoofax.cli]:                      https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fspoofax.cli%2Fmaven-metadata.xml
-[maven-badge:spoofax.intellij]:                 https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fspoofax.intellij%2Fmaven-metadata.xml
-[maven-badge:spoofax.eclipse]:                  https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fspoofax.eclipse%2Fmaven-metadata.xml
-[maven-badge:spoofax.compiler]:                 https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fspoofax.compiler%2Fmaven-metadata.xml
-[maven-badge:spoofax.compiler.spoofax2]:        https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fspoofax.compiler.spoofax2%2Fmaven-metadata.xml
-[maven-badge:spoofax.compiler.spoofax2.dagger]: https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fspoofax.compiler.spoofax2.dagger%2Fmaven-metadata.xml
-[maven-badge:spoofax.compiler.interfaces]:      https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fspoofax.compiler.interfaces%2Fmaven-metadata.xml
-[maven-badge:spoofax.compiler.gradle]:          https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fspoofax.compiler.gradle%2Fmaven-metadata.xml
-[maven-badge:spoofax.compiler.gradle.spoofax2]: https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fspoofax.compiler.gradle.spoofax2%2Fmaven-metadata.xml
-[maven-badge:spoofax.compiler.eclipsebundle]:   https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fspoofax.compiler.eclipsebundle%2Fmaven-metadata.xml
-[maven-badge:spoofax.lwb.compiler]:             https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fspoofax.lwb.compiler%2Fmaven-metadata.xml
-[maven-badge:spoofax.lwb.compiler.gradle]:      https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fspoofax.lwb.compiler.gradle%2Fmaven-metadata.xml
-[maven-badge:spoofax.lwb.dynamicloading]:       https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fspoofax.lwb.dynamicloading%2Fmaven-metadata.xml
-[maven-badge:cfg]:                              https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fcfg%2Fmaven-metadata.xml
-[maven-badge:cfg.cli]:                          https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fcfg.cli%2Fmaven-metadata.xml
-[maven-badge:cfg.eclipse]:                      https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fcfg.eclipse%2Fmaven-metadata.xml
-[maven-badge:cfg.intellij]:                     https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fcfg.intellij%2Fmaven-metadata.xml
-[maven-badge:cfg.spoofax2]:                     https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fcfg.spoofax2%2Fmaven-metadata.xml
-[maven-badge:dynamix]:                          https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fdynamix%2Fmaven-metadata.xml
-[maven-badge:dynamix.cli]:                      https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fdynamix.cli%2Fmaven-metadata.xml
-[maven-badge:dynamix.eclipse]:                  https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fdynamix.eclipse%2Fmaven-metadata.xml
-[maven-badge:dynamix.intellij]:                 https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fdynamix.intellij%2Fmaven-metadata.xml
-[maven-badge:dynamix.spoofax2]:                 https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fdynamix.spoofax2%2Fmaven-metadata.xml
-[maven-badge:sdf3_ext_dynamix]:                 https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fsdf3_ext_dynamix%2Fmaven-metadata.xml
-[maven-badge:sdf3_ext_dynamix.eclipse]:         https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fsdf3_ext_dynamix.eclipse%2Fmaven-metadata.xml
-[maven-badge:sdf3_ext_dynamix.spoofax2]:        https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fsdf3_ext_dynamix.spoofax2%2Fmaven-metadata.xml
-[maven-badge:sdf3]:                             https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fsdf3%2Fmaven-metadata.xml
-[maven-badge:sdf3.cli]:                         https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fsdf3.cli%2Fmaven-metadata.xml
-[maven-badge:sdf3.eclipse]:                     https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fsdf3.eclipse%2Fmaven-metadata.xml
-[maven-badge:sdf3.intellij]:                    https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fsdf3.intellij%2Fmaven-metadata.xml
-[maven-badge:stratego]:                         https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fstratego%2Fmaven-metadata.xml
-[maven-badge:stratego.cli]:                     https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fstratego.cli%2Fmaven-metadata.xml
-[maven-badge:stratego.eclipse]:                 https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fstratego.eclipse%2Fmaven-metadata.xml
-[maven-badge:stratego.intellij]:                https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fstratego.intellij%2Fmaven-metadata.xml
-[maven-badge:esv]:                              https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fesv%2Fmaven-metadata.xml
-[maven-badge:esv.cli]:                          https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fesv.cli%2Fmaven-metadata.xml
-[maven-badge:esv.eclipse]:                      https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fesv.eclipse%2Fmaven-metadata.xml
-[maven-badge:esv.intellij]:                     https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fesv.intellij%2Fmaven-metadata.xml
-[maven-badge:statix]:                           https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fstatix%2Fmaven-metadata.xml
-[maven-badge:statix.cli]:                       https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fstatix.cli%2Fmaven-metadata.xml
-[maven-badge:statix.eclipse]:                   https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fstatix.eclipse%2Fmaven-metadata.xml
-[maven-badge:statix.intellij]:                  https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fstatix.intellij%2Fmaven-metadata.xml
-[maven-badge:sdf3_ext_statix]:                  https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fsdf3_ext_statix%2Fmaven-metadata.xml
-[maven-badge:sdf3_ext_statix.eclipse]:          https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fsdf3_ext_statix.eclipse%2Fmaven-metadata.xml
-[maven-badge:spt]:                              https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fspt%2Fmaven-metadata.xml
-[maven-badge:spt.dynamicloading]:               https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fspt.dynamicloading%2Fmaven-metadata.xml
-[maven-badge:spt.cli]:                          https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fspt.cli%2Fmaven-metadata.xml
-[maven-badge:spt.eclipse]:                      https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fspt.eclipse%2Fmaven-metadata.xml
-[maven-badge:spt.intellij]:                     https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fspt.intellij%2Fmaven-metadata.xml
-[maven-badge:libspoofax2]:                      https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Flibspoofax2%2Fmaven-metadata.xml
-[maven-badge:libspoofax2.eclipse]:              https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Flibspoofax2.eclipse%2Fmaven-metadata.xml
-[maven-badge:libstatix]:                        https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Flibstatix%2Fmaven-metadata.xml
-[maven-badge:libstatix.eclipse]:                https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Flibstatix.eclipse%2Fmaven-metadata.xml
-[maven-badge:strategolib]:                      https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fstrategolib%2Fmaven-metadata.xml
-[maven-badge:strategolib.eclipse]:              https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fstrategolib.eclipse%2Fmaven-metadata.xml
-[maven-badge:gpp]:                              https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fgpp%2Fmaven-metadata.xml
-[maven-badge:gpp.eclipse]:                      https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fartifacts.metaborg.org%2Fcontent%2Frepositories%2Freleases%2Forg%2Fmetaborg%2Fgpp.eclipse%2Fmaven-metadata.xml
-
+[mvn:org.metaborg.devenv:gpp]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg.devenv~gpp~~~
+[mvn:org.metaborg.devenv:strategolib]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg.devenv~strategolib~~~
+[mvn:org.metaborg:aterm.common]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~aterm.common~~~
+[mvn:org.metaborg:cfg]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~cfg~~~
+[mvn:org.metaborg:cfg.spoofax2]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~cfg.spoofax2~~~
+[mvn:org.metaborg:constraint.common]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~constraint.common~~~
+[mvn:org.metaborg:constraint.pie]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~constraint.pie~~~
+[mvn:org.metaborg:dynamix]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~dynamix~~~
+[mvn:org.metaborg:dynamix.spoofax2]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~dynamix.spoofax2~~~
+[mvn:org.metaborg:esv]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~esv~~~
+[mvn:org.metaborg:esv.common]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~esv.common~~~
+[mvn:org.metaborg:jsglr.common]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~jsglr.common~~~
+[mvn:org.metaborg:jsglr.pie]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~jsglr.pie~~~
+[mvn:org.metaborg:jsglr1.common]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~jsglr1.common~~~
+[mvn:org.metaborg:jsglr2.common]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~jsglr2.common~~~
+[mvn:org.metaborg:libspoofax2]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~libspoofax2~~~
+[mvn:org.metaborg:libstatix]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~libstatix~~~
+[mvn:org.metaborg:nabl2.common]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~nabl2.common~~~
+[mvn:org.metaborg:sdf3]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~sdf3~~~
+[mvn:org.metaborg:sdf3_ext_dynamix]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~sdf3_ext_dynamix~~~
+[mvn:org.metaborg:sdf3_ext_dynamix.spoofax2]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~sdf3_ext_dynamix.spoofax2~~~
+[mvn:org.metaborg:sdf3_ext_statix]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~sdf3_ext_statix~~~
+[mvn:org.metaborg:spoofax.cli]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.cli~~~
+[mvn:org.metaborg:spoofax.common]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.common~~~
+[mvn:org.metaborg:spoofax.compiler]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.compiler~~~
+[mvn:org.metaborg:spoofax.compiler.eclipsebundle]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.compiler.eclipsebundle~~~
+[mvn:org.metaborg:spoofax.compiler.gradle]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.compiler.gradle~~~
+[mvn:org.metaborg:spoofax.compiler.gradle.spoofax2]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.compiler.gradle.spoofax2~~~
+[mvn:org.metaborg:spoofax.compiler.interfaces]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.compiler.interfaces~~~
+[mvn:org.metaborg:spoofax.compiler.spoofax2]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.compiler.spoofax2~~~
+[mvn:org.metaborg:spoofax.compiler.spoofax2.dagger]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.compiler.spoofax2.dagger~~~
+[mvn:org.metaborg:spoofax.core]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.core~~~
+[mvn:org.metaborg:spoofax.eclipse]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.eclipse~~~
+[mvn:org.metaborg:spoofax.intellij]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.intellij~~~
+[mvn:org.metaborg:spoofax.lwb.compiler]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.lwb.compiler~~~
+[mvn:org.metaborg:spoofax.lwb.compiler.gradle]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.lwb.compiler.gradle~~~
+[mvn:org.metaborg:spoofax.lwb.dynamicloading]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.lwb.dynamicloading~~~
+[mvn:org.metaborg:spoofax.resource]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.resource~~~
+[mvn:org.metaborg:spoofax.test]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax.test~~~
+[mvn:org.metaborg:spoofax2.common]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spoofax2.common~~~
+[mvn:org.metaborg:spt]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spt~~~
+[mvn:org.metaborg:spt.api]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~spt.api~~~
+[mvn:org.metaborg:statix]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~statix~~~
+[mvn:org.metaborg:statix.codecompletion]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~statix.codecompletion~~~
+[mvn:org.metaborg:statix.codecompletion.pie]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~statix.codecompletion.pie~~~
+[mvn:org.metaborg:statix.common]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~statix.common~~~
+[mvn:org.metaborg:statix.multilang]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~statix.multilang~~~
+[mvn:org.metaborg:statix.multilang.eclipse]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~statix.multilang.eclipse~~~
+[mvn:org.metaborg:statix.pie]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~statix.pie~~~
+[mvn:org.metaborg:stratego]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~stratego~~~
+[mvn:org.metaborg:stratego.common]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~stratego.common~~~
+[mvn:org.metaborg:stratego.pie]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~stratego.pie~~~
+[mvn:org.metaborg:tego.runtime]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~tego.runtime~~~
+[mvn:org.metaborg:tooling.eclipsebundle]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~tooling.eclipsebundle~~~
+[mvn:org.metaborg:transform.pie]: https://artifacts.metaborg.org/#nexus-search;gav~org.metaborg~transform.pie~~~
+[mvn-rel-badge:org.metaborg.devenv:gpp]: https://img.shields.io/nexus/r/org.metaborg.devenv/gpp?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg.devenv:strategolib]: https://img.shields.io/nexus/r/org.metaborg.devenv/strategolib?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:aterm.common]: https://img.shields.io/nexus/r/org.metaborg/aterm.common?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:cfg]: https://img.shields.io/nexus/r/org.metaborg/cfg?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:cfg.spoofax2]: https://img.shields.io/nexus/r/org.metaborg/cfg.spoofax2?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:constraint.common]: https://img.shields.io/nexus/r/org.metaborg/constraint.common?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:constraint.pie]: https://img.shields.io/nexus/r/org.metaborg/constraint.pie?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:dynamix]: https://img.shields.io/nexus/r/org.metaborg/dynamix?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:dynamix.spoofax2]: https://img.shields.io/nexus/r/org.metaborg/dynamix.spoofax2?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:esv]: https://img.shields.io/nexus/r/org.metaborg/esv?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:esv.common]: https://img.shields.io/nexus/r/org.metaborg/esv.common?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:jsglr.common]: https://img.shields.io/nexus/r/org.metaborg/jsglr.common?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:jsglr.pie]: https://img.shields.io/nexus/r/org.metaborg/jsglr.pie?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:jsglr1.common]: https://img.shields.io/nexus/r/org.metaborg/jsglr1.common?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:jsglr2.common]: https://img.shields.io/nexus/r/org.metaborg/jsglr2.common?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:libspoofax2]: https://img.shields.io/nexus/r/org.metaborg/libspoofax2?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:libstatix]: https://img.shields.io/nexus/r/org.metaborg/libstatix?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:nabl2.common]: https://img.shields.io/nexus/r/org.metaborg/nabl2.common?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:sdf3]: https://img.shields.io/nexus/r/org.metaborg/sdf3?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:sdf3_ext_dynamix]: https://img.shields.io/nexus/r/org.metaborg/sdf3_ext_dynamix?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:sdf3_ext_dynamix.spoofax2]: https://img.shields.io/nexus/r/org.metaborg/sdf3_ext_dynamix.spoofax2?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:sdf3_ext_statix]: https://img.shields.io/nexus/r/org.metaborg/sdf3_ext_statix?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:spoofax.cli]: https://img.shields.io/nexus/r/org.metaborg/spoofax.cli?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:spoofax.common]: https://img.shields.io/nexus/r/org.metaborg/spoofax.common?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:spoofax.compiler]: https://img.shields.io/nexus/r/org.metaborg/spoofax.compiler?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:spoofax.compiler.eclipsebundle]: https://img.shields.io/nexus/r/org.metaborg/spoofax.compiler.eclipsebundle?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:spoofax.compiler.gradle]: https://img.shields.io/nexus/r/org.metaborg/spoofax.compiler.gradle?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:spoofax.compiler.gradle.spoofax2]: https://img.shields.io/nexus/r/org.metaborg/spoofax.compiler.gradle.spoofax2?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:spoofax.compiler.interfaces]: https://img.shields.io/nexus/r/org.metaborg/spoofax.compiler.interfaces?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:spoofax.compiler.spoofax2]: https://img.shields.io/nexus/r/org.metaborg/spoofax.compiler.spoofax2?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:spoofax.compiler.spoofax2.dagger]: https://img.shields.io/nexus/r/org.metaborg/spoofax.compiler.spoofax2.dagger?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:spoofax.core]: https://img.shields.io/nexus/r/org.metaborg/spoofax.core?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:spoofax.eclipse]: https://img.shields.io/nexus/r/org.metaborg/spoofax.eclipse?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:spoofax.intellij]: https://img.shields.io/nexus/r/org.metaborg/spoofax.intellij?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:spoofax.lwb.compiler]: https://img.shields.io/nexus/r/org.metaborg/spoofax.lwb.compiler?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:spoofax.lwb.compiler.gradle]: https://img.shields.io/nexus/r/org.metaborg/spoofax.lwb.compiler.gradle?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:spoofax.lwb.dynamicloading]: https://img.shields.io/nexus/r/org.metaborg/spoofax.lwb.dynamicloading?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:spoofax.resource]: https://img.shields.io/nexus/r/org.metaborg/spoofax.resource?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:spoofax.test]: https://img.shields.io/nexus/r/org.metaborg/spoofax.test?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:spoofax2.common]: https://img.shields.io/nexus/r/org.metaborg/spoofax2.common?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:spt]: https://img.shields.io/nexus/r/org.metaborg/spt?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:spt.api]: https://img.shields.io/nexus/r/org.metaborg/spt.api?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:statix]: https://img.shields.io/nexus/r/org.metaborg/statix?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:statix.codecompletion]: https://img.shields.io/nexus/r/org.metaborg/statix.codecompletion?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:statix.codecompletion.pie]: https://img.shields.io/nexus/r/org.metaborg/statix.codecompletion.pie?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:statix.common]: https://img.shields.io/nexus/r/org.metaborg/statix.common?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:statix.multilang]: https://img.shields.io/nexus/r/org.metaborg/statix.multilang?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:statix.multilang.eclipse]: https://img.shields.io/nexus/r/org.metaborg/statix.multilang.eclipse?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:statix.pie]: https://img.shields.io/nexus/r/org.metaborg/statix.pie?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:stratego]: https://img.shields.io/nexus/r/org.metaborg/stratego?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:stratego.common]: https://img.shields.io/nexus/r/org.metaborg/stratego.common?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:stratego.pie]: https://img.shields.io/nexus/r/org.metaborg/stratego.pie?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:tego.runtime]: https://img.shields.io/nexus/r/org.metaborg/tego.runtime?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:tooling.eclipsebundle]: https://img.shields.io/nexus/r/org.metaborg/tooling.eclipsebundle?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-rel-badge:org.metaborg:transform.pie]: https://img.shields.io/nexus/r/org.metaborg/transform.pie?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg.devenv:gpp]: https://img.shields.io/nexus/s/org.metaborg.devenv/gpp?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg.devenv:strategolib]: https://img.shields.io/nexus/s/org.metaborg.devenv/strategolib?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:aterm.common]: https://img.shields.io/nexus/s/org.metaborg/aterm.common?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:cfg]: https://img.shields.io/nexus/s/org.metaborg/cfg?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:cfg.spoofax2]: https://img.shields.io/nexus/s/org.metaborg/cfg.spoofax2?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:constraint.common]: https://img.shields.io/nexus/s/org.metaborg/constraint.common?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:constraint.pie]: https://img.shields.io/nexus/s/org.metaborg/constraint.pie?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:dynamix]: https://img.shields.io/nexus/s/org.metaborg/dynamix?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:dynamix.spoofax2]: https://img.shields.io/nexus/s/org.metaborg/dynamix.spoofax2?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:esv]: https://img.shields.io/nexus/s/org.metaborg/esv?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:esv.common]: https://img.shields.io/nexus/s/org.metaborg/esv.common?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:jsglr.common]: https://img.shields.io/nexus/s/org.metaborg/jsglr.common?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:jsglr.pie]: https://img.shields.io/nexus/s/org.metaborg/jsglr.pie?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:jsglr1.common]: https://img.shields.io/nexus/s/org.metaborg/jsglr1.common?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:jsglr2.common]: https://img.shields.io/nexus/s/org.metaborg/jsglr2.common?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:libspoofax2]: https://img.shields.io/nexus/s/org.metaborg/libspoofax2?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:libstatix]: https://img.shields.io/nexus/s/org.metaborg/libstatix?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:nabl2.common]: https://img.shields.io/nexus/s/org.metaborg/nabl2.common?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:sdf3]: https://img.shields.io/nexus/s/org.metaborg/sdf3?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:sdf3_ext_dynamix]: https://img.shields.io/nexus/s/org.metaborg/sdf3_ext_dynamix?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:sdf3_ext_dynamix.spoofax2]: https://img.shields.io/nexus/s/org.metaborg/sdf3_ext_dynamix.spoofax2?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:sdf3_ext_statix]: https://img.shields.io/nexus/s/org.metaborg/sdf3_ext_statix?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:spoofax.cli]: https://img.shields.io/nexus/s/org.metaborg/spoofax.cli?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:spoofax.common]: https://img.shields.io/nexus/s/org.metaborg/spoofax.common?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:spoofax.compiler]: https://img.shields.io/nexus/s/org.metaborg/spoofax.compiler?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:spoofax.compiler.eclipsebundle]: https://img.shields.io/nexus/s/org.metaborg/spoofax.compiler.eclipsebundle?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:spoofax.compiler.gradle]: https://img.shields.io/nexus/s/org.metaborg/spoofax.compiler.gradle?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:spoofax.compiler.gradle.spoofax2]: https://img.shields.io/nexus/s/org.metaborg/spoofax.compiler.gradle.spoofax2?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:spoofax.compiler.interfaces]: https://img.shields.io/nexus/s/org.metaborg/spoofax.compiler.interfaces?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:spoofax.compiler.spoofax2]: https://img.shields.io/nexus/s/org.metaborg/spoofax.compiler.spoofax2?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:spoofax.compiler.spoofax2.dagger]: https://img.shields.io/nexus/s/org.metaborg/spoofax.compiler.spoofax2.dagger?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:spoofax.core]: https://img.shields.io/nexus/s/org.metaborg/spoofax.core?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:spoofax.eclipse]: https://img.shields.io/nexus/s/org.metaborg/spoofax.eclipse?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:spoofax.intellij]: https://img.shields.io/nexus/s/org.metaborg/spoofax.intellij?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:spoofax.lwb.compiler]: https://img.shields.io/nexus/s/org.metaborg/spoofax.lwb.compiler?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:spoofax.lwb.compiler.gradle]: https://img.shields.io/nexus/s/org.metaborg/spoofax.lwb.compiler.gradle?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:spoofax.lwb.dynamicloading]: https://img.shields.io/nexus/s/org.metaborg/spoofax.lwb.dynamicloading?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:spoofax.resource]: https://img.shields.io/nexus/s/org.metaborg/spoofax.resource?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:spoofax.test]: https://img.shields.io/nexus/s/org.metaborg/spoofax.test?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:spoofax2.common]: https://img.shields.io/nexus/s/org.metaborg/spoofax2.common?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:spt]: https://img.shields.io/nexus/s/org.metaborg/spt?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:spt.api]: https://img.shields.io/nexus/s/org.metaborg/spt.api?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:statix]: https://img.shields.io/nexus/s/org.metaborg/statix?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:statix.codecompletion]: https://img.shields.io/nexus/s/org.metaborg/statix.codecompletion?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:statix.codecompletion.pie]: https://img.shields.io/nexus/s/org.metaborg/statix.codecompletion.pie?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:statix.common]: https://img.shields.io/nexus/s/org.metaborg/statix.common?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:statix.multilang]: https://img.shields.io/nexus/s/org.metaborg/statix.multilang?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:statix.multilang.eclipse]: https://img.shields.io/nexus/s/org.metaborg/statix.multilang.eclipse?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:statix.pie]: https://img.shields.io/nexus/s/org.metaborg/statix.pie?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:stratego]: https://img.shields.io/nexus/s/org.metaborg/stratego?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:stratego.common]: https://img.shields.io/nexus/s/org.metaborg/stratego.common?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:stratego.pie]: https://img.shields.io/nexus/s/org.metaborg/stratego.pie?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:tego.runtime]: https://img.shields.io/nexus/s/org.metaborg/tego.runtime?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:tooling.eclipsebundle]: https://img.shields.io/nexus/s/org.metaborg/tooling.eclipsebundle?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
+[mvn-snap-badge:org.metaborg:transform.pie]: https://img.shields.io/nexus/s/org.metaborg/transform.pie?server=https%3A%2F%2Fartifacts.metaborg.org&label=%20
