@@ -1,4 +1,4 @@
-# A Spoofax tutorial implementing Programming Computable Functions (PCF)
+# Implementing Programming Computable Functions (PCF)
 
 > In computer science, Programming Computable Functions (PCF) is a typed functional language introduced by Gordon Plotkin in 1977, based on previous unpublished material by Dana Scott. It can be considered to be an extended version of the typed lambda calculus or a simplified version of modern typed functional languages such as ML or Haskell.
 
