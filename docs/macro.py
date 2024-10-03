@@ -21,8 +21,12 @@ win_jvm_variant = 'win32-x86_64-jvm'
 win_variant = 'win32-x86_64'
 macos_jvm_variant = 'macosx-x86_64-jvm'
 macos_variant = 'macosx-x86_64'
+macos_arm_jvm_variant = 'macosx-aarch64-jvm'
+macos_arm_variant = 'macosx-aarch64'
 linux_jvm_variant = 'linux-x86_64-jvm'
 linux_variant = 'linux-x86_64'
+linux_arm_jvm_variant = 'linux-aarch64-jvm'
+linux_arm_variant = 'linux-aarch64'
 
 
 def download_link(icon: str, name: str, link: str):
@@ -36,8 +40,12 @@ def fill_variables_with_release(variables, env_version: str, version: str, downl
     windows_jvm = eclipse_lwb_artifacts_download(repo, win_jvm_variant, download_version)
     macos_jvm = eclipse_lwb_artifacts_download(repo, macos_jvm_variant, download_version)
     macos = eclipse_lwb_artifacts_download(repo, macos_variant, download_version)
+    macos_arm_jvm = eclipse_lwb_artifacts_download(repo, macos_arm_jvm_variant, download_version)
+    macos_arm = eclipse_lwb_artifacts_download(repo, macos_arm_variant, download_version)
     linux_jvm = eclipse_lwb_artifacts_download(repo, linux_jvm_variant, download_version)
     linux = eclipse_lwb_artifacts_download(repo, linux_variant, download_version)
+    linux_arm_jvm = eclipse_lwb_artifacts_download(repo, linux_arm_jvm_variant, download_version)
+    linux_arm = eclipse_lwb_artifacts_download(repo, linux_arm_variant, download_version)
     eclipse_repo = f'https://artifacts.metaborg.org/content/unzip/releases-unzipped/org/metaborg/spoofax.lwb.eclipse' \
                    f'.repository/{version}/spoofax.lwb.eclipse.repository-{version}.zip-unzip/ '
 
@@ -48,17 +56,21 @@ def fill_variables_with_release(variables, env_version: str, version: str, downl
             install=dict(
                 jvm=dict(
                     link=dict(
-                        macos=download_link(macos_icon, "macOS 64-bit with embedded JVM", macos_jvm),
-                        linux=download_link(linux_icon, "Linux 64-bit with embedded JVM", linux_jvm),
-                        windows=download_link(windows_icon, "Windows 64-bit with embedded JVM", windows_jvm),
+                        macos=download_link(macos_icon, "macOS x86_64 with embedded JVM", macos_jvm),
+                        macos_arm=download_link(macos_icon, "macOS aarch64 with embedded JVM", macos_arm_jvm),
+                        linux=download_link(linux_icon, "Linux x86_64 with embedded JVM", linux_jvm),
+                        linux_arm=download_link(linux_icon, "Linux aarch64 with embedded JVM", linux_arm_jvm),
+                        windows=download_link(windows_icon, "Windows x86_64 with embedded JVM", windows_jvm),
                     ),
                     macos=macos_jvm,
                     linux=linux_jvm,
                     windows=windows_jvm,
                 ), link=dict(
-                    macos=download_link(macos_icon, "macOS 64-bit", macos),
-                    linux=download_link(linux_icon, "Linux 64-bit", linux),
-                    windows=download_link(windows_icon, "Windows 64-bit", windows),
+                    macos=download_link(macos_icon, "macOS x86_64", macos),
+                    macos_arm=download_link(macos_icon, "macOS aarch64", macos_arm),
+                    linux=download_link(linux_icon, "Linux x86_64", linux),
+                    linux_arm=download_link(linux_icon, "Linux aarch64", linux_arm),
+                    windows=download_link(windows_icon, "Windows x86_64", windows),
                 ),
                 macos=macos,
                 linux=linux,
@@ -70,6 +82,8 @@ def fill_variables_with_release(variables, env_version: str, version: str, downl
 
 
 release_versions = {
+    "0.23.1": "24-07-2024",
+    "0.23.0": "23-07-2024",
     "0.22.0": "27-05-2024",
     "0.20.0": "07-05-2024",
     "0.19.8": "06-03-2024",

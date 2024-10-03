@@ -14,13 +14,17 @@ With embedded JVM:
 
 * {{release.rel.eclipse_lwb.install.jvm.link.windows}}
 * {{release.rel.eclipse_lwb.install.jvm.link.macos}}
+* {{release.rel.eclipse_lwb.install.jvm.link.macos_arm}}
 * {{release.rel.eclipse_lwb.install.jvm.link.linux}}
+* {{release.rel.eclipse_lwb.install.jvm.link.linux_arm}}
 
 Without embedded JVM:
 
 * {{release.rel.eclipse_lwb.install.link.windows}}
 * {{release.rel.eclipse_lwb.install.link.macos}}
+* {{release.rel.eclipse_lwb.install.link.macos_arm}}
 * {{release.rel.eclipse_lwb.install.link.linux}}
+* {{release.rel.eclipse_lwb.install.link.linux_arm}}
 
 Repository for installing into an existing Eclipse installation: `{{release.rel.eclipse_lwb.repository}}`
 
@@ -36,10 +40,14 @@ With embedded JVM:
 
 * {{release.dev.eclipse_lwb.install.jvm.link.windows}}
 * {{release.dev.eclipse_lwb.install.jvm.link.macos}}
+* {{release.dev.eclipse_lwb.install.jvm.link.macos_arm}}
 * {{release.dev.eclipse_lwb.install.jvm.link.linux}}
+* {{release.dev.eclipse_lwb.install.jvm.link.linux_arm}}
 
 Without embedded JVM:
 
 * {{release.dev.eclipse_lwb.install.link.windows}}
 * {{release.dev.eclipse_lwb.install.link.macos}}
+* {{release.dev.eclipse_lwb.install.link.macos_arm}}
 * {{release.dev.eclipse_lwb.install.link.linux}}
+* {{release.dev.eclipse_lwb.install.link.linux_arm}}
