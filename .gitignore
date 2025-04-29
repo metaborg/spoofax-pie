@@ -31,3 +31,6 @@ __pycache__/
 
 # Eclipse Runner
 Eclipse.app/
+
+# MkDocs
+/site/
