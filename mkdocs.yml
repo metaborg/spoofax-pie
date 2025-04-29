@@ -24,6 +24,7 @@ nav:
   - Reference:
       - reference/configuration.md
       - reference/eclipse-lwb/eclipse-project-files.md
+      - reference/upload-an-arbitrary-file-to-nexus.md
   - Background:
       - background/documentation.md
       - background/motivation.md
