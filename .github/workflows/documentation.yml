@@ -1,40 +1,67 @@
+---
 name: Build and publish documentation
-on:
+
+on:  # yamllint disable-line rule:truthy
   push:
     branches:
       - master
       - develop
-jobs:
-  deploy:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v2
-      - uses: rlespinasse/github-slug-action@v3.x
+  workflow_dispatch:  # Allow running this workflow manually (Actions tab)
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    env:
+      CI: 1   # needed for the mkdocs-git-revision-date-plugin
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Inject slug/short variables
+        uses: rlespinasse/github-slug-action@v4
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.8'
+          python-version: '3.x'
       - name: Upgrade pip
         run: python3 -m pip install --upgrade pip
       - name: Get pip cache dir
         id: pip-cache
-        run: echo "::set-output name=dir::$(pip cache dir)"
+        run: echo "dir=$(pip cache dir)" >> $GITHUB_OUTPUT
       - name: Cache Python packages
-        uses: actions/cache@v1
+        uses: actions/cache@v4
         with:
           path: ${{ steps.pip-cache.outputs.dir }}
-          key: ${{ runner.os }}-pip-${{ hashFiles('mkdocs_requirements.txt') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('docs/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
       - name: Install Python packages
         run: python3 -m pip install -r mkdocs_requirements.txt
-
       - name: Build documentation
         run: mkdocs build
-      - name: Publish documentation
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./site
-          destination_dir: ${{ env.GITHUB_REF_SLUG }}
+          path: ./site/
+
+  deploy:
+    name: Deploy
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
